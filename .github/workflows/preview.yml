@@ -1,9 +1,12 @@
 name: preview
 
 # This workflow should run for any push which is a preview build.
-# Preview builds are indicated with changes to PREVIEW_NOTES.md.
+# Preview builds are indicated with a tag that ends in -preview
 # In order to effect this, you can do the following:
-#  scripts/release-notes.sh > PREVIEW_NOTES.md
+#  scripts/tag-preview-build
+# If you want to replace a build, you can use -f and then
+# push the update to the tag like push -f origin <tag>,
+# although this should never be done!
 
 on:
   push:
@@ -13,17 +16,17 @@ on:
 jobs:
   preview-build:
     runs-on: ubuntu-20.04
+    outputs:
+      preview_version: ${{ steps.versions.outputs.PREVIEW_VERSION }}
+      docker_tags: ${{ steps.versions.outputs.DOCKER_TAGS }}
     steps:
 
       - name: checkout repo
         uses: actions/checkout@v3
-        with:
-          node-version: '16'
 
       - name: setup java
         uses: actions/setup-java@v3
         with:
-          node-version: '16'
           distribution: 'temurin'
           java-version: '17'
           java-package: jdk
@@ -44,40 +47,38 @@ jobs:
           df -h
 
       - name: Cache Maven packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3.2.3
         with:
-          node-version: '16'
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
       - name: read versions
+        id: versions
         run: |
           set -x
           PREVIEW_VERSION=$(scripts/get-preview-version.sh)
           echo "PREVIEW_VERSION=${PREVIEW_VERSION}" >> $GITHUB_ENV
+          echo "PREVIEW_VERSION=${PREVIEW_VERSION}" >> $GITHUB_OUTPUT
           echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:preview" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:preview" >> $GITHUB_OUTPUT
 
       - name: build preview revision
         run: |
           mvn clean package -Drevision="${{ env.PREVIEW_VERSION }}"
 
       - name: Setup docker buildx
-        uses: docker/setup-buildx-action@v1
-        with:
-           node-version: '16'
+        uses: docker/setup-buildx-action@v2.2.1
 
       - name: docker hub login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2.1.0
         with:
-          node-version: '16'
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: docker test build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3.3.0
         with:
-          node-version: '16'
           context: .
           file: Dockerfile
           pull: true
@@ -99,7 +100,6 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v1
         with:
-          node-version: '16'
           name: binaries
           path: staging
 
@@ -117,17 +117,11 @@ jobs:
         id: prepare_summary
         run: |
           #summary=$(scripts/release-notes.sh)
-          summary=$(cat RELEASENOTES.md)
+          summary=$(cat PREVIEW_NOTES.md)
           summary="${summary//'%'/'%25'}"
           summary="${summary//$'\n'/'%0A'}"
           summary="${summary//$'\r'/'%0D'}"
           echo "release_summary=$summary" >> $GITHUB_STATE
-
-      - name: tag preview version
-        run: |
-          git tag nb5-${{ env.PREVIEW_VERSION }}
-          git tag -f nb5-preview
-          git push --tags
 
       - name: bump minor version
         run: |
@@ -136,7 +130,6 @@ jobs:
       - name: docker push to hub
         uses: docker/build-push-action@v2
         with:
-          node-version: '16'
           context: .
           platforms: linux/amd64,linux/arm64
           file: Dockerfile
@@ -144,125 +137,107 @@ jobs:
           push: true
           tags: ${{ env.DOCKER_TAGS }}
 
+      #  https://github.com/softprops/action-gh-release
       - name: create github release
-        id: create_github_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v0.1.15
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          node-version: '16'
-          tag_name: ${{ env.PREVIEW_VERSION }}
-          release_name: Release ${{ env.PREVIEW_VERSION }}
+#          body: ${{ steps.prepare_summary.outputs.release_summary }}
+#          body_path: PREVIEW_NOTES.md
           draft: false
           prerelease: true
-          body: ${{ steps.prepare_summary.outputs.release_summary }}
+          generate_release_notes: true
+          name: Preview ${{ env.PREVIEW_VERSION }}
+          fail_on_unmatched_files: true
+          tag_name: ${{ env.PREVIEW_VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            nb5/target/nb5
+            nb5/target/nb5.jar
 
-      - name: upload nb.jar to github release
-        id: upload-nb-jar
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          node-version: '16'
-          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
-          asset_path: nb5/target/nb5.jar
-          asset_name: nb5.jar
-          asset_content_type: application/octet-stream
-
-      - name: upload nb binary to github release
-        id: upload-nb-binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          node-version: '16'
-          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
-          asset_path: nb5/target/nb5
-          asset_name: nb5
-          asset_content_type: application/octet-stream
+#      - name: create github release
+#        id: create_github_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ env.PREVIEW_VERSION }}
+#          release_name: Release ${{ env.PREVIEW_VERSION }}
+#          draft: false
+#          prerelease: true
+#          body: ${{ steps.prepare_summary.outputs.release_summary }}
+#
+#      - name: upload nb.jar to github release
+#        id: upload-nb-jar
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
+#          asset_path: nb5/target/nb5.jar
+#          asset_name: nb5.jar
+#          asset_content_type: application/octet-stream
+#
+#      - name: upload nb binary to github release
+#        id: upload-nb-binary
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
+#          asset_path: nb5/target/nb5
+#          asset_name: nb5
+#          asset_content_type: application/octet-stream
 
       - name: Archive Test Results
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          node-version: '16'
           name: test-results
           path: |
             [a-zA-Z]**/logs/*
 
-#  javadocs:
-#    needs: release
-#    runs-on: ubuntu-20.04
-#    steps:
-#      - name: set git username
-#        run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
-#      - name: set git email
-#        run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
-#      - name: download javadocs
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: javadoc
-#      - run: ls -la
-#      - name: unpackage javadoc
-#        run: unzip nosqlbench-*-javadoc.jar
-#      - run: ls -la
-#      - name: Push javadocs
-#        uses: ad-m/github-push-action@master
-#        with:
-#          repository: nosqlbench/nosqlbench-javadoc
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          branch: main
-#
-#
-#  docs:
-#    needs: release
-#    runs-on: ubuntu-20.04
-#    steps:
-#
-#      - name: set git username
-#        run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
-#
-#      - name: set git email
-#        run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
-#
-#      - name: download guidebook
-#        uses: actions/download-artifact@v1
-#        with:
-#          name: guidebook
-#          path: guidebook
-#
-#      - run: ls -la
-#
-#      - name: clone nosqlbench-docs
-#        env:
-#          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
-#          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
-#        run: |
-#          git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git nosqlbench-docs
-#          cd nosqlbench-docs
-#          echo "files listing"
-#          find .
-#          git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-docs.git
-#          git remote -v
-#
-#      Disabling this because it will be replaced soon.
-#      - name: push changes
-#        env:
-#          NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
-#          NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
-#        run: |
-#          rsync -av --delete guidebook/guidebook/ nosqlbench-docs/docs/
-#          echo "docs.nosqlbench.io" > nosqlbench-docs/docs/CNAME
-#          cd nosqlbench-docs
-#          git add docs
-#          git add -u
-#          CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
-#          echo "found $CHANGES to push for doc updates"
-#          if (( $CHANGES > 0 ))
-#          then
-#            git commit -m"docs update for $GITHUB_REF"
-#            git push
-#          fi
+# This triggers a preview build by cascading the tag to the builddocs repo.
+# The builddocs repo then pushes to preview or release depending on the tag.
 
+  preview-docs:
+    needs: preview-build
+    runs-on: ubuntu-20.04
+    steps:
+    - name: import env vars
+      run: |
+        echo "PREVIEW_VERSION=${{ needs.preview-build.outputs.preview_version }}" >> $GITHUB_ENV
+        echo "DOCKER_TAGS=${{ needs.preview-build.outputs.docker_tags }}" >> $GITHUB_ENV
+    - name: clone nosqlbench-build-docs
+      run: |
+        git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git nosqlbench-build-docs
+        cd nosqlbench-build-docs
+        echo "files listing"
+        find .
+        git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
+        git remote -v
 
+    - name: set CNAME
+      run: |
+        echo "builddocs.nosqlbench.io" > nosqlbench-build-docs/site/static/CNAME
 
+    - name: commit changes
+      run: |
+        cd nosqlbench-build-docs
+        git add exported_docs.zip
+
+    - name: tag-preview-build
+      run: |
+        cd nosqlbench-build-docs
+        git tag -f ${{ env.PREVIEW_VERSION }}
+
+    - name: push changes
+      env:
+        NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
+        NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
+      run: |
+        set -x
+        cd nosqlbench-build-docs
+        CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
+        git push -f --tags
+        echo "push completed"

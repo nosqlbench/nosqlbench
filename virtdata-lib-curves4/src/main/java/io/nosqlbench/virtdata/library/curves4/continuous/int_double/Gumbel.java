@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,6 @@ import org.apache.commons.statistics.distribution.GumbelDistribution;
 @Categories({Category.distributions})
 public class Gumbel extends IntToDoubleContinuousCurve {
     public Gumbel(double mu, double beta, String... mods) {
-        super(new GumbelDistribution(mu, beta), mods);
+        super(GumbelDistribution.of(mu, beta), mods);
     }
 }

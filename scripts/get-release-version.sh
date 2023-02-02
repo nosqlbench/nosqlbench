@@ -15,18 +15,13 @@
 # limitations under the License.
 #
 
-set -e
-
-export branch=$(git status --branch --porcelain | cut -d' ' -f2)
-
-if [[ $branch =~ main ]]
-then
- printf "On branch main, continuing\n" 1>&2
-else
- printf "Not branch main, bailing out\n" 1>&2
- exit 2
+if [ "$1" == "-n" ]
+then numeric=true
+elif [ "$1" == "-s" ]
+then short=true
 fi
 
+set -e
 
 export REVISION=$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
 if [[ $REVISION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-SNAPSHOT$ ]]
@@ -60,6 +55,14 @@ else
  exit 5
 fi
 
-printf "%s.%s.%s-release\n" "${@:2:3}"
+if [ "$numeric" == "true" ]
+then
+ printf "%s.%s.%s\n" "${@:2:3}"
+elif [ "$short" == "true" ]
+then
+ printf "%s.%s\n" "${@:2:2}"
+else
+ printf "%s.%s.%s-release\n" "${@:2:3}"
+fi
 
 

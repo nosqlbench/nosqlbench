@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,6 @@ import org.apache.commons.statistics.distribution.ZipfDistribution;
 @Categories({Category.distributions})
 public class Zipf extends IntToIntDiscreteCurve {
     public Zipf(int numberOfElements, double exponent, String... modslist) {
-        super(new ZipfDistribution(numberOfElements, exponent), modslist);
+        super(ZipfDistribution.of(numberOfElements, exponent), modslist);
     }
 }

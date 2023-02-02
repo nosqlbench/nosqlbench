@@ -37,10 +37,10 @@ import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplateFormat;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DryRunOpDispenserWrapper;
@@ -109,7 +109,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     }
 
     @Override
-    public void initActivity() {
+    public synchronized void initActivity() {
         initOrUpdateRateLimiters(this.activityDef);
     }
 
@@ -353,7 +353,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
      *
      * @param seq - The {@link OpSequence} to derive the defaults from
      */
-    public void setDefaultsFromOpSequence(OpSequence<?> seq) {
+    public synchronized void setDefaultsFromOpSequence(OpSequence<?> seq) {
         Optional<String> strideOpt = getParams().getOptionalString("stride");
         if (strideOpt.isEmpty()) {
             String stride = String.valueOf(seq.getSequence().length);
@@ -549,21 +549,21 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
 
-        StmtsDocList stmtsDocList = loadStmtsDocList();
+        OpsDocList opsDocList = loadStmtsDocList();
 
-        List<OpTemplate> unfilteredOps = stmtsDocList.getStmts();
-        List<OpTemplate> filteredOps = stmtsDocList.getStmts(tagfilter);
+        List<OpTemplate> unfilteredOps = opsDocList.getOps();
+        List<OpTemplate> filteredOps = opsDocList.getOps(tagfilter);
 
         if (filteredOps.size() == 0) {
             if (unfilteredOps.size() > 0) { // There were no ops, and it was because they were all filtered out
-                throw new BasicError("There were no active statements with tag filter '"
+                throw new BasicError("There were no active op templates with tag filter '"
                     + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
             } else {
                 // There were no ops, and it *wasn't* because they were all filtered out.
 
                 // In this case, let's try to synthesize the ops as long as at least a default driver was provided
                 if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
-                    filteredOps = sotp.getSyntheticOpTemplates(stmtsDocList, getActivityDef().getParams());
+                    filteredOps = sotp.getSyntheticOpTemplates(opsDocList, getActivityDef().getParams());
                     Objects.requireNonNull(filteredOps);
                     if (filteredOps.size() == 0) {
                         throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + "'" +
@@ -573,12 +573,12 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
                     throw new BasicError("""
                         No op templates were provided. You must provide one of these activity parameters:
                         1) workload=some.yaml
-                        2) op='inline template
+                        2) op='inline template'
                         3) driver=stdout (or any other drive that can synthesize ops)""");
                 }
             }
             if (filteredOps.size() == 0) {
-                throw new BasicError("There were no active statements with tag filter '" + tagfilter + "'");
+                throw new BasicError("There were no active op templates with tag filter '" + tagfilter + "'");
             }
         }
 
@@ -613,8 +613,8 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
      * taken as the only provided statement.</LI>
      * <LI>If a 'yaml, or 'workload' parameter is provided, then the statements in that file
      * are taken with their ratios </LI>
-     * <LI>Any provided tags filter is used to select only the statements which have matching
-     * tags. If no tags are provided, then all the found statements are included.</LI>
+     * <LI>Any provided tags filter is used to select only the op templates which have matching
+     * tags. If no tags are provided, then all the found op templates are included.</LI>
      * <LI>The ratios and the 'seq' parameter are used to build a sequence of the ready operations,
      * where the sequence length is the sum of the ratios.</LI>
      * </OL>
@@ -661,20 +661,20 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         return planner.resolve();
     }
 
-    protected StmtsDocList loadStmtsDocList() {
+    protected OpsDocList loadStmtsDocList() {
 
         try {
             Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
             Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
             if (stmt.isPresent()) {
                 workloadSource = "commandline:" + stmt.get();
-                return StatementsLoader.loadStmt(logger, stmt.get(), activityDef.getParams());
+                return OpsLoader.loadString(stmt.get(), OpTemplateFormat.inline, activityDef.getParams(), null);
             } else if (op_yaml_loc.isPresent()) {
                 workloadSource = "yaml:" + op_yaml_loc.get();
-                return StatementsLoader.loadPath(logger, op_yaml_loc.get(), activityDef.getParams(), "activities");
+                return OpsLoader.loadPath(op_yaml_loc.get(), activityDef.getParams(), "activities");
             }
 
-            return StmtsDocList.none();
+            return OpsDocList.none();
 
         } catch (Exception e) {
             throw new OpConfigError("Error loading op templates: " + e, workloadSource, e);

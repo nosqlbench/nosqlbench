@@ -76,7 +76,7 @@ public class RawYamlLoader {
     private List<Map<String,Object>> parseYaml(Logger logger, String data) {
         Load yaml = new Load(LoadSettings.builder().build());
         Iterable<Object> objects = yaml.loadAllFromString(data);
-        List<RawStmtsDoc> newDocList = new ArrayList<>();
+        List<RawOpsDoc> newDocList = new ArrayList<>();
 
         List<Map<String,Object>> maps = new ArrayList<>();
 
@@ -84,7 +84,7 @@ public class RawYamlLoader {
             if (object instanceof Map) {
                 maps.add(new LinkedHashMap<>((Map<String,Object>)object));
             } else {
-                throw new RuntimeException("Unable to coerce a non-map type to a statements yaml doc: " + object.getClass().getCanonicalName());
+                throw new RuntimeException("Unable to coerce a non-map type to a workload structure: " + object.getClass().getCanonicalName());
             }
         }
         return maps;

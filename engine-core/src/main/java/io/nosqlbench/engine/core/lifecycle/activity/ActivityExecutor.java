@@ -299,7 +299,9 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
                 break;
             case Finished:
             case Stopping:
-                throw new RuntimeException("Invalid requested state in activity executor:" + activity.getRunState());
+            case Errored:
+                break;
+//                throw new RuntimeException("Invalid requested state in activity executor:" + activity.getRunState());
 
             default:
                 throw new RuntimeException("Unmatched run state:" + activity.getRunState());
@@ -314,16 +316,16 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             case Running:
                 tally.awaitNoneOther(RunState.Running, RunState.Finished);
                 break;
+            case Errored:
+            case Stopping:
             case Stopped:
-                tally.awaitNoneOther(RunState.Stopped, RunState.Finished);
+                tally.awaitNoneOther(RunState.Stopped, RunState.Finished, RunState.Errored);
                 break;
             case Uninitialized:
                 break;
             case Finished:
                 tally.awaitNoneOther(RunState.Finished);
                 break;
-            case Stopping:
-                throw new RuntimeException("Invalid requested state in activity executor:" + activity.getRunState());
             default:
                 throw new RuntimeException("Unmatched run state:" + activity.getRunState());
         }
@@ -417,7 +419,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         }
     }
 
-    public void startActivity() {
+    public synchronized void startActivity() {
         // we need an executor service to run motor threads on
         startMotorExecutorService();
         startRunningActivityThreads();

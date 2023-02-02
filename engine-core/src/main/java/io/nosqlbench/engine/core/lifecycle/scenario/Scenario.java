@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -277,8 +277,10 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
         }
 
         Runtime.getRuntime().removeShutdownHook(scenarioShutdownHook);
-        scenarioShutdownHook.run();
+        var runHook = scenarioShutdownHook;
         scenarioShutdownHook = null;
+        runHook.run();
+        logger.debug("removing scenario shutdown hook");
     }
 
     public void notifyException(Thread t, Throwable e) {
@@ -340,7 +342,7 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
         }
     }
 
-    public synchronized void finish() {
+    public void finish() {
         logger.debug("finishing scenario");
         endedAtMillis = System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
         if (this.state == State.Running) {
