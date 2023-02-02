@@ -133,8 +133,8 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-cockroachdb</artifactId>
-            <version>4.17.32-SNAPSHOT</version>
+            <artifactId>adapter-jdbc</artifactId>
+            <version>5.17.1-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

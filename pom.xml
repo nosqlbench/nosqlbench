@@ -61,6 +61,7 @@
         <module.adapter-pulsar>adapter-pulsar</module.adapter-pulsar>
         <module.adapter-s4j>adapter-s4j</module.adapter-s4j>
         <module.adapter-kafka>adapter-kafka</module.adapter-kafka>
+        <module.adapter-jdbc>adapter-jdbc</module.adapter-jdbc>
 
         <!-- VIRTDATA MODULES -->
         <module.virtdata-api>virtdata-api</module.virtdata-api>
@@ -102,7 +103,7 @@
         <module>adapter-pulsar</module>
         <module>adapter-s4j</module>
         <module>adapter-kafka</module>
-        <module>adapter-cockroachdb</module>
+        <module>adapter-jdbc</module>
 
         <!-- VIRTDATA MODULES -->
         <module>virtdata-api</module>
@@ -234,6 +235,9 @@
                                         <fileset dir="${basedir}/${module.adapter-kafka}/target">
                                             <include name="jacoco.exec" />
                                         </fileset>
+                                        <fileset dir="${basedir}/${module.adapter-jdbc}/target">
+                                            <include name="jacoco.exec" />
+                                        </fileset>
                                         <fileset dir="${basedir}/${module.virtdata-api}/target">
                                             <include name="jacoco.exec" />
                                         </fileset>
@@ -322,6 +326,9 @@
                                                 <fileset dir="${basedir}/${module.adapter-kafka}/target/classes">
                                                     <include name="io/nosqlbench/**/*.class" />
                                                 </fileset>
+                                                <fileset dir="${basedir}/${module.adapter-jdbc}/target/classes">
+                                                    <include name="io/nosqlbench/**/*.class" />
+                                                </fileset>
                                                 <fileset dir="${basedir}/${module.virtdata-api}/target/classes">
                                                     <include name="io/nosqlbench/**/*.class" />
                                                 </fileset>
@@ -368,6 +375,7 @@
                                                 <fileset dir="${basedir}/${module.adapter-pulsar}/src/main/java" />
                                                 <fileset dir="${basedir}/${module.adapter-s4j}/src/main/java" />
                                                 <fileset dir="${basedir}/${module.adapter-kafka}/src/main/java" />
+                                                <fileset dir="${basedir}/${module.adapter-jdbc}/src/main/java" />
                                                 <fileset dir="${basedir}/${module.virtdata-api}/src/main/java" />
                                                 <fileset dir="${basedir}/${module.virtdata-lang}/src/main/java" />
                                                 <fileset dir="${basedir}/${module.virtdata-realdata}/src/main/java" />
@@ -404,7 +412,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.4.2</version>
             </plugin>
         </plugins>
     </reporting>
@@ -419,6 +427,12 @@
         <developer>
             <name>Sebastián Estévez</name>
             <email>estevezsebastian@gmail.com</email>
+            <organization>nosqlbench.io</organization>
+            <organizationUrl>http://nosqlbench.io/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Madhavan S</name>
+            <email>madhavan_5k@yahoo.com</email>
             <organization>nosqlbench.io</organization>
             <organizationUrl>http://nosqlbench.io/</organizationUrl>
         </developer>
