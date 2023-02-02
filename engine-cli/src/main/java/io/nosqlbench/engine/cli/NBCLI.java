@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDu
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
@@ -165,7 +165,11 @@ public class NBCLI implements Function<String[], Integer> {
 
         logger = LogManager.getLogger("NBCLI");
         loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
-        logger.info(() -> "Configured scenario log at " + loggerConfig.getLogfileLocation());
+        if (logger.isInfoEnabled()) {
+            logger.info(() -> "Configured scenario log at " + loggerConfig.getLogfileLocation());
+        } else {
+            System.err.println("Configured scenario log at " + loggerConfig.getLogfileLocation());
+        }
         logger.debug("Scenario log started");
 
         // Global only processing
@@ -304,7 +308,7 @@ public class NBCLI implements Function<String[], Integer> {
             Optional<Content<?>> tocopy = NBIO.classpath()
                 .prefix("activities")
                 .prefix(options.wantsIncludes())
-                .name(resourceToCopy).extension(RawStmtsLoader.YAML_EXTENSIONS).first();
+                .name(resourceToCopy).extension(RawOpsLoader.YAML_EXTENSIONS).first();
 
             if (tocopy.isEmpty()) {
 

@@ -1,14 +1,20 @@
 name: release
 
+# This workflow should run for any push which is a release build.
+# Release builds are indicated with a tag that ends in -release
+# In order to effect this, you can do the following:
+#  scripts/tag-release-build
+# If you want to replace a build, you can use -f and then
+# push the update to the tag like push -f origin <tag>,
+# although this should never be done!
+
 on:
   push:
-    branches:
-      - main
-    paths:
-      - RELEASENOTES.**
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+-release"
 
 jobs:
-  release:
+  release-build:
     runs-on: ubuntu-20.04
     steps:
 
@@ -23,33 +29,11 @@ jobs:
           java-package: jdk
           architecture: x64
 
-      - name: avoid release loop
-        run: scripts/avoid-release-loop.sh
-        env:
-          GIT_RELEASE_BOT_NAME: "nb-droid"
-
-      - name: capture tty for gpg
-        run: |
-          echo "TTY="$(tty) >> $GITHUB_ENV
-          echo "GPG_TTY="$(tty) >> $GITHUB_ENV
-          # echo "::set-env name=TTY::"$(tty)
-          # echo "::set-env name=GPG_TTY::"$(tty)
-
-      - name: initialize gpg
-        run: |
-          set -x
-          echo "${{ secrets.GITHUB_GPG_KEY }}" | base64 -d > private.key
-          gpg --import --batch ./private.key
-          rm ./private.key
-          echo "gnupg files:"
-          ls -l ~/.gnupg/
-
       - name: set git username
         run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
 
       - name: set git email
         run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
-
 
       - name: free disk space
         run: |
@@ -60,7 +44,7 @@ jobs:
           df -h
 
       - name: Cache Maven packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3.2.3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -69,75 +53,28 @@ jobs:
       - name: read versions
         run: |
           set -x
-          CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          RELEASE_VERSION=${CURRENT_VERSION%%-SNAPSHOT}
-          BASE_VERSION=$(echo "$RELEASE_VERSION" | cut -d'.' -f1-2)
-          MINOR_VERSION=$(echo "$RELEASE_VERSION" | cut -d'.' -f3)
-          NEXT_MINOR_VERSION=$(( MINOR_VERSION+1))
-          NEXT_SNAPSHOT="${BASE_VERSION}.${NEXT_MINOR_VERSION}-SNAPSHOT"
-          RELEASE_TAGNAME="nosqlbench-${RELEASE_VERSION}"
-          echo "CURRENT_VERSION=${CURRENT_VERSION}" >> $GITHUB_ENV
-          echo "NEXT_SNAPSHOT=${NEXT_SNAPSHOT}" >> $GITHUB_ENV
+          RELEASE_VERSION=$(scripts/get-release-version.sh)
+          RELEASE_VERSION_NUMERIC=$(scripts/get-release-version.sh -n)
+          RELEASE_VERSION_SHORT=$(scripts/get-release-version.sh -s)
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_ENV
-          echo "RELEASE_TAGNAME=${RELEASE_TAGNAME}" >> $GITHUB_ENV
-          # echo "::set-env name=NEXT_SNAPSHOT::${NEXT_SNAPSHOT}"
-          # echo "::set-env name=RELEASE_VERSION::${RELEASE_VERSION}"
-          # echo "::set-env name=RELEASE_TAGNAME::${RELEASE_TAGNAME}"
+          echo "RELEASE_VERSION_NUMERIC=${RELEASE_VERSION_NUMERIC}" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${RELEASE_VERSION_NUMERIC},nosqlbench/nosqlbench:${RELEASE_VERSION_SHORT}-latest" >> $GITHUB_ENV
 
-      - name: prepare release summary
-        id: prepare_summary
+      - name: build release revision
         run: |
-          #summary=$(scripts/release-notes.sh)
-          summary=$(cat RELEASENOTES.md)
-          summary="${summary//'%'/'%25'}"
-          summary="${summary//$'\n'/'%0A'}"
-          summary="${summary//$'\r'/'%0D'}"
-          echo "::set-output name=release_summary::$summary"
-
-      - name: select release type from branch name
-        run: |
-          current_branch=$(git rev-parse --abbrev-ref HEAD)
-          if [[ ${current_branch} == *"nb4-maintenance"* ]]
-           then
-            echo "PRERELEASE=false" >> $GITHUB_ENV
-            echo "DOCKER_TAGS=nosqlbench/nosqlbench:latest,nosqlbench/nosqlbench:4x,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
-           else
-            echo "PRERELEASE=true" >> $GITHUB_ENV
-            echo "DOCKER_TAGS=nosqlbench/nosqlbench:nb5preview,nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
-          fi
-
-      - name: prepare Maven release
-        run: scripts/release-prepare.sh
-        env:
-          RELEASE_BRANCH_PATTERN: "nb4-maintenance"
-          PRERELEASE_BRANCH_PATTERN: "main"
-          GIT_RELEASE_BOT_NAME: "nb-droid"
-          GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
-          ACCESS_TOKEN: ${{ secrets.NBDROID_TOKEN }}
-          GPG_ENABLED: "true"
-          GPG_KEY_ID: ${{ secrets.GITHUB_GPG_KEY_ID }}
-          GPG_KEY: ${{ secrets.GITHUB_GPG_KEY }}
-          GPG_SERVER_NAME: ${{ secrets.GPG_SERVER_NAME }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          MAVEN_REPO_SERVER_ID: ${{ secrets.MAVEN_REPO_SERVER_ID }}
-          MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
-          MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
-
-      - name: generate javadoc
-        run: mvn javadoc:aggregate-jar
-        continue-on-error: false
+          mvn clean package -Drevision="${{ env.RELEASE_VERSION }}"
 
       - name: Setup docker buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2.2.1
 
       - name: docker hub login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2.1.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: docker test build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3.3.0
         with:
           context: .
           file: Dockerfile
@@ -148,38 +85,7 @@ jobs:
 
       - name: sanity check docker image
         run: |
-          docker run --rm nosqlbench/nosqlbench:${{ env.RELEASE_VERSION }} --version
-
-#      - name: bundle integration test logs
-#        run: |
-#          pwd
-#          find nb
-#          mkdir -p itlogs/nb
-#          cp -R nb/logs itlogs/nb
-#
-#      - name: upload integration test logs
-#        uses: actions/upload-artifact@v1
-#        with:
-#          name: itlogs
-#          path: itlogs
-
-      - name: perform Maven release
-        run: scripts/release-perform.sh
-        continue-on-error: true
-        env:
-          RELEASE_BRANCH_PATTERN: "nb4-maintenance"
-          PRERELEASE_BRANCH_PATTERN: "main"
-          GIT_RELEASE_BOT_NAME: "nb-droid"
-          GIT_RELEASE_BOT_EMAIL: ${{ secrets.GIT_RELEASE_BOT_EMAIL }}
-          ACCESS_TOKEN: ${{ secrets.NBDROID_TOKEN }}
-          GPG_ENABLED: "true"
-          GPG_KEY_ID: ${{ secrets.GITHUB_GPG_KEY_ID }}
-          GPG_KEY: ${{ secrets.GITHUB_GPG_KEY }}
-          GPG_SERVER_NAME: ${{ secrets.GPG_SERVER_NAME }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          MAVEN_REPO_SERVER_ID: ${{ secrets.MAVEN_REPO_SERVER_ID }}
-          MAVEN_REPO_SERVER_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
-          MAVEN_REPO_SERVER_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
+          docker run --rm nosqlbench/nosqlbench:${{ env.RELEASE_VERSION_NUMERIC }} --version
 
       - name: bundle artifacts
         run: |
@@ -194,13 +100,19 @@ jobs:
           name: binaries
           path: staging
 
-      - run: ls -la target
+      #      - name: generate javadoc
+      #        run: mvn javadoc:aggregate-jar
+      #        continue-on-error: false
+      #
+      #      - name: upload javadoc
+      #        uses: actions/upload-artifact@v3
+      #        with:
+      #          name: javadoc
+      #          path: target/nosqlbench-*-javadoc.jar
 
-      - name: upload javadoc
-        uses: actions/upload-artifact@v3
-        with:
-          name: javadoc
-          path: target/nosqlbench-*-javadoc.jar
+      - name: bump minor version
+        run: |
+          scripts/bump-minor-version
 
       - name: docker push to hub
         uses: docker/build-push-action@v2
@@ -212,49 +124,57 @@ jobs:
           push: true
           tags: ${{ env.DOCKER_TAGS }}
 
-#      - name: bundle guidebook
-#        run: mkdir guidebook && cp -R nb/target/guidebook guidebook
-#
-#      - name: upload guidebook
-#        uses: actions/upload-artifact@v1
-#        with:
-#          name: guidebook
-#          path: guidebook
-#
-
+      #  https://github.com/softprops/action-gh-release
       - name: create github release
-        id: create_github_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v0.1.15
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ env.RELEASE_TAGNAME }}
-          release_name: Release ${{ env.RELEASE_TAGNAME }}
+          #          body: ${{ steps.prepare_summary.outputs.release_summary }}
+          #          body_path: PREVIEW_NOTES.md
           draft: false
-          prerelease: ${{ env.PRERELEASE }}
-          body: ${{ steps.prepare_summary.outputs.release_summary }}
+          prerelease: true
+          generate_release_notes: true
+          name: Release ${{ env.RELEASE_VERSION }}
+          fail_on_unmatched_files: true
+          tag_name: ${{ env.RELEASE_VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            nb5/target/nb5
+            nb5/target/nb5.jar
 
-      - name: upload nb.jar to github release
-        id: upload-nb-jar
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
-          asset_path: nb5/target/nb5.jar
-          asset_name: nb5.jar
-          asset_content_type: application/octet-stream
-
-      - name: upload nb binary to github release
-        id: upload-nb-binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
-          asset_path: nb5/target/nb5
-          asset_name: nb5
-          asset_content_type: application/octet-stream
+      #      - name: create github release
+      #        id: create_github_release
+      #        uses: actions/create-release@v1
+      #        env:
+      #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #        with:
+      #          tag_name: ${{ env.RELEASE_VERSION }}
+      #          release_name: Release ${{ env.RELEASE_VERSION }}
+      #          draft: false
+      #          prerelease: true
+      #          body: ${{ steps.prepare_summary.outputs.release_summary }}
+      #
+      #      - name: upload nb.jar to github release
+      #        id: upload-nb-jar
+      #        uses: actions/upload-release-asset@v1
+      #        env:
+      #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #        with:
+      #          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
+      #          asset_path: nb5/target/nb5.jar
+      #          asset_name: nb5.jar
+      #          asset_content_type: application/octet-stream
+      #
+      #      - name: upload nb binary to github release
+      #        id: upload-nb-binary
+      #        uses: actions/upload-release-asset@v1
+      #        env:
+      #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #        with:
+      #          upload_url: ${{ steps.create_github_release.outputs.upload_url }}
+      #          asset_path: nb5/target/nb5
+      #          asset_name: nb5
+      #          asset_content_type: application/octet-stream
 
       - name: Archive Test Results
         if: always()
@@ -264,30 +184,30 @@ jobs:
           path: |
             [a-zA-Z]**/logs/*
 
-  javadocs:
-    needs: release
-    runs-on: ubuntu-20.04
-    steps:
-      - name: set git username
-        run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
-      - name: set git email
-        run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
-      - name: download javadocs
-        uses: actions/download-artifact@v3
-        with:
-          name: javadoc
-      - run: ls -la
-      - name: unpackage javadoc
-        run: unzip nosqlbench-*-javadoc.jar
-      - run: ls -la
-      - name: Push javadocs
-        uses: ad-m/github-push-action@master
-        with:
-          repository: nosqlbench/nosqlbench-javadoc
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
-
-
+#  javadocs:
+#    needs: release
+#    runs-on: ubuntu-20.04
+#    steps:
+#      - name: set git username
+#        run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
+#      - name: set git email
+#        run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
+#      - name: download javadocs
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: javadoc
+#      - run: ls -la
+#      - name: unpackage javadoc
+#        run: unzip nosqlbench-*-javadoc.jar
+#      - run: ls -la
+#      - name: Push javadocs
+#        uses: ad-m/github-push-action@master
+#        with:
+#          repository: nosqlbench/nosqlbench-javadoc
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          branch: main
+#
+#
 #  docs:
 #    needs: release
 #    runs-on: ubuntu-20.04

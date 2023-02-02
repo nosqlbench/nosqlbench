@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ public enum BindType {
 
     /**
      * A literal template is one which has no bindings that need to be provided to render a specific statement.
-     * These templates are basically static statements.
+     * These templates are basically static values.
      * Example: <em>{@code truncate testks.testtable;}</em>
      */
     literal,

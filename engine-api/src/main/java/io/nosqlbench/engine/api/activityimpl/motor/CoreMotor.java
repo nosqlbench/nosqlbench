@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import io.nosqlbench.engine.api.activityimpl.MotorState;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static io.nosqlbench.engine.api.activityapi.core.RunState.*;
@@ -460,18 +461,17 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
     @Override
     public synchronized void requestStop() {
-        if (motorState.get() == Running) {
+        RunState currentState = motorState.get();
+        if (Objects.requireNonNull(currentState) == Running) {
             if (input instanceof Stoppable) {
                 ((Stoppable) input).requestStop();
             }
             if (action instanceof Stoppable) {
                 ((Stoppable) action).requestStop();
             }
-            motorState.enterState(RunState.Stopping);
+            motorState.enterState(Stopping);
         } else {
-            if (motorState.get() != Stopped && motorState.get() != Stopping) {
-                logger.warn(()->"attempted to stop motor " + this.getSlotId() + ": from non Running state:" + motorState.get());
-            }
+            logger.warn(() -> "attempted to stop motor " + this.getSlotId() + ": from non Running state:" + currentState);
         }
     }
 

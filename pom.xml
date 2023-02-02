@@ -23,7 +23,7 @@
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
-        <version>5.17.1-SNAPSHOT</version>
+        <version>${revision}</version>
         <relativePath>mvn-defaults</relativePath>
     </parent>
 
@@ -36,19 +36,22 @@
     <properties>
         <!-- CORE MODULES -->
         <module.mvn-defaults>mvn-defaults</module.mvn-defaults>
-        <module.nb5>nb5</module.nb5>
-        <module.nbr>nbr</module.nbr>
-        <module.nbr-examples>nbr-examples</module.nbr-examples>
         <module.nb-api>nb-api</module.nb-api>
         <module.nb-annotations>nb-annotations</module.nb-annotations>
-        <module.nb-spectest>nb-spectest</module.nb-spectest>
+        <module.adapters-api>adapters-api</module.adapters-api>
         <module.engine-api>engine-api</module.engine-api>
+
         <module.engine-core>engine-core</module.engine-core>
         <module.engine-extensions>engine-extensions</module.engine-extensions>
         <module.engine-docker>engine-docker</module.engine-docker>
-        <module.engine-docs>engine-docs</module.engine-docs>
         <module.engine-cli>engine-cli</module.engine-cli>
-        <module.adapters-api>adapters-api</module.adapters-api>
+        <module.engine-docs>engine-docs</module.engine-docs>
+
+        <module.nb5>nb5</module.nb5>
+        <module.nbr>nbr</module.nbr>
+
+        <module.nb-spectest>nb-spectest</module.nb-spectest>
+        <module.nbr-examples>nbr-examples</module.nbr-examples>
 
         <!-- driver modules -->
         <module.adapter-diag>adapter-diag</module.adapter-diag>
@@ -89,6 +92,7 @@
         <module>engine-extensions</module>
         <module>engine-docker</module>
         <module>engine-docs</module>
+        <module>engine-clients</module>
         <module>engine-cli</module>
         <module>adapters-api</module>
 
@@ -152,257 +156,7 @@
                 <!--                <executions>-->
                 <!--                </executions>-->
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.6</version>
-                <executions>
-                    <execution>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <echo message="Generating NB Test Coverage Reports" />
-                                <taskdef name="report" classname="org.jacoco.ant.ReportTask">
-                                    <classpath path="${basedir}/target/jacoco-jars/org.jacoco.ant.jar" />
-                                </taskdef>
-                                <mkdir dir="${basedir}/target/coverage-report" />
-                                <report>
-                                    <executiondata>
-                                        <fileset dir="${basedir}/${module.nbr}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.nb-api}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.nb-annotations}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.nb-spectest}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.engine-api}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.engine-core}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.engine-extensions}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.engine-docker}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.engine-docs}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.engine-cli}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapters-api}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapter-diag}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapter-stdout}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapter-cqld4}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapter-http}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapter-tcp}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapter-dynamodb}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapter-mongodb}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapter-pulsar}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapter-s4j}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapter-kafka}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.adapter-jdbc}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.virtdata-api}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.virtdata-lang}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.virtdata-realdata}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.virtdata-lib-basics}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.virtdata-lib-random}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.virtdata-lib-curves4}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.virtdata-lib-realer}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                        <fileset dir="${basedir}/${module.virtdata-userlibs}/target">
-                                            <include name="jacoco.exec" />
-                                        </fileset>
-                                    </executiondata>
-                                    <structure name="NB Coverage">
-                                        <group name="jacoco-nb-all-modules">
-                                            <classfiles>
-                                                <fileset dir="${basedir}/${module.nb-api}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.nb-annotations}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.nb-spectest}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.engine-api}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.engine-core}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.engine-extensions}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.engine-docker}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.engine-docs}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.engine-cli}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapters-api}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapter-diag}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapter-stdout}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapter-cqld4}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapter-http}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapter-tcp}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapter-dynamodb}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapter-mongodb}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapter-pulsar}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapter-s4j}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapter-kafka}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.adapter-jdbc}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.virtdata-api}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.virtdata-lang}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.virtdata-realdata}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.virtdata-lib-basics}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.virtdata-lib-random}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.virtdata-lib-curves4}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.virtdata-lib-realer}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                                <fileset dir="${basedir}/${module.virtdata-userlibs}/target/classes">
-                                                    <include name="io/nosqlbench/**/*.class" />
-                                                </fileset>
-                                            </classfiles>
-                                            <sourcefiles encoding="UTF-8">
-                                                <fileset dir="${basedir}/${module.nb-api}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.nb-annotations}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.nb-spectest}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.engine-api}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.engine-core}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.engine-extensions}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.engine-docker}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.engine-docs}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.engine-cli}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapters-api}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapter-diag}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapter-stdout}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapter-cqld4}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapter-http}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapter-tcp}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapter-dynamodb}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapter-mongodb}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapter-pulsar}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapter-s4j}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapter-kafka}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.adapter-jdbc}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.virtdata-api}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.virtdata-lang}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.virtdata-realdata}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.virtdata-lib-basics}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.virtdata-lib-random}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.virtdata-lib-curves4}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.virtdata-lib-realer}/src/main/java" />
-                                                <fileset dir="${basedir}/${module.virtdata-userlibs}/src/main/java" />
-                                            </sourcefiles>
-                                        </group>
-                                    </structure>
-                                    <html destdir="${basedir}/target/coverage-report/html" />
-                                    <xml destfile="${basedir}/target/coverage-report/nb-coverage-report.xml" />
-                                    <csv destfile="${basedir}/target/coverage-report/nb-coverage-report.csv" />
-                                </report>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>org.jacoco.ant</artifactId>
-                        <version>${jacoco.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
+            
         </plugins>
 
     </build>

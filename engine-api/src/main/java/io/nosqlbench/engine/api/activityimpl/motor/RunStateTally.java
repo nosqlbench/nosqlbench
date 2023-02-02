@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package io.nosqlbench.engine.api.activityimpl.motor;
 import io.nosqlbench.engine.api.activityapi.core.RunState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Arrays;
 
 /**
  * <H2>Synopsis</H2>
@@ -90,9 +88,9 @@ public class RunStateTally {
         logger.trace(() -> this +" -"+from+ String.format(":%04d",counts[from.ordinal()])+ ", +"+to+ String.format(":%04d",counts[to.ordinal()]));
 
         if (counts[from.ordinal()]==0 || counts[to.ordinal()]==1) {
-            logger.debug(() -> "NOTIFYing on edge "+
-                "from " + from + String.format(":%04d",counts[from.ordinal()]) +
-                " to " + to + String.format(":%04d",counts[to.ordinal()]));
+//            logger.debug(() -> "NOTIFYing on edge "+
+//                "from " + from + String.format(":%04d",counts[from.ordinal()]) +
+//                " to " + to + String.format(":%04d",counts[to.ordinal()]));
             notifyAll();
         }
     }
@@ -107,7 +105,7 @@ public class RunStateTally {
         counts[state.ordinal()]++;
         logger.trace(() -> this +" +"+state+ String.format(":%04d",counts[state.ordinal()]));
         if (counts[state.ordinal()]==1) {
-            logger.debug(() -> "NOTIFYing on ++-SOME edge for " + state + String.format(":%04d",counts[state.ordinal()]));
+//            logger.debug(() -> "NOTIFYing on ++-SOME edge for " + state + String.format(":%04d",counts[state.ordinal()]));
             notifyAll();
         }
     }
@@ -122,7 +120,7 @@ public class RunStateTally {
         counts[state.ordinal()]--;
         logger.trace(() -> this +" -"+state+ String.format(":%04d",counts[state.ordinal()]));
         if (counts[state.ordinal()]==0) {
-            logger.debug(() -> "NOTIFYing on 00-NONE edge for " + state + String.format(":%04d",counts[state.ordinal()]));
+//            logger.debug(() -> "NOTIFYing on 00-NONE edge for " + state + String.format(":%04d",counts[state.ordinal()]));
             notifyAll();
         }
     }
@@ -145,7 +143,7 @@ public class RunStateTally {
      * @return A {@link RunStateImage}, indicating success or failure, and the view of states at the time of evaluation
      */
     public synchronized RunStateImage awaitNoneOther(long timeoutMillis, RunState... runStates) {
-        logger.debug(() -> "☐ Awaiting only " + Arrays.toString(runStates) + " for " + timeoutMillis+"ms");
+//        logger.debug(() -> "☐ Awaiting only " + Arrays.toString(runStates) + " for " + timeoutMillis+"ms");
         long timeoutAt = timeoutAt(timeoutMillis);
 
         int sum=0;
@@ -171,7 +169,7 @@ public class RunStateTally {
         }
 
         boolean timedout = (sum!=0);
-        logger.debug(() -> (timedout ? "✘ TIMED-OUT awaiting only " : "☑ Awaited only " ) + toString(runStates));
+//        logger.debug(() -> (timedout ? "✘ TIMED-OUT awaiting only " : "☑ Awaited only " ) + toString(runStates));
         return new RunStateImage(this.counts,timedout);
     }
 
@@ -194,7 +192,7 @@ public class RunStateTally {
      * @return A {@link RunStateImage}, indicating success or failure, and the view of states at the time of evaluation
      */
     public synchronized RunStateImage awaitNoneOf(long timeoutMillis, RunState... runStates) {
-        logger.debug(() -> "☐ Awaiting none of " + Arrays.toString(runStates)+ " for " + timeoutMillis+"ms");
+//        logger.debug(() -> "☐ Awaiting none of " + Arrays.toString(runStates)+ " for " + timeoutMillis+"ms");
         long timeoutAt = timeoutAt(timeoutMillis);
 
         int sum=0;
@@ -212,7 +210,7 @@ public class RunStateTally {
             }
         }
         boolean timedout=sum==0;
-        logger.debug(() -> (timedout ? "✘ TIMED-OUT awaiting none of " : "☑ Awaited none of " ) + toString(runStates));
+//        logger.debug(() -> (timedout ? "✘ TIMED-OUT awaiting none of " : "☑ Awaited none of " ) + toString(runStates));
         return new RunStateImage(this.counts,timedout);
     }
 
@@ -233,13 +231,13 @@ public class RunStateTally {
      * @return A {@link RunStateImage}, indicating success or failure, and the view of states at the time of evaluation
      */
     public synchronized RunStateImage awaitAny(long timeoutMillis, RunState... runStates) {
-        logger.debug(() -> "☐ Awaiting any " + Arrays.toString(runStates) + " for " + timeoutMillis + "ms");
+//        logger.debug(() -> "☐ Awaiting any " + Arrays.toString(runStates) + " for " + timeoutMillis + "ms");
         long timeoutAt = timeoutAt(timeoutMillis);
 
         while (System.currentTimeMillis()<timeoutAt) {
             for (RunState runState : runStates) {
                 if (counts[runState.ordinal()]>0) {
-                    logger.debug("☑ Awaited any " + toString(runStates));
+//                    logger.debug("☑ Awaited any " + toString(runStates));
                     return new RunStateImage(this.counts,false);
                 }
             }
@@ -248,7 +246,7 @@ public class RunStateTally {
             } catch (InterruptedException e) {
             }
         }
-        logger.debug(() -> "✘ TIMED-OUT awaiting any of " + toString(runStates));
+//        logger.debug(() -> "✘ TIMED-OUT awaiting any of " + toString(runStates));
         return new RunStateImage(this.counts,true);
     }
 

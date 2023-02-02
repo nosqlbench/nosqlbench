@@ -1,0 +1,12 @@
+#!/bin/bash
+cd mvn-defaults
+set -x
+CURRENT_VERSION=$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
+RELEASE_VERSION=${CURRENT_VERSION%%-SNAPSHOT}
+BASE_VERSION=$(echo "$RELEASE_VERSION" | cut -d'.' -f1-2)
+MINOR_VERSION=$(echo "$RELEASE_VERSION" | cut -d'.' -f3)
+NEXT_MINOR_VERSION=$(( $MINOR_VERSION + 1 ))
+NEXT_SNAPSHOT="${BASE_VERSION}.${NEXT_MINOR_VERSION}-SNAPSHOT"
+printf "next-snapshot: %s\n" "${NEXT_SNAPSHOT}"
+mvn versions:set-property -DallowSnapshots -DnewVersion="${NEXT_SNAPSHOT}" -Dproperty=revision
+

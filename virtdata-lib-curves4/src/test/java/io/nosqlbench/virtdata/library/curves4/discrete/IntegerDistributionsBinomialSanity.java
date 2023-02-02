@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class IntegerDistributionsBinomialSanity {
     @Test
     public void testBinomialMappedDist() {
         DiscreteLongLongSampler b85 = new DiscreteLongLongSampler(new IntegerDistributionICDSource(
-                new BinomialDistribution(8, 0.5D)
+                BinomialDistribution.of(8, 0.5D)
         ),false);
         assertThat(b85.applyAsLong(0L)).isEqualTo(0);
         assertThat(b85.applyAsLong(Long.MAX_VALUE)).isEqualTo(8);
@@ -76,7 +76,7 @@ public class IntegerDistributionsBinomialSanity {
     @Test
     public void showBinomialICDF() {
         DiscreteLongLongSampler b85 = new DiscreteLongLongSampler(new IntegerDistributionICDSource(
-                new BinomialDistribution(8,0.5D)),false);
+                BinomialDistribution.of(8,0.5D)),false);
         for (int i = 0; i < 1000; i++) {
             double factor=((double) i / 1000D);
             long v = b85.applyAsLong((long) (factor * (double) Long.MAX_VALUE));

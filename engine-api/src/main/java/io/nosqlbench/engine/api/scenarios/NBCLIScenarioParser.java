@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package io.nosqlbench.engine.api.scenarios;
 
-import io.nosqlbench.engine.api.activityconfig.StatementsLoader;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawStmtsLoader;
+import io.nosqlbench.engine.api.activityconfig.OpsLoader;
+import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsLoader;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
 import io.nosqlbench.engine.api.templating.StrInterpolator;
-import io.nosqlbench.api.config.params.Synonyms;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.content.NBPathsAPI;
@@ -54,7 +53,7 @@ public class NBCLIScenarioParser {
             .prefix("activities")
             .prefix(includes)
             .name(workload)
-            .extension(RawStmtsLoader.YAML_EXTENSIONS)
+            .extension(RawOpsLoader.YAML_EXTENSIONS)
             .first();
         return found.isPresent();
     }
@@ -68,7 +67,7 @@ public class NBCLIScenarioParser {
             .prefix("activities")
             .prefix(includes)
             .name(workloadName)
-            .extension(RawStmtsLoader.YAML_EXTENSIONS)
+            .extension(RawOpsLoader.YAML_EXTENSIONS)
             .first();
 //
         Content<?> workloadContent = found.orElseThrow();
@@ -94,7 +93,6 @@ public class NBCLIScenarioParser {
             && arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")) {
             String[] arg = arglist.removeFirst().split("=", 2);
-            arg[0] = Synonyms.canonicalize(arg[0], logger);
             if (userProvidedParams.containsKey(arg[0])) {
                 throw new BasicError("duplicate occurrence of option on command line: " + arg[0]);
             }
@@ -113,10 +111,10 @@ public class NBCLIScenarioParser {
                 .prefix(SEARCH_IN)
                 .prefix(includes)
                 .name(workloadName)
-                .extension(RawStmtsLoader.YAML_EXTENSIONS)
+                .extension(RawOpsLoader.YAML_EXTENSIONS)
                 .first().orElseThrow();
             // TODO: The yaml needs to be parsed with arguments from each command independently to support template vars
-            StmtsDocList scenariosYaml = StatementsLoader.loadContent(logger, yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
+            OpsDocList scenariosYaml = OpsLoader.loadContent(yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
             Scenarios scenarios = scenariosYaml.getDocScenarios();
 
             String[] nameparts = scenarioName.split("\\.",2);
@@ -236,7 +234,6 @@ public class NBCLIScenarioParser {
                 throw new BasicError("Unable to recognize scenario cmd spec in '" + commandFragment + "'");
             }
             String commandName = matcher.group("name");
-            commandName = Synonyms.canonicalize(commandName, logger);
             String assignmentOp = matcher.group("oper");
             String assignedValue = matcher.group("val");
             parsedStep.put(commandName, new CmdArg(commandName, assignmentOp, assignedValue));
@@ -317,12 +314,12 @@ public class NBCLIScenarioParser {
                 }
 
                 Content<?> content = NBIO.all().prefix(SEARCH_IN)
-                    .name(referenced).extension(RawStmtsLoader.YAML_EXTENSIONS)
+                    .name(referenced).extension(RawOpsLoader.YAML_EXTENSIONS)
                     .one();
 
-                StmtsDocList stmts = null;
+                OpsDocList stmts = null;
                 try {
-                    stmts = StatementsLoader.loadContent(logger, content, Map.of());
+                    stmts = OpsLoader.loadContent(content, Map.of());
                     if (stmts.getStmtDocs().size() == 0) {
                         logger.warn("Encountered yaml with no docs in '" + referenced + "'");
                         continue;
@@ -382,7 +379,7 @@ public class NBCLIScenarioParser {
 
         List<Content<?>> activities = searchin
             .prefix(includes)
-            .extension(RawStmtsLoader.YAML_EXTENSIONS)
+            .extension(RawOpsLoader.YAML_EXTENSIONS)
             .list();
 
         return filterForScenarios(activities);

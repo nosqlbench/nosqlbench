@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ public class ActivityExceptionHandler implements Thread.UncaughtExceptionHandler
 
     public ActivityExceptionHandler(ActivityExecutor executor) {
         this.executor = executor;
-        logger.debug(() -> "Activity exception handler starting up for executor '" + executor + "'");
+        logger.debug(() -> "Activity executor exception handler starting up for executor '" + executor.getActivityDef().getAlias() + "'");
     }
 
 

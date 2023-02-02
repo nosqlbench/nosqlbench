@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,13 @@ public class ExecutionResult {
         this.exception = error;
         this.iolog = ((iolog != null) ? iolog + "\n\n" : "") + exception;
         logger.debug("populating "+(error==null ? "NORMAL" : "ERROR")+" scenario result");
-        if (logger.isTraceEnabled()) {
-            StackTraceElement[] st = Thread.currentThread().getStackTrace();
-            for (int i = 0; i < st.length; i++) {
-                logger.debug(":AT " + st[i].getFileName()+":"+st[i].getLineNumber()+":"+st[i].getMethodName());
-                if (i>10) break;
-            }
-        }
+//        if (logger.isTraceEnabled()) {
+//            StackTraceElement[] st = Thread.currentThread().getStackTrace();
+//            for (int i = 0; i < st.length; i++) {
+//                logger.debug(":AT " + st[i].getFileName()+":"+st[i].getLineNumber()+":"+st[i].getMethodName());
+//                if (i>10) break;
+//            }
+//        }
 
     }
 

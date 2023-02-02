@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package io.nosqlbench.adapter.stdout;
 
 import io.nosqlbench.engine.api.activityconfig.yaml.OpData;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.engine.api.activityconfig.yaml.StmtsDocList;
+import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -34,15 +34,16 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-@Service(value= DriverAdapter.class,selector = "stdout")
+@Service(value = DriverAdapter.class, selector = "stdout")
 public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace> implements SyntheticOpTemplateProvider {
     private final static Logger logger = LogManager.getLogger(StdoutDriverAdapter.class);
 
     @Override
     public OpMapper<StdoutOp> getOpMapper() {
         DriverSpaceCache<? extends StdoutSpace> ctxCache = getSpaceCache();
-        return new StdoutOpMapper(this,ctxCache);
+        return new StdoutOpMapper(this, ctxCache);
     }
 
     @Override
@@ -58,15 +59,18 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
     }
 
     @Override
-    public List<OpTemplate> getSyntheticOpTemplates(StmtsDocList stmtsDocList, Map<String,Object> cfg) {
-        Set<String> activeBindingNames = new LinkedHashSet<>();
+    public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> cfg) {
+        Set<String> activeBindingNames = new LinkedHashSet<>(opsDocList.getDocBindings().keySet());
+
+        if (activeBindingNames.size()==0) {
+            logger.warn("Unable to synthesize op for driver=" + this.getAdapterName() + " with zero bindings.");
+            return List.of();
+        }
 
         String bindings = Optional.ofNullable(cfg.get("bindings")).map(Object::toString).orElse("doc");
-        activeBindingNames.addAll(stmtsDocList.getDocBindings().keySet());
-
         Pattern bindingsFilter = Pattern.compile(bindings.equalsIgnoreCase("doc") ? ".*" : bindings);
-        Set<String> filteredBindingNames = new LinkedHashSet<>();
-        activeBindingNames
+
+        Set<String> filteredBindingNames = activeBindingNames
             .stream()
             .filter(n -> {
                 if (bindingsFilter.matcher(n).matches()) {
@@ -77,16 +81,20 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
                     return false;
                 }
             })
-            .forEach(filteredBindingNames::add);
-        activeBindingNames = filteredBindingNames;
+            .collect(Collectors.toSet());
 
-        OpData op = new OpData("synthetic", "synthetic", Map.of(), stmtsDocList.getDocBindings(), cfg,
-            Map.of("stmt", genStatementTemplate(activeBindingNames, cfg)));
+        if (filteredBindingNames.size() == 0) {
+            logger.warn("Unable to synthesize op for driver="+getAdapterName()+" when " + activeBindingNames.size()+"/"+activeBindingNames.size() + " bindings were filtered out with bindings=" + bindings);
+            return List.of();
+        }
+
+        OpData op = new OpData("synthetic", "synthetic", Map.of(), opsDocList.getDocBindings(), cfg,
+            Map.of("stmt", genStatementTemplate(filteredBindingNames, cfg)));
 
         return List.of(op);
     }
 
-    private String genStatementTemplate(Set<String> keySet, Map<String,Object> cfg) {
+    private String genStatementTemplate(Set<String> keySet, Map<String, Object> cfg) {
         TemplateFormat format = Optional.ofNullable(cfg.get("format"))
             .map(Object::toString)
             .map(TemplateFormat::valueOf)

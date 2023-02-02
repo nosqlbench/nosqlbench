@@ -1,14 +1,22 @@
-description: A workload with only text keys and text values
+description: |
+  A workload with only text keys and text values.
+  This workload is rather simple but it is useful for demonstration purposes.
+  If you want a more thorough example, you might be interested in the
+  baselinesv2/cql-* workloads.
+  defaults:
+   TEMPLATE(keyspace,baselines)
+   TEMPLATE(table,keyvalue)
+
 
 scenarios:
   default:
-    schema: run driver=cql tags==phase:schema threads==1 cycles==UNDEF
-    rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags=='block:main-.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
   astra:
-    schema: run driver=cql tags==phase:schema-astra threads==1 cycles==UNDEF
-    rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags=='block:main-.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 bindings:
   seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
@@ -17,86 +25,60 @@ bindings:
   rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
 
 blocks:
-  - name: schema
-    tags:
-      phase: schema
-    params:
-      prepared: false
-    statements:
-    - create-keyspace: |
-        create keyspace if not exists <<keyspace:baselines>>
-        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
-        AND durable_writes = true;
-      tags:
-         name: create-keyspace
-    - create-table: |
-        create table if not exists <<keyspace:baselines>>.<<table:keyvalue>> (
+  schema:
+    ops:
+      create-keyspace:
+        raw: |
+          create keyspace if not exists TEMPLATE(keyspace,baselines)
+          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)>>'}
+          AND durable_writes = true;
+      create-table:
+        raw: |
+          create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
+          key text,
+           value text,
+           PRIMARY KEY (key)
+          );
+  schema-astra:
+    ops:
+     create-table:
+      raw: |
+        create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
         key text,
          value text,
          PRIMARY KEY (key)
         );
-      tags:
-        name: create-table
-  - name: schema-astra
-    tags:
-      phase: schema-astra
+  rampup:
     params:
-      prepared: false
-    statements:
-    - create-table: |
-        create table if not exists <<keyspace:baselines>>.<<table:keyvalue>> (
-        key text,
-         value text,
-         PRIMARY KEY (key)
-        );
-      tags:
-        name: create-table-astra
-  - name: rampup
-    tags:
-      phase: rampup
-    params:
-      cl: <<write_cl:LOCAL_QUORUM>>
-    statements:
-      - rampup-insert: |
-          insert into <<keyspace:baselines>>.<<table:keyvalue>>
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    ops:
+      rampup-insert:
+        prepared: |
+          insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
           (key, value)
           values ({seq_key},{seq_value});
-        tags:
-           name: rampup-insert
-  - name: verify
-    tags:
-      phase: verify
-      type: read
-    params:
-      cl: <<read_cl:LOCAL_QUORUM>>
-    statements:
-      - verify-select: |
-          select * from <<keyspace:baselines>>.<<table:keyvalue>> where key={seq_key};
-        verify-fields: key->seq_key, value->seq_value
-        tags:
-           name: verify
-  - name: main-read
-    tags:
-      phase: main
-      type: read
+#  verify:
+#    params:
+#      cl: <<read_cl:LOCAL_QUORUM>>
+#    ops:
+#      verify-select:
+#        prepared: |
+#          select * from <<keyspace:baselines>>.<<table:keyvalue>> where key={seq_key};
+#        verify-fields: key->seq_key, value->seq_value
+  main-read:
     params:
       ratio: 5
-      cl: <<read_cl:LOCAL_QUORUM>>
-    statements:
-      - main-select: |
-         select * from <<keyspace:baselines>>.<<table:keyvalue>> where key={rw_key};
-        tags:
-          name: main-select
-  - name: main-write
-    tags:
-      phase: main
-      type: write
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+    ops:
+      main-select:
+        prepared: |
+          select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) where key={rw_key};
+  main-write:
     params:
       ratio: 5
-      cl: <<write_cl:LOCAL_QUORUM>>
-    statements:
-      - main-insert: |
-          insert into <<keyspace:baselines>>.<<table:keyvalue>>
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    ops:
+      main-insert:
+        prepared: |
+          insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
           (key, value) values ({rw_key}, {rw_value});
-        tags:
-           name: main-insert

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class IntegerDistributionsConcurrencyTest {
     @Test
     public void testBinomialICDR() {
         Offset<Double> offset = Offset.offset(0.00001d);
-        BinomialDistribution distribution = new BinomialDistribution(8, 0.5);
+        BinomialDistribution distribution = BinomialDistribution.of(8, 0.5);
         assertThat(distribution.probability(0)).isCloseTo(0.00390d, offset);
         assertThat(distribution.probability(1)).isCloseTo(0.03125d, offset);
         assertThat(distribution.probability(2)).isCloseTo(0.10937d, offset);
