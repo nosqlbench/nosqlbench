@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.CassandraContainer;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.CassandraQueryWaitStrategy;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.Optional;
@@ -38,16 +39,17 @@ public class ExampleContainersIntegrationTest {
 //    private static GenericContainer cass= new CassandraContainer("cassandra").withExposedPorts(9042);
 
     private static String hostIP = "127.0.0.1";
+    private static String datacenter = "datacenter1";
     private static final Integer EXPOSED_PORT = 9042;
-    public static GenericContainer<?> cass = new CassandraContainer<>(DockerImageName.parse("cassandra:latest"))
-        .withExposedPorts(EXPOSED_PORT).withAccessToHost(true).waitingFor(new CassandraQueryWaitStrategy());
+    public static CassandraContainer<?> cass = new CassandraContainer<>(DockerImageName.parse("cassandra:latest")).withCreateContainerCmdModifier(cmd -> cmd.withNetworkMode("host")).withAccessToHost(true)
+        .withExposedPorts(EXPOSED_PORT).waitingFor(Wait.forLogMessage(".*cassandra:latest started.*", 1));
     @BeforeAll
     public static void initContainer() {
         //STEP0:Start the test container and expose the 9042 port on the local host.
         //So that the docker bridge controller exposes the port to our process invoker that will run nb5
         //and target cassandra on that docker container
         cass.start();
-
+        datacenter = cass.getLocalDatacenter();
         //When running with a local Docker daemon, exposed ports will usually be reachable on localhost.
         // However, in some CI environments they may instead be reachable on a different host.
         hostIP = cass.getHost();
@@ -72,7 +74,7 @@ public class ExampleContainersIntegrationTest {
 
         //STEP2: Run the example cassandra workload using the default params (
         ProcessResult runResult = invoker.run("run-workload", 30, "java", "-jar", JARNAME, "run",
-            "driver=cql", "workload=cql-keyvalue", "host="+hostIP, "localdc=datacenter1"
+            "driver=cql", "workload=cql-keyvalue", "host="+hostIP, "localdc="+datacenter
             );
         assertThat(runResult.exception).isNull();
         String runOut = String.join("\n", runResult.getStdoutData());
