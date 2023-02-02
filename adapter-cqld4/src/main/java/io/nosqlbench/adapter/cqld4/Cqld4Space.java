@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -284,6 +284,7 @@ public class Cqld4Space implements AutoCloseable {
             .add(Param.optional("localdc"))
             .add(Param.optional(List.of("secureconnectbundle", "scb")))
             .add(Param.optional(List.of("hosts", "host")))
+            .add(Param.defaultTo("port",9041))
             .add(Param.optional("driverconfig", String.class))
             .add(Param.optional("username", String.class, "user name (see also password and passfile)"))
             .add(Param.optional("userfile", String.class, "file to load the username from"))
