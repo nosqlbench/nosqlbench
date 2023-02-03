@@ -95,9 +95,15 @@ public class PulsarActivityUtil {
         PULSAR_API_TYPE(String label) {
             this.label = label;
         }
+
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label).collect(Collectors.toSet());
+
+        public static boolean isValidLabel(String label) {
+            return LABELS.contains(label);
+        }
     }
     public static boolean isValidPulsarApiType(String param) {
-        return Arrays.stream(PULSAR_API_TYPE.values()).anyMatch(t -> t.label.equals(param));
+        return PULSAR_API_TYPE.isValidLabel(param);
     }
     public static String getValidPulsarApiTypeList() {
         return Arrays.stream(PULSAR_API_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
@@ -221,9 +227,15 @@ public class PulsarActivityUtil {
         SUBSCRIPTION_TYPE(String label) {
             this.label = label;
         }
+
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label).collect(Collectors.toSet());
+
+        public static boolean isValidLabel(String label) {
+            return LABELS.contains(label);
+        }
     }
     public static boolean isValidSubscriptionType(String item) {
-        return Arrays.stream(SUBSCRIPTION_TYPE.values()).anyMatch(t -> t.label.equals(item));
+        return SUBSCRIPTION_TYPE.isValidLabel(item);
     }
     public static String getValidSubscriptionTypeList() {
         return Arrays.stream(SUBSCRIPTION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
@@ -275,9 +287,15 @@ public class PulsarActivityUtil {
         READER_MSG_POSITION_TYPE(String label) {
             this.label = label;
         }
+
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label).collect(Collectors.toSet());
+
+        public static boolean isValidLabel(String label) {
+            return LABELS.contains(label);
+        }
     }
     public static boolean isValideReaderStartPosition(String item) {
-        return Arrays.stream(READER_MSG_POSITION_TYPE.values()).anyMatch(t -> t.label.equals(item));
+        return READER_MSG_POSITION_TYPE.isValidLabel(item);
     }
 
     ///////
