@@ -156,7 +156,7 @@
                 <!--                <executions>-->
                 <!--                </executions>-->
             </plugin>
-            
+
         </plugins>
 
     </build>
@@ -185,7 +185,7 @@
             <organizationUrl>http://nosqlbench.io/</organizationUrl>
         </developer>
         <developer>
-            <name>Madhavan S</name>
+            <name>Madhavan S.</name>
             <email>madhavan_5k@yahoo.com</email>
             <organization>nosqlbench.io</organization>
             <organizationUrl>http://nosqlbench.io/</organizationUrl>

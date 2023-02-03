@@ -81,9 +81,11 @@ public class JDBCSpace implements AutoCloseable {
             throw new OpConfigError("Database name option is required.");
         }
 
-        Optional<Integer> portNumber = cfg.getOptional(Integer.class, "portNumber");
-        ds.setPortNumbers(new int[] { portNumber.orElse(26257) });
-        hikariConfig.addDataSourceProperty("portNumber", portNumber.orElse(26257));
+        //Optional<Integer> portNumber = cfg.getOptional(Integer.class, "portNumber");
+        int portNumber = Integer.parseInt(cfg.getOptional("portNumber").orElse("26257"));
+        //ds.setPortNumbers(new int[] { portNumber.orElse(26257) });
+        ds.setPortNumbers(new int[] { portNumber });
+        hikariConfig.addDataSourceProperty("portNumber", portNumber);
 
         Optional<String> user = cfg.getOptional("user");
         if(user.isPresent()) {
@@ -151,11 +153,13 @@ public class JDBCSpace implements AutoCloseable {
         Optional<Boolean> autoCommit = cfg.getOptional(Boolean.class, "autoCommit");
         hikariConfig.setAutoCommit(autoCommit.orElse(false));
 
-        Optional<Integer> maximumPoolSize = cfg.getOptional(Integer.class,"maximumPoolSize");
-        hikariConfig.setMaximumPoolSize(maximumPoolSize.orElse(40));
+        //Optional<Integer> maximumPoolSize = cfg.getOptional(Integer.class,"maximumPoolSize");
+        int maximumPoolSize = Integer.parseInt(cfg.getOptional("maximumPoolSize").orElse("40"));
+        hikariConfig.setMaximumPoolSize(maximumPoolSize);
 
-        Optional<Integer> keepaliveTime = cfg.getOptional(Integer.class,"keepaliveTime");
-        hikariConfig.setKeepaliveTime(keepaliveTime.orElse(150000));
+        //Optional<Integer> keepaliveTime = cfg.getOptional(Integer.class,"keepaliveTime");
+        int keepaliveTime = Integer.parseInt(cfg.getOptional("keepaliveTime").orElse("150000"));
+        hikariConfig.setKeepaliveTime(keepaliveTime);
 
         HikariDataSource hds = new HikariDataSource(hikariConfig);
         try {

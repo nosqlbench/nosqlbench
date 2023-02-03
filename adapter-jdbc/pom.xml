@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.5.1</version>
+            <version>42.5.2</version>
         </dependency>
 
         <!-- https://search.maven.org/artifact/com.zaxxer/HikariCP -->
