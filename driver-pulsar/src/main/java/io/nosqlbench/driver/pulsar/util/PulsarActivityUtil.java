@@ -103,18 +103,6 @@ public class PulsarActivityUtil {
         return Arrays.stream(PULSAR_API_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
-    ///////
-    // Valid persistence type
-    public enum PERSISTENT_TYPES {
-        PERSISTENT("persistent"),
-        NON_PERSISTENT("non-persistent")
-        ;
-
-        public final String label;
-        PERSISTENT_TYPES(String label) {
-            this.label = label;
-        }
-    }
 
     ///////
     // Valid Pulsar client configuration (activity-level settings)
@@ -320,31 +308,6 @@ public class PulsarActivityUtil {
 
         public static Optional<SEQ_ERROR_SIMU_TYPE> parseSimuType(String simuTypeString) {
             return Optional.ofNullable(MAPPING.get(simuTypeString.trim()));
-        }
-    }
-
-    ///////
-    // Valid websocket-producer configuration (activity-level settings)
-    // TODO: to be added
-    public enum WEBSKT_PRODUCER_CONF_KEY {
-        ;
-
-        public final String label;
-
-        WEBSKT_PRODUCER_CONF_KEY(String label) {
-            this.label = label;
-        }
-    }
-
-    ///////
-    // Valid managed-ledger configuration (activity-level settings)
-    // TODO: to be added
-    public enum MANAGED_LEDGER_CONF_KEY {
-        ;
-
-        public final String label;
-        MANAGED_LEDGER_CONF_KEY(String label) {
-            this.label = label;
         }
     }
 
