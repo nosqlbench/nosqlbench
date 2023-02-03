@@ -20,6 +20,7 @@ package io.nosqlbench.driver.pulsar.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +32,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -96,7 +100,7 @@ public class PulsarActivityUtil {
             this.label = label;
         }
 
-        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label).collect(Collectors.toSet());
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label).collect(Collectors.toUnmodifiableSet());
 
         public static boolean isValidLabel(String label) {
             return LABELS.contains(label);
@@ -228,7 +232,8 @@ public class PulsarActivityUtil {
             this.label = label;
         }
 
-        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label).collect(Collectors.toSet());
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label)
+            .collect(Collectors.toUnmodifiableSet());
 
         public static boolean isValidLabel(String label) {
             return LABELS.contains(label);
@@ -288,7 +293,8 @@ public class PulsarActivityUtil {
             this.label = label;
         }
 
-        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label).collect(Collectors.toSet());
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label)
+            .collect(Collectors.toUnmodifiableSet());
 
         public static boolean isValidLabel(String label) {
             return LABELS.contains(label);
@@ -311,17 +317,19 @@ public class PulsarActivityUtil {
             this.label = label;
         }
 
-        private static final Map<String, SEQ_ERROR_SIMU_TYPE> MAPPING = new HashMap<>();
+        private static final Map<String, SEQ_ERROR_SIMU_TYPE> MAPPING;
 
         static {
+            ImmutableMap.Builder<String, SEQ_ERROR_SIMU_TYPE> builder = ImmutableMap.builder();
             for (SEQ_ERROR_SIMU_TYPE simuType : values()) {
-                MAPPING.put(simuType.label, simuType);
-                MAPPING.put(simuType.label.toLowerCase(), simuType);
-                MAPPING.put(simuType.label.toUpperCase(), simuType);
-                MAPPING.put(simuType.name(), simuType);
-                MAPPING.put(simuType.name().toLowerCase(), simuType);
-                MAPPING.put(simuType.name().toUpperCase(), simuType);
+                builder.put(simuType.label, simuType);
+                builder.put(simuType.label.toLowerCase(), simuType);
+                builder.put(simuType.label.toUpperCase(), simuType);
+                builder.put(simuType.name(), simuType);
+                builder.put(simuType.name().toLowerCase(), simuType);
+                builder.put(simuType.name().toUpperCase(), simuType);
             }
+            MAPPING = builder.build();
         }
 
         public static Optional<SEQ_ERROR_SIMU_TYPE> parseSimuType(String simuTypeString) {
