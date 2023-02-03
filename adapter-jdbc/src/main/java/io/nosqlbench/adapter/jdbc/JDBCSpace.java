@@ -221,8 +221,9 @@ public class JDBCSpace implements AutoCloseable {
     public void close() {
         try {
             this.getConnection().close();
+            this.getHikariDataSource().close();
         } catch (Exception e) {
-            logger.warn("auto-closeable jdbc connection threw exception in jdbc space(" + this.spaceName + "): " + e);
+            logger.error("auto-closeable jdbc connection threw exception in jdbc space(" + this.spaceName + "): " + e);
             throw new RuntimeException(e);
         }
     }

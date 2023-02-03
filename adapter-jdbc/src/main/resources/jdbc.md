@@ -4,7 +4,7 @@ title: jdbc
 ---
 
 # JDBC driver
-This JDBC driver leverages HikariCP for connection pool and works with PostgreSQL. This leverages NoSQLBench based workload generation and performance testing against any PostgreSQL-compatible database cluster. Example: CockroachDB or YugabyteDB (YSQL API).
+This JDBC driver leverages [Hikari Connection Pool](https://github.com/brettwooldridge/HikariCP/wiki) for connection pool and works with PostgreSQL®. This leverages NoSQLBench based workload generation and performance testing against any PostgreSQL-compatible database cluster. Example: CockroachDB® or YugabyteDB® (YSQL API).
 
 # Executing JDBC Workload
 The following is an example of invoking a JDBC workload.
@@ -23,7 +23,11 @@ Other NB engine parameters are straight forward:
 * `*.yaml`: the NB jdbc scenario definition workload yaml file
 
 # Configuration
+There are three main configuration with which we could issue a query and process the results back based on the [PostgreSQL® Query](https://jdbc.postgresql.org/documentation/query/) pattern.
 ## Config Sources
+* `execute`: This is to issue any DDL statements such `CREATE DATABASE|TABLE` or `DROP DATABASE|TABLE` operations which returns nothing.
+* `executeUpdate`: This is to issue DML statements such as `INSERT|UPDATE|DELETE` operations that will return how many number of rows were affected by that operation.
+* `executeQuery`: This is to issue DML statement such as `SELECT` operation which would return a `ResultSet` object to process.
 ### Examples
 
 

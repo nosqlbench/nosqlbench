@@ -16,36 +16,34 @@
 
 package io.nosqlbench.adapter.jdbc.optypes;
 
-import io.nosqlbench.adapter.jdbc.JDBCSpace;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.RunnableOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Statement;
 
-/*
+/**
+ * References:
+ * https://docs.oracle.com/javase/tutorial/jdbc/basics/gettingstarted.html
+ * https://docs.oracle.com/javase/17/docs/api/java/sql/package-summary.html
+ * https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/package-summary.html
+ * https://jdbc.postgresql.org/documentation/query/
+ * https://www.cockroachlabs.com/docs/v22.2/connection-pooling.html
+ * https://www.cockroachlabs.com/docs/v22.2/connection-parameters#supported-options-parameters
+ * https://www.cockroachlabs.com/docs/v22.2/sql-statements.html#query-management-statements
+ * https://docs.yugabyte.com/preview/drivers-orms/java/yugabyte-jdbc/
  * @see <a href="https://github.com/brettwooldridge/HikariCP">HikariCP connection pooling</a> for details.
  */
-public /*abstract*/ class JDBCOp implements RunnableOp/*CycleOp<Object>*/ {
+public abstract class JDBCOp implements RunnableOp/*CycleOp<Object>*/ {
     private final static Logger logger = LogManager.getLogger(JDBCOp.class);
-    protected DataSource dataSource;
-    private final JDBCSpace jdbcSpace;
 
-    public String getTargetStatement() {
-        return targetStatement;
-    }
+    private final Connection connection;
+    private final Statement statement;
+    private final String queryString;
 
-    private final String targetStatement;
-
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
-    public JDBCSpace getJdbcSpace() {
-        return jdbcSpace;
+    public String getQueryString() {
+        return queryString;
     }
 
     public Connection getConnection() {
@@ -56,55 +54,15 @@ public /*abstract*/ class JDBCOp implements RunnableOp/*CycleOp<Object>*/ {
         return statement;
     }
 
-    private final Connection connection;
-    private final Statement statement;
-
-    /**
-     * Unused.
-     * @param jdbcSpace
-     * @param targetStatement
-     */
-    public JDBCOp(JDBCSpace jdbcSpace, String targetStatement) {
-        //TODO - implement code
-        //this.dataSource = new HikariDataSource();
-        this.jdbcSpace = jdbcSpace;
-        this.targetStatement = targetStatement;
-        this.connection = null;
-        this.statement = null;
-    }
-
     /**
      *
      * @param connection
      * @param statement
-     * @param targetStatement
+     * @param queryString
      */
-    public JDBCOp(Connection connection, Statement statement, String targetStatement) {
+    public JDBCOp(Connection connection, Statement statement, String queryString) {
         this.connection = connection;
         this.statement = statement;
-        this.targetStatement = targetStatement;
-        this.jdbcSpace = null;
-    }
-
-    @Override
-    public void run() {
-        logger.info(() -> "Executing JDBCOp for the given cycle.");
-        try {
-            this.getConnection().setAutoCommit(false);
-            if(logger.isDebugEnabled()) {
-                logger.debug(() -> "JDBC Query is: " + this.getTargetStatement());
-            }
-            this.getStatement().execute(this.getTargetStatement());
-            this.getConnection().commit();
-            logger.info(() -> "Executed the JDBC statement & committed the connection successfully");
-        } catch (SQLException sqlException) {
-            logger.error("JDBCOp ERROR: { state => %s, cause => %s, message => %s }\n",
-                sqlException.getSQLState(), sqlException.getCause(), sqlException.getMessage(), sqlException);
-            throw new RuntimeException(sqlException);
-        } catch (Exception ex) {
-            String exMsg = String.format("Exception while attempting to run the jdbc statement %s", getStatement());
-            logger.error(exMsg, ex);
-            throw new RuntimeException(exMsg, ex);
-        }
+        this.queryString = queryString;
     }
 }

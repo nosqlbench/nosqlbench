@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.jdbc.opdispensers;
 
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
+import io.nosqlbench.adapter.jdbc.optypes.JDBCExecuteOp;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -29,13 +30,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.function.LongFunction;
 
-public class JDBCDDLOpDispenser extends BaseOpDispenser<JDBCOp, JDBCSpace> {
-    private static final Logger logger = LogManager.getLogger(JDBCDDLOpDispenser.class);
+public class JDBCExecuteOpDispenser extends BaseOpDispenser<JDBCOp, JDBCSpace> {
+    private static final Logger logger = LogManager.getLogger(JDBCExecuteOpDispenser.class);
     private final LongFunction<String> targetFunction;
     private final LongFunction<Connection> connectionLongFunction;
     private final LongFunction<Statement> statementLongFunction;
 
-    public JDBCDDLOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter, LongFunction<Connection> connectionLongFunc, ParsedOp op, LongFunction<String> targetFunction) {
+    public JDBCExecuteOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter, LongFunction<Connection> connectionLongFunc, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op);
 
         this.connectionLongFunction = connectionLongFunc;
@@ -61,7 +62,7 @@ public class JDBCDDLOpDispenser extends BaseOpDispenser<JDBCOp, JDBCSpace> {
     }
 
     @Override
-    public JDBCOp apply(long cycle) {
-        return new JDBCOp(this.connectionLongFunction.apply(cycle), this.statementLongFunction.apply(cycle), targetFunction.apply(cycle));
+    public JDBCExecuteOp apply(long cycle) {
+        return new JDBCExecuteOp(this.connectionLongFunction.apply(cycle), this.statementLongFunction.apply(cycle), targetFunction.apply(cycle));
     }
 }
