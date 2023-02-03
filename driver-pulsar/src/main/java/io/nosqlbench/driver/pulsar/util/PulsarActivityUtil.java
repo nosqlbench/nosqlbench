@@ -18,6 +18,7 @@ package io.nosqlbench.driver.pulsar.util;
  */
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -518,9 +519,10 @@ public class PulsarActivityUtil {
     ///////
     // Convert JSON string to a key/value map
     private static final ObjectMapper JACKSON_OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<Map<String, String>> MAP_TYPE_REF = new TypeReference<>() {};
 
     public static Map<String, String> convertJsonToMap(String jsonStr) throws IOException {
-        return JACKSON_OBJECT_MAPPER.readValue(jsonStr, Map.class);
+        return JACKSON_OBJECT_MAPPER.readValue(jsonStr, MAP_TYPE_REF);
     }
 
     ///////
