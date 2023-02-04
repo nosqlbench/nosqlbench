@@ -54,7 +54,7 @@ public class JDBCExecuteOpDispenser extends BaseOpDispenser<JDBCOp, JDBCSpace> {
                 }
             };
             return basefunc;
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             String err_msg = "Error while attempting to create the jdbc statement from the connection";
             logger.error(err_msg, ex);
             throw new RuntimeException(err_msg, ex);

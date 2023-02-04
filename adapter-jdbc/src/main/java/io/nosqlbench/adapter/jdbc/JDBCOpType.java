@@ -17,22 +17,13 @@
 package io.nosqlbench.adapter.jdbc;
 
 /**
- * Op templates which are supported by the NoSQLBench CockroachDB driver are
+ * Op templates which are supported by the NoSQLBench JDBC driver are
  * enumerated below. These command names should mirror those in the official
- * CockroachDB API exactly. See the official API for more details.
+ * CockroachDB API exactly, as an example. See the official API for more details.
+ *
  * @see <a href="https://www.cockroachlabs.com/docs/v22.2/sql-statements.html#data-definition-statements">CockroachDB API Reference</a>
  */
 public enum JDBCOpType {
     //See https://jdbc.postgresql.org/documentation/query/
-    executeQuery, // used for SELECT operation matches executeQuery
-    executeUpdate, // used for performing updates such as INSERT/UPDATE/DELETE matches executeUpdate
-    execute, // used for creating/modifying database objects matches execute
-    create, // used for DDL - CREATE operation using 'execute'
-    drop, // used for DDL - DROP operation using 'execute'
-    insert, // used for DML - INSERT operation using 'executeUpdate'
-    update, // used for DML - UPDATE operation using 'executeUpdate'
-    delete, // used for DML - DELETE operation using 'executeUpdate'
-    select, // used for DML - SELECT operation using 'executeQuery'
-    dml, // used for DML operations like SELECT|INSERT|UPDATE|DELETE leveraging `executeUpdate` & `executeQuery`
-    ddl, // used for DDL operations like CREATE|DROP DATABASE|TABLE leveraging `execute`
+    jdbcQuery,
 }

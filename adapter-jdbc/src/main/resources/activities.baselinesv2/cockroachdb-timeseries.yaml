@@ -1,0 +1,80 @@
+# jara -jar nb5.jar cockroachdb-timeseries default -vv --show-stacktraces
+min_version: "5.17.1"
+
+description: |
+  This workload emulates a time-series data model and access patterns.
+
+scenarios:
+  default:
+    schema: run driver=jdbc tags==block:schema   threads==1 cycles==UNDEF                               url="jdbc:postgresql://crdb0-3153.g8z.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-ca&password=CHANGE_ME&user=newuser" databaseName="defaultdb" portNumber=26257 user="newuser" password="CHANGE_ME" sslmode="verify-full" serverName="crdb" sslrootcert="/path/to/postgresql_certs/root.crt"
+    rampup: run driver=jdbc tags==block:rampup   cycles===TEMPLATE(rampup-cycles,10000000) threads=auto url="jdbc:postgresql://crdb0-3153.g8z.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-ca&password=CHANGE_ME&user=newuser" databaseName="defaultdb" portNumber=26257 user="newuser" password="CHANGE_ME" sslmode="verify-full" serverName="crdb" sslrootcert="/path/to/postgresql_certs/root.crt"
+    main:   run driver=jdbc tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000)   threads=auto url="jdbc:postgresql://crdb0-3153.g8z.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-ca&password=CHANGE_ME&user=newuser" databaseName="defaultdb" portNumber=26257 user="newuser" password="CHANGE_ME" sslmode="verify-full" serverName="crdb" sslrootcert="/path/to/postgresql_certs/root.crt"
+
+params:
+  instrument: TEMPLATE(instrument,false)
+
+bindings:
+  machine_id: Mod(TEMPLATE(sources,10000)); ToHashedUUID() -> java.util.UUID
+  sensor_name: HashedLineToString('data/variable_words.txt')
+  time: Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); ToJavaInstant()
+  cell_timestamp: Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); Mul(1000L)
+  sensor_value: Normal(0.0,5.0); Add(100.0) -> double
+  station_id: Div(TEMPLATE(sources,10000));Mod(TEMPLATE(stations,100)); ToHashedUUID() -> java.util.UUID
+  data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800TEMPLATE(addzeroes,),1200TEMPLATE(addzeroes,))
+
+blocks:
+  schema:
+    params:
+    ops:
+      drop-database:
+        jdbcQuery: |
+          DROP DATABASE IF EXISTS TEMPLATE(database,baselines);
+      create-database:
+        jdbcQuery: |
+          CREATE DATABASE IF NOT EXISTS TEMPLATE(database,baselines);
+      drop-table:
+        jdbcQuery: |
+          DROP TABLE IF EXISTS TEMPLATE(database,baselines).TEMPLATE(table,iot);
+      create-table:
+        jdbcQuery: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,iot) (
+            machine_id UUID,
+            sensor_name STRING,
+            time TIMESTAMP,
+            sensor_value FLOAT,
+            station_id UUID,
+            data STRING,
+            PRIMARY KEY (machine_id, sensor_name, time)
+          );
+
+  rampup:
+    params:
+    ops:
+      insert-rampup:
+        jdbcQuery: |
+          INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
+          (machine_id, sensor_name, time, sensor_value, station_id, data)
+          VALUES ('{machine_id}', '{sensor_name}', '{time}', {sensor_value}, '{station_id}', '{data}')
+
+        #using timestamp {cell_timestamp}
+
+  main-read:
+    params:
+      ratio: TEMPLATE(read_ratio,1)
+    ops:
+      select-read:
+        jdbcQuery: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
+          WHERE machine_id='{machine_id}' and sensor_name='{sensor_name}'
+          LIMIT TEMPLATE(limit,10)
+  main-write:
+    params:
+      ratio: TEMPLATE(write_ratio,9)
+    ops:
+      insert-main:
+        jdbcQuery: |
+          INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
+          (machine_id, sensor_name, time, sensor_value, station_id, data)
+          VALUES ('{machine_id}', '{sensor_name}', '{time}', {sensor_value}, '{station_id}', '{data}')
+
+        #using timestamp {cell_timestamp}

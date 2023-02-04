@@ -32,19 +32,19 @@ public class JDBCExecuteOp extends JDBCOp {
 
     @Override
     public void run() {
-        logger.info(() -> "Executing JDBCExecuteOp for the given cycle.");
+        logger.debug(() -> "Executing JDBCExecuteOp for the given cycle.");
         try {
             this.getConnection().setAutoCommit(false);
-            if(logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) {
                 logger.debug(() -> "JDBC Query is: " + this.getQueryString());
             }
             boolean isResultSet = this.getStatement().execute(this.getQueryString());
-            if(isResultSet) {
-                logger.info(() -> ">>>>>>>>>>Executed a SELECT operation [" + this.getQueryString() + "]<<<<<<<<<<");
-            } else if(!isResultSet) {
-                logger.info(() -> {
+            if (isResultSet) {
+                logger.debug(() -> ">>>>>>>>>>Executed a SELECT operation [" + this.getQueryString() + "]<<<<<<<<<<");
+            } else if (!isResultSet) {
+                logger.debug(() -> {
                     try {
-                        return ">>>>>>>>>>Executed a normal DDL/DML (non-SELECT) operation [" + this.getStatement().getUpdateCount() + "]<<<<<<<<<<";
+                        return ">>>>>>>>>>Executed a normal DDL/DML (non-SELECT) operation. Objects affected is [" + this.getStatement().getUpdateCount() + "]<<<<<<<<<<";
                     } catch (SQLException e) {
                         String err_msg = "Exception occurred while attempting to fetch the update count of the query operation";
                         logger.error(err_msg, e);
@@ -55,7 +55,7 @@ public class JDBCExecuteOp extends JDBCOp {
                 int countResults = 0;
                 ResultSet rs = this.getStatement().getResultSet();
                 countResults += rs.getRow();
-                while(!this.getStatement().getMoreResults() && 0 < this.getStatement().getUpdateCount()) {
+                while (!this.getStatement().getMoreResults() && 0 < this.getStatement().getUpdateCount()) {
                     rs = this.getStatement().getResultSet();
                     countResults += rs.getRow();
                     //rs.close(); Optional as getMoreResults() will already close it.
@@ -64,7 +64,7 @@ public class JDBCExecuteOp extends JDBCOp {
                 logger.debug(() -> ">>>>>>>>>>Total number of rows processed is [" + finalCountResults + "]<<<<<<<<<<");
             }
             this.getConnection().commit();
-            logger.info(() -> "Executed the JDBC statement & committed the connection successfully");
+            logger.debug(() -> "Executed the JDBC statement & committed the connection successfully");
         } catch (SQLException sqlException) {
             logger.error("ERROR: { state => {}, cause => {}, message => {} }\n",
                 sqlException.getSQLState(), sqlException.getCause(), sqlException.getMessage(), sqlException);
