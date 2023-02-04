@@ -106,7 +106,7 @@ public enum RunState {
                 case Stopping, Finished, Errored -> true;// A motor has exhausted its input, and is finished with its work
                 default -> false;
             };
-            case Stopping -> (target == Stopped||target==Finished); // A motor was stopped by request before exhausting input
+            case Stopping -> (target == Stopped||target==Finished||target==Errored); // A motor was stopped by request before exhausting input
             case Finished -> (target == Running); // A motor was restarted?
             case Errored -> target==Errored;
         };

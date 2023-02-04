@@ -17,8 +17,6 @@
 package io.nosqlbench.adapter.jdbc;
 
 import io.nosqlbench.adapter.jdbc.opdispensers.JDBCExecuteOpDispenser;
-import io.nosqlbench.adapter.jdbc.opdispensers.JDBCExecuteQueryOpDispenser;
-import io.nosqlbench.adapter.jdbc.opdispensers.JDBCExecuteUpdateOpDispenser;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
@@ -51,12 +49,9 @@ public class JDBCOpMapper implements OpMapper<JDBCOp> {
         LongFunction<String> spaceNameF = op.getAsFunctionOr("space", "default");
         LongFunction<JDBCSpace> spaceFunc = l -> spaceCache.get(spaceNameF.apply(l));
 
-        // Since the only needed thing in the JDBCSpace is the connection, we can short-circuit
+        // Since the only needed thing in the JDBCSpace is the Connection, we can short-circuit
         // to it here instead of stepping down from the cycle to the space to the connection.
         LongFunction<Connection> connectionLongFunc = l -> spaceCache.get(spaceNameF.apply(l)).getConnection();
-
-
-        //return new JDBCExecuteQueryOpDispenser(adapter, spaceFunc, op);working
 
         /*
          * If the user provides a body element, then they want to provide the JSON or
@@ -65,26 +60,22 @@ public class JDBCOpMapper implements OpMapper<JDBCOp> {
          */
         if (op.isDefined("body")) {
             throw new RuntimeException("This mode is reserved for later. Do not use the 'body' op field.");
-        }
-        else {
+        } else {
             TypeAndTarget<JDBCOpType, String> opType = op.getTypeAndTarget(JDBCOpType.class, String.class, "type", "stmt");
 
             logger.info(() -> "Using " + opType.enumId + " statement form for '" + op.getName());
 
-            //return new JDBCExecuteQueryOpDispenser(adapter, spaceFunc, op/*, opType.targetFunction*/);
             return switch (opType.enumId) {
 
                 // SELECT uses 'executeQuery' and returns a 'ResultSet'
                 // https://jdbc.postgresql.org/documentation/query/#example51processing-a-simple-query-in-jdbc
-                case executeQuery, select -> new JDBCExecuteQueryOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
 
                 // INSERT|UPDATE|DELETE uses 'executeUpdate' and returns an 'int'
                 // https://jdbc.postgresql.org/documentation/query/#performing-updates
-                case dml, executeUpdate, update, insert, delete -> new JDBCExecuteUpdateOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
 
                 // CREATE|DROP TABLE|VIEW uses 'execute' (as opposed to 'executeQuery' which returns a 'ResultSet')
                 // https://jdbc.postgresql.org/documentation/query/#example54dropping-a-table-in-jdbc
-                case ddl, create, drop, execute -> new JDBCExecuteOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction)/*.apply(op)*/;
+                case jdbcQuery -> new JDBCExecuteOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
             };
         }
     }

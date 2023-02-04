@@ -1,4 +1,4 @@
-# run driver=jdbc workload="/path/to/cockroachdb-keyvalue.yaml" tags="block:schema" threads=1 cycles=4 url="jdbc:postgresql://insectdb0-3153.g8z.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-ca&password=CHANGE_ME&user=newuser" databaseName="defaultdb" portNumber=26257 user="newuser" password="CHANGE_ME" sslmode="verify-full" serverName="insectdb" sslrootcert="/path/to/postgresql_certs/root.crt" -vv --show-stacktraces
+# run driver=jdbc workload="/path/to/cockroachdb-keyvalue.yaml" tags="block:schema" threads=AUTO cycles=4 url="jdbc:postgresql://crdb0-3153.g8z.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-ca&password=CHANGE_ME&user=newuser" databaseName="defaultdb" portNumber=26257 user="newuser" password="CHANGE_ME" sslmode="verify-full" serverName=insectdb sslrootcert="/path/to/postgresql_certs/root.crt" -vv --show-stacktraces
 min_version: "5.17.1"
 
 description: |
@@ -7,11 +7,13 @@ description: |
 
 scenarios:
   default:
-    schema: run driver=jdbc tags=="block:schema" threads==1 cycles==4 url="jdbc:postgresql://insectdb0-3153.g8z.cockroachlabs.cloud" user="newuser" password="CHANGE_ME" sslmode="verify-ca"
+    schema: run driver=jdbc workload="/path/to/cockroachdb-keyvalue.yaml" tags==block:schema   threads=1    cycles==UNDEF                             url="jdbc:postgresql://crdb0-3153.g8z.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-ca&password=CHANGE_ME&user=newuser" databaseName="defaultdb" portNumber=26257 user="newuser" password="CHANGE_ME" sslmode="verify-full" serverName="crdb" sslrootcert="/path/to/postgresql_certs/root.crt"
+    rampup: run driver=jdbc workload="/path/to/cockroachdb-keyvalue.yaml" tags==block:rampup   threads=AUTO cycles===TEMPLATE(rampup-cycles,10000000) url="jdbc:postgresql://crdb0-3153.g8z.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-ca&password=CHANGE_ME&user=newuser" databaseName="defaultdb" portNumber=26257 user="newuser" password="CHANGE_ME" sslmode="verify-full" serverName="crdb" sslrootcert="/path/to/postgresql_certs/root.crt"
+    main:   run driver=jdbc workload="/path/to/cockroachdb-keyvalue.yaml" tags=="block:main.*" threads=AUTO cycles===TEMPLATE(main-cycles,10000000)   url="jdbc:postgresql://crdb0-3153.g8z.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-ca&password=CHANGE_ME&user=newuser" databaseName="defaultdb" portNumber=26257 user="newuser" password="CHANGE_ME" sslmode="verify-full" serverName="crdb" sslrootcert="/path/to/postgresql_certs/root.crt"
 
 bindings:
-  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
-  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
+  seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString() -> String
+  seq_value: Hash(); Mod(TEMPLATE(valuecount,1000000000)); ToString() -> String
   rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
   rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
 
@@ -19,37 +21,38 @@ blocks:
   schema:
     ops:
       drop-database:
-        ddl: |
+        jdbcQuery: |
           DROP DATABASE IF EXISTS TEMPLATE(database,baselines);
       create-database:
-        create: |
+        jdbcQuery: |
           CREATE DATABASE IF NOT EXISTS TEMPLATE(database,baselines);
       drop-table:
-        drop: |
+        jdbcQuery: |
           DROP TABLE IF EXISTS TEMPLATE(database,baselines).TEMPLATE(table,keyvalue);
       create-table:
-        create: |
+        jdbcQuery: |
           CREATE TABLE IF NOT EXISTS TEMPLATE(database,baselines).TEMPLATE(table,keyvalue) (key STRING PRIMARY KEY, value STRING);
 
   rampup:
     params:
     ops:
-      rampup-insert: |
-        INSERT INTO TEMPLATE(database,baselines).TEMPLATE(table,keyvalue)
-        (key, value)
-        VALUES ({seq_key},{seq_value});
+      rampup-insert:
+        jdbcQuery: |
+          INSERT INTO TEMPLATE(database,baselines).TEMPLATE(table,keyvalue)
+          (key, value) VALUES ({seq_key},{seq_value});
+
   main-read:
     params:
-      ratio: 5
-      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
-    statements:
-      main-select: |
-        SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) WHERE key={rw_key};
+      ratio: TEMPLATE(read_ratio,5)
+    ops:
+      main-select:
+        jdbcQuery: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) WHERE key='{rw_key}';
   main-write:
     params:
-      ratio: 5
-      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
-    statements:
-      main-insert: |
-        INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
-        (key, value) VALUES ({rw_key}, {rw_value});
+      ratio: TEMPLATE(write_ratio,5)
+    ops:
+      main-insert:
+        jdbcQuery: |
+          INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
+          (key, value) VALUES ('{rw_key}', '{rw_value}');

@@ -33,9 +33,10 @@ import java.sql.Statement;
  * https://www.cockroachlabs.com/docs/v22.2/connection-parameters#supported-options-parameters
  * https://www.cockroachlabs.com/docs/v22.2/sql-statements.html#query-management-statements
  * https://docs.yugabyte.com/preview/drivers-orms/java/yugabyte-jdbc/
+ *
  * @see <a href="https://github.com/brettwooldridge/HikariCP">HikariCP connection pooling</a> for details.
  */
-public abstract class JDBCOp implements RunnableOp/*CycleOp<Object>*/ {
+public abstract class JDBCOp implements RunnableOp {
     private final static Logger logger = LogManager.getLogger(JDBCOp.class);
 
     private final Connection connection;
@@ -55,7 +56,6 @@ public abstract class JDBCOp implements RunnableOp/*CycleOp<Object>*/ {
     }
 
     /**
-     *
      * @param connection
      * @param statement
      * @param queryString
