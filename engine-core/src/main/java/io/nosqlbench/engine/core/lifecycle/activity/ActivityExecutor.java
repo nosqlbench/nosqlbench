@@ -87,10 +87,10 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
         activity.setRunState(RunState.Stopping);
         motors.forEach(Motor::requestStop);
-        tally.awaitNoneOther(RunState.Stopped, RunState.Finished);
+        tally.awaitNoneOther(RunState.Stopped, RunState.Finished, RunState.Errored);
 
         shutdownExecutorService(Integer.MAX_VALUE);
-        tally.awaitNoneOther(RunState.Stopped, RunState.Finished);
+        tally.awaitNoneOther(RunState.Stopped, RunState.Finished, RunState.Errored);
         activity.setRunState(RunState.Stopped);
 
         logger.info(() -> "stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
@@ -349,7 +349,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         return activity;
     }
 
-    public void notifyException(Thread t, Throwable e) {
+    public synchronized void notifyException(Thread t, Throwable e) {
         logger.debug(() -> "Uncaught exception in activity thread forwarded to activity executor: " + e.getMessage());
         this.exception = new RuntimeException("Error in activity thread " + t.getName(), e);
         this.requestStopMotors();
