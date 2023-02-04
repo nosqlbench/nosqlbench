@@ -27,8 +27,8 @@ blocks:
     params:
     ops:
       drop-database:
-        jdbcQuery: |
-          DROP DATABASE IF EXISTS TEMPLATE(database,baselines);
+        #jdbcQuery: |
+        #  DROP DATABASE IF EXISTS TEMPLATE(database,baselines);
       create-database:
         jdbcQuery: |
           CREATE DATABASE IF NOT EXISTS TEMPLATE(database,baselines);
