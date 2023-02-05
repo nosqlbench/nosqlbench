@@ -20,7 +20,6 @@ package io.nosqlbench.driver.pulsar.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -317,20 +316,16 @@ public class PulsarActivityUtil {
             this.label = label;
         }
 
-        private static final Map<String, SEQ_ERROR_SIMU_TYPE> MAPPING;
-
-        static {
-            ImmutableMap.Builder<String, SEQ_ERROR_SIMU_TYPE> builder = ImmutableMap.builder();
-            for (SEQ_ERROR_SIMU_TYPE simuType : values()) {
-                builder.put(simuType.label, simuType);
-                builder.put(simuType.label.toLowerCase(), simuType);
-                builder.put(simuType.label.toUpperCase(), simuType);
-                builder.put(simuType.name(), simuType);
-                builder.put(simuType.name().toLowerCase(), simuType);
-                builder.put(simuType.name().toUpperCase(), simuType);
-            }
-            MAPPING = builder.build();
-        }
+        private static final Map<String, SEQ_ERROR_SIMU_TYPE> MAPPING = Stream.of(values())
+            .flatMap(simuType ->
+                Stream.of(simuType.label,
+                        simuType.label.toLowerCase(),
+                        simuType.label.toUpperCase(),
+                        simuType.name(),
+                        simuType.name().toLowerCase(),
+                        simuType.name().toUpperCase())
+                    .distinct().map(key -> Map.entry(key, simuType)))
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
 
         public static Optional<SEQ_ERROR_SIMU_TYPE> parseSimuType(String simuTypeString) {
             return Optional.ofNullable(MAPPING.get(simuTypeString.trim()));
