@@ -420,7 +420,10 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     }
 
     public synchronized void startActivity() {
-        // we need an executor service to run motor threads on
+        RunStateImage startable = tally.awaitNoneOther(1000L, RunState.Uninitialized, RunState.Stopped);
+        if (startable.isTimeout()) {
+            throw new RuntimeException("Unable to start activity '" + getActivity().getAlias() + "' which is in state " + startable);
+        }
         startMotorExecutorService();
         startRunningActivityThreads();
         awaitMotorsAtLeastRunning();
