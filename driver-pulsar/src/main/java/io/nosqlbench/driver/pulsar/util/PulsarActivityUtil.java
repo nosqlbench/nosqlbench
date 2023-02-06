@@ -380,7 +380,7 @@ public class PulsarActivityUtil {
                 if (schemaDefinitionStr.startsWith("file://")) {
                     try {
                         Path filePath = Paths.get(URI.create(schemaDefinitionStr));
-                        schemaDefinitionStr = Files.readString(filePath, StandardCharsets.US_ASCII);
+                        schemaDefinitionStr = Files.readString(filePath, StandardCharsets.UTF_8);
                     } catch (IOException ioe) {
                         throw new RuntimeException("Error reading the specified \"Avro\" schema definition file: " + definitionStr + ": " + ioe.getMessage());
                     }
