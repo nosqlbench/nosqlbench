@@ -20,6 +20,8 @@ import io.nosqlbench.engine.api.activityapi.core.RunState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
+
 /**
  * A value type which encodes the atomic state of a RunState tally.
  */
@@ -39,21 +41,43 @@ public class RunStateImage {
     }
 
     public boolean is(RunState runState) {
-        return counts[runState.ordinal()]>0;
+        return counts[runState.ordinal()] > 0;
     }
 
     public boolean isOnly(RunState runState) {
         for (int i = 0; i < counts.length; i++) {
-            if (counts[i]>0 && i!=runState.ordinal()) {
+            if (counts[i] > 0 && i != runState.ordinal()) {
                 return false;
             }
         }
         return true;
     }
 
+    public boolean isNonOther(RunState... runStates) {
+        int[] scan = Arrays.copyOf(counts, counts.length);
+        for (RunState runState : runStates) {
+            scan[runState.ordinal()]=0;
+        }
+        for (int i : scan) {
+            if (i>0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public RunState getMinState() {
+        for (int ord = 0; ord < counts.length - 1; ord++) {
+            if (counts[ord] > 0) {
+                return RunState.values()[ord];
+            }
+        }
+        throw new RuntimeException("There were zero states, so min state is undefined");
+    }
+
     public RunState getMaxState() {
-        for (int ord = counts.length-1; ord >= 0; ord--) {
-            if (counts[ord]>0) {
+        for (int ord = counts.length - 1; ord >= 0; ord--) {
+            if (counts[ord] > 0) {
                 return RunState.values()[ord];
             }
         }
