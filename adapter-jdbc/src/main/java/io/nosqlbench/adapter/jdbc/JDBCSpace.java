@@ -52,28 +52,15 @@ public class JDBCSpace implements AutoCloseable {
     private HikariDataSource createClient(NBConfiguration cfg) {
         hikariConfig = new HikariConfig();
 
-        Optional<String> url = cfg.getOptional("url");
-        if (url.isEmpty()) {
-            throw new OpConfigError("url option is required.");
-        } else {
-            hikariConfig.setJdbcUrl(url.get());
-        }
-
-        Optional<String> serverNames = cfg.getOptional("serverName");
-        if (serverNames.isPresent()) {
-            hikariConfig.addDataSourceProperty("serverName", serverNames.get());
-        } else {
-            throw new OpConfigError("Server name option is required.");
-        }
+        hikariConfig.setJdbcUrl(cfg.get("url"));
+        hikariConfig.addDataSourceProperty("serverName", cfg.get("serverName"));
 
         Optional<String> databaseName = cfg.getOptional("databaseName");
         if (databaseName.isPresent()) {
             hikariConfig.addDataSourceProperty("databaseName", databaseName.get());
-        } else {
-            throw new OpConfigError("Database name option is required.");
         }
 
-        int portNumber = Integer.parseInt(cfg.getOptional("portNumber").orElse("26257"));
+        int portNumber = Integer.parseInt(cfg.get("portNumber"));
         hikariConfig.addDataSourceProperty("portNumber", portNumber);
 
         Optional<String> user = cfg.getOptional("user");
@@ -90,23 +77,17 @@ public class JDBCSpace implements AutoCloseable {
         } else {
             if (user.isPresent()) {
                 throw new OpConfigError("Both user and password options are required. Only user is supplied in this case.");
-                // Maybe simply ignore user and move on as opposed to throwing an error?
-                //logger.warn(() -> "Both user and password options are required. Only user is supplied in this case and it will be ignored.");
             }
         }
 
         Optional<Boolean> ssl = cfg.getOptional(Boolean.class, "ssl");
-        if (ssl.isPresent()) {
-            hikariConfig.addDataSourceProperty("ssl", ssl.get());
-        } else {
-            hikariConfig.addDataSourceProperty("ssl", false);
-        }
+        hikariConfig.addDataSourceProperty("ssl", ssl.orElse(false));
 
         Optional<String> sslMode = cfg.getOptional("sslmode");
         if (sslMode.isPresent()) {
             hikariConfig.addDataSourceProperty("sslmode", sslMode.get());
         } else {
-            hikariConfig.addDataSourceProperty("sslmode", "verify-full");
+            hikariConfig.addDataSourceProperty("sslmode", "prefer");
         }
 
         Optional<String> sslCert = cfg.getOptional("sslcert");
@@ -121,25 +102,22 @@ public class JDBCSpace implements AutoCloseable {
             hikariConfig.addDataSourceProperty("sslrootcert", sslRootCert.get());
         }
 
-        Optional<String> applicationName = cfg.getOptional("applicationName");
-        hikariConfig.addDataSourceProperty("applicationName", applicationName.orElse("NoSQLBench"));
+        hikariConfig.addDataSourceProperty("applicationName", cfg.get("applicationName"));
+        hikariConfig.addDataSourceProperty("rewriteBatchedInserts", cfg.getOrDefault("rewriteBatchedInserts", true));
 
-        Optional<Boolean> rewriteBatchedInserts = cfg.getOptional(Boolean.class, "rewriteBatchedInserts");
-        hikariConfig.addDataSourceProperty("rewriteBatchedInserts", rewriteBatchedInserts.orElse(true));
+        // We're managing the auto-commit behavior of connections ourselves and hence disabling the auto-commit.
+        //Optional<Boolean> autoCommit = cfg.getOptional(Boolean.class, "autoCommit");
+        hikariConfig.setAutoCommit(false);
 
-        //Maybe always disable auto-commit since we manage ourselves?
-        Optional<Boolean> autoCommit = cfg.getOptional(Boolean.class, "autoCommit");
-        hikariConfig.setAutoCommit(autoCommit.orElse(false));
-
-        int maximumPoolSize = Integer.parseInt(cfg.getOptional("maximumPoolSize").orElse("40"));
-        hikariConfig.setMaximumPoolSize(maximumPoolSize);
-
-        int keepaliveTime = Integer.parseInt(cfg.getOptional("keepaliveTime").orElse("150000"));
-        hikariConfig.setKeepaliveTime(keepaliveTime);
+        hikariConfig.setMaximumPoolSize(Integer.parseInt(cfg.get("maximumPoolSize")));
+        hikariConfig.setKeepaliveTime(Integer.parseInt(cfg.get("keepaliveTime")));
+        hikariConfig.setMaximumPoolSize(Integer.parseInt(cfg.get("maximumPoolSize")));
 
         HikariDataSource hds = new HikariDataSource(hikariConfig);
         try {
             this.connection = hds.getConnection();
+            // We're taking an opinionated approach here and managing the commit ourselves.
+            this.getConnection().setAutoCommit(false);
         } catch (Exception ex) {
             String exp = "Exception occurred while attempting to create a connection using the HikariDataSource";
             logger.error(exp, ex);
@@ -155,41 +133,41 @@ public class JDBCSpace implements AutoCloseable {
             .add(Param.defaultTo("serverName", "localhost").setDescription("The host name of the server. Defaults to 'localhost'"))
             .add(Param.optional("databaseName").setDescription("The database name. The default is to connect to a database with the same name as the user name used to connect to the server."))
             // See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby & https://jdbc.postgresql.org/documentation/use/
-            .add(Param.defaultTo("portNumber", 5432).setDescription("The port number the server is listening on. Defaults to the PostgreSQL® standard port number (5432)"))
-            .add(Param.optional("user"))
-            .add(Param.optional("password"))
-            .add(Param.optional("ssl"))
-            .add(Param.optional("sslmode"))
-            .add(Param.optional("sslcert"))
-            .add(Param.optional("sslrootcert"))
-            .add(Param.optional("applicationName"))
-            .add(Param.optional("rewriteBatchedInserts"))
-            .add(Param.optional("autoCommit"))
-            .add(Param.optional("connectionTimeout"))
-            .add(Param.optional("idleTimeout"))
-            .add(Param.optional("keepaliveTime"))
-            .add(Param.optional("maxLifetime"))
-            .add(Param.optional("connectionTestQuery"))
-            .add(Param.optional("minimumIdle"))
-            .add(Param.optional("maximumPoolSize"))
-            .add(Param.optional("metricRegistry"))
-            .add(Param.optional("healthCheckRegistry"))
-            .add(Param.optional("poolName"))
-            .add(Param.optional("initializationFailTimeout"))
-            .add(Param.optional("isolateInternalQueries"))
-            .add(Param.optional("allowPoolSuspension"))
-            .add(Param.optional("readOnly"))
-            .add(Param.optional("registerMbeans"))
-            .add(Param.optional("catalog"))
-            .add(Param.optional("connectionInitSql"))
-            .add(Param.optional("driverClassName"))
-            .add(Param.optional("transactionIsolation"))
-            .add(Param.optional("validationTimeout"))
-            .add(Param.optional("leakDetectionThreshold"))
-            .add(Param.optional("dataSource"))
-            .add(Param.optional("schema"))
-            .add(Param.optional("threadFactory"))
-            .add(Param.optional("scheduledExecutor"))
+            .add(Param.defaultTo("portNumber", "5432").setDescription("The port number the server is listening on. Defaults to the PostgreSQL® standard port number (5432)."))
+            .add(Param.optional("user").setDescription("The database user on whose behalf the connection is being made."))
+            .add(Param.optional("password").setDescription("The database user’s password."))
+            .add(Param.optional("ssl").setDescription("Whether to connect using SSL. Default is false."))
+            .add(Param.optional("sslmode").setDescription("Possible values include disable , allow , prefer , require , verify-ca and verify-full . require , allow and prefer all default to a non-validating SSL factory and do not check the validity of the certificate or the host name. verify-ca validates the certificate, but does not verify the hostname. verify-full will validate that the certificate is correct and verify the host connected to has the same hostname as the certificate. Default is prefer."))
+            .add(Param.optional("sslcert").setDescription("Provide the full path for the certificate file. Defaults to defaultdir/postgresql.crt, where defaultdir is ${user.home}/.postgresql/ in *nix systems and %appdata%/postgresql/ on windows."))
+            .add(Param.optional("sslrootcert").setDescription("File name of the SSL root certificate."))
+            .add(Param.defaultTo("applicationName", "NoSQLBench").setDescription("The application name to be used. Default is 'NoSQLBench'."))
+            .add(Param.optional("rewriteBatchedInserts").setDescription("This will change batch inserts from insert into foo (col1, col2, col3) values (1, 2, 3) into insert into foo (col1, col2, col3) values (1, 2, 3), (4, 5, 6) this provides 2-3x performance improvement. Default is true"))
+            .add(Param.optional("autoCommit").setDescription("This property controls the default auto-commit behavior of connections returned from the pool. It is a boolean value. Default: false. This cannot be changed."))
+            .add(Param.optional("connectionTimeout").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("idleTimeout").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.defaultTo("keepaliveTime", "150000").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("maxLifetime").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("connectionTestQuery").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("minimumIdle").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.defaultTo("maximumPoolSize", "40").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. Default value is 40 and cannot be changed."))
+            .add(Param.optional("metricRegistry").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("healthCheckRegistry").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("poolName").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("initializationFailTimeout").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("isolateInternalQueries").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("allowPoolSuspension").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("readOnly").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("registerMbeans").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("catalog").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("connectionInitSql").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("driverClassName").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("transactionIsolation").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("validationTimeout").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("leakDetectionThreshold").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("dataSource").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("schema").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("threadFactory").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("scheduledExecutor").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
             .asReadOnly();
     }
 

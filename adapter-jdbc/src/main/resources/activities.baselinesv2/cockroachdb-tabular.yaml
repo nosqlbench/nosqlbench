@@ -27,12 +27,12 @@ description: |
 
 scenarios:
   default:
-    schema: run driver=jdbc tags==block:schema threads==1 cycles==UNDEF
-    rampup: run driver=jdbc tags==block:rampup cycles===TEMPLATE(rampup-cycles,10B) threads=auto
-    main: run driver=jdbc tags==block:"main.*" cycles===TEMPLATE(main-cycles,100M) threads=auto
+    schema: run driver=jdbc tags==block:schema   cycles==UNDEF threads==1
+    rampup: run driver=jdbc tags==block:rampup   cycles===TEMPLATE(rampup-cycles,10B) threads=auto
+    main:   run driver=jdbc tags==block:'main.*' cycles===TEMPLATE(main-cycles,100M)  threads=auto
 
 params:
-  instrument: true
+  instrument: TEMPLATE(instrument,false)
 
 bindings:
   # for ramp-up and verify phases
@@ -66,16 +66,16 @@ blocks:
       prepared: false
     ops:
       #drop-database:
-      #  jdbcQuery: |
+      #  query: |
       #    DROP DATABASE IF EXISTS TEMPLATE(database,baselines);
       create-database:
-        jdbcQuery: |
+        query: |
           CREATE DATABASE IF NOT EXISTS TEMPLATE(database,baselines);
       drop-table:
-        jdbcQuery: |
+        query: |
           DROP TABLE IF EXISTS TEMPLATE(database,baselines).TEMPLATE(table,tabular);
       create-table:
-        jdbcQuery: |
+        query: |
           CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) (
            part STRING,
            clust STRING,
@@ -87,51 +87,68 @@ blocks:
     params:
     ops:
       rampup-insert:
-        jdbcQuery: |
+        query: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           (part,clust,data0,data1,data2,data3,data4,data5,data6,data7)
-          VALUES ('{part_layout}','{clust_layout}','{data0}','{data1}','{data2}','{data3}','{data4}','{data5}','{data6}','{data7}')
+          VALUES (
+            '{part_layout}','{clust_layout}','{data0}','{data1}','{data2}',
+            '{data3}','{data4}','{data5}','{data6}','{data7}'
+          );
   verify:
     params:
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
     ops:
       verify-select:
-        jdbcQuery: |
-          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) WHERE part='{part_layout}' AND clust='{clust_layout}'
+        query: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_layout}'
+          AND clust='{clust_layout}'
   main-read:
     params:
       ratio: TEMPLATE(read_ratio,1)
     ops:
       main-select-all:
-        jdbcQuery: |
-          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) WHERE part='{part_read}' LIMIT {limit};
+        query: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
       main-select-01:
-        jdbcQuery: |
-          SELECT data0,data1 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) WHERE part='{part_read}' LIMIT {limit};
+        query: |
+          SELECT data0,data1 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
       main-select-0246:
-        jdbcQuery: |
-          SELECT data0,data2,data4,data6 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) WHERE part='{part_read}' LIMIT {limit};
+        query: |
+          SELECT data0,data2,data4,data6 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
       main-select-1357:
-        jdbcQuery: |
-          SELECT data1,data3,data5,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) WHERE part='{part_read}' LIMIT {limit};
+        query: |
+          SELECT data1,data3,data5,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
       main-select-0123:
-        jdbcQuery: |
-          SELECT data0,data1,data2,data3 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) WHERE part='{part_read}' LIMIT {limit};
+        query: |
+          SELECT data0,data1,data2,data3 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
       main-select-4567:
-        jdbcQuery: |
-          SELECT data4,data5,data6,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) WHERE part='{part_read}' LIMIT {limit};
+        query: |
+          SELECT data4,data5,data6,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
       main-select-67:
-        jdbcQuery: |
-          SELECT data6,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) WHERE part='{part_read}' LIMIT {limit};
+        query: |
+          SELECT data6,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
       main-select:
-        jdbcQuery: |
-          SELECT data0,data1,data2,data3,data4,data5,data6,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) WHERE part='{part_read}' LIMIT {limit};
+        query: |
+          SELECT data0,data1,data2,data3,data4,data5,data6,data7
+          FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
   main-write:
     params:
       ratio: TEMPLATE(write_ratio,8)
     ops:
       main-write:
-        jdbcQuery: |
+        query: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           (part, clust, data0,data1,data2,data3,data4,data5,data6,data7)
-          VALUES ('{part_write}','{clust_write}','{data0}','{data1}','{data2}','{data3}','{data4}','{data5}','{data6}','{data7}')
+          VALUES (
+            '{part_write}','{clust_write}','{data0}','{data1}','{data2}',
+            '{data3}','{data4}','{data5}','{data6}','{data7}'
+          );

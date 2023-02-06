@@ -25,5 +25,5 @@ package io.nosqlbench.adapter.jdbc;
  */
 public enum JDBCOpType {
     //See https://jdbc.postgresql.org/documentation/query/
-    jdbcQuery,
+    query,
 }

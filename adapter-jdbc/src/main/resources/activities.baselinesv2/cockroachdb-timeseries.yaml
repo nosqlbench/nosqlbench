@@ -6,9 +6,9 @@ description: |
 
 scenarios:
   default:
-    schema: run driver=jdbc tags==block:schema   threads==1 cycles==UNDEF                               url="jdbc:postgresql://crdb0-3153.g8z.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-ca&password=CHANGE_ME&user=newuser" databaseName="defaultdb" portNumber=26257 user="newuser" password="CHANGE_ME" sslmode="verify-full" serverName="crdb" sslrootcert="/path/to/postgresql_certs/root.crt"
-    rampup: run driver=jdbc tags==block:rampup   cycles===TEMPLATE(rampup-cycles,10000000) threads=auto url="jdbc:postgresql://crdb0-3153.g8z.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-ca&password=CHANGE_ME&user=newuser" databaseName="defaultdb" portNumber=26257 user="newuser" password="CHANGE_ME" sslmode="verify-full" serverName="crdb" sslrootcert="/path/to/postgresql_certs/root.crt"
-    main:   run driver=jdbc tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000)   threads=auto url="jdbc:postgresql://crdb0-3153.g8z.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-ca&password=CHANGE_ME&user=newuser" databaseName="defaultdb" portNumber=26257 user="newuser" password="CHANGE_ME" sslmode="verify-full" serverName="crdb" sslrootcert="/path/to/postgresql_certs/root.crt"
+    schema: run driver=jdbc tags==block:schema   cycles==UNDEF                             threads==1   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    rampup: run driver=jdbc tags==block:rampup   cycles===TEMPLATE(rampup-cycles,10000000) threads=auto url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    main:   run driver=jdbc tags==block:'main.*' cycles===TEMPLATE(main-cycles,10000000)   threads=auto url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
 
 params:
   instrument: TEMPLATE(instrument,false)
@@ -27,16 +27,16 @@ blocks:
     params:
     ops:
       drop-database:
-        #jdbcQuery: |
+        #query: |
         #  DROP DATABASE IF EXISTS TEMPLATE(database,baselines);
       create-database:
-        jdbcQuery: |
+        query: |
           CREATE DATABASE IF NOT EXISTS TEMPLATE(database,baselines);
       drop-table:
-        jdbcQuery: |
+        query: |
           DROP TABLE IF EXISTS TEMPLATE(database,baselines).TEMPLATE(table,iot);
       create-table:
-        jdbcQuery: |
+        query: |
           CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,iot) (
             machine_id UUID,
             sensor_name STRING,
@@ -51,10 +51,12 @@ blocks:
     params:
     ops:
       insert-rampup:
-        jdbcQuery: |
+        query: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
           (machine_id, sensor_name, time, sensor_value, station_id, data)
-          VALUES ('{machine_id}', '{sensor_name}', '{time}', {sensor_value}, '{station_id}', '{data}')
+          VALUES (
+            '{machine_id}', '{sensor_name}', '{time}', {sensor_value}, '{station_id}', '{data}'
+          );
 
         #using timestamp {cell_timestamp}
 
@@ -63,18 +65,20 @@ blocks:
       ratio: TEMPLATE(read_ratio,1)
     ops:
       select-read:
-        jdbcQuery: |
+        query: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
           WHERE machine_id='{machine_id}' and sensor_name='{sensor_name}'
-          LIMIT TEMPLATE(limit,10)
+          LIMIT TEMPLATE(limit,10);
   main-write:
     params:
       ratio: TEMPLATE(write_ratio,9)
     ops:
       insert-main:
-        jdbcQuery: |
+        query: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
           (machine_id, sensor_name, time, sensor_value, station_id, data)
-          VALUES ('{machine_id}', '{sensor_name}', '{time}', {sensor_value}, '{station_id}', '{data}')
+          VALUES (
+            '{machine_id}', '{sensor_name}', '{time}', {sensor_value}, '{station_id}', '{data}'
+          );
 
         #using timestamp {cell_timestamp}

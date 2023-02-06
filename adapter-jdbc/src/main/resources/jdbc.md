@@ -1,8 +1,3 @@
----
-weight: 0
-title: jdbc
----
-
 # JDBC driver
 This JDBC driver leverages [Hikari Connection Pool](https://github.com/brettwooldridge/HikariCP/wiki) for connection pool and works with PostgreSQL®. This leverages NoSQLBench based workload generation and performance testing against any PostgreSQL-compatible database cluster. Example: CockroachDB® or YugabyteDB® (YSQL API).
 
@@ -26,6 +21,6 @@ Other NB engine parameters are straight forward:
 # Configuration
 There is really one main configuration with which we could issue a query and process the results back based on the [PostgreSQL® Query](https://jdbc.postgresql.org/documentation/query/) pattern.
 ## Config Sources
-* `jdbcQuery`: This is to issue DML statement such as `SELECT` operation which would return a `ResultSet` object to process. This is to issue any DDL statements such `CREATE DATABASE|TABLE` or `DROP DATABASE|TABLE` operations which returns nothing. This is to issue DML statements such as `INSERT|UPDATE|DELETE` operations that will return how many number of rows were affected by that operation.
+* `query`: This is to issue DML statement such as `SELECT` operation which would return a `ResultSet` object to process. This is to issue any DDL statements such `CREATE DATABASE|TABLE` or `DROP DATABASE|TABLE` operations which returns nothing. This is to issue DML statements such as `INSERT|UPDATE|DELETE` operations that will return how many number of rows were affected by that operation.
 ### Examples
 Check out the default activities under the [activities.baselinesv2](./activities.baselinesv2) directory.

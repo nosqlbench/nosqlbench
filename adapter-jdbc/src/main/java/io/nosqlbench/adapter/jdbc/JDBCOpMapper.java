@@ -75,7 +75,7 @@ public class JDBCOpMapper implements OpMapper<JDBCOp> {
 
                 // CREATE|DROP TABLE|VIEW uses 'execute' (as opposed to 'executeQuery' which returns a 'ResultSet')
                 // https://jdbc.postgresql.org/documentation/query/#example54dropping-a-table-in-jdbc
-                case jdbcQuery -> new JDBCExecuteOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
+                case query -> new JDBCExecuteOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
             };
         }
     }

@@ -24,27 +24,33 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class JDBCExecuteOp extends JDBCOp {
-    private final static Logger logger = LogManager.getLogger(JDBCExecuteOp.class);
+    private static final Logger logger = LogManager.getLogger(JDBCExecuteOp.class);
+    private static final String LOG_COMMIT_SUCCESS = "Executed the JDBC statement & committed the connection successfully";
+    private final String LOG_QUERY_STRING;
+    private final String LOG_SELECT_QUERY_STRING;
+    private int finalResultCount;
+    private String LOG_ROWS_PROCESSED = "Total number of rows processed is [" + finalResultCount + "]";
 
     public JDBCExecuteOp(Connection connection, Statement statement, String queryString) {
         super(connection, statement, queryString);
+        LOG_QUERY_STRING = "JDBC Query is: " + this.getQueryString();
+        LOG_SELECT_QUERY_STRING = "Executed a SELECT operation [" + LOG_QUERY_STRING + "]";
+        if (logger.isDebugEnabled()) {
+            logger.debug(() -> LOG_QUERY_STRING);
+        }
     }
 
     @Override
     public void run() {
-        logger.debug(() -> "Executing JDBCExecuteOp for the given cycle.");
         try {
-            this.getConnection().setAutoCommit(false);
-            if (logger.isDebugEnabled()) {
-                logger.debug(() -> "JDBC Query is: " + this.getQueryString());
-            }
             boolean isResultSet = this.getStatement().execute(this.getQueryString());
+
             if (isResultSet) {
-                logger.debug(() -> ">>>>>>>>>>Executed a SELECT operation [" + this.getQueryString() + "]<<<<<<<<<<");
+                logger.debug(() -> LOG_SELECT_QUERY_STRING);
             } else if (!isResultSet) {
                 logger.debug(() -> {
                     try {
-                        return ">>>>>>>>>>Executed a normal DDL/DML (non-SELECT) operation. Objects affected is [" + this.getStatement().getUpdateCount() + "]<<<<<<<<<<";
+                        return "Executed a normal DDL/DML (non-SELECT) operation. Objects affected is [" + this.getStatement().getUpdateCount() + "]";
                     } catch (SQLException e) {
                         String err_msg = "Exception occurred while attempting to fetch the update count of the query operation";
                         logger.error(err_msg, e);
@@ -55,20 +61,23 @@ public class JDBCExecuteOp extends JDBCOp {
                 int countResults = 0;
                 ResultSet rs = this.getStatement().getResultSet();
                 countResults += rs.getRow();
+
                 while (!this.getStatement().getMoreResults() && 0 < this.getStatement().getUpdateCount()) {
                     rs = this.getStatement().getResultSet();
                     countResults += rs.getRow();
                     //rs.close(); Optional as getMoreResults() will already close it.
                 }
-                int finalCountResults = countResults;
-                logger.debug(() -> ">>>>>>>>>>Total number of rows processed is [" + finalCountResults + "]<<<<<<<<<<");
+
+                finalResultCount = countResults;
+                logger.debug(() -> LOG_ROWS_PROCESSED);
             }
             this.getConnection().commit();
-            logger.debug(() -> "Executed the JDBC statement & committed the connection successfully");
+            logger.debug(() -> LOG_COMMIT_SUCCESS);
         } catch (SQLException sqlException) {
-            logger.error("ERROR: { state => {}, cause => {}, message => {} }\n",
-                sqlException.getSQLState(), sqlException.getCause(), sqlException.getMessage(), sqlException);
-            throw new RuntimeException(sqlException);
+            String exMsg = String.format("ERROR: [ state => %s, cause => %s, message => %s ]",
+                sqlException.getSQLState(), sqlException.getCause(), sqlException.getMessage());
+            logger.error(exMsg, sqlException);
+            throw new RuntimeException(exMsg, sqlException);
         } catch (Exception ex) {
             String exMsg = String.format("Exception while attempting to run the jdbc statement %s", getStatement());
             logger.error(exMsg, ex);
