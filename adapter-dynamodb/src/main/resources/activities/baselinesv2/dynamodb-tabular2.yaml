@@ -7,7 +7,7 @@ scenarios:
   schema: run driver=dynamodb tags=block:schema region=us-east-1
   rampup: run driver=dynamodb tags=block:rampup region=us-east-1
   read: run driver=dynamodb tags=block:read region=us-east-1
-  main: run driver=dynamodb tags=block:"main.*" region=us-east-1
+  main: run driver=dynamodb tags=block:"main-*.*" region=us-east-1
   read01: run driver=dynamodb tags='name:.*main-read-01' region=us-east-1
   delete:
     table: run driver=dynamodb tags==block:delete threads==1 cycles==UNDEF
