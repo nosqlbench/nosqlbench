@@ -82,8 +82,18 @@
                 <includes>
                     <include>version.properties</include>
                     <include>nb_version_info.md</include>
+                    <include>log4j2.xml</include>
                 </includes>
                 <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>examples</include>
+                    <include>scripts</include>
+                    <include>**.md</include>
+                </includes>
+                <filtering>false</filtering>
             </resource>
         </resources>
 
