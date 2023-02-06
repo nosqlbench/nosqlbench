@@ -1,14 +1,15 @@
+min_version: "5.17.1"
 description: A tabular workload with partitions, clusters, and data fields
 
 scenarios:
   default:
-    schema: run driver=cql tags==phase:schema threads==1 cycles==UNDEF
-    rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:main-*.* cycles===TEMPLATE(main-cycles,10000000) threads=auto
   astra:
-    schema: run driver=cql tags==phase:schema-astra threads==1 cycles==UNDEF
-    rampup: run driver=cql tags==phase:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==phase:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:main-*.* cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 bindings:
   # for ramp-up and verify
@@ -25,88 +26,60 @@ bindings:
   data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150) -> String
 
 blocks:
-  - name: schema
-    tags:
-      phase: schema
+  schema:
     params:
       prepared: false
-    statements:
-    - create-keyspace: |
+    ops:
+      create-keyspace: |
         create keyspace if not exists <<keyspace:baselines>>
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
         AND durable_writes = true;
-      tags:
-        name: create-keyspace
-    - create-table: |
+      create-table: |
         create table if not exists <<keyspace:baselines>>.<<table:tabular>> (
          part text,
          clust text,
          data text,
          PRIMARY KEY (part,clust)
         );
-      tags:
-        name: create-table
-  - name: schema-astra
-    tags:
-      phase: schema-astra
+  schema-astra:
     params:
       prepared: false
-    statements:
-    - create-table: |
+    ops:
+      create-table: |
         create table if not exists <<keyspace:baselines>>.<<table:tabular>> (
          part text,
          clust text,
          data text,
          PRIMARY KEY (part,clust)
         );
-      tags:
-        name: create-table-astra
-  - name: rampup
-    tags:
-      phase: rampup
+  rampup:
     params:
       cl: <<write_cl:LOCAL_QUORUM>>
-    statements:
-      - rampup-insert: |
+    ops:
+      rampup-insert: |
          insert into <<keyspace:baselines>>.<<table:tabular>>
          (part,clust,data)
          values ({part_layout},{clust_layout},{data})
-        tags:
-          name: rampup-insert
-  - name: verify
-    tags:
-      phase: verify
-      type: read
+  verify:
     params:
       cl: <<read_cl:LOCAL_QUORUM>>
-    statements:
-      - verify-select: |
-          select * from <<keyspace:baselines>>.<<table:tabular>> where part={part_layout} and clust={clust_layout}
-        tags:
-          name: verify-select
-  - name: main-read
-    tags:
-      phase: main
-      type: read
+    ops:
+      verify-select: |
+          select * from <<keyspace:baselines>>.<<table:tabular>> where part={part_layout} and clust={clust_layout};
+
+  main-read:
     params:
       ratio: 5
       cl: <<read_cl:LOCAL_QUORUM>>
-    statements:
-    - main-select: |
+    ops:
+      main-select: |
         select * from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
-      tags:
-        name: main-select
-  - name: main-write
-    tags:
-      phase: main
-      type: write
+
+  main-write:
     params:
       ratio: 5
       cl: <<write_cl:LOCAL_QUORUM>>
-    statements:
-    - main-write: |
+    ops:
+      main-write: |
         insert into <<keyspace:baselines>>.<<table:tabular>>
-        (part, clust, data)
-        values ({part_write},{clust_write},{data_write})
-      tags:
-        name: main-write
+        (part, clust, data) values ({part_write},{clust_write},{data_write});

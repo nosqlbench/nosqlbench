@@ -1,10 +1,9 @@
-# nb -v run driver=mongodb yaml=mongodb-basic-uuid connection=mongodb://127.0.0.1 database=testdb tags=phase:rampup
 description: An example of a basic mongo insert and find with UUID
 
 scenarios:
   default:
-    - run driver=mongodb tags==phase:rampup cycles===TEMPLATE(rampup-cycles,100000000) threads=auto
-    - run driver=mongodb tags==phase:main cycles===TEMPLATE(main-cycles,100000000) threads=auto
+    rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,100000000) threads=auto
+    main: run driver=mongodb tags==block:main cycles===TEMPLATE(main-cycles,100000000) threads=auto
 bindings:
   seq_uuid: Mod(<<uuidCount:100000000>>L); ToHashedUUID() -> java.util.UUID; ToString() -> String
   rw_uuid: <<uuidDist:Uniform(0,100000000)->long>>; ToHashedUUID() -> java.util.UUID; ToString() -> String
@@ -12,69 +11,50 @@ bindings:
   seq_value: Mod(<<valueCount:1000000000>>L); <<valueSizeDist:Hash()>>; ToLong()
   rw_key: <<keyDist:Uniform(0,1000000)->long>>; ToInt()
   rw_value: <<valDist:Uniform(0,1000000000)->long>>; <<valueSizeDist:Hash()>>; ToLong()
-
 blocks:
-  - name: rampup
-    tags:
-      phase: rampup
-    statements:
-      - rampup-insert: |
-          {
-            insert: "<<collection:keyvalueuuid>>",
-            documents: [ { _id: UUID("{seq_uuid}"),
-                           key: {seq_key},
-                           value: NumberLong({seq_value}) } ]
-          }
-        params:
-          readPreference: primary
-        tags:
-          name: rampup-insert
-  - name: verify
-    tags:
-      phase: verify
-      type: read
+  params:
+    readPreference: primary
+  rampup:
+    ops:
+      rampup-insert: |
+        {
+          insert: "<<collection:keyvalueuuid>>",
+          documents: [ { _id: UUID("{seq_uuid}"),
+                         key: {seq_key},
+                         value: NumberLong({seq_value}) } ]
+        }
+  verify:
     params:
-      cl: <<read_cl:LOCAL_QUORUM>>
-    statements:
-      - verify-find: |
-          {
-            find: "<<collection:keyvalueuuid>>",
-            filter: { _id: UUID("{seq_uuid}") }
-          }
-        verify-fields: _id->seq_uuid, key->seq_key, value->seq_value
-        tags:
-          name: verify
-  - name: main-read
-    tags:
-      phase: main
       type: read
+      cl: <<read_cl:LOCAL_QUORUM>>
+      verify-fields: _id->seq_uuid, key->seq_key, value->seq_value
+    ops:
+      verify-find: |
+        {
+          find: "<<collection:keyvalueuuid>>",
+          filter: { _id: UUID("{seq_uuid}") }
+        }
+  main-read:
     params:
       ratio: <<read_ratio:1>>
-    statements:
-      - main-find: |
-          {
-            find: "<<collection:keyvalueuuid>>",
-            filter: { _id: UUID("{rw_uuid}") }
-          }
-        params:
-          readPreference: primary
-        tags:
-          name: main-find
-  - name: main-write
-    tags:
-      phase: main
-      type: write
+      type: read
+      readPreference: primary
+    ops:
+      main-find: |
+        {
+          find: "<<collection:keyvalueuuid>>",
+          filter: { _id: UUID("{rw_uuid}") }
+        }
+  main-write:
     params:
       ratio: <<write_ratio:1>>
-    statements:
-      - main-insert: |
-          {
-            insert: "<<collection:keyvalueuuid>>",
-            documents: [ { _id: UUID("{rw_uuid}")
-                           key: {rw_key},
-                           value: NumberLong({rw_value}) } ]
-          }
-        params:
-          readPreference: primary
-        tags:
-          name: main-insert
+      type: write
+      readPreference: primary
+    ops:
+      main-insert: |
+        {
+          insert: "<<collection:keyvalueuuid>>",
+          documents: [ { _id: UUID("{rw_uuid}")
+                         key: {rw_key},
+                         value: NumberLong({rw_value}) } ]
+        }

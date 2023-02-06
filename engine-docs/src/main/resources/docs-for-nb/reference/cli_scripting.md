@@ -103,8 +103,8 @@ semicolon, then a newline is also added immediately after.
 
 ~~~text
 ./nb \
-start driver=stdout alias=a cycles=100K workload=cql-iot tags=phase:main\
-start driver=stdout alias=b cycles=200K workload=cql-iot tags=phase:main\
+start driver=stdout alias=a cycles=100K workload=cql-iot tags=block:main\
+start driver=stdout alias=b cycles=200K workload=cql-iot tags=block:main\
 waitmillis 10000 \
 await one \
 stop two

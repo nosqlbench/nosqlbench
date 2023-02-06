@@ -15,7 +15,7 @@ command line, go ahead and execute the following command, replacing
 the `host=<host-or-ip>` with that of one of your database nodes.
 
 ```text
-./nb run driver=cql workload=cql-keyvalue tags=phase:schema host=<host-or-ip>
+./nb run driver=cql workload=cql-keyvalue tags=block:'schema.*' host=<host-or-ip>
 ```
 
 This command is creating the following schema in your database:
@@ -45,8 +45,8 @@ defines the activity.
 In this example, we use `cql-keyvalue` which is a pre-built workload that
 is packaged with nosqlbench.
 
-`tags=phase:schema` tells nosqlbench to run the yaml block that has
-the `phase:schema` defined as one of its tags.
+`tags=block:"schema.*"` tells nosqlbench to run the yaml block that has
+the `block:"schema.*"` defined as one of its tags.
 
 In this example, that is the DDL portion of the `cql-keyvalue`
 workload. `host=...` tells nosqlbench how to connect to your database,
@@ -68,7 +68,7 @@ statements.
 
 Go ahead and execute the following command:
 
-    ./nb run driver=stdout workload=cql-keyvalue tags=phase:rampup cycles=10
+    ./nb run driver=stdout workload=cql-keyvalue tags=block:rampup cycles=10
 
 You should see 10 of the following statements in your console
 
@@ -91,12 +91,12 @@ be the same from run to run.
 Now we are ready to write some data to our database. Go ahead and execute
 the following from your command line:
 
-    ./nb run driver=cql workload=cql-keyvalue tags=phase:rampup host=<host-or-ip> cycles=100k --progress console:1s
+    ./nb run driver=cql workload=cql-keyvalue tags=block:rampup host=<host-or-ip> cycles=100k --progress console:1s
 
 Note the differences between this and the command that we used to generate
 the schema.
 
-`tags=phase:rampup` is running the yaml block in `cql-keyvalue` that has
+`tags=block:rampup` is running the yaml block in `cql-keyvalue` that has
 only INSERT statements.
 
 `cycles=100k` will run a total of 100,000 operations, in this case,
@@ -139,7 +139,7 @@ Now that we have a base dataset of 100k rows in the database, we will now
 run a mixed read / write workload, by default this runs a 50% read / 50%
 write workload.
 
-    ./nb run driver=cql workload=cql-keyvalue tags=phase:main host=<host-or-ip> cycles=100k cyclerate=5000 threads=50 --progress console:1s
+    ./nb run driver=cql workload=cql-keyvalue tags=block:main host=<host-or-ip> cycles=100k cyclerate=5000 threads=50 --progress console:1s
 
 You should see output that looks like this:
 
@@ -174,7 +174,7 @@ cql-keyvalue: 100.00%/Finished (details: min=0 cycle=100000 max=100000)
 
 We have a few new command line options here:
 
-`tags=phase:main` is using a new block in our activity's yaml that
+`tags=block:main` is using a new block in our activity's yaml that
 contains both read and write queries.
 
 `threads=50` is an important one. The default for nosqlbench is to run

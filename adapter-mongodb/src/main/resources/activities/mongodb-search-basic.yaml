@@ -1,4 +1,3 @@
-# nb -v run driver=mongodb yaml=mongodb-search-basic tags=phase:schema connection=mongodb://127.0.0.1 database=testdb
 
 description: |
   This workload emulates basic search operations for the mongoDB.
@@ -7,15 +6,15 @@ description: |
   It's a counterpart of the Stargate's Documents API Basic Search workflow.
 
 scenarios:
-  schema:                run driver=mongodb tags==phase:schema threads==1 cycles==UNDEF
-  rampup-write:          run driver=mongodb tags==phase:rampup-write cycles===TEMPLATE(docscount,10000000) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=auto errors=timer,warn
-  rampup-read:           run driver=mongodb tags==phase:rampup-read cycles===TEMPLATE(rampup-cycles, 10000000) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main:                  run driver=mongodb tags==phase:main cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main-eq:               run driver=mongodb tags==phase:main,filter:eq cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main-lt:               run driver=mongodb tags==phase:main,filter:lt cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main-and:              run driver=mongodb tags==phase:main,filter:and cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main-or:               run driver=mongodb tags==phase:main,filter:or cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main-or-single-match:  run driver=mongodb tags==phase:main,filter:or-single-match cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
+  schema:                run driver=mongodb tags==block:'schema.*' threads==1 cycles==UNDEF
+  rampup-write:          run driver=mongodb tags==block:rampup-write cycles===TEMPLATE(docscount,10000000) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=auto errors=timer,warn
+  rampup-read:           run driver=mongodb tags==block:rampup-read cycles===TEMPLATE(rampup-cycles, 10000000) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
+  main:                  run driver=mongodb tags==block:main cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
+  main-eq:               run driver=mongodb tags==block:main-eq,filter:eq cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
+  main-lt:               run driver=mongodb tags==block:main-lt,filter:lt cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
+  main-and:              run driver=mongodb tags==block:main-and,filter:and cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
+  main-or:               run driver=mongodb tags==block:main-or,filter:or cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
+  main-or-single-match:  run driver=mongodb tags==block:main-or-single-match,filter:or-single-match cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
 
 bindings:
   seq_key: Mod(<<docscount:10000000>>); ToString() -> String
@@ -34,57 +33,49 @@ bindings:
   match1: Identity(); CoinFunc(<<match-ratio>>, FixedValue(0), FixedValue(1000))
   match2: Identity(); CoinFunc(<<match-ratio>>, FixedValue("true"), FixedValue("false"))
   additional_fields: ListSizedStepped(<<docpadding:0>>,Template("\"{}\":{}",Identity(),Identity())); ToString(); ReplaceAll('\[\"', ',\"'); ReplaceAll('\[', ''); ReplaceAll('\]', '') -> String
+
 blocks:
-  - tags:
-      phase: schema
-    statements:
-      - dummy-insert: |
-          {
-            insert: "<<collection:search_basic>>",
-            documents: [ { _id: "dummyyyy" } ]
-          }
+  schema:
+    ops:
+      dummy-insert: |
+        {
+          insert: "<<collection:search_basic>>",
+          documents: [ { _id: "dummyyyy" } ]
+        }
 
-      - drop-collection: |
-          {
-            drop: "<<collection:search_basic>>"
-          }
-        tags:
-          name: drop-collection
+      drop-collection: |
+        {
+          drop: "<<collection:search_basic>>"
+        }       
 
-      - create-collection: |
-          {
-            create: "<<collection:search_basic>>"
-          }
-        tags:
-          name: create-collection
+      create-collection: |
+        {
+          create: "<<collection:search_basic>>"
+        }      
 
-      - create-indexes: |
-          {
-            createIndexes: "<<collection:search_basic>>",
-            indexes: [
-              {
-                key: { user_id: 1 },
-                name: "user_id_idx",
-                unique: true
-              },
-              {
-                key: { created_on: 1 },
-                name: "created_on_idx"
-              },
-              {
-                key: { city: 1 },
-                name: "city_idx"
-              }
-            ]
-          }
-        tags:
-          name: create-indexes
+      create-indexes: |
+        {
+          createIndexes: "<<collection:search_basic>>",
+          indexes: [
+            {
+              key: { user_id: 1 },
+              name: "user_id_idx",
+              unique: true
+            },
+            {
+              key: { created_on: 1 },
+              name: "created_on_idx"
+            },
+            {
+              key: { city: 1 },
+              name: "city_idx"
+            }
+          ]
+        }        
 
-  - name: rampup-write
-    tags:
-      phase: rampup-write
-    statements:
-      - write-document: |
+    rampup-write:
+      ops:
+        write-document:
           {
             insert: "<<collection:search_basic>>",
             writeConcern: { w: "majority" },
@@ -118,83 +109,62 @@ blocks:
               }
             ]
           }
-        tags:
-          name: rampup-write
-
-  - name: rampup
-    tags:
-      phase: rampup-read
-      filter: eq
-    statements:
-      - read-document: |
+    rampup-read:
+      params:
+        filter: eq
+      ops:
+        read-document: |
           {
             find: "<<collection:search_basic>>",
             filter: { match1: 0 }
           }, <<field-projection:null>>
-        tags:
-          name: rampup-read
 
-  - name: main-eq
-    tags:
-      phase: main
+  main-eq:
+    params:
       filter: eq
-    statements:
-      - read-document: |
+    ops:
+      read-document: |
           {
             find: "<<collection:search_basic>>",
             filter: { match3: true }
-          }, <<field-projection:null>>
-        tags:
-          name: read-document
+          }, <<field-projection:null>>        
 
-  - name: main-lt
-    tags:
-      phase: main
+  main-lt:
+    params:
       filter: lt
-    statements:
-      - read-document: |
+    ops:
+      read-document: |
           {
             find: "<<collection:search_basic>>",
             filter: { match1: {$lt: 1}}
-          }, <<field-projection:null>>
-        tags:
-          name: read-document
+          }, <<field-projection:null>>        
 
-  - name: main-and
-    tags:
-      phase: main
+  main-and:
+    params:
       filter: and
-    statements:
-      - read-document: |
-          {
-            find: "<<collection:search_basic>>",
-            filter: { match1: {$lt: 1}, match2: "true"}
-          }, <<field-projection:null>>
-        tags:
-          name: read-document
+    ops:
+      read-document: |
+        {
+          find: "<<collection:search_basic>>",
+          filter: { match1: {$lt: 1}, match2: "true"}
+        }, <<field-projection:null>>        
 
-  - name: main-or
-    tags:
-      phase: main
+  main-or:
+    params:
       filter: or
-    statements:
-      - read-document: |
+    ops:
+      read-document: |
           {
             find: "<<collection:search_basic>>",
             filter: { $or: [ {match1: {$lt: 1}}, {match3: true}]}
-          }, <<field-projection:null>>
-        tags:
-          name: read-document
+          }, <<field-projection:null>>        
 
-  - name: main-or-single-match
-    tags:
-      phase: main
+  main-or-single-match:
+    params:
       filter: or-single-match
-    statements:
-      - read-document: |
-          {
-            find: "<<collection:search_basic>>",
-            filter: { $or: [ {match1: {$lt: 1}}, {match2: "notamatch"}]}
-          }, <<field-projection:null>>
-        tags:
-          name: read-document
+    ops:
+      read-document: |
+        {
+          find: "<<collection:search_basic>>",
+          filter: { $or: [ {match1: {$lt: 1}}, {match2: "notamatch"}]}
+        }, <<field-projection:null>>
