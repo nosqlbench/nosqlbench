@@ -1,4 +1,4 @@
-### Command-Line Options ###
+# Command-Line Options
 
 Help ( You're looking at it. )
 
@@ -8,27 +8,31 @@ Short options, like '-v' represent simple options, like verbosity. Using multipl
 level of the option, like '-vvv'.
 
 Long options, like '--help' are top-level options that may only be used once. These modify general
-behavior, or allow you to get more details on how to use PROG.
+behavior, or allow you to get more details on how to use ${PROG}.
 
 All other options are either commands, or named arguments to commands. Any single word without
 dashes is a command that will be converted into script form. Any option that includes an equals sign
 is a named argument to the previous command. The following example is a commandline with a command *
 start*, and two named arguments to that command.
 
-    PROG start driver=diag alias=example
+    ${PROG} start driver=diag alias=example
 
-### Discovery options ###
+## Discovery options
 
-These options help you learn more about running PROG, and about the plugins that are present in your
+These options help you learn more about running ${PROG}, and about the plugins that are present in your
 particular version.
+
+Show version, long form, with artifact coordinates.
+
+    --version
 
 Get a list of additional help topics that have more detailed documentation:
 
-    PROG help topics
+    ${PROG} help topics
 
 Provide specific help for the named activity type:
 
-    PROG help <activity type>
+    ${PROG} help <activity type>
 
 List the available drivers:
 
@@ -50,9 +54,9 @@ Provide the metrics that are available for scripting
 
     --list-metrics <activity type> [ <activity name> ]
 
-### Execution Options ###
+## Execution Options
 
-This is how you actually tell PROG what scenario to run. Each of these commands appends script logic
+This is how you actually tell ${PROG} what scenario to run. Each of these commands appends script logic
 to the scenario that will be executed. These are considered as commands, can occur in any order and
 quantity. The only rule is that arguments in the arg=value form will apply to the preceding script
 or activity.
@@ -65,9 +69,7 @@ Add the named activity to the scenario, interpolating named parameters
 
     activity [arg=value]...
 
-### General options ###
-
-These options modify how the scenario is run.
+## Logging options
 
 Specify a directory for scenario log files:
 
@@ -111,11 +113,37 @@ Specify the logging pattern for logfile only:
     # ANSI variants are auto promoted for console if --ansi=enable
     # ANSI variants are auto demoted for logfile in any case
 
+## Console Options
+
+Increase console logging levels: (Default console logging level is *warning*)
+
+    -v         (info)
+    -vv        (debug)
+    -vvv       (trace)
+
+    --progress console:1m (disables itself if -v options are used)
+
+These levels affect *only* the console output level. Other logging level parameters affect logging
+to the scenario log, stored by default in logs/...
+
 Explicitly enable or disable ANSI logging support:
 (ANSI support is enabled if the TERM environment variable is defined)
 
     --ansi=enabled
     --ansi=disabled
+
+Adjust the progress reporting interval:
+
+    --progress console:1m
+
+or
+
+    --progress logonly:5m
+
+NOTE: The progress indicator on console is provided by default unless logging levels are turned up
+or there is a script invocation on the command line.
+
+## Metrics options
 
 Specify a directory and enable CSV reporting of metrics:
 
@@ -158,17 +186,6 @@ Each activity can also override this value with the hdr_digits parameter. Be awa
 increase in this number multiples the amount of detail tracked on the client by 10x, so use
 caution.
 
-Adjust the progress reporting interval:
-
-    --progress console:1m
-
-or
-
-    --progress logonly:5m
-
-NOTE: The progress indicator on console is provided by default unless logging levels are turned up
-or there is a script invocation on the command line.
-
 If you want to add in classic time decaying histogram metrics for your histograms and timers, you
 may do so with this option:
 
@@ -191,22 +208,6 @@ automatically. It also imports a base dashboard for nosqlbench and configures gr
 export to share with a central DataStax grafana instance (grafana can be found on localhost:3000
 with the default credentials admin/admin).
 
-### Console Options ###
-
-Increase console logging levels: (Default console logging level is *warning*)
-
-    -v         (info)
-    -vv        (debug)
-    -vvv       (trace)
-
-    --progress console:1m (disables itself if -v options are used)
-
-These levels affect *only* the console output level. Other logging level parameters affect logging
-to the scenario log, stored by default in logs/...
-
-Show version, long form, with artifact coordinates.
-
-    --version
 
 ### Summary Reporting
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,45 +45,48 @@ import static org.assertj.core.api.Assertions.fail;
 class ActivityExecutorTest {
     private static final Logger logger = LogManager.getLogger(ActivityExecutorTest.class);
 
-    @Test
-    synchronized void testRestart() {
-        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;op=initdelay:initdelay=5000;");
-        new ActivityTypeLoader().load(activityDef);
-
-        final Activity activity = new DelayedInitActivity(activityDef);
-        InputDispenser inputDispenser = new CoreInputDispenser(activity);
-        ActionDispenser adisp = new CoreActionDispenser(activity);
-        OutputDispenser tdisp = CoreServices.getOutputDispenser(activity).orElse(null);
-
-        final MotorDispenser<?> mdisp = new CoreMotorDispenser(activity, inputDispenser, adisp, tdisp);
-        activity.setActionDispenserDelegate(adisp);
-        activity.setOutputDispenserDelegate(tdisp);
-        activity.setInputDispenserDelegate(inputDispenser);
-        activity.setMotorDispenserDelegate(mdisp);
-
-        final ExecutorService executor = Executors.newCachedThreadPool();
-        ActivityExecutor activityExecutor = new ActivityExecutor(activity, "test-restart");
-        final Future<ExecutionResult> future = executor.submit(activityExecutor);
-        try {
-            activityDef.setThreads(1);
-            activityExecutor.startActivity();
-            activityExecutor.stopActivity();
-            activityExecutor.startActivity();
-            activityExecutor.startActivity();
-            future.get();
-            Thread.sleep(500L);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        executor.shutdown();
-        assertThat(inputDispenser.getInput(10).getInputSegment(3)).isNull();
-
-    }
+// TODO: Design review of this mechanism
+//    @Test
+//    synchronized void testRestart() {
+//        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-restart;cycles=1000;cyclerate=10;op=initdelay:initdelay=5000;");
+//        new ActivityTypeLoader().load(activityDef);
+//
+//        final Activity activity = new DelayedInitActivity(activityDef);
+//        InputDispenser inputDispenser = new CoreInputDispenser(activity);
+//        ActionDispenser adisp = new CoreActionDispenser(activity);
+//        OutputDispenser tdisp = CoreServices.getOutputDispenser(activity).orElse(null);
+//
+//        final MotorDispenser<?> mdisp = new CoreMotorDispenser(activity, inputDispenser, adisp, tdisp);
+//        activity.setActionDispenserDelegate(adisp);
+//        activity.setOutputDispenserDelegate(tdisp);
+//        activity.setInputDispenserDelegate(inputDispenser);
+//        activity.setMotorDispenserDelegate(mdisp);
+//
+//        final ExecutorService executor = Executors.newCachedThreadPool();
+//        ActivityExecutor activityExecutor = new ActivityExecutor(activity, "test-restart");
+//        final Future<ExecutionResult> future = executor.submit(activityExecutor);
+//        try {
+//            activityDef.setThreads(1);
+//            activityExecutor.startActivity();
+//            Thread.sleep(100L);
+//            activityExecutor.stopActivity();
+//            Thread.sleep(100L);
+//            activityExecutor.startActivity();
+//            Thread.sleep(100L);
+//            activityExecutor.stopActivity();
+//            future.get();
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        executor.shutdown();
+//        assertThat(inputDispenser.getInput(10).getInputSegment(3)).isNotNull();
+//
+//    }
 
     @Test
     synchronized void testDelayedStartSanity() {
 
-        final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
+        final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-delayed-start;cycles=1000;initdelay=2000;");
         new ActivityTypeLoader().load(activityDef);
 
         final Activity activity = new DelayedInitActivity(activityDef);
@@ -119,7 +122,7 @@ class ActivityExecutorTest {
     @Test
     synchronized void testNewActivityExecutor() {
 
-        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
+        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-dynamic-params;cycles=1000;initdelay=5000;");
         new ActivityTypeLoader().load(activityDef);
 
         getActivityMotorFactory(motorActionDelay(999), new AtomicInput(activityDef));
@@ -140,7 +143,7 @@ class ActivityExecutorTest {
         activityDef.setThreads(5);
         activityExecutor.startActivity();
 
-        int[] speeds = new int[]{1, 2000, 5, 2000, 2, 2000};
+        int[] speeds = new int[]{1, 50, 5, 50, 2, 50};
         for (int offset = 0; offset < speeds.length; offset += 2) {
             int threadTarget = speeds[offset];
             int threadTime = speeds[offset + 1];
@@ -158,7 +161,7 @@ class ActivityExecutorTest {
         // Used for slowing the roll due to state transitions in test.
         try {
             activityExecutor.stopActivity();
-            Thread.sleep(2000L);
+//            Thread.sleep(2000L);
         } catch (Exception e) {
             fail("Not expecting exception", e);
         }

@@ -19,6 +19,6 @@ However, there are other ways to feed an activity. All inputs are
 modular within the nosqlbench runtime. To see what inputs are
 available, you can simpy run:
 
-    PROG --list-input-types
+    ${PROG} --list-input-types
 
 Any input listed this way should have its own documentation.
