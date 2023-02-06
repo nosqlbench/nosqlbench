@@ -89,9 +89,9 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>examples</include>
-                    <include>scripts</include>
-                    <include>**.md</include>
+                    <include>examples/**</include>
+                    <include>scripts/**</include>
+                    <include>**/*.md</include>
                 </includes>
                 <filtering>false</filtering>
             </resource>
