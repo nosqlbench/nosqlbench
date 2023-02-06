@@ -2,13 +2,13 @@ package io.nosqlbench.driver.pulsar;
 
 /*
  * Copyright (c) 2022 nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,8 @@ import io.nosqlbench.engine.api.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ActivityMetrics;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.admin.Clusters;
@@ -33,14 +35,8 @@ import org.apache.pulsar.client.admin.PulsarAdmin;
 import org.apache.pulsar.client.admin.PulsarAdminException;
 import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.client.api.transaction.Transaction;
-import org.apache.pulsar.common.schema.KeyValueEncodingType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -59,9 +55,9 @@ public class PulsarSpace {
 
     private final String spaceName;
 
-    private final ConcurrentHashMap<String, Producer<?>> producers = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Consumer<?>> consumers = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Reader<?>> readers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Pair<String, String>, Producer<?>> producers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Triple<String, String, String>, Consumer<?>> consumers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Triple<String, String, String>, Reader<?>> readers = new ConcurrentHashMap<>();
 
     private final PulsarActivity pulsarActivity;
     private final ActivityDef activityDef;
@@ -259,6 +255,7 @@ public class PulsarSpace {
         throw new RuntimeException("Producer topic name must be set at either global level or cycle level!");
     }
 
+
     public Producer<?> getProducer(String cycleTopicName, String cycleProducerName) {
         String topicName = getEffectiveProducerTopicName(cycleTopicName);
         String producerName = getEffectiveProducerName(cycleProducerName);
@@ -267,10 +264,7 @@ public class PulsarSpace {
             throw new RuntimeException("Producer:: must specify a topic name");
         }
 
-        String producerCacheKey = PulsarActivityUtil.buildCacheKey(producerName, topicName);
-        Producer<?> producer = producers.get(producerCacheKey);
-
-        if (producer == null) {
+        return producers.computeIfAbsent(Pair.of(producerName, topicName), __ -> {
             PulsarClient pulsarClient = getPulsarClient();
 
             // Get other possible producer settings that are set at global level
@@ -295,8 +289,7 @@ public class PulsarSpace {
                     producerBuilder = producerBuilder.producerName(producerName);
                 }
 
-                producer = producerBuilder.create();
-                producers.put(producerCacheKey, producer);
+                Producer<?> producer = producerBuilder.create();
 
                 ActivityMetrics.gauge(activityDef,
                     producerMetricsPrefix + "total_bytes_sent",
@@ -316,13 +309,13 @@ public class PulsarSpace {
                 ActivityMetrics.gauge(activityDef,
                     producerMetricsPrefix + "send_msg_rate",
                     producerSafeExtractMetric(producer, ProducerStats::getSendMsgsRate));
+
+                return producer;
             }
             catch (PulsarClientException ple) {
                 throw new RuntimeException("Unable to create a Pulsar producer!", ple);
             }
-        }
-
-        return producer;
+        });
     }
     //
     //////////////////////////////////////
@@ -424,8 +417,7 @@ public class PulsarSpace {
             throw new RuntimeException("Consumer:: must specify a topic name and a subscription name");
         }
 
-        String consumerCacheKey = PulsarActivityUtil.buildCacheKey(consumerName, subscriptionName, cycleTopicName);
-        Consumer<?> consumer = consumers.computeIfAbsent(consumerCacheKey, (k -> {
+        return consumers.computeIfAbsent(Triple.of(consumerName, subscriptionName, cycleTopicName), (k -> {
 
             PulsarClient pulsarClient = getPulsarClient();
 
@@ -495,8 +487,6 @@ public class PulsarSpace {
                 throw new RuntimeException("Unable to create a Pulsar consumer!");
             }
         }));
-
-        return consumer;
     }
 
     private static Range[] parseRanges(String ranges) {
@@ -622,14 +612,9 @@ public class PulsarSpace {
         } else {
             consumerTopicListString = cycleTopicUri;
         }
-        String consumerCacheKey = PulsarActivityUtil.buildCacheKey(
-            consumerName,
-            subscriptionName,
-            consumerTopicListString);
 
-        Consumer<?> consumer = consumers.get(consumerCacheKey);
 
-        if (consumer == null) {
+        return consumers.computeIfAbsent(Triple.of(consumerName, subscriptionName, consumerTopicListString), __ -> {
             PulsarClient pulsarClient = getPulsarClient();
 
             // Get other possible producer settings that are set at global level
@@ -660,7 +645,7 @@ public class PulsarSpace {
                     consumerBuilder = consumerBuilder.topic(cycleTopicUri);
                 }
 
-                consumer = consumerBuilder.subscribe();
+                Consumer<?> consumer = consumerBuilder.subscribe();
 
                 String consumerMetricsPrefix = getPulsarAPIMetricsPrefix(
                     PulsarActivityUtil.PULSAR_API_TYPE.PRODUCER.label,
@@ -686,15 +671,13 @@ public class PulsarSpace {
                     consumerMetricsPrefix + "recvdMsgsRate",
                     consumerSafeExtractMetric(consumer, ConsumerStats::getRateMsgsReceived));
 
+                return consumer;
+
             } catch (PulsarClientException ple) {
                 ple.printStackTrace();
                 throw new RuntimeException("Unable to create a Pulsar consumer!");
             }
-
-            consumers.put(consumerCacheKey, consumer);
-        }
-
-        return consumer;
+        });
     }
     //
     //////////////////////////////////////
@@ -755,10 +738,7 @@ public class PulsarSpace {
             throw new RuntimeException("Reader:: Invalid value for reader start message position!");
         }
 
-        String readerCacheKey = PulsarActivityUtil.buildCacheKey(topicName, readerName, startMsgPosStr);
-        Reader<?> reader = readers.get(readerCacheKey);
-
-        if (reader == null) {
+        return readers.computeIfAbsent(Triple.of(topicName, readerName, startMsgPosStr), __ -> {
             PulsarClient pulsarClient = getPulsarClient();
 
             Map<String, Object> readerConf = pulsarNBClientConf.getReaderConfMap();
@@ -785,17 +765,12 @@ public class PulsarSpace {
                 //    startMsgId = MessageId.latest;
                 //}
 
-                reader = readerBuilder.startMessageId(startMsgId).create();
-
+                return readerBuilder.startMessageId(startMsgId).create();
             } catch (PulsarClientException ple) {
                 ple.printStackTrace();
                 throw new RuntimeException("Unable to create a Pulsar reader!");
             }
-
-            readers.put(readerCacheKey, reader);
-        }
-
-        return reader;
+        });
     }
     //////////////////////////////////////
     // Reader Processing <-- end

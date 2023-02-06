@@ -2,13 +2,13 @@ package io.nosqlbench.driver.pulsar.util;
 
 /*
  * Copyright (c) 2022 nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,6 +18,7 @@ package io.nosqlbench.driver.pulsar.util;
  */
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +31,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,10 +66,6 @@ public class PulsarActivityUtil {
     }
 
 
-    public static boolean isValidClientType(String type) {
-        return Arrays.stream(OP_TYPES.values()).anyMatch(t -> t.label.equals(type));
-    }
-
     public static final String MSG_SEQUENCE_NUMBER = "sequence_number";
 
     ///////
@@ -85,9 +85,6 @@ public class PulsarActivityUtil {
             this.label = label;
         }
     }
-    public static boolean isValidDocLevelParam(String param) {
-        return Arrays.stream(DOC_LEVEL_PARAMS.values()).anyMatch(t -> t.label.equals(param));
-    }
 
     ///////
     // Valid Pulsar API type
@@ -101,29 +98,20 @@ public class PulsarActivityUtil {
         PULSAR_API_TYPE(String label) {
             this.label = label;
         }
+
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label).collect(Collectors.toUnmodifiableSet());
+
+        public static boolean isValidLabel(String label) {
+            return LABELS.contains(label);
+        }
     }
     public static boolean isValidPulsarApiType(String param) {
-        return Arrays.stream(PULSAR_API_TYPE.values()).anyMatch(t -> t.label.equals(param));
+        return PULSAR_API_TYPE.isValidLabel(param);
     }
     public static String getValidPulsarApiTypeList() {
         return Arrays.stream(PULSAR_API_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
-    ///////
-    // Valid persistence type
-    public enum PERSISTENT_TYPES {
-        PERSISTENT("persistent"),
-        NON_PERSISTENT("non-persistent")
-        ;
-
-        public final String label;
-        PERSISTENT_TYPES(String label) {
-            this.label = label;
-        }
-    }
-    public static boolean isValidPersistenceType(String type) {
-        return Arrays.stream(PERSISTENT_TYPES.values()).anyMatch(t -> t.label.equals(type));
-    }
 
     ///////
     // Valid Pulsar client configuration (activity-level settings)
@@ -156,9 +144,6 @@ public class PulsarActivityUtil {
             this.label = label;
         }
     }
-    public static boolean isValidClientConfItem(String item) {
-        return Arrays.stream(CLNT_CONF_KEY.values()).anyMatch(t -> t.label.equals(item));
-    }
 
     ///////
     // Standard producer configuration (activity-level settings)
@@ -183,9 +168,6 @@ public class PulsarActivityUtil {
         PRODUCER_CONF_STD_KEY(String label) {
             this.label = label;
         }
-    }
-    public static boolean isStandardProducerConfItem(String item) {
-        return Arrays.stream(PRODUCER_CONF_STD_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
     ///////
@@ -220,9 +202,6 @@ public class PulsarActivityUtil {
             this.label = label;
         }
     }
-    public static boolean isStandardConsumerConfItem(String item) {
-        return Arrays.stream(CONSUMER_CONF_STD_KEY.values()).anyMatch(t -> t.label.equals(item));
-    }
 
     ///////
     // Custom consumer configuration (activity-level settings)
@@ -236,9 +215,6 @@ public class PulsarActivityUtil {
         CONSUMER_CONF_CUSTOM_KEY(String label) {
             this.label = label;
         }
-    }
-    public static boolean isCustomConsumerConfItem(String item) {
-        return Arrays.stream(CONSUMER_CONF_CUSTOM_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
     ///////
@@ -254,9 +230,16 @@ public class PulsarActivityUtil {
         SUBSCRIPTION_TYPE(String label) {
             this.label = label;
         }
+
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label)
+            .collect(Collectors.toUnmodifiableSet());
+
+        public static boolean isValidLabel(String label) {
+            return LABELS.contains(label);
+        }
     }
     public static boolean isValidSubscriptionType(String item) {
-        return Arrays.stream(SUBSCRIPTION_TYPE.values()).anyMatch(t -> t.label.equals(item));
+        return SUBSCRIPTION_TYPE.isValidLabel(item);
     }
     public static String getValidSubscriptionTypeList() {
         return Arrays.stream(SUBSCRIPTION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
@@ -282,10 +265,6 @@ public class PulsarActivityUtil {
             this.label = label;
         }
     }
-    public static boolean isStandardReaderConfItem(String item) {
-        return Arrays.stream(READER_CONF_STD_KEY.values()).anyMatch(t -> t.label.equals(item));
-    }
-
     ///////
     // Custom reader configuration (activity-level settings)
     // - NOT part of https://pulsar.apache.org/docs/en/client-libraries-java/#reader
@@ -298,9 +277,6 @@ public class PulsarActivityUtil {
         READER_CONF_CUSTOM_KEY(String label) {
             this.label = label;
         }
-    }
-    public static boolean isCustomReaderConfItem(String item) {
-        return Arrays.stream(READER_CONF_CUSTOM_KEY.values()).anyMatch(t -> t.label.equals(item));
     }
 
     ///////
@@ -315,9 +291,16 @@ public class PulsarActivityUtil {
         READER_MSG_POSITION_TYPE(String label) {
             this.label = label;
         }
+
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label)
+            .collect(Collectors.toUnmodifiableSet());
+
+        public static boolean isValidLabel(String label) {
+            return LABELS.contains(label);
+        }
     }
     public static boolean isValideReaderStartPosition(String item) {
-        return Arrays.stream(READER_MSG_POSITION_TYPE.values()).anyMatch(t -> t.label.equals(item));
+        return READER_MSG_POSITION_TYPE.isValidLabel(item);
     }
 
     ///////
@@ -333,52 +316,19 @@ public class PulsarActivityUtil {
             this.label = label;
         }
 
-        private static final Map<String, SEQ_ERROR_SIMU_TYPE> MAPPING = new HashMap<>();
-
-        static {
-            for (SEQ_ERROR_SIMU_TYPE simuType : values()) {
-                MAPPING.put(simuType.label, simuType);
-                MAPPING.put(simuType.label.toLowerCase(), simuType);
-                MAPPING.put(simuType.label.toUpperCase(), simuType);
-                MAPPING.put(simuType.name(), simuType);
-                MAPPING.put(simuType.name().toLowerCase(), simuType);
-                MAPPING.put(simuType.name().toUpperCase(), simuType);
-            }
-        }
+        private static final Map<String, SEQ_ERROR_SIMU_TYPE> MAPPING = Stream.of(values())
+            .flatMap(simuType ->
+                Stream.of(simuType.label,
+                        simuType.label.toLowerCase(),
+                        simuType.label.toUpperCase(),
+                        simuType.name(),
+                        simuType.name().toLowerCase(),
+                        simuType.name().toUpperCase())
+                    .distinct().map(key -> Map.entry(key, simuType)))
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
 
         public static Optional<SEQ_ERROR_SIMU_TYPE> parseSimuType(String simuTypeString) {
             return Optional.ofNullable(MAPPING.get(simuTypeString.trim()));
-        }
-    }
-    public static boolean isValidSeqErrSimuType(String item) {
-        return Arrays.stream(SEQ_ERROR_SIMU_TYPE.values()).anyMatch(t -> t.label.equals(item));
-    }
-    public static String getValidSeqErrSimuTypeList() {
-        return Arrays.stream(SEQ_ERROR_SIMU_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
-    }
-
-    ///////
-    // Valid websocket-producer configuration (activity-level settings)
-    // TODO: to be added
-    public enum WEBSKT_PRODUCER_CONF_KEY {
-        ;
-
-        public final String label;
-
-        WEBSKT_PRODUCER_CONF_KEY(String label) {
-            this.label = label;
-        }
-    }
-
-    ///////
-    // Valid managed-ledger configuration (activity-level settings)
-    // TODO: to be added
-    public enum MANAGED_LEDGER_CONF_KEY {
-        ;
-
-        public final String label;
-        MANAGED_LEDGER_CONF_KEY(String label) {
-            this.label = label;
         }
     }
 
@@ -469,9 +419,6 @@ public class PulsarActivityUtil {
     public static boolean isAvroSchemaTypeStr(String typeStr) {
         return typeStr.equalsIgnoreCase("AVRO");
     }
-    public static boolean isKeyValueTypeStr(String typeStr) {
-        return typeStr.equalsIgnoreCase("KEY_VALUE");
-    }
 
     // automatic decode the type from the Registry
     public static boolean isAutoConsumeSchemaTypeStr(String typeStr) {
@@ -504,22 +451,12 @@ public class PulsarActivityUtil {
     }
 
     ///////
-    // Generate effective key string
-    public static String buildCacheKey(String... keyParts) {
-        // Ignore blank keyPart
-        String joinedKeyStr =
-            Stream.of(keyParts)
-            .filter(s -> !StringUtils.isBlank(s))
-            .collect(Collectors.joining(","));
-
-        return Base64.getEncoder().encodeToString(joinedKeyStr.getBytes());
-    }
-
-    ///////
     // Convert JSON string to a key/value map
-    public static Map<String, String> convertJsonToMap(String jsonStr) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(jsonStr, Map.class);
+    private static final ObjectMapper JACKSON_OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<Map<String, String>> MAP_TYPE_REF = new TypeReference<>() {};
+
+    public static Map<String, String> convertJsonToMap(String jsonStr) throws IOException {
+        return JACKSON_OBJECT_MAPPER.readValue(jsonStr, MAP_TYPE_REF);
     }
 
     ///////
