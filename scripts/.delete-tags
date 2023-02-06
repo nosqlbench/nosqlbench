@@ -9,7 +9,7 @@ printf " - nosqlbench-4.17.20+\n"
 printf " - nosqlbench-4.15.100+\n"
 printf " FURTHER: This removes all your local tags first and then synchronizes\n"
 printf "  from origin. If you have any special tags only on local, it will remove them.\n"
-printf " If you do NOT want to do this, hit crtl-c now!\n"
+printf " If you do NOT want to do this, hit control-c now!\n"
 read response
 
 #delete all the remote tags with the pattern your looking for ...
