@@ -280,7 +280,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         }
     }
 
-    private void alignMotorStateToIntendedActivityState() {
+    private synchronized void alignMotorStateToIntendedActivityState() {
         RunState intended = activity.getRunState();
         logger.trace(() -> "ADJUSTING to INTENDED " + intended);
         switch (intended) {

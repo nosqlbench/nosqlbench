@@ -47,7 +47,7 @@ class ActivityExecutorTest {
 
     @Test
     synchronized void testRestart() {
-        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;op=initdelay:initdelay=5000;");
+        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-restart;cycles=1000;cyclerate=1;op=initdelay:initdelay=5000;");
         new ActivityTypeLoader().load(activityDef);
 
         final Activity activity = new DelayedInitActivity(activityDef);
@@ -67,6 +67,7 @@ class ActivityExecutorTest {
         try {
             activityDef.setThreads(1);
             activityExecutor.startActivity();
+            Thread.sleep(500L);
             activityExecutor.stopActivity();
             activityExecutor.startActivity();
             activityExecutor.stopActivity();
@@ -82,7 +83,7 @@ class ActivityExecutorTest {
     @Test
     synchronized void testDelayedStartSanity() {
 
-        final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=2000;");
+        final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-delayed-start;cycles=1000;initdelay=2000;");
         new ActivityTypeLoader().load(activityDef);
 
         final Activity activity = new DelayedInitActivity(activityDef);
@@ -118,7 +119,7 @@ class ActivityExecutorTest {
     @Test
     synchronized void testNewActivityExecutor() {
 
-        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
+        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-dynamic-params;cycles=1000;initdelay=5000;");
         new ActivityTypeLoader().load(activityDef);
 
         getActivityMotorFactory(motorActionDelay(999), new AtomicInput(activityDef));
