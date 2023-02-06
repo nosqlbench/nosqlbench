@@ -122,7 +122,8 @@ public class NBCLIScenarioParser {
             if (nameparts.length==1) {
                 Map<String, String> namedScenario = scenarios.getNamedScenario(scenarioName);
                 if (namedScenario==null) {
-                    throw new BasicError("Named step '" + scenarioName + "' was not found.");
+                    throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
+                    + "', but you can pick from one of: " + String.join(", ", scenarios.getScenarioNames()));
                 }
                 namedSteps.putAll(namedScenario);
             } else {

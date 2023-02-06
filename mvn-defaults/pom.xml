@@ -465,6 +465,14 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>log4j2.xml</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
@@ -473,7 +481,7 @@
                 </excludes>
                 <filtering>true</filtering>
             </testResource>
-            <testResource>
+            <testResource> <!-- Not sure why the complementary configs are here.. -->
                 <directory>src/test/resources</directory>
                 <includes>
                     <include>log4j2-test.xml</include>
