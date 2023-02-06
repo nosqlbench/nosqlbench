@@ -1,0 +1,28 @@
+#!/bin/bash
+printf "WARNING:\n"
+printf " This will remove any tags which were known to be stale as of 5.17.0\n"
+printf " Only these will be kept:\n"
+printf " - 5.*\n"
+printf " - nb-5.*\n"
+printf " - nosqlbench-5.*\n"
+printf " - nosqlbench-4.17.20+\n"
+printf " - nosqlbench-4.15.100+\n"
+printf " FURTHER: This removes all your local tags first and then synchronizes\n"
+printf "  from origin. If you have any special tags only on local, it will remove them.\n"
+printf " If you do NOT want to do this, hit crtl-c now!\n"
+read response
+
+#delete all the remote tags with the pattern your looking for ...
+git tag \
+| grep -v '5\.' \
+| grep -v 'nosqlbench-5\.' \
+| grep -v 'nb-5\.' \
+| grep -v 'nosqlbench-4\.17\.[23][0-9]' \
+| grep -v 'nosqlbench-4\.15\.10[0-9]' \
+| xargs -n 1 -I% git push origin :refs/tags/%
+
+# delete all your local tags
+git tag | xargs -I% git tag -d %
+
+# fetch the remote tags which still remain
+git fetch
