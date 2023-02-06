@@ -33,7 +33,7 @@ public class RunStateImageTest {
         assertThat(image.is(RunState.Starting)).isTrue();
         assertThat(image.isTimeout()).isFalse();
         assertThat(image.is(RunState.Errored)).isFalse();
-        assertThat(image.isNonOther(RunState.Starting, RunState.Running)).isTrue();
+        assertThat(image.isNoneOther(RunState.Starting, RunState.Running)).isTrue();
         RunState maxState = image.getMaxState();
         assertThat(maxState).isEqualTo(RunState.values()[RunState.Running.ordinal()]);
         RunState minState = image.getMinState();
