@@ -69,21 +69,20 @@ class ActivityExecutorTest {
             activityExecutor.startActivity();
             activityExecutor.stopActivity();
             activityExecutor.startActivity();
-            activityExecutor.startActivity();
+            activityExecutor.stopActivity();
             future.get();
-            Thread.sleep(500L);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         executor.shutdown();
-        assertThat(inputDispenser.getInput(10).getInputSegment(3)).isNull();
+        assertThat(inputDispenser.getInput(10).getInputSegment(3)).isNotNull();
 
     }
 
     @Test
     synchronized void testDelayedStartSanity() {
 
-        final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=5000;");
+        final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test;cycles=1000;initdelay=2000;");
         new ActivityTypeLoader().load(activityDef);
 
         final Activity activity = new DelayedInitActivity(activityDef);

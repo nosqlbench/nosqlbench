@@ -79,6 +79,8 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     // TODO: Doc how uninitialized activities do not propagate parameter map changes and how
     // TODO: this is different from preventing modification to uninitialized activities
 
+    // TODO: Determine whether this should really be synchronized
+
     /**
      * Simply stop the motors
      */
@@ -183,8 +185,9 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     /**
      * Shutdown the activity executor, with a grace period for the motor threads.
      *
-     * @param initialMillisToWait milliseconds to wait after graceful shutdownActivity request, before forcing
-     *                            everything to stop
+     * @param initialMillisToWait
+     *     milliseconds to wait after graceful shutdownActivity request, before forcing
+     *     everything to stop
      */
     public synchronized void forceStopScenarioAndThrow(int initialMillisToWait, boolean rethrow) {
         Exception exception = forceStopActivity(initialMillisToWait);
@@ -234,7 +237,8 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     /**
      * Stop extra motors, start missing motors
      *
-     * @param activityDef the activityDef for this activity instance
+     * @param activityDef
+     *     the activityDef for this activity instance
      */
     private void adjustMotorCountToThreadParam(ActivityDef activityDef) {
         logger.trace(() -> ">-pre-adjust->" + getSlotStatus());
@@ -311,26 +315,28 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     private void awaitAlignmentOfMotorStateToActivityState() {
 
         logger.debug(() -> "awaiting state alignment from " + activity.getRunState());
+        RunStateImage states = null;
         switch (activity.getRunState()) {
             case Starting:
             case Running:
-                tally.awaitNoneOther(RunState.Running, RunState.Finished);
+                states = tally.awaitNoneOther(RunState.Running, RunState.Finished);
                 break;
             case Errored:
             case Stopping:
             case Stopped:
-                tally.awaitNoneOther(RunState.Stopped, RunState.Finished, RunState.Errored);
+                states = tally.awaitNoneOther(RunState.Stopped, RunState.Finished, RunState.Errored);
                 break;
             case Uninitialized:
                 break;
             case Finished:
-                tally.awaitNoneOther(RunState.Finished);
+                states = tally.awaitNoneOther(RunState.Finished);
                 break;
             default:
                 throw new RuntimeException("Unmatched run state:" + activity.getRunState());
         }
-        logger.debug("activity and threads are aligned to state " + activity.getRunState() + " for " + this.getActivity().getAlias());
-
+        RunState previousState = activity.getRunState();
+        activity.setRunState(states.getMaxState());
+        logger.debug("activity and threads are aligned to state " + previousState + " for " + this.getActivity().getAlias() + ", and advanced to " + activity.getRunState());
     }
 
 
@@ -391,12 +397,16 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             // instantiate and configure fixtures that need to be present
             // before threads start running such as metrics instruments
             activity.initActivity();
+            startMotorExecutorService();
+            startRunningActivityThreads();
             awaitMotorsAtLeastRunning();
+            logger.debug("STARTED " + activityDef.getAlias());
             awaitActivityCompletion();
-            activity.shutdownActivity();
-            activity.closeAutoCloseables();
         } catch (Exception e) {
             this.exception = e;
+        } finally {
+            activity.shutdownActivity();
+            activity.closeAutoCloseables();
         }
         ExecutionResult result = new ExecutionResult(startedAt, stoppedAt, "", exception);
         return result;

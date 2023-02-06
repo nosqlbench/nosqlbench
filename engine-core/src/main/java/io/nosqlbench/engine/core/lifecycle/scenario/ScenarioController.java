@@ -86,8 +86,6 @@ public class ScenarioController {
             Future<ExecutionResult> startedActivity = activitiesExecutor.submit(executor);
             ActivityRuntimeInfo activityRuntimeInfo = new ActivityRuntimeInfo(activity, startedActivity, executor);
             this.activityInfoMap.put(activity.getAlias(), activityRuntimeInfo);
-            executor.startActivity();
-            scenariologger.debug("STARTED " + activityDef.getAlias());
         }
         return this.activityInfoMap.get(activityDef.getAlias());
     }
