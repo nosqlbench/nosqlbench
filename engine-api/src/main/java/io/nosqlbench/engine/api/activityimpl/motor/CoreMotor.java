@@ -463,12 +463,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
     public synchronized void requestStop() {
         RunState currentState = motorState.get();
         if (Objects.requireNonNull(currentState) == Running) {
-            if (input instanceof Stoppable) {
-                ((Stoppable) input).requestStop();
-            }
-            if (action instanceof Stoppable) {
-                ((Stoppable) action).requestStop();
-            }
+            Stoppable.stop(input, action);
             motorState.enterState(Stopping);
         } else {
             logger.warn(() -> "attempted to stop motor " + this.getSlotId() + ": from non Running state:" + currentState);

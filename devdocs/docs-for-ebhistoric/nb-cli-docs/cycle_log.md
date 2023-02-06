@@ -14,7 +14,7 @@ All cycle logfiles have the *.cyclelog* suffix.
 You can dump an rlefile to the screen to see the content in text form by
 running a command like this:
 
-    PROG --export-cycle-log <filename> [spans|cycles]
+    ${PROG} --export-cycle-log <filename> [spans|cycles]
 
 You do not need to specify the extension. If you do not specify either
 optional format at the end, then *spans* is assumed. It will print output
@@ -40,7 +40,7 @@ If you need to modify and then re-use a cycle log, you can do this with
 simple text tools. Once you have modified the file, you can import it back
 to the native format with:
 
-    PROG --import-cycle-log <infile.txt> <outfile.cyclelog>
+    ${PROG} --import-cycle-log <infile.txt> <outfile.cyclelog>
 
 The importer recognizes both formats listed above.
 

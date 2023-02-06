@@ -495,7 +495,8 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
                     logger.info(() -> "skipped mapping op '" + pop.getName() + "'");
                     continue;
                 }
-                boolean dryrun = pop.takeStaticConfigOr("dryrun", false);
+                String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
+                boolean dryrun = dryrunSpec.equalsIgnoreCase("op");
 
                 DriverAdapter adapter = adapters.get(i);
                 OpMapper opMapper = adapter.getOpMapper();
