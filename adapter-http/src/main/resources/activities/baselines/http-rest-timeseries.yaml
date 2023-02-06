@@ -1,4 +1,4 @@
-min_version: "4.17.15"
+min_version: "5.17.1"
 
 description: |
   This workload emulates a time-series data model and access patterns.
@@ -12,10 +12,10 @@ description: |
 
 scenarios:
   default:
-    schema: run driver=cql tags==block:"schema-*.*" threads==1 cycles==UNDEF
+    schema: run driver=cql tags==block:'schema-*.*' threads==1 cycles==UNDEF
     schema-astra: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
-    rampup: run driver=http tags==block:"rampup-*.*" cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=http tags==block:"main-*.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    rampup: run driver=http tags==block:'rampup-*.*' cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=http tags==block:'main-*.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer

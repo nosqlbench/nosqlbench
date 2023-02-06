@@ -302,7 +302,7 @@ in the workload construction guide.
 
 ```yaml
 tags:
-  phase: main
+  block: main
 ```
 
 *json:*
@@ -311,7 +311,7 @@ tags:
 
 {
   "tags": {
-    "phase": "main"
+    "block": "main"
   }
 }
 ```
@@ -331,7 +331,7 @@ Blocks are used to logically partition a workload for the purposes of grouping, 
 executing subsets and op sequences. Blocks can contain any of the defined elements above.
 Every op template within a block automatically gets a tag with the name 'block' and the value of
 the block name. This makes it easy to select a whole block at a time with a tag filter like
-`tags=block:schema`.
+`tags=block:"schema.*"`.
 
 Blocks are not recursive. You may not put a block inside another block.
 

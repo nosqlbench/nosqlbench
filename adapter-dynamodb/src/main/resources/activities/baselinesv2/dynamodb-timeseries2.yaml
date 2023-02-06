@@ -1,4 +1,4 @@
-min_version: "4.17.15"
+min_version: "5.17.1"
 
 description: |
   This workload emulates a time-series data model and access patterns. This is based on the
@@ -11,7 +11,7 @@ description: |
 
 scenarios:
   default:
-    schema: run driver=dynamodb tags==block:schema threads==1 cycles==UNDEF
+    schema: run driver=dynamodb tags==block:'schema.*' threads==1 cycles==UNDEF
     rampup: run driver=dynamodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     main: run driver=dynamodb tags==block:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
   delete:

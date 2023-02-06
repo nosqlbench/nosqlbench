@@ -230,6 +230,12 @@ public class NBCLIScenarioParser {
         String[] namedStepPieces = cmd.split(" ");
         for (String commandFragment : namedStepPieces) {
             Matcher matcher = WordAndMaybeAssignment.matcher(commandFragment);
+
+            if (commandFragment.equalsIgnoreCase("")) {
+                logger.debug("Command fragment discovered to be empty.  Skipping this fragment for cmd: {}", cmd);
+                continue;
+            }
+
             if (!matcher.matches()) {
                 throw new BasicError("Unable to recognize scenario cmd spec in '" + commandFragment + "'");
             }

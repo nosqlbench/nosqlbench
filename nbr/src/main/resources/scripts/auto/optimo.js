@@ -25,7 +25,7 @@ function as_js(ref) {
     }
     if (ref instanceof java.util.Map) {
         let newobj = {};
-        for each(key in ref.keySet()) {
+        for (let key in ref.keySet()) {
             newobj[key] = Java.asJSONCompatible(ref.get(key));
         }
         return newobj;
@@ -112,7 +112,7 @@ schema_activitydef = params.withDefaults({
 });
 schema_activitydef.alias = "optimo_schema";
 schema_activitydef.threads = "1";
-schema_activitydef.tags = "TEMPLATE(schematags,phase:schema)";
+schema_activitydef.tags = "TEMPLATE(schematags,block:'schema.*')";
 schema_activitydef.speculative = "none"
 print("Creating schema with schematags:" + schema_activitydef.tags);
 
@@ -129,7 +129,7 @@ activitydef = params.withDefaults({
 activitydef.alias = "optimo";
 activitydef.cycles = "1000000000";
 activitydef.recycles = "1000000000";
-activitydef.tags = "TEMPLATE(maintags,phase:main)";
+activitydef.tags = "TEMPLATE(maintags,block:main)";
 activitydef.speculative = "none"
 
 print("Iterating main workload with tags:" + activitydef.tags);

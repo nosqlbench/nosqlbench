@@ -1,8 +1,8 @@
 # example-scenarios.yaml
 scenarios:
   default:
-    - run cycles=3 alias=A driver=stdout
-    - run cycles=5 alias=B driver=stdout
+    one: run cycles=3 alias=A driver=stdout
+    two: run cycles=5 alias=B driver=stdout
   namedsteps:
     one: run cycles=3 alias=A driver=stdout testparam1=testvalue1
     two: run cycles=5 alias=B driver=stdout
