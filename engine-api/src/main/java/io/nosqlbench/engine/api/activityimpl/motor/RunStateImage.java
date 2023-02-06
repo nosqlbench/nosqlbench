@@ -53,7 +53,7 @@ public class RunStateImage {
         return true;
     }
 
-    public boolean isNonOther(RunState... runStates) {
+    public boolean isNoneOther(RunState... runStates) {
         int[] scan = Arrays.copyOf(counts, counts.length);
         for (RunState runState : runStates) {
             scan[runState.ordinal()]=0;
