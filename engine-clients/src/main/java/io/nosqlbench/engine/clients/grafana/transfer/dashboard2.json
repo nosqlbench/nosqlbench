@@ -53,7 +53,7 @@
                 "span:interval",
                 "appname:nosqlbench"
               ],
-              "text": "session: scenario_20201215_050302_981\n[2020-12-15T05:03:04.813Z[GMT] - 2020-12-15T05:03:04.813Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(4)/{keycount\u003d5B, hosts\u003dnode1, main-cycles\u003d1B, threads\u003d1, workload\u003d./keyvalue.yaml, cycles\u003d2, stride\u003d2, tags\u003dphase:schema, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5B, alias\u003dkeyvalue_default_schema, valuecount\u003d5B, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_schema\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050302_981\n span: interval\n appname: nosqlbench\n",
+              "text": "session: scenario_20201215_050302_981\n[2020-12-15T05:03:04.813Z[GMT] - 2020-12-15T05:03:04.813Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(4)/{keycount\u003d5B, hosts\u003dnode1, main-cycles\u003d1B, threads\u003d1, workload\u003d./keyvalue.yaml, cycles\u003d2, stride\u003d2, tags\u003dblock:"schema.*", password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5B, alias\u003dkeyvalue_default_schema, valuecount\u003d5B, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_schema\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050302_981\n span: interval\n appname: nosqlbench\n",
               "time": 1608008584813,
               "timeEnd": 1608008588900,
               "updated": 1608008588918,
@@ -81,7 +81,7 @@
                 "span:interval",
                 "appname:nosqlbench"
               ],
-              "text": "session: scenario_20201215_050355_270\n[2020-12-15T05:03:57.142Z[GMT] - 2020-12-15T05:03:57.142Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(4)/{keycount\u003d5000000000, hosts\u003dnode1, main-cycles\u003d5000000000, threads\u003d1, workload\u003d./keyvalue.yaml, cycles\u003d2, stride\u003d2, tags\u003dphase:schema, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_schema, valuecount\u003d5000000000, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_schema\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050355_270\n span: interval\n appname: nosqlbench\n",
+              "text": "session: scenario_20201215_050355_270\n[2020-12-15T05:03:57.142Z[GMT] - 2020-12-15T05:03:57.142Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(4)/{keycount\u003d5000000000, hosts\u003dnode1, main-cycles\u003d5000000000, threads\u003d1, workload\u003d./keyvalue.yaml, cycles\u003d2, stride\u003d2, tags\u003dblock:"schema.*", password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_schema, valuecount\u003d5000000000, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_schema\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050355_270\n span: interval\n appname: nosqlbench\n",
               "time": 1608008637142,
               "timeEnd": 1608008641044,
               "updated": 1608008641063,
@@ -109,7 +109,7 @@
                 "span:interval",
                 "appname:nosqlbench"
               ],
-              "text": "session: scenario_20201215_050435_240\n[2020-12-15T05:04:37.232Z[GMT] - 2020-12-15T05:04:37.232Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(4)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d1, workload\u003d./keyvalue.yaml, cycles\u003d2, stride\u003d2, tags\u003dphase:schema, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_schema, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_schema\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
+              "text": "session: scenario_20201215_050435_240\n[2020-12-15T05:04:37.232Z[GMT] - 2020-12-15T05:04:37.232Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(4)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d1, workload\u003d./keyvalue.yaml, cycles\u003d2, stride\u003d2, tags\u003dblock:"schema.*", password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_schema, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_schema\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
               "time": 1608008677232,
               "timeEnd": 1608008681038,
               "updated": 1608008681058,
@@ -137,7 +137,7 @@
                 "span:interval",
                 "appname:nosqlbench"
               ],
-              "text": "session: scenario_20201215_050435_240\n[2020-12-15T05:04:41.120Z[GMT] - 2020-12-15T05:04:41.120Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(3)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d960, workload\u003d./keyvalue.yaml, cycles\u003d5000000000, stride\u003d1, tags\u003dphase:rampup, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_rampup, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_rampup\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
+              "text": "session: scenario_20201215_050435_240\n[2020-12-15T05:04:41.120Z[GMT] - 2020-12-15T05:04:41.120Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(3)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d960, workload\u003d./keyvalue.yaml, cycles\u003d5000000000, stride\u003d1, tags\u003dblock:rampup, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_rampup, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_rampup\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
               "time": 1608008681120,
               "timeEnd": 1608042107780,
               "updated": 1608042107859,
@@ -165,7 +165,7 @@
                 "span:interval",
                 "appname:nosqlbench"
               ],
-              "text": "session: scenario_20201215_050435_240\n[2020-12-15T14:21:47.918Z[GMT] - 2020-12-15T14:21:47.918Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(3)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d500, workload\u003d./keyvalue.yaml, cycles\u003d500, stride\u003d10, tags\u003dphase:main, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_main, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_main\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
+              "text": "session: scenario_20201215_050435_240\n[2020-12-15T14:21:47.918Z[GMT] - 2020-12-15T14:21:47.918Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(3)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d500, workload\u003d./keyvalue.yaml, cycles\u003d500, stride\u003d10, tags\u003dblock:main, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_main, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_main\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
               "time": 1608042107918,
               "timeEnd": 1608042108099,
               "updated": 1608042108117,
@@ -193,7 +193,7 @@
                 "span:interval",
                 "appname:nosqlbench"
               ],
-              "text": "session: scenario_20201215_050435_240\n[2020-12-15T14:21:47.918Z[GMT] - 2020-12-15T14:21:47.918Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(3)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d500, workload\u003d./keyvalue.yaml, cycles\u003d500, stride\u003d10, tags\u003dphase:main, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_main, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_main\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
+              "text": "session: scenario_20201215_050435_240\n[2020-12-15T14:21:47.918Z[GMT] - 2020-12-15T14:21:47.918Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(3)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d500, workload\u003d./keyvalue.yaml, cycles\u003d500, stride\u003d10, tags\u003dblock:main, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_main, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_main\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
               "time": 1608042107918,
               "timeEnd": 1608042108127,
               "updated": 1608042108144,
@@ -221,7 +221,7 @@
                 "span:interval",
                 "appname:nosqlbench"
               ],
-              "text": "session: scenario_20201215_050435_240\n[2020-12-15T05:04:41.120Z[GMT] - 2020-12-15T05:04:41.120Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(3)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d960, workload\u003d./keyvalue.yaml, cycles\u003d5000000000, stride\u003d1, tags\u003dphase:rampup, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_rampup, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_rampup\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
+              "text": "session: scenario_20201215_050435_240\n[2020-12-15T05:04:41.120Z[GMT] - 2020-12-15T05:04:41.120Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(3)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d960, workload\u003d./keyvalue.yaml, cycles\u003d5000000000, stride\u003d1, tags\u003dblock:rampup, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_rampup, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_rampup\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
               "time": 1608008681120,
               "timeEnd": 1608042108127,
               "updated": 1608042108167,
@@ -249,7 +249,7 @@
                 "span:interval",
                 "appname:nosqlbench"
               ],
-              "text": "session: scenario_20201215_050435_240\n[2020-12-15T05:04:37.232Z[GMT] - 2020-12-15T05:04:37.232Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(4)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d1, workload\u003d./keyvalue.yaml, cycles\u003d2, stride\u003d2, tags\u003dphase:schema, password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_schema, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_schema\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
+              "text": "session: scenario_20201215_050435_240\n[2020-12-15T05:04:37.232Z[GMT] - 2020-12-15T05:04:37.232Z[GMT]]\nspan:interval\ndetails:\n params: ActivityDef:(4)/{keycount\u003d5000000000L, hosts\u003dnode1, main-cycles\u003d500, threads\u003d1, workload\u003d./keyvalue.yaml, cycles\u003d2, stride\u003d2, tags\u003dblock:"schema.*", password\u003dcassandra, rf\u003d3, pooling\u003d16:16:500, driver\u003dcql, rampup-cycles\u003d5000000000, alias\u003dkeyvalue_default_schema, valuecount\u003d5000000000L, errors\u003dcount, username\u003dcassandra}\nlabels:\n layer: Activity\n alias: keyvalue_default_schema\n driver: cql\n workload: ./keyvalue.yaml\n session: scenario_20201215_050435_240\n span: interval\n appname: nosqlbench\n",
               "time": 1608008677232,
               "timeEnd": 1608042108127,
               "updated": 1608042108190,

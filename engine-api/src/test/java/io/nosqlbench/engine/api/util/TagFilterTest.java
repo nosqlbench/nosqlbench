@@ -153,19 +153,19 @@ public class TagFilterTest {
     public void testLeadingSpaceTrimmedInQuotedTag() {
 
         Map<String, String> itemtags = new HashMap<>() {{
-            put("phase", "main");
+            put("block", "main");
         }};
 
-        TagFilter tf = new TagFilter("\"phase: main\"");
+        TagFilter tf = new TagFilter("\"block: main\"");
         assertThat(tf.matches(itemtags).matched()).isTrue();
     }
 
     @Test
     public void testAnyCondition() {
-        Map<String, String> itemtags = Map.of("phase", "main", "truck", "car");
-        TagFilter tf = new TagFilter("any(truck:car,phase:moon)");
+        Map<String, String> itemtags = Map.of("block", "main", "truck", "car");
+        TagFilter tf = new TagFilter("any(truck:car,block:moon)");
         assertThat(tf.matches(itemtags).matched()).isTrue();
-        TagFilter tf2 = new TagFilter("any(car:truck,phase:moon)");
+        TagFilter tf2 = new TagFilter("any(car:truck,block:moon)");
         assertThat(tf2.matches(itemtags).matched()).isFalse();
     }
 }

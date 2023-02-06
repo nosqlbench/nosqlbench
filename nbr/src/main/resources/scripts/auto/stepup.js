@@ -60,7 +60,7 @@ print("starting activity for stepup analysis");
 var activitydef = params.withDefaults({
     'alias': 'stepup',
     'driver': driver,
-    'tags':'any(block:main.*,phase:main)',
+    'tags':'any(block:main.*,block:main)',
     'workload' : 'TEMPLATE(workload)',
     'cycles': '1t',
     'stride': '1000',
