@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class RunStateImage {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (RunState runState : RunState.values()) {
-            sb.append(runState.getCode()).append(" ").append(counts[runState.ordinal()]).append("  ");
+            sb.append(runState.getCode()).append(":").append(counts[runState.ordinal()]).append(" ");
         }
         return sb.toString();
     }

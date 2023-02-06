@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,17 @@ public class RunStateImageTest {
     public void testMaxStateImage() {
         int[] counts = new int[RunState.values().length];
         counts[RunState.Running.ordinal()]=3;
+        counts[RunState.Starting.ordinal()]=2;
         RunStateImage image = new RunStateImage(counts, false);
         assertThat(image.is(RunState.Running)).isTrue();
+        assertThat(image.is(RunState.Starting)).isTrue();
         assertThat(image.isTimeout()).isFalse();
         assertThat(image.is(RunState.Errored)).isFalse();
-        assertThat(image.isOnly(RunState.Running)).isTrue();
+        assertThat(image.isNonOther(RunState.Starting, RunState.Running)).isTrue();
         RunState maxState = image.getMaxState();
-        assertThat(maxState).isEqualTo(RunState.values()[2]);
+        assertThat(maxState).isEqualTo(RunState.values()[RunState.Running.ordinal()]);
+        RunState minState = image.getMinState();
+        assertThat(minState).isEqualTo(RunState.values()[RunState.St.ordinal()]);
     }
 
 }
