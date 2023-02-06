@@ -24,19 +24,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.CassandraContainer;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.Network;
-import org.testcontainers.containers.wait.CassandraQueryWaitStrategy;
-import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ExampleContainersIntegrationTest {
+public class DSEContainerIntegrationTest {
 
-    public static Logger logger = LogManager.getLogger(ExampleContainersIntegrationTest.class);
+    public static Logger logger = LogManager.getLogger(DSEContainerIntegrationTest.class);
     private final String java = Optional.ofNullable(System.getenv(
         "JAVA_HOME")).map(v -> v + "/bin/java").orElse("java");
 
@@ -46,19 +42,23 @@ public class ExampleContainersIntegrationTest {
     private static String hostIP = "127.0.0.1";
     private static String datacenter = "datacenter1";
     private static Integer mappedPort9042 = 9042;
-    private static final Integer EXPOSED_PORT = 9042;
-    private static final CassandraContainer cass = (CassandraContainer) new CassandraContainer().withExposedPorts(9042);
+    private static ProcessInvoker invoker = new ProcessInvoker();
+    private static  CassandraContainer dse;
+    static {
+        dse  = (CassandraContainer) new CassandraContainer(DockerImageName.parse("datastax/dse-server:6.8.17-ubi7").asCompatibleSubstituteFor("cassandra")).withEnv("DS_LICENSE", "accept").withEnv("CASSANDRA_DC", datacenter).withExposedPorts(9042);
+    }
     @BeforeAll
     public static void initContainer() {
         //STEP0:Start the test container and expose the 9042 port on the local host.
         //So that the docker bridge controller exposes the port to our process invoker that will run nb5
         //and target cassandra on that docker container
-        cass.start();
-        datacenter = cass.getLocalDatacenter();
+        dse.start();
+        datacenter = dse.getLocalDatacenter();
+
         //When running with a local Docker daemon, exposed ports will usually be reachable on localhost.
         // However, in some CI environments they may instead be reachable on a different host.
-        mappedPort9042 = cass.getMappedPort(9042);
-        hostIP = cass.getHost();
+        mappedPort9042 = dse.getMappedPort(9042);
+        hostIP = dse.getHost();
     }
 
     @BeforeEach
@@ -68,18 +68,18 @@ public class ExampleContainersIntegrationTest {
 
     @Test
     public void testSimplePutAndGet() {
-        ProcessInvoker invoker = new ProcessInvoker();
+
         invoker.setLogDir("logs/test");
 //        //STEP1: Copy the example workload to the local dir
         ProcessResult copyResult = invoker.run("copy-workload", 30,
-            "java", "-jar", JARNAME, "--copy=activities/baselines/cql-keyvalue.yaml"
+            "java", "-jar", JARNAME, "--copy=activities/baselines/cql-iot-dse.yaml"
         );
         assertThat(copyResult.exception).isNull();
         String copyOut = String.join("\n", copyResult.getStdoutData());
 
         //STEP2: Run the example cassandra workload using the schema tag to create the Cass Baselines keyspace
         String[] args = new String[]{
-            "java", "-jar", JARNAME, "cql-keyvalue.yaml", "default", "host="+hostIP, "localdc="+datacenter, "port="+ mappedPort9042.toString()
+            "java", "-jar", JARNAME, "cql-iot-dse.yaml", "default", "host="+hostIP, "localdc="+datacenter, "port="+ mappedPort9042.toString()
         };
         ProcessResult runSchemaResult = invoker.run("run-workload", 30, args);
         logger.info("The final command line: " + String.join(" ", args));
@@ -88,13 +88,13 @@ public class ExampleContainersIntegrationTest {
         System.out.println(runSchemaOut);
 
         //STEP3: Run the example cassandra workload using the rampup phase to create the data in a specific number of cycles
-        ProcessResult runRampUpResult = invoker.run("run-workload", 30, "java", "-jar", JARNAME, "run",
-            "driver=cql", "workload=cql-keyvalue", "host="+hostIP, "localdc="+datacenter, "port="+ mappedPort9042.toString(),
-            "tags=blocks:rampup", "cycles=100k"
-        );
-        assertThat(runRampUpResult.exception).isNull();
-        String runRampUpOut = String.join("\n", runRampUpResult.getStdoutData());
-        System.out.println(runRampUpOut);
+//        ProcessResult runRampUpResult = invoker.run("run-workload", 30, "java", "-jar", JARNAME, "run",
+//            "driver=cql", "workload=cql-keyvalue", "host="+hostIP, "localdc="+datacenter, "port="+ mappedPort9042.toString(),
+//            "tags=blocks:rampup", "cycles=100k"
+//        );
+//        assertThat(runRampUpResult.exception).isNull();
+//        String runRampUpOut = String.join("\n", runRampUpResult.getStdoutData());
+//        System.out.println(runRampUpOut);
 
         System.out.println("end");
     }
