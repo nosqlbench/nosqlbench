@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,7 +166,7 @@ public abstract class BaseDriverAdapter<R extends Op, S> implements DriverAdapte
             .add(Param.optional("instrument", Boolean.class))
             .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
             .add(Param.optional("driver", String.class))
-            .add(Param.defaultTo("dryrun",false))
+            .add(Param.defaultTo("dryrun","none").setRegex("(op|jsonnet|none)"))
             .asReadOnly();
     }
 
