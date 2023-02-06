@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,7 +140,7 @@ class ActivityExecutorTest {
         activityDef.setThreads(5);
         activityExecutor.startActivity();
 
-        int[] speeds = new int[]{1, 2000, 5, 2000, 2, 2000};
+        int[] speeds = new int[]{1, 50, 5, 50, 2, 50};
         for (int offset = 0; offset < speeds.length; offset += 2) {
             int threadTarget = speeds[offset];
             int threadTime = speeds[offset + 1];
@@ -158,7 +158,7 @@ class ActivityExecutorTest {
         // Used for slowing the roll due to state transitions in test.
         try {
             activityExecutor.stopActivity();
-            Thread.sleep(2000L);
+//            Thread.sleep(2000L);
         } catch (Exception e) {
             fail("Not expecting exception", e);
         }
