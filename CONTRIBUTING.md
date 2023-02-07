@@ -173,6 +173,7 @@ For recognizing contributions, please follow [this documentation](https://allcon
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/BrynCooke"><img src="https://avatars.githubusercontent.com/u/747836?v=4?s=50" width="50px;" alt="Bryn Cooke"/><br /><sub><b>Bryn Cooke</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=BrynCooke" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/KatSarah"><img src="https://avatars.githubusercontent.com/u/658015?v=4?s=50" width="50px;" alt="KatSarah"/><br /><sub><b>KatSarah</b></sub></a><br /><a href="#ideas-KatSarah" title="Ideas, Planning, & Feedback">🤔</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/peytoncasper"><img src="https://avatars.githubusercontent.com/u/8305883?v=4?s=50" width="50px;" alt="Peyton Casper"/><br /><sub><b>Peyton Casper</b></sub></a><br /><a href="#ideas-peytoncasper" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=peytoncasper" title="Code">💻</a></td>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/landim"><img src="https://avatars.githubusercontent.com/u/91446?v=4?s=50" width="50px;" alt="Arthur Costa"/><br /><sub><b>Arthur Costa</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/issues?q=author%3Alandim" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>
