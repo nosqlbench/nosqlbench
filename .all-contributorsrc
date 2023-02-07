@@ -71,6 +71,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "eolivelli",
+      "name": "Enrico Olivelli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9469110?v=4",
+      "profile": "http://eolivelli.blogspot.it/",
+      "contributions": [
+        "test"
+      ]
     }
   ]
 }
