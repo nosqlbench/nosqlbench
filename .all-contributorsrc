@@ -220,6 +220,17 @@
         "test",
         "ideas"
       ]
+    },
+    {
+      "login": "alicel",
+      "name": "Alice Lottini",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2972347?v=4",
+      "profile": "https://github.com/alicel",
+      "contributions": [
+        "bug",
+        "ideas",
+        "test"
+      ]
     }
   ]
 }
