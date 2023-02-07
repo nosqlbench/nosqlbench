@@ -41,6 +41,16 @@
         "talk",
         "tutorial"
       ]
+    },
+    {
+      "login": "MikeYaacoubStax",
+      "name": "MikeYaacoubStax",
+      "avatar_url": "https://avatars.githubusercontent.com/u/117678633?v=4",
+      "profile": "https://github.com/MikeYaacoubStax",
+      "contributions": [
+        "review",
+        "tool"
+      ]
     }
   ]
 }
