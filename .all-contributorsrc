@@ -60,7 +60,25 @@
       "contributions": [
         "code",
         "mentoring",
-        "test"
+        "test",
+        "bug",
+        "business",
+        "content",
+        "data",
+        "doc",
+        "design",
+        "example",
+        "ideas",
+        "infra",
+        "maintenance",
+        "platform",
+        "plugin",
+        "projectManagement",
+        "research",
+        "review",
+        "security",
+        "tool",
+        "userTesting"
       ]
     }
   ]
