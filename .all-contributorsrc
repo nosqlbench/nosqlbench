@@ -161,6 +161,18 @@
       ]
     },
     {
+      "login": "smccarthy788",
+      "name": "Sean McCarthy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6601281?v=4",
+      "profile": "https://github.com/smccarthy788",
+      "contributions": [
+        "mentoring",
+        "ideas",
+        "code",
+        "test"
+      ]
+    },
+    {
       "login": "yabinmeng",
       "name": "yabinmeng",
       "avatar_url": "https://avatars.githubusercontent.com/u/16789452?v=4",
@@ -456,18 +468,6 @@
         "bug",
         "code",
         "ideas"
-      ]
-    },
-    {
-      "login": "smccarthy788",
-      "name": "Sean McCarthy",
-      "avatar_url": "https://avatars.githubusercontent.com/u/6601281?v=4",
-      "profile": "https://github.com/smccarthy788",
-      "contributions": [
-        "mentoring",
-        "ideas",
-        "code",
-        "test"
       ]
     }
   ]
