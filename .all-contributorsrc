@@ -85,25 +85,27 @@
       ]
     },
     {
-
-"login": "yabinmeng",
+      "login": "yabinmeng",
       "name": "yabinmeng",
       "avatar_url": "https://avatars.githubusercontent.com/u/16789452?v=4",
       "profile": "https://github.com/yabinmeng",
       "contributions": [
         "bug",
-        "test" ]
-     },
-     {
+        "test"
+      ]
+    },
+    {
       "login": "eolivelli",
       "name": "Enrico Olivelli",
       "avatar_url": "https://avatars.githubusercontent.com/u/9469110?v=4",
       "profile": "http://eolivelli.blogspot.it/",
       "contributions": [
-        "test", "code", "review"
-        ]
-     },
-     {
+        "test",
+        "code",
+        "review"
+      ]
+    },
+    {
       "login": "lhotari",
       "name": "Lari Hotari",
       "avatar_url": "https://avatars.githubusercontent.com/u/66864?v=4",
