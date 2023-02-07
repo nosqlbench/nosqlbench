@@ -32,8 +32,10 @@ import org.apache.pulsar.client.admin.PulsarAdminBuilder;
 import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.common.schema.KeyValueEncodingType;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public class PulsarSpace implements  AutoCloseable {
 
@@ -50,9 +52,18 @@ public class PulsarSpace implements  AutoCloseable {
     private PulsarAdmin pulsarAdmin;
     private Schema<?> pulsarSchema;
 
-    private final ConcurrentHashMap<String, Producer<?>> producers = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Consumer<?>> consumers = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Reader<?>> readers = new ConcurrentHashMap<>();
+    public record ProducerCacheKey(String producerName, String topicName) {
+    }
+
+    private final ConcurrentHashMap<ProducerCacheKey, Producer<?>> producers = new ConcurrentHashMap<>();
+
+    public record ConsumerCacheKey(String consumerName, String subscriptionName, List<String> topicNameList, String topicPattern) {
+    }
+    private final ConcurrentHashMap<ConsumerCacheKey, Consumer<?>> consumers = new ConcurrentHashMap<>();
+
+    public record ReaderCacheKey(String readerName, String topicName, String startMsgPosStr) {
+    }
+    private final ConcurrentHashMap<ReaderCacheKey, Reader<?>> readers = new ConcurrentHashMap<>();
 
 
     public PulsarSpace(String spaceName, NBConfiguration cfg) {
@@ -89,13 +100,11 @@ public class PulsarSpace implements  AutoCloseable {
     public int getProducerSetCnt() { return producers.size(); }
     public int getConsumerSetCnt() { return consumers.size(); }
     public int getReaderSetCnt() { return readers.size(); }
-    public Producer<?> getProducer(String name) { return producers.get(name); }
-    public void setProducer(String name, Producer<?> producer) { producers.put(name, producer); }
-    public Consumer<?> getConsumer(String name) { return consumers.get(name); }
-    public void setConsumer(String name, Consumer<?> consumer) { consumers.put(name, consumer); }
+    public Producer<?> getProducer(ProducerCacheKey key, Supplier<Producer<?>> producerSupplier) { return producers.computeIfAbsent(key, __ -> producerSupplier.get()); }
 
-    public Reader<?> getReader(String name) { return readers.get(name); }
-    public void setReader(String name, Reader<?> reader) { readers.put(name, reader); }
+    public Consumer<?> getConsumer(ConsumerCacheKey key, Supplier<Consumer<?>> consumerSupplier) { return consumers.computeIfAbsent(key, __ -> consumerSupplier.get()); }
+
+    public Reader<?> getReader(ReaderCacheKey key, Supplier<Reader<?>> readerSupplier) { return readers.computeIfAbsent(key, __ -> readerSupplier.get()); }
 
 
     /**
