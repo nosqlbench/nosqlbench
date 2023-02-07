@@ -71,6 +71,17 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "lhotari",
+      "name": "Lari Hotari",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66864?v=4",
+      "profile": "https://github.com/lhotari",
+      "contributions": [
+        "bug",
+        "code",
+        "review"
+      ]
     }
   ]
 }
