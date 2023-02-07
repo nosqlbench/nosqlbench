@@ -113,6 +113,16 @@
         "code",
         "review"
       ]
+    },
+    {
+      "login": "mfleming",
+      "name": "Matt Fleming",
+      "avatar_url": "https://avatars.githubusercontent.com/u/94254?v=4",
+      "profile": "http://www.codeblueprint.co.uk",
+      "contributions": [
+        "bug",
+        "design"
+      ]
     }
   ]
 }
