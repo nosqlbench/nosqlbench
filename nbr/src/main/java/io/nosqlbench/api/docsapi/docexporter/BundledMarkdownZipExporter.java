@@ -33,9 +33,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -65,10 +62,7 @@ public class BundledMarkdownZipExporter {
                 }
             }
 
-            ExecutorService executorService = Executors.newSingleThreadExecutor();
-            Future<Map<String, StringBuilder>> future = executorService.submit(new VirtDataGenDocsApp(null));
-            Map<String, StringBuilder> builderMap = future.get();
-            executorService.shutdown();
+            Map<String, StringBuilder> builderMap= new VirtDataGenDocsApp(null).call();
             String bindingsPrefix ="bindings/";
             for(Map.Entry<String, StringBuilder> entry : builderMap.entrySet())
             {
