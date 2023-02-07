@@ -155,6 +155,7 @@ For recognizing contributions, please follow [this documentation](https://allcon
     <tr>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/dougwettlaufer"><img src="https://avatars.githubusercontent.com/u/45750136?v=4?s=50" width="50px;" alt="Doug Wettlaufer"/><br /><sub><b>Doug Wettlaufer</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=dougwettlaufer" title="Tests">⚠️</a></td>
       <td align="center" valign="top" width="16.66%"><a href="http://jeromatron.blogspot.com"><img src="https://avatars.githubusercontent.com/u/254887?v=4?s=50" width="50px;" alt="Jeremy Hanna"/><br /><sub><b>Jeremy Hanna</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=jeromatron" title="Tests">⚠️</a> <a href="#ideas-jeromatron" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/alicel"><img src="https://avatars.githubusercontent.com/u/2972347?v=4?s=50" width="50px;" alt="Alice Lottini"/><br /><sub><b>Alice Lottini</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/issues?q=author%3Aalicel" title="Bug reports">🐛</a> <a href="#ideas-alicel" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=alicel" title="Tests">⚠️</a></td>
     </tr>
   </tbody>
 </table>
