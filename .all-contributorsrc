@@ -2,7 +2,7 @@
   "projectOwner": "nosqlbench",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "files": ["CONTRIBUTING.md"],
+  "files": ["README.md"],
   "imageSize": 50,
   "commit": false,
   "contributorsPerLine": 7,
