@@ -71,6 +71,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "yabinmeng",
+      "name": "yabinmeng",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16789452?v=4",
+      "profile": "https://github.com/yabinmeng",
+      "contributions": [
+        "bug",
+        "test"
+      ]
     }
   ]
 }
