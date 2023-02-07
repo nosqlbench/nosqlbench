@@ -176,6 +176,9 @@ For recognizing contributions, please follow [this documentation](https://allcon
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/landim"><img src="https://avatars.githubusercontent.com/u/91446?v=4?s=50" width="50px;" alt="Arthur Costa"/><br /><sub><b>Arthur Costa</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/issues?q=author%3Alandim" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/guyboltonking"><img src="https://avatars.githubusercontent.com/u/98294?v=4?s=50" width="50px;" alt="Guy Bolton King"/><br /><sub><b>Guy Bolton King</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/issues?q=author%3Aguyboltonking" title="Bug reports">🐛</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=guyboltonking" title="Code">💻</a> <a href="#ideas-guyboltonking" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/smccarthy788"><img src="https://avatars.githubusercontent.com/u/6601281?v=4?s=50" width="50px;" alt="Sean McCarthy"/><br /><sub><b>Sean McCarthy</b></sub></a><br /><a href="#mentoring-smccarthy788" title="Mentoring">🧑‍🏫</a> <a href="#ideas-smccarthy788" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=smccarthy788" title="Code">💻</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=smccarthy788" title="Tests">⚠️</a></td>
+    </tr>
   </tbody>
 </table>
 
