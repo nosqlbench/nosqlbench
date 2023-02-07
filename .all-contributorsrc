@@ -1,100 +1,17 @@
-{ "projectName": "nosqlbench",
+{ 
   "projectOwner": "nosqlbench",
+  "projectName": "nosqlbench",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "files": ["README.md"],
+  "files": [
+    "README.md"
+  ],
   "imageSize": 50,
   "commit": false,
+  "commitConvention": "angular",
   "contributorsPerLine": 7,
   "contributorsSortAlphabetically": false,
-  "badgeTemplate": "[![All Contributors](https://img.shields.io/github/all-contributors/nosqlbench/nosqlbench?color=ee8449&style=flat-square)](#contributors)",
-  "contributorTemplate": "<a href=\"<%= contributor.profile %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
-  "types": {
-    "custom": {
-      "symbol": "🔭",
-      "description": "A custom contribution type.",
-      "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
-    }
-  },
-  "linkToUsage": false,
+  "linkToUsage": true,
   "skipCi": true,
-  "contributors": [
-    {
-      "login": "jshook",
-      "name": "Jonathan Shook",
-      "avatar_url": "https://avatars.githubusercontent.com/u/2148847?v=4",
-      "profile": "https://github.com/jshook",
-      "contributions": [
-        "question",
-        "doc",
-        "review",
-        "talk",
-        "mentoring",
-        "platform",
-        "projectManagement",
-        "research",
-        
-      ]
-    },
-    {
-      "login": "phact",
-      "name": "Sebastián Estévez",
-      "avatar_url": "https://avatars.githubusercontent.com/u/1313220?v=4",
-      "profile": "https://www.sestevez.com",
-      "contributions": [
-        "question",
-        "doc",
-        "review",
-        "talk"
-      ]
-    },
-    {
-      "login": "yabinmeng",
-      "name": "Yabin Meng",
-      "avatar_url": "https://avatars.githubusercontent.com/u/16789452?v=4",
-      "profile": "https://github.com/yabinmeng",
-      "contributions": [
-        "question",
-        "doc",
-        "review",
-        "talk"
-      ]
-    },
-    {
-      "login": "MikeYaacoubStax",
-      "name": "Mike Yaacoub",
-      "avatar_url": "https://avatars.githubusercontent.com/u/117678633?v=4",
-      "profile": "https://github.com/MikeYaacoubStax",
-      "contributions": [
-        "question",
-        "doc",
-        "review",
-        "talk"
-      ]
-    },
-    {
-      "login": "jeffbanks",
-      "name": "Jeff Banks",
-      "avatar_url": "https://avatars.githubusercontent.com/u/4078933?v=4",
-      "profile": "https://github.com/jeffbanks",
-      "contributions": [
-        "question",
-        "doc",
-        "review",
-        "talk"
-      ]
-    },
-    {
-      "login": "msmygit",
-      "name": "Madhavan S.",
-      "avatar_url": "https://avatars.githubusercontent.com/u/19366623?v=4",
-      "profile": "https://github.com/msmygit",
-      "contributions": [
-        "question",
-        "doc",
-        "review",
-        "talk"
-      ]
-    },
-  ]
+  "contributors": []
 }
