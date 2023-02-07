@@ -152,6 +152,9 @@ For recognizing contributions, please follow [this documentation](https://allcon
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/yassermohamed81"><img src="https://avatars.githubusercontent.com/u/53837411?v=4?s=50" width="50px;" alt="yassermohamed81"/><br /><sub><b>yassermohamed81</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=yassermohamed81" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/Pierrotws"><img src="https://avatars.githubusercontent.com/u/6002161?v=4?s=50" width="50px;" alt="Pierre Sauvage"/><br /><sub><b>Pierre Sauvage</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=Pierrotws" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/dougwettlaufer"><img src="https://avatars.githubusercontent.com/u/45750136?v=4?s=50" width="50px;" alt="Doug Wettlaufer"/><br /><sub><b>Doug Wettlaufer</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=dougwettlaufer" title="Tests">⚠️</a></td>
+    </tr>
   </tbody>
 </table>
 
