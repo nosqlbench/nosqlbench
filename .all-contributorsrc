@@ -210,6 +210,16 @@
       "contributions": [
         "test"
       ]
+    },
+    {
+      "login": "jeromatron",
+      "name": "Jeremy Hanna",
+      "avatar_url": "https://avatars.githubusercontent.com/u/254887?v=4",
+      "profile": "http://jeromatron.blogspot.com",
+      "contributions": [
+        "test",
+        "ideas"
+      ]
     }
   ]
 }
