@@ -4,14 +4,14 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "files": [
-    "README.md"
+    "CONTRIBUTING.md"
   ],
   "imageSize": 50,
   "commit": false,
   "commitConvention": "angular",
   "contributorsPerLine": 7,
   "contributorsSortAlphabetically": false,
-  "linkToUsage": true,
+  "linkToUsage": false,
   "skipCi": true,
   "contributors": [
     {
