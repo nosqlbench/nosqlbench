@@ -483,18 +483,6 @@ public class PulsarAdapterUtil {
     }
 
     ///////
-    // Generate effective key string
-    public static String buildCacheKey(String... keyParts) {
-        // Ignore blank keyPart
-        String joinedKeyStr =
-            Stream.of(keyParts)
-            .filter(s -> !StringUtils.isBlank(s))
-            .collect(Collectors.joining(","));
-
-        return Base64.getEncoder().encodeToString(joinedKeyStr.getBytes());
-    }
-
-    ///////
     // Convert JSON string to a key/value map
     private static final ObjectMapper JACKSON_OBJECT_MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, String>> MAP_TYPE_REF = new TypeReference<>() {};
