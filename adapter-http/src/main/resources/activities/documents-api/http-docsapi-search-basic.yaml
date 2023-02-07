@@ -7,7 +7,7 @@ description: |
   Note that docsapi_port should reflect the port where the Docs API is exposed (defaults to 8180).
 
 scenarios:
-  schema:                 run driver=http tags==block:'schema.*' threads==<<threads:1>> cycles==UNDEF
+  schema:                 run driver=http tags==block:"schema.*" threads==<<threads:1>> cycles==UNDEF
   rampup:
     write:                run driver=http tags==name:'rampup-put.*' cycles===TEMPLATE(docscount,10000000) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
     read:                 run driver=http tags==name:'rampup-get.*' cycles===TEMPLATE(rampup-cycles, 10000000) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn

@@ -13,7 +13,7 @@ description: |
 
 scenarios:
   default:
-    schema: run driver=mongodb tags==block:'schema.*' threads==1 cycles==UNDEF
+    schema: run driver=mongodb tags==block:"schema.*" threads==1 cycles==UNDEF
     rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     main: run driver=mongodb tags==block:'main-.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
     drop: run driver=mongodb tags==block:drop-collection threads==1 cycles==UNDEF
