@@ -141,6 +141,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "pingtimeout",
+      "name": "Pierre Laporte",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1159578?v=4",
+      "profile": "http://www.pingtimeout.fr",
+      "contributions": [
+        "ideas",
+        "bug"
+      ]
     }
   ]
 }
