@@ -425,6 +425,17 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "guyboltonking",
+      "name": "Guy Bolton King",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98294?v=4",
+      "profile": "https://github.com/guyboltonking",
+      "contributions": [
+        "bug",
+        "code",
+        "ideas"
+      ]
     }
   ]
 }
