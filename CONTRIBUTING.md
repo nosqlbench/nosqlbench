@@ -140,6 +140,9 @@ For recognizing contributions, please follow [this documentation](https://allcon
       <td align="center" valign="top" width="10%"><a href="https://github.com/lhotari"><img src="https://avatars.githubusercontent.com/u/66864?v=4?s=50" width="50px;" alt="Lari Hotari"/><br /><sub><b>Lari Hotari</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/issues?q=author%3Alhotari" title="Bug reports">🐛</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=lhotari" title="Code">💻</a> <a href="https://github.com/nosqlbench/nosqlbench/pulls?q=is%3Apr+reviewed-by%3Alhotari" title="Reviewed Pull Requests">👀</a></td>
       <td align="center" valign="top" width="10%"><a href="http://www.codeblueprint.co.uk"><img src="https://avatars.githubusercontent.com/u/94254?v=4?s=50" width="50px;" alt="Matt Fleming"/><br /><sub><b>Matt Fleming</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/issues?q=author%3Amfleming" title="Bug reports">🐛</a> <a href="#design-mfleming" title="Design">🎨</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/tjake"><img src="https://avatars.githubusercontent.com/u/44456?v=4?s=50" width="50px;" alt="Jake Luciani"/><br /><sub><b>Jake Luciani</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/issues?q=author%3Atjake" title="Bug reports">🐛</a></td>
+    </tr>
   </tbody>
 </table>
 
