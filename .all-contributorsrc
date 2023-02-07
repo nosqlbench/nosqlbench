@@ -303,6 +303,16 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "derrickCos",
+      "name": "Derrick Cosmas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25781387?v=4",
+      "profile": "https://github.com/derrickCos",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
     }
   ]
 }
