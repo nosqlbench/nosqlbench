@@ -160,7 +160,7 @@ activity types.
 - **ssl** - specifies the type of the SSL implementation.
   Disabled by default, possible values are `jdk` and `openssl`.
 
-  [Additional parameters may need to be provided](ssl.md).
+  See the ssl help topic for more details with `nb5 help ssl` for more details.
 
 - **jmxreporting** - enable JMX reporting if needed.
   Examples:
