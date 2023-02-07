@@ -9,7 +9,7 @@
   "imageSize": 50,
   "commit": false,
   "commitConvention": "angular",
-  "contributorsPerLine": 7,
+  "contributorsPerLine": 10,
   "contributorsSortAlphabetically": false,
   "linkToUsage": false,
   "skipCi": true,
