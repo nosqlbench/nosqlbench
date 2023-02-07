@@ -160,6 +160,17 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "alexott",
+      "name": "Alex Ott",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30342?v=4",
+      "profile": "http://alexott.net",
+      "contributions": [
+        "platform",
+        "bug",
+        "code"
+      ]
     }
   ]
 }
