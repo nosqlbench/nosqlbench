@@ -1,7 +1,5 @@
 [comment]: < ![build](https://github.com/nosqlbench/nosqlbench/workflows/build/badge.svg) >
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.nosqlbench/nosqlbench/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.nosqlbench/nosqlbench)
-[![All Contributors](https://img.shields.io/github/all-contributors/nosqlbench/nosqlbench?color=ee8449&style=flat-square)](#contributors)
-
 
 # NoSQLBench v5
 
