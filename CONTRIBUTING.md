@@ -163,6 +163,7 @@ For recognizing contributions, please follow [this documentation](https://allcon
     <tr>
       <td align="center" valign="top" width="16.66%"><a href="https://justinchuch.wordpress.com/"><img src="https://avatars.githubusercontent.com/u/15710241?v=4?s=50" width="50px;" alt="Justin Chu"/><br /><sub><b>Justin Chu</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=justinchuch" title="Code">💻</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=justinchuch" title="Tests">⚠️</a> <a href="https://github.com/nosqlbench/nosqlbench/pulls?q=is%3Apr+reviewed-by%3Ajustinchuch" title="Reviewed Pull Requests">👀</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://ds-steven-matison.github.io/"><img src="https://avatars.githubusercontent.com/u/70520951?v=4?s=50" width="50px;" alt="Steven Matison"/><br /><sub><b>Steven Matison</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=ds-steven-matison" title="Tests">⚠️</a> <a href="#ideas-ds-steven-matison" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/szimmer1"><img src="https://avatars.githubusercontent.com/u/8455475?v=4?s=50" width="50px;" alt="shahar z"/><br /><sub><b>shahar z</b></sub></a><br /><a href="#ideas-szimmer1" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=szimmer1" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
