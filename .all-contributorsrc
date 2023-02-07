@@ -171,6 +171,17 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "jeffreyscarpenter",
+      "name": "Jeffrey Carpenter",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12115970?v=4",
+      "profile": "https://github.com/jeffreyscarpenter",
+      "contributions": [
+        "bug",
+        "test",
+        "maintenance"
+      ]
     }
   ]
 }
