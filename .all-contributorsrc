@@ -231,6 +231,17 @@
         "ideas",
         "test"
       ]
+    },
+    {
+      "login": "EricBorczuk",
+      "name": "Eric Borczuk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4205492?v=4",
+      "profile": "https://github.com/EricBorczuk",
+      "contributions": [
+        "code",
+        "review",
+        "test"
+      ]
     }
   ]
 }
