@@ -79,6 +79,7 @@ jobs:
   builddocs:
     needs: build
     runs-on: ubuntu-20.04
+    if: ${{ github.repository == 'nosqlbench/nosqlbench' && github.event_name == 'push' && github.ref_name == 'master' }}
     steps:
 
       - name: set git username
