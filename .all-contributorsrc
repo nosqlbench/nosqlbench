@@ -73,6 +73,15 @@
       ]
     },
     {
+      "login": "eolivelli",
+      "name": "Enrico Olivelli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9469110?v=4",
+      "profile": "http://eolivelli.blogspot.it/",
+      "contributions": [
+        "test", "code", "review"
+        ]
+     },
+     {
       "login": "lhotari",
       "name": "Lari Hotari",
       "avatar_url": "https://avatars.githubusercontent.com/u/66864?v=4",
