@@ -1,5 +1,4 @@
 [![All Contributors](https://img.shields.io/github/all-contributors/nosqlbench/nosqlbench?color=ee8449&style=flat-square)](#contributors)
-[![All Contributors](https://img.shields.io/badge/all_contributors-37-orange.svg?style=flat-square)](#contributors)
 
 NoSQLBench is an ambitious project. It aims to solve long-standing problems in distributed systems
 testing. There are *many* ways you can contribute! Please take a moment to review this document
@@ -122,11 +121,27 @@ are eager to get it into the hands of users who need it.
 
 ## Contributors
 Thanks to these contributors! :sparkle:
-For recognizing contributions, please follow [this documentation](https://allcontributors.org/docs/en/bot/usage).
+For recognizing contributions, please follow [this documentation](https://allcontributors.org/docs/en/bot/usage) and pick a key/contribution type from [here](https://allcontributors.org/docs/en/emoji-key).
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jshook"><img src="https://avatars.githubusercontent.com/u/2148847?v=4?s=50" width="50px;" alt="Jonathan Shook"/><br /><sub><b>Jonathan Shook</b></sub></a><br /><a href="#mentoring-jshook" title="Mentoring">🧑‍🏫</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td align="center" size="13px" colspan="7">
+        <img src="https://raw.githubusercontent.com/all-contributors/all-contributors-cli/1b8533af435da9854653492b1327a23a4dbd0a10/assets/logo-small.svg">
+          <a href="https://all-contributors.js.org/docs/en/bot/usage">Add your contributions</a>
+        </img>
+      </td>
+    </tr>
+  </tfoot>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
