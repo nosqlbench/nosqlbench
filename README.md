@@ -109,30 +109,6 @@ available, but more work is needed to support them fully. Here is what is suppor
 
 
 ## Contributors
+Checkout all our wonderful contributors [here](./CONTRIBUTING.md#contributors).
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jshook"><img src="https://avatars.githubusercontent.com/u/2148847?v=4?s=50" width="50px;" alt="Jonathan Shook"/><br /><sub><b>Jonathan Shook</b></sub></a><br /><a href="#mentoring-jshook" title="Mentoring">🧑‍🏫</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/msmygit"><img src="https://avatars.githubusercontent.com/u/19366623?v=4?s=50" width="50px;" alt="Madhavan"/><br /><sub><b>Madhavan</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=msmygit" title="Code">💻</a> <a href="https://github.com/nosqlbench/nosqlbench/issues?q=author%3Amsmygit" title="Bug reports">🐛</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=msmygit" title="Documentation">📖</a> <a href="#ideas-msmygit" title="Ideas, Planning, & Feedback">🤔</a> <a href="#question-msmygit" title="Answering Questions">💬</a> <a href="#research-msmygit" title="Research">🔬</a> <a href="https://github.com/nosqlbench/nosqlbench/pulls?q=is%3Apr+reviewed-by%3Amsmygit" title="Reviewed Pull Requests">👀</a> <a href="#tool-msmygit" title="Tools">🔧</a> <a href="#userTesting-msmygit" title="User Testing">📓</a> <a href="#talk-msmygit" title="Talks">📢</a> <a href="#tutorial-msmygit" title="Tutorials">✅</a></td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td align="center" size="13px" colspan="7">
-        <img src="https://raw.githubusercontent.com/all-contributors/all-contributors-cli/1b8533af435da9854653492b1327a23a4dbd0a10/assets/logo-small.svg">
-          <a href="https://all-contributors.js.org/docs/en/bot/usage">Add your contributions</a>
-        </img>
-      </td>
-    </tr>
-  </tfoot>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
+---
