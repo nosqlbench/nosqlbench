@@ -262,6 +262,17 @@
       "contributions": [
         "test"
       ]
+    },
+    {
+      "login": "justinchuch",
+      "name": "Justin Chu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15710241?v=4",
+      "profile": "https://justinchuch.wordpress.com/",
+      "contributions": [
+        "code",
+        "test",
+        "review"
+      ]
     }
   ]
 }
