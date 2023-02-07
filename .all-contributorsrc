@@ -416,6 +416,15 @@
         "ideas",
         "code"
       ]
+    },
+    {
+      "login": "landim",
+      "name": "Arthur Costa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/91446?v=4",
+      "profile": "https://github.com/landim",
+      "contributions": [
+        "bug"
+      ]
     }
   ]
 }
