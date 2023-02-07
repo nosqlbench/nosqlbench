@@ -151,6 +151,15 @@
         "ideas",
         "bug"
       ]
+    },
+    {
+      "login": "tatu-at-datastax",
+      "name": "Tatu Saloranta",
+      "avatar_url": "https://avatars.githubusercontent.com/u/87213665?v=4",
+      "profile": "https://github.com/tatu-at-datastax",
+      "contributions": [
+        "doc"
+      ]
     }
   ]
 }
