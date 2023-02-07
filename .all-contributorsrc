@@ -51,6 +51,17 @@
         "review",
         "tool"
       ]
+    },
+    {
+      "login": "jeffbanks",
+      "name": "Jeff Banks",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4078933?v=4",
+      "profile": "http://jjbanks.com",
+      "contributions": [
+        "code",
+        "mentoring",
+        "test"
+      ]
     }
   ]
 }
