@@ -79,10 +79,12 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     // TODO: Doc how uninitialized activities do not propagate parameter map changes and how
     // TODO: this is different from preventing modification to uninitialized activities
 
+    // TODO: Determine whether this should really be synchronized
+
     /**
      * Simply stop the motors
      */
-    public void stopActivity() {
+     public void stopActivity() {
         logger.info(() -> "stopping activity in progress: " + this.getActivityDef().getAlias());
 
         activity.setRunState(RunState.Stopping);
@@ -96,14 +98,14 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         logger.info(() -> "stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
 
         Annotators.recordAnnotation(Annotation.newBuilder()
-                .session(sessionId)
-                .interval(this.startedAt, this.stoppedAt)
-                .layer(Layer.Activity)
-                .label("alias", getActivityDef().getAlias())
-                .label("driver", getActivityDef().getActivityType())
-                .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
-                .detail("params", getActivityDef().toString())
-                .build()
+            .session(sessionId)
+            .interval(this.startedAt, this.stoppedAt)
+            .layer(Layer.Activity)
+            .label("alias", getActivityDef().getAlias())
+            .label("driver", getActivityDef().getActivityType())
+            .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
+            .detail("params", getActivityDef().toString())
+            .build()
         );
     }
 
@@ -123,14 +125,14 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         logger.info(() -> "stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
 
         Annotators.recordAnnotation(Annotation.newBuilder()
-                .session(sessionId)
-                .interval(this.startedAt, this.stoppedAt)
-                .layer(Layer.Activity)
-                .label("alias", getActivityDef().getAlias())
-                .label("driver", getActivityDef().getActivityType())
-                .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
-                .detail("params", getActivityDef().toString())
-                .build()
+            .session(sessionId)
+            .interval(this.startedAt, this.stoppedAt)
+            .layer(Layer.Activity)
+            .label("alias", getActivityDef().getAlias())
+            .label("driver", getActivityDef().getActivityType())
+            .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
+            .detail("params", getActivityDef().toString())
+            .build()
         );
     }
 
@@ -183,8 +185,9 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     /**
      * Shutdown the activity executor, with a grace period for the motor threads.
      *
-     * @param initialMillisToWait milliseconds to wait after graceful shutdownActivity request, before forcing
-     *                            everything to stop
+     * @param initialMillisToWait
+     *     milliseconds to wait after graceful shutdownActivity request, before forcing
+     *     everything to stop
      */
     public synchronized void forceStopScenarioAndThrow(int initialMillisToWait, boolean rethrow) {
         Exception exception = forceStopActivity(initialMillisToWait);
@@ -210,10 +213,10 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
                 adjustMotorCountToThreadParam(activity.getActivityDef());
             }
             motors.stream()
-                    .filter(m -> (m instanceof ActivityDefObserver))
+                .filter(m -> (m instanceof ActivityDefObserver))
 //                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Uninitialized)
 //                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Starting)
-                    .forEach(m -> ((ActivityDefObserver) m).onActivityDefUpdate(activityDef));
+                .forEach(m -> ((ActivityDefObserver) m).onActivityDefUpdate(activityDef));
         }
     }
 
@@ -227,14 +230,15 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
     private String getSlotStatus() {
         return motors.stream()
-                .map(m -> m.getState().get().getCode())
-                .collect(Collectors.joining(",", "[", "]"));
+            .map(m -> m.getState().get().getCode())
+            .collect(Collectors.joining(",", "[", "]"));
     }
 
     /**
      * Stop extra motors, start missing motors
      *
-     * @param activityDef the activityDef for this activity instance
+     * @param activityDef
+     *     the activityDef for this activity instance
      */
     private void adjustMotorCountToThreadParam(ActivityDef activityDef) {
         logger.trace(() -> ">-pre-adjust->" + getSlotStatus());
@@ -276,7 +280,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         }
     }
 
-    private void alignMotorStateToIntendedActivityState() {
+    private synchronized void alignMotorStateToIntendedActivityState() {
         RunState intended = activity.getRunState();
         logger.trace(() -> "ADJUSTING to INTENDED " + intended);
         switch (intended) {
@@ -285,17 +289,17 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             case Running:
             case Starting:
                 motors.stream()
-                        .filter(m -> m.getState().get() != RunState.Running)
-                        .filter(m -> m.getState().get() != RunState.Finished)
-                        .filter(m -> m.getState().get() != RunState.Starting)
-                        .forEach(m -> {
-                            executorService.execute(m);
-                        });
+                    .filter(m -> m.getState().get() != RunState.Running)
+                    .filter(m -> m.getState().get() != RunState.Finished)
+                    .filter(m -> m.getState().get() != RunState.Starting)
+                    .forEach(m -> {
+                        executorService.execute(m);
+                    });
                 break;
             case Stopped:
                 motors.stream()
-                        .filter(m -> m.getState().get() != RunState.Stopped)
-                        .forEach(Motor::requestStop);
+                    .filter(m -> m.getState().get() != RunState.Stopped)
+                    .forEach(Motor::requestStop);
                 break;
             case Finished:
             case Stopping:
@@ -311,26 +315,28 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     private void awaitAlignmentOfMotorStateToActivityState() {
 
         logger.debug(() -> "awaiting state alignment from " + activity.getRunState());
+        RunStateImage states = null;
         switch (activity.getRunState()) {
             case Starting:
             case Running:
-                tally.awaitNoneOther(RunState.Running, RunState.Finished);
+                states = tally.awaitNoneOther(RunState.Running, RunState.Finished);
                 break;
             case Errored:
             case Stopping:
             case Stopped:
-                tally.awaitNoneOther(RunState.Stopped, RunState.Finished, RunState.Errored);
+                states = tally.awaitNoneOther(RunState.Stopped, RunState.Finished, RunState.Errored);
                 break;
             case Uninitialized:
                 break;
             case Finished:
-                tally.awaitNoneOther(RunState.Finished);
+                states = tally.awaitNoneOther(RunState.Finished);
                 break;
             default:
                 throw new RuntimeException("Unmatched run state:" + activity.getRunState());
         }
-        logger.debug("activity and threads are aligned to state " + activity.getRunState() + " for " + this.getActivity().getAlias());
-
+        RunState previousState = activity.getRunState();
+        activity.setRunState(states.getMaxState());
+        logger.debug("activity and threads are aligned to state " + previousState + " for " + this.getActivity().getAlias() + ", and advanced to " + activity.getRunState());
     }
 
 
@@ -391,12 +397,16 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             // instantiate and configure fixtures that need to be present
             // before threads start running such as metrics instruments
             activity.initActivity();
+            startMotorExecutorService();
+            startRunningActivityThreads();
             awaitMotorsAtLeastRunning();
+            logger.debug("STARTED " + activityDef.getAlias());
             awaitActivityCompletion();
-            activity.shutdownActivity();
-            activity.closeAutoCloseables();
         } catch (Exception e) {
             this.exception = e;
+        } finally {
+            activity.shutdownActivity();
+            activity.closeAutoCloseables();
         }
         ExecutionResult result = new ExecutionResult(startedAt, stoppedAt, "", exception);
         return result;
@@ -420,7 +430,10 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     }
 
     public synchronized void startActivity() {
-        // we need an executor service to run motor threads on
+        RunStateImage startable = tally.awaitNoneOther(1000L, RunState.Uninitialized, RunState.Stopped);
+        if (startable.isTimeout()) {
+            throw new RuntimeException("Unable to start activity '" + getActivity().getAlias() + "' which is in state " + startable);
+        }
         startMotorExecutorService();
         startRunningActivityThreads();
         awaitMotorsAtLeastRunning();
@@ -471,10 +484,10 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
     private void startMotorExecutorService() {
         this.executorService = new ThreadPoolExecutor(
-                0, Integer.MAX_VALUE,
-                0L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
-                new IndexedThreadFactory(activity.getAlias(), new ActivityExceptionHandler(this))
+            0, Integer.MAX_VALUE,
+            0L, TimeUnit.SECONDS,
+            new SynchronousQueue<>(),
+            new IndexedThreadFactory(activity.getAlias(), new ActivityExceptionHandler(this))
         );
     }
 
@@ -491,14 +504,14 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
         logger.info(() -> "starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
         Annotators.recordAnnotation(Annotation.newBuilder()
-                .session(sessionId)
-                .now()
-                .layer(Layer.Activity)
-                .label("alias", getActivityDef().getAlias())
-                .label("driver", getActivityDef().getActivityType())
-                .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
-                .detail("params", getActivityDef().toString())
-                .build()
+            .session(sessionId)
+            .now()
+            .layer(Layer.Activity)
+            .label("alias", getActivityDef().getAlias())
+            .label("driver", getActivityDef().getActivityType())
+            .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
+            .detail("params", getActivityDef().toString())
+            .build()
         );
 
         activitylogger.debug("START/before alias=(" + activity.getAlias() + ")");

@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -31,39 +31,39 @@ public class NBCLIScenarioParserTest {
 
     @Test
     public void providePathForScenario() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "local/example-scenarios" });
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"local/example-scenarios"});
         List<Cmd> cmds = opts.getCommands();
     }
 
     @Test
     public void defaultScenario() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test" });
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test"});
         List<Cmd> cmds = opts.getCommands();
     }
 
     @Test
     public void defaultScenarioWithParams() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "cycles=100"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "cycles=100"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.get(0).getArg("cycles")).isEqualTo("100");
     }
 
     @Test
     public void namedScenario() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "schema-only"});
         List<Cmd> cmds = opts.getCommands();
     }
 
     @Test
     public void namedScenarioWithParams() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "cycles=100"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "schema-only", "cycles=100"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.get(0).getArg("cycles")).containsOnlyOnce("100");
     }
 
     @Test
     public void testThatSilentFinalParametersPersist() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "type=foo"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "type=foo"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.get(0).getArg("driver")).isEqualTo("stdout");
     }
@@ -71,25 +71,25 @@ public class NBCLIScenarioParserTest {
     @Test
     public void testThatVerboseFinalParameterThrowsError() {
         assertThatExceptionOfType(BasicError.class)
-            .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "workload=canttouchthis"}));
+                .isThrownBy(() -> new NBCLIOptions(new String[]{"scenario-test", "workload=canttouchthis"}));
     }
 
     @Test
     public void testThatMissingScenarioNameThrowsError() {
         assertThatExceptionOfType(BasicError.class)
-            .isThrownBy(() -> new NBCLIOptions(new String[]{ "scenario-test", "missing-scenario"}));
+                .isThrownBy(() -> new NBCLIOptions(new String[]{"scenario-test", "missing-scenario"}));
     }
 
     @Test
     public void testThatMultipleScenariosConcatenate() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "default", "default"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "default", "default"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(6);
     }
 
     @Test
     public void testThatTemplatesAreExpandedDefault() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "template-test"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "template-test"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArg("driver")).isEqualTo("stdout");
@@ -99,31 +99,31 @@ public class NBCLIScenarioParserTest {
 
     @Test
     public void testThatTemplateParamsAreExpandedAndNotRemovedOverride() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "template-test", "cycles-test=20"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "template-test", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
-            "alias","scenariotest_templatetest_withtemplate",
-            "cycles","20",
-            "cycles-test","20",
-            "driver","stdout",
-            "workload","scenario-test"
+                "alias", "scenariotest_templatetest_withtemplate",
+                "cycles", "20",
+                "cycles-test", "20",
+                "driver", "stdout",
+                "workload", "scenario-test"
         ));
     }
 
     @Test
     public void testThatUndefValuesAreUndefined() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "cycles-test=20"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "schema-only", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
-            "alias","scenariotest_schemaonly_000",
-            "cycles-test","20",
-            "driver","stdout",
-            "tags","phase:schema",
-            "workload","scenario-test"
+                "alias", "scenariotest_schemaonly_schema",
+                "cycles-test", "20",
+                "driver", "stdout",
+                "tags", "block:'schema.*'",
+                "workload", "scenario-test"
         ));
-        NBCLIOptions opts1 = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "doundef=20"});
+        NBCLIOptions opts1 = new NBCLIOptions(new String[]{"scenario-test", "schema-only", "doundef=20"});
         List<Cmd> cmds1 = opts1.getCommands();
         assertThat(cmds1.size()).isEqualTo(1);
         assertThat(cmds1.get(0).getArg("cycles-test")).isNull();
@@ -140,7 +140,7 @@ public class NBCLIScenarioParserTest {
         Path absolute = rel.toAbsolutePath();
         assertThat(absolute).exists();
 
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ absolute.toString(), "schema-only", "cycles-test=20"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{absolute.toString(), "schema-only", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isGreaterThan(0);
     }
@@ -150,7 +150,7 @@ public class NBCLIScenarioParserTest {
         //TODO: This might change?
         String urlScenario = "https://raw.githubusercontent.com/nosqlbench/nosqlbench/main/engine-cli/src/test/resources/activities/scenario-test.yaml";
 
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ urlScenario, "schema-only", "cycles-test=20"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{urlScenario, "schema-only", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isGreaterThan(0);
     }
@@ -163,17 +163,17 @@ public class NBCLIScenarioParserTest {
 
     @Test
     public void testSubStepSelection() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "scenario-test", "schema-only", "cycles-test=20"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "schema-only", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
-            "alias","scenariotest_schemaonly_000",
-            "cycles-test","20",
-            "driver","stdout",
-            "tags","phase:schema",
-            "workload","scenario-test"
+                "alias", "scenariotest_schemaonly_schema",
+                "cycles-test", "20",
+                "driver", "stdout",
+                "tags", "block:'schema.*'",
+                "workload", "scenario-test"
         ));
-        NBCLIOptions opts1 = new NBCLIOptions(new String[]{ "local/example-scenarios", "namedsteps.one", "testparam1=testvalue2"});
+        NBCLIOptions opts1 = new NBCLIOptions(new String[]{"local/example-scenarios", "namedsteps.one", "testparam1=testvalue2"});
         List<Cmd> cmds1 = opts1.getCommands();
         assertThat(cmds1.size()).isEqualTo(1);
         assertThat(cmds1.get(0).getArg("cycles-test")).isNull();

@@ -161,7 +161,7 @@ This puts NB on a footing to be "Modular Jar" compatible, which is a step toward
 * auto-injected statement block and statement name tags.
   - this means: You can now construct filters for specific blocks or statements simply by
     knowing their name:
-  - `tags=block:schema` or `tags='main-.*'`
+  - `tags=block:"schema.*"` or `tags='main-.*'`
 * safe usage of activity params and template vars are compatible, but may not be ambiguous. This
   means that if you have a template variable in myworkload.yaml, it must be distinctly named
   from any valid activity parameters, or an error is thrown. This eliminates a confusing source
@@ -229,7 +229,7 @@ cqlgen - takes schema.cql tablestats -> workload.yaml
 sstablegen
 
 * yaml+nb version checks
-    - `min_version: "4.17.15"`
+    - `min_version: "5.17.1"`
 
 
 * Mac M1 support

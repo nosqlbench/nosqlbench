@@ -148,7 +148,7 @@ var yaml_file = "TEMPLATE(yaml_file,cql-iot)";
 //
 // schema_activitydef.alias = "findmax_schema";
 // schema_activitydef.threads = "1";
-// schema_activitydef.tags = "TEMPLATE(schematags,phase:schema)";
+// schema_activitydef.tags = "TEMPLATE(schematags,block:'schema.*')";
 // printf("Creating schema with schematags: %s\n",schema_activitydef.tags.toString());
 //
 // scenario.run(schema_activitydef);
@@ -164,7 +164,7 @@ activitydef = params.withDefaults({
 activitydef.alias = "findmax";
 activitydef.cycles = "1000000000";
 activitydef.recycles = "1000000000";
-activitydef.tags = "TEMPLATE(maintags,phase:main)";
+activitydef.tags = "TEMPLATE(maintags,block:main)";
 
 function ops_s(iteration, results) {
     return results[iteration].ops_per_second;

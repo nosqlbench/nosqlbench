@@ -1,4 +1,3 @@
-# nb -v run driver=cql yaml=cql-iot tags=phase:schema host=dsehost
 description: |
   Time-series data model and access patterns. (use cql-timeseries instead)
   This is the same a cql-timeseries, which is the preferred name as it is
