@@ -242,6 +242,17 @@
         "review",
         "test"
       ]
+    },
+    {
+      "login": "weideng1",
+      "name": "weideng1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5520525?v=4",
+      "profile": "https://github.com/weideng1",
+      "contributions": [
+        "test",
+        "ideas",
+        "code"
+      ]
     }
   ]
 }
