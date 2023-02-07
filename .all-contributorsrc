@@ -49,7 +49,26 @@
       "profile": "https://github.com/MikeYaacoubStax",
       "contributions": [
         "review",
-        "tool"
+        "tool",
+        "bug",
+        "business",
+        "code",
+        "content",
+        "data",
+        "doc",
+        "design",
+        "example",
+        "ideas",
+        "infra",
+        "maintenance",
+        "mentoring",
+        "platform",
+        "plugin",
+        "projectManagement",
+        "research",
+        "security",
+        "test",
+        "userTesting"
       ]
     },
     {
