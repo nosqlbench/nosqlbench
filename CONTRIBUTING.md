@@ -143,6 +143,7 @@ For recognizing contributions, please follow [this documentation](https://allcon
     <tr>
       <td align="center" valign="top" width="10%"><a href="https://github.com/tjake"><img src="https://avatars.githubusercontent.com/u/44456?v=4?s=50" width="50px;" alt="Jake Luciani"/><br /><sub><b>Jake Luciani</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/issues?q=author%3Atjake" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="10%"><a href="https://github.com/lakshmi-M18"><img src="https://avatars.githubusercontent.com/u/89935678?v=4?s=50" width="50px;" alt="Lakshmi Manjunatha"/><br /><sub><b>Lakshmi Manjunatha</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/issues?q=author%3Alakshmi-M18" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="10%"><a href="http://www.pingtimeout.fr"><img src="https://avatars.githubusercontent.com/u/1159578?v=4?s=50" width="50px;" alt="Pierre Laporte"/><br /><sub><b>Pierre Laporte</b></sub></a><br /><a href="#ideas-pingtimeout" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/nosqlbench/nosqlbench/issues?q=author%3Apingtimeout" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>
