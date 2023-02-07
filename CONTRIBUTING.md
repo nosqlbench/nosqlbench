@@ -1,3 +1,5 @@
+[![All Contributors](https://img.shields.io/github/all-contributors/nosqlbench/nosqlbench?color=ee8449&style=flat-square)](#contributors)
+
 NoSQLBench is an ambitious project. It aims to solve long-standing problems in distributed systems
 testing. There are *many* ways you can contribute! Please take a moment to review this document
 in order to make the contribution process easy and effective for everyone involved.
@@ -117,5 +119,17 @@ are eager to get it into the hands of users who need it.
   [discord server](https://discord.gg/dBHRakusMN) and raise your hand!
 
 
+## Contributors! :sparkle:
+Thanks to these contributors!
+For recognizing contributions, please follow [this documentation](https://allcontributors.org/docs/en/bot/usage).
 
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
 
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+---
