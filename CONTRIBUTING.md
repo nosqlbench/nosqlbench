@@ -160,6 +160,9 @@ For recognizing contributions, please follow [this documentation](https://allcon
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/weideng1"><img src="https://avatars.githubusercontent.com/u/5520525?v=4?s=50" width="50px;" alt="weideng1"/><br /><sub><b>weideng1</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=weideng1" title="Tests">⚠️</a> <a href="#ideas-weideng1" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=weideng1" title="Code">💻</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/ivansenic"><img src="https://avatars.githubusercontent.com/u/10600041?v=4?s=50" width="50px;" alt="Ivan Senic"/><br /><sub><b>Ivan Senic</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=ivansenic" title="Tests">⚠️</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="16.66%"><a href="https://justinchuch.wordpress.com/"><img src="https://avatars.githubusercontent.com/u/15710241?v=4?s=50" width="50px;" alt="Justin Chu"/><br /><sub><b>Justin Chu</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=justinchuch" title="Code">💻</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=justinchuch" title="Tests">⚠️</a> <a href="https://github.com/nosqlbench/nosqlbench/pulls?q=is%3Apr+reviewed-by%3Ajustinchuch" title="Reviewed Pull Requests">👀</a></td>
+    </tr>
   </tbody>
 </table>
 
