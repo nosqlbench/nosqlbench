@@ -62,6 +62,15 @@
         "mentoring",
         "test"
       ]
+    },
+    {
+      "login": "hemidactylus",
+      "name": "Stefano Lottini",
+      "avatar_url": "https://avatars.githubusercontent.com/u/14221764?v=4",
+      "profile": "https://github.com/hemidactylus",
+      "contributions": [
+        "bug"
+      ]
     }
   ]
 }
