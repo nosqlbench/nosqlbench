@@ -170,6 +170,7 @@ For recognizing contributions, please follow [this documentation](https://allcon
     </tr>
     <tr>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/grighetto"><img src="https://avatars.githubusercontent.com/u/413792?v=4?s=50" width="50px;" alt="Gianluca Righetto"/><br /><sub><b>Gianluca Righetto</b></sub></a><br /><a href="#platform-grighetto" title="Packaging/porting to new platform">📦</a></td>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/BrynCooke"><img src="https://avatars.githubusercontent.com/u/747836?v=4?s=50" width="50px;" alt="Bryn Cooke"/><br /><sub><b>Bryn Cooke</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=BrynCooke" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
