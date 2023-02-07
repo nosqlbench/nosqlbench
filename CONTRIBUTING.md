@@ -168,6 +168,9 @@ For recognizing contributions, please follow [this documentation](https://allcon
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/MMirelli"><img src="https://avatars.githubusercontent.com/u/22191891?v=4?s=50" width="50px;" alt="Massimiliano Mirelli"/><br /><sub><b>Massimiliano Mirelli</b></sub></a><br /><a href="#platform-MMirelli" title="Packaging/porting to new platform">📦</a></td>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/derrickCos"><img src="https://avatars.githubusercontent.com/u/25781387?v=4?s=50" width="50px;" alt="Derrick Cosmas"/><br /><sub><b>Derrick Cosmas</b></sub></a><br /><a href="https://github.com/nosqlbench/nosqlbench/commits?author=derrickCos" title="Code">💻</a> <a href="#ideas-derrickCos" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="16.66%"><a href="https://github.com/grighetto"><img src="https://avatars.githubusercontent.com/u/413792?v=4?s=50" width="50px;" alt="Gianluca Righetto"/><br /><sub><b>Gianluca Righetto</b></sub></a><br /><a href="#platform-grighetto" title="Packaging/porting to new platform">📦</a></td>
+    </tr>
   </tbody>
 </table>
 

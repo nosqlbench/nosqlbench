@@ -322,6 +322,15 @@
         "code",
         "ideas"
       ]
+    },
+    {
+      "login": "grighetto",
+      "name": "Gianluca Righetto",
+      "avatar_url": "https://avatars.githubusercontent.com/u/413792?v=4",
+      "profile": "https://github.com/grighetto",
+      "contributions": [
+        "platform"
+      ]
     }
   ]
 }
