@@ -139,7 +139,7 @@ public class NBCLIScenarioParser {
                 if (selectedScenario.containsKey(stepname)) {
                     namedSteps.put(stepname,selectedScenario.get(stepname));
                 } else {
-                    throw new BasicError("Unable to find named scenario.step'" + scenarioName + "' in workload '" + workloadName
+                    throw new BasicError("Unable to find named scenario.step '" + scenarioName + "' in workload '" + workloadName
                         + "', but you can pick from one of: " + selectedScenario.keySet().stream().map(n -> nameparts[0].concat(".").concat(n)).collect(Collectors.joining(", ")));
                 }
             }

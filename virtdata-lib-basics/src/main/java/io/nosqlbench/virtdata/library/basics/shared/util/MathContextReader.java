@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class MathContextReader {
             }
         } catch (IllegalArgumentException iae) {
             throw new BasicError("'" + name + "' was not a valid format for a new MathContext(String), try something " +
-                "like 'precision=17 roundingMode=UP");
+                "like 'precision=17 roundingMode=UP', original exception:" + iae);
         }
 
     }
