@@ -1,6 +1,4 @@
-min_version: "4.17.15"
-
-# nb -v run driver=http yaml=http-docsapi-crud-basic tags=phase:schema docsapi_host=my_docsapi_host auth_token=$AUTH_TOKEN
+min_version: "5.17.1"
 
 description: |
   This workload emulates CRUD operations for the Stargate Documents API.
@@ -9,11 +7,11 @@ description: |
 
 scenarios:
   default:
-    schema:   run driver=http tags==block:schema threads==1 cycles==UNDEF
-    write:    run driver=http tags==block:"write.*" cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    read:     run driver=http tags==block:"read.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    update:   run driver=http tags==block:"update.*" cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    delete:   run driver=http tags==block:"delete.*" cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    schema:   run driver=http tags==block:"schema.*" threads==1 cycles==UNDEF
+    write:    run driver=http tags==block:'write.*' cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    read:     run driver=http tags==block:'read.*' cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    update:   run driver=http tags==block:'update.*' cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    delete:   run driver=http tags==block:'delete.*' cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
 
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer

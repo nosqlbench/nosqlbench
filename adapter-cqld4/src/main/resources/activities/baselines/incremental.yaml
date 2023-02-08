@@ -1,3 +1,4 @@
+min_version: "5.17.1"
 description: |
   This is a workload which creates an incrementally growing dataset over cycles.
 
@@ -26,15 +27,12 @@ description: |
 
 scenarios:
   default:
-    schema: run tags=phase:schema threads==1
-    #    rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,100000) threads=auto
-    main: run tags=block:"main.*" cycles===TEMPLATE(main-cycles,0) threads=auto
-  default-schema: run tags=block:schema threads==1
-  #  default-rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,100000) threads=auto
-  default-main: run tags=block:"main.* cycles===TEMPLATE(main-cycles,0) threads=auto
+    schema: run tags=block:schema.* threads==1
+    main: run tags=block:main-.*.* cycles===TEMPLATE(main-cycles,0) threads=auto
+    default-schema: run tags=block:"schema.*" threads==1
+    default-main: run tags=block:"main.*" cycles===TEMPLATE(main-cycles,0) threads=auto
   astra:
     schema: run tags=block:astra-schema threads==1
-    #    rampup: run tags=phase:rampup cycles===TEMPLATE(rampup-cycles,0) threads=auto
     main: run tags=block:"main.*" cycles===TEMPLATE(main-cycles,0) threads=auto
 
 params:

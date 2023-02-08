@@ -1,10 +1,10 @@
-# nb -v run driver=mongodb yaml=mongodb-basic connection=mongodb://127.0.0.1 database=testdb tags=phase:rampup cycles=1M
 description: An example of a basic mongo insert and find.
 
 scenarios:
   default:
-    - run driver=mongodb tags==phase:rampup cycles===TEMPLATE(rampup-cycles,1000000) threads=auto
-    - run driver=mongodb tags==phase:main cycles===TEMPLATE(main-cycles,1000000) threads=auto
+    rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,1000000) threads=auto
+    main: run driver=mongodb tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
 bindings:
   seq_key: Mod(<<keyCount:1000000>>L); ToInt()
   seq_value: Mod(<<valueCount:1000000000>>L); <<valueSizeDist:Hash()>>; ToString() -> String
@@ -12,46 +12,39 @@ bindings:
   rw_value: <<valDist:Uniform(0,1000000000)->int>>; <<valueSizeDist:Hash()>>; ToString() -> String
 
 blocks:
-  - name: rampup
-    tags:
-      phase: rampup
-    statements:
-      - rampup-insert: |
+  rampup:
+    ops:
+      rampup-insert: |
           {
             insert: "<<collection:keyvalue>>",
-            documents: [ { _id: {seq_key},
-                           value: {seq_value} } ]
+            documents: [ { _id: {seq_key}, value: {seq_value} } ]
           }
         params:
           readPreference: primary
         tags:
           name: rampup-insert
-  - name: main-read
-    tags:
-      phase: main
-      type: read
+
+  main-read:
     params:
       ratio: <<read_ratio:1>>
-    statements:
-      - main-find: |
-          {
-            find: "<<collection:keyvalue>>",
-            filter: { _id: {rw_key} }
-          }
-        params:
-          readPreference: primary
-  - name: main-write
-    tags:
-      phase: main
-      type: write
+      readPreference: primary
+      type: read
+    ops:
+      main-find: |
+        {
+          find: "<<collection:keyvalue>>",
+          filter: { _id: {rw_key} }
+        }      
+
+  main-write:
     params:
       ratio: <<write_ratio:1>>
-    statements:
-      - main-insert: |
+      type: write
+    ops:
+      main-insert: |
           {
             insert: "<<collection:keyvalue>>",
-            documents: [ { _id: {rw_key},
-                           value: {rw_value} } ]
+            documents: [ { _id: {rw_key}, value: {rw_value} } ]
           }
         params:
           readPreference: primary

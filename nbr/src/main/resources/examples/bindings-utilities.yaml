@@ -21,10 +21,10 @@ bindings:
 
 # The TypeOf() function tells you the java class of its input
 
-  typeof: TypeOf();
+  typeof: ToJavaInstant(); TypeOf();
 
 # The Show() function provides a snapshot of what is in the thread-local
 # variable map as a String
 
-  show: Show();
+  show: SaveLong('var42'); Show();
 

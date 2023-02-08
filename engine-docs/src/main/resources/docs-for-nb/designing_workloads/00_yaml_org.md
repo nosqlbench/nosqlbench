@@ -33,7 +33,7 @@ You can mark statements as schema phase statements by adding this set of
 tags to the statements, either directly, or by block:
 
     tags:
-      phase: schema
+      block: schema
 
 ## Rampup phase
 
@@ -64,7 +64,7 @@ You can mark statements as rampup phase statements by adding this set of
 tags to the statements, either directly, or by block:
 
     tags:
-      phase: rampup
+      block: rampup
 
 ## Main phase
 
@@ -76,4 +76,4 @@ You can mark statement as schema phase statements by adding this set of
 tags to the statements, either directly, or by block:
 
     tags:
-      phase: main
+      block: main

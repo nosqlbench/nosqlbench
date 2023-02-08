@@ -18,16 +18,16 @@ package io.nosqlbench.cqlgen.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
-import io.nosqlbench.api.apps.BundledApp;
+import io.nosqlbench.cqlgen.api.BindingsLibrary;
 import io.nosqlbench.cqlgen.binders.Binding;
 import io.nosqlbench.cqlgen.binders.BindingsAccumulator;
-import io.nosqlbench.cqlgen.api.BindingsLibrary;
 import io.nosqlbench.cqlgen.binders.NamingFolio;
-import io.nosqlbench.cqlgen.transformers.CGModelTransformers;
 import io.nosqlbench.cqlgen.model.*;
 import io.nosqlbench.cqlgen.parser.CqlModelParser;
+import io.nosqlbench.cqlgen.transformers.CGModelTransformers;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,14 +75,14 @@ public class CGWorkloadExporter implements BundledApp {
     private Map<String, List<String>> blockplan = Map.of();
 
     private final Map<String, Double> timeouts = new HashMap<String, Double>(Map.of(
-        "create", 60.0,
-        "truncate", 900.0,
-        "drop", 900.0,
-        "scan", 30.0,
-        "select", 10.0,
-        "insert", 10.0,
-        "delete", 10.0,
-        "update", 10.0
+            "create", 60.0,
+            "truncate", 900.0,
+            "drop", 900.0,
+            "scan", 30.0,
+            "select", 10.0,
+            "insert", 10.0,
+            "delete", 10.0,
+            "update", 10.0
     ));
 
     public static void main(String[] args) {
@@ -166,7 +166,7 @@ public class CGWorkloadExporter implements BundledApp {
 
         this.model = CqlModelParser.parse(ddl, srcpath);
         List<String> errorlist = model.getReferenceErrors();
-        if (errorlist.size()>0) {
+        if (errorlist.size() > 0) {
             for (String error : errorlist) {
                 logger.error(error);
             }
@@ -177,12 +177,12 @@ public class CGWorkloadExporter implements BundledApp {
         String workload = getWorkloadAsYaml();
         try {
             Files.writeString(
-                target,
-                workload,
-                StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING
+                    target,
+                    workload,
+                    StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING
             );
             logger.info("Wrote workload template as '" + target + "'. Bear in mind that this is simply one version " +
-                "of a workload using this schema, and may not be representative of actual production usage patterns.");
+                    "of a workload using this schema, and may not be representative of actual production usage patterns.");
         } catch (IOException e) {
             String errmsg = "There was an error writing '" + target + "'.";
             logger.error(errmsg);
@@ -218,7 +218,7 @@ public class CGWorkloadExporter implements BundledApp {
         workload.put("bindings", new LinkedHashMap<String, String>());
         Map<String, Object> blocks = new LinkedHashMap<>();
         workload.put("params", new LinkedHashMap<>(
-            Map.of("cl", "LOCAL_QUORUM")
+                Map.of("cl", "LOCAL_QUORUM")
         ));
         workload.put("blocks", blocks);
 
@@ -227,7 +227,7 @@ public class CGWorkloadExporter implements BundledApp {
             List<String> components = blocknameAndComponents.getValue();
 
             LinkedHashMap<String, Object> block = new LinkedHashMap<>(
-                Map.of("params", new LinkedHashMap<String, Object>())
+                    Map.of("params", new LinkedHashMap<String, Object>())
             );
             for (String component : components) {
                 Map<String, Object> additions = switch (component) {
@@ -319,11 +319,11 @@ public class CGWorkloadExporter implements BundledApp {
         return new LinkedHashMap<>() {{
 
             put("default",
-                new LinkedHashMap<>() {{
-                    put("schema", "run driver=cql tags=block:schema.* threads===UNDEF cycles===UNDEF");
-                    put("rampup", "run driver=cql tags=block:rampup.* threads=auto cycles===TEMPLATE(rampup-cycles,10000)");
-                    put("main", "run driver=cql tags=block:main.* threads=auto cycles===TEMPLATE(main-cycles,10000)");
-                }});
+                    new LinkedHashMap<>() {{
+                        put("schema", "run driver=cql tags=block:\"schema.*\" threads===UNDEF cycles===UNDEF");
+                        put("rampup", "run driver=cql tags=block:rampup threads=auto cycles===TEMPLATE(rampup-cycles,10000)");
+                        put("main", "run driver=cql tags=block:\"main.*\" threads=auto cycles===TEMPLATE(main-cycles,10000)");
+                    }});
 
             put("main-insert", "run driver=cql tags=block:main-insert threads=auto cycles===TEMPLATE(main-cycles,10000)");
             put("main-select", "run driver=cql tags=block:main-select threads=auto cycles===TEMPLATE(main-cycles,10000)");
@@ -351,12 +351,12 @@ public class CGWorkloadExporter implements BundledApp {
                 logger.debug(() -> "skipping table " + table.getFullName() + " for scan since there are no clustering columns");
             }
             ops.put(
-                namer.nameFor(table, "optype", "scan", "blockname", blockname),
-                Map.of(
-                    "prepared", genScanSyntax(table),
-                    "timeout", timeouts.get("scan"),
-                    "ratio", readRatioFor(table)
-                )
+                    namer.nameFor(table, "optype", "scan", "blockname", blockname),
+                    Map.of(
+                            "prepared", genScanSyntax(table),
+                            "timeout", timeouts.get("scan"),
+                            "ratio", readRatioFor(table)
+                    )
             );
         }
         return blockdata;
@@ -364,14 +364,14 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genScanSyntax(CqlTable table) {
         return """
-            select * from KEYSPACE.TABLE
-            where PREDICATE
-            LIMIT;
-            """
-            .replace("KEYSPACE", table.getKeyspace().getName())
-            .replace("TABLE", table.getName())
-            .replace("PREDICATE", genPredicateTemplate(table, -1))
-            .replace("LIMIT", genLimitSyntax(table));
+                select * from KEYSPACE.TABLE
+                where PREDICATE
+                LIMIT;
+                """
+                .replace("KEYSPACE", table.getKeyspace().getName())
+                .replace("TABLE", table.getName())
+                .replace("PREDICATE", genPredicateTemplate(table, -1))
+                .replace("LIMIT", genLimitSyntax(table));
     }
 
 
@@ -381,12 +381,12 @@ public class CGWorkloadExporter implements BundledApp {
         blockdata.put("ops", ops);
         for (CqlTable table : model.getTableDefs()) {
             ops.put(
-                namer.nameFor(table, "optype", "select", "blockname", blockname),
-                Map.of(
-                    "prepared", genSelectSyntax(table),
-                    "timeout", timeouts.get("select"),
-                    "ratio", readRatioFor(table)
-                )
+                    namer.nameFor(table, "optype", "select", "blockname", blockname),
+                    Map.of(
+                            "prepared", genSelectSyntax(table),
+                            "timeout", timeouts.get("select"),
+                            "ratio", readRatioFor(table)
+                    )
             );
         }
         return blockdata;
@@ -394,14 +394,14 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genSelectSyntax(CqlTable table) {
         return """
-            select * from  KEYSPACE.TABLE
-            where PREDICATE
-            LIMIT;
-            """
-            .replace("KEYSPACE", table.getKeyspace().getName())
-            .replace("TABLE", table.getName())
-            .replace("PREDICATE", genPredicateTemplate(table, 0))
-            .replace("LIMIT", genLimitSyntax(table));
+                select * from  KEYSPACE.TABLE
+                where PREDICATE
+                LIMIT;
+                """
+                .replace("KEYSPACE", table.getKeyspace().getName())
+                .replace("TABLE", table.getName())
+                .replace("PREDICATE", genPredicateTemplate(table, 0))
+                .replace("LIMIT", genLimitSyntax(table));
     }
 
     private String genLimitSyntax(CqlTable table) {
@@ -415,12 +415,12 @@ public class CGWorkloadExporter implements BundledApp {
         for (CqlTable table : model.getTableDefs()) {
             if (!isCounterTable(table)) {
                 ops.put(
-                    namer.nameFor(table, "optype", "insert", "blockname", blockname),
-                    Map.of(
-                        "prepared", genInsertSyntax(table),
-                        "timeout", timeouts.get("insert"),
-                        "ratio", writeRatioFor(table)
-                    )
+                        namer.nameFor(table, "optype", "insert", "blockname", blockname),
+                        Map.of(
+                                "prepared", genInsertSyntax(table),
+                                "timeout", timeouts.get("insert"),
+                                "ratio", writeRatioFor(table)
+                        )
                 );
             }
         }
@@ -433,22 +433,22 @@ public class CGWorkloadExporter implements BundledApp {
         }
 
         return """
-            insert into KEYSPACE.TABLE
-            ( FIELDNAMES )
-            VALUES
-            ( BINDINGS );
-            """
-            .replace("KEYSPACE", table.getKeyspace().getName())
-            .replace("TABLE", table.getName())
-            .replace("FIELDNAMES",
-                String.join(", ",
-                    table.getColumnDefs().stream()
-                        .map(CqlTableColumn::getName).toList()))
-            .replaceAll("BINDINGS",
-                String.join(", ",
-                    table.getColumnDefs().stream()
-                        .map(c -> binder.forColumn(c))
-                        .map(c -> "{" + c.getName() + "}").toList()));
+                insert into KEYSPACE.TABLE
+                ( FIELDNAMES )
+                VALUES
+                ( BINDINGS );
+                """
+                .replace("KEYSPACE", table.getKeyspace().getName())
+                .replace("TABLE", table.getName())
+                .replace("FIELDNAMES",
+                        String.join(", ",
+                                table.getColumnDefs().stream()
+                                        .map(CqlTableColumn::getName).toList()))
+                .replaceAll("BINDINGS",
+                        String.join(", ",
+                                table.getColumnDefs().stream()
+                                        .map(c -> binder.forColumn(c))
+                                        .map(c -> "{" + c.getName() + "}").toList()));
     }
 
 
@@ -458,12 +458,12 @@ public class CGWorkloadExporter implements BundledApp {
         blockdata.put("ops", ops);
         for (CqlTable table : model.getTableDefs()) {
             ops.put(
-                namer.nameFor(table, "optype", "update", "blockname", blockname),
-                Map.of(
-                    "prepared", genUpdateSyntax(table),
-                    "timeout", timeouts.get("update"),
-                    "ratio", writeRatioFor(table)
-                )
+                    namer.nameFor(table, "optype", "update", "blockname", blockname),
+                    Map.of(
+                            "prepared", genUpdateSyntax(table),
+                            "timeout", timeouts.get("update"),
+                            "ratio", writeRatioFor(table)
+                    )
             );
         }
         return blockdata;
@@ -472,7 +472,7 @@ public class CGWorkloadExporter implements BundledApp {
 
     private boolean isCounterTable(CqlTable table) {
         return table.getColumnDefs().stream()
-            .anyMatch(cd -> cd.getTrimmedTypedef().equalsIgnoreCase("counter"));
+                .anyMatch(cd -> cd.getTrimmedTypedef().equalsIgnoreCase("counter"));
     }
 
     private int totalRatioFor(CqlTable table) {
@@ -540,9 +540,9 @@ public class CGWorkloadExporter implements BundledApp {
 
         // TODO; constraints on predicates based on valid constructions
         pkeys.stream().map(this::genPredicatePart)
-            .forEach(p -> {
-                sb.append(p).append("\n  AND ");
-            });
+                .forEach(p -> {
+                    sb.append(p).append("\n  AND ");
+                });
         if (sb.length() > 0) {
             sb.setLength(sb.length() - "\n  AND ".length());
         }
@@ -557,14 +557,14 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genUpdateSyntax(CqlTable table) {
         return """
-            update KEYSPACE.TABLE
-            set ASSIGNMENTS
-            where PREDICATES;
-            """
-            .replaceAll("KEYSPACE", table.getKeyspace().getName())
-            .replaceAll("TABLE", table.getName())
-            .replaceAll("PREDICATES", genPredicateTemplate(table, 0))
-            .replaceAll("ASSIGNMENTS", genAssignments(table));
+                update KEYSPACE.TABLE
+                set ASSIGNMENTS
+                where PREDICATES;
+                """
+                .replaceAll("KEYSPACE", table.getKeyspace().getName())
+                .replaceAll("TABLE", table.getName())
+                .replaceAll("PREDICATES", genPredicateTemplate(table, 0))
+                .replaceAll("ASSIGNMENTS", genAssignments(table));
     }
 
     private String genAssignments(CqlTable table) {
@@ -572,12 +572,12 @@ public class CGWorkloadExporter implements BundledApp {
         for (CqlTableColumn coldef : table.getNonKeyColumnDefinitions()) {
             if (coldef.isCounter()) {
                 sb.append(coldef.getName()).append("=")
-                    .append(coldef.getName()).append("+").append("{").append(binder.forColumn(coldef).getName()).append("}")
-                    .append(", ");
+                        .append(coldef.getName()).append("+").append("{").append(binder.forColumn(coldef).getName()).append("}")
+                        .append(", ");
             } else {
                 sb.append(coldef.getName()).append("=")
-                    .append("{").append(binder.forColumn(coldef).getName()).append("}")
-                    .append(", ");
+                        .append("{").append(binder.forColumn(coldef).getName()).append("}")
+                        .append(", ");
             }
         }
         if (sb.length() > 0) {
@@ -602,16 +602,16 @@ public class CGWorkloadExporter implements BundledApp {
         ((Map<String, String>) workload.get("bindings")).putAll(bindingslib.getAccumulatedBindings());
 
         DumpSettings dumpSettings = DumpSettings.builder()
-            .setDefaultFlowStyle(FlowStyle.BLOCK)
-            .setIndent(2)
-            .setDefaultScalarStyle(ScalarStyle.PLAIN)
-            .setMaxSimpleKeyLength(1000)
-            .setWidth(100)
-            .setSplitLines(true)
-            .setIndentWithIndicator(true)
-            .setMultiLineFlow(true)
-            .setNonPrintableStyle(NonPrintableStyle.ESCAPE)
-            .build();
+                .setDefaultFlowStyle(FlowStyle.BLOCK)
+                .setIndent(2)
+                .setDefaultScalarStyle(ScalarStyle.PLAIN)
+                .setMaxSimpleKeyLength(1000)
+                .setWidth(100)
+                .setSplitLines(true)
+                .setIndentWithIndicator(true)
+                .setMultiLineFlow(true)
+                .setNonPrintableStyle(NonPrintableStyle.ESCAPE)
+                .build();
         BaseRepresenter r;
         Dump dump = new Dump(dumpSettings);
 
@@ -637,11 +637,11 @@ public class CGWorkloadExporter implements BundledApp {
         dropTablesBlock.put("ops", ops);
         for (CqlTable table : model.getTableDefs()) {
             ops.put(
-                namer.nameFor(table, "optype", "drop", "blockname", blockname),
-                Map.of(
-                    "simple", "drop table if exists " + table.getFullName() + ";",
-                    "timeout", timeouts.get("drop")
-                )
+                    namer.nameFor(table, "optype", "drop", "blockname", blockname),
+                    Map.of(
+                            "simple", "drop table if exists " + table.getFullName() + ";",
+                            "timeout", timeouts.get("drop")
+                    )
             );
         }
         return dropTablesBlock;
@@ -653,11 +653,11 @@ public class CGWorkloadExporter implements BundledApp {
         dropTypesBlock.put("ops", ops);
         for (CqlType type : model.getTypeDefs()) {
             ops.put(
-                namer.nameFor(type, "optype", "drop-type", "blockname", blockname),
-                Map.of(
-                    "simple", "drop type if exists " + type.getKeyspace() + "." + type.getName() + ";",
-                    "timeout", timeouts.get("drop")
-                )
+                    namer.nameFor(type, "optype", "drop-type", "blockname", blockname),
+                    Map.of(
+                            "simple", "drop type if exists " + type.getKeyspace() + "." + type.getName() + ";",
+                            "timeout", timeouts.get("drop")
+                    )
             );
         }
         return dropTypesBlock;
@@ -669,11 +669,11 @@ public class CGWorkloadExporter implements BundledApp {
         dropTypesBlock.put("ops", ops);
         for (CqlType type : model.getTypeDefs()) {
             ops.put(
-                namer.nameFor(type, "optype", "drop-keyspace", "blockname", blockname),
-                Map.of(
-                    "simple", "drop keyspace if exists " + type.getKeyspace() + ";",
-                    "timeout", timeouts.get("drop")
-                )
+                    namer.nameFor(type, "optype", "drop-keyspace", "blockname", blockname),
+                    Map.of(
+                            "simple", "drop keyspace if exists " + type.getKeyspace() + ";",
+                            "timeout", timeouts.get("drop")
+                    )
             );
         }
         return dropTypesBlock;
@@ -687,11 +687,11 @@ public class CGWorkloadExporter implements BundledApp {
 
         for (CqlTable table : model.getTableDefs()) {
             ops.put(
-                namer.nameFor(table, "optype", "truncate", "blockname", blockname),
-                Map.of(
-                    "simple", "truncate " + table.getFullName() + ";",
-                    "timeout", timeouts.get("truncate")
-                )
+                    namer.nameFor(table, "optype", "truncate", "blockname", blockname),
+                    Map.of(
+                            "simple", "truncate " + table.getFullName() + ";",
+                            "timeout", timeouts.get("truncate")
+                    )
             );
         }
         return truncateblock;
@@ -703,11 +703,11 @@ public class CGWorkloadExporter implements BundledApp {
 
         for (CqlKeyspaceDef ks : model.getKeyspaceDefs()) {
             ops.put(
-                namer.nameFor(ks, "optype", "create", "blockname", blockname),
-                Map.of(
-                    "simple", genKeyspaceDDL(ks),
-                    "timeout", timeouts.get("create")
-                )
+                    namer.nameFor(ks, "optype", "create", "blockname", blockname),
+                    Map.of(
+                            "simple", genKeyspaceDDL(ks),
+                            "timeout", timeouts.get("create")
+                    )
             );
         }
 
@@ -722,11 +722,11 @@ public class CGWorkloadExporter implements BundledApp {
 
         model.getTypeDefs().forEach(type -> {
             ops.put(
-                namer.nameFor(type,"optype","create","blockname",blockname),
-                Map.of(
-                    "simple",genTypeDDL(type),
-                    "timeout",timeouts.get("create")
-                )
+                    namer.nameFor(type, "optype", "create", "blockname", blockname),
+                    Map.of(
+                            "simple", genTypeDDL(type),
+                            "timeout", timeouts.get("create")
+                    )
             );
         });
 
@@ -736,13 +736,13 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genKeyspaceDDL(CqlKeyspaceDef keyspace) {
         return """
-            create keyspace KEYSPACE
-            with replication = {REPLICATION}DURABLEWRITES?;
-            """
-            .replace("KEYSPACE", keyspace.getName())
-            .replace("REPLICATION", keyspace.getReplicationData())
-            .replace("DURABLEWRITES?", keyspace.isDurableWrites() ? "" : "\n and durable writes = false")
-            ;
+                create keyspace KEYSPACE
+                with replication = {REPLICATION}DURABLEWRITES?;
+                """
+                .replace("KEYSPACE", keyspace.getName())
+                .replace("REPLICATION", keyspace.getReplicationData())
+                .replace("DURABLEWRITES?", keyspace.isDurableWrites() ? "" : "\n and durable writes = false")
+                ;
     }
 
     private Map<String, Object> genCreateTablesOpTemplates(CqlModel model, String blockname) {
@@ -751,11 +751,11 @@ public class CGWorkloadExporter implements BundledApp {
 
         model.getTableDefs().forEach(table -> {
             ops.put(
-                namer.nameFor(table, "optype","create","blockname",blockname),
-                Map.of(
-                    "simple",genTableDDL(table),
-                    "timeout",timeouts.get("create")
-                )
+                    namer.nameFor(table, "optype", "create", "blockname", blockname),
+                    Map.of(
+                            "simple", genTableDDL(table),
+                            "timeout", timeouts.get("create")
+                    )
             );
         });
 
@@ -766,14 +766,14 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genTypeDDL(CqlType type) {
         return """
-            create type KEYSPACE.TYPENAME (
-            TYPEDEF
-            );
-            """
-            .replace("KEYSPACE", type.getKeyspace().getName())
-            .replace("TYPENAME", type.getName())
-            .replace("TYPEDEF", type.getColumnDefs().stream()
-                .map(def -> def.getName() + " " + def.getTypedef()).collect(Collectors.joining(",\n")));
+                create type KEYSPACE.TYPENAME (
+                TYPEDEF
+                );
+                """
+                .replace("KEYSPACE", type.getKeyspace().getName())
+                .replace("TYPENAME", type.getName())
+                .replace("TYPEDEF", type.getColumnDefs().stream()
+                        .map(def -> def.getName() + " " + def.getTypedef()).collect(Collectors.joining(",\n")));
     }
 
     private Object genTableDDL(CqlTable cqltable) {
@@ -782,16 +782,16 @@ public class CGWorkloadExporter implements BundledApp {
         }
 
         return """
-            create table if not exists KEYSPACE.TABLE (
-            COLUMN_DEFS,
-            primary key (PRIMARYKEY)
-            )CLUSTERING;
-            """
-            .replace("KEYSPACE", cqltable.getKeyspace().getName())
-            .replace("TABLE", cqltable.getName())
-            .replace("COLUMN_DEFS", genTableColumnDDL(cqltable))
-            .replace("PRIMARYKEY", genPrimaryKeyDDL(cqltable))
-            .replace("CLUSTERING", genTableClusteringOrderDDL(cqltable));
+                create table if not exists KEYSPACE.TABLE (
+                COLUMN_DEFS,
+                primary key (PRIMARYKEY)
+                )CLUSTERING;
+                """
+                .replace("KEYSPACE", cqltable.getKeyspace().getName())
+                .replace("TABLE", cqltable.getName())
+                .replace("COLUMN_DEFS", genTableColumnDDL(cqltable))
+                .replace("PRIMARYKEY", genPrimaryKeyDDL(cqltable))
+                .replace("CLUSTERING", genTableClusteringOrderDDL(cqltable));
 
     }
 
@@ -829,8 +829,8 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genTableColumnDDL(CqlTable cqltable) {
         return cqltable.getColumnDefs().stream()
-            .map(cd -> cd.getName() + " " + cd.getTrimmedTypedef())
-            .collect(Collectors.joining(",\n"));
+                .map(cd -> cd.getName() + " " + cd.getTrimmedTypedef())
+                .collect(Collectors.joining(",\n"));
     }
 
 

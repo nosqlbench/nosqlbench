@@ -74,7 +74,7 @@ public class GrafanaRegionAnalyzer implements Runnable {
         //[2020-12-15T05:04:37.232Z[GMT] - 2020-12-15T05:04:37.232Z[GMT]]
         //span:interval
         //details:
-        // params: ActivityDef:(4)/{keycount=5000000000L, hosts=node1, main-cycles=500, threads=1, workload=./keyvalue.yaml, cycles=2, stride=2, tags=phase:schema, password=cassandra, rf=3, pooling=16:16:500, driver=cql, rampup-cycles=5000000000, alias=keyvalue_default_schema, valuecount=5000000000L, errors=count, username=cassandra}
+        // params: ActivityDef:(4)/{keycount=5000000000L, hosts=node1, main-cycles=500, threads=1, workload=./keyvalue.yaml, cycles=2, stride=2, tags=block:'schema.*', password=cassandra, rf=3, pooling=16:16:500, driver=cql, rampup-cycles=5000000000, alias=keyvalue_default_schema, valuecount=5000000000L, errors=count, username=cassandra}
         //labels:
         // layer: Activity
         // alias: keyvalue_default_schema

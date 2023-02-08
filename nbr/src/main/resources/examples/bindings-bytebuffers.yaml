@@ -21,9 +21,6 @@ bindings:
   # control the size of the extracted sample with a hash range
   hashed_bb_sizerange: ByteBufferSizedHashed(HashRange(1,10)); ToHexString();
 
-  # control the size of the extracted sample based on a continuous function
-  hashed_bb_size_normal: ByteBufferSizedHashed(Normal(5.0, 1.0)); ToHexString();
-
   # control the size of the extracted sample based on a discrete function
   hashed_bb_size_binomial: ByteBufferSizedHashed(Binomial(8,0.5)); ToHexString();
 

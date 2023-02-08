@@ -29,7 +29,6 @@ import io.nosqlbench.virtdata.userlibs.apps.docsapp.fdocs.FDocFuncs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -72,48 +71,6 @@ public class VirtDataGenDocsApp implements Callable<Map<String, StringBuilder>> 
     public VirtDataGenDocsApp(String[] args) {this.args = args;}
 
     public Map<String, StringBuilder> call() {
-
-        /*LinkedList<String> largs = new LinkedList<>(Arrays.asList(args));
-        if (args.length > 0 && args[0].contains("help")) {
-            System.out.println(
-                "usage:\n" +
-                    "[basefile <name>] [basedir <dir>] [categories combined|split] [format json|markdown] " +
-                    "[blurbsdirs <dir>[:...]]\n\n"
-            );
-            return result;
-        }
-        while (largs.peekFirst() != null) {
-            String argtype = largs.removeFirst();
-            if (largs.peekFirst() == null) {
-                throw new RuntimeException(VirtDataGenDocsApp.class + " expects args in param value couplets.");
-            }
-
-            String argval = largs.removeFirst().toLowerCase();
-            switch (argtype) {
-                case "basefile":
-                    this.baseFileName = argval;
-                    break;
-                case "basedir":
-                    this.basedir = argval;
-                    break;
-                case BLURBS_DIRS:
-                    this.blurbsDirs = argval;
-                    break;
-                case CATEGORIES:
-                    if (!argval.equals(CATEGORIES_SPLIT) && !argval.equals(CATEGORIES_COMBINED)) {
-                        throw new RuntimeException("categories must either be " + CATEGORIES_SPLIT + ", or " + CATEGORIES_COMBINED + ".");
-                    }
-                    this.categories = argval;
-                    break;
-                case FORMAT:
-                    if (!argval.equals(FORMAT_MARKDOWN) && !argval.equals(FORMAT_JSON)) {
-                        throw new RuntimeException("format must either be " + FORMAT_MARKDOWN + ", or " + FORMAT_JSON + ".");
-                    }
-                    this.format = argval;
-                    break;
-                default:
-            }
-        }*/
 
         Optional<FDoc> docsinfo = loadAllDocs();
 
@@ -180,6 +137,7 @@ public class VirtDataGenDocsApp implements Callable<Map<String, StringBuilder>> 
 
                             logger.debug("writing blurb to " + outputname);
                             builder.append(blurb);
+                            break;
                         }
                     }
                 }

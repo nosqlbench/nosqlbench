@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,4 +22,12 @@ public interface Stoppable {
      * completes, the request will cause the component to stop cooperatively.
      */
     void requestStop();
+
+    static void stop(Object... candidates) {
+        for (Object candidate : candidates) {
+            if (candidate instanceof Stoppable stoppable) {
+                stoppable.requestStop();
+            }
+        }
+    }
 }

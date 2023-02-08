@@ -1,13 +1,13 @@
-min_version: "4.17.15"
+min_version: "5.17.1"
 
 description: creates local graphs which resemble a wagon-wheel topology, using
  DSE Graph, version 6.8 or newer
 
 scenarios:
   default:
-    creategraph: run driver=cqld4 graphname=graph_wheels tags=phase:create-graph cycles===UNDEF
-    schema: run driver=cqld4 graphname=graph_wheels tags=phase:graph-schema cycles===UNDEF
-    rampup: run driver==cqld4 graphname=graph_wheels tags=phase:rampup cycles=1
+    creategraph: run driver=cqld4 graphname=graph_wheels tags=block:create-graph cycles===UNDEF
+    schema: run driver=cqld4 graphname=graph_wheels tags=block:graph-schema cycles===UNDEF
+    rampup: run driver==cqld4 graphname=graph_wheels tags=block:rampup cycles=1
   drop-graph: run driver=cqld4 graphname=graph_wheels tags=block:drop-graph cycles===UNDEF
   creategraph-classic: run driver=cqld4 graphname=graph_wheels tags=block:create-graph-classic cycles===UNDEF
   fluent: run driver=cqld4 graphname=graph_wheels tags=block:fluent cycles=10
@@ -40,16 +40,12 @@ blocks:
            .classicEngine()
            .create()
   create-graph:
-    tags:
-      phase: create-graph
     statements:
       creategraph:
        type: gremlin
        script: >-
          system.graph('<<graphname:graph_wheels>>').ifNotExists().create()
   create-schema:
-    tags:
-      phase: graph-schema
     statements:
       graph-schema:
         type: gremlin
@@ -78,7 +74,7 @@ blocks:
            .create()
   dev-mode:
     tags:
-      phase: dev-mode
+      block: dev-mode
     statements:
       dev-mode:
        type: gremlin
@@ -87,7 +83,7 @@ blocks:
         schema.config().option('graph.schema_mode').set('Development');
   prod-mode:
     tags:
-      phase: prod-mode
+      block: prod-mode
     statements:
       prod-mode:
         type: gremlin
@@ -96,7 +92,7 @@ blocks:
          schema.config().option('graph.schema_mode').set('Production');
   rampup:
     tags:
-      phase: rampup
+      block: rampup
     statements:
       main-add:
         type: gremlin

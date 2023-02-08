@@ -1,4 +1,4 @@
-min_version: "4.17.15"
+min_version: "5.17.1"
 
 description: |
   This workload emulates a time-series data model and access patterns.
@@ -82,11 +82,12 @@ blocks:
       ratio: 1
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
       instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
+      verify-fields: "*, -cell_timestamp"
     ops:
       select-verify: |
         select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         where machine_id={machine_id} and sensor_name={sensor_name} and time={time};
-        verify-fields: "*, -cell_timestamp"
+
   main-read:
     params:
       ratio: TEMPLATE(read_ratio,1)
@@ -96,7 +97,7 @@ blocks:
       select-read: |
         select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         where machine_id={machine_id} and sensor_name={sensor_name}
-        limit TEMPLATE(limit,10)
+        limit TEMPLATE(limit,10);
   main-write:
     params:
       ratio: TEMPLATE(write_ratio,9)
@@ -108,4 +109,4 @@ blocks:
         insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         (machine_id, sensor_name, time, sensor_value, station_id, data)
         values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
-        using timestamp {cell_timestamp}
+        using timestamp {cell_timestamp};

@@ -7,7 +7,7 @@ scenarios:
     - run driver=stdout alias=step1
     - run driver=stdout alias=step2
   schema-only:
-    - run driver=blah tags=phase:schema
+    - run driver=blah tags=block:"schema.*"
 
 tags:
   atagname: atagvalue

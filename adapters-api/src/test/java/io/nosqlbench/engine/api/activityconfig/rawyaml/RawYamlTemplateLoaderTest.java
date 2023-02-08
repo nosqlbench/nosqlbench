@@ -77,7 +77,7 @@ public class RawYamlTemplateLoaderTest {
         assertThat(schemaOnlyScenario.keySet())
             .containsExactly("000");
         assertThat(schemaOnlyScenario.values())
-            .containsExactly("run driver=blah tags=phase:schema");
+            .containsExactly("run driver=blah tags=block:\"schema.*\"");
 
         assertThat(rawOpsDoc.getName()).isEqualTo("doc1");
         assertThat(blocks).hasSize(1);

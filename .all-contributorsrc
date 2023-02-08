@@ -1,0 +1,484 @@
+{
+  "projectOwner": "nosqlbench",
+  "projectName": "nosqlbench",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "CONTRIBUTING.md"
+  ],
+  "imageSize": 50,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributorsPerLine": 6,
+  "contributorsSortAlphabetically": false,
+  "linkToUsage": false,
+  "skipCi": true,
+  "contributors": [
+    {
+      "login": "jshook",
+      "name": "Jonathan Shook",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2148847?v=4",
+      "profile": "https://github.com/jshook",
+      "contributions": [
+        "review",
+        "tool",
+        "bug",
+        "business",
+        "code",
+        "content",
+        "data",
+        "doc",
+        "design",
+        "example",
+        "ideas",
+        "infra",
+        "maintenance",
+        "mentoring",
+        "platform",
+        "plugin",
+        "projectManagement",
+        "research",
+        "security",
+        "test",
+        "userTesting"
+      ]
+    },
+    {
+      "login": "MikeYaacoubStax",
+      "name": "MikeYaacoubStax",
+      "avatar_url": "https://avatars.githubusercontent.com/u/117678633?v=4",
+      "profile": "https://github.com/MikeYaacoubStax",
+      "contributions": [
+        "review",
+        "tool",
+        "bug",
+        "business",
+        "code",
+        "content",
+        "data",
+        "doc",
+        "design",
+        "example",
+        "ideas",
+        "infra",
+        "maintenance",
+        "mentoring",
+        "platform",
+        "plugin",
+        "projectManagement",
+        "research",
+        "security",
+        "test",
+        "userTesting"
+      ]
+    },
+    {
+      "login": "jeffbanks",
+      "name": "Jeff Banks",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4078933?v=4",
+      "profile": "http://jjbanks.com",
+      "contributions": [
+        "code",
+        "mentoring",
+        "test",
+        "bug",
+        "business",
+        "content",
+        "data",
+        "doc",
+        "design",
+        "example",
+        "ideas",
+        "infra",
+        "maintenance",
+        "platform",
+        "plugin",
+        "projectManagement",
+        "research",
+        "review",
+        "security",
+        "tool",
+        "userTesting"
+      ]
+    },
+    {
+      "login": "msmygit",
+      "name": "Madhavan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19366623?v=4",
+      "profile": "https://github.com/msmygit",
+      "contributions": [
+        "code",
+        "bug",
+        "doc",
+        "ideas",
+        "question",
+        "research",
+        "review",
+        "tool",
+        "userTesting",
+        "talk",
+        "tutorial"
+      ]
+    },
+    {
+      "login": "hemidactylus",
+      "name": "Stefano Lottini",
+      "avatar_url": "https://avatars.githubusercontent.com/u/14221764?v=4",
+      "profile": "https://github.com/hemidactylus",
+      "contributions": [
+        "bug",
+        "blog",
+        "code",
+        "content",
+        "data",
+        "doc",
+        "example",
+        "eventOrganizing",
+        "mentoring",
+        "promotion",
+        "research",
+        "tutorial",
+        "userTesting",
+        "video"
+      ]
+    },
+    {
+      "login": "phact",
+      "name": "Sebastián Estévez",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1313220?v=4",
+      "profile": "https://github.com/phact",
+      "contributions": [
+        "bug",
+        "design",
+        "business",
+        "code",
+        "content",
+        "data",
+        "doc",
+        "ideas",
+        "promotion",
+        "research"
+      ]
+    },
+    {
+      "login": "smccarthy788",
+      "name": "Sean McCarthy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6601281?v=4",
+      "profile": "https://github.com/smccarthy788",
+      "contributions": [
+        "mentoring",
+        "ideas",
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "yabinmeng",
+      "name": "yabinmeng",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16789452?v=4",
+      "profile": "https://github.com/yabinmeng",
+      "contributions": [
+        "bug",
+        "test"
+      ]
+    },
+    {
+      "login": "eolivelli",
+      "name": "Enrico Olivelli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9469110?v=4",
+      "profile": "http://eolivelli.blogspot.it/",
+      "contributions": [
+        "test",
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "lhotari",
+      "name": "Lari Hotari",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66864?v=4",
+      "profile": "https://github.com/lhotari",
+      "contributions": [
+        "bug",
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "mfleming",
+      "name": "Matt Fleming",
+      "avatar_url": "https://avatars.githubusercontent.com/u/94254?v=4",
+      "profile": "http://www.codeblueprint.co.uk",
+      "contributions": [
+        "bug",
+        "design"
+      ]
+    },
+    {
+      "login": "tjake",
+      "name": "Jake Luciani",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44456?v=4",
+      "profile": "https://github.com/tjake",
+      "contributions": [
+        "bug",
+        "ideas"
+      ]
+    },
+    {
+      "login": "lakshmi-M18",
+      "name": "Lakshmi Manjunatha",
+      "avatar_url": "https://avatars.githubusercontent.com/u/89935678?v=4",
+      "profile": "https://github.com/lakshmi-M18",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "pingtimeout",
+      "name": "Pierre Laporte",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1159578?v=4",
+      "profile": "http://www.pingtimeout.fr",
+      "contributions": [
+        "ideas",
+        "bug"
+      ]
+    },
+    {
+      "login": "tatu-at-datastax",
+      "name": "Tatu Saloranta",
+      "avatar_url": "https://avatars.githubusercontent.com/u/87213665?v=4",
+      "profile": "https://github.com/tatu-at-datastax",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "alexott",
+      "name": "Alex Ott",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30342?v=4",
+      "profile": "http://alexott.net",
+      "contributions": [
+        "platform",
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "jeffreyscarpenter",
+      "name": "Jeffrey Carpenter",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12115970?v=4",
+      "profile": "https://github.com/jeffreyscarpenter",
+      "contributions": [
+        "bug",
+        "test",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "yassermohamed81",
+      "name": "yassermohamed81",
+      "avatar_url": "https://avatars.githubusercontent.com/u/53837411?v=4",
+      "profile": "https://github.com/yassermohamed81",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Pierrotws",
+      "name": "Pierre Sauvage",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6002161?v=4",
+      "profile": "https://github.com/Pierrotws",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "dougwettlaufer",
+      "name": "Doug Wettlaufer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/45750136?v=4",
+      "profile": "https://github.com/dougwettlaufer",
+      "contributions": [
+        "test"
+      ]
+    },
+    {
+      "login": "jeromatron",
+      "name": "Jeremy Hanna",
+      "avatar_url": "https://avatars.githubusercontent.com/u/254887?v=4",
+      "profile": "http://jeromatron.blogspot.com",
+      "contributions": [
+        "test",
+        "ideas"
+      ]
+    },
+    {
+      "login": "alicel",
+      "name": "Alice Lottini",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2972347?v=4",
+      "profile": "https://github.com/alicel",
+      "contributions": [
+        "bug",
+        "ideas",
+        "test"
+      ]
+    },
+    {
+      "login": "EricBorczuk",
+      "name": "Eric Borczuk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4205492?v=4",
+      "profile": "https://github.com/EricBorczuk",
+      "contributions": [
+        "code",
+        "review",
+        "test"
+      ]
+    },
+    {
+      "login": "weideng1",
+      "name": "weideng1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5520525?v=4",
+      "profile": "https://github.com/weideng1",
+      "contributions": [
+        "test",
+        "ideas",
+        "code"
+      ]
+    },
+    {
+      "login": "ivansenic",
+      "name": "Ivan Senic",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10600041?v=4",
+      "profile": "https://github.com/ivansenic",
+      "contributions": [
+        "test"
+      ]
+    },
+    {
+      "login": "justinchuch",
+      "name": "Justin Chu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15710241?v=4",
+      "profile": "https://justinchuch.wordpress.com/",
+      "contributions": [
+        "code",
+        "test",
+        "review"
+      ]
+    },
+    {
+      "login": "ds-steven-matison",
+      "name": "Steven Matison",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70520951?v=4",
+      "profile": "https://ds-steven-matison.github.io/",
+      "contributions": [
+        "test",
+        "ideas"
+      ]
+    },
+    {
+      "login": "szimmer1",
+      "name": "shahar z",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8455475?v=4",
+      "profile": "https://github.com/szimmer1",
+      "contributions": [
+        "ideas",
+        "code"
+      ]
+    },
+    {
+      "login": "ncarvind",
+      "name": "ncarvind",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70302571?v=4",
+      "profile": "https://github.com/ncarvind",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "MMirelli",
+      "name": "Massimiliano Mirelli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22191891?v=4",
+      "profile": "https://github.com/MMirelli",
+      "contributions": [
+        "platform"
+      ]
+    },
+    {
+      "login": "derrickCos",
+      "name": "Derrick Cosmas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25781387?v=4",
+      "profile": "https://github.com/derrickCos",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "grighetto",
+      "name": "Gianluca Righetto",
+      "avatar_url": "https://avatars.githubusercontent.com/u/413792?v=4",
+      "profile": "https://github.com/grighetto",
+      "contributions": [
+        "platform"
+      ]
+    },
+    {
+      "login": "BrynCooke",
+      "name": "Bryn Cooke",
+      "avatar_url": "https://avatars.githubusercontent.com/u/747836?v=4",
+      "profile": "https://github.com/BrynCooke",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "KatSarah",
+      "name": "KatSarah",
+      "avatar_url": "https://avatars.githubusercontent.com/u/658015?v=4",
+      "profile": "https://github.com/KatSarah",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "peytoncasper",
+      "name": "Peyton Casper",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8305883?v=4",
+      "profile": "https://github.com/peytoncasper",
+      "contributions": [
+        "ideas",
+        "code"
+      ]
+    },
+    {
+      "login": "landim",
+      "name": "Arthur Costa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/91446?v=4",
+      "profile": "https://github.com/landim",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "guyboltonking",
+      "name": "Guy Bolton King",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98294?v=4",
+      "profile": "https://github.com/guyboltonking",
+      "contributions": [
+        "bug",
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "XN137",
+      "name": "Christopher Lambert",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1204398?v=4",
+      "profile": "https://github.com/XN137",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    }
+  ]
+}

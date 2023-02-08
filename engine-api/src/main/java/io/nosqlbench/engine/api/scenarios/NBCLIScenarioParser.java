@@ -122,7 +122,8 @@ public class NBCLIScenarioParser {
             if (nameparts.length==1) {
                 Map<String, String> namedScenario = scenarios.getNamedScenario(scenarioName);
                 if (namedScenario==null) {
-                    throw new BasicError("Named step '" + scenarioName + "' was not found.");
+                    throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
+                    + "', but you can pick from one of: " + String.join(", ", scenarios.getScenarioNames()));
                 }
                 namedSteps.putAll(namedScenario);
             } else {
@@ -138,7 +139,7 @@ public class NBCLIScenarioParser {
                 if (selectedScenario.containsKey(stepname)) {
                     namedSteps.put(stepname,selectedScenario.get(stepname));
                 } else {
-                    throw new BasicError("Unable to find named scenario.step'" + scenarioName + "' in workload '" + workloadName
+                    throw new BasicError("Unable to find named scenario.step '" + scenarioName + "' in workload '" + workloadName
                         + "', but you can pick from one of: " + selectedScenario.keySet().stream().map(n -> nameparts[0].concat(".").concat(n)).collect(Collectors.joining(", ")));
                 }
             }
@@ -230,6 +231,12 @@ public class NBCLIScenarioParser {
         String[] namedStepPieces = cmd.split(" ");
         for (String commandFragment : namedStepPieces) {
             Matcher matcher = WordAndMaybeAssignment.matcher(commandFragment);
+
+            if (commandFragment.equalsIgnoreCase("")) {
+                logger.debug("Command fragment discovered to be empty.  Skipping this fragment for cmd: {}", cmd);
+                continue;
+            }
+
             if (!matcher.matches()) {
                 throw new BasicError("Unable to recognize scenario cmd spec in '" + commandFragment + "'");
             }

@@ -1,18 +1,18 @@
 description: Auto-generated workload from source schema.
 scenarios:
   default:
-    schema: run driver=cql tags=block:schema.* threads===UNDEF cycles===UNDEF
-    rampup: run driver=cql tags=block:rampup.* threads=auto cycles===TEMPLATE(rampup-cycles,10000)
-    main: run driver=cql tags=block:main.* threads=auto cycles===TEMPLATE(main-cycles,10000)
+    schema: run driver=cql tags=block:"schema.*" threads===UNDEF cycles===UNDEF
+    rampup: run driver=cql tags=block:"rampup.*" threads=auto cycles===TEMPLATE(rampup-cycles,10000)
+    main: run driver=cql tags=block:"main.*" threads=auto cycles===TEMPLATE(main-cycles,10000)
   main-insert: run driver=cql tags=block:main-insert threads=auto cycles===TEMPLATE(main-cycles,10000)
   main-select: run driver=cql tags=block:main-select threads=auto cycles===TEMPLATE(main-cycles,10000)
   main-scan: run driver=cql tags=block:main-scan threads=auto cycles===TEMPLATE(main-cycles,10000)
   main-update: run driver=cql tags=block:main-update threads=auto cycles===TEMPLATE(main-cycles,10000)
-  truncate: run driver=cql tags=block:truncate.* threads===UNDEF cycles===UNDEF
+  truncate: run driver=cql tags=block:'truncate.*' threads===UNDEF cycles===UNDEF
   schema-keyspaces: run driver=cql tags=block:schema-keyspaces threads===UNDEF cycles===UNDEF
   schema-types: run driver=cql tags=block:schema-types threads===UNDEF cycles===UNDEF
   schema-tables: run driver=cql tags=block:schema-tables threads===UNDEF cycles===UNDEF
-  drop: run driver=cql tags=block:drop.* threads===UNDEF cycles===UNDEF
+  drop: run driver=cql tags=block:'drop.*' threads===UNDEF cycles===UNDEF
   drop-tables: run driver=cql tags=block:drop-tables threads===UNDEF cycles===UNDEF
   drop-types: run driver=cql tags=block:drop-types threads===UNDEF cycles===UNDEF
   drop-keyspaces: run driver=cql tags=block:drop-keyspaces threads===UNDEF cycles===UNDEF

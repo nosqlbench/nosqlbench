@@ -1,17 +1,17 @@
 # Connection Guide: https://www.mongodb.com/docs/drivers/java/sync/current/fundamentals/connection/
-# nb5 run driver=mongodb workload=/path/to/mongodb-keyvalue2.yaml tags=block:schema connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+# nb5 run driver=mongodb workload=/path/to/mongodb-keyvalue2.yaml tags=block:"schema.*" connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
 # nb5 run driver=mongodb workload=/path/to/mongodb-keyvalue2.yaml tags=block:rampup cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
 # nb5 run driver=mongodb workload=/path/to/mongodb-keyvalue2.yaml tags='block:main-.*' cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
-min_version: "4.17.31"
+min_version: "5.17.1"
 
 description: |
   This workload is analogous to the cql-keyvalue2 workload, just implemented for MongoDB.
 
 scenarios:
   default:
-    schema: run driver=mongodb tags==block:schema threads==1 cycles==UNDEF
+    schema: run driver=mongodb tags==block:"schema.*" threads==1 cycles==UNDEF
     rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=mongodb tags==block:"main-.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=mongodb tags==block:'main-.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
     drop: run driver=mongodb tags==block:drop-collection threads==1 cycles==UNDEF
 
 params:

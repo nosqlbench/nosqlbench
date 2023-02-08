@@ -1,12 +1,13 @@
-min_version: "4.17.15"
+min_version: "5.17.1"
 
 scenarios:
   default:
-    schema: run driver==stdout workload===scenario-test tags=block:schema
+    schema: run driver==stdout workload===scenario-test tags=block:"schema.*"
     rampup: run driver=stdout workload===scenario-test tags=block:rampup cycles=TEMPLATE(cycles1,10)
     main: run driver=stdout workload===scenario-test tags=block:"main.*" cycles=TEMPLATE(cycles2,10)
   schema-only:
-    - "run driver=stdout workload=scenario-test tags=phase:schema doundef==undef"
+    schema: run driver=stdout workload==scenario-test tags=block:"schema.*" doundef==undef
+
   template-test:
     with-template: run driver=stdout cycles=TEMPLATE(cycles-test,10)
 
@@ -22,6 +23,6 @@ blocks:
   main:
     ops:
       insert: |
-          insert into puppies (test) values (1) ;
+          insert into puppies (test) values (1);
       select: |
           select * from puppies;
