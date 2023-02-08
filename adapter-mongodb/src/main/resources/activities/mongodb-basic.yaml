@@ -3,7 +3,7 @@ description: An example of a basic mongo insert and find.
 scenarios:
   default:
     rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,1000000) threads=auto
-    main: run driver=mongodb tags==block:'main-*.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=mongodb tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 bindings:
   seq_key: Mod(<<keyCount:1000000>>L); ToInt()

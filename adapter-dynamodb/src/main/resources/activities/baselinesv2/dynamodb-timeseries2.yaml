@@ -11,7 +11,7 @@ description: |
 
 scenarios:
   default:
-    schema: run driver=dynamodb tags==block:'schema.*' threads==1 cycles==UNDEF
+    schema: run driver=dynamodb tags==block:"schema.*" threads==1 cycles==UNDEF
     rampup: run driver=dynamodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     main: run driver=dynamodb tags==block:main cycles===TEMPLATE(main-cycles,10000000) threads=auto
   delete:

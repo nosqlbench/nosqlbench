@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class CountryNames extends CSVSampler implements LongFunction<String> {
 
     @Example("CountryNames()")
     public CountryNames() {
-        super("COUNTRY_NAME","n/a","name","countries.csv");
+        super("COUNTRY_NAME","n/a","name","data/countries.csv");
     }
 
 }

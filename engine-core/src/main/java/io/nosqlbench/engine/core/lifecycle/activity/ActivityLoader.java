@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ public class ActivityLoader {
     }
 
     public synchronized Activity loadActivity(ActivityDef activityDef) {
+        activityDef= activityDef.deprecate("yaml","workload").deprecate("type","driver");
         Activity activity = new StandardActivityType(activityDef).getAssembledActivity(activityDef, activityMap);
         activityMap.put(activity.getAlias(),activity);
         logger.debug("Resolved activity for alias '" + activityDef.getAlias() + "'");

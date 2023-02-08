@@ -15,7 +15,7 @@ command line, go ahead and execute the following command, replacing
 the `host=<host-or-ip>` with that of one of your database nodes.
 
 ```text
-./nb run driver=cql workload=cql-keyvalue tags=block:'schema.*' host=<host-or-ip>
+./nb run driver=cql workload=cql-keyvalue tags=block:"schema.*" host=<host-or-ip>
 ```
 
 This command is creating the following schema in your database:

@@ -16,15 +16,15 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
+import io.nosqlbench.api.config.standard.NBConfigModel;
+import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.api.config.standard.NBReconfigurable;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
-import io.nosqlbench.api.config.standard.NBConfigModel;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.config.standard.NBReconfigurable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,7 +39,10 @@ public class StandardActivityType<A extends StandardActivity<?,?>> extends Simpl
     private final Map<String,DriverAdapter> adapters = new HashMap<>();
 
     public StandardActivityType(DriverAdapter<?,?> adapter, ActivityDef activityDef) {
-        super(activityDef);
+        super(activityDef
+            .deprecate("type","driver")
+            .deprecate("yaml", "workload")
+        );
         this.adapters.put(adapter.getAdapterName(),adapter);
         if (adapter instanceof ActivityDefAware) {
             ((ActivityDefAware) adapter).setActivityDef(activityDef);

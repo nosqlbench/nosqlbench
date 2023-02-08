@@ -28,12 +28,12 @@ description: |
 scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
-    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10B) threads=auto
-    main: run driver=cql tags==block:"main-*.*" cycles===TEMPLATE(main-cycles,100M) threads=auto
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,100) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,100) threads=auto
   astra:
     schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
-    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==block:"main-*.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,100) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,100) threads=auto
 
 params:
   instrument: true
@@ -100,13 +100,13 @@ blocks:
       rampup-insert: |
         insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
         (part,clust,data0,data1,data2,data3,data4,data5,data6,data7)
-        values ({part_layout},{clust_layout},{data0},{data1},{data2},{data3},{data4},{data5},{data6},{data7})
+        values ({part_layout},{clust_layout},{data0},{data1},{data2},{data3},{data4},{data5},{data6},{data7});
   verify:
     params:
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
     ops:
       verify-select: |
-        select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_layout} and clust={clust_layout}
+        select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_layout} and clust={clust_layout};
   main-read:
     params:
       ratio: 1

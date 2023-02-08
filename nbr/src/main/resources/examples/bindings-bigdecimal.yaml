@@ -10,13 +10,16 @@ scenarios:
 # a scale parameter or a custom MathContext, but not both. The scale parameter
 # is not supported for String or Double input forms.
 
+# As of Java 17, the roundingMode enums are UP DOWN CEILING FLOOR HALF_UP HALF_DOWN HALF_EVEN UNNECESSARY
+# and the precision must be zero or greater
+
 bindings:
 
   # convert an example double with some fractional values, then convert it to BigDecimal
   from_double: ToDouble(); Div(100.0d); ToBigDecimal();
 
   # convert doubles to BigDecimal, with custom precision and rounding
-  from_double_custom5: ToDouble(); Div(100.0d); ToBigDecimal('precision=5 roundingMode=HALF');
+  from_double_custom5: ToDouble(); Div(100.0d); ToBigDecimal('precision=5 roundingMode=HALF_EVEN');
 
   # convert directly to BigDecimal from long as whole numbers
   from_long: ToBigDecimal();

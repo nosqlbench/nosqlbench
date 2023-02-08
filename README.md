@@ -1,5 +1,7 @@
 [comment]: < ![build](https://github.com/nosqlbench/nosqlbench/workflows/build/badge.svg) >
-
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.nosqlbench/nosqlbench/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.nosqlbench/nosqlbench)
+[![Star on Github](https://img.shields.io/github/stars/nosqlbench/nosqlbench.svg?style=social)](https://github.com/nosqlbench/nosqlbench/stargazers)
+[![Chat on Discord](https://img.shields.io/discord/819995781406130176?logo=discord)](https://discord.gg/dBHRakusMN)
 
 # NoSQLBench v5
 
@@ -104,3 +106,9 @@ available, but more work is needed to support them fully. Here is what is suppor
     </td>
   </tr>
 </table>
+
+
+## Contributors
+Checkout all our wonderful contributors [here](./CONTRIBUTING.md#contributors).
+
+---

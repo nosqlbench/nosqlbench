@@ -37,7 +37,6 @@ import java.util.*;
 import java.util.function.LongFunction;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, PulsarSpace> implements NBNamedElement {
@@ -239,10 +238,8 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
             PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.producerName.label,
             cycleProducerName);
 
-        String producerCacheKey = PulsarAdapterUtil.buildCacheKey(producerName, topicName);
-        Producer<?> producer = pulsarSpace.getProducer(producerCacheKey);
-
-        if (producer == null) {
+        PulsarSpace.ProducerCacheKey producerCacheKey = new PulsarSpace.ProducerCacheKey(producerName, topicName);
+        return pulsarSpace.getProducer(producerCacheKey, () -> {
             PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
 
             // Get other possible producer settings that are set at global level
@@ -262,21 +259,17 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                     producerBuilder = producerBuilder.producerName(producerName);
                 }
 
-                producer = producerBuilder.create();
-                pulsarSpace.setProducer(producerCacheKey, producer);
-
+                Producer<?> producer = producerBuilder.create();
                 pulsarAdapterMetrics.registerProducerApiMetrics(producer,
                     getPulsarAPIMetricsPrefix(
                         PulsarAdapterUtil.PULSAR_API_TYPE.PRODUCER.label,
                         producerName,
                         topicName));
-            }
-            catch (PulsarClientException ple) {
+                return producer;
+            } catch (PulsarClientException ple) {
                 throw new PulsarAdapterUnexpectedException("Failed to create a Pulsar producer.");
             }
-        }
-
-        return producer;
+        });
     }
 
     private List<String> getEffectiveConsumerTopicNameList(String cycleTopicNameListStr) {
@@ -294,24 +287,6 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
         }
 
         return effectiveTopicNameList;
-    }
-
-    private Pattern getEffectiveConsumerTopicPattern(String cycleTopicPatternStr) {
-        String effectiveTopicPatternStr = getEffectiveConValue(
-            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
-            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label,
-            cycleTopicPatternStr);
-
-        Pattern topicsPattern;
-        try {
-            if (!StringUtils.isBlank(effectiveTopicPatternStr))
-                topicsPattern = Pattern.compile(effectiveTopicPatternStr);
-            else
-                topicsPattern = null;
-        } catch (PatternSyntaxException pse) {
-            topicsPattern = null;
-        }
-        return topicsPattern;
     }
 
     private SubscriptionType getEffectiveSubscriptionType(String cycleSubscriptionType) {
@@ -344,11 +319,10 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
 
         List<String> topicNameList = getEffectiveConsumerTopicNameList(cycleTopicNameListStr);
 
-        String topicPatternStr = getEffectiveConValue(
+        String topicPatternStr = StringUtils.trimToNull(getEffectiveConValue(
             PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
             PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label,
-            cycleTopicPatternStr);
-        Pattern topicPattern = getEffectiveConsumerTopicPattern(cycleTopicPatternStr);
+            cycleTopicPatternStr));
 
         String subscriptionName = getEffectiveConValue(
             PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
@@ -368,28 +342,14 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                 "creating multiple consumers of \"Exclusive\" subscription type under the same subscription name");
         }
 
-        if ( (topicNameList.isEmpty() && (topicPattern == null)) ||
-             (!topicNameList.isEmpty() && (topicPattern != null)) ) {
+        if ( (topicNameList.isEmpty() && (topicPatternStr == null)) ||
+             (!topicNameList.isEmpty() && (topicPatternStr != null)) ) {
             throw new PulsarAdapterInvalidParamException(
                 "Invalid combination of topic name(s) and topic patterns; only specify one parameter!");
         }
 
-        boolean multiTopicConsumer = (topicNameList.size() > 1 || (topicPattern != null));
-
-        String consumerTopicListString;
-        if (!topicNameList.isEmpty()) {
-            consumerTopicListString = String.join("|", topicNameList);
-        } else {
-            consumerTopicListString = topicPatternStr;
-        }
-
-        String consumerCacheKey = PulsarAdapterUtil.buildCacheKey(
-            consumerName,
-            subscriptionName,
-            consumerTopicListString);
-        Consumer<?> consumer = pulsarSpace.getConsumer(consumerCacheKey);
-
-        if (consumer == null) {
+        return pulsarSpace.getConsumer(
+            new PulsarSpace.ConsumerCacheKey(consumerName, subscriptionName, topicNameList, topicPatternStr), () -> {
             PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
 
             // Get other possible consumer settings that are set at global level
@@ -417,6 +377,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                 consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.negativeAckRedeliveryBackoff.label);
                 consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.ackTimeoutRedeliveryBackoff.label);
 
+                boolean multiTopicConsumer = (topicNameList.size() > 1 || (topicPatternStr != null));
                 if (!multiTopicConsumer) {
                     assert (topicNameList.size() == 1);
                     consumerBuilder = pulsarClient.newConsumer(pulsarSpace.getPulsarSchema());
@@ -429,6 +390,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                         consumerBuilder.topics(topicNameList);
                     }
                     else {
+                        Pattern topicPattern = Pattern.compile(topicPatternStr);
                         consumerBuilder.topicsPattern(topicPattern);
                     }
                 }
@@ -465,22 +427,22 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                     consumerBuilder.keySharedPolicy(keySharedPolicy);
                 }
 
-                consumer = consumerBuilder.subscribe();
-                pulsarSpace.setConsumer(consumerCacheKey, consumer);
+                Consumer<?> consumer = consumerBuilder.subscribe();
 
+                String consumerTopicListString = (!topicNameList.isEmpty()) ? String.join("|", topicNameList) : topicPatternStr;
                 pulsarAdapterMetrics.registerConsumerApiMetrics(
                     consumer,
                     getPulsarAPIMetricsPrefix(
                         PulsarAdapterUtil.PULSAR_API_TYPE.CONSUMER.label,
                         consumerName,
                         consumerTopicListString));
+
+                return consumer;
             }
             catch (PulsarClientException ple) {
                 throw new PulsarAdapterUnexpectedException("Failed to create a Pulsar consumer!");
             }
-        }
-
-        return consumer;
+        });
     }
 
     private static Range[] parseRanges(String ranges) {
@@ -528,10 +490,7 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
             throw new RuntimeException("Reader:: Invalid value for reader start message position!");
         }
 
-        String readerCacheKey = PulsarAdapterUtil.buildCacheKey(topicName, readerName, startMsgPosStr);
-        Reader<?> reader = pulsarSpace.getReader(readerCacheKey);
-
-        if (reader == null) {
+        return pulsarSpace.getReader(new PulsarSpace.ReaderCacheKey(readerName, topicName, startMsgPosStr), () -> {
             PulsarClient pulsarClient = pulsarSpace.getPulsarClient();;
 
             Map<String, Object> readerConf = pulsarSpace.getPulsarNBClientConf().getReaderConfMapTgt();
@@ -558,17 +517,12 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
                 //    startMsgId = MessageId.latest;
                 //}
 
-                reader = readerBuilder.startMessageId(startMsgId).create();
-
+                return readerBuilder.startMessageId(startMsgId).create();
             } catch (PulsarClientException ple) {
                 ple.printStackTrace();
                 throw new RuntimeException("Unable to create a Pulsar reader!");
             }
-
-            pulsarSpace.setReader(readerCacheKey, reader);
-        }
-
-        return reader;
+        });
     }
     //
     //////////////////////////////////////
