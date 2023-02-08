@@ -5,12 +5,12 @@ description: |
 
 scenarios:
   default: run driver===stdout format=readout
-  names: run driver===stdout format=readout bindings=names
-  cities: run driver===stdout format=readout bindings=cities
-  states: run driver===stdout format=readout bindings=states
-  zips: run driver===stdout format=readout bindings=zips
-  counties: run driver===stdout format=readout bindings=counties
-  countries: run driver===stdout format=readout bindings=country
+  names: run driver===stdout format=readout bindings='names.*'
+  cities: run driver===stdout format=readout bindings='cities.*'
+  states: run driver===stdout format=readout bindings='states.*'
+  zips: run driver===stdout format=readout bindings='zips.*'
+  counties: run driver===stdout format=readout bindings='counties.*'
+  countries: run driver===stdout format=readout bindings='country.*'
 
 
 # Each binding is named, so the bindings is a map of names to
