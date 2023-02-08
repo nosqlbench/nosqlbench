@@ -17,22 +17,25 @@
 package io.nosqlbench.adapter.jdbc.opdispensers;
 
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
-import io.nosqlbench.adapter.jdbc.optypes.JDBCExecuteOp;
+import io.nosqlbench.adapter.jdbc.optypes.JDBCExecuteQueryOp;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.util.function.LongFunction;
 
-public class JDBCExecuteOpDispenser extends JDBCBaseOpDispenser {
+public class JDBCExecuteQueryOpDispenser extends JDBCBaseOpDispenser {
+    private static final Logger logger = LogManager.getLogger(JDBCExecuteQueryOpDispenser.class);
 
-    public JDBCExecuteOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter, LongFunction<Connection> connectionLongFunc, ParsedOp op, LongFunction<String> targetFunction) {
+    public JDBCExecuteQueryOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter, LongFunction<Connection> connectionLongFunc, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, connectionLongFunc, op, targetFunction);
     }
 
     @Override
-    public JDBCExecuteOp apply(long cycle) {
-        return new JDBCExecuteOp(this.connectionLongFunction.apply(cycle), this.statementLongFunction.apply(cycle), targetFunction.apply(cycle));
+    public JDBCExecuteQueryOp apply(long cycle) {
+        return new JDBCExecuteQueryOp(this.connectionLongFunction.apply(cycle), this.statementLongFunction.apply(cycle), targetFunction.apply(cycle));
     }
 }

@@ -19,30 +19,39 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Objects;
 
-public class JDBCExecuteOp extends JDBCOp {
-    private static final Logger LOGGER = LogManager.getLogger(JDBCExecuteOp.class);
-    private static final String LOG_UPDATE_COUNT_ERROR = "Exception occurred while attempting to fetch the update count of the query operation";
-    private static final String LOG_UPDATE_COUNT = "Executed a normal DDL/DML (non-SELECT) operation. DML query updated [%d] records";
+public class JDBCExecuteQueryOp extends JDBCOp {
+    private static final Logger LOGGER = LogManager.getLogger(JDBCExecuteQueryOp.class);
 
-    public JDBCExecuteOp(Connection connection, Statement statement, String queryString) {
+    public JDBCExecuteQueryOp(Connection connection, Statement statement, String queryString) {
         super(connection, statement, queryString);
     }
 
     @Override
     public void run() {
         try {
-            if (!statement.execute(queryString)) {
-                LOGGER.debug(() -> {
-                    try {
-                        return String.format(LOG_UPDATE_COUNT, statement.getUpdateCount());
-                    } catch (SQLException e) {
-                        LOGGER.error(LOG_UPDATE_COUNT_ERROR, e);
-                        throw new RuntimeException(LOG_UPDATE_COUNT_ERROR, e);
+            boolean isResultSet = statement.execute(queryString);
+
+            ResultSet rs;
+            if (isResultSet) {
+                int countResults = 0;
+                rs = statement.getResultSet();
+                Objects.requireNonNull(rs);
+                countResults += rs.getRow();
+
+                while (null != rs) {
+                    while (statement.getMoreResults() && -1 > statement.getUpdateCount()) {
+                        countResults += rs.getRow();
                     }
-                });
+                    rs = statement.getResultSet();
+                }
+
+                finalResultCount = countResults;
+                LOGGER.debug(() -> LOG_ROWS_PROCESSED);
             }
             connection.commit();
             LOGGER.debug(() -> LOG_COMMIT_SUCCESS);

@@ -6,9 +6,9 @@ description: |
 
 scenarios:
   default:
-    schema: run driver=jdbc tags==block:schema   cycles==UNDEF                             threads==1   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
-    rampup: run driver=jdbc tags==block:rampup   cycles===TEMPLATE(rampup-cycles,10000000) threads=auto url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
-    main:   run driver=jdbc tags==block:'main.*' cycles===TEMPLATE(main-cycles,10000000)   threads=auto url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    schema: run driver=jdbc tags==block:schema   cycles==UNDEF                        threads==1   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    rampup: run driver=jdbc tags==block:rampup   cycles===TEMPLATE(rampup-cycles,100) threads=auto url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    main:   run driver=jdbc tags==block:'main.*' cycles===TEMPLATE(main-cycles,100)   threads=auto url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
 
 params:
   instrument: TEMPLATE(instrument,false)
@@ -27,16 +27,16 @@ blocks:
     params:
     ops:
       drop-database:
-        #query: |
+        #execute: |
         #  DROP DATABASE IF EXISTS TEMPLATE(database,baselines);
       create-database:
-        query: |
+        execute: |
           CREATE DATABASE IF NOT EXISTS TEMPLATE(database,baselines);
       drop-table:
-        query: |
+        execute: |
           DROP TABLE IF EXISTS TEMPLATE(database,baselines).TEMPLATE(table,iot);
       create-table:
-        query: |
+        execute: |
           CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,iot) (
             machine_id UUID,
             sensor_name STRING,
@@ -51,7 +51,7 @@ blocks:
     params:
     ops:
       insert-rampup:
-        query: |
+        executeUpdate: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
           (machine_id, sensor_name, time, sensor_value, station_id, data)
           VALUES (
@@ -65,7 +65,7 @@ blocks:
       ratio: TEMPLATE(read_ratio,1)
     ops:
       select-read:
-        query: |
+        executeQuery: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
           WHERE machine_id='{machine_id}' and sensor_name='{sensor_name}'
           LIMIT TEMPLATE(limit,10);
@@ -74,7 +74,7 @@ blocks:
       ratio: TEMPLATE(write_ratio,9)
     ops:
       insert-main:
-        query: |
+        executeUpdate: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
           (machine_id, sensor_name, time, sensor_value, station_id, data)
           VALUES (

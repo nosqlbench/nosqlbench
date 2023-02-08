@@ -28,8 +28,8 @@ description: |
 scenarios:
   default:
     schema: run driver=jdbc tags==block:schema   cycles==UNDEF threads==1
-    rampup: run driver=jdbc tags==block:rampup   cycles===TEMPLATE(rampup-cycles,10B) threads=auto
-    main:   run driver=jdbc tags==block:'main.*' cycles===TEMPLATE(main-cycles,100M)  threads=auto
+    rampup: run driver=jdbc tags==block:rampup   cycles===TEMPLATE(rampup-cycles,100) threads=auto
+    main:   run driver=jdbc tags==block:'main.*' cycles===TEMPLATE(main-cycles,100)   threads=auto
 
 params:
   instrument: TEMPLATE(instrument,false)
@@ -66,16 +66,16 @@ blocks:
       prepared: false
     ops:
       #drop-database:
-      #  query: |
+      #  execute: |
       #    DROP DATABASE IF EXISTS TEMPLATE(database,baselines);
       create-database:
-        query: |
+        execute: |
           CREATE DATABASE IF NOT EXISTS TEMPLATE(database,baselines);
       drop-table:
-        query: |
+        execute: |
           DROP TABLE IF EXISTS TEMPLATE(database,baselines).TEMPLATE(table,tabular);
       create-table:
-        query: |
+        execute: |
           CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) (
            part STRING,
            clust STRING,
@@ -83,60 +83,63 @@ blocks:
            data4 STRING, data5 STRING, data6 STRING, data7 STRING,
            PRIMARY KEY (part,clust)
           );
+
   rampup:
     params:
     ops:
       rampup-insert:
-        query: |
+        executeUpdate: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           (part,clust,data0,data1,data2,data3,data4,data5,data6,data7)
           VALUES (
             '{part_layout}','{clust_layout}','{data0}','{data1}','{data2}',
             '{data3}','{data4}','{data5}','{data6}','{data7}'
           );
+
   verify:
     params:
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
     ops:
       verify-select:
-        query: |
+        executeQuery: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_layout}'
           AND clust='{clust_layout}'
+
   main-read:
     params:
       ratio: TEMPLATE(read_ratio,1)
     ops:
       main-select-all:
-        query: |
+        executeQuery: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-01:
-        query: |
+        executeQuery: |
           SELECT data0,data1 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-0246:
-        query: |
+        executeQuery: |
           SELECT data0,data2,data4,data6 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-1357:
-        query: |
+        executeQuery: |
           SELECT data1,data3,data5,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-0123:
-        query: |
+        executeQuery: |
           SELECT data0,data1,data2,data3 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-4567:
-        query: |
+        executeQuery: |
           SELECT data4,data5,data6,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-67:
-        query: |
+        executeQuery: |
           SELECT data6,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select:
-        query: |
+        executeQuery: |
           SELECT data0,data1,data2,data3,data4,data5,data6,data7
           FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
@@ -145,7 +148,7 @@ blocks:
       ratio: TEMPLATE(write_ratio,8)
     ops:
       main-write:
-        query: |
+        executeUpdate: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           (part, clust, data0,data1,data2,data3,data4,data5,data6,data7)
           VALUES (

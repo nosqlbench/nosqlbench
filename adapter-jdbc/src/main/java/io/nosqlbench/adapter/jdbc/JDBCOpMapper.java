@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.jdbc;
 
 import io.nosqlbench.adapter.jdbc.opdispensers.JDBCExecuteOpDispenser;
+import io.nosqlbench.adapter.jdbc.opdispensers.JDBCExecuteQueryOpDispenser;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
@@ -69,13 +70,16 @@ public class JDBCOpMapper implements OpMapper<JDBCOp> {
 
                 // SELECT uses 'executeQuery' and returns a 'ResultSet'
                 // https://jdbc.postgresql.org/documentation/query/#example51processing-a-simple-query-in-jdbc
+                case executeQuery ->
+                    new JDBCExecuteQueryOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
 
                 // INSERT|UPDATE|DELETE uses 'executeUpdate' and returns an 'int'
                 // https://jdbc.postgresql.org/documentation/query/#performing-updates
 
                 // CREATE|DROP TABLE|VIEW uses 'execute' (as opposed to 'executeQuery' which returns a 'ResultSet')
                 // https://jdbc.postgresql.org/documentation/query/#example54dropping-a-table-in-jdbc
-                case query -> new JDBCExecuteOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
+                case execute, executeUpdate ->
+                    new JDBCExecuteOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
             };
         }
     }

@@ -37,23 +37,16 @@ import java.sql.Statement;
  * @see <a href="https://github.com/brettwooldridge/HikariCP">HikariCP connection pooling</a> for details.
  */
 public abstract class JDBCOp implements RunnableOp {
-    private final static Logger logger = LogManager.getLogger(JDBCOp.class);
+    private static final Logger LOGGER = LogManager.getLogger(JDBCOp.class);
+    protected static final String LOG_COMMIT_SUCCESS = "Executed the JDBC statement & committed the connection successfully";
 
-    private final Connection connection;
-    private final Statement statement;
-    private final String queryString;
+    protected final String LOG_GENERIC_ERROR;
+    protected final Connection connection;
+    protected final Statement statement;
+    protected final String queryString;
 
-    public String getQueryString() {
-        return queryString;
-    }
-
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public Statement getStatement() {
-        return statement;
-    }
+    protected int finalResultCount;
+    protected String LOG_ROWS_PROCESSED = "Total number of rows processed is [" + finalResultCount + "]";
 
     /**
      * @param connection
@@ -64,5 +57,7 @@ public abstract class JDBCOp implements RunnableOp {
         this.connection = connection;
         this.statement = statement;
         this.queryString = queryString;
+        LOG_GENERIC_ERROR = String.format("Exception while attempting to run the jdbc query %s", queryString);
+        LOGGER.debug(() -> "Query to be executed: " + queryString);
     }
 }

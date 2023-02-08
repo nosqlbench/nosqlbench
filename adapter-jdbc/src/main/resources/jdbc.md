@@ -19,8 +19,10 @@ Other NB engine parameters are straight forward:
 * `<nb_cmd>`: is `./nb` (using binary) or the `java -jar nb5.jar`.
 
 # Configuration
-There is really one main configuration with which we could issue a query and process the results back based on the [PostgreSQL® Query](https://jdbc.postgresql.org/documentation/query/) pattern.
+There are the below main configuratios with which we could issue a query and process the results back based on the [PostgreSQL® Query](https://jdbc.postgresql.org/documentation/query/) pattern.
 ## Config Sources
-* `query`: This is to issue DML statement such as `SELECT` operation which would return a `ResultSet` object to process. This is to issue any DDL statements such `CREATE DATABASE|TABLE` or `DROP DATABASE|TABLE` operations which returns nothing. This is to issue DML statements such as `INSERT|UPDATE|DELETE` operations that will return how many number of rows were affected by that operation.
+* `execute`: This is to issue any DDL statements such `CREATE DATABASE|TABLE` or `DROP DATABASE|TABLE` operations which returns nothing.
+* `executeQuery`: This is to issue DML statement such as `SELECT` operation which would return a `ResultSet` object to process.
+* `executeUpdate`: This is to issue DML statements such as `INSERT|UPDATE|DELETE` operations that will return how many number of rows were affected by that operation.
 ### Examples
 Check out the default activities under the [activities.baselinesv2](./activities.baselinesv2) directory.
