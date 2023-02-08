@@ -64,6 +64,7 @@
         <module.adapter-pulsar>adapter-pulsar</module.adapter-pulsar>
         <module.adapter-s4j>adapter-s4j</module.adapter-s4j>
         <module.adapter-kafka>adapter-kafka</module.adapter-kafka>
+        <module.adapter-jdbc>adapter-jdbc</module.adapter-jdbc>
 
         <!-- VIRTDATA MODULES -->
         <module.virtdata-api>virtdata-api</module.virtdata-api>
@@ -106,6 +107,7 @@
         <module>adapter-pulsar</module>
         <module>adapter-s4j</module>
         <module>adapter-kafka</module>
+        <module>adapter-jdbc</module>
 
         <!-- VIRTDATA MODULES -->
         <module>virtdata-api</module>
@@ -164,7 +166,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.4.2</version>
             </plugin>
         </plugins>
     </reporting>
@@ -179,6 +181,12 @@
         <developer>
             <name>Sebastián Estévez</name>
             <email>estevezsebastian@gmail.com</email>
+            <organization>nosqlbench.io</organization>
+            <organizationUrl>http://nosqlbench.io/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Madhavan S.</name>
+            <url>https://github.com/msmygit</url>
             <organization>nosqlbench.io</organization>
             <organizationUrl>http://nosqlbench.io/</organizationUrl>
         </developer>
