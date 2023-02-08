@@ -18,6 +18,7 @@ package io.nosqlbench.api.engine.activityimpl;
 
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.engine.util.Unit;
+import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -212,5 +213,23 @@ public class ActivityDef implements NBNamedElement {
     @Override
     public String getName() {
         return getAlias();
+    }
+
+    public ActivityDef deprecate(String deprecatedName, String newName) {
+        Object deprecatedParam = this.parameterMap.get(deprecatedName);
+        if (deprecatedParam==null) {
+            return this;
+        }
+        if (deprecatedParam instanceof CharSequence chars) {
+            if (this.parameterMap.containsKey(newName)) {
+                throw new BasicError("You have specified activity param '" + deprecatedName + "' in addition to the valid name '" + newName +"'. Remove '" + deprecatedName + "'.");
+            } else {
+                logger.warn("Auto replacing deprecated activity param " + deprecatedName + " with new '" + newName +"="+ chars +".");
+                parameterMap.put(newName,parameterMap.remove(deprecatedParam));
+            }
+        } else {
+            throw new BasicError("Can't replace deprecated name with value of type " + deprecatedName.getClass().getCanonicalName());
+        }
+        return this;
     }
 }
