@@ -224,8 +224,8 @@ public class ActivityDef implements NBNamedElement {
             if (this.parameterMap.containsKey(newName)) {
                 throw new BasicError("You have specified activity param '" + deprecatedName + "' in addition to the valid name '" + newName +"'. Remove '" + deprecatedName + "'.");
             } else {
-                logger.warn("Auto replacing deprecated activity param " + deprecatedName + " with new '" + newName +"="+ chars +".");
-                parameterMap.put(newName,parameterMap.remove(deprecatedParam));
+                logger.warn("Auto replacing deprecated activity param '" + deprecatedName + "="+ chars +"' with new '" + newName +"="+ chars +"'.");
+                parameterMap.put(newName,parameterMap.remove(deprecatedName));
             }
         } else {
             throw new BasicError("Can't replace deprecated name with value of type " + deprecatedName.getClass().getCanonicalName());
