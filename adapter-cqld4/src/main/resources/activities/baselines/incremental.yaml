@@ -29,11 +29,11 @@ scenarios:
   default:
     schema: run tags=block:schema.* threads==1
     main: run tags=block:main-.*.* cycles===TEMPLATE(main-cycles,0) threads=auto
-    default-schema: run tags=block:'schema.*' threads==1
-    default-main: run tags=block:'main.*' cycles===TEMPLATE(main-cycles,0) threads=auto
+    default-schema: run tags=block:"schema.*" threads==1
+    default-main: run tags=block:"main.*" cycles===TEMPLATE(main-cycles,0) threads=auto
   astra:
     schema: run tags=block:astra-schema threads==1
-    main: run tags=block:'main.*' cycles===TEMPLATE(main-cycles,0) threads=auto
+    main: run tags=block:"main.*" cycles===TEMPLATE(main-cycles,0) threads=auto
 
 params:
   instrument: true

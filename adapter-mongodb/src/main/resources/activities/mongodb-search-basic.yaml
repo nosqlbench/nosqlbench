@@ -6,7 +6,7 @@ description: |
   It's a counterpart of the Stargate's Documents API Basic Search workflow.
 
 scenarios:
-  schema:                run driver=mongodb tags==block:'schema.*' threads==1 cycles==UNDEF
+  schema:                run driver=mongodb tags==block:"schema.*" threads==1 cycles==UNDEF
   rampup-write:          run driver=mongodb tags==block:rampup-write cycles===TEMPLATE(docscount,10000000) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=auto errors=timer,warn
   rampup-read:           run driver=mongodb tags==block:rampup-read cycles===TEMPLATE(rampup-cycles, 10000000) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
   main:                  run driver=mongodb tags==block:main cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn

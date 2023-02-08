@@ -7,11 +7,11 @@ scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==block:"main-*.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
   astra:
     schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==block:"main-*.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 params:
   instrument: TEMPLATE(instrument,false)

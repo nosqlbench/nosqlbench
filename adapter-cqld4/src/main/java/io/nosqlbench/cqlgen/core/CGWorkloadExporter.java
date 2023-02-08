@@ -320,9 +320,9 @@ public class CGWorkloadExporter implements BundledApp {
 
             put("default",
                     new LinkedHashMap<>() {{
-                        put("schema", "run driver=cql tags=block:'schema-*.*' threads===UNDEF cycles===UNDEF");
+                        put("schema", "run driver=cql tags=block:\"schema.*\" threads===UNDEF cycles===UNDEF");
                         put("rampup", "run driver=cql tags=block:rampup threads=auto cycles===TEMPLATE(rampup-cycles,10000)");
-                        put("main", "run driver=cql tags=block:'main-*.*' threads=auto cycles===TEMPLATE(main-cycles,10000)");
+                        put("main", "run driver=cql tags=block:\"main.*\" threads=auto cycles===TEMPLATE(main-cycles,10000)");
                     }});
 
             put("main-insert", "run driver=cql tags=block:main-insert threads=auto cycles===TEMPLATE(main-cycles,10000)");

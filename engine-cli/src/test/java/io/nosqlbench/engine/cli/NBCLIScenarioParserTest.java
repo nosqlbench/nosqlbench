@@ -120,7 +120,7 @@ public class NBCLIScenarioParserTest {
                 "alias", "scenariotest_schemaonly_schema",
                 "cycles-test", "20",
                 "driver", "stdout",
-                "tags", "block:'schema.*'",
+                "tags", "block:\"schema.*\"",
                 "workload", "scenario-test"
         ));
         NBCLIOptions opts1 = new NBCLIOptions(new String[]{"scenario-test", "schema-only", "doundef=20"});
@@ -170,7 +170,7 @@ public class NBCLIScenarioParserTest {
                 "alias", "scenariotest_schemaonly_schema",
                 "cycles-test", "20",
                 "driver", "stdout",
-                "tags", "block:'schema.*'",
+                "tags", "block:\"schema.*\"",
                 "workload", "scenario-test"
         ));
         NBCLIOptions opts1 = new NBCLIOptions(new String[]{"local/example-scenarios", "namedsteps.one", "testparam1=testvalue2"});

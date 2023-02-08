@@ -48,7 +48,7 @@ schema_activitydef = params.withDefaults({
 });
 schema_activitydef.alias="findmax_schema";
 schema_activitydef.threads="1";
-schema_activitydef.tags="TEMPLATE(schematags,block:'schema.*')";
+schema_activitydef.tags="TEMPLATE(schematags,block:\"schema.*\")";
 print("Creating schema with schematags:" + schema_activitydef.tags);
 
 scenario.run(schema_activitydef);

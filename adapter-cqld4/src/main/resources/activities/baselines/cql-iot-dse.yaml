@@ -2,8 +2,8 @@ description: An IOT workload with more optimal settings for DSE
 scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
-    rampup: run driver=cql tags==block:rampup  cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==block:"main-*.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    rampup: run driver=cql tags==block:rampup  cycles===TEMPLATE(rampup-cycles,100) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,100) threads=auto
 
 bindings:
   machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID

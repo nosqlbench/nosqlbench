@@ -1,0 +1,79 @@
+description: |
+  A cql-starter workload primarily for:
+  * Cassandra: 3.x, 4.x.
+  * DataStax Enterprise: 6.8.x.
+  * DataStax Astra.
+
+scenarios:
+  default:
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+  astra:
+    schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+
+params:
+  x: y
+
+bindings:
+  machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
+  message: ToString(); TextOfFile('data/cql-starter-message.txt')
+  time: Mul(100L); Div(10000L); ToJavaInstant()
+  timestamp: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L); Mul(1000L);
+
+blocks:
+  schema:
+    params:
+      prepared: false
+    ops:
+      create-keyspace: |
+        create keyspace if not exists <<keyspace:starter>>
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
+        AND durable_writes = true;
+      create-table: |
+        create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
+        machine_id UUID,  
+        message text,    
+        time timestamp,          
+        PRIMARY KEY ((machine_id), time)
+        ) WITH CLUSTERING ORDER BY (time DESC);
+#      truncate-table: |
+#        truncate table <<keyspace:starter>>.<<table:cqlstarter>>;
+  schema-astra:
+    params:
+      prepared: false
+    ops:
+      create-table-astra: |
+        create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
+        machine_id UUID, 
+        message text,
+        time timestamp, 
+        PRIMARY KEY ((machine_id), time)
+        ) WITH CLUSTERING ORDER BY (time DESC);
+  rampup:
+    params:
+      cl: <<write_cl:LOCAL_QUORUM>>
+      idempotent: true
+    ops:
+      insert-rampup: |
+        insert into  <<keyspace:starter>>.<<table:cqlstarter>> (machine_id, message, time) 
+        values ({machine_id}, {message}, {time}) using timestamp {timestamp};
+  main-read:
+    params:
+      ratio: <<read_ratio:1>>
+      cl: <<read_cl:LOCAL_QUORUM>>
+    ops:
+      select-read: |
+        select * from <<keyspace:starter>>.<<table:cqlstarter>>
+        where machine_id={machine_id};
+  main-write:
+    params:
+      ratio: <<write_ratio:9>>
+      cl: <<write_cl:LOCAL_QUORUM>>
+      idempotent: true
+    ops:
+      insert-main: |
+        insert into <<keyspace:starter>>.<<table:cqlstarter>>
+        (machine_id, message, time) values ({machine_id}, {message}, {time}) using timestamp {timestamp};

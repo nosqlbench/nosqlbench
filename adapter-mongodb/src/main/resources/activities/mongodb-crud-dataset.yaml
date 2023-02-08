@@ -6,7 +6,7 @@ description: |
 
 scenarios:
   default:
-    schema:   run driver=mongodb tags==block:'schema.*' threads==1 cycles==UNDEF
+    schema:   run driver=mongodb tags==block:"schema.*" threads==1 cycles==UNDEF
     write:    run driver=mongodb tags==block:main-write,type:write cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
     read:     run driver=mongodb tags==block:main-read,type:read cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
     update:   run driver=mongodb tags==block:main-update,type:update cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
