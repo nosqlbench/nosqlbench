@@ -26,6 +26,6 @@ package io.nosqlbench.adapter.jdbc;
 public enum JDBCOpType {
     //See https://jdbc.postgresql.org/documentation/query/
     execute, // Used for CREATE|DROP DATABASE|TABLE operation. Returns nothing.
-    executeQuery, // Used for SELECT operation. Returns a ResultSet object.
-    executeUpdate // Used for updating records such as INSERT|UPDATE|DELETE. Returns the number of rows affected.
+    query, // Used for SELECT operation. Returns a ResultSet object.
+    update // Used for updating records such as INSERT|UPDATE|DELETE. Returns the number of rows affected.
 }

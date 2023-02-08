@@ -51,7 +51,7 @@ blocks:
     params:
     ops:
       insert-rampup:
-        executeUpdate: |
+        update: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
           (machine_id, sensor_name, time, sensor_value, station_id, data)
           VALUES (
@@ -65,7 +65,7 @@ blocks:
       ratio: TEMPLATE(read_ratio,1)
     ops:
       select-read:
-        executeQuery: |
+        query: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
           WHERE machine_id='{machine_id}' and sensor_name='{sensor_name}'
           LIMIT TEMPLATE(limit,10);
@@ -74,7 +74,7 @@ blocks:
       ratio: TEMPLATE(write_ratio,9)
     ops:
       insert-main:
-        executeUpdate: |
+        update: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
           (machine_id, sensor_name, time, sensor_value, station_id, data)
           VALUES (

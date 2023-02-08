@@ -41,7 +41,7 @@ blocks:
     params:
     ops:
       rampup-insert:
-        executeUpdate: |
+        update: |
           INSERT INTO TEMPLATE(database,baselines).TEMPLATE(table,keyvalue)
           (key, value) VALUES ({seq_key},{seq_value});
 
@@ -50,13 +50,13 @@ blocks:
       ratio: TEMPLATE(read_ratio,5)
     ops:
       main-select:
-        executeQuery: |
+        query: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) WHERE key='{rw_key}';
   main-write:
     params:
       ratio: TEMPLATE(write_ratio,5)
     ops:
       main-insert:
-        executeUpdate: |
+        update: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
           (key, value) VALUES ('{rw_key}', '{rw_value}');

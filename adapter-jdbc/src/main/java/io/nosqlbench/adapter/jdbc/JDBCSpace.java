@@ -129,45 +129,113 @@ public class JDBCSpace implements AutoCloseable {
 
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(JDBCSpace.class)
-            .add(Param.defaultTo("url", "jdbc:postgresql:/").setDescription("The connection URL used to connect to the DBMS. Defaults to 'jdbc:postgresql:/'"))
-            .add(Param.defaultTo("serverName", "localhost").setDescription("The host name of the server. Defaults to 'localhost'"))
-            .add(Param.optional("databaseName").setDescription("The database name. The default is to connect to a database with the same name as the user name used to connect to the server."))
+            .add(Param.defaultTo("url", "jdbc:postgresql:/")
+                .setDescription("The connection URL used to connect to the DBMS. Defaults to 'jdbc:postgresql:/'"))
+            .add(Param.defaultTo("serverName", "localhost")
+                .setDescription("The host name of the server. Defaults to 'localhost'"))
+            .add(Param.optional("databaseName")
+                .setDescription("The database name. The default is to connect to a database with the same name as the user name used to connect to the server."))
             // See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby & https://jdbc.postgresql.org/documentation/use/
-            .add(Param.defaultTo("portNumber", "5432").setDescription("The port number the server is listening on. Defaults to the PostgreSQL® standard port number (5432)."))
-            .add(Param.optional("user").setDescription("The database user on whose behalf the connection is being made."))
-            .add(Param.optional("password").setDescription("The database user’s password."))
-            .add(Param.optional("ssl").setDescription("Whether to connect using SSL. Default is false."))
-            .add(Param.optional("sslmode").setDescription("Possible values include disable , allow , prefer , require , verify-ca and verify-full . require , allow and prefer all default to a non-validating SSL factory and do not check the validity of the certificate or the host name. verify-ca validates the certificate, but does not verify the hostname. verify-full will validate that the certificate is correct and verify the host connected to has the same hostname as the certificate. Default is prefer."))
-            .add(Param.optional("sslcert").setDescription("Provide the full path for the certificate file. Defaults to defaultdir/postgresql.crt, where defaultdir is ${user.home}/.postgresql/ in *nix systems and %appdata%/postgresql/ on windows."))
-            .add(Param.optional("sslrootcert").setDescription("File name of the SSL root certificate."))
-            .add(Param.defaultTo("applicationName", "NoSQLBench").setDescription("The application name to be used. Default is 'NoSQLBench'."))
-            .add(Param.optional("rewriteBatchedInserts").setDescription("This will change batch inserts from insert into foo (col1, col2, col3) values (1, 2, 3) into insert into foo (col1, col2, col3) values (1, 2, 3), (4, 5, 6) this provides 2-3x performance improvement. Default is true"))
-            .add(Param.optional("autoCommit").setDescription("This property controls the default auto-commit behavior of connections returned from the pool. It is a boolean value. Default: false. This cannot be changed."))
-            .add(Param.optional("connectionTimeout").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("idleTimeout").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.defaultTo("keepaliveTime", "150000").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("maxLifetime").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("connectionTestQuery").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("minimumIdle").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.defaultTo("maximumPoolSize", "40").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. Default value is 40 and cannot be changed."))
-            .add(Param.optional("metricRegistry").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("healthCheckRegistry").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("poolName").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("initializationFailTimeout").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("isolateInternalQueries").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("allowPoolSuspension").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("readOnly").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("registerMbeans").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("catalog").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("connectionInitSql").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("driverClassName").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("transactionIsolation").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("validationTimeout").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("leakDetectionThreshold").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("dataSource").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("schema").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("threadFactory").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
-            .add(Param.optional("scheduledExecutor").setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. This property is not exposed and hence cannot be changed."))
+            .add(Param.defaultTo("portNumber", "5432")
+                .setDescription("The port number the server is listening on. Defaults to the PostgreSQL® standard port number (5432)."))
+            .add(Param.optional("user")
+                .setDescription("The database user on whose behalf the connection is being made."))
+            .add(Param.optional("password")
+                .setDescription("The database user’s password."))
+            .add(Param.optional("ssl")
+                .setDescription("Whether to connect using SSL. Default is false."))
+            .add(Param.optional("sslmode")
+                .setDescription("Possible values include disable , allow , prefer , require , verify-ca and verify-full." +
+                    " require , allow and prefer all default to a non-validating SSL factory and do not check the validity of the certificate or the host name." +
+                    " verify-ca validates the certificate, but does not verify the hostname." +
+                    " verify-full will validate that the certificate is correct and verify the host connected to has the same hostname as the certificate." +
+                    " Default is prefer."))
+            .add(Param.optional("sslcert")
+                .setDescription("Provide the full path for the certificate file. Defaults to defaultdir/postgresql.crt, where defaultdir is ${user.home}/.postgresql/ in *nix systems and %appdata%/postgresql/ on windows."))
+            .add(Param.optional("sslrootcert")
+                .setDescription("File name of the SSL root certificate."))
+            .add(Param.defaultTo("applicationName", "NoSQLBench")
+                .setDescription("The application name to be used. Default is 'NoSQLBench'."))
+            .add(Param.optional("rewriteBatchedInserts")
+                .setDescription("This will change batch inserts from insert into foo (col1, col2, col3) values (1, 2, 3) into insert into foo (col1, col2, col3) values (1, 2, 3), (4, 5, 6) this provides 2-3x performance improvement. " +
+                    "Default is true"))
+            .add(Param.optional("autoCommit")
+                .setDescription("This property controls the default auto-commit behavior of connections returned from the pool. " +
+                    "It is a boolean value. Default: false. This cannot be changed."))
+            .add(Param.optional("connectionTimeout")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("idleTimeout")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.defaultTo("keepaliveTime", "150000")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("maxLifetime")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("connectionTestQuery")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("minimumIdle")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.defaultTo("maximumPoolSize", "40")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. Default value is 40 and cannot be changed."))
+            .add(Param.optional("metricRegistry")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("healthCheckRegistry")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("poolName")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("initializationFailTimeout")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("isolateInternalQueries")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("allowPoolSuspension")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("readOnly")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("registerMbeans")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("catalog")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("connectionInitSql")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("driverClassName")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("transactionIsolation")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("validationTimeout")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("leakDetectionThreshold")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("dataSource")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("schema")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("threadFactory")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
+            .add(Param.optional("scheduledExecutor")
+                .setDescription("See https://github.com/brettwooldridge/HikariCP/tree/dev#gear-configuration-knobs-baby for details. " +
+                     "This property is not exposed and hence cannot be changed."))
             .asReadOnly();
     }
 

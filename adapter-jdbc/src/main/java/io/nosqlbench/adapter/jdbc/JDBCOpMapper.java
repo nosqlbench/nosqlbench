@@ -70,7 +70,7 @@ public class JDBCOpMapper implements OpMapper<JDBCOp> {
 
                 // SELECT uses 'executeQuery' and returns a 'ResultSet'
                 // https://jdbc.postgresql.org/documentation/query/#example51processing-a-simple-query-in-jdbc
-                case executeQuery ->
+                case query ->
                     new JDBCExecuteQueryOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
 
                 // INSERT|UPDATE|DELETE uses 'executeUpdate' and returns an 'int'
@@ -78,7 +78,7 @@ public class JDBCOpMapper implements OpMapper<JDBCOp> {
 
                 // CREATE|DROP TABLE|VIEW uses 'execute' (as opposed to 'executeQuery' which returns a 'ResultSet')
                 // https://jdbc.postgresql.org/documentation/query/#example54dropping-a-table-in-jdbc
-                case execute, executeUpdate ->
+                case execute, update ->
                     new JDBCExecuteOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
             };
         }

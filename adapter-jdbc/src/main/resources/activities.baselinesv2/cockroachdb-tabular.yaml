@@ -88,7 +88,7 @@ blocks:
     params:
     ops:
       rampup-insert:
-        executeUpdate: |
+        update: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           (part,clust,data0,data1,data2,data3,data4,data5,data6,data7)
           VALUES (
@@ -101,7 +101,7 @@ blocks:
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
     ops:
       verify-select:
-        executeQuery: |
+        query: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_layout}'
           AND clust='{clust_layout}'
@@ -111,35 +111,35 @@ blocks:
       ratio: TEMPLATE(read_ratio,1)
     ops:
       main-select-all:
-        executeQuery: |
+        query: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-01:
-        executeQuery: |
+        query: |
           SELECT data0,data1 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-0246:
-        executeQuery: |
+        query: |
           SELECT data0,data2,data4,data6 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-1357:
-        executeQuery: |
+        query: |
           SELECT data1,data3,data5,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-0123:
-        executeQuery: |
+        query: |
           SELECT data0,data1,data2,data3 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-4567:
-        executeQuery: |
+        query: |
           SELECT data4,data5,data6,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select-67:
-        executeQuery: |
+        query: |
           SELECT data6,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
       main-select:
-        executeQuery: |
+        query: |
           SELECT data0,data1,data2,data3,data4,data5,data6,data7
           FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           WHERE part='{part_read}' LIMIT {limit};
@@ -148,7 +148,7 @@ blocks:
       ratio: TEMPLATE(write_ratio,8)
     ops:
       main-write:
-        executeUpdate: |
+        update: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
           (part, clust, data0,data1,data2,data3,data4,data5,data6,data7)
           VALUES (
