@@ -80,6 +80,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         for (OpTemplate ot : opTemplates) {
             ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of());
             String driverName = incompleteOpDef.takeOptionalStaticValue("driver", String.class)
+                .or(() -> incompleteOpDef.takeOptionalStaticValue("type",String.class))
                 .or(() -> activityDef.getParams().getOptionalString("driver"))
                 .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
 
