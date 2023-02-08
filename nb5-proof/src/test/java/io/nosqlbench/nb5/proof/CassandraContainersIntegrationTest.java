@@ -40,19 +40,19 @@ import java.util.regex.Pattern;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ExampleContainersIntegrationTest {
+public class CassandraContainersIntegrationTest {
 
-    public static Logger logger = LogManager.getLogger(ExampleContainersIntegrationTest.class);
+    public static Logger logger = LogManager.getLogger(CassandraContainersIntegrationTest.class);
     private final String java = Optional.ofNullable(System.getenv(
         "JAVA_HOME")).map(v -> v + "/bin/java").orElse("java");
 
     private final static String JARNAME = "../nb5/target/nb5.jar";
 //    private static GenericContainer cass= new CassandraContainer("cassandra").withExposedPorts(9042);
 
-    private static String hostIP = "127.0.0.1";
-    private static String datacenter = "datacenter1";
-    private static Integer mappedPort9042 = 9042;
-    private static final Integer EXPOSED_PORT = 9042;
+    private static final ArrayList<String> matchedPaths = new ArrayList<>(); //the list of paths from list-workloads
+    private static String hostIP = "127.0.0.1"; //the host ip of the cassandra image in the container
+    private static String datacenter = "datacenter1"; //the default datacenter name
+    private static Integer mappedPort9042 = 9042; //the port mapped to the original exposed port of the cassandra image
     private static final CassandraContainer cass = (CassandraContainer) new CassandraContainer(DockerImageName.parse("cassandra:latest"))
         .withExposedPorts(9042).withAccessToHost(true);
         //.waitingFor(new CassandraWaitStrategy());
@@ -74,7 +74,7 @@ public class ExampleContainersIntegrationTest {
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 
         Matcher matcher = pattern.matcher(listOut);
-        ArrayList<String> matchedPaths = new ArrayList<>();
+
 
         while (matcher.find()) {
             matchedPaths.add(matcher.group());
