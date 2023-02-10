@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,8 +114,8 @@ public class ActivityTypeLoader {
 
     private Set<URL> addLibDir(Set<URL> urlsToAdd, Path libpath) {
         Set<URL> urls = NBIO.local()
-            .prefix(libpath.toString())
-            .extension(".jar")
+            .searchPrefixes(libpath.toString())
+            .extensionSet(".jar")
             .list().stream().map(Content::getURL)
             .collect(Collectors.toSet());
         urlsToAdd.addAll(urls);

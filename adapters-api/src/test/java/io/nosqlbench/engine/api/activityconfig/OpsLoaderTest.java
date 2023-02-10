@@ -20,6 +20,7 @@ import io.nosqlbench.engine.api.activityconfig.yaml.OpsDoc;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public class OpsLoaderTest {
 
     @Test
     public void testTemplateVarSubstitution() {
-        OpsDocList opsDocs = OpsLoader.loadPath("activities/template_vars", Map.of(),"src/test/resources");
+        OpsDocList opsDocs = OpsLoader.loadPath("activities/template_vars", new HashMap<>(),"src/test/resources");
         assertThat(opsDocs).isNotNull();
         List<OpsDoc> docs = opsDocs.getStmtDocs();
         assertThat(docs).hasSize(1);

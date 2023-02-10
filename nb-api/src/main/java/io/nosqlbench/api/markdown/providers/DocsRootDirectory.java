@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public abstract class DocsRootDirectory implements RawMarkdownSource {
 
     @Override
     public List<Content<?>> getMarkdownInfo() {
-        List<Content<?>> list = NBIO.local().name(getRootPathName()).list();
+        List<Content<?>> list = NBIO.local().pathname(getRootPathName()).list();
         NBIOWalker.CollectVisitor capture = new NBIOWalker.CollectVisitor(true, false);
         NBIOWalker.RegexFilter filter = new NBIOWalker.RegexFilter("\\.md",true);
         for (Content<?> content : list) {

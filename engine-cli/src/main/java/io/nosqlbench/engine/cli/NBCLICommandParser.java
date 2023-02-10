@@ -71,9 +71,9 @@ public class NBCLICommandParser {
                     break;
                 default:
                     Optional<Content<?>> scriptfile = NBIO.local()
-                            .prefix("scripts/auto")
-                            .name(word)
-                            .extension("js")
+                            .searchPrefixes("scripts/auto")
+                            .pathname(word)
+                            .extensionSet("js")
                             .first();
 
                     //Script
