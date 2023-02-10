@@ -150,13 +150,14 @@
     </build>
     <profiles>
         <profile>
-            <id>build-nb-appimage</id>
+            <id>build-nbr-appimage</id>
             <activation>
                 <os>
                     <family>unix</family>
                     <name>linux</name>
                     <arch>amd64</arch>
                 </os>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <build>
                 <plugins>
