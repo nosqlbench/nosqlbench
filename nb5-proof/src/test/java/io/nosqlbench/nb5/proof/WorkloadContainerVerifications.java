@@ -37,8 +37,9 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class CassandraContainersIntegrationTest {
+public class WorkloadContainerVerifications {
     private enum Driver {
         CQL("cql"),
         HTTP("http"),
@@ -55,16 +56,14 @@ public class CassandraContainersIntegrationTest {
             return name;
         }
     }
-    public static Logger logger = LogManager.getLogger(CassandraContainersIntegrationTest.class);
+    public static Logger logger = LogManager.getLogger(WorkloadContainerVerifications.class);
     private final String java = Optional.ofNullable(System.getenv(
         "JAVA_HOME")).map(v -> v + "/bin/java").orElse("java");
     private final static String JARNAME = "../nb5/target/nb5.jar";
     private final static String BASIC_CHECK_IDENTIFIER = "basic_check";
     private static final CassandraContainer cass = (CassandraContainer) new CassandraContainer(DockerImageName.parse("cassandra:latest"))
         .withExposedPorts(9042).withAccessToHost(true);
-
     private static Map<Driver, List<WorkloadDesc>> basicWorkloadsMapPerDriver = null;
-        //.waitingFor(new CassandraWaitStrategy());
     @BeforeAll
     public static void listWorkloads() {
 
@@ -82,7 +81,6 @@ public class CassandraContainersIntegrationTest {
 
     @BeforeEach
     public void setUp() {
-
         System.out.println("setup");
     }
 
@@ -101,13 +99,12 @@ public class CassandraContainersIntegrationTest {
             String path = workloadDesc.getYamlPath();
             int lastSlashIndex = path.lastIndexOf('/');
             String shortName = path.substring(lastSlashIndex + 1);
-            if(!shortName.equals("cql-keyvalue2.yaml"))
-                continue;;
+            if(shortName.equals("cql-iot-dse.yaml"))
+                continue;
             //STEP0:Start the test container and expose the 9042 port on the local host.
             //So that the docker bridge controller exposes the port to our process invoker that will run nb5
             //and target cassandra on that docker container
             cass.start();
-
             //the default datacenter name
             String datacenter = cass.getLocalDatacenter();
             //When running with a local Docker daemon, exposed ports will usually be reachable on localhost.
@@ -118,10 +115,9 @@ public class CassandraContainersIntegrationTest {
             String hostIP = cass.getHost();
 
 
-
            //STEP1: Run the example cassandra workload using the schema tag to create the Cass Baselines keyspace
             String[] args = new String[]{
-                "java", "-jar", JARNAME, shortName, BASIC_CHECK_IDENTIFIER, "host="+ hostIP, "localdc="+ datacenter, "port="+ mappedPort9042.toString()
+                "java", "-jar", JARNAME, shortName, BASIC_CHECK_IDENTIFIER, "host="+ hostIP, "localdc="+ datacenter, "port="+ mappedPort9042.toString(), "table=keyvalue", "keyspace=baselines"
             };
             logger.info("The final command line: " + String.join(" ", args));
             ProcessResult runSchemaResult = invoker.run("run-workload", 30, args);
@@ -166,43 +162,30 @@ public class CassandraContainersIntegrationTest {
                 logger.info("Table \"baselines.keyvalue\" was found, nb5 command had created it successfully");
 
                 //->Check for the creation of the baselines keyvalue table
-                logger.info("Table \"baselines.keyvalue\" has at least 5 rows of key-value pairs, nb5 command had created them successfully");
-                result = session.execute("SELECT count(*) FROM baselines.keyvalue");
-                int rowCount = result.one().getInt(0);
+                ResultSet resultSet = session.execute("SELECT count(*) FROM baselines.keyvalue");
+                Row row = resultSet.one();
+                long rowCount = row.getLong(0);
+                logger.info("Number of rows in baselines.keyvalue: " + rowCount);
                 assertTrue(rowCount >= 5);
                 logger.info("Table \"baselines.keyvalue\" has at least 5 rows of key-value pairs, nb5 command had created them successfully");
 
             } catch (Exception e)
             {
                 System.out.println(e.getMessage());
+                fail();
+            } finally {
+                cass.stop();
             }
-
-            cass.stop();
-
         }
-
-
-
-
-        //STEP5 Create a failing test to make sure that the workload won't work, here we use a random wrong IP
-//        String[] args2 = new String[]{
-//            "java", "-jar", JARNAME, "cql-keyvalue2.yaml", "default", "host=0.1.0.1", "localdc="+datacenter, "port="+ mappedPort9042.toString(), "rampup-cycles=10", "main-cycles=10"
-//        };
-//        logger.info("The final command line: " + String.join(" ", args2));
-//        ProcessResult runFailingSchemaResult = invoker.run("run-workload", 30, args2);
-//        assertThat(runFailingSchemaResult.exception).isNull();
-//        String runFailingSchemaOut = String.join("\n", runFailingSchemaResult.getStdoutData());
-//        assertThat(runFailingSchemaOut.toLowerCase()).contains("error");
-//        System.out.println("end");
     }
     @AfterEach
-    public void stopContainers(){
-
+    public void cleanup(){
+        System.out.println("setup");
     }
 
     /*
-    This method filters the input list of workloads to output the subset of workloads that include a specific scenario (input)
-    and run the specified driver
+    This method filters the input list of workloads to output the subset of workloads
+    that include a specific scenario (input) and run the specified driver
     */
     public static List<WorkloadDesc> getBasicCheckWorkloadsForDriver(List<WorkloadDesc> workloads ,String scenarioFilter,  String driver) {
         String substring = "driver=" + driver;

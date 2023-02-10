@@ -6,6 +6,7 @@ description: |
 scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    truncate: run driver=cql tags==block:truncate threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
   astra:
@@ -13,7 +14,8 @@ scenarios:
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
   basic_check:
-    schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    truncate: run driver=cql tags==block:truncate threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
     main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
@@ -54,6 +56,11 @@ blocks:
          'compaction_window_size': TEMPLATE(expiry_minutes,60),
          'compaction_window_unit': 'MINUTES'
         };
+
+  truncate:
+    params:
+      prepared: false
+    ops:
       truncate-table: |
         truncate table TEMPLATE(keyspace,baselines).TEMPLATE(table,iot);
   schema-astra:
