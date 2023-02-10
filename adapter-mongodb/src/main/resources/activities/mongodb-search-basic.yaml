@@ -29,9 +29,10 @@ bindings:
   lat: Uniform(-180d, 180d)
   lng: Hash() -> long; Uniform(-180d, 180d)
   friend_id: Add(-1); ToHashedUUID(); ToString() -> String
-  
+
   match1: Identity(); CoinFunc(<<match-ratio>>, FixedValue(0), FixedValue(1000))
   match2: Identity(); CoinFunc(<<match-ratio>>, FixedValue("true"), FixedValue("false"))
+#  Being removed because we are using the new JSON structure
   additional_fields: ListSizedStepped(<<docpadding:0>>,Template("\"{}\":{}",Identity(),Identity())); ToString(); ReplaceAll('\[\"', ',\"'); ReplaceAll('\[', ''); ReplaceAll('\]', '') -> String
 
 blocks:
@@ -46,12 +47,12 @@ blocks:
       drop-collection: |
         {
           drop: "<<collection:search_basic>>"
-        }       
+        }
 
       create-collection: |
         {
           create: "<<collection:search_basic>>"
-        }      
+        }
 
       create-indexes: |
         {
@@ -71,7 +72,7 @@ blocks:
               name: "city_idx"
             }
           ]
-        }        
+        }
 
     rampup-write:
       ops:
@@ -83,9 +84,9 @@ blocks:
               {
                 "_id":          "{seq_key}",
                 "user_id":      "{user_id}",
-                "created_on":   {created_on},
+                "created_on":   "{created_on}",
                 "full_name":    "{full_name}",
-                "married":      {married},
+                "married":      "{married}",
                 "address": {
                   "primary": {
                       "city":   "{city}",
@@ -94,18 +95,17 @@ blocks:
                   "secondary":  {}
                 },
                 "coordinates": [
-                                {lat},
-                                {lng}
+                                "{lat}",
+                                "{lng}"
                 ],
                 "children":     [],
                 "friends": [
                                 "{friend_id}"
                 ],
                 "debt":         null,
-                "match1":       {match1},
+                "match1":       "{match1}",
                 "match2":       "{match2}",
-                "match3":       {match2}
-                {additional_fields}
+                "match3":       "{match2}"
               }
             ]
           }
@@ -127,7 +127,7 @@ blocks:
           {
             find: "<<collection:search_basic>>",
             filter: { match3: true }
-          }, <<field-projection:null>>        
+          }, <<field-projection:null>>
 
   main-lt:
     params:
@@ -137,7 +137,7 @@ blocks:
           {
             find: "<<collection:search_basic>>",
             filter: { match1: {$lt: 1}}
-          }, <<field-projection:null>>        
+          }, <<field-projection:null>>
 
   main-and:
     params:
@@ -147,7 +147,7 @@ blocks:
         {
           find: "<<collection:search_basic>>",
           filter: { match1: {$lt: 1}, match2: "true"}
-        }, <<field-projection:null>>        
+        }, <<field-projection:null>>
 
   main-or:
     params:
@@ -157,7 +157,7 @@ blocks:
           {
             find: "<<collection:search_basic>>",
             filter: { $or: [ {match1: {$lt: 1}}, {match3: true}]}
-          }, <<field-projection:null>>        
+          }, <<field-projection:null>>
 
   main-or-single-match:
     params:

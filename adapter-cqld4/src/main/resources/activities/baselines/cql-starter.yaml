@@ -13,6 +13,10 @@ scenarios:
     schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
     main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+  basic_check:
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 params:
   x: y
@@ -34,9 +38,9 @@ blocks:
         AND durable_writes = true;
       create-table: |
         create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
-        machine_id UUID,  
-        message text,    
-        time timestamp,          
+        machine_id UUID,
+        message text,
+        time timestamp,
         PRIMARY KEY ((machine_id), time)
         ) WITH CLUSTERING ORDER BY (time DESC);
 #      truncate-table: |
@@ -47,9 +51,9 @@ blocks:
     ops:
       create-table-astra: |
         create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
-        machine_id UUID, 
+        machine_id UUID,
         message text,
-        time timestamp, 
+        time timestamp,
         PRIMARY KEY ((machine_id), time)
         ) WITH CLUSTERING ORDER BY (time DESC);
   rampup:
@@ -58,7 +62,7 @@ blocks:
       idempotent: true
     ops:
       insert-rampup: |
-        insert into  <<keyspace:starter>>.<<table:cqlstarter>> (machine_id, message, time) 
+        insert into  <<keyspace:starter>>.<<table:cqlstarter>> (machine_id, message, time)
         values ({machine_id}, {message}, {time}) using timestamp {timestamp};
   main-read:
     params:

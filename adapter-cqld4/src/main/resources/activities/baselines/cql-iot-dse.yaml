@@ -4,6 +4,10 @@ scenarios:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup  cycles===TEMPLATE(rampup-cycles,100) threads=auto
     main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,100) threads=auto
+  basic_check:
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup  cycles===TEMPLATE(rampup-cycles,10) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
   machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
@@ -50,8 +54,8 @@ blocks:
       idempotent: true
     ops:
       rampup-insert: |
-        insert into  <<keyspace:baselines>>.<<table:iot>> (machine_id, sensor_name, time, sensor_value, station_id, data) 
-        values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data}) 
+        insert into  <<keyspace:baselines>>.<<table:iot>> (machine_id, sensor_name, time, sensor_value, station_id, data)
+        values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
         using timestamp {cell_timestamp};
   verify:
     params:
@@ -61,7 +65,7 @@ blocks:
       verify-fields: "*, -cell_timestamp"
     ops:
       select-verify: |
-        select * from <<keyspace:baselines>>.<<table:iot>> where machine_id={machine_id} 
+        select * from <<keyspace:baselines>>.<<table:iot>> where machine_id={machine_id}
         and sensor_name={sensor_name} and time={time};
 
   main-read:
@@ -70,8 +74,8 @@ blocks:
       cl: <<read_cl:LOCAL_QUORUM>>
     ops:
       select-read: |
-        select * from <<keyspace:baselines>>.<<table:iot>> 
-        where machine_id={machine_id} and sensor_name={sensor_name} 
+        select * from <<keyspace:baselines>>.<<table:iot>>
+        where machine_id={machine_id} and sensor_name={sensor_name}
         limit <<limit:10>>;
   main-write:
     params:
@@ -80,7 +84,7 @@ blocks:
       idempotent: true
     ops:
       insert-main: |
-        insert into <<keyspace:baselines>>.<<table:iot>> 
-        (machine_id, sensor_name, time, sensor_value, station_id, data) 
-        values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data}) 
+        insert into <<keyspace:baselines>>.<<table:iot>>
+        (machine_id, sensor_name, time, sensor_value, station_id, data)
+        values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
         using timestamp {cell_timestamp};
