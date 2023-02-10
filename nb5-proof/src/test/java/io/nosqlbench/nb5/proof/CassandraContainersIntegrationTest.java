@@ -26,27 +26,18 @@ import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Ignore;
 import org.junit.jupiter.api.*;
-import org.rnorth.ducttape.unreliables.Unreliables;
 import org.testcontainers.containers.CassandraContainer;
-import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
 import org.testcontainers.utility.DockerImageName;
 
-import java.io.BufferedReader;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-@Ignore
+
 public class CassandraContainersIntegrationTest {
     private enum Driver {
         CQL("cql"),
@@ -107,12 +98,15 @@ public class CassandraContainersIntegrationTest {
 
         for(WorkloadDesc workloadDesc : basicWorkloadsMapPerDriver.get(Driver.CQL))
         {
+            String path = workloadDesc.getYamlPath();
+            int lastSlashIndex = path.lastIndexOf('/');
+            String shortName = path.substring(lastSlashIndex + 1);
+            if(!shortName.equals("cql-keyvalue2.yaml"))
+                continue;;
             //STEP0:Start the test container and expose the 9042 port on the local host.
             //So that the docker bridge controller exposes the port to our process invoker that will run nb5
             //and target cassandra on that docker container
             cass.start();
-            int lastSlashIndex = workloadDesc.getWorkloadName().lastIndexOf('/');
-            String shortName = workloadDesc.getWorkloadName().substring(lastSlashIndex + 1);
 
             //the default datacenter name
             String datacenter = cass.getLocalDatacenter();
@@ -127,7 +121,7 @@ public class CassandraContainersIntegrationTest {
 
            //STEP1: Run the example cassandra workload using the schema tag to create the Cass Baselines keyspace
             String[] args = new String[]{
-                "java", "-jar", JARNAME, shortName, "default", "host="+ hostIP, "localdc="+ datacenter, "port="+ mappedPort9042.toString()
+                "java", "-jar", JARNAME, shortName, BASIC_CHECK_IDENTIFIER, "host="+ hostIP, "localdc="+ datacenter, "port="+ mappedPort9042.toString()
             };
             logger.info("The final command line: " + String.join(" ", args));
             ProcessResult runSchemaResult = invoker.run("run-workload", 30, args);
@@ -137,7 +131,7 @@ public class CassandraContainersIntegrationTest {
             logger.info("Checking if the NB5 command resulted in any errors...");
             assertThat(runSchemaResult.exception).isNull();
             String runSchemaOut = String.join("\n", runSchemaResult.getStdoutData());
-            //assertThat(runSchemaOut.toLowerCase()).doesNotContain("error");
+            assertThat(runSchemaOut.toLowerCase()).doesNotContain("error");
             logger.info("NB5 command completed with no errors");
 
 
