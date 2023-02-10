@@ -65,7 +65,7 @@ public class RawYamlLoader {
 
         String data = null;
         try {
-            Optional<Content<?>> oyaml = NBIO.all().prefix(searchPaths).name(path).extension(YAML_EXTENSIONS).first();
+            Optional<Content<?>> oyaml = NBIO.all().searchPrefixes(searchPaths).pathname(path).extensionSet(YAML_EXTENSIONS).first();
             data = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + path));
             return loadString(logger, data);
         } catch (Exception e) {

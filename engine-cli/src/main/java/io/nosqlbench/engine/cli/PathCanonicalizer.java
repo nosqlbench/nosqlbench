@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,9 @@ public class PathCanonicalizer {
 
     public String canonicalizePath(String path) {
 
-        Optional<Content<?>> found = NBIO.local().prefix("activities")
-            .prefix(includes)
-            .name(path)
+        Optional<Content<?>> found = NBIO.local().searchPrefixes("activities")
+            .searchPrefixes(includes)
+            .pathname(path)
             .first();
 
         if (found.isPresent()) {
@@ -46,7 +46,7 @@ public class PathCanonicalizer {
             rewriteTo=(rewriteTo.startsWith(separator) ? rewriteTo.substring(1) : rewriteTo);
 
             if (!rewriteTo.equals(path)) {
-                if (NBIO.local().prefix("activities").prefix(includes).name(rewriteTo).first().isPresent()) {
+                if (NBIO.local().searchPrefixes("activities").searchPrefixes(includes).pathname(rewriteTo).first().isPresent()) {
                     logger.info("rewrote path for " + path + " as " + rewriteTo);
                     return rewriteTo;
                 } else {

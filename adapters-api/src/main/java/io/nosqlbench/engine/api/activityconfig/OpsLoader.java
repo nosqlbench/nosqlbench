@@ -54,7 +54,7 @@ public class OpsLoader {
     public static OpsDocList loadPath(String path, Map<String, ?> params, String... searchPaths) {
         String[] extensions = path.indexOf('.')>-1 ? new String[]{} : YAML_EXTENSIONS;
 
-        Content<?> foundPath = NBIO.all().prefix(searchPaths).name(path).extension(extensions).first()
+        Content<?> foundPath = NBIO.all().searchPrefixes(searchPaths).pathname(path).extensionSet(extensions).first()
             .orElseThrow(() -> new RuntimeException("Unable to load path '" + path + "'"));
         OpTemplateFormat fmt = OpTemplateFormat.valueOfURI(foundPath.getURI());
         return loadString(foundPath.asString(), fmt, params, foundPath.getURI());
@@ -81,9 +81,7 @@ public class OpsLoader {
 
         transformer.checkpointAccesses().forEach((k, v) -> {
             layered.addTemplateVariable(k, v);
-            if (params.containsKey(k)) {
-                params.remove(k);
-            }
+            params.remove(k);
         });
 
         return layered;

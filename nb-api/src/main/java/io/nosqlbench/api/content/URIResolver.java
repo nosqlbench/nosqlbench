@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This is a stateful search object for resources like Paths or URLs.
@@ -48,6 +49,7 @@ public class URIResolver implements ContentResolver {
      * Include resources from all known places, including remote URLs,
      * the local default filesystem, and the classpath, which includes
      * the jars that hold the current runtime application.
+     *
      * @return this URISearch
      */
     public URIResolver all() {
@@ -57,6 +59,7 @@ public class URIResolver implements ContentResolver {
 
     /**
      * Includ resources in the default filesystem
+     *
      * @return this URISearch
      */
     public URIResolver inFS() {
@@ -66,6 +69,7 @@ public class URIResolver implements ContentResolver {
 
     /**
      * Include resources in remote URLs
+     *
      * @return this URISearch
      */
     public URIResolver inURLs() {
@@ -75,6 +79,7 @@ public class URIResolver implements ContentResolver {
 
     /**
      * Include resources within the classpath.
+     *
      * @return this URISearch
      */
     public URIResolver inCP() {
@@ -117,26 +122,38 @@ public class URIResolver implements ContentResolver {
     }
 
     public URIResolver extension(String extension) {
-        this.extensions = this.extensions==null ? new ArrayList<>() : this.extensions;
+        this.extensions = this.extensions == null ? new ArrayList<>() : this.extensions;
         this.extensions.add(extension);
         return this;
     }
 
     public URIResolver extraPaths(String extraPath) {
-        this.extraPaths = this.extraPaths==null ? new ArrayList<>() : this.extraPaths;
+        this.extraPaths = this.extraPaths == null ? new ArrayList<>() : this.extraPaths;
         this.extraPaths.add(Path.of(extraPath));
         return this;
     }
 
+    public Optional<Content<?>> resolveOneOptionally(String candidatePath) {
+        List<Content<?>> contents = resolveAll(candidatePath);
+        if (contents.size() == 1) {
+            return Optional.of(contents.get(0));
+        }
+        if (contents.size() == 0) {
+            return Optional.empty();
+        }
+        throw new BasicError("Error while loading content '" + candidatePath + "', only one is allowed, but " + contents.size() + " were found");
+
+    }
+
     public Content<?> resolveOne(String candidatePath) {
         List<Content<?>> contents = resolveAll(candidatePath);
-        if (contents.size()==1) {
+        if (contents.size() == 1) {
             return contents.get(0);
         }
-        if (contents.size()==0) {
+        if (contents.size() == 0) {
             return null;
         }
-        throw new BasicError("Error while loading content '" + candidatePath +"', only one is allowed, but " + contents.size() + " were found");
+        throw new BasicError("Error while loading content '" + candidatePath + "', only one is allowed, but " + contents.size() + " were found");
     }
 
     public String toString() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,10 @@ public class MarkdownFinder {
 
     public String forResourceMarkdown(String s, String... additionalSearchPaths) {
         Optional<Content<?>> docs = NBIO.local()
-            .prefix("docs")
-            .prefix(additionalSearchPaths)
-            .name(s)
-            .extension(".md")
+            .searchPrefixes("docs")
+            .searchPrefixes(additionalSearchPaths)
+            .pathname(s)
+            .extensionSet(".md")
             .first();
 
         return docs.map(Content::asString).orElse(null);

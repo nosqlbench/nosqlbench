@@ -38,10 +38,10 @@ public interface BundledApp extends ToIntFunction<String[]> {
 
         String dev_docspath = "app-" + this.getBundledAppName() + "/src/main/resources/docs/" + this.getBundledAppName();
         String cp_docspath = "docs/" + this.getBundledAppName();
-        Optional<Content<?>> bundled_docs = NBIO.local().name(dev_docspath, cp_docspath).first();
+        Optional<Content<?>> bundled_docs = NBIO.local().pathname(dev_docspath, cp_docspath).first();
         bundled_docs.map(Content::asPath).ifPresent(docs::addContentsOf);
 
-        Optional<Content<?>> maindoc = NBIO.local().name("/src/main/resources/" + this.getBundledAppName() + ".md", this.getBundledAppName() + ".md").first();
+        Optional<Content<?>> maindoc = NBIO.local().pathname("/src/main/resources/" + this.getBundledAppName() + ".md", this.getBundledAppName() + ".md").first();
 
         maindoc.map(Content::asPath).ifPresent(docs::addPath);
 

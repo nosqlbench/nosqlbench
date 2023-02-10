@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,11 @@ import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.LongFunction;
-import java.util.stream.Stream;
 
 /**
  * <P>The DriverAdapter interface is expected to be the replacement
@@ -185,10 +181,10 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> {
 
         String dev_docspath = "adapter-" + this.getAdapterName() + "/src/main/resources/docs/" + this.getAdapterName();
         String cp_docspath = "docs/" + this.getAdapterName();
-        Optional<Content<?>> bundled_docs = NBIO.local().name(dev_docspath, cp_docspath).first();
+        Optional<Content<?>> bundled_docs = NBIO.local().pathname(dev_docspath, cp_docspath).first();
         bundled_docs.map(Content::asPath).ifPresent(docs::addContentsOf);
 
-        Optional<Content<?>> maindoc = NBIO.local().name("/src/main/resources/" + this.getAdapterName() + ".md", this.getAdapterName() + ".md").first();
+        Optional<Content<?>> maindoc = NBIO.local().pathname("/src/main/resources/" + this.getAdapterName() + ".md", this.getAdapterName() + ".md").first();
 
         maindoc.map(Content::asPath).ifPresent(docs::addPath);
 

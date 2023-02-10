@@ -306,16 +306,16 @@ public class NBCLI implements Function<String[], Integer> {
             logger.debug(() -> "user requests to copy out " + resourceToCopy);
 
             Optional<Content<?>> tocopy = NBIO.classpath()
-                .prefix("activities")
-                .prefix(options.wantsIncludes())
-                .name(resourceToCopy).extension(RawOpsLoader.YAML_EXTENSIONS).first();
+                .searchPrefixes("activities")
+                .searchPrefixes(options.wantsIncludes())
+                .pathname(resourceToCopy).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
 
             if (tocopy.isEmpty()) {
 
                 tocopy = NBIO.classpath()
-                    .prefix().prefix(options.wantsIncludes())
-                    .prefix(options.wantsIncludes())
-                    .name(resourceToCopy).first();
+                    .searchPrefixes().searchPrefixes(options.wantsIncludes())
+                    .searchPrefixes(options.wantsIncludes())
+                    .pathname(resourceToCopy).first();
             }
 
             Content<?> data = tocopy.orElseThrow(

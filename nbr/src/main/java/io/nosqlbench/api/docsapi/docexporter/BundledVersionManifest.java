@@ -28,7 +28,7 @@ public class BundledVersionManifest implements BundledMarkdownManifest {
     public DocsBinder getDocs() {
         return new Docs()
             .namespace("versions")
-            .addPath(NBIO.classpath().name("nb_version_info.md").one().asPath())
+            .addPath(NBIO.classpath().pathname("nb_version_info.md").one().asPath())
             .asDocsBinder();
     }
 }

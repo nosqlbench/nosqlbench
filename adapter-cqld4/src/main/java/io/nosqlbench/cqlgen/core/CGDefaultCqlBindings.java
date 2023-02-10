@@ -37,9 +37,9 @@ public class CGDefaultCqlBindings implements BindingsLibrary {
 
     public CGDefaultCqlBindings() {
         Content<?> content = NBIO.all()
-            .name(DEFAULT_BINDINGS_FILE)
+            .pathname(DEFAULT_BINDINGS_FILE)
             .first()
-            .or(() -> NBIO.all().prefix(DEFAULT_CFG_DIR).name(DEFAULT_BINDINGS_FILE).first())
+            .or(() -> NBIO.all().searchPrefixes(DEFAULT_CFG_DIR).pathname(DEFAULT_BINDINGS_FILE).first())
             .orElseThrow(
                 () -> new RuntimeException("Unable to load " + DEFAULT_BINDINGS_FILE +
                     ", from local dir or internally as cqlgen" + DEFAULT_BINDINGS_FILE)
