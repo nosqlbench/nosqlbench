@@ -135,6 +135,14 @@
                 <directory>src/test/resources</directory>
                 <filtering>false</filtering> <!-- exclusion from defaults -->
             </testResource>
+            <testResource>
+                <filtering>true</filtering>
+                <directory>src/test/resources</directory>
+                <includes>
+                    <include>log4j2-test.xml</include>
+                </includes>
+            </testResource>
+
         </testResources>
     </build>
 
