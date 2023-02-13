@@ -1,5 +1,5 @@
 # jara -jar nb5.jar cockroachdb-timeseries default -vv --show-stacktraces
-min_version: "5.17.1"
+min_version: "5.17.2"
 
 description: |
   This workload emulates a time-series data model and access patterns.
@@ -44,7 +44,8 @@ blocks:
             sensor_value FLOAT,
             station_id UUID,
             data STRING,
-            PRIMARY KEY (machine_id, sensor_name, time)
+            PRIMARY KEY (machine_id ASC, sensor_name ASC),
+            INDEX TEMPLATE(table,iot)_time_desc_idx (time DESC)
           );
 
   rampup:

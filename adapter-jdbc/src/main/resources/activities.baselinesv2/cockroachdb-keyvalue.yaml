@@ -1,5 +1,5 @@
 # run driver=jdbc workload="/path/to/postgresql-keyvalue.yaml" tags="block:schema" threads=AUTO cycles=4 url="jdbc:postgresql://host:port/database" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName=insectdb sslrootcert="/path/to/postgresql_certs/root.crt" -vv --show-stacktraces
-min_version: "5.17.1"
+min_version: "5.17.2"
 
 description: |
   A workload with only text keys and text values. This is based on the CQL keyvalue workloads as found
