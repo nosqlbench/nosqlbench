@@ -93,12 +93,12 @@
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna</artifactId>
-                <version>5.12.1</version>
+                <version>5.13.0</version>
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna-platform</artifactId>
-                <version>5.12.1</version>
+                <version>5.13.0</version>
             </dependency>
 
             <dependency>
@@ -375,7 +375,7 @@
             <dependency>
                 <groupId>org.graalvm.sdk</groupId>
                 <artifactId>graal-sdk</artifactId>
-                <version>22.3.0</version>
+                <version>22.3.1</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
@@ -391,7 +391,7 @@
             <dependency>
                 <groupId>org.graalvm.tools</groupId>
                 <artifactId>profiler</artifactId>
-                <version>22.3.0</version>
+                <version>22.3.1</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
