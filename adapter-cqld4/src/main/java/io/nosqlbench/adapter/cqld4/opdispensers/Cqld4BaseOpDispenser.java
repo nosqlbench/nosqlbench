@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,10 +86,10 @@ public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, C
     protected LongFunction<Statement> getEnhancedStmtFunc(LongFunction<Statement> basefunc, ParsedOp op) {
 
         LongFunction<Statement> partial = basefunc;
-        partial = op.enhanceEnum(partial, "cl", DefaultConsistencyLevel.class, Statement::setConsistencyLevel);
-        partial = op.enhanceEnum(partial, "consistency_level", DefaultConsistencyLevel.class, Statement::setConsistencyLevel);
-        partial = op.enhanceEnum(partial, "scl", DefaultConsistencyLevel.class, Statement::setSerialConsistencyLevel);
-        partial = op.enhanceEnum(partial, "serial_consistency_level", DefaultConsistencyLevel.class, Statement::setSerialConsistencyLevel);
+        partial = op.enhanceEnumOptionally(partial, "cl", DefaultConsistencyLevel.class, Statement::setConsistencyLevel);
+        partial = op.enhanceEnumOptionally(partial, "consistency_level", DefaultConsistencyLevel.class, Statement::setConsistencyLevel);
+        partial = op.enhanceEnumOptionally(partial, "scl", DefaultConsistencyLevel.class, Statement::setSerialConsistencyLevel);
+        partial = op.enhanceEnumOptionally(partial, "serial_consistency_level", DefaultConsistencyLevel.class, Statement::setSerialConsistencyLevel);
         partial = op.enhanceFuncOptionally(partial, "idempotent", Boolean.class, Statement::setIdempotent);
         partial = op.enhanceFuncOptionally(partial, "timeout", double.class, (statement, l) -> statement.setTimeout(Duration.ofMillis((long) (l * 1000L))));
         partial = op.enhanceFuncOptionally(partial, "custom_payload", Map.class, Statement::setCustomPayload);
