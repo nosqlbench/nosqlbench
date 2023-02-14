@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
@@ -66,8 +67,13 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         }
 
         ServiceLoader<DriverAdapter> adapterLoader = ServiceLoader.load(DriverAdapter.class);
-        Optional<DriverAdapter> defaultAdapter = activityDef.getParams().getOptionalString("driver")
+        Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
+        Optional<DriverAdapter> defaultAdapter = defaultDriverName
             .flatMap(s -> ServiceSelector.of(s, adapterLoader).get());
+
+        if (defaultDriverName.isPresent() && defaultAdapter.isEmpty()) {
+            throw new BasicError("Unable to load default driver adapter '" + defaultDriverName.get() + "'");
+        }
 
         // HERE, op templates are loaded before drivers are loaded
         List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter);
