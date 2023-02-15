@@ -228,7 +228,7 @@ public class NBCLIScenarioParser {
     private static LinkedHashMap<String, CmdArg> parseStep(String cmd) {
         LinkedHashMap<String, CmdArg> parsedStep = new LinkedHashMap<>();
 
-        String[] namedStepPieces = cmd.split(" ");
+        String[] namedStepPieces = cmd.split(" +");
         for (String commandFragment : namedStepPieces) {
             Matcher matcher = WordAndMaybeAssignment.matcher(commandFragment);
 
