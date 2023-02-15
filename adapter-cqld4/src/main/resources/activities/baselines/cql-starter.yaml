@@ -40,7 +40,7 @@ blocks:
         PRIMARY KEY ((machine_id), time)
         ) WITH CLUSTERING ORDER BY (time DESC);
       truncate-table: |
-        truncate table <<keyspace:starter>>.<<table:cqlstarter>>;
+        truncate table TEMPLATE(keyspace,starter).TEMPLATE(table,cqlstarter);
   schema-astra:
     params:
       prepared: false

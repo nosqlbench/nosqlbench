@@ -71,7 +71,7 @@ blocks:
               name: "city_idx"
             }
           ]
-        }        
+        }
 
     rampup-write:
       ops:
@@ -104,8 +104,10 @@ blocks:
                 "debt":         null,
                 "match1":       {match1},
                 "match2":       "{match2}",
-                "match3":       {match2}
-                {additional_fields}
+                "match3":       {match2},
+                {
+                  additional_fields
+                }
               }
             ]
           }
@@ -124,20 +126,20 @@ blocks:
       filter: eq
     ops:
       read-document: |
-          {
-            find: "<<collection:search_basic>>",
-            filter: { match3: true }
-          }, <<field-projection:null>>        
+        {
+          find: "<<collection:search_basic>>",
+          filter: { match3: true }
+        }, <<field-projection:null>>        
 
   main-lt:
     params:
       filter: lt
     ops:
       read-document: |
-          {
-            find: "<<collection:search_basic>>",
-            filter: { match1: {$lt: 1}}
-          }, <<field-projection:null>>        
+        {
+          find: "<<collection:search_basic>>",
+          filter: { match1: {$lt: 1}}
+        }, <<field-projection:null>>        
 
   main-and:
     params:
@@ -154,10 +156,10 @@ blocks:
       filter: or
     ops:
       read-document: |
-          {
-            find: "<<collection:search_basic>>",
-            filter: { $or: [ {match1: {$lt: 1}}, {match3: true}]}
-          }, <<field-projection:null>>        
+        {
+          find: "<<collection:search_basic>>",
+          filter: { $or: [ {match1: {$lt: 1}}, {match3: true}]}
+        }, <<field-projection:null>>        
 
   main-or-single-match:
     params:
