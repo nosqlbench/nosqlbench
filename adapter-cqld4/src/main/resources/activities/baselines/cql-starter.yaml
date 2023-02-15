@@ -1,5 +1,5 @@
 description: |
-  A cql-starter workload primarily for:
+  A cql-starter workload. 
   * Cassandra: 3.x, 4.x.
   * DataStax Enterprise: 6.8.x.
   * DataStax Astra.
@@ -15,11 +15,11 @@ scenarios:
     main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 params:
-  x: y
+  a-param: aparam-value
 
 bindings:
   machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
-  message: ToString(); TextOfFile('data/cql-starter-message.txt')
+  message: Discard(); TextOfFile('data/cql-starter-message.txt')
   time: Mul(100L); Div(10000L); ToJavaInstant()
   timestamp: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L); Mul(1000L);
 
@@ -39,8 +39,8 @@ blocks:
         time timestamp,          
         PRIMARY KEY ((machine_id), time)
         ) WITH CLUSTERING ORDER BY (time DESC);
-#      truncate-table: |
-#        truncate table <<keyspace:starter>>.<<table:cqlstarter>>;
+      truncate-table: |
+        truncate table <<keyspace:starter>>.<<table:cqlstarter>>;
   schema-astra:
     params:
       prepared: false
