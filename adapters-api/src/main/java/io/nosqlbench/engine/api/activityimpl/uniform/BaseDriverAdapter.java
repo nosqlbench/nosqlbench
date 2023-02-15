@@ -160,6 +160,7 @@ public abstract class BaseDriverAdapter<R extends Op, S> implements DriverAdapte
             .add(Param.optional("stride").setRegex("\\d+"))
             .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
             .add(Param.optional("cycles").setRegex("\\d+[KMBGTPE]?|\\d+[KMBGTPE]?\\.\\.\\d+[KMBGTPE]?").setDescription("cycle interval to use"))
+            .add(Param.optional("recycles").setDescription("allow cycles to be re-used this many times"))
             .add(Param.optional(List.of("cyclerate", "targetrate", "rate"), String.class, "rate limit for cycles per second"))
             .add(Param.optional("phaserate", String.class, "rate limit for phases per second"))
             .add(Param.optional("seq", String.class, "sequencing algorithm"))

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -893,7 +893,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param <FE> The enhancer function result type
      * @return an (optionally) enhanced base function
      */
-    public <FA,FE extends Enum<FE>> LongFunction<FA> enhanceEnum(
+    public <FA,FE extends Enum<FE>> LongFunction<FA> enhanceEnumOptionally(
         LongFunction<FA> func,
         String field,
         Class<FE> type,

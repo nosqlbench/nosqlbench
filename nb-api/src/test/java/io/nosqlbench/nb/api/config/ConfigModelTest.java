@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package io.nosqlbench.nb.api.config;
 
-import io.nosqlbench.api.config.standard.ConfigModel;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.config.standard.Param;
+import io.nosqlbench.api.config.standard.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -36,6 +34,25 @@ public class ConfigModelTest {
         NBConfiguration cfg = cm.apply(Map.of("c", 232));
         assertThat(cfg.getOptional("a")).isEmpty();
         assertThat(cfg.get("c",int.class)).isEqualTo(232);
+    }
+
+    @Test
+    public void testBoxingSupport() {
+        NBConfigModel model = ConfigModel.of(ConfigModelTest.class)
+            .add(Param.defaultTo("val",5))
+            .asReadOnly();
+        NBConfiguration config = model.apply(Map.of("val", 7));
+        Integer val1 = config.getOrDefault("val", 8);
+        assertThat(val1).isEqualTo(7);
+
+        int val2 = config.getOrDefault("val", 9);
+        assertThat(val2).isEqualTo(7);
+
+        Integer val3 = config.get("val");
+        assertThat(val3).isEqualTo(7);
+
+        int val4 = config.get("val");
+        assertThat(val4).isEqualTo(7);
 
     }
 }
