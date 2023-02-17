@@ -29,7 +29,7 @@ bindings:
 
   # http request id
   request_id: ToHashedUUID(); ToString();
-  request_token: Discard(); TextOfFile(TEMPLATE(stargate_tokenfile,'data/stargate_token.txt'));
+  request_token: Discard(); TextOfFile("TEMPLATE(stargate_tokenfile,data/stargate_token.txt)");
 
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String

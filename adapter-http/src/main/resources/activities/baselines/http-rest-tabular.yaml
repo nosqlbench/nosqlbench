@@ -21,7 +21,7 @@ bindings:
   #   multiple weighted hosts: restapi_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('<<restapi_host:stargate>>')
   request_id: ToHashedUUID(); ToString();
-  request_token: ToString(); TextOfFile(TEMPLATE(stargate_tokenfile,'data/stargate_token.txt'));
+  request_token: Discard(); TextOfFile("TEMPLATE(stargate_tokenfile,data/stargate_token.txt)");
 
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String
