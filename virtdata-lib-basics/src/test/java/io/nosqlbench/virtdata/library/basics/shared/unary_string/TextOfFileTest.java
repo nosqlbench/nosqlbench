@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatException;
 class TextOfFileTest {
 
     private static final String EXPECTED_CONTENTS = "test-data-entry";
+    private static final String EXPECTED_MULTILINE_CONTENTS = "additional information";
     private static final String NOT_EXPECTED_CONTENTS = "foozy-content";
     private static final String VALID_PATH = "text-provider-sample.txt";
     private static final String INVALID_PATH = "not-good.txt";
@@ -32,14 +33,26 @@ class TextOfFileTest {
     @Test
     void testValidPathAndContents() {
         final TextOfFile TextOfFile = new TextOfFile(VALID_PATH);
-        assertThat(TextOfFile.apply(PLACEHOLDER_APPLY_INPUT)).isEqualTo(EXPECTED_CONTENTS);
+        assertThat(TextOfFile.apply(PLACEHOLDER_APPLY_INPUT).trim()).isEqualTo(EXPECTED_CONTENTS);
     }
 
     @Test
-    void testInvalidPathAndContents() {
+    void testInvalidPathAndSingleLineContents() {
         final TextOfFile textOfFileValid = new TextOfFile(VALID_PATH);
         assertThatException().isThrownBy(() -> new TextOfFile(INVALID_PATH));
         assertThat(textOfFileValid.apply(PLACEHOLDER_APPLY_INPUT)).isNotEqualTo(NOT_EXPECTED_CONTENTS);
+    }
+
+    @Test
+    void testFullContentsAndSingleLine() {
+
+        boolean isFirstLineOnly = false;
+        final TextOfFile textOfEntireFile = new TextOfFile(VALID_PATH, isFirstLineOnly);
+        assertThat(textOfEntireFile.apply(PLACEHOLDER_APPLY_INPUT)).contains(EXPECTED_MULTILINE_CONTENTS);
+
+        isFirstLineOnly = true;
+        final TextOfFile textOfSingleLine = new TextOfFile(VALID_PATH, isFirstLineOnly);
+        assertThat(textOfSingleLine.apply(PLACEHOLDER_APPLY_INPUT).trim()).isEqualTo(EXPECTED_CONTENTS);
     }
 
 }

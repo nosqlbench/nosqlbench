@@ -35,22 +35,36 @@ import java.util.function.Function;
 @Categories({Category.general})
 public class TextOfFile implements Function<Object, String> {
     private static final Logger logger = LogManager.getLogger(TextOfFile.class);
-    private final String text;
+    private String text;
 
     public String toString() {
         return getClass().getSimpleName();
     }
 
-    @Example({"TextOfFile()", "Provides the first line of text in the specified file."})
+    @Example({"TextOfFile('path-to-file')", "Provides the first line of text in the specified file."})
     public TextOfFile(String targetFile) {
+        readFile(targetFile, true);
+    }
 
+    @Example({"TextOfFile('path-to-file', isFirstLineOnly)", "Provides the text in the specified file as specified for first-line or entire file."})
+    public TextOfFile(String targetFile, boolean isFirstLineOnly) {
+        readFile(targetFile, isFirstLineOnly);
+    }
+
+    private void readFile(String targetFile, boolean isFirstLineOnly) {
         try {
             final List<String> lines = NBIO.readLines(targetFile);
-            logger.info("TextOfFile() reading: {}", targetFile);
             if (lines.isEmpty()) {
                 throw new BasicError(String.format("Unable to locate content for %s", this));
             }
-            text = lines.get(0);
+            if (isFirstLineOnly) {
+                this.text = lines.get(0);
+            } else {
+                StringBuilder content = new StringBuilder();
+                lines.forEach(content::append);
+                this.text = content.toString();
+            }
+
         } catch (Exception ex) {
             throw new BasicError(String.format("Unable to locate file %s: ", targetFile), ex);
         }
@@ -58,7 +72,7 @@ public class TextOfFile implements Function<Object, String> {
 
     @Override
     public String apply(Object obj) {
-        return text;
+        return this.text;
     }
 
 }

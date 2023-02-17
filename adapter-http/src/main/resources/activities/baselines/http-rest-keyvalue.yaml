@@ -21,7 +21,7 @@ bindings:
   weighted_hosts: WeightedStrings('<<restapi_host:stargate>>')
 
   request_id: ToHashedUUID(); ToString();
-  request_token: ToString(); TextOfFile(TEMPLATE(stargate_tokenfile,'data/stargate_token.txt')));
+  request_token: ToString(); TextOfFile(TEMPLATE(stargate_tokenfile,'data/stargate_token.txt'));
 
   seq_key: Mod(<<keycount:10000000>>); ToString() -> String
   seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String

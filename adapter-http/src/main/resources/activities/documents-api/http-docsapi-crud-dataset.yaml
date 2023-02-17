@@ -27,8 +27,7 @@ bindings:
 
   seq_key: Mod(<<docscount:10000000>>); ToString() -> String
   random_key: Uniform(0,<<docscount:10000000>>); ToString() -> String
-  # TODO - this needs a dataset_file to be used from data/* preferably
-  document_json: ModuloLineToString('<<dataset_file>>');
+  document_json: Discard(); TextOfFile('data/docsapi-dataset.json', false));
 
 blocks:
   schema:
