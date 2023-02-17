@@ -7,11 +7,12 @@ description: |
 
 scenarios:
   default:
-    schema:   run driver=http tags==block:"schema.*" threads==1 cycles==UNDEF
-    write:    run driver=http tags==name:'write.*' cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    read:     run driver=http tags==name:'read.*' cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    update:   run driver=http tags==name:'update.*' cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    delete:   run driver=http tags==name:'delete.*' cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    schema: run driver=http tags==block:"schema.*" threads==1 cycles==UNDEF
+    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
+    # write:    run driver=http tags==block:"write.*" cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
+    # read:     run driver=http tags==block:"read.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
+    # update:   run driver=http tags==block:"update.*" cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
+    # delete:   run driver=http tags==block:"delete.*" cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
 
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
@@ -22,9 +23,12 @@ bindings:
   weighted_hosts: WeightedStrings('<<docsapi_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
+  request_token: ToString(); TextOfFile(TEMPLATE(stargate_tokenfile,'data/stargate_token.txt'));
 
   seq_key: Mod(<<docscount:10000000>>); ToString() -> String
   random_key: Uniform(0,<<docscount:10000000>>); ToString() -> String
+  # TODO - this needs a dataset_file to be used from data/* preferably
+  document_json: ModuloLineToString('<<dataset_file>>');
 
 blocks:
   schema:
@@ -34,12 +38,12 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/schemas/namespaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: |
           {
-              "name": "<<namespace:docs_crud_dataset>>",
-              "replicas": <<rf:1>>
+            "name": "<<namespace:docs_crud_dataset>>",
+            "replicas": <<rf:1>>
           }
         ok-status: ".*"
 
@@ -48,7 +52,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections/<<collection:docs_collection>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         ok-status: "[2-4][0-9][0-9]"
 
       create-docs-collection:
@@ -56,23 +60,21 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: |
           {
-              "name": "<<collection:docs_collection>>"
+            "name": "<<collection:docs_collection>>"
           }
 
   main:
-    bindings:
-      document_json: ModuloLineToString('<<dataset_file>>');
     ops:
       write-document:
         method: PUT
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections/<<collection:docs_collection>>/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: "{document_json}"
 
@@ -81,7 +83,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections/<<collection:docs_collection>>/{random_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         ok-status: "[2-4][0-9][0-9]"
 
       # TODO - what is the purpose of this? does it overwrite? is there a way to make sure it is actually overwriting existing documents?
@@ -90,7 +92,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections/<<collection:docs_collection>>/{random_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: "{document_json}"
 
@@ -99,5 +101,5 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections/<<collection:docs_collection>>/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         ok-status: "[2-4][0-9][0-9]"

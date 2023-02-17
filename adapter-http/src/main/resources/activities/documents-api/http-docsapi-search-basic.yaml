@@ -7,17 +7,17 @@ description: |
   Note that docsapi_port should reflect the port where the Docs API is exposed (defaults to 8180).
 
 scenarios:
-  schema:                 run driver=http tags==block:"schema.*" threads==<<threads:1>> cycles==UNDEF
+  schema: run driver=http tags==block:"schema.*" threads==<<threads:1>> cycles==UNDEF
   rampup:
-    write:                run driver=http tags==name:'rampup-put.*' cycles===TEMPLATE(docscount,10000000) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
-    read:                 run driver=http tags==name:'rampup-get.*' cycles===TEMPLATE(rampup-cycles, 10000000) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    write: run driver=http tags==name:'rampup-put.*' cycles===TEMPLATE(docscount,10) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
+    read: run driver=http tags==name:'rampup-get.*' cycles===TEMPLATE(rampup-cycles, 10) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
   main:
-    all:                  run driver=http tags==block:main cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-    get-eq:               run driver=http tags==name:main-get-eq,filter:eq cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-    get-lt:               run driver=http tags==name:main-get-lt cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-    get-and:              run driver=http tags==name:main-get-and cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-    get-or:               run driver=http tags==name:main-get-or cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-    get-or-single-match:  run driver=http tags==name:main-get-or-single-match cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    all: run driver=http tags==block:main cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-eq: run driver=http tags==name:main-get-eq,filter:eq cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-lt: run driver=http tags==name:main-get-lt cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-and: run driver=http tags==name:main-get-and cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-or: run driver=http tags==name:main-get-or cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+    get-or-single-match: run driver=http tags==name:main-get-or-single-match cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
 
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
@@ -28,6 +28,7 @@ bindings:
   weighted_hosts: WeightedStrings('<<docsapi_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
+  request_token: ToString(); TextOfFile(TEMPLATE(stargate_tokenfile,'data/stargate_token.txt'));
 
   seq_key: Mod(<<docscount:10000000>>); ToString() -> String
   random_key: Uniform(0,<<docscount:10000000>>); ToString() -> String
@@ -54,12 +55,12 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/schemas/namespaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: |
           {
-              "name": "<<namespace:docs_search_basic>>",
-              "replicas": <<rf:1>>
+            "name": "<<namespace:docs_search_basic>>",
+            "replicas": <<rf:1>>
           }
         ok-status: ".*"
 
@@ -68,7 +69,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         ok-status: "[2-4][0-9][0-9]"
 
       create-docs-collection:
@@ -76,11 +77,11 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: |
           {
-              "name": "<<collection:docs_collection>>"
+            "name": "<<collection:docs_collection>>"
           }
 
   rampup:
@@ -90,33 +91,33 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: |
           {
-            "user_id":      "{user_id}",
-            "created_on":   {created_on},
-            "full_name":    "{full_name}",
-            "married":      {married},
+            "user_id": "{user_id}",
+            "created_on": {created_on},
+            "full_name": "{full_name}",
+            "married": {married},
             "address": {
               "primary": {
-                  "city":   "{city}",
-                  "cc":     "{country_code}"
+                "city": "{city}",
+                "cc": "{country_code}"
               },
-              "secondary":  {}
+              "secondary": {}
             },
             "coordinates": [
-                            {lat},
-                            {lng}
+              {lat},
+              {lng}
             ],
-            "children":     [],
+            "children": [],
             "friends": [
-                            "{friend_id}"
+              "{friend_id}"
             ],
-            "debt":         null,
-            "match1":       {match1},
-            "match2":       "{match2}",
-            "match3":       {match2}
+            "debt": null,
+            "match1": {match1},
+            "match2": "{match2}",
+            "match3": {match2}
             {additional_fields}
           }
 
@@ -126,7 +127,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>?where=URLENCODE[[{"match3":{"$eq":true}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
 
       # where={"match1":{"$lt":1}}
@@ -135,7 +136,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>?where=URLENCODE[[{"match1":{"$lt":1}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
 
       # where={"match1":{"$lt":1},"match2":{"$eq":"true"}}
@@ -144,7 +145,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>?where=URLENCODE[[{"match1":{"$lt":1},"match2":{"$eq":"true"}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
 
       # where={"$or":[{"match1":{"$lt":1}},{"match3":{"$eq":true}}]}
@@ -153,7 +154,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match3":{"$eq":true}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
 
       # where={"$or":[{"match1":{"$lt":1}},{"match2":{"$eq":"notamatch"}}]}
@@ -162,7 +163,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match2":{"$eq":"notamatch"}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
 
   # where={"match3":{"$eq":true}}
@@ -173,7 +174,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>?where=URLENCODE[[{"match3":{"$eq":true}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
 
       # where={"match1":{"$lt":1}}
@@ -182,7 +183,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>?where=URLENCODE[[{"match1":{"$lt":1}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
 
       # where={"match1":{"$lt":1},"match2":{"$eq":"true"}}
@@ -191,7 +192,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>?where=URLENCODE[[{"match1":{"$lt":1},"match2":{"$eq":"true"}}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
 
       # where={"$or":[{"match1":{"$lt":1}},{"match3":{"$eq":true}}]}
@@ -200,7 +201,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match3":{"$eq":true}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
 
       # where={"$or":[{"match1":{"$lt":1}},{"match2":{"$eq":"notamatch"}}]}
@@ -209,5 +210,5 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_search_basic>>/collections/<<collection:docs_collection>>?where=URLENCODE[[{"$or":[{"match1":{"$lt":1}},{"match2":{"$eq":"notamatch"}}]}]]&page-size=<<page-size,3>>&fields=<<fields,%5b%5d>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"

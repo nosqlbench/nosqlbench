@@ -10,8 +10,8 @@ description: |
 scenarios:
   default:
     schema: run driver=http tags==block:"schema.*" threads==1 cycles==UNDEF
-    rampup: run driver=http tags==block:"rampup.*" cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    rampup: run driver=http tags==block:"rampup.*" cycles===TEMPLATE(rampup-cycles,10) threads=auto
+    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
@@ -21,7 +21,7 @@ bindings:
   #   multiple weighted hosts: restapi_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('<<restapi_host:stargate>>')
   request_id: ToHashedUUID(); ToString();
-  request_token: ToString(); TextOfFile("TEMPLATE(stargate_tokenfile,data/stargate_token.txt)")
+  request_token: ToString(); TextOfFile(TEMPLATE(stargate_tokenfile,'data/stargate_token.txt'));
 
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String
@@ -50,8 +50,8 @@ blocks:
         Content-Type: "application/json"
         body: |
           {
-              "name": "<<keyspace:baselines>>",
-              "replicas": <<rf:1>>
+            "name": "<<keyspace:baselines>>",
+            "replicas": <<rf:1>>
           }
 
       drop-table:
@@ -72,30 +72,30 @@ blocks:
         Content-Type: "application/json"
         body: |
           {
-              "name": "<<table:tabular>>",
-              "columnDefinitions": [
-                  {
-                      "name": "part",
-                      "typeDefinition": "text"
-                  },
-                  {
-                      "name": "clust",
-                      "typeDefinition": "text"
-                  },
-                  {
-                      "name": "data",
-                      "typeDefinition": "text"
-                  }
-              ],
-              "primaryKey": {
-                  "partitionKey": [
-                      "part"
-                  ],
-                  "clusteringKey": [
-                      "clust"
-                  ]
+            "name": "<<table:tabular>>",
+            "columnDefinitions": [
+              {
+                "name": "part",
+                "typeDefinition": "text"
               },
-              "ifNotExists": true
+              {
+                "name": "clust",
+                "typeDefinition": "text"
+              },
+              {
+                "name": "data",
+                "typeDefinition": "text"
+              }
+            ],
+            "primaryKey": {
+              "partitionKey": [
+                  "part"
+              ],
+              "clusteringKey": [
+                  "clust"
+              ]
+            },
+            "ifNotExists": true
           }
 
   rampup:
