@@ -20,7 +20,6 @@ import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
-import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,51 +27,54 @@ import org.apache.logging.log4j.Logger;
 import java.util.List;
 import java.util.function.Function;
 
-/**
- * Provides a single line of text from a target file provided.
- */
 @ThreadSafeMapper
 @Categories({Category.general})
-public class TextOfFile implements Function<Object, String> {
-    private static final Logger logger = LogManager.getLogger(TextOfFile.class);
-    private String text;
+public class FirstLines implements Function<Object, String> {
 
-    public String toString() {
-        return getClass().getSimpleName();
+    private static final Logger logger = LogManager.getLogger(FirstLines.class);
+
+    private String fileContents;
+    private int numberOfLines;
+
+    public FirstLines(String filePath) {
+        this(filePath, 1);
     }
 
-    @Example({"TextOfFile('path-to-file')", "Provides the first line of text in the specified file."})
-    public TextOfFile(String targetFile) {
-        readFile(targetFile, true);
+    public FirstLines(String filePath, Integer numberOfLines) {
+
+        if (numberOfLines < 1) {
+            throw new BasicError("numberOfLines specified must be greater than zero.");
+        }
+
+        this.numberOfLines = numberOfLines;
+        this.fileContents = readFile(filePath, numberOfLines == 1);
     }
 
-    @Example({"TextOfFile('path-to-file', isFirstLineOnly)", "Provides the text in the specified file as specified for first-line or entire file."})
-    public TextOfFile(String targetFile, boolean isFirstLineOnly) {
-        readFile(targetFile, isFirstLineOnly);
+    @Override
+    public String apply(Object value) {
+        return fileContents;
     }
 
-    private void readFile(String targetFile, boolean isFirstLineOnly) {
+    private String readFile(String targetFile, boolean isFirstLineOnly) {
         try {
             final List<String> lines = NBIO.readLines(targetFile);
             if (lines.isEmpty()) {
                 throw new BasicError(String.format("Unable to locate content for %s", this));
             }
             if (isFirstLineOnly) {
-                this.text = lines.get(0);
+                return lines.get(0);
             } else {
                 StringBuilder content = new StringBuilder();
-                lines.forEach(content::append);
-                this.text = content.toString();
-            }
+                if (numberOfLines > lines.size()) {
+                    this.numberOfLines = lines.size();
+                }
 
+                List<String> requestedLines = lines.subList(0, numberOfLines - 1);
+                requestedLines.forEach(content::append);
+                return content.toString();
+            }
         } catch (Exception ex) {
             throw new BasicError(String.format("Unable to locate file %s: ", targetFile), ex);
         }
     }
-
-    @Override
-    public String apply(Object obj) {
-        return this.text;
-    }
-
 }

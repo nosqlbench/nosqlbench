@@ -20,7 +20,7 @@ params:
 
 bindings:
   machine_id: ElapsedNanoTime(); ToHashedUUID() -> java.util.UUID
-  message: Discard(); TextOfFile('data/cql-starter-message.txt');
+  message: Discard(); FirstLines('data/cql-starter-message.txt');
   rampup_message: ToString();
   time: ElapsedNanoTime(); Mul(1000); ToJavaInstant();
   ts: ElapsedNanoTime(); Mul(1000);

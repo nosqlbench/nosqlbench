@@ -27,7 +27,7 @@ bindings:
   # http request id
 
   request_id: ToHashedUUID(); ToString();
-  request_token: Discard(); TextOfFile("TEMPLATE(stargate_tokenfile,data/stargate_token.txt)");
+  request_token: Discard(); FirstLines("TEMPLATE(stargate_tokenfile,data/stargate_token.txt)");
 
   seq_key: Mod(<<keycount:10000000>>); ToString() -> String
   seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String

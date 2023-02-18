@@ -20,39 +20,40 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
 
-class TextOfFileTest {
+class FirstLinesTest {
 
-    private static final String EXPECTED_CONTENTS = "test-data-entry";
+    private static final String EXPECTED_SINGLELINE_CONTENTS = "test-data-entry";
     private static final String EXPECTED_MULTILINE_CONTENTS = "additional information";
     private static final String NOT_EXPECTED_CONTENTS = "foozy-content";
     private static final String VALID_PATH = "text-provider-sample.txt";
     private static final String INVALID_PATH = "not-good.txt";
-    private static final String PLACEHOLDER_APPLY_INPUT = "placeholder-input";
+    private static final Object PLACEHOLDER_APPLY_INPUT = new Object();
 
 
     @Test
     void testValidPathAndContents() {
-        final TextOfFile TextOfFile = new TextOfFile(VALID_PATH);
-        assertThat(TextOfFile.apply(PLACEHOLDER_APPLY_INPUT).trim()).isEqualTo(EXPECTED_CONTENTS);
+        final FirstLines firstLines = new FirstLines(VALID_PATH);
+        assertThat(firstLines.apply(PLACEHOLDER_APPLY_INPUT).trim()).isEqualTo(EXPECTED_SINGLELINE_CONTENTS);
     }
 
     @Test
-    void testInvalidPathAndSingleLineContents() {
-        final TextOfFile textOfFileValid = new TextOfFile(VALID_PATH);
-        assertThatException().isThrownBy(() -> new TextOfFile(INVALID_PATH));
-        assertThat(textOfFileValid.apply(PLACEHOLDER_APPLY_INPUT)).isNotEqualTo(NOT_EXPECTED_CONTENTS);
+    void testInvalidPath() {
+        final FirstLines firstLinesValid = new FirstLines(VALID_PATH);
+        assertThatException().isThrownBy(() -> new FirstLines(INVALID_PATH));
+        assertThat(firstLinesValid.apply(PLACEHOLDER_APPLY_INPUT)).isNotEqualTo(NOT_EXPECTED_CONTENTS);
     }
 
     @Test
     void testFullContentsAndSingleLine() {
 
-        boolean isFirstLineOnly = false;
-        final TextOfFile textOfEntireFile = new TextOfFile(VALID_PATH, isFirstLineOnly);
+        FirstLines allLines = new FirstLines(VALID_PATH, 8675309);
+        assertThat(allLines.apply(PLACEHOLDER_APPLY_INPUT)).isNotEmpty();
+
+        final FirstLines textOfEntireFile = new FirstLines(VALID_PATH, 3);
         assertThat(textOfEntireFile.apply(PLACEHOLDER_APPLY_INPUT)).contains(EXPECTED_MULTILINE_CONTENTS);
 
-        isFirstLineOnly = true;
-        final TextOfFile textOfSingleLine = new TextOfFile(VALID_PATH, isFirstLineOnly);
-        assertThat(textOfSingleLine.apply(PLACEHOLDER_APPLY_INPUT).trim()).isEqualTo(EXPECTED_CONTENTS);
+        final FirstLines textOfSingleLine = new FirstLines(VALID_PATH, 1);
+        assertThat(textOfSingleLine.apply(PLACEHOLDER_APPLY_INPUT).trim()).isEqualTo(EXPECTED_SINGLELINE_CONTENTS);
     }
 
 }
