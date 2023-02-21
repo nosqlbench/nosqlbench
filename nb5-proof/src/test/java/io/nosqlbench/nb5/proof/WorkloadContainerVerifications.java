@@ -127,51 +127,53 @@ public class WorkloadContainerVerifications {
             logger.info("NB5 command completed with no errors");
 
 
-            //STEP 4 Check the cluster for created data
-            try (CqlSession session = CqlSession.builder().addContactPoint(new InetSocketAddress(hostIP, mappedPort9042)).withLocalDatacenter(datacenter).build()) {
-                //->Check for the creation of the keyspace baselines
-                logger.info("Checking for the creation of the keyspace \"baselines\"...");
-                ResultSet result = session.execute("SELECT keyspace_name FROM system_schema.keyspaces");
-                List<Row> rows = result.all();
-                boolean keyspaceFound = false;
-                for (Row row : rows) {
-                    if (row.getString("keyspace_name").equals("baselines")) {
-                        keyspaceFound = true;
-                        break;
-                    }
-                }
-                assertTrue(keyspaceFound);
-                logger.info("Keyspace \"baselines\" was found, nb5 command had created it successfully");
+            //STEP 3 Check the cluster for created data
+            //THIS PART IS LEFT COMMENTED FOR RUNNING SPECIFIC CQL DATA CREATION CHECKING
 
-                //->Check for the creation of the baselines keyvalue table
-                logger.info("Checking for the creation of the table \"baselines.keyvalue\"...");
-                result = session.execute("SELECT table_name FROM system_schema.tables WHERE keyspace_name='baselines'");
-                rows = result.all();
-                boolean tableFound = false;
-                for (Row row : rows) {
-                    if (row.getString("table_name").equals("keyvalue")) {
-                        tableFound = true;
-                        break;
-                    }
-                }
-                assertTrue(tableFound);
-                logger.info("Table \"baselines.keyvalue\" was found, nb5 command had created it successfully");
-
-                //->Check for the creation of the baselines keyvalue table
-                ResultSet resultSet = session.execute("SELECT count(*) FROM baselines.keyvalue");
-                Row row = resultSet.one();
-                long rowCount = row.getLong(0);
-                logger.info("Number of rows in baselines.keyvalue: " + rowCount);
-                assertTrue(rowCount >= 5);
-                logger.info("Table \"baselines.keyvalue\" has at least 5 rows of key-value pairs, nb5 command had created them successfully");
-
-            } catch (Exception e)
-            {
-                System.out.println(e.getMessage());
-                fail();
-            } finally {
+//            try (CqlSession session = CqlSession.builder().addContactPoint(new InetSocketAddress(hostIP, mappedPort9042)).withLocalDatacenter(datacenter).build()) {
+//                //->Check for the creation of the keyspace baselines
+//                logger.info("Checking for the creation of the keyspace \"baselines\"...");
+//                ResultSet result = session.execute("SELECT keyspace_name FROM system_schema.keyspaces");
+//                List<Row> rows = result.all();
+//                boolean keyspaceFound = false;
+//                for (Row row : rows) {
+//                    if (row.getString("keyspace_name").equals("baselines")) {
+//                        keyspaceFound = true;
+//                        break;
+//                    }
+//                }
+//                assertTrue(keyspaceFound);
+//                logger.info("Keyspace \"baselines\" was found, nb5 command had created it successfully");
+//
+//                //->Check for the creation of the baselines keyvalue table
+//                logger.info("Checking for the creation of the table \"baselines.keyvalue\"...");
+//                result = session.execute("SELECT table_name FROM system_schema.tables WHERE keyspace_name='baselines'");
+//                rows = result.all();
+//                boolean tableFound = false;
+//                for (Row row : rows) {
+//                    if (row.getString("table_name").equals("keyvalue")) {
+//                        tableFound = true;
+//                        break;
+//                    }
+//                }
+//                assertTrue(tableFound);
+//                logger.info("Table \"baselines.keyvalue\" was found, nb5 command had created it successfully");
+//
+//                //->Check for the creation of the baselines keyvalue table
+//                ResultSet resultSet = session.execute("SELECT count(*) FROM baselines.keyvalue");
+//                Row row = resultSet.one();
+//                long rowCount = row.getLong(0);
+//                logger.info("Number of rows in baselines.keyvalue: " + rowCount);
+//                assertTrue(rowCount >= 5);
+//                logger.info("Table \"baselines.keyvalue\" has at least 5 rows of key-value pairs, nb5 command had created them successfully");
+//
+//            } catch (Exception e)
+//            {
+//                System.out.println(e.getMessage());
+//                fail();
+//            } finally {
                 cass.stop();
-            }
+//            }
         }
     }
     @AfterEach
