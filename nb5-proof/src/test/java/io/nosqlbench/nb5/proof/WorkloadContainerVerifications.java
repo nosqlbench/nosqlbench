@@ -79,10 +79,6 @@ public class WorkloadContainerVerifications {
         }
     }
 
-    @BeforeEach
-    public void setUp() {
-        System.out.println("setup");
-    }
 
     @Test
     public void testCqlKeyValueWorkload() {

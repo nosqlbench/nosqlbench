@@ -19,43 +19,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <profiles>
-      <profile>
-          <id>enable-container-tests</id>
-          <activation>
-              <activeByDefault>false</activeByDefault>
-          </activation>
-          <build>
-              <plugins>
-                  <plugin>
-                      <groupId>org.apache.maven.plugins</groupId>
-                      <artifactId>maven-failsafe-plugin</artifactId>
-                      <executions>
-                          <execution>
-                              <id>run-container-tests</id>
-                              <phase>integration-test</phase>
-                              <goals>
-                                  <goal>integration-test</goal>
-                                  <goal>verify</goal>
-                              </goals>
-                          </execution>
-                      </executions>
-                      <configuration>
-                          <forkCount>1</forkCount>
-                          <reuseForks>false</reuseForks>
-                          <includes>
-                              <include>**/*Container*Verification*.java</include>
-                              <include>**/*ContainerVerifications.java</include>
-                          </includes>
-                          <properties>
-                          </properties>
-                      </configuration>
-                  </plugin>
-              </plugins>
-          </build>
-
-      </profile>
-  </profiles>
   <parent>
     <artifactId>mvn-defaults</artifactId>
     <groupId>io.nosqlbench</groupId>
@@ -131,4 +94,41 @@
 <!--      </plugin>-->
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>enable-container-tests</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>run-container-tests</id>
+                <phase>integration-test</phase>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <forkCount>1</forkCount>
+              <reuseForks>false</reuseForks>
+              <includes>
+                <include>**/*Container*Verification*.java</include>
+                <include>**/*ContainerVerifications.java</include>
+              </includes>
+              <properties>
+              </properties>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+
+    </profile>
+  </profiles>
 </project>
