@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,19 +82,19 @@ public class DockerMetricsManager {
         String GRAFANA_IMG = "grafana/grafana";
         tag = (tag == null || tag.isEmpty()) ? "latest" : tag;
         String name = "grafana";
-        List<Integer> port = Arrays.asList(3000);
+        List<Integer> port = List.of(3000);
 
         boolean grafanaFilesExist = grafanaFilesExist();
         if (!grafanaFilesExist) {
             setupGrafanaFiles(ip);
         }
 
-        List<String> volumeDescList = Arrays.asList(
-                userHome + "/.nosqlbench/grafana:/var/lib/grafana:rw"
-                //cwd+"/docker-metrics/grafana:/grafana",
-                //cwd+"/docker-metrics/grafana/datasources:/etc/grafana/provisioning/datasources",
-                //cwd+"/docker-metrics/grafana/dashboardconf:/etc/grafana/provisioning/dashboards"
-                //,cwd+"/docker-metrics/grafana/dashboards:/var/lib/grafana/dashboards:ro"
+        List<String> volumeDescList = List.of(
+            userHome + "/.nosqlbench/grafana:/var/lib/grafana:rw"
+            //cwd+"/docker-metrics/grafana:/grafana",
+            //cwd+"/docker-metrics/grafana/datasources:/etc/grafana/provisioning/datasources",
+            //cwd+"/docker-metrics/grafana/dashboardconf:/etc/grafana/provisioning/dashboards"
+            //,cwd+"/docker-metrics/grafana/dashboards:/var/lib/grafana/dashboards:ro"
         );
         List<String> envList = Arrays.asList(
                 "GF_SECURITY_ADMIN_PASSWORD=admin",
@@ -125,7 +125,7 @@ public class DockerMetricsManager {
         logger.info("preparing to start docker metrics");
         String PROMETHEUS_IMG = "prom/prometheus";
         String name = "prom";
-        List<Integer> port = Arrays.asList(9090);
+        List<Integer> port = List.of(9090);
 
         if (!promFilesExist()) {
             setupPromFiles(ip);
@@ -175,7 +175,7 @@ public class DockerMetricsManager {
 
         setupGraphiteFiles(volumeDescList);
 
-        List<String> envList = Arrays.asList();
+        List<String> envList = List.of();
 
         String reload = null;
         List<String> linkNames = new ArrayList();
@@ -342,7 +342,7 @@ public class DockerMetricsManager {
 
 
     private void configureGrafana() {
-        List<Content<?>> dashboardContent = NBIO.all().prefix("docker/dashboards").extension(".json").list();
+        List<Content<?>> dashboardContent = NBIO.all().searchPrefixes("docker/dashboards").extensionSet(".json").list();
 
         for (Content<?> content : dashboardContent) {
             String dashboardData = content.asString();
@@ -355,7 +355,7 @@ public class DockerMetricsManager {
 
         }
 
-        List<Content<?>> datasources = NBIO.all().prefix("docker/datasources").extension(".yaml").list();
+        List<Content<?>> datasources = NBIO.all().searchPrefixes("docker/datasources").extensionSet(".yaml").list();
 
         for (Content<?> datasource : datasources) {
             String datasourceContent = datasource.asString();

@@ -33,6 +33,7 @@ import org.apache.logging.log4j.Logger;
 import org.assertj.core.api.Assertions;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -108,7 +109,7 @@ public class YamlSpecValidator implements STAssemblyValidator {
                 }.getType();
                 List<Map<String, Object>> expectedList = gson.fromJson(json, type);
 
-                OpsDocList stmtsDocs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
+                OpsDocList stmtsDocs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, new HashMap<>(), null);
                 List<OpTemplate> stmts = stmtsDocs.getOps();
                 List<Map<String, Object>> stmt_objs = stmts.stream().map(OpTemplate::asData).collect(Collectors.toList());
 

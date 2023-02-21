@@ -30,7 +30,7 @@ public class SpecDocsManifest implements BundledMarkdownManifest {
     @Override
     public DocsBinder getDocs() {
         Docs docs = new Docs().namespace("workload_definition");
-        List<Content<?>> specfiles = NBIO.classpath().prefix("workload_definition/").extension(".md").list();
+        List<Content<?>> specfiles = NBIO.classpath().searchPrefixes("workload_definition/").extensionSet(".md").list();
         for (Content<?> specfile : specfiles) {
             docs.addPath(specfile.asPath());
         }

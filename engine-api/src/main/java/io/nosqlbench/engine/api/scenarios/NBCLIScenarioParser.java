@@ -50,10 +50,10 @@ public class NBCLIScenarioParser {
 
     public static boolean isFoundWorkload(String workload, String... includes) {
         Optional<Content<?>> found = NBIO.all()
-            .prefix("activities")
-            .prefix(includes)
-            .name(workload)
-            .extension(RawOpsLoader.YAML_EXTENSIONS)
+            .searchPrefixes("activities")
+            .searchPrefixes(includes)
+            .pathname(workload)
+            .extensionSet(RawOpsLoader.YAML_EXTENSIONS)
             .first();
         return found.isPresent();
     }
@@ -64,10 +64,10 @@ public class NBCLIScenarioParser {
 
         String workloadName = arglist.removeFirst();
         Optional<Content<?>> found = NBIO.all()
-            .prefix("activities")
-            .prefix(includes)
-            .name(workloadName)
-            .extension(RawOpsLoader.YAML_EXTENSIONS)
+            .searchPrefixes("activities")
+            .searchPrefixes(includes)
+            .pathname(workloadName)
+            .extensionSet(RawOpsLoader.YAML_EXTENSIONS)
             .first();
 //
         Content<?> workloadContent = found.orElseThrow();
@@ -108,10 +108,10 @@ public class NBCLIScenarioParser {
 
             // Load in named scenario
             Content<?> yamlWithNamedScenarios = NBIO.all()
-                .prefix(SEARCH_IN)
-                .prefix(includes)
-                .name(workloadName)
-                .extension(RawOpsLoader.YAML_EXTENSIONS)
+                .searchPrefixes(SEARCH_IN)
+                .searchPrefixes(includes)
+                .pathname(workloadName)
+                .extensionSet(RawOpsLoader.YAML_EXTENSIONS)
                 .first().orElseThrow();
             // TODO: The yaml needs to be parsed with arguments from each command independently to support template vars
             OpsDocList scenariosYaml = OpsLoader.loadContent(yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
@@ -228,7 +228,7 @@ public class NBCLIScenarioParser {
     private static LinkedHashMap<String, CmdArg> parseStep(String cmd) {
         LinkedHashMap<String, CmdArg> parsedStep = new LinkedHashMap<>();
 
-        String[] namedStepPieces = cmd.split(" ");
+        String[] namedStepPieces = cmd.split(" +");
         for (String commandFragment : namedStepPieces) {
             Matcher matcher = WordAndMaybeAssignment.matcher(commandFragment);
 
@@ -320,8 +320,8 @@ public class NBCLIScenarioParser {
                     }
                 }
 
-                Content<?> content = NBIO.all().prefix(SEARCH_IN)
-                    .name(referenced).extension(RawOpsLoader.YAML_EXTENSIONS)
+                Content<?> content = NBIO.all().searchPrefixes(SEARCH_IN)
+                    .pathname(referenced).extensionSet(RawOpsLoader.YAML_EXTENSIONS)
                     .one();
 
                 OpsDocList stmts = null;
@@ -379,14 +379,14 @@ public class NBCLIScenarioParser {
 
     public static List<WorkloadDesc> getWorkloadsWithScenarioScripts(boolean defaultIncludes, String... includes) {
 
-        NBPathsAPI.GetPrefix searchin = NBIO.all();
+        NBPathsAPI.GetPrefixes searchin = NBIO.all();
         if (defaultIncludes) {
-            searchin = searchin.prefix(SEARCH_IN);
+            searchin = searchin.searchPrefixes(SEARCH_IN);
         }
 
         List<Content<?>> activities = searchin
-            .prefix(includes)
-            .extension(RawOpsLoader.YAML_EXTENSIONS)
+            .searchPrefixes(includes)
+            .extensionSet(RawOpsLoader.YAML_EXTENSIONS)
             .list();
 
         return filterForScenarios(activities);
@@ -395,15 +395,15 @@ public class NBCLIScenarioParser {
 
     public static List<String> getScripts(boolean defaultIncludes, String... includes) {
 
-        NBPathsAPI.GetPrefix searchin = NBIO.all();
+        NBPathsAPI.GetPrefixes searchin = NBIO.all();
         if (defaultIncludes) {
-            searchin = searchin.prefix(SEARCH_IN);
+            searchin = searchin.searchPrefixes(SEARCH_IN);
         }
 
         List<Path> scriptPaths = searchin
-            .prefix("scripts/auto")
-            .prefix(includes)
-            .extension("js")
+            .searchPrefixes("scripts/auto")
+            .searchPrefixes(includes)
+            .extensionSet("js")
             .list().stream().map(Content::asPath).collect(Collectors.toList());
 
         List<String> scriptNames = new ArrayList();

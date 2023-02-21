@@ -145,7 +145,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
 
         logger.debug(() -> "Looking for " + script_path);
 
-        Content<?> one = NBIO.all().prefix("scripts").name(script_path).extension("js").one();
+        Content<?> one = NBIO.all().searchPrefixes("scripts").pathname(script_path).extensionSet("js").one();
         scriptData = one.asString();
 
         StrInterpolator interpolator = new StrInterpolator(cmd.getParams());

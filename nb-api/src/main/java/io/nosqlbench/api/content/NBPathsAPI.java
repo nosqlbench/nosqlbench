@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,21 @@ package io.nosqlbench.api.content;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+/**
+ * This API provides a single service to locate and load content resource from multiple places,
+ * at build time and runtime, using a standard fluent-like pattern. The most important details for new uesrs are:
+ * <UL>
+ *     <LI>Search paths are optional, and are tried <strong>after</strong> non-prefixed paths.</LI>
+ *     <LI>If extensions are provided, then any result returned <strong>must</strong> match one of the extensions.</LI>
+ *     <LI>The most efficient way to access a single path will be to use the {@link Facets#one()} method as {@link NBIO#one()}</LI>
+ * </UL>
+ */
 public interface NBPathsAPI {
 
     interface Facets extends
-        GetSource, GetPrefix, GetName, GetExtension, DoSearch {
+        GetSource, GetPrefixes, GetPathname, GetExtensions, DoSearch {
     }
 
     interface GetSource {
@@ -32,7 +42,7 @@ public interface NBPathsAPI {
          *
          * @return this builder
          */
-        GetPrefix localContent();
+        GetPrefixes localContent();
 
         /**
          * Only return content from remote URLs. If the user is providing non-URL content
@@ -40,7 +50,7 @@ public interface NBPathsAPI {
          *
          * @return this builder
          */
-        GetPrefix remoteContent();
+        GetPrefixes remoteContent();
 
         /**
          * Only return content from the runtime classpath, internal resources that are bundled,
@@ -48,14 +58,14 @@ public interface NBPathsAPI {
          *
          * @return this builder
          */
-        GetPrefix internalContent();
+        GetPrefixes internalContent();
 
         /**
          * Only return content from the filesystem, but not remote URLs nor internal bundled resources.
          *
          * @return this builder
          */
-        GetPrefix fileContent();
+        GetPrefixes fileContent();
 
         /**
          * Return content from everywhere, from remote URls, or from the file system and then the internal
@@ -63,10 +73,10 @@ public interface NBPathsAPI {
          *
          * @return this builder
          */
-        GetPrefix allContent();
+        GetPrefixes allContent();
     }
 
-    interface GetPrefix extends GetName {
+    interface GetPrefixes extends GetPathname {
         /**
          * Each of the prefix paths will be searched if the resource is not found with the exact
          * path given. To be specific, if you want to search within a location based on wildcards,
@@ -75,10 +85,10 @@ public interface NBPathsAPI {
          * @param prefixPaths A list of paths to include in the search
          * @return this builder
          */
-        GetPrefix prefix(String... prefixPaths);
+        GetPrefixes searchPrefixes(String... prefixPaths);
     }
 
-    interface GetName extends GetExtension {
+    interface GetPathname extends GetExtensions {
         /**
          * Provide the names of the resources to be resolved. More than one resource may be provided.
          * If no name is provided, then a wildcard search is assumed.
@@ -86,7 +96,7 @@ public interface NBPathsAPI {
          * @param name The name of the resource to load
          * @return this builder
          */
-        GetExtension name(String... name);
+        GetExtensions pathname(String... name);
 
         /**
          * Provide a combined prefix, name and suffix in a combined form. For each search template provided,
@@ -123,7 +133,7 @@ public interface NBPathsAPI {
 
     }
 
-    interface GetExtension extends DoSearch {
+    interface GetExtensions extends DoSearch {
         /**
          * provide a list of optional file extensions which should be considered. If the content is
          * not found under the provided name, then each of the extension is tried in order.
@@ -134,8 +144,8 @@ public interface NBPathsAPI {
          * @param extensions The extension names to try
          * @return this builder
          */
-        DoSearch extension(String... extensions);
-
+        GetExtensions extensionSet(String... extensions);
+        GetExtensions extensionSets(Set<String>... cosets);
     }
 
     interface DoSearch {

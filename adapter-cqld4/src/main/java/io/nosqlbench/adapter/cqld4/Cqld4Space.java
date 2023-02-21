@@ -99,7 +99,7 @@ public class Cqld4Space implements AutoCloseable {
         int port = cfg.getOptional(int.class, "port").orElse(9042);
 
         Optional<String> scb = cfg.getOptional(String.class, "secureconnectbundle", "scb");
-        scb.flatMap(s -> NBIO.all().name(s).first().map(Content::getInputStream))
+        scb.flatMap(s -> NBIO.all().pathname(s).first().map(Content::getInputStream))
             .map(builder::withCloudSecureConnectBundle);
 
         Optional<List<InetSocketAddress>> contactPointsOption = cfg
@@ -229,14 +229,14 @@ public class Cqld4Space implements AutoCloseable {
 
         for (String loaderspec : loaderspecs) {
             // path
-            Optional<Content<?>> fsconfig = NBIO.fs().name(driverconfig).first();
+            Optional<Content<?>> fsconfig = NBIO.fs().pathname(driverconfig).first();
             if (fsconfig.isPresent()) {
                 loaders.add(DriverConfigLoader.fromPath(fsconfig.get().asPath()));
                 continue;
             }
 
             // classpath
-            Optional<Content<?>> cpconfig = NBIO.classpath().name(driverconfig).first();
+            Optional<Content<?>> cpconfig = NBIO.classpath().pathname(driverconfig).first();
             if (cpconfig.isPresent()) {
                 loaders.add(DriverConfigLoader.fromClasspath(driverconfig));
                 continue;
@@ -244,7 +244,7 @@ public class Cqld4Space implements AutoCloseable {
 
             // URLs
             try {
-                Optional<Content<?>> removeconf = NBIO.remote().name(driverconfig).first();
+                Optional<Content<?>> removeconf = NBIO.remote().pathname(driverconfig).first();
                 if (removeconf.isPresent()) {
                     loaders.add(DriverConfigLoader.fromUrl(removeconf.get().getURI().toURL()));
                     continue;

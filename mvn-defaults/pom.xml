@@ -94,19 +94,19 @@
             <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
-                <version>4.7.0</version>
+                <version>4.7.1</version>
             </dependency>
 
             <!-- due to https://github.com/oshi/oshi/issues/1289 -->
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna</artifactId>
-                <version>5.12.1</version>
+                <version>5.13.0</version>
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna-platform</artifactId>
-                <version>5.12.1</version>
+                <version>5.13.0</version>
             </dependency>
 
             <dependency>
@@ -300,7 +300,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.393</version>
+                <version>1.12.407</version>
             </dependency>
 
             <dependency>
@@ -336,7 +336,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-csv</artifactId>
-                <version>1.9.0</version>
+                <version>1.10.0</version>
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
@@ -383,7 +383,7 @@
             <dependency>
                 <groupId>org.graalvm.sdk</groupId>
                 <artifactId>graal-sdk</artifactId>
-                <version>22.3.0</version>
+                <version>22.3.1</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
@@ -399,7 +399,7 @@
             <dependency>
                 <groupId>org.graalvm.tools</groupId>
                 <artifactId>profiler</artifactId>
-                <version>22.3.0</version>
+                <version>22.3.1</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>

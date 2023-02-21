@@ -52,7 +52,7 @@ blocks:
       prepared: false
     ops:
       truncate-table: |
-        truncate table <<keyspace:baselines>>.<<table:iot>>;
+        truncate table TEMPLATE(keyspace, baselines).TEMPLATE(table:iot);
   rampup:
     params:
       cl: <<write_cl:LOCAL_QUORUM>>

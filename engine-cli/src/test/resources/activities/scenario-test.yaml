@@ -2,9 +2,9 @@ min_version: "5.17.1"
 
 scenarios:
   default:
-    schema: run driver==stdout workload===scenario-test tags=block:"schema.*"
-    rampup: run driver=stdout workload===scenario-test tags=block:rampup cycles=TEMPLATE(cycles1,10)
-    main: run driver=stdout workload===scenario-test tags=block:"main.*" cycles=TEMPLATE(cycles2,10)
+    schema: run  driver==stdout workload===scenario-test  tags=block:"schema.*"
+    rampup: run  driver=stdout  workload===scenario-test  tags=block:rampup cycles=TEMPLATE(cycles1,10)
+    main: run    driver=stdout  workload===scenario-test  tags=block:"main.*" cycles=TEMPLATE(cycles2,10)
   schema-only:
     schema: run driver=stdout workload==scenario-test tags=block:"schema.*" doundef==undef
 

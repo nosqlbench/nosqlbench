@@ -1,0 +1,21 @@
+#!/bin/bash
+cd mvn-defaults
+#set -x
+CURRENT_VERSION=$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
+RELEASE_VERSION=${CURRENT_VERSION%%-SNAPSHOT}
+PREVIEW_TAG="${RELEASE_VERSION}-preview"
+printf "preview tag: '%s'\n" "${PREVIEW_TAG}"
+set -e
+
+if [ "$1" == "-f" ]
+then
+ git tag -f "${PREVIEW_TAG}" \
+ && git push -f origin "${PREVIEW_TAG}" \
+ && printf "force pushed tag %s to origin, triggering build.\n" "${PREVIEW_TAG}"
+else
+ git tag "${PREVIEW_TAG}" \
+ && git push origin "${PREVIEW_TAG}" \
+ && printf "pushed tag %s to origin, triggering build.\n" "${PREVIEW_TAG}"
+fi
+
+

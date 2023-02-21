@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
@@ -66,8 +67,13 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         }
 
         ServiceLoader<DriverAdapter> adapterLoader = ServiceLoader.load(DriverAdapter.class);
-        Optional<DriverAdapter> defaultAdapter = activityDef.getParams().getOptionalString("driver")
+        Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
+        Optional<DriverAdapter> defaultAdapter = defaultDriverName
             .flatMap(s -> ServiceSelector.of(s, adapterLoader).get());
+
+        if (defaultDriverName.isPresent() && defaultAdapter.isEmpty()) {
+            throw new BasicError("Unable to load default driver adapter '" + defaultDriverName.get() + "'");
+        }
 
         // HERE, op templates are loaded before drivers are loaded
         List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter);
@@ -77,11 +83,12 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         List<DriverAdapter> adapterlist = new ArrayList<>();
         NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(yamlmodel);
 
+        Optional<String> defaultDriverOption = activityDef.getParams().getOptionalString("driver");
         for (OpTemplate ot : opTemplates) {
             ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of());
             String driverName = incompleteOpDef.takeOptionalStaticValue("driver", String.class)
                 .or(() -> incompleteOpDef.takeOptionalStaticValue("type",String.class))
-                .or(() -> activityDef.getParams().getOptionalString("driver"))
+                .or(() -> defaultDriverOption)
                 .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
 
 //            String driverName = ot.getOptionalStringParam("driver")
@@ -109,12 +116,18 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             }
             supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
 
-
             DriverAdapter adapter = adapters.get(driverName);
             adapterlist.add(adapter);
             ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()));
             Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
             pops.add(pop);
+        }
+
+        if (defaultDriverOption.isPresent()) {
+            long matchingDefault = mappers.keySet().stream().filter(n -> n.equals(defaultDriverOption.get())).count();
+            if (matchingDefault==0) {
+                logger.warn("All op templates used a different driver than the default '" + defaultDriverOption.get()+"'");
+            }
         }
 
         try {

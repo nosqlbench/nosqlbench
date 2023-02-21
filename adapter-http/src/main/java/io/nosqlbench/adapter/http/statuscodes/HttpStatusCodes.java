@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class HttpStatusCodes {
     private static final IetfStatusCode[] codes = loadMap();
 
     private static IetfStatusCode[] loadMap() {
-        Content<?> csv = NBIO.local().name("ietf-http-status-codes").extension("csv").one();
+        Content<?> csv = NBIO.local().pathname("ietf-http-status-codes").extensionSet("csv").one();
         InputStreamReader isr = new InputStreamReader(csv.getInputStream());
         IetfStatusCode[] codes = new IetfStatusCode[600];
 

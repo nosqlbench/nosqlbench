@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class PMatrixElemTest {
     @Disabled
     public void testMatrixElem() {
         Gson gson = new GsonBuilder().create();
-        String json = NBIO.classpath().name("test.json").one().asString();
+        String json = NBIO.classpath().pathname("test.json").one().asString();
         Type type = new TypeToken<PromQueryResult<PMatrixData>>() {
         }.getType();
         Object result = gson.fromJson(json, type);
