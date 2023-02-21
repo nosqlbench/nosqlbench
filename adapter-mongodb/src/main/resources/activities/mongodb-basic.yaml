@@ -15,12 +15,14 @@ blocks:
   rampup:
     ops:
       rampup-insert: |
-          {
-            insert: "<<collection:keyvalue>>",
-            documents: [ { _id: {seq_key}, value: {seq_value} } ]
-          }
-    params:
-      readPreference: primary
+        {
+          insert: "<<collection:keyvalue>>",
+          documents: [ { _id: {seq_key}, value: {seq_value} } ]
+        }
+      params:
+        readPreference: primary
+      tags:
+        name: rampup-insert
 
   main-read:
     params:
@@ -32,7 +34,7 @@ blocks:
         {
           find: "<<collection:keyvalue>>",
           filter: { _id: {rw_key} }
-        }
+        }      
 
   main-write:
     params:
@@ -40,9 +42,9 @@ blocks:
       type: write
     ops:
       main-insert: |
-          {
-            insert: "<<collection:keyvalue>>",
-            documents: [ { _id: {rw_key}, value: {rw_value} } ]
-          }
-        params:
-          readPreference: primary
+        {
+          insert: "<<collection:keyvalue>>",
+          documents: [ { _id: {rw_key}, value: {rw_value} } ]
+        }
+      params:
+        readPreference: primary

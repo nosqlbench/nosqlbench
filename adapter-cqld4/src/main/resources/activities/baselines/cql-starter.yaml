@@ -1,5 +1,5 @@
 description: |
-  A cql-starter workload primarily for:
+  A cql-starter workload. 
   * Cassandra: 3.x, 4.x.
   * DataStax Enterprise: 6.8.x.
   * DataStax Astra.
@@ -7,8 +7,9 @@ description: |
 scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
-    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,1) threads=auto
     main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+    # rampdown: run driver=cql tags==block:rampdown threads==1 cycles==UNDEF
   astra:
     schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
@@ -19,13 +20,15 @@ scenarios:
     main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 params:
-  x: y
+  a_param: "value"
 
 bindings:
-  machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
-  message: ToString(); TextOfFile('data/cql-starter-message.txt')
-  time: Mul(100L); Div(10000L); ToJavaInstant()
-  timestamp: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L); Mul(1000L);
+  machine_id: ElapsedNanoTime(); ToHashedUUID() -> java.util.UUID
+  message: Discard(); TextOfFile('data/cql-starter-message.txt');
+  rampup_message: ToString();
+  time: ElapsedNanoTime(); Mul(1000); ToJavaInstant();
+  ts: ElapsedNanoTime(); Mul(1000);
+
 
 blocks:
   schema:
@@ -38,32 +41,38 @@ blocks:
         AND durable_writes = true;
       create-table: |
         create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
-        machine_id UUID,
-        message text,
-        time timestamp,
+        machine_id UUID,  
+        message text,    
+        time timestamp,          
         PRIMARY KEY ((machine_id), time)
         ) WITH CLUSTERING ORDER BY (time DESC);
-#      truncate-table: |
-#        truncate table <<keyspace:starter>>.<<table:cqlstarter>>;
+
   schema-astra:
     params:
       prepared: false
     ops:
       create-table-astra: |
         create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
-        machine_id UUID,
+        machine_id UUID, 
         message text,
-        time timestamp,
+        time timestamp, 
         PRIMARY KEY ((machine_id), time)
         ) WITH CLUSTERING ORDER BY (time DESC);
+
   rampup:
     params:
       cl: <<write_cl:LOCAL_QUORUM>>
       idempotent: true
     ops:
       insert-rampup: |
-        insert into  <<keyspace:starter>>.<<table:cqlstarter>> (machine_id, message, time)
-        values ({machine_id}, {message}, {time}) using timestamp {timestamp};
+        insert into  <<keyspace:starter>>.<<table:cqlstarter>> (machine_id, message, time) 
+        values ({machine_id}, {rampup_message}, {time}) using timestamp {ts};
+
+  rampdown:
+    ops:
+      truncate-table: |
+        truncate table <<keyspace:starter>>.<<table:cqlstarter>>;
+
   main-read:
     params:
       ratio: <<read_ratio:1>>
@@ -80,4 +89,4 @@ blocks:
     ops:
       insert-main: |
         insert into <<keyspace:starter>>.<<table:cqlstarter>>
-        (machine_id, message, time) values ({machine_id}, {message}, {time}) using timestamp {timestamp};
+        (machine_id, message, time) values ({machine_id}, {message}, {time}) using timestamp {ts};
