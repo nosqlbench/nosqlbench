@@ -198,7 +198,8 @@ public class WorkloadContainerVerifications {
                         }
                     }
                 } catch (Exception e) {
-                    System.out.println("Error reading file " + workload.getYamlPath() + ": " + e.getMessage());
+                    logger.error("Error reading file " + workload.getYamlPath() + ": " + e.getMessage());
+                    break;
                 }
             }
         }
