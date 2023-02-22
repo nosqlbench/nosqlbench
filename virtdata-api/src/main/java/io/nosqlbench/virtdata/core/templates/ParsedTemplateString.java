@@ -17,7 +17,7 @@
 package io.nosqlbench.virtdata.core.templates;
 
 
-import io.nosqlbench.engine.api.templating.BindType;
+import io.nosqlbench.engine.api.templating.ParsedSpanType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -150,13 +150,13 @@ public class ParsedStringTemplate {
         this.bindpoints = bindPointsResult.getBindpoints();
     }
 
-    public BindType getType() {
+    public ParsedSpanType getType() {
         if (this.spans.length == 1) {
-            return BindType.literal;
+            return ParsedSpanType.literal;
         } else if (this.spans[0].isEmpty() && this.spans[2].isEmpty()) {
-            return BindType.bindref;
+            return ParsedSpanType.bindref;
         } else {
-            return BindType.concat;
+            return ParsedSpanType.concat;
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class Templatizer {
     }
 
     public static class Result {
-        private BindType type;
+        private ParsedSpanType type;
         private final List<CapturePoint> captures = new ArrayList<>();
         private String name;
         private Object value;
@@ -97,7 +97,7 @@ public class Templatizer {
             this.type = null;
         }
 
-        public BindType getType() {
+        public ParsedSpanType getType() {
             return this.type;
         }
 
@@ -109,7 +109,7 @@ public class Templatizer {
             this.captures.addAll(captures);
         }
 
-        public void setType(BindType type) {
+        public void setType(ParsedSpanType type) {
             this.type = type;
         }
 
