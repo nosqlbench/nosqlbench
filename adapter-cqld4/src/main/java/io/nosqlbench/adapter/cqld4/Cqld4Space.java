@@ -96,7 +96,7 @@ public class Cqld4Space implements AutoCloseable {
 
         builder.withConfigLoader(dcl);
 
-        int port = cfg.getOrDefault("port", 9042);
+        int port = cfg.getOptional(int.class, "port").orElse(9042);
 
         Optional<String> scb = cfg.getOptional(String.class, "secureconnectbundle", "scb");
         scb.flatMap(s -> NBIO.all().pathname(s).first().map(Content::getInputStream))
@@ -284,6 +284,7 @@ public class Cqld4Space implements AutoCloseable {
             .add(Param.optional("localdc"))
             .add(Param.optional(List.of("secureconnectbundle", "scb")))
             .add(Param.optional(List.of("hosts", "host")))
+            .add(Param.defaultTo("port",9042))
             .add(Param.optional("driverconfig", String.class))
             .add(Param.optional("username", String.class, "user name (see also password and passfile)"))
             .add(Param.optional("userfile", String.class, "file to load the username from"))

@@ -29,7 +29,7 @@ bindings:
   lat: Uniform(-180d, 180d)
   lng: Hash() -> long; Uniform(-180d, 180d)
   friend_id: Add(-1); ToHashedUUID(); ToString() -> String
-  
+
   match1: Identity(); CoinFunc(<<match-ratio>>, FixedValue(0), FixedValue(1000))
   match2: Identity(); CoinFunc(<<match-ratio>>, FixedValue("true"), FixedValue("false"))
   additional_fields: ListSizedStepped(<<docpadding:0>>,Template("\"{}\":{}",Identity(),Identity())); ToString(); ReplaceAll('\[\"', ',\"'); ReplaceAll('\[', ''); ReplaceAll('\]', '') -> String

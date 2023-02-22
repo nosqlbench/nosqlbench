@@ -58,6 +58,7 @@ nb5 ... driverconfig='http://gist.github.com...'
 - **hosts** & **localdc** - (required unless using scb) - Set the endpoint and local datacenter name
   for the driver.
   - example: `host=mydsehost localdc=testdc1`
+- **port** (optional for hosts) - Set the port to connect to for the CQL binary protocol.
 - **driverconfig** - (explained above) - set the configuration source for the driver.
 - **username** OR **userfile** - (optional, only one may be used) - If you need to specify a
   username but want to put it in a file instead, simply use the `userfile=myfile` option. It is
