@@ -16,18 +16,18 @@
 
 package io.nosqlbench.engine.api.templating;
 
+import io.nosqlbench.api.config.fieldreaders.DynamicFieldReader;
+import io.nosqlbench.api.config.fieldreaders.StaticFieldReader;
 import io.nosqlbench.api.config.standard.NBConfigError;
+import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.templating.binders.ArrayBinder;
 import io.nosqlbench.engine.api.templating.binders.ListBinder;
 import io.nosqlbench.engine.api.templating.binders.OrderedMapBinder;
-import io.nosqlbench.api.config.fieldreaders.DynamicFieldReader;
-import io.nosqlbench.api.config.fieldreaders.StaticFieldReader;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
-import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -302,7 +302,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * representation of a result. If the values are defined, then each one represents the name
      * that the found value should be saved as instead of the original name.
      */
-    private final List<List<CapturePoint>> captures = new ArrayList<>();
+    private final List<CapturePoint> captures = new ArrayList<>();
 
     private final OpTemplate _opTemplate;
     private final NBConfiguration activityCfg;
@@ -426,7 +426,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return tmap.getStaticValue(field);
     }
 
-    public Optional<ParsedStringTemplate> getAsTemplate(String fieldname) {
+    public Optional<ParsedTemplateString> getAsTemplate(String fieldname) {
         return this.tmap.getAsStringTemplate(fieldname);
     }
 
@@ -915,5 +915,9 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     @Override
     public String toString() {
         return this.tmap.toString();
+    }
+
+    public List<CapturePoint> getCaptures() {
+        return tmap.getCaptures();
     }
 }

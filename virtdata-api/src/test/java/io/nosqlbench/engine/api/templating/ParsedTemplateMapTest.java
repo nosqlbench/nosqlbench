@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.core.templates;
+package io.nosqlbench.engine.api.templating;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class FastStringCompositorTest {
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class ParsedTemplateMapTest {
 
     @Test
-    @Disabled // Needs to have annotation processor run in test scope first
-    public void testFastStringCompositor() {
-        String rawTpl = "template {b1}, {{TestValue(5)}}";
-        Map<String, String> bindings = Map.of("b1", "TestIdentity()");
-        ParsedTemplateString ptpl = new ParsedTemplateString(rawTpl, bindings);
-        StringCompositor fsc = new StringCompositor(ptpl,Map.of());
-        System.out.println(fsc);
+    public void testParsedTemplateMap() {
+        ParsedTemplateMap ptm = new ParsedTemplateMap("name1", Map.of("string1", "string2"), Map.of(), List.of());
+        assertThat(ptm.getOpFieldNames()).isEqualTo(Set.of("string1"));
     }
 
 }

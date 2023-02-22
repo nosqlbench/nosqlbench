@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityconfig.yaml;
 
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
-import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,8 +27,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ParsedOpTemplateTest {
-    private static final Logger logger = LogManager.getLogger(ParsedOpTemplateTest.class);
+public class ParsedWorkloadTemplateTest {
+    private static final Logger logger = LogManager.getLogger(ParsedWorkloadTemplateTest.class);
     private static OpsDocList doclist;
 
     @BeforeAll
@@ -40,13 +40,13 @@ public class ParsedOpTemplateTest {
     public void testBasicParser() {
         OpsBlock block0 = doclist.getStmtDocs().get(0).getBlocks().get(0);
         OpTemplate stmtDef0 = block0.getOps().get(0);
-        ParsedStringTemplate parsed0 = stmtDef0.getParsed().orElseThrow();
+        ParsedTemplateString parsed0 = stmtDef0.getParsed().orElseThrow();
         assertThat(parsed0.getMissing()).containsExactly("delta");
         assertThat(parsed0.hasError()).isTrue();
 
         OpsBlock block1 = doclist.getStmtDocs().get(0).getBlocks().get(1);
         OpTemplate stmtDef1 = block1.getOps().get(0);
-        ParsedStringTemplate parsed1 = stmtDef1.getParsed().orElseThrow();
+        ParsedTemplateString parsed1 = stmtDef1.getParsed().orElseThrow();
         assertThat(parsed1.getMissing()).containsExactly();
         assertThat(parsed1.hasError()).isFalse();
     }
@@ -56,12 +56,12 @@ public class ParsedOpTemplateTest {
         OpsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(2);
 
         OpTemplate stmtDef0 = block2.getOps().get(0);
-        ParsedStringTemplate parsed0 = stmtDef0.getParsed().orElseThrow();
+        ParsedTemplateString parsed0 = stmtDef0.getParsed().orElseThrow();
         assertThat(parsed0.getMissing()).isEmpty();
         assertThat(parsed0.hasError()).isFalse();
 
         OpTemplate stmtDef1 = block2.getOps().get(1);
-        ParsedStringTemplate parsed1 = stmtDef1.getParsed().orElseThrow();
+        ParsedTemplateString parsed1 = stmtDef1.getParsed().orElseThrow();
         assertThat(parsed1.getMissing()).isEmpty();
         assertThat(parsed1.hasError()).isFalse();
     }

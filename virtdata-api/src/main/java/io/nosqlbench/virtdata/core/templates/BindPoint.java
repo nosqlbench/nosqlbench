@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,15 @@ public class BindPoint {
          * a definition bindpoint is expressed as anything between double curly braces like <pre>{@code {{Identity()}}</pre>
          * or <pre>{@code {(Identity())}}
          */
-        definition
+        definition,
+        /**
+         * a reference to a captured variable, local to the current thread
+         */
+        localref,
+        /**
+         * a reference to a global captured variable, across the local JVM instance
+         */
+        globalref
     }
 
     public BindPoint(String anchor, String bindspec, Type type) {
@@ -84,7 +92,7 @@ public class BindPoint {
     }
 
     /**
-     * The name of the anchor for a binding as it appears in a user-specified template, parsed by {@link ParsedStringTemplate}.
+     * The name of the anchor for a binding as it appears in a user-specified template, parsed by {@link ParsedTemplateString}.
      * @return A string name for the bind point anchor, or null for {@link BindPoint.Type#definition} types.
      */
     public String getAnchor() {

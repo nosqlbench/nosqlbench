@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.api.templating;
 
+import io.nosqlbench.virtdata.core.templates.CapturePoint;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,7 @@ public class ParsedTemplateList implements LongFunction<List<?>> {
     private final List<Object> protolist = new ArrayList<>();
     private final int[] dynamic_idx;
     private final LongFunction<?>[] functions;
+    private final List<CapturePoint> captures = new ArrayList<>();
 
     public ParsedTemplateList(List<Object> sublist, Map<String, String> bindings, List<Map<String, Object>> cfgsources) {
 
@@ -34,6 +37,7 @@ public class ParsedTemplateList implements LongFunction<List<?>> {
         for (int i = 0; i < sublist.size(); i++) {
             Object item = sublist.get(i);
             Templatizer.Result result = Templatizer.make(bindings, item, null, cfgsources);
+            this.captures.addAll(result.getCaptures());
             switch (result.getType()) {
                 case literal:
                     protolist.add(result.getValue());
@@ -63,5 +67,9 @@ public class ParsedTemplateList implements LongFunction<List<?>> {
 
     public boolean isStatic() {
         return dynamic_idx.length==0;
+    }
+
+    public List<CapturePoint> getCaptures() {
+        return this.captures;
     }
 }

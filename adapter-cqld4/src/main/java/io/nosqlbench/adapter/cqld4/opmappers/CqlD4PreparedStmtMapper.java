@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.api.config.params.ParamsParser;
 import io.nosqlbench.api.errors.BasicError;
-import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 
 import java.util.List;
 import java.util.Map;
@@ -51,7 +51,7 @@ public class CqlD4PreparedStmtMapper implements OpMapper<Cqld4CqlOp> {
 
     public OpDispenser<Cqld4CqlOp> apply(ParsedOp op) {
 
-        ParsedStringTemplate stmtTpl = op.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
+        ParsedTemplateString stmtTpl = op.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
             "No statement was found in the op template:" + op
         ));
 

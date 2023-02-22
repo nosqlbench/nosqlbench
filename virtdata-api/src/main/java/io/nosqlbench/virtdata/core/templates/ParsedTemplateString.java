@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.nosqlbench.virtdata.core.templates;
 
 
-import io.nosqlbench.engine.api.templating.BindType;
+import io.nosqlbench.engine.api.templating.ParsedSpanType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -74,7 +74,7 @@ import java.util.stream.StreamSupport;
  * <LI>provide a text template for re-assembly with injected data</LI>
  * </UL>
  *
- * Once the parsed template is constructed, the method {@link ParsedStringTemplate#orError()}
+ * Once the parsed template is constructed, the method {@link ParsedTemplateString#orError()}
  * should <em>always</em> called before it is used.
  *
  * <H2>Validity Checks</H2>
@@ -106,16 +106,16 @@ import java.util.stream.StreamSupport;
  * This is a list of binding names which were provided by the user, but which were not used in the raw template by name.
  * </p>
  */
-public class ParsedStringTemplate {
+public class ParsedTemplateString {
 
-    private final static Logger logger = LogManager.getLogger(ParsedStringTemplate.class);
+    private final static Logger logger = LogManager.getLogger(ParsedTemplateString.class);
 
     private final String rawtemplate;
-    private final List<CapturePoint> captures;
+    private final List<CapturePoint> captures = new ArrayList<>();
     private final List<BindPoint> bindpoints;
 
-    public static ParsedStringTemplate of(String rawtemplate, Map<String, String> bindings) {
-        return new ParsedStringTemplate(rawtemplate, bindings);
+    public static ParsedTemplateString of(String rawtemplate, Map<String, String> bindings) {
+        return new ParsedTemplateString(rawtemplate, bindings);
     }
 
     /**
@@ -130,19 +130,19 @@ public class ParsedStringTemplate {
     private final Map<String, String> bindings = new LinkedHashMap<>();
 
     /**
-     * Parse the given raw template, check the bind points against the provide bindings, and
+     * Parse the given raw template, check the bind points against the provided bindings, and
      * provide detailed template checks for validity.
      *
      * @param rawtemplate       A string template which contains optionally embedded named anchors
      * @param availableBindings The bindings which are provided by the user to fulfill the named anchors in this raw template
      */
-    public ParsedStringTemplate(String rawtemplate, Map<String, String> availableBindings) {
+    public ParsedTemplateString(String rawtemplate, Map<String, String> availableBindings) {
         this.bindings.putAll(availableBindings);
         this.rawtemplate = rawtemplate;
 
         CapturePointParser capturePointParser = new CapturePointParser();
         CapturePointParser.Result captureData = capturePointParser.apply(rawtemplate);
-        this.captures = captureData.getCaptures();
+        this.captures.addAll(captureData.getCaptures());
 
         BindPointParser bindPointParser = new BindPointParser();
         BindPointParser.Result bindPointsResult = bindPointParser.apply(captureData.getRawTemplate(), availableBindings);
@@ -150,17 +150,17 @@ public class ParsedStringTemplate {
         this.bindpoints = bindPointsResult.getBindpoints();
     }
 
-    public BindType getType() {
+    public ParsedSpanType getType() {
         if (this.spans.length == 1) {
-            return BindType.literal;
+            return ParsedSpanType.literal;
         } else if (this.spans[0].isEmpty() && this.spans[2].isEmpty()) {
-            return BindType.bindref;
+            return ParsedSpanType.bindref;
         } else {
-            return BindType.concat;
+            return ParsedSpanType.concat;
         }
     }
 
-    public ParsedStringTemplate orError() {
+    public ParsedTemplateString orError() {
         if (hasError()) {
             throw new RuntimeException("Unable to parse statement: " + this);
         }

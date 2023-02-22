@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.api.errors.OpConfigError;
-import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,13 +37,13 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
 
     private final RSProcessors processors;
     private final LongFunction<Statement> stmtFunc;
-    private final ParsedStringTemplate stmtTpl;
+    private final ParsedTemplateString stmtTpl;
     private final LongFunction<Object[]> fieldsF;
     private PreparedStatement preparedStmt;
     private CqlSession boundSession;
 
     public Cqld4PreparedStmtDispenser(
-        DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, ParsedOp op, ParsedStringTemplate stmtTpl, RSProcessors processors) {
+            DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, ParsedOp op, ParsedTemplateString stmtTpl, RSProcessors processors) {
         super(adapter, sessionFunc, op);
         if (op.isDynamic("space")) {
             throw new RuntimeException("Prepared statements and dynamic space values are not supported." +

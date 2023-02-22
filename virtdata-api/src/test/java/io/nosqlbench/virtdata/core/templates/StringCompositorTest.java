@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ public class StringCompositorTest {
 
     @Test
     public void testShouldMatchSpanOnly() {
-        ParsedStringTemplate pt = new ParsedStringTemplate("A\\{ {one}two", Map.of());
+        ParsedTemplateString pt = new ParsedTemplateString("A\\{ {one}two", Map.of());
         assertThat(pt.getSpans()).containsExactly("A\\{ ", "one", "two");
     }
 
     @Test
     public void testShouldNotMatchEscaped() {
-        ParsedStringTemplate pt = new ParsedStringTemplate("A\\{{B}C",Map.of());
+        ParsedTemplateString pt = new ParsedTemplateString("A\\{{B}C",Map.of());
         assertThat(pt.getSpans()).containsExactly("A\\{","B","C");
     }
 

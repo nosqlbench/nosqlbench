@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
-import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,7 +76,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      * representation of a result. If the values are defined, then each one represents the name
      * that the found value should be saved as instead of the original name.
      */
-    private final List<List<CapturePoint>> captures = new ArrayList<>();
+    private final List<CapturePoint> captures = new ArrayList<>();
     private final int mapsize;
 
     /**
@@ -103,13 +103,13 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         this.specmap = map;
         this.bindings = bindings;
         map.forEach((k, v) -> {
-            if (v instanceof CharSequence) {
-                ParsedStringTemplate pt = ParsedStringTemplate.of(((CharSequence) v).toString(), bindings);
-                this.captures.add(pt.getCaptures());
+            if (v instanceof CharSequence charvalue) {
+                ParsedTemplateString pt = ParsedTemplateString.of(charvalue.toString(), bindings);
+                this.captures.addAll(pt.getCaptures());
                 switch (pt.getType()) {
                     case literal:
-                        statics.put(k, ((CharSequence) v).toString());
-                        protomap.put(k, ((CharSequence) v).toString());
+                        statics.put(k, charvalue.toString());
+                        protomap.put(k, charvalue.toString());
                         break;
                     case bindref:
                         String spec = pt.asBinding().orElseThrow().getBindspec();
@@ -126,14 +126,15 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                         protomap.put(k, null);
                         break;
                 }
-            } else if (v instanceof Map) {
-                ((Map) v).keySet().forEach(smk -> {
+            } else if (v instanceof Map mapvalue) {
+                mapvalue.keySet().forEach(smk -> {
                     if (!CharSequence.class.isAssignableFrom(smk.getClass())) {
                         throw new OpConfigError("Only string keys are allowed in submaps.");
                     }
                 });
                 Map<String, Object> submap = (Map<String, Object>) v;
                 ParsedTemplateMap subtpl = new ParsedTemplateMap(getName(),submap, bindings, cfgsources);
+                this.captures.addAll(subtpl.getCaptures());
                 if (subtpl.isStatic()) {
                     statics.put(k, submap);
                     protomap.put(k, submap);
@@ -141,9 +142,10 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                     dynamics.put(k, subtpl);
                     protomap.put(k, null);
                 }
-            } else if (v instanceof List) {
-                List<Object> sublist = (List<Object>) v;
+            } else if (v instanceof List listvalue) {
+                List<Object> sublist = listvalue;
                 ParsedTemplateList subtpl = new ParsedTemplateList(sublist, bindings, cfgsources);
+                this.captures.addAll(subtpl.getCaptures());
                 if (subtpl.isStatic()) {
                     statics.put(k, sublist);
                     protomap.put(k, sublist);
@@ -160,6 +162,10 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             }
         });
 
+    }
+
+    public List<CapturePoint> getCaptures() {
+        return this.captures;
     }
 
     /**
@@ -695,11 +701,11 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return false;
     }
 
-    public Optional<ParsedStringTemplate> getAsStringTemplate(String fieldname) {
+    public Optional<ParsedTemplateString> getAsStringTemplate(String fieldname) {
         if (specmap.containsKey(fieldname)) {
             Object fval = specmap.get(fieldname);
             if (fval instanceof CharSequence) {
-                return Optional.of(new ParsedStringTemplate(fval.toString(), this.bindings));
+                return Optional.of(new ParsedTemplateString(fval.toString(), this.bindings));
             } else {
                 throw new RuntimeException("Can not make a parsed text template from op template field '" + fieldname + "' of type '" + fval.getClass().getSimpleName() + "'");
             }
@@ -982,4 +988,5 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         }
         return sb.toString();
     }
+
 }

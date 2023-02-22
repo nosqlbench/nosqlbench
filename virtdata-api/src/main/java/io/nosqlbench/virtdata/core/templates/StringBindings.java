@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,15 +37,15 @@ public class StringBindings implements Binder<String> {
     }
 
     public StringBindings(String template, Map<String,String> bindings, Map<String,Object> fconfig) {
-        ParsedStringTemplate parsed = new ParsedStringTemplate(template,bindings);
+        ParsedTemplateString parsed = new ParsedTemplateString(template,bindings);
         this.compositor = new StringCompositor(parsed, fconfig);
     }
 
-    public StringBindings(ParsedStringTemplate parsedStringTemplate) {
+    public StringBindings(ParsedTemplateString parsedStringTemplate) {
         this(parsedStringTemplate, Map.of());
     }
 
-    public StringBindings(ParsedStringTemplate pt, Map<String,Object> fconfig) {
+    public StringBindings(ParsedTemplateString pt, Map<String,Object> fconfig) {
         this.compositor = new StringCompositor(pt,fconfig);
     }
 

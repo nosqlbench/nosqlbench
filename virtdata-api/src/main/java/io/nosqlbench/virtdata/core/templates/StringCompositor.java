@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class StringCompositor implements LongFunction<String> {
 
     private final Function<Object, String> stringfunc;
 
-    public StringCompositor(ParsedStringTemplate template, Map<String,Object> fconfig, Function<Object,String> stringfunc) {
+    public StringCompositor(ParsedTemplateString template, Map<String,Object> fconfig, Function<Object,String> stringfunc) {
         Map<String,Integer> specs = new HashMap<>();
         List<BindPoint> bindpoints = template.getBindPoints();
         for (BindPoint bindPoint : bindpoints) {
@@ -69,7 +69,7 @@ public class StringCompositor implements LongFunction<String> {
         bufsize = minsize*2;
     }
 
-    public StringCompositor(ParsedStringTemplate template, Map<String,Object> fconfig) {
+    public StringCompositor(ParsedTemplateString template, Map<String,Object> fconfig) {
         this(template,fconfig,Object::toString);
     }
 

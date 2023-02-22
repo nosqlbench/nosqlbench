@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,24 @@
 
 package io.nosqlbench.virtdata.core.templates;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
+import java.util.List;
 
-public class FastStringCompositorTest {
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class CapturePointParserTest {
 
     @Test
-    @Disabled // Needs to have annotation processor run in test scope first
-    public void testFastStringCompositor() {
-        String rawTpl = "template {b1}, {{TestValue(5)}}";
-        Map<String, String> bindings = Map.of("b1", "TestIdentity()");
-        ParsedTemplateString ptpl = new ParsedTemplateString(rawTpl, bindings);
-        StringCompositor fsc = new StringCompositor(ptpl,Map.of());
-        System.out.println(fsc);
+    public void testCapturePoint1() {
+        CapturePointParser cpp = new CapturePointParser();
+        CapturePointParser.Result result = cpp.apply("string with [capture1]");
+        assertThat(result).isEqualTo(
+            new CapturePointParser.Result(
+                "string with capture1",
+                List.of(CapturePoint.of("capture1"))
+            )
+        );
     }
 
 }
