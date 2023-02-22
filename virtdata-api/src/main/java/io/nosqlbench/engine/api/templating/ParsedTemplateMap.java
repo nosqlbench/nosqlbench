@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,8 +108,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 this.captures.add(pt.getCaptures());
                 switch (pt.getType()) {
                     case literal:
-                        statics.put(k, ((CharSequence) v).toString());
-                        protomap.put(k, ((CharSequence) v).toString());
+                        statics.put(k, charvalue.toString());
+                        protomap.put(k, charvalue.toString());
                         break;
                     case bindref:
                         String spec = pt.asBinding().orElseThrow().getBindspec();
@@ -126,8 +126,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                         protomap.put(k, null);
                         break;
                 }
-            } else if (v instanceof Map) {
-                ((Map) v).keySet().forEach(smk -> {
+            } else if (v instanceof Map mapvalue) {
+                mapvalue.keySet().forEach(smk -> {
                     if (!CharSequence.class.isAssignableFrom(smk.getClass())) {
                         throw new OpConfigError("Only string keys are allowed in submaps.");
                     }
@@ -141,8 +141,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                     dynamics.put(k, subtpl);
                     protomap.put(k, null);
                 }
-            } else if (v instanceof List) {
-                List<Object> sublist = (List<Object>) v;
+            } else if (v instanceof List listvalue) {
+                List<Object> sublist = listvalue;
                 ParsedTemplateList subtpl = new ParsedTemplateList(sublist, bindings, cfgsources);
                 if (subtpl.isStatic()) {
                     statics.put(k, sublist);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,12 +50,12 @@ public class CharBufferExtract implements LongFunction<CharBuffer> {
 
     public CharBufferExtract(Object initFunc, Object sizeFunc) {
         CharBuffer image = null;
-        if (initFunc instanceof Number) {
-            int bufsize = ((Number) initFunc).intValue();
+        if (initFunc instanceof Number number) {
+            int bufsize = number.intValue();
             this.image = new CharBufImage(bufsize).apply(1L);
         } else {
-            LongFunction<String> bbfunc = VirtDataConversions.adaptFunction(initFunc, LongFunction.class, String.class);
-            this.image = CharBuffer.wrap(bbfunc.apply(0));
+            LongFunction<String> stringFunc = VirtDataConversions.adaptFunction(initFunc, LongFunction.class, String.class);
+            this.image = CharBuffer.wrap(stringFunc.apply(0));
         }
         this.imgsize = this.image.limit();
 
