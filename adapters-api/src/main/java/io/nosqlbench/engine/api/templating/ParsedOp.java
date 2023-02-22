@@ -302,7 +302,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * representation of a result. If the values are defined, then each one represents the name
      * that the found value should be saved as instead of the original name.
      */
-    private final List<List<CapturePoint>> captures = new ArrayList<>();
+    private final List<CapturePoint> captures = new ArrayList<>();
 
     private final OpTemplate _opTemplate;
     private final NBConfiguration activityCfg;
@@ -915,5 +915,9 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     @Override
     public String toString() {
         return this.tmap.toString();
+    }
+
+    public List<CapturePoint> getCaptures() {
+        return tmap.getCaptures();
     }
 }

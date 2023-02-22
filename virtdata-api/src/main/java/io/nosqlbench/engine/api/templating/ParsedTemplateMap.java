@@ -76,7 +76,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      * representation of a result. If the values are defined, then each one represents the name
      * that the found value should be saved as instead of the original name.
      */
-    private final List<List<CapturePoint>> captures = new ArrayList<>();
+    private final List<CapturePoint> captures = new ArrayList<>();
     private final int mapsize;
 
     /**
@@ -103,9 +103,9 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         this.specmap = map;
         this.bindings = bindings;
         map.forEach((k, v) -> {
-            if (v instanceof CharSequence) {
-                ParsedStringTemplate pt = ParsedStringTemplate.of(((CharSequence) v).toString(), bindings);
-                this.captures.add(pt.getCaptures());
+            if (v instanceof CharSequence charvalue) {
+                ParsedTemplateString pt = ParsedTemplateString.of(charvalue.toString(), bindings);
+                this.captures.addAll(pt.getCaptures());
                 switch (pt.getType()) {
                     case literal:
                         statics.put(k, charvalue.toString());
@@ -134,6 +134,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 });
                 Map<String, Object> submap = (Map<String, Object>) v;
                 ParsedTemplateMap subtpl = new ParsedTemplateMap(getName(),submap, bindings, cfgsources);
+                this.captures.addAll(subtpl.getCaptures());
                 if (subtpl.isStatic()) {
                     statics.put(k, submap);
                     protomap.put(k, submap);
@@ -144,6 +145,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             } else if (v instanceof List listvalue) {
                 List<Object> sublist = listvalue;
                 ParsedTemplateList subtpl = new ParsedTemplateList(sublist, bindings, cfgsources);
+                this.captures.addAll(subtpl.getCaptures());
                 if (subtpl.isStatic()) {
                     statics.put(k, sublist);
                     protomap.put(k, sublist);
@@ -160,6 +162,10 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             }
         });
 
+    }
+
+    public List<CapturePoint> getCaptures() {
+        return this.captures;
     }
 
     /**
