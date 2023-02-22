@@ -20,7 +20,7 @@ import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
-import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class Templatizer {
         result.setName(name);
 
         if (v instanceof CharSequence) {
-            ParsedStringTemplate pt = ParsedStringTemplate.of(((CharSequence) v).toString(), bindings);
+            ParsedTemplateString pt = ParsedTemplateString.of(((CharSequence) v).toString(), bindings);
             result.addCaptures(pt.getCaptures());
             result.setType(pt.getType());
             switch (pt.getType()) {

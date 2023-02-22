@@ -92,7 +92,7 @@ public class BindPoint {
     }
 
     /**
-     * The name of the anchor for a binding as it appears in a user-specified template, parsed by {@link ParsedStringTemplate}.
+     * The name of the anchor for a binding as it appears in a user-specified template, parsed by {@link ParsedTemplateString}.
      * @return A string name for the bind point anchor, or null for {@link BindPoint.Type#definition} types.
      */
     public String getAnchor() {

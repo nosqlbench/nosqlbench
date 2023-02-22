@@ -16,18 +16,18 @@
 
 package io.nosqlbench.engine.api.templating;
 
+import io.nosqlbench.api.config.fieldreaders.DynamicFieldReader;
+import io.nosqlbench.api.config.fieldreaders.StaticFieldReader;
 import io.nosqlbench.api.config.standard.NBConfigError;
+import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.engine.api.templating.binders.ArrayBinder;
 import io.nosqlbench.engine.api.templating.binders.ListBinder;
 import io.nosqlbench.engine.api.templating.binders.OrderedMapBinder;
-import io.nosqlbench.api.config.fieldreaders.DynamicFieldReader;
-import io.nosqlbench.api.config.fieldreaders.StaticFieldReader;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
-import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -426,7 +426,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
         return tmap.getStaticValue(field);
     }
 
-    public Optional<ParsedStringTemplate> getAsTemplate(String fieldname) {
+    public Optional<ParsedTemplateString> getAsTemplate(String fieldname) {
         return this.tmap.getAsStringTemplate(fieldname);
     }
 

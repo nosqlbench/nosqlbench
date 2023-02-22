@@ -30,7 +30,7 @@ import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
-import io.nosqlbench.virtdata.core.templates.ParsedStringTemplate;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import io.nosqlbench.virtdata.core.templates.StringBindings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -701,11 +701,11 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return false;
     }
 
-    public Optional<ParsedStringTemplate> getAsStringTemplate(String fieldname) {
+    public Optional<ParsedTemplateString> getAsStringTemplate(String fieldname) {
         if (specmap.containsKey(fieldname)) {
             Object fval = specmap.get(fieldname);
             if (fval instanceof CharSequence) {
-                return Optional.of(new ParsedStringTemplate(fval.toString(), this.bindings));
+                return Optional.of(new ParsedTemplateString(fval.toString(), this.bindings));
             } else {
                 throw new RuntimeException("Can not make a parsed text template from op template field '" + fieldname + "' of type '" + fval.getClass().getSimpleName() + "'");
             }
@@ -988,4 +988,5 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         }
         return sb.toString();
     }
+
 }
