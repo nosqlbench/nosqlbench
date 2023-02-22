@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,7 @@ public class ParsedStringTemplate {
     private final Map<String, String> bindings = new LinkedHashMap<>();
 
     /**
-     * Parse the given raw template, check the bind points against the provide bindings, and
+     * Parse the given raw template, check the bind points against the provided bindings, and
      * provide detailed template checks for validity.
      *
      * @param rawtemplate       A string template which contains optionally embedded named anchors
