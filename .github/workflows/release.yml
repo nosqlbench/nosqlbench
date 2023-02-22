@@ -62,7 +62,7 @@ jobs:
 
       - name: build release revision
         run: |
-          mvn clean package -Drevision="${{ env.RELEASE_VERSION }}" -P enable-container-tests
+          mvn clean verify -Drevision="${{ env.RELEASE_VERSION }}" -P enable-container-tests
 
       - name: Setup docker buildx
         uses: docker/setup-buildx-action@v2.2.1
