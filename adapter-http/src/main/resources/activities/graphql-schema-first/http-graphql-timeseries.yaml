@@ -20,8 +20,8 @@ description: |
 scenarios:
   default:
     schema: run driver=http tags==block:"schema.*" threads==1 cycles==UNDEF
-    rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
+    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
   # To enable an optional weighted set of hosts in place of a load balancer
@@ -30,8 +30,11 @@ bindings:
   #   multiple hosts: graphql_host=host1,host2,host3
   #   multiple weighted hosts: graphql_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
+
   # http request id
   request_id: ToHashedUUID(); ToString();
+  request_token: Discard(); FirstLines("TEMPLATE(stargate_tokenfile,data/stargate_token.txt)");
+
   machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
   sensor_name: HashedLineToString('data/variable_words.txt')
   time: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L); StringDateWrapper("yyyy-MM-dd'T'hh:mm:ss'Z");
@@ -47,7 +50,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: |
             {
@@ -59,7 +62,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-admin
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: |
             {
@@ -73,7 +76,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: |
             {
@@ -89,7 +92,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: |
             {
@@ -105,7 +108,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "{request_token}"
         Content-Type: "application/json"
         body: |
             {
