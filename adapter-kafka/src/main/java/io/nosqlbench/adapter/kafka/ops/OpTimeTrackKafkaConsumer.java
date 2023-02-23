@@ -116,10 +116,11 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
                 if (record != null) {
                     if (logger.isDebugEnabled()) {
                         logger.debug(
-                            "Receiving message is successful: [{}] - offset({}), cycle ({})",
+                            "Receiving message is successful: [{}] - offset({}), cycle ({}), e2e_latency_ms({})",
                             printRecvedMsg(record),
                             record.offset(),
-                            cycle);
+                            cycle,
+                            System.currentTimeMillis() - record.timestamp());
                     }
 
                     if (!autoCommitEnabled) {
