@@ -17,7 +17,10 @@
 
 package io.nosqlbench.adapter.kafka.ops;
 
+import com.codahale.metrics.Histogram;
 import io.nosqlbench.adapter.kafka.KafkaSpace;
+import io.nosqlbench.adapter.kafka.util.EndToEndStartingTimeSource;
+import io.nosqlbench.adapter.kafka.util.KafkaAdapterMetrics;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
@@ -30,7 +33,7 @@ import java.util.Map;
 
 public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
     private final static Logger logger = LogManager.getLogger("OpTimeTrackKafkaConsumer");
-
+    private final EndToEndStartingTimeSource e2eStartingTimeSrc;
     private final int msgPoolIntervalInMs;
     private final boolean asyncMsgCommit;
     private final boolean autoCommitEnabled;
@@ -40,19 +43,24 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
     private final ThreadLocal<Integer> manualCommitTrackingCnt = ThreadLocal.withInitial(() -> 0);
 
     private final KafkaConsumer<String, String> consumer;
+    private Histogram e2eMsgProcLatencyHistogram;
 
     public OpTimeTrackKafkaConsumer(KafkaSpace kafkaSpace,
                                     boolean asyncMsgCommit,
                                     int msgPoolIntervalInMs,
                                     boolean autoCommitEnabled,
                                     int maxMsgCntPerCommit,
-                                    KafkaConsumer<String, String> consumer) {
+                                    KafkaConsumer<String, String> consumer,
+                                    EndToEndStartingTimeSource e2eStartingTimeSrc,
+                                    KafkaAdapterMetrics kafkaAdapterMetrics) {
         super(kafkaSpace);
         this.msgPoolIntervalInMs = msgPoolIntervalInMs;
         this.asyncMsgCommit = asyncMsgCommit;
         this.autoCommitEnabled = autoCommitEnabled;
         this.maxMsgCntPerCommit = maxMsgCntPerCommit;
         this.consumer = consumer;
+        this.e2eStartingTimeSrc = e2eStartingTimeSrc;
+        this.e2eMsgProcLatencyHistogram = kafkaAdapterMetrics.getE2eMsgProcLatencyHistogram();
     }
 
     public int getManualCommitTrackingCnt() { return manualCommitTrackingCnt.get(); }
@@ -128,7 +136,7 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
                         if (bCommitMsg) {
                             if (!asyncMsgCommit) {
                                 consumer.commitSync();
-
+                                updateE2ELatencyMetric(record);
                                 if (logger.isDebugEnabled()) {
                                     logger.debug(
                                         "Sync message commit is successful: cycle ({}), maxMsgCntPerCommit ({})",
@@ -145,6 +153,7 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
                                                     "Async message commit succeeded: cycle({}), maxMsgCntPerCommit ({})",
                                                     cycle,
                                                     maxMsgCntPerCommit);
+                                                updateE2ELatencyMetric(record);
                                             } else {
                                                 logger.debug(
                                                     "Async message commit failed: cycle ({}), maxMsgCntPerCommit ({}), error ({})",
@@ -158,12 +167,27 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
                             }
 
                             resetManualCommitTrackingCnt();
-                        } else {
+                        } else  {
+                            updateE2ELatencyMetric(record);
                             incManualCommitTrackingCnt();
                         }
                     }
+                    updateE2ELatencyMetric(record);
                 }
             }
+        }
+    }
+
+    private void updateE2ELatencyMetric(ConsumerRecord<String, String> record) {
+        long startTimeStamp = 0L;
+        switch (e2eStartingTimeSrc) {
+            case MESSAGE_PUBLISH_TIME:
+                startTimeStamp = record.timestamp();
+                break;
+        }
+        if (startTimeStamp != 0L) {
+            long e2eMsgLatency = System.currentTimeMillis() - startTimeStamp;
+            e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
         }
     }
 

@@ -32,6 +32,11 @@ public class KafkaAdapterMetrics implements NBNamedElement {
     private Histogram messageSizeHistogram;
     private Timer bindTimer;
     private Timer executeTimer;
+
+    public Histogram getE2eMsgProcLatencyHistogram() {
+        return e2eMsgProcLatencyHistogram;
+    }
+
     // end-to-end latency
     private Histogram e2eMsgProcLatencyHistogram;
     private KafkaBaseOpDispenser kafkaBaseOpDispenser;
