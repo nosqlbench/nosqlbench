@@ -37,7 +37,7 @@ import java.util.function.Predicate;
 
 public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, KafkaSpace> implements NBNamedElement {
 
-    private final static Logger logger = LogManager.getLogger("PulsarBaseOpDispenser");
+    private final static Logger logger = LogManager.getLogger("KafkaBaseOpDispenser");
 
     protected final ParsedOp parsedOp;
     protected final KafkaAdapterMetrics kafkaAdapterMetrics;
@@ -135,6 +135,6 @@ public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, Kaf
 
     @Override
     public String getName() {
-        return "MessageConsumerOpDispenser";
+        return "KafkaBaseOpDispenser";
     }
 }
