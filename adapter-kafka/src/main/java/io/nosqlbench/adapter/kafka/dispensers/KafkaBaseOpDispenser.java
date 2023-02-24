@@ -22,11 +22,11 @@ import io.nosqlbench.adapter.kafka.exception.KafkaAdapterInvalidParamException;
 import io.nosqlbench.adapter.kafka.ops.KafkaOp;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterMetrics;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
+import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,9 +35,9 @@ import java.util.*;
 import java.util.function.LongFunction;
 import java.util.function.Predicate;
 
-public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, KafkaSpace> {
+public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, KafkaSpace> implements NBNamedElement {
 
-    private final static Logger logger = LogManager.getLogger("PulsarBaseOpDispenser");
+    private final static Logger logger = LogManager.getLogger("KafkaBaseOpDispenser");
 
     protected final ParsedOp parsedOp;
     protected final KafkaAdapterMetrics kafkaAdapterMetrics;
@@ -69,7 +69,7 @@ public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, Kaf
         this.kafkaSpace = kafkaSpace;
 
         String defaultMetricsPrefix = getDefaultMetricsPrefix(this.parsedOp);
-        this.kafkaAdapterMetrics = new KafkaAdapterMetrics(defaultMetricsPrefix);
+        this.kafkaAdapterMetrics = new KafkaAdapterMetrics(this, defaultMetricsPrefix);
         kafkaAdapterMetrics.initS4JAdapterInstrumentation();
 
         this.asyncAPI =
@@ -131,5 +131,10 @@ public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, Kaf
         logger.info("{}: {}", paramName, stringLongFunction.apply(0));
 
         return stringLongFunction;
+    }
+
+    @Override
+    public String getName() {
+        return "KafkaBaseOpDispenser";
     }
 }

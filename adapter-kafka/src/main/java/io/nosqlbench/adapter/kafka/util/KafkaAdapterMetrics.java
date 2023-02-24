@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.kafka.util;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.adapter.kafka.dispensers.KafkaBaseOpDispenser;
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
@@ -32,7 +33,16 @@ public class KafkaAdapterMetrics implements NBNamedElement {
     private Timer bindTimer;
     private Timer executeTimer;
 
-    public KafkaAdapterMetrics(String defaultMetricsPrefix) {
+    public Histogram getE2eMsgProcLatencyHistogram() {
+        return e2eMsgProcLatencyHistogram;
+    }
+
+    // end-to-end latency
+    private Histogram e2eMsgProcLatencyHistogram;
+    private KafkaBaseOpDispenser kafkaBaseOpDispenser;
+
+    public KafkaAdapterMetrics(KafkaBaseOpDispenser kafkaBaseOpDispenser, String defaultMetricsPrefix) {
+        this.kafkaBaseOpDispenser = kafkaBaseOpDispenser;
         this.defaultAdapterMetricsPrefix = defaultMetricsPrefix;
     }
 
@@ -59,6 +69,11 @@ public class KafkaAdapterMetrics implements NBNamedElement {
             ActivityMetrics.timer(
                 this,
                 defaultAdapterMetricsPrefix + "execute",
+                ActivityMetrics.DEFAULT_HDRDIGITS);
+        this.e2eMsgProcLatencyHistogram =
+            ActivityMetrics.histogram(
+                kafkaBaseOpDispenser,
+                defaultAdapterMetricsPrefix + "e2e_msg_latency",
                 ActivityMetrics.DEFAULT_HDRDIGITS);
     }
 

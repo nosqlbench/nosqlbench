@@ -1,7 +1,7 @@
-package io.nosqlbench.adapter.pulsar.util;
+package io.nosqlbench.adapter.kafka.util;
 
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2022 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,7 @@ package io.nosqlbench.adapter.pulsar.util;
  * under the License.
  */
 
-
 public enum EndToEndStartingTimeSource {
     NONE, // no end-to-end latency calculation
     MESSAGE_PUBLISH_TIME, // use message publish timestamp
-    MESSAGE_EVENT_TIME, // use message event timestamp
-    MESSAGE_PROPERTY_E2E_STARTING_TIME // use message property called "e2e_starting_time" as the timestamp
 }
