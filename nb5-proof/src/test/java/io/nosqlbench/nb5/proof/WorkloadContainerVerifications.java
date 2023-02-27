@@ -17,29 +17,17 @@
 package io.nosqlbench.nb5.proof;
 
 
-
-
-import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.oss.driver.api.core.cql.Row;
-import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
-import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.*;
 import org.testcontainers.containers.CassandraContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class WorkloadContainerVerifications {
     private enum Driver {
@@ -59,8 +47,6 @@ public class WorkloadContainerVerifications {
         }
     }
     public static Logger logger = LogManager.getLogger(WorkloadContainerVerifications.class);
-    private final String java = Optional.ofNullable(System.getenv(
-        "JAVA_HOME")).map(v -> v + "/bin/java").orElse("java");
     private final static String JARNAME = "../nb5/target/nb5.jar";
     private final static String BASIC_CHECK_IDENTIFIER = "basic_check";
     private static final CassandraContainer cass = (CassandraContainer) new CassandraContainer(DockerImageName.parse("cassandra:latest"))
