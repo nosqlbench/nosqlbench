@@ -188,14 +188,11 @@ public class WorkloadContainerVerifications {
 //            }
         }
     }
-    @AfterEach
-    public void cleanup(){
-        System.out.println("setup");
-    }
 
     /*
     This method filters the input list of workloads to output the subset of workloads
-    that include a specific scenario (input) and run the specified driver
+    that include a specific scenario (input) and maps all workloads with that scenario to
+    a key which is their common driver
     */
     private static void getBasicCheckWorkloadsForEachDriver(List<String> workloadPaths ,String scenarioFilter) {
         for (String workloadPath : workloadPaths) {
@@ -206,12 +203,12 @@ public class WorkloadContainerVerifications {
                     "java", "-jar", JARNAME, shortName, scenarioFilter, "--show-script"
                 };
                 ProcessInvoker invoker = new ProcessInvoker();
-                ProcessResult runShowScriptResult = invoker.run("run-workload", 10, args);
+                ProcessResult runShowScriptResult = invoker.run("run-show-script", 10, args);
                 assertThat(runShowScriptResult.exception).isNull();
                 String listOut = String.join("\n", runShowScriptResult.getStdoutData());
                 Pattern pattern = Pattern.compile("'driver':\\s*'(.+?)'");
 
-                // Use the Matcher class to find the substring in the long string and extract the value of X
+                // Use the Matcher class to find the substring in the output script that defines the driver
                 Matcher matcher = pattern.matcher(listOut);
                 if (matcher.find()) {
                     String scenarioDriverValue = matcher.group(1);
