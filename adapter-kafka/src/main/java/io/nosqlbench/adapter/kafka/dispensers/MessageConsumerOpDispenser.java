@@ -21,6 +21,7 @@ import io.nosqlbench.adapter.kafka.exception.KafkaAdapterInvalidParamException;
 import io.nosqlbench.adapter.kafka.ops.KafkaOp;
 import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaClient;
 import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaConsumer;
+import io.nosqlbench.adapter.kafka.util.EndToEndStartingTimeSource;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -49,6 +50,7 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
     // - This is only relevant when the effective setting (global level and statement level)
     //   of "enable.auto.commit" is false
     protected final int maxMsgCntPerCommit;
+    private final LongFunction<String> e2eStartTimeSrcParamStrFunc;
 
     protected boolean autoCommitEnabled;
 
@@ -76,6 +78,8 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
                 this.autoCommitEnabled = BooleanUtils.toBoolean(consumerClientConfMap.get("enable.auto.commit"));
             }
         }
+        this.e2eStartTimeSrcParamStrFunc = lookupOptionalStrOpValueFunc(
+            KafkaAdapterUtil.DOC_LEVEL_PARAMS.E2E_STARTING_TIME_SOURCE.label, "none");
     }
 
     private String getEffectiveGroupId(long cycle) {
@@ -119,7 +123,15 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
             }
 
             opTimeTrackKafkaClient = new OpTimeTrackKafkaConsumer(
-                kafkaSpace, asyncAPI, msgPollIntervalInSec, autoCommitEnabled, maxMsgCntPerCommit, consumer);
+                kafkaSpace,
+                asyncAPI,
+                msgPollIntervalInSec,
+                autoCommitEnabled,
+                maxMsgCntPerCommit,
+                consumer,
+                EndToEndStartingTimeSource.valueOf(e2eStartTimeSrcParamStrFunc.apply(cycle).toUpperCase()),
+                kafkaAdapterMetrics
+            );
             kafkaSpace.addOpTimeTrackKafkaClient(cacheKey, opTimeTrackKafkaClient);
         }
 

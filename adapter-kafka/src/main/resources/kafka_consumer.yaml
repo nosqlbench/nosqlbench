@@ -3,7 +3,8 @@ params:
   # Whether to commit message asynchronously
   # - default: true
   # - only relevant for manual commit
-  async_api: "true"
+#  async_api: "true"
+  e2e_starting_time_source: "message_publish_time"
 
 blocks:
   msg-consume-block:

@@ -17,27 +17,17 @@
 package io.nosqlbench.nb5.proof;
 
 
-
-
-import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.oss.driver.api.core.cql.Row;
-import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
-import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.*;
 import org.testcontainers.containers.CassandraContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class WorkloadContainerVerifications {
     private enum Driver {
@@ -57,26 +47,35 @@ public class WorkloadContainerVerifications {
         }
     }
     public static Logger logger = LogManager.getLogger(WorkloadContainerVerifications.class);
-    private final String java = Optional.ofNullable(System.getenv(
-        "JAVA_HOME")).map(v -> v + "/bin/java").orElse("java");
     private final static String JARNAME = "../nb5/target/nb5.jar";
     private final static String BASIC_CHECK_IDENTIFIER = "basic_check";
     private static final CassandraContainer cass = (CassandraContainer) new CassandraContainer(DockerImageName.parse("cassandra:latest"))
         .withExposedPorts(9042).withAccessToHost(true);
-    private static Map<Driver, List<WorkloadDesc>> basicWorkloadsMapPerDriver = null;
+    private static Map<Driver, List<String>> basicWorkloadsMapPerDriver = null;
     @BeforeAll
     public static void listWorkloads() {
+        //List the tests we would like to run
+        ProcessInvoker invoker = new ProcessInvoker();
+        //STEP1: Copy the example workload to the local dir
+        ProcessResult listResult = invoker.run("list-workloads", 30,
+            "java", "-jar", JARNAME, "--list-workloads", "--include=examples"
+        );
+        assertThat(listResult.exception).isNull();
+        String listOut = String.join("\n", listResult.getStdoutData());
 
-        List<WorkloadDesc> workloads = List.of();
+
+        // Define the regular expression pattern
+        String regex = "/(.+?/)+.+?\\.yaml";
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+
+        Matcher matcher = pattern.matcher(listOut);
+        ArrayList<String> matchedPaths = new ArrayList<>();
+
+        while (matcher.find()) {
+            matchedPaths.add(matcher.group());
+        }
         basicWorkloadsMapPerDriver = new HashMap<>();
-        try {
-            workloads = NBCLIScenarioParser.getWorkloadsWithScenarioScripts(true, "examples");
-        } catch (Exception e) {
-            throw new RuntimeException("Error while getting workloads:" + e.getMessage(), e);
-        }
-        for (Driver driver : Driver.values()) {
-            basicWorkloadsMapPerDriver.put(driver, getBasicCheckWorkloadsForDriver(workloads, BASIC_CHECK_IDENTIFIER, driver.getName()));
-        }
+        getBasicCheckWorkloadsForEachDriver(matchedPaths, BASIC_CHECK_IDENTIFIER);
     }
 
 
@@ -90,11 +89,10 @@ public class WorkloadContainerVerifications {
         else if (basicWorkloadsMapPerDriver.get(Driver.CQL).size() == 0)
             return;
 
-        for(WorkloadDesc workloadDesc : basicWorkloadsMapPerDriver.get(Driver.CQL))
+        for(String workloadPath : basicWorkloadsMapPerDriver.get(Driver.CQL))
         {
-            String path = workloadDesc.getYamlPath();
-            int lastSlashIndex = path.lastIndexOf('/');
-            String shortName = path.substring(lastSlashIndex + 1);
+            int lastSlashIndex = workloadPath.lastIndexOf('/');
+            String shortName = workloadPath.substring(lastSlashIndex + 1);
             if(shortName.equals("cql-iot-dse.yaml"))
                 continue;
             //STEP0:Start the test container and expose the 9042 port on the local host.
@@ -111,7 +109,7 @@ public class WorkloadContainerVerifications {
             String hostIP = cass.getHost();
 
 
-           //STEP1: Run the example cassandra workload using the schema tag to create the Cass Baselines keyspace
+            //STEP1: Run the example cassandra workload using the schema tag to create the Cass Baselines keyspace
             String[] args = new String[]{
                 "java", "-jar", JARNAME, shortName, BASIC_CHECK_IDENTIFIER, "host="+ hostIP, "localdc="+ datacenter, "port="+ mappedPort9042.toString(), "table=keyvalue", "keyspace=baselines"
             };
@@ -172,40 +170,62 @@ public class WorkloadContainerVerifications {
 //                System.out.println(e.getMessage());
 //                fail();
 //            } finally {
-                cass.stop();
+            cass.stop();
 //            }
         }
-    }
-    @AfterEach
-    public void cleanup(){
-        System.out.println("setup");
     }
 
     /*
     This method filters the input list of workloads to output the subset of workloads
-    that include a specific scenario (input) and run the specified driver
+    that include a specific scenario (input) and maps all workloads with that scenario to
+    a key which is their common driver
     */
-    public static List<WorkloadDesc> getBasicCheckWorkloadsForDriver(List<WorkloadDesc> workloads ,String scenarioFilter,  String driver) {
-        String substring = "driver=" + driver;
-        ArrayList<WorkloadDesc> workloadsForDriver = new ArrayList<>();
-        for (WorkloadDesc workload : workloads) {
-            if(workload.getScenarioNames().contains(scenarioFilter)) {
-                try {
-                    Path yamlPath = Path.of(workload.getYamlPath());
-                    List<String> lines = Files.readAllLines(yamlPath);
-                    for (String line : lines) {
-                        if (line.contains(substring)) {
-                            workloadsForDriver.add(workload);
+    private static void getBasicCheckWorkloadsForEachDriver(List<String> workloadPaths ,String scenarioFilter) {
+        for (String workloadPath : workloadPaths) {
+            try {
+                int lastSlashIndex = workloadPath.lastIndexOf('/');
+                String shortName = workloadPath.substring(lastSlashIndex + 1);
+                String[] args = new String[]{
+                    "java", "-jar", JARNAME, shortName, scenarioFilter, "--show-script"
+                };
+                ProcessInvoker invoker = new ProcessInvoker();
+                ProcessResult runShowScriptResult = invoker.run("run-show-script", 10, args);
+                assertThat(runShowScriptResult.exception).isNull();
+                String listOut = String.join("\n", runShowScriptResult.getStdoutData());
+                Pattern pattern = Pattern.compile("'driver':\\s*'(.+?)'");
+
+                // Use the Matcher class to find the substring in the output script that defines the driver
+                Matcher matcher = pattern.matcher(listOut);
+                if (matcher.find()) {
+                    String scenarioDriverValue = matcher.group(1);
+                    for (Driver driverType : Driver.values())
+                    {
+                        if(driverType.getName().equals(scenarioDriverValue))
+                        {
+                            if(basicWorkloadsMapPerDriver.containsKey(driverType))
+                            {
+                                List<String> currentList = basicWorkloadsMapPerDriver.get(driverType);
+                                // Modify the list by adding new strings to it
+                                currentList.add(workloadPath);
+                                // Put the updated list back into the HashMap using the same key
+                                basicWorkloadsMapPerDriver.put(driverType, currentList);
+                            }
+                            else
+                            {
+                                List<String> pathList = new ArrayList<>();
+                                pathList.add(workloadPath);
+                                basicWorkloadsMapPerDriver.put(driverType, pathList);
+                            }
                             break;
                         }
                     }
-                } catch (Exception e) {
-                    logger.error("Error reading file " + workload.getYamlPath() + ": " + e.getMessage());
-                    break;
                 }
+
+            } catch (Exception e) {
+                logger.error("Error reading file " + workloadPath + ": " + e.getMessage());
+                break;
             }
         }
-        return workloadsForDriver;
     }
 
 
