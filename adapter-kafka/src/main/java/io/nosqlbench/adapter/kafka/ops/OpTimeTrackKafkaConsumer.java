@@ -197,15 +197,18 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
     }
 
     private void updateE2ELatencyMetric(ConsumerRecord<String, String> record) {
-        long startTimeStamp = 0L;
-        switch (e2eStartingTimeSrc) {
-            case MESSAGE_PUBLISH_TIME:
-                startTimeStamp = record.timestamp();
-                break;
-        }
-        if (startTimeStamp != 0L) {
-            long e2eMsgLatency = System.currentTimeMillis() - startTimeStamp;
-            e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
+        // keep track end-to-end message processing latency
+        if (e2eStartingTimeSrc != EndToEndStartingTimeSource.NONE) {
+            long startTimeStamp = 0L;
+            switch (e2eStartingTimeSrc) {
+                case MESSAGE_PUBLISH_TIME:
+                    startTimeStamp = record.timestamp();
+                    break;
+            }
+            if (startTimeStamp != 0L) {
+                long e2eMsgLatency = System.currentTimeMillis() - startTimeStamp;
+                e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
+            }
         }
     }
 
