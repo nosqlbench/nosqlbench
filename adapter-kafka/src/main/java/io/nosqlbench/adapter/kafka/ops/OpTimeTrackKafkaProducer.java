@@ -20,6 +20,8 @@ package io.nosqlbench.adapter.kafka.ops;
 import io.nosqlbench.adapter.kafka.KafkaSpace;
 import io.nosqlbench.adapter.kafka.exception.KafkaAdapterUnexpectedException;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
+import io.nosqlbench.adapter.pulsar.util.MessageSequenceNumberSendingHandler;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -31,6 +33,9 @@ import org.apache.kafka.common.errors.ProducerFencedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.kafka.common.errors.TimeoutException;
@@ -45,6 +50,10 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
     private final boolean asyncMsgAck;
     private final boolean transactEnabledConfig;
     private final int txnBatchNum;
+    private ThreadLocal<Map<String, MessageSequenceNumberSendingHandler>> MessageSequenceNumberSendingHandlersThreadLocal =
+        ThreadLocal.withInitial(HashMap::new);
+    private final boolean seqTracking;
+    private final Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet;
 
     enum TxnProcResult {
         SUCCESS,
@@ -67,11 +76,15 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
                                     boolean asyncMsgAck,
                                     boolean transactEnabledConfig,
                                     int txnBatchNum,
+                                    boolean seqTracking,
+                                    Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet,
                                     KafkaProducer<String, String> producer) {
         super(kafkaSpace);
         this.asyncMsgAck = asyncMsgAck;
         this.transactEnabledConfig = transactEnabledConfig;
         this.txnBatchNum = txnBatchNum;
+        this.seqTracking = seqTracking;
+        this.errSimuTypeSet = errSimuTypeSet;
         this.transactionEnabled = transactEnabledConfig && (txnBatchNum > 2);
         this.producer = producer;
     }
@@ -193,6 +206,11 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
         }
 
         ProducerRecord<String, String> message = (ProducerRecord<String, String>) cycleObj;
+        if (seqTracking) {
+            long nextSequenceNumber = getMessageSequenceNumberSendingHandler(message.topic())
+                .getNextSequenceNumber(errSimuTypeSet);
+            message.headers().add(PulsarAdapterUtil.MSG_SEQUENCE_NUMBER, String.valueOf(nextSequenceNumber).getBytes());
+        }
         try {
             if (result == TxnProcResult.SUCCESS) {
                 Future<RecordMetadata> responseFuture = producer.send(message, new Callback() {
@@ -260,5 +278,10 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
         catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private MessageSequenceNumberSendingHandler getMessageSequenceNumberSendingHandler(String topicName) {
+        return MessageSequenceNumberSendingHandlersThreadLocal.get()
+            .computeIfAbsent(topicName, k -> new MessageSequenceNumberSendingHandler());
     }
 }
