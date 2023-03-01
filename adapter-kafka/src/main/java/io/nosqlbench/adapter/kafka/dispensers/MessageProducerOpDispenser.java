@@ -66,11 +66,6 @@ public class MessageProducerOpDispenser extends KafkaBaseOpDispenser {
                                       LongFunction<String> tgtNameFunc,
                                       KafkaSpace kafkaSpace) {
         super(adapter, op, tgtNameFunc, kafkaSpace);
-        // Doc-level parameter: seq_tracking
-        this.seqTrackingFunc = lookupStaticBoolConfigValueFunc(
-            PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label, false);
-        this.msgSeqErrSimuTypeSetFunc = getStaticErrSimuTypeSetOpValueFunc();
-
         this.producerClientConfMap.putAll(kafkaSpace.getKafkaClientConf().getProducerConfMap());
         producerClientConfMap.put("bootstrap.servers", kafkaSpace.getBootstrapSvr());
 
@@ -79,6 +74,11 @@ public class MessageProducerOpDispenser extends KafkaBaseOpDispenser {
         this.msgHeaderJsonStrFunc = lookupOptionalStrOpValueFunc(MSG_HEADER_OP_PARAM);
         this.msgKeyStrFunc = lookupOptionalStrOpValueFunc(MSG_KEY_OP_PARAM);
         this.msgValueStrFunc = lookupMandtoryStrOpValueFunc(MSG_BODY_OP_PARAM);
+
+        this.msgSeqErrSimuTypeSetFunc = getStaticErrSimuTypeSetOpValueFunc();
+        // Doc-level parameter: seq_tracking
+        this.seqTrackingFunc = lookupStaticBoolConfigValueFunc(
+            PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label, false);
     }
 
     private String getEffectiveClientId(long cycle) {

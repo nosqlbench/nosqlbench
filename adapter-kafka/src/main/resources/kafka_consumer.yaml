@@ -5,6 +5,10 @@ params:
   # - only relevant for manual commit
 #  async_api: "true"
   e2e_starting_time_source: "message_publish_time"
+  # activates e2e error metrics (message duplication, message loss and out-of-order detection)
+  # it needs to be enabled both on the producer and the consumer
+  # - default: false
+  seq_tracking: "true"
 
 blocks:
   msg-consume-block:

@@ -42,7 +42,8 @@ public class KafkaAdapterUtil {
     public enum DOC_LEVEL_PARAMS {
         // Blocking message producing or consuming
         ASYNC_API("async_api"),
-        E2E_STARTING_TIME_SOURCE("e2e_starting_time_source");
+        E2E_STARTING_TIME_SOURCE("e2e_starting_time_source"),
+        SEQ_TRACKING("seq_tracking");
         public final String label;
 
         DOC_LEVEL_PARAMS(String label) {

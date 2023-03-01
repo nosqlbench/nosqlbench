@@ -23,6 +23,7 @@ import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaClient;
 import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaConsumer;
 import io.nosqlbench.adapter.kafka.util.EndToEndStartingTimeSource;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
+import io.nosqlbench.adapter.pulsar.util.ReceivedMessageSequenceTracker;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.commons.lang3.BooleanUtils;
@@ -50,9 +51,14 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
     // - This is only relevant when the effective setting (global level and statement level)
     //   of "enable.auto.commit" is false
     protected final int maxMsgCntPerCommit;
-    private final LongFunction<String> e2eStartTimeSrcParamStrFunc;
 
     protected boolean autoCommitEnabled;
+
+    private final LongFunction<String> e2eStartTimeSrcParamStrFunc;
+
+    private final ThreadLocal<Map<String, ReceivedMessageSequenceTracker>>
+        receivedMessageSequenceTrackersForTopicThreadLocal = ThreadLocal.withInitial(HashMap::new);
+    protected final LongFunction<Boolean> seqTrackingFunc;
 
     public MessageConsumerOpDispenser(DriverAdapter adapter,
                                       ParsedOp op,
@@ -80,6 +86,9 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
         }
         this.e2eStartTimeSrcParamStrFunc = lookupOptionalStrOpValueFunc(
             KafkaAdapterUtil.DOC_LEVEL_PARAMS.E2E_STARTING_TIME_SOURCE.label, "none");
+        this.seqTrackingFunc = lookupStaticBoolConfigValueFunc(
+            KafkaAdapterUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label, false);
+        ;
     }
 
     private String getEffectiveGroupId(long cycle) {
@@ -129,15 +138,26 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
                 autoCommitEnabled,
                 maxMsgCntPerCommit,
                 consumer,
+                kafkaAdapterMetrics,
                 EndToEndStartingTimeSource.valueOf(e2eStartTimeSrcParamStrFunc.apply(cycle).toUpperCase()),
-                kafkaAdapterMetrics
-            );
+                this::getReceivedMessageSequenceTracker,
+                seqTrackingFunc.apply(cycle));
             kafkaSpace.addOpTimeTrackKafkaClient(cacheKey, opTimeTrackKafkaClient);
         }
 
         return opTimeTrackKafkaClient;
     }
 
+    private ReceivedMessageSequenceTracker getReceivedMessageSequenceTracker(String topicName) {
+        return receivedMessageSequenceTrackersForTopicThreadLocal.get()
+            .computeIfAbsent(topicName, k -> createReceivedMessageSequenceTracker());
+    }
+
+    private ReceivedMessageSequenceTracker createReceivedMessageSequenceTracker() {
+        return new ReceivedMessageSequenceTracker(kafkaAdapterMetrics.getMsgErrOutOfSeqCounter(),
+            kafkaAdapterMetrics.getMsgErrDuplicateCounter(),
+            kafkaAdapterMetrics.getMsgErrLossCounter());
+    }
 
     protected List<String> getEffectiveTopicNameList(long cycle) {
         String explicitTopicListStr = topicNameStrFunc.apply(cycle);

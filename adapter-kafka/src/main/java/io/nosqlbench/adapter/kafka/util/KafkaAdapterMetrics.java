@@ -103,4 +103,28 @@ public class KafkaAdapterMetrics implements NBNamedElement {
     public Timer getBindTimer() { return bindTimer; }
     public Timer getExecuteTimer() { return executeTimer; }
     public Histogram getMessagesizeHistogram() { return messageSizeHistogram; }
+
+    public Counter getMsgErrOutOfSeqCounter() {
+        return msgErrOutOfSeqCounter;
+    }
+
+    public void setMsgErrOutOfSeqCounter(Counter msgErrOutOfSeqCounter) {
+        this.msgErrOutOfSeqCounter = msgErrOutOfSeqCounter;
+    }
+
+    public Counter getMsgErrLossCounter() {
+        return msgErrLossCounter;
+    }
+
+    public void setMsgErrLossCounter(Counter msgErrLossCounter) {
+        this.msgErrLossCounter = msgErrLossCounter;
+    }
+
+    public Counter getMsgErrDuplicateCounter() {
+        return msgErrDuplicateCounter;
+    }
+
+    public void setMsgErrDuplicateCounter(Counter msgErrDuplicateCounter) {
+        this.msgErrDuplicateCounter = msgErrDuplicateCounter;
+    }
 }

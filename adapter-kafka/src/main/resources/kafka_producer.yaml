@@ -9,6 +9,10 @@ params:
   # whether to confirm message send ack. asynchronously
   # - default: true
   async_api: "true"
+  # activates e2e error metrics (message duplication, message loss and out-of-order detection)
+  # it needs to be enabled both on the producer and the consumer
+  # - default: false
+  seq_tracking: "true"
 
 blocks:
   msg-produce-block:
