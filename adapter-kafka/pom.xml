@@ -76,6 +76,12 @@
             <artifactId>commons-configuration2</artifactId>
             <version>2.8.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-pulsar</artifactId>
+            <version>5.17.2-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>
