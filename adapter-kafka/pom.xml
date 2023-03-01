@@ -77,9 +77,9 @@
             <version>2.8.0</version>
         </dependency>
         <dependency>
-            <groupId>io.nosqlbench</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>adapter-pulsar</artifactId>
-            <version>5.17.2-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
