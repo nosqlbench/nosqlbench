@@ -1,6 +1,9 @@
 min_version: "5.17.1"
 
 description: |
+  NOTE: THIS VERSION IS NOT FUNCTIONING FULLY AND HAS AN OPEN TICKET TO INVESTIGATE:
+  See here: https://github.com/nosqlbench/nosqlbench/issues/1148
+  
   This workload emulates a time-series data model and access patterns.
   This should be identical to the cql variant except for:
   - We can't specify the write timestamp to make the write idempotent like we can with cql.
