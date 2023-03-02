@@ -24,6 +24,8 @@ bindings:
   # http request id
   request_id: ToHashedUUID(); ToString();
 
+  auto_gen_token: Discard(); StargateToken('http://localhost:8081/v1/auth'); ToString();
+
   seq_key: Mod(<<keycount:10000000>>); ToString() -> String
   seq_value: Hash(); Mod(<<valuecount:10000000>>); ToString() -> String
   rw_key: <<keydist:Uniform(0,<<keycount:10000000>>)->int>>; ToString() -> String
@@ -37,7 +39,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/schemas/namespaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
         body: |
           {
@@ -51,7 +53,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections/<<collection:docs_collection>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         ok-status: "[2-4][0-9][0-9]"
 
       create-docs-collection:
@@ -59,7 +61,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
         body: |
           {
@@ -73,7 +75,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections/<<collection:docs_collection>>/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
         body: |
             {
@@ -89,7 +91,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections/<<collection:docs_collection>>/{rw_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         ok-status: "[2-4][0-9][0-9]"
 
       main-write:
@@ -97,7 +99,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections/<<collection:docs_collection>>/{rw_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:my_auth_token>>"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
         body: |
             {
