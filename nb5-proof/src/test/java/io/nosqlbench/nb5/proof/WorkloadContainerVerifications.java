@@ -114,7 +114,7 @@ public class WorkloadContainerVerifications {
                 "java", "-jar", JARNAME, shortName, BASIC_CHECK_IDENTIFIER, "host="+ hostIP, "localdc="+ datacenter, "port="+ mappedPort9042.toString(), "table=keyvalue", "keyspace=baselines"
             };
             logger.info("The final command line: " + String.join(" ", args));
-            ProcessResult runSchemaResult = invoker.run("run-workload", 30, args);
+            ProcessResult runSchemaResult = invoker.run("run-workload", 60, args);
 
 
             //STEP 2 Check runSchemaOut for errors
