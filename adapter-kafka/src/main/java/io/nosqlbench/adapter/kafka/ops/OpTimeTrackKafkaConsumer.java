@@ -211,16 +211,14 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
 
     private void checkAndUpdateMessageErrorCounter(ConsumerRecord<String, String> record) {
         Header msg_seq_number_header = record.headers().lastHeader(PulsarAdapterUtil.MSG_SEQUENCE_NUMBER);
-        if (msg_seq_number_header == null) {
-            logger.warn("Message sequence number header is null, skipping e2e message error metrics generation.");
+        String msgSeqIdStr = msg_seq_number_header != null ? new String(msg_seq_number_header.value()) : StringUtils.EMPTY;
+        if (!StringUtils.isBlank(msgSeqIdStr)) {
+            long sequenceNumber = Long.parseLong(msgSeqIdStr);
+            ReceivedMessageSequenceTracker receivedMessageSequenceTracker =
+                receivedMessageSequenceTrackerForTopic.apply(record.topic());
+            receivedMessageSequenceTracker.sequenceNumberReceived(sequenceNumber);
         } else {
-            String msgSeqIdStr = new String(msg_seq_number_header.value());
-            if (!StringUtils.isBlank(msgSeqIdStr)) {
-                long sequenceNumber = Long.parseLong(msgSeqIdStr);
-                ReceivedMessageSequenceTracker receivedMessageSequenceTracker =
-                    receivedMessageSequenceTrackerForTopic.apply(record.topic());
-                receivedMessageSequenceTracker.sequenceNumberReceived(sequenceNumber);
-            }
+            logger.warn("Message sequence number header is null, skipping e2e message error metrics generation.");
         }
     }
 
