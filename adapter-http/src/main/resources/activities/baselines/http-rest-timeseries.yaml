@@ -9,6 +9,7 @@ description: |
   - Schema creation is cql of the lack of being able to define compaction strategy in the REST API.
   - There is no instrumentation with the http driver.
   - There is no async mode with the http driver.
+  - Refer to 'http-rest.md' for more information.
 
 scenarios:
   default:
@@ -17,16 +18,9 @@ scenarios:
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
-  # To enable an optional weighted set of hosts in place of a load balancer
-  # Examples
-  #   single host: restapi_host=host1
-  #   multiple hosts: restapi_host=host1,host2,host3
-  #   multiple weighted hosts: restapi_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('<<restapi_host:stargate>>')
-
-  # http request id
   request_id: ToHashedUUID(); ToString();
-  request_token: Discard(); FirstLines("TEMPLATE(stargate_tokenfile,data/stargate_token.txt)");
+  auto_gen_token: Discard(); StargateToken('http://localhost:8081/v1/auth'); ToString();
 
   machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
   sensor_name: HashedLineToString('data/variable_words.txt');
@@ -36,89 +30,6 @@ bindings:
   data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800,1200); URLEncode();
 
 blocks:
-  schema:
-    ops:
-      create-keyspace:
-        method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
-        Accept: "application/json"
-        X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
-        Content-Type: "application/json"
-        body: |
-          {
-            "name": "<<keyspace:baselines>>",
-            "replicas": <<rf:1>>
-          }      
-
-      drop-table:
-        method: DELETE
-        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables/<<table:iot>>
-        Accept: "application/json"
-        X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
-        Content-Type: "application/json"
-        ok-status: "[2-4][0-9][0-9]"
-
-      create-table:
-        method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
-        Accept: "application/json"
-        X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
-        Content-Type: "application/json"
-        body: |
-          {
-            "name": "<<table:iot>>",
-            "columnDefinitions": |
-            [
-              {
-                "name": "machine_id",
-                "typeDefinition": "uuid"
-              },
-              {
-                "name": "sensor_name",
-                "typeDefinition": "text"
-              },
-              {
-                "name": "time",
-                "typeDefinition": "timestamp"
-              },
-              {
-                "name": "sensor_value",
-                "typeDefinition": "double"
-              },
-              {
-                "name": "station_id",
-                "typeDefinition": "uuid"
-              },
-              {
-                "name": "data",
-                "typeDefinition": "text"
-              }
-            ],
-            "primaryKey": |
-            {
-              "partitionKey": [
-                "machine_id",
-                "sensor_name"
-                ],
-              "clusteringKey": [
-                "time"
-              ]
-            },
-            "tableOptions": |
-            {
-              "clusteringExpression": | 
-              [
-                {
-                  "column": "time",
-                  "order": "DESC"
-                }
-              ]
-            },
-            "ifNotExists": true
-          }
   rampup:
     ops:
       rampup-insert:
@@ -126,7 +37,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
         body: |
           {
@@ -137,6 +48,92 @@ blocks:
             "station_id": "{station_id}",
             "data": "{data}"
           }
+  schema:
+    ops:
+      create-keyspace:
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        Content-Type: "application/json"
+        body: |-
+          {
+            "name": "<<keyspace:baselines>>",
+            "replicas": <<rf:1>>
+          }
+
+      drop-table:
+        method: DELETE
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables/<<table:iot>>
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        Content-Type: "application/json"
+        ok-status: "[2-4][0-9][0-9]"
+
+      create-table:
+        method: POST
+        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
+        Accept: "application/json"
+        X-Cassandra-Request-Id: "{request_id}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        Content-Type: "application/json"
+        body: |-
+          {
+            "name": "<<table:iot>>",
+            "columnDefinitions": |-
+              [
+                {
+                  "name": "machine_id",
+                  "typeDefinition": "uuid"
+                },
+                {
+                  "name": "sensor_name",
+                  "typeDefinition": "text"
+                },
+                {
+                  "name": "time",
+                  "typeDefinition": "timestamp"
+                },
+                {
+                  "name": "sensor_value",
+                  "typeDefinition": "double"
+                },
+                {
+                  "name": "station_id",
+                  "typeDefinition": "uuid"
+                },
+                {
+                  "name": "data",
+                  "typeDefinition": "text"
+                }
+              ],
+            "primaryKey": |-
+            {
+              "partitionKey": |-
+                [
+                  "machine_id",
+                  "sensor_name"
+                ],
+              "clusteringKey": |-
+                [
+                  "time"
+                ]
+            },
+            "tableOptions": |-
+            {
+              "clusteringExpression": |-
+                [
+                  {
+                    "column": "time",
+                    "order": "DESC"
+                  }
+                ]
+            },
+            "ifNotExists": true
+          }
+
   main-read:
     params:
       ratio: <<read_ratio:1>>
@@ -146,7 +143,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>?where=URLENCODE[[{"machine_id":{"$eq":"{machine_id}"},"sensor_name":{"$eq":"{sensor_name}"}}]]&page-size=<<limit:10>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
 
   main-write:
@@ -158,9 +155,9 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: |-
           {
             "machine_id": "{machine_id}",
             "sensor_name": "{sensor_name}",
