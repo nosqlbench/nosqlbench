@@ -52,7 +52,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "query":"mutation {\n  createKeyspace(name: \"<<keyspace:gqlsf_timeseries>>\", replicas: <<rf:1>>, ifNotExists: true) \n}\n"
           }
@@ -64,7 +64,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "query":"mutation {\n  deploySchema(keyspace: \"<<keyspace:gqlsf_timeseries>>\", schema: \"\"\"\n      type Iot @cql_input {\n        machine_id: Uuid! @cql_column(partitionKey: true)\n        sensor_name: String! @cql_column(partitionKey: true)\n        time: Timestamp! @cql_column(clusteringOrder: DESC)\n        sensor_value: Float!\n    \tstation_id: Uuid!\n        data: String!\n      }\n      type SelectIotResult @cql_payload {\n    \t\tdata: [Iot]\n    \t\tpagingState: String\n    }\n      type Query {\n        getIots(\n          machine_id: Uuid!,\n          sensor_name: String!,\n          pagingState: String @cql_pagingState\n        ): SelectIotResult @cql_select(pageSize: 10)\n      }\n      type Mutation {\n    \t\tinsertIot(iot: IotInput): Iot\n    }\n  \"\"\") {\n    version\n  }\n}\n"
           }
@@ -78,7 +78,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "query":"mutation {\n  insertIot(iot: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", sensor_value: {sensor_value}, station_id: \"{station_id}\", data: \"{data}\"}) {\n    machine_id\n    sensor_name\n    time\n    sensor_value\n    station_id\n    data\n  }\n}\n"
           }
@@ -94,7 +94,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "query":"{\n  getIots(machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\") {\n    data {\n      machine_id\n      sensor_name\n      time\n      sensor_value\n      station_id\n      data\n    }\n  }\n}\n"
           }
@@ -110,7 +110,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "query":"mutation {\n  insertIot(iot: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", sensor_value: {sensor_value}, station_id: \"{station_id}\", data: \"{data}\"}) {\n    machine_id\n    sensor_name\n    time\n    sensor_value\n    station_id\n    data\n  }\n}\n"
           }

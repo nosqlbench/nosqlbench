@@ -48,7 +48,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "name": "<<namespace:docs_crud_basic>>",
             "replicas": <<rf:1>>
@@ -70,7 +70,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "name": "<<collection:docs_collection>>"
           }
@@ -84,7 +84,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "user_id":      "{user_id}",
             "created_on":   {created_on},
@@ -128,7 +128,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "user_id":      "{user_id}",
             "created_on":   {created_on},

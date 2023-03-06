@@ -44,7 +44,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "name": "<<keyspace:baselines>>",
             "replicas": <<rf:1>>
@@ -66,7 +66,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "name": "<<table:tabular>>",
             "columnDefinitions": [
@@ -103,7 +103,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "part": "{part_layout}",
             "clust": "{clust_layout}",
@@ -133,7 +133,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "part": "{part_write}",
             "clust": "{clust_write}",

@@ -85,7 +85,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {"query":"{<<table:tabular>>(value: {part: \"{part_read}\"}, options: { pageSize: <<limit:10>> }) {values {part, clust, data}}}"}
 
   main-write:
@@ -99,5 +99,5 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {"query":"mutation {\n  insert<<table:tabular>>( value: {part: \"{part_write}\", clust: \"{clust_write}\", data: \"{data_write}\"}) {value {part, clust, data}}}"}

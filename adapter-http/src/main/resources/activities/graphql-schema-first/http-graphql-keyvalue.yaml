@@ -45,7 +45,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "query":"mutation {\n  createKeyspace(name: \"<<keyspace:gqlsf_keyvalue>>\", replicas: <<rf:1>>, ifNotExists: true) \n}\n"
           }
@@ -57,7 +57,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "query":"mutation {\n  deploySchema(keyspace: \"<<keyspace:gqlsf_keyvalue>>\", schema: \"\"\"\n      type KeyValue @cql_input {\n        key: String! @cql_column(partitionKey: true)\n        value: String!\n      }\n      type Query {\n        getKeyValue(\n          key: String!,\n        ): KeyValue\n      }\n      type Mutation {\n    \t\tinsertKeyValue(keyValue: KeyValueInput): KeyValue\n    }\n  \"\"\") {\n    version\n  }\n}\n"
           }
@@ -71,7 +71,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "query":"mutation {\n  insertKeyValue(keyValue: {key: \"{seq_key}\", value: \"{seq_value}\"}) {\n    key\n    value\n  }\n}\n"
           }
@@ -87,7 +87,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "query":"{\n  getKeyValue(key: \"rw_key\") {\n    key\n    value\n  }\n}\n"
           }
@@ -103,7 +103,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "query":"mutation {\n  insertKeyValue(keyValue: {key: \"{rw_key}\", value: \"{rw_value}\"}) {\n    key\n    value\n  }\n}\n"
           }

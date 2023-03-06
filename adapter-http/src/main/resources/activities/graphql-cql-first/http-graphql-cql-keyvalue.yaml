@@ -39,8 +39,8 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
-          {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_keyvalue>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
+        body: >2
+          {"quersy":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_keyvalue>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
 
       create-table:
         method: POST

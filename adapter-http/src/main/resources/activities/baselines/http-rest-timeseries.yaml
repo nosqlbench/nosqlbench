@@ -42,7 +42,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "machine_id": "{machine_id}",
             "sensor_name": "{sensor_name}",
@@ -60,7 +60,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "name": "<<keyspace:baselines>>",
             "replicas": <<rf:1>>
@@ -82,7 +82,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "name": "<<table:iot>>",
             "columnDefinitions": |-
@@ -160,7 +160,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |-
+        body: >2
           {
             "machine_id": "{machine_id}",
             "sensor_name": "{sensor_name}",

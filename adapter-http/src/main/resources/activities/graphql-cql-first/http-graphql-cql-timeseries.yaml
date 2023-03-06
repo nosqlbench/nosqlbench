@@ -48,7 +48,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_iot>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
 
       create-table:
@@ -58,7 +58,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_iot>>\"\n    tableName: \"<<table:iot>>\"\n    partitionKeys: [{ name: \"machine_id\", type: { basic: UUID } }, { name: \"sensor_name\", type: { basic: TEXT } }]\n    clusteringKeys: [{ name: \"time\", type: { basic: TIMESTAMP }, order: \"DESC\" }]\n    values: [{ name: \"sensor_value\", type: { basic: FLOAT } }, { name: \"station_id\", type: { basic: UUID } }, { name: \"data\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}\n"}
 
   rampup:
@@ -70,7 +70,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {"query":"mutation insertReading {\n  reading: insert<<table:iot>>( value: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", data: \"{data}\", sensor_value: {sensor_value}, station_id: \"{station_id}\"}) {value {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
 
   main-read:
@@ -98,5 +98,5 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {"query":"mutation insertReading {\n  reading: insert<<table:iot>>( value: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", data: \"{data}\", sensor_value: {sensor_value}, station_id: \"{station_id}\"}) {value {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
