@@ -1,6 +1,6 @@
 # cqlgen
 
-cqlgen is a default CQL workload generator
+*cqlgen* is a default CQL workload generator
 
 With NB5, the cqld4 driver comes with a workload generator that can be used to generate a
 workload yaml from a CQL schema file.
@@ -13,16 +13,16 @@ more accurately emulate those in-situ.
 
 You need the cql schema for whatever keyspaces, types, and tables you want to include.
 Optionally, you can provide a table stats file which is generated as
-`nodetool tablestats > tablestats`.
+[`nodetool tablestats > tablestats`](https://cassandra.apache.org/doc/latest/cassandra/tools/nodetool/tablestats.html#tablestats).
 
-Note: The table stats file provides results only for a single node. As such, you will want to
-adjust a config parameter called `partition_multiplier` to improve accuracy of the generated
+**Note**: The tablestats file provides results only for a single node. As such, you will want to
+adjust a config parameter called `partition_multiplier` (within the `cqlgen.conf`) to improve accuracy of the generated
 workload. Further, the file only contains traffic and data details since the last time your node
 was restarted, thus it may not be representative of the overall character of your workload and data.
 
 ## Usage
 
-A typical cqlgen command looks like this:
+A typical *cqlgen* command looks like this:
 
 ```
 nb5 cqlgen myschema.cql myworkload.yaml myhistograms
@@ -66,23 +66,23 @@ The initial version of the cql workload generator provides these defaults:
 ## Fine Tuning
 
 The generator uses two internal files for the purposes of setting defaults:
-- cqlgen.conf - a yaml formatted configuration file.
-- cqlgen-bindings.yaml
+- `cqlgen.conf` - a yaml formatted configuration file.
+- `bindings-cqlgen.yaml`
 
 Both of these files will be read from the internal nb5 resources unless you pull them into the
 local directory with these commands:
 
 ```
-nb5 --copy cqlgen/cqlgen-bindings.yaml
+nb5 --copy cqlgen/bindings-cqlgen.yaml
 nb5 --copy cqlgen/cqlgen.conf
 ```
 
-The details of how to customize these files are included within them. The cqlgen-bindings.yaml
-file contains default bindings by type. If you get UnresolvedBindingsException when trying to
+The details of how to customize these files are included within them. The `bindings-cqlgen.yaml`
+file contains default bindings by type. If you get *UnresolvedBindingsException* when trying to
 generate a workload, then a binding for the type in question must be added to the
-cqlgen-bindings.yaml file.
+`bindings-cqlgen.yaml` file.
 
-The cqlgen.conf controls much of the internal wiring of the workload generator. Modifying it
+The `cqlgen.conf` controls much of the internal wiring of the workload generator. Modifying it
 gives you the ability to enable and disable certain stages and behaviors, like:
 
 * obfuscating all keyspace, table, and column names
@@ -97,4 +97,4 @@ Some transformers depend on others upstream, but if the data provided is not suf
 will silently pass-through.
 
 This is a new feature of the NoSQLBench driver. If you are an early adopter, please reach out
-with ideas, or for requests and support as needed.
+with [ideas, or for requests and support](https://github.com/nosqlbench/nosqlbench/issues/new/choose) as needed.
