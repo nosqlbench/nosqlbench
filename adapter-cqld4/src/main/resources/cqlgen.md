@@ -67,20 +67,20 @@ The initial version of the cql workload generator provides these defaults:
 
 The generator uses two internal files for the purposes of setting defaults:
 - cqlgen.conf - a yaml formatted configuration file.
-- cqlgen-bindings.yaml
+- bindings-cqlgen.yaml
 
 Both of these files will be read from the internal nb5 resources unless you pull them into the
 local directory with these commands:
 
 ```
-nb5 --copy cqlgen/cqlgen-bindings.yaml
+nb5 --copy cqlgen/bindings-cqlgen.yaml
 nb5 --copy cqlgen/cqlgen.conf
 ```
 
-The details of how to customize these files are included within them. The cqlgen-bindings.yaml
+The details of how to customize these files are included within them. The bindings-cqlgen.yaml
 file contains default bindings by type. If you get UnresolvedBindingsException when trying to
 generate a workload, then a binding for the type in question must be added to the
-cqlgen-bindings.yaml file.
+bindings-cqlgen.yaml file.
 
 The cqlgen.conf controls much of the internal wiring of the workload generator. Modifying it
 gives you the ability to enable and disable certain stages and behaviors, like:
