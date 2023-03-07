@@ -6,6 +6,7 @@ description: |
   - We need to URLEncode the `data` and `data_write` bindings because newlines can't be sent in REST calls.
   - There is no instrumentation with the http driver.
   - There is no async mode with the http driver.
+  - Refer to 'http-rest.md' for more information.
 
 scenarios:
   default:
@@ -14,14 +15,9 @@ scenarios:
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
-  # To enable an optional weighted set of hosts in place of a load balancer
-  # Examples
-  #   single host: restapi_host=host1
-  #   multiple hosts: restapi_host=host1,host2,host3
-  #   multiple weighted hosts: restapi_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('<<restapi_host:stargate>>')
   request_id: ToHashedUUID(); ToString();
-  request_token: Discard(); FirstLines("TEMPLATE(stargate_tokenfile,data/stargate_token.txt)");
+  auto_gen_token: Discard(); StargateToken('http://localhost:8081/v1/auth'); ToString();
 
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String
@@ -46,9 +42,9 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "name": "<<keyspace:baselines>>",
             "replicas": <<rf:1>>
@@ -59,7 +55,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
         ok-status: "[2-4][0-9][0-9]"
 
@@ -68,9 +64,9 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "name": "<<table:tabular>>",
             "columnDefinitions": [
@@ -105,9 +101,9 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "part": "{part_layout}",
             "clust": "{clust_layout}",
@@ -123,7 +119,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
 
   main-write:
@@ -135,9 +131,9 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "part": "{part_write}",
             "clust": "{clust_write}",

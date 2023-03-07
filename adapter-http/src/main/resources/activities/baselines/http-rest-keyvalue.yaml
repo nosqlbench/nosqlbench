@@ -5,6 +5,7 @@ description: |
   This should be identical to the cql variant except for:
   - There is no instrumentation with the http driver.
   - There is no async mode with the http driver.
+  - Refer to 'http-rest.md' for more information.
 
 scenarios:
   default:
@@ -13,15 +14,10 @@ scenarios:
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
-  # To enable an optional weighted set of hosts in place of a load balancer
-  # Examples
-  #   single host: restapi_host=host1
-  #   multiple hosts: restapi_host=host1,host2,host3
-  #   multiple weighted hosts: restapi_host=host1:3,host2:7
-  weighted_hosts: WeightedStrings('<<restapi_host:stargate>>')
 
+  weighted_hosts: ToString(); WeightedStrings('<<restapi_host:stargate>>'); ToString();
   request_id: ToHashedUUID(); ToString();
-  request_token: ToString(); FirstLines("TEMPLATE(stargate_tokenfile,data/stargate_token.txt)");
+  auto_gen_token: Discard(); StargateToken('http://localhost:8081/v1/auth'); ToString();
 
   seq_key: Mod(<<keycount:10000000>>); ToString() -> String
   seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
@@ -37,20 +33,19 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
-              "name": "<<keyspace:baselines>>",
-              "replicas": <<rf:1>>
+            "name": "<<keyspace:baselines>>",
+            "replicas": <<rf:1>>
           }
-
       drop-table:
         method: DELETE
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables/<<table:keyvalue>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
         ok-status: "[2-4][0-9][0-9]"
 
@@ -59,59 +54,58 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
-              "name": "<<table:keyvalue>>",
-              "columnDefinitions": [
-                  {
-                      "name": "key",
-                      "typeDefinition": "text"
-                  },
-                  {
-                      "name": "value",
-                      "typeDefinition": "text"
-                  }
-              ],
-              "primaryKey": {
-                  "partitionKey": [
-                      "key"
-                  ]
+            "name": "<<table:keyvalue>>",
+            "columnDefinitions": [
+              {
+                "name": "key",
+                "typeDefinition": "text"
               },
-              "ifNotExists": true
+              {
+                "name": "value",
+                "typeDefinition": "text"
+              }
+            ],
+            "primaryKey": {
+              "partitionKey": [
+                "key"
+              ]
+            },
+            "ifNotExists": true
           }
 
   schema-astra:
-    statements:
+    ops:
       create-table-astra:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "name": "<<table:keyvalue>>",
             "columnDefinitions": [
-                {
-                    "name": "key",
-                    "typeDefinition": "text"
-                },
-                {
-                    "name": "value",
-                    "typeDefinition": "text"
-                }
+              {
+                "name": "key",
+                "typeDefinition": "text"
+              },
+              {
+                "name": "value",
+                "typeDefinition": "text"
+              }
             ],
             "primaryKey": {
-                "partitionKey": [
-                    "key"
-                ]
+              "partitionKey": [
+                "key"
+              ]
             },
             "ifNotExists": true
           }
-
   rampup:
     ops:
       rampup-insert:
@@ -119,9 +113,9 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:keyvalue>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "key": "{seq_key}",
             "value": "{seq_value}"
@@ -136,7 +130,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:keyvalue>>/{rw_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
         ok-status: "[2-4][0-9][0-9]"
 
@@ -149,9 +143,9 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:keyvalue>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "{request_token}"
+        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {
             "key": "{rw_key}",
             "value": "{rw_value}"
