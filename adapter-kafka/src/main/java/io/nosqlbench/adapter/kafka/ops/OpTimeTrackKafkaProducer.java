@@ -50,7 +50,7 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
     private final boolean asyncMsgAck;
     private final boolean transactEnabledConfig;
     private final int txnBatchNum;
-    private ThreadLocal<Map<String, MessageSequenceNumberSendingHandler>> MessageSequenceNumberSendingHandlersThreadLocal =
+    private final ThreadLocal<Map<String, MessageSequenceNumberSendingHandler>> MessageSequenceNumberSendingHandlersThreadLocal =
         ThreadLocal.withInitial(HashMap::new);
     private final boolean seqTracking;
     private final Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet;
