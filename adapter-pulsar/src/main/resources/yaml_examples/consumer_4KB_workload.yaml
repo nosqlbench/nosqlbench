@@ -1,0 +1,14 @@
+description: consumer
+params:
+  topic_uri:
+  seq_tracking: 'true'
+  seqerr_simu: 'out_of_order,msg_loss,msg_dup'
+  e2e_starting_time_source: 'message_publish_time'
+blocks:
+  ec2-msg-proc-consume:
+    ops:
+      op1:
+        MessageConsume: "persistent://public/default/perftest"
+        consumerName: ''
+        subscriptionName: "perfsub"
+        subscriptionType: 'Exclusive'
