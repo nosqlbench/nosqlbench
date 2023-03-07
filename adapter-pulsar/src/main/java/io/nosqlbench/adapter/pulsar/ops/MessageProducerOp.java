@@ -19,10 +19,11 @@ package io.nosqlbench.adapter.pulsar.ops;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterAsyncOperationFailedException;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
-import io.nosqlbench.adapter.pulsar.util.MessageSequenceNumberSendingHandler;
+import io.nosqlbench.engine.api.metrics.MessageSequenceNumberSendingHandler;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterMetrics;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.adapter.pulsar.util.PulsarAvroSchemaUtil;
+import io.nosqlbench.engine.api.metrics.EndToEndMetricsAdapterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +50,7 @@ public class MessageProducerOp extends PulsarClientOp {
     private final boolean useTransact;
     private final boolean seqTracking;
     private final Supplier<Transaction> transactSupplier;
-    private final Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet;
+    private final Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet;
     private final Producer<?> producer;
     private final String msgKey;
     private final String msgPropRawJsonStr;
@@ -66,7 +67,7 @@ public class MessageProducerOp extends PulsarClientOp {
                              boolean useTransact,
                              boolean seqTracking,
                              Supplier<Transaction> transactSupplier,
-                             Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet,
+                             Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet,
                              Producer<?> producer,
                              String msgKey,
                              String msgProp,

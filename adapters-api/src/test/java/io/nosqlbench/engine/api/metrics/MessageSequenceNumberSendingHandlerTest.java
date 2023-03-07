@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.pulsar.util;
+package io.nosqlbench.engine.api.metrics;
 
 import org.junit.jupiter.api.Test;
 
@@ -39,19 +39,19 @@ class MessageSequenceNumberSendingHandlerTest {
     @Test
     void shouldInjectMessageLoss() {
         assertEquals(1L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.emptySet()));
-        assertEquals(3L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.singleton(PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE.MsgLoss), 100));
+        assertEquals(3L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.singleton(EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE.MsgLoss), 100));
     }
 
     @Test
     void shouldInjectMessageDuplication() {
         assertEquals(1L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.emptySet()));
-        assertEquals(1L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.singleton(PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE.MsgDup), 100));
+        assertEquals(1L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.singleton(EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE.MsgDup), 100));
     }
 
     @Test
     void shouldInjectMessageOutOfOrder() {
         assertEquals(1L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.emptySet()));
-        assertEquals(4L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.singleton(PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE.OutOfOrder), 100));
+        assertEquals(4L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.singleton(EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE.OutOfOrder), 100));
         assertEquals(2L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.emptySet()));
         assertEquals(3L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.emptySet()));
         assertEquals(5L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.emptySet()));
@@ -60,7 +60,7 @@ class MessageSequenceNumberSendingHandlerTest {
 
     @Test
     void shouldInjectOneOfTheSimulatedErrorsRandomly() {
-        Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> allErrorTypes = new HashSet<>(Arrays.asList(PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE.values()));
+        Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> allErrorTypes = new HashSet<>(Arrays.asList(EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE.values()));
 
         assertEquals(1L, sequenceNumberSendingHandler.getNextSequenceNumber(Collections.emptySet()));
         long previousSequenceNumber = 1L;

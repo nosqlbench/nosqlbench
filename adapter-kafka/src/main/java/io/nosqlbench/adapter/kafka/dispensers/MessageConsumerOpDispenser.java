@@ -23,7 +23,7 @@ import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaClient;
 import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaConsumer;
 import io.nosqlbench.adapter.kafka.util.EndToEndStartingTimeSource;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
-import io.nosqlbench.adapter.pulsar.util.ReceivedMessageSequenceTracker;
+import io.nosqlbench.engine.api.metrics.ReceivedMessageSequenceTracker;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.commons.lang3.BooleanUtils;

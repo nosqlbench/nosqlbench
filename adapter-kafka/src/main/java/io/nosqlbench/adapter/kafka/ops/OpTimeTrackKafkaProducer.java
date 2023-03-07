@@ -20,8 +20,8 @@ package io.nosqlbench.adapter.kafka.ops;
 import io.nosqlbench.adapter.kafka.KafkaSpace;
 import io.nosqlbench.adapter.kafka.exception.KafkaAdapterUnexpectedException;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
-import io.nosqlbench.adapter.pulsar.util.MessageSequenceNumberSendingHandler;
-import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
+import io.nosqlbench.engine.api.metrics.MessageSequenceNumberSendingHandler;
+import io.nosqlbench.engine.api.metrics.EndToEndMetricsAdapterUtil;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -53,7 +53,7 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
     private ThreadLocal<Map<String, MessageSequenceNumberSendingHandler>> MessageSequenceNumberSendingHandlersThreadLocal =
         ThreadLocal.withInitial(HashMap::new);
     private final boolean seqTracking;
-    private final Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet;
+    private final Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet;
 
     enum TxnProcResult {
         SUCCESS,
@@ -77,7 +77,7 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
                                     boolean transactEnabledConfig,
                                     int txnBatchNum,
                                     boolean seqTracking,
-                                    Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet,
+                                    Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet,
                                     KafkaProducer<String, String> producer) {
         super(kafkaSpace);
         this.asyncMsgAck = asyncMsgAck;
@@ -209,7 +209,7 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
         if (seqTracking) {
             long nextSequenceNumber = getMessageSequenceNumberSendingHandler(message.topic())
                 .getNextSequenceNumber(errSimuTypeSet);
-            message.headers().add(PulsarAdapterUtil.MSG_SEQUENCE_NUMBER, String.valueOf(nextSequenceNumber).getBytes());
+            message.headers().add(KafkaAdapterUtil.MSG_SEQUENCE_NUMBER, String.valueOf(nextSequenceNumber).getBytes());
         }
         try {
             if (result == TxnProcResult.SUCCESS) {

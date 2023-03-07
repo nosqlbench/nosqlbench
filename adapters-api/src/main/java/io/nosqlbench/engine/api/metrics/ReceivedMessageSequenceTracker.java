@@ -1,4 +1,4 @@
-package io.nosqlbench.adapter.pulsar.util;
+package io.nosqlbench.engine.api.metrics;
 
 /*
  * Copyright (c) 2022 nosqlbench

@@ -20,7 +20,7 @@ import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.ops.MessageConsumerOp;
 import io.nosqlbench.adapter.pulsar.util.EndToEndStartingTimeSource;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
-import io.nosqlbench.adapter.pulsar.util.ReceivedMessageSequenceTracker;
+import io.nosqlbench.engine.api.metrics.ReceivedMessageSequenceTracker;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;

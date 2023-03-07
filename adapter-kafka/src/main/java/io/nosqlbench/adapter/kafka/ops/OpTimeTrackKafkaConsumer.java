@@ -22,8 +22,7 @@ import io.nosqlbench.adapter.kafka.KafkaSpace;
 import io.nosqlbench.adapter.kafka.util.EndToEndStartingTimeSource;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterMetrics;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
-import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
-import io.nosqlbench.adapter.pulsar.util.ReceivedMessageSequenceTracker;
+import io.nosqlbench.engine.api.metrics.ReceivedMessageSequenceTracker;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
@@ -133,7 +132,7 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
             for (ConsumerRecord<String, String> record : records) {
                 if (record != null) {
                     if (logger.isDebugEnabled()) {
-                        Header msg_seq_header = record.headers().lastHeader(PulsarAdapterUtil.MSG_SEQUENCE_NUMBER);
+                        Header msg_seq_header = record.headers().lastHeader(KafkaAdapterUtil.MSG_SEQUENCE_NUMBER);
                         logger.debug(
                             "Receiving message is successful: [{}] - offset({}), cycle ({}), e2e_latency_ms({}), e2e_seq_number({})",
                             printRecvedMsg(record),
@@ -210,7 +209,7 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
     }
 
     private void checkAndUpdateMessageErrorCounter(ConsumerRecord<String, String> record) {
-        Header msg_seq_number_header = record.headers().lastHeader(PulsarAdapterUtil.MSG_SEQUENCE_NUMBER);
+        Header msg_seq_number_header = record.headers().lastHeader(KafkaAdapterUtil.MSG_SEQUENCE_NUMBER);
         String msgSeqIdStr = msg_seq_number_header != null ? new String(msg_seq_number_header.value()) : StringUtils.EMPTY;
         if (!StringUtils.isBlank(msgSeqIdStr)) {
             long sequenceNumber = Long.parseLong(msgSeqIdStr);

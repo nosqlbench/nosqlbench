@@ -22,8 +22,8 @@ import io.nosqlbench.adapter.kafka.ops.KafkaOp;
 import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaClient;
 import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaProducer;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
-import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.metrics.EndToEndMetricsAdapterUtil;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -59,7 +59,7 @@ public class MessageProducerOpDispenser extends KafkaBaseOpDispenser {
     private final LongFunction<String> msgKeyStrFunc;
     private final LongFunction<String> msgValueStrFunc;
     protected final LongFunction<Boolean> seqTrackingFunc;
-    protected final LongFunction<Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> msgSeqErrSimuTypeSetFunc;
+    protected final LongFunction<Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> msgSeqErrSimuTypeSetFunc;
 
     public MessageProducerOpDispenser(DriverAdapter adapter,
                                       ParsedOp op,
@@ -78,7 +78,7 @@ public class MessageProducerOpDispenser extends KafkaBaseOpDispenser {
         this.msgSeqErrSimuTypeSetFunc = getStaticErrSimuTypeSetOpValueFunc();
         // Doc-level parameter: seq_tracking
         this.seqTrackingFunc = lookupStaticBoolConfigValueFunc(
-            PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label, false);
+            KafkaAdapterUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label, false);
     }
 
     private String getEffectiveClientId(long cycle) {
@@ -226,17 +226,17 @@ public class MessageProducerOpDispenser extends KafkaBaseOpDispenser {
             message);
     }
 
-    protected LongFunction<Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> getStaticErrSimuTypeSetOpValueFunc() {
-        LongFunction<Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> setStringLongFunction;
+    protected LongFunction<Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> getStaticErrSimuTypeSetOpValueFunc() {
+        LongFunction<Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> setStringLongFunction;
         setStringLongFunction = (l) ->
-            parsedOp.getOptionalStaticValue(PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQERR_SIMU.label, String.class)
+            parsedOp.getOptionalStaticValue(KafkaAdapterUtil.DOC_LEVEL_PARAMS.SEQERR_SIMU.label, String.class)
                 .filter(Predicate.not(String::isEmpty))
                 .map(value -> {
-                    Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> set = new HashSet<>();
+                    Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> set = new HashSet<>();
 
                     if (StringUtils.contains(value,',')) {
                         set = Arrays.stream(value.split(","))
-                            .map(PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE::parseSimuType)
+                            .map(EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE::parseSimuType)
                             .filter(Optional::isPresent)
                             .map(Optional::get)
                             .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -245,7 +245,7 @@ public class MessageProducerOpDispenser extends KafkaBaseOpDispenser {
                     return set;
                 }).orElse(Collections.emptySet());
         logger.info(
-            PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQERR_SIMU.label + ": {}",
+            KafkaAdapterUtil.DOC_LEVEL_PARAMS.SEQERR_SIMU.label + ": {}",
             setStringLongFunction.apply(0));
         return setStringLongFunction;
     }
