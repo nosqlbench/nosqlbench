@@ -1,10 +1,10 @@
 # Overview
 
-This NB Kafka driver allows publishing messages to or consuming messages from
+This NB Kafka adapter allows publishing messages to or consuming messages from
 * a Kafka cluster, or
 * a Pulsar cluster with [S4K](https://github.com/datastax/starlight-for-kafka) or [KoP](https://github.com/streamnative/kop) Kafka Protocol handler for Pulsar.
 
-At high level, this driver supports the following Kafka functionalities
+At high level, this adapter supports the following Kafka functionalities
 * Publishing messages to one Kafka topic with sync. or async. message-send acknowledgements (from brokers)
 * Subscribing messages from one or multiple Kafka topics with sync. or async. message-recv acknowlegements (to brokers) (aka, message commits)
     * auto message commit
@@ -26,7 +26,7 @@ $ <nb_cmd> run driver=kafka -vv cycles=100 threads=2 num_clnt=2 yaml=kafka_produ
 $ <nb_cmd> run driver=kafka -vv cycles=100 threads=4 num_clnt=2 num_cons_grp=2 yaml=kafka_producer.yaml config=kafka_config.properties bootstrap_server=PLAINTEXT://localhost:9092
 ```
 
-## NB Kafka driver specific CLI parameters
+## NB Kafka adapter specific CLI parameters
 
 * `num_clnt`: the number of Kafka clients to publish messages to or to receive messages from
     * For producer workload, this is the number of the producer threads to publish messages to the same topic

@@ -19,7 +19,7 @@ package io.nosqlbench.adapter.kafka.exception;
 
 public class KafkaAdapterUnsupportedOpException extends RuntimeException {
 
-    public KafkaAdapterUnsupportedOpException(String pulsarOpType) {
-        super("Unsupported Pulsar adapter operation type: \"" + pulsarOpType + "\"");
+    public KafkaAdapterUnsupportedOpException(String kafkaOpType) {
+        super("Unsupported Kafka adapter operation type: \"" + kafkaOpType + "\"");
     }
 }
