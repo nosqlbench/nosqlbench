@@ -155,6 +155,7 @@ For the Pulsar NB driver, Document level parameters can only be statically bound
         * `out_of_order`: simulate message out of sequence
         * `msg_loss`: simulate message loss
         * `msg_dup`: simulate message duplication
+    * This value should be used only for testing purposes. It is not recommended to use this parameter in actual testing environments.
 * ***e2e_starting_time_source***:
     * Starting timestamp for end-to-end operation. When specified, will update the `e2e_msg_latency` histogram with the calculated end-to-end latency. The latency is calculated by subtracting the starting time from the current time. The starting time is determined from a configured starting time source. The unit of the starting time is milliseconds since epoch.
     * The possible values for `e2e_starting_time_source`:

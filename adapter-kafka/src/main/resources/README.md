@@ -39,3 +39,24 @@ $ <nb_cmd> run driver=kafka -vv cycles=100 threads=4 num_clnt=2 num_cons_grp=2 y
 
 * `num_cons_grp`: the number of consumer groups
     * Only relevant for consumer workload
+
+
+
+For the Kafka NB adapter, Document level parameters can only be statically bound; and currently, the following Document level configuration parameters are supported:
+
+* `async_api` (boolean):
+    * When true, use async Kafka client API.
+* `seq_tracking` (boolean):
+    * When true, a sequence number is created as part of each message's properties
+    * This parameter is used in conjunction with the next one in order to simulate abnormal message processing errors and then be able to detect such errors successfully.
+* `seqerr_simu`:
+    * A list of error simulation types separated by comma (,)
+    * Valid error simulation types
+        * `out_of_order`: simulate message out of sequence
+        * `msg_loss`: simulate message loss
+        * `msg_dup`: simulate message duplication
+    * This value should be used only for testing purposes. It is not recommended to use this parameter in actual testing environments.
+* `e2e_starting_time_source`:
+    * Starting timestamp for end-to-end operation. When specified, will update the `e2e_msg_latency` histogram with the calculated end-to-end latency. The latency is calculated by subtracting the starting time from the current time. The starting time is determined from a configured starting time source. The unit of the starting time is milliseconds since epoch.
+    * The possible values for `e2e_starting_time_source`:
+        * `message_publish_time` : uses the message publishing timestamp as the starting time. The message publishing time, in this case, [is computed by the Kafka client on record generation](https://kafka.apache.org/34/javadoc/org/apache/kafka/clients/producer/ProducerRecord.html). This is the case, as [`CreateTime` is the default](https://docs.confluent.io/platform/current/installation/configuration/topic-configs.html#message-timestamp-type).

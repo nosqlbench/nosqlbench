@@ -1,9 +1,11 @@
-# document level parameters that apply to all Pulsar client types:
+# document level parameters that apply to all Kafka client types:
 params:
   # Whether to commit message asynchronously
   # - default: true
   # - only relevant for manual commit
 #  async_api: "true"
+  # activates e2e latency metrics
+  # - default: "none" (i.e. disabled)
   e2e_starting_time_source: "message_publish_time"
   # activates e2e error metrics (message duplication, message loss and out-of-order detection)
   # it needs to be enabled both on the producer and the consumer
@@ -16,7 +18,7 @@ blocks:
       op1:
         ## The value represents the topic names
         #  - for consumer, a list of topics (separated by comma) are supported
-        MessageConsume: "nbktest1,nbktest2"
+        MessageConsume: "nbktest"
 
         # The timeout value to poll messages (unit: milli-seconds)
         # - default: 0

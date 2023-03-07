@@ -13,6 +13,8 @@ params:
   # it needs to be enabled both on the producer and the consumer
   # - default: false
   seq_tracking: "true"
+  # test error injection, remove in production
+  seqerr_simu: 'out_of_order,msg_loss,msg_dup'
 
 blocks:
   msg-produce-block:
@@ -26,7 +28,7 @@ blocks:
         # - default: 0
         # - value 0 or 1 means no transaction
         # - it also requires "transactional.id" parameter is set
-        txn_batch_num: 8
+        txn_batch_num: 1
 
         ## (Optional) Kafka message headers (in JSON format).
         msg_header: |
