@@ -135,7 +135,7 @@ public class MessageProducerOp extends PulsarClientOp {
         }
 
         // set message properties
-        if ( !msgPropRawJsonStr.isEmpty() ) {
+        if (!StringUtils.isBlank(msgPropRawJsonStr) || seqTracking) {
             typedMessageBuilder = typedMessageBuilder.properties(msgProperties);
         }
 
