@@ -335,6 +335,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     public Map<String,String> getStringStringMap() {
         return new HashMap<String,String>() {{
             for (Entry entry : ParameterMap.this.entrySet()) {
+                logger.debug("entry: {}, value: {}",entry.getKey(), entry.getValue());
                 put(entry.getKey().toString(),entry.getValue().toString());
             }
         }};

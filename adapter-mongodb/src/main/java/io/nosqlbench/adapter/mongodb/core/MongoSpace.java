@@ -36,48 +36,52 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 public class MongoSpace implements NBNamedElement {
     private final String name;
     private final NBConfiguration cfg;
-    private final String connectionString;
+    private final String connection;
     private final MongoClient client;
     private MongoDatabase mongoDatabase;
 
-    public MongoSpace(String name, NBConfiguration cfg) {
+    public MongoSpace(String name, String connection, NBConfiguration cfg) {
         this.name = name;
         this.cfg = cfg;
-        this.connectionString = cfg.get("connection",String.class);
-        this.client = createMongoClient(connectionString);
+        this.connection = connection;
+        this.client = createMongoClient(this.connection);
     }
 
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(MongoSpace.class)
-            .add(Param.required("connection", String.class)
-                .setDescription("The connection string for your MongoDB endpoint"))
-            .add(Param.required("database", String.class)
-                .setDescription("The database name to connect to."))
-            .asReadOnly();
+                .add(Param.required("connection", String.class)
+                        .setDescription("The connection string for your MongoDB endpoint"))
+                .add(Param.required("database", String.class)
+                        .setDescription("The database name to connect to."));
     }
+
 
     @Override
     public String getName() {
         return name;
     }
 
-    public MongoClient createMongoClient(String connectionString) {
+    public MongoClient createMongoClient(String connection) {
 
         CodecRegistry codecRegistry = fromRegistries(
-            fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
-            MongoClientSettings.getDefaultCodecRegistry()
+                fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
+                MongoClientSettings.getDefaultCodecRegistry()
         );
 
         MongoClientSettings settings = MongoClientSettings.builder()
-            .applyConnectionString(new ConnectionString(connectionString))
-            .codecRegistry(codecRegistry)
-            .uuidRepresentation(UuidRepresentation.STANDARD)
-            .build();
+                .applyConnectionString(new ConnectionString(connection))
+                .codecRegistry(codecRegistry)
+                .uuidRepresentation(UuidRepresentation.STANDARD)
+                .build();
         return MongoClients.create(settings);
     }
 
     protected MongoDatabase getDatabase() {
-        return mongoDatabase;
+        return this.mongoDatabase;
+    }
+
+    protected String getConnection() {
+        return this.connection;
     }
 
     public MongoClient getClient() {

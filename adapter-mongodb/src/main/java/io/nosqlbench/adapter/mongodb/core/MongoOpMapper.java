@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.mongodb.core;
 
 import io.nosqlbench.adapter.mongodb.dispensers.MongoCommandOpDispenser;
+import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
@@ -29,7 +30,7 @@ import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class MongoOpMapper implements OpMapper<Op> {
-    private final static Logger logger = LogManager.getLogger(MongoOpMapper.class);
+    private static final Logger logger = LogManager.getLogger(MongoOpMapper.class);
 
     private final MongodbDriverAdapter adapter;
 
@@ -39,7 +40,15 @@ public class MongoOpMapper implements OpMapper<Op> {
 
     @Override
     public OpDispenser<? extends Op> apply(ParsedOp op) {
+
         LongFunction<String> ctxNamer = op.getAsFunctionOr("space", "default");
+        String connectionValue = op.getStaticConfigOr("connection", "unknown");
+
+        if (connectionValue == null) {
+            throw new BasicError("Must provide a connection value for use be MongoDB adapter.");
+        }
+        adapter.setConnection(connectionValue);
+
         LongFunction<MongoSpace> spaceF = l -> adapter.getSpaceCache().get(ctxNamer.apply(l));
         Optional<LongFunction<String>> oDatabaseF = op.getAsOptionalFunction("database");
         if (oDatabaseF.isEmpty()) {
@@ -47,27 +56,19 @@ public class MongoOpMapper implements OpMapper<Op> {
         }
 
         Optional<TypeAndTarget<MongoDBOpTypes, String>> target = op.getOptionalTypeAndTargetEnum(MongoDBOpTypes.class, String.class);
+
         // For any of the named operations which are called out directly AND supported via the fluent API,
         // use specialized dispensers
         if (target.isPresent()) {
-            TypeAndTarget<MongoDBOpTypes, String> targetdata = target.get();
-            return switch (targetdata.enumId) {
+            TypeAndTarget<MongoDBOpTypes, String> targetData = target.get();
+            return switch (targetData.enumId) {
                 case command -> new MongoCommandOpDispenser(adapter, spaceF, op);
-//                case update -> new MongoDbUpdateOpDispenser(adapter, op, targetdata.targetFunction);
-//            case insert -> new MongoDbInsertOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
-//            case delete -> new MongoDbDeleteOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
-//            case find -> new mongoDbFindOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
-//            case findAndModify -> new MongoDbFindAndModifyOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
-//            case getMore -> new MongoDbGetMoreOpDispenser(adapter, op, opTypeAndTarget.targetFunction);
             };
         }
         // For everything else use the command API
         else {
             return new MongoCommandOpDispenser(adapter, spaceF, op);
         }
-
-
-
 
 
     }

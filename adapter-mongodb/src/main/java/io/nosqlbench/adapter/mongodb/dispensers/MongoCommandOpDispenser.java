@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapter.mongodb.dispensers;
 
-import com.mongodb.ReadPreference;
 import io.nosqlbench.adapter.mongodb.core.MongoSpace;
 import io.nosqlbench.adapter.mongodb.ops.MongoDirectCommandOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
@@ -30,40 +29,33 @@ import java.util.Map;
 import java.util.function.LongFunction;
 
 public class MongoCommandOpDispenser extends BaseOpDispenser<Op, MongoSpace> {
-    private final LongFunction<MongoDirectCommandOp> opFunc;
+
     private final LongFunction<MongoDirectCommandOp> mongoOpF;
 
-    public MongoCommandOpDispenser(DriverAdapter adapter, LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
-        super(adapter,op);
-        opFunc = createOpFunc(ctxFunc, op);
-        this.mongoOpF = createOpFunc(ctxFunc,op);
+    public MongoCommandOpDispenser(DriverAdapter<Op, MongoSpace> adapter, LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
+        super(adapter, op);
+        this.mongoOpF = createOpFunc(ctxFunc, op);
     }
 
     private LongFunction<MongoDirectCommandOp> createOpFunc(LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
-
-        LongFunction<String> rpstring = op.getAsOptionalFunction("readPreference")
-            .orElseGet(() -> op.getAsOptionalFunction("read-preference")
-                .orElse(l -> "primary"));
-        LongFunction<ReadPreference> readPreferenceF = l -> ReadPreference.valueOf(rpstring.apply(l));
 
         LongFunction<?> payload = op.getAsRequiredFunction("stmt", Object.class);
         Object exampleValue = payload.apply(0);
 
         LongFunction<Bson> bsonFunc;
-        if (exampleValue instanceof CharSequence cs) {
+        if (exampleValue instanceof CharSequence) {
             bsonFunc = l -> Document.parse(payload.apply(l).toString());
-        } else if ( exampleValue instanceof Map map) {
-            bsonFunc = l -> new Document((Map<String,Object>)payload.apply(l));
+        } else if (exampleValue instanceof Map) {
+            bsonFunc = l -> new Document((Map<String, Object>) payload.apply(l));
         } else {
             throw new RuntimeException("You must provide a String or Map for your BSON payload.");
         }
 
-        LongFunction<String> databaseNamerF = op.getAsRequiredFunction("database", String.class);
-
-        return l-> new MongoDirectCommandOp(
-            ctxFunc.apply(l).getClient(),
-            databaseNamerF.apply(l),
-            bsonFunc.apply(l)
+        final LongFunction<String> databaseNamerF = op.getAsRequiredFunction("database", String.class);
+        return l -> new MongoDirectCommandOp(
+                ctxFunc.apply(l).getClient(),
+                databaseNamerF.apply(l),
+                bsonFunc.apply(l)
         );
     }
 

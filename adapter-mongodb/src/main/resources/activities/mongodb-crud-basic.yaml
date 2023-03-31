@@ -7,10 +7,10 @@ description: |
 scenarios:
   default:
     schema:   run driver=mongodb tags==block:"schema.*" threads==1 cycles==UNDEF
-    write:    run driver=mongodb tags==block:main-write,type:write cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    read:     run driver=mongodb tags==block:main-read,type:read cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    update:   run driver=mongodb tags==block:main-update,type:update cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
-    delete:   run driver=mongodb tags==block:main-delete,type:delete cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
+    write:    run driver=mongodb tags==block:"write.*", cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
+    read:     run driver=mongodb tags==block:"read.*",  cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
+    update:   run driver=mongodb tags==block:"update.*", cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
+    delete:   run driver=mongodb tags==block:"delete.*", cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
 
 bindings:
   seq_key: Mod(<<docscount:10000000>>); ToString() -> String
@@ -30,7 +30,7 @@ bindings:
 blocks:
   schema:
     ops:
-      dummy-insert: |
+      dummy-insert: >2
         {
           insert: "<<collection:crud_basic>>",
           documents: [ { _id: "dummyyyy" } ]
@@ -63,9 +63,9 @@ blocks:
           ]
         }        
 
-  main-write:
+  write:
     ops:
-      write-document: |
+      write-document: >2
         {
           insert: "<<collection:crud_basic>>",
           writeConcern: { w: "majority" },
@@ -79,35 +79,34 @@ blocks:
               "married":      {married},
               "address": {
                 "primary": {
-                    "city":   "{city}",
-                    "cc":     "{country_code}"
+                  "city":   "{city}",
+                  "cc":     "{country_code}"
                 },
                 "secondary":  {}
               },
               "coordinates": [
-                              {lat},
-                              {lng}
+                {lat},
+                {lng}
               ],
-              "children":     [],
+              "children": [],
               "friends": [
-                              "{friend_id}"
+                "{friend_id}"
               ],
-              "debt":         null
+              "debt": null
             }
           ]
-        }        
-
-  main-read:
+        }
+  read:
     ops:
-      read-document: |
+      read-document: >2
         {
           find: "<<collection:crud_basic>>",
           filter: { _id: "{random_key}" }
         }        
 
-  main-update:
+  update:
     ops:
-      update-document: |
+      update-document: >2
         {
           update: "<<collection:crud_basic>>",
           writeConcern: { w: "majority" },
@@ -123,28 +122,28 @@ blocks:
                 "married":      {married},
                 "address": {
                   "primary": {
-                      "city":   "{city}",
-                      "cc":     "{country_code}"
+                    "city":   "{city}",
+                    "cc":     "{country_code}"
                   },
                   "secondary":  {}
                 },
                 "coordinates": [
-                                {lat},
-                                {lng}
+                  {lat},
+                  {lng}
                 ],
-                "children":     [],
+                "children": [],
                 "friends": [
-                                "{friend_id}"
+                  "{friend_id}"
                 ],
-                "debt":         null
+                "debt": null
               }
             }
           ]
         }        
 
-  main-delete:
+  delete:
     ops:
-      delete-document: |
+      delete-document: >2
         {
           delete: "<<collection:crud_basic>>",
           deletes: [

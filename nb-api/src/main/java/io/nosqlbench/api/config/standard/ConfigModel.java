@@ -274,6 +274,7 @@ public class ConfigModel implements NBConfigModel {
             if (param.isRequired() && param.getDefaultValue() == null) {
                 boolean provided = false;
                 for (String name : param.getNames()) {
+
                     if (config.containsKey(name)) {
                         provided = true;
                         break;
@@ -305,7 +306,6 @@ public class ConfigModel implements NBConfigModel {
                 throw new BasicError(paramhelp.toString());
             }
             Object value = config.get(configkey);
-            Object testValue = convertValueTo(ofType.getSimpleName(), configkey, value, element.getType());
         }
     }
 

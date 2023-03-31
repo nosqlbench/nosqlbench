@@ -19,38 +19,9 @@ package io.nosqlbench.adapter.mongodb.core;
 public enum MongoDBOpTypes {
     /**
      * Use direct command structure....
+     *
      * @see <a href="https://docs.mongodb.com/manual/reference/method/db.runCommand/#command-response">command-response</a>
      */
     command,
-
-//    /**
-//     * @see <a href="https://www.mongodb.com/docs/manual/reference/command/update/#mongodb-dbcommand-dbcmd.update">update</a>
-//     */
-//    update,
-
-//    /**
-//     * @see <a href="https://www.mongodb.com/docs/manual/reference/command/insert/">insert</a>
-//     */
-//    insert,
-//
-//    /**
-//     * @see <a href="https://www.mongodb.com/docs/manual/reference/command/delete/">delete</a>
-//     */
-//    delete,
-//
-//    /**
-//     * @see <a href="https://www.mongodb.com/docs/manual/reference/command/find/">find</a>
-//     */
-//    find,
-//
-//    /**
-//     * @see <a href="https://www.mongodb.com/docs/manual/reference/command/findAndModify/">findAndModify</a>
-//     */
-//    findAndModify,
-//
-//    /**
-//     * @see <a href="https://www.mongodb.com/docs/manual/reference/command/getMore/">getMore</a>
-//     */
-//    getMore
 
 }
