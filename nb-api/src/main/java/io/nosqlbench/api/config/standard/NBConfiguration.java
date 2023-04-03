@@ -41,10 +41,6 @@ public class NBConfiguration {
         this.model = model;
     }
 
-    public LinkedHashMap<String, Object> getData() {
-        return data;
-    }
-
     public NBConfigModel getModel() {
         return model;
     }
