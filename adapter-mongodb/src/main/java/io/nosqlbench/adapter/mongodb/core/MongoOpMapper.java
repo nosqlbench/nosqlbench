@@ -17,9 +17,11 @@
 package io.nosqlbench.adapter.mongodb.core;
 
 import io.nosqlbench.adapter.mongodb.dispensers.MongoCommandOpDispenser;
+import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
+import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
@@ -33,8 +35,13 @@ public class MongoOpMapper implements OpMapper<Op> {
     private static final Logger logger = LogManager.getLogger(MongoOpMapper.class);
 
     private final MongodbDriverAdapter adapter;
+    private final NBConfiguration configuration;
+    private final DriverSpaceCache<? extends MongoSpace> spaceCache;
 
-    public MongoOpMapper(MongodbDriverAdapter adapter) {
+    public MongoOpMapper(MongodbDriverAdapter adapter, NBConfiguration cfg,
+                         DriverSpaceCache<? extends MongoSpace> spaceCache) {
+        this.configuration = cfg;
+        this.spaceCache = spaceCache;
         this.adapter = adapter;
     }
 
@@ -42,20 +49,22 @@ public class MongoOpMapper implements OpMapper<Op> {
     public OpDispenser<? extends Op> apply(ParsedOp op) {
 
         LongFunction<String> ctxNamer = op.getAsFunctionOr("space", "default");
-        String connectionValue = op.getStaticConfigOr("connection", "unknown");
+        LongFunction<MongoSpace> spaceF = l -> adapter.getSpaceCache()
+                .get(ctxNamer.apply(l));
 
-        if (connectionValue == null) {
-            throw new BasicError("Must provide a connection value for use be MongoDB adapter.");
+        String connectionURL = op.getStaticConfigOr("connection", "unknown");
+        if (connectionURL == null) {
+            throw new BasicError("Must provide a connection value for use by the MongoDB adapter.");
         }
-        adapter.setConnection(connectionValue);
+        spaceCache.get(ctxNamer.apply(0L)).createMongoClient(connectionURL);
 
-        LongFunction<MongoSpace> spaceF = l -> adapter.getSpaceCache().get(ctxNamer.apply(l));
         Optional<LongFunction<String>> oDatabaseF = op.getAsOptionalFunction("database");
         if (oDatabaseF.isEmpty()) {
             logger.warn("op field 'database' was not defined");
         }
 
-        Optional<TypeAndTarget<MongoDBOpTypes, String>> target = op.getOptionalTypeAndTargetEnum(MongoDBOpTypes.class, String.class);
+        Optional<TypeAndTarget<MongoDBOpTypes, String>> target = op.getOptionalTypeAndTargetEnum(MongoDBOpTypes.class,
+                String.class);
 
         // For any of the named operations which are called out directly AND supported via the fluent API,
         // use specialized dispensers
