@@ -43,11 +43,11 @@ public class FDocCtor {
     public String asMarkdown() {
         StringBuilder sb = new StringBuilder();
         // - in->Name(arg1: type1, ...) ->out
-        sb.append("- ").append(in).append(" -> ");
+        sb.append("- `").append(in).append(" -> ");
         sb.append(className).append("(");
         String args = this.args.entrySet().stream().map(e -> e.getValue() + ": " + e.getKey()).collect(Collectors.joining(", "));
         sb.append(args);
-        sb.append(") -> ").append(out).append("\n");
+        sb.append(") -> ").append(out).append("`\n");
 
         if (!ctorJavaDoc.isEmpty()) {
             sb.append("  - *notes:* ").append(ctorJavaDoc).append("\n");
