@@ -20,12 +20,13 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.UuidCodec;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -33,18 +34,15 @@ import org.bson.codecs.configuration.CodecRegistry;
 import static org.bson.codecs.configuration.CodecRegistries.fromCodecs;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
-public class MongoSpace implements NBNamedElement {
-    private final String name;
-    private final NBConfiguration cfg;
-    private final String connection;
-    private final MongoClient client;
-    private MongoDatabase mongoDatabase;
+public class MongoSpace implements NBNamedElement, AutoCloseable {
+    private final static Logger logger = LogManager.getLogger(MongoSpace.class);
+    private final String spaceName;
+    private final NBConfiguration mongoConfig;
+    private MongoClient mongoClient;
 
-    public MongoSpace(String name, String connection, NBConfiguration cfg) {
-        this.name = name;
-        this.cfg = cfg;
-        this.connection = connection;
-        this.client = createMongoClient(this.connection);
+    public MongoSpace(String name, NBConfiguration cfg) {
+        this.spaceName = name;
+        this.mongoConfig = cfg;
     }
 
     public static NBConfigModel getConfigModel() {
@@ -52,16 +50,30 @@ public class MongoSpace implements NBNamedElement {
                 .add(Param.required("connection", String.class)
                         .setDescription("The connection string for your MongoDB endpoint"))
                 .add(Param.required("database", String.class)
-                        .setDescription("The database name to connect to."));
-    }
+                        .setDescription("The database name to connect to."))
+                .asReadOnly();
 
+    }
 
     @Override
     public String getName() {
-        return name;
+        return spaceName;
     }
 
-    public MongoClient createMongoClient(String connection) {
+    @Override
+    public void close() {
+        try {
+            if (mongoClient != null) {
+                mongoClient.close();
+            }
+        } catch (Exception e) {
+            logger.error(() -> "auto-closeable mongodb connection threw exception in " +
+                    "mongodb space(" + this.spaceName + "): " + e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void createMongoClient(String connectionURL) {
 
         CodecRegistry codecRegistry = fromRegistries(
                 fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
@@ -69,22 +81,15 @@ public class MongoSpace implements NBNamedElement {
         );
 
         MongoClientSettings settings = MongoClientSettings.builder()
-                .applyConnectionString(new ConnectionString(connection))
+                .applyConnectionString(new ConnectionString(connectionURL))
                 .codecRegistry(codecRegistry)
                 .uuidRepresentation(UuidRepresentation.STANDARD)
                 .build();
-        return MongoClients.create(settings);
-    }
-
-    protected MongoDatabase getDatabase() {
-        return this.mongoDatabase;
-    }
-
-    protected String getConnection() {
-        return this.connection;
+        this.mongoClient = MongoClients.create(settings);
     }
 
     public MongoClient getClient() {
-        return this.client;
+        return this.mongoClient;
     }
+
 }
