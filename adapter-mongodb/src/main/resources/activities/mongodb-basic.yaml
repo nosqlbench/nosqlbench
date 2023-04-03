@@ -7,10 +7,10 @@ scenarios:
     read: run driver=mongodb tags==block:"read.*", cycles===TEMPLATE(read-cycles,10) threads=auto errors=timer,warn
 
 bindings:
-  seq_key: Mod(<<keyCount:1000000>>); ToString() -> String
-  seq_value: Mod(<<valueCount:1000000000>>); <<valueSizeDist:Hash()>>; ToString() -> String
-  rw_key: <<keyDist:Uniform(0,1000000)>>; ToString() -> String
-  rw_value: <<valDist:Uniform(0,1000000000)>>; <<valueSizeDist:Hash()>>; ToString() -> String
+  seq_key: Mod(<<keyCount:1000000>>); ToString();
+  seq_value: Mod(<<valueCount:1000000000>>); <<valueSizeDist:Hash()>>; ToString();
+  rw_key: <<keyDist:Uniform(0,1000000)>>; ToString();
+  rw_value: <<valDist:Uniform(0,1000000000)>>; <<valueSizeDist:Hash()>>; ToString();
 
 blocks:
   rampup: 
