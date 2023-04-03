@@ -18,8 +18,8 @@ package io.nosqlbench.api.engine.activityimpl;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.api.engine.util.Unit;
 import io.nosqlbench.api.config.params.ParamsParser;
+import io.nosqlbench.api.engine.util.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
@@ -43,24 +43,24 @@ import java.util.stream.Collectors;
  * <p>No non-String types are used internally. Everything is encoded as a String, even though the
  * generic type is parameterized for Bindings support.</p>
  */
-public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bindings, ProxyObject {
+public class ParameterMap extends ConcurrentHashMap<String, Object> implements Bindings, ProxyObject {
     private final static Logger logger = LogManager.getLogger("PARAMS");
     private final static Gson gson = new GsonBuilder().create();
 
 
-//    private final ConcurrentHashMap<String, String> paramMap = new ConcurrentHashMap<>(10);
+    //    private final ConcurrentHashMap<String, String> paramMap = new ConcurrentHashMap<>(10);
     private final AtomicLong changeCounter;
     private final LinkedList<Listener> listeners = new LinkedList<>();
 
     public ParameterMap(Map<String, String> valueMap) {
         logger.trace(() -> "new parameter map:" + valueMap.toString());
-        this.changeCounter=new AtomicLong(0L);
+        this.changeCounter = new AtomicLong(0L);
         putAll(valueMap);
     }
 
     public void assertOnlyOneOf(String... paramName) {
         Object[] objects = Arrays.stream(paramName).map(super::get).filter(Objects::nonNull).toArray();
-        if (objects.length>1) {
+        if (objects.length > 1) {
             throw new RuntimeException("Multiple incompatible parameters are specified: " + Arrays.toString(paramName)
                     + ". Just use one of them.");
         }
@@ -68,9 +68,9 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     public Optional<String> getOptionalString(String... paramName) {
         Object[] objects = Arrays.stream(paramName).map(super::get).filter(Objects::nonNull).toArray();
-        if (objects.length>1) {
-         throw new RuntimeException("Multiple parameters are specified for the same value: " + Arrays.toString(paramName)
-                 + ". Just use one of them.");
+        if (objects.length > 1) {
+            throw new RuntimeException("Multiple parameters are specified for the same value: " + Arrays.toString(paramName)
+                    + ". Just use one of them.");
         }
         return Arrays.stream(objects).map(String::valueOf).findAny();
         //return Optional.ofNullable(super.get(paramName)).map(String::valueOf);
@@ -89,10 +89,10 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     public Optional<NamedParameter> getOptionalNamedParameter(String... paramName) {
         List<String> defined = Arrays.stream(paramName).filter(super::containsKey).collect(Collectors.toList());
-        if (defined.size()==1) {
-            return Optional.of(new NamedParameter(defined.get(0),String.valueOf(super.get(defined.get(0)))));
+        if (defined.size() == 1) {
+            return Optional.of(new NamedParameter(defined.get(0), String.valueOf(super.get(defined.get(0)))));
         }
-        if (defined.size()>1) {
+        if (defined.size() > 1) {
             throw new RuntimeException("Multiple incompatible parameter names are specified: " + Arrays.toString(paramName)
                     + ". Just use one of them.");
         }
@@ -237,7 +237,8 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         logger.debug(() -> "getting entry set for " + this);
         return super.entrySet()
                 .stream()
-                .map(e -> new AbstractMap.SimpleEntry<String,Object>(e.getKey(), e.getValue()) {})
+                .map(e -> new AbstractMap.SimpleEntry<String, Object>(e.getKey(), e.getValue()) {
+                })
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
@@ -285,7 +286,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         if (encodedParams == null) {
             throw new RuntimeException("Must provide a non-null String to parse parameters.");
         }
-        Map<String, String> parsedMap = ParamsParser.parse(encodedParams,true);
+        Map<String, String> parsedMap = ParamsParser.parse(encodedParams, true);
         return new ParameterMap(parsedMap);
     }
 
@@ -318,13 +319,13 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     @Override
     public void putMember(String key, Value value) {
-        this.put(key,value);
+        this.put(key, value);
     }
 
     @Override
     public boolean removeMember(String key) {
         Object removed = this.remove(key);
-        return removed!=null;
+        return removed != null;
     }
 
 
@@ -332,11 +333,10 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         void handleParameterMapUpdate(ParameterMap parameterMap);
     }
 
-    public Map<String,String> getStringStringMap() {
-        return new HashMap<String,String>() {{
+    public Map<String, String> getStringStringMap() {
+        return new HashMap<>() {{
             for (Entry entry : ParameterMap.this.entrySet()) {
-                logger.debug("entry: {}, value: {}",entry.getKey(), entry.getValue());
-                put(entry.getKey().toString(),entry.getValue().toString());
+                put(entry.getKey().toString(), entry.getValue().toString());
             }
         }};
     }
@@ -349,21 +349,24 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
             this.name = name;
             this.value = value;
         }
+
         public String toString() {
-            return name+"="+value;
+            return name + "=" + value;
         }
+
         public String getName() {
             return name;
         }
+
         public String getValue() {
             return value;
         }
     }
 
-    public static String toJSON(Map<?,?> map) {
+    public static String toJSON(Map<?, ?> map) {
         List<String> l = new ArrayList<>();
-        map.forEach((k,v) -> l.add("'" + k + "': '" + v + "'"));
-        return "params={"+String.join(",\n  ",l)+"};\n";
+        map.forEach((k, v) -> l.add("'" + k + "': '" + v + "'"));
+        return "params={" + String.join(",\n  ", l) + "};\n";
     }
 
 }
