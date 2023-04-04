@@ -29,22 +29,21 @@ import java.util.function.Function;
 /**
  * Special thanks to Justin Chu who authored the original NoSQLBench MongoDB ActivityType.
  */
-@Service(value=DriverAdapter.class, selector ="mongodb")
+@Service(value = DriverAdapter.class, selector = "mongodb")
 public class MongodbDriverAdapter extends BaseDriverAdapter<Op, MongoSpace> {
 
     @Override
     public OpMapper<Op> getOpMapper() {
-        return new MongoOpMapper(this);
+        return new MongoOpMapper(this, getConfiguration(), getSpaceCache());
     }
 
     @Override
     public Function<String, ? extends MongoSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return s -> new MongoSpace(s, cfg);
+        return spaceName -> new MongoSpace(spaceName, cfg);
     }
 
     @Override
     public NBConfigModel getConfigModel() {
         return super.getConfigModel().add(MongoSpace.getConfigModel());
     }
-
 }

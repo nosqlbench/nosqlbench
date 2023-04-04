@@ -2,49 +2,45 @@ description: An example of a basic mongo insert and find.
 
 scenarios:
   default:
-    rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,1000000) threads=auto
-    main: run driver=mongodb tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    rampup: run driver=mongodb tags==block:"rampup.*", cycles===TEMPLATE(rampup-cycles,10) threads=auto errors=timer,warn
+    write: run driver=mongodb tags==block:"write.*", cycles===TEMPLATE(write-cycles,10) threads=auto errors=timer,warn
+    read: run driver=mongodb tags==block:"read.*", cycles===TEMPLATE(read-cycles,10) threads=auto errors=timer,warn
 
 bindings:
-  seq_key: Mod(<<keyCount:1000000>>L); ToInt()
-  seq_value: Mod(<<valueCount:1000000000>>L); <<valueSizeDist:Hash()>>; ToString() -> String
-  rw_key: <<keyDist:Uniform(0,1000000)->long>>; ToInt()
-  rw_value: <<valDist:Uniform(0,1000000000)->int>>; <<valueSizeDist:Hash()>>; ToString() -> String
+  seq_key: Mod(<<keyCount:1000000>>); ToString();
+  seq_value: Mod(<<valueCount:1000000000>>); <<valueSizeDist:Hash()>>; ToString();
+  rw_key: <<keyDist:Uniform(0,1000000)>>; ToString();
+  rw_value: <<valDist:Uniform(0,1000000000)>>; <<valueSizeDist:Hash()>>; ToString();
 
 blocks:
-  rampup:
-    ops:
-      rampup-insert: |
+  rampup: 
+    params:
+      readPreference: primary      
+    ops:      
+      insert:  >2
         {
           insert: "<<collection:keyvalue>>",
           documents: [ { _id: {seq_key}, value: {seq_value} } ]
         }
-      params:
-        readPreference: primary
-      tags:
-        name: rampup-insert
 
-  main-read:
-    params:
-      ratio: <<read_ratio:1>>
-      readPreference: primary
-      type: read
-    ops:
-      main-find: |
+  read:
+    ops:     
+      find: >2
         {
           find: "<<collection:keyvalue>>",
           filter: { _id: {rw_key} }
-        }      
-
-  main-write:
+        }
     params:
-      ratio: <<write_ratio:1>>
-      type: write
-    ops:
-      main-insert: |
+      ratio: <<read_ratio:1>>
+      readPreference: primary
+
+  write:
+    ops:     
+      insert: >2
         {
           insert: "<<collection:keyvalue>>",
           documents: [ { _id: {rw_key}, value: {rw_value} } ]
         }
-      params:
-        readPreference: primary
+    params:
+      ratio: <<write_ratio:1>>
+      readPreference: primary

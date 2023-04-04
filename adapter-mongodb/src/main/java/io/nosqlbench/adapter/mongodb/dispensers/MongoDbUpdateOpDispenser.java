@@ -44,11 +44,7 @@ public class MongoDbUpdateOpDispenser extends BaseOpDispenser<Op, MongoSpace> {
 
     private LongFunction<Op> createOpF(ParsedOp pop) {
         LongFunction<MongoClient> clientF = cycle -> spaceF.apply(cycle).getClient();
-
         LongFunction<MongoDatabase> docF = l -> clientF.apply(l).getDatabase(collectionF.apply(l));
-//        docF.apply(1).getCollection()
-//        LongFunctionclientF.apply(l).getDatabase()
-
         return l -> new Op() {};
     }
 

@@ -114,6 +114,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
                 adapters.put(driverName, adapter);
                 mappers.put(driverName, adapter.getOpMapper());
             }
+
             supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
 
             DriverAdapter adapter = adapters.get(driverName);

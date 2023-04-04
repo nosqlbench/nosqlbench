@@ -41,13 +41,18 @@ public class NBConfiguration {
         this.model = model;
     }
 
+    public NBConfigModel getModel() {
+        return model;
+    }
+
     public static NBConfiguration empty() {
-        return new NBConfiguration(ConfigModel.of(Object.class).asReadOnly(),new LinkedHashMap<>());
+        return new NBConfiguration(ConfigModel.of(Object.class).asReadOnly(), new LinkedHashMap<>());
     }
 
     /**
      * Returns the value of the named parameter as {@link #getOptional(String)}, so long
      * as no env vars were reference OR all env var references were found.
+     *
      * @param name The name of the variable to look up
      * @return An optional value, if present and (optionally) interpolated correctly from the environment
      */
@@ -59,7 +64,7 @@ public class NBConfiguration {
         String span = optionalValue.get();
         Optional<String> maybeInterpolated = NBEnvironment.INSTANCE.interpolate(span);
         if (maybeInterpolated.isEmpty()) {
-            throw new NBConfigError("Unable to interpolate '" + span +"' with env vars.");
+            throw new NBConfigError("Unable to interpolate '" + span + "' with env vars.");
         }
         return maybeInterpolated;
     }
@@ -70,7 +75,7 @@ public class NBConfiguration {
 
     public <T> T getWithEnv(String name, Class<? extends T> vclass) {
         T value = get(name, vclass);
-        if (value==null) {
+        if (value == null) {
 
         }
         if (value instanceof String) {
@@ -79,7 +84,7 @@ public class NBConfiguration {
                 throw new NBConfigError("Unable to interpolate env and sys props in '" + value + "'");
             }
             String result = interpolated.get();
-            return ConfigModel.convertValueTo(this.getClass().getSimpleName(),name, result, vclass);
+            return ConfigModel.convertValueTo(this.getClass().getSimpleName(), name, result, vclass);
         } else {
             return value;
         }
@@ -90,14 +95,15 @@ public class NBConfiguration {
      * in addition to the internal model for type checking and ergonomic use. If you do not
      * call this within an assignment or context where the Java compiler knows what type you
      * are expecting, then use {@link #get(String, Class)} instead.
+     *
      * @param name The name of the configuration parameter
-     * @param <T> The (inferred) generic type of the configuration value
+     * @param <T>  The (inferred) generic type of the configuration value
      * @return The value of type T, matching the config model type for the provided field name
      */
     public <T> T get(String name) {
-        Param<T> param = (Param<T>)model.getNamedParams().get(name);
+        Param<T> param = (Param<T>) model.getNamedParams().get(name);
         Object object = this.data.get(name);
-        object=object!=null?object: param.getDefaultValue();
+        object = object != null ? object : param.getDefaultValue();
         if (param.type.isInstance(object)) {
             return (T) object;
         } else if (param.type.isAssignableFrom(object.getClass())) {
@@ -110,28 +116,26 @@ public class NBConfiguration {
     }
 
     public <T> T get(String name, Class<? extends T> type) {
+
         Param<T> param = model.getParam(name);
-        if (param==null) {
+        if (param == null) {
             throw new NBConfigError("Parameter named '" + name + "' is not valid for " + model.getOf().getSimpleName() + ".");
         }
-        if ((!param.isRequired())&&param.getDefaultValue()==null) {
+
+        if ((!param.isRequired()) && param.getDefaultValue() == null) {
             throw new RuntimeException("Non-optional get on optional parameter " + name + "' which has no default value while configuring " + model.getOf() + "." +
-                "\nTo avoid user impact, ensure that ConfigModel and NBConfigurable usage are aligned.");
+                    "\nTo avoid user impact, ensure that ConfigModel and NBConfigurable usage are aligned.");
         }
 
         Object o = data.get(name);
         if (o == null) {
-            if (param.getDefaultValue()==null) {
+            if (param.getDefaultValue() == null) {
                 throw new NBConfigError("config param '" + name + "' was not defined.");
             } else {
-                o= param.getDefaultValue();
+                o = param.getDefaultValue();
             }
         }
-        return ConfigModel.convertValueTo(this.getClass().getSimpleName(), name,o,type);
-//        if (type.isAssignableFrom(o.getClass())) {
-//            return (T) o;
-//        }
-//        throw new NBConfigError("config param '" + name + "' was not assignable to class '" + type.getCanonicalName() + "'");
+        return ConfigModel.convertValueTo(this.getClass().getSimpleName(), name, o, type);
     }
 
     public Optional<String> getOptional(String name) {
@@ -146,10 +150,10 @@ public class NBConfiguration {
         Object o = null;
         for (String name : names) {
             Param<?> param = model.getParam(names);
-            if (param!=null) {
+            if (param != null) {
                 for (String pname : param.getNames()) {
-                    o =data.get(pname);
-                    if (o!=null) {
+                    o = data.get(pname);
+                    if (o != null) {
                         break;
                     }
                 }
@@ -157,17 +161,17 @@ public class NBConfiguration {
                 throw new NBConfigError("Parameter was not found for " + Arrays.toString(names) + ".");
             }
         }
-        if (o==null) {
+        if (o == null) {
             return Optional.empty();
         }
         if (type.isInstance(o)) {
             return Optional.of((T) o);
         } else if (type.isAssignableFrom(o.getClass())) {
-            return Optional.of((T)type.cast(o));
+            return Optional.of((T) type.cast(o));
         } else if (NBTypeConverter.canConvert(o, type)) {
             return Optional.of((T) NBTypeConverter.convert(o, type));
         } else {
-            throw new NBConfigError("config param " + Arrays.toString(names) +" was not assignable to class '" + type.getCanonicalName() + "'");
+            throw new NBConfigError("config param " + Arrays.toString(names) + " was not assignable to class '" + type.getCanonicalName() + "'");
         }
 
     }

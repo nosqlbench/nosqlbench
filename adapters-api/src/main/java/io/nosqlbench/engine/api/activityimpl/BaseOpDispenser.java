@@ -18,9 +18,9 @@ package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * {@inheritDoc}
  * See {@link OpDispenser} for details on how to use this type.
- *
+ * <p>
  * Some details are tracked per op template, which aligns to the life-cycle of the op dispenser.
  * Thus, each op dispenser is where the stats for all related operations are kept.
  *
@@ -37,51 +37,41 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T> {
 
-    private final String name;
+    private final String opName;
     protected final DriverAdapter<T, S> adapter;
     private boolean instrument;
     private Histogram resultSizeHistogram;
     private Timer successTimer;
     private Timer errorTimer;
-    private String[] timerStarts = new String[0];
-    private String[] timerStops = new String[0];
+    private final String[] timerStarts;
+    private final String[] timerStops;
 
-    public BaseOpDispenser(DriverAdapter<T,S> adapter,ParsedOp op) {
-        this.name = op.getName();
+    protected BaseOpDispenser(DriverAdapter<T, S> adapter, ParsedOp op) {
+        this.opName = op.getName();
         this.adapter = adapter;
         timerStarts = op.takeOptionalStaticValue("start-timers", String.class)
-            .map(s -> s.split(", *"))
-            .orElse(null);
+                .map(s -> s.split(", *"))
+                .orElse(null);
 
         timerStops = op.takeOptionalStaticValue("stop-timers", String.class)
-            .map(s -> s.split(", *"))
-            .orElse(null);
+                .map(s -> s.split(", *"))
+                .orElse(null);
 
-        if (timerStarts!=null) {
+        if (timerStarts != null) {
             for (String timerStart : timerStarts) {
-                ThreadLocalNamedTimers.addTimer(op,timerStart);
+                ThreadLocalNamedTimers.addTimer(op, timerStart);
             }
         }
         configureInstrumentation(op);
     }
 
-    public DriverAdapter<T,S> getAdapter() {
-        return adapter;
+    String getOpName() {
+        return opName;
     }
 
-//    public BaseOpDispenser(CommandTemplate cmdtpl) {
-//        this.name = cmdtpl.getName();
-//    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param cycle The cycle number which serves as the seed for any
-     *              generated op fields to be bound into an operation.
-     * @return
-     */
-    @Override
-    public abstract T apply(long cycle);
+    public DriverAdapter<T, S> getAdapter() {
+        return adapter;
+    }
 
     protected String getDefaultMetricsPrefix(ParsedOp pop) {
         return pop.getStaticConfigOr("alias", "UNKNOWN") + "-" + pop.getName() + "--";
@@ -98,32 +88,31 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
 
     @Override
     public void onStart(long cycleValue) {
-        if (timerStarts!=null) {
+        if (timerStarts != null) {
             ThreadLocalNamedTimers.TL_INSTANCE.get().start(timerStarts);
         }
     }
 
     @Override
-    public void onSuccess(long cycleValue, long nanoTime, long resultsize) {
+    public void onSuccess(long cycleValue, long nanoTime, long resultSize) {
         if (instrument) {
             successTimer.update(nanoTime, TimeUnit.NANOSECONDS);
-            if (resultsize>-1) {
-                resultSizeHistogram.update(resultsize);
+            if (resultSize > -1) {
+                resultSizeHistogram.update(resultSize);
             }
         }
-        if (timerStops!=null) {
+        if (timerStops != null) {
             ThreadLocalNamedTimers.TL_INSTANCE.get().stop(timerStops);
         }
-
-//        ThreadLocalNamedTimers.TL_INSTANCE.get().stop(stopTimers);
     }
 
     @Override
     public void onError(long cycleValue, long resultNanos, Throwable t) {
+
         if (instrument) {
             errorTimer.update(resultNanos, TimeUnit.NANOSECONDS);
         }
-        if (timerStops!=null) {
+        if (timerStops != null) {
             ThreadLocalNamedTimers.TL_INSTANCE.get().stop(timerStops);
         }
     }
