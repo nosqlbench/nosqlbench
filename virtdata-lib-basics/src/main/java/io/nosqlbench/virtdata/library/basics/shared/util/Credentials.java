@@ -23,8 +23,8 @@ public class Credentials {
     private String password;
     private String authToken;
 
-    public static Credentials defaultCredentials() {
-        return new Credentials(DEFAULT_IDENTITY, DEFAULT_IDENTITY);
+    public Credentials(String authToken) {
+        this.authToken = authToken;
     }
 
     public Credentials(String username, String password) {
@@ -32,9 +32,9 @@ public class Credentials {
         this.password = password;
     }
 
-    // Added for support of auth tokens not obtained via defaultCredentials
-    public Credentials(String authToken) {
-        this.authToken = authToken;
+
+    public static Credentials create(String username, String password) {
+        return new Credentials(username, password);
     }
 
     public String getUsername() {
