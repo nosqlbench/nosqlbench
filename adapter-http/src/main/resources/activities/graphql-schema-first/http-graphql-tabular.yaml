@@ -29,7 +29,7 @@ bindings:
 
   # http request id
   request_id: ToHashedUUID(); ToString();
-  auto_gen_token: Discard(); StargateToken('http://localhost:8081/v1/auth'); ToString();
+  token: Discard(); Token('<<auth_token:>>','<<uri:http://localhost:8081/v1/auth>>', '<<uid:cassandra>>', '<<pswd:cassandra>>');
 
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String
@@ -52,7 +52,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
@@ -64,7 +64,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-admin
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
@@ -78,7 +78,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
@@ -94,7 +94,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
@@ -110,7 +110,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {

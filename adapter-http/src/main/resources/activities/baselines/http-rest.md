@@ -16,13 +16,15 @@ Currently supporting Stargate, with plans to make more generic where REST tokens
 can be commented out.  Otherwise, the default automatic token generation is used.
 
 ### auto_gen_token
-Use the `StargateToken('url')` unary string binding function, which auto-generates, caches, and returns a token with automatic refresh upon expiry.
+Use the `Token('<<auth_token:>>','<<uri:http://localhost:8081/v1/auth>>', '<<uid:cassandra>>', '<<pswd:cassandra>>');` string binding function, which auto-generates, caches, and returns a token with automatic refresh upon expiry.
+When the `auth_token` is provided only that token value will be used (i.e. not auto-generated) and the rest of the passed in values for uri, uid, and pswd are ignored.
 
-### Example
-* auto_gen_token: Discard(); StargateToken('http://localhost:8081/v1/auth');
+### Example using all defaults.
+token=Discard(); Token('<<auth_token:>>','<<uri:http://localhost:8081/v1/auth>>', '<<uid:cassandra>>', '<<pswd:cassandra>>');
 
-Here `Discard()` will ignore the long input value received (by default for the binding), then the StargateToken function automates a check for a cached Stargate token.  
-If not already discovered, a request to the local running Stargate service will be invoked.  Each subsequent cycles utilizes the cached value until a timeout occurs or the workload is restarted.
+Here `Discard()` will ignore the long input value received (by default for the binding), then the Token function automates a check for a cached tokens from the endpoint provided.  
+If not already discovered, a request to the local running token service will be invoked.  
+Each subsequent cycles utilizes the cached value until a timeout occurs (default 30m) or the workload is restarted.
 
 Regardless of the option used, both will be considered to determine the value for the following:
 ```yaml

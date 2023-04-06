@@ -23,7 +23,7 @@ bindings:
   weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();
-  auto_gen_token: Discard(); StargateToken('http://localhost:8081/v1/auth'); ToString();
+  token: Discard(); Token('<<auth_token:>>','<<uri:http://localhost:8081/v1/auth>>', '<<uid:cassandra>>', '<<pswd:cassandra>>');
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String
   clust_layout: Mod(<<partsize:1000000>>); ToString() -> String
@@ -47,7 +47,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: |
           {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_tabular>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
@@ -57,7 +57,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: |
           {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_tabular>>\"\n    tableName: \"<<table:tabular>>\"\n    partitionKeys: [{ name: \"part\", type: { basic: TEXT } }]\n    clusteringKeys: [{ name: \"clust\", type: { basic: TEXT } }]\n    values: [{ name: \"data\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}\n"}
@@ -69,7 +69,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: |
           {"query":"mutation {\n  insert<<table:tabular>>( value: {part: \"{part_layout}\", clust: \"{clust_layout}\", data: \"{data}\"}) {value {part, clust, data}}}"}
@@ -83,7 +83,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {"query":"{<<table:tabular>>(value: {part: \"{part_read}\"}, options: { pageSize: <<limit:10>> }) {values {part, clust, data}}}"}
@@ -97,7 +97,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {"query":"mutation {\n  insert<<table:tabular>>( value: {part: \"{part_write}\", clust: \"{clust_write}\", data: \"{data_write}\"}) {value {part, clust, data}}}"}

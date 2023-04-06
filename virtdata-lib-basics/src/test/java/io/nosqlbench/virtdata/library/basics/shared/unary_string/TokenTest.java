@@ -81,10 +81,10 @@ class TokenTest {
 
         mockResponse();
 
-        final Token stargateToken = new Token(null, VALID_TEST_URL, VALID_TEST_CREDS.getUsername(),
+        final Token token = new Token(null, VALID_TEST_URL, VALID_TEST_CREDS.getUsername(),
                 VALID_TEST_CREDS.getPassword());
         // Since constructor handles state management, the inputs aren't utilized in the apply function.
-        final String result = stargateToken.apply("p1", "p2", "p3");
+        final String result = token.apply("p1");
 
         assertThat(result).isEqualTo(TEST_AUTH_TOKEN);
     }
@@ -109,9 +109,9 @@ class TokenTest {
         when(httpResponse.statusCode()).thenReturn(201);
         mockResponse();
 
-        final Token stargateToken = new Token(null, VALID_TEST_URL, VALID_TEST_CREDS.getUsername(),
+        final Token token = new Token(null, VALID_TEST_URL, VALID_TEST_CREDS.getUsername(),
                 VALID_TEST_CREDS.getPassword());
-        final String resultFirstCheck = stargateToken.apply("p1", "p2", "p3");
+        final String resultFirstCheck = token.apply("p1");
         final Instant tokenInstantFirstCheck = Token.TokenKeeper.lastTokenInstant();
 
         assertThat(resultFirstCheck).isEqualTo(TEST_AUTH_TOKEN);
@@ -122,7 +122,7 @@ class TokenTest {
         when(httpResponse.statusCode()).thenReturn(201);
         mockResponse();
 
-        final String resultSecondCheck = stargateToken.apply("p1", "p2", "p3");
+        final String resultSecondCheck = token.apply("p1");
         final Instant tokenInstantSecondCheck = Token.TokenKeeper.lastTokenInstant();
 
         assertThat(resultSecondCheck).isEqualTo(resultFirstCheck);
@@ -133,8 +133,8 @@ class TokenTest {
         // Note: Explicit token expiry, default is 30m
         Token.setExpired();
 
-        final String resultThirdCheck = stargateToken.apply("p1", "p2", "p3");
-        final FieldReader fileReaderLastCheck = new FieldReader(stargateToken,
+        final String resultThirdCheck = token.apply("p1");
+        final FieldReader fileReaderLastCheck = new FieldReader(token,
                 FieldUtils.getDeclaredField(Token.class,
                         "lastTokenInstant", true));
         final Instant tokenInstantThirdCheck = Token.TokenKeeper.lastTokenInstant();
@@ -146,16 +146,16 @@ class TokenTest {
     @Test
     void provideToken() {
 
-        final Token stargateToken = new Token(TEST_AUTH_TOKEN, VALID_TEST_URL, VALID_TEST_CREDS.getUsername(),
+        final Token token = new Token(TEST_AUTH_TOKEN, VALID_TEST_URL, VALID_TEST_CREDS.getUsername(),
                 VALID_TEST_CREDS.getPassword());
 
-        final String result = stargateToken.apply("p1", "p2", "p3");
+        final String result = token.apply("p1");
 
         assertThat(result).isEqualTo(TEST_AUTH_TOKEN);
 
 
-        final Token stargateToken2 = new Token(TEST_AUTH_TOKEN, null, null, null);
-        final String result2 = stargateToken2.apply("p1", "p2", "p3");
+        final Token token2 = new Token(TEST_AUTH_TOKEN, null, null, null);
+        final String result2 = token2.apply("p1");
 
         assertThat(result2).isEqualTo(TEST_AUTH_TOKEN);
     }

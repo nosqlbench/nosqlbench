@@ -21,7 +21,6 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.util.Credentials;
-import org.apache.commons.lang3.function.TriFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,11 +30,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.function.Function;
 
 
 @ThreadSafeMapper
 @Categories({Category.general})
-public class Token implements TriFunction<String, String, String, String> {
+public class Token implements Function<String, String> {
 
     private static final Logger logger = LogManager.getLogger(Token.class);
     private Credentials credentials;
@@ -51,16 +51,16 @@ public class Token implements TriFunction<String, String, String, String> {
         }
 
         if (uri == null || uri.trim().isEmpty()) {
-            throw new IllegalArgumentException("Expected uri to be specified for Token.");
+            throw new IllegalArgumentException("Expected uri to be specified for obtaining Token.");
         }
         this.uri = URI.create(uri.trim());
 
         if (uid == null || uid.trim().isEmpty()) {
-            throw new IllegalArgumentException("Expected uid to be specified for Token.");
+            throw new IllegalArgumentException("Expected uid to be specified for obtaining Token.");
         }
 
         if (password == null || password.trim().isEmpty()) {
-            throw new IllegalArgumentException("Expected password to be specified for Token.");
+            throw new IllegalArgumentException("Expected password to be specified for obtaining Token.");
         }
         this.credentials = Credentials.create(uid.trim(), password.trim());
 
@@ -70,29 +70,29 @@ public class Token implements TriFunction<String, String, String, String> {
     }
 
     @Override
-    public String apply(String p1, String p2, String p3) {
+    public String apply(String p1) {
 
         if (this.providedToken != null) {
             return this.providedToken;
         }
 
-        if (TokenKeeper.isExpired()) {
-            return authTokenStargate(this.uri, this.credentials);
+        if (TokenKeeper.isExpired() || TokenKeeper.token == null || TokenKeeper.token.isEmpty()) {
+            authTokenStargate(this.uri, this.credentials);
         }
-        return TokenKeeper.token;
+        return TokenKeeper.getToken();
     }
 
     public static void setExpired() {
         TokenKeeper.isExpiredRequested = true;
     }
 
-    private String authTokenStargate(URI uri, Credentials credentials) throws SecurityException {
+    private static void authTokenStargate(URI uri, Credentials credentials) throws SecurityException {
 
         if (credentials == null || uri == null) {
             throw new BasicError("Must provide url and credentials to obtain authTokenStargate");
         }
 
-        logger.debug(() -> "Received uri for Stargate auth token request: " + uri);
+        logger.debug(() -> "Received uri for auth token request: " + uri);
 
         try {
             final Gson gson = new Gson();
@@ -113,9 +113,8 @@ public class Token implements TriFunction<String, String, String, String> {
                 throw new BasicError(errorMessage);
             }
 
-            Credentials retrievedToken = gson.fromJson(resp.body(), Credentials.class);
-            TokenKeeper.setToken(retrievedToken.getAuthToken());
-            return TokenKeeper.getToken();
+            final Credentials cred = gson.fromJson(resp.body(), Credentials.class);
+            TokenKeeper.setToken(cred.getAuthToken());
 
         } catch (Exception e) {
             throw new SecurityException("Auth Token error, stargate-token retrieval failure", e);
@@ -137,28 +136,31 @@ public class Token implements TriFunction<String, String, String, String> {
             lastTokenInstant = Instant.now();
         }
 
-        public static void setToken(String input) {
-            token = input;
-        }
-
-        public static String getToken() {
-            return token;
-        }
-
         public static Instant lastTokenInstant() {
             return lastTokenInstant;
         }
 
         public static boolean isExpired() {
 
-            if (isExpiredRequested || Duration.between(Instant.now(),
+            if (token == null || isExpiredRequested || Duration.between(Instant.now(),
                     lastTokenInstant).toMinutes() > TOKEN_EXPIRE_MIN) {
-                logger.trace("Token expiry detected.");
+                logger.debug("Token expiry detected.");
                 lastTokenInstant = Instant.now();
                 isExpiredRequested = false;
+                token = null;
                 return true;
             }
+
+            logger.debug(() -> "Token not expired, reusing as: " + token);
             return false;
+        }
+
+        public static synchronized void setToken(String value) {
+            token = value;
+        }
+
+        public static synchronized String getToken() {
+            return token;
         }
     }
 }

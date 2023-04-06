@@ -18,20 +18,14 @@ package io.nosqlbench.virtdata.library.basics.shared.util;
 
 public class Credentials {
 
-    private static final String DEFAULT_IDENTITY = "cassandra";
-    private String username;
-    private String password;
+    private final String username;
+    private final String password;
     private String authToken;
-
-    public Credentials(String authToken) {
-        this.authToken = authToken;
-    }
 
     public Credentials(String username, String password) {
         this.username = username;
         this.password = password;
     }
-
 
     public static Credentials create(String username, String password) {
         return new Credentials(username, password);
@@ -48,4 +42,5 @@ public class Credentials {
     public String getAuthToken() {
         return authToken;
     }
+    
 }
