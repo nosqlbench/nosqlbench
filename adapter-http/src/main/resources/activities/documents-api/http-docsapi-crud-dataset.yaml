@@ -9,17 +9,8 @@ scenarios:
   default:
     schema: run driver=http tags==block:"schema.*" threads==1 cycles==UNDEF
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
-    # write:    run driver=http tags==block:"write.*" cycles===TEMPLATE(write-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
-    # read:     run driver=http tags==block:"read.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
-    # update:   run driver=http tags==block:"update.*" cycles===TEMPLATE(update-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
-    # delete:   run driver=http tags==block:"delete.*" cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
 
 bindings:
-  # To enable an optional weighted set of hosts in place of a load balancer
-  # Examples
-  #   single host: docsapi_host=host1
-  #   multiple hosts: docsapi_host=host1,host2,host3
-  #   multiple weighted hosts: docsapi_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('<<docsapi_host:stargate>>')
   # http request id
   request_id: ToHashedUUID(); ToString();

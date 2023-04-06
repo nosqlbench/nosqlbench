@@ -1,6 +1,6 @@
 min_version: "5.17.1"
 
-description: |
+description: >2
   This workload emulates a key-value data model and access patterns.
   This should be identical to the cql variant except for:
   - There is no instrumentation with the http driver.

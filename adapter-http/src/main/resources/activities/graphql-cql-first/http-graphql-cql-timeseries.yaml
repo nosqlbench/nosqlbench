@@ -15,17 +15,12 @@ scenarios:
   default:
     schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
-    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+    main-read: run driver=http tags==block:"main-read.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+    main-write: run driver=http tags==block:"main-write.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+
 
 bindings:
-  # To enable an optional weighted set of hosts in place of a load balancer
-  # Examples
-  #   single host: graphql_host=host1
-  #   multiple hosts: graphql_host=host1,host2,host3
-  #   multiple weighted hosts: graphql_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
-
-  # http request id
   request_id: ToHashedUUID(); ToString();
   token: Discard(); Token('<<auth_token:>>','<<uri:http://localhost:8081/v1/auth>>', '<<uid:cassandra>>', '<<pswd:cassandra>>');
 
@@ -84,7 +79,7 @@ blocks:
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {"query":"query readings {<<table:iot>>(value: {machine_id: \"{machine_id}\",sensor_name: \"{sensor_name}\"}, options: { pageSize: <<limit:10>> }) {values {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
 
   main-write:

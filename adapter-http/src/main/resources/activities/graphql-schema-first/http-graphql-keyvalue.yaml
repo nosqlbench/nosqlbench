@@ -18,14 +18,7 @@ scenarios:
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
-  # To enable an optional weighted set of hosts in place of a load balancer
-  # Examples
-  #   single host: graphql_host=host1
-  #   multiple hosts: graphql_host=host1,host2,host3
-  #   multiple weighted hosts: graphql_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
-  # http request id
-
   request_id: ToHashedUUID(); ToString();
   token: Discard(); Token('<<auth_token:>>','<<uri:http://localhost:8081/v1/auth>>', '<<uid:cassandra>>', '<<pswd:cassandra>>');
 

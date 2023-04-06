@@ -10,17 +10,11 @@ description: |
 scenarios:
   default:
     schema: run driver=http tags==block:"schema.*" threads==1 cycles==UNDEF
-    rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
+    rampup: run driver=http tags==block:"rampup.*" cycles===TEMPLATE(rampup-cycles,10) threads=auto
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
-  # To enable an optional weighted set of hosts in place of a load balancer
-  # Examples
-  #   single host: graphql_host=host1
-  #   multiple hosts: graphql_host=host1,host2,host3
-  #   multiple weighted hosts: graphql_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
-  # http request id
   request_id: ToHashedUUID(); ToString();
   token: Discard(); Token('<<auth_token:>>','<<uri:http://localhost:8081/v1/auth>>', '<<uid:cassandra>>', '<<pswd:cassandra>>');
 
@@ -40,7 +34,7 @@ blocks:
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
-          {"quersy":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_keyvalue>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
+          {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_keyvalue>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
 
       create-table:
         method: POST
