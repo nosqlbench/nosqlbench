@@ -1,4 +1,4 @@
-min_version: "5.17.1"
+min_version: "5.17.2"
 
 description: |
   This workload emulates basic search operations for the Stargate Documents API.
@@ -7,15 +7,33 @@ description: |
   Note that docsapi_port should reflect the port where the Docs API is exposed (defaults to 8180).
 
 scenarios:
-  schema: run driver=http tags==block:"schema.*" threads==<<threads:1>> cycles==UNDEF
-  rampup-write: run driver=http tags==name:"rampup-put.*" cycles===TEMPLATE(docscount,10) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
-  rampup-read: run driver=http tags==name:"rampup-get.*" cycles===TEMPLATE(rampup-cycles,10) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-all: run driver=http tags==block:"main-get.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-eq: run driver=http tags==name:main-get-eq,filter:eq cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-lt: run driver=http tags==name:main-get-lt cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-and: run driver=http tags==name:main-get-and cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-or: run driver=http tags==name:main-get-or cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-or-single-match: run driver=http tags==name:main-get-or-single-match cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  schema: >-
+    run driver=http tags==block:"schema.*" threads==<<threads:1>> cycles==UNDEF
+  rampup-write: >- 
+    run driver=http tags==name:"rampup-put.*" cycles===TEMPLATE(docscount,10) 
+    docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
+  rampup-read: >- 
+    run driver=http tags==name:"rampup-get.*" cycles===TEMPLATE(rampup-cycles,10)  
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-all: >-
+    run driver=http tags==block:"main-get.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) 
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-equal: >-
+    run driver=http tags==name:"main-get-equal.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) 
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-lt: >-
+    run driver=http tags==name:"main-get-lt.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10))
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-and: >- 
+    run driver=http tags==name:"main-get-and.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) 
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-or: >-
+    run driver=http tags==name:"main-get-or.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10))
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-or-single-match: >- 
+    run driver=http tags==name:"main-get-or-single-match.*"
+    cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) 
+    fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
 
 bindings:
   weighted_hosts: WeightedStrings('<<docsapi_host:stargate>>')
@@ -170,7 +188,7 @@ blocks:
         Content-Type: "application/json"
 
   # where={"match3":{"$eq":true}}
-  main-get-eq:
+  main-get-equal:
     ops:
       action:
         method: GET

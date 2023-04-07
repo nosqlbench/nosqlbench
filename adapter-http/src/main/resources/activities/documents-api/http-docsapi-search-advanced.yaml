@@ -1,4 +1,4 @@
-min_version: "5.17.1"
+min_version: "5.17.3"
 
 description: >2
   This workload emulates advanced search filter combinations for the Stargate Documents API.
@@ -14,7 +14,7 @@ description: >2
 # complex1: match1 EQ 0 AND (match2 EQ "true" OR match3 EQ false)
 # complex2: (match1 LTE 0 OR match2 EQ "false") AND (match2 EQ "false" OR match3 EQ true)
 # complex3: (match1 LTE 0 AND match2 EQ "true") OR (match2 EQ "false" AND match3 EQ true)
-scenarios:
+scenarios: >-
   schema: run driver=http tags==block:"schema.*" threads==<<threads:1>> cycles==UNDEF
 
   rampup-write: run driver=http tags==block:"rampup-put.*" cycles===TEMPLATE(docscount,10) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
