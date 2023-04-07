@@ -1,4 +1,4 @@
-min_version: "5.17.1"
+min_version: "5.17.3"
 
 description: >2
   This workload emulates CRUD operations for the Stargate Documents API.

@@ -14,20 +14,40 @@ description: >2
 # complex1: match1 EQ 0 AND (match2 EQ "true" OR match3 EQ false)
 # complex2: (match1 LTE 0 OR match2 EQ "false") AND (match2 EQ "false" OR match3 EQ true)
 # complex3: (match1 LTE 0 AND match2 EQ "true") OR (match2 EQ "false" AND match3 EQ true)
-scenarios: >-
+scenarios:
   schema: run driver=http tags==block:"schema.*" threads==<<threads:1>> cycles==UNDEF
 
-  rampup-write: run driver=http tags==block:"rampup-put.*" cycles===TEMPLATE(docscount,10) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
-  rampup-read: run driver=http tags==block:"rampup-get.*" cycles===TEMPLATE(rampup-cycles,10) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  rampup-write: >-
+    run driver=http tags==block:"rampup-put.*" cycles===TEMPLATE(docscount,10) docpadding=TEMPLATE(docpadding,0) 
+    match-ratio=TEMPLATE(match-ratio,0.01) threads=<<threads:auto>> errors=timer,warn
+  rampup-read: >- 
+    run driver=http tags==block:"rampup-get.*" cycles===TEMPLATE(rampup-cycles,10) page-size=TEMPLATE(page-size,3) 
+    fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
 
-  main-all: run driver=http tags==block:"main-get.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-in: run driver=http tags==block:main-get-in,filter:in cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-not-in: run driver=http tags==block:main-get-not-in cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-mem-and: run driver=http tags==block:main-get-mem-and cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-mem-or: run driver=http tags==block:main-get-mem-or cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-complex1: run driver=http tags==block:main-get-complex1 cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-complex2: run driver=http tags==block:main-get-complex2 cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
-  main-get-complex3: run driver=http tags==block:main-get-complex3 cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-all:  >-
+    run driver=http tags==block:"main-get.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) 
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-in: >- 
+    run driver=http tags==block:"main-get-in.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) 
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-not-in: >-
+    run driver=http tags==block:"main-get-not-in.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) 
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-mem-and: >- 
+    run driver=http tags==block:"main-get-mem-and.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) 
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-mem-or: >- 
+    run driver=http tags==block:"main-get-mem-or.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) 
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-complex1: >- 
+    run driver=http tags==block:"main-get-complex1.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) 
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-complex2: >-
+    run driver=http tags==block:"main-get-complex2.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) 
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
+  main-get-complex3: >-
+    run driver=http tags==block:"main-get-complex3.*" cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10)) 
+    page-size=TEMPLATE(page-size,3) fields=TEMPLATE(fields,%5b%5d) threads=<<threads:auto>> errors=timer,warn
 
 bindings:
   weighted_hosts: WeightedStrings('<<docsapi_host:stargate>>')

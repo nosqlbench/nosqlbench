@@ -1,4 +1,4 @@
-min_version: "5.17.1"
+min_version: "5.17.3"
 
 description: |
   This workload emulates a time-series data model and access patterns.

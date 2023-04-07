@@ -1,4 +1,4 @@
-min_version: "5.17.2"
+min_version: "5.17.3"
 
 description: |
   This workload emulates basic search operations for the Stargate Documents API.
