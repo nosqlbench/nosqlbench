@@ -17,7 +17,7 @@ scenarios:
 bindings:
   weighted_hosts: WeightedStrings('<<docsapi_host:stargate>>')
   request_id: ToHashedUUID(); ToString();
-  token: Discard(); Token('<<auth_token:>>','<<uri:http://localhost:8081/v1/auth>>', '<<uid:cassandra>>', '<<pswd:cassandra>>');
+  token: Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
   seq_key: Mod(<<keycount:10000000>>); ToString() -> String
   seq_value: Hash(); Mod(<<valuecount:10000000>>); ToString() -> String
   rw_key: <<keydist:Uniform(0,<<keycount:10000000>>)->int>>; ToString() -> String

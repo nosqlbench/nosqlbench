@@ -17,7 +17,7 @@ scenarios:
 bindings:
   weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
   request_id: ToHashedUUID(); ToString();
-  token: Discard(); Token('<<auth_token:>>','<<uri:http://localhost:8081/v1/auth>>', '<<uid:cassandra>>', '<<pswd:cassandra>>');
+  token: Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
 
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String

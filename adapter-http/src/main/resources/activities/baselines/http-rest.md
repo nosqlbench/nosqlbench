@@ -16,11 +16,11 @@ Currently supporting Stargate, with plans to make more generic where REST tokens
 can be commented out.  Otherwise, the default automatic token generation is used.
 
 ### auto_gen_token
-Use the `Token('<<auth_token:>>','<<uri:http://localhost:8081/v1/auth>>', '<<uid:cassandra>>', '<<pswd:cassandra>>');` string binding function, which auto-generates, caches, and returns a token with automatic refresh upon expiry.
+Use the `Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');` string binding function, which auto-generates, caches, and returns a token with automatic refresh upon expiry.
 When the `auth_token` is provided only that token value will be used (i.e. not auto-generated) and the rest of the passed in values for uri, uid, and pswd are ignored.
 
 ### Example using all defaults.
-token=Discard(); Token('<<auth_token:>>','<<uri:http://localhost:8081/v1/auth>>', '<<uid:cassandra>>', '<<pswd:cassandra>>');
+token=Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
 
 Here `Discard()` will ignore the long input value received (by default for the binding), then the Token function automates a check for a cached tokens from the endpoint provided.  
 If not already discovered, a request to the local running token service will be invoked.  
