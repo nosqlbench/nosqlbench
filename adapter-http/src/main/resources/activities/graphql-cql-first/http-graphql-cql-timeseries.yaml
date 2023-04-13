@@ -1,4 +1,4 @@
-min_version: "5.17.1"
+min_version: "5.17.3"
 
 description: |
   This workload emulates a time-series data model and access patterns.
@@ -15,19 +15,14 @@ scenarios:
   default:
     schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
-    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+    main-read: run driver=http tags==block:"main-read.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+    main-write: run driver=http tags==block:"main-write.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+
 
 bindings:
-  # To enable an optional weighted set of hosts in place of a load balancer
-  # Examples
-  #   single host: graphql_host=host1
-  #   multiple hosts: graphql_host=host1,host2,host3
-  #   multiple weighted hosts: graphql_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
-
-  # http request id
   request_id: ToHashedUUID(); ToString();
-  auto_gen_token: Discard(); StargateToken('http://localhost:8081/v1/auth'); ToString();
+  token: Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
 
   machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
   sensor_name: HashedLineToString('data/variable_words.txt')
@@ -46,7 +41,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_iot>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
@@ -56,7 +51,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_iot>>\"\n    tableName: \"<<table:iot>>\"\n    partitionKeys: [{ name: \"machine_id\", type: { basic: UUID } }, { name: \"sensor_name\", type: { basic: TEXT } }]\n    clusteringKeys: [{ name: \"time\", type: { basic: TIMESTAMP }, order: \"DESC\" }]\n    values: [{ name: \"sensor_value\", type: { basic: FLOAT } }, { name: \"station_id\", type: { basic: UUID } }, { name: \"data\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}\n"}
@@ -68,7 +63,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_iot>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {"query":"mutation insertReading {\n  reading: insert<<table:iot>>( value: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", data: \"{data}\", sensor_value: {sensor_value}, station_id: \"{station_id}\"}) {value {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
@@ -82,9 +77,9 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_iot>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
-        body: |
+        body: >2
           {"query":"query readings {<<table:iot>>(value: {machine_id: \"{machine_id}\",sensor_name: \"{sensor_name}\"}, options: { pageSize: <<limit:10>> }) {values {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
 
   main-write:
@@ -96,7 +91,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_iot>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {"query":"mutation insertReading {\n  reading: insert<<table:iot>>( value: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", data: \"{data}\", sensor_value: {sensor_value}, station_id: \"{station_id}\"}) {value {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}

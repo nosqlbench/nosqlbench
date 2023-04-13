@@ -35,60 +35,75 @@ import java.util.function.Function;
 
 @ThreadSafeMapper
 @Categories({Category.general})
-public class StargateToken implements Function<Object, String> {
+public class Token implements Function<String, String> {
 
-    private static final Logger logger = LogManager.getLogger(StargateToken.class);
-    private final Credentials credentials;
-    private final String url;
-    private final HttpClient httpClient;
+    private static final Logger logger = LogManager.getLogger(Token.class);
+    private Credentials credentials;
+    private URI uri;
+    private String providedToken;
 
 
-    public StargateToken(String url) throws SecurityException {
-        this(url, Credentials.defaultCredentials());
-    }
+    public Token(String token, String uri, String uid, String password) {
 
-    public StargateToken(String url, Credentials credentials) throws SecurityException {
-        this(url, credentials, HttpClient.newBuilder().build());
-    }
+        if (token != null && !token.trim().isEmpty()) {
+            this.providedToken = token.trim();
+            return;
+        }
 
-    public StargateToken(String url, Credentials credentials, HttpClient client) throws SecurityException {
-        this.url = url;
-        this.credentials = credentials;
-        this.httpClient = client;
+        if (uri == null || uri.trim().isEmpty()) {
+            throw new IllegalArgumentException("Expected uri to be specified for obtaining Token.");
+        }
+        this.uri = URI.create(uri.trim());
+
+        if (uid == null || uid.trim().isEmpty()) {
+            throw new IllegalArgumentException("Expected uid to be specified for obtaining Token.");
+        }
+
+        if (password == null || password.trim().isEmpty()) {
+            throw new IllegalArgumentException("Expected password to be specified for obtaining Token.");
+        }
+        this.credentials = Credentials.create(uid.trim(), password.trim());
+
         if (TokenKeeper.isExpired()) {
-            authTokenStargate(url, credentials);
+            authTokenStargate(this.uri, this.credentials);
         }
     }
 
     @Override
-    public String apply(Object value) throws SecurityException {
-        if (TokenKeeper.isExpired()) {
-            authTokenStargate(url, credentials);
+    public String apply(String p1) {
+
+        if (this.providedToken != null) {
+            return this.providedToken;
         }
-        return TokenKeeper.token;
+
+        if (TokenKeeper.isExpired() || TokenKeeper.token == null || TokenKeeper.token.isEmpty()) {
+            authTokenStargate(this.uri, this.credentials);
+        }
+        return TokenKeeper.getToken();
     }
 
     public static void setExpired() {
         TokenKeeper.isExpiredRequested = true;
     }
 
-    private void authTokenStargate(String url, Credentials credentials) throws SecurityException {
+    private static void authTokenStargate(URI uri, Credentials credentials) throws SecurityException {
 
-        if (credentials == null || url == null) {
+        if (credentials == null || uri == null) {
             throw new BasicError("Must provide url and credentials to obtain authTokenStargate");
         }
-        logger.debug("Received url for Stargate auth token request: {} ", url);
+
+        logger.debug(() -> "Received uri for auth token request: " + uri);
 
         try {
             final Gson gson = new Gson();
             HttpRequest.Builder builder = HttpRequest.newBuilder();
-            builder = builder.uri(URI.create(url));
+            builder = builder.uri(uri);
             builder = builder.POST(HttpRequest.BodyPublishers.ofString(gson.toJson(credentials)));
             builder.setHeader("Content-Type", "application/json");
 
             HttpRequest request = builder.build();
+            HttpClient httpClient = HttpClient.newBuilder().build();
             HttpResponse<String> resp = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
             logger.debug(() -> "Stargate response status code: " + resp.statusCode());
 
             if (resp.statusCode() != 201) {
@@ -98,8 +113,8 @@ public class StargateToken implements Function<Object, String> {
                 throw new BasicError(errorMessage);
             }
 
-            Credentials retrievedToken = gson.fromJson(resp.body(), Credentials.class);
-            TokenKeeper.setToken(retrievedToken.getAuthToken());
+            final Credentials cred = gson.fromJson(resp.body(), Credentials.class);
+            TokenKeeper.setToken(cred.getAuthToken());
 
         } catch (Exception e) {
             throw new SecurityException("Auth Token error, stargate-token retrieval failure", e);
@@ -121,28 +136,31 @@ public class StargateToken implements Function<Object, String> {
             lastTokenInstant = Instant.now();
         }
 
-        public static void setToken(String input) {
-            token = input;
-        }
-
-        public static String getToken() {
-            return token;
-        }
-
         public static Instant lastTokenInstant() {
             return lastTokenInstant;
         }
 
         public static boolean isExpired() {
 
-            if (isExpiredRequested || Duration.between(Instant.now(),
+            if (token == null || isExpiredRequested || Duration.between(Instant.now(),
                     lastTokenInstant).toMinutes() > TOKEN_EXPIRE_MIN) {
-                logger.trace("Token expiry detected.");
+                logger.debug("Token expiry detected.");
                 lastTokenInstant = Instant.now();
                 isExpiredRequested = false;
+                token = null;
                 return true;
             }
+
+            logger.debug(() -> "Token not expired, reusing as: " + token);
             return false;
+        }
+
+        public static synchronized void setToken(String value) {
+            token = value;
+        }
+
+        public static synchronized String getToken() {
+            return token;
         }
     }
 }

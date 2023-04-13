@@ -1,4 +1,4 @@
-min_version: "5.17.1"
+min_version: "5.17.3"
 
 # TODO
 # - do we need a truncate schema / namespace at the end
@@ -20,26 +20,18 @@ scenarios:
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
-  # To enable an optional weighted set of hosts in place of a load balancer
-  # Examples
-  #   single host: graphql_host=host1
-  #   multiple hosts: graphql_host=host1,host2,host3
-  #   multiple weighted hosts: graphql_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
-
-  # http request id
   request_id: ToHashedUUID(); ToString();
-  auto_gen_token: Discard(); StargateToken('http://localhost:8081/v1/auth'); ToString();
+  token: Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
 
-  # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String
   clust_layout: Mod(<<partsize:1000000>>); ToString() -> String
   data: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
-  # for read
+
   limit: Uniform(1,10) -> int
   part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
   clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
-  # for write
+
   part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
   clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
   data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
@@ -52,7 +44,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
@@ -64,7 +56,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-admin
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
@@ -78,7 +70,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
@@ -94,7 +86,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
@@ -110,7 +102,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {

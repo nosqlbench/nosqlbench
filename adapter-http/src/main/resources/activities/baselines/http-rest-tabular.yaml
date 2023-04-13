@@ -1,4 +1,4 @@
-min_version: "5.17.1"
+min_version: "5.17.3"
 
 description: |
   This workload emulates a tabular workload with partitions, clusters, and data fields.
@@ -15,9 +15,9 @@ scenarios:
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
-  weighted_hosts: WeightedStrings('<<restapi_host:stargate>>')
+  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
   request_id: ToHashedUUID(); ToString();
-  auto_gen_token: Discard(); StargateToken('http://localhost:8081/v1/auth'); ToString();
+  token: Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
 
   # for ramp-up and verify
   part_layout: Div(<<partsize:1000000>>); ToString() -> String
@@ -42,7 +42,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
@@ -55,7 +55,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         ok-status: "[2-4][0-9][0-9]"
 
@@ -64,7 +64,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
@@ -101,7 +101,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
@@ -119,7 +119,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
 
   main-write:
@@ -131,7 +131,7 @@ blocks:
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
-        X-Cassandra-Token: "<<auth_token:{auto_gen_token}>>"
+        X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
