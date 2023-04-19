@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics;
+package io.nosqlbench.api.engine.metrics.micro;
 
-import com.codahale.metrics.Snapshot;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramIterationValue;
 

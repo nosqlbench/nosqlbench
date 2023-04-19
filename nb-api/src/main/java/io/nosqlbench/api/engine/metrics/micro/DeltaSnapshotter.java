@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics;
+package io.nosqlbench.api.engine.metrics.micro;
 
-import com.codahale.metrics.Timer;
+import io.nosqlbench.api.engine.metrics.micro.ConvenientSnapshot;
 
-
-public interface TimerAttachment {
-    Timer attachTimer(Timer timer);
+public interface DeltaSnapshotter {
+    DeltaSnapshotReader getDeltaReader();
+    ConvenientSnapshot getDeltaSnapshot(long cacheTimeMillis);
 }

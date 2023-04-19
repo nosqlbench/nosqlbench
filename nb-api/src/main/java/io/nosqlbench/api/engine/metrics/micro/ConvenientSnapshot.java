@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics;
-
-import com.codahale.metrics.Snapshot;
+package io.nosqlbench.api.engine.metrics.micro;
 
 import java.io.OutputStream;
 
 public class ConvenientSnapshot extends Snapshot {
 
-    // TODO - Determine if HistorgramSnapshot vs. Snapshot (codahale)
     private final double NS_PER_S = 1000000000.0D;
     private final double NS_PER_MS = 1000000.0D;
     private final double NS_PER_US = 1000.0D;

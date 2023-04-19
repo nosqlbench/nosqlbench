@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics;
+package io.nosqlbench.api.engine.metrics.micro;
 
-import com.codahale.metrics.Timer;
+import com.codahale.metrics.Histogram;
 
-
-public interface TimerAttachment {
-    Timer attachTimer(Timer timer);
+public interface HistogramAttachment {
+    Histogram attachHistogram(Histogram histogram);
 }

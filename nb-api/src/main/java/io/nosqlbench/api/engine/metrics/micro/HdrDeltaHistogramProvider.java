@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics;
+package io.nosqlbench.api.engine.metrics.micro;
 
-import com.codahale.metrics.Timer;
+import org.HdrHistogram.Histogram;
 
+public interface HdrDeltaHistogramProvider {
 
-public interface TimerAttachment {
-    Timer attachTimer(Timer timer);
+    /**
+     * Create a new interval histogram from the current data, then reset the histogram reservoir.
+     * @return the new interval histogram
+     */
+    Histogram getNextHdrDeltaHistogram();
+
 }
