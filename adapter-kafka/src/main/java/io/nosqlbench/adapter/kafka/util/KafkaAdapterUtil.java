@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class KafkaAdapterUtil {
-
+    public static final String MSG_SEQUENCE_NUMBER = "sequence_number";
     private final static Logger logger = LogManager.getLogger(KafkaAdapterUtil.class);
 
     public static String DFT_CONSUMER_GROUP_NAME_PREFIX = "nbKafkaGrp";
@@ -42,7 +42,9 @@ public class KafkaAdapterUtil {
     public enum DOC_LEVEL_PARAMS {
         // Blocking message producing or consuming
         ASYNC_API("async_api"),
-        E2E_STARTING_TIME_SOURCE("e2e_starting_time_source");
+        SEQERR_SIMU("seqerr_simu"),
+        E2E_STARTING_TIME_SOURCE("e2e_starting_time_source"),
+        SEQ_TRACKING("seq_tracking");
         public final String label;
 
         DOC_LEVEL_PARAMS(String label) {

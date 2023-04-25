@@ -49,7 +49,7 @@ public class KafkaClientConf {
     public KafkaClientConf(String clientConfFileName) {
 
         //////////////////
-        // Read related Pulsar client configuration settings from a file
+        // Read related Kafka client configuration settings from a file
         readRawConfFromFile(clientConfFileName);
 
 

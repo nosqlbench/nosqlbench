@@ -15,7 +15,7 @@
  * under the License.
  */
 
-package io.nosqlbench.adapter.pulsar.util;
+package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Counter;
 import org.junit.jupiter.api.Test;

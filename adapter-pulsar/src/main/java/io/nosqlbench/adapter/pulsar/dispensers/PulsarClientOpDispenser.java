@@ -20,6 +20,7 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.metrics.EndToEndMetricsAdapterUtil;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -49,7 +50,7 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
     protected final LongFunction<Boolean> seqTrackingFunc;
     protected final LongFunction<String> payloadRttFieldFunc;
     protected final LongFunction<Supplier<Transaction>> transactSupplierFunc;
-    protected final LongFunction<Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> msgSeqErrSimuTypeSetFunc;
+    protected final LongFunction<Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> msgSeqErrSimuTypeSetFunc;
 
     public PulsarClientOpDispenser(DriverAdapter adapter,
                                    ParsedOp op,
@@ -101,17 +102,17 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
         };
     }
 
-    protected LongFunction<Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> getStaticErrSimuTypeSetOpValueFunc() {
-        LongFunction<Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> setStringLongFunction;
+    protected LongFunction<Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> getStaticErrSimuTypeSetOpValueFunc() {
+        LongFunction<Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> setStringLongFunction;
         setStringLongFunction = (l) ->
             parsedOp.getOptionalStaticValue(PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQERR_SIMU.label, String.class)
             .filter(Predicate.not(String::isEmpty))
             .map(value -> {
-                Set<PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> set = new HashSet<>();
+                Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> set = new HashSet<>();
 
                 if (StringUtils.contains(value,',')) {
                     set = Arrays.stream(value.split(","))
-                        .map(PulsarAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE::parseSimuType)
+                        .map(EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE::parseSimuType)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .collect(Collectors.toCollection(LinkedHashSet::new));

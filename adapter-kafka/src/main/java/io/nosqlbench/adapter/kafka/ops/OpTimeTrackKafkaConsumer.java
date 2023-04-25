@@ -22,6 +22,8 @@ import io.nosqlbench.adapter.kafka.KafkaSpace;
 import io.nosqlbench.adapter.kafka.util.EndToEndStartingTimeSource;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterMetrics;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
+import io.nosqlbench.engine.api.metrics.ReceivedMessageSequenceTracker;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Header;
@@ -30,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
+import java.util.function.Function;
 
 public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
     private final static Logger logger = LogManager.getLogger("OpTimeTrackKafkaConsumer");
@@ -44,6 +47,8 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
 
     private final KafkaConsumer<String, String> consumer;
     private Histogram e2eMsgProcLatencyHistogram;
+    private final Function<String, ReceivedMessageSequenceTracker> receivedMessageSequenceTrackerForTopic;
+    private final boolean seqTracking;
 
     public OpTimeTrackKafkaConsumer(KafkaSpace kafkaSpace,
                                     boolean asyncMsgCommit,
@@ -51,8 +56,10 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
                                     boolean autoCommitEnabled,
                                     int maxMsgCntPerCommit,
                                     KafkaConsumer<String, String> consumer,
+                                    KafkaAdapterMetrics kafkaAdapterMetrics,
                                     EndToEndStartingTimeSource e2eStartingTimeSrc,
-                                    KafkaAdapterMetrics kafkaAdapterMetrics) {
+                                    Function<String, ReceivedMessageSequenceTracker> receivedMessageSequenceTrackerForTopic,
+                                    boolean seqTracking) {
         super(kafkaSpace);
         this.msgPoolIntervalInMs = msgPoolIntervalInMs;
         this.asyncMsgCommit = asyncMsgCommit;
@@ -61,6 +68,8 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
         this.consumer = consumer;
         this.e2eStartingTimeSrc = e2eStartingTimeSrc;
         this.e2eMsgProcLatencyHistogram = kafkaAdapterMetrics.getE2eMsgProcLatencyHistogram();
+        this.receivedMessageSequenceTrackerForTopic = receivedMessageSequenceTrackerForTopic;
+        this.seqTracking = seqTracking;
     }
 
     public int getManualCommitTrackingCnt() { return manualCommitTrackingCnt.get(); }
@@ -123,12 +132,14 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
             for (ConsumerRecord<String, String> record : records) {
                 if (record != null) {
                     if (logger.isDebugEnabled()) {
+                        Header msg_seq_header = record.headers().lastHeader(KafkaAdapterUtil.MSG_SEQUENCE_NUMBER);
                         logger.debug(
-                            "Receiving message is successful: [{}] - offset({}), cycle ({}), e2e_latency_ms({})",
+                            "Receiving message is successful: [{}] - offset({}), cycle ({}), e2e_latency_ms({}), e2e_seq_number({})",
                             printRecvedMsg(record),
                             record.offset(),
                             cycle,
-                            System.currentTimeMillis() - record.timestamp());
+                            System.currentTimeMillis() - record.timestamp(),
+                            (msg_seq_header != null ? new String(msg_seq_header.value())  : "null"));
                     }
 
                     if (!autoCommitEnabled) {
@@ -136,7 +147,7 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
                         if (bCommitMsg) {
                             if (!asyncMsgCommit) {
                                 consumer.commitSync();
-                                updateE2ELatencyMetric(record);
+                                checkAndUpdateMessageE2EMetrics(record);
                                 if (logger.isDebugEnabled()) {
                                     logger.debug(
                                         "Sync message commit is successful: cycle ({}), maxMsgCntPerCommit ({})",
@@ -153,7 +164,7 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
                                                     "Async message commit succeeded: cycle({}), maxMsgCntPerCommit ({})",
                                                     cycle,
                                                     maxMsgCntPerCommit);
-                                                updateE2ELatencyMetric(record);
+                                                checkAndUpdateMessageE2EMetrics(record);
                                             } else {
                                                 logger.debug(
                                                     "Async message commit failed: cycle ({}), maxMsgCntPerCommit ({}), error ({})",
@@ -168,14 +179,20 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
 
                             resetManualCommitTrackingCnt();
                         } else  {
-                            updateE2ELatencyMetric(record);
+                            checkAndUpdateMessageE2EMetrics(record);
                             incManualCommitTrackingCnt();
                         }
                     }
-                    updateE2ELatencyMetric(record);
+                    checkAndUpdateMessageE2EMetrics(record);
                 }
             }
         }
+    }
+
+    private void checkAndUpdateMessageE2EMetrics(ConsumerRecord<String, String> record) {
+        // keep track of message errors and update error counters
+        if(seqTracking) checkAndUpdateMessageErrorCounter(record);
+        updateE2ELatencyMetric(record);
     }
 
     private void updateE2ELatencyMetric(ConsumerRecord<String, String> record) {
@@ -188,6 +205,19 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
         if (startTimeStamp != 0L) {
             long e2eMsgLatency = System.currentTimeMillis() - startTimeStamp;
             e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
+        }
+    }
+
+    private void checkAndUpdateMessageErrorCounter(ConsumerRecord<String, String> record) {
+        Header msg_seq_number_header = record.headers().lastHeader(KafkaAdapterUtil.MSG_SEQUENCE_NUMBER);
+        String msgSeqIdStr = msg_seq_number_header != null ? new String(msg_seq_number_header.value()) : StringUtils.EMPTY;
+        if (!StringUtils.isBlank(msgSeqIdStr)) {
+            long sequenceNumber = Long.parseLong(msgSeqIdStr);
+            ReceivedMessageSequenceTracker receivedMessageSequenceTracker =
+                receivedMessageSequenceTrackerForTopic.apply(record.topic());
+            receivedMessageSequenceTracker.sequenceNumberReceived(sequenceNumber);
+        } else {
+            logger.warn("Message sequence number header is null, skipping e2e message error metrics generation.");
         }
     }
 
