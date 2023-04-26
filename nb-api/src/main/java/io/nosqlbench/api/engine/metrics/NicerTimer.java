@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,76 +17,75 @@
 package io.nosqlbench.api.engine.metrics;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.NBLabeledElement;
 import org.HdrHistogram.Histogram;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-public class NicerTimer extends Timer implements DeltaSnapshotter, HdrDeltaHistogramAttachment, TimerAttachment {
+public class NicerTimer extends Timer implements DeltaSnapshotter, HdrDeltaHistogramAttachment, TimerAttachment, NBLabeledElement {
     private final String metricName;
     private final DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
-    private long cacheExpiry = 0L;
+    private long cacheExpiry;
     private List<Timer> mirrors;
+    private final MapLabels labels;
 
-    public NicerTimer(String metricName, DeltaHdrHistogramReservoir deltaHdrHistogramReservoir) {
+    public NicerTimer(final String metricName, final DeltaHdrHistogramReservoir deltaHdrHistogramReservoir) {
         super(deltaHdrHistogramReservoir);
+        labels = NBLabeledElement.forMap(Map.of("name",metricName));
         this.metricName = metricName;
         this.deltaHdrHistogramReservoir = deltaHdrHistogramReservoir;
     }
 
     @Override
     public ConvenientSnapshot getSnapshot() {
-        if (System.currentTimeMillis() >= cacheExpiry) {
-            return new ConvenientSnapshot(deltaHdrHistogramReservoir.getSnapshot());
-        } else {
-            return new ConvenientSnapshot(deltaHdrHistogramReservoir.getLastSnapshot());
-        }
+        if (System.currentTimeMillis() >= this.cacheExpiry)
+            return new ConvenientSnapshot(this.deltaHdrHistogramReservoir.getSnapshot());
+        return new ConvenientSnapshot(this.deltaHdrHistogramReservoir.getLastSnapshot());
     }
 
+    @Override
     public DeltaSnapshotReader getDeltaReader() {
         return new DeltaSnapshotReader(this);
     }
 
     @Override
-    public ConvenientSnapshot getDeltaSnapshot(long cacheTimeMillis) {
-        this.cacheExpiry = System.currentTimeMillis() + cacheTimeMillis;
-        return new ConvenientSnapshot(deltaHdrHistogramReservoir.getSnapshot());
+    public ConvenientSnapshot getDeltaSnapshot(final long cacheTimeMillis) {
+        cacheExpiry = System.currentTimeMillis() + cacheTimeMillis;
+        return new ConvenientSnapshot(this.deltaHdrHistogramReservoir.getSnapshot());
     }
 
     @Override
     public synchronized NicerTimer attachHdrDeltaHistogram() {
-        if (mirrors==null) {
-            mirrors = new CopyOnWriteArrayList<>();
-        }
-        DeltaHdrHistogramReservoir sameConfigReservoir = this.deltaHdrHistogramReservoir.copySettings();
-        NicerTimer mirror = new NicerTimer(this.metricName, sameConfigReservoir);
-        mirrors.add(mirror);
+        if (null == mirrors) this.mirrors = new CopyOnWriteArrayList<>();
+        final DeltaHdrHistogramReservoir sameConfigReservoir = deltaHdrHistogramReservoir.copySettings();
+        final NicerTimer mirror = new NicerTimer(metricName, sameConfigReservoir);
+        this.mirrors.add(mirror);
         return mirror;
     }
     @Override
-    public Timer attachTimer(Timer timer) {
-        if (mirrors==null) {
-            mirrors = new CopyOnWriteArrayList<>();
-        }
-        mirrors.add(timer);
+    public Timer attachTimer(final Timer timer) {
+        if (null == mirrors) this.mirrors = new CopyOnWriteArrayList<>();
+        this.mirrors.add(timer);
         return timer;
     }
 
 
     @Override
     public Histogram getNextHdrDeltaHistogram() {
-        return this.deltaHdrHistogramReservoir.getNextHdrHistogram();
+        return deltaHdrHistogramReservoir.getNextHdrHistogram();
     }
 
     @Override
-    public void update(long duration, TimeUnit unit) {
+    public void update(final long duration, final TimeUnit unit) {
         super.update(duration, unit);
-        if (mirrors!=null) {
-            for (Timer mirror : mirrors) {
-                mirror.update(duration,unit);
-            }
-        }
+        if (null != mirrors) for (final Timer mirror : this.mirrors) mirror.update(duration, unit);
     }
 
+    @Override
+    public Map<String, String> getLabels() {
+        return labels.getLabels();
+    }
 }
