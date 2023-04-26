@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.transformers.namecache;
 
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -29,29 +29,27 @@ public class NamedType {
     private String alias;
     private final Map<String,NamedColumn> columns = new LinkedHashMap<>();
 
-    public NamedType(String typename) {
-        this.name = typename;
+    public NamedType(final String typename) {
+        name = typename;
     }
 
-    public void alias(String alias) {
+    public void alias(final String alias) {
         this.alias = alias;
     }
 
-    public NamedColumn column(String key) {
-        return this.columns.computeIfAbsent(key, NamedColumn::new);
+    public NamedColumn column(final String key) {
+        return columns.computeIfAbsent(key, NamedColumn::new);
     }
     public List<NamedColumn> getColumnDefs() {
-        return new ArrayList<>(columns.values());
+        return new ArrayList<>(this.columns.values());
     }
 
-    public String computeAlias(Labeled labeled, Function<Labeled, String> namer) {
-        if (this.alias==null) {
-            this.alias = namer.apply(labeled);
-        }
-        return this.alias;
+    public String computeAlias(final NBLabeledElement labeled, final Function<NBLabeledElement, String> namer) {
+        if (null == this.alias) alias = namer.apply(labeled);
+        return alias;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 }

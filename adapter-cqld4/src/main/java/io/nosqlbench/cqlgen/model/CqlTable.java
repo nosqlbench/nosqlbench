@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.nosqlbench.cqlgen.model;
 
 import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.cqlgen.core.CGTableStats;
 import io.nosqlbench.cqlgen.transformers.ComputedTableStats;
 
@@ -25,10 +25,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class CqlTable implements NBNamedElement, Labeled {
+public class CqlTable implements NBNamedElement, NBLabeledElement {
     private CqlKeyspaceDef keyspace;
     String name = "";
-    CGTableStats tableAttributes = null;
+    CGTableStats tableAttributes;
     int[] partitioning = new int[0];
     int[] clustering = new int[0];
     List<String> clusteringOrders = new ArrayList<>();
@@ -40,179 +40,168 @@ public class CqlTable implements NBNamedElement, Labeled {
     }
 
     public boolean isCompactStorage() {
-        return compactStorage;
+        return this.compactStorage;
     }
 
     public CGTableStats getTableAttributes() {
-        return tableAttributes;
+        return this.tableAttributes;
     }
 
-    public void setStats(CGTableStats tableAttributes) {
+    public void setStats(final CGTableStats tableAttributes) {
         this.tableAttributes = tableAttributes;
     }
 
-    public void addcolumnDef(CqlTableColumn cqlField) {
+    public void addcolumnDef(final CqlTableColumn cqlField) {
         cqlField.setTable(this);
-        this.coldefs.add(cqlField);
+        coldefs.add(cqlField);
     }
 
-    public void setName(String tableName) {
-        this.name = tableName;
+    public void setName(final String tableName) {
+        name = tableName;
     }
 
     @Override
     public String toString() {
-        return "cql table: '" + this.name + "':\n"
-            + this.coldefs.stream()
+        return "cql table: '" + name + "':\n"
+            + coldefs.stream()
             .map(Object::toString)
             .map(s -> "   " + s)
             .collect(Collectors.joining("\n"));
     }
 
     public List<CqlTableColumn> getColumnDefs() {
-        return this.coldefs;
+        return coldefs;
     }
 
+    @Override
     public String getName() {
-        return this.name;
+        return name;
     }
 
-    public void setKeyspace(CqlKeyspaceDef keyspace) {
+    public void setKeyspace(final CqlKeyspaceDef keyspace) {
         this.keyspace = keyspace;
     }
 
     @Override
     public Map<String, String> getLabels() {
         return Map.of(
-            "keyspace", this.keyspace.getName(),
-            "name", this.name,
+            "keyspace", keyspace.getName(),
+            "name", name,
             "type", "table"
         );
     }
 
-    public void addPartitionKey(String pkey) {
-        int[] new_partitioning = partitioning;
-        for (int idx = 0; idx < coldefs.size(); idx++) {
-            if (coldefs.get(idx).getName().equals(pkey)) {
-                coldefs.get(idx).setPosition(ColumnPosition.Partitioning);
-                new_partitioning = new int[partitioning.length + 1];
-                System.arraycopy(partitioning, 0, new_partitioning, 0, partitioning.length);
+    public void addPartitionKey(final String pkey) {
+        int[] new_partitioning = this.partitioning;
+        for (int idx = 0; idx < this.coldefs.size(); idx++)
+            if (this.coldefs.get(idx).getName().equals(pkey)) {
+                this.coldefs.get(idx).setPosition(ColumnPosition.Partitioning);
+                new_partitioning = new int[this.partitioning.length + 1];
+                System.arraycopy(this.partitioning, 0, new_partitioning, 0, this.partitioning.length);
                 new_partitioning[new_partitioning.length - 1] = idx;
                 break;
             }
-        }
-        if (new_partitioning==partitioning) {
+        if (new_partitioning== this.partitioning)
             throw new RuntimeException("Unable to assign partition key '" + pkey + "' to a known column of the same name.");
-        } else {
-            this.partitioning = new_partitioning;
-        }
+        partitioning = new_partitioning;
 
     }
 
-    public void addClusteringColumn(String ccol) {
-        int[] new_clustering = clustering;
+    public void addClusteringColumn(final String ccol) {
+        int[] new_clustering = this.clustering;
 
-        for (int i = 0; i < coldefs.size(); i++) {
-            if (coldefs.get(i).getName().equals(ccol)) {
-                coldefs.get(i).setPosition(ColumnPosition.Clustering);
-                new_clustering= new int[clustering.length + 1];
-                System.arraycopy(clustering, 0, new_clustering, 0, clustering.length);
+        for (int i = 0; i < this.coldefs.size(); i++)
+            if (this.coldefs.get(i).getName().equals(ccol)) {
+                this.coldefs.get(i).setPosition(ColumnPosition.Clustering);
+                new_clustering = new int[this.clustering.length + 1];
+                System.arraycopy(this.clustering, 0, new_clustering, 0, this.clustering.length);
                 new_clustering[new_clustering.length - 1] = i;
                 break;
             }
-        }
-        if (new_clustering == clustering) {
+        if (new_clustering == this.clustering)
             throw new RuntimeException("Unable to assign clustering field '" + ccol + " to a known column of the same name.");
-        } else {
-            this.clustering = new_clustering;
-        }
+        clustering = new_clustering;
     }
 
-    public void addTableClusteringOrder(String colname, String order) {
-        clusteringOrders.add(order);
+    public void addTableClusteringOrder(final String colname, final String order) {
+        this.clusteringOrders.add(order);
     }
 
     public List<String> getClusteringOrders() {
-        return clusteringOrders;
+        return this.clusteringOrders;
     }
 
 
     public List<String> getPartitionKeys() {
-        return Arrays.stream(partitioning).mapToObj(i -> this.coldefs.get(i).getName()).toList();
+        return Arrays.stream(this.partitioning).mapToObj(i -> coldefs.get(i).getName()).toList();
     }
 
     public List<String> getClusteringColumns() {
-        return Arrays.stream(clustering).mapToObj(i -> this.coldefs.get(i).getName()).toList();
+        return Arrays.stream(this.clustering).mapToObj(i -> coldefs.get(i).getName()).toList();
     }
 
-    public CqlTableColumn getColumnDefForName(String colname) {
-        Optional<CqlTableColumn> def = coldefs
+    public CqlTableColumn getColumnDefForName(final String colname) {
+        final Optional<CqlTableColumn> def = this.coldefs
             .stream()
             .filter(c -> c.getName().equalsIgnoreCase(colname))
             .findFirst();
-        if (!def.isPresent()) {
-            throw new RuntimeException("Unable to find column definition in table '" +
-                this.getName() + "' for column '" + colname + "'");
-        }
+        if (!def.isPresent()) throw new RuntimeException("Unable to find column definition in table '" +
+            name + "' for column '" + colname + '\'');
         return def.orElseThrow();
     }
 
-    public void renameColumns(Function<String, String> renamer) {
-        for (CqlTableColumn coldef : coldefs) {
-            coldef.setName(renamer.apply(coldef.getName()));
-        }
+    public void renameColumns(final Function<String, String> renamer) {
+        for (final CqlTableColumn coldef : this.coldefs) coldef.setName(renamer.apply(coldef.getName()));
     }
 
     public List<CqlTableColumn> getNonKeyColumnDefinitions() {
-        int last = partitioning[partitioning.length - 1];
-        last = (clustering.length > 0 ? clustering[clustering.length - 1] : last);
-        List<CqlTableColumn> nonkeys = new ArrayList<>();
-        for (int nonkey = last; nonkey < coldefs.size(); nonkey++) {
-            nonkeys.add(coldefs.get(nonkey));
-        }
+        int last = this.partitioning[this.partitioning.length - 1];
+        last = (0 < clustering.length) ? this.clustering[this.clustering.length - 1] : last;
+        final List<CqlTableColumn> nonkeys = new ArrayList<>();
+        for (int nonkey = last; nonkey < this.coldefs.size(); nonkey++) nonkeys.add(this.coldefs.get(nonkey));
         return nonkeys;
     }
 
-    public void setCompactStorage(boolean isCompactStorage) {
-        this.compactStorage = isCompactStorage;
+    public void setCompactStorage(final boolean isCompactStorage) {
+        compactStorage = isCompactStorage;
     }
 
     public String getFullName() {
-        return (this.keyspace != null ? this.keyspace.getName() + "." : "") + this.name;
+        return (null != this.keyspace ? keyspace.getName() + '.' : "") + name;
     }
 
-    public boolean isPartitionKey(int position) {
-        return position < partitioning.length;
+    public boolean isPartitionKey(final int position) {
+        return position < this.partitioning.length;
     }
 
-    public boolean isLastPartitionKey(int position) {
-        return position == partitioning.length - 1;
+    public boolean isLastPartitionKey(final int position) {
+        return position == (this.partitioning.length - 1);
     }
 
-    public boolean isClusteringColumn(int position) {
-        return clustering.length > 0 && position < clustering[clustering.length - 1] && position >= clustering[0];
+    public boolean isClusteringColumn(final int position) {
+        return (0 < clustering.length) && (position < this.clustering[this.clustering.length - 1]) && (position >= this.clustering[0]);
     }
 
-    public boolean isLastClusteringColumn(int position) {
-        return clustering.length > 0 && position == clustering[clustering.length - 1];
+    public boolean isLastClusteringColumn(final int position) {
+        return (0 < clustering.length) && (position == this.clustering[this.clustering.length - 1]);
     }
 
     public ComputedTableStats getComputedStats() {
-        return this.computedTableStats;
+        return computedTableStats;
     }
 
-    public void setComputedStats(ComputedTableStats stats) {
-        this.computedTableStats = stats;
+    public void setComputedStats(final ComputedTableStats stats) {
+        computedTableStats = stats;
     }
 
     public boolean hasStats() {
-        return this.computedTableStats!=null;
+        return null != this.computedTableStats;
     }
 
     public CqlKeyspaceDef getKeyspace() {
-        return this.keyspace;
+        return keyspace;
     }
 
-    public void getReferenceErrors(List<String> errors) {
+    public void getReferenceErrors(final List<String> errors) {
     }
 }

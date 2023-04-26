@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,77 +17,76 @@
 package io.nosqlbench.cqlgen.model;
 
 import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class CqlType implements NBNamedElement, Labeled {
+public class CqlType implements NBNamedElement, NBLabeledElement {
 
     private String name;
     private CqlKeyspaceDef keyspace;
     private List<CqlTypeColumn> columnDefs = new ArrayList<>();
     private volatile boolean defined;
 
-    public void setKeyspace(CqlKeyspaceDef keyspace) {
+    public void setKeyspace(final CqlKeyspaceDef keyspace) {
         this.keyspace = keyspace;
     }
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
     public CqlKeyspaceDef getKeyspace() {
-        return keyspace;
+        return this.keyspace;
     }
 
+    @Override
     public String getName() {
-        return this.name;
+        return name;
     }
 
-    public void addColumn(CqlTypeColumn def) {
-        this.columnDefs.add(this.columnDefs.size(),def);
+    public void addColumn(final CqlTypeColumn def) {
+        columnDefs.add(columnDefs.size(),def);
         def.setPosition(ColumnPosition.TypeDef);
     }
 
     public List<CqlTypeColumn> columns() {
-        return columnDefs;
+        return this.columnDefs;
     }
 
     @Override
     public Map<String, String> getLabels() {
         return Map.of(
-            "keyspace", keyspace.getName(),
+            "keyspace", this.keyspace.getName(),
             "type","type",
-            "name",name
+            "name", this.name
         );
     }
 
-    public void setColumnDefs(List<CqlTypeColumn> columnDefs) {
+    public void setColumnDefs(final List<CqlTypeColumn> columnDefs) {
         this.columnDefs = columnDefs;
     }
 
     public List<CqlTypeColumn> getColumnDefs() {
-        return columnDefs;
+        return this.columnDefs;
     }
 
     public String getFullName() {
-        return keyspace.getName()+"."+getName();
+        return this.keyspace.getName()+ '.' + name;
     }
 
-    public void getReferenceErrors(List<String> errors) {
-        if (!defined) {
-            errors.add("type " + this.getName() + " was referenced but not defined.");
-        }
+    public void getReferenceErrors(final List<String> errors) {
+        if (!this.defined) errors.add("type " + name + " was referenced but not defined.");
     }
 
     public void validate() {
-        Objects.requireNonNull(this.name);
-        Objects.requireNonNull(this.keyspace);
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(keyspace);
     }
 
     public void setDefined() {
-        this.defined=true;
+        defined=true;
     }
 }

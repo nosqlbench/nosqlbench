@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,71 +17,72 @@
 package io.nosqlbench.cqlgen.model;
 
 import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 import java.util.Map;
 
-public abstract class CqlColumnBase implements NBNamedElement, Labeled {
+public abstract class CqlColumnBase implements NBNamedElement, NBLabeledElement {
 
     private String name;
     private String typedef;
     private ColumnPosition position=ColumnPosition.NonKey;
 
-    protected CqlColumnBase(String colname, String typedef) {
+    protected CqlColumnBase(final String colname, final String typedef) {
         this.typedef = typedef;
-        this.name = colname;
+        name = colname;
     }
 
-    public void setPosition(ColumnPosition position) {
+    public void setPosition(final ColumnPosition position) {
         this.position = position;
     }
 
     public ColumnPosition getPosition() {
-        return this.position;
+        return position;
     }
-    public void setTypeDef(String type) {
-        this.typedef = type;
+    public void setTypeDef(final String type) {
+        typedef = type;
     }
 
+    @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getTypedef() {
-        return typedef;
+        return this.typedef;
     }
 
     public String getTrimmedTypedef() {
-        return typedef.replaceAll(" ", "");
+        return this.typedef.replaceAll(" ", "");
     }
 
     @Override
     public String toString() {
-        return getLabels().toString();
+        return this.getLabels().toString();
     }
 
     @Override
     public Map<String, String> getLabels() {
         return Map.of(
-            "name", name,
+            "name", this.name,
             "type", "column"
         );
     }
 
     public boolean isCounter() {
-        return getTrimmedTypedef().equalsIgnoreCase("counter");
+        return "counter".equalsIgnoreCase(getTrimmedTypedef());
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
     public String getSyntax() {
-        return getName() + " " + getTrimmedTypedef();
+        return name + ' ' + this.getTrimmedTypedef();
     }
 
     public String getFullName() {
-        return getParentFullName() + "." + getName();
+        return this.getParentFullName() + '.' + name;
     }
 
     protected abstract String getParentFullName();

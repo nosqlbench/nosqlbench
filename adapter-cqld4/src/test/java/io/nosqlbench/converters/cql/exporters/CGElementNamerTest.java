@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.converters.cql.exporters;
 
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.cqlgen.core.CGElementNamer;
 import org.junit.jupiter.api.Test;
 
@@ -30,27 +30,27 @@ public class CGElementNamerTest {
 
     @Test
     public void testNonRequiredFields() {
-        CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
+        final CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
         assertThat(namer.apply(Map.of())).isEqualTo("");
     }
 
     @Test
     public void testLiteralTweens() {
-        CGElementNamer namer = new CGElementNamer("[ABC---]!-23[,deFGH])(*&[__IJ__]");
+        final CGElementNamer namer = new CGElementNamer("[ABC---]!-23[,deFGH])(*&[__IJ__]");
         assertThat(namer.apply(Map.of("abc","123"))).isEqualTo("123---!-23)(*&");
     }
 
 
     @Test
     public void testPartialFields() {
-        CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
+        final CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
         assertThat(namer.apply(Map.of("abc", "base"))).isEqualTo("base---");
     }
 
     @Test
     public void testLabeledFields() {
-        CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
-        Labeled mylabeled = new Labeled() {
+        final CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
+        final NBLabeledElement mylabeled = new NBLabeledElement() {
             @Override
             public Map<String, String> getLabels() {
                 return Map.of("ij", "eyejay");
@@ -61,7 +61,7 @@ public class CGElementNamerTest {
 
     @Test
     public void testCasedSectionName() {
-        CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
+        final CGElementNamer namer = new CGElementNamer("[ABC---][,deFGH][__IJ__]");
         assertThat(namer.apply(
             Map.of(
                 "abc", "1111",
@@ -73,8 +73,8 @@ public class CGElementNamerTest {
 
     @Test
     public void testRequiredFieldsPresent() {
-        CGElementNamer namer = new CGElementNamer("[ABC!---!]");
-        Labeled mylabeled = new Labeled() {
+        final CGElementNamer namer = new CGElementNamer("[ABC!---!]");
+        final NBLabeledElement mylabeled = new NBLabeledElement() {
             @Override
             public Map<String, String> getLabels() {
                 return Map.of("ij", "eyejay");
@@ -88,8 +88,8 @@ public class CGElementNamerTest {
 
     @Test
     public void testRequiredFieldsMissing() {
-        CGElementNamer namer = new CGElementNamer("[ABC!---!]");
-        Labeled mylabeled = new Labeled() {
+        final CGElementNamer namer = new CGElementNamer("[ABC!---!]");
+        final NBLabeledElement mylabeled = new NBLabeledElement() {
             @Override
             public Map<String, String> getLabels() {
                 return Map.of("ij", "eyejay");

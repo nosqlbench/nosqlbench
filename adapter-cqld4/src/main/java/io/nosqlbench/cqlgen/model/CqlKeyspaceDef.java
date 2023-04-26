@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package io.nosqlbench.cqlgen.model;
 
 import com.datastax.oss.driver.internal.core.util.Strings;
 import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.cqlgen.core.CGKeyspaceStats;
 
 import java.util.*;
 
-public class CqlKeyspaceDef implements NBNamedElement, Labeled {
+public class CqlKeyspaceDef implements NBNamedElement, NBLabeledElement {
     String keyspaceName= "";
     CGKeyspaceStats stats;
     private boolean isDurableWrites;
@@ -34,107 +34,100 @@ public class CqlKeyspaceDef implements NBNamedElement, Labeled {
      * Has this been populated by keyspace definition? If false, it is only
      * here because it was vivified by a reference.
      */
-    private transient boolean defined;
+    private boolean defined;
 
     public CqlKeyspaceDef() {
     }
 
-    public CqlKeyspaceDef(String ksname) {
-        setKeyspaceName(ksname);
+    public CqlKeyspaceDef(final String ksname) {
+        keyspaceName = ksname;
     }
 
-    public void setKeyspaceName(String newname) {
-        this.keyspaceName=newname;
+    public void setKeyspaceName(final String newname) {
+        keyspaceName=newname;
     }
 
+    @Override
     public String getName() {
-        return this.keyspaceName;
+        return keyspaceName;
     }
 
     @Override
     public String toString() {
         return "CqlKeyspace{" +
-            "keyspaceName='" + keyspaceName + '\'' +
-            ", stats=" + stats +
-            ", isDurableWrites=" + isDurableWrites +
-            ", replicationData='" + replicationData + '\'' +
+            "keyspaceName='" + this.keyspaceName + '\'' +
+            ", stats=" + this.stats +
+            ", isDurableWrites=" + this.isDurableWrites +
+            ", replicationData='" + this.replicationData + '\'' +
             '}';
     }
 
     @Override
     public Map<String, String> getLabels() {
         return Map.of(
-            "name", keyspaceName,
+            "name", this.keyspaceName,
             "type","keyspace"
         );
     }
 
-    public void setStats(CGKeyspaceStats ksstats) {
-        this.stats=ksstats;
+    public void setStats(final CGKeyspaceStats ksstats) {
+        stats=ksstats;
     }
 
     public boolean isDurableWrites() {
-        return isDurableWrites;
+        return this.isDurableWrites;
     }
 
-    public void setDurableWrites(boolean isDurableWrites) {
+    public void setDurableWrites(final boolean isDurableWrites) {
         this.isDurableWrites = isDurableWrites;
     }
 
-    public void setReplicationData(String repldata) {
-        this.replicationData = repldata;
+    public void setReplicationData(final String repldata) {
+        replicationData = repldata;
     }
 
     public String getReplicationData() {
-        return this.replicationData;
+        return replicationData;
     }
 
-    public CqlTable getTable(String table) {
-        return this.tableDefs.stream().filter(t -> t.getName().equals(table)).findAny().orElse(null);
+    public CqlTable getTable(final String table) {
+        return tableDefs.stream().filter(t -> t.getName().equals(table)).findAny().orElse(null);
     }
 
-    public void addTable(CqlTable table) {
+    public void addTable(final CqlTable table) {
         table.setKeyspace(this);
-        this.tableDefs.add(table);
+        tableDefs.add(table);
     }
 
     public List<CqlType> getTypeDefs() {
-        return this.typeDefs;
+        return typeDefs;
     }
 
     public List<CqlTable> getTableDefs() {
-        return this.tableDefs;
+        return tableDefs;
 
     }
 
-    public void removeTable(CqlTable table) {
-        this.tableDefs.remove(table.getName());
+    public void removeTable(final CqlTable table) {
+        tableDefs.remove(table.getName());
     }
 
-    public void getReferenceErrors(List<String> errors) {
-        if (!defined) {
-            errors.add("keyspace " + this.getName() + " was referenced but not defined.");
-        }
-        for (CqlType typedef : typeDefs) {
-            typedef.getReferenceErrors(errors);
-        }
-        for (CqlTable value : tableDefs) {
-            value.getReferenceErrors(errors);
-        }
+    public void getReferenceErrors(final List<String> errors) {
+        if (!this.defined) errors.add("keyspace " + keyspaceName + " was referenced but not defined.");
+        for (final CqlType typedef : this.typeDefs) typedef.getReferenceErrors(errors);
+        for (final CqlTable value : this.tableDefs) value.getReferenceErrors(errors);
     }
 
     public void setDefined() {
-        if (this.keyspaceName==null) {
-            throw new RuntimeException("nuh uh");
-        }
-        this.defined=true;
+        if (null == this.keyspaceName) throw new RuntimeException("nuh uh");
+        defined=true;
     }
 
     public void validate() {
-        Strings.requireNotEmpty(this.keyspaceName, "keyspace name");
+        Strings.requireNotEmpty(keyspaceName, "keyspace name");
     }
 
-    public void addType(CqlType usertype) {
-        this.typeDefs.add(usertype);
+    public void addType(final CqlType usertype) {
+        typeDefs.add(usertype);
     }
 }

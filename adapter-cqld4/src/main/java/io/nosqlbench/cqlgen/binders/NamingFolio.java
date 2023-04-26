@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import io.nosqlbench.cqlgen.model.CqlColumnBase;
 import io.nosqlbench.cqlgen.model.CqlModel;
 import io.nosqlbench.cqlgen.model.CqlTable;
 import io.nosqlbench.cqlgen.core.CGElementNamer;
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 import java.util.*;
 
@@ -40,58 +40,55 @@ import java.util.*;
  */
 public class NamingFolio {
 
-    private final Map<String, Labeled> graph = new LinkedHashMap<>();
+    private final Map<String, NBLabeledElement> graph = new LinkedHashMap<>();
     private final CGElementNamer namer;
-    public final static String DEFAULT_NAMER_SPEC = "[BLOCKNAME-][OPTYPE-][COLUMN]-[TYPEDEF-][TABLE][-KEYSPACE]";
+    public static final String DEFAULT_NAMER_SPEC = "[BLOCKNAME-][OPTYPE-][COLUMN]-[TYPEDEF-][TABLE][-KEYSPACE]";
     NamingStyle namingStyle = NamingStyle.SymbolicType;
 
-    public NamingFolio(String namerspec) {
-        this.namer = new CGElementNamer(
+    public NamingFolio(final String namerspec) {
+        namer = new CGElementNamer(
             namerspec,
             List.of(s -> s.toLowerCase().replaceAll("[^a-zA-Z0-9_-]", ""))
         );
     }
 
     public NamingFolio() {
-        this.namer = new CGElementNamer(DEFAULT_NAMER_SPEC);
+        namer = new CGElementNamer(NamingFolio.DEFAULT_NAMER_SPEC);
     }
 
-    public void addFieldRef(Map<String, String> labels) {
-        String name = namer.apply(labels);
-        graph.put(name, Labeled.forMap(labels));
+    public void addFieldRef(final Map<String, String> labels) {
+        final String name = this.namer.apply(labels);
+        this.graph.put(name, NBLabeledElement.forMap(labels));
     }
 
-    public void addFieldRef(String column, String typedef, String table, String keyspace) {
-        addFieldRef(Map.of("column", column, "typedef", typedef, "table", table, "keyspace", keyspace));
+    public void addFieldRef(final String column, final String typedef, final String table, final String keyspace) {
+        this.addFieldRef(Map.of("column", column, "typedef", typedef, "table", table, "keyspace", keyspace));
     }
 
     /**
      * This will eventually elide extraneous fields according to knowledge of all known names
      * by name, type, table, keyspace. For now it just returns everything in fully qualified form.
      */
-    public String nameFor(Labeled labeled, String... fields) {
-        Map<String, String> labelsPlus = labeled.getLabelsAnd(fields);
-        String name = namer.apply(labelsPlus);
+    public String nameFor(final NBLabeledElement labeled, final String... fields) {
+        final Map<String, String> labelsPlus = labeled.getLabelsAnd(fields);
+        final String name = this.namer.apply(labelsPlus);
         return name;
     }
 
-    public String nameFor(Labeled labeled, Map<String,String> fields) {
-        Map<String, String> labelsPlus = labeled.getLabelsAnd(fields);
-        String name = namer.apply(labelsPlus);
+    public String nameFor(final NBLabeledElement labeled, final Map<String,String> fields) {
+        final Map<String, String> labelsPlus = labeled.getLabelsAnd(fields);
+        final String name = this.namer.apply(labelsPlus);
         return name;
 
     }
 
-    public void informNamerOfAllKnownNames(CqlModel model) {
-        for (CqlTable table : model.getTableDefs()) {
-            for (CqlColumnBase coldef : table.getColumnDefs()) {
-                addFieldRef(coldef.getLabels());
-            }
-        }
+    public void informNamerOfAllKnownNames(final CqlModel model) {
+        for (final CqlTable table : model.getTableDefs())
+            for (final CqlColumnBase coldef : table.getColumnDefs()) this.addFieldRef(coldef.getLabels());
     }
 
     public Set<String> getNames() {
-        return new LinkedHashSet<>(graph.keySet());
+        return new LinkedHashSet<>(this.graph.keySet());
     }
 
 }
