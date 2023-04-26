@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,13 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Gauge;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.engine.api.activityapi.core.Startable;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters.BurstRateGauge;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters.RateGauge;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters.WaitTimeGauge;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -77,10 +81,10 @@ import java.util.concurrent.atomic.AtomicLong;
  * </p>
  */
 @Service(value = RateLimiter.class, selector = "hybrid")
-public class HybridRateLimiter implements Startable, RateLimiter {
+public class HybridRateLimiter implements RateLimiter {
 
-    private final static Logger logger = LogManager.getLogger(HybridRateLimiter.class);
-    private NBNamedElement named;
+    private static final Logger logger = LogManager.getLogger(HybridRateLimiter.class);
+    private NBLabeledElement named;
 
     //private volatile TokenFiller filler;
     private volatile long starttime;
@@ -104,93 +108,87 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     protected HybridRateLimiter() {
     }
 
-    public HybridRateLimiter(NBNamedElement named, String label, RateSpec rateSpec) {
-        setLabel(label);
-        init(named);
+    public HybridRateLimiter(final NBLabeledElement named, final String label, final RateSpec rateSpec) {
+        this.label = label;
+        this.init(named);
         this.named = named;
-        this.applyRateSpec(rateSpec);
+        applyRateSpec(rateSpec);
     }
 
-    protected void setLabel(String label) {
+    protected void setLabel(final String label) {
         this.label = label;
     }
 
     @Override
     public long maybeWaitForOp() {
-        return tokens.blockAndTake();
+        return this.tokens.blockAndTake();
     }
 
     @Override
     public long getTotalWaitTime() {
-        return this.cumulativeWaitTimeNanos.get() + getWaitTime();
+        return cumulativeWaitTimeNanos.get() + this.getWaitTime();
     }
 
     @Override
     public long getWaitTime() {
-        return tokens.getWaitTime();
+        return this.tokens.getWaitTime();
     }
 
     @Override
     public RateSpec getRateSpec() {
-        return this.rateSpec;
+        return rateSpec;
     }
 
     @Override
-    public synchronized void applyRateSpec(RateSpec updatingRateSpec) {
+    public synchronized void applyRateSpec(final RateSpec updatingRateSpec) {
 
-        if (updatingRateSpec == null) {
-            throw new RuntimeException("RateSpec must be defined");
-        }
+        if (null == updatingRateSpec) throw new RuntimeException("RateSpec must be defined");
 
-        if (updatingRateSpec.equals(this.rateSpec) && !updatingRateSpec.isRestart()) {
-            return;
-        }
+        if (updatingRateSpec.equals(rateSpec) && !updatingRateSpec.isRestart()) return;
 
-        this.rateSpec = updatingRateSpec;
-        this.tokens = (this.tokens == null) ? new ThreadDrivenTokenPool(rateSpec, named) : this.tokens.apply(named, rateSpec);
+        rateSpec = updatingRateSpec;
+        tokens = null == this.tokens ? new ThreadDrivenTokenPool(this.rateSpec, this.named) : tokens.apply(this.named, this.rateSpec);
 //        this.filler = (this.filler == null) ? new TokenFiller(rateSpec, activityDef) : filler.apply(rateSpec);
 //        this.tokens = this.filler.getTokenPool();
 
-        if (this.state == State.Idle && updatingRateSpec.isAutoStart()) {
-            this.start();
-        } else if (updatingRateSpec.isRestart()) {
-            this.restart();
-        }
+        if ((State.Idle == this.state) && updatingRateSpec.isAutoStart()) start();
+        else if (updatingRateSpec.isRestart()) restart();
     }
 
 
-    protected void init(NBNamedElement activityDef) {
-        this.delayGauge = ActivityMetrics.gauge(activityDef, label + ".waittime", new RateLimiters.WaitTimeGauge(this));
-        this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + ".config.cyclerate", new RateLimiters.RateGauge(this));
-        this.burstRateGauge = ActivityMetrics.gauge(activityDef, label + ".config.burstrate", new RateLimiters.BurstRateGauge(this));
+    protected void init(final NBLabeledElement activityDef) {
+        delayGauge = ActivityMetrics.gauge(activityDef, this.label + ".waittime", new WaitTimeGauge(this));
+        avgRateGauge = ActivityMetrics.gauge(activityDef, this.label + ".config.cyclerate", new RateGauge(this));
+        burstRateGauge = ActivityMetrics.gauge(activityDef, this.label + ".config.burstrate", new BurstRateGauge(this));
     }
 
+    @Override
     public synchronized void start() {
 
-        switch (state) {
+        switch (this.state) {
             case Started:
 //                logger.warn("Tried to start a rate limiter that was already started. If this is desired, use restart() instead");
                 // TODO: Find a better way to warn about spurious rate limiter
                 // starts, since the check condition was not properly isolated
                 break;
             case Idle:
-                long nanos = getNanoClockTime();
-                this.starttime = nanos;
-                this.tokens.start();
-                state = State.Started;
+                final long nanos = this.getNanoClockTime();
+                starttime = nanos;
+                tokens.start();
+                this.state = State.Started;
                 break;
         }
     }
 
     public synchronized long restart() {
-        switch (state) {
+        switch (this.state) {
             case Idle:
-                this.start();
+                start();
                 return 0L;
             case Started:
-                long accumulatedWaitSinceLastStart = cumulativeWaitTimeNanos.get();
-                cumulativeWaitTimeNanos.set(0L);
-                return this.tokens.restart() + accumulatedWaitSinceLastStart;
+                final long accumulatedWaitSinceLastStart = this.cumulativeWaitTimeNanos.get();
+                this.cumulativeWaitTimeNanos.set(0L);
+                return tokens.restart() + accumulatedWaitSinceLastStart;
             default:
                 return 0L;
         }
@@ -202,9 +200,9 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     }
 
     private synchronized void checkpointCumulativeWaitTime() {
-        long nanos = getNanoClockTime();
-        this.starttime = nanos;
-        cumulativeWaitTimeNanos.addAndGet(getWaitTime());
+        final long nanos = this.getNanoClockTime();
+        starttime = nanos;
+        this.cumulativeWaitTimeNanos.addAndGet(this.getWaitTime());
     }
 
     protected long getNanoClockTime() {
@@ -213,17 +211,11 @@ public class HybridRateLimiter implements Startable, RateLimiter {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(HybridRateLimiter.class.getSimpleName());
+        final StringBuilder sb = new StringBuilder(HybridRateLimiter.class.getSimpleName());
         sb.append("{\n");
-        if (this.getRateSpec() != null) {
-            sb.append("      spec:").append(this.getRateSpec().toString());
-        }
-        if (this.tokens != null) {
-            sb.append(",\n tokenpool:").append(this.tokens.toString());
-        }
-        if (this.state != null) {
-            sb.append(",\n     state:'").append(this.state).append("'");
-        }
+        if (null != this.getRateSpec()) sb.append("      spec:").append(rateSpec.toString());
+        if (null != this.tokens) sb.append(",\n tokenpool:").append(tokens);
+        if (null != this.state) sb.append(",\n     state:'").append(state).append('\'');
         sb.append("\n}");
         return sb.toString();
     }
@@ -240,16 +232,14 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     private class PoolGauge implements Gauge<Long> {
         private final HybridRateLimiter rl;
 
-        public PoolGauge(HybridRateLimiter hybridRateLimiter) {
-            this.rl = hybridRateLimiter;
+        public PoolGauge(final HybridRateLimiter hybridRateLimiter) {
+            rl = hybridRateLimiter;
         }
 
         @Override
         public Long getValue() {
-            TokenPool pool = rl.tokens;
-            if (pool==null) {
-                return 0L;
-            }
+            final TokenPool pool = this.rl.tokens;
+            if (null == pool) return 0L;
             return pool.getWaitTime();
         }
     }

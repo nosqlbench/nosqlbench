@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
@@ -25,18 +26,18 @@ import io.nosqlbench.nb.annotations.Service;
 import java.util.Map;
 
 @Service(value = DiagTask.class, selector = "diagrate")
-public class DiagTask_diagrate implements DiagTask, NBReconfigurable {
+public class DiagTask_diagrate implements DiagTask, NBReconfigurable, NBLabeledElement {
     private String name;
     private RateLimiter rateLimiter;
     private RateSpec rateSpec;
 
-    private void updateRateLimiter(String spec) {
-        this.rateSpec = new RateSpec(spec);
-        rateLimiter = RateLimiters.createOrUpdate(
+    private void updateRateLimiter(final String spec) {
+        rateSpec = new RateSpec(spec);
+        this.rateLimiter = RateLimiters.createOrUpdate(
             this,
             "diag",
-            rateLimiter,
-            rateSpec
+            this.rateLimiter,
+            this.rateSpec
         );
     }
 
@@ -56,25 +57,30 @@ public class DiagTask_diagrate implements DiagTask, NBReconfigurable {
     }
 
     @Override
-    public void applyConfig(NBConfiguration cfg) {
-        this.name = cfg.get("name", String.class);
+    public void applyConfig(final NBConfiguration cfg) {
+        name = cfg.get("name", String.class);
         cfg.getOptional("diagrate").ifPresent(this::updateRateLimiter);
     }
 
     @Override
-    public void applyReconfig(NBConfiguration recfg) {
+    public void applyReconfig(final NBConfiguration recfg) {
         recfg.getOptional("diagrate").ifPresent(this::updateRateLimiter);
     }
 
     @Override
-    public Map<String, Object> apply(Long aLong, Map<String, Object> stringObjectMap) {
-        rateLimiter.maybeWaitForOp();
+    public Map<String, Object> apply(final Long aLong, final Map<String, Object> stringObjectMap) {
+        this.rateLimiter.maybeWaitForOp();
         return stringObjectMap;
     }
 
 
     @Override
     public String getName() {
-        return name;
+        return this.name;
+    }
+
+    @Override
+    public Map<String, String> getLabels() {
+        return Map.of("name", name);
     }
 }
