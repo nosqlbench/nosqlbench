@@ -24,7 +24,6 @@ import io.nosqlbench.api.engine.util.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.script.ScriptContext;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ public enum ActivityMetrics {
 
     public static final String HDRDIGITS_PARAM = "hdr_digits";
     public static final int DEFAULT_HDRDIGITS = 4;
-    private static int _HDRDIGITS = DEFAULT_HDRDIGITS;
+    private static int _HDRDIGITS = ActivityMetrics.DEFAULT_HDRDIGITS;
 
     private static MetricRegistry registry;
 
@@ -52,11 +51,11 @@ public enum ActivityMetrics {
 
 
     public static int getHdrDigits() {
-        return _HDRDIGITS;
+        return ActivityMetrics._HDRDIGITS;
     }
 
-    public static void setHdrDigits(int hdrDigits) {
-        ActivityMetrics._HDRDIGITS = hdrDigits;
+    public static void setHdrDigits(final int hdrDigits) {
+        _HDRDIGITS = hdrDigits;
     }
 
     /**
@@ -71,18 +70,16 @@ public enum ActivityMetrics {
      * @return a Metric, or null if the metric for the name was already present
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private static Metric register(NBLabeledElement labeled, String name, MetricProvider metricProvider) {
-        String fullMetricName = labeled.linearizedByValueGraphite("name", name);
-        Metric metric = get().getMetrics().get(fullMetricName);
-        if (null == metric) {
-            synchronized (labeled) {
-                metric = get().getMetrics().get(fullMetricName);
-                if (null == metric) {
-                    metric = metricProvider.getMetric();
-                    Metric registered = get().register(fullMetricName, metric);
-                    logger.debug(() -> "registered metric: " + fullMetricName);
-                    return registered;
-                }
+    private static Metric register(final NBLabeledElement labeled, final String name, final MetricProvider metricProvider) {
+        final String fullMetricName = labeled.linearizedByValueGraphite("name", name);
+        Metric metric = ActivityMetrics.get().getMetrics().get(fullMetricName);
+        if (null == metric) synchronized (labeled) {
+            metric = ActivityMetrics.get().getMetrics().get(fullMetricName);
+            if (null == metric) {
+                metric = metricProvider.getMetric();
+                final Metric registered = ActivityMetrics.get().register(fullMetricName, metric);
+                ActivityMetrics.logger.debug(() -> "registered metric: " + fullMetricName);
+                return registered;
             }
         }
         return metric;
@@ -103,9 +100,9 @@ public enum ActivityMetrics {
      *     a simple, descriptive name for the timer
      * @return the timer, perhaps a different one if it has already been registered
      */
-    public static Timer timer(NBLabeledElement labeled, String name, int hdrdigits) {
-        String fullMetricName = labeled.linearizedByValueGraphite("name", name);
-        Timer registeredTimer = (Timer) register(labeled, name, () ->
+    public static Timer timer(final NBLabeledElement labeled, final String name, final int hdrdigits) {
+        final String fullMetricName = labeled.linearizedByValueGraphite("name", name);
+        final Timer registeredTimer = (Timer) ActivityMetrics.register(labeled, name, () ->
             new NicerTimer(fullMetricName,
                 new DeltaHdrHistogramReservoir(
                     fullMetricName,
@@ -115,12 +112,12 @@ public enum ActivityMetrics {
         return registeredTimer;
     }
 
-    public static Timer timer(String fullMetricName) {
-        NicerTimer timer = get().register(fullMetricName, new NicerTimer(
+    public static Timer timer(final String fullMetricName) {
+        final NicerTimer timer = ActivityMetrics.get().register(fullMetricName, new NicerTimer(
             fullMetricName,
             new DeltaHdrHistogramReservoir(
                 fullMetricName,
-                _HDRDIGITS
+                ActivityMetrics._HDRDIGITS
             ))
         );
         return timer;
@@ -141,9 +138,9 @@ public enum ActivityMetrics {
      *     a simple, descriptive name for the histogram
      * @return the histogram, perhaps a different one if it has already been registered
      */
-    public static Histogram histogram(NBLabeledElement labeled, String name, int hdrdigits) {
-        String fullMetricName = labeled.linearizedByValueGraphite("name", name);
-        return (Histogram) register(labeled, name, () ->
+    public static Histogram histogram(final NBLabeledElement labeled, final String name, final int hdrdigits) {
+        final String fullMetricName = labeled.linearizedByValueGraphite("name", name);
+        return (Histogram) ActivityMetrics.register(labeled, name, () ->
             new NicerHistogram(
                 fullMetricName,
                 new DeltaHdrHistogramReservoir(
@@ -153,12 +150,12 @@ public enum ActivityMetrics {
             ));
     }
 
-    public static Histogram histogram(String fullname) {
-        NicerHistogram histogram = get().register(fullname, new NicerHistogram(
+    public static Histogram histogram(final String fullname) {
+        final NicerHistogram histogram = ActivityMetrics.get().register(fullname, new NicerHistogram(
             fullname,
             new DeltaHdrHistogramReservoir(
                 fullname,
-                _HDRDIGITS
+                ActivityMetrics._HDRDIGITS
             )
         ));
         return histogram;
@@ -175,9 +172,9 @@ public enum ActivityMetrics {
      *     a simple, descriptive name for the counter
      * @return the counter, perhaps a different one if it has already been registered
      */
-    public static Counter counter(NBLabeledElement parent, String submetricName) {
-        Map<String, String> metricLabels = parent.getLabelsAnd("name", submetricName);
-        return (Counter) register(parent, submetricName, Counter::new);
+    public static Counter counter(final NBLabeledElement parent, final String submetricName) {
+        final Map<String, String> metricLabels = parent.getLabelsAnd("name", submetricName);
+        return (Counter) ActivityMetrics.register(parent, submetricName, Counter::new);
         // {"__name__"=$name}
     }
 
@@ -192,51 +189,39 @@ public enum ActivityMetrics {
      *     a simple, descriptive name for the meter
      * @return the meter, perhaps a different one if it has already been registered
      */
-    public static Meter meter(NBLabeledElement named, String name) {
-        return (Meter) register(named, name, Meter::new);
+    public static Meter meter(final NBLabeledElement named, final String name) {
+        return (Meter) ActivityMetrics.register(named, name, Meter::new);
     }
 
     private static MetricRegistry get() {
-        if (null != ActivityMetrics.registry) {
-            return registry;
-        }
+        if (null != registry) return ActivityMetrics.registry;
         synchronized (ActivityMetrics.class) {
-            if (null == ActivityMetrics.registry) {
-                registry = lookupRegistry();
-            }
+            if (null == registry) ActivityMetrics.registry = ActivityMetrics.lookupRegistry();
         }
-        return registry;
+        return ActivityMetrics.registry;
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Gauge<T> gauge(NBLabeledElement named, String name, Gauge<T> gauge) {
-        return (Gauge<T>) register(named, name, () -> gauge);
+    public static <T> Gauge<T> gauge(final NBLabeledElement named, final String name, final Gauge<T> gauge) {
+        return (Gauge<T>) ActivityMetrics.register(named, name, () -> gauge);
     }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Gauge<T> gauge(ScriptContext scriptContext, String name, Gauge<T> gauge) {
-        return (Gauge<T>) register(scriptContext, name, () -> gauge);
-    }
-
 
     private static MetricRegistry lookupRegistry() {
-        ServiceLoader<MetricRegistryService> metricRegistryServices =
+        final ServiceLoader<MetricRegistryService> metricRegistryServices =
             ServiceLoader.load(MetricRegistryService.class);
-        List<MetricRegistryService> mrss = new ArrayList<>();
+        final List<MetricRegistryService> mrss = new ArrayList<>();
         metricRegistryServices.iterator().forEachRemaining(mrss::add);
 
-        if (1 == mrss.size()) {
-            return mrss.get(0).getMetricRegistry();
-        }
+        if (1 == mrss.size()) return mrss.get(0).getMetricRegistry();
         final String infoMsg = "Unable to load a dynamic MetricRegistry via ServiceLoader, using the default.";
-        logger.info(infoMsg);
+        ActivityMetrics.logger.info(infoMsg);
         return new MetricRegistry();
 
     }
 
 
     public static MetricRegistry getMetricRegistry() {
-        return get();
+        return ActivityMetrics.get();
     }
 
     /**
@@ -251,19 +236,17 @@ public enum ActivityMetrics {
      * @param interval
      *     How many seconds to wait between writing each interval histogram
      */
-    public static void addHistoLogger(String sessionName, String pattern, String filename, String interval) {
-        if (filename.contains("_SESSION_")) {
-            filename = filename.replace("_SESSION_", sessionName);
-        }
-        Pattern compiledPattern = Pattern.compile(pattern);
-        File logfile = new File(filename);
-        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:'" + interval + '\''));
+    public static void addHistoLogger(final String sessionName, final String pattern, String filename, final String interval) {
+        if (filename.contains("_SESSION_")) filename = filename.replace("_SESSION_", sessionName);
+        final Pattern compiledPattern = Pattern.compile(pattern);
+        final File logfile = new File(filename);
+        final long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:'" + interval + '\''));
 
-        HistoIntervalLogger histoIntervalLogger =
+        final HistoIntervalLogger histoIntervalLogger =
             new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
-        logger.debug(() -> "attaching " + histoIntervalLogger + " to the metrics registry.");
-        get().addListener(histoIntervalLogger);
-        metricsCloseables.add(histoIntervalLogger);
+        ActivityMetrics.logger.debug(() -> "attaching " + histoIntervalLogger + " to the metrics registry.");
+        ActivityMetrics.get().addListener(histoIntervalLogger);
+        ActivityMetrics.metricsCloseables.add(histoIntervalLogger);
     }
 
     /**
@@ -278,19 +261,17 @@ public enum ActivityMetrics {
      * @param interval
      *     How many seconds to wait between writing each interval histogram
      */
-    public static void addStatsLogger(String sessionName, String pattern, String filename, String interval) {
-        if (filename.contains("_SESSION_")) {
-            filename = filename.replace("_SESSION_", sessionName);
-        }
-        Pattern compiledPattern = Pattern.compile(pattern);
-        File logfile = new File(filename);
-        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + '\''));
+    public static void addStatsLogger(final String sessionName, final String pattern, String filename, final String interval) {
+        if (filename.contains("_SESSION_")) filename = filename.replace("_SESSION_", sessionName);
+        final Pattern compiledPattern = Pattern.compile(pattern);
+        final File logfile = new File(filename);
+        final long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + '\''));
 
-        HistoStatsLogger histoStatsLogger =
+        final HistoStatsLogger histoStatsLogger =
             new HistoStatsLogger(sessionName, logfile, compiledPattern, intervalMillis, TimeUnit.NANOSECONDS);
-        logger.debug(() -> "attaching " + histoStatsLogger + " to the metrics registry.");
-        get().addListener(histoStatsLogger);
-        metricsCloseables.add(histoStatsLogger);
+        ActivityMetrics.logger.debug(() -> "attaching " + histoStatsLogger + " to the metrics registry.");
+        ActivityMetrics.get().addListener(histoStatsLogger);
+        ActivityMetrics.metricsCloseables.add(histoStatsLogger);
     }
 
     /**
@@ -307,19 +288,19 @@ public enum ActivityMetrics {
      * @param interval
      *     How frequently to update the histogram
      */
-    public static void addClassicHistos(String sessionName, String pattern, String prefix, String interval) {
-        Pattern compiledPattern = Pattern.compile(pattern);
-        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + '\''));
+    public static void addClassicHistos(final String sessionName, final String pattern, final String prefix, final String interval) {
+        final Pattern compiledPattern = Pattern.compile(pattern);
+        final long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + '\''));
 
-        ClassicHistoListener classicHistoListener =
-            new ClassicHistoListener(get(), sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
-        logger.debug(() -> "attaching histo listener " + classicHistoListener + " to the metrics registry.");
-        get().addListener(classicHistoListener);
+        final ClassicHistoListener classicHistoListener =
+            new ClassicHistoListener(ActivityMetrics.get(), sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
+        ActivityMetrics.logger.debug(() -> "attaching histo listener " + classicHistoListener + " to the metrics registry.");
+        ActivityMetrics.get().addListener(classicHistoListener);
 
-        ClassicTimerListener classicTimerListener =
-            new ClassicTimerListener(get(), sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
-        logger.debug(() -> "attaching timer listener " + classicTimerListener + " to the metrics registry.");
-        get().addListener(classicTimerListener);
+        final ClassicTimerListener classicTimerListener =
+            new ClassicTimerListener(ActivityMetrics.get(), sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
+        ActivityMetrics.logger.debug(() -> "attaching timer listener " + classicTimerListener + " to the metrics registry.");
+        ActivityMetrics.get().addListener(classicTimerListener);
     }
 
     /**
@@ -329,14 +310,12 @@ public enum ActivityMetrics {
      * @param showChart
      *     whether to chart metrics on console
      */
-    public static void closeMetrics(boolean showChart) {
-        logger.trace("Closing all registered metrics closable objects.");
-        for (MetricsCloseable metricsCloseable : metricsCloseables) {
-            logger.trace(() -> "closing metrics closeable: " + metricsCloseable);
+    public static void closeMetrics(final boolean showChart) {
+        ActivityMetrics.logger.trace("Closing all registered metrics closable objects.");
+        for (final MetricsCloseable metricsCloseable : ActivityMetrics.metricsCloseables) {
+            ActivityMetrics.logger.trace(() -> "closing metrics closeable: " + metricsCloseable);
             metricsCloseable.closeMetrics();
-            if (showChart) {
-                metricsCloseable.chart();
-            }
+            if (showChart) metricsCloseable.chart();
         }
     }
 
@@ -344,9 +323,9 @@ public enum ActivityMetrics {
         Metric getMetric();
     }
 
-    public static void reportTo(PrintStream out) {
+    public static void reportTo(final PrintStream out) {
         out.println("====================  BEGIN-METRIC-LOG  ====================");
-        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+        final ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(getMetricRegistry())
             .convertDurationsTo(TimeUnit.MICROSECONDS)
             .convertRatesTo(TimeUnit.SECONDS)
             .filter(MetricFilter.ALL)
@@ -356,13 +335,13 @@ public enum ActivityMetrics {
         out.println("====================   END-METRIC-LOG   ====================");
     }
 
-    public static void mountSubRegistry(String mountPrefix, MetricRegistry subRegistry) {
-        new MetricsRegistryMount(getMetricRegistry(), subRegistry, mountPrefix);
+    public static void mountSubRegistry(final String mountPrefix, final MetricRegistry subRegistry) {
+        new MetricsRegistryMount(ActivityMetrics.getMetricRegistry(), subRegistry, mountPrefix);
     }
 
-    public static void removeActivityMetrics(NBNamedElement named) {
-        get().getMetrics().keySet().stream().filter(s -> s.startsWith(named.getName() + '.'))
-            .forEach(get()::remove);
+    public static void removeActivityMetrics(final NBNamedElement named) {
+        ActivityMetrics.get().getMetrics().keySet().stream().filter(s -> s.startsWith(named.getName() + '.'))
+            .forEach(ActivityMetrics.get()::remove);
     }
 
 }

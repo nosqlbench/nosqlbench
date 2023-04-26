@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@
 package io.nosqlbench.engine.api.extensions;
 
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
-
-import javax.script.ScriptContext;
 
 /**
  * Any implementation of a SandboxExtension that is found in the runtime
@@ -44,13 +43,13 @@ public interface ScriptingPluginInfo<T> {
      * @param scriptContext The scripting context object, useful for interacting with the sandbox directly
      * @return a new instance of an extension. The extension is given a logger if it desires.
      */
-     T getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext);
+     T getExtensionObject(Logger logger, MetricRegistry metricRegistry, LabeledScenarioContext scriptContext);
 
     /**
      * @return a simple name at the root of the variable namespace to anchor this extension.
      */
     default String getBaseVariableName() {
-        return getClass().getAnnotation(Service.class).selector();
+        return this.getClass().getAnnotation(Service.class).selector();
     }
 
     /**
