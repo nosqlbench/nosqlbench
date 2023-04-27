@@ -46,7 +46,7 @@ public class HistoIntervalLoggerTest {
         final int significantDigits = 4;
 
         final NBMetricHistogram NBHistogram = new NBMetricHistogram(
-                Map.of("name","histo1"), new DeltaHdrHistogramReservoir("histo1", significantDigits));
+                Map.of("name", "histo1"), new DeltaHdrHistogramReservoir(Map.of("name", "histo1"), significantDigits));
 
         hil.onHistogramAdded("histo1", NBHistogram);
 
@@ -70,13 +70,13 @@ public class HistoIntervalLoggerTest {
 
         assertThat(histos.size()).isEqualTo(2);
         assertThat(histos.get(0)).isInstanceOf(Histogram.class);
-        assertThat(((Histogram)histos.get(0)).getNumberOfSignificantValueDigits()).isEqualTo(significantDigits);
+        assertThat(((Histogram) histos.get(0)).getNumberOfSignificantValueDigits()).isEqualTo(significantDigits);
     }
 
     private void delay(final int i) {
         final long now = System.currentTimeMillis();
-        final long target = now+i;
-        while (System.currentTimeMillis()<target) try {
+        final long target = now + i;
+        while (System.currentTimeMillis() < target) try {
             Thread.sleep(target - System.currentTimeMillis());
         } catch (final InterruptedException ignored) {
         }

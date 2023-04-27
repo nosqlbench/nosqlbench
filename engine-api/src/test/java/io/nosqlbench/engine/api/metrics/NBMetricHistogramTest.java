@@ -21,25 +21,28 @@ import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class NBMetricHistogramTest {
 
     @Test
     public void testNicerHistogramValues() {
-        final NBMetricHistogram nh = new NBMetricHistogram("testhisto",new DeltaHdrHistogramReservoir("testhisto",4));
+        final NBMetricHistogram nh = new NBMetricHistogram("testhisto", new DeltaHdrHistogramReservoir(
+                Map.of("name", "testhisto"), 4));
         for (int i = 1; 100 >= i; i++) nh.update(i);
         final ConvenientSnapshot snapshot = nh.getSnapshot();
         assertThat(snapshot.getMax()).isEqualTo(100);
 
         nh.getDeltaSnapshot(500); // Just to reset
-        for (int i = 1; 200 >= i; i++ ) nh.update(i);
+        for (int i = 1; 200 >= i; i++) nh.update(i);
         final ConvenientSnapshot deltaSnapshot1 = nh.getDeltaSnapshot(500);
         assertThat(deltaSnapshot1.getMax()).isEqualTo(200);
 
         final ConvenientSnapshot cachedSnapshot = nh.getSnapshot();
         assertThat(cachedSnapshot.getMax()).isEqualTo(200);
-        for (int i = 1; 300 >= i; i++ ) nh.update(i);
+        for (int i = 1; 300 >= i; i++) nh.update(i);
         final ConvenientSnapshot stillCachedSnapshot = nh.getSnapshot();
         assertThat(stillCachedSnapshot.getMax()).isEqualTo(200);
 

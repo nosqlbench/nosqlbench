@@ -24,6 +24,7 @@ import io.nosqlbench.api.testutils.Result;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -141,18 +142,18 @@ public class RateLimiterPerfTestMethods {
             System.out.println(rl);
 
             System.out.println(ANSI_Blue +
-                String.format(
-                    "spec: %s\n count: %9d, duration %.5fS, acquires/s %.3f, nanos/op: %f\n delay: %d (%.5fS)",
-                    rl.getRateSpec(),
-                    count, duration, acqops, (1_000_000_000.0d / acqops), divDelay, (divDelay / 1_000_000_000.0d)) +
-                ANSI_Reset);
+                    String.format(
+                            "spec: %s\n count: %9d, duration %.5fS, acquires/s %.3f, nanos/op: %f\n delay: %d (%.5fS)",
+                            rl.getRateSpec(),
+                            count, duration, acqops, (1_000_000_000.0d / acqops), divDelay, (divDelay / 1_000_000_000.0d)) +
+                    ANSI_Reset);
 
         }
 
         long[] delays = results.stream().mapToLong(Long::longValue).toArray();
 
         String delaySummary = Arrays.stream(delays).mapToDouble(d -> (double) d / 1_000_000_000.0D).mapToObj(d -> String.format("%.3f", d))
-            .collect(Collectors.joining(","));
+                .collect(Collectors.joining(","));
         System.out.println("delays in seconds:\n" + delaySummary);
         System.out.println("delays in ns:\n" + Arrays.toString(delays));
 
@@ -190,7 +191,7 @@ public class RateLimiterPerfTestMethods {
 
         System.out.format("Running %,d iterations split over %,d threads (%,d per) at %,.3f ops/s\n", iterations, threadCount, (iterations / threadCount), rate);
         RateLimiterPerfTestMethods.Acquirer[] threads = new RateLimiterPerfTestMethods.Acquirer[threadCount];
-        DeltaHdrHistogramReservoir stats = new DeltaHdrHistogramReservoir("times", 5);
+        DeltaHdrHistogramReservoir stats = new DeltaHdrHistogramReservoir(Map.of("name", "times"), 5);
 
         CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
 

@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -50,8 +51,8 @@ public class ThreadLocalNamedTimers {
         if (timers.containsKey("name")) {
             logger.warn("A timer named '" + name + "' was already defined and initialized.");
         }
-        Timer timer = ActivityMetrics.timer(pop.getStaticConfig("alias",String.class)+"."+name);
-        timers.put(name, timer);
+        timers.put(name, ActivityMetrics.timer(NBLabeledElement.forMap(Map.of("name", name)),
+                pop.getStaticConfig("alias", String.class) + "." + name, ActivityMetrics.DEFAULT_HDRDIGITS));
     }
 
     public void start(String name) {

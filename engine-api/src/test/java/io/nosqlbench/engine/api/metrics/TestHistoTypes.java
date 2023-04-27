@@ -22,6 +22,8 @@ import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 public class TestHistoTypes {
 
     @Test
@@ -31,7 +33,7 @@ public class TestHistoTypes {
 
         // Use the defaults that you get with "Timer()"
         ExponentiallyDecayingReservoir expRes = new ExponentiallyDecayingReservoir(1028,0.015,c);
-        DeltaHdrHistogramReservoir hdrRes = new DeltaHdrHistogramReservoir("dr",4);
+        DeltaHdrHistogramReservoir hdrRes = new DeltaHdrHistogramReservoir(Map.of("name", "dr"),4);
         long max=100000000;
 
         for (long i = 0; i < max; i++) {
