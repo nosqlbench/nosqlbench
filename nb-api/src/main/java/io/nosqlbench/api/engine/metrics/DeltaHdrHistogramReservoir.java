@@ -35,7 +35,6 @@ import java.util.Map;
  *
  * <p>This implementation also supports attaching a single log writer. If a log writer is attached, each
  * time an interval is snapshotted internally, the data will also be written to an hdr log via the writer.</p>
- *
  */
 public final class DeltaHdrHistogramReservoir implements Reservoir, NBLabeledElement {
     private static final Logger logger = LogManager.getLogger(DeltaHdrHistogramReservoir.class);
@@ -45,16 +44,16 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, NBLabeledEle
 
     private Histogram intervalHistogram;
     private long intervalHistogramEndTime = System.currentTimeMillis();
-    private final Map<String,String> labels;
+    private final Map<String, String> labels;
     private HistogramLogWriter writer;
 
     /**
      * Create a reservoir with a default recorder. This recorder should be suitable for most usage.
      *
-     * @param name the name to give to the reservoir, for logging purposes
+     * @param labels              the labels to give to the reservoir, for logging purposes
      * @param significantDigits how many significant digits to track in the reservoir
      */
-    public DeltaHdrHistogramReservoir(final Map<String,String> labels, final int significantDigits) {
+    public DeltaHdrHistogramReservoir(final Map<String, String> labels, final int significantDigits) {
         this.labels = labels;
         recorder = new Recorder(significantDigits);
 
@@ -122,6 +121,7 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, NBLabeledEle
 
     /**
      * Write the last results via the log writer.
+     *
      * @param writer the log writer to use
      */
     public void write(final HistogramLogWriter writer) {
