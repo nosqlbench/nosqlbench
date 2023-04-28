@@ -17,15 +17,20 @@
 package io.nosqlbench.api.engine.metrics.reporters;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Timer;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricMeter;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
+import io.nosqlbench.api.testutils.Perf;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,6 +78,42 @@ public class PromExpositionFormatTest {
             mynameismud\\{label3="value3",quantile="0.98"} 36223.0
             mynameismud\\{label3="value3",quantile="0.99"} 36607.0
             mynameismud\\{label3="value3",quantile="0.999"} 36927.0
+            """));
+    }
+
+    @Test
+    public void testTimerFormat() {
+
+        final DeltaHdrHistogramReservoir hdr = new DeltaHdrHistogramReservoir(Map.of("label4","value4"),3);
+        for (long i = 0; 1000 > i; i++)
+        {
+            hdr.update(i * 37L);
+        }
+        final NBMetricTimer nbMetricTimer = new NBMetricTimer(Map.of("name","monsieurmarius","label4", "value4"), hdr);
+        final String formatted = PromExpositionFormat.format(this.nowclock, nbMetricTimer);
+
+        assertThat(formatted).matches(Pattern.compile("""
+            # TYPE monsieurmarius_total counter
+            monsieurmarius_total\\{label4="value4"} 0 \\d+
+            # TYPE monsieurmarius summary
+            monsieurmarius\\{label4="value4",quantile="0.5"} 18463.0
+            monsieurmarius\\{label4="value4",quantile="0.75"} 27727.0
+            monsieurmarius\\{label4="value4",quantile="0.9"} 33279.0
+            monsieurmarius\\{label4="value4",quantile="0.95"} 35135.0
+            monsieurmarius\\{label4="value4",quantile="0.98"} 36223.0
+            monsieurmarius\\{label4="value4",quantile="0.99"} 36607.0
+            monsieurmarius\\{label4="value4",quantile="0.999"} 36927.0
+            """));
+    }
+
+    @Test
+    public void testMeterFormat() {
+        final NBMetricMeter nbMetricMeter = new NBMetricMeter(Map.of("name","eponine","label5", "value5"));
+        final String formatted = PromExpositionFormat.format(this.nowclock, nbMetricMeter);
+
+        assertThat(formatted).matches(Pattern.compile("""
+            # TYPE eponine_total counter
+            eponine_total\\{label5="value5"} 0 \\d+
             """));
     }
 
