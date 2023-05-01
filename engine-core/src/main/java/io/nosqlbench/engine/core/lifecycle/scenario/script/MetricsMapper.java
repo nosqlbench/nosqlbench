@@ -40,16 +40,14 @@ import java.util.stream.Collectors;
 public enum MetricsMapper {
     ;
     private static final Logger logger = LogManager.getLogger(MetricsMapper.class);
-    private static final Set<Class<?>> metricsElements = new HashSet<>();
-
-    static {
-        this.add(Snapshot.class);
-        this.add(Gauge.class);
-        this.add(Histogram.class);
-        this.add(Timer.class);
-        this.add(Counter.class);
-        this.add(Meter.class);
-    }
+    private static final Set<Class<?>> metricsElements = new HashSet<>() {{
+        add(Snapshot.class);
+        add(Gauge.class);
+        add(Histogram.class);
+        add(Timer.class);
+        add(Counter.class);
+        add(Meter.class);
+    }};
 
     private static final Predicate<Method> isSimpleGetter = method ->
         method.getName().startsWith("get")
