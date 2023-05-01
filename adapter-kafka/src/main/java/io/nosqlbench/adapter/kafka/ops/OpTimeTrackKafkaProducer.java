@@ -1,18 +1,17 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package io.nosqlbench.adapter.kafka.ops;
@@ -20,6 +19,8 @@ package io.nosqlbench.adapter.kafka.ops;
 import io.nosqlbench.adapter.kafka.KafkaSpace;
 import io.nosqlbench.adapter.kafka.exception.KafkaAdapterUnexpectedException;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
+import io.nosqlbench.engine.api.metrics.MessageSequenceNumberSendingHandler;
+import io.nosqlbench.engine.api.metrics.EndToEndMetricsAdapterUtil;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -31,6 +32,10 @@ import org.apache.kafka.common.errors.ProducerFencedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.kafka.common.errors.TimeoutException;
@@ -38,13 +43,17 @@ import org.apache.kafka.common.errors.InterruptException;
 
 public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
 
-    private final static Logger logger = LogManager.getLogger("OpTimeTrackKafkaProducer");
+    private static final Logger logger = LogManager.getLogger("OpTimeTrackKafkaProducer");
 
     private final boolean transactionEnabled;
 
     private final boolean asyncMsgAck;
     private final boolean transactEnabledConfig;
     private final int txnBatchNum;
+    private final ThreadLocal<Map<String, MessageSequenceNumberSendingHandler>> MessageSequenceNumberSendingHandlersThreadLocal =
+        ThreadLocal.withInitial(HashMap::new);
+    private final boolean seqTracking;
+    private final Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet;
 
     enum TxnProcResult {
         SUCCESS,
@@ -55,210 +64,201 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
 
 
     // Keep track the transaction count per thread
-    private static ThreadLocal<Integer>
+    private static final ThreadLocal<Integer>
         txnBatchTrackingCntTL = ThreadLocal.withInitial(() -> 0);
 
-    private static ThreadLocal<TxnProcResult>
+    private static final ThreadLocal<TxnProcResult>
         txnProcResultTL = ThreadLocal.withInitial(() -> TxnProcResult.SUCCESS);
 
     private final KafkaProducer<String, String> producer;
 
-    public OpTimeTrackKafkaProducer(KafkaSpace kafkaSpace,
-                                    boolean asyncMsgAck,
-                                    boolean transactEnabledConfig,
-                                    int txnBatchNum,
-                                    KafkaProducer<String, String> producer) {
+    public OpTimeTrackKafkaProducer(final KafkaSpace kafkaSpace,
+                                    final boolean asyncMsgAck,
+                                    final boolean transactEnabledConfig,
+                                    final int txnBatchNum,
+                                    final boolean seqTracking,
+                                    final Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> errSimuTypeSet,
+                                    final KafkaProducer<String, String> producer) {
         super(kafkaSpace);
         this.asyncMsgAck = asyncMsgAck;
         this.transactEnabledConfig = transactEnabledConfig;
         this.txnBatchNum = txnBatchNum;
-        this.transactionEnabled = transactEnabledConfig && (txnBatchNum > 2);
+        this.seqTracking = seqTracking;
+        this.errSimuTypeSet = errSimuTypeSet;
+        transactionEnabled = transactEnabledConfig && 2 < txnBatchNum;
         this.producer = producer;
     }
 
     public static int getTxnBatchTrackingCntTL() {
-        return txnBatchTrackingCntTL.get();
+        return OpTimeTrackKafkaProducer.txnBatchTrackingCntTL.get();
     }
     public static void incTxnBatchTrackingCnt() {
-        txnBatchTrackingCntTL.set(getTxnBatchTrackingCntTL() + 1);
+        OpTimeTrackKafkaProducer.txnBatchTrackingCntTL.set(OpTimeTrackKafkaProducer.getTxnBatchTrackingCntTL() + 1);
     }
     public static void resetTxnBatchTrackingCnt() {
-        txnBatchTrackingCntTL.set(0);
+        OpTimeTrackKafkaProducer.txnBatchTrackingCntTL.set(0);
     }
 
     public static TxnProcResult getTxnProcResultTL() {
-        return txnProcResultTL.get();
+        return OpTimeTrackKafkaProducer.txnProcResultTL.get();
     }
-    public static void setTxnProcResultTL(TxnProcResult result) {
-        txnProcResultTL.set(result);
+    public static void setTxnProcResultTL(final TxnProcResult result) {
+        OpTimeTrackKafkaProducer.txnProcResultTL.set(result);
     }
-    public static void resetTxnProcResultTL(TxnProcResult result) {
-        txnProcResultTL.set(TxnProcResult.SUCCESS);
+    public static void resetTxnProcResultTL(final TxnProcResult result) {
+        OpTimeTrackKafkaProducer.txnProcResultTL.set(TxnProcResult.SUCCESS);
     }
 
-    private void processMsgTransaction(long cycle, KafkaProducer<String, String> producer) {
+    private void processMsgTransaction(final long cycle, final KafkaProducer<String, String> producer) {
         TxnProcResult result = TxnProcResult.SUCCESS;
 
-        if (transactionEnabled) {
-            int txnBatchTackingCnt = getTxnBatchTrackingCntTL();
+        if (this.transactionEnabled) {
+            final int txnBatchTackingCnt = OpTimeTrackKafkaProducer.getTxnBatchTrackingCntTL();
 
             try {
-                if (txnBatchTackingCnt == 0) {
+                if (0 == txnBatchTackingCnt) {
                     // Start a new transaction when first starting the processing
                     producer.beginTransaction();
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("New transaction started ( {}, {}, {}, {}, {} )",
-                            cycle, producer, transactEnabledConfig, txnBatchNum, getTxnBatchTrackingCntTL());
-                    }
-                } else if ( (txnBatchTackingCnt % (txnBatchNum - 1) == 0) ||
-                            (cycle == (kafkaSpace.getTotalCycleNum() - 1)) ) {
+                    if (OpTimeTrackKafkaProducer.logger.isDebugEnabled())
+                        OpTimeTrackKafkaProducer.logger.debug("New transaction started ( {}, {}, {}, {}, {} )",
+                            cycle, producer, this.transactEnabledConfig, this.txnBatchNum, OpTimeTrackKafkaProducer.getTxnBatchTrackingCntTL());
+                } else if ((0 == (txnBatchTackingCnt % (txnBatchNum - 1))) ||
+                    (cycle == (this.kafkaSpace.getTotalCycleNum() - 1))) synchronized (this) {
+                    // Commit the current transaction
+                    if (OpTimeTrackKafkaProducer.logger.isDebugEnabled())
+                        OpTimeTrackKafkaProducer.logger.debug("Start committing transaction ... ( {}, {}, {}, {}, {} )",
+                            cycle, producer, this.transactEnabledConfig, this.txnBatchNum, OpTimeTrackKafkaProducer.getTxnBatchTrackingCntTL());
+                    producer.commitTransaction();
+                    if (OpTimeTrackKafkaProducer.logger.isDebugEnabled())
+                        OpTimeTrackKafkaProducer.logger.debug("Transaction committed ( {}, {}, {}, {}, {} )",
+                            cycle, producer, this.transactEnabledConfig, this.txnBatchNum, OpTimeTrackKafkaProducer.getTxnBatchTrackingCntTL());
 
-                    synchronized (this) {
-                        // Commit the current transaction
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Start committing transaction ... ( {}, {}, {}, {}, {} )",
-                                cycle, producer, transactEnabledConfig, txnBatchNum, getTxnBatchTrackingCntTL());
-                        }
-                        producer.commitTransaction();
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Transaction committed ( {}, {}, {}, {}, {} )",
-                                cycle, producer, transactEnabledConfig, txnBatchNum, getTxnBatchTrackingCntTL());
-                        }
-
-                        // Start a new transaction
-                        producer.beginTransaction();
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("New transaction started ( {}, {}, {}, {}, {} )",
-                                cycle, producer, transactEnabledConfig, txnBatchNum, getTxnBatchTrackingCntTL());
-                        }
-                    }
+                    // Start a new transaction
+                    producer.beginTransaction();
+                    if (OpTimeTrackKafkaProducer.logger.isDebugEnabled())
+                        OpTimeTrackKafkaProducer.logger.debug("New transaction started ( {}, {}, {}, {}, {} )",
+                            cycle, producer, this.transactEnabledConfig, this.txnBatchNum, OpTimeTrackKafkaProducer.getTxnBatchTrackingCntTL());
                 }
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 e.printStackTrace();
-                if ( (e instanceof IllegalStateException) ||
-                     (e instanceof ProducerFencedException) ||
-                     (e instanceof UnsupportedOperationException) ||
-                     (e instanceof AuthorizationException) ) {
-                    result = TxnProcResult.FATAL_ERROR;
-                }
-                else if ( (e instanceof TimeoutException ) ||
-                          (e instanceof  InterruptException)) {
-                    result = TxnProcResult.RECOVERABLE_ERROR;
-                }
-                else {
-                    result = TxnProcResult.UNKNOWN_ERROR;
-                }
+                if ( e instanceof IllegalStateException ||
+                    e instanceof ProducerFencedException ||
+                    e instanceof UnsupportedOperationException ||
+                    e instanceof AuthorizationException) result = TxnProcResult.FATAL_ERROR;
+                else if ( e instanceof TimeoutException ||
+                    e instanceof  InterruptException) result = TxnProcResult.RECOVERABLE_ERROR;
+                else result = TxnProcResult.UNKNOWN_ERROR;
             }
         }
 
-        setTxnProcResultTL(result);
+        OpTimeTrackKafkaProducer.setTxnProcResultTL(result);
     }
 
     @Override
-    void cycleMsgProcess(long cycle, Object cycleObj) {
+    void cycleMsgProcess(final long cycle, final Object cycleObj) {
         // For producer, cycleObj represents a "message" (ProducerRecord)
-        assert (cycleObj != null);
+        assert null != cycleObj;
 
-        if (kafkaSpace.isShuttigDown()) {
-            if (transactionEnabled) {
-                try {
-                    producer.abortTransaction();
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Abort open transaction while shutting down ( {}, {}, {}, {}, {} )",
-                            cycle, producer, transactEnabledConfig, txnBatchNum, getTxnBatchTrackingCntTL());
-                    }
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
+        if (this.kafkaSpace.isShuttigDown()) {
+            if (this.transactionEnabled) try {
+                this.producer.abortTransaction();
+                if (OpTimeTrackKafkaProducer.logger.isDebugEnabled())
+                    OpTimeTrackKafkaProducer.logger.debug("Abort open transaction while shutting down ( {}, {}, {}, {}, {} )",
+                        cycle, this.producer, this.transactEnabledConfig, this.txnBatchNum, OpTimeTrackKafkaProducer.getTxnBatchTrackingCntTL());
+            } catch (final Exception e) {
+                e.printStackTrace();
             }
             return;
         }
 
-        processMsgTransaction(cycle, producer);
-        TxnProcResult result = getTxnProcResultTL();
+        this.processMsgTransaction(cycle, this.producer);
+        final TxnProcResult result = OpTimeTrackKafkaProducer.getTxnProcResultTL();
 
-        if (result == TxnProcResult.RECOVERABLE_ERROR) {
-            try {
-                producer.abortTransaction();
-            }
-            catch (Exception e) {
-                throw new KafkaAdapterUnexpectedException("Aborting transaction failed!");
-            }
-        } else if (result == TxnProcResult.FATAL_ERROR) {
-            throw new KafkaAdapterUnexpectedException("Fatal error when initializing or committing transactions!");
-        } else if (result == TxnProcResult.UNKNOWN_ERROR) {
-            logger.debug("Unexpected error when initializing or committing transactions!");
+        if (TxnProcResult.RECOVERABLE_ERROR == result) try {
+            this.producer.abortTransaction();
+        } catch (final Exception e) {
+            throw new KafkaAdapterUnexpectedException("Aborting transaction failed!");
         }
+        else if (TxnProcResult.FATAL_ERROR == result)
+            throw new KafkaAdapterUnexpectedException("Fatal error when initializing or committing transactions!");
+        else if (TxnProcResult.UNKNOWN_ERROR == result)
+            OpTimeTrackKafkaProducer.logger.debug("Unexpected error when initializing or committing transactions!");
 
-        ProducerRecord<String, String> message = (ProducerRecord<String, String>) cycleObj;
+        final ProducerRecord<String, String> message = (ProducerRecord<String, String>) cycleObj;
+        if (this.seqTracking) {
+            final long nextSequenceNumber = this.getMessageSequenceNumberSendingHandler(message.topic())
+                .getNextSequenceNumber(this.errSimuTypeSet);
+            message.headers().add(KafkaAdapterUtil.MSG_SEQUENCE_NUMBER, String.valueOf(nextSequenceNumber).getBytes(StandardCharsets.UTF_8));
+        }
         try {
-            if (result == TxnProcResult.SUCCESS) {
-                Future<RecordMetadata> responseFuture = producer.send(message, new Callback() {
+            if (TxnProcResult.SUCCESS == result) {
+                final Future<RecordMetadata> responseFuture = this.producer.send(message, new Callback() {
                     @Override
-                    public void onCompletion(RecordMetadata recordMetadata, Exception e) {
-                        if (asyncMsgAck) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Message sending with async ack. is successful ({}) - {}, {}",
-                                    cycle, producer, recordMetadata);
-                            }
-                        }
+                    public void onCompletion(final RecordMetadata recordMetadata, final Exception e) {
+                        if (OpTimeTrackKafkaProducer.this.asyncMsgAck)
+                            if (OpTimeTrackKafkaProducer.logger.isDebugEnabled())
+                                OpTimeTrackKafkaProducer.logger.debug("Message sending with async ack. is successful ({}) - {}, {}",
+                                    cycle, OpTimeTrackKafkaProducer.this.producer, recordMetadata);
                     }
                 });
 
-                if (!asyncMsgAck) {
-                    try {
-                        RecordMetadata recordMetadata = responseFuture.get();
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Message sending with sync ack. is successful ({}) - {}, {}",
-                                cycle, producer, recordMetadata);
-                        }
-                    } catch (InterruptedException | ExecutionException e) {
-                        KafkaAdapterUtil.messageErrorHandling(
-                            e,
-                            kafkaSpace.isStrictMsgErrorHandling(),
-                            "Unexpected error when waiting to receive message-send ack from the Kafka cluster." +
-                                "\n-----\n" + e);
-                    }
+                if (!this.asyncMsgAck) try {
+                    final RecordMetadata recordMetadata = responseFuture.get();
+                    if (OpTimeTrackKafkaProducer.logger.isDebugEnabled())
+                        OpTimeTrackKafkaProducer.logger.debug("Message sending with sync ack. is successful ({}) - {}, {}",
+                            cycle, this.producer, recordMetadata);
+                } catch (final InterruptedException | ExecutionException e) {
+                    KafkaAdapterUtil.messageErrorHandling(
+                        e,
+                        this.kafkaSpace.isStrictMsgErrorHandling(),
+                        "Unexpected error when waiting to receive message-send ack from the Kafka cluster." +
+                            "\n-----\n" + e);
                 }
 
-                incTxnBatchTrackingCnt();
+                OpTimeTrackKafkaProducer.incTxnBatchTrackingCnt();
             }
 
         }
-        catch ( ProducerFencedException | OutOfOrderSequenceException |
-                UnsupportedOperationException | AuthorizationException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Fatal error when sending a message ({}) - {}, {}",
-                    cycle, producer, message);
-            }
+        catch ( final ProducerFencedException | OutOfOrderSequenceException |
+                      UnsupportedOperationException | AuthorizationException e) {
+            if (OpTimeTrackKafkaProducer.logger.isDebugEnabled())
+                OpTimeTrackKafkaProducer.logger.debug("Fatal error when sending a message ({}) - {}, {}",
+                    cycle, this.producer, message);
             throw new KafkaAdapterUnexpectedException(e);
         }
-        catch (IllegalStateException | KafkaException e) {
-            if (transactionEnabled) {
+        catch (final IllegalStateException | KafkaException e) {
+            if (this.transactionEnabled) {
 
             }
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             throw new KafkaAdapterUnexpectedException(e);
         }
     }
 
+    @Override
     public void close() {
         try {
-            if (producer != null) {
-                if (transactionEnabled) producer.commitTransaction();
-                producer.close();
+            if (null != producer) {
+                if (this.transactionEnabled) {
+                    this.producer.commitTransaction();
+                }
+                this.producer.close();
             }
 
-            this.txnBatchTrackingCntTL.remove();
+            txnBatchTrackingCntTL.remove();
         }
-        catch (IllegalStateException ise) {
+        catch (final IllegalStateException ise) {
             // If a producer is already closed, that's fine.
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private MessageSequenceNumberSendingHandler getMessageSequenceNumberSendingHandler(final String topicName) {
+        return this.MessageSequenceNumberSendingHandlersThreadLocal.get()
+            .computeIfAbsent(topicName, k -> new MessageSequenceNumberSendingHandler());
     }
 }

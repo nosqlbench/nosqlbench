@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package io.nosqlbench.adapter.pulsar.ops;
 
 import com.codahale.metrics.Timer;
+import com.codahale.metrics.Timer.Context;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterAsyncOperationFailedException;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import io.nosqlbench.adapter.pulsar.util.*;
+import io.nosqlbench.engine.api.metrics.ReceivedMessageSequenceTracker;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,6 +32,7 @@ import org.apache.pulsar.client.api.transaction.Transaction;
 import org.apache.pulsar.common.schema.KeyValue;
 import org.apache.pulsar.shade.org.apache.avro.AvroRuntimeException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +42,7 @@ import java.util.function.Supplier;
 
 public class MessageConsumerOp extends PulsarClientOp {
 
-    private final static Logger logger = LogManager.getLogger(MessageConsumerOp.class);
+    private static final Logger logger = LogManager.getLogger(MessageConsumerOp.class);
 
     private final boolean useTransact;
     private final boolean seqTracking;
@@ -50,18 +53,18 @@ public class MessageConsumerOp extends PulsarClientOp {
     private final Consumer<?> consumer;
     private final int consumerTimeoutInSec;
 
-    public MessageConsumerOp(PulsarAdapterMetrics pulsarAdapterMetrics,
-                             PulsarClient pulsarClient,
-                             Schema<?> pulsarSchema,
-                             boolean asyncApi,
-                             boolean useTransact,
-                             boolean seqTracking,
-                             Supplier<Transaction> transactSupplier,
-                             String payloadRttField,
-                             EndToEndStartingTimeSource e2eStartingTimeSrc,
-                             Function<String, ReceivedMessageSequenceTracker> receivedMessageSequenceTrackerForTopic,
-                             Consumer<?> consumer,
-                             int consumerTimeoutInSec) {
+    public MessageConsumerOp(final PulsarAdapterMetrics pulsarAdapterMetrics,
+                             final PulsarClient pulsarClient,
+                             final Schema<?> pulsarSchema,
+                             final boolean asyncApi,
+                             final boolean useTransact,
+                             final boolean seqTracking,
+                             final Supplier<Transaction> transactSupplier,
+                             final String payloadRttField,
+                             final EndToEndStartingTimeSource e2eStartingTimeSrc,
+                             final Function<String, ReceivedMessageSequenceTracker> receivedMessageSequenceTrackerForTopic,
+                             final Consumer<?> consumer,
+                             final int consumerTimeoutInSec) {
         super(pulsarAdapterMetrics, pulsarClient, pulsarSchema, asyncApi);
 
         this.useTransact = useTransact;
@@ -75,193 +78,158 @@ public class MessageConsumerOp extends PulsarClientOp {
     }
 
     @Override
-    public Object apply(long value) {
-        final Transaction transaction;
-        if (useTransact) {
-            // if you are in a transaction you cannot set the schema per-message
-            transaction = transactSupplier.get();
+    public Object apply(final long value) {
+        Transaction transaction;
+        // if you are in a transaction you cannot set the schema per-message
+        if (this.useTransact) transaction = this.transactSupplier.get();
+        else transaction = null;
+
+        if (!this.asyncApi) try {
+            final Message<?> message;
+
+            // wait forever
+            if (0 >= consumerTimeoutInSec) message = this.consumer.receive();
+            else {
+                message = this.consumer.receive(this.consumerTimeoutInSec, TimeUnit.SECONDS);
+                if (null == message) if (MessageConsumerOp.logger.isDebugEnabled())
+                    MessageConsumerOp.logger.debug("Failed to sync-receive a message before time out ({} seconds)", this.consumerTimeoutInSec);
+            }
+
+            this.handleMessage(transaction, message);
+        } catch (final Exception e) {
+            throw new PulsarAdapterUnexpectedException("Sync message receiving failed - timeout value: " + this.consumerTimeoutInSec + " seconds ");
         }
-        else {
-            transaction = null;
-        }
-
-        if (!asyncApi) {
-            try {
-                Message<?> message;
-
-                if (consumerTimeoutInSec <= 0) {
-                    // wait forever
-                    message = consumer.receive();
+        else try {
+            CompletableFuture<? extends Message<?>> msgRecvFuture = this.consumer.receiveAsync();
+            // add commit step
+            if (this.useTransact) msgRecvFuture = msgRecvFuture.thenCompose(msg -> {
+                    final Context ctx = this.transactionCommitTimer.time();
+                    return transaction
+                        .commit()
+                        .whenComplete((m, e) -> ctx.close())
+                        .thenApply(v -> msg);
                 }
-                else {
-                    message = consumer.receive(consumerTimeoutInSec, TimeUnit.SECONDS);
-                    if (message == null) {
-                        if ( logger.isDebugEnabled() ) {
-                            logger.debug("Failed to sync-receive a message before time out ({} seconds)", consumerTimeoutInSec);
-                        }
-                    }
-                }
+            );
 
-                handleMessage(transaction, message);
-            }
-            catch (Exception e) {
-                throw new PulsarAdapterUnexpectedException("" +
-                    "Sync message receiving failed - timeout value: " + consumerTimeoutInSec + " seconds ");
-            }
-        }
-        else {
-            try {
-                CompletableFuture<? extends Message<?>> msgRecvFuture = consumer.receiveAsync();
-                if (useTransact) {
-                    // add commit step
-                    msgRecvFuture = msgRecvFuture.thenCompose(msg -> {
-                            Timer.Context ctx = transactionCommitTimer.time();
-                            return transaction
-                                .commit()
-                                .whenComplete((m,e) -> ctx.close())
-                                .thenApply(v-> msg);
-                        }
-                    );
+            msgRecvFuture.thenAccept(message -> {
+                try {
+                    this.handleMessage(transaction, message);
+                } catch (final PulsarClientException | TimeoutException e) {
+                    throw new PulsarAdapterAsyncOperationFailedException(e);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (final ExecutionException e) {
+                    throw new PulsarAdapterAsyncOperationFailedException(e.getCause());
                 }
-
-                msgRecvFuture.thenAccept(message -> {
-                    try {
-                        handleMessage(transaction, message);
-                    } catch (PulsarClientException | TimeoutException e) {
-                        throw new PulsarAdapterAsyncOperationFailedException(e);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    } catch (ExecutionException e) {
-                        throw new PulsarAdapterAsyncOperationFailedException(e.getCause());
-                    }
-                }).exceptionally(ex -> {
-                    throw new PulsarAdapterAsyncOperationFailedException(ex);
-                });
-            }
-            catch (Exception e) {
-                throw new PulsarAdapterUnexpectedException(e);
-            }
+            }).exceptionally(ex -> {
+                throw new PulsarAdapterAsyncOperationFailedException(ex);
+            });
+        } catch (final Exception e) {
+            throw new PulsarAdapterUnexpectedException(e);
         }
 
         return null;
     }
 
-    private void handleMessage(Transaction transaction, Message<?> message)
+    private void handleMessage(final Transaction transaction, final Message<?> message)
         throws PulsarClientException, InterruptedException, ExecutionException, TimeoutException {
 
         // acknowledge the message as soon as possible
-        if (!useTransact) {
-            consumer.acknowledgeAsync(message.getMessageId())
-                .get(consumerTimeoutInSec, TimeUnit.SECONDS);
-        } else {
-            consumer.acknowledgeAsync(message.getMessageId(), transaction)
-                .get(consumerTimeoutInSec, TimeUnit.SECONDS);
+        if (!this.useTransact) this.consumer.acknowledgeAsync(message.getMessageId())
+            .get(this.consumerTimeoutInSec, TimeUnit.SECONDS);
+        else {
+            this.consumer.acknowledgeAsync(message.getMessageId(), transaction)
+                .get(this.consumerTimeoutInSec, TimeUnit.SECONDS);
 
             // little problem: here we are counting the "commit" time
             // inside the overall time spent for the execution of the consume operation
             // we should refactor this operation as for PulsarProducerOp, and use the passed callback
             // to track with precision the time spent for the operation and for the commit
-            try (Timer.Context ctx = transactionCommitTimer.time()) {
+            try (final Context ctx = this.transactionCommitTimer.time()) {
                 transaction.commit().get();
             }
         }
 
-        if (logger.isDebugEnabled()) {
-            Object decodedPayload = message.getValue();
-            if (decodedPayload instanceof GenericObject) {
+        if (MessageConsumerOp.logger.isDebugEnabled()) {
+            final Object decodedPayload = message.getValue();
+            if (decodedPayload instanceof GenericObject object) {
                 // GenericObject is a wrapper for Primitives, for AVRO/JSON structs and for KeyValu
                 // we fall here with a configured AVRO schema or with AUTO_CONSUME
-                GenericObject object = (GenericObject) decodedPayload;
-                logger.debug("({}) message received: msg-key={}; msg-properties={}; msg-payload={}",
-                    consumer.getConsumerName(),
+                MessageConsumerOp.logger.debug("({}) message received: msg-key={}; msg-properties={}; msg-payload={}",
+                    this.consumer.getConsumerName(),
                     message.getKey(),
                     message.getProperties(),
-                    object.getNativeObject() + "");
+                    String.valueOf(object.getNativeObject()));
             }
-            else {
-                logger.debug("({}) message received: msg-key={}; msg-properties={}; msg-payload={}",
-                    consumer.getConsumerName(),
-                    message.getKey(),
-                    message.getProperties(),
-                    new String(message.getData()));
-            }
+            else MessageConsumerOp.logger.debug("({}) message received: msg-key={}; msg-properties={}; msg-payload={}",
+                this.consumer.getConsumerName(),
+                message.getKey(),
+                message.getProperties(),
+                new String(message.getData(), StandardCharsets.UTF_8));
         }
 
-        if (!payloadRttField.isEmpty()) {
+        if (!this.payloadRttField.isEmpty()) {
             boolean done = false;
-            Object decodedPayload = message.getValue();
+            final Object decodedPayload = message.getValue();
             Long extractedSendTime = null;
             // if Pulsar is able to decode this it is better to let it do the work
             // because Pulsar caches the Schema, handles Schema evolution
             // as much efficiently as possible
-            if (decodedPayload instanceof GenericRecord) { // AVRO and AUTO_CONSUME
-                final GenericRecord pulsarGenericRecord = (GenericRecord) decodedPayload;
+            if (decodedPayload instanceof final GenericRecord pulsarGenericRecord) { // AVRO and AUTO_CONSUME
 
                 Object field = null;
                 // KeyValue is a special wrapper in Pulsar to represent a pair of values
                 // a Key and a Value
-                Object nativeObject = pulsarGenericRecord.getNativeObject();
-                if (nativeObject instanceof KeyValue) {
-                    KeyValue keyValue = (KeyValue) nativeObject;
+                final Object nativeObject = pulsarGenericRecord.getNativeObject();
+                if (nativeObject instanceof KeyValue keyValue) {
                     // look into the Key
-                    if (keyValue.getKey() instanceof GenericRecord) {
-                        GenericRecord keyPart = (GenericRecord) keyValue.getKey();
+                    if (keyValue.getKey() instanceof GenericRecord keyPart) {
                         try {
-                            field = keyPart.getField(payloadRttField);
-                        } catch (AvroRuntimeException err) {
+                            field = keyPart.getField(this.payloadRttField);
+                        } catch (final AvroRuntimeException err) {
                             // field is not in the key
-                            logger.error("Cannot find {} in key {}: {}", payloadRttField, keyPart, err + "");
+                            MessageConsumerOp.logger.error("Cannot find {} in key {}: {}", this.payloadRttField, keyPart, String.valueOf(err));
                         }
                     }
                     // look into the Value
-                    if (keyValue.getValue() instanceof GenericRecord && field == null) {
-                        GenericRecord valuePart = (GenericRecord) keyValue.getValue();
+                    if ((keyValue.getValue() instanceof GenericRecord valuePart) && (null == field)) {
                         try {
-                            field = valuePart.getField(payloadRttField);
-                        } catch (AvroRuntimeException err) {
+                            field = valuePart.getField(this.payloadRttField);
+                        } catch (final AvroRuntimeException err) {
                             // field is not in the value
-                            logger.error("Cannot find {} in value {}: {}", payloadRttField, valuePart, err + "");
+                            MessageConsumerOp.logger.error("Cannot find {} in value {}: {}", this.payloadRttField, valuePart, String.valueOf(err));
                         }
                     }
-                    if (field == null) {
-                        throw new RuntimeException("Cannot find field {}" + payloadRttField + " in " + keyValue.getKey() + " and " + keyValue.getValue());
-                    }
-                } else {
-                    field = pulsarGenericRecord.getField(payloadRttField);
-                }
+                    if (null == field)
+                        throw new RuntimeException("Cannot find field {}" + this.payloadRttField + " in " + keyValue.getKey() + " and " + keyValue.getValue());
+                } else field = pulsarGenericRecord.getField(this.payloadRttField);
 
-                if (field != null) {
-                    if (field instanceof Number) {
-                        extractedSendTime = ((Number) field).longValue();
-                    } else {
-                        extractedSendTime = Long.valueOf(field.toString());
-                    }
-                } else {
-                    logger.error("Cannot find {} in value {}", payloadRttField, pulsarGenericRecord);
-                }
+                if (null != field) if (field instanceof Number) extractedSendTime = ((Number) field).longValue();
+                else extractedSendTime = Long.valueOf(field.toString());
+                else
+                    MessageConsumerOp.logger.error("Cannot find {} in value {}", this.payloadRttField, pulsarGenericRecord);
                 done = true;
             }
             if (!done) {
-                org.apache.avro.Schema avroSchema = getAvroSchemaFromConfiguration();
-                org.apache.avro.generic.GenericRecord avroGenericRecord =
+                final org.apache.avro.Schema avroSchema = this.getAvroSchemaFromConfiguration();
+                final org.apache.avro.generic.GenericRecord avroGenericRecord =
                     PulsarAvroSchemaUtil.GetGenericRecord_ApacheAvro(avroSchema, message.getData());
-                if (avroGenericRecord.hasField(payloadRttField)) {
-                    extractedSendTime = (Long) avroGenericRecord.get(payloadRttField);
-                }
+                if (avroGenericRecord.hasField(this.payloadRttField))
+                    extractedSendTime = (Long) avroGenericRecord.get(this.payloadRttField);
             }
-            if (extractedSendTime != null) {
+            if (null != extractedSendTime) {
                 // fallout expects latencies in "ns" and not in "ms"
-                long delta = TimeUnit.MILLISECONDS
+                final long delta = TimeUnit.MILLISECONDS
                     .toNanos(System.currentTimeMillis() - extractedSendTime);
-                payloadRttHistogram.update(delta);
+                this.payloadRttHistogram.update(delta);
             }
         }
 
         // keep track end-to-end message processing latency
-        if (e2eStartingTimeSrc != EndToEndStartingTimeSource.NONE) {
+        if (EndToEndStartingTimeSource.NONE != e2eStartingTimeSrc) {
             long startTimeStamp = 0L;
 
-            switch (e2eStartingTimeSrc) {
+            switch (this.e2eStartingTimeSrc) {
                 case MESSAGE_PUBLISH_TIME:
                     startTimeStamp = message.getPublishTime();
                     break;
@@ -269,31 +237,33 @@ public class MessageConsumerOp extends PulsarClientOp {
                     startTimeStamp = message.getEventTime();
                     break;
                 case MESSAGE_PROPERTY_E2E_STARTING_TIME:
-                    String startingTimeProperty = message.getProperty("e2e_starting_time");
-                    startTimeStamp = startingTimeProperty != null ? Long.parseLong(startingTimeProperty) : 0L;
+                    final String startingTimeProperty = message.getProperty("e2e_starting_time");
+                    startTimeStamp = (null != startingTimeProperty) ? Long.parseLong(startingTimeProperty) : 0L;
                     break;
             }
 
-            if (startTimeStamp != 0L) {
-                long e2eMsgLatency = System.currentTimeMillis() - startTimeStamp;
-                e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
+            if (0L != startTimeStamp) {
+                final long e2eMsgLatency = System.currentTimeMillis() - startTimeStamp;
+                this.e2eMsgProcLatencyHistogram.update(e2eMsgLatency);
             }
         }
 
         // keep track of message errors and update error counters
-        if (seqTracking) checkAndUpdateMessageErrorCounter(message);
+        if (this.seqTracking) {
+            this.checkAndUpdateMessageErrorCounter(message);
+        }
 
-        int messageSize = message.getData().length;
-        messageSizeHistogram.update(messageSize);
+        final int messageSize = message.getData().length;
+        this.messageSizeHistogram.update(messageSize);
     }
 
-    private void checkAndUpdateMessageErrorCounter(Message<?> message) {
-        String msgSeqIdStr = message.getProperty(PulsarAdapterUtil.MSG_SEQUENCE_NUMBER);
+    private void checkAndUpdateMessageErrorCounter(final Message<?> message) {
+        final String msgSeqIdStr = message.getProperty(PulsarAdapterUtil.MSG_SEQUENCE_NUMBER);
 
         if ( !StringUtils.isBlank(msgSeqIdStr) ) {
-            long sequenceNumber = Long.parseLong(msgSeqIdStr);
-            ReceivedMessageSequenceTracker receivedMessageSequenceTracker =
-                receivedMessageSequenceTrackerForTopic.apply(message.getTopicName());
+            final long sequenceNumber = Long.parseLong(msgSeqIdStr);
+            final ReceivedMessageSequenceTracker receivedMessageSequenceTracker =
+                this.receivedMessageSequenceTrackerForTopic.apply(message.getTopicName());
             receivedMessageSequenceTracker.sequenceNumberReceived(sequenceNumber);
         }
     }

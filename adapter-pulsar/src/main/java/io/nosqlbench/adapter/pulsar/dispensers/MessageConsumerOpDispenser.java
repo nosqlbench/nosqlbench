@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,10 @@ import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.ops.MessageConsumerOp;
 import io.nosqlbench.adapter.pulsar.util.EndToEndStartingTimeSource;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
-import io.nosqlbench.adapter.pulsar.util.ReceivedMessageSequenceTracker;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.CONSUMER_CONF_CUSTOM_KEY;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.CONSUMER_CONF_STD_KEY;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.DOC_LEVEL_PARAMS;
+import io.nosqlbench.engine.api.metrics.ReceivedMessageSequenceTracker;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +36,7 @@ import java.util.function.LongFunction;
 
 public class MessageConsumerOpDispenser extends PulsarClientOpDispenser {
 
-    private final static Logger logger = LogManager.getLogger("MessageConsumerOpDispenser");
+    private static final Logger logger = LogManager.getLogger("MessageConsumerOpDispenser");
 
     private final LongFunction<String> topicPatternFunc;
     private final LongFunction<String> subscriptionNameFunc;
@@ -46,59 +49,59 @@ public class MessageConsumerOpDispenser extends PulsarClientOpDispenser {
     private final ThreadLocal<Map<String, ReceivedMessageSequenceTracker>>
         receivedMessageSequenceTrackersForTopicThreadLocal = ThreadLocal.withInitial(HashMap::new);
 
-    public MessageConsumerOpDispenser(DriverAdapter adapter,
-                                      ParsedOp op,
-                                      LongFunction<String> tgtNameFunc,
-                                      PulsarSpace pulsarSpace) {
+    public MessageConsumerOpDispenser(final DriverAdapter adapter,
+                                      final ParsedOp op,
+                                      final LongFunction<String> tgtNameFunc,
+                                      final PulsarSpace pulsarSpace) {
         super(adapter, op, tgtNameFunc, pulsarSpace);
 
-        this.topicPatternFunc =
-            lookupOptionalStrOpValueFunc(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label);
-        this.subscriptionNameFunc =
-            lookupMandtoryStrOpValueFunc(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionName.label);
-        this.subscriptionTypeFunc =
-            lookupOptionalStrOpValueFunc(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label);
-        this.cycleConsumerNameFunc =
-            lookupOptionalStrOpValueFunc(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.consumerName.label);
-        this.rangesFunc =
-            lookupOptionalStrOpValueFunc(PulsarAdapterUtil.CONSUMER_CONF_CUSTOM_KEY.ranges.label);
-        this.e2eStartTimeSrcParamStrFunc = lookupOptionalStrOpValueFunc(
-            PulsarAdapterUtil.DOC_LEVEL_PARAMS.E2E_STARTING_TIME_SOURCE.label, "none");
-        this.consumerFunction = (l) -> getConsumer(
+        topicPatternFunc =
+            this.lookupOptionalStrOpValueFunc(CONSUMER_CONF_STD_KEY.topicsPattern.label);
+        subscriptionNameFunc =
+            this.lookupMandtoryStrOpValueFunc(CONSUMER_CONF_STD_KEY.subscriptionName.label);
+        subscriptionTypeFunc =
+            this.lookupOptionalStrOpValueFunc(CONSUMER_CONF_STD_KEY.subscriptionType.label);
+        cycleConsumerNameFunc =
+            this.lookupOptionalStrOpValueFunc(CONSUMER_CONF_STD_KEY.consumerName.label);
+        rangesFunc =
+            this.lookupOptionalStrOpValueFunc(CONSUMER_CONF_CUSTOM_KEY.ranges.label);
+        e2eStartTimeSrcParamStrFunc = this.lookupOptionalStrOpValueFunc(
+            DOC_LEVEL_PARAMS.E2E_STARTING_TIME_SOURCE.label, "none");
+        consumerFunction = l -> this.getConsumer(
             tgtNameFunc.apply(l),
-            topicPatternFunc.apply(l),
-            subscriptionNameFunc.apply(l),
-            subscriptionTypeFunc.apply(l),
-            cycleConsumerNameFunc.apply(l),
-            rangesFunc.apply(l));
+            this.topicPatternFunc.apply(l),
+            this.subscriptionNameFunc.apply(l),
+            this.subscriptionTypeFunc.apply(l),
+            this.cycleConsumerNameFunc.apply(l),
+            this.rangesFunc.apply(l));
     }
 
     @Override
-    public MessageConsumerOp apply(long cycle) {
+    public MessageConsumerOp apply(final long cycle) {
         return new MessageConsumerOp(
-            pulsarAdapterMetrics,
-            pulsarClient,
-            pulsarSchema,
-            asyncApiFunc.apply(cycle),
-            useTransactFunc.apply(cycle),
-            seqTrackingFunc.apply(cycle),
-            transactSupplierFunc.apply(cycle),
-            payloadRttFieldFunc.apply(cycle),
-            EndToEndStartingTimeSource.valueOf(e2eStartTimeSrcParamStrFunc.apply(cycle).toUpperCase()),
+            this.pulsarAdapterMetrics,
+            this.pulsarClient,
+            this.pulsarSchema,
+            this.asyncApiFunc.apply(cycle),
+            this.useTransactFunc.apply(cycle),
+            this.seqTrackingFunc.apply(cycle),
+            this.transactSupplierFunc.apply(cycle),
+            this.payloadRttFieldFunc.apply(cycle),
+            EndToEndStartingTimeSource.valueOf(this.e2eStartTimeSrcParamStrFunc.apply(cycle).toUpperCase()),
             this::getReceivedMessageSequenceTracker,
-            consumerFunction.apply(cycle),
-            pulsarSpace.getPulsarNBClientConf().getConsumerTimeoutSeconds()
+            this.consumerFunction.apply(cycle),
+            this.pulsarSpace.getPulsarNBClientConf().getConsumerTimeoutSeconds()
         );
     }
 
-    private ReceivedMessageSequenceTracker getReceivedMessageSequenceTracker(String topicName) {
-        return receivedMessageSequenceTrackersForTopicThreadLocal.get()
-            .computeIfAbsent(topicName, k -> createReceivedMessageSequenceTracker());
+    private ReceivedMessageSequenceTracker getReceivedMessageSequenceTracker(final String topicName) {
+        return this.receivedMessageSequenceTrackersForTopicThreadLocal.get()
+            .computeIfAbsent(topicName, k -> this.createReceivedMessageSequenceTracker());
     }
 
     private ReceivedMessageSequenceTracker createReceivedMessageSequenceTracker() {
-        return new ReceivedMessageSequenceTracker(pulsarAdapterMetrics.getMsgErrOutOfSeqCounter(),
-            pulsarAdapterMetrics.getMsgErrDuplicateCounter(),
-            pulsarAdapterMetrics.getMsgErrLossCounter());
+        return new ReceivedMessageSequenceTracker(this.pulsarAdapterMetrics.getMsgErrOutOfSeqCounter(),
+            this.pulsarAdapterMetrics.getMsgErrDuplicateCounter(),
+            this.pulsarAdapterMetrics.getMsgErrLossCounter());
     }
 }

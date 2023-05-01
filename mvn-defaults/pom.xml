@@ -26,7 +26,7 @@
 
     <properties>
 
-        <revision>5.17.2-SNAPSHOT</revision>
+        <revision>5.17.3-SNAPSHOT</revision>
         <!-- Set this level to override the logging level for tests during build -->
         <project.testlevel>INFO</project.testlevel>
         <!-- Set this level to override the logging level for tests logging configuration during build -->
@@ -215,7 +215,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.90.Final</version>
+                <version>4.1.91.Final</version>
             </dependency>
 
             <dependency>
@@ -309,7 +309,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.420</version>
+                <version>1.12.445</version>
             </dependency>
 
             <dependency>
@@ -339,7 +339,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.12.4</version>
+                <version>2.12.5</version>
             </dependency>
 
             <dependency>
@@ -392,18 +392,18 @@
             <dependency>
                 <groupId>org.graalvm.sdk</groupId>
                 <artifactId>graal-sdk</artifactId>
-                <version>22.3.1</version>
+                <version>22.3.2</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js</artifactId>
-                <version>22.3.1</version>
+                <version>22.3.2</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
-                <version>22.3.1</version>
+                <version>22.3.2</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.tools</groupId>

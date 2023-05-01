@@ -44,16 +44,16 @@ public class KafkaAdapterMetrics implements NBLabeledElement {
     private Counter msgErrDuplicateCounter;
 
     public Histogram getE2eMsgProcLatencyHistogram() {
-        return this.e2eMsgProcLatencyHistogram;
+        return e2eMsgProcLatencyHistogram;
     }
 
     // end-to-end latency
     private Histogram e2eMsgProcLatencyHistogram;
     private final KafkaBaseOpDispenser kafkaBaseOpDispenser;
 
-    public KafkaAdapterMetrics(final KafkaBaseOpDispenser kafkaBaseOpDispenser, final String defaultMetricsPrefix) {
+    public KafkaAdapterMetrics(KafkaBaseOpDispenser kafkaBaseOpDispenser, String defaultMetricsPrefix) {
         this.kafkaBaseOpDispenser = kafkaBaseOpDispenser;
-        defaultAdapterMetricsPrefix = defaultMetricsPrefix;
+        this.defaultAdapterMetricsPrefix = defaultMetricsPrefix;
     }
 
     public String getName() {
@@ -62,52 +62,76 @@ public class KafkaAdapterMetrics implements NBLabeledElement {
 
     @Override
     public Map<String, String> getLabels() {
-        return Map.of("name", this.getName());
+        return Map.of("name", getName());
     }
 
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
-        messageSizeHistogram =
+        this.messageSizeHistogram =
             ActivityMetrics.histogram(
                 this,
-                    this.defaultAdapterMetricsPrefix + "message_size",
+                    defaultAdapterMetricsPrefix + "message_size",
                 ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // Timer metrics
-        bindTimer =
+        this.bindTimer =
             ActivityMetrics.timer(
                 this,
-                    this.defaultAdapterMetricsPrefix + "bind",
+                    defaultAdapterMetricsPrefix + "bind",
                 ActivityMetrics.DEFAULT_HDRDIGITS);
-        executeTimer =
+        this.executeTimer =
             ActivityMetrics.timer(
                 this,
-                    this.defaultAdapterMetricsPrefix + "execute",
+                    defaultAdapterMetricsPrefix + "execute",
                 ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // End-to-end metrics
         // Latency
-        e2eMsgProcLatencyHistogram =
+        this.e2eMsgProcLatencyHistogram =
             ActivityMetrics.histogram(
-                    this.kafkaBaseOpDispenser,
-                    this.defaultAdapterMetricsPrefix + "e2e_msg_latency",
+                    kafkaBaseOpDispenser,
+                    defaultAdapterMetricsPrefix + "e2e_msg_latency",
                 ActivityMetrics.DEFAULT_HDRDIGITS);
         // Error metrics
-        msgErrOutOfSeqCounter =
+        this.msgErrOutOfSeqCounter =
             ActivityMetrics.counter(
-                    this.kafkaBaseOpDispenser,
-                    this.defaultAdapterMetricsPrefix + "err_msg_oos");
-        msgErrLossCounter =
+                    kafkaBaseOpDispenser,
+                    defaultAdapterMetricsPrefix + "err_msg_oos");
+        this.msgErrLossCounter =
             ActivityMetrics.counter(
-                    this.kafkaBaseOpDispenser,
-                    this.defaultAdapterMetricsPrefix + "err_msg_loss");
-        msgErrDuplicateCounter =
+                    kafkaBaseOpDispenser,
+                    defaultAdapterMetricsPrefix + "err_msg_loss");
+        this.msgErrDuplicateCounter =
             ActivityMetrics.counter(
-                    this.kafkaBaseOpDispenser,
-                    this.defaultAdapterMetricsPrefix + "err_msg_dup");
+                    kafkaBaseOpDispenser,
+                    defaultAdapterMetricsPrefix + "err_msg_dup");
     }
 
     public Timer getBindTimer() { return this.bindTimer; }
     public Timer getExecuteTimer() { return this.executeTimer; }
     public Histogram getMessagesizeHistogram() { return this.messageSizeHistogram; }
+
+    public Counter getMsgErrOutOfSeqCounter() {
+        return this.msgErrOutOfSeqCounter;
+    }
+
+    public void setMsgErrOutOfSeqCounter(final Counter msgErrOutOfSeqCounter) {
+        this.msgErrOutOfSeqCounter = msgErrOutOfSeqCounter;
+    }
+
+    public Counter getMsgErrLossCounter() {
+        return this.msgErrLossCounter;
+    }
+
+    public void setMsgErrLossCounter(final Counter msgErrLossCounter) {
+        this.msgErrLossCounter = msgErrLossCounter;
+    }
+
+    public Counter getMsgErrDuplicateCounter() {
+        return this.msgErrDuplicateCounter;
+    }
+
+    public void setMsgErrDuplicateCounter(final Counter msgErrDuplicateCounter) {
+        this.msgErrDuplicateCounter = msgErrDuplicateCounter;
+    }
 }
