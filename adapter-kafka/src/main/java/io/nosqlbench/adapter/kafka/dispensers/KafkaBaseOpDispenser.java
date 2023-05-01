@@ -21,7 +21,6 @@ import io.nosqlbench.adapter.kafka.exception.KafkaAdapterInvalidParamException;
 import io.nosqlbench.adapter.kafka.ops.KafkaOp;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterMetrics;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
-import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil.DOC_LEVEL_PARAMS;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -59,75 +58,77 @@ public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, Kaf
     protected final int totalThreadNum;
     protected final long totalCycleNum;
 
-    protected KafkaBaseOpDispenser(final DriverAdapter adapter,
-                                   final ParsedOp op,
-                                   final LongFunction<String> topicNameStrFunc,
-                                   final KafkaSpace kafkaSpace) {
+    protected KafkaBaseOpDispenser(DriverAdapter adapter,
+                                   ParsedOp op,
+                                   LongFunction<String> topicNameStrFunc,
+                                   KafkaSpace kafkaSpace) {
 
         super(adapter, op);
 
-        parsedOp = op;
+        this.parsedOp = op;
         this.kafkaSpace = kafkaSpace;
 
-        final String defaultMetricsPrefix = this.getDefaultMetricsPrefix(parsedOp);
-        kafkaAdapterMetrics = new KafkaAdapterMetrics(this, defaultMetricsPrefix);
-        this.kafkaAdapterMetrics.initS4JAdapterInstrumentation();
+        String defaultMetricsPrefix = this.parsedOp.linearizeLabels();
+        this.kafkaAdapterMetrics = new KafkaAdapterMetrics(this, defaultMetricsPrefix);
+        kafkaAdapterMetrics.initS4JAdapterInstrumentation();
 
-        asyncAPI =
-            this.parsedOp.getStaticConfigOr(DOC_LEVEL_PARAMS.ASYNC_API.label, Boolean.TRUE);
+        this.asyncAPI =
+            parsedOp.getStaticConfigOr(KafkaAdapterUtil.DOC_LEVEL_PARAMS.ASYNC_API.label, Boolean.TRUE);
 
         this.topicNameStrFunc = topicNameStrFunc;
-        topicConfMap.putAll(kafkaSpace.getKafkaClientConf().getTopicConfMap());
+        this.topicConfMap.putAll(kafkaSpace.getKafkaClientConf().getTopicConfMap());
 
-        totalCycleNum = NumberUtils.toLong(this.parsedOp.getStaticConfig("cycles", String.class));
-        kafkaSpace.setTotalCycleNum(this.totalCycleNum);
+        this.totalCycleNum = NumberUtils.toLong(parsedOp.getStaticConfig("cycles", String.class));
+        kafkaSpace.setTotalCycleNum(totalCycleNum);
 
-        kafkaClntCnt = kafkaSpace.getKafkaClntNum();
-        consumerGrpCnt = kafkaSpace.getConsumerGrpNum();
-        totalThreadNum = NumberUtils.toInt(this.parsedOp.getStaticConfig("threads", String.class));
+        this.kafkaClntCnt = kafkaSpace.getKafkaClntNum();
+        this.consumerGrpCnt = kafkaSpace.getConsumerGrpNum();
+        this.totalThreadNum = NumberUtils.toInt(parsedOp.getStaticConfig("threads", String.class));
 
-        assert 0 < kafkaClntCnt;
-        assert 0 < consumerGrpCnt;
+        assert 0 < this.kafkaClntCnt;
+        assert 0 < this.consumerGrpCnt;
 
-        final boolean validThreadNum =
-            this instanceof MessageProducerOpDispenser && this.totalThreadNum == this.kafkaClntCnt ||
-                this instanceof MessageConsumerOpDispenser && this.totalThreadNum == this.kafkaClntCnt * this.consumerGrpCnt;
-        if (!validThreadNum) throw new KafkaAdapterInvalidParamException(
-            "Incorrect settings of 'threads', 'num_clnt', or 'num_cons_grp' -- " +
-                this.totalThreadNum + ", " + this.kafkaClntCnt + ", " + this.consumerGrpCnt);
+        boolean validThreadNum =
+            ((this instanceof MessageProducerOpDispenser) && (totalThreadNum == kafkaClntCnt)) ||
+                ((this instanceof MessageConsumerOpDispenser) && (totalThreadNum == (kafkaClntCnt * consumerGrpCnt)));
+        if (!validThreadNum) {
+            throw new KafkaAdapterInvalidParamException(
+                "Incorrect settings of 'threads', 'num_clnt', or 'num_cons_grp' -- " +
+                    totalThreadNum + ", " + kafkaClntCnt + ", " + consumerGrpCnt);
+        }
     }
 
-    public KafkaSpace getKafkaSpace() { return this.kafkaSpace; }
-    public KafkaAdapterMetrics getKafkaAdapterMetrics() { return this.kafkaAdapterMetrics; }
+    public KafkaSpace getKafkaSpace() { return kafkaSpace; }
+    public KafkaAdapterMetrics getKafkaAdapterMetrics() { return kafkaAdapterMetrics; }
 
-    protected LongFunction<Boolean> lookupStaticBoolConfigValueFunc(final String paramName, final boolean defaultValue) {
-        final LongFunction<Boolean> booleanLongFunction;
-        booleanLongFunction = l -> this.parsedOp.getOptionalStaticConfig(paramName, String.class)
+    protected LongFunction<Boolean> lookupStaticBoolConfigValueFunc(String paramName, boolean defaultValue) {
+        LongFunction<Boolean> booleanLongFunction;
+        booleanLongFunction = l -> parsedOp.getOptionalStaticConfig(paramName, String.class)
             .filter(Predicate.not(String::isEmpty))
             .map(value -> BooleanUtils.toBoolean(value))
             .orElse(defaultValue);
-        KafkaBaseOpDispenser.logger.info("{}: {}", paramName, booleanLongFunction.apply(0));
+        logger.info("{}: {}", paramName, booleanLongFunction.apply(0));
         return  booleanLongFunction;
     }
 
     // If the corresponding Op parameter is not provided, use the specified default value
-    protected LongFunction<String> lookupOptionalStrOpValueFunc(final String paramName, final String defaultValue) {
-        final LongFunction<String> stringLongFunction;
-        stringLongFunction = this.parsedOp.getAsOptionalFunction(paramName, String.class)
+    protected LongFunction<String> lookupOptionalStrOpValueFunc(String paramName, String defaultValue) {
+        LongFunction<String> stringLongFunction;
+        stringLongFunction = parsedOp.getAsOptionalFunction(paramName, String.class)
             .orElse(l -> defaultValue);
-        KafkaBaseOpDispenser.logger.info("{}: {}", paramName, stringLongFunction.apply(0));
+        logger.info("{}: {}", paramName, stringLongFunction.apply(0));
 
         return stringLongFunction;
     }
-    protected LongFunction<String> lookupOptionalStrOpValueFunc(final String paramName) {
-        return this.lookupOptionalStrOpValueFunc(paramName, "");
+    protected LongFunction<String> lookupOptionalStrOpValueFunc(String paramName) {
+        return lookupOptionalStrOpValueFunc(paramName, "");
     }
 
     // Mandatory Op parameter. Throw an error if not specified or having empty value
-    protected LongFunction<String> lookupMandtoryStrOpValueFunc(final String paramName) {
-        final LongFunction<String> stringLongFunction;
-        stringLongFunction = this.parsedOp.getAsRequiredFunction(paramName, String.class);
-        KafkaBaseOpDispenser.logger.info("{}: {}", paramName, stringLongFunction.apply(0));
+    protected LongFunction<String> lookupMandtoryStrOpValueFunc(String paramName) {
+        LongFunction<String> stringLongFunction;
+        stringLongFunction = parsedOp.getAsRequiredFunction(paramName, String.class);
+        logger.info("{}: {}", paramName, stringLongFunction.apply(0));
 
         return stringLongFunction;
     }
@@ -138,6 +139,6 @@ public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, Kaf
 
     @Override
     public Map<String, String> getLabels() {
-        return Map.of("name", this.getName());
+        return Map.of("name", getName());
     }
 }

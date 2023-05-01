@@ -18,14 +18,12 @@ package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> The type of operation
  */
-public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>, NBLabeledElement {
+public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T> {
 
     private final String opName;
     protected final DriverAdapter<T, S> adapter;
@@ -48,68 +46,74 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
     private final String[] timerStarts;
     private final String[] timerStops;
 
-    protected BaseOpDispenser(final DriverAdapter<T, S> adapter, final ParsedOp op) {
-        opName = op.getName();
+    protected BaseOpDispenser(DriverAdapter<T, S> adapter, ParsedOp op) {
+        this.opName = op.getName();
+
         this.adapter = adapter;
-        this.timerStarts = op.takeOptionalStaticValue("start-timers", String.class)
+
+        timerStarts = op.takeOptionalStaticValue("start-timers", String.class)
                 .map(s -> s.split(", *"))
                 .orElse(null);
 
-        this.timerStops = op.takeOptionalStaticValue("stop-timers", String.class)
+        timerStops = op.takeOptionalStaticValue("stop-timers", String.class)
                 .map(s -> s.split(", *"))
                 .orElse(null);
 
-        if (null != timerStarts)
-            for (final String timerStart : this.timerStarts) ThreadLocalNamedTimers.addTimer(op, timerStart);
-        this.configureInstrumentation(op);
+        if (null != this.timerStarts) {
+            for (String timerStart : timerStarts) {
+                ThreadLocalNamedTimers.addTimer(op, timerStart);
+            }
+        }
+        configureInstrumentation(op);
     }
 
     String getOpName() {
-        return this.opName;
+        return opName;
     }
 
     public DriverAdapter<T, S> getAdapter() {
-        return this.adapter;
+        return adapter;
     }
 
-    protected String getDefaultMetricsPrefix(final ParsedOp pop) {
-        return pop.getStaticConfigOr("alias", "UNKNOWN") + '-' + pop.getName() + "--";
-    }
-
-    private void configureInstrumentation(final ParsedOp pop) {
-        instrument = pop.takeStaticConfigOr("instrument", false);
-        if (this.instrument) {
-            final int hdrDigits = pop.getStaticConfigOr("hdr_digits", 4).intValue();
-            successTimer = ActivityMetrics.timer(this, this.getDefaultMetricsPrefix(pop) + "success",hdrDigits);
-            errorTimer = ActivityMetrics.timer(this, this.getDefaultMetricsPrefix(pop) + "error", hdrDigits);
-            resultSizeHistogram = ActivityMetrics.histogram(this, this.getDefaultMetricsPrefix(pop) + "resultset-size", hdrDigits);
+    private void configureInstrumentation(ParsedOp pop) {
+        this.instrument = pop.takeStaticConfigOr("instrument", false);
+        if (instrument) {
+            int hdrDigits = pop.getStaticConfigOr("hdr_digits", 4).intValue();
+            this.successTimer = ActivityMetrics.timer(pop, "success",hdrDigits);
+            this.errorTimer = ActivityMetrics.timer(pop, "error", hdrDigits);
+            this.resultSizeHistogram = ActivityMetrics.histogram(pop, "resultset-size", hdrDigits);
         }
     }
 
     @Override
-    public void onStart(final long cycleValue) {
-        if (null != timerStarts) ThreadLocalNamedTimers.TL_INSTANCE.get().start(this.timerStarts);
-    }
-
-    @Override
-    public void onSuccess(final long cycleValue, final long nanoTime, final long resultSize) {
-        if (this.instrument) {
-            this.successTimer.update(nanoTime, TimeUnit.NANOSECONDS);
-            if (-1 < resultSize) this.resultSizeHistogram.update(resultSize);
+    public void onStart(long cycleValue) {
+        if (null != this.timerStarts) {
+            ThreadLocalNamedTimers.TL_INSTANCE.get().start(timerStarts);
         }
-        if (null != timerStops) ThreadLocalNamedTimers.TL_INSTANCE.get().stop(this.timerStops);
     }
 
     @Override
-    public void onError(final long cycleValue, final long resultNanos, final Throwable t) {
-
-        if (this.instrument) this.errorTimer.update(resultNanos, TimeUnit.NANOSECONDS);
-        if (null != timerStops) ThreadLocalNamedTimers.TL_INSTANCE.get().stop(this.timerStops);
+    public void onSuccess(long cycleValue, long nanoTime, long resultSize) {
+        if (instrument) {
+            successTimer.update(nanoTime, TimeUnit.NANOSECONDS);
+            if (-1 < resultSize) {
+                resultSizeHistogram.update(resultSize);
+            }
+        }
+        if (null != this.timerStops) {
+            ThreadLocalNamedTimers.TL_INSTANCE.get().stop(timerStops);
+        }
     }
 
     @Override
-    public Map<String,String> getLabels() {
-        return Map.of("opname", opName);
+    public void onError(long cycleValue, long resultNanos, Throwable t) {
+
+        if (instrument) {
+            errorTimer.update(resultNanos, TimeUnit.NANOSECONDS);
+        }
+        if (null != this.timerStops) {
+            ThreadLocalNamedTimers.TL_INSTANCE.get().stop(timerStops);
+        }
     }
 
 }

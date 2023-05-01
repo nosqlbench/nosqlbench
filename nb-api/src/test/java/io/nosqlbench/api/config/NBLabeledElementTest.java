@@ -16,7 +16,6 @@
 
 package io.nosqlbench.api.config;
 
-import io.nosqlbench.api.config.NBLabeledElement.MapLabels;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -27,8 +26,8 @@ public class NBLabeledElementTest {
 
     @Test
     public void testBasicNameScenario() {
-        final MapLabels e1 = NBLabeledElement.forMap(Map.of());
-        assertThat(e1.linearizedByValueGraphite("name","testname")).isEqualTo("testname");
+        NBLabeledElement.MapLabels e1 = NBLabeledElement.forMap(Map.of());
+        assertThat(e1.linearizeLabelsByValueGraphite("name","testname")).isEqualTo("testname");
     }
 
 }

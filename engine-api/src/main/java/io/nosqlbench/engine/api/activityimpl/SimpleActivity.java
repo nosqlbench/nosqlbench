@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
@@ -54,6 +55,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.AnnotatedType;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -62,8 +64,9 @@ import java.util.stream.Collectors;
 /**
  * A default implementation of an Activity, suitable for building upon.
  */
-public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObserver {
-    private final static Logger logger = LogManager.getLogger("ACTIVITY");
+public class SimpleActivity implements Activity, NBLabeledElement {
+    private static final Logger logger = LogManager.getLogger("ACTIVITY");
+    private final NBLabeledElement parentLabels;
 
     protected ActivityDef activityDef;
     private final List<AutoCloseable> closeables = new ArrayList<>();
@@ -80,231 +83,220 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     private ActivityInstrumentation activityInstrumentation;
     private PrintWriter console;
     private long startedAtMillis;
-    private int nameEnumerator = 0;
+    private int nameEnumerator;
     private ErrorMetrics errorMetrics;
     private NBErrorHandler errorHandler;
     private ActivityMetricProgressMeter progressMeter;
     private String workloadSource = "unspecified";
     private final RunStateTally tally = new RunStateTally();
 
-    public SimpleActivity(ActivityDef activityDef) {
+    public SimpleActivity(final ActivityDef activityDef, final NBLabeledElement parentLabels) {
         this.activityDef = activityDef;
+        this.parentLabels = parentLabels;
         if (activityDef.getAlias().equals(ActivityDef.DEFAULT_ALIAS)) {
-            Optional<String> workloadOpt = activityDef.getParams().getOptionalString(
+            final Optional<String> workloadOpt = activityDef.getParams().getOptionalString(
                 "workload",
                 "yaml"
             );
-            if (workloadOpt.isPresent()) {
-                activityDef.getParams().set("alias", workloadOpt.get());
-            } else {
+            if (workloadOpt.isPresent()) activityDef.getParams().set("alias", workloadOpt.get());
+            else {
                 activityDef.getParams().set("alias",
                     activityDef.getActivityType().toUpperCase(Locale.ROOT)
-                        + nameEnumerator++);
+                        + this.nameEnumerator);
+                this.nameEnumerator++;
             }
         }
     }
 
-    public SimpleActivity(String activityDefString) {
-        this(ActivityDef.parseActivityDef(activityDefString));
+    public SimpleActivity(final String activityDefString, final NBLabeledElement parentLabels) {
+        this(ActivityDef.parseActivityDef(activityDefString),parentLabels);
     }
 
     @Override
     public synchronized void initActivity() {
-        initOrUpdateRateLimiters(this.activityDef);
+        this.initOrUpdateRateLimiters(activityDef);
     }
 
     public synchronized NBErrorHandler getErrorHandler() {
-        if (errorHandler == null) {
-            errorHandler = new NBErrorHandler(
-                () -> activityDef.getParams().getOptionalString("errors").orElse("stop"),
-                () -> getExceptionMetrics());
-        }
-        return errorHandler;
+        if (null == errorHandler) this.errorHandler = new NBErrorHandler(
+            () -> this.activityDef.getParams().getOptionalString("errors").orElse("stop"),
+            () -> this.getExceptionMetrics());
+        return this.errorHandler;
     }
 
+    @Override
     public synchronized RunState getRunState() {
-        return runState;
+        return this.runState;
     }
 
-    public synchronized void setRunState(RunState runState) {
+    @Override
+    public synchronized void setRunState(final RunState runState) {
         this.runState = runState;
-        if (runState == RunState.Running) {
-            this.startedAtMillis = System.currentTimeMillis();
-        }
+        if (RunState.Running == runState) startedAtMillis = System.currentTimeMillis();
     }
 
     @Override
     public long getStartedAtMillis() {
-        return startedAtMillis;
+        return this.startedAtMillis;
     }
 
     @Override
     public final MotorDispenser getMotorDispenserDelegate() {
-        return motorDispenser;
+        return this.motorDispenser;
     }
 
     @Override
-    public final void setMotorDispenserDelegate(MotorDispenser motorDispenser) {
+    public final void setMotorDispenserDelegate(final MotorDispenser motorDispenser) {
         this.motorDispenser = motorDispenser;
     }
 
     @Override
     public final InputDispenser getInputDispenserDelegate() {
-        return inputDispenser;
+        return this.inputDispenser;
     }
 
     @Override
-    public final void setInputDispenserDelegate(InputDispenser inputDispenser) {
+    public final void setInputDispenserDelegate(final InputDispenser inputDispenser) {
         this.inputDispenser = inputDispenser;
     }
 
     @Override
     public final ActionDispenser getActionDispenserDelegate() {
-        return actionDispenser;
+        return this.actionDispenser;
     }
 
     @Override
-    public final void setActionDispenserDelegate(ActionDispenser actionDispenser) {
+    public final void setActionDispenserDelegate(final ActionDispenser actionDispenser) {
         this.actionDispenser = actionDispenser;
     }
 
     @Override
     public IntPredicateDispenser getResultFilterDispenserDelegate() {
-        return resultFilterDispenser;
+        return this.resultFilterDispenser;
     }
 
     @Override
-    public void setResultFilterDispenserDelegate(IntPredicateDispenser resultFilterDispenser) {
+    public void setResultFilterDispenserDelegate(final IntPredicateDispenser resultFilterDispenser) {
         this.resultFilterDispenser = resultFilterDispenser;
     }
 
     @Override
     public OutputDispenser getMarkerDispenserDelegate() {
-        return this.markerDispenser;
+        return markerDispenser;
     }
 
     @Override
-    public void setOutputDispenserDelegate(OutputDispenser outputDispenser) {
-        this.markerDispenser = outputDispenser;
+    public void setOutputDispenserDelegate(final OutputDispenser outputDispenser) {
+        markerDispenser = outputDispenser;
     }
 
     @Override
     public ActivityDef getActivityDef() {
-        return activityDef;
+        return this.activityDef;
     }
 
     public String toString() {
-        return getAlias() + ":" + getRunState() + ":" + getRunStateTally().toString();
+        return this.getAlias() + ':' + runState + ':' + tally.toString();
     }
 
     @Override
-    public int compareTo(Activity o) {
-        return getAlias().compareTo(o.getAlias());
+    public int compareTo(final Activity o) {
+        return this.getAlias().compareTo(o.getAlias());
     }
 
     @Override
     public ActivityController getActivityController() {
-        return activityController;
+        return this.activityController;
     }
 
     @Override
-    public void setActivityController(ActivityController activityController) {
+    public void setActivityController(final ActivityController activityController) {
         this.activityController = activityController;
 
     }
 
     @Override
-    public void registerAutoCloseable(AutoCloseable closeable) {
-        this.closeables.add(closeable);
+    public void registerAutoCloseable(final AutoCloseable closeable) {
+        closeables.add(closeable);
     }
 
     @Override
     public void closeAutoCloseables() {
-        for (AutoCloseable closeable : closeables) {
-            logger.debug(() -> "CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable);
+        for (final AutoCloseable closeable : this.closeables) {
+            SimpleActivity.logger.debug(() -> "CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable);
             try {
                 closeable.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new RuntimeException("Error closing " + closeable + ": " + e, e);
             }
         }
-        closeables.clear();
+        this.closeables.clear();
     }
 
     @Override
     public RateLimiter getCycleLimiter() {
-        return this.cycleLimiter;
-    }
-
-    @Override
-    public synchronized void setCycleLimiter(RateLimiter rateLimiter) {
-        this.cycleLimiter = rateLimiter;
-    }
-
-    @Override
-    public synchronized RateLimiter getCycleRateLimiter(Supplier<? extends RateLimiter> s) {
-        if (cycleLimiter == null) {
-            cycleLimiter = s.get();
-        }
         return cycleLimiter;
     }
 
     @Override
+    public synchronized void setCycleLimiter(final RateLimiter rateLimiter) {
+        cycleLimiter = rateLimiter;
+    }
+
+    @Override
+    public synchronized RateLimiter getCycleRateLimiter(final Supplier<? extends RateLimiter> s) {
+        if (null == cycleLimiter) this.cycleLimiter = s.get();
+        return this.cycleLimiter;
+    }
+
+    @Override
     public synchronized RateLimiter getStrideLimiter() {
-        return this.strideLimiter;
-    }
-
-    @Override
-    public synchronized void setStrideLimiter(RateLimiter rateLimiter) {
-        this.strideLimiter = rateLimiter;
-    }
-
-    @Override
-    public synchronized RateLimiter getStrideRateLimiter(Supplier<? extends RateLimiter> s) {
-        if (strideLimiter == null) {
-            strideLimiter = s.get();
-        }
         return strideLimiter;
     }
 
     @Override
+    public synchronized void setStrideLimiter(final RateLimiter rateLimiter) {
+        strideLimiter = rateLimiter;
+    }
+
+    @Override
+    public synchronized RateLimiter getStrideRateLimiter(final Supplier<? extends RateLimiter> s) {
+        if (null == strideLimiter) this.strideLimiter = s.get();
+        return this.strideLimiter;
+    }
+
+    @Override
     public RateLimiter getPhaseLimiter() {
-        return phaseLimiter;
+        return this.phaseLimiter;
     }
 
 
     @Override
     public Timer getResultTimer() {
-        return ActivityMetrics.timer(getActivityDef(), "result", getParams().getOptionalInteger("hdr_digits").orElse(4));
+        return ActivityMetrics.timer(activityDef, "result", this.getParams().getOptionalInteger("hdr_digits").orElse(4));
     }
 
     @Override
-    public void setPhaseLimiter(RateLimiter rateLimiter) {
-        this.phaseLimiter = rateLimiter;
+    public void setPhaseLimiter(final RateLimiter rateLimiter) {
+        phaseLimiter = rateLimiter;
     }
 
     @Override
-    public synchronized RateLimiter getPhaseRateLimiter(Supplier<? extends RateLimiter> supplier) {
-        if (phaseLimiter == null) {
-            phaseLimiter = supplier.get();
-        }
-        return phaseLimiter;
+    public synchronized RateLimiter getPhaseRateLimiter(final Supplier<? extends RateLimiter> supplier) {
+        if (null == phaseLimiter) this.phaseLimiter = supplier.get();
+        return this.phaseLimiter;
     }
 
     @Override
     public synchronized ActivityInstrumentation getInstrumentation() {
-        if (activityInstrumentation == null) {
-            activityInstrumentation = new CoreActivityInstrumentation(this);
-        }
-        return activityInstrumentation;
+        if (null == activityInstrumentation) this.activityInstrumentation = new CoreActivityInstrumentation(this);
+        return this.activityInstrumentation;
     }
 
     @Override
     public synchronized PrintWriter getConsoleOut() {
-        if (this.console == null) {
-            this.console = new PrintWriter(System.out);
-        }
-        return this.console;
+        if (null == this.console) console = new PrintWriter(System.out, false, StandardCharsets.UTF_8);
+        return console;
     }
 
     @Override
@@ -313,36 +305,34 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     }
 
     @Override
-    public void setConsoleOut(PrintWriter writer) {
-        this.console = writer;
+    public void setConsoleOut(final PrintWriter writer) {
+        console = writer;
     }
 
     @Override
     public synchronized ErrorMetrics getExceptionMetrics() {
-        if (errorMetrics == null) {
-            errorMetrics = new ErrorMetrics(this.getActivityDef());
-        }
-        return errorMetrics;
+        if (null == errorMetrics) this.errorMetrics = new ErrorMetrics(activityDef);
+        return this.errorMetrics;
     }
 
     @Override
-    public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
-        initOrUpdateRateLimiters(activityDef);
+    public synchronized void onActivityDefUpdate(final ActivityDef activityDef) {
+        this.initOrUpdateRateLimiters(activityDef);
     }
 
-    public synchronized void initOrUpdateRateLimiters(ActivityDef activityDef) {
+    public synchronized void initOrUpdateRateLimiters(final ActivityDef activityDef) {
 
         activityDef.getParams().getOptionalNamedParameter("striderate")
             .map(RateSpec::new)
-            .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "strides", strideLimiter, spec));
+            .ifPresent(spec -> this.strideLimiter = RateLimiters.createOrUpdate(activityDef, "strides", this.strideLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate")
             .map(RateSpec::new).ifPresent(
-                spec -> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
+                spec -> this.cycleLimiter = RateLimiters.createOrUpdate(activityDef, "cycles", this.cycleLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("phaserate")
             .map(RateSpec::new)
-            .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "phases", phaseLimiter, spec));
+            .ifPresent(spec -> this.phaseLimiter = RateLimiters.createOrUpdate(activityDef, "phases", this.phaseLimiter, spec));
 
     }
 
@@ -353,97 +343,84 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
      *
      * @param seq - The {@link OpSequence} to derive the defaults from
      */
-    public synchronized void setDefaultsFromOpSequence(OpSequence<?> seq) {
-        Optional<String> strideOpt = getParams().getOptionalString("stride");
+    public synchronized void setDefaultsFromOpSequence(final OpSequence<?> seq) {
+        final Optional<String> strideOpt = this.getParams().getOptionalString("stride");
         if (strideOpt.isEmpty()) {
-            String stride = String.valueOf(seq.getSequence().length);
-            logger.info(() -> "defaulting stride to " + stride + " (the sequence length)");
+            final String stride = String.valueOf(seq.getSequence().length);
+            SimpleActivity.logger.info(() -> "defaulting stride to " + stride + " (the sequence length)");
 //            getParams().set("stride", stride);
-            getParams().setSilently("stride", stride);
+            this.getParams().setSilently("stride", stride);
         }
 
-        Optional<String> cyclesOpt = getParams().getOptionalString("cycles");
+        final Optional<String> cyclesOpt = this.getParams().getOptionalString("cycles");
         if (cyclesOpt.isEmpty()) {
-            String cycles = getParams().getOptionalString("stride").orElseThrow();
-            logger.info(() -> "defaulting cycles to " + cycles + " (the stride length)");
+            final String cycles = this.getParams().getOptionalString("stride").orElseThrow();
+            SimpleActivity.logger.info(() -> "defaulting cycles to " + cycles + " (the stride length)");
 //            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
-            getParams().setSilently("cycles", getParams().getOptionalString("stride").orElseThrow());
+            this.getParams().setSilently("cycles", this.getParams().getOptionalString("stride").orElseThrow());
         } else {
-            if (getActivityDef().getCycleCount() == 0) {
-                throw new RuntimeException(
-                    "You specified cycles, but the range specified means zero cycles: " + getParams().get("cycles")
-                );
-            }
-            long stride = getParams().getOptionalLong("stride").orElseThrow();
-            long cycles = getActivityDef().getCycleCount();
-            if (cycles < stride) {
-                throw new RuntimeException(
-                    "The specified cycles (" + cycles + ") are less than the stride (" + stride + "). This means there aren't enough cycles to cause a stride to be executed." +
-                        " If this was intended, then set stride low enough to allow it."
-                );
-            }
+            if (0 == getActivityDef().getCycleCount()) throw new RuntimeException(
+                "You specified cycles, but the range specified means zero cycles: " + this.getParams().get("cycles")
+            );
+            final long stride = this.getParams().getOptionalLong("stride").orElseThrow();
+            final long cycles = activityDef.getCycleCount();
+            if (cycles < stride) throw new RuntimeException(
+                "The specified cycles (" + cycles + ") are less than the stride (" + stride + "). This means there aren't enough cycles to cause a stride to be executed." +
+                    " If this was intended, then set stride low enough to allow it."
+            );
         }
 
-        long cycleCount = getActivityDef().getCycleCount();
-        long stride = getActivityDef().getParams().getOptionalLong("stride").orElseThrow();
+        final long cycleCount = activityDef.getCycleCount();
+        final long stride = activityDef.getParams().getOptionalLong("stride").orElseThrow();
 
-        if (stride > 0 && (cycleCount % stride) != 0) {
-            logger.warn(() -> "The stride does not evenly divide cycles. Only full strides will be executed," +
-                "leaving some cycles unused. (stride=" + stride + ", cycles=" + cycleCount + ")");
-        }
+        if ((0 < stride) && (0 != (cycleCount % stride)))
+            SimpleActivity.logger.warn(() -> "The stride does not evenly divide cycles. Only full strides will be executed," +
+                "leaving some cycles unused. (stride=" + stride + ", cycles=" + cycleCount + ')');
 
-        Optional<String> threadSpec = activityDef.getParams().getOptionalString("threads");
+        final Optional<String> threadSpec = this.activityDef.getParams().getOptionalString("threads");
         if (threadSpec.isPresent()) {
-            String spec = threadSpec.get();
-            int processors = Runtime.getRuntime().availableProcessors();
-            if (spec.equalsIgnoreCase("auto")) {
+            final String spec = threadSpec.get();
+            final int processors = Runtime.getRuntime().availableProcessors();
+            if ("auto".equalsIgnoreCase(spec)) {
                 int threads = processors * 10;
-                if (threads > activityDef.getCycleCount()) {
-                    threads = (int) activityDef.getCycleCount();
-                    logger.info("setting threads to " + threads + " (auto) [10xCORES, cycle count limited]");
-                } else {
-                    logger.info("setting threads to " + threads + " (auto) [10xCORES]");
-                }
+                if (threads > this.activityDef.getCycleCount()) {
+                    threads = (int) this.activityDef.getCycleCount();
+                    SimpleActivity.logger.info("setting threads to {} (auto) [10xCORES, cycle count limited]", threads);
+                } else SimpleActivity.logger.info("setting threads to {} (auto) [10xCORES]", threads);
 //                activityDef.setThreads(threads);
-                activityDef.getParams().setSilently("threads", threads);
+                this.activityDef.getParams().setSilently("threads", threads);
             } else if (spec.toLowerCase().matches("\\d+x")) {
-                String multiplier = spec.substring(0, spec.length() - 1);
-                int threads = processors * Integer.parseInt(multiplier);
-                logger.info(() -> "setting threads to " + threads + " (" + multiplier + "x)");
+                final String multiplier = spec.substring(0, spec.length() - 1);
+                final int threads = processors * Integer.parseInt(multiplier);
+                SimpleActivity.logger.info(() -> "setting threads to " + threads + " (" + multiplier + "x)");
 //                activityDef.setThreads(threads);
-                activityDef.getParams().setSilently("threads", threads);
+                this.activityDef.getParams().setSilently("threads", threads);
             } else if (spec.toLowerCase().matches("\\d+")) {
-                logger.info(() -> "setting threads to " + spec + " (direct)");
+                SimpleActivity.logger.info(() -> "setting threads to " + spec + " (direct)");
 //                activityDef.setThreads(Integer.parseInt(spec));
-                activityDef.getParams().setSilently("threads", Integer.parseInt(spec));
+                this.activityDef.getParams().setSilently("threads", Integer.parseInt(spec));
             }
 
-            if (activityDef.getThreads() > activityDef.getCycleCount()) {
-                logger.warn(() -> "threads=" + activityDef.getThreads() + " and cycles=" + activityDef.getCycleSummary()
+            if (this.activityDef.getThreads() > this.activityDef.getCycleCount())
+                SimpleActivity.logger.warn(() -> "threads=" + this.activityDef.getThreads() + " and cycles=" + this.activityDef.getCycleSummary()
                     + ", you should have more cycles than threads.");
-            }
 
-        } else {
-            if (cycleCount > 1000) {
-                logger.warn(() -> "For testing at scale, it is highly recommended that you " +
-                    "set threads to a value higher than the default of 1." +
-                    " hint: you can use threads=auto for reasonable default, or" +
-                    " consult the topic on threads with `help threads` for" +
-                    " more information.");
+        } else if (1000 < cycleCount)
+            SimpleActivity.logger.warn(() -> "For testing at scale, it is highly recommended that you " +
+                "set threads to a value higher than the default of 1." +
+                " hint: you can use threads=auto for reasonable default, or" +
+                " consult the topic on threads with `help threads` for" +
+                " more information.");
 
-            }
-        }
-
-        if (activityDef.getCycleCount() > 0 && seq.getOps().size() == 0) {
+        if ((0 < activityDef.getCycleCount()) && (0 == seq.getOps().size()))
             throw new BasicError("You have configured a zero-length sequence and non-zero cycles. Tt is not possible to continue with this activity.");
-        }
     }
 
     /**
      * Given a function that can create an op of type <O> from a CommandTemplate, generate
      * an indexed sequence of ready to call operations.
      *
-     * This method works almost exactly like the {@link #createOpSequenceFromCommands(Function, boolean)},
+     * This method works almost exactly like the ,
      * except that it uses the {@link CommandTemplate} semantics, which are more general and allow
      * for map-based specification of operations with bindings in each field.
      *
@@ -456,50 +433,50 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
      * @return
      */
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSequenceFromCommands(
-        Function<CommandTemplate, OpDispenser<O>> opinit,
-        boolean strict
+        final Function<CommandTemplate, OpDispenser<O>> opinit,
+        final boolean strict
     ) {
-        Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
-        Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
+        final Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
+        final Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
 
-        return createOpSequence(opTemplateOFunction, strict, Optional.empty());
+        return this.createOpSequence(opTemplateOFunction, strict, Optional.empty());
     }
 
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromParsedOps(
-        Map<String, DriverAdapter> adapterCache,
-        Map<String, OpMapper<Op>> mapperCache,
-        List<DriverAdapter> adapters,
-        List<ParsedOp> pops
+        final Map<String, DriverAdapter> adapterCache,
+        final Map<String, OpMapper<Op>> mapperCache,
+        final List<DriverAdapter> adapters,
+        final List<ParsedOp> pops
     ) {
         try {
 
-            List<Long> ratios = new ArrayList<>(pops.size());
+            final List<Long> ratios = new ArrayList<>(pops.size());
 
             for (int i = 0; i < pops.size(); i++) {
-                ParsedOp pop = pops.get(i);
-                long ratio = pop.takeStaticConfigOr("ratio", 1);
+                final ParsedOp pop = pops.get(i);
+                final long ratio = pop.takeStaticConfigOr("ratio", 1);
                 ratios.add(ratio);
             }
 
-            SequencerType sequencerType = getParams()
+            final SequencerType sequencerType = this.getParams()
                 .getOptionalString("seq")
                 .map(SequencerType::valueOf)
                 .orElse(SequencerType.bucket);
-            SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
+            final SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
             int dryrunCount = 0;
             for (int i = 0; i < pops.size(); i++) {
-                long ratio = ratios.get(i);
-                ParsedOp pop = pops.get(i);
-                if (ratio == 0) {
-                    logger.info(() -> "skipped mapping op '" + pop.getName() + "'");
+                final long ratio = ratios.get(i);
+                final ParsedOp pop = pops.get(i);
+                if (0 == ratio) {
+                    SimpleActivity.logger.info(() -> "skipped mapping op '" + pop.getName() + '\'');
                     continue;
                 }
-                String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
-                boolean dryrun = dryrunSpec.equalsIgnoreCase("op");
+                final String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
+                final boolean dryrun = "op".equalsIgnoreCase(dryrunSpec);
 
-                DriverAdapter adapter = adapters.get(i);
-                OpMapper opMapper = adapter.getOpMapper();
+                final DriverAdapter adapter = adapters.get(i);
+                final OpMapper opMapper = adapter.getOpMapper();
                 OpDispenser<? extends Op> dispenser = opMapper.apply(pop);
 
                 if (dryrun) {
@@ -512,15 +489,14 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 //                }
                 planner.addOp((OpDispenser<? extends O>) dispenser, ratio);
             }
-            if (dryrunCount > 0) {
-                logger.warn("initialized " + dryrunCount + " op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.");
-            }
+            if (0 < dryrunCount)
+                SimpleActivity.logger.warn("initialized {} op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.", dryrunCount);
 
 
             return planner.resolve();
 
-        } catch (Exception e) {
-            throw new OpConfigError(e.getMessage(), workloadSource, e);
+        } catch (final Exception e) {
+            throw new OpConfigError(e.getMessage(), this.workloadSource, e);
         }
 
 
@@ -528,77 +504,67 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
 
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromCommands(
-        Function<ParsedOp, OpDispenser<? extends O>> opinit,
-        NBConfiguration cfg,
-        List<Function<Map<String, Object>, Map<String, Object>>> parsers,
-        boolean strict
+        final Function<ParsedOp, OpDispenser<? extends O>> opinit,
+        final NBConfiguration cfg,
+        final List<Function<Map<String, Object>, Map<String, Object>>> parsers,
+        final boolean strict
     ) {
-        Function<OpTemplate, ParsedOp> f = t -> new ParsedOp(t, cfg, parsers);
-        Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
+        final Function<OpTemplate, ParsedOp> f = t -> new ParsedOp(t, cfg, parsers, this);
+        final Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
 
-        return createOpSequence(opTemplateOFunction, strict, Optional.empty());
+        return this.createOpSequence(opTemplateOFunction, strict, Optional.empty());
     }
 
-    protected List<ParsedOp> loadParsedOps(NBConfiguration cfg, Optional<DriverAdapter> defaultAdapter) {
-        List<ParsedOp> parsedOps = loadOpTemplates(defaultAdapter).stream().map(
-            ot -> new ParsedOp(ot, cfg, List.of())
+    protected List<ParsedOp> loadParsedOps(final NBConfiguration cfg, final Optional<DriverAdapter> defaultAdapter) {
+        final List<ParsedOp> parsedOps = this.loadOpTemplates(defaultAdapter).stream().map(
+            ot -> new ParsedOp(ot, cfg, List.of(), this)
         ).toList();
         return parsedOps;
     }
 
-    protected List<OpTemplate> loadOpTemplates(Optional<DriverAdapter> defaultDriverAdapter) {
+    protected List<OpTemplate> loadOpTemplates(final Optional<DriverAdapter> defaultDriverAdapter) {
 
-        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
+        final String tagfilter = this.activityDef.getParams().getOptionalString("tags").orElse("");
 
-        OpsDocList opsDocList = loadStmtsDocList();
+        final OpsDocList opsDocList = this.loadStmtsDocList();
 
-        List<OpTemplate> unfilteredOps = opsDocList.getOps();
+        final List<OpTemplate> unfilteredOps = opsDocList.getOps();
         List<OpTemplate> filteredOps = opsDocList.getOps(tagfilter);
 
-        if (filteredOps.size() == 0) {
-            if (unfilteredOps.size() > 0) { // There were no ops, and it was because they were all filtered out
-                throw new BasicError("There were no active op templates with tag filter '"
-                    + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
-            } else {
-                // There were no ops, and it *wasn't* because they were all filtered out.
-
-                // In this case, let's try to synthesize the ops as long as at least a default driver was provided
-                if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
-                    filteredOps = sotp.getSyntheticOpTemplates(opsDocList, getActivityDef().getParams());
-                    Objects.requireNonNull(filteredOps);
-                    if (filteredOps.size() == 0) {
-                        throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + "'" +
-                            " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
-                    }
-                } else { // But if there were no ops, and there was no default driver provided, we can't continue
-                    throw new BasicError("""
-                        No op templates were provided. You must provide one of these activity parameters:
-                        1) workload=some.yaml
-                        2) op='inline template'
-                        3) driver=stdout (or any other drive that can synthesize ops)""");
-                }
-            }
-            if (filteredOps.size() == 0) {
-                throw new BasicError("There were no active op templates with tag filter '" + tagfilter + "'");
-            }
+        if (0 == filteredOps.size()) {
+            // There were no ops, and it *wasn't* because they were all filtered out.
+            // In this case, let's try to synthesize the ops as long as at least a default driver was provided
+            // But if there were no ops, and there was no default driver provided, we can't continue
+            // There were no ops, and it was because they were all filtered out
+            if (0 < unfilteredOps.size()) throw new BasicError("There were no active op templates with tag filter '"
+                + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
+            if (defaultDriverAdapter.isPresent() && (defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp)) {
+                filteredOps = sotp.getSyntheticOpTemplates(opsDocList, activityDef.getParams());
+                Objects.requireNonNull(filteredOps);
+                if (0 == filteredOps.size())
+                    throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + '\'' +
+                        " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
+            } else throw new BasicError("""
+                No op templates were provided. You must provide one of these activity parameters:
+                1) workload=some.yaml
+                2) op='inline template'
+                3) driver=stdout (or any other drive that can synthesize ops)""");
+            if (0 == filteredOps.size())
+                throw new BasicError("There were no active op templates with tag filter '" + tagfilter + '\'');
         }
 
-        if (filteredOps.size() == 0) {
+        if (0 == filteredOps.size())
             throw new OpConfigError("No op templates found. You must provide either workload=... or op=..., or use " +
                 "a default driver (driver=___). This includes " +
                 ServiceLoader.load(DriverAdapter.class).stream()
                     .filter(p -> {
-                        AnnotatedType[] annotatedInterfaces = p.type().getAnnotatedInterfaces();
-                        for (AnnotatedType ai : annotatedInterfaces) {
-                            if (ai.getType().equals(SyntheticOpTemplateProvider.class)) {
-                                return true;
-                            }
-                        }
+                        final AnnotatedType[] annotatedInterfaces = p.type().getAnnotatedInterfaces();
+                        for (final AnnotatedType ai : annotatedInterfaces)
+                            if (ai.getType().equals(SyntheticOpTemplateProvider.class)) return true;
                         return false;
                     })
                     .map(d -> d.get().getAdapterName())
                     .collect(Collectors.joining(",")));
-        }
 
         return filteredOps;
     }
@@ -627,36 +593,34 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
      * @return The sequence of operations as determined by filtering and ratios
      */
     @Deprecated(forRemoval = true)
-    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate, OpDispenser<? extends O>> opinit, boolean strict, Optional<DriverAdapter> defaultAdapter) {
+    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(final Function<OpTemplate, OpDispenser<? extends O>> opinit, final boolean strict, final Optional<DriverAdapter> defaultAdapter) {
 
-        var stmts = loadOpTemplates(defaultAdapter);
+        final var stmts = this.loadOpTemplates(defaultAdapter);
 
-        List<Long> ratios = new ArrayList<>(stmts.size());
+        final List<Long> ratios = new ArrayList<>(stmts.size());
 
         for (int i = 0; i < stmts.size(); i++) {
-            OpTemplate opTemplate = stmts.get(i);
-            long ratio = opTemplate.removeParamOrDefault("ratio", 1);
+            final OpTemplate opTemplate = stmts.get(i);
+            final long ratio = opTemplate.removeParamOrDefault("ratio", 1);
             ratios.add(ratio);
         }
 
-        SequencerType sequencerType = getParams()
+        final SequencerType sequencerType = this.getParams()
             .getOptionalString("seq")
             .map(SequencerType::valueOf)
             .orElse(SequencerType.bucket);
-        SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
+        final SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
         try {
             for (int i = 0; i < stmts.size(); i++) {
-                long ratio = ratios.get(i);
-                OpTemplate optemplate = stmts.get(i);
-                OpDispenser<? extends O> driverSpecificReadyOp = opinit.apply(optemplate);
-                if (strict) {
-                    optemplate.assertConsumed();
-                }
+                final long ratio = ratios.get(i);
+                final OpTemplate optemplate = stmts.get(i);
+                final OpDispenser<? extends O> driverSpecificReadyOp = opinit.apply(optemplate);
+                if (strict) optemplate.assertConsumed();
                 planner.addOp(driverSpecificReadyOp, ratio);
             }
-        } catch (Exception e) {
-            throw new OpConfigError(e.getMessage(), workloadSource, e);
+        } catch (final Exception e) {
+            throw new OpConfigError(e.getMessage(), this.workloadSource, e);
         }
 
         return planner.resolve();
@@ -665,30 +629,29 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     protected OpsDocList loadStmtsDocList() {
 
         try {
-            Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
-            Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+            final Optional<String> stmt = this.activityDef.getParams().getOptionalString("op", "stmt", "statement");
+            final Optional<String> op_yaml_loc = this.activityDef.getParams().getOptionalString("yaml", "workload");
             if (stmt.isPresent()) {
-                workloadSource = "commandline:" + stmt.get();
-                return OpsLoader.loadString(stmt.get(), OpTemplateFormat.inline, activityDef.getParams(), null);
-            } else if (op_yaml_loc.isPresent()) {
-                workloadSource = "yaml:" + op_yaml_loc.get();
-                return OpsLoader.loadPath(op_yaml_loc.get(), activityDef.getParams(), "activities");
+                this.workloadSource = "commandline:" + stmt.get();
+                return OpsLoader.loadString(stmt.get(), OpTemplateFormat.inline, this.activityDef.getParams(), null);
+            }
+            if (op_yaml_loc.isPresent()) {
+                this.workloadSource = "yaml:" + op_yaml_loc.get();
+                return OpsLoader.loadPath(op_yaml_loc.get(), this.activityDef.getParams(), "activities");
             }
 
             return OpsDocList.none();
 
-        } catch (Exception e) {
-            throw new OpConfigError("Error loading op templates: " + e, workloadSource, e);
+        } catch (final Exception e) {
+            throw new OpConfigError("Error loading op templates: " + e, this.workloadSource, e);
         }
 
     }
 
     @Override
     public synchronized ProgressMeterDisplay getProgressMeter() {
-        if (progressMeter == null) {
-            this.progressMeter = new ActivityMetricProgressMeter(this);
-        }
-        return this.progressMeter;
+        if (null == progressMeter) progressMeter = new ActivityMetricProgressMeter(this);
+        return progressMeter;
     }
 
     /**
@@ -700,17 +663,22 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
      */
     @Override
     public int getMaxTries() {
-        return getActivityDef().getParams().getOptionalInteger("maxtries").orElse(10);
+        return activityDef.getParams().getOptionalInteger("maxtries").orElse(10);
     }
 
     @Override
     public RunStateTally getRunStateTally() {
-        return tally;
+        return this.tally;
     }
 
 
     @Override
     public String getName() {
-        return this.activityDef.getAlias();
+        return activityDef.getAlias();
+    }
+
+    @Override
+    public Map<String, String> getLabels() {
+        return this.parentLabels.getLabelsAnd("alias", this.activityDef.getAlias());
     }
 }

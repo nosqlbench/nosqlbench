@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.templating;
 
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.fieldreaders.DynamicFieldReader;
 import io.nosqlbench.api.config.fieldreaders.StaticFieldReader;
 import io.nosqlbench.api.config.standard.NBConfigError;
@@ -292,9 +293,9 @@ import java.util.function.LongFunction;
  * in the activity parameters if needed to find a missing configuration parameter, but this will only work if
  * the specific named parameter is allowed at the activity level.</P>
  */
-public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader, DynamicFieldReader {
+public class ParsedOp implements LongFunction<Map<String, ?>>, NBLabeledElement, StaticFieldReader, DynamicFieldReader {
 
-    private final static Logger logger = LogManager.getLogger(ParsedOp.class);
+    private static final Logger logger = LogManager.getLogger(ParsedOp.class);
 
     /**
      * The names of payload values in the result of the operation which should be saved.
@@ -307,45 +308,40 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     private final OpTemplate _opTemplate;
     private final NBConfiguration activityCfg;
     private final ParsedTemplateMap tmap;
-
-    /**
-     * Create a parsed command from an Op template.
-     *
-     * @param ot          An OpTemplate representing an operation to be performed in a native driver.
-     * @param activityCfg The activity configuration, used for reading config parameters
-     */
-    public ParsedOp(OpTemplate ot, NBConfiguration activityCfg) {
-        this(ot, activityCfg, List.of());
-    }
+    private final NBLabeledElement labels;
 
     /**
      * Create a parsed command from an Op template. This version is exactly like
-     * {@link ParsedOp (OpTemplate,NBConfiguration)} except that it allows
+     *  except that it allows
      * preprocessors. Preprocessors are all applied to the the op template before
      * it is applied to the parsed command fields, allowing you to combine or destructure
      * fields from more tha one representation into a single canonical representation
      * for processing.
      *
-     * @param opTemplate    The OpTemplate as provided by a user via YAML, JSON, or API (data structure)
-     * @param activityCfg   The activity configuration, used to resolve nested config parameters
-     * @param preprocessors Map->Map transformers.
+     * @param opTemplate
+     *     The OpTemplate as provided by a user via YAML, JSON, or API (data structure)
+     * @param activityCfg
+     *     The activity configuration, used to resolve nested config parameters
+     * @param preprocessors
+     *     Map->Map transformers.
+     * @param labels
      */
     public ParsedOp(
-        OpTemplate opTemplate,
-        NBConfiguration activityCfg,
-        List<Function<Map<String, Object>, Map<String, Object>>> preprocessors
-    ) {
-        this._opTemplate = opTemplate;
+        final OpTemplate opTemplate,
+        final NBConfiguration activityCfg,
+        final List<Function<Map<String, Object>, Map<String, Object>>> preprocessors,
+        final NBLabeledElement labels) {
+        _opTemplate = opTemplate;
         this.activityCfg = activityCfg;
+        this.labels=labels;
 
         Map<String, Object> map = opTemplate.getOp().orElseThrow(() ->
             new OpConfigError("ParsedOp constructor requires a non-null value for the op field, but it was missing."));
-        for (Function<Map<String, Object>, Map<String, Object>> preprocessor : preprocessors) {
+        for (final Function<Map<String, Object>, Map<String, Object>> preprocessor : preprocessors)
             map = preprocessor.apply(map);
-        }
 
-        this.tmap = new ParsedTemplateMap(
-            getName(),
+        tmap = new ParsedTemplateMap(
+            this.getName(),
             map,
             opTemplate.getBindings(),
             List.of(opTemplate.getParams(),
@@ -356,21 +352,21 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
 
 
     public String getName() {
-        return _opTemplate.getName();
+        return this._opTemplate.getName();
     }
 
     public ParsedTemplateMap getTemplateMap() {
-        return tmap;
+        return this.tmap;
     }
 
     @Override
-    public Map<String, Object> apply(long value) {
-        return tmap.apply(value);
+    public Map<String, Object> apply(final long value) {
+        return this.tmap.apply(value);
     }
 
     @Override
-    public boolean isDynamic(String field) {
-        return tmap.isDynamic(field);
+    public boolean isDynamic(final String field) {
+        return this.tmap.isDynamic(field);
     }
 
 
@@ -378,16 +374,16 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param field The field name to look for in the static field map.
      * @return true if and only if the named field is present in the static field map.
      */
-    public boolean isStatic(String field) {
-        return tmap.isStatic(field);
+    public boolean isStatic(final String field) {
+        return this.tmap.isStatic(field);
     }
 
-    private boolean isConfig(String fieldname) {
-        return tmap.isConfig(fieldname);
+    private boolean isConfig(final String fieldname) {
+        return this.tmap.isConfig(fieldname);
     }
 
-    public boolean isStatic(String field, Class<?> type) {
-        return tmap.isStatic(field, type);
+    public boolean isStatic(final String field, final Class<?> type) {
+        return this.tmap.isStatic(field, type);
     }
 
     /**
@@ -395,8 +391,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return true if and only if all provided field names are present in the static field map.
      */
     @Override
-    public boolean isDefined(String... fields) {
-        return tmap.isDefined(fields);
+    public boolean isDefined(final String... fields) {
+        return this.tmap.isDefined(fields);
     }
 
     /**
@@ -409,8 +405,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return A value of type T, or null
      */
     @Override
-    public <T> T getStaticValue(String field, Class<T> classOfT) {
-        return tmap.getStaticValue(field, classOfT);
+    public <T> T getStaticValue(final String field, final Class<T> classOfT) {
+        return this.tmap.getStaticValue(field, classOfT);
     }
 
     /**
@@ -422,12 +418,12 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return A value of type T, or null
      */
     @Override
-    public <T> T getStaticValue(String field) {
-        return tmap.getStaticValue(field);
+    public <T> T getStaticValue(final String field) {
+        return this.tmap.getStaticValue(field);
     }
 
-    public Optional<ParsedTemplateString> getAsTemplate(String fieldname) {
-        return this.tmap.getAsStringTemplate(fieldname);
+    public Optional<ParsedTemplateString> getAsTemplate(final String fieldname) {
+        return tmap.getAsStringTemplate(fieldname);
     }
 
     /**
@@ -441,8 +437,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @throws RuntimeException if the field name is only present in the dynamic fields.
      */
     @Override
-    public <T> T getStaticValueOr(String name, T defaultValue) {
-        return tmap.getStaticValueOr(name, defaultValue);
+    public <T> T getStaticValueOr(final String name, final T defaultValue) {
+        return this.tmap.getStaticValueOr(name, defaultValue);
     }
 
     /**
@@ -458,8 +454,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @throws NBConfigError if the named field is defined dynamically,
      *                                                            as in this case, it is presumed that the parameter is not supported unless it is defined statically.
      */
-    public <T> T getStaticConfigOr(String name, T defaultValue) {
-        return tmap.getStaticConfigOr(name, defaultValue);
+    public <T> T getStaticConfigOr(final String name, final T defaultValue) {
+        return this.tmap.getStaticConfigOr(name, defaultValue);
     }
 
     /**
@@ -470,16 +466,16 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param <T> The type of the field
      * @return The config value.
      */
-    public <T> T takeStaticConfigOr(String name, T defaultValue) {
-        return tmap.takeStaticConfigOr(name, defaultValue);
+    public <T> T takeStaticConfigOr(final String name, final T defaultValue) {
+        return this.tmap.takeStaticConfigOr(name, defaultValue);
     }
-    public String getStaticConfig(String name, Class<String> clazz) {
-        return tmap.getStaticConfig(name, clazz);
+    public String getStaticConfig(final String name, final Class<String> clazz) {
+        return this.tmap.getStaticConfig(name, clazz);
     }
 
 
-    public <T> Optional<T> getOptionalStaticConfig(String name, Class<T> type) {
-        return tmap.getOptionalStaticConfig(name, type);
+    public <T> Optional<T> getOptionalStaticConfig(final String name, final Class<T> type) {
+        return this.tmap.getOptionalStaticConfig(name, type);
     }
 
 
@@ -488,8 +484,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * at the op field level will be generated on a per-input basis. This is a shortcut method for
      * allowing configuration values to be accessed dynamically where it makes sense.
      */
-    public <T> T getConfigOr(String name, T defaultValue, long input) {
-        return tmap.getConfigOr(name, defaultValue, input);
+    public <T> T getConfigOr(final String name, final T defaultValue, final long input) {
+        return this.tmap.getConfigOr(name, defaultValue, input);
     }
 
 
@@ -503,13 +499,13 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return An optional value, empty unless the named value is defined in the static field map.
      */
     @Override
-    public <T> Optional<T> getOptionalStaticValue(String field, Class<T> classOfT) {
-        return Optional.ofNullable(tmap.getStaticValue(field, classOfT));
+    public <T> Optional<T> getOptionalStaticValue(final String field, final Class<T> classOfT) {
+        return Optional.ofNullable(this.tmap.getStaticValue(field, classOfT));
     }
 
 
-    public <T> Optional<T> takeOptionalStaticValue(String field, Class<T> classOfT) {
-        return Optional.ofNullable(tmap.takeStaticValue(field, classOfT));
+    public <T> Optional<T> takeOptionalStaticValue(final String field, final Class<T> classOfT) {
+        return Optional.ofNullable(this.tmap.takeStaticValue(field, classOfT));
     }
 
     /**
@@ -524,15 +520,15 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return The value.
      */
     @Override
-    public <T> T get(String field, long input) {
-        return tmap.get(field, input);
+    public <T> T get(final String field, final long input) {
+        return this.tmap.get(field, input);
     }
 
     /**
      * @return a set of names which are defined, whether in static fields or dynamic fields
      */
     public Set<String> getDefinedNames() {
-        return tmap.getOpFieldNames();
+        return this.tmap.getOpFieldNames();
     }
 
     /**
@@ -542,8 +538,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param name The field name which must be defined as static or dynamic
      * @return A function which can provide the named field value
      */
-    public LongFunction<? extends String> getAsRequiredFunction(String name) {
-        return tmap.getAsRequiredFunction(name, String.class);
+    public LongFunction<String> getAsRequiredFunction(final String name) {
+        return this.tmap.getAsRequiredFunction(name, String.class);
     }
 
     /**
@@ -553,19 +549,19 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param type The value type which the field must be assignable to
      * @return A function which can provide a value for the given name and type
      */
-    public <V> Optional<LongFunction<V>> getAsOptionalFunction(String name, Class<V> type) {
-        return tmap.getAsOptionalFunction(name, type);
+    public <V> Optional<LongFunction<V>> getAsOptionalFunction(final String name, final Class<V> type) {
+        return this.tmap.getAsOptionalFunction(name, type);
     }
-    public <V extends Enum<V>> Optional<LongFunction<V>> getAsOptionalEnumFunction(String name, Class<V> type) {
-        return tmap.getAsOptionalEnumFunction(name, type);
-    }
-
-    public <V> Optional<LongFunction<String>> getAsOptionalFunction(String name) {
-        return this.getAsOptionalFunction(name, String.class);
+    public <V extends Enum<V>> Optional<LongFunction<V>> getAsOptionalEnumFunction(final String name, final Class<V> type) {
+        return this.tmap.getAsOptionalEnumFunction(name, type);
     }
 
-    public <V> LongFunction<V> getAsRequiredFunction(String name, Class<? extends V> type) {
-        return tmap.getAsRequiredFunction(name, type);
+    public <V> Optional<LongFunction<String>> getAsOptionalFunction(final String name) {
+        return getAsOptionalFunction(name, String.class);
+    }
+
+    public <V> LongFunction<V> getAsRequiredFunction(final String name, final Class<? extends V> type) {
+        return this.tmap.getAsRequiredFunction(name, type);
     }
 
 
@@ -579,8 +575,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return A {@link LongFunction} of type V
      */
     @Override
-    public <V> LongFunction<V> getAsFunctionOr(String name, V defaultValue) {
-        return tmap.getAsFunctionOr(name, defaultValue);
+    public <V> LongFunction<V> getAsFunctionOr(final String name, final V defaultValue) {
+        return this.tmap.getAsFunctionOr(name, defaultValue);
     }
 
     /**
@@ -593,16 +589,17 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param <V>          The type of object to return
      * @return A caching function which chains to the init function, with caching
      */
-    public <V> LongFunction<V> getAsCachedFunctionOr(String fieldname, String defaultValue, Function<String, V> init) {
-        return tmap.getAsCachedFunctionOr(fieldname, defaultValue, init);
+    public <V> LongFunction<V> getAsCachedFunctionOr(final String fieldname, final String defaultValue, final Function<String, V> init) {
+        return this.tmap.getAsCachedFunctionOr(fieldname, defaultValue, init);
     }
 
     /**
      * @param field The requested field name
      * @return true if the named field is defined as static or dynamic
      */
-    public boolean isDefined(String field) {
-        return tmap.isDefined(field);
+    @Override
+    public boolean isDefined(final String field) {
+        return this.tmap.isDefined(field);
     }
 
     /**
@@ -611,8 +608,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param field The field name
      * @return true if the named field is defined neither as static nor as dynamic
      */
-    public boolean isUndefined(String field) {
-        return tmap.isUndefined(field);
+    public boolean isUndefined(final String field) {
+        return this.tmap.isUndefined(field);
     }
 
     /**
@@ -621,8 +618,8 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return true if the named field is defined as static or dynamic and the value produced can be assigned to the specified type
      */
     @Override
-    public boolean isDefined(String field, Class<?> type) {
-        return tmap.isDefined(field, type);
+    public boolean isDefined(final String field, final Class<?> type) {
+        return this.tmap.isDefined(field, type);
     }
 
     /**
@@ -631,56 +628,56 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param fields The fields which should be defined as either static or dynamic
      * @return true if all specified fields are defined as static or dynamic
      */
-    public boolean isDefinedAll(String... fields) {
-        return tmap.isDefinedAll(fields);
+    public boolean isDefinedAll(final String... fields) {
+        return this.tmap.isDefinedAll(fields);
     }
 
     /**
      * @param fields The ordered field names for which the {@link ListBinder} will be created
      * @return a new {@link ListBinder} which can produce a {@link List} of Objects from a long input.
      */
-    public LongFunction<List<Object>> newListBinder(String... fields) {
-        return tmap.newListBinder(fields);
+    public LongFunction<List<Object>> newListBinder(final String... fields) {
+        return this.tmap.newListBinder(fields);
     }
 
     /**
      * @param fields The ordered field names for which the {@link ListBinder} will be created
      * @return a new {@link ListBinder} which can produce a {@link List} of Objects from a long input.
      */
-    public LongFunction<List<Object>> newListBinder(List<String> fields) {
-        return tmap.newListBinder(fields);
+    public LongFunction<List<Object>> newListBinder(final List<String> fields) {
+        return this.tmap.newListBinder(fields);
     }
 
     /**
      * @param fields The ordered field names for which the {@link OrderedMapBinder} will be created
      * @return a new {@link OrderedMapBinder} which can produce a {@link Map} of String to Objects from a long input.
      */
-    public LongFunction<Map<String, Object>> newOrderedMapBinder(String... fields) {
-        return tmap.newOrderedMapBinder(fields);
+    public LongFunction<Map<String, Object>> newOrderedMapBinder(final String... fields) {
+        return this.tmap.newOrderedMapBinder(fields);
     }
 
     /**
      * @param fields The ordered field names for which the {@link ArrayBinder} will be created
      * @return a new {@link ArrayBinder} which can produce a {@link Object} array from a long input.
      */
-    public LongFunction<Object[]> newArrayBinder(String... fields) {
-        return tmap.newArrayBinder(fields);
+    public LongFunction<Object[]> newArrayBinder(final String... fields) {
+        return this.tmap.newArrayBinder(fields);
     }
 
     /**
      * @param fields The ordered field names for which the {@link ArrayBinder} will be created
      * @return a new {@link ArrayBinder} which can produce a {@link Object} array from a long input.
      */
-    public LongFunction<Object[]> newArrayBinder(List<String> fields) {
-        return tmap.newArrayBinder(fields);
+    public LongFunction<Object[]> newArrayBinder(final List<String> fields) {
+        return this.tmap.newArrayBinder(fields);
     }
 
     /**
      * @param bindPoints The {@link BindPoint}s for which the {@link ArrayBinder} will be created
      * @return a new {@link ArrayBinder} which can produce a {@link Object} array from a long input.
      */
-    public LongFunction<Object[]> newArrayBinderFromBindPoints(List<BindPoint> bindPoints) {
-        return tmap.newArrayBinderFromBindPoints(bindPoints);
+    public LongFunction<Object[]> newArrayBinderFromBindPoints(final List<BindPoint> bindPoints) {
+        return this.tmap.newArrayBinderFromBindPoints(bindPoints);
     }
 
     /**
@@ -689,19 +686,19 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param field The field name for a dynamic parameter
      * @return The mapping function
      */
-    public LongFunction<?> getMapper(String field) {
-        return tmap.getMapper(field);
+    public LongFunction<?> getMapper(final String field) {
+        return this.tmap.getMapper(field);
     }
 
     /**
      * @return the logical map size, including all static and dynamic fields
      */
     public int getSize() {
-        return tmap.getSize();
+        return this.tmap.getSize();
     }
 
-    public Class<?> getValueType(String fieldname) {
-        return tmap.getValueType(fieldname);
+    public Class<?> getValueType(final String fieldname) {
+        return this.tmap.getValueType(fieldname);
     }
 
     /**
@@ -715,40 +712,40 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return Optionally, an enum value which matches, or {@link Optional#empty()}
      * @throws OpConfigError if more than one field matches
      */
-    public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getTypeAndTargetFromEnum(Class<E> enumclass, Class<V> valueClass) {
-        return tmap.getOptionalTargetEnum(enumclass,valueClass);
+    public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getTypeAndTargetFromEnum(final Class<E> enumclass, final Class<V> valueClass) {
+        return this.tmap.getOptionalTargetEnum(enumclass,valueClass);
     }
 
     public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getOptionalTypeAndTargetEnum(
-        Class<E> enumclass,
-        Class<V> valueClass
+        final Class<E> enumclass,
+        final Class<V> valueClass
     ){
-        return tmap.getOptionalTargetEnum(enumclass,valueClass);
+        return this.tmap.getOptionalTargetEnum(enumclass,valueClass);
     }
 
     public <E extends Enum<E>,V> Optional<TypeAndTarget<E,V>> getOptionalTypeAndTargetEnum(
-        Class<E> enumclass,
-        Class<V> valueClass,
-        String alternateTypeField,
-        String alternateValueField
+        final Class<E> enumclass,
+        final Class<V> valueClass,
+        final String alternateTypeField,
+        final String alternateValueField
     ) {
-        return tmap.getOptionalTargetEnum(enumclass, valueClass, alternateTypeField, alternateValueField);
+        return this.tmap.getOptionalTargetEnum(enumclass, valueClass, alternateTypeField, alternateValueField);
     }
 
-    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTypeAndTarget(Class<E> enumclass, Class<V> valueClass) {
-        return tmap.getTargetEnum(enumclass, valueClass);
+    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTypeAndTarget(final Class<E> enumclass, final Class<V> valueClass) {
+        return this.tmap.getTargetEnum(enumclass, valueClass);
     }
 
-    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTypeAndTarget(Class<E> enumclass, Class<V> valueclass, String tname, String vname) {
-        return tmap.getTargetEnum(enumclass, valueclass,tname,vname);
+    public <E extends Enum<E>,V> TypeAndTarget<E,V> getTypeAndTarget(final Class<E> enumclass, final Class<V> valueclass, final String tname, final String vname) {
+        return this.tmap.getTargetEnum(enumclass, valueclass,tname,vname);
     }
 
-    public <E extends Enum<E>> Optional<E> getOptionalEnumFromField(Class<E> enumclass, String fieldName) {
-        return tmap.getOptionalEnumFromField(enumclass,fieldName);
+    public <E extends Enum<E>> Optional<E> getOptionalEnumFromField(final Class<E> enumclass, final String fieldName) {
+        return this.tmap.getOptionalEnumFromField(enumclass,fieldName);
     }
 
-    public <E extends Enum<E>> E getEnumFromFieldOr(Class<E> enumClass, E defaultEnum, String fieldName) {
-        return getOptionalEnumFromField(enumClass,fieldName).orElse(defaultEnum);
+    public <E extends Enum<E>> E getEnumFromFieldOr(final Class<E> enumClass, final E defaultEnum, final String fieldName) {
+        return this.getOptionalEnumFromField(enumClass,fieldName).orElse(defaultEnum);
     }
 
     /**
@@ -763,15 +760,15 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return an enhanced function
      */
     public <FA,FE> LongFunction<FA> enhanceDefaultFunc(
-        LongFunction<FA> func,
-        String field,
-        Class<FE> type,
-        FE defaultFe,
-        BiFunction<FA,FE,FA> combiner
+        final LongFunction<FA> func,
+        final String field,
+        final Class<FE> type,
+        final FE defaultFe,
+        final BiFunction<FA,FE,FA> combiner
     ) {
-        LongFunction<FE> fieldEnhancerFunc = getAsFunctionOr(field, defaultFe);
-        LongFunction<FA> faLongFunction = func;
-        LongFunction<FA> lfa = l -> combiner.apply(faLongFunction.apply(l),fieldEnhancerFunc.apply(l));
+        final LongFunction<FE> fieldEnhancerFunc = this.getAsFunctionOr(field, defaultFe);
+        final LongFunction<FA> faLongFunction = func;
+        final LongFunction<FA> lfa = l -> combiner.apply(faLongFunction.apply(l),fieldEnhancerFunc.apply(l));
         return lfa;
 
     }
@@ -787,13 +784,13 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return a version of the base function, optionally enhanced
      */
     public <FA,FE> LongFunction<FA> enhanceFunc(
-        LongFunction<FA> func,
-        String field,
-        Class<FE> type,
-        BiFunction<FA,FE,FA> combiner
+        final LongFunction<FA> func,
+        final String field,
+        final Class<FE> type,
+        final BiFunction<FA,FE,FA> combiner
     ) {
-        LongFunction<FE> fieldEnhancerFunc = getAsRequiredFunction(field, type);
-        LongFunction<FA> lfa = l -> combiner.apply(func.apply(l),fieldEnhancerFunc.apply(l));
+        final LongFunction<FE> fieldEnhancerFunc = this.getAsRequiredFunction(field, type);
+        final LongFunction<FA> lfa = l -> combiner.apply(func.apply(l),fieldEnhancerFunc.apply(l));
         return lfa;
     }
 
@@ -808,17 +805,15 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return a version of the base function, optionally enhanced
      */
     public <FA,FE> LongFunction<FA> enhanceFuncOptionally(
-        LongFunction<FA> func,
-        String field,
-        Class<FE> type,
-        BiFunction<FA,FE,FA> combiner
+        final LongFunction<FA> func,
+        final String field,
+        final Class<FE> type,
+        final BiFunction<FA,FE,FA> combiner
     ) {
-        Optional<LongFunction<FE>> fieldEnhancerFunc = getAsOptionalFunction(field, type);
-        if (fieldEnhancerFunc.isEmpty()) {
-            return func;
-        }
-        LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
-        LongFunction<FA> lfa = l -> combiner.apply(func.apply(l),feLongFunction.apply(l));
+        final Optional<LongFunction<FE>> fieldEnhancerFunc = this.getAsOptionalFunction(field, type);
+        if (fieldEnhancerFunc.isEmpty()) return func;
+        final LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
+        final LongFunction<FA> lfa = l -> combiner.apply(func.apply(l),feLongFunction.apply(l));
         return lfa;
     }
 
@@ -836,18 +831,16 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return the enhanced optional function
      */
     public <FA,FE> Optional<LongFunction<FA>> enhanceOptionalFuncOptionally(
-        Optional<LongFunction<FA>> func,
-        String field,
-        Class<FE> type,
-        BiFunction<FA,FE,FA> combiner
+        final Optional<LongFunction<FA>> func,
+        final String field,
+        final Class<FE> type,
+        final BiFunction<FA,FE,FA> combiner
     ) {
-        Optional<LongFunction<FE>> fieldEnhancerFunc = getAsOptionalFunction(field, type);
-        if (func.isEmpty()||fieldEnhancerFunc.isEmpty()) {
-            return func;
-        }
-        LongFunction<FA> faLongFunction = func.get();
-        LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
-        LongFunction<FA> lfa = l -> combiner.apply(faLongFunction.apply(l),feLongFunction.apply(l));
+        final Optional<LongFunction<FE>> fieldEnhancerFunc = this.getAsOptionalFunction(field, type);
+        if (func.isEmpty()||fieldEnhancerFunc.isEmpty()) return func;
+        final LongFunction<FA> faLongFunction = func.get();
+        final LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
+        final LongFunction<FA> lfa = l -> combiner.apply(faLongFunction.apply(l),feLongFunction.apply(l));
         return Optional.of(lfa);
     }
 
@@ -868,18 +861,16 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return the enhanced optional base function
      */
     public <FA,FE> Optional<LongFunction<FA>> enhanceOptionalDefaultFunc(
-        Optional<LongFunction<FA>> func,
-        String field,
-        Class<FE> type,
-        FE defaultFe,
-        BiFunction<FA,FE,FA> combiner
+        final Optional<LongFunction<FA>> func,
+        final String field,
+        final Class<FE> type,
+        final FE defaultFe,
+        final BiFunction<FA,FE,FA> combiner
     ) {
-        if (func.isEmpty()) {
-            return func;
-        }
-        LongFunction<FE> fieldEnhancerFunc = getAsFunctionOr(field, defaultFe);
-        LongFunction<FA> faLongFunction = func.get();
-        LongFunction<FA> lfa = l -> combiner.apply(faLongFunction.apply(l),fieldEnhancerFunc.apply(l));
+        if (func.isEmpty()) return func;
+        final LongFunction<FE> fieldEnhancerFunc = this.getAsFunctionOr(field, defaultFe);
+        final LongFunction<FA> faLongFunction = func.get();
+        final LongFunction<FA> lfa = l -> combiner.apply(faLongFunction.apply(l),fieldEnhancerFunc.apply(l));
         return Optional.of(lfa);
     }
 
@@ -894,30 +885,33 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @return an (optionally) enhanced base function
      */
     public <FA,FE extends Enum<FE>> LongFunction<FA> enhanceEnumOptionally(
-        LongFunction<FA> func,
-        String field,
-        Class<FE> type,
-        BiFunction<FA,FE,FA> combiner
+        final LongFunction<FA> func,
+        final String field,
+        final Class<FE> type,
+        final BiFunction<FA,FE,FA> combiner
     ) {
-        Optional<LongFunction<FE>> fieldEnhancerFunc = getAsOptionalEnumFunction(field, type);
-        if (fieldEnhancerFunc.isEmpty()) {
-            return func;
-        }
-        LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
-        LongFunction<FA> lfa = l -> combiner.apply(func.apply(l),feLongFunction.apply(l));
+        final Optional<LongFunction<FE>> fieldEnhancerFunc = this.getAsOptionalEnumFunction(field, type);
+        if (fieldEnhancerFunc.isEmpty()) return func;
+        final LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
+        final LongFunction<FA> lfa = l -> combiner.apply(func.apply(l),feLongFunction.apply(l));
         return lfa;
     }
 
-    public Map<String, Object> parseStaticCmdMap(String key, String mainField) {
-        return tmap.parseStaticCmdMap(key, mainField);
+    public Map<String, Object> parseStaticCmdMap(final String key, final String mainField) {
+        return this.tmap.parseStaticCmdMap(key, mainField);
     }
 
     @Override
     public String toString() {
-        return this.tmap.toString();
+        return tmap.toString();
     }
 
     public List<CapturePoint> getCaptures() {
-        return tmap.getCaptures();
+        return this.tmap.getCaptures();
+    }
+
+    @Override
+    public Map<String, String> getLabels() {
+        return this.labels.getLabelsAnd("opname", this.getName());
     }
 }

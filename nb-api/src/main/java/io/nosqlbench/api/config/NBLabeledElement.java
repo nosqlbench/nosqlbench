@@ -22,6 +22,8 @@ import java.util.Map;
 
 public interface NBLabeledElement {
 
+    NBLabeledElement EMPTY = forMap(Map.of());
+
     Map<String, String> getLabels();
 
     /**
@@ -29,11 +31,9 @@ public interface NBLabeledElement {
      * @param keyvalues
      * @return
      */
-    default Map<String, String> getLabelsAnd(String... keyvalues) {
-        LinkedHashMap<String, String> map = new LinkedHashMap<>(getLabels());
-        for (int idx = 0; idx < keyvalues.length; idx+=2) {
-            map.put(keyvalues[idx], keyvalues[idx + 1]);
-        }
+    default Map<String, String> getLabelsAnd(final String... keyvalues) {
+        final LinkedHashMap<String, String> map = new LinkedHashMap<>(this.getLabels());
+        for (int idx = 0; idx < keyvalues.length; idx+=2) map.put(keyvalues[idx], keyvalues[idx + 1]);
         return map;
     }
 
@@ -41,26 +41,26 @@ public interface NBLabeledElement {
 //
 //    }
 
-    default Map<String, String> getLabelsAnd(Map<String,String> extra) {
-        LinkedHashMap<String,String> map = new LinkedHashMap<>(getLabels());
+    default Map<String, String> getLabelsAnd(final Map<String,String> extra) {
+        final LinkedHashMap<String,String> map = new LinkedHashMap<>(this.getLabels());
         map.putAll(extra);
         return map;
     }
 
-    static MapLabels forMap(Map<String,String> labels) {
+    static MapLabels forMap(final Map<String,String> labels) {
         return new MapLabels(labels);
     }
 
     class MapLabels implements NBLabeledElement {
         private final Map<String, String> labels;
 
-        public MapLabels(Map<String,String> labels) {
+        public MapLabels(final Map<String,String> labels) {
             this.labels = labels;
         }
 
         @Override
         public Map<String, String> getLabels() {
-            return labels;
+            return this.labels;
         }
     }
 
@@ -73,29 +73,27 @@ public interface NBLabeledElement {
      * @param and
      * @return
      */
-    default String linearized(Map<String,String> and) {
-        StringBuilder sb= new StringBuilder();
-        Map<String, String> allLabels = this.getLabelsAnd(and);
-        ArrayList<String> sortedLabels = new ArrayList<>(allLabels.keySet());
-        for (String label : sortedLabels) {
-            sb.append(label).append(':').append(allLabels.get(label)).append(',');
-        }
+    default String linearizeLabels(final Map<String,String> and) {
+        final StringBuilder sb= new StringBuilder();
+        final Map<String, String> allLabels = getLabelsAnd(and);
+        final ArrayList<String> sortedLabels = new ArrayList<>(allLabels.keySet());
+        for (final String label : sortedLabels) sb.append(label).append(':').append(allLabels.get(label)).append(',');
         sb.setLength(sb.length()-",".length());
         return sb.toString();
     }
 
     /**
-     * Equivalent to {@link #linearized(Map)}, except that additional key-value pairs can
+     * Equivalent to {@link #linearizeLabels(Map)}, except that additional key-value pairs can
      * be expressed as a pairs of Strings in the argument list.
      * @param and - An even numbered list of strings as key1, value1, key2, value2, ...
      * @return A linearized string representation
      */
-    default String linearized(String... and) {
-        return linearized(getLabelsAnd(and));
+    default String linearizeLabels(final String... and) {
+        return this.linearizeLabels(this.getLabelsAnd(and));
     }
 
-    default String linearizedByValueGraphite(String... and) {
-        return linearizedByValueDelim(".",and);
+    default String linearizeLabelsByValueGraphite(final String... and) {
+        return this.linearizeLabelsByValueDelim(".",and);
     }
     /**
      * Create a single String representation of the label set, preserving key order,
@@ -107,12 +105,10 @@ public interface NBLabeledElement {
      * @param and
      * @return
      */
-    default String linearizedByValueDelim(String delim, String... and) {
-        Map<String, String> fullLabels = getLabelsAnd(and);
-        StringBuilder sb = new StringBuilder();
-        for (String labelName : fullLabels.keySet()) {
-            sb.append(fullLabels.get(labelName)).append(delim);
-        }
+    default String linearizeLabelsByValueDelim(final String delim, final String... and) {
+        final Map<String, String> fullLabels = this.getLabelsAnd(and);
+        final StringBuilder sb = new StringBuilder();
+        for (final String labelName : fullLabels.keySet()) sb.append(fullLabels.get(labelName)).append(delim);
         sb.setLength(sb.length()-1);
         return sb.toString();
     }

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.templating;
 
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpData;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
@@ -51,17 +52,19 @@ public class ParsedOpTest {
         ConfigModel.of(ParsedOpTest.class)
             .add(Param.defaultTo("testcfg", "testval"))
             .asReadOnly()
-            .apply(Map.of())
+            .apply(Map.of()),
+        List.of(),
+        NBLabeledElement.forMap(Map.of())
     );
 
     @Test
     public void testFieldDelegationFromDynamicToStaticToConfig() {
-        NBConfiguration cfg = ConfigModel.of(ParsedOpTest.class)
+        final NBConfiguration cfg = ConfigModel.of(ParsedOpTest.class)
             .add(Param.defaultTo("puppy", "dog"))
             .add(Param.required("surname", String.class))
             .asReadOnly().apply(Map.of("surname", "yes"));
 
-        String opt = """
+        final String opt = """
             ops:
                op1:
                  d1: "{{NumberNameToString()}}"
@@ -69,10 +72,10 @@ public class ParsedOpTest {
                  params:
                   ps1: "param-one"
             """;
-        OpsDocList stmtsDocs = OpsLoader.loadString(opt, OpTemplateFormat.yaml, cfg.getMap(), null);
+        final OpsDocList stmtsDocs = OpsLoader.loadString(opt, OpTemplateFormat.yaml, cfg.getMap(), null);
         assertThat(stmtsDocs.getOps().size()).isEqualTo(1);
-        OpTemplate opTemplate = stmtsDocs.getOps().get(0);
-        ParsedOp parsedOp = new ParsedOp(opTemplate, cfg);
+        final OpTemplate opTemplate = stmtsDocs.getOps().get(0);
+        final ParsedOp parsedOp = new ParsedOp(opTemplate, cfg, List.of(), NBLabeledElement.forMap(Map.of()));
 
         assertThat(parsedOp.getAsFunctionOr("d1","invalid").apply(1L)).isEqualTo("one");
         assertThat(parsedOp.getAsFunctionOr("s1","invalid").apply(1L)).isEqualTo("static-one");
@@ -90,7 +93,7 @@ public class ParsedOpTest {
 
     @Test
     public void testSubMapTemplates() {
-        ParsedOp parsedOp = new ParsedOp(
+        final ParsedOp parsedOp = new ParsedOp(
             new OpData().applyFields(Map.of(
                 "op", Map.of(
                     "field1-literal", "literalvalue1",
@@ -109,13 +112,15 @@ public class ParsedOpTest {
             ConfigModel.of(ParsedOpTest.class)
                 .add(Param.defaultTo("testcfg", "testval"))
                 .asReadOnly()
-                .apply(Map.of())
+                .apply(Map.of()),
+            List.of(),
+            NBLabeledElement.forMap(Map.of())
         );
-        LongFunction<? extends String> f1 = parsedOp.getAsRequiredFunction("field1-literal");
-        LongFunction<? extends String> f2 = parsedOp.getAsRequiredFunction("field2-object");
-        LongFunction<? extends String> f3 = parsedOp.getAsRequiredFunction("field3-template");
-        LongFunction<? extends Map> f4 = parsedOp.getAsRequiredFunction("field4-map-template",Map.class);
-        LongFunction<? extends Map> f5 = parsedOp.getAsRequiredFunction("field5-map-literal",Map.class);
+        final LongFunction<? extends String> f1 = parsedOp.getAsRequiredFunction("field1-literal");
+        final LongFunction<? extends String> f2 = parsedOp.getAsRequiredFunction("field2-object");
+        final LongFunction<? extends String> f3 = parsedOp.getAsRequiredFunction("field3-template");
+        final LongFunction<? extends Map> f4 = parsedOp.getAsRequiredFunction("field4-map-template",Map.class);
+        final LongFunction<? extends Map> f5 = parsedOp.getAsRequiredFunction("field5-map-literal",Map.class);
         assertThat(f1.apply(1)).isNotNull();
         assertThat(f2.apply(2)).isNotNull();
         assertThat(f3.apply(3)).isNotNull();
@@ -126,7 +131,7 @@ public class ParsedOpTest {
 
     @Test
     public void testParsedOp() {
-        Map<String, Object> m1 = pc.apply(0);
+        final Map<String, Object> m1 = this.pc.apply(0);
         assertThat(m1).containsEntry("stmt", "test");
         assertThat(m1).containsEntry("dyna1", "zero");
         assertThat(m1).containsEntry("dyna2", "zero");
@@ -135,22 +140,22 @@ public class ParsedOpTest {
 
     @Test
     public void testNewListBinder() {
-        LongFunction<List<Object>> lb = pc.newListBinder("dyna1", "identity", "dyna2", "identity");
-        List<Object> objects = lb.apply(1);
+        final LongFunction<List<Object>> lb = this.pc.newListBinder("dyna1", "identity", "dyna2", "identity");
+        final List<Object> objects = lb.apply(1);
         assertThat(objects).isEqualTo(List.of("one", 1L, "one", 1L));
     }
 
     @Test
     public void testNewMapBinder() {
-        LongFunction<Map<String, Object>> mb = pc.newOrderedMapBinder("dyna1", "identity", "dyna2");
-        Map<String, Object> objects = mb.apply(2);
+        final LongFunction<Map<String, Object>> mb = this.pc.newOrderedMapBinder("dyna1", "identity", "dyna2");
+        final Map<String, Object> objects = mb.apply(2);
         assertThat(objects).isEqualTo(Map.<String, Object>of("dyna1", "two", "identity", 2L, "dyna2", "two"));
     }
 
     @Test
     public void testNewAryBinder() {
-        LongFunction<Object[]> ab = pc.newArrayBinder("dyna1", "dyna1", "identity", "identity");
-        Object[] objects = ab.apply(3);
+        final LongFunction<Object[]> ab = this.pc.newArrayBinder("dyna1", "dyna1", "identity", "identity");
+        final Object[] objects = ab.apply(3);
         assertThat(objects).isEqualTo(new Object[]{"three", "three", 3L, 3L});
     }
 

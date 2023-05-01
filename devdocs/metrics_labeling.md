@@ -52,3 +52,13 @@ above.
     - includes above labels
     - "op": "<name of the parsed op>"
 
+# Additional Data
+In the future it would be nice to include both the driver adapter name and the space name.
+
+# Caller and Callee Semantics
+When constructing child elements, or _owned_ fields, the calling convention is to provide
+_this_ element as the labeled object.
+
+When returning labels as a labeled object, the convention is to return the labels from
+the labeled parent object with the name of _this_ object appended to the end of the
+label set.
