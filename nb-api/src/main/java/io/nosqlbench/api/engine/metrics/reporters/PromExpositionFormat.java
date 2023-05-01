@@ -97,13 +97,25 @@ public enum PromExpositionFormat {
 
             }
             if (metric instanceof Gauge gauge) {
+                buffer.append("# TYPE ").append(rawName).append(" gauge\n");
                 final Object value = gauge.getValue();
                 if (value instanceof Number number) {
                     final double doubleValue = number.doubleValue();
+                    buffer.append(rawName)
+                        .append(' ')
+                        .append(doubleValue)
+                        .append('\n');
                 } else if (value instanceof CharSequence sequence) {
                     final String stringValue = sequence.toString();
+                    buffer.append(rawName)
+                        .append(' ')
+                        .append(stringValue)
+                        .append('\n');
                 } else if (value instanceof String stringValue) {
-
+                    buffer.append(rawName)
+                        .append(' ')
+                        .append(stringValue)
+                        .append('\n');
                 } else throw new RuntimeException(
                     "Unknown label set for metric type '" + metric.getClass().getCanonicalName() + '\''
                 );

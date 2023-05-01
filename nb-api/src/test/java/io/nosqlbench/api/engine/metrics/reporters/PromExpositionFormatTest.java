@@ -17,20 +17,15 @@
 package io.nosqlbench.api.engine.metrics.reporters;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Timer;
+import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricMeter;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
-import io.nosqlbench.api.testutils.Perf;
+import io.nosqlbench.api.engine.metrics.instruments.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -117,4 +112,35 @@ public class PromExpositionFormatTest {
             """));
     }
 
+    @Test
+    public void testGaugeFormat() {
+        final Gauge cosetteGauge = () -> 1500;
+        final NBMetricGauge nbMetricGauge = new NBMetricGauge(Map.of("name","cosette","label6", "value6"), cosetteGauge);
+        final String formatted = PromExpositionFormat.format(this.nowclock, nbMetricGauge);
+
+        assertThat(formatted).matches(Pattern.compile("""
+            # TYPE cosette gauge
+            cosette 1500.0
+            """));
+
+        final Gauge cosetteGauge2 = () -> new String("2000.0");
+        final NBMetricGauge nbMetricGauge2 = new NBMetricGauge(Map.of("name","cosette2","label7", "value7"), cosetteGauge2);
+        final String formatted2 = PromExpositionFormat.format(this.nowclock, nbMetricGauge2);
+
+        assertThat(formatted2).matches(Pattern.compile("""
+            # TYPE cosette2 gauge
+            cosette2 2000.0
+            """));
+
+        final int number = 3000;
+        CharSequence charSequence = Integer.toString(number);
+        final Gauge cosetteGauge3 = () -> charSequence;
+        final NBMetricGauge nbMetricGauge3 = new NBMetricGauge(Map.of("name","cosette3","label8", "value8"), cosetteGauge3);
+        final String formatted3 = PromExpositionFormat.format(this.nowclock, nbMetricGauge3);
+
+        assertThat(formatted3).matches(Pattern.compile("""
+            # TYPE cosette3 gauge
+            cosette3 3000
+            """));
+    }
 }
