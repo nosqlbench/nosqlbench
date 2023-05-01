@@ -18,11 +18,13 @@ package io.nosqlbench.api.engine.metrics.reporters;
 
 import com.codahale.metrics.*;
 import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.testutils.Perf;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -33,7 +35,7 @@ import java.util.Map;
  *     exposition format</a>
  */
 
-public enum PromExpositionFormat {
+public class PromExpositionFormat {
     ;
 
     public static String format(final Clock clock, final Metric... metrics) {
@@ -89,11 +91,40 @@ public enum PromExpositionFormat {
                         .append(value)
                         .append('\n');
                 }
-
+                final double snapshotCount =snapshot.size();
+                buffer.append(rawName)
+                    .append("_count")
+                    .append(' ')
+                    .append(snapshotCount)
+                    .append('\n');
+                buffer.append("# TYPE ").append(rawName).append("_max").append(" gauge\n");
                 final long maxValue = snapshot.getMax();
+                buffer.append(rawName)
+                    .append("_max")
+                    .append(' ')
+                    .append(maxValue)
+                    .append('\n');
+                buffer.append("# TYPE ").append(rawName).append("_min").append(" gauge\n");
                 final long minValue = snapshot.getMin();
+                buffer.append(rawName)
+                    .append("_min")
+                    .append(' ')
+                    .append(minValue)
+                    .append('\n');
+                buffer.append("# TYPE ").append(rawName).append("_mean").append(" gauge\n");
                 final double meanValue = snapshot.getMean();
+                buffer.append(rawName)
+                    .append("_mean")
+                    .append(' ')
+                    .append(meanValue)
+                    .append('\n');
+                buffer.append("# TYPE ").append(rawName).append("_stdev").append(" gauge\n");
                 final double stdDev = snapshot.getStdDev();
+                buffer.append(rawName)
+                    .append("_stdev")
+                    .append(' ')
+                    .append(stdDev)
+                    .append('\n');
 
             }
             if (metric instanceof Gauge gauge) {
@@ -121,10 +152,38 @@ public enum PromExpositionFormat {
                 );
             }
             if (metric instanceof Metered meter) {
+                buffer.append("# TYPE ").append(rawName).append("_1mRate").append(" gauge\n");
                 final double oneMinuteRate = meter.getOneMinuteRate();
+                buffer.append(rawName)
+                    .append("_1mRate")
+                    .append(' ')
+                    .append(oneMinuteRate)
+                    .append('\n');
+
+                buffer.append("# TYPE ").append(rawName).append("_5mRate").append(" gauge\n");
                 final double fiveMinuteRate = meter.getFiveMinuteRate();
+                buffer.append(rawName)
+                    .append("_5mRate")
+                    .append(' ')
+                    .append(fiveMinuteRate)
+                    .append('\n');
+
+                buffer.append("# TYPE ").append(rawName).append("_15mRate").append(" gauge\n");
                 final double fifteenMinuteRate = meter.getFifteenMinuteRate();
+                buffer.append(rawName)
+                    .append("_15mRate")
+                    .append(' ')
+                    .append(fifteenMinuteRate)
+                    .append('\n');
+
+                buffer.append("# TYPE ").append(rawName).append("_meanRate").append(" gauge\n");
                 final double meanRate = meter.getMeanRate();
+                buffer.append(rawName)
+                    .append("_meanRate")
+                    .append(' ')
+                    .append(meanRate)
+                    .append('\n');
+
             }
 
         }

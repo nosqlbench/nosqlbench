@@ -26,6 +26,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,6 +74,15 @@ public class PromExpositionFormatTest {
             mynameismud\\{label3="value3",quantile="0.98"} 36223.0
             mynameismud\\{label3="value3",quantile="0.99"} 36607.0
             mynameismud\\{label3="value3",quantile="0.999"} 36927.0
+            mynameismud_count 1000.0
+            # TYPE mynameismud_max gauge
+            mynameismud_max 36991
+            # TYPE mynameismud_min gauge
+            mynameismud_min 0
+            # TYPE mynameismud_mean gauge
+            mynameismud_mean 18481.975
+            # TYPE mynameismud_stdev gauge
+            mynameismud_stdev 10681.018083421426
             """));
     }
 
@@ -80,16 +90,17 @@ public class PromExpositionFormatTest {
     public void testTimerFormat() {
 
         final DeltaHdrHistogramReservoir hdr = new DeltaHdrHistogramReservoir(Map.of("label4","value4"),3);
+        final NBMetricTimer nbMetricTimer = new NBMetricTimer(Map.of("name","monsieurmarius","label4", "value4"), hdr);
         for (long i = 0; 1000 > i; i++)
         {
-            hdr.update(i * 37L);
+            nbMetricTimer.update(i*37L, TimeUnit.NANOSECONDS);
         }
-        final NBMetricTimer nbMetricTimer = new NBMetricTimer(Map.of("name","monsieurmarius","label4", "value4"), hdr);
+
         final String formatted = PromExpositionFormat.format(this.nowclock, nbMetricTimer);
 
         assertThat(formatted).matches(Pattern.compile("""
             # TYPE monsieurmarius_total counter
-            monsieurmarius_total\\{label4="value4"} 0 \\d+
+            monsieurmarius_total\\{label4="value4"} 1000 \\d+
             # TYPE monsieurmarius summary
             monsieurmarius\\{label4="value4",quantile="0.5"} 18463.0
             monsieurmarius\\{label4="value4",quantile="0.75"} 27727.0
@@ -98,6 +109,23 @@ public class PromExpositionFormatTest {
             monsieurmarius\\{label4="value4",quantile="0.98"} 36223.0
             monsieurmarius\\{label4="value4",quantile="0.99"} 36607.0
             monsieurmarius\\{label4="value4",quantile="0.999"} 36927.0
+            monsieurmarius_count 1000.0
+            # TYPE monsieurmarius_max gauge
+            monsieurmarius_max 36991
+            # TYPE monsieurmarius_min gauge
+            monsieurmarius_min 0
+            # TYPE monsieurmarius_mean gauge
+            monsieurmarius_mean 18481.975
+            # TYPE monsieurmarius_stdev gauge
+            monsieurmarius_stdev \\d+\\.\\d+
+            # TYPE monsieurmarius_1mRate gauge
+            monsieurmarius_1mRate 0.0
+            # TYPE monsieurmarius_5mRate gauge
+            monsieurmarius_5mRate 0.0
+            # TYPE monsieurmarius_15mRate gauge
+            monsieurmarius_15mRate 0.0
+            # TYPE monsieurmarius_meanRate gauge
+            monsieurmarius_meanRate \\d+\\.\\d+
             """));
     }
 
@@ -109,6 +137,14 @@ public class PromExpositionFormatTest {
         assertThat(formatted).matches(Pattern.compile("""
             # TYPE eponine_total counter
             eponine_total\\{label5="value5"} 0 \\d+
+            # TYPE eponine_1mRate gauge
+            eponine_1mRate 0.0
+            # TYPE eponine_5mRate gauge
+            eponine_5mRate 0.0
+            # TYPE eponine_15mRate gauge
+            eponine_15mRate 0.0
+            # TYPE eponine_meanRate gauge
+            eponine_meanRate 0.0
             """));
     }
 
