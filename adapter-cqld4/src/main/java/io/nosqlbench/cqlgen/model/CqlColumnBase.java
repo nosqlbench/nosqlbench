@@ -16,6 +16,7 @@
 
 package io.nosqlbench.cqlgen.model;
 
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.config.NBLabeledElement;
 
@@ -27,62 +28,59 @@ public abstract class CqlColumnBase implements NBNamedElement, NBLabeledElement 
     private String typedef;
     private ColumnPosition position=ColumnPosition.NonKey;
 
-    protected CqlColumnBase(final String colname, final String typedef) {
+    protected CqlColumnBase(String colname, String typedef) {
         this.typedef = typedef;
-        name = colname;
+        this.name = colname;
     }
 
-    public void setPosition(final ColumnPosition position) {
+    public void setPosition(ColumnPosition position) {
         this.position = position;
     }
 
     public ColumnPosition getPosition() {
-        return position;
+        return this.position;
     }
-    public void setTypeDef(final String type) {
-        typedef = type;
+    public void setTypeDef(String type) {
+        this.typedef = type;
     }
 
     @Override
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public String getTypedef() {
-        return this.typedef;
+        return typedef;
     }
 
     public String getTrimmedTypedef() {
-        return this.typedef.replaceAll(" ", "");
+        return typedef.replaceAll(" ", "");
     }
 
     @Override
     public String toString() {
-        return this.getLabels().toString();
+        return getLabels().toString();
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return Map.of(
-            "name", this.name,
-            "type", "column"
-        );
+    public NBLabels getLabels() {
+        return NBLabels.forKV("name", name, "type", "column");
     }
 
     public boolean isCounter() {
-        return "counter".equalsIgnoreCase(getTrimmedTypedef());
+        return "counter".equalsIgnoreCase(this.getTrimmedTypedef());
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
     public String getSyntax() {
-        return name + ' ' + this.getTrimmedTypedef();
+        return this.name + ' ' + getTrimmedTypedef();
     }
 
     public String getFullName() {
-        return this.getParentFullName() + '.' + name;
+        return getParentFullName() + '.' + this.name;
     }
 
     protected abstract String getParentFullName();

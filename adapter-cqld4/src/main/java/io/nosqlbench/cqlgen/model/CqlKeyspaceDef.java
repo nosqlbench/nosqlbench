@@ -17,6 +17,7 @@
 package io.nosqlbench.cqlgen.model;
 
 import com.datastax.oss.driver.internal.core.util.Strings;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.cqlgen.core.CGKeyspaceStats;
@@ -39,95 +40,103 @@ public class CqlKeyspaceDef implements NBNamedElement, NBLabeledElement {
     public CqlKeyspaceDef() {
     }
 
-    public CqlKeyspaceDef(final String ksname) {
-        keyspaceName = ksname;
+    public CqlKeyspaceDef(String ksname) {
+        this.keyspaceName = ksname;
     }
 
-    public void setKeyspaceName(final String newname) {
-        keyspaceName=newname;
+    public void setKeyspaceName(String newname) {
+        this.keyspaceName =newname;
     }
 
     @Override
     public String getName() {
-        return keyspaceName;
+        return this.keyspaceName;
     }
 
     @Override
     public String toString() {
         return "CqlKeyspace{" +
-            "keyspaceName='" + this.keyspaceName + '\'' +
-            ", stats=" + this.stats +
-            ", isDurableWrites=" + this.isDurableWrites +
-            ", replicationData='" + this.replicationData + '\'' +
+            "keyspaceName='" + keyspaceName + '\'' +
+            ", stats=" + stats +
+            ", isDurableWrites=" + isDurableWrites +
+            ", replicationData='" + replicationData + '\'' +
             '}';
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return Map.of(
-            "name", this.keyspaceName,
+    public NBLabels getLabels() {
+        return NBLabels.forKV(
+            "name", keyspaceName,
             "type","keyspace"
         );
     }
 
-    public void setStats(final CGKeyspaceStats ksstats) {
-        stats=ksstats;
+    public void setStats(CGKeyspaceStats ksstats) {
+        this.stats =ksstats;
     }
 
     public boolean isDurableWrites() {
-        return this.isDurableWrites;
+        return isDurableWrites;
     }
 
-    public void setDurableWrites(final boolean isDurableWrites) {
+    public void setDurableWrites(boolean isDurableWrites) {
         this.isDurableWrites = isDurableWrites;
     }
 
-    public void setReplicationData(final String repldata) {
-        replicationData = repldata;
+    public void setReplicationData(String repldata) {
+        this.replicationData = repldata;
     }
 
     public String getReplicationData() {
-        return replicationData;
+        return this.replicationData;
     }
 
-    public CqlTable getTable(final String table) {
-        return tableDefs.stream().filter(t -> t.getName().equals(table)).findAny().orElse(null);
+    public CqlTable getTable(String table) {
+        return this.tableDefs.stream().filter(t -> t.getName().equals(table)).findAny().orElse(null);
     }
 
-    public void addTable(final CqlTable table) {
+    public void addTable(CqlTable table) {
         table.setKeyspace(this);
-        tableDefs.add(table);
+        this.tableDefs.add(table);
     }
 
     public List<CqlType> getTypeDefs() {
-        return typeDefs;
+        return this.typeDefs;
     }
 
     public List<CqlTable> getTableDefs() {
-        return tableDefs;
+        return this.tableDefs;
 
     }
 
-    public void removeTable(final CqlTable table) {
-        tableDefs.remove(table.getName());
+    public void removeTable(CqlTable table) {
+        this.tableDefs.remove(table.getName());
     }
 
-    public void getReferenceErrors(final List<String> errors) {
-        if (!this.defined) errors.add("keyspace " + keyspaceName + " was referenced but not defined.");
-        for (final CqlType typedef : this.typeDefs) typedef.getReferenceErrors(errors);
-        for (final CqlTable value : this.tableDefs) value.getReferenceErrors(errors);
+    public void getReferenceErrors(List<String> errors) {
+        if (!defined) {
+            errors.add("keyspace " + this.keyspaceName + " was referenced but not defined.");
+        }
+        for (CqlType typedef : typeDefs) {
+            typedef.getReferenceErrors(errors);
+        }
+        for (CqlTable value : tableDefs) {
+            value.getReferenceErrors(errors);
+        }
     }
 
     public void setDefined() {
-        if (null == this.keyspaceName) throw new RuntimeException("nuh uh");
-        defined=true;
+        if (null == keyspaceName) {
+            throw new RuntimeException("nuh uh");
+        }
+        this.defined =true;
     }
 
     public void validate() {
-        Strings.requireNotEmpty(keyspaceName, "keyspace name");
+        Strings.requireNotEmpty(this.keyspaceName, "keyspace name");
     }
 
-    public void addType(final CqlType usertype) {
-        typeDefs.add(usertype);
+    public void addType(CqlType usertype) {
+        this.typeDefs.add(usertype);
     }
 }

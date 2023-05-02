@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.diag.optasks;
 
 import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
@@ -31,13 +32,13 @@ public class DiagTask_diagrate implements DiagTask, NBReconfigurable, NBLabeledE
     private RateLimiter rateLimiter;
     private RateSpec rateSpec;
 
-    private void updateRateLimiter(final String spec) {
-        rateSpec = new RateSpec(spec);
-        this.rateLimiter = RateLimiters.createOrUpdate(
+    private void updateRateLimiter(String spec) {
+        this.rateSpec = new RateSpec(spec);
+        rateLimiter = RateLimiters.createOrUpdate(
             this,
             "diag",
-            this.rateLimiter,
-            this.rateSpec
+            rateLimiter,
+            rateSpec
         );
     }
 
@@ -57,30 +58,30 @@ public class DiagTask_diagrate implements DiagTask, NBReconfigurable, NBLabeledE
     }
 
     @Override
-    public void applyConfig(final NBConfiguration cfg) {
-        name = cfg.get("name", String.class);
+    public void applyConfig(NBConfiguration cfg) {
+        this.name = cfg.get("name", String.class);
         cfg.getOptional("diagrate").ifPresent(this::updateRateLimiter);
     }
 
     @Override
-    public void applyReconfig(final NBConfiguration recfg) {
+    public void applyReconfig(NBConfiguration recfg) {
         recfg.getOptional("diagrate").ifPresent(this::updateRateLimiter);
     }
 
     @Override
-    public Map<String, Object> apply(final Long aLong, final Map<String, Object> stringObjectMap) {
-        this.rateLimiter.maybeWaitForOp();
+    public Map<String, Object> apply(Long aLong, Map<String, Object> stringObjectMap) {
+        rateLimiter.maybeWaitForOp();
         return stringObjectMap;
     }
 
 
     @Override
     public String getName() {
-        return this.name;
+        return name;
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return Map.of("name", name);
+    public NBLabels getLabels() {
+        return NBLabels.forKV("diagop", name);
     }
 }

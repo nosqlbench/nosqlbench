@@ -16,6 +16,7 @@
 
 package io.nosqlbench.cqlgen.binders;
 
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.cqlgen.model.CqlColumnBase;
 import io.nosqlbench.cqlgen.model.CqlModel;
 import io.nosqlbench.cqlgen.model.CqlTable;
@@ -45,50 +46,53 @@ public class NamingFolio {
     public static final String DEFAULT_NAMER_SPEC = "[BLOCKNAME-][OPTYPE-][COLUMN]-[TYPEDEF-][TABLE][-KEYSPACE]";
     NamingStyle namingStyle = NamingStyle.SymbolicType;
 
-    public NamingFolio(final String namerspec) {
-        namer = new CGElementNamer(
+    public NamingFolio(String namerspec) {
+        this.namer = new CGElementNamer(
             namerspec,
             List.of(s -> s.toLowerCase().replaceAll("[^a-zA-Z0-9_-]", ""))
         );
     }
 
     public NamingFolio() {
-        namer = new CGElementNamer(NamingFolio.DEFAULT_NAMER_SPEC);
+        this.namer = new CGElementNamer(DEFAULT_NAMER_SPEC);
     }
 
-    public void addFieldRef(final Map<String, String> labels) {
-        final String name = this.namer.apply(labels);
-        this.graph.put(name, NBLabeledElement.forMap(labels));
+    public void addFieldRef(Map<String, String> labels) {
+        String name = namer.apply(labels);
+        graph.put(name, NBLabeledElement.forMap(labels));
     }
 
-    public void addFieldRef(final String column, final String typedef, final String table, final String keyspace) {
-        this.addFieldRef(Map.of("column", column, "typedef", typedef, "table", table, "keyspace", keyspace));
+    public void addFieldRef(String column, String typedef, String table, String keyspace) {
+        addFieldRef(Map.of("column", column, "typedef", typedef, "table", table, "keyspace", keyspace));
     }
 
     /**
      * This will eventually elide extraneous fields according to knowledge of all known names
      * by name, type, table, keyspace. For now it just returns everything in fully qualified form.
      */
-    public String nameFor(final NBLabeledElement labeled, final String... fields) {
-        final Map<String, String> labelsPlus = labeled.getLabelsAnd(fields);
-        final String name = this.namer.apply(labelsPlus);
+    public String nameFor(NBLabeledElement labeled, String... fields) {
+        NBLabels labelsPlus = labeled.getLabels().and(fields);
+        String name = namer.apply(labelsPlus.asMap());
         return name;
     }
 
-    public String nameFor(final NBLabeledElement labeled, final Map<String,String> fields) {
-        final Map<String, String> labelsPlus = labeled.getLabelsAnd(fields);
-        final String name = this.namer.apply(labelsPlus);
+    public String nameFor(NBLabeledElement labeled, Map<String,String> fields) {
+        NBLabels labelsPlus = labeled.getLabels().and(fields);
+        String name = namer.apply(labelsPlus.asMap());
         return name;
 
     }
 
-    public void informNamerOfAllKnownNames(final CqlModel model) {
-        for (final CqlTable table : model.getTableDefs())
-            for (final CqlColumnBase coldef : table.getColumnDefs()) this.addFieldRef(coldef.getLabels());
+    public void informNamerOfAllKnownNames(CqlModel model) {
+        for (CqlTable table : model.getTableDefs()) {
+            for (CqlColumnBase coldef : table.getColumnDefs()) {
+                addFieldRef(coldef.getLabels().asMap());
+            }
+        }
     }
 
     public Set<String> getNames() {
-        return new LinkedHashSet<>(this.graph.keySet());
+        return new LinkedHashSet<>(graph.keySet());
     }
 
 }

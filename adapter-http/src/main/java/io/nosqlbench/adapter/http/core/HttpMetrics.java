@@ -18,25 +18,24 @@ package io.nosqlbench.adapter.http.core;
 
 import com.codahale.metrics.Histogram;
 import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-
-import java.util.Map;
 
 public class HttpMetrics implements NBLabeledElement {
     private final HttpSpace space;
     final Histogram statusCodeHistogram;
 
-    public HttpMetrics(final HttpSpace space) {
+    public HttpMetrics(HttpSpace space) {
         this.space = space;
-        this.statusCodeHistogram = ActivityMetrics.histogram(this, "statuscode",space.getHdrDigits());
+        statusCodeHistogram = ActivityMetrics.histogram(this, "statuscode",space.getHdrDigits());
     }
 
     public String getName() {
-        return "http"+("default".equals(space.getName())?"": '-' + this.space.getName());
+        return "http"+("default".equals(this.space.getName())?"": '-' + space.getName());
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return Map.of("name", this.getName());
+    public NBLabels getLabels() {
+        return NBLabels.forKV("name", getName());
     }
 }

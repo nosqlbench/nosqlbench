@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,32 @@
 
 package io.nosqlbench.cqlgen.model;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import io.nosqlbench.api.config.NBLabels;
 
 public class CqlTypeColumn extends CqlColumnBase {
 
     CqlType type;
 
-    public CqlTypeColumn(String colname, String typedef, CqlType usertype) {
+    public CqlTypeColumn(final String colname, final String typedef, final CqlType usertype) {
         super(colname, typedef);
-        this.setType(usertype);
+        type = usertype;
     }
 
     @Override
     protected String getParentFullName() {
-        return type.getFullName();
+        return this.type.getFullName();
     }
 
     public CqlType getType() {
-        return type;
+        return this.type;
     }
 
-    public void setType(CqlType type) {
+    public void setType(final CqlType type) {
         this.type = type;
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        Map<String,String> map = new LinkedHashMap<>(super.getLabels());
-        map.put("name",type.getName());
-        return map;
+    public NBLabels getLabels() {
+        return super.getLabels().and("name", this.type.getName());
     }
 }
