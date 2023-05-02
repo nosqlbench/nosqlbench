@@ -16,44 +16,43 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
 import io.nosqlbench.api.config.LabeledScenarioContext;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import io.nosqlbench.engine.core.lifecycle.scenario.ScenarioController;
-
-import java.util.Map;
 
 public class ScenarioContext extends ScriptEnvBuffer implements LabeledScenarioContext {
 
     private final ScenarioController sc;
     private final String contextName;
 
-    public ScenarioContext(final String contextName, final ScenarioController sc) {
+    public ScenarioContext(String contextName, ScenarioController sc) {
         this.contextName = contextName;
         this.sc = sc;
     }
 
     public String getContextName() {
-        return contextName;
+        return this.contextName;
     }
 
     @Override
-    public Object getAttribute(final String name) {
-        final Object o = super.getAttribute(name);
+    public Object getAttribute(String name) {
+        Object o = super.getAttribute(name);
         return o;
     }
 
     @Override
-    public Object getAttribute(final String name, final int scope) {
-        final Object o = super.getAttribute(name, scope);
+    public Object getAttribute(String name, int scope) {
+        Object o = super.getAttribute(name, scope);
         return o;
     }
 
     @Override
-    public void setAttribute(final String name, final Object value, final int scope) {
+    public void setAttribute(String name, Object value, int scope) {
         super.setAttribute(name, value, scope);
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return Map.of("scenario", contextName);
+    public NBLabels getLabels() {
+        return NBLabels.forKV("scenario", this.contextName);
     }
 }
