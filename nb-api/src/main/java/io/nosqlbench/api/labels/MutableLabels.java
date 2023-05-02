@@ -17,21 +17,24 @@
 package io.nosqlbench.api.labels;
 
 import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class MutableLabels extends HashMap<String, String> implements NBLabeledElement {
 
-    public static MutableLabels fromMaps(final Map<String, String> entries) {
-        final MutableLabels mutableLabels = new MutableLabels();
+    private NBLabels labels;
+
+    public static MutableLabels fromMaps(Map<String, String> entries) {
+        MutableLabels mutableLabels = new MutableLabels();
         mutableLabels.putAll(entries);
         return mutableLabels;
     }
 
 
     @Override
-    public Map<String, String> getLabels() {
-        return this;
+    public NBLabels getLabels() {
+        return this.labels;
     }
 }

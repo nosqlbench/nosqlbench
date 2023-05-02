@@ -19,13 +19,12 @@ package io.nosqlbench.api.engine.metrics;
 import com.codahale.metrics.Reservoir;
 import com.codahale.metrics.Snapshot;
 import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogWriter;
 import org.HdrHistogram.Recorder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Map;
 
 /**
  * A custom wrapping of snapshotting logic on the HdrHistogram. This histogram will always report the last histogram
@@ -44,7 +43,7 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, NBLabeledEle
 
     private Histogram intervalHistogram;
     private long intervalHistogramEndTime = System.currentTimeMillis();
-    private final Map<String, String> labels;
+    private final NBLabels labels;
     private HistogramLogWriter writer;
 
     /**
@@ -53,9 +52,9 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, NBLabeledEle
      * @param labels              the labels to give to the reservoir, for logging purposes
      * @param significantDigits how many significant digits to track in the reservoir
      */
-    public DeltaHdrHistogramReservoir(final Map<String, String> labels, final int significantDigits) {
+    public DeltaHdrHistogramReservoir(NBLabels labels, int significantDigits) {
         this.labels = labels;
-        recorder = new Recorder(significantDigits);
+        this.recorder = new Recorder(significantDigits);
 
         /*
          * Start by flipping the recorder's interval histogram.
@@ -64,19 +63,19 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, NBLabeledEle
          * - intervalHistogram can be nonnull.
          * - it lets us figure out the number of significant digits to use in runningTotals.
          */
-        this.intervalHistogram = this.recorder.getIntervalHistogram();
-        this.lastHistogram = new Histogram(this.intervalHistogram.getNumberOfSignificantValueDigits());
+        intervalHistogram = recorder.getIntervalHistogram();
+        lastHistogram = new Histogram(intervalHistogram.getNumberOfSignificantValueDigits());
     }
 
     @Override
     public int size() {
         // This appears to be infrequently called, so not keeping a separate counter just for this.
-        return this.getSnapshot().size();
+        return getSnapshot().size();
     }
 
     @Override
-    public void update(final long value) {
-        this.recorder.recordValue(value);
+    public void update(long value) {
+        recorder.recordValue(value);
     }
 
     /**
@@ -84,12 +83,12 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, NBLabeledEle
      */
     @Override
     public Snapshot getSnapshot() {
-        this.lastHistogram = this.getNextHdrHistogram();
-        return new DeltaHistogramSnapshot(this.lastHistogram);
+        lastHistogram = getNextHdrHistogram();
+        return new DeltaHistogramSnapshot(lastHistogram);
     }
 
     public Histogram getNextHdrHistogram() {
-        return this.getDataSinceLastSnapshotAndUpdate();
+        return getDataSinceLastSnapshotAndUpdate();
     }
 
 
@@ -97,26 +96,28 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, NBLabeledEle
      * @return last histogram snapshot that was provided by {@link #getSnapshot()}
      */
     public Snapshot getLastSnapshot() {
-        return new DeltaHistogramSnapshot(this.lastHistogram);
+        return new DeltaHistogramSnapshot(lastHistogram);
     }
 
     /**
      * @return a copy of the accumulated state since the reservoir last had a snapshot
      */
     private synchronized Histogram getDataSinceLastSnapshotAndUpdate() {
-        this.intervalHistogram = this.recorder.getIntervalHistogram(this.intervalHistogram);
-        final long intervalHistogramStartTime = this.intervalHistogramEndTime;
-        this.intervalHistogramEndTime = System.currentTimeMillis();
+        intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
+        long intervalHistogramStartTime = intervalHistogramEndTime;
+        intervalHistogramEndTime = System.currentTimeMillis();
 
-        this.intervalHistogram.setTag(labels.get("name"));
-        this.intervalHistogram.setStartTimeStamp(intervalHistogramStartTime);
-        this.intervalHistogram.setEndTimeStamp(this.intervalHistogramEndTime);
+        intervalHistogram.setTag(this.labels.linearizeValues("name"));
+        intervalHistogram.setStartTimeStamp(intervalHistogramStartTime);
+        intervalHistogram.setEndTimeStamp(intervalHistogramEndTime);
 
-        this.lastHistogram = this.intervalHistogram.copy();
-        this.lastHistogram.setTag(labels.get("name"));
+        lastHistogram = intervalHistogram.copy();
+        lastHistogram.setTag(this.labels.linearizeValues("name"));
 
-        if (null != writer) this.writer.outputIntervalHistogram(this.lastHistogram);
-        return this.lastHistogram;
+        if (null != this.writer) {
+            writer.outputIntervalHistogram(lastHistogram);
+        }
+        return lastHistogram;
     }
 
     /**
@@ -124,24 +125,24 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, NBLabeledEle
      *
      * @param writer the log writer to use
      */
-    public void write(final HistogramLogWriter writer) {
-        writer.outputIntervalHistogram(this.lastHistogram);
+    public void write(HistogramLogWriter writer) {
+        writer.outputIntervalHistogram(lastHistogram);
     }
 
     public DeltaHdrHistogramReservoir copySettings() {
-        return new DeltaHdrHistogramReservoir(labels, this.intervalHistogram.getNumberOfSignificantValueDigits());
+        return new DeltaHdrHistogramReservoir(this.labels, intervalHistogram.getNumberOfSignificantValueDigits());
     }
 
-    public void attachLogWriter(final HistogramLogWriter logWriter) {
-        writer = logWriter;
+    public void attachLogWriter(HistogramLogWriter logWriter) {
+        this.writer = logWriter;
     }
 
     public Histogram getLastHistogram() {
-        return this.lastHistogram;
+        return lastHistogram;
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return labels;
+    public NBLabels getLabels() {
+        return this.labels;
     }
 }

@@ -16,7 +16,6 @@
 
 package io.nosqlbench.api.engine.activityimpl;
 
-import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.engine.util.Unit;
 import io.nosqlbench.api.errors.BasicError;
@@ -24,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -38,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Essentially, ActivityDef is just a type-aware wrapper around a thread-safe parameter map,
  * with an atomic change counter which can be used to signal changes to observers.</p>
  */
-public class ActivityDef implements NBNamedElement, NBLabeledElement {
+public class ActivityDef implements NBNamedElement {
 
     // milliseconds between cycles per thread, for slow tests only
     public static final String DEFAULT_ALIAS = "UNNAMEDACTIVITY";
@@ -55,36 +53,36 @@ public class ActivityDef implements NBNamedElement, NBLabeledElement {
     // initial thread concurrency for this activity
     private static final String FIELD_THREADS = "threads";
     private static final String[] field_list = {
-        ActivityDef.FIELD_ALIAS, ActivityDef.FIELD_ATYPE, ActivityDef.FIELD_CYCLES, ActivityDef.FIELD_THREADS
+        FIELD_ALIAS, FIELD_ATYPE, FIELD_CYCLES, FIELD_THREADS
     };
     // parameter map has its own internal atomic map
     private final ParameterMap parameterMap;
 
-    public ActivityDef(final ParameterMap parameterMap) {
+    public ActivityDef(ParameterMap parameterMap) {
         this.parameterMap = parameterMap;
     }
 
-    public static Optional<ActivityDef> parseActivityDefOptionally(final String namedActivitySpec) {
+    public static Optional<ActivityDef> parseActivityDefOptionally(String namedActivitySpec) {
         try {
-            final ActivityDef activityDef = ActivityDef.parseActivityDef(namedActivitySpec);
+            ActivityDef activityDef = parseActivityDef(namedActivitySpec);
             return Optional.of(activityDef);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return Optional.empty();
         }
     }
 
-    public static ActivityDef parseActivityDef(final String namedActivitySpec) {
-        final Optional<ParameterMap> activityParameterMap = ParameterMap.parseParams(namedActivitySpec);
-        final ActivityDef activityDef = new ActivityDef(activityParameterMap.orElseThrow(
+    public static ActivityDef parseActivityDef(String namedActivitySpec) {
+        Optional<ParameterMap> activityParameterMap = ParameterMap.parseParams(namedActivitySpec);
+        ActivityDef activityDef = new ActivityDef(activityParameterMap.orElseThrow(
                 () -> new RuntimeException("Unable to parse:" + namedActivitySpec)
         ));
-        ActivityDef.logger.info("parsed activityDef {} to-> {}", namedActivitySpec, activityDef);
+        logger.info("parsed activityDef {} to-> {}", namedActivitySpec, activityDef);
 
         return activityDef;
     }
 
     public String toString() {
-        return "ActivityDef:" + this.parameterMap.toString();
+        return "ActivityDef:" + parameterMap.toString();
     }
 
     /**
@@ -93,11 +91,11 @@ public class ActivityDef implements NBNamedElement, NBLabeledElement {
      * @return the alias
      */
     public String getAlias() {
-        return this.parameterMap.getOptionalString("alias").orElse(ActivityDef.DEFAULT_ALIAS);
+        return parameterMap.getOptionalString("alias").orElse(DEFAULT_ALIAS);
     }
 
     public String getActivityType() {
-        return this.parameterMap.getOptionalString("type", "driver").orElse(ActivityDef.DEFAULT_ATYPE);
+        return parameterMap.getOptionalString("type", "driver").orElse(DEFAULT_ATYPE);
     }
 
     /**
@@ -109,29 +107,32 @@ public class ActivityDef implements NBNamedElement, NBLabeledElement {
      * @return the long start cycle
      */
     public long getStartCycle() {
-        final String cycles = this.parameterMap.getOptionalString("cycles").orElse(ActivityDef.DEFAULT_CYCLES);
-        final int rangeAt = cycles.indexOf("..");
-        final String startCycle;
-        if (0 < rangeAt) startCycle = cycles.substring(0, rangeAt);
-        else startCycle = "0";
+        String cycles = parameterMap.getOptionalString("cycles").orElse(DEFAULT_CYCLES);
+        int rangeAt = cycles.indexOf("..");
+        String startCycle;
+        if (0 < rangeAt) {
+            startCycle = cycles.substring(0, rangeAt);
+        } else {
+            startCycle = "0";
+        }
 
         return Unit.longCountFor(startCycle).orElseThrow(
                 () -> new RuntimeException("Unable to parse start cycles from " + startCycle)
         );
     }
 
-    public void setStartCycle(final long startCycle) {
-        this.parameterMap.set(ActivityDef.FIELD_CYCLES, startCycle + ".." + this.getEndCycle());
+    public void setStartCycle(long startCycle) {
+        parameterMap.set(FIELD_CYCLES, startCycle + ".." + getEndCycle());
     }
 
-    public void setStartCycle(final String startCycle) {
-        this.setStartCycle(Unit.longCountFor(startCycle).orElseThrow(
+    public void setStartCycle(String startCycle) {
+        setStartCycle(Unit.longCountFor(startCycle).orElseThrow(
                 () -> new RuntimeException("Unable to convert start cycle '" + startCycle + "' to a value.")
         ));
     }
 
-    public void setEndCycle(final String endCycle) {
-        this.setEndCycle(Unit.longCountFor(endCycle).orElseThrow(
+    public void setEndCycle(String endCycle) {
+        setEndCycle(Unit.longCountFor(endCycle).orElseThrow(
                 () -> new RuntimeException("Unable to convert end cycle '" + endCycle + "' to a value.")
         ));
     }
@@ -142,18 +143,21 @@ public class ActivityDef implements NBNamedElement, NBLabeledElement {
      * @return the long end cycle
      */
     public long getEndCycle() {
-        final String cycles = this.parameterMap.getOptionalString(ActivityDef.FIELD_CYCLES).orElse(ActivityDef.DEFAULT_CYCLES);
-        final int rangeAt = cycles.indexOf("..");
-        final String endCycle;
-        if (0 < rangeAt) endCycle = cycles.substring(rangeAt + 2);
-        else endCycle = cycles;
+        String cycles = parameterMap.getOptionalString(FIELD_CYCLES).orElse(DEFAULT_CYCLES);
+        int rangeAt = cycles.indexOf("..");
+        String endCycle;
+        if (0 < rangeAt) {
+            endCycle = cycles.substring(rangeAt + 2);
+        } else {
+            endCycle = cycles;
+        }
         return Unit.longCountFor(endCycle).orElseThrow(
                 () -> new RuntimeException("Unable to convert end cycle from " + endCycle)
         );
     }
 
-    public void setEndCycle(final long endCycle) {
-        this.parameterMap.set(ActivityDef.FIELD_CYCLES, this.getStartCycle() + ".." + endCycle);
+    public void setEndCycle(long endCycle) {
+        parameterMap.set(FIELD_CYCLES, getStartCycle() + ".." + endCycle);
     }
 
     /**
@@ -162,11 +166,11 @@ public class ActivityDef implements NBNamedElement, NBLabeledElement {
      * @return target thread count
      */
     public int getThreads() {
-        return this.parameterMap.getOptionalInteger(ActivityDef.FIELD_THREADS).orElse(ActivityDef.DEFAULT_THREADS);
+        return parameterMap.getOptionalInteger(FIELD_THREADS).orElse(DEFAULT_THREADS);
     }
 
-    public void setThreads(final int threads) {
-        this.parameterMap.set(ActivityDef.FIELD_THREADS, threads);
+    public void setThreads(int threads) {
+        parameterMap.set(FIELD_THREADS, threads);
     }
 
     /**
@@ -175,56 +179,57 @@ public class ActivityDef implements NBNamedElement, NBLabeledElement {
      * @return the parameter map
      */
     public ParameterMap getParams() {
-        return this.parameterMap;
+        return parameterMap;
     }
 
     public AtomicLong getChangeCounter() {
-        return this.parameterMap.getChangeCounter();
+        return parameterMap.getChangeCounter();
     }
 
-    public void setCycles(final String cycles) {
-        this.parameterMap.set(ActivityDef.FIELD_CYCLES, cycles);
-        this.checkInvariants();
+    public void setCycles(String cycles) {
+        parameterMap.set(FIELD_CYCLES, cycles);
+        checkInvariants();
     }
 
     public String getCycleSummary() {
         return "["
-                + this.getStartCycle()
+                + getStartCycle()
                 + ".."
-                + this.getEndCycle()
+                + getEndCycle()
                 + ")="
-                + this.getCycleCount();
+                + getCycleCount();
     }
 
     public long getCycleCount() {
-        return this.getEndCycle() - this.getStartCycle();
+        return getEndCycle() - getStartCycle();
     }
 
     private void checkInvariants() {
-        if (this.getStartCycle() >= this.getEndCycle())
-            throw new InvalidParameterException("Start cycle must be strictly less than end cycle, but they are [" + this.getStartCycle() + ',' + this.getEndCycle() + ')');
+        if (getStartCycle() >= getEndCycle()) {
+            throw new InvalidParameterException("Start cycle must be strictly less than end cycle, but they are [" + getStartCycle() + ',' + getEndCycle() + ')');
+        }
     }
 
     @Override
     public String getName() {
-        return this.getAlias();
+        return getAlias();
     }
 
-    public ActivityDef deprecate(final String deprecatedName, final String newName) {
-        final Object deprecatedParam = parameterMap.get(deprecatedName);
-        if (null == deprecatedParam) return this;
+    public ActivityDef deprecate(String deprecatedName, String newName) {
+        Object deprecatedParam = this.parameterMap.get(deprecatedName);
+        if (null == deprecatedParam) {
+            return this;
+        }
         if (deprecatedParam instanceof CharSequence chars) {
-            if (parameterMap.containsKey(newName))
+            if (this.parameterMap.containsKey(newName)) {
                 throw new BasicError("You have specified activity param '" + deprecatedName + "' in addition to the valid name '" + newName + "'. Remove '" + deprecatedName + "'.");
-            ActivityDef.logger.warn("Auto replacing deprecated activity param '{}={}' with new '{}={}'.", deprecatedName, chars, newName, chars);
-            this.parameterMap.put(newName, this.parameterMap.remove(deprecatedName));
-        } else
+            }
+            logger.warn("Auto replacing deprecated activity param '{}={}' with new '{}={}'.", deprecatedName, chars, newName, chars);
+            parameterMap.put(newName, parameterMap.remove(deprecatedName));
+        } else {
             throw new BasicError("Can't replace deprecated name with value of type " + deprecatedName.getClass().getCanonicalName());
+        }
         return this;
     }
 
-    @Override
-    public Map<String, String> getLabels() {
-        return Map.of("alias", this.getAlias());
-    }
 }

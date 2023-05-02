@@ -18,6 +18,7 @@ package io.nosqlbench.api.engine.metrics.reporters;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.api.engine.metrics.instruments.*;
 import org.junit.jupiter.api.Test;
@@ -38,16 +39,16 @@ public class PromExpositionFormatTest {
     @Test
     public void testLabelFormat() {
         assertThat(
-            PromExpositionFormat.labels(Map.of("name","namefoo","property2","value2"))
+            NBLabels.forMap(Map.of("name","namefoo","property2","value2")).linearize("name")
         ).isEqualTo("""
-            {property2="value2"}""");
+            namefoo{property2="value2"}""");
     }
     @Test
     public void testCounterFormat() {
-        final Counter counter = new NBMetricCounter(Map.of("name","counter_test_2342", "origin","mars"));
+        Counter counter = new NBMetricCounter(NBLabels.forKV("name","counter_test_2342", "origin","mars"));
         counter.inc(23423L);
 
-        final String buffer = PromExpositionFormat.format(this.nowclock, counter);
+        String buffer = PromExpositionFormat.format(nowclock, counter);
         assertThat(buffer).matches(Pattern.compile("""
             # TYPE counter_test_2342_total counter
             counter_test_2342_total\\{origin="mars"} \\d+ \\d+
@@ -57,11 +58,13 @@ public class PromExpositionFormatTest {
     @Test
     public void testHistogramFormat() {
 
-        final DeltaHdrHistogramReservoir hdr = new DeltaHdrHistogramReservoir(Map.of("label3","value3"),3);
+        DeltaHdrHistogramReservoir hdr = new DeltaHdrHistogramReservoir(NBLabels.forKV("name","mynameismud","label3","value3"),3);
 
-        for (long i = 0; 1000 > i; i++) hdr.update(i * 37L);
-        final NBMetricHistogram nbHistogram = new NBMetricHistogram(Map.of("name","mynameismud","label3", "value3"), hdr);
-        final String formatted = PromExpositionFormat.format(this.nowclock, nbHistogram);
+        for (long i = 0; 1000 > i; i++) {
+            hdr.update(i * 37L);
+        }
+        NBMetricHistogram nbHistogram = new NBMetricHistogram(NBLabels.forKV("name","mynameismud","label3", "value3"), hdr);
+        String formatted = PromExpositionFormat.format(nowclock, nbHistogram);
 
         assertThat(formatted).matches(Pattern.compile("""
             # TYPE mynameismud_total counter
@@ -74,29 +77,27 @@ public class PromExpositionFormatTest {
             mynameismud\\{label3="value3",quantile="0.98"} 36223.0
             mynameismud\\{label3="value3",quantile="0.99"} 36607.0
             mynameismud\\{label3="value3",quantile="0.999"} 36927.0
-            mynameismud_count 1000.0
+            mynameismud_count\\{label3="value3"} 1000.0
             # TYPE mynameismud_max gauge
-            mynameismud_max 36991
+            mynameismud_max\\{label3="value3"} 36991
             # TYPE mynameismud_min gauge
-            mynameismud_min 0
+            mynameismud_min\\{label3="value3"} 0
             # TYPE mynameismud_mean gauge
-            mynameismud_mean 18481.975
+            mynameismud_mean\\{label3="value3"} 18481.975
             # TYPE mynameismud_stdev gauge
-            mynameismud_stdev 10681.018083421426
+            mynameismud_stdev\\{label3="value3"} 10681.018083421426
             """));
     }
 
     @Test
     public void testTimerFormat() {
 
-        final DeltaHdrHistogramReservoir hdr = new DeltaHdrHistogramReservoir(Map.of("label4","value4"),3);
-        final NBMetricTimer nbMetricTimer = new NBMetricTimer(Map.of("name","monsieurmarius","label4", "value4"), hdr);
+        DeltaHdrHistogramReservoir hdr = new DeltaHdrHistogramReservoir(NBLabels.forKV("name","monsieurmarius","label4","value4"),3);
+        NBMetricTimer nbMetricTimer = new NBMetricTimer(NBLabels.forKV("name","monsieurmarius","label4", "value4"), hdr);
         for (long i = 0; 1000 > i; i++)
-        {
-            nbMetricTimer.update(i*37L, TimeUnit.NANOSECONDS);
-        }
+            nbMetricTimer.update(i * 37L, TimeUnit.NANOSECONDS);
 
-        final String formatted = PromExpositionFormat.format(this.nowclock, nbMetricTimer);
+        String formatted = PromExpositionFormat.format(nowclock, nbMetricTimer);
 
         assertThat(formatted).matches(Pattern.compile("""
             # TYPE monsieurmarius_total counter
@@ -109,74 +110,74 @@ public class PromExpositionFormatTest {
             monsieurmarius\\{label4="value4",quantile="0.98"} 36223.0
             monsieurmarius\\{label4="value4",quantile="0.99"} 36607.0
             monsieurmarius\\{label4="value4",quantile="0.999"} 36927.0
-            monsieurmarius_count 1000.0
+            monsieurmarius_count\\{label4="value4"} 1000.0
             # TYPE monsieurmarius_max gauge
-            monsieurmarius_max 36991
+            monsieurmarius_max\\{label4="value4"} 36991
             # TYPE monsieurmarius_min gauge
-            monsieurmarius_min 0
+            monsieurmarius_min\\{label4="value4"} 0
             # TYPE monsieurmarius_mean gauge
-            monsieurmarius_mean 18481.975
+            monsieurmarius_mean\\{label4="value4"} 18481.975
             # TYPE monsieurmarius_stdev gauge
-            monsieurmarius_stdev \\d+\\.\\d+
+            monsieurmarius_stdev\\{label4="value4"} \\d+\\.\\d+
             # TYPE monsieurmarius_1mRate gauge
-            monsieurmarius_1mRate 0.0
+            monsieurmarius_1mRate\\{label4="value4"} 0.0
             # TYPE monsieurmarius_5mRate gauge
-            monsieurmarius_5mRate 0.0
+            monsieurmarius_5mRate\\{label4="value4"} 0.0
             # TYPE monsieurmarius_15mRate gauge
-            monsieurmarius_15mRate 0.0
+            monsieurmarius_15mRate\\{label4="value4"} 0.0
             # TYPE monsieurmarius_meanRate gauge
-            monsieurmarius_meanRate \\d+\\.\\d+
+            monsieurmarius_meanRate\\{label4="value4"} \\d+\\.\\d+
             """));
     }
 
     @Test
     public void testMeterFormat() {
-        final NBMetricMeter nbMetricMeter = new NBMetricMeter(Map.of("name","eponine","label5", "value5"));
-        final String formatted = PromExpositionFormat.format(this.nowclock, nbMetricMeter);
+        NBMetricMeter nbMetricMeter = new NBMetricMeter(NBLabels.forKV("name","eponine","label5", "value5"));
+        String formatted = PromExpositionFormat.format(nowclock, nbMetricMeter);
 
         assertThat(formatted).matches(Pattern.compile("""
             # TYPE eponine_total counter
             eponine_total\\{label5="value5"} 0 \\d+
             # TYPE eponine_1mRate gauge
-            eponine_1mRate 0.0
+            eponine_1mRate\\{label5="value5"} 0.0
             # TYPE eponine_5mRate gauge
-            eponine_5mRate 0.0
+            eponine_5mRate\\{label5="value5"} 0.0
             # TYPE eponine_15mRate gauge
-            eponine_15mRate 0.0
+            eponine_15mRate\\{label5="value5"} 0.0
             # TYPE eponine_meanRate gauge
-            eponine_meanRate 0.0
+            eponine_meanRate\\{label5="value5"} 0.0
             """));
     }
 
     @Test
     public void testGaugeFormat() {
-        final Gauge cosetteGauge = () -> 1500;
-        final NBMetricGauge nbMetricGauge = new NBMetricGauge(Map.of("name","cosette","label6", "value6"), cosetteGauge);
-        final String formatted = PromExpositionFormat.format(this.nowclock, nbMetricGauge);
+        Gauge cosetteGauge = () -> 1500;
+        NBMetricGauge nbMetricGauge = new NBMetricGauge(NBLabels.forKV("name","cosette","label6", "value6"), cosetteGauge);
+        String formatted = PromExpositionFormat.format(nowclock, nbMetricGauge);
 
         assertThat(formatted).matches(Pattern.compile("""
             # TYPE cosette gauge
-            cosette 1500.0
+            cosette\\{label6="value6"} 1500.0
             """));
 
-        final Gauge cosetteGauge2 = () -> new String("2000.0");
-        final NBMetricGauge nbMetricGauge2 = new NBMetricGauge(Map.of("name","cosette2","label7", "value7"), cosetteGauge2);
-        final String formatted2 = PromExpositionFormat.format(this.nowclock, nbMetricGauge2);
+        Gauge cosetteGauge2 = () -> "2000.0";
+        NBMetricGauge nbMetricGauge2 = new NBMetricGauge(NBLabels.forKV("name","cosette2","label7", "value7"), cosetteGauge2);
+        String formatted2 = PromExpositionFormat.format(nowclock, nbMetricGauge2);
 
         assertThat(formatted2).matches(Pattern.compile("""
             # TYPE cosette2 gauge
-            cosette2 2000.0
+            cosette2\\{label7="value7"} 2000.0
             """));
 
         final int number = 3000;
-        CharSequence charSequence = Integer.toString(number);
-        final Gauge cosetteGauge3 = () -> charSequence;
-        final NBMetricGauge nbMetricGauge3 = new NBMetricGauge(Map.of("name","cosette3","label8", "value8"), cosetteGauge3);
-        final String formatted3 = PromExpositionFormat.format(this.nowclock, nbMetricGauge3);
+        final CharSequence charSequence = Integer.toString(number);
+        Gauge cosetteGauge3 = () -> charSequence;
+        NBMetricGauge nbMetricGauge3 = new NBMetricGauge(NBLabels.forKV("name","cosette3","label8", "value8"), cosetteGauge3);
+        String formatted3 = PromExpositionFormat.format(nowclock, nbMetricGauge3);
 
         assertThat(formatted3).matches(Pattern.compile("""
             # TYPE cosette3 gauge
-            cosette3 3000
+            cosette3\\{label8="value8"} 3000
             """));
     }
 }

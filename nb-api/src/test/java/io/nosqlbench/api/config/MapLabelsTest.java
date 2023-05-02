@@ -18,14 +18,17 @@ package io.nosqlbench.api.config;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class NBLabeledElementTest {
+public class MapLabelsTest {
 
     @Test
-    public void testBasicNameScenario() {
-        final NBLabels labels = NBLabels.forKV("name", "testname","label1","labelvalue1");
-        assertThat(labels.linearize("name")).isEqualTo("testname{label1=\"labelvalue1\"}");
+    public void testLinearizeValues() {
+        final MapLabels l1 = new MapLabels(Map.of("key-a", "value-a", "key-c", "value-c"));
+        final String result = l1.linearizeValues('_', "key-a", "[key-b]", "key-c");
+        assertThat(result).isEqualTo("value-a_value-c");
     }
 
 }

@@ -18,31 +18,31 @@ package io.nosqlbench.api.engine.metrics.instruments;
 
 import com.codahale.metrics.Histogram;
 import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class NBMetricHistogram extends Histogram implements DeltaSnapshotter, HdrDeltaHistogramAttachment, HistogramAttachment, NBLabeledElement {
 
     private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
-    private final Map<String, String> labels;
+    private final NBLabels labels;
     private long cacheExpiryMillis;
     private long cacheTimeMillis;
     private List<Histogram> mirrors;
 
-    public NBMetricHistogram(final Map<String,String> labels, final DeltaHdrHistogramReservoir hdrHistogramReservoir) {
+    public NBMetricHistogram(NBLabels labels, DeltaHdrHistogramReservoir hdrHistogramReservoir) {
         super(hdrHistogramReservoir);
         this.labels = labels;
-        hdrDeltaReservoir = hdrHistogramReservoir;
+        this.hdrDeltaReservoir = hdrHistogramReservoir;
     }
 
-    public NBMetricHistogram(final String name, final DeltaHdrHistogramReservoir hdrHistogramReservoir) {
+    public NBMetricHistogram(String name, DeltaHdrHistogramReservoir hdrHistogramReservoir) {
         super(hdrHistogramReservoir);
-        labels = Map.of("name",name);
-        hdrDeltaReservoir = hdrHistogramReservoir;
+        this.labels = NBLabels.forKV("name",name);
+        this.hdrDeltaReservoir = hdrHistogramReservoir;
     }
 
     @Override
@@ -57,48 +57,57 @@ public class NBMetricHistogram extends Histogram implements DeltaSnapshotter, Hd
      */
     @Override
     public ConvenientSnapshot getSnapshot() {
-        if (System.currentTimeMillis() < this.cacheExpiryMillis)
-            return new ConvenientSnapshot(this.hdrDeltaReservoir.getLastSnapshot());
-        return new ConvenientSnapshot(this.hdrDeltaReservoir.getSnapshot());
+        if (System.currentTimeMillis() < cacheExpiryMillis) {
+            return new ConvenientSnapshot(hdrDeltaReservoir.getLastSnapshot());
+        }
+        return new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());
     }
 
     @Override
-    public ConvenientSnapshot getDeltaSnapshot(final long cacheTimeMillis) {
+    public ConvenientSnapshot getDeltaSnapshot(long cacheTimeMillis) {
         this.cacheTimeMillis = cacheTimeMillis;
-        this.cacheExpiryMillis = System.currentTimeMillis() + this.cacheTimeMillis;
-        final ConvenientSnapshot convenientSnapshot = new ConvenientSnapshot(this.hdrDeltaReservoir.getSnapshot());
+        cacheExpiryMillis = System.currentTimeMillis() + this.cacheTimeMillis;
+        ConvenientSnapshot convenientSnapshot = new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());
         return convenientSnapshot;
     }
 
     @Override
     public synchronized NBMetricHistogram attachHdrDeltaHistogram() {
-        if (null == mirrors) this.mirrors = new CopyOnWriteArrayList<>();
-        final DeltaHdrHistogramReservoir mirrorReservoir = hdrDeltaReservoir.copySettings();
-        final NBMetricHistogram mirror = new NBMetricHistogram("mirror-" + labels.get("name"), mirrorReservoir);
-        this.mirrors.add(mirror);
+        if (null == this.mirrors) {
+            mirrors = new CopyOnWriteArrayList<>();
+        }
+        DeltaHdrHistogramReservoir mirrorReservoir = this.hdrDeltaReservoir.copySettings();
+        NBMetricHistogram mirror = new NBMetricHistogram("mirror-" + this.labels.linearizeValues("name"), mirrorReservoir);
+        mirrors.add(mirror);
         return mirror;
     }
 
     @Override
-    public Histogram attachHistogram(final Histogram histogram) {
-        if (null == mirrors) this.mirrors = new CopyOnWriteArrayList<>();
-        this.mirrors.add(histogram);
+    public Histogram attachHistogram(Histogram histogram) {
+        if (null == this.mirrors) {
+            mirrors = new CopyOnWriteArrayList<>();
+        }
+        mirrors.add(histogram);
         return histogram;
     }
 
     @Override
-    public void update(final long value) {
+    public void update(long value) {
         super.update(value);
-        if (null != mirrors) for (final Histogram mirror : this.mirrors) mirror.update(value);
+        if (null != this.mirrors) {
+            for (Histogram mirror : mirrors) {
+                mirror.update(value);
+            }
+        }
     }
 
     @Override
     public org.HdrHistogram.Histogram getNextHdrDeltaHistogram() {
-        return this.hdrDeltaReservoir.getNextHdrHistogram();
+        return hdrDeltaReservoir.getNextHdrHistogram();
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return labels;
+    public NBLabels getLabels() {
+        return this.labels;
     }
 }

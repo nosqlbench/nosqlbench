@@ -18,26 +18,25 @@ package io.nosqlbench.api.engine.metrics.instruments;
 
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.config.NBLabeledElement;
-
-import java.util.Map;
+import io.nosqlbench.api.config.NBLabels;
 
 public class NBMetricGauge<T> implements Gauge<T>, NBLabeledElement {
 
     private final Gauge<? extends T> gauge;
-    private final Map<String,String> labels;
+    private final NBLabels labels;
 
-    public NBMetricGauge(final Map<String, String> labels, final Gauge<? extends T> gauge) {
+    public NBMetricGauge(NBLabels labels, Gauge<? extends T> gauge) {
         this.gauge = gauge;
         this.labels = labels;
     }
 
     @Override
     public T getValue() {
-        return this.gauge.getValue();
+        return gauge.getValue();
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return this.labels;
+    public NBLabels getLabels() {
+        return labels;
     }
 }
