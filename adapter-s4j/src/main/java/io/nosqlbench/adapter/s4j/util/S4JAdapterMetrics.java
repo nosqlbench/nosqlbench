@@ -19,11 +19,10 @@ package io.nosqlbench.adapter.s4j.util;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Map;
 
 public class S4JAdapterMetrics implements NBLabeledElement {
 
@@ -35,8 +34,8 @@ public class S4JAdapterMetrics implements NBLabeledElement {
     private Timer bindTimer;
     private Timer executeTimer;
 
-    public S4JAdapterMetrics(final String defaultMetricsPrefix) {
-        defaultAdapterMetricsPrefix = defaultMetricsPrefix;
+    public S4JAdapterMetrics(String defaultMetricsPrefix) {
+        this.defaultAdapterMetricsPrefix = defaultMetricsPrefix;
     }
 
     public String getName() {
@@ -45,31 +44,31 @@ public class S4JAdapterMetrics implements NBLabeledElement {
 
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
-        messageSizeHistogram =
+        this.messageSizeHistogram =
             ActivityMetrics.histogram(
                 this,
-                this.defaultAdapterMetricsPrefix + "message_size",
+                defaultAdapterMetricsPrefix + "message_size",
                 ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // Timer metrics
-        bindTimer =
+        this.bindTimer =
             ActivityMetrics.timer(
                 this,
-                this.defaultAdapterMetricsPrefix + "bind",
+                defaultAdapterMetricsPrefix + "bind",
                 ActivityMetrics.DEFAULT_HDRDIGITS);
-        executeTimer =
+        this.executeTimer =
             ActivityMetrics.timer(
                 this,
-                this.defaultAdapterMetricsPrefix + "execute",
+                defaultAdapterMetricsPrefix + "execute",
                 ActivityMetrics.DEFAULT_HDRDIGITS);
     }
 
-    public Timer getBindTimer() { return this.bindTimer; }
-    public Timer getExecuteTimer() { return this.executeTimer; }
-    public Histogram getMessagesizeHistogram() { return this.messageSizeHistogram; }
+    public Timer getBindTimer() { return bindTimer; }
+    public Timer getExecuteTimer() { return executeTimer; }
+    public Histogram getMessagesizeHistogram() { return messageSizeHistogram; }
 
     @Override
-    public Map<String, String> getLabels() {
-        return Map.of("name", this.getName());
+    public NBLabels getLabels() {
+        return NBLabels.forKV("name", getName());
     }
 }

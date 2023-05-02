@@ -21,17 +21,15 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.kafka.dispensers.KafkaBaseOpDispenser;
 import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
-
-public class KafkaAdapterMetrics implements NBLabeledElement {
+public class KafkaAdapterMetrics {
 
     private static final Logger logger = LogManager.getLogger("S4JAdapterMetrics");
-
-    private final String defaultAdapterMetricsPrefix;
+    private final NBLabels labels;
 
     private Histogram messageSizeHistogram;
     private Timer bindTimer;
@@ -44,94 +42,70 @@ public class KafkaAdapterMetrics implements NBLabeledElement {
     private Counter msgErrDuplicateCounter;
 
     public Histogram getE2eMsgProcLatencyHistogram() {
-        return e2eMsgProcLatencyHistogram;
+        return this.e2eMsgProcLatencyHistogram;
     }
 
     // end-to-end latency
     private Histogram e2eMsgProcLatencyHistogram;
     private final KafkaBaseOpDispenser kafkaBaseOpDispenser;
 
-    public KafkaAdapterMetrics(KafkaBaseOpDispenser kafkaBaseOpDispenser, String defaultMetricsPrefix) {
+    public KafkaAdapterMetrics(final KafkaBaseOpDispenser kafkaBaseOpDispenser, final NBLabeledElement labeledParent) {
         this.kafkaBaseOpDispenser = kafkaBaseOpDispenser;
-        this.defaultAdapterMetricsPrefix = defaultMetricsPrefix;
-    }
-
-    public String getName() {
-        return "KafkaAdapterMetrics";
-    }
-
-    @Override
-    public Map<String, String> getLabels() {
-        return Map.of("name", getName());
+        labels=labeledParent.getLabels().and("name",KafkaAdapterMetrics.class.getSimpleName());
     }
 
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
-        this.messageSizeHistogram =
-            ActivityMetrics.histogram(
-                this,
-                    defaultAdapterMetricsPrefix + "message_size",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
+        messageSizeHistogram =
+            ActivityMetrics.histogram(this.kafkaBaseOpDispenser,
+                "message_size", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // Timer metrics
-        this.bindTimer =
-            ActivityMetrics.timer(
-                this,
-                    defaultAdapterMetricsPrefix + "bind",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
-        this.executeTimer =
-            ActivityMetrics.timer(
-                this,
-                    defaultAdapterMetricsPrefix + "execute",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
+        bindTimer =
+            ActivityMetrics.timer(this.kafkaBaseOpDispenser,
+                    "bind", ActivityMetrics.DEFAULT_HDRDIGITS);
+        executeTimer =
+            ActivityMetrics.timer(this.kafkaBaseOpDispenser,
+                     "execute", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // End-to-end metrics
         // Latency
-        this.e2eMsgProcLatencyHistogram =
-            ActivityMetrics.histogram(
-                    kafkaBaseOpDispenser,
-                    defaultAdapterMetricsPrefix + "e2e_msg_latency",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
+        e2eMsgProcLatencyHistogram =
+            ActivityMetrics.histogram(this.kafkaBaseOpDispenser, "e2e_msg_latency", ActivityMetrics.DEFAULT_HDRDIGITS);
         // Error metrics
-        this.msgErrOutOfSeqCounter =
-            ActivityMetrics.counter(
-                    kafkaBaseOpDispenser,
-                    defaultAdapterMetricsPrefix + "err_msg_oos");
-        this.msgErrLossCounter =
-            ActivityMetrics.counter(
-                    kafkaBaseOpDispenser,
-                    defaultAdapterMetricsPrefix + "err_msg_loss");
-        this.msgErrDuplicateCounter =
-            ActivityMetrics.counter(
-                    kafkaBaseOpDispenser,
-                    defaultAdapterMetricsPrefix + "err_msg_dup");
+        msgErrOutOfSeqCounter =
+            ActivityMetrics.counter(this.kafkaBaseOpDispenser, "err_msg_oos");
+        msgErrLossCounter =
+            ActivityMetrics.counter(this.kafkaBaseOpDispenser, "err_msg_loss");
+        msgErrDuplicateCounter =
+            ActivityMetrics.counter(this.kafkaBaseOpDispenser, "err_msg_dup");
     }
 
-    public Timer getBindTimer() { return this.bindTimer; }
-    public Timer getExecuteTimer() { return this.executeTimer; }
-    public Histogram getMessagesizeHistogram() { return this.messageSizeHistogram; }
+    public Timer getBindTimer() { return bindTimer; }
+    public Timer getExecuteTimer() { return executeTimer; }
+    public Histogram getMessagesizeHistogram() { return messageSizeHistogram; }
 
     public Counter getMsgErrOutOfSeqCounter() {
-        return this.msgErrOutOfSeqCounter;
+        return msgErrOutOfSeqCounter;
     }
 
-    public void setMsgErrOutOfSeqCounter(final Counter msgErrOutOfSeqCounter) {
+    public void setMsgErrOutOfSeqCounter(Counter msgErrOutOfSeqCounter) {
         this.msgErrOutOfSeqCounter = msgErrOutOfSeqCounter;
     }
 
     public Counter getMsgErrLossCounter() {
-        return this.msgErrLossCounter;
+        return msgErrLossCounter;
     }
 
-    public void setMsgErrLossCounter(final Counter msgErrLossCounter) {
+    public void setMsgErrLossCounter(Counter msgErrLossCounter) {
         this.msgErrLossCounter = msgErrLossCounter;
     }
 
     public Counter getMsgErrDuplicateCounter() {
-        return this.msgErrDuplicateCounter;
+        return msgErrDuplicateCounter;
     }
 
-    public void setMsgErrDuplicateCounter(final Counter msgErrDuplicateCounter) {
+    public void setMsgErrDuplicateCounter(Counter msgErrDuplicateCounter) {
         this.msgErrDuplicateCounter = msgErrDuplicateCounter;
     }
 }
