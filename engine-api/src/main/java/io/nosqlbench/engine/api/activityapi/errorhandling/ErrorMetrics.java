@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.errorhandling;
 
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;
@@ -26,42 +27,36 @@ import java.util.function.Supplier;
 
 public class ErrorMetrics {
 
-    private final ActivityDef activityDef;
+    private final NBLabeledElement parentLabels;
     private ExceptionCountMetrics exceptionCountMetrics;
     private ExceptionHistoMetrics exceptionHistoMetrics;
     private ExceptionMeterMetrics exceptionMeterMetrics;
     private ExceptionTimerMetrics exceptionTimerMetrics;
 
-    public ErrorMetrics(ActivityDef activityDef) {
-        this.activityDef = activityDef;
+    public ErrorMetrics(final NBLabeledElement parentLabels) {
+        this.parentLabels = parentLabels;
     }
 
     public synchronized ExceptionCountMetrics getExceptionCountMetrics() {
-        if (exceptionCountMetrics == null) {
-            exceptionCountMetrics = new ExceptionCountMetrics(activityDef);
-        }
-        return exceptionCountMetrics;
+        if (null == exceptionCountMetrics) this.exceptionCountMetrics = new ExceptionCountMetrics(this.parentLabels);
+        return this.exceptionCountMetrics;
     }
 
     public synchronized ExceptionHistoMetrics getExceptionHistoMetrics() {
-        if (exceptionHistoMetrics == null) {
-            exceptionHistoMetrics = new ExceptionHistoMetrics(activityDef);
-        }
-        return exceptionHistoMetrics;
+        if (null == exceptionHistoMetrics)
+            this.exceptionHistoMetrics = new ExceptionHistoMetrics(this.parentLabels, ActivityDef.parseActivityDef(""));
+        return this.exceptionHistoMetrics;
     }
 
     public synchronized ExceptionMeterMetrics getExceptionMeterMetrics() {
-        if (exceptionMeterMetrics == null) {
-            exceptionMeterMetrics = new ExceptionMeterMetrics(activityDef);
-        }
-        return exceptionMeterMetrics;
+        if (null == exceptionMeterMetrics) this.exceptionMeterMetrics = new ExceptionMeterMetrics(this.parentLabels);
+        return this.exceptionMeterMetrics;
     }
 
     public synchronized ExceptionTimerMetrics getExceptionTimerMetrics() {
-        if (exceptionTimerMetrics == null) {
-            exceptionTimerMetrics = new ExceptionTimerMetrics(activityDef);
-        }
-        return exceptionTimerMetrics;
+        if (null == exceptionTimerMetrics)
+            this.exceptionTimerMetrics = new ExceptionTimerMetrics(this.parentLabels, ActivityDef.parseActivityDef(""));
+        return this.exceptionTimerMetrics;
     }
 
     public interface Aware {

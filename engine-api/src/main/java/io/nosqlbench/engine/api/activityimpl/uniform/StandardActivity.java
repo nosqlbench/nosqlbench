@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.errors.BasicError;
@@ -36,7 +37,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -55,37 +55,40 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
     private final ConcurrentHashMap<String, DriverAdapter> adapters = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, OpMapper<Op>> mappers = new ConcurrentHashMap<>();
 
-    public StandardActivity(final ActivityDef activityDef, final NBLabeledElement parentLabels) {
+    public StandardActivity(ActivityDef activityDef, NBLabeledElement parentLabels) {
         super(activityDef, parentLabels);
-        final OpsDocList workload;
+        OpsDocList workload;
 
-        final Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+        Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
         if (yaml_loc.isPresent()) {
-            final Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
+            Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
             workload = OpsLoader.loadPath(yaml_loc.get(), disposable, "activities");
-            this.yamlmodel = workload.getConfigModel();
-        } else this.yamlmodel = ConfigModel.of(StandardActivity.class).asReadOnly();
+            yamlmodel = workload.getConfigModel();
+        } else {
+            yamlmodel = ConfigModel.of(StandardActivity.class).asReadOnly();
+        }
 
-        final ServiceLoader<DriverAdapter> adapterLoader = ServiceLoader.load(DriverAdapter.class);
-        final Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
-        final Optional<DriverAdapter> defaultAdapter = defaultDriverName
+        ServiceLoader<DriverAdapter> adapterLoader = ServiceLoader.load(DriverAdapter.class);
+        Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
+        Optional<DriverAdapter> defaultAdapter = defaultDriverName
             .flatMap(s -> ServiceSelector.of(s, adapterLoader).get());
 
-        if (defaultDriverName.isPresent() && defaultAdapter.isEmpty())
+        if (defaultDriverName.isPresent() && defaultAdapter.isEmpty()) {
             throw new BasicError("Unable to load default driver adapter '" + defaultDriverName.get() + '\'');
+        }
 
         // HERE, op templates are loaded before drivers are loaded
-        final List<OpTemplate> opTemplates = this.loadOpTemplates(defaultAdapter);
+        List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter);
 
 
-        final List<ParsedOp> pops = new ArrayList<>();
-        final List<DriverAdapter> adapterlist = new ArrayList<>();
-        final NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(this.yamlmodel);
+        List<ParsedOp> pops = new ArrayList<>();
+        List<DriverAdapter> adapterlist = new ArrayList<>();
+        NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(yamlmodel);
 
-        final Optional<String> defaultDriverOption = activityDef.getParams().getOptionalString("driver");
-        for (final OpTemplate ot : opTemplates) {
-            final ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
-            final String driverName = incompleteOpDef.takeOptionalStaticValue("driver", String.class)
+        Optional<String> defaultDriverOption = activityDef.getParams().getOptionalString("driver");
+        for (OpTemplate ot : opTemplates) {
+            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
+            String driverName = incompleteOpDef.takeOptionalStaticValue("driver", String.class)
                 .or(() -> incompleteOpDef.takeOptionalStaticValue("type",String.class))
                 .or(() -> defaultDriverOption)
                 .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
@@ -94,46 +97,49 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 //                .or(() -> activityDef.getParams().getOptionalString("driver"))
 //                .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
 
-            if (!this.adapters.containsKey(driverName)) {
-                final DriverAdapter adapter = ServiceSelector.of(driverName, adapterLoader).get().orElseThrow(
+            if (!adapters.containsKey(driverName)) {
+                DriverAdapter adapter = ServiceSelector.of(driverName, adapterLoader).get().orElseThrow(
                     () -> new OpConfigError("Unable to load driver adapter for name '" + driverName + '\'')
                 );
 
-                NBConfigModel combinedModel = this.yamlmodel;
+                NBConfigModel combinedModel = yamlmodel;
                 NBConfiguration combinedConfig = combinedModel.matchConfig(activityDef.getParams());
 
                 if (adapter instanceof NBConfigurable configurable) {
-                    final NBConfigModel adapterModel = configurable.getConfigModel();
+                    NBConfigModel adapterModel = configurable.getConfigModel();
                     supersetConfig.add(adapterModel);
 
-                    combinedModel = adapterModel.add(this.yamlmodel);
+                    combinedModel = adapterModel.add(yamlmodel);
                     combinedConfig = combinedModel.matchConfig(activityDef.getParams());
                     configurable.applyConfig(combinedConfig);
                 }
-                this.adapters.put(driverName, adapter);
-                this.mappers.put(driverName, adapter.getOpMapper());
+                adapters.put(driverName, adapter);
+                mappers.put(driverName, adapter.getOpMapper());
             }
 
             supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
 
-            final DriverAdapter adapter = this.adapters.get(driverName);
+            DriverAdapter adapter = adapters.get(driverName);
             adapterlist.add(adapter);
-            final ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
-            final Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
+            ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
+            Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
             pops.add(pop);
         }
 
         if (defaultDriverOption.isPresent()) {
-            final long matchingDefault = this.mappers.keySet().stream().filter(n -> n.equals(defaultDriverOption.get())).count();
-            if (0 == matchingDefault)
-                StandardActivity.logger.warn("All op templates used a different driver than the default '{}'", defaultDriverOption.get());
+            long matchingDefault = mappers.keySet().stream().filter(n -> n.equals(defaultDriverOption.get())).count();
+            if (0 == matchingDefault) {
+                logger.warn("All op templates used a different driver than the default '{}'", defaultDriverOption.get());
+            }
         }
 
         try {
-            final boolean strict = activityDef.getParams().getOptionalBoolean("strict").orElse(false);
-            this.sequence = this.createOpSourceFromParsedOps(this.adapters, this.mappers, adapterlist, pops);
-        } catch (final Exception e) {
-            if (e instanceof OpConfigError) throw e;
+            boolean strict = activityDef.getParams().getOptionalBoolean("strict").orElse(false);
+            sequence = createOpSourceFromParsedOps(adapters, mappers, adapterlist, pops);
+        } catch (Exception e) {
+            if (e instanceof OpConfigError) {
+                throw e;
+            }
             throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
         }
     }
@@ -141,11 +147,11 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
     @Override
     public void initActivity() {
         super.initActivity();
-        this.setDefaultsFromOpSequence(this.sequence);
+        setDefaultsFromOpSequence(sequence);
     }
 
     public OpSequence<OpDispenser<? extends Op>> getOpSequence() {
-        return this.sequence;
+        return sequence;
     }
 
 //    /**
@@ -161,25 +167,27 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 //    }
 
     @Override
-    public synchronized void onActivityDefUpdate(final ActivityDef activityDef) {
+    public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
 
-        for (final DriverAdapter adapter : this.adapters.values())
+        for (DriverAdapter adapter : adapters.values()) {
             if (adapter instanceof NBReconfigurable configurable) {
-                final NBConfigModel cfgModel = configurable.getReconfigModel();
-                final NBConfiguration cfg = cfgModel.matchConfig(activityDef.getParams());
+                NBConfigModel cfgModel = configurable.getReconfigModel();
+                NBConfiguration cfg = cfgModel.matchConfig(activityDef.getParams());
                 NBReconfigurable.applyMatching(cfg, List.of(configurable));
             }
+        }
     }
 
     @Override
-    public List<OpTemplate> getSyntheticOpTemplates(final OpsDocList opsDocList, final Map<String, Object> cfg) {
-        final List<OpTemplate> opTemplates = new ArrayList<>();
-        for (final DriverAdapter adapter : this.adapters.values())
+    public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> cfg) {
+        List<OpTemplate> opTemplates = new ArrayList<>();
+        for (DriverAdapter adapter : adapters.values()) {
             if (adapter instanceof SyntheticOpTemplateProvider sotp) {
-                final List<OpTemplate> newTemplates = sotp.getSyntheticOpTemplates(opsDocList, cfg);
+                List<OpTemplate> newTemplates = sotp.getSyntheticOpTemplates(opsDocList, cfg);
                 opTemplates.addAll(newTemplates);
             }
+        }
         return opTemplates;
     }
 
@@ -190,17 +198,24 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
      */
     @Override
     public void shutdownActivity() {
-        for (final Entry<String, DriverAdapter> entry : this.adapters.entrySet()) {
-            final String adapterName = entry.getKey();
-            final DriverAdapter<?,?> adapter = entry.getValue();
+        for (Map.Entry<String, DriverAdapter> entry : adapters.entrySet()) {
+            String adapterName = entry.getKey();
+            DriverAdapter<?,?> adapter = entry.getValue();
             adapter.getSpaceCache().getElements().forEach((spaceName, space) -> {
-                if (space instanceof AutoCloseable autocloseable) try {
-                    autocloseable.close();
-                } catch (final Exception e) {
-                    throw new RuntimeException("Error while shutting down state space for " +
-                        "adapter=" + adapterName + ", space=" + spaceName + ": " + e, e);
+                if (space instanceof AutoCloseable autocloseable) {
+                    try {
+                        autocloseable.close();
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error while shutting down state space for " +
+                            "adapter=" + adapterName + ", space=" + spaceName + ": " + e, e);
+                    }
                 }
             });
         }
+    }
+
+    @Override
+    public NBLabels getLabels() {
+        return super.getLabels();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 
@@ -32,31 +33,32 @@ public class ExceptionTimerMetrics {
     private final ConcurrentHashMap<String, Timer> timers = new ConcurrentHashMap<>();
     private final Timer allerrors;
     private final ActivityDef activityDef;
+    private final NBLabeledElement parentLabels;
 
-    public ExceptionTimerMetrics(ActivityDef activityDef) {
+    public ExceptionTimerMetrics(final NBLabeledElement parentLabels, final ActivityDef activityDef) {
         this.activityDef = activityDef;
-        allerrors = ActivityMetrics.timer(
-            activityDef,
+        this.parentLabels = parentLabels;
+
+        this.allerrors = ActivityMetrics.timer(
+            parentLabels,
             "errortimers.ALL",
             activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4)
         );
     }
 
-    public void update(String name, long nanosDuration) {
-        Timer timer = timers.get(name);
-        if (timer == null) {
-            synchronized (timers) {
-                timer = timers.computeIfAbsent(
-                    name,
-                    k -> ActivityMetrics.timer(activityDef, "errortimers." + name, activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
-                );
-            }
+    public void update(final String name, final long nanosDuration) {
+        Timer timer = this.timers.get(name);
+        if (null == timer) synchronized (this.timers) {
+            timer = this.timers.computeIfAbsent(
+                name,
+                k -> ActivityMetrics.timer(this.parentLabels, "errortimers." + name, this.activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
+            );
         }
         timer.update(nanosDuration, TimeUnit.NANOSECONDS);
-        allerrors.update(nanosDuration, TimeUnit.NANOSECONDS);
+        this.allerrors.update(nanosDuration, TimeUnit.NANOSECONDS);
     }
 
     public List<Timer> getTimers() {
-        return new ArrayList<>(timers.values());
+        return new ArrayList<>(this.timers.values());
     }
 }

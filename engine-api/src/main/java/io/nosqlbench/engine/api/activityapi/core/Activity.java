@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
@@ -25,8 +27,6 @@ import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 
@@ -38,7 +38,7 @@ import java.util.function.Supplier;
  * Provides the components needed to build and run an activity a runtime.
  * The easiest way to build a useful Activity is to extend {@link SimpleActivity}.
  */
-public interface Activity extends Comparable<Activity>, ActivityDefObserver, ProgressCapable, StateCapable, NBNamedElement {
+public interface Activity extends Comparable<Activity>, ActivityDefObserver, ProgressCapable, StateCapable, NBLabeledElement {
 
     /**
      * Provide the activity with the controls needed to stop itself.
@@ -59,11 +59,11 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
     ActivityDef getActivityDef();
 
     default String getAlias() {
-        return getActivityDef().getAlias();
+        return this.getActivityDef().getAlias();
     }
 
     default ParameterMap getParams() {
-        return getActivityDef().getParams();
+        return this.getActivityDef().getParams();
     }
 
     default void initActivity() {
@@ -94,6 +94,7 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
 
     void setOutputDispenserDelegate(OutputDispenser outputDispenser);
 
+    @Override
     RunState getRunState();
 
     void setRunState(RunState runState);
@@ -104,7 +105,7 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
     }
 
     default String getCycleSummary() {
-        return getActivityDef().getCycleSummary();
+        return this.getActivityDef().getCycleSummary();
     }
 
     /**
@@ -214,7 +215,7 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
     int getMaxTries();
 
     default int getHdrDigits() {
-        return getParams().getOptionalInteger("hdr_digits").orElse(4);
+        return this.getParams().getOptionalInteger("hdr_digits").orElse(4);
     }
 
     RunStateTally getRunStateTally();

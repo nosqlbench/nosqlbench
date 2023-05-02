@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
@@ -25,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -55,9 +57,10 @@ import static io.nosqlbench.engine.api.util.Colors.*;
  */
 public class InlineTokenPool {
 
-    private final static Logger logger = LogManager.getLogger(InlineTokenPool.class);
+    private static final Logger logger = LogManager.getLogger(InlineTokenPool.class);
 
     public static final double MIN_CONCURRENT_OPS = 5;
+    private final NBLabeledElement parentLabels;
 
     // Size limit of active pool
     private long maxActivePoolSize;
@@ -83,7 +86,7 @@ public class InlineTokenPool {
     // metrics for refill
     private final Timer refillTimer;
     // update rate for refiller
-    private final long interval = (long) 1E6;
+    private final long interval = (long) 1.0E6;
 
 
     private RateSpec rateSpec;
@@ -91,10 +94,10 @@ public class InlineTokenPool {
 //    private long debugRate=1000000000;
 
     // Total number of thread blocks that occured since this token pool was started
-    private long blocks = 0L;
+    private long blocks;
 
     private final Lock lock = new ReentrantLock();
-    private final Condition lockheld = lock.newCondition();
+    private final Condition lockheld = this.lock.newCondition();
 
     /**
      * This constructor tries to pick reasonable defaults for the token pool for
@@ -103,20 +106,22 @@ public class InlineTokenPool {
      *
      * @param rateSpec a {@link RateSpec}
      */
-    public InlineTokenPool(RateSpec rateSpec, ActivityDef def) {
-        ByteBuffer logbuf = getBuffer();
-        apply(rateSpec);
-        logger.debug("initialized token pool: " + this + " for rate:" + rateSpec);
-        this.refillTimer = ActivityMetrics.timer(def, "tokenfiller",4);
+    public InlineTokenPool(final RateSpec rateSpec, final ActivityDef def, final NBLabeledElement parentLabels) {
+        this.parentLabels = parentLabels;
+        final ByteBuffer logbuf = this.getBuffer();
+        this.apply(rateSpec);
+        InlineTokenPool.logger.debug("initialized token pool: {} for rate:{}", this, rateSpec);
+        refillTimer = ActivityMetrics.timer(parentLabels, "tokenfiller",4);
     }
 
-    public InlineTokenPool(long poolsize, double burstRatio, ActivityDef def) {
-        ByteBuffer logbuf = getBuffer();
-        this.maxActivePoolSize = poolsize;
+    public InlineTokenPool(final long poolsize, final double burstRatio, final ActivityDef def, final NBLabeledElement parentLabels) {
+        this.parentLabels = parentLabels;
+        final ByteBuffer logbuf = this.getBuffer();
+        maxActivePoolSize = poolsize;
         this.burstRatio = burstRatio;
-        this.maxActiveAndBurstSize = (long) (maxActivePoolSize * burstRatio);
-        this.maxBurstPoolSize = maxActiveAndBurstSize - maxActivePoolSize;
-        this.refillTimer = ActivityMetrics.timer(def, "tokenfiller",4);
+        maxActiveAndBurstSize = (long) (this.maxActivePoolSize * burstRatio);
+        maxBurstPoolSize = this.maxActiveAndBurstSize - this.maxActivePoolSize;
+        refillTimer = ActivityMetrics.timer(parentLabels, "tokenfiller",4);
     }
 
     /**
@@ -125,21 +130,21 @@ public class InlineTokenPool {
      *
      * @param rateSpec The rate specifier.
      */
-    public synchronized void apply(RateSpec rateSpec) {
+    public synchronized void apply(final RateSpec rateSpec) {
         this.rateSpec = rateSpec;
         // maxActivePool is set to the higher of 1M or however many nanos are needed for 2 ops to be buffered
-        this.maxActivePoolSize = Math.max((long) 1E6, (long) ((double) rateSpec.getNanosPerOp() * MIN_CONCURRENT_OPS));
-        this.maxActiveAndBurstSize = (long) (maxActivePoolSize * rateSpec.getBurstRatio());
-        this.burstRatio = rateSpec.getBurstRatio();
+        maxActivePoolSize = Math.max((long) 1.0E6, (long) (rateSpec.getNanosPerOp() * InlineTokenPool.MIN_CONCURRENT_OPS));
+        maxActiveAndBurstSize = (long) (this.maxActivePoolSize * rateSpec.getBurstRatio());
+        burstRatio = rateSpec.getBurstRatio();
 
-        this.maxBurstPoolSize = maxActiveAndBurstSize - maxActivePoolSize;
-        this.nanosPerOp = rateSpec.getNanosPerOp();
-        notifyAll();
+        maxBurstPoolSize = this.maxActiveAndBurstSize - this.maxActivePoolSize;
+        nanosPerOp = rateSpec.getNanosPerOp();
+        this.notifyAll();
     }
 
 
     public double getBurstRatio() {
-        return burstRatio;
+        return this.burstRatio;
     }
 
     /**
@@ -149,9 +154,9 @@ public class InlineTokenPool {
      * @param amt tokens requested
      * @return actual number of tokens removed, greater to or equal to zero
      */
-    public synchronized long takeUpTo(long amt) {
-        long take = Math.min(amt, activePool);
-        activePool -= take;
+    public synchronized long takeUpTo(final long amt) {
+        final long take = Math.min(amt, this.activePool);
+        this.activePool -= take;
         return take;
     }
 
@@ -163,30 +168,23 @@ public class InlineTokenPool {
      */
     public long blockAndTake() {
         synchronized (this) {
-            if (activePool >= nanosPerOp) {
-                activePool -= nanosPerOp;
-                return waitingPool + activePool;
+            if (this.activePool >= this.nanosPerOp) {
+                this.activePool -= this.nanosPerOp;
+                return this.waitingPool + this.activePool;
             }
         }
-        while (true) {
-            if (lock.tryLock()) {
-                try {
-                    while (activePool < nanosPerOp) {
-                        dorefill();
-                    }
-                    lockheld.signal();
-                    lockheld.signal();
-                } finally {
-                    lock.unlock();
-                }
-            } else {
-                try {
-                    lockheld.await();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        while (true) if (this.lock.tryLock()) try {
+            while (this.activePool < this.nanosPerOp) this.dorefill();
+            this.lockheld.signal();
+            this.lockheld.signal();
+        } finally {
+            this.lock.unlock();
         }
+        else try {
+                this.lockheld.await();
+            } catch (final InterruptedException e) {
+                throw new RuntimeException(e);
+            }
 //        while (activePool < nanosPerOp) {
 //            blocks++;
 //            //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
@@ -205,54 +203,52 @@ public class InlineTokenPool {
 //        return waitingPool + activePool;
     }
 
-    public synchronized long blockAndTakeOps(long ops) {
-        long totalNanosNeeded = ops * nanosPerOp;
-        while (activePool < totalNanosNeeded) {
-            blocks++;
+    public synchronized long blockAndTakeOps(final long ops) {
+        final long totalNanosNeeded = ops * this.nanosPerOp;
+        while (this.activePool < totalNanosNeeded) {
+            this.blocks++;
             //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
             try {
-                wait();
+                this.wait();
 //                wait(maxActivePoolSize / 1000000, (int) maxActivePoolSize % 1000000);
-            } catch (InterruptedException ignored) {
-            } catch (Exception e) {
+            } catch (final InterruptedException ignored) {
+            } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
             //System.out.println("waited for " + amt + "/" + activePool + " tokens");
         }
         //System.out.println(ANSI_BrightYellow + "taking " + amt + "/" + activePool + ANSI_Reset);
 
-        activePool -= totalNanosNeeded;
-        return waitingPool + activePool;
+        this.activePool -= totalNanosNeeded;
+        return this.waitingPool + this.activePool;
     }
 
-    public synchronized long blockAndTake(long tokens) {
-        while (activePool < tokens) {
-            //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
-            try {
-                wait();
+    public synchronized long blockAndTake(final long tokens) {
+        //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
+        //System.out.println("waited for " + amt + "/" + activePool + " tokens");
+        while (this.activePool < tokens) try {
+            this.wait();
 //                wait(maxActivePoolSize / 1000000, (int) maxActivePoolSize % 1000000);
-            } catch (InterruptedException ignored) {
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            //System.out.println("waited for " + amt + "/" + activePool + " tokens");
+        } catch (final InterruptedException ignored) {
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         }
         //System.out.println(ANSI_BrightYellow + "taking " + amt + "/" + activePool + ANSI_Reset);
 
-        activePool -= tokens;
-        return waitingPool + activePool;
+        this.activePool -= tokens;
+        return this.waitingPool + this.activePool;
     }
 
     public long getWaitTime() {
-        return activePool + waitingPool;
+        return this.activePool + this.waitingPool;
     }
 
     public long getWaitPool() {
-        return waitingPool;
+        return this.waitingPool;
     }
 
     public long getActivePool() {
-        return activePool;
+        return this.activePool;
     }
 
     /**
@@ -269,70 +265,67 @@ public class InlineTokenPool {
      * @param newTokens The number of new tokens to add to the token pools
      * @return the total number of tokens in all pools
      */
-    public synchronized long refill(long newTokens) {
-        boolean debugthis = false;
+    public synchronized long refill(final long newTokens) {
+        final boolean debugthis = false;
 //        long debugAt = System.nanoTime();
 //        if (debugAt>debugTrigger+debugRate) {
 //            debugTrigger=debugAt;
 //            debugthis=true;
 //        }
 
-        long needed = Math.max(maxActivePoolSize - activePool, 0L);
-        long allocatedToActivePool = Math.min(newTokens, needed);
-        activePool += allocatedToActivePool;
+        final long needed = Math.max(this.maxActivePoolSize - this.activePool, 0L);
+        final long allocatedToActivePool = Math.min(newTokens, needed);
+        this.activePool += allocatedToActivePool;
 
 
         // overflow logic
-        long allocatedToOverflowPool = newTokens - allocatedToActivePool;
-        waitingPool += allocatedToOverflowPool;
+        final long allocatedToOverflowPool = newTokens - allocatedToActivePool;
+        this.waitingPool += allocatedToOverflowPool;
 
         // backfill logic
-        double refillFactor = Math.min((double) newTokens / maxActivePoolSize, 1.0D);
-        long burstFillAllowed = (long) (refillFactor * maxBurstPoolSize);
+        final double refillFactor = Math.min((double) newTokens / this.maxActivePoolSize, 1.0D);
+        long burstFillAllowed = (long) (refillFactor * this.maxBurstPoolSize);
 
-        burstFillAllowed = Math.min(maxActiveAndBurstSize - activePool, burstFillAllowed);
-        long burstFill = Math.min(burstFillAllowed, waitingPool);
+        burstFillAllowed = Math.min(this.maxActiveAndBurstSize - this.activePool, burstFillAllowed);
+        final long burstFill = Math.min(burstFillAllowed, this.waitingPool);
 
-        waitingPool -= burstFill;
-        activePool += burstFill;
+        this.waitingPool -= burstFill;
+        this.activePool += burstFill;
 
         if (debugthis) {
             System.out.print(this);
             System.out.print(ANSI_BrightBlue + " adding=" + allocatedToActivePool);
-            if (allocatedToOverflowPool > 0) {
+            if (0 < allocatedToOverflowPool)
                 System.out.print(ANSI_Red + " OVERFLOW:" + allocatedToOverflowPool + ANSI_Reset);
-            }
-            if (burstFill > 0) {
-                System.out.print(ANSI_BrightGreen + " BACKFILL:" + burstFill + ANSI_Reset);
-            }
+            if (0 < burstFill) System.out.print(ANSI_BrightGreen + " BACKFILL:" + burstFill + ANSI_Reset);
             System.out.println();
         }
 
         //System.out.println(this);
-        notifyAll();
+        this.notifyAll();
 
-        return activePool + waitingPool;
+        return this.activePool + this.waitingPool;
     }
 
     @Override
     public String toString() {
-        return "Tokens: active=" + activePool + "/" + maxActivePoolSize
+        return "Tokens: active=" + this.activePool + '/' + this.maxActivePoolSize
                 + String.format(
                 " (%3.1f%%)A (%3.1f%%)B ",
-                (((double) activePool / (double) maxActivePoolSize) * 100.0),
-                (((double) activePool / (double) maxActiveAndBurstSize) * 100.0)) + " waiting=" + waitingPool +
-                " blocks=" + blocks +
-                " rateSpec:" + ((rateSpec != null) ? rateSpec.toString() : "NULL");
+            (double) this.activePool / this.maxActivePoolSize * 100.0,
+            (double) this.activePool / this.maxActiveAndBurstSize * 100.0) + " waiting=" + this.waitingPool +
+                " blocks=" + this.blocks +
+                " rateSpec:" + (null != rateSpec ? this.rateSpec.toString() : "NULL");
     }
 
     public RateSpec getRateSpec() {
-        return rateSpec;
+        return this.rateSpec;
     }
 
     public synchronized long restart() {
-        long wait = activePool + waitingPool;
-        activePool = 0L;
-        waitingPool = 0L;
+        final long wait = this.activePool + this.waitingPool;
+        this.activePool = 0L;
+        this.waitingPool = 0L;
         return wait;
     }
 
@@ -340,33 +333,33 @@ public class InlineTokenPool {
         RandomAccessFile image = null;
         try {
             image = new RandomAccessFile("tokenbucket.binlog", "rw");
-            ByteBuffer mbb = image.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, image.length());
+            final ByteBuffer mbb = image.getChannel().map(MapMode.READ_WRITE, 0, image.length());
             return mbb;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     public synchronized void dorefill() {
-        lastRefillAt = System.nanoTime();
-        long nextRefillTime = lastRefillAt + interval;
+        this.lastRefillAt = System.nanoTime();
+        final long nextRefillTime = this.lastRefillAt + this.interval;
         long thisRefillTime = System.nanoTime();
         while (thisRefillTime < nextRefillTime) {
 //            while (thisRefillTime < lastRefillAt + interval) {
-            long parkfor = Math.max(nextRefillTime - thisRefillTime, 0L);
+            final long parkfor = Math.max(nextRefillTime - thisRefillTime, 0L);
             //System.out.println(ANSI_Blue + "parking for " + parkfor + "ns" + ANSI_Reset);
             LockSupport.parkNanos(parkfor);
             thisRefillTime = System.nanoTime();
         }
 
 //            this.times[iteration]=thisRefillTime;
-        long delta = thisRefillTime - lastRefillAt;
+        final long delta = thisRefillTime - this.lastRefillAt;
 //            this.amounts[iteration]=delta;
-        lastRefillAt = thisRefillTime;
+        this.lastRefillAt = thisRefillTime;
 
         //System.out.println(this);
-        refill(delta);
-        refillTimer.update(delta, TimeUnit.NANOSECONDS);
+        this.refill(delta);
+        this.refillTimer.update(delta, TimeUnit.NANOSECONDS);
 //            iteration++;
 
     }
