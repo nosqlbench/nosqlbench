@@ -39,8 +39,8 @@ import java.util.Map;
 public enum PromExpositionFormat {
     ;
 
-    public static String format(Clock clock, Metric... metrics) {
-        return format(clock, new StringBuilder(), metrics).toString();
+    public static String format(final Clock clock, final Metric... metrics) {
+        return PromExpositionFormat.format(clock, new StringBuilder(), metrics).toString();
     }
 
     /**
@@ -52,28 +52,24 @@ public enum PromExpositionFormat {
      *     zero or more metric which need to be formatted
      * @return A string representation of the metrics in prometheus exposition format
      */
-    public static StringBuilder format(Clock clock, StringBuilder builder, Metric... metrics) {
-        StringBuilder buffer = null != builder ? builder : new StringBuilder();
-        Instant instant = clock.instant();
+    public static StringBuilder format(final Clock clock, final StringBuilder builder, final Object... metrics) {
+        final StringBuilder buffer = (null != builder) ? builder : new StringBuilder();
+        final Instant instant = clock.instant();
 
-        for (Metric metric : metrics) {
-            NBLabels labels;
+        for (final Object metric : metrics) {
+            NBLabels labels = null;
 
-            if (metric instanceof NBLabeledElement labeled) {
-                labels = labeled.getLabels();
-            } else {
-                throw new RuntimeException(
-                    "Unknown label set for metric type '" + metric.getClass().getCanonicalName() + '\''
-                );
-            }
-//            String metricNameAndLabels = labels.linearize("name");
-            long epochMillis = instant.toEpochMilli();
+            if (metric instanceof final NBLabeledElement labeled) labels = labeled.getLabels();
+            else throw new RuntimeException(
+                "Unknown label set for metric type '" + metric.getClass().getCanonicalName() + '\''
+            );
+            final long epochMillis = instant.toEpochMilli();
 
-            if (metric instanceof Counting counting) {
+            if (metric instanceof final Counting counting) {
                 buffer.append("# TYPE ")
                     .append(labels.modifyValue("name", n -> n+"_total").only("name")).append(" counter\n");
 
-                long count = counting.getCount();
+                final long count = counting.getCount();
                 buffer
                     .append(labels.modifyValue("name", n -> n+"_total"))
                     .append(' ')
@@ -82,98 +78,97 @@ public enum PromExpositionFormat {
                     .append(epochMillis)
                     .append('\n');
             }
-            if (metric instanceof Sampling sampling) {
+            if (metric instanceof final Sampling sampling) {
                 // Use the summary form
                 buffer.append("# TYPE ").append(labels.only("name")).append(" summary\n");
-                Snapshot snapshot = sampling.getSnapshot();
-                for (double quantile : new double[]{0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999}) {
-                    double value = snapshot.getValue(quantile);
+                final Snapshot snapshot = sampling.getSnapshot();
+                for (final double quantile : new double[]{0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999}) {
+                    final double value = snapshot.getValue(quantile);
                     buffer
                         .append(labels.and("quantile", String.valueOf(quantile)))
                         .append(' ')
                         .append(value)
                         .append('\n');
                 }
-                double snapshotCount =snapshot.size();
+                final double snapshotCount =snapshot.size();
                 buffer.append(labels.modifyValue("name",n->n+"_count"))
                     .append(' ')
                     .append(snapshotCount)
                     .append('\n');
                 buffer.append("# TYPE ").append(labels.only("name")).append("_max").append(" gauge\n");
-                long maxValue = snapshot.getMax();
+                final long maxValue = snapshot.getMax();
                 buffer.append(labels.modifyValue("name",n->n+"_max"))
                     .append(' ')
                     .append(maxValue)
                     .append('\n');
                 buffer.append("# TYPE ").append(labels.only("name")).append("_min").append(" gauge\n");
-                long minValue = snapshot.getMin();
+                final long minValue = snapshot.getMin();
                 buffer.append(labels.modifyValue("name",n->n+"_min"))
                     .append(' ')
                     .append(minValue)
                     .append('\n');
                 buffer.append("# TYPE ").append(labels.only("name")).append("_mean").append(" gauge\n");
-                double meanValue = snapshot.getMean();
+                final double meanValue = snapshot.getMean();
                 buffer.append(labels.modifyValue("name",n->n+"_mean"))
                     .append(' ')
                     .append(meanValue)
                     .append('\n');
                 buffer.append("# TYPE ").append(labels.only("name")).append("_stdev").append(" gauge\n");
-                double stdDev = snapshot.getStdDev();
+                final double stdDev = snapshot.getStdDev();
                 buffer.append(labels.modifyValue("name",n->n+"_stdev"))
                     .append(' ')
                     .append(stdDev)
                     .append('\n');
 
             }
-            if (metric instanceof Gauge gauge) {
+            if (metric instanceof final Gauge gauge) {
                 buffer.append("# TYPE ").append(labels.only("name")).append(" gauge\n");
-                Object value = gauge.getValue();
-                if (value instanceof Number number) {
-                    double doubleValue = number.doubleValue();
+                final Object value = gauge.getValue();
+                if (value instanceof final Number number) {
+                    final double doubleValue = number.doubleValue();
                     buffer.append(labels)
                         .append(' ')
                         .append(doubleValue)
                         .append('\n');
-                } else if (value instanceof CharSequence sequence) {
-                    String stringValue = sequence.toString();
+                } else if (value instanceof final CharSequence sequence) {
+                    final String stringValue = sequence.toString();
                     buffer.append(labels)
                         .append(' ')
                         .append(stringValue)
                         .append('\n');
-                } else if (value instanceof String stringValue) buffer.append(labels)
-                    .append(' ')
-                    .append(stringValue)
-                    .append('\n');
-                else {
-                    throw new RuntimeException(
+                } else if (value instanceof final String stringValue) {
+                    buffer.append(labels)
+                        .append(' ')
+                        .append(stringValue)
+                        .append('\n');
+                } else throw new RuntimeException(
                         "Unknown label set for metric type '" + metric.getClass().getCanonicalName() + '\''
                     );
-                }
             }
-            if (metric instanceof Metered meter) {
-                buffer.append("# TYPE ").append(labels.only("name")).append("_1mRate").append(" gauge\n");
-                double oneMinuteRate = meter.getOneMinuteRate();
+            if (metric instanceof final Metered meter) {
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_1mRate").only("name")).append(" gauge\n");
+                final double oneMinuteRate = meter.getOneMinuteRate();
                 buffer.append(labels.modifyValue("name",n->n+"_1mRate"))
                     .append(' ')
                     .append(oneMinuteRate)
                     .append('\n');
 
-                buffer.append("# TYPE ").append(labels.only("name")).append("_5mRate").append(" gauge\n");
-                double fiveMinuteRate = meter.getFiveMinuteRate();
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_5mRate").only("name")).append(" gauge\n");
+                final double fiveMinuteRate = meter.getFiveMinuteRate();
                 buffer.append(labels.modifyValue("name",n->n+"_5mRate"))
                     .append(' ')
                     .append(fiveMinuteRate)
                     .append('\n');
 
-                buffer.append("# TYPE ").append(labels.only("name")).append("_15mRate").append(" gauge\n");
-                double fifteenMinuteRate = meter.getFifteenMinuteRate();
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_15mRate").only("name")).append(" gauge\n");
+                final double fifteenMinuteRate = meter.getFifteenMinuteRate();
                 buffer.append(labels.modifyValue("name",n->n+"_15mRate"))
                     .append(' ')
                     .append(fifteenMinuteRate)
                     .append('\n');
 
-                buffer.append("# TYPE ").append(labels.only("name")).append("_meanRate").append(" gauge\n");
-                double meanRate = meter.getMeanRate();
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_meanRate").only("name")).append(" gauge\n");
+                final double meanRate = meter.getMeanRate();
                 buffer.append(labels.modifyValue("name",n->n+"_meanRate"))
                     .append(' ')
                     .append(meanRate)
@@ -188,12 +183,10 @@ public enum PromExpositionFormat {
 
     }
 
-    public static String labels(Map<String, String> labels, String... additional) {
-        StringBuilder sb = new StringBuilder("{");
-        for (String labelName : labels.keySet()) {
-            if ("name".equals(labelName)) {
-                continue;
-            }
+    public static String labels(final Map<String, String> labels, final String... additional) {
+        final StringBuilder sb = new StringBuilder("{");
+        for (final String labelName : labels.keySet()) {
+            if ("name".equals(labelName)) continue;
             sb.append(labelName)
                 .append("=\"")
                 .append(labels.get(labelName))
@@ -203,22 +196,21 @@ public enum PromExpositionFormat {
         sb.setLength(sb.length() - 1);
 
 //        if (additional.length > 0) {
-            for (int i = 0; i < additional.length; i += 2) {
+            for (int i = 0; i < additional.length; i += 2)
                 sb.append(',')
                     .append(additional[i])
                     .append("=\"")
                     .append(additional[i + 1])
                     .append('"');
-            }
 //        }
 
         sb.append('}');
         return sb.toString();
     }
 
-    private static void writeEscapedHelp(Writer writer, String s) throws IOException {
+    private static void writeEscapedHelp(final Writer writer, final String s) throws IOException {
         for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
+            final char c = s.charAt(i);
             switch (c) {
                 case '\\':
                     writer.append("\\\\");

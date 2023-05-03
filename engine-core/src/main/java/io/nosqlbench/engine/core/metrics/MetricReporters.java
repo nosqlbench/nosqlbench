@@ -19,6 +19,7 @@ package io.nosqlbench.engine.core.metrics;
 import com.codahale.metrics.*;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
+import io.nosqlbench.api.engine.metrics.reporters.PromPushReporter;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.lifecycle.process.ShutdownManager;
@@ -45,98 +46,135 @@ public class MetricReporters implements Shutdownable {
     }
 
     public static MetricReporters getInstance() {
-        return MetricReporters.instance;
+        return instance;
     }
 
-    public MetricReporters addRegistry(final String registryPrefix, final MetricRegistry metricsRegistry) {
-        metricRegistries.add(new PrefixedRegistry(registryPrefix, metricsRegistry));
+    public MetricReporters addRegistry(String registryPrefix, MetricRegistry metricsRegistry) {
+        this.metricRegistries.add(new PrefixedRegistry(registryPrefix, metricsRegistry));
         return this;
     }
 
-    public MetricReporters addGraphite(final String dest, final String prefix) {
-        MetricReporters.logger.debug(() -> "Adding graphite reporter to " + dest + " with prefix " + prefix);
-        if (0 <= dest.indexOf(":")) {
-            final String[] split = dest.split(":");
-            this.addGraphite(split[0],Integer.valueOf(split[1]),prefix);
-        } else this.addGraphite(dest, 2003, prefix);
+    public MetricReporters addGraphite(String dest, String prefix) {
+        logger.debug(() -> "Adding graphite reporter to " + dest + " with prefix " + prefix);
+        if (0 <= dest.indexOf(':')) {
+            String[] split = dest.split(":");
+            addGraphite(split[0],Integer.valueOf(split[1]),prefix);
+        } else {
+            addGraphite(dest, 2003, prefix);
+        }
         return this;
     }
 
-    public void addCSVReporter(final String directoryName, final String prefix) {
-        MetricReporters.logger.debug(() -> "Adding CSV reporter to " + directoryName + " with prefix " + prefix);
+    public void addCSVReporter(String directoryName, String prefix) {
+        logger.debug(() -> "Adding CSV reporter to " + directoryName + " with prefix " + prefix);
 
-        if (this.metricRegistries.isEmpty()) throw new RuntimeException("There are no metric registries.");
+        if (metricRegistries.isEmpty()) {
+            throw new RuntimeException("There are no metric registries.");
+        }
 
-        final File csvDirectory = new File(directoryName);
-        if (!csvDirectory.exists()) if (!csvDirectory.mkdirs())
-            throw new RuntimeException("Error creating CSV reporting directory:" + csvDirectory.getAbsolutePath());
+        File csvDirectory = new File(directoryName);
+        if (!csvDirectory.exists()) {
+            if (!csvDirectory.mkdirs()) {
+                throw new RuntimeException("Error creating CSV reporting directory:" + csvDirectory.getAbsolutePath());
+            }
+        }
 
-        for (final PrefixedRegistry prefixedRegistry : this.metricRegistries) {
-            final CsvReporter csvReporter = CsvReporter.forRegistry(prefixedRegistry.metricRegistry)
+        for (PrefixedRegistry prefixedRegistry : metricRegistries) {
+            CsvReporter csvReporter = CsvReporter.forRegistry(prefixedRegistry.metricRegistry)
                     .convertDurationsTo(TimeUnit.NANOSECONDS)
                     .convertRatesTo(TimeUnit.SECONDS)
                     .filter(ActivityMetrics.METRIC_FILTER)
                     .formatFor(Locale.US)
                     .build(csvDirectory);
 
-            this.scheduledReporters.add(csvReporter);
+            scheduledReporters.add(csvReporter);
         }
     }
 
-    public MetricReporters addGraphite(final String host, final int graphitePort, final String globalPrefix) {
+    public MetricReporters addGraphite(String host, int graphitePort, String globalPrefix) {
 
-        MetricReporters.logger.debug(() -> "Adding graphite reporter to " + host + " with port " + graphitePort + " and prefix " + globalPrefix);
+        logger.debug(() -> "Adding graphite reporter to " + host + " with port " + graphitePort + " and prefix " + globalPrefix);
 
-        if (this.metricRegistries.isEmpty()) throw new RuntimeException("There are no metric registries.");
+        if (metricRegistries.isEmpty()) {
+            throw new RuntimeException("There are no metric registries.");
+        }
 
-        for (final PrefixedRegistry prefixedRegistry : this.metricRegistries) {
+        for (PrefixedRegistry prefixedRegistry : metricRegistries) {
 
-            final Graphite graphite = new Graphite(new InetSocketAddress(host, graphitePort));
-            final String _prefix = (null != prefixedRegistry.prefix) ? (!prefixedRegistry.prefix.isEmpty() ? (globalPrefix + '.' + prefixedRegistry.prefix) : globalPrefix) : globalPrefix;
-            final GraphiteReporter graphiteReporter = GraphiteReporter.forRegistry(prefixedRegistry.metricRegistry)
+            Graphite graphite = new Graphite(new InetSocketAddress(host, graphitePort));
+            String _prefix = null != prefixedRegistry.prefix ? !prefixedRegistry.prefix.isEmpty() ? globalPrefix + '.' + prefixedRegistry.prefix : globalPrefix : globalPrefix;
+            GraphiteReporter graphiteReporter = GraphiteReporter.forRegistry(prefixedRegistry.metricRegistry)
                     .prefixedWith(_prefix)
                     .convertRatesTo(TimeUnit.SECONDS)
                     .convertDurationsTo(TimeUnit.NANOSECONDS)
                     .filter(ActivityMetrics.METRIC_FILTER)
                     .build(graphite);
 
-            this.scheduledReporters.add(graphiteReporter);
+            scheduledReporters.add(graphiteReporter);
         }
         return this;
     }
 
+    public MetricReporters addPromPush(final String reportPromPushTo, final String prefix) {
+
+        logger.debug(() -> "Adding prompush reporter to " + reportPromPushTo + " with prefix label to " + prefix);
+
+        if (metricRegistries.isEmpty()) {
+            throw new RuntimeException("There are no metric registries.");
+        }
+
+        for (PrefixedRegistry prefixedRegistry : metricRegistries) {
+            final PromPushReporter promPushReporter =
+                new PromPushReporter(
+                    reportPromPushTo,
+                    prefixedRegistry.metricRegistry,
+                    "prompush",
+                    MetricFilter.ALL,
+                    TimeUnit.SECONDS,
+                    TimeUnit.NANOSECONDS
+                    );
+            scheduledReporters.add(promPushReporter);
+        }
+        return this;
+    }
+
+
     public MetricReporters addLogger() {
-        MetricReporters.logger.debug("Adding log4j reporter for metrics");
+        logger.debug("Adding log4j reporter for metrics");
 
-        if (this.metricRegistries.isEmpty()) throw new RuntimeException("There are no metric registries.");
+        if (metricRegistries.isEmpty()) {
+            throw new RuntimeException("There are no metric registries.");
+        }
 
-        for (final PrefixedRegistry prefixedRegistry : this.metricRegistries) {
+        for (PrefixedRegistry prefixedRegistry : metricRegistries) {
 
-            final Log4JMetricsReporter reporter4j = Log4JMetricsReporter.forRegistry(prefixedRegistry.metricRegistry)
+            Log4JMetricsReporter reporter4j = Log4JMetricsReporter.forRegistry(prefixedRegistry.metricRegistry)
                     .convertRatesTo(TimeUnit.SECONDS)
                     .convertDurationsTo(TimeUnit.NANOSECONDS)
                     .filter(ActivityMetrics.METRIC_FILTER)
-                    .outputTo(MetricReporters.logger)
+                    .outputTo(logger)
                     .build();
 
-            this.scheduledReporters.add(reporter4j);
+            scheduledReporters.add(reporter4j);
         }
         return this;
     }
 
-    public MetricReporters start(final int consoleIntervalSeconds, final int remoteIntervalSeconds) {
-        for (final ScheduledReporter scheduledReporter : this.scheduledReporters) {
-            MetricReporters.logger.info(() -> "starting reporter: " + scheduledReporter.getClass().getSimpleName());
-            if (scheduledReporter instanceof ConsoleReporter)
+    public MetricReporters start(int consoleIntervalSeconds, int remoteIntervalSeconds) {
+        for (ScheduledReporter scheduledReporter : scheduledReporters) {
+            logger.info(() -> "starting reporter: " + scheduledReporter.getClass().getSimpleName());
+            if (scheduledReporter instanceof ConsoleReporter) {
                 scheduledReporter.start(consoleIntervalSeconds, TimeUnit.SECONDS);
-            else scheduledReporter.start(remoteIntervalSeconds, TimeUnit.SECONDS);
+            } else {
+                scheduledReporter.start(remoteIntervalSeconds, TimeUnit.SECONDS);
+            }
         }
         return this;
     }
 
     public MetricReporters stop() {
-        for (final ScheduledReporter scheduledReporter : this.scheduledReporters) {
-            MetricReporters.logger.info(() -> "stopping reporter: " + scheduledReporter);
+        for (ScheduledReporter scheduledReporter : scheduledReporters) {
+            logger.info(() -> "stopping reporter: " + scheduledReporter);
             scheduledReporter.stop();
         }
         return this;
@@ -144,8 +182,8 @@ public class MetricReporters implements Shutdownable {
 
 
     public MetricReporters report() {
-        for (final ScheduledReporter scheduledReporter : this.scheduledReporters) {
-            MetricReporters.logger.info(() -> "flushing reporter data: " + scheduledReporter);
+        for (ScheduledReporter scheduledReporter : scheduledReporters) {
+            logger.info(() -> "flushing reporter data: " + scheduledReporter);
             scheduledReporter.report();
         }
         return this;
@@ -153,17 +191,18 @@ public class MetricReporters implements Shutdownable {
 
     @Override
     public void shutdown() {
-        for (final ScheduledReporter reporter : this.scheduledReporters) {
+        for (ScheduledReporter reporter : scheduledReporters) {
             reporter.report();
             reporter.stop();
         }
     }
 
+
     private class PrefixedRegistry {
         public String prefix;
         public MetricRegistry metricRegistry;
 
-        public PrefixedRegistry(final String prefix, final MetricRegistry metricRegistry) {
+        public PrefixedRegistry(String prefix, MetricRegistry metricRegistry) {
             this.prefix = prefix;
             this.metricRegistry = metricRegistry;
         }
