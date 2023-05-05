@@ -20,11 +20,13 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 
+import java.io.Serializable;
+
 public class Cqld4CqlSimpleStatement extends Cqld4CqlOp {
     private final SimpleStatement stmt;
 
-    public Cqld4CqlSimpleStatement(CqlSession session, SimpleStatement stmt, int maxPages, boolean retryReplace, int maxLwtRetries) {
-        super(session, maxPages,retryReplace, maxLwtRetries, new RSProcessors());
+    public Cqld4CqlSimpleStatement(CqlSession session, SimpleStatement stmt, int maxPages, boolean retryReplace, int maxLwtRetries, Serializable expectedResultExpression) {
+        super(session, maxPages,retryReplace, maxLwtRetries, new RSProcessors(), expectedResultExpression);
         this.stmt = stmt;
     }
 

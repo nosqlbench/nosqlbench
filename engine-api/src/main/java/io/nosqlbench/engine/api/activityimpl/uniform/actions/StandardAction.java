@@ -87,7 +87,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
         while (op != null) {
 
             int tries = 0;
-            while (tries++ <= maxTries) {
+            while (tries++ < maxTries) {
                 Throwable error = null;
                 long startedAt = System.nanoTime();
 
@@ -112,7 +112,27 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                     if (error == null) {
                         resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
                         dispenser.onSuccess(cycle, nanos, op.getResultSize());
-                        break;
+
+                        if (dispenser.getExpectedResultExpression() != null) { // TODO JK refactor the whole if/else break/continue tree
+                            if (op.verified()) { // TODO JK Could this be moved to BaseOpDispenser?
+                                logger.info(() -> "Verification of result passed");
+                                break;
+                            } else {
+                                // retry
+                                var triesLeft = maxTries - tries;
+                                logger.info("Verification of result did not pass - {} retries left", triesLeft);
+                                if (triesLeft == 0) {
+                                    var retriesExhausted = new RuntimeException("Max retries for verification step exhausted."); // TODO JK do we need a dedicated exception here? VerificationRetriesExhaustedException?
+                                    var errorDetail = errorHandler.handleError(retriesExhausted, cycle, nanos);
+                                    dispenser.onError(cycle, nanos, retriesExhausted);
+                                    code = ErrorDetail.ERROR_RETRYABLE.resultCode; // TODO JK use code from errorDetail.resultCode?
+                                    break;
+                                }
+                                continue;
+                            }
+                        } else {
+                            break;
+                        }
                     } else {
                         ErrorDetail detail = errorHandler.handleError(error, cycle, nanos);
                         dispenser.onError(cycle, nanos, error);

@@ -23,7 +23,9 @@ import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import org.mvel2.MVEL;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T> {
 
     private final String opName;
+    private Serializable expectedResultExpression;
     protected final DriverAdapter<T, S> adapter;
     private boolean instrument;
     private Histogram resultSizeHistogram;
@@ -63,6 +66,17 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
             }
         }
         configureInstrumentation(op);
+        configureExpectations(op);
+    }
+
+    private void configureExpectations(ParsedOp op) {
+        op.getOptionalStaticValue("expected-result", String.class)
+            .map(MVEL::compileExpression)
+            .ifPresent(result -> this.expectedResultExpression = result);
+    }
+
+    public Serializable getExpectedResultExpression() {
+        return expectedResultExpression;
     }
 
     String getOpName() {

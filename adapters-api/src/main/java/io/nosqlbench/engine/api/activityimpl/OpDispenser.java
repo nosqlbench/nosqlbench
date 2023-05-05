@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
+import java.io.Serializable;
 import java.util.function.LongFunction;
 
 /**
@@ -81,5 +82,6 @@ public interface OpDispenser<T> extends LongFunction<T>, OpResultTracker {
      */
 
     T apply(long value);
+    Serializable getExpectedResultExpression();
 
 }

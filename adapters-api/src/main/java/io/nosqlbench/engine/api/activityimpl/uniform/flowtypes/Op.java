@@ -33,4 +33,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform.flowtypes;
  */
 // TODO: optimize the runtime around the specific op type
 public interface Op extends OpResultSize {
+    default boolean verified() {
+        return false;
+    }
 }

@@ -27,8 +27,12 @@ import io.nosqlbench.adapter.cqld4.exceptions.ExceededRetryReplaceException;
 import io.nosqlbench.adapter.cqld4.exceptions.UndefinedResultSetException;
 import io.nosqlbench.adapter.cqld4.exceptions.UnexpectedPagingException;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
+import org.mvel2.MVEL;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 
@@ -54,12 +58,20 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
     private Cqld4CqlOp nextOp;
     private final RSProcessors processors;
 
+    private final ThreadLocal<List<Row>> results = new ThreadLocal<>();
+    private Serializable expectedResultExpression;
+
     public Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors) {
+        this(session, maxPages, retryReplace, maxLwtRetries, processors, null);
+    }
+
+    public Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors, Serializable expectedResultExpressions) {
         this.session = session;
         this.maxPages = maxPages;
         this.retryReplace = retryReplace;
         this.maxLwtRetries =maxLwtRetries;
         this.processors = processors;
+        this.expectedResultExpression = expectedResultExpressions;
     }
 
     protected Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, int retryRplaceCount, RSProcessors processors) {
@@ -97,19 +109,22 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
 
         Iterator<Row> reader = rs.iterator();
         int pages = 0;
+        var resultRows = new ArrayList<Row>();
         while (true) {
             int pageRows = rs.getAvailableWithoutFetching();
             for (int i = 0; i < pageRows; i++) {
                 Row row = reader.next();
+                resultRows.add(row);
                 processors.buffer(row);
             }
             if (pages++ > maxPages) {
                 throw new UnexpectedPagingException(rs, getQueryString(), pages, maxPages, stmt.getPageSize());
             }
             if (rs.isFullyFetched()) {
+                results.set(resultRows);
                 break;
             }
-            totalRows += pageRows;
+            totalRows += pageRows; // TODO JK what is this for?
         }
         processors.flush();
         return rs;
@@ -139,4 +154,8 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
         return new Cqld4CqlReboundStatement(session, maxPages, retryReplace, maxLwtRetries, retryReplaceCount, rebound, processors);
     }
 
+    @Override
+    public boolean verified() { // TODO JK can this be made CQL agnostic? And moved to BaseOpDispenser?
+        return MVEL.executeExpression(expectedResultExpression, results.get(), boolean.class);
+    }
 }
