@@ -35,8 +35,7 @@ import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-public enum ActivityMetrics {
-    ;
+public class ActivityMetrics {
 
     private static final Logger logger = LogManager.getLogger(ActivityMetrics.class);
 
