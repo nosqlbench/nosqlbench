@@ -31,7 +31,7 @@ public class HttpMetrics implements NBLabeledElement {
     }
 
     public String getName() {
-        return "http"+("default".equals(this.space.getName())?"": '-' + space.getName());
+        return "http"+("default".equals(this.space.getSpaceName())?"": '-' + space.getSpaceName());
     }
 
     @Override
