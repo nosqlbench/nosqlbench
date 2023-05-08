@@ -10,9 +10,9 @@ import org.apache.logging.log4j.Logger;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PineConeSpace {
+public class PineconeSpace {
 
-    private final static Logger LOGGER = LogManager.getLogger(PineConeSpace.class);
+    private final static Logger LOGGER = LogManager.getLogger(PineconeSpace.class);
     private final String apiKey;
     private final String environment;
     private final String projectName;
@@ -27,7 +27,7 @@ public class PineConeSpace {
      */
     private Map<String,PineconeConnection> connections = new HashMap<String,PineconeConnection>();
 
-    public PineConeSpace(String apiKey, String environment, String projectName, String name) {
+    public PineconeSpace(String apiKey, String environment, String projectName, String name) {
         this.apiKey = apiKey;
         this.environment = environment;
         this.projectName = projectName;
