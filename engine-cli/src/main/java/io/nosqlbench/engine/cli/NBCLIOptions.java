@@ -16,15 +16,14 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.api.engine.util.Unit;
-import io.nosqlbench.engine.cli.Cmd.CmdType;
-import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
-import io.nosqlbench.engine.core.lifecycle.scenario.Scenario.Engine;
-import io.nosqlbench.nb.annotations.Maturity;
-import io.nosqlbench.api.system.NBEnvironment;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.logging.NBLogLevel;
+import io.nosqlbench.api.system.NBEnvironment;
+import io.nosqlbench.engine.api.metrics.IndicatorMode;
+import io.nosqlbench.engine.cli.Cmd.CmdType;
+import io.nosqlbench.engine.core.lifecycle.scenario.Scenario.Engine;
+import io.nosqlbench.nb.annotations.Maturity;
 
 import java.io.File;
 import java.io.IOException;
@@ -188,7 +187,7 @@ public class NBCLIOptions {
     private String reportSummaryTo = NBCLIOptions.REPORT_SUMMARY_TO_DEFAULT;
     private boolean enableAnsi = (null != System.getenv("TERM")) && !System.getenv("TERM").isEmpty();
     private Maturity minMaturity = Maturity.Unspecified;
-    private String graphitelogLevel="info";
+    private String graphitelogLevel = "info";
     private boolean wantsListCommands;
     private boolean wantsListApps;
 
@@ -199,6 +198,7 @@ public class NBCLIOptions {
     public boolean getWantsListCommands() {
         return this.wantsListCommands;
     }
+
     public String getAnnotatorsConfig() {
         return this.annotatorsConfig;
     }
@@ -217,7 +217,7 @@ public class NBCLIOptions {
     }
 
     public void setWantsStackTraces(final boolean wantsStackTraces) {
-        showStackTraces =wantsStackTraces;
+        showStackTraces = wantsStackTraces;
     }
 
     public boolean isEnableAnsi() {
@@ -254,10 +254,7 @@ public class NBCLIOptions {
 
     private LinkedList<String> parseGlobalOptions(final String[] args) {
 
-        LinkedList<String> arglist = new LinkedList<>();
-        addAll(Collections.singletonList(args));
-
-
+        LinkedList<String> arglist = new LinkedList<>(Arrays.asList(args));
         if (null == arglist.peekFirst()) {
             this.wantsBasicHelp = true;
             return arglist;
@@ -327,7 +324,7 @@ public class NBCLIOptions {
                 case NBCLIOptions.ANSI:
                     arglist.removeFirst();
                     final String doEnableAnsi = this.readWordOrThrow(arglist, "enable/disable ansi codes");
-                    this.enableAnsi =doEnableAnsi.toLowerCase(Locale.ROOT).matches("enabled|enable|true");
+                    this.enableAnsi = doEnableAnsi.toLowerCase(Locale.ROOT).matches("enabled|enable|true");
                     break;
                 case NBCLIOptions.DASH_V_INFO:
                     this.consoleLevel = NBLogLevel.INFO;
@@ -362,7 +359,7 @@ public class NBCLIOptions {
                     break;
                 case NBCLIOptions.GRAPHITE_LOG_LEVEL:
                     arglist.removeFirst();
-                    this.graphitelogLevel =arglist.removeFirst();
+                    this.graphitelogLevel = arglist.removeFirst();
                     break;
                 case NBCLIOptions.METRICS_PREFIX:
                     arglist.removeFirst();
@@ -447,7 +444,7 @@ public class NBCLIOptions {
                     break;
                 case NBCLIOptions.MATURITY:
                     arglist.removeFirst();
-                    final String maturity = this.readWordOrThrow(arglist,"maturity of components to allow");
+                    final String maturity = this.readWordOrThrow(arglist, "maturity of components to allow");
                     minMaturity = Maturity.valueOf(maturity.toLowerCase(Locale.ROOT));
                 default:
                     nonincludes.addLast(arglist.removeFirst());
@@ -460,9 +457,9 @@ public class NBCLIOptions {
     private Path setStatePath() {
         if (0 < statePathAccesses.size())
             throw new BasicError("The state dir must be set before it is used by other\n" +
-                " options. If you want to change the statedir, be sure you do it before\n" +
-                " dependent options. These parameters were called before this --statedir:\n" +
-                this.statePathAccesses.stream().map(s -> "> " + s).collect(Collectors.joining("\n")));
+                    " options. If you want to change the statedir, be sure you do it before\n" +
+                    " dependent options. These parameters were called before this --statedir:\n" +
+                    this.statePathAccesses.stream().map(s -> "> " + s).collect(Collectors.joining("\n")));
         if (null != this.statepath) return statepath;
 
         final List<String> paths = NBEnvironment.INSTANCE.interpolateEach(":", this.statedirs);
@@ -482,8 +479,8 @@ public class NBCLIOptions {
 
         if (!Files.exists(selected)) try {
             Files.createDirectories(
-                selected,
-                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---"))
+                    selected,
+                    PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---"))
             );
         } catch (final IOException e) {
             throw new BasicError("Could not create state directory at '" + selected + "': " + e.getMessage());
@@ -632,21 +629,21 @@ public class NBCLIOptions {
             final String arg = arglist.peekFirst();
             Objects.requireNonNull(arg);
             final String helpmsg = """
-                Could not recognize command 'ARG'.
-                This means that all of the following searches for a compatible command failed:
-                1. commands: no scenario command named 'ARG' is known. (start, run, await, ...)
-                2. scripts: no auto script named './scripts/auto/ARG.js' in the local filesystem.
-                3. scripts: no auto script named 'scripts/auto/ARG.js' was found in the PROG binary.
-                4. workloads: no workload file named ARG[.yaml] was found in the local filesystem, even in include paths INCLUDES.
-                5. workloads: no workload file named ARG[.yaml] was bundled in PROG binary, even in include paths INCLUDES.
-                6. apps: no application named ARG was bundled in PROG.
+                    Could not recognize command 'ARG'.
+                    This means that all of the following searches for a compatible command failed:
+                    1. commands: no scenario command named 'ARG' is known. (start, run, await, ...)
+                    2. scripts: no auto script named './scripts/auto/ARG.js' in the local filesystem.
+                    3. scripts: no auto script named 'scripts/auto/ARG.js' was found in the PROG binary.
+                    4. workloads: no workload file named ARG[.yaml] was found in the local filesystem, even in include paths INCLUDES.
+                    5. workloads: no workload file named ARG[.yaml] was bundled in PROG binary, even in include paths INCLUDES.
+                    6. apps: no application named ARG was bundled in PROG.
 
-                You can discover available ways to invoke PROG by using the various --list-* commands:
-                [ --list-commands, --list-scripts, --list-workloads (and --list-scenarios), --list-apps ]
-                """
-                .replaceAll("ARG",arg)
-                .replaceAll("PROG","nb5")
-                .replaceAll("INCLUDES", String.join(",", wantsIncludes()));
+                    You can discover available ways to invoke PROG by using the various --list-* commands:
+                    [ --list-commands, --list-scripts, --list-workloads (and --list-scenarios), --list-apps ]
+                    """
+                    .replaceAll("ARG", arg)
+                    .replaceAll("PROG", "nb5")
+                    .replaceAll("INCLUDES", String.join(",", wantsIncludes()));
             throw new BasicError(helpmsg);
 
         }
@@ -673,21 +670,21 @@ public class NBCLIOptions {
 
     public List<LoggerConfigData> getHistoLoggerConfigs() {
         final List<LoggerConfigData> configs =
-            this.histoLoggerConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
+                this.histoLoggerConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
         this.checkLoggerConfigs(configs, NBCLIOptions.LOG_HISTOGRAMS);
         return configs;
     }
 
     public List<LoggerConfigData> getStatsLoggerConfigs() {
         final List<LoggerConfigData> configs =
-            this.statsLoggerConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
+                this.statsLoggerConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
         this.checkLoggerConfigs(configs, NBCLIOptions.LOG_HISTOSTATS);
         return configs;
     }
 
     public List<LoggerConfigData> getClassicHistoConfigs() {
         final List<LoggerConfigData> configs =
-            this.classicHistoConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
+                this.classicHistoConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
         this.checkLoggerConfigs(configs, NBCLIOptions.CLASSIC_HISTOGRAMS);
         return configs;
     }
@@ -810,8 +807,8 @@ public class NBCLIOptions {
         configs.stream().map(LoggerConfigData::getFilename).forEach(s -> {
             if (files.contains(s))
                 System.err.println(s + " is included in " + configName + " more than once. It will only be " +
-                    "included " +
-                    "in the first matching config. Reorder your options if you need to control this.");
+                        "included " +
+                        "in the first matching config. Reorder your options if you need to control this.");
             files.add(s);
         });
     }
@@ -924,7 +921,7 @@ public class NBCLIOptions {
                     break;
                 default:
                     throw new RuntimeException(
-                        NBCLIOptions.LOG_HISTOGRAMS +
+                            NBCLIOptions.LOG_HISTOGRAMS +
                                     " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
                     );
             }

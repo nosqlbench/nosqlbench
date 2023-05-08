@@ -37,8 +37,7 @@ import java.util.Map;
  */
 
 public enum PromExpositionFormat {
-    ;
-
+;
     public static String format(final Clock clock, final Metric... metrics) {
         return PromExpositionFormat.format(clock, new StringBuilder(), metrics).toString();
     }
