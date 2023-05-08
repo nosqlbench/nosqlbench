@@ -28,7 +28,7 @@ import java.util.function.Function;
 
 public class TestHybridRateLimiterPerf {
 
-    private final Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(NBLabeledElement.forKV("alias","tokenrl"),"hybrid", rs.withVerb(Verb.start));
+    private final Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(NBLabeledElement.EMPTY,"hybrid", rs.withVerb(Verb.start));
     private final RateLimiterPerfTestMethods methods = new RateLimiterPerfTestMethods();
 
     @Test
