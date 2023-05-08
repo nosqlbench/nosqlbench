@@ -36,6 +36,6 @@ public class HttpMetrics implements NBLabeledElement {
 
     @Override
     public NBLabels getLabels() {
-        return NBLabels.forKV("name", getName());
+        return space.getLabels();
     }
 }

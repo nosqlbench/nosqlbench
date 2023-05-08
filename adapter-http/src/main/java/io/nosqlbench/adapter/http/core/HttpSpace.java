@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package io.nosqlbench.adapter.http.core;
 
-import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
@@ -34,7 +35,7 @@ import java.util.Locale;
  * HTTP client implementation is meant to be immutable. If shared-state issues
  * occur, thread-local support will be re-added.
  */
-public class HttpSpace implements NBNamedElement {
+public class HttpSpace implements NBLabeledElement {
     private final static Logger logger = LogManager.getLogger(HttpSpace.class);
 
     private final String name;
@@ -93,7 +94,11 @@ public class HttpSpace implements NBNamedElement {
     }
 
     @Override
-    public String getName() {
+    public NBLabels getLabels() {
+        return NBLabels.forKV("space", getSpaceName());
+    }
+
+    public String getSpaceName() {
         return name;
     }
 
