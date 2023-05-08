@@ -18,7 +18,7 @@ package io.nosqlbench.api.config;
 
 import java.util.Map;
 
-public interface NBLabeledElement {
+public interface NBLabeledElement extends NBComponent {
 
     NBLabeledElement EMPTY = forKV();
 
