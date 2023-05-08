@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,8 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
         configureExpectations(op);
     }
 
+    // TODO/MVEL: Please add some error handling around that explains to the user
+    // what happened in the event of a compilation failure.
     private void configureExpectations(ParsedOp op) {
         op.getOptionalStaticValue("expected-result", String.class)
             .map(MVEL::compileExpression)

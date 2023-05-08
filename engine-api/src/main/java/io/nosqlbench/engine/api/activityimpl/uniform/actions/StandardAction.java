@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,12 +115,13 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
 
                         if (dispenser.getExpectedResultExpression() != null) { // TODO JK refactor the whole if/else break/continue tree
                             if (op.verified()) { // TODO JK Could this be moved to BaseOpDispenser?
-                                logger.info(() -> "Verification of result passed");
+                                logger.info(() -> "Verification of result passed"); // TODO/MVEL: this is too verbose per cycle
                                 break;
                             } else {
                                 // retry
                                 var triesLeft = maxTries - tries;
                                 logger.info("Verification of result did not pass - {} retries left", triesLeft);
+                                // TODO/MVEL: I think we should designate a separate logging channel for verification logic
                                 if (triesLeft == 0) {
                                     var retriesExhausted = new RuntimeException("Max retries for verification step exhausted."); // TODO JK do we need a dedicated exception here? VerificationRetriesExhaustedException?
                                     var errorDetail = errorHandler.handleError(retriesExhausted, cycle, nanos);
@@ -129,6 +130,9 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                                     break;
                                 }
                                 continue;
+                                // TODO/MVEL: I think we should collapse all this if possible to throwing a UnverifiedError and let error handlers do their thing.
+                                // TODO/MVEL: This would work nicely with existing mechanisms and allow users to route errors and status codes as they like.
+                                // TODO/MVEL: A future refinement would be to allow customized error handlers (+-) per dispenser
                             }
                         } else {
                             break;

@@ -91,7 +91,8 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
                 isRetryReplace(),
                 getMaxLwtRetries(),
                 processors,
-                getExpectedResultExpression()
+                getExpectedResultExpression() // TODO/MVEL: When this is moved to BaseOpDispenser + StandardAction
+                // there will be no need to add it to the value type for the op, since the dispenser can hold it
             );
         } catch (Exception exception) {
             return CQLD4PreparedStmtDiagnostics.rebindWithDiagnostics(

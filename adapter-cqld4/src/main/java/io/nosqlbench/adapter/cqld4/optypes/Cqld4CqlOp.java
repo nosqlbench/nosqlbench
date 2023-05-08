@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,10 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
 
         Iterator<Row> reader = rs.iterator();
         int pages = 0;
+        // TODO/MVEL: An optimization to this would be to collect the results in a result set processor,
+        // but allow/require this processor to be added to an op _only_ in the event that it would
+        // be needed by a downstream consumer like the MVEL expected result evaluator
+
         var resultRows = new ArrayList<Row>();
         while (true) {
             int pageRows = rs.getAvailableWithoutFetching();
@@ -125,6 +129,7 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
                 break;
             }
             totalRows += pageRows; // TODO JK what is this for?
+            // TODO/MVEL: JK: this is meant to go to a total-rows metric, although it is not wired correctly yet
         }
         processors.flush();
         return rs;
@@ -156,6 +161,11 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
 
     @Override
     public boolean verified() { // TODO JK can this be made CQL agnostic? And moved to BaseOpDispenser?
+        // TODO/MVEL: Yes, it can. The initial implementation should, and it should actually be inside
+        // the main StandardAction, _after_ CycleOp or ChainingOp result is computed
         return MVEL.executeExpression(expectedResultExpression, results.get(), boolean.class);
+        // TODO/MVEL: Wherever this logic lives, we might want to have a symbolic description which
+        // is emitted for logging our metrics purposes indicating the success or failure outcomes.
+        // perhaps something like expected-name: .... and metrics could be then <expected-name>-success and <expected-name>-error
     }
 }

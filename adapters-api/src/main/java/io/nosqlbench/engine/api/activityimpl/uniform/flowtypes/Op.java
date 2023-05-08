@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ package io.nosqlbench.engine.api.activityimpl.uniform.flowtypes;
  */
 // TODO: optimize the runtime around the specific op type
 public interface Op extends OpResultSize {
+    // TODO/MVEL: Let's take this out of here to keep Op as a tagging interface
+    // I think it will sit fine on the BaseOpDispenser, and lifecycles align for this nicely
     default boolean verified() {
         return false;
     }
