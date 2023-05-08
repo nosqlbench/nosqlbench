@@ -94,7 +94,7 @@
             <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
-                <version>4.7.1</version>
+                <version>4.7.2</version>
             </dependency>
 
             <!-- due to https://github.com/oshi/oshi/issues/1289 -->
@@ -300,7 +300,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.445</version>
+                <version>1.12.450</version>
             </dependency>
 
             <dependency>
