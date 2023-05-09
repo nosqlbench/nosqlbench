@@ -18,5 +18,9 @@ package io.nosqlbench.adapter.pinecone.ops;
 
 public enum PineconeOpTypes {
     query,
-    update
+    update,
+    upsert,
+    delete,
+    describeindexstats,
+    fetch
 }

@@ -1,5 +1,6 @@
 package io.nosqlbench.adapter.pinecone;
 
+import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.pinecone.PineconeClient;
 import io.pinecone.PineconeClientConfig;
 import io.pinecone.PineconeConnection;
@@ -27,10 +28,10 @@ public class PineconeSpace {
      */
     private Map<String,PineconeConnection> connections = new HashMap<String,PineconeConnection>();
 
-    public PineconeSpace(String apiKey, String environment, String projectName, String name) {
-        this.apiKey = apiKey;
-        this.environment = environment;
-        this.projectName = projectName;
+    public PineconeSpace(String name, NBConfiguration cfg) {
+        this.apiKey = cfg.get("apiKey");
+        this.environment = cfg.get("environment");
+        this.projectName = cfg.get("projectName");
         this.name = name;
 
         config = new PineconeClientConfig()

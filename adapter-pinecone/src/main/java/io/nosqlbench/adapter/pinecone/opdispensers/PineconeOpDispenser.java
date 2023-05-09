@@ -21,14 +21,21 @@ import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.pinecone.PineconeConnection;
 
-public class PineconeOpDispenser extends BaseOpDispenser<PineconeOp, PineconeSpace> {
-    protected PineconeOpDispenser(PineconeDriverAdapter adapter, ParsedOp op) {
+import java.util.function.LongFunction;
+
+public abstract class PineconeOpDispenser extends BaseOpDispenser<PineconeOp, PineconeSpace> {
+    protected LongFunction<PineconeSpace> pcFunction;
+    protected LongFunction<String> targetFunction;
+
+    protected PineconeOpDispenser(PineconeDriverAdapter adapter,
+                                  ParsedOp op,
+                                  LongFunction<PineconeSpace> pcFunction,
+                                  LongFunction<String> targetFunction) {
         super(adapter, op);
+        this.pcFunction = pcFunction;
+        this.targetFunction = targetFunction;
     }
 
-    @Override
-    public PineconeOp apply(long value) {
-        return null;
-    }
 }

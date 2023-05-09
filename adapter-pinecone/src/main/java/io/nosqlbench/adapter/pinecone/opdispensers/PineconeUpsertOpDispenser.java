@@ -1,17 +1,60 @@
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
+import com.google.common.primitives.Floats;
+import com.google.protobuf.Struct;
+import com.google.protobuf.Value;
+import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapter.pinecone.ops.PineconeUpsertOp;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.pinecone.PineconeConnection;
+import io.pinecone.proto.UpsertRequest;
+import io.pinecone.proto.Vector;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.LongFunction;
 
 public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
-    protected PineconeUpsertOpDispenser(DriverAdapter<PineconeOp, PineconeSpace> adapter, ParsedOp op) {
-        super(adapter, op);
+    private UpsertRequest request;
+    private PineconeConnection connection;
+
+    public PineconeUpsertOpDispenser(PineconeDriverAdapter adapter,
+                                     ParsedOp op,
+                                     LongFunction<PineconeSpace> pcFunction,
+                                     LongFunction<String> targetFunction) {
+        super(adapter, op, pcFunction, targetFunction);
+
+        String indexName = op.getStaticValue("upsert");
+        connection = pcFunction.apply(0).getConnection(indexName);
+        request = createUpsertRequest();
+    }
+
+    private UpsertRequest createUpsertRequest() {
+        float[][] upsertData = {{1.0F, 2.0F, 3.0F}, {4.0F, 5.0F, 6.0F}, {7.0F, 8.0F, 9.0F}};
+        List<String> upsertIds = Arrays.asList("v1", "v2", "v3");
+        List<Vector> upsertVectors = new ArrayList<>();
+
+        for (int i = 0; i < upsertData.length; i++) {
+            upsertVectors.add(Vector.newBuilder()
+                .addAllValues(Floats.asList(upsertData[i]))
+                .setMetadata(Struct.newBuilder()
+                    .putFields("some_field", Value.newBuilder().setNumberValue(i).build())
+                    .build())
+                .setId(upsertIds.get(i))
+                .build());
+        }
+
+        return UpsertRequest.newBuilder()
+            .addAllVectors(upsertVectors)
+            .setNamespace("default-namespace")
+            .build();
     }
 
     @Override
     public PineconeOp apply(long value) {
-        return null;
+        return new PineconeUpsertOp(connection, request);
     }
 }

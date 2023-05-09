@@ -21,7 +21,8 @@ public class PineconeQueryOp extends PineconeOp {
     public void run() {
         try {
             QueryResponse response = connection.getBlockingStub().query(request);
-            // Do soemething with the response...
+            LOGGER.info("got query result ids: "
+                + response.getResultsList().get(0).getMatchesList());
         } catch (Exception e) {
             LOGGER.error("Exception %s caught trying to do Query", e.getMessage());
             LOGGER.error(e.getStackTrace());

@@ -21,7 +21,7 @@ public class PineconeDeleteOp extends PineconeOp {
     public void run() {
         try {
             DeleteResponse response = connection.getBlockingStub().delete(request);
-            // Do soemething with the response...
+            LOGGER.info(response.toString());
         } catch (Exception e) {
             LOGGER.error("Exception %s caught trying to do delete", e.getMessage());
             LOGGER.error(e.getStackTrace());
