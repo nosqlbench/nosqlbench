@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,32 @@
 
 package io.nosqlbench.cqlgen.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import io.nosqlbench.api.config.NBLabels;
 
 public class CqlTableColumn extends CqlColumnBase {
 
     private CqlTable table;
 
-    public CqlTableColumn(String colname, String typedef, CqlTable table) {
+    public CqlTableColumn(final String colname, final String typedef, final CqlTable table) {
         super(colname, typedef);
-        setTable(table);
-    }
-
-    @Override
-    protected String getParentFullName() {
-        return table.getFullName();
-    }
-
-    public CqlTable getTable() {
-        return table;
-    }
-
-    public void setTable(CqlTable table) {
         this.table = table;
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        HashMap<String, String> map = new HashMap<>(super.getLabels());
-        map.put("table",getTable().getName());
-        return map;
+    protected String getParentFullName() {
+        return this.table.getFullName();
+    }
+
+    public CqlTable getTable() {
+        return this.table;
+    }
+
+    public void setTable(final CqlTable table) {
+        this.table = table;
+    }
+
+    @Override
+    public NBLabels getLabels() {
+        return super.getLabels().and("table", table.getName());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,13 +26,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 public class TokenFiller implements Runnable {
-    private final static Logger logger = LogManager.getLogger(TokenFiller.class);
+    private static final Logger logger = LogManager.getLogger(TokenFiller.class);
 
-    public final static double MIN_PER_SECOND = 10D;
-    public final static double MAX_PER_SECOND = 1000D;
+    public static final double MIN_PER_SECOND = 10.0D;
+    public static final double MAX_PER_SECOND = 1000.0D;
 //    private final SysPerfData PERFDATA = SysPerf.get().getPerfData
 //    (false);
-    private final long interval = (long) 1E5;
+    private final long interval = (long) 1.0E5;
 
     private final ThreadDrivenTokenPool tokenPool;
     private volatile boolean running = true;
@@ -47,34 +47,34 @@ public class TokenFiller implements Runnable {
      * in the JVM.
      *
      */
-    public TokenFiller(RateSpec rateSpec, ThreadDrivenTokenPool tokenPool, NBNamedElement named, int hdrdigits) {
+    public TokenFiller(final RateSpec rateSpec, final ThreadDrivenTokenPool tokenPool, final NBLabeledElement labeled, final int hdrdigits) {
         this.rateSpec = rateSpec;
         this.tokenPool = tokenPool;
-        this.timer = ActivityMetrics.timer(named, "tokenfiller", hdrdigits);
+        timer = ActivityMetrics.timer(labeled, "tokenfiller", hdrdigits);
     }
 
-    public TokenFiller apply(RateSpec rateSpec) {
+    public TokenFiller apply(final RateSpec rateSpec) {
         this.rateSpec = rateSpec;
         return this;
     }
 
     private void stop() {
-        this.running=false;
+        running=false;
     }
 
     public TokenPool getTokenPool() {
-        return tokenPool;
+        return this.tokenPool;
     }
 
     @Override
     public void run() {
-        lastRefillAt = System.nanoTime();
-        while (running) {
-            long nextRefillTime = lastRefillAt + interval;
+        this.lastRefillAt = System.nanoTime();
+        while (this.running) {
+            final long nextRefillTime = this.lastRefillAt + this.interval;
             long thisRefillTime = System.nanoTime();
             while (thisRefillTime < nextRefillTime) {
 //            while (thisRefillTime < lastRefillAt + interval) {
-                long parkfor = Math.max(nextRefillTime - thisRefillTime, 0L);
+                final long parkfor = Math.max(nextRefillTime - thisRefillTime, 0L);
 //                System.out.println(ANSI_Blue + "  parking for " + parkfor + "ns" + ANSI_Reset); System.out.flush();
                 LockSupport.parkNanos(parkfor);
 //                System.out.println(ANSI_Blue + "unparking for " + parkfor + "ns" + ANSI_Reset); System.out.flush();
@@ -82,33 +82,33 @@ public class TokenFiller implements Runnable {
             }
 
 //            this.times[iteration]=thisRefillTime;
-            long delta = thisRefillTime - lastRefillAt;
+            final long delta = thisRefillTime - this.lastRefillAt;
 //            this.amounts[iteration]=delta;
-            lastRefillAt = thisRefillTime;
+            this.lastRefillAt = thisRefillTime;
 
 //            System.out.println(ANSI_Blue + this + ANSI_Reset); System.out.flush();
-            tokenPool.refill(delta);
-            timer.update(delta, TimeUnit.NANOSECONDS);
+            this.tokenPool.refill(delta);
+            this.timer.update(delta, TimeUnit.NANOSECONDS);
 //            iteration++;
 
         }
     }
 
     public synchronized TokenFiller start() {
-        this.tokenPool.refill(rateSpec.getNanosPerOp());
+        tokenPool.refill(this.rateSpec.getNanosPerOp());
 
-        thread = new Thread(this);
-        thread.setName(this.toString());
-        thread.setPriority(Thread.MAX_PRIORITY);
-        thread.setDaemon(true);
-        thread.start();
-        logger.debug("Starting token filler thread: " + this);
+        this.thread = new Thread(this);
+        this.thread.setName(toString());
+        this.thread.setPriority(Thread.MAX_PRIORITY);
+        this.thread.setDaemon(true);
+        this.thread.start();
+        TokenFiller.logger.debug("Starting token filler thread: {}", this);
         return this;
     }
 
     @Override
     public String toString() {
-        return "TokenFiller spec=" + rateSpec + " interval=" + this.interval + "ns pool:" + tokenPool +" running=" + running;
+        return "TokenFiller spec=" + this.rateSpec + " interval=" + interval + "ns pool:" + this.tokenPool +" running=" + this.running;
     }
 
 //    public String getRefillLog() {
@@ -120,9 +120,9 @@ public class TokenFiller implements Runnable {
 //    }
 
     public synchronized long restart() {
-        this.lastRefillAt=System.nanoTime();
-        logger.debug("Restarting token filler at " + lastRefillAt + " thread: " + this);
-        long wait = this.tokenPool.restart();
+        lastRefillAt=System.nanoTime();
+        TokenFiller.logger.debug("Restarting token filler at {} thread: {}", this.lastRefillAt, this);
+        final long wait = tokenPool.restart();
         return wait;
     }
 

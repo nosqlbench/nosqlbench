@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.transformers.namecache;
 
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -29,35 +29,33 @@ public class NamedKeyspace {
     private final Map<String, NamedType> types = new LinkedHashMap<>();
     private String alias;
 
-    public NamedKeyspace(String ksname) {
+    public NamedKeyspace(final String ksname) {
         this.ksname = ksname;
     }
 
-    public NamedType type(String typename) {
-        return types.computeIfAbsent(typename, NamedType::new);
+    public NamedType type(final String typename) {
+        return this.types.computeIfAbsent(typename, NamedType::new);
     }
 
-    public NamedTable table(String tablename) {
-        return tables.computeIfAbsent(tablename, NamedTable::new);
+    public NamedTable table(final String tablename) {
+        return this.tables.computeIfAbsent(tablename, NamedTable::new);
     }
 
-    public NamedKeyspace alias(String alias) {
+    public NamedKeyspace alias(final String alias) {
         this.alias = alias;
         return this;
     }
 
-    public String computeAlias(Labeled labeled, Function<Labeled,String> namer) {
-        if (this.alias==null) {
-            this.alias = namer.apply(labeled);
-        }
-        return this.alias;
+    public String computeAlias(final NBLabeledElement labeled, final Function<NBLabeledElement,String> namer) {
+        if (null == this.alias) alias = namer.apply(labeled);
+        return alias;
     }
 
     public Collection<NamedTable> tables() {
-        return tables.values();
+        return this.tables.values();
     }
 
     public Collection<NamedType> types() {
-        return types.values();
+        return this.types.values();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package io.nosqlbench.cqlgen.binders;
 
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.cqlgen.model.CqlColumnBase;
 import io.nosqlbench.cqlgen.model.CqlModel;
 import io.nosqlbench.cqlgen.model.CqlTable;
 import io.nosqlbench.cqlgen.core.CGElementNamer;
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 import java.util.*;
 
@@ -40,9 +41,9 @@ import java.util.*;
  */
 public class NamingFolio {
 
-    private final Map<String, Labeled> graph = new LinkedHashMap<>();
+    private final Map<String, NBLabeledElement> graph = new LinkedHashMap<>();
     private final CGElementNamer namer;
-    public final static String DEFAULT_NAMER_SPEC = "[BLOCKNAME-][OPTYPE-][COLUMN]-[TYPEDEF-][TABLE][-KEYSPACE]";
+    public static final String DEFAULT_NAMER_SPEC = "[BLOCKNAME-][OPTYPE-][COLUMN]-[TYPEDEF-][TABLE][-KEYSPACE]";
     NamingStyle namingStyle = NamingStyle.SymbolicType;
 
     public NamingFolio(String namerspec) {
@@ -58,7 +59,7 @@ public class NamingFolio {
 
     public void addFieldRef(Map<String, String> labels) {
         String name = namer.apply(labels);
-        graph.put(name, Labeled.forMap(labels));
+        graph.put(name, NBLabeledElement.forMap(labels));
     }
 
     public void addFieldRef(String column, String typedef, String table, String keyspace) {
@@ -69,15 +70,15 @@ public class NamingFolio {
      * This will eventually elide extraneous fields according to knowledge of all known names
      * by name, type, table, keyspace. For now it just returns everything in fully qualified form.
      */
-    public String nameFor(Labeled labeled, String... fields) {
-        Map<String, String> labelsPlus = labeled.getLabelsAnd(fields);
-        String name = namer.apply(labelsPlus);
+    public String nameFor(NBLabeledElement labeled, String... fields) {
+        NBLabels labelsPlus = labeled.getLabels().and(fields);
+        String name = namer.apply(labelsPlus.asMap());
         return name;
     }
 
-    public String nameFor(Labeled labeled, Map<String,String> fields) {
-        Map<String, String> labelsPlus = labeled.getLabelsAnd(fields);
-        String name = namer.apply(labelsPlus);
+    public String nameFor(NBLabeledElement labeled, Map<String,String> fields) {
+        NBLabels labelsPlus = labeled.getLabels().and(fields);
+        String name = namer.apply(labelsPlus.asMap());
         return name;
 
     }
@@ -85,7 +86,7 @@ public class NamingFolio {
     public void informNamerOfAllKnownNames(CqlModel model) {
         for (CqlTable table : model.getTableDefs()) {
             for (CqlColumnBase coldef : table.getColumnDefs()) {
-                addFieldRef(coldef.getLabels());
+                addFieldRef(coldef.getLabels().asMap());
             }
         }
     }

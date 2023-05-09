@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package io.nosqlbench.cqlgen.model;
 
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.cqlgen.core.CGTableStats;
 import io.nosqlbench.cqlgen.transformers.ComputedTableStats;
 
@@ -25,10 +26,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class CqlTable implements NBNamedElement, Labeled {
+public class CqlTable implements NBNamedElement, NBLabeledElement {
     private CqlKeyspaceDef keyspace;
     String name = "";
-    CGTableStats tableAttributes = null;
+    CGTableStats tableAttributes;
     int[] partitioning = new int[0];
     int[] clustering = new int[0];
     List<String> clusteringOrders = new ArrayList<>();
@@ -73,6 +74,7 @@ public class CqlTable implements NBNamedElement, Labeled {
         return this.coldefs;
     }
 
+    @Override
     public String getName() {
         return this.name;
     }
@@ -82,8 +84,8 @@ public class CqlTable implements NBNamedElement, Labeled {
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return Map.of(
+    public NBLabels getLabels() {
+        return NBLabels.forKV(
             "keyspace", this.keyspace.getName(),
             "name", this.name,
             "type", "table"
@@ -101,11 +103,10 @@ public class CqlTable implements NBNamedElement, Labeled {
                 break;
             }
         }
-        if (new_partitioning==partitioning) {
+        if (new_partitioning== partitioning) {
             throw new RuntimeException("Unable to assign partition key '" + pkey + "' to a known column of the same name.");
-        } else {
-            this.partitioning = new_partitioning;
         }
+        this.partitioning = new_partitioning;
 
     }
 
@@ -115,7 +116,7 @@ public class CqlTable implements NBNamedElement, Labeled {
         for (int i = 0; i < coldefs.size(); i++) {
             if (coldefs.get(i).getName().equals(ccol)) {
                 coldefs.get(i).setPosition(ColumnPosition.Clustering);
-                new_clustering= new int[clustering.length + 1];
+                new_clustering = new int[clustering.length + 1];
                 System.arraycopy(clustering, 0, new_clustering, 0, clustering.length);
                 new_clustering[new_clustering.length - 1] = i;
                 break;
@@ -123,9 +124,8 @@ public class CqlTable implements NBNamedElement, Labeled {
         }
         if (new_clustering == clustering) {
             throw new RuntimeException("Unable to assign clustering field '" + ccol + " to a known column of the same name.");
-        } else {
-            this.clustering = new_clustering;
         }
+        this.clustering = new_clustering;
     }
 
     public void addTableClusteringOrder(String colname, String order) {
@@ -152,7 +152,7 @@ public class CqlTable implements NBNamedElement, Labeled {
             .findFirst();
         if (!def.isPresent()) {
             throw new RuntimeException("Unable to find column definition in table '" +
-                this.getName() + "' for column '" + colname + "'");
+                this.name + "' for column '" + colname + '\'');
         }
         return def.orElseThrow();
     }
@@ -165,7 +165,7 @@ public class CqlTable implements NBNamedElement, Labeled {
 
     public List<CqlTableColumn> getNonKeyColumnDefinitions() {
         int last = partitioning[partitioning.length - 1];
-        last = (clustering.length > 0 ? clustering[clustering.length - 1] : last);
+        last = 0 < this.clustering.length ? clustering[clustering.length - 1] : last;
         List<CqlTableColumn> nonkeys = new ArrayList<>();
         for (int nonkey = last; nonkey < coldefs.size(); nonkey++) {
             nonkeys.add(coldefs.get(nonkey));
@@ -178,7 +178,7 @@ public class CqlTable implements NBNamedElement, Labeled {
     }
 
     public String getFullName() {
-        return (this.keyspace != null ? this.keyspace.getName() + "." : "") + this.name;
+        return (null != keyspace ? this.keyspace.getName() + '.' : "") + this.name;
     }
 
     public boolean isPartitionKey(int position) {
@@ -190,11 +190,11 @@ public class CqlTable implements NBNamedElement, Labeled {
     }
 
     public boolean isClusteringColumn(int position) {
-        return clustering.length > 0 && position < clustering[clustering.length - 1] && position >= clustering[0];
+        return 0 < this.clustering.length && position < clustering[clustering.length - 1] && position >= clustering[0];
     }
 
     public boolean isLastClusteringColumn(int position) {
-        return clustering.length > 0 && position == clustering[clustering.length - 1];
+        return 0 < this.clustering.length && position == clustering[clustering.length - 1];
     }
 
     public ComputedTableStats getComputedStats() {
@@ -206,7 +206,7 @@ public class CqlTable implements NBNamedElement, Labeled {
     }
 
     public boolean hasStats() {
-        return this.computedTableStats!=null;
+        return null != computedTableStats;
     }
 
     public CqlKeyspaceDef getKeyspace() {

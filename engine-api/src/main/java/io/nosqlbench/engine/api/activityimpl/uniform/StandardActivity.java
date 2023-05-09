@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.errors.BasicError;
@@ -46,15 +48,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <S> The context type for the activity, AKA the 'space' for a named driver instance and its associated object graph
  */
 public class StandardActivity<R extends Op, S> extends SimpleActivity implements SyntheticOpTemplateProvider {
-    private final static Logger logger = LogManager.getLogger("ACTIVITY");
+    private static final Logger logger = LogManager.getLogger("ACTIVITY");
 
     private final OpSequence<OpDispenser<? extends Op>> sequence;
     private final NBConfigModel yamlmodel;
     private final ConcurrentHashMap<String, DriverAdapter> adapters = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, OpMapper<Op>> mappers = new ConcurrentHashMap<>();
 
-    public StandardActivity(ActivityDef activityDef) {
-        super(activityDef);
+    public StandardActivity(ActivityDef activityDef, NBLabeledElement parentLabels) {
+        super(activityDef, parentLabels);
         OpsDocList workload;
 
         Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
@@ -72,7 +74,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             .flatMap(s -> ServiceSelector.of(s, adapterLoader).get());
 
         if (defaultDriverName.isPresent() && defaultAdapter.isEmpty()) {
-            throw new BasicError("Unable to load default driver adapter '" + defaultDriverName.get() + "'");
+            throw new BasicError("Unable to load default driver adapter '" + defaultDriverName.get() + '\'');
         }
 
         // HERE, op templates are loaded before drivers are loaded
@@ -85,7 +87,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
         Optional<String> defaultDriverOption = activityDef.getParams().getOptionalString("driver");
         for (OpTemplate ot : opTemplates) {
-            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of());
+            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
             String driverName = incompleteOpDef.takeOptionalStaticValue("driver", String.class)
                 .or(() -> incompleteOpDef.takeOptionalStaticValue("type",String.class))
                 .or(() -> defaultDriverOption)
@@ -97,7 +99,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
             if (!adapters.containsKey(driverName)) {
                 DriverAdapter adapter = ServiceSelector.of(driverName, adapterLoader).get().orElseThrow(
-                    () -> new OpConfigError("Unable to load driver adapter for name '" + driverName + "'")
+                    () -> new OpConfigError("Unable to load driver adapter for name '" + driverName + '\'')
                 );
 
                 NBConfigModel combinedModel = yamlmodel;
@@ -119,15 +121,15 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
             DriverAdapter adapter = adapters.get(driverName);
             adapterlist.add(adapter);
-            ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()));
+            ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
             Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
             pops.add(pop);
         }
 
         if (defaultDriverOption.isPresent()) {
             long matchingDefault = mappers.keySet().stream().filter(n -> n.equals(defaultDriverOption.get())).count();
-            if (matchingDefault==0) {
-                logger.warn("All op templates used a different driver than the default '" + defaultDriverOption.get()+"'");
+            if (0 == matchingDefault) {
+                logger.warn("All op templates used a different driver than the default '{}'", defaultDriverOption.get());
             }
         }
 
@@ -137,9 +139,8 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         } catch (Exception e) {
             if (e instanceof OpConfigError) {
                 throw e;
-            } else {
-                throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
             }
+            throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
         }
     }
 
@@ -211,5 +212,10 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
                 }
             });
         }
+    }
+
+    @Override
+    public NBLabels getLabels() {
+        return super.getLabels();
     }
 }

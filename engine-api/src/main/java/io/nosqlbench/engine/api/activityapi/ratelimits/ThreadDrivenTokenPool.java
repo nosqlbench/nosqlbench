@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,7 +46,7 @@ import static io.nosqlbench.engine.api.util.Colors.*;
 @Service(value= TokenPool.class, selector="threaded")
 public class ThreadDrivenTokenPool implements TokenPool {
 
-    private final static Logger logger = LogManager.getLogger(ThreadDrivenTokenPool.class);
+    private static final Logger logger = LogManager.getLogger(ThreadDrivenTokenPool.class);
 
     public static final double MIN_CONCURRENT_OPS = 2;
 
@@ -59,7 +59,7 @@ public class ThreadDrivenTokenPool implements TokenPool {
     private volatile long waitingPool;
     private RateSpec rateSpec;
     private long nanosPerOp;
-    private long blocks = 0L;
+    private long blocks;
 
     private TokenFiller filler;
 
@@ -70,9 +70,9 @@ public class ThreadDrivenTokenPool implements TokenPool {
      *
      * @param rateSpec a {@link RateSpec}
      */
-    public ThreadDrivenTokenPool(RateSpec rateSpec, NBNamedElement named) {
-        apply(named,rateSpec);
-        logger.debug(() -> "initialized token pool: " + this + " for rate:" + rateSpec);
+    public ThreadDrivenTokenPool(final RateSpec rateSpec, final NBLabeledElement named) {
+        this.apply(named,rateSpec);
+        ThreadDrivenTokenPool.logger.debug(() -> "initialized token pool: " + this + " for rate:" + rateSpec);
 //        filler.start();
     }
 
@@ -83,23 +83,23 @@ public class ThreadDrivenTokenPool implements TokenPool {
      * @param rateSpec The rate specifier.
      */
     @Override
-    public synchronized TokenPool apply(NBNamedElement named, RateSpec rateSpec) {
+    public synchronized TokenPool apply(final NBLabeledElement labeled, final RateSpec rateSpec) {
         this.rateSpec = rateSpec;
-        this.maxActivePool = Math.max((long) 1E6, (long) ((double) rateSpec.getNanosPerOp() * MIN_CONCURRENT_OPS));
-        this.maxOverActivePool = (long) (maxActivePool * rateSpec.getBurstRatio());
-        this.burstRatio = rateSpec.getBurstRatio();
+        maxActivePool = Math.max((long) 1.0E6, (long) (rateSpec.getNanosPerOp() * ThreadDrivenTokenPool.MIN_CONCURRENT_OPS));
+        maxOverActivePool = (long) (this.maxActivePool * rateSpec.getBurstRatio());
+        burstRatio = rateSpec.getBurstRatio();
 
-        this.burstPoolSize = maxOverActivePool - maxActivePool;
-        this.nanosPerOp = rateSpec.getNanosPerOp();
-        this.filler = (this.filler == null) ? new TokenFiller(rateSpec, this, named, 3) : filler.apply(rateSpec);
-        notifyAll();
+        burstPoolSize = this.maxOverActivePool - this.maxActivePool;
+        nanosPerOp = rateSpec.getNanosPerOp();
+        filler = null == this.filler ? new TokenFiller(rateSpec, this, labeled, 3) : this.filler.apply(rateSpec);
+        this.notifyAll();
         return this;
     }
 
 
     @Override
     public double getBurstRatio() {
-        return burstRatio;
+        return this.burstRatio;
     }
 
     /**
@@ -110,9 +110,9 @@ public class ThreadDrivenTokenPool implements TokenPool {
      * @return actual number of tokens removed, greater to or equal to zero
      */
     @Override
-    public synchronized long takeUpTo(long amt) {
-        long take = Math.min(amt, activePool);
-        activePool -= take;
+    public synchronized long takeUpTo(final long amt) {
+        final long take = Math.min(amt, this.activePool);
+        this.activePool -= take;
         return take;
     }
 
@@ -124,55 +124,53 @@ public class ThreadDrivenTokenPool implements TokenPool {
      */
     @Override
     public synchronized long blockAndTake() {
-        while (activePool < nanosPerOp) {
-            blocks++;
+        while (this.activePool < this.nanosPerOp) {
+            this.blocks++;
             //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
             try {
-                wait(1000);
+                this.wait(1000);
 //                wait(maxActivePool / 1000000, 0);
-            } catch (InterruptedException ignored) {
-            } catch (Exception e) {
+            } catch (final InterruptedException ignored) {
+            } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
             //System.out.println("waited for " + amt + "/" + activePool + " tokens");
         }
         //System.out.println(ANSI_BrightYellow + "taking " + amt + "/" + activePool + ANSI_Reset);
 
-        activePool -= nanosPerOp;
-        return waitingPool + activePool;
+        this.activePool -= this.nanosPerOp;
+        return this.waitingPool + this.activePool;
     }
 
     @Override
-    public synchronized long blockAndTake(long tokens) {
-        while (activePool < tokens) {
-            //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
-            try {
-                wait(maxActivePool / 1000000, (int) maxActivePool % 1000000);
-            } catch (InterruptedException ignored) {
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            //System.out.println("waited for " + amt + "/" + activePool + " tokens");
+    public synchronized long blockAndTake(final long tokens) {
+        //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
+        //System.out.println("waited for " + amt + "/" + activePool + " tokens");
+        while (this.activePool < tokens) try {
+            this.wait(this.maxActivePool / 1000000, (int) this.maxActivePool % 1000000);
+        } catch (final InterruptedException ignored) {
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         }
         //System.out.println(ANSI_BrightYellow + "taking " + amt + "/" + activePool + ANSI_Reset);
 
-        activePool -= tokens;
-        return waitingPool + activePool;
+        this.activePool -= tokens;
+        return this.waitingPool + this.activePool;
     }
 
     @Override
     public long getWaitTime() {
-        return activePool + waitingPool;
+        return this.activePool + this.waitingPool;
     }
 
     @Override
     public long getWaitPool() {
-        return waitingPool;
+        return this.waitingPool;
     }
 
     @Override
     public long getActivePool() {
-        return activePool;
+        return this.activePool;
     }
 
     /**
@@ -189,77 +187,74 @@ public class ThreadDrivenTokenPool implements TokenPool {
      * @param newTokens The number of new tokens to add to the token pools
      * @return the total number of tokens in all pools
      */
-    public synchronized long refill(long newTokens) {
-        boolean debugthis = false;
+    public synchronized long refill(final long newTokens) {
+        final boolean debugthis = false;
 //        long debugAt = System.nanoTime();
 //        if (debugAt>debugTrigger+debugRate) {
 //            debugTrigger=debugAt;
 //            debugthis=true;
 //        }
 
-        long needed = Math.max(maxActivePool - activePool, 0L);
-        long allocatedToActivePool = Math.min(newTokens, needed);
-        activePool += allocatedToActivePool;
+        final long needed = Math.max(this.maxActivePool - this.activePool, 0L);
+        final long allocatedToActivePool = Math.min(newTokens, needed);
+        this.activePool += allocatedToActivePool;
 
 
         // overflow logic
-        long allocatedToOverflowPool = newTokens - allocatedToActivePool;
-        waitingPool += allocatedToOverflowPool;
+        final long allocatedToOverflowPool = newTokens - allocatedToActivePool;
+        this.waitingPool += allocatedToOverflowPool;
 
         // backfill logic
-        double refillFactor = Math.min((double) newTokens / maxActivePool, 1.0D);
-        long burstFillAllowed = (long) (refillFactor * burstPoolSize);
+        final double refillFactor = Math.min((double) newTokens / this.maxActivePool, 1.0D);
+        long burstFillAllowed = (long) (refillFactor * this.burstPoolSize);
 
-        burstFillAllowed = Math.min(maxOverActivePool - activePool, burstFillAllowed);
-        long burstFill = Math.min(burstFillAllowed, waitingPool);
+        burstFillAllowed = Math.min(this.maxOverActivePool - this.activePool, burstFillAllowed);
+        final long burstFill = Math.min(burstFillAllowed, this.waitingPool);
 
-        waitingPool -= burstFill;
-        activePool += burstFill;
+        this.waitingPool -= burstFill;
+        this.activePool += burstFill;
 
         if (debugthis) {
             System.out.print(this);
             System.out.print(ANSI_BrightBlue + " adding=" + allocatedToActivePool);
-            if (allocatedToOverflowPool > 0) {
+            if (0 < allocatedToOverflowPool)
                 System.out.print(ANSI_Red + " OVERFLOW:" + allocatedToOverflowPool + ANSI_Reset);
-            }
-            if (burstFill > 0) {
-                System.out.print(ANSI_BrightGreen + " BACKFILL:" + burstFill + ANSI_Reset);
-            }
+            if (0 < burstFill) System.out.print(ANSI_BrightGreen + " BACKFILL:" + burstFill + ANSI_Reset);
             System.out.println();
         }
         //System.out.println(this);
-        notifyAll();
+        this.notifyAll();
 
-        return activePool + waitingPool;
+        return this.activePool + this.waitingPool;
     }
 
     @Override
     public String toString() {
         return String.format(
             "{ active:%d, max:%d, fill:'(%,3.1f%%)A (%,3.1f%%)B', wait_ns:%,d, blocks:%,d }",
-            activePool, maxActivePool,
-            (((double) activePool / (double) maxActivePool) * 100.0),
-            (((double) activePool / (double) maxOverActivePool) * 100.0),
-            waitingPool,
-            blocks
+            this.activePool, this.maxActivePool,
+            (double) this.activePool / this.maxActivePool * 100.0,
+            (double) this.activePool / this.maxOverActivePool * 100.0,
+            this.waitingPool,
+            this.blocks
         );
     }
 
     @Override
     public RateSpec getRateSpec() {
-        return rateSpec;
+        return this.rateSpec;
     }
 
     @Override
     public synchronized long restart() {
-        long wait = activePool + waitingPool;
-        activePool = 0L;
-        waitingPool = 0L;
+        final long wait = this.activePool + this.waitingPool;
+        this.activePool = 0L;
+        this.waitingPool = 0L;
         return wait;
     }
 
     @Override
     public synchronized void start() {
-        filler.start();
+        this.filler.start();
     }
 }

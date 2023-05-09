@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.activity;
 
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -44,76 +45,71 @@ public class ActivityTypeLoader {
     private final SimpleServiceLoader<DriverAdapter> DRIVERADAPTER_SPI_FINDER = new SimpleServiceLoader<>(DriverAdapter.class, Maturity.Any);
     private final Set<URL> jarUrls = new HashSet<>();
 
-    public ActivityTypeLoader setMaturity(Maturity maturity) {
-        ACTIVITYTYPE_SPI_FINDER.setMaturity(maturity);
+    public ActivityTypeLoader setMaturity(final Maturity maturity) {
+        this.ACTIVITYTYPE_SPI_FINDER.setMaturity(maturity);
         return this;
     }
 
     public ActivityTypeLoader() {
 
-        List<String> libpaths = NBEnvironment.INSTANCE.interpolateEach(":", "$" + NBEnvironment.NBLIBS);
+        final List<String> libpaths = NBEnvironment.INSTANCE.interpolateEach(":", '$' + NBEnvironment.NBLIBS);
         Set<URL> urlsToAdd = new HashSet<>();
 
-        for (String libpaths_entry : libpaths) {
-            Path libpath = Path.of(libpaths_entry);
-            if (Files.isDirectory(libpath)) {
-                urlsToAdd = addLibDir(urlsToAdd, libpath);
-            } else if (Files.isRegularFile(libpath) && libpath.toString().toLowerCase().endsWith(".zip")) {
-                urlsToAdd = addZipDir(urlsToAdd, libpath);
-            } else if (Files.isRegularFile(libpath) && libpath.toString().toLowerCase().endsWith(".jar")) {
-                urlsToAdd = addJarFile(urlsToAdd, libpath);
-            }
+        for (final String libpaths_entry : libpaths) {
+            final Path libpath = Path.of(libpaths_entry);
+            if (Files.isDirectory(libpath)) urlsToAdd = this.addLibDir(urlsToAdd, libpath);
+            else if (Files.isRegularFile(libpath) && libpath.toString().toLowerCase().endsWith(".zip"))
+                urlsToAdd = this.addZipDir(urlsToAdd, libpath);
+            else if (Files.isRegularFile(libpath) && libpath.toString().toLowerCase().endsWith(".jar"))
+                urlsToAdd = this.addJarFile(urlsToAdd, libpath);
         }
-        extendClassLoader(urlsToAdd);
+        this.extendClassLoader(urlsToAdd);
     }
 
-    private synchronized void extendClassLoader(String... paths) {
-        Set<URL> urls = new HashSet<>();
-        for (String path : paths) {
+    private synchronized void extendClassLoader(final String... paths) {
+        final Set<URL> urls = new HashSet<>();
+        for (final String path : paths) {
             URL url = null;
             try {
                 url = new URL(path);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 throw new RuntimeException(e);
             }
             urls.add(url);
         }
-        extendClassLoader(urls);
+        this.extendClassLoader(urls);
     }
 
-    private synchronized void extendClassLoader(Set<URL> urls) {
-        Set<URL> newUrls = new HashSet<>();
-        if (!jarUrls.containsAll(urls)) {
-            for (URL url : urls) {
-                if (!jarUrls.contains(url)) {
+    private synchronized void extendClassLoader(final Set<URL> urls) {
+        final Set<URL> newUrls = new HashSet<>();
+        if (!this.jarUrls.containsAll(urls)) {
+            for (final URL url : urls)
+                if (!this.jarUrls.contains(url)) {
                     newUrls.add(url);
-                    jarUrls.add(url);
+                    this.jarUrls.add(url);
                 }
-            }
-            URL[] newUrlAry = newUrls.toArray(new URL[]{});
-            URLClassLoader ucl = URLClassLoader.newInstance(newUrlAry, Thread.currentThread().getContextClassLoader());
+            final URL[] newUrlAry = newUrls.toArray(new URL[]{});
+            final URLClassLoader ucl = URLClassLoader.newInstance(newUrlAry, Thread.currentThread().getContextClassLoader());
             Thread.currentThread().setContextClassLoader(ucl);
-            logger.debug("Extended class loader layering with " + newUrls);
-        } else {
-            logger.debug("All URLs specified were already in a class loader.");
-        }
+            ActivityTypeLoader.logger.debug("Extended class loader layering with {}", newUrls);
+        } else ActivityTypeLoader.logger.debug("All URLs specified were already in a class loader.");
     }
 
-    private Set<URL> addJarFile(Set<URL> urls, Path libpath) {
+    private Set<URL> addJarFile(final Set<URL> urls, final Path libpath) {
         try {
             urls.add(libpath.toUri().toURL());
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             throw new RuntimeException(e);
         }
         return urls;
     }
 
-    private Set<URL> addZipDir(Set<URL> urlsToAdd, Path libpath) {
+    private Set<URL> addZipDir(final Set<URL> urlsToAdd, final Path libpath) {
         return urlsToAdd;
     }
 
-    private Set<URL> addLibDir(Set<URL> urlsToAdd, Path libpath) {
-        Set<URL> urls = NBIO.local()
+    private Set<URL> addLibDir(final Set<URL> urlsToAdd, final Path libpath) {
+        final Set<URL> urls = NBIO.local()
             .searchPrefixes(libpath.toString())
             .extensionSet(".jar")
             .list().stream().map(Content::getURL)
@@ -122,16 +118,16 @@ public class ActivityTypeLoader {
         return urlsToAdd;
     }
 
-    public Optional<ActivityType> load(ActivityDef activityDef) {
+    public Optional<ActivityType> load(final ActivityDef activityDef, final NBLabeledElement labels) {
 
-        final String driverName = activityDef.getParams()
+        String driverName = activityDef.getParams()
             .getOptionalString("driver", "type")
             .orElseThrow(() -> new BasicError("The parameter 'driver=' is required."));
 
         activityDef.getParams()
             .getOptionalString("jar")
             .map(jar -> {
-                Set<URL> urls = NBIO.local().search(jar)
+                final Set<URL> urls = NBIO.local().search(jar)
                     .list()
                     .stream().map(Content::getURL)
                     .collect(Collectors.toSet());
@@ -139,28 +135,27 @@ public class ActivityTypeLoader {
             })
             .ifPresent(this::extendClassLoader);
 
-        return this.getDriverAdapter(driverName,activityDef)
-            .or(() -> ACTIVITYTYPE_SPI_FINDER.getOptionally(driverName));
+        return getDriverAdapter(driverName,activityDef,labels)
+            .or(() -> this.ACTIVITYTYPE_SPI_FINDER.getOptionally(driverName));
 
     }
 
-    private Optional<ActivityType> getDriverAdapter(String activityTypeName, ActivityDef activityDef) {
-        Optional<DriverAdapter> oda = DRIVERADAPTER_SPI_FINDER.getOptionally(activityTypeName);
+    private Optional<ActivityType> getDriverAdapter(final String activityTypeName, final ActivityDef activityDef, final NBLabeledElement labels) {
+        final Optional<DriverAdapter> oda = this.DRIVERADAPTER_SPI_FINDER.getOptionally(activityTypeName);
 
         if (oda.isPresent()) {
-            DriverAdapter<?, ?> driverAdapter = oda.get();
+            final DriverAdapter<?, ?> driverAdapter = oda.get();
 
-            ActivityType activityType = new StandardActivityType<>(driverAdapter, activityDef);
+            final ActivityType activityType = new StandardActivityType<>(driverAdapter, activityDef, labels);
             return Optional.of(activityType);
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     public Set<String> getAllSelectors() {
-        Map<String, Maturity> allSelectors = ACTIVITYTYPE_SPI_FINDER.getAllSelectors();
-        Map<String, Maturity> addAdapters = DRIVERADAPTER_SPI_FINDER.getAllSelectors();
-        Set<String> all = new LinkedHashSet<>();
+        final Map<String, Maturity> allSelectors = this.ACTIVITYTYPE_SPI_FINDER.getAllSelectors();
+        final Map<String, Maturity> addAdapters = this.DRIVERADAPTER_SPI_FINDER.getAllSelectors();
+        final Set<String> all = new LinkedHashSet<>();
         all.addAll(allSelectors.keySet());
         all.addAll(addAdapters.keySet());
         return all;

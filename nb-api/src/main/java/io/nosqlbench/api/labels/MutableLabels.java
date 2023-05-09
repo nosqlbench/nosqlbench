@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,15 @@
 
 package io.nosqlbench.api.labels;
 
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
+
 import java.util.HashMap;
 import java.util.Map;
 
-public class MutableLabels extends HashMap<String, String> implements Labeled {
+public class MutableLabels extends HashMap<String, String> implements NBLabeledElement {
+
+    private NBLabels labels;
 
     public static MutableLabels fromMaps(Map<String, String> entries) {
         MutableLabels mutableLabels = new MutableLabels();
@@ -29,7 +34,7 @@ public class MutableLabels extends HashMap<String, String> implements Labeled {
 
 
     @Override
-    public Map<String, String> getLabels() {
-        return this;
+    public NBLabels getLabels() {
+        return this.labels;
     }
 }

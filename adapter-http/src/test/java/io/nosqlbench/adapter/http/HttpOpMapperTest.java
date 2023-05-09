@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.http;
 
 import io.nosqlbench.adapter.http.core.HttpOpMapper;
 import io.nosqlbench.adapter.http.core.HttpSpace;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
@@ -37,30 +38,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class HttpOpMapperTest {
 
-    private final static Logger logger = LogManager.getLogger(HttpOpMapperTest.class);
+    private static final Logger logger = LogManager.getLogger(HttpOpMapperTest.class);
     static NBConfiguration cfg;
     static HttpDriverAdapter adapter;
     static HttpOpMapper mapper;
 
     @BeforeAll
     public static void initializeTestMapper() {
-        cfg = HttpSpace.getConfigModel().apply(Map.of());
-        adapter = new HttpDriverAdapter();
-        adapter.applyConfig(cfg);
-        DriverSpaceCache<? extends HttpSpace> cache = adapter.getSpaceCache();
-        mapper = new HttpOpMapper(adapter,cfg, cache);
+        HttpOpMapperTest.cfg = HttpSpace.getConfigModel().apply(Map.of());
+        HttpOpMapperTest.adapter = new HttpDriverAdapter();
+        HttpOpMapperTest.adapter.applyConfig(HttpOpMapperTest.cfg);
+        final DriverSpaceCache<? extends HttpSpace> cache = HttpOpMapperTest.adapter.getSpaceCache();
+        HttpOpMapperTest.mapper = new HttpOpMapper(HttpOpMapperTest.adapter, HttpOpMapperTest.cfg, cache);
     }
 
-    private static ParsedOp parsedOpFor(String yaml) {
-        OpsDocList docs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
-        OpTemplate opTemplate = docs.getOps().get(0);
-        ParsedOp parsedOp = new ParsedOp(opTemplate, cfg, List.of(adapter.getPreprocessor()));
+    private static ParsedOp parsedOpFor(final String yaml) {
+        final OpsDocList docs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
+        final OpTemplate opTemplate = docs.getOps().get(0);
+        final ParsedOp parsedOp = new ParsedOp(opTemplate, HttpOpMapperTest.cfg, List.of(HttpOpMapperTest.adapter.getPreprocessor()), NBLabeledElement.forMap(Map.of()));
         return parsedOp;
     }
 
     @Test
     public void testOnelineSpec() {
-        ParsedOp pop = parsedOpFor("""
+        final ParsedOp pop = HttpOpMapperTest.parsedOpFor("""
             ops:
              - s1: method=get uri=http://localhost/
             """);
@@ -70,7 +71,7 @@ public class HttpOpMapperTest {
 
     @Test
     public void testRFCFormMinimal() {
-        ParsedOp pop = parsedOpFor("""
+        final ParsedOp pop = HttpOpMapperTest.parsedOpFor("""
                 ops:
                  - s1: get http://localhost/
             """);
@@ -81,7 +82,7 @@ public class HttpOpMapperTest {
 
     @Test
     public void testRFCFormVersioned() {
-        ParsedOp pop = parsedOpFor("""
+        final ParsedOp pop = HttpOpMapperTest.parsedOpFor("""
                 ops:
                  - s1: get http://localhost/ HTTP/1.1
             """);
@@ -90,7 +91,7 @@ public class HttpOpMapperTest {
 
     @Test
     public void testRFCFormHeaders() {
-        ParsedOp pop = parsedOpFor("""
+        final ParsedOp pop = HttpOpMapperTest.parsedOpFor("""
                 ops:
                  - s1: |
                     get http://localhost/
@@ -101,7 +102,7 @@ public class HttpOpMapperTest {
 
     @Test
     public void testRFCFormBody() {
-        ParsedOp pop = parsedOpFor("""
+        final ParsedOp pop = HttpOpMapperTest.parsedOpFor("""
                 ops:
                  - s1: |
                     get http://localhost/
@@ -117,7 +118,7 @@ public class HttpOpMapperTest {
 
         // This can not be fully resolved in the unit testing context, but it could be
         // in the integrated testing context. It is sufficient to verify parsing here.
-        ParsedOp pop = parsedOpFor("""
+        final ParsedOp pop = HttpOpMapperTest.parsedOpFor("""
                 ops:
                  - s1: |
                     {method} {scheme}://{host}/{path}?{query} {version}
@@ -136,7 +137,7 @@ public class HttpOpMapperTest {
                  body: StaticStringMapper('test')
             """);
 
-        logger.debug(pop);
+        HttpOpMapperTest.logger.debug(pop);
         assertThat(pop.getDefinedNames()).containsAll(List.of(
             "method","uri","version","Header1","body"
         ));

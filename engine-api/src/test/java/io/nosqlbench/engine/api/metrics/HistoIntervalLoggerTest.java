@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package io.nosqlbench.engine.api.metrics;
 
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.api.engine.metrics.HistoIntervalLogger;
-import io.nosqlbench.api.engine.metrics.NicerHistogram;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogReader;
@@ -44,16 +45,16 @@ public class HistoIntervalLoggerTest {
 
         final int significantDigits = 4;
 
-        NicerHistogram nicerHistogram = new NicerHistogram(
-                "histo1", new DeltaHdrHistogramReservoir("histo1", significantDigits));
+        NBMetricHistogram NBHistogram = new NBMetricHistogram(
+                NBLabels.forKV("name", "histo1"), new DeltaHdrHistogramReservoir(NBLabels.forKV("name", "histo1"), significantDigits));
 
-        hil.onHistogramAdded("histo1",nicerHistogram);
+        hil.onHistogramAdded("histo1", NBHistogram);
 
-        nicerHistogram.update(1L);
+        NBHistogram.update(1L);
         delay(1001);
-        nicerHistogram.update(1000000L);
+        NBHistogram.update(1000000L);
         delay(1001);
-        nicerHistogram.update(1000L);
+        NBHistogram.update(1000L);
         hil.onHistogramRemoved("histo1");
 
         hil.closeMetrics();
@@ -63,7 +64,7 @@ public class HistoIntervalLoggerTest {
         EncodableHistogram histogram;
         while (true) {
             histogram = hlr.nextIntervalHistogram();
-            if (histogram==null) {
+            if (null == histogram) {
                 break;
             }
             histos.add(histogram);
@@ -71,15 +72,15 @@ public class HistoIntervalLoggerTest {
 
         assertThat(histos.size()).isEqualTo(2);
         assertThat(histos.get(0)).isInstanceOf(Histogram.class);
-        assertThat(((Histogram)histos.get(0)).getNumberOfSignificantValueDigits()).isEqualTo(significantDigits);
+        assertThat(((Histogram) histos.get(0)).getNumberOfSignificantValueDigits()).isEqualTo(significantDigits);
     }
 
     private void delay(int i) {
         long now = System.currentTimeMillis();
-        long target = now+i;
-        while (System.currentTimeMillis()<target) {
+        long target = now + i;
+        while (System.currentTimeMillis() < target) {
             try {
-                Thread.sleep(target-System.currentTimeMillis());
+                Thread.sleep(target - System.currentTimeMillis());
             } catch (InterruptedException ignored) {
             }
         }

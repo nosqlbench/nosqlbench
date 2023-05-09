@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class PulsarAdapterUtil {
+public enum PulsarAdapterUtil {
+    ;
 
-    private final static Logger logger = LogManager.getLogger(PulsarAdapterUtil.class);
+    private static final Logger logger = LogManager.getLogger(PulsarAdapterUtil.class);
 
     public static final String MSG_SEQUENCE_NUMBER = "sequence_number";
 
@@ -61,7 +62,7 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        DOC_LEVEL_PARAMS(String label) {
+        DOC_LEVEL_PARAMS(final String label) {
             this.label = label;
         }
     }
@@ -75,17 +76,17 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        PULSAR_API_TYPE(String label) {
+        PULSAR_API_TYPE(final String label) {
             this.label = label;
         }
 
-        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label).collect(Collectors.toUnmodifiableSet());
+        private static final Set<String> LABELS = Stream.of(PULSAR_API_TYPE.values()).map(v -> v.label).collect(Collectors.toUnmodifiableSet());
 
-        public static boolean isValidLabel(String label) {
-            return LABELS.contains(label);
+        public static boolean isValidLabel(final String label) {
+            return PULSAR_API_TYPE.LABELS.contains(label);
         }
     }
-    public static boolean isValidPulsarApiType(String param) {
+    public static boolean isValidPulsarApiType(final String param) {
         return PULSAR_API_TYPE.isValidLabel(param);
     }
 
@@ -101,17 +102,17 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        CONF_GATEGORY(String label) {
+        CONF_GATEGORY(final String label) {
             this.label = label;
         }
 
-        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label).collect(Collectors.toUnmodifiableSet());
+        private static final Set<String> LABELS = Stream.of(CONF_GATEGORY.values()).map(v -> v.label).collect(Collectors.toUnmodifiableSet());
 
-        public static boolean isValidLabel(String label) {
-            return LABELS.contains(label);
+        public static boolean isValidLabel(final String label) {
+            return CONF_GATEGORY.LABELS.contains(label);
         }
     }
-    public static boolean isValidConfCategory(String item) {
+    public static boolean isValidConfCategory(final String item) {
         return CONF_GATEGORY.isValidLabel(item);
     }
     ///////
@@ -122,7 +123,7 @@ public class PulsarAdapterUtil {
         ;
 
         public final String label;
-        PERSISTENT_TYPES(String label) {
+        PERSISTENT_TYPES(final String label) {
             this.label = label;
         }
     }
@@ -157,7 +158,7 @@ public class PulsarAdapterUtil {
         ;
 
         public final String label;
-        CLNT_CONF_KEY(String label) {
+        CLNT_CONF_KEY(final String label) {
             this.label = label;
         }
     }
@@ -182,7 +183,7 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        PRODUCER_CONF_STD_KEY(String label) {
+        PRODUCER_CONF_STD_KEY(final String label) {
             this.label = label;
         }
     }
@@ -197,11 +198,11 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        COMPRESSION_TYPE(String label) {
+        COMPRESSION_TYPE(final String label) {
             this.label = label;
         }
 
-        private final static String TYPE_LIST = Stream.of(COMPRESSION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
+        private static final String TYPE_LIST = Stream.of(values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
     public static String getValidCompressionTypeList() {
@@ -241,7 +242,7 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        CONSUMER_CONF_STD_KEY(String label) {
+        CONSUMER_CONF_STD_KEY(final String label) {
             this.label = label;
         }
     }
@@ -256,18 +257,18 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        CONSUMER_CONF_CUSTOM_KEY(String label) {
+        CONSUMER_CONF_CUSTOM_KEY(final String label) {
             this.label = label;
         }
 
-        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label).collect(Collectors.toUnmodifiableSet());
+        private static final Set<String> LABELS = Stream.of(CONSUMER_CONF_CUSTOM_KEY.values()).map(v -> v.label).collect(Collectors.toUnmodifiableSet());
 
-        public static boolean isValidLabel(String label) {
-            return LABELS.contains(label);
+        public static boolean isValidLabel(final String label) {
+            return CONSUMER_CONF_CUSTOM_KEY.LABELS.contains(label);
         }
 
     }
-    public static boolean isCustomConsumerConfItem(String item) {
+    public static boolean isCustomConsumerConfItem(final String item) {
         return CONSUMER_CONF_CUSTOM_KEY.isValidLabel(item);
     }
 
@@ -280,20 +281,20 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        SUBSCRIPTION_TYPE(String label) {
+        SUBSCRIPTION_TYPE(final String label) {
             this.label = label;
         }
 
-        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label)
+        private static final Set<String> LABELS = Stream.of(SUBSCRIPTION_TYPE.values()).map(v -> v.label)
             .collect(Collectors.toUnmodifiableSet());
 
-        public static boolean isValidLabel(String label) {
-            return LABELS.contains(label);
+        public static boolean isValidLabel(final String label) {
+            return SUBSCRIPTION_TYPE.LABELS.contains(label);
         }
 
-        private final static String TYPE_LIST = Stream.of(COMPRESSION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
+        private static final String TYPE_LIST = Stream.of(COMPRESSION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
-    public static boolean isValidSubscriptionType(String item) {
+    public static boolean isValidSubscriptionType(final String item) {
         return SUBSCRIPTION_TYPE.isValidLabel(item);
     }
     public static String getValidSubscriptionTypeList() {
@@ -307,11 +308,11 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        SUBSCRIPTION_INITIAL_POSITION(String label) {
+        SUBSCRIPTION_INITIAL_POSITION(final String label) {
             this.label = label;
         }
 
-        private final static String TYPE_LIST = Stream.of(COMPRESSION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
+        private static final String TYPE_LIST = Stream.of(COMPRESSION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
 
     }
     public static String getValidSubscriptionInitialPositionList() {
@@ -326,11 +327,11 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        REGEX_SUBSCRIPTION_MODE(String label) {
+        REGEX_SUBSCRIPTION_MODE(final String label) {
             this.label = label;
         }
 
-        private final static String TYPE_LIST = Stream.of(COMPRESSION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
+        private static final String TYPE_LIST = Stream.of(COMPRESSION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
     public static String getValidRegexSubscriptionModeList() {
@@ -353,7 +354,7 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        READER_CONF_STD_KEY(String label) {
+        READER_CONF_STD_KEY(final String label) {
             this.label = label;
         }
     }
@@ -367,7 +368,7 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        READER_CONF_CUSTOM_KEY(String label) {
+        READER_CONF_CUSTOM_KEY(final String label) {
             this.label = label;
         }
     }
@@ -380,18 +381,18 @@ public class PulsarAdapterUtil {
 
         public final String label;
 
-        READER_MSG_POSITION_TYPE(String label) {
+        READER_MSG_POSITION_TYPE(final String label) {
             this.label = label;
         }
 
-        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label)
+        private static final Set<String> LABELS = Stream.of(READER_MSG_POSITION_TYPE.values()).map(v -> v.label)
             .collect(Collectors.toUnmodifiableSet());
 
-        public static boolean isValidLabel(String label) {
-            return LABELS.contains(label);
+        public static boolean isValidLabel(final String label) {
+            return READER_MSG_POSITION_TYPE.LABELS.contains(label);
         }
     }
-    public static boolean isValideReaderStartPosition(String item) {
+    public static boolean isValideReaderStartPosition(final String item) {
         return READER_MSG_POSITION_TYPE.isValidLabel(item);
     }
 
@@ -402,53 +403,48 @@ public class PulsarAdapterUtil {
 
     ///////
     // Primitive Schema type
-    public static boolean isPrimitiveSchemaTypeStr(String typeStr) {
-        return StringUtils.isBlank(typeStr) || PRIMITIVE_SCHEMA_TYPE_MAPPING.containsKey(typeStr.toUpperCase());
+    public static boolean isPrimitiveSchemaTypeStr(final String typeStr) {
+        return StringUtils.isBlank(typeStr) || PulsarAdapterUtil.PRIMITIVE_SCHEMA_TYPE_MAPPING.containsKey(typeStr.toUpperCase());
     }
 
-    public static Schema<?> getPrimitiveTypeSchema(String typeStr) {
-        String lookupKey = StringUtils.isBlank(typeStr) ? "BYTES" : typeStr.toUpperCase();
-        Schema<?> schema = PRIMITIVE_SCHEMA_TYPE_MAPPING.get(lookupKey);
-        if (schema == null) {
+    public static Schema<?> getPrimitiveTypeSchema(final String typeStr) {
+        final String lookupKey = StringUtils.isBlank(typeStr) ? "BYTES" : typeStr.toUpperCase();
+        final Schema<?> schema = PulsarAdapterUtil.PRIMITIVE_SCHEMA_TYPE_MAPPING.get(lookupKey);
+        if (null == schema)
             throw new PulsarAdapterInvalidParamException("Invalid Pulsar primitive schema type string : " + typeStr);
-        }
         return schema;
     }
 
     ///////
     // Complex strut type: Avro or Json
-    public static boolean isAvroSchemaTypeStr(String typeStr) {
+    public static boolean isAvroSchemaTypeStr(final String typeStr) {
         return "AVRO".equalsIgnoreCase(typeStr);
     }
 
     // automatic decode the type from the Registry
-    public static boolean isAutoConsumeSchemaTypeStr(String typeStr) {
+    public static boolean isAutoConsumeSchemaTypeStr(final String typeStr) {
         return "AUTO_CONSUME".equalsIgnoreCase(typeStr);
     }
 
     private static final Map<String, Schema<?>> AVRO_SCHEMA_CACHE = new ConcurrentHashMap<>();
 
-    public static Schema<?> getAvroSchema(String typeStr, final String definitionStr) {
+    public static Schema<?> getAvroSchema(final String typeStr, String definitionStr) {
         // Check if payloadStr points to a file (e.g. "file:///path/to/a/file")
-        if (isAvroSchemaTypeStr(typeStr)) {
-            if (StringUtils.isBlank(definitionStr)) {
+        if (PulsarAdapterUtil.isAvroSchemaTypeStr(typeStr)) {
+            if (StringUtils.isBlank(definitionStr))
                 throw new PulsarAdapterInvalidParamException("Schema definition must be provided for \"Avro\" schema type!");
-            }
-            return AVRO_SCHEMA_CACHE.computeIfAbsent(definitionStr, __ -> {
+            return PulsarAdapterUtil.AVRO_SCHEMA_CACHE.computeIfAbsent(definitionStr, __ -> {
                 String schemaDefinitionStr = definitionStr;
-                if (schemaDefinitionStr.startsWith("file://")) {
-                    try {
-                        Path filePath = Paths.get(URI.create(schemaDefinitionStr));
-                        schemaDefinitionStr = Files.readString(filePath, StandardCharsets.UTF_8);
-                    } catch (IOException ioe) {
-                        throw new PulsarAdapterUnexpectedException("Error reading the specified \"Avro\" schema definition file: " + definitionStr + ": " + ioe.getMessage());
-                    }
+                if (schemaDefinitionStr.startsWith("file://")) try {
+                    final Path filePath = Paths.get(URI.create(schemaDefinitionStr));
+                    schemaDefinitionStr = Files.readString(filePath, StandardCharsets.UTF_8);
+                } catch (final IOException ioe) {
+                    throw new PulsarAdapterUnexpectedException("Error reading the specified \"Avro\" schema definition file: " + definitionStr + ": " + ioe.getMessage());
                 }
                 return PulsarAvroSchemaUtil.GetSchema_PulsarAvro("NBAvro", schemaDefinitionStr);
             });
-        } else {
-            throw new PulsarAdapterInvalidParamException("Trying to create a \"Avro\" schema for a non-Avro schema type string: " + typeStr);
         }
+        throw new PulsarAdapterInvalidParamException("Trying to create a \"Avro\" schema for a non-Avro schema type string: " + typeStr);
     }
 
     ///////
@@ -456,20 +452,20 @@ public class PulsarAdapterUtil {
     private static final ObjectMapper JACKSON_OBJECT_MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, String>> MAP_TYPE_REF = new TypeReference<>() {};
 
-    public static Map<String, String> convertJsonToMap(String jsonStr) throws IOException {
-        return JACKSON_OBJECT_MAPPER.readValue(jsonStr, MAP_TYPE_REF);
+    public static Map<String, String> convertJsonToMap(final String jsonStr) throws IOException {
+        return PulsarAdapterUtil.JACKSON_OBJECT_MAPPER.readValue(jsonStr, PulsarAdapterUtil.MAP_TYPE_REF);
     }
 
 
     ///////
     // Get full namespace name (<tenant>/<namespace>) from a Pulsar topic URI
-    public static String getFullNamespaceName(String topicUri) {
+    public static String getFullNamespaceName(final String topicUri) {
         // Get tenant/namespace string
         // - topicUri   : persistent://<tenant>/<namespace>/<topic>
         // - tmpStr     : <tenant>/<namespace>/<topic>
         // - fullNsName : <tenant>/<namespace>
 
-        String tmpStr = StringUtils.substringAfter(topicUri,"://");
+        final String tmpStr = StringUtils.substringAfter(topicUri,"://");
         return StringUtils.substringBeforeLast(tmpStr, "/");
     }
 }

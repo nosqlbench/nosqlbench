@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 package io.nosqlbench.cqlgen.model;
 
 import com.datastax.oss.driver.internal.core.util.Strings;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.cqlgen.core.CGKeyspaceStats;
 
 import java.util.*;
 
-public class CqlKeyspaceDef implements NBNamedElement, Labeled {
+public class CqlKeyspaceDef implements NBNamedElement, NBLabeledElement {
     String keyspaceName= "";
     CGKeyspaceStats stats;
     private boolean isDurableWrites;
@@ -34,19 +35,20 @@ public class CqlKeyspaceDef implements NBNamedElement, Labeled {
      * Has this been populated by keyspace definition? If false, it is only
      * here because it was vivified by a reference.
      */
-    private transient boolean defined;
+    private boolean defined;
 
     public CqlKeyspaceDef() {
     }
 
     public CqlKeyspaceDef(String ksname) {
-        setKeyspaceName(ksname);
+        this.keyspaceName = ksname;
     }
 
     public void setKeyspaceName(String newname) {
-        this.keyspaceName=newname;
+        this.keyspaceName =newname;
     }
 
+    @Override
     public String getName() {
         return this.keyspaceName;
     }
@@ -62,15 +64,15 @@ public class CqlKeyspaceDef implements NBNamedElement, Labeled {
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return Map.of(
+    public NBLabels getLabels() {
+        return NBLabels.forKV(
             "name", keyspaceName,
             "type","keyspace"
         );
     }
 
     public void setStats(CGKeyspaceStats ksstats) {
-        this.stats=ksstats;
+        this.stats =ksstats;
     }
 
     public boolean isDurableWrites() {
@@ -113,7 +115,7 @@ public class CqlKeyspaceDef implements NBNamedElement, Labeled {
 
     public void getReferenceErrors(List<String> errors) {
         if (!defined) {
-            errors.add("keyspace " + this.getName() + " was referenced but not defined.");
+            errors.add("keyspace " + this.keyspaceName + " was referenced but not defined.");
         }
         for (CqlType typedef : typeDefs) {
             typedef.getReferenceErrors(errors);
@@ -124,10 +126,10 @@ public class CqlKeyspaceDef implements NBNamedElement, Labeled {
     }
 
     public void setDefined() {
-        if (this.keyspaceName==null) {
+        if (null == keyspaceName) {
             throw new RuntimeException("nuh uh");
         }
-        this.defined=true;
+        this.defined =true;
     }
 
     public void validate() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import com.codahale.metrics.Timer.Context;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
@@ -32,59 +32,41 @@ import java.util.Map;
  */
 public class ThreadLocalNamedTimers {
 
-    private final static Logger logger = LogManager.getLogger(ThreadLocalNamedTimers.class);
+    private static final Logger logger = LogManager.getLogger(ThreadLocalNamedTimers.class);
 
-    public transient final static ThreadLocal<ThreadLocalNamedTimers> TL_INSTANCE = ThreadLocal.withInitial(ThreadLocalNamedTimers::new);
-    private final static Map<String, Timer> timers = new HashMap<>();
-    private final Map<String, Timer.Context> contexts = new HashMap<>();
+    public final static ThreadLocal<ThreadLocalNamedTimers> TL_INSTANCE = ThreadLocal.withInitial(ThreadLocalNamedTimers::new);
+    private static final Map<String, Timer> timers = new HashMap<>();
+    private final Map<String, Context> contexts = new HashMap<>();
 
-    public static void addTimer(ActivityDef def, String name, int hdrdigits) {
-        if (timers.containsKey("name")) {
-            logger.warn("A timer named '" + name + "' was already defined and initialized.");
-        }
-        Timer timer = ActivityMetrics.timer(def, name, hdrdigits);
-        timers.put(name, timer);
+    public static void addTimer(final ParsedOp pop, final String name) {
+        if (ThreadLocalNamedTimers.timers.containsKey("name"))
+            ThreadLocalNamedTimers.logger.warn("A timer named '{}' was already defined and initialized.", name);
+        ThreadLocalNamedTimers.timers.put(name, ActivityMetrics.timer(pop,name,ActivityMetrics.DEFAULT_HDRDIGITS));
     }
 
-    public static void addTimer(ParsedOp pop, String name) {
-        if (timers.containsKey("name")) {
-            logger.warn("A timer named '" + name + "' was already defined and initialized.");
-        }
-        Timer timer = ActivityMetrics.timer(pop.getStaticConfig("alias",String.class)+"."+name);
-        timers.put(name, timer);
+    public void start(final String name) {
+        final Context context = ThreadLocalNamedTimers.timers.get(name).time();
+        this.contexts.put(name, context);
     }
 
-    public void start(String name) {
-        Timer.Context context = timers.get(name).time();
-        contexts.put(name, context);
-    }
-
-    public void stop(String name) {
-        Timer.Context context = contexts.get(name);
+    public void stop(final String name) {
+        final Context context = this.contexts.get(name);
         context.stop();
     }
 
-    public void start(List<String> timerNames) {
-        for (String timerName : timerNames) {
-            start(timerName);
-        }
+    public void start(final List<String> timerNames) {
+        for (final String timerName : timerNames) this.start(timerName);
     }
 
-    public void start(String[] timerNames) {
-        for (String timerName : timerNames) {
-            start(timerName);
-        }
+    public void start(final String[] timerNames) {
+        for (final String timerName : timerNames) this.start(timerName);
     }
 
-    public void stop(List<String> timerName) {
-        for (String stopTimer : timerName) {
-            stop(stopTimer);
-        }
+    public void stop(final List<String> timerName) {
+        for (final String stopTimer : timerName) this.stop(stopTimer);
     }
 
-    public void stop(String[] timerStops) {
-        for (String timerStop : timerStops) {
-            stop(timerStop);
-        }
+    public void stop(final String[] timerStops) {
+        for (final String timerStop : timerStops) this.stop(timerStop);
     }
 }

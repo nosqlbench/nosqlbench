@@ -1,22 +1,20 @@
-package io.nosqlbench.engine.api.metrics;
-
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
+package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Counter;
 
@@ -46,20 +44,20 @@ public class ReceivedMessageSequenceTracker implements AutoCloseable {
     private final int maxTrackSkippedSequenceNumbers;
     private long expectedNumber = -1;
 
-    public ReceivedMessageSequenceTracker(Counter msgErrOutOfSeqCounter, Counter msgErrDuplicateCounter, Counter msgErrLossCounter) {
+    public ReceivedMessageSequenceTracker(final Counter msgErrOutOfSeqCounter, final Counter msgErrDuplicateCounter, final Counter msgErrLossCounter) {
         this(msgErrOutOfSeqCounter, msgErrDuplicateCounter, msgErrLossCounter,
-            DEFAULT_MAX_TRACK_OUT_OF_ORDER_SEQUENCE_NUMBERS, DEFAULT_MAX_TRACK_SKIPPED_SEQUENCE_NUMBERS);
+            ReceivedMessageSequenceTracker.DEFAULT_MAX_TRACK_OUT_OF_ORDER_SEQUENCE_NUMBERS, ReceivedMessageSequenceTracker.DEFAULT_MAX_TRACK_SKIPPED_SEQUENCE_NUMBERS);
     }
 
-    public ReceivedMessageSequenceTracker(Counter msgErrOutOfSeqCounter, Counter msgErrDuplicateCounter, Counter msgErrLossCounter,
-                                          int maxTrackOutOfOrderSequenceNumbers, int maxTrackSkippedSequenceNumbers) {
+    public ReceivedMessageSequenceTracker(final Counter msgErrOutOfSeqCounter, final Counter msgErrDuplicateCounter, final Counter msgErrLossCounter,
+                                          final int maxTrackOutOfOrderSequenceNumbers, final int maxTrackSkippedSequenceNumbers) {
         this.msgErrOutOfSeqCounter = msgErrOutOfSeqCounter;
         this.msgErrDuplicateCounter = msgErrDuplicateCounter;
         this.msgErrLossCounter = msgErrLossCounter;
         this.maxTrackOutOfOrderSequenceNumbers = maxTrackOutOfOrderSequenceNumbers;
         this.maxTrackSkippedSequenceNumbers = maxTrackSkippedSequenceNumbers;
-        this.pendingOutOfSeqNumbers = new TreeSet<>();
-        this.skippedSeqNumbers = new TreeSet<>();
+        pendingOutOfSeqNumbers = new TreeSet<>();
+        skippedSeqNumbers = new TreeSet<>();
     }
 
     /**
@@ -67,84 +65,71 @@ public class ReceivedMessageSequenceTracker implements AutoCloseable {
      *
      * @param sequenceNumber the sequence number of the received message
      */
-    public void sequenceNumberReceived(long sequenceNumber) {
-        if (expectedNumber == -1) {
-            expectedNumber = sequenceNumber + 1;
+    public void sequenceNumberReceived(final long sequenceNumber) {
+        if (-1 == expectedNumber) {
+            this.expectedNumber = sequenceNumber + 1;
             return;
         }
 
-        if (sequenceNumber < expectedNumber) {
-            if (skippedSeqNumbers.remove(sequenceNumber)) {
+        if (sequenceNumber < this.expectedNumber) {
+            if (this.skippedSeqNumbers.remove(sequenceNumber)) {
                 // late out-of-order delivery was detected
                 // decrease the loss counter
-                msgErrLossCounter.dec();
+                this.msgErrLossCounter.dec();
                 // increment the out-of-order counter
-                msgErrOutOfSeqCounter.inc();
-            } else {
-                msgErrDuplicateCounter.inc();
-            }
+                this.msgErrOutOfSeqCounter.inc();
+            } else this.msgErrDuplicateCounter.inc();
             return;
         }
 
         boolean messagesSkipped = false;
-        if (sequenceNumber > expectedNumber) {
-            if (pendingOutOfSeqNumbers.size() == maxTrackOutOfOrderSequenceNumbers) {
-                messagesSkipped = processLowestPendingOutOfSequenceNumber();
-            }
-            if (!pendingOutOfSeqNumbers.add(sequenceNumber)) {
-                msgErrDuplicateCounter.inc();
-            }
-        } else {
-            // sequenceNumber == expectedNumber
-            expectedNumber++;
-        }
-        processPendingOutOfSequenceNumbers(messagesSkipped);
-        cleanUpTooFarBehindOutOfSequenceNumbers();
+        // sequenceNumber == expectedNumber
+        if (sequenceNumber > this.expectedNumber) {
+            if (this.pendingOutOfSeqNumbers.size() == this.maxTrackOutOfOrderSequenceNumbers)
+                messagesSkipped = this.processLowestPendingOutOfSequenceNumber();
+            if (!this.pendingOutOfSeqNumbers.add(sequenceNumber)) this.msgErrDuplicateCounter.inc();
+        } else this.expectedNumber++;
+        this.processPendingOutOfSequenceNumbers(messagesSkipped);
+        this.cleanUpTooFarBehindOutOfSequenceNumbers();
     }
 
     private boolean processLowestPendingOutOfSequenceNumber() {
         // remove the lowest pending out of sequence number
-        Long lowestOutOfSeqNumber = pendingOutOfSeqNumbers.first();
-        pendingOutOfSeqNumbers.remove(lowestOutOfSeqNumber);
-        if (lowestOutOfSeqNumber > expectedNumber) {
+        final Long lowestOutOfSeqNumber = this.pendingOutOfSeqNumbers.first();
+        this.pendingOutOfSeqNumbers.remove(lowestOutOfSeqNumber);
+        if (lowestOutOfSeqNumber > this.expectedNumber) {
             // skip the expected number ahead to the number after the lowest sequence number
             // increment the counter with the amount of sequence numbers that got skipped
             // keep track of the skipped sequence numbers to detect late out-of-order message delivery
-            for (long l = expectedNumber; l < lowestOutOfSeqNumber; l++) {
-                msgErrLossCounter.inc();
-                skippedSeqNumbers.add(l);
-                if (skippedSeqNumbers.size() > maxTrackSkippedSequenceNumbers) {
-                    skippedSeqNumbers.remove(skippedSeqNumbers.first());
-                }
+            for (long l = this.expectedNumber; l < lowestOutOfSeqNumber; l++) {
+                this.msgErrLossCounter.inc();
+                this.skippedSeqNumbers.add(l);
+                if (this.skippedSeqNumbers.size() > this.maxTrackSkippedSequenceNumbers)
+                    this.skippedSeqNumbers.remove(this.skippedSeqNumbers.first());
             }
-            expectedNumber = lowestOutOfSeqNumber + 1;
+            this.expectedNumber = lowestOutOfSeqNumber + 1;
             return true;
-        } else {
-            msgErrLossCounter.inc();
         }
+        this.msgErrLossCounter.inc();
         return false;
     }
 
-    private void processPendingOutOfSequenceNumbers(boolean messagesSkipped) {
+    private void processPendingOutOfSequenceNumbers(final boolean messagesSkipped) {
         // check if there are previously received out-of-order sequence number that have been received
-        while (pendingOutOfSeqNumbers.remove(expectedNumber)) {
-            expectedNumber++;
-            if (!messagesSkipped) {
-                msgErrOutOfSeqCounter.inc();
-            }
+        while (this.pendingOutOfSeqNumbers.remove(this.expectedNumber)) {
+            this.expectedNumber++;
+            if (!messagesSkipped) this.msgErrOutOfSeqCounter.inc();
         }
     }
 
     private void cleanUpTooFarBehindOutOfSequenceNumbers() {
         // remove sequence numbers that are too far behind
-        for (Iterator<Long> iterator = pendingOutOfSeqNumbers.iterator(); iterator.hasNext(); ) {
-            Long number = iterator.next();
-            if (number < expectedNumber - maxTrackOutOfOrderSequenceNumbers) {
-                msgErrLossCounter.inc();
+        for (final Iterator<Long> iterator = this.pendingOutOfSeqNumbers.iterator(); iterator.hasNext(); ) {
+            final Long number = iterator.next();
+            if (number < (this.expectedNumber - this.maxTrackOutOfOrderSequenceNumbers)) {
+                this.msgErrLossCounter.inc();
                 iterator.remove();
-            } else {
-                break;
-            }
+            } else break;
         }
     }
 
@@ -154,16 +139,15 @@ public class ReceivedMessageSequenceTracker implements AutoCloseable {
      */
     @Override
     public void close() {
-        while (!pendingOutOfSeqNumbers.isEmpty()) {
-            processPendingOutOfSequenceNumbers(processLowestPendingOutOfSequenceNumber());
-        }
+        while (!this.pendingOutOfSeqNumbers.isEmpty())
+            this.processPendingOutOfSequenceNumbers(this.processLowestPendingOutOfSequenceNumber());
     }
 
     public int getMaxTrackOutOfOrderSequenceNumbers() {
-        return maxTrackOutOfOrderSequenceNumbers;
+        return this.maxTrackOutOfOrderSequenceNumbers;
     }
 
     public int getMaxTrackSkippedSequenceNumbers() {
-        return maxTrackSkippedSequenceNumbers;
+        return this.maxTrackSkippedSequenceNumbers;
     }
 }

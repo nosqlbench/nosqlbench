@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.logging;
+package io.nosqlbench.api.engine.metrics.reporters;
 
 import com.codahale.metrics.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
  * This is a Log4J targeted metrics logging reporter, derived from
- * {@link com.codahale.metrics.Slf4jReporter}. This implementation
+ * {@link Slf4jReporter}. This implementation
  * was built to allow for consolidating internal logging dependencies
  * to log4j only.
  */
 public class Log4JMetricsReporter extends ScheduledReporter {
     /**
-     * Returns a new {@link Builder} for {@link Log4JMetricsReporter}.
+     * Returns a new {@link Builder} for .
      *
      * @param registry the registry to report
-     * @return a {@link Builder} instance for a {@link Log4JMetricsReporter}
+     * @return a {@link Builder} instance for a
      */
-    public static Builder forRegistry(MetricRegistry registry) {
+    public static Builder forRegistry(final MetricRegistry registry) {
         return new Builder(registry);
     }
 
@@ -62,17 +62,17 @@ public class Log4JMetricsReporter extends ScheduledReporter {
         private ScheduledExecutorService executor;
         private boolean shutdownExecutorOnStop;
 
-        private Builder(MetricRegistry registry) {
+        private Builder(final MetricRegistry registry) {
             this.registry = registry;
-            this.logger = LogManager.getLogger("metrics");
-            this.marker = null;
-            this.prefix = "";
-            this.rateUnit = TimeUnit.SECONDS;
-            this.durationUnit = TimeUnit.MILLISECONDS;
-            this.filter = MetricFilter.ALL;
-            this.loggingLevel = LoggingLevel.INFO;
-            this.executor = null;
-            this.shutdownExecutorOnStop = true;
+            logger = LogManager.getLogger("metrics");
+            marker = null;
+            prefix = "";
+            rateUnit = TimeUnit.SECONDS;
+            durationUnit = TimeUnit.MILLISECONDS;
+            filter = MetricFilter.ALL;
+            loggingLevel = LoggingLevel.INFO;
+            executor = null;
+            shutdownExecutorOnStop = true;
         }
 
         /**
@@ -83,7 +83,7 @@ public class Log4JMetricsReporter extends ScheduledReporter {
          * @param shutdownExecutorOnStop if true, then executor will be stopped in same time with this reporter
          * @return {@code this}
          */
-        public Builder shutdownExecutorOnStop(boolean shutdownExecutorOnStop) {
+        public Builder shutdownExecutorOnStop(final boolean shutdownExecutorOnStop) {
             this.shutdownExecutorOnStop = shutdownExecutorOnStop;
             return this;
         }
@@ -96,7 +96,7 @@ public class Log4JMetricsReporter extends ScheduledReporter {
          * @param executor the executor to use while scheduling reporting of metrics.
          * @return {@code this}
          */
-        public Builder scheduleOn(ScheduledExecutorService executor) {
+        public Builder scheduleOn(final ScheduledExecutorService executor) {
             this.executor = executor;
             return this;
         }
@@ -107,7 +107,7 @@ public class Log4JMetricsReporter extends ScheduledReporter {
          * @param logger an SLF4J {@link Logger}
          * @return {@code this}
          */
-        public Builder outputTo(Logger logger) {
+        public Builder outputTo(final Logger logger) {
             this.logger = logger;
             return this;
         }
@@ -118,7 +118,7 @@ public class Log4JMetricsReporter extends ScheduledReporter {
          * @param marker an SLF4J {@link Marker}
          * @return {@code this}
          */
-        public Builder markWith(Marker marker) {
+        public Builder markWith(final Marker marker) {
             this.marker = marker;
             return this;
         }
@@ -129,7 +129,7 @@ public class Log4JMetricsReporter extends ScheduledReporter {
          * @param prefix the prefix for all metric names
          * @return {@code this}
          */
-        public Builder prefixedWith(String prefix) {
+        public Builder prefixedWith(final String prefix) {
             this.prefix = prefix;
             return this;
         }
@@ -140,7 +140,7 @@ public class Log4JMetricsReporter extends ScheduledReporter {
          * @param rateUnit a unit of time
          * @return {@code this}
          */
-        public Builder convertRatesTo(TimeUnit rateUnit) {
+        public Builder convertRatesTo(final TimeUnit rateUnit) {
             this.rateUnit = rateUnit;
             return this;
         }
@@ -151,7 +151,7 @@ public class Log4JMetricsReporter extends ScheduledReporter {
          * @param durationUnit a unit of time
          * @return {@code this}
          */
-        public Builder convertDurationsTo(TimeUnit durationUnit) {
+        public Builder convertDurationsTo(final TimeUnit durationUnit) {
             this.durationUnit = durationUnit;
             return this;
         }
@@ -162,7 +162,7 @@ public class Log4JMetricsReporter extends ScheduledReporter {
          * @param filter a {@link MetricFilter}
          * @return {@code this}
          */
-        public Builder filter(MetricFilter filter) {
+        public Builder filter(final MetricFilter filter) {
             this.filter = filter;
             return this;
         }
@@ -173,7 +173,7 @@ public class Log4JMetricsReporter extends ScheduledReporter {
          * @param loggingLevel a (@link Slf4jReporter.LoggingLevel}
          * @return {@code this}
          */
-        public Builder withLoggingLevel(LoggingLevel loggingLevel) {
+        public Builder withLoggingLevel(final LoggingLevel loggingLevel) {
             this.loggingLevel = loggingLevel;
             return this;
         }
@@ -184,26 +184,26 @@ public class Log4JMetricsReporter extends ScheduledReporter {
          * @return a {@link Log4JMetricsReporter}
          */
         public Log4JMetricsReporter build() {
-            LoggerProxy loggerProxy;
-            switch (loggingLevel) {
+            final LoggerProxy loggerProxy;
+            switch (this.loggingLevel) {
                 case TRACE:
-                    loggerProxy = new TraceLoggerProxy(logger);
+                    loggerProxy = new TraceLoggerProxy(this.logger);
                     break;
                 case INFO:
-                    loggerProxy = new InfoLoggerProxy(logger);
+                    loggerProxy = new InfoLoggerProxy(this.logger);
                     break;
                 case WARN:
-                    loggerProxy = new WarnLoggerProxy(logger);
+                    loggerProxy = new WarnLoggerProxy(this.logger);
                     break;
                 case ERROR:
-                    loggerProxy = new ErrorLoggerProxy(logger);
+                    loggerProxy = new ErrorLoggerProxy(this.logger);
                     break;
                 default:
                 case DEBUG:
-                    loggerProxy = new DebugLoggerProxy(logger);
+                    loggerProxy = new DebugLoggerProxy(this.logger);
                     break;
             }
-            return new Log4JMetricsReporter(registry, loggerProxy, marker, prefix, rateUnit, durationUnit, filter, executor, shutdownExecutorOnStop);
+            return new Log4JMetricsReporter(this.registry, loggerProxy, this.marker, this.prefix, this.rateUnit, this.durationUnit, this.filter, this.executor, this.shutdownExecutorOnStop);
         }
     }
 
@@ -211,15 +211,15 @@ public class Log4JMetricsReporter extends ScheduledReporter {
     private final Marker marker;
     private final String prefix;
 
-    private Log4JMetricsReporter(MetricRegistry registry,
-                                 LoggerProxy loggerProxy,
-                                 Marker marker,
-                                 String prefix,
-                                 TimeUnit rateUnit,
-                                 TimeUnit durationUnit,
-                                 MetricFilter filter,
-                                 ScheduledExecutorService executor,
-                                 boolean shutdownExecutorOnStop) {
+    private Log4JMetricsReporter(final MetricRegistry registry,
+                                 final LoggerProxy loggerProxy,
+                                 final Marker marker,
+                                 final String prefix,
+                                 final TimeUnit rateUnit,
+                                 final TimeUnit durationUnit,
+                                 final MetricFilter filter,
+                                 final ScheduledExecutorService executor,
+                                 final boolean shutdownExecutorOnStop) {
         super(registry, "logger-reporter", filter, rateUnit, durationUnit, executor, shutdownExecutorOnStop);
         this.loggerProxy = loggerProxy;
         this.marker = marker;
@@ -228,81 +228,76 @@ public class Log4JMetricsReporter extends ScheduledReporter {
 
     @Override
     @SuppressWarnings("rawtypes")
-    public void report(SortedMap<String, Gauge> gauges,
-                       SortedMap<String, Counter> counters,
-                       SortedMap<String, Histogram> histograms,
-                       SortedMap<String, Meter> meters,
-                       SortedMap<String, Timer> timers) {
-        if (loggerProxy.isEnabled(marker)) {
-            for (Entry<String, Gauge> entry : gauges.entrySet()) {
-                logGauge(entry.getKey(), entry.getValue());
-            }
+    public void report(final SortedMap<String, Gauge> gauges,
+                       final SortedMap<String, Counter> counters,
+                       final SortedMap<String, Histogram> histograms,
+                       final SortedMap<String, Meter> meters,
+                       final SortedMap<String, Timer> timers) {
+        if (this.loggerProxy.isEnabled(this.marker)) {
+            for (final Map.Entry<String, Gauge> entry : gauges.entrySet())
+                this.logGauge(entry.getKey(), entry.getValue());
 
-            for (Entry<String, Counter> entry : counters.entrySet()) {
-                logCounter(entry.getKey(), entry.getValue());
-            }
+            for (final Map.Entry<String, Counter> entry : counters.entrySet())
+                this.logCounter(entry.getKey(), entry.getValue());
 
-            for (Entry<String, Histogram> entry : histograms.entrySet()) {
-                logHistogram(entry.getKey(), entry.getValue());
-            }
+            for (final Map.Entry<String, Histogram> entry : histograms.entrySet())
+                this.logHistogram(entry.getKey(), entry.getValue());
 
-            for (Entry<String, Meter> entry : meters.entrySet()) {
-                logMeter(entry.getKey(), entry.getValue());
-            }
+            for (final Map.Entry<String, Meter> entry : meters.entrySet())
+                this.logMeter(entry.getKey(), entry.getValue());
 
-            for (Entry<String, Timer> entry : timers.entrySet()) {
-                logTimer(entry.getKey(), entry.getValue());
-            }
+            for (final Map.Entry<String, Timer> entry : timers.entrySet())
+                this.logTimer(entry.getKey(), entry.getValue());
         }
     }
 
-    private void logTimer(String name, Timer timer) {
-        final Snapshot snapshot = timer.getSnapshot();
-        loggerProxy.log(marker,
+    private void logTimer(final String name, final Timer timer) {
+        Snapshot snapshot = timer.getSnapshot();
+        this.loggerProxy.log(this.marker,
                 "type={}, name={}, count={}, min={}, max={}, mean={}, stddev={}, median={}, " +
                         "p75={}, p95={}, p98={}, p99={}, p999={}, mean_rate={}, m1={}, m5={}, " +
                         "m15={}, rate_unit={}, duration_unit={}",
                 "TIMER",
-                prefix(name),
+            this.prefix(name),
                 timer.getCount(),
-                convertDuration(snapshot.getMin()),
-                convertDuration(snapshot.getMax()),
-                convertDuration(snapshot.getMean()),
-                convertDuration(snapshot.getStdDev()),
-                convertDuration(snapshot.getMedian()),
-                convertDuration(snapshot.get75thPercentile()),
-                convertDuration(snapshot.get95thPercentile()),
-                convertDuration(snapshot.get98thPercentile()),
-                convertDuration(snapshot.get99thPercentile()),
-                convertDuration(snapshot.get999thPercentile()),
-                convertRate(timer.getMeanRate()),
-                convertRate(timer.getOneMinuteRate()),
-                convertRate(timer.getFiveMinuteRate()),
-                convertRate(timer.getFifteenMinuteRate()),
-                getRateUnit(),
-                getDurationUnit());
+            this.convertDuration(snapshot.getMin()),
+            this.convertDuration(snapshot.getMax()),
+            this.convertDuration(snapshot.getMean()),
+            this.convertDuration(snapshot.getStdDev()),
+            this.convertDuration(snapshot.getMedian()),
+            this.convertDuration(snapshot.get75thPercentile()),
+            this.convertDuration(snapshot.get95thPercentile()),
+            this.convertDuration(snapshot.get98thPercentile()),
+            this.convertDuration(snapshot.get99thPercentile()),
+            this.convertDuration(snapshot.get999thPercentile()),
+            this.convertRate(timer.getMeanRate()),
+            this.convertRate(timer.getOneMinuteRate()),
+            this.convertRate(timer.getFiveMinuteRate()),
+            this.convertRate(timer.getFifteenMinuteRate()),
+            this.getRateUnit(),
+            this.getDurationUnit());
     }
 
-    private void logMeter(String name, Meter meter) {
-        loggerProxy.log(marker,
+    private void logMeter(final String name, final Meter meter) {
+        this.loggerProxy.log(this.marker,
                 "type={}, name={}, count={}, mean_rate={}, m1={}, m5={}, m15={}, rate_unit={}",
                 "METER",
-                prefix(name),
+            this.prefix(name),
                 meter.getCount(),
-                convertRate(meter.getMeanRate()),
-                convertRate(meter.getOneMinuteRate()),
-                convertRate(meter.getFiveMinuteRate()),
-                convertRate(meter.getFifteenMinuteRate()),
-                getRateUnit());
+            this.convertRate(meter.getMeanRate()),
+            this.convertRate(meter.getOneMinuteRate()),
+            this.convertRate(meter.getFiveMinuteRate()),
+            this.convertRate(meter.getFifteenMinuteRate()),
+            this.getRateUnit());
     }
 
-    private void logHistogram(String name, Histogram histogram) {
-        final Snapshot snapshot = histogram.getSnapshot();
-        loggerProxy.log(marker,
+    private void logHistogram(final String name, final Histogram histogram) {
+        Snapshot snapshot = histogram.getSnapshot();
+        this.loggerProxy.log(this.marker,
                 "type={}, name={}, count={}, min={}, max={}, mean={}, stddev={}, " +
                         "median={}, p75={}, p95={}, p98={}, p99={}, p999={}",
                 "HISTOGRAM",
-                prefix(name),
+            this.prefix(name),
                 histogram.getCount(),
                 snapshot.getMin(),
                 snapshot.getMax(),
@@ -316,12 +311,12 @@ public class Log4JMetricsReporter extends ScheduledReporter {
                 snapshot.get999thPercentile());
     }
 
-    private void logCounter(String name, Counter counter) {
-        loggerProxy.log(marker, "type={}, name={}, count={}", "COUNTER", prefix(name), counter.getCount());
+    private void logCounter(final String name, final Counter counter) {
+        this.loggerProxy.log(this.marker, "type={}, name={}, count={}", "COUNTER", this.prefix(name), counter.getCount());
     }
 
-    private void logGauge(String name, Gauge<?> gauge) {
-        loggerProxy.log(marker, "type={}, name={}, value={}", "GAUGE", prefix(name), gauge.getValue());
+    private void logGauge(final String name, final Gauge<?> gauge) {
+        this.loggerProxy.log(this.marker, "type={}, name={}, value={}", "GAUGE", this.prefix(name), gauge.getValue());
     }
 
     @Override
@@ -329,15 +324,15 @@ public class Log4JMetricsReporter extends ScheduledReporter {
         return "events/" + super.getRateUnit();
     }
 
-    private String prefix(String... components) {
-        return MetricRegistry.name(prefix, components);
+    private String prefix(final String... components) {
+        return MetricRegistry.name(this.prefix, components);
     }
 
     /* private class to allow logger configuration */
-    static abstract class LoggerProxy {
+    abstract static class LoggerProxy {
         protected final Logger logger;
 
-        public LoggerProxy(Logger logger) {
+        protected LoggerProxy(final Logger logger) {
             this.logger = logger;
         }
 
@@ -348,86 +343,86 @@ public class Log4JMetricsReporter extends ScheduledReporter {
 
     /* private class to allow logger configuration */
     private static class DebugLoggerProxy extends LoggerProxy {
-        public DebugLoggerProxy(Logger logger) {
+        public DebugLoggerProxy(final Logger logger) {
             super(logger);
         }
 
         @Override
-        public void log(Marker marker, String format, Object... arguments) {
-            logger.debug(marker, format, arguments);
+        public void log(final Marker marker, final String format, final Object... arguments) {
+            this.logger.debug(marker, format, arguments);
         }
 
         @Override
-        public boolean isEnabled(Marker marker) {
-            return logger.isDebugEnabled(marker);
+        public boolean isEnabled(final Marker marker) {
+            return this.logger.isDebugEnabled(marker);
         }
     }
 
     /* private class to allow logger configuration */
     private static class TraceLoggerProxy extends LoggerProxy {
-        public TraceLoggerProxy(Logger logger) {
+        public TraceLoggerProxy(final Logger logger) {
             super(logger);
         }
 
         @Override
-        public void log(Marker marker, String format, Object... arguments) {
-            logger.trace(marker, format, arguments);
+        public void log(final Marker marker, final String format, final Object... arguments) {
+            this.logger.trace(marker, format, arguments);
         }
 
         @Override
-        public boolean isEnabled(Marker marker) {
-            return logger.isTraceEnabled(marker);
+        public boolean isEnabled(final Marker marker) {
+            return this.logger.isTraceEnabled(marker);
         }
     }
 
     /* private class to allow logger configuration */
     private static class InfoLoggerProxy extends LoggerProxy {
-        public InfoLoggerProxy(Logger logger) {
+        public InfoLoggerProxy(final Logger logger) {
             super(logger);
         }
 
         @Override
-        public void log(Marker marker, String format, Object... arguments) {
-            logger.info(marker, format, arguments);
+        public void log(final Marker marker, final String format, final Object... arguments) {
+            this.logger.info(marker, format, arguments);
         }
 
         @Override
-        public boolean isEnabled(Marker marker) {
-            return logger.isInfoEnabled(marker);
+        public boolean isEnabled(final Marker marker) {
+            return this.logger.isInfoEnabled(marker);
         }
     }
 
     /* private class to allow logger configuration */
     private static class WarnLoggerProxy extends LoggerProxy {
-        public WarnLoggerProxy(Logger logger) {
+        public WarnLoggerProxy(final Logger logger) {
             super(logger);
         }
 
         @Override
-        public void log(Marker marker, String format, Object... arguments) {
-            logger.warn(marker, format, arguments);
+        public void log(final Marker marker, final String format, final Object... arguments) {
+            this.logger.warn(marker, format, arguments);
         }
 
         @Override
-        public boolean isEnabled(Marker marker) {
-            return logger.isWarnEnabled(marker);
+        public boolean isEnabled(final Marker marker) {
+            return this.logger.isWarnEnabled(marker);
         }
     }
 
     /* private class to allow logger configuration */
     private static class ErrorLoggerProxy extends LoggerProxy {
-        public ErrorLoggerProxy(Logger logger) {
+        public ErrorLoggerProxy(final Logger logger) {
             super(logger);
         }
 
         @Override
-        public void log(Marker marker, String format, Object... arguments) {
-            logger.error(marker, format, arguments);
+        public void log(final Marker marker, final String format, final Object... arguments) {
+            this.logger.error(marker, format, arguments);
         }
 
         @Override
-        public boolean isEnabled(Marker marker) {
-            return logger.isErrorEnabled(marker);
+        public boolean isEnabled(final Marker marker) {
+            return this.logger.isErrorEnabled(marker);
         }
     }
 

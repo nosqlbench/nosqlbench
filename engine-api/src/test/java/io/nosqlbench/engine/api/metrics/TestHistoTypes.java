@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.ExponentiallyDecayingReservoir;
 import com.codahale.metrics.Snapshot;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -27,33 +28,29 @@ public class TestHistoTypes {
     @Test
     @Disabled
     public void compareHistos() {
-        Clock c = new Clock();
+        final Clock c = new Clock();
 
         // Use the defaults that you get with "Timer()"
-        ExponentiallyDecayingReservoir expRes = new ExponentiallyDecayingReservoir(1028,0.015,c);
-        DeltaHdrHistogramReservoir hdrRes = new DeltaHdrHistogramReservoir("dr",4);
-        long max=100000000;
+        final ExponentiallyDecayingReservoir expRes = new ExponentiallyDecayingReservoir(1028,0.015,c);
+        final DeltaHdrHistogramReservoir hdrRes = new DeltaHdrHistogramReservoir(NBLabels.forKV("name", "dr"),4);
+        final long max=100000000;
 
         for (long i = 0; i < max; i++) {
             expRes.update(i);
             hdrRes.update(i);
-            if ((i%1000000)==0) {
-                System.out.println(i);
-            }
+            if (0 == (i % 1000000)) System.out.println(i);
         }
 
-        summary(0L,max, expRes.getSnapshot(), hdrRes.getSnapshot());
+        this.summary(0L,max, expRes.getSnapshot(), hdrRes.getSnapshot());
     }
 
-    private void summary(long min, long max,Snapshot... snapshots) {
-        for (int i = 0; i <=100; i++) {
-            double pct = (double)i/100.0D;
-            double expectedValue=pct*max;
+    private void summary(final long min, final long max, final Snapshot... snapshots) {
+        for (int i = 0; 100 >= i; i++) {
+            final double pct = i /100.0D;
+            final double expectedValue=pct*max;
             System.out.format("% 3d %%p is % 11d : ",(long)(pct*100),(long)expectedValue);
-            for (Snapshot snapshot : snapshots) {
-                System.out.format("% 10d ",(long)snapshot.getValue(pct));
-            }
-            System.out.print("\n");
+            for (final Snapshot snapshot : snapshots) System.out.format("% 10d ", (long) snapshot.getValue(pct));
+            System.out.print('\n');
         }
     }
 
@@ -63,12 +60,12 @@ public class TestHistoTypes {
 
         @Override
         public long getTime() {
-            return nanos/1000000;
+            return this.nanos /1000000;
         }
 
         @Override
         public long getTick() {
-            return nanos;
+            return this.nanos;
         }
     }
 }

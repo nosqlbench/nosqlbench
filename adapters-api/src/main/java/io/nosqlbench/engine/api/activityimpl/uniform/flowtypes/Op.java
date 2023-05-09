@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform.flowtypes;
  *  hand down the chain is more costly, so implementing this interface allows the runtime
  *  to be more optimized.</li>
  *  <li>{@link ChainingOp}</li>
+ *  <li>{@link RunnableOp}</li>
  * </ul>
  * </p>
  */

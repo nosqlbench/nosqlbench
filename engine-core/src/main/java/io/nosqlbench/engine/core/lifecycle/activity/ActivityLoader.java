@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.activity;
 
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
@@ -32,23 +33,23 @@ import java.util.concurrent.ConcurrentHashMap;
  * see each other by name.
  */
 public class ActivityLoader {
-    private final static Logger logger = LogManager.getLogger("ACTIVITIES");
+    private static final Logger logger = LogManager.getLogger("ACTIVITIES");
     private final Map<String, Activity> activityMap = new ConcurrentHashMap<>();
     private final Scenario scenario;
 
-    public ActivityLoader(Scenario scenario) {
+    public ActivityLoader(final Scenario scenario) {
         this.scenario = scenario;
     }
 
-    public synchronized Activity loadActivity(ActivityDef activityDef) {
+    public synchronized Activity loadActivity(ActivityDef activityDef, final NBLabeledElement labels) {
         activityDef= activityDef.deprecate("yaml","workload").deprecate("type","driver");
-        Activity activity = new StandardActivityType(activityDef).getAssembledActivity(activityDef, activityMap);
-        activityMap.put(activity.getAlias(),activity);
-        logger.debug("Resolved activity for alias '" + activityDef.getAlias() + "'");
+        final Activity activity = new StandardActivityType(activityDef, labels).getAssembledActivity(activityDef, this.activityMap, labels);
+        this.activityMap.put(activity.getAlias(),activity);
+        ActivityLoader.logger.debug("Resolved activity for alias '{}'", activityDef.getAlias());
         return activity;
     }
 
-    public void purgeActivity(String activityAlias) {
-        this.activityMap.remove(activityAlias);
+    public void purgeActivity(final String activityAlias) {
+        activityMap.remove(activityAlias);
     }
 }

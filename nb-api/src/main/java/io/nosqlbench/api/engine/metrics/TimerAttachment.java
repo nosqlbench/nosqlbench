@@ -18,6 +18,7 @@ package io.nosqlbench.api.engine.metrics;
 
 import com.codahale.metrics.Timer;
 
+
 public interface TimerAttachment {
     Timer attachTimer(Timer timer);
 }

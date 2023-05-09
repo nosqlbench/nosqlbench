@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.testutils.Perf;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec.Verb;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +33,7 @@ import java.util.function.Function;
  */
 public class TestRateLimiterPerf1E7 {
 
-    private final Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(ActivityDef.parseActivityDef("alias=tokenrl"),"hybrid", rs.withVerb(RateSpec.Verb.configure));
+    private final Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(NBLabeledElement.forKV("alias","tokenrl"),"hybrid", rs.withVerb(Verb.configure));
     private final RateLimiterPerfTestMethods methods = new RateLimiterPerfTestMethods();
 
     // 160 threads at 10_000_000 ops/s
@@ -41,7 +42,7 @@ public class TestRateLimiterPerf1E7 {
     @Test
     @Disabled
     public void test10Mops_160threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 20_000_000,160);
+        final Perf perf = this.methods.testRateLimiterMultiThreadedContention(this.rlFunction, new RateSpec(1.0E7, 1.1), 20_000_000,160);
         System.out.println(perf.getLastResult());
     }
 
@@ -51,7 +52,7 @@ public class TestRateLimiterPerf1E7 {
     @Test
     @Disabled
     public void test10Mops_80threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 20_000_000,80);
+        final Perf perf = this.methods.testRateLimiterMultiThreadedContention(this.rlFunction, new RateSpec(1.0E7, 1.1), 20_000_000,80);
         System.out.println(perf.getLastResult());
     }
 
@@ -61,7 +62,7 @@ public class TestRateLimiterPerf1E7 {
     @Test
     @Disabled
     public void test10Mops_40threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 20_000_000,40);
+        final Perf perf = this.methods.testRateLimiterMultiThreadedContention(this.rlFunction, new RateSpec(1.0E7, 1.1), 20_000_000,40);
         System.out.println(perf.getLastResult());
     }
 
@@ -71,7 +72,7 @@ public class TestRateLimiterPerf1E7 {
     @Test
     @Disabled
     public void test10Mops_20threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 10), 20_000_000,20);
+        final Perf perf = this.methods.testRateLimiterMultiThreadedContention(this.rlFunction, new RateSpec(1.0E7, 10), 20_000_000,20);
         System.out.println(perf.getLastResult());
 
     }
@@ -85,7 +86,7 @@ public class TestRateLimiterPerf1E7 {
     @Test
     @Disabled
     public void test10Mops_10threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 20_000_000,10);
+        final Perf perf = this.methods.testRateLimiterMultiThreadedContention(this.rlFunction, new RateSpec(1.0E7, 1.1), 20_000_000,10);
         System.out.println(perf.getLastResult());
     }
 
@@ -100,7 +101,7 @@ public class TestRateLimiterPerf1E7 {
     @Test
     @Disabled
     public void test10Mops_5threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 20_000_000,5);
+        final Perf perf = this.methods.testRateLimiterMultiThreadedContention(this.rlFunction, new RateSpec(1.0E7, 1.1), 20_000_000,5);
         System.out.println(perf.getLastResult());
     }
 

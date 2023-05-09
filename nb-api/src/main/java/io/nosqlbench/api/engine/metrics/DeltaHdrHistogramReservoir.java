@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package io.nosqlbench.api.engine.metrics;
 
 import com.codahale.metrics.Reservoir;
 import com.codahale.metrics.Snapshot;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogWriter;
 import org.HdrHistogram.Recorder;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A custom wrapping of snapshotting logic on the HdrHistogram. This histogram will always report the last histogram
@@ -32,27 +34,26 @@ import org.apache.logging.log4j.LogManager;
  *
  * <p>This implementation also supports attaching a single log writer. If a log writer is attached, each
  * time an interval is snapshotted internally, the data will also be written to an hdr log via the writer.</p>
- *
  */
-public final class DeltaHdrHistogramReservoir implements Reservoir {
-    private final static Logger logger = LogManager.getLogger(DeltaHdrHistogramReservoir.class);
+public final class DeltaHdrHistogramReservoir implements Reservoir, NBLabeledElement {
+    private static final Logger logger = LogManager.getLogger(DeltaHdrHistogramReservoir.class);
 
     private final Recorder recorder;
     private Histogram lastHistogram;
 
     private Histogram intervalHistogram;
     private long intervalHistogramEndTime = System.currentTimeMillis();
-    private final String metricName;
+    private final NBLabels labels;
     private HistogramLogWriter writer;
 
     /**
      * Create a reservoir with a default recorder. This recorder should be suitable for most usage.
      *
-     * @param name the name to give to the reservoir, for logging purposes
+     * @param labels              the labels to give to the reservoir, for logging purposes
      * @param significantDigits how many significant digits to track in the reservoir
      */
-    public DeltaHdrHistogramReservoir(String name, int significantDigits) {
-        this.metricName = name;
+    public DeltaHdrHistogramReservoir(NBLabels labels, int significantDigits) {
+        this.labels = labels;
         this.recorder = new Recorder(significantDigits);
 
         /*
@@ -106,14 +107,14 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
         long intervalHistogramStartTime = intervalHistogramEndTime;
         intervalHistogramEndTime = System.currentTimeMillis();
 
-        intervalHistogram.setTag(metricName);
+        intervalHistogram.setTag(this.labels.linearizeValues("name"));
         intervalHistogram.setStartTimeStamp(intervalHistogramStartTime);
         intervalHistogram.setEndTimeStamp(intervalHistogramEndTime);
 
         lastHistogram = intervalHistogram.copy();
-        lastHistogram.setTag(metricName);
+        lastHistogram.setTag(this.labels.linearizeValues("name"));
 
-        if (writer!=null) {
+        if (null != this.writer) {
             writer.outputIntervalHistogram(lastHistogram);
         }
         return lastHistogram;
@@ -121,6 +122,7 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
 
     /**
      * Write the last results via the log writer.
+     *
      * @param writer the log writer to use
      */
     public void write(HistogramLogWriter writer) {
@@ -128,7 +130,7 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
     }
 
     public DeltaHdrHistogramReservoir copySettings() {
-        return new DeltaHdrHistogramReservoir(this.metricName, intervalHistogram.getNumberOfSignificantValueDigits());
+        return new DeltaHdrHistogramReservoir(this.labels, intervalHistogram.getNumberOfSignificantValueDigits());
     }
 
     public void attachLogWriter(HistogramLogWriter logWriter) {
@@ -137,5 +139,10 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
 
     public Histogram getLastHistogram() {
         return lastHistogram;
+    }
+
+    @Override
+    public NBLabels getLabels() {
+        return this.labels;
     }
 }

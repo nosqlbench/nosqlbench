@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package io.nosqlbench.adapter.pulsar.dispensers;
 
 import com.codahale.metrics.Timer;
+import com.codahale.metrics.Timer.Context;
 import io.nosqlbench.adapter.pulsar.PulsarSpace;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.DOC_LEVEL_PARAMS;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.metrics.EndToEndMetricsAdapterUtil;
+import io.nosqlbench.engine.api.metrics.EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -39,7 +42,7 @@ import java.util.stream.Collectors;
 
 public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
 
-    private final static Logger logger = LogManager.getLogger("PulsarClientOpDispenser");
+    private static final Logger logger = LogManager.getLogger("PulsarClientOpDispenser");
 
     protected final PulsarClient pulsarClient;
     protected final Schema<?> pulsarSchema;
@@ -50,20 +53,20 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
     protected final LongFunction<Boolean> seqTrackingFunc;
     protected final LongFunction<String> payloadRttFieldFunc;
     protected final LongFunction<Supplier<Transaction>> transactSupplierFunc;
-    protected final LongFunction<Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> msgSeqErrSimuTypeSetFunc;
+    protected final LongFunction<Set<MSG_SEQ_ERROR_SIMU_TYPE>> msgSeqErrSimuTypeSetFunc;
 
-    public PulsarClientOpDispenser(DriverAdapter adapter,
-                                   ParsedOp op,
-                                   LongFunction<String> tgtNameFunc,
-                                   PulsarSpace pulsarSpace) {
+    protected PulsarClientOpDispenser(final DriverAdapter adapter,
+                                      final ParsedOp op,
+                                      final LongFunction<String> tgtNameFunc,
+                                      final PulsarSpace pulsarSpace) {
         super(adapter, op, tgtNameFunc, pulsarSpace);
 
-        this.pulsarClient = pulsarSpace.getPulsarClient();
-        this.pulsarSchema = pulsarSpace.getPulsarSchema();
+        pulsarClient = pulsarSpace.getPulsarClient();
+        pulsarSchema = pulsarSpace.getPulsarSchema();
 
         // Doc-level parameter: use_transaction
-        this.useTransactFunc = lookupStaticBoolConfigValueFunc(
-            PulsarAdapterUtil.DOC_LEVEL_PARAMS.USE_TRANSACTION.label, false);
+        useTransactFunc = this.lookupStaticBoolConfigValueFunc(
+            DOC_LEVEL_PARAMS.USE_TRANSACTION.label, false);
 
         // TODO: add support for "operation number per transaction"
         // Doc-level parameter: transact_batch_num
@@ -71,58 +74,53 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
         //    PulsarAdapterUtil.DOC_LEVEL_PARAMS.TRANSACT_BATCH_NUM.label, 1);
 
         // Doc-level parameter: seq_tracking
-        this.seqTrackingFunc = lookupStaticBoolConfigValueFunc(
-            PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label, false);
+        seqTrackingFunc = this.lookupStaticBoolConfigValueFunc(
+            DOC_LEVEL_PARAMS.SEQ_TRACKING.label, false);
 
         // Doc-level parameter: payload-tracking-field
-        this.payloadRttFieldFunc = (l) -> parsedOp.getStaticConfigOr(
-            PulsarAdapterUtil.DOC_LEVEL_PARAMS.RTT_TRACKING_FIELD.label, "");
+        payloadRttFieldFunc = l -> this.parsedOp.getStaticConfigOr(
+            DOC_LEVEL_PARAMS.RTT_TRACKING_FIELD.label, "");
 
-        this.transactSupplierFunc = (l) -> getTransactionSupplier();
+        transactSupplierFunc = l -> this.getTransactionSupplier();
 
-        this.msgSeqErrSimuTypeSetFunc = getStaticErrSimuTypeSetOpValueFunc();
+        msgSeqErrSimuTypeSetFunc = this.getStaticErrSimuTypeSetOpValueFunc();
     }
 
     protected Supplier<Transaction> getTransactionSupplier() {
         return () -> {
-            try (Timer.Context time = pulsarAdapterMetrics.getCommitTransactionTimer().time() ){
-                return pulsarClient
+            try (final Context time = this.pulsarAdapterMetrics.getCommitTransactionTimer().time() ){
+                return this.pulsarClient
                     .newTransaction()
                     .build()
                     .get();
-            } catch (ExecutionException | InterruptedException err) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Error while starting a new transaction", err);
-                }
+            } catch (final ExecutionException | InterruptedException err) {
+                if (PulsarClientOpDispenser.logger.isWarnEnabled())
+                    PulsarClientOpDispenser.logger.warn("Error while starting a new transaction", err);
                 throw new RuntimeException(err);
-            } catch (PulsarClientException err) {
+            } catch (final PulsarClientException err) {
                 throw new RuntimeException("Transactions are not enabled on Pulsar Client, " +
                     "please set client.enableTransaction=true in your Pulsar Client configuration");
             }
         };
     }
 
-    protected LongFunction<Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> getStaticErrSimuTypeSetOpValueFunc() {
-        LongFunction<Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE>> setStringLongFunction;
-        setStringLongFunction = (l) ->
-            parsedOp.getOptionalStaticValue(PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQERR_SIMU.label, String.class)
+    protected LongFunction<Set<MSG_SEQ_ERROR_SIMU_TYPE>> getStaticErrSimuTypeSetOpValueFunc() {
+        final LongFunction<Set<MSG_SEQ_ERROR_SIMU_TYPE>> setStringLongFunction;
+        setStringLongFunction = l ->
+            this.parsedOp.getOptionalStaticValue(DOC_LEVEL_PARAMS.SEQERR_SIMU.label, String.class)
             .filter(Predicate.not(String::isEmpty))
             .map(value -> {
-                Set<EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE> set = new HashSet<>();
+                Set<MSG_SEQ_ERROR_SIMU_TYPE> set = new HashSet<>();
 
-                if (StringUtils.contains(value,',')) {
-                    set = Arrays.stream(value.split(","))
-                        .map(EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE::parseSimuType)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
-                }
+                if (StringUtils.contains(value,',')) set = Arrays.stream(value.split(","))
+                    .map(MSG_SEQ_ERROR_SIMU_TYPE::parseSimuType)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
                 return set;
             }).orElse(Collections.emptySet());
-        logger.info(
-            PulsarAdapterUtil.DOC_LEVEL_PARAMS.SEQERR_SIMU.label + ": {}",
-            setStringLongFunction.apply(0));
+        PulsarClientOpDispenser.logger.info("{}: {}", DOC_LEVEL_PARAMS.SEQERR_SIMU.label, setStringLongFunction.apply(0));
         return setStringLongFunction;
     }
 }

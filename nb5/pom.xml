@@ -41,12 +41,6 @@
             <groupId>io.nosqlbench</groupId>
             <artifactId>nbr</artifactId>
             <version>${revision}</version>
-            <!--            <exclusions>-->
-            <!--                <exclusion>-->
-            <!--                    <artifactId>slf4j-api</artifactId>-->
-            <!--                    <groupId>org.slf4j</groupId>-->
-            <!--                </exclusion>-->
-            <!--            </exclusions>-->
 
         </dependency>
 
@@ -87,12 +81,6 @@
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-cqld4</artifactId>
             <version>${revision}</version>
-            <!--            <exclusions>-->
-            <!--                <exclusion>-->
-            <!--                    <artifactId>slf4j-api</artifactId>-->
-            <!--                    <groupId>org.slf4j</groupId>-->
-            <!--                </exclusion>-->
-            <!--            </exclusions>-->
         </dependency>
 
         <dependency>
@@ -105,12 +93,6 @@
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-pulsar</artifactId>
             <version>${revision}</version>
-            <!--            <exclusions>-->
-            <!--                <exclusion>-->
-            <!--                    <artifactId>slf4j-api</artifactId>-->
-            <!--                    <groupId>org.slf4j</groupId>-->
-            <!--                </exclusion>-->
-            <!--            </exclusions>-->
         </dependency>
 
         <dependency>
@@ -123,12 +105,6 @@
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-kafka</artifactId>
             <version>${revision}</version>
-            <!--            <exclusions>-->
-            <!--                <exclusion>-->
-            <!--                    <artifactId>slf4j-api</artifactId>-->
-            <!--                    <groupId>org.slf4j</groupId>-->
-            <!--                </exclusion>-->
-            <!--            </exclusions>-->
         </dependency>
 
         <dependency>

@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.api.templating;
 
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.fieldreaders.DynamicFieldReader;
 import io.nosqlbench.api.config.fieldreaders.StaticFieldReader;
 import io.nosqlbench.api.config.standard.NBConfigError;
@@ -292,9 +294,9 @@ import java.util.function.LongFunction;
  * in the activity parameters if needed to find a missing configuration parameter, but this will only work if
  * the specific named parameter is allowed at the activity level.</P>
  */
-public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader, DynamicFieldReader {
+public class ParsedOp implements LongFunction<Map<String, ?>>, NBLabeledElement, StaticFieldReader, DynamicFieldReader {
 
-    private final static Logger logger = LogManager.getLogger(ParsedOp.class);
+    private static final Logger logger = LogManager.getLogger(ParsedOp.class);
 
     /**
      * The names of payload values in the result of the operation which should be saved.
@@ -307,36 +309,32 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
     private final OpTemplate _opTemplate;
     private final NBConfiguration activityCfg;
     private final ParsedTemplateMap tmap;
-
-    /**
-     * Create a parsed command from an Op template.
-     *
-     * @param ot          An OpTemplate representing an operation to be performed in a native driver.
-     * @param activityCfg The activity configuration, used for reading config parameters
-     */
-    public ParsedOp(OpTemplate ot, NBConfiguration activityCfg) {
-        this(ot, activityCfg, List.of());
-    }
+    private final NBLabels labels;
 
     /**
      * Create a parsed command from an Op template. This version is exactly like
-     * {@link ParsedOp (OpTemplate,NBConfiguration)} except that it allows
+     *  except that it allows
      * preprocessors. Preprocessors are all applied to the the op template before
      * it is applied to the parsed command fields, allowing you to combine or destructure
      * fields from more tha one representation into a single canonical representation
      * for processing.
      *
-     * @param opTemplate    The OpTemplate as provided by a user via YAML, JSON, or API (data structure)
-     * @param activityCfg   The activity configuration, used to resolve nested config parameters
-     * @param preprocessors Map->Map transformers.
+     * @param opTemplate
+     *     The OpTemplate as provided by a user via YAML, JSON, or API (data structure)
+     * @param activityCfg
+     *     The activity configuration, used to resolve nested config parameters
+     * @param preprocessors
+     *     Map->Map transformers.
+     * @param labels
      */
     public ParsedOp(
         OpTemplate opTemplate,
         NBConfiguration activityCfg,
-        List<Function<Map<String, Object>, Map<String, Object>>> preprocessors
-    ) {
+        List<Function<Map<String, Object>, Map<String, Object>>> preprocessors,
+        NBLabeledElement parent) {
         this._opTemplate = opTemplate;
         this.activityCfg = activityCfg;
+        labels=parent.getLabels().and("op", this.getName());
 
         Map<String, Object> map = opTemplate.getOp().orElseThrow(() ->
             new OpConfigError("ParsedOp constructor requires a non-null value for the op field, but it was missing."));
@@ -542,7 +540,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param name The field name which must be defined as static or dynamic
      * @return A function which can provide the named field value
      */
-    public LongFunction<? extends String> getAsRequiredFunction(String name) {
+    public LongFunction<String> getAsRequiredFunction(String name) {
         return tmap.getAsRequiredFunction(name, String.class);
     }
 
@@ -601,6 +599,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
      * @param field The requested field name
      * @return true if the named field is defined as static or dynamic
      */
+    @Override
     public boolean isDefined(String field) {
         return tmap.isDefined(field);
     }
@@ -919,5 +918,10 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, StaticFieldReader
 
     public List<CapturePoint> getCaptures() {
         return tmap.getCaptures();
+    }
+
+    @Override
+    public NBLabels getLabels() {
+        return labels;
     }
 }
