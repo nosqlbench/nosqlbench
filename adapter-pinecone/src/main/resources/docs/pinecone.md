@@ -6,7 +6,13 @@ ops:
 # A pinecone query op
  query-example:
   query: myindex
-  ... additional fields ...
+  vector: use bindings to generate an array of floats
+  namespace: mynamespace
+  filter:
+    field:
+    operator:
+    comparator:
+
 
 # A delete op
  delete-example:

@@ -10,30 +10,49 @@ import io.pinecone.proto.FetchRequest;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class PineconeFetchOpDispenser extends PineconeOpDispenser {
-    private FetchRequest request;
-    private PineconeConnection connection;
+    private final LongFunction<FetchRequest> fetchRequestFunc;
+    private final String indexName;
 
     public PineconeFetchOpDispenser(PineconeDriverAdapter adapter,
                                     ParsedOp op,
                                     LongFunction<PineconeSpace> pcFunction,
                                     LongFunction<String> targetFunction) {
         super(adapter, op, pcFunction, targetFunction);
-
-        String indexName = op.getStaticValue("fetch");
-        connection = pcFunction.apply(0).getConnection(indexName);
-        request = createFetchRequest();
+        indexName = op.getAsRequiredFunction("fetch", String.class).apply(0);
+        fetchRequestFunc = createFetchRequestFunction(op);
     }
 
-    private FetchRequest createFetchRequest() {
-        List<String> ids = Arrays.asList("v1","v2");
-        return FetchRequest.newBuilder().addAllIds(ids).setNamespace("default-namespace").build();
+    private LongFunction<FetchRequest> createFetchRequestFunction(ParsedOp op) {
+        LongFunction<FetchRequest.Builder> rFunc = l -> FetchRequest.newBuilder();
+
+        Optional<LongFunction<String>> nFunc = op.getAsOptionalFunction("namespace", String.class);
+        if (nFunc.isPresent()) {
+            LongFunction<FetchRequest.Builder> finalFunc = rFunc;
+            LongFunction<String> af = nFunc.get();
+            rFunc = l -> finalFunc.apply(l).setNamespace(af.apply(l));
+        }
+
+        Optional<LongFunction<String>> iFunc = op.getAsOptionalFunction("ids", String.class);
+        if (iFunc.isPresent()) {
+            LongFunction<FetchRequest.Builder> finalFunc = rFunc;
+            LongFunction<String> af = iFunc.get();
+            LongFunction<List<String>> alf = l -> {
+                String[] vals = af.apply(l).split(",");
+                return Arrays.asList(vals);
+            };
+            rFunc = l -> finalFunc.apply(l).addAllIds(alf.apply(l));
+        }
+
+        LongFunction<FetchRequest.Builder> finalRFunc = rFunc;
+        return l -> finalRFunc.apply(l).build();
     }
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeFetchOp(connection, request);
+        return new PineconeFetchOp(pcFunction.apply(value).getConnection(indexName), fetchRequestFunc.apply(value));
     }
 }

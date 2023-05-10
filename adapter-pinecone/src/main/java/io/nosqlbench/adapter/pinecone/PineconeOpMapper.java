@@ -3,6 +3,7 @@ package io.nosqlbench.adapter.pinecone;
 import io.nosqlbench.adapter.pinecone.opdispensers.*;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOpTypes;
+import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
@@ -17,10 +18,12 @@ public class PineconeOpMapper implements OpMapper<PineconeOp> {
     private static final Logger LOGGER = LogManager.getLogger(PineconeOpMapper.class);
     private final PineconeDriverAdapter adapter;
     private final DriverSpaceCache<? extends PineconeSpace> spaceCache;
+    private final NBConfiguration cfg;
 
-    public PineconeOpMapper(PineconeDriverAdapter adapter, DriverSpaceCache<? extends PineconeSpace> spaceCache) {
+    public PineconeOpMapper(PineconeDriverAdapter adapter, DriverSpaceCache<? extends PineconeSpace> spaceCache, NBConfiguration cfg) {
         this.adapter = adapter;
         this.spaceCache = spaceCache;
+        this.cfg = cfg;
     }
 
     @Override

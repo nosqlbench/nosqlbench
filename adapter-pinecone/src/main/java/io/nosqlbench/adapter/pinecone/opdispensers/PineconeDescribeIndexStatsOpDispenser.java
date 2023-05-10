@@ -11,8 +11,8 @@ import io.pinecone.proto.DescribeIndexStatsRequest;
 import java.util.function.LongFunction;
 
 public class PineconeDescribeIndexStatsOpDispenser extends PineconeOpDispenser {
-    private DescribeIndexStatsRequest request;
-    private PineconeConnection connection;
+    private final String indexName;
+    private final LongFunction<DescribeIndexStatsRequest> indexStatsRequestFunc;
 
     public PineconeDescribeIndexStatsOpDispenser(PineconeDriverAdapter adapter,
                                                  ParsedOp op,
@@ -20,17 +20,17 @@ public class PineconeDescribeIndexStatsOpDispenser extends PineconeOpDispenser {
                                                  LongFunction<String> targetFunction) {
         super(adapter, op, pcFunction, targetFunction);
 
-        String indexName = op.getStaticValue("describeIndexStats");
-        connection = pcFunction.apply(0).getConnection(indexName);
-        request = createDescribeIndexStatsRequest();
+        indexName = op.getAsRequiredFunction("indexStatsRequest", String.class).apply(0);
+        indexStatsRequestFunc = createDescribeIndexStatsRequestFunction(op);
     }
 
-    private DescribeIndexStatsRequest createDescribeIndexStatsRequest() {
-        return DescribeIndexStatsRequest.newBuilder().build();
+    private LongFunction<DescribeIndexStatsRequest> createDescribeIndexStatsRequestFunction(ParsedOp op) {
+        LongFunction<DescribeIndexStatsRequest.Builder> rFunc = l -> DescribeIndexStatsRequest.newBuilder();
+        return l -> rFunc.apply(l).build();
     }
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeDescribeIndexStatsOp(connection, request);
+        return new PineconeDescribeIndexStatsOp(pcFunction.apply(value).getConnection(indexName), indexStatsRequestFunc.apply(value));
     }
 }
