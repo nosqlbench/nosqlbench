@@ -8,7 +8,7 @@ description: |
  The data image for the gauge summary is updated consistently with
  respect to monotonic (whole step) cycle values. There are a few parameters
  which can be adjusted in order to make the gauge data appear more realistic.
-  name - A standard parameter for diag tasks. This determines the metric name as well.
+  label - A standard parameter for diag tasks. This determines the metric name as well.
   buckets - The number of values to seed incrementally to produce a data image
   binding - The binding used to create the value stored in a bin for a given cycle
   modulo - The interval of cycle values at which a new bin value is computed and stored in a bin
