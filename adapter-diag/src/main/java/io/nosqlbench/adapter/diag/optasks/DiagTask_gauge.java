@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.diag.optasks;
 
 import com.codahale.metrics.Gauge;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.nb.annotations.Service;
@@ -32,27 +33,27 @@ import java.util.function.LongToDoubleFunction;
 
 /**
  * <p>A diag gauge task allows you to create a source of metrics data for testing or demonstration.
- * You can customize the function used to produce the raw values, the number of bins to use for
- * leavening the values over time, and the basic stat function used to summarize the bins into
+ * You can customize the function used to produce the raw values, the number of buckets to use for
+ * leavening the values over time, and the basic stat function used to summarize the buckets into
  * an aggregate double value.</p>
  *
  * <H2>Usage Notes</H2>
  * The data image for the gauge summary is updated consistently with respect to monotonic (whole step) cycle values.
  * There are a few parameters which can be adjusted in order to make the gauge data appear more realistic.
  * <UL>
- *     <LI>name - A standard paramter for diag tasks. This determines the metric name as well.</LI>
- *     <LI>bins - The number of values to seed incrementally to produce a data image</LI>
+ *     <LI>label - This determines the metric label, normally used as the metric family name. Default is the task name.</LI>
+ *     <LI>buckets - The number of values to seed incrementally to produce a data image</LI>
  *     <LI>binding - The binding recipe to use to create the value stored in a bin for a given cycle</LI>
  *     <LI>modulo - The interval of cycle values at which a new bin value is computed and stored in a bin</LI>
  *     <LI>stat - The aggregate statistic to use when computing the gauge value: min, avg, or max</LI>
  * </UL>
  *
- * <p>The bins are updated incrementally and consistently based on the cycle value, modulated by the modulo value.
- * When the gauge is observed, the present value of the bins is converted to a values image and the result is
+ * <p>The buckets are updated incrementally and consistently based on the cycle value, modulated by the modulo value.
+ * When the gauge is observed, the present value of the buckets is converted to a values image and the result is
  * summarized according to the selected stat.</p>
  *
  * <p>Practical values should be selected with awareness of the op rate and the rate of change desired in
- * the metrics over time. The bins allow for the effective rate of change over cycles to be slowed, but it
+ * the metrics over time. The buckets allow for the effective rate of change over cycles to be slowed, but it
  * is recommended to keep bin counts relative low by increasing modulo instead.</p>
  *
  * <H2>Examples</H2>
@@ -63,13 +64,13 @@ import java.util.function.LongToDoubleFunction;
  *     <LI>activity rate=10 modulo=10 - a new update will be visible every second.</LI>
  *     <LI>activity rate=1000 modulo=1000 - a new gauge value will be visible every second.</LI>
  *     <LI>activity rate=1000 modulo=60000 - a new gauge value will be visible every minute.</LI>
- *     <LI>activity rate=100 modulo=100 bins=50 stat=avg - a new value will be visible every second,
+ *     <LI>activity rate=100 modulo=100 buckets=50 stat=avg - a new value will be visible every second,
  *     however the rate of change will be reduced due to the large sample size.</LI>
  * </UL>
  *
  * <H2>Usage Notes</H2>
- * Changing the number of bins has a different effect based on the stat. For avg, the higher the number of bins,
- * the smaller the standard deviation of the results. For min and max, the higher the number of bins, the more
+ * Changing the number of buckets has a different effect based on the stat. For avg, the higher the number of buckets,
+ * the smaller the standard deviation of the results. For min and max, the higher the number of buckets, the more
  * extreme the value will become. This is true for uniform bindings and non-uniform binding functions as well,
  * although you can tailor the shape of the sample data as you like.
  *
@@ -85,7 +86,8 @@ public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double> {
     private long[] cycleMixer;
     private double[] valueMixer;
     private long modulo;
-    private int bins;
+    private int buckets;
+    private String label;
 
     private enum Stats {
         min,
@@ -108,14 +110,14 @@ public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double> {
 
     @Override
     public void applyConfig(NBConfiguration cfg) {
-        this.name = cfg.get("name");
         String binding = cfg.get("binding",String.class);
-        this.bins = cfg.get("bins",Integer.class);
+        this.buckets = cfg.get("buckets",Integer.class);
         this.modulo = cfg.get("modulo",Long.class);
+        this.label = cfg.getOptional("label").orElse(super.getName());
         String stat = cfg.get("stat");
 
-        this.cycleMixer=new long[bins];
-        this.valueMixer=new double[bins];
+        this.cycleMixer=new long[buckets];
+        this.valueMixer=new double[buckets];
 
         this.stat=Stats.valueOf(stat);
 
@@ -127,16 +129,19 @@ public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double> {
             this.function= VirtDataConversions.adaptFunction(mapper,LongToDoubleFunction.class);
         }
 
-        this.gauge=ActivityMetrics.gauge(getParentLabels(), name, this);
+        logger.info("Registering gauge for diag task with labels:" + getParentLabels().getLabels() + " label:" + label);
+        this.gauge=ActivityMetrics.gauge(this, label, this);
     }
 
     @Override
     public NBConfigModel getConfigModel() {
         return ConfigModel.of(DiagTask_gauge.class)
             .add(Param.required("name",String.class))
+            .add(Param.optional("label",String.class)
+                .setDescription("A metric family name override. Defaults to the op name."))
             .add(Param.defaultTo("binding","HashRange(0L,1000000L)")
                 .setDescription("A binding function to derive values from"))
-            .add(Param.defaultTo("bins", "3")
+            .add(Param.defaultTo("buckets", "3")
                 .setDescription("how many slots to maintain in the mixer to aggregate over"))
             .add(Param.defaultTo("stat","avg")
                 .setRegex("min|avg|max")
@@ -157,7 +162,12 @@ public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double> {
             case avg -> Arrays.stream(this.valueMixer).sum()/(double)this.valueMixer.length;
             case max -> Arrays.stream(this.valueMixer).reduce(Math::max).getAsDouble();
         };
-        logger.debug(() -> "sample value for " + getParentLabels() + ": " + sample);
+        logger.debug(() -> "sample value for " + getParentLabels().getLabels() + ": " + sample);
         return sample;
+    }
+
+    @Override
+    public NBLabels getLabels() {
+        return super.getLabels().and("stat",this.stat.toString());
     }
 }
