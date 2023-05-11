@@ -41,9 +41,14 @@ public abstract class BaseDiagTask implements DiagTask {
     public void setLabelsFrom(NBLabeledElement labeledElement) {
         this.parentLabels = labeledElement;
     }
+
     @Override
     public NBLabeledElement getParentLabels() {
         return parentLabels;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
 }
