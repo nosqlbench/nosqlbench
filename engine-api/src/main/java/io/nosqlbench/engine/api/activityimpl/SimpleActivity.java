@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityimpl;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.config.params.ParamsParser;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
@@ -675,8 +676,13 @@ public class SimpleActivity implements Activity {
             Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
             Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
             if (stmt.isPresent()) {
+                String op = stmt.get();
                 workloadSource = "commandline:" + stmt.get();
-                return OpsLoader.loadString(stmt.get(), OpTemplateFormat.inline, activityDef.getParams(), null);
+                if (op.startsWith("{")||op.startsWith("[")) {
+                    return OpsLoader.loadString(stmt.get(), OpTemplateFormat.json, activityDef.getParams(), null);
+                } else {
+                    return OpsLoader.loadString(stmt.get(), OpTemplateFormat.inline, activityDef.getParams(), null);
+                }
             }
             if (op_yaml_loc.isPresent()) {
                 workloadSource = "yaml:" + op_yaml_loc.get();
