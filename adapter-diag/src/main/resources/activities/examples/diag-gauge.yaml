@@ -1,0 +1,42 @@
+description: |
+ A diag gauge task allows you to create a source of metrics data
+ for testing or demonstration. You can customize the binding used
+ to produce the raw values, the number of buckets to use for leavening
+ the values over time, and the basic stat function used to summarize
+ the buckets into an aggregate double value.
+ Usage Notes
+ The data image for the gauge summary is updated consistently with
+ respect to monotonic (whole step) cycle values. There are a few parameters
+ which can be adjusted in order to make the gauge data appear more realistic.
+  name - A standard parameter for diag tasks. This determines the metric name as well.
+  buckets - The number of values to seed incrementally to produce a data image
+  binding - The binding used to create the value stored in a bin for a given cycle
+  modulo - The interval of cycle values at which a new bin value is computed and stored in a bin
+  stat - The aggregate statistic to use when computing the gauge value: min, avg, or max
+ The buckets are updated incrementally and consistently based on the cycle value,
+ modulated by the modulo value. When the gauge value is observed, the present
+ value of the buckets is converted to a values image and the result is summarized
+ according to the selected stat.
+ Practical values should be selected with awareness of the op rate and the rate
+ of change desired in the metrics over time. The buckets allow for the effective
+ rate of change over cycles to be slowed, but it is recommended to keep bin counts
+ relative low by increasing modulo instead.
+
+scenarios:
+ default:
+  per-second: run driver=diag tags=block:per-second rate=10 cycles=6000
+  per-minute: run driver=diag tags=block:per-minute rate=10 cycles=6000
+
+blocks:
+ per-second:
+  ops:
+   of-ten-buckets:
+    lower: type=gauge modulo=10 buckets=10 binding='HashRange(0L,100L)' stat=min
+    middle: type=gauge modulo=10 buckets=10 binding='HashRange(0L,100L)' stat=avg
+    higher: type=gauge modulo=10 buckets=10 binding='HashRange(0L,100L)' stat=max
+ per-minute:
+   ops:
+     of-ten-buckets:
+       lower: type=gauge modulo=600 buckets=10 binding='HashRange(0L,100L)' stat=min
+       middle: type=gauge modulo=600 buckets=10 binding='HashRange(0L,100L)' stat=avg
+       higher: type=gauge modulo=600 buckets=10 binding='HashRange(0L,100L)' stat=max
