@@ -38,7 +38,6 @@ import java.util.function.LongFunction;
 
 public class PineconeQueryOpDispenser extends PineconeOpDispenser {
     private final LongFunction<QueryRequest> queryRequestFunc;
-    private final String indexName;
 
     public PineconeQueryOpDispenser(PineconeDriverAdapter adapter,
                                     ParsedOp op,
@@ -46,7 +45,7 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
                                     LongFunction<String> targetFunction) {
         super(adapter, op, pcFunction, targetFunction);
 
-        indexName = op.getAsRequiredFunction("query", String.class).apply(0);
+        indexNameFunc = op.getAsRequiredFunction("query", String.class);
         queryRequestFunc = createQueryRequestFunc(op, createQueryVectorFunc(op));
     }
 
@@ -112,6 +111,7 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeQueryOp(pcFunction.apply(value).getConnection(indexName), queryRequestFunc.apply(value));
+        return new PineconeQueryOp(pcFunction.apply(value).getConnection(indexNameFunc.apply(value)),
+            queryRequestFunc.apply(value));
     }
 }

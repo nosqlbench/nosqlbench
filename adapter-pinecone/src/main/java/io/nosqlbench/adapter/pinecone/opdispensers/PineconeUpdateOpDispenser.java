@@ -11,8 +11,7 @@ import io.pinecone.proto.UpdateRequest;
 import java.util.function.LongFunction;
 
 public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
-    private UpdateRequest request;
-    private PineconeConnection connection;
+    private final LongFunction<UpdateRequest> updateRequestFunc;
 
     public PineconeUpdateOpDispenser(PineconeDriverAdapter adapter,
                                      ParsedOp op,
@@ -20,17 +19,18 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
                                      LongFunction<String> targetFunction) {
         super(adapter, op, pcFunction, targetFunction);
 
-        String indexName = op.getStaticValue("update");
-        connection = pcFunction.apply(0).getConnection(indexName);
-        request = createUpdateRequest();
+        indexNameFunc = op.getAsRequiredFunction("update", String.class);
+        updateRequestFunc = createUpdateRequestFunction(op);
     }
 
-    private UpdateRequest createUpdateRequest() {
-        return UpdateRequest.newBuilder().build();
+    private LongFunction<UpdateRequest> createUpdateRequestFunction(ParsedOp op) {
+        LongFunction<UpdateRequest.Builder> rFunc = l -> UpdateRequest.newBuilder();
+        return l -> rFunc.apply(l).build();
     }
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeUpdateOp(connection, request);
+        return new PineconeUpdateOp(pcFunction.apply(value).getConnection(indexNameFunc.apply(value)),
+            updateRequestFunc.apply(value));
     }
 }

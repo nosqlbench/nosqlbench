@@ -23,7 +23,6 @@ import java.util.function.LongFunction;
  */
 
 public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
-    private final String indexName;
     private final LongFunction<DeleteRequest> deleteRequestFunc;
 
     public PineconeDeleteOpDispenser(PineconeDriverAdapter adapter,
@@ -32,13 +31,14 @@ public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
                                      LongFunction<String> targetFunction) {
         super(adapter, op, pcFunction, targetFunction);
 
-        indexName = op.getAsRequiredFunction("query", String.class).apply(0);
+        indexNameFunc = op.getAsRequiredFunction("delete", String.class);
         deleteRequestFunc = createDeleteRequestFunction(op);
     }
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeDeleteOp(pcFunction.apply(value).getConnection(indexName), deleteRequestFunc.apply(value));
+        return new PineconeDeleteOp(pcFunction.apply(value).getConnection(indexNameFunc.apply(value)),
+            deleteRequestFunc.apply(value));
     }
 
     private LongFunction<DeleteRequest> createDeleteRequestFunction(ParsedOp op) {

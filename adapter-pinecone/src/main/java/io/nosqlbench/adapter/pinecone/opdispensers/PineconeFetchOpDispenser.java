@@ -15,14 +15,13 @@ import java.util.function.LongFunction;
 
 public class PineconeFetchOpDispenser extends PineconeOpDispenser {
     private final LongFunction<FetchRequest> fetchRequestFunc;
-    private final String indexName;
 
     public PineconeFetchOpDispenser(PineconeDriverAdapter adapter,
                                     ParsedOp op,
                                     LongFunction<PineconeSpace> pcFunction,
                                     LongFunction<String> targetFunction) {
         super(adapter, op, pcFunction, targetFunction);
-        indexName = op.getAsRequiredFunction("fetch", String.class).apply(0);
+        indexNameFunc = op.getAsRequiredFunction("fetch", String.class);
         fetchRequestFunc = createFetchRequestFunction(op);
     }
 
@@ -53,6 +52,7 @@ public class PineconeFetchOpDispenser extends PineconeOpDispenser {
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeFetchOp(pcFunction.apply(value).getConnection(indexName), fetchRequestFunc.apply(value));
+        return new PineconeFetchOp(pcFunction.apply(value).getConnection(indexNameFunc.apply(value)),
+            fetchRequestFunc.apply(value));
     }
 }
