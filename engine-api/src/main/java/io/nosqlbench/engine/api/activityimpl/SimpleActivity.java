@@ -80,7 +80,6 @@ public class SimpleActivity implements Activity {
     private RunState runState = RunState.Uninitialized;
     private RateLimiter strideLimiter;
     private RateLimiter cycleLimiter;
-    private RateLimiter phaseLimiter;
     private ActivityController activityController;
     private ActivityInstrumentation activityInstrumentation;
     private PrintWriter console;
@@ -279,27 +278,8 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
-    public RateLimiter getPhaseLimiter() {
-        return phaseLimiter;
-    }
-
-
-    @Override
     public Timer getResultTimer() {
         return ActivityMetrics.timer(this, "result", getParams().getOptionalInteger("hdr_digits").orElse(4));
-    }
-
-    @Override
-    public void setPhaseLimiter(RateLimiter rateLimiter) {
-        this.phaseLimiter = rateLimiter;
-    }
-
-    @Override
-    public synchronized RateLimiter getPhaseRateLimiter(Supplier<? extends RateLimiter> supplier) {
-        if (null == this.phaseLimiter) {
-            phaseLimiter = supplier.get();
-        }
-        return phaseLimiter;
     }
 
     @Override
@@ -350,10 +330,6 @@ public class SimpleActivity implements Activity {
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate")
             .map(RateSpec::new).ifPresent(
                 spec -> cycleLimiter = RateLimiters.createOrUpdate(this, "cycles", cycleLimiter, spec));
-
-        activityDef.getParams().getOptionalNamedParameter("phaserate")
-            .map(RateSpec::new)
-            .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this, "phases", phaseLimiter, spec));
 
     }
 
