@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,34 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
-import io.nosqlbench.api.config.standard.ConfigModel;
-import io.nosqlbench.api.config.standard.NBConfigModel;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 
 import java.util.Map;
 
-@Service(value= DiagTask.class,selector = "noop")
-public class DiagTask_noop extends BaseDiagTask {
-
+public abstract class BaseDiagTask implements DiagTask {
+    private NBLabeledElement parentLabels;
     private String name;
 
     @Override
-    public void applyConfig(NBConfiguration cfg) {
+    public abstract Map<String, Object> apply(Long cycle, Map<String, Object> opstate);
+
+    @Override
+    public NBLabels getLabels() {
+        return parentLabels.getLabels();
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
-    public NBConfigModel getConfigModel() {
-        return ConfigModel.of(DiagTask_noop.class)
-            .add(Param.required("name",String.class))
-            .asReadOnly();
+    public void setLabelsFrom(NBLabeledElement labeledElement) {
+        this.parentLabels = labeledElement;
     }
-
     @Override
-    public Map<String, Object> apply(Long aLong, Map<String, Object> stringObjectMap) {
-        return Map.of();
+    public NBLabeledElement getParentLabels() {
+        return parentLabels;
     }
 
 }

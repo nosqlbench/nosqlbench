@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,11 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 
 @Service(value= DiagTask.class,selector="log")
-public class DiagTask_log implements DiagTask, NBConfigurable {
+public class DiagTask_log extends BaseDiagTask {
     private final static Logger logger = LogManager.getLogger("DIAG");
     private Level level;
     private long modulo;
     private long interval;
-    private String name;
 
     @Override
     public Map<String, Object> apply(Long aLong, Map<String, Object> stringObjectMap) {
@@ -43,7 +42,6 @@ public class DiagTask_log implements DiagTask, NBConfigurable {
     @Override
     public void applyConfig(NBConfiguration cfg) {
         String level = cfg.getOptional("level").orElse("INFO");
-        this.name = cfg.get("name");
         this.level = Level.valueOf(level);
         this.modulo = cfg.get("modulo",long.class);
         this.interval = cfg.get("interval",long.class);
@@ -57,10 +55,5 @@ public class DiagTask_log implements DiagTask, NBConfigurable {
             .add(Param.defaultTo("modulo", 1))
             .add(Param.defaultTo("interval",1000))
             .asReadOnly();
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 }
