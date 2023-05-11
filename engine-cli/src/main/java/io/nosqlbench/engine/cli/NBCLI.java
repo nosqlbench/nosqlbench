@@ -18,10 +18,11 @@ package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import io.nosqlbench.api.engine.metrics.reporters.PromPushReporter;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.logging.NBLogLevel;
 import io.nosqlbench.api.metadata.SessionNamer;
@@ -66,7 +67,7 @@ import java.util.ServiceLoader.Provider;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class NBCLI implements Function<String[], Integer> {
+public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
     private static Logger logger;
     private static final LoggerConfig loggerConfig;
@@ -80,6 +81,9 @@ public class NBCLI implements Function<String[], Integer> {
     }
 
     private final String commandName;
+
+    private NBLabels labels;
+    private String sessionName;
 
     public NBCLI(final String commandName) {
         this.commandName = commandName;
@@ -95,7 +99,7 @@ public class NBCLI implements Function<String[], Integer> {
      */
     public static void main(final String[] args) {
         try {
-            final NBCLI cli = new NBCLI("nb");
+            final NBCLI cli = new NBCLI("nb5");
             final int statusCode = cli.apply(args);
             System.exit(statusCode);
         } catch (final Exception e) {
@@ -149,7 +153,8 @@ public class NBCLI implements Function<String[], Integer> {
         NBCLI.loggerConfig.setConsoleLevel(NBLogLevel.ERROR);
 
         final NBCLIOptions globalOptions = new NBCLIOptions(args, Mode.ParseGlobalsOnly);
-        final String sessionName = SessionNamer.format(globalOptions.getSessionName());
+        this.labels=NBLabels.forKV("command",commandName).and(globalOptions.getLabelMap());
+        this.sessionName = SessionNamer.format(globalOptions.getSessionName());
 
         NBCLI.loggerConfig
             .setSessionName(sessionName)
@@ -431,7 +436,8 @@ public class NBCLI implements Function<String[], Integer> {
             options.getReportSummaryTo(),
             String.join("\n", args),
             options.getLogsDirectory(),
-            Maturity.Unspecified);
+            Maturity.Unspecified,
+            this);
 
         final ScriptBuffer buffer = new BasicScriptBuffer()
             .add(options.getCommands()
@@ -503,4 +509,8 @@ public class NBCLI implements Function<String[], Integer> {
         return metrics;
     }
 
+    @Override
+    public NBLabels getLabels() {
+        return labels;
+    }
 }

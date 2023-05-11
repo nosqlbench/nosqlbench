@@ -51,6 +51,7 @@ public class NBCLIOptions {
     private static final String userHome = System.getProperty("user.home");
 
 
+    private static final Map<String,String> DEFAULT_LABELS=Map.of("appname","nosqlbench");
     private static final String METRICS_PREFIX = "--metrics-prefix";
     private static final String ANNOTATE_EVENTS = "--annotate";
     private static final String ANNOTATORS_CONFIG = "--annotators";
@@ -81,6 +82,9 @@ public class NBCLIOptions {
     private static final String SHOW_STACKTRACES = "--show-stacktraces";
     private static final String EXPERIMENTAL = "--experimental";
     private static final String MATURITY = "--maturity";
+
+    private static final String SET_LABELS = "--set-labels";
+    private static final String ADD_LABELS = "--add-labels";
 
     // Execution
     private static final String EXPORT_CYCLE_LOG = "--export-cycle-log";
@@ -131,6 +135,7 @@ public class NBCLIOptions {
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
 
+    private final Map<String,String> labels = new LinkedHashMap<>(DEFAULT_LABELS);
     private final List<Cmd> cmdList = new ArrayList<>();
     private int logsMax;
     private boolean wantsVersionShort;
@@ -203,6 +208,9 @@ public class NBCLIOptions {
         return this.annotatorsConfig;
     }
 
+    public Map<String,String> getLabelMap() {
+        return Collections.unmodifiableMap(this.labels);
+    }
 
     public String getChartHdrFileName() {
         return this.hdrForChartFileName;
@@ -446,6 +454,16 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     final String maturity = this.readWordOrThrow(arglist, "maturity of components to allow");
                     minMaturity = Maturity.valueOf(maturity.toLowerCase(Locale.ROOT));
+                case NBCLIOptions.SET_LABELS:
+                    arglist.removeFirst();
+                    String setLabelData = arglist.removeFirst();
+                    setLabels(setLabelData);
+                    break;
+                case NBCLIOptions.ADD_LABELS:
+                    arglist.removeFirst();
+                    String addLabeldata = arglist.removeFirst();
+                    addLabels(addLabeldata);
+                    break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
             }
@@ -453,6 +471,29 @@ public class NBCLIOptions {
 
         return nonincludes;
     }
+
+    private void setLabels(String labeldata) {
+        this.labels.clear();
+        addLabels(labeldata);
+    }
+
+    private void addLabels(String labeldata) {
+        Map<String,String> newLabels = parseLabels(labeldata);
+        this.labels.putAll(newLabels);
+    }
+
+    private Map<String, String> parseLabels(String labeldata) {
+        Map<String,String> setLabelsTo = new LinkedHashMap<>();
+        for (String component : labeldata.split("[,; ]")) {
+            String[] parts = component.split("\\W", 2);
+            if (parts.length!=2) {
+                throw new BasicError("Unable to parse labels to set:" + labeldata);
+            }
+            setLabelsTo.put(parts[0],parts[1]);
+        }
+        return setLabelsTo;
+    }
+
 
     private Path setStatePath() {
         if (0 < statePathAccesses.size())

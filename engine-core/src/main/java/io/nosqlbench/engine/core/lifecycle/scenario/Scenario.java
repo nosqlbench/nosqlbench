@@ -74,6 +74,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
     private ScenarioMetadata scenarioMetadata;
 
     private ExecutionMetricsResult result;
+    private final NBLabeledElement parentComponent;
 
     public Optional<ExecutionMetricsResult> getResultIfComplete() {
         return Optional.ofNullable(result);
@@ -82,7 +83,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
 
     @Override
     public NBLabels getLabels() {
-        return NBLabels.forKV("scenario", this.scenarioName);
+        return this.parentComponent.getLabels().and("scenario", this.scenarioName);
     }
 
     public enum State {
@@ -100,10 +101,10 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
     private ScenarioContext scriptEnv;
     private final String scenarioName;
     private ScriptParams scenarioScriptParams;
-    private String scriptfile;
+    private final String scriptfile;
     private Engine engine = Engine.Graalvm;
-    private boolean wantsStackTraces;
-    private boolean wantsCompiledScript;
+    private final boolean wantsStackTraces;
+    private final boolean wantsCompiledScript;
     private long startedAtMillis = -1L;
     private long endedAtMillis = -1L;
 
@@ -121,7 +122,8 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
         final String reportSummaryTo,
         final String commandLine,
         final Path logsPath,
-        final Maturity minMaturity) {
+        final Maturity minMaturity,
+        NBLabeledElement parentComponent) {
 
         this.scenarioName = scenarioName;
         this.scriptfile = scriptfile;
@@ -133,17 +135,22 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
         this.commandLine = commandLine;
         this.logsPath = logsPath;
         this.minMaturity = minMaturity;
+        this.parentComponent = parentComponent;
     }
 
-    public Scenario(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
-        scenarioName = name;
-        this.reportSummaryTo = reportSummaryTo;
-        this.engine = engine;
-        commandLine = "";
-        this.minMaturity = minMaturity;
-        logsPath = Path.of("logs");
+    public static Scenario forTesting(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
+        return new Scenario(name,null,engine,null,true,true,reportSummaryTo,"",Path.of("logs"),minMaturity, NBLabeledElement.forKV("test-name","name"));
     }
 
+//    public Scenario(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
+//        scenarioName = name;
+//        this.reportSummaryTo = reportSummaryTo;
+//        this.engine = engine;
+//        commandLine = "";
+//        this.minMaturity = minMaturity;
+//        logsPath = Path.of("logs");
+//    }
+//
     public Scenario setLogger(final Logger logger) {
         this.logger = logger;
         return this;
