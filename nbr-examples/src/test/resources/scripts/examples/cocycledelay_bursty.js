@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ co_cycle_delay_bursty = {
     "cycles": "0..1000000",
     "threads": "10",
     "cyclerate": "1000,1.5",
-    "op" : '{"log":{"level":"info","modulo":1000},"diagrate":{"diagrate":"500"}}'
+    "op" : "diagrate: diagrate=500"
 };
 
 print('starting activity co_cycle_delay_bursty');
