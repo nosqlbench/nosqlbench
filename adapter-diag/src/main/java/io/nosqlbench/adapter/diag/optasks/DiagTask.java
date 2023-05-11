@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
-import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.api.config.standard.NBReconfigurable;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfigurable;
+import io.nosqlbench.api.config.standard.NBReconfigurable;
 
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -44,7 +44,13 @@ import java.util.function.BiFunction;
 public interface DiagTask extends
     BiFunction<Long,Map<String,Object>, Map<String,Object>>,
     NBConfigurable,
-    NBNamedElement
+    NBLabeledElement
 {
     Map<String, Object> apply(Long cycle, Map<String, Object> opstate);
+
+    void setName(String opname);
+
+    void setLabelsFrom(NBLabeledElement labeledElement);
+
+    NBLabeledElement getParentLabels();
 }
