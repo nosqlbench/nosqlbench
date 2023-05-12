@@ -33,7 +33,10 @@ public class PineconeDescribeIndexStatsOpDispenser extends PineconeOpDispenser {
     }
 
     private LongFunction<DescribeIndexStatsRequest> createDescribeIndexStatsRequestFunction(ParsedOp op) {
-        throw new NotSupportedException("Pinecone Describe Index Stats Op not yet supported");
+        LongFunction<DescribeIndexStatsRequest.Builder> rFunc = l -> DescribeIndexStatsRequest.newBuilder();
+        //TODO: Add filters
+        LongFunction<DescribeIndexStatsRequest.Builder> finalRFunc = rFunc;
+        return l -> finalRFunc.apply(l).build();
     }
 
     @Override

@@ -76,9 +76,22 @@ public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
             rFunc = l -> finalFunc.apply(l).setDeleteAll(af.apply(l));
         }
 
+        //TODO: Add filters
+
         LongFunction<DeleteRequest.Builder> finalRFunc = rFunc;
         return l -> finalRFunc.apply(l).build();
     }
+
+/*    private LongFunction<Collection<AttributeDefinition>> resolveAttributeDefinitionFunction(ParsedOp cmd) {
+        LongFunction<? extends Map> attrsmap = cmd.getAsRequiredFunction("Attributes", Map.class);
+        return (long l) -> {
+            List<AttributeDefinition> defs = new ArrayList<>();
+            attrsmap.apply(l).forEach((k, v) -> {
+                defs.add(new AttributeDefinition(k.toString(), ScalarAttributeType.valueOf(v.toString())));
+            });
+            return defs;
+        };
+    }*/
 
 
 }

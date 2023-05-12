@@ -31,7 +31,7 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
                                     LongFunction<PineconeSpace> pcFunction,
                                     LongFunction<String> targetFunction) {
         super(adapter, op, pcFunction, targetFunction);
-        queryRequestFunc = createQueryRequestFunc(op, createQueryVectorFunc(op));
+        queryRequestFunc = createQueryRequestFunc(op);
     }
 
      /*
@@ -57,7 +57,7 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
      .build();
      }
      */
-    private LongFunction<QueryRequest> createQueryRequestFunc(ParsedOp op, LongFunction<QueryVector> queryVectorFunc) {
+    private LongFunction<QueryRequest> createQueryRequestFunc(ParsedOp op) {
         LongFunction<QueryRequest.Builder> rFunc = l -> QueryRequest.newBuilder();
 
         Optional<LongFunction<String>> nFunc = op.getAsOptionalFunction("namespace", String.class);
@@ -74,26 +74,24 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
             rFunc = l -> finalFunc.apply(l).setTopK(af.apply(l));
         }
 
-        Optional<LongFunction<Boolean>> mFunc = op.getAsOptionalFunction("includemetadata", Boolean.class);
+        Optional<LongFunction<Boolean>> mFunc = op.getAsOptionalFunction("include_metadata", Boolean.class);
         if (mFunc.isPresent()) {
             LongFunction<QueryRequest.Builder> finalFunc = rFunc;
             LongFunction<Boolean> af = mFunc.get();
             rFunc = l -> finalFunc.apply(l).setIncludeMetadata(af.apply(l));
         }
 
-        LongFunction<QueryRequest.Builder> returnFunc = rFunc;
-        rFunc = l -> returnFunc.apply(l).addQueries(queryVectorFunc.apply(l));
-        LongFunction<QueryRequest.Builder> finalRFunc = rFunc;
-        return l -> finalRFunc.apply(l).build();
-    }
+        Optional<LongFunction<Boolean>> ivFunc = op.getAsOptionalFunction("include_values", Boolean.class);
+        if (ivFunc.isPresent()) {
+            LongFunction<QueryRequest.Builder> finalFunc = rFunc;
+            LongFunction<Boolean> af = ivFunc.get();
+            rFunc = l -> finalFunc.apply(l).setIncludeValues(af.apply(l));
+        }
 
-    private LongFunction<QueryVector> createQueryVectorFunc(ParsedOp op) {
-        LongFunction<QueryVector.Builder> vFunc = l -> QueryVector.newBuilder();
-
-        Optional<LongFunction<String>> qFunc = op.getAsOptionalFunction("query", String.class);
-        if (qFunc.isPresent()) {
-            LongFunction<QueryVector.Builder> finalFunc = vFunc;
-            LongFunction<String> af = qFunc.get();
+        Optional<LongFunction<String>> vFunc = op.getAsOptionalFunction("vector", String.class);
+        if (vFunc.isPresent()) {
+            LongFunction<QueryRequest.Builder> finalFunc = rFunc;
+            LongFunction<String> af = vFunc.get();
             LongFunction<ArrayList<Float>> alf = l -> {
                 String[] vals = af.apply(l).split(",");
                 ArrayList<Float> fVals = new ArrayList<Float>();
@@ -102,17 +100,18 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
                 }
                 return fVals;
             };
-            vFunc = l -> finalFunc.apply(l).addAllValues(alf.apply(l));
+            rFunc = l -> finalFunc.apply(l).addAllVector(alf.apply(l));
         }
+        //TODO: Add filters
+        //TODO: IF the above values are not populated we need to create and add the query vectors
+        //LongFunction<QueryRequest.Builder> returnFunc = rFunc;
+        //rFunc = l -> returnFunc.apply(l).addQueries(queryVectorFunc.apply(l));
+        LongFunction<QueryRequest.Builder> finalRFunc = rFunc;
+        return l -> finalRFunc.apply(l).build();
+    }
 
-        Optional<LongFunction<String>> nFunc = op.getAsOptionalFunction("namespace", String.class);
-        if (nFunc.isPresent()) {
-            LongFunction<QueryVector.Builder> finalFunc = vFunc;
-            LongFunction<String> af = nFunc.get();
-            vFunc = l -> finalFunc.apply(l).setNamespace(af.apply(l));
-        }
-        //TODO: Add in optional filters
-
+    private LongFunction<QueryVector> createQueryVectorFunc(ParsedOp op) {
+        LongFunction<QueryVector.Builder> vFunc = l -> QueryVector.newBuilder();
         LongFunction<QueryVector.Builder> finalVFunc = vFunc;
         return l -> finalVFunc.apply(l).build();
     }

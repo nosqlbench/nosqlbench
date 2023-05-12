@@ -1,5 +1,7 @@
 package io.nosqlbench.adapter.pinecone;
 
+import io.nosqlbench.api.config.standard.ConfigModel;
+import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.pinecone.PineconeClient;
 import io.pinecone.PineconeClientConfig;
@@ -60,6 +62,10 @@ public class PineconeSpace {
             connections.put(index, connection);
         }
         return connection;
+    }
+
+    public static NBConfigModel getConfigModel() {
+        return ConfigModel.of(PineconeSpace.class);
     }
 
 }
