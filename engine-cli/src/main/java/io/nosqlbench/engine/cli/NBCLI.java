@@ -119,7 +119,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
     @Override
     public Integer apply(final String[] args) {
         try {
-            final NBCLI cli = new NBCLI("nb");
+            final NBCLI cli = new NBCLI("nb5");
             final int result = cli.applyDirect(args);
             return result;
         } catch (final Exception e) {

@@ -78,6 +78,9 @@ import java.util.function.LongToDoubleFunction;
 @Service(value= DiagTask.class,selector="gauge")
 public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double> {
     private final static Logger logger = LogManager.getLogger("DIAG");
+
+    // TODO: allow for temporal filtering
+    // TODO: allow for temporal cycles
     private String name;
 
     private Gauge<Double> gauge;

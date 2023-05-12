@@ -24,19 +24,42 @@ description: |
 
 scenarios:
  default:
-  per-second: run driver=diag tags=block:per-second rate=10 cycles=6000
-  per-minute: run driver=diag tags=block:per-minute rate=10 cycles=6000
+   bysecond: start driver=diag tags=block:bysecond rate=10 cycles=6000
+   byminute: start driver=diag tags=block:stable rate=10 cycles=6000
+   for100bins: start driver=diag tags=block:byminute rate=10 cycles=6000
+   for2bins: start driver=diag tags=block:randomish rate=10 cycles=6000
+ bysecond:
+   bysecond: start driver=diag tags=block:bysecond rate=10 cycles=6000
+ byminute:
+   byminute: start driver=diag tags=block:stable rate=10 cycles=6000
+ stable:
+   for100bins: start driver=diag tags=block:byminute rate=10 cycles=6000
+ randomish:
+   for2bins: start driver=diag tags=block:randomish rate=10 cycles=6000
+
 
 blocks:
- per-second:
-  ops:
-   of-ten-buckets:
-    lower: type=gauge modulo=10 buckets=10 binding='HashRange(0L,100L)' stat=min
-    middle: type=gauge modulo=10 buckets=10 binding='HashRange(0L,100L)' stat=avg
-    higher: type=gauge modulo=10 buckets=10 binding='HashRange(0L,100L)' stat=max
- per-minute:
+ bysecond: # This assumes you are using a matching rate=10, for one update per second
    ops:
-     of-ten-buckets:
+     tenbins:
+       lower: type=gauge modulo=10 buckets=10 binding='HashRange(0L,100L)' stat=min
+       middle: type=gauge modulo=10 buckets=10 binding='HashRange(0L,100L)' stat=avg
+       higher: type=gauge modulo=10 buckets=10 binding='HashRange(0L,100L)' stat=max
+ byminute:  # This assumes you are using a matching rate=10, for one update per minute
+   ops:
+     tenbins:
        lower: type=gauge modulo=600 buckets=10 binding='HashRange(0L,100L)' stat=min
        middle: type=gauge modulo=600 buckets=10 binding='HashRange(0L,100L)' stat=avg
        higher: type=gauge modulo=600 buckets=10 binding='HashRange(0L,100L)' stat=max
+ stable:  # This assumes you are using a matching rate=10, for one update per minute
+   ops:
+     hundobins:
+       lower: type=gauge modulo=600 buckets=100 binding='HashRange(0L,100L)' stat=min
+       middle: type=gauge modulo=600 buckets=100 binding='HashRange(0L,100L)' stat=avg
+       higher: type=gauge modulo=600 buckets=100 binding='HashRange(0L,100L)' stat=max
+ randomish:  # This assumes you are using a matching rate=10, for 1 update per second
+   ops:
+     threebins:
+       lower: type=gauge modulo=60 buckets=3 binding='HashRange(0L,100L)' stat=min
+       middle: type=gauge modulo=60 buckets=3 binding='HashRange(0L,100L)' stat=avg
+       higher: type=gauge modulo=60 buckets=3 binding='HashRange(0L,100L)' stat=max
