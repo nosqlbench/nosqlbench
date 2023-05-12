@@ -26,10 +26,8 @@ import io.pinecone.PineconeConnection;
 import java.util.function.LongFunction;
 
 public abstract class PineconeOpDispenser extends BaseOpDispenser<PineconeOp, PineconeSpace> {
-    protected LongFunction<PineconeSpace> pcFunction;
-    protected LongFunction<String> targetFunction;
-    protected LongFunction<String> indexNameFunc;
-
+    protected final LongFunction<PineconeSpace> pcFunction;
+    protected final LongFunction<String> targetFunction;
 
     protected PineconeOpDispenser(PineconeDriverAdapter adapter,
                                   ParsedOp op,

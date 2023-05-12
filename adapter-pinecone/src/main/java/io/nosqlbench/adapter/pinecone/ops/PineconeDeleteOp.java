@@ -1,5 +1,6 @@
 package io.nosqlbench.adapter.pinecone.ops;
 
+import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.pinecone.proto.DeleteRequest;
 import io.pinecone.proto.DeleteResponse;
 import io.pinecone.PineconeConnection;
@@ -10,8 +11,14 @@ public class PineconeDeleteOp extends PineconeOp {
 
     private static final Logger LOGGER = LogManager.getLogger(PineconeDeleteOp.class);
 
-    private DeleteRequest request;
+    private final DeleteRequest request;
 
+    /**
+     * Create a new {@link ParsedOp} encapsulating a call to the Pinecone client delete method
+     *
+     * @param connection    The associated {@link PineconeConnection} used to communicate with the database
+     * @param request       The {@link DeleteRequest} built for this operation
+     */
     public PineconeDeleteOp(PineconeConnection connection, DeleteRequest request) {
         super(connection);
         this.request = request;

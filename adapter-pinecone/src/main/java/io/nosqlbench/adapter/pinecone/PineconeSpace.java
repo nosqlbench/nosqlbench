@@ -20,14 +20,17 @@ public class PineconeSpace {
     private final String name;
 
     private final PineconeClient client;
-    private PineconeClientConfig config;
+    private final PineconeClientConfig config;
+
+    private final Map<String,PineconeConnection> connections = new HashMap<String,PineconeConnection>();
 
     /**
-     * Connections are index-specific so we need to allow for multiple connection management across indices.
-     * However, note that a single connection object is thread safe and can be used by multiple clients.
+     * Create a new PineconeSpace Object which stores all stateful contextual information needed to interact
+     * with the Pinecone database instance.
+     *
+     * @param name  The name of this space
+     * @param cfg   The configuration ({@link NBConfiguration}) for this nb run
      */
-    private Map<String,PineconeConnection> connections = new HashMap<String,PineconeConnection>();
-
     public PineconeSpace(String name, NBConfiguration cfg) {
         this.apiKey = cfg.get("apiKey");
         this.environment = cfg.get("environment");
@@ -42,6 +45,13 @@ public class PineconeSpace {
         this.client = new PineconeClient(config);
     }
 
+    /**
+     * Connections are index-specific so we need to allow for multiple connection management across indices.
+     * However, note that a single connection object is thread safe and can be used by multiple clients.
+     *
+     * @param index     The database index for which a connection is being requested
+     * @return          The {@link PineconeConnection} for this database index
+     */
     public synchronized PineconeConnection getConnection(String index) {
         PineconeConnection connection = connections.get(index);
         if (connection == null) {

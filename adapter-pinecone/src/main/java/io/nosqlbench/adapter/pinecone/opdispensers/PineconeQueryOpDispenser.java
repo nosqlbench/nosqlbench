@@ -7,48 +7,56 @@ import io.nosqlbench.adapter.pinecone.ops.PineconeQueryOp;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.pinecone.proto.QueryRequest;
 import io.pinecone.proto.QueryVector;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-/**
- float[] rawVector = {1.0F, 2.0F, 3.0F};
- QueryVector queryVector = QueryVector.newBuilder()
- .addAllValues(Floats.asList(rawVector))
- .setFilter(Struct.newBuilder()
- .putFields("some_field", Value.newBuilder()
- .setStructValue(Struct.newBuilder()
- .putFields("$lt", Value.newBuilder()
- .setNumberValue(3)
- .build()))
- .build())
- .build())
- .setNamespace("default-namespace")
- .build();
-
- QueryRequest queryRequest = QueryRequest.newBuilder()
- .addQueries(queryVector)
- .setNamespace("default-namespace")
- .setTopK(2)
- .setIncludeMetadata(true)
- .build();
- }
- **/
-
 public class PineconeQueryOpDispenser extends PineconeOpDispenser {
+    private static final Logger LOGGER = LogManager.getLogger(PineconeQueryOpDispenser.class);
     private final LongFunction<QueryRequest> queryRequestFunc;
 
+    /**
+     * Create a new PineconeQueryOpDispenser subclassed from {@link PineconeOpDispenser}.
+     *
+     * @param adapter           The associated {@link PineconeDriverAdapter}
+     * @param op                The {@link ParsedOp} encapsulating the activity for this cycle
+     * @param pcFunction        A function to return the associated context of this activity (see {@link PineconeSpace})
+     * @param targetFunction    A LongFunction that returns the specified Pinecone Index for this Op
+     */
     public PineconeQueryOpDispenser(PineconeDriverAdapter adapter,
                                     ParsedOp op,
                                     LongFunction<PineconeSpace> pcFunction,
                                     LongFunction<String> targetFunction) {
         super(adapter, op, pcFunction, targetFunction);
-
-        indexNameFunc = op.getAsRequiredFunction("query", String.class);
         queryRequestFunc = createQueryRequestFunc(op, createQueryVectorFunc(op));
     }
 
+     /*
+     float[] rawVector = {1.0F, 2.0F, 3.0F};
+     QueryVector queryVector = QueryVector.newBuilder()
+     .addAllValues(Floats.asList(rawVector))
+     .setFilter(Struct.newBuilder()
+     .putFields("some_field", Value.newBuilder()
+     .setStructValue(Struct.newBuilder()
+     .putFields("$lt", Value.newBuilder()
+     .setNumberValue(3)
+     .build()))
+     .build())
+     .build())
+     .setNamespace("default-namespace")
+     .build();
+
+     QueryRequest queryRequest = QueryRequest.newBuilder()
+     .addQueries(queryVector)
+     .setNamespace("default-namespace")
+     .setTopK(2)
+     .setIncludeMetadata(true)
+     .build();
+     }
+     */
     private LongFunction<QueryRequest> createQueryRequestFunc(ParsedOp op, LongFunction<QueryVector> queryVectorFunc) {
         LongFunction<QueryRequest.Builder> rFunc = l -> QueryRequest.newBuilder();
 
@@ -111,7 +119,7 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeQueryOp(pcFunction.apply(value).getConnection(indexNameFunc.apply(value)),
+        return new PineconeQueryOp(pcFunction.apply(value).getConnection(targetFunction.apply(value)),
             queryRequestFunc.apply(value));
     }
 }

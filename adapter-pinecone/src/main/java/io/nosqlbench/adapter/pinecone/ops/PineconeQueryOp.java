@@ -1,5 +1,6 @@
 package io.nosqlbench.adapter.pinecone.ops;
 
+import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.pinecone.proto.QueryRequest;
 import io.pinecone.PineconeConnection;
 import io.pinecone.proto.QueryResponse;
@@ -10,8 +11,14 @@ public class PineconeQueryOp extends PineconeOp {
 
     private static final Logger LOGGER = LogManager.getLogger(PineconeQueryOp.class);
 
-    private QueryRequest request;
+    private final QueryRequest request;
 
+    /**
+     * Create a new {@link ParsedOp} encapsulating a call to the Pinecone client query method
+     *
+     * @param connection    The associated {@link PineconeConnection} used to communicate with the database
+     * @param request       The {@link QueryRequest} built for this operation
+     */
     public PineconeQueryOp(PineconeConnection connection, QueryRequest request) {
         super(connection);
         this.request = request;

@@ -20,18 +20,33 @@ public class PineconeOpMapper implements OpMapper<PineconeOp> {
     private final DriverSpaceCache<? extends PineconeSpace> spaceCache;
     private final NBConfiguration cfg;
 
-    public PineconeOpMapper(PineconeDriverAdapter adapter, DriverSpaceCache<? extends PineconeSpace> spaceCache, NBConfiguration cfg) {
+    /**
+     * Create a new PineconeOpMapper implementing the {@link OpMapper} interface.
+     *
+     * @param adapter       The associated {@link PineconeDriverAdapter}
+     * @param spaceCache    A cached context Object of thpe {@link PineconeSpace})
+     * @param cfg           The configuration ({@link NBConfiguration}) for this nb run
+     */
+    public PineconeOpMapper(PineconeDriverAdapter adapter,
+                            DriverSpaceCache<? extends PineconeSpace> spaceCache,
+                            NBConfiguration cfg) {
         this.adapter = adapter;
         this.spaceCache = spaceCache;
         this.cfg = cfg;
     }
 
+    /**
+     * Given an instance of a {@link ParsedOp} returns the appropriate {@link PineconeOpDispenser} subclass
+     *
+     * @param op    The ParsedOp to be evaluated
+     * @return      The correct PineconeOpDispenser subclass based on the op type
+     */
     @Override
     public OpDispenser<? extends PineconeOp> apply(ParsedOp op) {
         LongFunction<String> spaceFunction = op.getAsFunctionOr("space", "default");
         LongFunction<PineconeSpace> pcFunction = l -> spaceCache.get(spaceFunction.apply(l));
 
-        TypeAndTarget<PineconeOpTypes, String> opType = op.getTypeAndTarget(PineconeOpTypes.class, String.class, "type", "stmt");
+        TypeAndTarget<PineconeOpTypes, String> opType = op.getTypeAndTarget(PineconeOpTypes.class, String.class, "type", "index");
 
         LOGGER.info(() -> "Using " + opType.enumId + " statement form for '" + op.getName());
 

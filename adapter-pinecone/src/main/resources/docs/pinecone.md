@@ -13,6 +13,17 @@ ops:
     operator:
     comparator:
 
+# A pinecone query op verbose
+ query-example:
+   type: query
+   index: myindex
+   vector: use bindings to generate an array of floats
+   namespace: mynamespace
+   filter:
+     field:
+     operator:
+     comparator:
+
 
 # A delete op
  delete-example:

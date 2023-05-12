@@ -5,42 +5,49 @@ import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeDeleteOp;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.pinecone.PineconeConnection;
 import io.pinecone.proto.DeleteRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-/**
- * return DeleteRequest.newBuilder()
- *             .setNamespace(namespace)
- *             .addAllIds(Arrays.asList(idsToDelete))
- *             .setDeleteAll(false)
- *             .build();
- */
 
 public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
+    private static final Logger LOGGER = LogManager.getLogger(PineconeDeleteOpDispenser.class);
     private final LongFunction<DeleteRequest> deleteRequestFunc;
 
+    /**
+     * Create a new PineconeDeleteOpDispenser subclassed from {@link PineconeOpDispenser}.
+     *
+     * @param adapter           The associated {@link PineconeDriverAdapter}
+     * @param op                The {@link ParsedOp} encapsulating the activity for this cycle
+     * @param pcFunction        A function to return the associated context of this activity (see {@link PineconeSpace})
+     * @param targetFunction    A LongFunction that returns the specified Pinecone Index for this Op
+     */
     public PineconeDeleteOpDispenser(PineconeDriverAdapter adapter,
                                      ParsedOp op,
                                      LongFunction<PineconeSpace> pcFunction,
                                      LongFunction<String> targetFunction) {
         super(adapter, op, pcFunction, targetFunction);
-
-        indexNameFunc = op.getAsRequiredFunction("delete", String.class);
         deleteRequestFunc = createDeleteRequestFunction(op);
     }
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeDeleteOp(pcFunction.apply(value).getConnection(indexNameFunc.apply(value)),
+        return new PineconeDeleteOp(pcFunction.apply(value).getConnection(targetFunction.apply(value)),
             deleteRequestFunc.apply(value));
     }
 
+    /*
+     * return DeleteRequest.newBuilder()
+     * .setNamespace(namespace)
+     * .addAllIds(Arrays.asList(idsToDelete))
+     * .setDeleteAll(false)
+     * .build();
+     */
     private LongFunction<DeleteRequest> createDeleteRequestFunction(ParsedOp op) {
         LongFunction<DeleteRequest.Builder> rFunc = l -> DeleteRequest.newBuilder();
 

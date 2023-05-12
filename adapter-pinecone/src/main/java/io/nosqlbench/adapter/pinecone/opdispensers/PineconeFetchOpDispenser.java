@@ -7,6 +7,8 @@ import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.pinecone.PineconeConnection;
 import io.pinecone.proto.FetchRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,14 +16,22 @@ import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class PineconeFetchOpDispenser extends PineconeOpDispenser {
+    private static final Logger LOGGER = LogManager.getLogger(PineconeFetchOpDispenser.class);
     private final LongFunction<FetchRequest> fetchRequestFunc;
 
+    /**
+     * Create a new PineconeFetchOpDispenser subclassed from {@link PineconeOpDispenser}.
+     *
+     * @param adapter           The associated {@link PineconeDriverAdapter}
+     * @param op                The {@link ParsedOp} encapsulating the activity for this cycle
+     * @param pcFunction        A function to return the associated context of this activity (see {@link PineconeSpace})
+     * @param targetFunction    A LongFunction that returns the specified Pinecone Index for this Op
+     */
     public PineconeFetchOpDispenser(PineconeDriverAdapter adapter,
                                     ParsedOp op,
                                     LongFunction<PineconeSpace> pcFunction,
                                     LongFunction<String> targetFunction) {
         super(adapter, op, pcFunction, targetFunction);
-        indexNameFunc = op.getAsRequiredFunction("fetch", String.class);
         fetchRequestFunc = createFetchRequestFunction(op);
     }
 
@@ -52,7 +62,7 @@ public class PineconeFetchOpDispenser extends PineconeOpDispenser {
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeFetchOp(pcFunction.apply(value).getConnection(indexNameFunc.apply(value)),
+        return new PineconeFetchOp(pcFunction.apply(value).getConnection(targetFunction.apply(value)),
             fetchRequestFunc.apply(value));
     }
 }

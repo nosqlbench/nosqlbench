@@ -1,5 +1,6 @@
 package io.nosqlbench.adapter.pinecone.ops;
 
+import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.pinecone.proto.DescribeIndexStatsRequest;
 import io.pinecone.proto.DescribeIndexStatsResponse;
 import io.pinecone.PineconeConnection;
@@ -10,8 +11,14 @@ public class PineconeDescribeIndexStatsOp extends PineconeOp {
 
     private static final Logger LOGGER = LogManager.getLogger(PineconeDescribeIndexStatsOp.class);
 
-    private DescribeIndexStatsRequest request;
+    private final DescribeIndexStatsRequest request;
 
+    /**
+     * Create a new {@link ParsedOp} encapsulating a call to the Pinecone client describeIndexStats method
+     *
+     * @param connection    The associated {@link PineconeConnection} used to communicate with the database
+     * @param request       The {@link DescribeIndexStatsRequest} built for this operation
+     */
     public PineconeDescribeIndexStatsOp(PineconeConnection connection, DescribeIndexStatsRequest request) {
         super(connection);
         this.request = request;
