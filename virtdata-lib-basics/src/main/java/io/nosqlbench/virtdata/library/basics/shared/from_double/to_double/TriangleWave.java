@@ -26,23 +26,45 @@ import java.util.function.LongUnaryOperator;
 
 @ThreadSafeMapper
 @Categories(Category.periodic)
-public class CyclicDistance implements DoubleUnaryOperator {
+public class TriangleWave implements DoubleUnaryOperator {
     private final double phaseLength;
     private final DoubleUnaryOperator scaleFunc;
+    private final DoubleUnaryOperator normalizerFunc;
 
-    public CyclicDistance(double phaseLength, Object scaleFunc) {
+    private final double halfWave;
+
+    public TriangleWave(double phaseLength, Object scaler) {
+        this.halfWave = phaseLength*0.5d;
+
+        normalizerFunc=d -> d/(phaseLength/2.0);
         this.phaseLength=phaseLength;
-        this.scaleFunc = VirtDataConversions.adaptFunction(scaleFunc, DoubleUnaryOperator.class);
+        if (scaler instanceof Number number) {
+            if (scaler instanceof Double adouble) {
+                this.scaleFunc=d -> d*adouble;
+            } else {
+                this.scaleFunc= d -> d*number.doubleValue();
+            }
+        } else {
+            this.scaleFunc = VirtDataConversions.adaptFunction(scaler, DoubleUnaryOperator.class);
+        }
     }
-    public CyclicDistance(double phaseLength) {
+    public TriangleWave(double phaseLength) {
         this(phaseLength, LongUnaryOperator.identity());
     }
 
     @Override
     public double applyAsDouble(double operand) {
         double position = operand % phaseLength;
-        double minDistanceFromEnds = Math.min(Math.abs(phaseLength - position), position);
-        double result = scaleFunc.applyAsDouble(minDistanceFromEnds);
-        return result;
+        int slot = (int) (4.0d*position/phaseLength);
+        double sample = switch (slot) {
+            case 0 -> position;
+            case 1 -> halfWave-position;
+            case 2 -> position-halfWave;
+            case 4 -> phaseLength-position;
+            default -> Double.NaN;
+        };
+        double normalized = normalizerFunc.applyAsDouble(sample);
+        double scaled = scaleFunc.applyAsDouble(sample);
+        return sample;
     }
 }

@@ -33,15 +33,15 @@ import java.util.function.LongUnaryOperator;
  */
 @ThreadSafeMapper
 @Categories(Category.periodic)
-public class CyclicDistance implements LongUnaryOperator {
+public class TriangleWave implements LongUnaryOperator {
     private final long phaseLength;
     private final LongUnaryOperator scaleFunc;
 
-    public CyclicDistance(long phaseLength, Object scaleFunc) {
+    public TriangleWave(long phaseLength, Object scaleFunc) {
         this.phaseLength=phaseLength;
         this.scaleFunc = VirtDataConversions.adaptFunction(scaleFunc, LongUnaryOperator.class);
     }
-    public CyclicDistance(long phaseLength) {
+    public TriangleWave(long phaseLength) {
         this(phaseLength, LongUnaryOperator.identity());
     }
 
