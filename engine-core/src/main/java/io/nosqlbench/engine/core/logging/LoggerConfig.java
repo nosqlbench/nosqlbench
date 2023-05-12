@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package io.nosqlbench.engine.core.logging;
 
 import io.nosqlbench.api.logging.NBLogLevel;
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.ExpectedResultVerificationErrorHandler;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
@@ -208,6 +210,25 @@ public class LoggerConfig extends ConfigurationFactory {
                             .add(logfileLayout)
                             .addComponent(triggeringPolicy);
             builder.add(logsAppenderBuilder);
+
+            // RESULTVERIFYLOG appender
+            AppenderComponentBuilder resultVerificationAppenderBuilder =
+                builder
+                    .newAppender("RESULTVERIFYLOG", FileAppender.PLUGIN_NAME)
+                    .addAttribute("append", false)
+                    .addAttribute("fileName", loggerDir.resolve("expected-result-verification.log").toString())
+                    .add(builder
+                        .newLayout("PatternLayout")
+                        .addAttribute("pattern", "%d %p %C{1.} [%t] %m%n")
+                    );
+            builder.add(resultVerificationAppenderBuilder);
+
+            // Result Verification logging
+            builder.add(builder
+                .newLogger(ExpectedResultVerificationErrorHandler.class.getName(), Level.INFO)
+                .add(builder.newAppenderRef("RESULTVERIFYLOG"))
+                .addAttribute("additivity", false)
+            );
 
             rootBuilder.add(
                     builder.newAppenderRef("SCENARIO_APPENDER")

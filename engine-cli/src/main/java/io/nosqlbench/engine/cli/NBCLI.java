@@ -246,7 +246,7 @@ public class NBCLI implements Function<String[], Integer> {
         }
 
         NBCLIOptions options = new NBCLIOptions(args);
-        logger = LogManager.getLogger("NBCLI");
+        logger = LogManager.getLogger("NBCLI"); // TODO JK - already present in L166
 
         NBIO.addGlobalIncludes(options.wantsIncludes());
 

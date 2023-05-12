@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityimpl;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.errors.MVELCompilationError;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ThreadLocalNamedTimers;
@@ -66,19 +67,27 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
             }
         }
         configureInstrumentation(op);
-        configureExpectations(op);
-    }
-
-    // TODO/MVEL: Please add some error handling around that explains to the user
-    // what happened in the event of a compilation failure.
-    private void configureExpectations(ParsedOp op) {
-        op.getOptionalStaticValue("expected-result", String.class)
-            .map(MVEL::compileExpression)
-            .ifPresent(result -> this.expectedResultExpression = result);
+        configureResultExpectations(op);
     }
 
     public Serializable getExpectedResultExpression() {
         return expectedResultExpression;
+    }
+
+    private void configureResultExpectations(ParsedOp op) {
+        op.getOptionalStaticValue("expected-result", String.class)
+            .map(this::compileExpectedResultExpression)
+            .ifPresent(result -> this.expectedResultExpression = result);
+    }
+
+    private Serializable compileExpectedResultExpression(String expectedResultExpression) {
+        try {
+            return MVEL.compileExpression(expectedResultExpression);
+        } catch (Exception e) {
+            throw new MVELCompilationError(
+                String.format("Failed to compile expected-result expression: \"%s\"", expectedResultExpression), e
+            );
+        }
     }
 
     String getOpName() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityapi.errorhandling;
 
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
+import io.nosqlbench.engine.api.metrics.ExceptionExpectedResultVerificationMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionMeterMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionTimerMetrics;
@@ -31,6 +32,7 @@ public class ErrorMetrics {
     private ExceptionHistoMetrics exceptionHistoMetrics;
     private ExceptionMeterMetrics exceptionMeterMetrics;
     private ExceptionTimerMetrics exceptionTimerMetrics;
+    private ExceptionExpectedResultVerificationMetrics exceptionExpectedResultVerificationMetrics;
 
     public ErrorMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -62,6 +64,13 @@ public class ErrorMetrics {
             exceptionTimerMetrics = new ExceptionTimerMetrics(activityDef);
         }
         return exceptionTimerMetrics;
+    }
+
+    public synchronized ExceptionExpectedResultVerificationMetrics getExceptionExpectedResultVerificationMetrics() {
+        if (exceptionExpectedResultVerificationMetrics == null) {
+            exceptionExpectedResultVerificationMetrics = new ExceptionExpectedResultVerificationMetrics(activityDef);
+        }
+        return exceptionExpectedResultVerificationMetrics;
     }
 
     public interface Aware {

@@ -33,9 +33,4 @@ package io.nosqlbench.engine.api.activityimpl.uniform.flowtypes;
  */
 // TODO: optimize the runtime around the specific op type
 public interface Op extends OpResultSize {
-    // TODO/MVEL: Let's take this out of here to keep Op as a tagging interface
-    // I think it will sit fine on the BaseOpDispenser, and lifecycles align for this nicely
-    default boolean verified() {
-        return false;
-    }
 }

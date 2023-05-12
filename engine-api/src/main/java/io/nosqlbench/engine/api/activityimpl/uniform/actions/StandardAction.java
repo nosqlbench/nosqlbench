@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform.actions;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.errors.ExpectedResultVerificationError;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
@@ -29,7 +30,9 @@ import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mvel2.MVEL;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -104,6 +107,16 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                         throw new RuntimeException("The op implementation did not implement any active logic. Implement " +
                             "one of [RunnableOp, CycleOp, or ChainingOp]");
                     }
+                    var expectedResultExpression = dispenser.getExpectedResultExpression();
+                    if (shouldVerifyExpectedResultFor(op, expectedResultExpression)) {
+                        var verified = MVEL.executeExpression(expectedResultExpression, result, boolean.class);
+                        // TODO/MVEL: Wherever this logic lives, we might want to have a symbolic description which
+                        // is emitted for logging our metrics purposes indicating the success or failure outcomes.
+                        // perhaps something like expected-name: .... and metrics could be then <expected-name>-success and <expected-name>-error
+                        if (!verified) {
+                            throw new ExpectedResultVerificationError(maxTries - tries);
+                        }
+                    }
                 } catch (Exception e) {
                     error = e;
                 } finally {
@@ -112,31 +125,6 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                     if (error == null) {
                         resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
                         dispenser.onSuccess(cycle, nanos, op.getResultSize());
-
-                        if (dispenser.getExpectedResultExpression() != null) { // TODO JK refactor the whole if/else break/continue tree
-                            if (op.verified()) { // TODO JK Could this be moved to BaseOpDispenser?
-                                logger.info(() -> "Verification of result passed"); // TODO/MVEL: this is too verbose per cycle
-                                break;
-                            } else {
-                                // retry
-                                var triesLeft = maxTries - tries;
-                                logger.info("Verification of result did not pass - {} retries left", triesLeft);
-                                // TODO/MVEL: I think we should designate a separate logging channel for verification logic
-                                if (triesLeft == 0) {
-                                    var retriesExhausted = new RuntimeException("Max retries for verification step exhausted."); // TODO JK do we need a dedicated exception here? VerificationRetriesExhaustedException?
-                                    var errorDetail = errorHandler.handleError(retriesExhausted, cycle, nanos);
-                                    dispenser.onError(cycle, nanos, retriesExhausted);
-                                    code = ErrorDetail.ERROR_RETRYABLE.resultCode; // TODO JK use code from errorDetail.resultCode?
-                                    break;
-                                }
-                                continue;
-                                // TODO/MVEL: I think we should collapse all this if possible to throwing a UnverifiedError and let error handlers do their thing.
-                                // TODO/MVEL: This would work nicely with existing mechanisms and allow users to route errors and status codes as they like.
-                                // TODO/MVEL: A future refinement would be to allow customized error handlers (+-) per dispenser
-                            }
-                        } else {
-                            break;
-                        }
                     } else {
                         ErrorDetail detail = errorHandler.handleError(error, cycle, nanos);
                         dispenser.onError(cycle, nanos, error);
@@ -162,5 +150,9 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
+    }
+
+    private boolean shouldVerifyExpectedResultFor(Op op, Serializable expectedResultExpression) {
+        return !(op instanceof RunnableOp) && expectedResultExpression != null;
     }
 }

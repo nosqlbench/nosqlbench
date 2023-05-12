@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,11 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 
-import java.io.Serializable;
-
 public class Cqld4CqlSimpleStatement extends Cqld4CqlOp {
     private final SimpleStatement stmt;
 
-    public Cqld4CqlSimpleStatement(CqlSession session, SimpleStatement stmt, int maxPages, boolean retryReplace, int maxLwtRetries, Serializable expectedResultExpression) {
-        super(session, maxPages,retryReplace, maxLwtRetries, new RSProcessors(), expectedResultExpression);
+    public Cqld4CqlSimpleStatement(CqlSession session, SimpleStatement stmt, int maxPages, boolean retryReplace, int maxLwtRetries) {
+        super(session, maxPages,retryReplace, maxLwtRetries, new RSProcessors());
         this.stmt = stmt;
     }
 

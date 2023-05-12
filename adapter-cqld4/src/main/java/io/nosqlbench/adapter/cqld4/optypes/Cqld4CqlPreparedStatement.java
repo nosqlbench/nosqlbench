@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,12 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 
-import java.io.Serializable;
-
 public class Cqld4CqlPreparedStatement extends Cqld4CqlOp {
 
     private final BoundStatement stmt;
 
-    public Cqld4CqlPreparedStatement(CqlSession session, BoundStatement stmt, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors, Serializable expectedResultExpression) {
-        super(session, maxPages, retryReplace, maxLwtRetries, processors, expectedResultExpression);
+    public Cqld4CqlPreparedStatement(CqlSession session, BoundStatement stmt, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors) {
+        super(session, maxPages, retryReplace, maxLwtRetries, processors);
         this.stmt = stmt;
     }
 

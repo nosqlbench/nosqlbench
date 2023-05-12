@@ -27,9 +27,7 @@ import io.nosqlbench.adapter.cqld4.exceptions.ExceededRetryReplaceException;
 import io.nosqlbench.adapter.cqld4.exceptions.UndefinedResultSetException;
 import io.nosqlbench.adapter.cqld4.exceptions.UnexpectedPagingException;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
-import org.mvel2.MVEL;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +44,7 @@ import java.util.Map;
 // TODO: add rows histogram resultSetSizeHisto
 
 
-public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture, OpGenerator, OpResultSize {
+public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture, OpGenerator, OpResultSize {
 
     private final CqlSession session;
     private final int maxPages;
@@ -59,19 +57,13 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
     private final RSProcessors processors;
 
     private final ThreadLocal<List<Row>> results = new ThreadLocal<>();
-    private Serializable expectedResultExpression;
 
     public Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors) {
-        this(session, maxPages, retryReplace, maxLwtRetries, processors, null);
-    }
-
-    public Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors, Serializable expectedResultExpressions) {
         this.session = session;
         this.maxPages = maxPages;
         this.retryReplace = retryReplace;
         this.maxLwtRetries =maxLwtRetries;
         this.processors = processors;
-        this.expectedResultExpression = expectedResultExpressions;
     }
 
     protected Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, int retryRplaceCount, RSProcessors processors) {
@@ -83,7 +75,7 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
         this.processors = processors;
     }
 
-    public final ResultSet apply(long cycle) {
+    public final List<Row> apply(long cycle) {
 
         Statement<?> stmt = getStmt();
         rs = session.execute(stmt);
@@ -128,11 +120,10 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
                 results.set(resultRows);
                 break;
             }
-            totalRows += pageRows; // TODO JK what is this for?
-            // TODO/MVEL: JK: this is meant to go to a total-rows metric, although it is not wired correctly yet
+            totalRows += pageRows;
         }
         processors.flush();
-        return rs;
+        return results.get();
     }
 
     @Override
@@ -159,13 +150,4 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
         return new Cqld4CqlReboundStatement(session, maxPages, retryReplace, maxLwtRetries, retryReplaceCount, rebound, processors);
     }
 
-    @Override
-    public boolean verified() { // TODO JK can this be made CQL agnostic? And moved to BaseOpDispenser?
-        // TODO/MVEL: Yes, it can. The initial implementation should, and it should actually be inside
-        // the main StandardAction, _after_ CycleOp or ChainingOp result is computed
-        return MVEL.executeExpression(expectedResultExpression, results.get(), boolean.class);
-        // TODO/MVEL: Wherever this logic lives, we might want to have a symbolic description which
-        // is emitted for logging our metrics purposes indicating the success or failure outcomes.
-        // perhaps something like expected-name: .... and metrics could be then <expected-name>-success and <expected-name>-error
-    }
 }
