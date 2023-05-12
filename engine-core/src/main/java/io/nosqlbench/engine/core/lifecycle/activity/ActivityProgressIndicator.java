@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,9 @@ public class ActivityProgressIndicator implements Runnable {
     }
 
     private void parseProgressSpec(String interval) {
+        if (interval==null) {
+            throw new RuntimeException("can't parse progress spec if it is null");
+        }
         String[] parts = interval.split(":");
         switch (parts.length) {
             case 2:

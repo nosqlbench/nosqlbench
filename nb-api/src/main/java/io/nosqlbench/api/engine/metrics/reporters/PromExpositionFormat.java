@@ -68,7 +68,7 @@ public enum PromExpositionFormat {
 
                 final long count = counting.getCount();
                 buffer
-                    .append(labels.modifyValue("name", n -> n+"_total"))
+                    .append(labels.modifyValue("name", n -> n+"_total").linearize("name"))
                     .append(' ')
                     .append(count)
                     .append(' ')
@@ -110,7 +110,7 @@ public enum PromExpositionFormat {
                     .append(' ')
                     .append(meanValue)
                     .append('\n');
-                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_stdev")).append(" gauge\n");
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_stdev").only("name")).append(" gauge\n");
                 final double stdDev = snapshot.getStdDev();
                 buffer.append(labels.modifyValue("name",n->n+"_stdev").linearize("name"))
                     .append(' ')

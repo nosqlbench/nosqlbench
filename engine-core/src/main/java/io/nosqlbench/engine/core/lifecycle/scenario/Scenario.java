@@ -139,7 +139,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
     }
 
     public static Scenario forTesting(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
-        return new Scenario(name,null,engine,null,true,true,reportSummaryTo,"",Path.of("logs"),minMaturity, NBLabeledElement.forKV("test-name","name"));
+        return new Scenario(name,null,engine,"console:10s",true,true,reportSummaryTo,"",Path.of("logs"),minMaturity, NBLabeledElement.forKV("test-name","name"));
     }
 
 //    public Scenario(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {

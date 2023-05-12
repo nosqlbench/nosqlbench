@@ -34,7 +34,7 @@ public class DiagTask_gaugeTest {
         gaugeTask.setLabelsFrom(NBLabeledElement.EMPTY);
         NBConfiguration taskConfig = gaugeTask.getConfigModel().apply(Map.of(
                 "name","test",
-                "bins","5",
+                "buckets","5",
                 "binding", "Identity()"
         ));
         gaugeTask.applyConfig(taskConfig);
@@ -52,7 +52,7 @@ public class DiagTask_gaugeTest {
         gaugeTask.setLabelsFrom(NBLabeledElement.EMPTY);
         NBConfiguration taskConfig = gaugeTask.getConfigModel().apply(Map.of(
             "name","test",
-            "bins","5",
+            "buckets","5",
             "stat", "min",
             "binding", "Identity()"
         ));
@@ -71,7 +71,7 @@ public class DiagTask_gaugeTest {
         gaugeTask.setLabelsFrom(NBLabeledElement.EMPTY);
         NBConfiguration taskConfig = gaugeTask.getConfigModel().apply(Map.of(
             "name","test",
-            "bins","5",
+            "buckets","5",
             "stat", "max",
             "binding", "Identity()"
         ));

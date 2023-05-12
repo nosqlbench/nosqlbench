@@ -261,7 +261,7 @@ public class ScriptExampleTests {
     public void testErrorPropagationFromAdapterOperation() {
         ExecutionMetricsResult scenarioResult = runScenario(
             "basicdiag",
-            "type", "diag", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
+            "driver", "diag", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
         );
     }
 
