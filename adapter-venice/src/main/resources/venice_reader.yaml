@@ -1,0 +1,13 @@
+bindings:
+  mykey: Mod(5); ToString(); Prefix("key-")
+
+# document level parameters that apply to all Pulsar client types:
+params:
+  temporary_dest: "false"
+
+blocks:
+  read-block:
+    ops:
+      op1:
+        ReadSingleKey: "store1"
+        key: "{mykey}"

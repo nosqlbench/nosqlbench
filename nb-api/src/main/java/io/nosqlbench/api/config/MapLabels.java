@@ -31,7 +31,7 @@ public class MapLabels implements NBLabels {
         parentLabels.forEach(combined::put);
         childLabels.forEach((k,v) -> {
             if (combined.containsKey(k))
-                throw new RuntimeException("Can't overlap label keys between parent and child elements. parent:" + parentLabels + ", child:" + childLabels);
+                throw new RuntimeException("Can't overlap label keys (for instance " + k + ") between parent and child elements. parent:" + parentLabels + ", child:" + childLabels);
             combined.put(k,v);
         });
         labels=Collections.unmodifiableMap(combined);
