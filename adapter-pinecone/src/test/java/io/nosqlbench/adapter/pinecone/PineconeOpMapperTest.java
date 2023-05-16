@@ -1,5 +1,7 @@
 package io.nosqlbench.adapter.pinecone;
 
+import io.nosqlbench.adapter.pinecone.opdispensers.PineconeDeleteOpDispenser;
+import io.nosqlbench.adapter.pinecone.opdispensers.PineconeQueryOpDispenser;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
@@ -26,7 +28,10 @@ public class PineconeOpMapperTest {
 
     @BeforeAll
     public static void initializeTestMapper() {
-        cfg = PineconeSpace.getConfigModel().apply(Map.of());
+        Map<String,String> configMap = Map.of("apiKey","2f55b2f0-670f-4c51-9073-4d37142b761a",
+            "environment","us-east-1-aws",
+            "projectName","default");
+        cfg = PineconeSpace.getConfigModel().apply(configMap);
         adapter = new PineconeDriverAdapter();
         adapter.applyConfig(cfg);
         DriverSpaceCache<? extends PineconeSpace> cache = adapter.getSpaceCache();
@@ -36,34 +41,45 @@ public class PineconeOpMapperTest {
     private static ParsedOp parsedOpFor(String yaml) {
         OpsDocList docs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
         OpTemplate opTemplate = docs.getOps().get(0);
-        ParsedOp parsedOp = new ParsedOp(opTemplate, cfg, List.of(adapter.getPreprocessor()));
-        return parsedOp;
+        return new ParsedOp(opTemplate, cfg, List.of(adapter.getPreprocessor()));
     }
 
     @Test
     public void testQueryOpDispenserSimple() {
         ParsedOp pop = parsedOpFor("""
-                                         ops:
-                                           query-op1:
-                                             query: "test-index"
-                                             vector: "1.0,2.0,3.0"
-                                             namespace: "test-namespace"
-                                             top_k: 10
-                                             filters:
-                                               - filter_field: "value"
-                                                 operator: "$lt"
-                                                 comparator: 2
-                                             include_values: true
-                                             include_metadata: true
-
+            ops:
+              op1:
+                 type: "query"
+                 index: "test-index"
+                 vector: "1.0,2.0,3.0"
+                 namespace: "test-namespace"
+                 top_k: 10
+                 filters:
+                   - "value $lt 2"
+                   - "value $gt 10"
+                 include_values: true
+                 include_metadata: true
             """);
         OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
-        //assertions go here...
+        assert(dispenser instanceof PineconeQueryOpDispenser);
     }
 
     @Test
     public void testDeleteOpDispenser() {
-
+        ParsedOp pop = parsedOpFor("""
+            ops:
+              op1:
+                 type: "delete"
+                 index: "test-index"
+                 ids: "1.0,2.0,3.0"
+                 namespace: "test-namespace"
+                 deleteall: true
+                 filters:
+                   - "value $lt 2"
+                   - "value $gt 10"
+            """);
+        OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
+        assert(dispenser instanceof PineconeDeleteOpDispenser);
     }
 
     @Test

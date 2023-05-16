@@ -1,5 +1,7 @@
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
+import com.google.protobuf.Struct;
+import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeDeleteOp;
@@ -9,9 +11,7 @@ import io.pinecone.proto.DeleteRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.LongFunction;
 
 
@@ -41,13 +41,6 @@ public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
             deleteRequestFunc.apply(value));
     }
 
-    /*
-     * return DeleteRequest.newBuilder()
-     * .setNamespace(namespace)
-     * .addAllIds(Arrays.asList(idsToDelete))
-     * .setDeleteAll(false)
-     * .build();
-     */
     private LongFunction<DeleteRequest> createDeleteRequestFunction(ParsedOp op) {
         LongFunction<DeleteRequest.Builder> rFunc = l -> DeleteRequest.newBuilder();
 
@@ -76,22 +69,22 @@ public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
             rFunc = l -> finalFunc.apply(l).setDeleteAll(af.apply(l));
         }
 
-        //TODO: Add filters
+        Optional<LongFunction<String>> filterFunction = op.getAsOptionalFunction("filter", String.class);
+        if (filterFunction.isPresent()) {
+            LongFunction<DeleteRequest.Builder> finalFunc = rFunc;
+            LongFunction<Struct> builtFilter = l -> {
+                String[] filterFields = filterFunction.get().apply(l).split(" ");
+                return Struct.newBuilder().putFields(filterFields[0],
+                    Value.newBuilder().setStructValue(Struct.newBuilder().putFields(filterFields[1],
+                            Value.newBuilder().setNumberValue(Integer.valueOf(filterFields[2])).build()))
+                            .build()).build();
+            };
+            rFunc = l -> finalFunc.apply(l).setFilter(builtFilter.apply(l));
+        }
 
         LongFunction<DeleteRequest.Builder> finalRFunc = rFunc;
         return l -> finalRFunc.apply(l).build();
     }
-
-/*    private LongFunction<Collection<AttributeDefinition>> resolveAttributeDefinitionFunction(ParsedOp cmd) {
-        LongFunction<? extends Map> attrsmap = cmd.getAsRequiredFunction("Attributes", Map.class);
-        return (long l) -> {
-            List<AttributeDefinition> defs = new ArrayList<>();
-            attrsmap.apply(l).forEach((k, v) -> {
-                defs.add(new AttributeDefinition(k.toString(), ScalarAttributeType.valueOf(v.toString())));
-            });
-            return defs;
-        };
-    }*/
 
 
 }

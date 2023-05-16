@@ -3,6 +3,7 @@ package io.nosqlbench.adapter.pinecone;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.api.config.standard.Param;
 import io.pinecone.PineconeClient;
 import io.pinecone.PineconeClientConfig;
 import io.pinecone.PineconeConnection;
@@ -65,7 +66,21 @@ public class PineconeSpace {
     }
 
     public static NBConfigModel getConfigModel() {
-        return ConfigModel.of(PineconeSpace.class);
+
+        return ConfigModel.of(PineconeSpace.class)
+            .add(
+                Param.required("apiKey",String.class)
+                    .setDescription("the Pinecone API key to use to connect to the database")
+            )
+            .add(
+                Param.defaultTo("environment","us-east-1-aws")
+                    .setDescription("the environment in which the desired index is running.")
+            )
+            .add(
+                Param.defaultTo("projectName","default")
+                    .setDescription("the project name associated with the desired index")
+            )
+            .asReadOnly();
     }
 
 }

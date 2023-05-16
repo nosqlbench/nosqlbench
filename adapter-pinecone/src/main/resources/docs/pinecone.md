@@ -64,25 +64,13 @@ ops:
     namespace: delete_namespace
     ids: csv_list_of_vectors_to_delete
     deleteall: [true,false]
-    filters:
-      - filter_field: delete_filter_field
-        operator: [$lt, $gt, $eq, ...]
-        comparator: query_compval
-      - filter_field: delete_filter_field
-        operator: [$lt, $gt, $eq, ...]
-        comparator: query_compval
+    filter: <field operator compval>
 
 # A describe index stats op. Specify metadata filters to narrow the range of indices described.
   describe-index-stats-example:
     type: describe-index-stats
     index: describe_index
-    filters:
-      - filter_field: delete_filter_field
-        operator: [$lt, $gt, $eq, ...]
-        comparator: query_compval
-      - filter_field: delete_filter_field
-        operator: [$lt, $gt, $eq, ...]
-        comparator: query_compval
+    filter: <field operator compval>
 
 # A pinecone fetch op
   fetch-example:
