@@ -79,7 +79,7 @@ public class VeniceSpace implements  AutoCloseable {
         ClientConfig clientConfig = ClientConfig.defaultGenericClientConfig(storeName);
         clientConfig.setVeniceURL(routerUrl);
         clientConfig.setForceClusterDiscoveryAtStartTime(true);
-        // clientConfig.setToken(token);
+        clientConfig.setToken(token);
         client = ClientFactory.getAndStartGenericAvroClient(clientConfig);
     }
 
