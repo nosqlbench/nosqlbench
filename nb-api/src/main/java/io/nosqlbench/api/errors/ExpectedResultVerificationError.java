@@ -21,12 +21,10 @@ import java.io.Serializable;
 public class ExpectedResultVerificationError extends RuntimeException {
     private final int triesLeft;
     private final Serializable expectedResultExpression;
-    private final Object result;
 
-    public ExpectedResultVerificationError(int triesLeft, Serializable expectedResultExpression, Object result) {
+    public ExpectedResultVerificationError(int triesLeft, Serializable expectedResultExpression) {
         this.triesLeft = triesLeft;
         this.expectedResultExpression = expectedResultExpression;
-        this.result = result;
     }
 
     public int getTriesLeft() {
@@ -37,7 +35,4 @@ public class ExpectedResultVerificationError extends RuntimeException {
         return expectedResultExpression;
     }
 
-    public String getResultAsString() {
-        return result.toString(); // TODO JK how to traverse the first x characters of the result? parse to json? via reflection?
-    }
 }

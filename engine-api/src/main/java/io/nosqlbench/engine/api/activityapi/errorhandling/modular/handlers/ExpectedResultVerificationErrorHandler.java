@@ -40,7 +40,7 @@ public class ExpectedResultVerificationErrorHandler implements ErrorHandler, Err
     public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
         if (t instanceof ExpectedResultVerificationError erve) {
             if (erve.getTriesLeft() == 0) {
-                logger.warn("Cycle: {} Verification of result {} did not pass following expression: {}", cycle, erve.getResultAsString(), erve.getExpectedResultExpression());
+                logger.warn("Cycle: {} Verification of result did not pass following expression: {}", cycle, erve.getExpectedResultExpression());
                 exceptionExpectedResultVerificationMetrics.countVerificationErrors();
             } else {
                 logger.info("Cycle: {} Verification of result did not pass. {} retries left.", cycle, erve.getTriesLeft());

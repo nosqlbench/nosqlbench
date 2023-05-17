@@ -205,13 +205,13 @@ class NBErrorHandlerTest {
         appender.cleanup(logger);
     }
 
+    @SuppressWarnings("unused")
     private static Stream<Arguments> testExpectedResultVerificationErrorHandler() {
         Logger logger = (Logger) LogManager.getLogger("VERIFY");
-        var obj = new Object();
         return Stream.of(
             Arguments.of(
                 "retries left",
-                new ExpectedResultVerificationError(5, "expected", obj),
+                new ExpectedResultVerificationError(5, "expected"),
                 "Cycle: 1 Verification of result did not pass. 5 retries left.",
                 1,
                 0,
@@ -219,13 +219,13 @@ class NBErrorHandlerTest {
             ),
             Arguments.of(
                 "no retries left",
-        new ExpectedResultVerificationError(0, "expected", obj),
-                String.format("Cycle: 1 Verification of result %s did not pass following expression: %s", obj.toString(), "expected"),
+                new ExpectedResultVerificationError(0, "expected"),
+                "Cycle: 1 Verification of result did not pass following expression: expected",
                 0,
                 1,
                 logger
             )
-            );
+        );
     }
 
 }

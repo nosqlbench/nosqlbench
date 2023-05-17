@@ -111,7 +111,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                     if (shouldVerifyExpectedResultFor(op, expectedResultExpression)) {
                         var verified = MVEL.executeExpression(expectedResultExpression, result, boolean.class);
                         if (!verified) {
-                            throw new ExpectedResultVerificationError(maxTries - tries, expectedResultExpression, result);
+                            throw new ExpectedResultVerificationError(maxTries - tries, expectedResultExpression);
                         }
                     }
                 } catch (Exception e) {
