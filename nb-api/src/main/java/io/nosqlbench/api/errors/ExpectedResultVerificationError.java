@@ -16,14 +16,28 @@
 
 package io.nosqlbench.api.errors;
 
+import java.io.Serializable;
+
 public class ExpectedResultVerificationError extends RuntimeException {
     private final int triesLeft;
+    private final Serializable expectedResultExpression;
+    private final Object result;
 
-    public ExpectedResultVerificationError(int triesLeft) {
+    public ExpectedResultVerificationError(int triesLeft, Serializable expectedResultExpression, Object result) {
         this.triesLeft = triesLeft;
+        this.expectedResultExpression = expectedResultExpression;
+        this.result = result;
     }
 
     public int getTriesLeft() {
         return triesLeft;
+    }
+
+    public Serializable getExpectedResultExpression() {
+        return expectedResultExpression;
+    }
+
+    public String getResultAsString() {
+        return result.toString(); // TODO JK how to traverse the first x characters of the result? parse to json? via reflection?
     }
 }

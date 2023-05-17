@@ -207,11 +207,12 @@ class NBErrorHandlerTest {
     }
 
     private static Stream<Arguments> testExpectedResultVerificationErrorHandler() {
-        Logger logger = (Logger) LogManager.getLogger(ExpectedResultVerificationErrorHandler.class);
+        Logger logger = (Logger) LogManager.getLogger("VERIFY");
+        var obj = new Object();
         return Stream.of(
             Arguments.of(
                 "retries left",
-                new ExpectedResultVerificationError(5),
+                new ExpectedResultVerificationError(5, "expected", obj),
                 "Cycle: 1 Verification of result did not pass. 5 retries left.",
                 1,
                 0,
@@ -219,8 +220,8 @@ class NBErrorHandlerTest {
             ),
             Arguments.of(
                 "no retries left",
-        new ExpectedResultVerificationError(0),
-                "Verification of result did not pass. All retries exhausted.",
+        new ExpectedResultVerificationError(0, "expected", obj),
+                String.format("Cycle: 1 Verification of result %s did not pass following expression: %s", obj.toString(), "expected"),
                 0,
                 1,
                 logger

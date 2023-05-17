@@ -110,11 +110,8 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                     var expectedResultExpression = dispenser.getExpectedResultExpression();
                     if (shouldVerifyExpectedResultFor(op, expectedResultExpression)) {
                         var verified = MVEL.executeExpression(expectedResultExpression, result, boolean.class);
-                        // TODO/MVEL: Wherever this logic lives, we might want to have a symbolic description which
-                        // is emitted for logging our metrics purposes indicating the success or failure outcomes.
-                        // perhaps something like expected-name: .... and metrics could be then <expected-name>-success and <expected-name>-error
                         if (!verified) {
-                            throw new ExpectedResultVerificationError(maxTries - tries);
+                            throw new ExpectedResultVerificationError(maxTries - tries, expectedResultExpression, result);
                         }
                     }
                 } catch (Exception e) {
@@ -125,6 +122,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                     if (error == null) {
                         resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
                         dispenser.onSuccess(cycle, nanos, op.getResultSize());
+                        break;
                     } else {
                         ErrorDetail detail = errorHandler.handleError(error, cycle, nanos);
                         dispenser.onError(cycle, nanos, error);

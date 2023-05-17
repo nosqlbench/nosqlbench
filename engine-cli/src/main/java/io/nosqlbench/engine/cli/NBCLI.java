@@ -160,6 +160,7 @@ public class NBCLI implements Function<String[], Integer> {
             .setMaxLogs(globalOptions.getLogsMax())
             .setLogsDirectory(globalOptions.getLogsDirectory())
             .setAnsiEnabled(globalOptions.isEnableAnsi())
+            .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
             .activate();
         ConfigurationFactory.setConfigurationFactory(loggerConfig);
 
@@ -246,7 +247,7 @@ public class NBCLI implements Function<String[], Integer> {
         }
 
         NBCLIOptions options = new NBCLIOptions(args);
-        logger = LogManager.getLogger("NBCLI"); // TODO JK - already present in L166
+        logger = LogManager.getLogger("NBCLI");
 
         NBIO.addGlobalIncludes(options.wantsIncludes());
 

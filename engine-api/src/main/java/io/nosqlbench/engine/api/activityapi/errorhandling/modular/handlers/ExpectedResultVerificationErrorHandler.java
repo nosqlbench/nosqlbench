@@ -33,19 +33,17 @@ import java.util.function.Supplier;
  */
 @Service(value = ErrorHandler.class, selector = "verifyexpected")
 public class ExpectedResultVerificationErrorHandler implements ErrorHandler, ErrorMetrics.Aware {
-    private static final Logger logger = LogManager.getLogger(ExpectedResultVerificationErrorHandler.class);
+    private static final Logger logger = LogManager.getLogger("VERIFY");
     private ExceptionExpectedResultVerificationMetrics exceptionExpectedResultVerificationMetrics;
 
     @Override
     public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
         if (t instanceof ExpectedResultVerificationError erve) {
             if (erve.getTriesLeft() == 0) {
-                logger.warn("Verification of result did not pass. All retries exhausted.");
+                logger.warn("Cycle: {} Verification of result {} did not pass following expression: {}", cycle, erve.getResultAsString(), erve.getExpectedResultExpression());
                 exceptionExpectedResultVerificationMetrics.countVerificationErrors();
             } else {
                 logger.info("Cycle: {} Verification of result did not pass. {} retries left.", cycle, erve.getTriesLeft());
-                // TODO/MVEL: I think we should designate a separate logging channel for verification logic
-                // TODO JK: Should this be done via a dedicated logger in the LoggerConfig class? log4j2.xml files seem to be overridden?
                 exceptionExpectedResultVerificationMetrics.countVerificationRetries();
             }
         }

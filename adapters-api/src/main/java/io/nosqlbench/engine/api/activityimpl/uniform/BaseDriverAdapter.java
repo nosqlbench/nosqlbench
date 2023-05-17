@@ -170,6 +170,7 @@ public abstract class BaseDriverAdapter<R extends Op, S> implements DriverAdapte
                 .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
                 .add(Param.optional("driver", String.class))
                 .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|none)"))
+                .add(Param.optional("maxtries", Integer.class))
                 .asReadOnly();
     }
 

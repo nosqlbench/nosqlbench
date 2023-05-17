@@ -89,6 +89,7 @@ public class LoggerConfig extends ConfigurationFactory {
     private int maxLogfiles = 100;
     private String logfileLocation;
     private boolean ansiEnabled;
+    private boolean isDedicatedVerificationLoggerEnabled = false;
 
 
     public LoggerConfig() {
@@ -106,6 +107,11 @@ public class LoggerConfig extends ConfigurationFactory {
 
     public LoggerConfig setLogfileLevel(NBLogLevel level) {
         this.fileLevel = level;
+        return this;
+    }
+
+    public LoggerConfig setDedicatedVerificationLogger(boolean enabled) {
+        this.isDedicatedVerificationLoggerEnabled = enabled;
         return this;
     }
 
@@ -211,24 +217,10 @@ public class LoggerConfig extends ConfigurationFactory {
                             .addComponent(triggeringPolicy);
             builder.add(logsAppenderBuilder);
 
-            // RESULTVERIFYLOG appender
-            AppenderComponentBuilder resultVerificationAppenderBuilder =
-                builder
-                    .newAppender("RESULTVERIFYLOG", FileAppender.PLUGIN_NAME)
-                    .addAttribute("append", false)
-                    .addAttribute("fileName", loggerDir.resolve("expected-result-verification.log").toString())
-                    .add(builder
-                        .newLayout("PatternLayout")
-                        .addAttribute("pattern", "%d %p %C{1.} [%t] %m%n")
-                    );
-            builder.add(resultVerificationAppenderBuilder);
-
-            // Result Verification logging
-            builder.add(builder
-                .newLogger(ExpectedResultVerificationErrorHandler.class.getName(), Level.INFO)
-                .add(builder.newAppenderRef("RESULTVERIFYLOG"))
-                .addAttribute("additivity", false)
-            );
+            if (isDedicatedVerificationLoggerEnabled) {
+                var verificationLogfilePath = loggerDir.resolve(filebase + "_verification.log").toString();
+                addResultVerificationLoggingChannel(builder, verificationLogfilePath);
+            }
 
             rootBuilder.add(
                     builder.newAppenderRef("SCENARIO_APPENDER")
@@ -387,5 +379,24 @@ public class LoggerConfig extends ConfigurationFactory {
     public LoggerConfig setLogsDirectory(Path logsDirectory) {
         this.loggerDir = logsDirectory;
         return this;
+    }
+
+    private void addResultVerificationLoggingChannel(ConfigurationBuilder<BuiltConfiguration> builder, String verificationLogfilePath) {
+        var appenderName = "RESULTVERIFYLOG";
+        var appender = builder
+            .newAppender(appenderName, FileAppender.PLUGIN_NAME)
+            .addAttribute("append", false)
+            .addAttribute("fileName", verificationLogfilePath)
+            .add(builder
+                .newLayout("PatternLayout")
+                .addAttribute("pattern", "%d %p %C{1.} [%t] %m%n")
+            );
+        var logger = builder
+            .newLogger("VERIFY", Level.INFO)
+            .add(builder.newAppenderRef(appenderName))
+            .addAttribute("additivity", false);
+
+        builder.add(appender);
+        builder.add(logger);
     }
 }
