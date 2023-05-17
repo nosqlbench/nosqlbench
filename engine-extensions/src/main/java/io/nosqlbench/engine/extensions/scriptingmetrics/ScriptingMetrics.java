@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,26 @@
 package io.nosqlbench.engine.extensions.scriptingmetrics;
 
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.Logger;
-
-import javax.script.ScriptContext;
 
 public class ScriptingMetrics {
     private final Logger logger;
     private final MetricRegistry metricRegistry;
-    private final ScriptContext scriptContext;
+    private final LabeledScenarioContext scriptContext;
 
-    public ScriptingMetrics(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public ScriptingMetrics(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
 
         this.logger = logger;
         this.metricRegistry = metricRegistry;
         this.scriptContext = scriptContext;
     }
 
-    public ScriptingGauge newGauge(String name, double initialValue) {
-        ScriptingGauge scriptingGauge = new ScriptingGauge(name, initialValue);
-        ActivityMetrics.gauge(scriptContext,name, scriptingGauge);
-        logger.info(() -> "registered scripting gauge:" + name);
+    public ScriptingGauge newGauge(final String name, final double initialValue) {
+        final ScriptingGauge scriptingGauge = new ScriptingGauge(name, initialValue);
+        ActivityMetrics.gauge(this.scriptContext,name, scriptingGauge);
+        this.logger.info(() -> "registered scripting gauge:" + name);
         return scriptingGauge;
     }
 

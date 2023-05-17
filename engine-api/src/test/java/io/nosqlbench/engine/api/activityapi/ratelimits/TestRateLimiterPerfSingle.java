@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.testutils.Result;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec.Verb;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -32,83 +33,83 @@ import java.util.function.Function;
  */
 public class TestRateLimiterPerfSingle {
 
-    private final Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(ActivityDef.parseActivityDef("alias=tokenrl"),"hybrid", rs.withVerb(RateSpec.Verb.start));
+    private final Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(NBLabeledElement.forKV("alias","tokenrl"),"hybrid", rs.withVerb(Verb.start));
     private final RateLimiterPerfTestMethods methods = new RateLimiterPerfTestMethods();
 
     @Test
     @Disabled
     public void testPerf1e9() {
-        Result result = methods.rateLimiterSingleThreadedConvergence(rlFunction,new RateSpec(1E9, 1.1),10_000_000,0.01d);
+        final Result result = this.methods.rateLimiterSingleThreadedConvergence(this.rlFunction,new RateSpec(1.0E9, 1.1),10_000_000,0.01d);
         System.out.println(result);
     }
 
     @Test
     @Disabled
     public void testPerf1e8() {
-        Result result = methods.rateLimiterSingleThreadedConvergence(rlFunction,new RateSpec(1E8, 1.1),50_000_000,0.005d);
+        final Result result = this.methods.rateLimiterSingleThreadedConvergence(this.rlFunction,new RateSpec(1.0E8, 1.1),50_000_000,0.005d);
         System.out.println(result);
     }
 
     @Test
     @Disabled
     public void testPerf1e7() {
-        Result result = methods.rateLimiterSingleThreadedConvergence(rlFunction,new RateSpec(1E7, 1.1),5_000_000,0.01d);
+        final Result result = this.methods.rateLimiterSingleThreadedConvergence(this.rlFunction,new RateSpec(1.0E7, 1.1),5_000_000,0.01d);
         System.out.println(result);
     }
 
     @Test
     @Disabled
     public void testPerf1e6() {
-        Result result = methods.rateLimiterSingleThreadedConvergence(rlFunction,new RateSpec(1E6, 1.1),500_000,0.005d);
+        final Result result = this.methods.rateLimiterSingleThreadedConvergence(this.rlFunction,new RateSpec(1.0E6, 1.1),500_000,0.005d);
         System.out.println(result);
     }
 
     @Test
     @Disabled
     public void testPerf1e5() {
-        Result result = methods.rateLimiterSingleThreadedConvergence(rlFunction,new RateSpec(1E5, 1.1),50_000,0.01d);
+        final Result result = this.methods.rateLimiterSingleThreadedConvergence(this.rlFunction,new RateSpec(1.0E5, 1.1),50_000,0.01d);
         System.out.println(result);
     }
 
     @Test
     @Disabled
     public void testPerf1e4() {
-        Result result = methods.rateLimiterSingleThreadedConvergence(rlFunction,new RateSpec(1E4, 1.1),5_000,0.005d);
+        final Result result = this.methods.rateLimiterSingleThreadedConvergence(this.rlFunction,new RateSpec(1.0E4, 1.1),5_000,0.005d);
         System.out.println(result);
     }
 
     @Test
     @Disabled
     public void testPerf1e3() {
-        Result result = methods.rateLimiterSingleThreadedConvergence(rlFunction,new RateSpec(1E3, 1.1),500,0.005d);
+        final Result result = this.methods.rateLimiterSingleThreadedConvergence(this.rlFunction,new RateSpec(1.0E3, 1.1),500,0.005d);
         System.out.println(result);
     }
 
     @Test
     @Disabled
     public void testPerf1e2() {
-        Result result = methods.rateLimiterSingleThreadedConvergence(rlFunction,new RateSpec(1E2, 1.1),50,0.005d);
+        final Result result = this.methods.rateLimiterSingleThreadedConvergence(this.rlFunction,new RateSpec(1.0E2, 1.1),50,0.005d);
         System.out.println(result);
     }
 
     @Test
     @Disabled
     public void testPerf1e1() {
-        Result result = methods.rateLimiterSingleThreadedConvergence(rlFunction,new RateSpec(1E1, 1.1),5,0.005d);
+        final Result result = this.methods.rateLimiterSingleThreadedConvergence(this.rlFunction,new RateSpec(1.0E1, 1.1),5,0.005d);
         System.out.println(result);
     }
 
     @Test
     @Disabled
     public void testPerf1e0() {
-        Result result = methods.rateLimiterSingleThreadedConvergence(rlFunction,new RateSpec(1E0, 1.1),2,0.005d);
+        final Result result = this.methods.rateLimiterSingleThreadedConvergence(this.rlFunction,new RateSpec(1.0E0, 1.1),2,0.005d);
         System.out.println(result);
     }
 
     @Test
     @Disabled
     public void testePerf1eN1() {
-        Result result = methods.rateLimiterSingleThreadedConvergence(rlFunction,new RateSpec(1E-1, 1.1),1,0.005d);
+        final Result result = this.methods.rateLimiterSingleThreadedConvergence(this.rlFunction,new RateSpec(1.0E-1, 1.1),1,0.005d);
         System.out.println(result);
 
     }

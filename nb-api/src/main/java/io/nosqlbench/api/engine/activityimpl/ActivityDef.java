@@ -43,7 +43,7 @@ public class ActivityDef implements NBNamedElement {
     public static final String DEFAULT_ATYPE = "stdout  ";
     public static final String DEFAULT_CYCLES = "0";
     public static final int DEFAULT_THREADS = 1;
-    private final static Logger logger = LogManager.getLogger(ActivityDef.class);
+    private static final Logger logger = LogManager.getLogger(ActivityDef.class);
     // an alias with which to control the activity while it is running
     private static final String FIELD_ALIAS = "alias";
     // a file or URL containing the activity: op templates, generator bindings, ...
@@ -52,8 +52,8 @@ public class ActivityDef implements NBNamedElement {
     private static final String FIELD_CYCLES = "cycles";
     // initial thread concurrency for this activity
     private static final String FIELD_THREADS = "threads";
-    private static final String[] field_list = new String[]{
-            FIELD_ALIAS, FIELD_ATYPE, FIELD_CYCLES, FIELD_THREADS
+    private static final String[] field_list = {
+        FIELD_ALIAS, FIELD_ATYPE, FIELD_CYCLES, FIELD_THREADS
     };
     // parameter map has its own internal atomic map
     private final ParameterMap parameterMap;
@@ -76,7 +76,7 @@ public class ActivityDef implements NBNamedElement {
         ActivityDef activityDef = new ActivityDef(activityParameterMap.orElseThrow(
                 () -> new RuntimeException("Unable to parse:" + namedActivitySpec)
         ));
-        logger.info("parsed activityDef " + namedActivitySpec + " to-> " + activityDef);
+        logger.info("parsed activityDef {} to-> {}", namedActivitySpec, activityDef);
 
         return activityDef;
     }
@@ -110,7 +110,7 @@ public class ActivityDef implements NBNamedElement {
         String cycles = parameterMap.getOptionalString("cycles").orElse(DEFAULT_CYCLES);
         int rangeAt = cycles.indexOf("..");
         String startCycle;
-        if (rangeAt > 0) {
+        if (0 < rangeAt) {
             startCycle = cycles.substring(0, rangeAt);
         } else {
             startCycle = "0";
@@ -122,7 +122,7 @@ public class ActivityDef implements NBNamedElement {
     }
 
     public void setStartCycle(long startCycle) {
-        parameterMap.set(FIELD_CYCLES, "" + startCycle + ".." + getEndCycle());
+        parameterMap.set(FIELD_CYCLES, startCycle + ".." + getEndCycle());
     }
 
     public void setStartCycle(String startCycle) {
@@ -146,7 +146,7 @@ public class ActivityDef implements NBNamedElement {
         String cycles = parameterMap.getOptionalString(FIELD_CYCLES).orElse(DEFAULT_CYCLES);
         int rangeAt = cycles.indexOf("..");
         String endCycle;
-        if (rangeAt > 0) {
+        if (0 < rangeAt) {
             endCycle = cycles.substring(rangeAt + 2);
         } else {
             endCycle = cycles;
@@ -157,7 +157,7 @@ public class ActivityDef implements NBNamedElement {
     }
 
     public void setEndCycle(long endCycle) {
-        parameterMap.set(FIELD_CYCLES, "" + getStartCycle() + ".." + endCycle);
+        parameterMap.set(FIELD_CYCLES, getStartCycle() + ".." + endCycle);
     }
 
     /**
@@ -201,12 +201,12 @@ public class ActivityDef implements NBNamedElement {
     }
 
     public long getCycleCount() {
-        return (getEndCycle() - getStartCycle());
+        return getEndCycle() - getStartCycle();
     }
 
     private void checkInvariants() {
         if (getStartCycle() >= getEndCycle()) {
-            throw new InvalidParameterException("Start cycle must be strictly less than end cycle, but they are [" + getStartCycle() + "," + getEndCycle() + ")");
+            throw new InvalidParameterException("Start cycle must be strictly less than end cycle, but they are [" + getStartCycle() + ',' + getEndCycle() + ')');
         }
     }
 
@@ -217,19 +217,19 @@ public class ActivityDef implements NBNamedElement {
 
     public ActivityDef deprecate(String deprecatedName, String newName) {
         Object deprecatedParam = this.parameterMap.get(deprecatedName);
-        if (deprecatedParam==null) {
+        if (null == deprecatedParam) {
             return this;
         }
         if (deprecatedParam instanceof CharSequence chars) {
             if (this.parameterMap.containsKey(newName)) {
-                throw new BasicError("You have specified activity param '" + deprecatedName + "' in addition to the valid name '" + newName +"'. Remove '" + deprecatedName + "'.");
-            } else {
-                logger.warn("Auto replacing deprecated activity param '" + deprecatedName + "="+ chars +"' with new '" + newName +"="+ chars +"'.");
-                parameterMap.put(newName,parameterMap.remove(deprecatedName));
+                throw new BasicError("You have specified activity param '" + deprecatedName + "' in addition to the valid name '" + newName + "'. Remove '" + deprecatedName + "'.");
             }
+            logger.warn("Auto replacing deprecated activity param '{}={}' with new '{}={}'.", deprecatedName, chars, newName, chars);
+            parameterMap.put(newName, parameterMap.remove(deprecatedName));
         } else {
             throw new BasicError("Can't replace deprecated name with value of type " + deprecatedName.getClass().getCanonicalName());
         }
         return this;
     }
+
 }

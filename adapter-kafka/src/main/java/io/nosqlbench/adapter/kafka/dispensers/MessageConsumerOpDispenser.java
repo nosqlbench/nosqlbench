@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaClient;
 import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaConsumer;
 import io.nosqlbench.adapter.kafka.util.EndToEndStartingTimeSource;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
+import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil.DOC_LEVEL_PARAMS;
 import io.nosqlbench.engine.api.metrics.ReceivedMessageSequenceTracker;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -39,7 +40,7 @@ import java.util.stream.Collectors;
 
 public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
 
-    private final static Logger logger = LogManager.getLogger("MessageConsumerOpDispenser");
+    private static final Logger logger = LogManager.getLogger("MessageConsumerOpDispenser");
 
     private final Map<String, String> consumerClientConfMap = new HashMap<>();
 
@@ -60,108 +61,102 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
         receivedMessageSequenceTrackersForTopicThreadLocal = ThreadLocal.withInitial(HashMap::new);
     protected final LongFunction<Boolean> seqTrackingFunc;
 
-    public MessageConsumerOpDispenser(DriverAdapter adapter,
-                                      ParsedOp op,
-                                      LongFunction<String> tgtNameFunc,
-                                      KafkaSpace kafkaSpace) {
+    public MessageConsumerOpDispenser(final DriverAdapter adapter,
+                                      final ParsedOp op,
+                                      final LongFunction<String> tgtNameFunc,
+                                      final KafkaSpace kafkaSpace) {
         super(adapter, op, tgtNameFunc, kafkaSpace);
 
-        this.consumerClientConfMap.putAll(kafkaSpace.getKafkaClientConf().getConsumerConfMap());
-        consumerClientConfMap.put("bootstrap.servers", kafkaSpace.getBootstrapSvr());
+        consumerClientConfMap.putAll(kafkaSpace.getKafkaClientConf().getConsumerConfMap());
+        this.consumerClientConfMap.put("bootstrap.servers", kafkaSpace.getBootstrapSvr());
 
-        this.msgPollIntervalInSec =
-            NumberUtils.toInt(parsedOp.getStaticConfigOr("msg_poll_interval", "0"));
+        msgPollIntervalInSec =
+            NumberUtils.toInt(this.parsedOp.getStaticConfigOr("msg_poll_interval", "0"));
 
-        this.maxMsgCntPerCommit =
-            NumberUtils.toInt(parsedOp.getStaticConfig("manual_commit_batch_num", String.class));
+        maxMsgCntPerCommit =
+            NumberUtils.toInt(this.parsedOp.getStaticConfig("manual_commit_batch_num", String.class));
 
-        this.autoCommitEnabled = true;
-        if (maxMsgCntPerCommit > 0) {
-            this.autoCommitEnabled = false;
-            consumerClientConfMap.put("enable.auto.commit", "false");
-        } else {
-            if (consumerClientConfMap.containsKey("enable.auto.commit")) {
-                this.autoCommitEnabled = BooleanUtils.toBoolean(consumerClientConfMap.get("enable.auto.commit"));
-            }
-        }
-        this.e2eStartTimeSrcParamStrFunc = lookupOptionalStrOpValueFunc(
-            KafkaAdapterUtil.DOC_LEVEL_PARAMS.E2E_STARTING_TIME_SOURCE.label, "none");
-        this.seqTrackingFunc = lookupStaticBoolConfigValueFunc(
-            KafkaAdapterUtil.DOC_LEVEL_PARAMS.SEQ_TRACKING.label, false);
-        ;
+        autoCommitEnabled = true;
+        if (0 < maxMsgCntPerCommit) {
+            autoCommitEnabled = false;
+            this.consumerClientConfMap.put("enable.auto.commit", "false");
+        } else if (this.consumerClientConfMap.containsKey("enable.auto.commit"))
+            autoCommitEnabled = BooleanUtils.toBoolean(this.consumerClientConfMap.get("enable.auto.commit"));
+        e2eStartTimeSrcParamStrFunc = this.lookupOptionalStrOpValueFunc(
+            DOC_LEVEL_PARAMS.E2E_STARTING_TIME_SOURCE.label, "none");
+        seqTrackingFunc = this.lookupStaticBoolConfigValueFunc(
+            DOC_LEVEL_PARAMS.SEQ_TRACKING.label, false);
     }
 
-    private String getEffectiveGroupId(long cycle) {
-        int grpIdx = (int) (cycle % consumerGrpCnt);
+    private String getEffectiveGroupId(final long cycle) {
+        final int grpIdx = (int) (cycle % this.consumerGrpCnt);
         String defaultGrpNamePrefix = KafkaAdapterUtil.DFT_CONSUMER_GROUP_NAME_PREFIX;
-        if (consumerClientConfMap.containsKey("group.id")) {
-            defaultGrpNamePrefix = consumerClientConfMap.get("group.id");
-        }
+        if (this.consumerClientConfMap.containsKey("group.id"))
+            defaultGrpNamePrefix = this.consumerClientConfMap.get("group.id");
 
-        return defaultGrpNamePrefix + "-" + grpIdx;
+        return defaultGrpNamePrefix + '-' + grpIdx;
     }
 
     private OpTimeTrackKafkaClient getOrCreateOpTimeTrackKafkaConsumer(
-        long cycle,
-        List<String> topicNameList,
-        String groupId)
+        final long cycle,
+        final List<String> topicNameList,
+        final String groupId)
     {
-        String topicNameListStr = topicNameList.stream()
+        final String topicNameListStr = topicNameList.stream()
             .collect(Collectors.joining("::"));
 
-        String cacheKey = KafkaAdapterUtil.buildCacheKey(
-            "consumer-" + String.valueOf(cycle % kafkaClntCnt), topicNameListStr, groupId );
+        final String cacheKey = KafkaAdapterUtil.buildCacheKey(
+            "consumer-" + cycle % this.kafkaClntCnt, topicNameListStr, groupId );
 
-        OpTimeTrackKafkaClient opTimeTrackKafkaClient = kafkaSpace.getOpTimeTrackKafkaClient(cacheKey);
-        if (opTimeTrackKafkaClient == null) {
-            Properties consumerConfProps = new Properties();
-            consumerConfProps.putAll(consumerClientConfMap);
+        OpTimeTrackKafkaClient opTimeTrackKafkaClient = this.kafkaSpace.getOpTimeTrackKafkaClient(cacheKey);
+        if (null == opTimeTrackKafkaClient) {
+            final Properties consumerConfProps = new Properties();
+            consumerConfProps.putAll(this.consumerClientConfMap);
             consumerConfProps.put("group.id", groupId);
 
-            KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConfProps);
+            final KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConfProps);
             synchronized (this) {
                 consumer.subscribe(topicNameList);
             }
-            if (logger.isDebugEnabled()) {
-                logger.debug("Kafka consumer created: {}/{} -- {}, {}, {}",
+            if (MessageConsumerOpDispenser.logger.isDebugEnabled())
+                MessageConsumerOpDispenser.logger.debug("Kafka consumer created: {}/{} -- {}, {}, {}",
                     cacheKey,
                     consumer,
                     topicNameList,
-                    autoCommitEnabled,
-                    maxMsgCntPerCommit);
-            }
+                    this.autoCommitEnabled,
+                    this.maxMsgCntPerCommit);
 
             opTimeTrackKafkaClient = new OpTimeTrackKafkaConsumer(
-                kafkaSpace,
-                asyncAPI,
-                msgPollIntervalInSec,
-                autoCommitEnabled,
-                maxMsgCntPerCommit,
+                this.kafkaSpace,
+                this.asyncAPI,
+                this.msgPollIntervalInSec,
+                this.autoCommitEnabled,
+                this.maxMsgCntPerCommit,
                 consumer,
-                kafkaAdapterMetrics,
-                EndToEndStartingTimeSource.valueOf(e2eStartTimeSrcParamStrFunc.apply(cycle).toUpperCase()),
+                this.kafkaAdapterMetrics,
+                EndToEndStartingTimeSource.valueOf(this.e2eStartTimeSrcParamStrFunc.apply(cycle).toUpperCase()),
                 this::getReceivedMessageSequenceTracker,
-                seqTrackingFunc.apply(cycle));
-            kafkaSpace.addOpTimeTrackKafkaClient(cacheKey, opTimeTrackKafkaClient);
+                this.seqTrackingFunc.apply(cycle));
+            this.kafkaSpace.addOpTimeTrackKafkaClient(cacheKey, opTimeTrackKafkaClient);
         }
 
         return opTimeTrackKafkaClient;
     }
 
-    private ReceivedMessageSequenceTracker getReceivedMessageSequenceTracker(String topicName) {
-        return receivedMessageSequenceTrackersForTopicThreadLocal.get()
-            .computeIfAbsent(topicName, k -> createReceivedMessageSequenceTracker());
+    private ReceivedMessageSequenceTracker getReceivedMessageSequenceTracker(final String topicName) {
+        return this.receivedMessageSequenceTrackersForTopicThreadLocal.get()
+            .computeIfAbsent(topicName, k -> this.createReceivedMessageSequenceTracker());
     }
 
     private ReceivedMessageSequenceTracker createReceivedMessageSequenceTracker() {
-        return new ReceivedMessageSequenceTracker(kafkaAdapterMetrics.getMsgErrOutOfSeqCounter(),
-            kafkaAdapterMetrics.getMsgErrDuplicateCounter(),
-            kafkaAdapterMetrics.getMsgErrLossCounter());
+        return new ReceivedMessageSequenceTracker(this.kafkaAdapterMetrics.getMsgErrOutOfSeqCounter(),
+            this.kafkaAdapterMetrics.getMsgErrDuplicateCounter(),
+            this.kafkaAdapterMetrics.getMsgErrLossCounter());
     }
 
-    protected List<String> getEffectiveTopicNameList(long cycle) {
-        String explicitTopicListStr = topicNameStrFunc.apply(cycle);
-        assert (StringUtils.isNotBlank(explicitTopicListStr));
+    protected List<String> getEffectiveTopicNameList(final long cycle) {
+        final String explicitTopicListStr = this.topicNameStrFunc.apply(cycle);
+        assert StringUtils.isNotBlank(explicitTopicListStr);
 
         return Arrays.stream(StringUtils.split(explicitTopicListStr, ','))
             .filter(s -> StringUtils.isNotBlank(s))
@@ -169,20 +164,18 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
     }
 
     @Override
-    public KafkaOp apply(long cycle) {
-        List<String> topicNameList = getEffectiveTopicNameList(cycle);
-        String groupId = getEffectiveGroupId(cycle);
-        if (topicNameList.size() ==0 || StringUtils.isBlank(groupId)) {
-            throw new KafkaAdapterInvalidParamException(
-                "Effective consumer group name and/or topic names  are needed for creating a consumer!");
-        }
+    public KafkaOp apply(final long cycle) {
+        final List<String> topicNameList = this.getEffectiveTopicNameList(cycle);
+        final String groupId = this.getEffectiveGroupId(cycle);
+        if ((0 == topicNameList.size()) || StringUtils.isBlank(groupId)) throw new KafkaAdapterInvalidParamException(
+            "Effective consumer group name and/or topic names  are needed for creating a consumer!");
 
-        OpTimeTrackKafkaClient opTimeTrackKafkaConsumer =
-            getOrCreateOpTimeTrackKafkaConsumer(cycle, topicNameList, groupId);
+        final OpTimeTrackKafkaClient opTimeTrackKafkaConsumer =
+            this.getOrCreateOpTimeTrackKafkaConsumer(cycle, topicNameList, groupId);
 
         return new KafkaOp(
-            kafkaAdapterMetrics,
-            kafkaSpace,
+            this.kafkaAdapterMetrics,
+            this.kafkaSpace,
             opTimeTrackKafkaConsumer,
             null);
     }

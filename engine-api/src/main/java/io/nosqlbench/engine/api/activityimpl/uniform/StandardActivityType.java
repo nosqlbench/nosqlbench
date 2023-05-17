@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.NBReconfigurable;
@@ -35,55 +36,52 @@ import java.util.Optional;
 
 public class StandardActivityType<A extends StandardActivity<?,?>> extends SimpleActivity implements ActivityType<A> {
 
-    private final static Logger logger = LogManager.getLogger("ACTIVITY");
+    private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final Map<String,DriverAdapter> adapters = new HashMap<>();
 
-    public StandardActivityType(DriverAdapter<?,?> adapter, ActivityDef activityDef) {
+    public StandardActivityType(final DriverAdapter<?,?> adapter, final ActivityDef activityDef, final NBLabeledElement parentLabels) {
         super(activityDef
             .deprecate("type","driver")
-            .deprecate("yaml", "workload")
+            .deprecate("yaml", "workload"),
+            parentLabels
         );
-        this.adapters.put(adapter.getAdapterName(),adapter);
-        if (adapter instanceof ActivityDefAware) {
-            ((ActivityDefAware) adapter).setActivityDef(activityDef);
-        }
+        adapters.put(adapter.getAdapterName(),adapter);
+        if (adapter instanceof ActivityDefAware) ((ActivityDefAware) adapter).setActivityDef(activityDef);
     }
 
-    public StandardActivityType(ActivityDef activityDef) {
-        super(activityDef);
+    public StandardActivityType(final ActivityDef activityDef, final NBLabeledElement parentLabels) {
+        super(activityDef, parentLabels);
     }
 
     @Override
-    public A getActivity(ActivityDef activityDef) {
-        if (activityDef.getParams().getOptionalString("async").isPresent()) {
+    public A getActivity(final ActivityDef activityDef, final NBLabeledElement parentLabels) {
+        if (activityDef.getParams().getOptionalString("async").isPresent())
             throw new RuntimeException("This driver does not support async mode yet.");
-        }
 
-        return (A) new StandardActivity(activityDef);
+        return (A) new StandardActivity(activityDef, parentLabels);
     }
 
     @Override
-    public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
+    public synchronized void onActivityDefUpdate(final ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
 
-        for (DriverAdapter adapter : adapters.values()) {
+        for (final DriverAdapter adapter : this.adapters.values())
             if (adapter instanceof NBReconfigurable reconfigurable) {
                 NBConfigModel cfgModel = reconfigurable.getReconfigModel();
-                Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+                final Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
                 if (op_yaml_loc.isPresent()) {
-                    Map<String,Object> disposable = new LinkedHashMap<>(activityDef.getParams());
-                    OpsDocList workload = OpsLoader.loadPath(op_yaml_loc.get(), disposable, "activities");
-                    cfgModel=cfgModel.add(workload.getConfigModel());
+                    final Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
+                    final OpsDocList workload = OpsLoader.loadPath(op_yaml_loc.get(), disposable, "activities");
+                    cfgModel = cfgModel.add(workload.getConfigModel());
                 }
-                NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
+                final NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
                 reconfigurable.applyReconfig(cfg);
             }
-        }
 
     }
 
     @Override
-    public ActionDispenser getActionDispenser(A activity) {
+    public ActionDispenser getActionDispenser(final A activity) {
         return new StandardActionDispenser(activity);
     }
 

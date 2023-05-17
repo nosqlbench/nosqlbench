@@ -1,7 +1,5 @@
-package io.nosqlbench.adapter.pulsar.dispensers;
-
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +14,27 @@ package io.nosqlbench.adapter.pulsar.dispensers;
  * limitations under the License.
  */
 
+package io.nosqlbench.adapter.pulsar.dispensers;
+
 import io.nosqlbench.adapter.pulsar.PulsarSpace;
+import io.nosqlbench.adapter.pulsar.PulsarSpace.ConsumerCacheKey;
+import io.nosqlbench.adapter.pulsar.PulsarSpace.ProducerCacheKey;
+import io.nosqlbench.adapter.pulsar.PulsarSpace.ReaderCacheKey;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterInvalidParamException;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterMetrics;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
-import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.CONF_GATEGORY;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.CONSUMER_CONF_STD_KEY;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.DOC_LEVEL_PARAMS;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.PRODUCER_CONF_STD_KEY;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.PULSAR_API_TYPE;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.READER_CONF_CUSTOM_KEY;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.READER_CONF_STD_KEY;
+import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.READER_MSG_POSITION_TYPE;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
@@ -39,9 +51,9 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, PulsarSpace> implements NBNamedElement {
+public abstract class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, PulsarSpace> {
 
-    private final static Logger logger = LogManager.getLogger("PulsarBaseOpDispenser");
+    private static final Logger logger = LogManager.getLogger("PulsarBaseOpDispenser");
 
     protected final ParsedOp parsedOp;
     protected final PulsarSpace pulsarSpace;
@@ -53,98 +65,102 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
 
     protected final long totalCycleNum;
 
-    public PulsarBaseOpDispenser(DriverAdapter adapter,
-                                 ParsedOp op,
-                                 LongFunction<String> tgtNameFunc,
-                                 PulsarSpace pulsarSpace) {
+    protected PulsarBaseOpDispenser(final DriverAdapter adapter,
+                                    final ParsedOp op,
+                                    final LongFunction<String> tgtNameFunc,
+                                    final PulsarSpace pulsarSpace) {
 
         super(adapter, op);
 
-        this.parsedOp = op;
+        parsedOp = op;
         this.tgtNameFunc = tgtNameFunc;
         this.pulsarSpace = pulsarSpace;
 
         // Doc-level parameter: async_api
-        this.asyncApiFunc = lookupStaticBoolConfigValueFunc(
-            PulsarAdapterUtil.DOC_LEVEL_PARAMS.ASYNC_API.label, true);
+        asyncApiFunc = this.lookupStaticBoolConfigValueFunc(
+            DOC_LEVEL_PARAMS.ASYNC_API.label, true);
 
-        String defaultMetricsPrefix = getDefaultMetricsPrefix(this.parsedOp);
-        this.pulsarAdapterMetrics = new PulsarAdapterMetrics(this, defaultMetricsPrefix);
-        pulsarAdapterMetrics.initPulsarAdapterInstrumentation();
+        pulsarAdapterMetrics = new PulsarAdapterMetrics(this);
+        this.pulsarAdapterMetrics.initPulsarAdapterInstrumentation();
 
-        totalThreadNum = NumberUtils.toInt(parsedOp.getStaticValue("threads"));
-        totalCycleNum = NumberUtils.toLong(parsedOp.getStaticValue("cycles"));
+        this.totalThreadNum = NumberUtils.toInt(this.parsedOp.getStaticValue("threads"));
+        this.totalCycleNum = NumberUtils.toLong(this.parsedOp.getStaticValue("cycles"));
     }
 
-    @Override
     public String getName() {
         return "PulsarBaseOpDispenser";
     }
 
-    public PulsarSpace getPulsarSpace() { return pulsarSpace; }
 
-    protected LongFunction<Boolean> lookupStaticBoolConfigValueFunc(String paramName, boolean defaultValue) {
-        LongFunction<Boolean> booleanLongFunction;
-        booleanLongFunction = (l) -> parsedOp.getOptionalStaticConfig(paramName, String.class)
+    @Override
+    public NBLabels getLabels() {
+        return NBLabels.forKV("name", this.getName());
+    }
+
+    public PulsarSpace getPulsarSpace() { return this.pulsarSpace; }
+
+    protected LongFunction<Boolean> lookupStaticBoolConfigValueFunc(final String paramName, final boolean defaultValue) {
+        final LongFunction<Boolean> booleanLongFunction;
+        booleanLongFunction = l -> this.parsedOp.getOptionalStaticConfig(paramName, String.class)
             .filter(Predicate.not(String::isEmpty))
             .map(value -> BooleanUtils.toBoolean(value))
             .orElse(defaultValue);
-        logger.info("{}: {}", paramName, booleanLongFunction.apply(0));
+        PulsarBaseOpDispenser.logger.info("{}: {}", paramName, booleanLongFunction.apply(0));
         return  booleanLongFunction;
     }
 
-    protected LongFunction<Set<String>> lookupStaticStrSetOpValueFunc(String paramName) {
-        LongFunction<Set<String>> setStringLongFunction;
-        setStringLongFunction = (l) -> parsedOp.getOptionalStaticValue(paramName, String.class)
+    protected LongFunction<Set<String>> lookupStaticStrSetOpValueFunc(final String paramName) {
+        final LongFunction<Set<String>> setStringLongFunction;
+        setStringLongFunction = l -> this.parsedOp.getOptionalStaticValue(paramName, String.class)
             .filter(Predicate.not(String::isEmpty))
             .map(value -> {
                 Set<String > set = new HashSet<>();
 
-                if (StringUtils.contains(value,',')) {
-                    set = Arrays.stream(value.split(","))
-                        .map(String::trim)
-                        .filter(Predicate.not(String::isEmpty))
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
-                }
+                if (StringUtils.contains(value,',')) set = Arrays.stream(value.split(","))
+                    .map(String::trim)
+                    .filter(Predicate.not(String::isEmpty))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
                 return set;
             }).orElse(Collections.emptySet());
-        logger.info("{}: {}", paramName, setStringLongFunction.apply(0));
+        PulsarBaseOpDispenser.logger.info("{}: {}", paramName, setStringLongFunction.apply(0));
         return setStringLongFunction;
     }
 
     // If the corresponding Op parameter is not provided, use the specified default value
-    protected LongFunction<Integer> lookupStaticIntOpValueFunc(String paramName, int defaultValue) {
-        LongFunction<Integer> integerLongFunction;
-        integerLongFunction = (l) -> parsedOp.getOptionalStaticValue(paramName, String.class)
+    protected LongFunction<Integer> lookupStaticIntOpValueFunc(final String paramName, final int defaultValue) {
+        final LongFunction<Integer> integerLongFunction;
+        integerLongFunction = l -> this.parsedOp.getOptionalStaticValue(paramName, String.class)
             .filter(Predicate.not(String::isEmpty))
             .map(value -> NumberUtils.toInt(value))
             .map(value -> {
-                if (value < 0) return 0;
-                else return value;
+                if (0 > value) {
+                    return 0;
+                }
+                return value;
             }).orElse(defaultValue);
-        logger.info("{}: {}", paramName, integerLongFunction.apply(0));
+        PulsarBaseOpDispenser.logger.info("{}: {}", paramName, integerLongFunction.apply(0));
         return integerLongFunction;
     }
 
     // If the corresponding Op parameter is not provided, use the specified default value
-    protected LongFunction<String> lookupOptionalStrOpValueFunc(String paramName, String defaultValue) {
-        LongFunction<String> stringLongFunction;
-        stringLongFunction = parsedOp.getAsOptionalFunction(paramName, String.class)
-            .orElse((l) -> defaultValue);
-        logger.info("{}: {}", paramName, stringLongFunction.apply(0));
+    protected LongFunction<String> lookupOptionalStrOpValueFunc(final String paramName, final String defaultValue) {
+        final LongFunction<String> stringLongFunction;
+        stringLongFunction = this.parsedOp.getAsOptionalFunction(paramName, String.class)
+            .orElse(l -> defaultValue);
+        PulsarBaseOpDispenser.logger.info("{}: {}", paramName, stringLongFunction.apply(0));
 
         return stringLongFunction;
     }
-    protected LongFunction<String> lookupOptionalStrOpValueFunc(String paramName) {
-        return lookupOptionalStrOpValueFunc(paramName, "");
+    protected LongFunction<String> lookupOptionalStrOpValueFunc(final String paramName) {
+        return this.lookupOptionalStrOpValueFunc(paramName, "");
     }
 
     // Mandatory Op parameter. Throw an error if not specified or having empty value
-    protected LongFunction<String> lookupMandtoryStrOpValueFunc(String paramName) {
-        LongFunction<String> stringLongFunction;
-        stringLongFunction = parsedOp.getAsRequiredFunction(paramName, String.class);
-        logger.info("{}: {}", paramName, stringLongFunction.apply(0));
+    protected LongFunction<String> lookupMandtoryStrOpValueFunc(final String paramName) {
+        final LongFunction<String> stringLongFunction;
+        stringLongFunction = this.parsedOp.getAsRequiredFunction(paramName, String.class);
+        PulsarBaseOpDispenser.logger.info("{}: {}", paramName, stringLongFunction.apply(0));
 
         return stringLongFunction;
     }
@@ -157,28 +173,28 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
      * @param topicName - topic name
      * @return String
      */
-    private String getPulsarAPIMetricsPrefix(String apiType, String apiObjName, String topicName) {
+    private String getPulsarAPIMetricsPrefix(final String apiType, final String apiObjName, final String topicName) {
         String apiMetricsPrefix = "";
 
         if (PulsarAdapterUtil.isValidPulsarApiType(apiType)) {
-            if (!StringUtils.isBlank(apiObjName)) {
-                apiMetricsPrefix = apiObjName + "_";
-            } else {
+            if (!StringUtils.isBlank(apiObjName)) apiMetricsPrefix = apiObjName + '_';
+            else {
                 // we want a meaningful name for the API object (producer, consumer, reader, etc.)
                 // we are not appending the topic name
                 apiMetricsPrefix = apiType;
 
-                if (apiType.equalsIgnoreCase(PulsarAdapterUtil.PULSAR_API_TYPE.PRODUCER.label))
-                    apiMetricsPrefix += pulsarSpace.getProducerSetCnt();
-                else if (apiType.equalsIgnoreCase(PulsarAdapterUtil.PULSAR_API_TYPE.CONSUMER.label))
-                    apiMetricsPrefix += pulsarSpace.getConsumerSetCnt();
-                else if (apiType.equalsIgnoreCase(PulsarAdapterUtil.PULSAR_API_TYPE.READER.label))
-                    apiMetricsPrefix += pulsarSpace.getReaderSetCnt();
+                if (apiType.equalsIgnoreCase(PULSAR_API_TYPE.PRODUCER.label)) {
+                    apiMetricsPrefix += this.pulsarSpace.getProducerSetCnt();
+                } else if (apiType.equalsIgnoreCase(PULSAR_API_TYPE.CONSUMER.label)) {
+                    apiMetricsPrefix += this.pulsarSpace.getConsumerSetCnt();
+                } else if (apiType.equalsIgnoreCase(PULSAR_API_TYPE.READER.label)) {
+                    apiMetricsPrefix += this.pulsarSpace.getReaderSetCnt();
+                }
 
                 apiMetricsPrefix += "_";
             }
 
-            apiMetricsPrefix += topicName + "_";
+            apiMetricsPrefix += topicName + '_';
             apiMetricsPrefix = apiMetricsPrefix
                 // default name for tests/demos (in all Pulsar examples) is persistent://public/default/test -> use just the topic name test
                 .replace("persistent://public/default/", "")
@@ -198,327 +214,303 @@ public abstract  class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, P
     // A configuration parameter can be set either at the global level (config.properties file),
     //   or at the cycle level (<nb_scenario>.yaml file).
     // If set at both levels, cycle level setting takes precedence
-    private String getEffectiveConValue(String confCategory, String confParamName, String cycleConfValue) {
-        if (!StringUtils.isBlank(cycleConfValue)) {
-            return cycleConfValue;
-        }
+    private String getEffectiveConValue(final String confCategory, final String confParamName, final String cycleConfValue) {
+        if (!StringUtils.isBlank(cycleConfValue)) return cycleConfValue;
 
         if (PulsarAdapterUtil.isValidConfCategory(confCategory)) {
             Map<String, String> catConfMap = new HashMap<>();
 
-            if (StringUtils.equalsIgnoreCase(confCategory, PulsarAdapterUtil.CONF_GATEGORY.Schema.label))
-                catConfMap = pulsarSpace.getPulsarNBClientConf().getSchemaConfMapRaw();
-            else if (StringUtils.equalsIgnoreCase(confCategory, PulsarAdapterUtil.CONF_GATEGORY.Client.label))
-                catConfMap = pulsarSpace.getPulsarNBClientConf().getClientConfMapRaw();
-            else if (StringUtils.equalsIgnoreCase(confCategory, PulsarAdapterUtil.CONF_GATEGORY.Producer.label))
-                catConfMap = pulsarSpace.getPulsarNBClientConf().getProducerConfMapRaw();
-            else if (StringUtils.equalsIgnoreCase(confCategory, PulsarAdapterUtil.CONF_GATEGORY.Consumer.label))
-                catConfMap = pulsarSpace.getPulsarNBClientConf().getConsumerConfMapRaw();
-            else if (StringUtils.equalsIgnoreCase(confCategory, PulsarAdapterUtil.CONF_GATEGORY.Reader.label))
-                catConfMap = pulsarSpace.getPulsarNBClientConf().getReaderConfMapRaw();
-
-            String globalConfValue = catConfMap.get(confParamName);
-            if (!StringUtils.isBlank(globalConfValue)) {
-                return globalConfValue;
+            if (StringUtils.equalsIgnoreCase(confCategory, CONF_GATEGORY.Schema.label)) {
+                catConfMap = this.pulsarSpace.getPulsarNBClientConf().getSchemaConfMapRaw();
+            } else if (StringUtils.equalsIgnoreCase(confCategory, CONF_GATEGORY.Client.label)) {
+                catConfMap = this.pulsarSpace.getPulsarNBClientConf().getClientConfMapRaw();
+            } else if (StringUtils.equalsIgnoreCase(confCategory, CONF_GATEGORY.Producer.label)) {
+                catConfMap = this.pulsarSpace.getPulsarNBClientConf().getProducerConfMapRaw();
+            } else if (StringUtils.equalsIgnoreCase(confCategory, CONF_GATEGORY.Consumer.label)) {
+                catConfMap = this.pulsarSpace.getPulsarNBClientConf().getConsumerConfMapRaw();
+            } else if (StringUtils.equalsIgnoreCase(confCategory, CONF_GATEGORY.Reader.label)) {
+                catConfMap = this.pulsarSpace.getPulsarNBClientConf().getReaderConfMapRaw();
             }
+
+            final String globalConfValue = catConfMap.get(confParamName);
+            if (!StringUtils.isBlank(globalConfValue)) return globalConfValue;
         }
 
         return "";
     }
 
 
-    public Producer<?> getProducer(String cycleTopicName, String cycleProducerName) {
-        String topicName = getEffectiveConValue(
-            PulsarAdapterUtil.CONF_GATEGORY.Producer.label,
-            PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.topicName.label,
+    public Producer<?> getProducer(final String cycleTopicName, final String cycleProducerName) {
+        final String topicName = this.getEffectiveConValue(
+            CONF_GATEGORY.Producer.label,
+            PRODUCER_CONF_STD_KEY.topicName.label,
             cycleTopicName);
 
-        String producerName = getEffectiveConValue(
-            PulsarAdapterUtil.CONF_GATEGORY.Producer.label,
-            PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.producerName.label,
+        final String producerName = this.getEffectiveConValue(
+            CONF_GATEGORY.Producer.label,
+            PRODUCER_CONF_STD_KEY.producerName.label,
             cycleProducerName);
 
-        PulsarSpace.ProducerCacheKey producerCacheKey = new PulsarSpace.ProducerCacheKey(producerName, topicName);
-        return pulsarSpace.getProducer(producerCacheKey, () -> {
-            PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
+        final ProducerCacheKey producerCacheKey = new ProducerCacheKey(producerName, topicName);
+        return this.pulsarSpace.getProducer(producerCacheKey, () -> {
+            final PulsarClient pulsarClient = this.pulsarSpace.getPulsarClient();
 
             // Get other possible producer settings that are set at global level
-            Map<String, Object> producerConf = pulsarSpace.getPulsarNBClientConf().getProducerConfMapTgt();
+            final Map<String, Object> producerConf = this.pulsarSpace.getPulsarNBClientConf().getProducerConfMapTgt();
 
             // Remove global level settings
-            producerConf.remove(PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.topicName.label);
-            producerConf.remove(PulsarAdapterUtil.PRODUCER_CONF_STD_KEY.producerName.label);
+            producerConf.remove(PRODUCER_CONF_STD_KEY.topicName.label);
+            producerConf.remove(PRODUCER_CONF_STD_KEY.producerName.label);
 
             try {
                 ProducerBuilder<?> producerBuilder = pulsarClient.
-                    newProducer(pulsarSpace.getPulsarSchema()).
+                    newProducer(this.pulsarSpace.getPulsarSchema()).
                     loadConf(producerConf).
                     topic(topicName);
 
-                if (!StringUtils.isAnyBlank(producerName)) {
-                    producerBuilder = producerBuilder.producerName(producerName);
-                }
+                if (!StringUtils.isAnyBlank(producerName)) producerBuilder = producerBuilder.producerName(producerName);
 
-                Producer<?> producer = producerBuilder.create();
-                pulsarAdapterMetrics.registerProducerApiMetrics(producer,
-                    getPulsarAPIMetricsPrefix(
-                        PulsarAdapterUtil.PULSAR_API_TYPE.PRODUCER.label,
-                        producerName,
-                        topicName));
+                final Producer<?> producer = producerBuilder.create();
+                this.pulsarAdapterMetrics.registerProducerApiMetrics(producer);
                 return producer;
-            } catch (PulsarClientException ple) {
+            } catch (final PulsarClientException ple) {
                 throw new PulsarAdapterUnexpectedException("Failed to create a Pulsar producer.");
             }
         });
     }
 
-    private List<String> getEffectiveConsumerTopicNameList(String cycleTopicNameListStr) {
-        String effectiveTopicNamesStr = getEffectiveConValue(
-            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
-            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicNames.label,
+    private List<String> getEffectiveConsumerTopicNameList(final String cycleTopicNameListStr) {
+        final String effectiveTopicNamesStr = this.getEffectiveConValue(
+            CONF_GATEGORY.Consumer.label,
+            CONSUMER_CONF_STD_KEY.topicNames.label,
             cycleTopicNameListStr);
 
-        String[] names = effectiveTopicNamesStr.split("[;,]");
-        ArrayList<String> effectiveTopicNameList = new ArrayList<>();
+        final String[] names = effectiveTopicNamesStr.split("[;,]");
+        final ArrayList<String> effectiveTopicNameList = new ArrayList<>();
 
-        for (String name : names) {
-            if (!StringUtils.isBlank(name))
+        for (final String name : names)
+            if (!StringUtils.isBlank(name)) {
                 effectiveTopicNameList.add(name.trim());
-        }
+            }
 
         return effectiveTopicNameList;
     }
 
-    private SubscriptionType getEffectiveSubscriptionType(String cycleSubscriptionType) {
-        String subscriptionTypeStr = getEffectiveConValue(
-            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
-            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label,
+    private SubscriptionType getEffectiveSubscriptionType(final String cycleSubscriptionType) {
+        final String subscriptionTypeStr = this.getEffectiveConValue(
+            CONF_GATEGORY.Consumer.label,
+            CONSUMER_CONF_STD_KEY.subscriptionType.label,
             cycleSubscriptionType);
 
         SubscriptionType subscriptionType = SubscriptionType.Exclusive; // default subscription type
-        if (!StringUtils.isBlank(subscriptionTypeStr)) {
-            try {
-                subscriptionType = SubscriptionType.valueOf(subscriptionTypeStr);
-            }
-            catch (Exception e) {
-                throw new PulsarAdapterInvalidParamException(
-                    "Invalid effective subscription type for a consumer (\"" + subscriptionTypeStr + "\"). " +
-                        "It must be one of the following values: " +  PulsarAdapterUtil.getValidSubscriptionTypeList());
-            }
+        if (!StringUtils.isBlank(subscriptionTypeStr)) try {
+            subscriptionType = SubscriptionType.valueOf(subscriptionTypeStr);
+        } catch (final Exception e) {
+            throw new PulsarAdapterInvalidParamException(
+                "Invalid effective subscription type for a consumer (\"" + subscriptionTypeStr + "\"). " +
+                    "It must be one of the following values: " + PulsarAdapterUtil.getValidSubscriptionTypeList());
         }
 
         return subscriptionType;
     }
 
-    public Consumer<?> getConsumer(String cycleTopicNameListStr,
-                                   String cycleTopicPatternStr,
-                                   String cycleSubscriptionName,
-                                   String cycleSubscriptionType,
-                                   String cycleConsumerName,
-                                   String cycleKeySharedSubscriptionRanges) {
+    public Consumer<?> getConsumer(final String cycleTopicNameListStr,
+                                   final String cycleTopicPatternStr,
+                                   final String cycleSubscriptionName,
+                                   final String cycleSubscriptionType,
+                                   final String cycleConsumerName,
+                                   final String cycleKeySharedSubscriptionRanges) {
 
-        List<String> topicNameList = getEffectiveConsumerTopicNameList(cycleTopicNameListStr);
+        final List<String> topicNameList = this.getEffectiveConsumerTopicNameList(cycleTopicNameListStr);
 
-        String topicPatternStr = StringUtils.trimToNull(getEffectiveConValue(
-            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
-            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label,
+        final String topicPatternStr = StringUtils.trimToNull(this.getEffectiveConValue(
+            CONF_GATEGORY.Consumer.label,
+            CONSUMER_CONF_STD_KEY.topicsPattern.label,
             cycleTopicPatternStr));
 
-        String subscriptionName = getEffectiveConValue(
-            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
-            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionName.label,
+        final String subscriptionName = this.getEffectiveConValue(
+            CONF_GATEGORY.Consumer.label,
+            CONSUMER_CONF_STD_KEY.subscriptionName.label,
             cycleSubscriptionName);
 
-        SubscriptionType subscriptionType = getEffectiveSubscriptionType(cycleSubscriptionType);
+        final SubscriptionType subscriptionType = this.getEffectiveSubscriptionType(cycleSubscriptionType);
 
-        String consumerName = getEffectiveConValue(
-            PulsarAdapterUtil.CONF_GATEGORY.Consumer.label,
-            PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.consumerName.label,
+        final String consumerName = this.getEffectiveConValue(
+            CONF_GATEGORY.Consumer.label,
+            CONSUMER_CONF_STD_KEY.consumerName.label,
             cycleConsumerName);
 
-        if ( subscriptionType.equals(SubscriptionType.Exclusive) && (totalThreadNum > 1) ) {
+        if (SubscriptionType.Exclusive == subscriptionType && 1 < totalThreadNum)
             throw new PulsarAdapterInvalidParamException(
-                PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label,
+                CONSUMER_CONF_STD_KEY.subscriptionType.label,
                 "creating multiple consumers of \"Exclusive\" subscription type under the same subscription name");
-        }
 
-        if ( (topicNameList.isEmpty() && (topicPatternStr == null)) ||
-             (!topicNameList.isEmpty() && (topicPatternStr != null)) ) {
-            throw new PulsarAdapterInvalidParamException(
-                "Invalid combination of topic name(s) and topic patterns; only specify one parameter!");
-        }
+        if (topicNameList.isEmpty() == (null == topicPatternStr)) throw new PulsarAdapterInvalidParamException(
+            "Invalid combination of topic name(s) and topic patterns; only specify one parameter!");
 
-        return pulsarSpace.getConsumer(
-            new PulsarSpace.ConsumerCacheKey(consumerName, subscriptionName, topicNameList, topicPatternStr), () -> {
-            PulsarClient pulsarClient = pulsarSpace.getPulsarClient();
+        return this.pulsarSpace.getConsumer(
+            new ConsumerCacheKey(consumerName, subscriptionName, topicNameList, topicPatternStr), () -> {
+            final PulsarClient pulsarClient = this.pulsarSpace.getPulsarClient();
 
             // Get other possible consumer settings that are set at global level
-            Map<String, Object> consumerConf =
-                new HashMap<>(pulsarSpace.getPulsarNBClientConf().getConsumerConfMapTgt());
-            Map<String, Object> consumerConfToLoad = new HashMap<>();
+            final Map<String, Object> consumerConf =
+                new HashMap<>(this.pulsarSpace.getPulsarNBClientConf().getConsumerConfMapTgt());
+            final Map<String, Object> consumerConfToLoad = new HashMap<>();
             consumerConfToLoad.putAll(consumerConf);
 
             try {
-                ConsumerBuilder<?> consumerBuilder;
+                final ConsumerBuilder<?> consumerBuilder;
 
                 // Remove settings that will be handled outside "loadConf()"
-                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicNames.label);
-                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.topicsPattern.label);
-                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionName.label);
-                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.subscriptionType.label);
-                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.consumerName.label);
+                consumerConfToLoad.remove(CONSUMER_CONF_STD_KEY.topicNames.label);
+                consumerConfToLoad.remove(CONSUMER_CONF_STD_KEY.topicsPattern.label);
+                consumerConfToLoad.remove(CONSUMER_CONF_STD_KEY.subscriptionName.label);
+                consumerConfToLoad.remove(CONSUMER_CONF_STD_KEY.subscriptionType.label);
+                consumerConfToLoad.remove(CONSUMER_CONF_STD_KEY.consumerName.label);
 
                 // TODO: It looks like loadConf() method can't handle the following settings properly.
                 //       Do these settings manually for now
                 //       - deadLetterPolicy
                 //       - negativeAckRedeliveryBackoff
                 //       - ackTimeoutRedeliveryBackoff
-                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.deadLetterPolicy.label);
-                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.negativeAckRedeliveryBackoff.label);
-                consumerConfToLoad.remove(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.ackTimeoutRedeliveryBackoff.label);
+                consumerConfToLoad.remove(CONSUMER_CONF_STD_KEY.deadLetterPolicy.label);
+                consumerConfToLoad.remove(CONSUMER_CONF_STD_KEY.negativeAckRedeliveryBackoff.label);
+                consumerConfToLoad.remove(CONSUMER_CONF_STD_KEY.ackTimeoutRedeliveryBackoff.label);
 
-                boolean multiTopicConsumer = (topicNameList.size() > 1 || (topicPatternStr != null));
+                final boolean multiTopicConsumer = 1 < topicNameList.size() || null != topicPatternStr;
                 if (!multiTopicConsumer) {
-                    assert (topicNameList.size() == 1);
-                    consumerBuilder = pulsarClient.newConsumer(pulsarSpace.getPulsarSchema());
+                    assert 1 == topicNameList.size();
+                    consumerBuilder = pulsarClient.newConsumer(this.pulsarSpace.getPulsarSchema());
                     consumerBuilder.topic(topicNameList.get(0));
                 }
                 else {
                     consumerBuilder = pulsarClient.newConsumer();
                     if (!topicNameList.isEmpty()) {
-                        assert (topicNameList.size() > 1);
+                        assert 1 < topicNameList.size();
                         consumerBuilder.topics(topicNameList);
                     }
                     else {
-                        Pattern topicPattern = Pattern.compile(topicPatternStr);
+                        final Pattern topicPattern = Pattern.compile(topicPatternStr);
                         consumerBuilder.topicsPattern(topicPattern);
                     }
                 }
 
                 consumerBuilder.loadConf(consumerConfToLoad);
 
-                if (consumerConf.containsKey(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.deadLetterPolicy.label)) {
+                if (consumerConf.containsKey(CONSUMER_CONF_STD_KEY.deadLetterPolicy.label))
                     consumerBuilder.deadLetterPolicy((DeadLetterPolicy)
-                        consumerConf.get(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.deadLetterPolicy.label));
-                }
-                if (consumerConf.containsKey(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.negativeAckRedeliveryBackoff.label)) {
+                        consumerConf.get(CONSUMER_CONF_STD_KEY.deadLetterPolicy.label));
+                if (consumerConf.containsKey(CONSUMER_CONF_STD_KEY.negativeAckRedeliveryBackoff.label))
                     consumerBuilder.negativeAckRedeliveryBackoff((RedeliveryBackoff)
-                        consumerConf.get(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.negativeAckRedeliveryBackoff.label));
-                }
-                if (consumerConf.containsKey(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.ackTimeoutRedeliveryBackoff.label)) {
+                        consumerConf.get(CONSUMER_CONF_STD_KEY.negativeAckRedeliveryBackoff.label));
+                if (consumerConf.containsKey(CONSUMER_CONF_STD_KEY.ackTimeoutRedeliveryBackoff.label))
                     consumerBuilder.ackTimeoutRedeliveryBackoff((RedeliveryBackoff)
-                        consumerConf.get(PulsarAdapterUtil.CONSUMER_CONF_STD_KEY.ackTimeoutRedeliveryBackoff.label));
-                }
+                        consumerConf.get(CONSUMER_CONF_STD_KEY.ackTimeoutRedeliveryBackoff.label));
 
                 consumerBuilder
                     .subscriptionName(subscriptionName)
                     .subscriptionType(subscriptionType);
 
-                if (!StringUtils.isBlank(consumerName))
+                if (!StringUtils.isBlank(consumerName)) {
                     consumerBuilder.consumerName(consumerName);
+                }
 
-                if (subscriptionType == SubscriptionType.Key_Shared) {
+                if (SubscriptionType.Key_Shared == subscriptionType) {
                     KeySharedPolicy keySharedPolicy = KeySharedPolicy.autoSplitHashRange();
-                    if (cycleKeySharedSubscriptionRanges != null && !cycleKeySharedSubscriptionRanges.isEmpty()) {
-                        Range[] ranges = parseRanges(cycleKeySharedSubscriptionRanges);
-                        logger.info("Configuring KeySharedPolicy#stickyHashRange with ranges {}", ranges);
+                    if ((null != cycleKeySharedSubscriptionRanges) && !cycleKeySharedSubscriptionRanges.isEmpty()) {
+                        final Range[] ranges = PulsarBaseOpDispenser.parseRanges(cycleKeySharedSubscriptionRanges);
+                        PulsarBaseOpDispenser.logger.info("Configuring KeySharedPolicy#stickyHashRange with ranges {}", ranges);
                         keySharedPolicy = KeySharedPolicy.stickyHashRange().ranges(ranges);
                     }
                     consumerBuilder.keySharedPolicy(keySharedPolicy);
                 }
 
-                Consumer<?> consumer = consumerBuilder.subscribe();
+                final Consumer<?> consumer = consumerBuilder.subscribe();
 
-                String consumerTopicListString = (!topicNameList.isEmpty()) ? String.join("|", topicNameList) : topicPatternStr;
-                pulsarAdapterMetrics.registerConsumerApiMetrics(
+                final String consumerTopicListString = !topicNameList.isEmpty() ? String.join("|", topicNameList) : topicPatternStr;
+                this.pulsarAdapterMetrics.registerConsumerApiMetrics(
                     consumer,
-                    getPulsarAPIMetricsPrefix(
-                        PulsarAdapterUtil.PULSAR_API_TYPE.CONSUMER.label,
+                    this.getPulsarAPIMetricsPrefix(
+                        PULSAR_API_TYPE.CONSUMER.label,
                         consumerName,
                         consumerTopicListString));
 
                 return consumer;
             }
-            catch (PulsarClientException ple) {
+            catch (final PulsarClientException ple) {
                 throw new PulsarAdapterUnexpectedException("Failed to create a Pulsar consumer!");
             }
         });
     }
 
-    private static Range[] parseRanges(String ranges) {
-        if (ranges == null || ranges.isEmpty()) {
-            return new Range[0];
-        }
-        String[] split = ranges.split(",");
-        Range[] result = new Range[split.length];
+    private static Range[] parseRanges(final String ranges) {
+        if ((null == ranges) || ranges.isEmpty()) return new Range[0];
+        final String[] split = ranges.split(",");
+        final Range[] result = new Range[split.length];
         for (int i = 0; i < split.length; i++) {
-            String range = split[i];
-            int pos = range.indexOf("..");
-            if (pos <= 0) {
-                throw new IllegalArgumentException("Invalid range '" + range + "'");
-            }
+            final String range = split[i];
+            final int pos = range.indexOf("..");
+            if (0 >= pos) throw new IllegalArgumentException("Invalid range '" + range + '\'');
             try {
-                int start = Integer.parseInt(range.substring(0, pos));
-                int end = Integer.parseInt(range.substring(pos + 2));
+                final int start = Integer.parseInt(range.substring(0, pos));
+                final int end = Integer.parseInt(range.substring(pos + 2));
                 result[i] = Range.of(start, end);
-            } catch (NumberFormatException err) {
-                throw new IllegalArgumentException("Invalid range '" + range + "'");
+            } catch (final NumberFormatException err) {
+                throw new IllegalArgumentException("Invalid range '" + range + '\'');
             }
         }
         return result;
     }
 
-    public Reader<?> getReader(String cycleTopicName,
-                               String cycleReaderName,
-                               String cycleStartMsgPos) {
+    public Reader<?> getReader(final String cycleTopicName,
+                               final String cycleReaderName,
+                               final String cycleStartMsgPos) {
 
-        String topicName = getEffectiveConValue(
-            PulsarAdapterUtil.CONF_GATEGORY.Reader.label,
-            PulsarAdapterUtil.READER_CONF_STD_KEY.topicName.label,
+        final String topicName = this.getEffectiveConValue(
+            CONF_GATEGORY.Reader.label,
+            READER_CONF_STD_KEY.topicName.label,
             cycleTopicName);
 
-        String readerName = getEffectiveConValue(
-            PulsarAdapterUtil.CONF_GATEGORY.Reader.label,
-            PulsarAdapterUtil.READER_CONF_STD_KEY.readerName.label,
+        final String readerName = this.getEffectiveConValue(
+            CONF_GATEGORY.Reader.label,
+            READER_CONF_STD_KEY.readerName.label,
             cycleReaderName);
 
-        String startMsgPosStr = getEffectiveConValue(
-            PulsarAdapterUtil.CONF_GATEGORY.Reader.label,
-            PulsarAdapterUtil.READER_CONF_CUSTOM_KEY.startMessagePos.label,
+        final String startMsgPosStr = this.getEffectiveConValue(
+            CONF_GATEGORY.Reader.label,
+            READER_CONF_CUSTOM_KEY.startMessagePos.label,
             cycleStartMsgPos);
-        if (!PulsarAdapterUtil.isValideReaderStartPosition(startMsgPosStr)) {
+        if (!PulsarAdapterUtil.isValideReaderStartPosition(startMsgPosStr))
             throw new RuntimeException("Reader:: Invalid value for reader start message position!");
-        }
 
-        return pulsarSpace.getReader(new PulsarSpace.ReaderCacheKey(readerName, topicName, startMsgPosStr), () -> {
-            PulsarClient pulsarClient = pulsarSpace.getPulsarClient();;
+        return this.pulsarSpace.getReader(new ReaderCacheKey(readerName, topicName, startMsgPosStr), () -> {
+            final PulsarClient pulsarClient = this.pulsarSpace.getPulsarClient();
 
-            Map<String, Object> readerConf = pulsarSpace.getPulsarNBClientConf().getReaderConfMapTgt();
+            final Map<String, Object> readerConf = this.pulsarSpace.getPulsarNBClientConf().getReaderConfMapTgt();
 
             // Remove global level settings: "topicName" and "readerName"
-            readerConf.remove(PulsarAdapterUtil.READER_CONF_STD_KEY.topicName.label);
-            readerConf.remove(PulsarAdapterUtil.READER_CONF_STD_KEY.readerName.label);
+            readerConf.remove(READER_CONF_STD_KEY.topicName.label);
+            readerConf.remove(READER_CONF_STD_KEY.readerName.label);
             // Remove non-standard reader configuration properties
-            readerConf.remove(PulsarAdapterUtil.READER_CONF_CUSTOM_KEY.startMessagePos.label);
+            readerConf.remove(READER_CONF_CUSTOM_KEY.startMessagePos.label);
 
             try {
-                ReaderBuilder<?> readerBuilder = pulsarClient.
-                    newReader(pulsarSpace.getPulsarSchema()).
+                final ReaderBuilder<?> readerBuilder = pulsarClient.
+                    newReader(this.pulsarSpace.getPulsarSchema()).
                     loadConf(readerConf).
                     topic(topicName).
                     readerName(readerName);
 
                 MessageId startMsgId = MessageId.latest;
-                if (startMsgPosStr.equalsIgnoreCase(PulsarAdapterUtil.READER_MSG_POSITION_TYPE.earliest.label)) {
+                if (startMsgPosStr.equalsIgnoreCase(READER_MSG_POSITION_TYPE.earliest.label))
                     startMsgId = MessageId.earliest;
-                }
                 //TODO: custom start message position is NOT supported yet
                 //else if (startMsgPosStr.startsWith(PulsarAdapterUtil.READER_MSG_POSITION_TYPE.custom.label)) {
                 //    startMsgId = MessageId.latest;
                 //}
 
                 return readerBuilder.startMessageId(startMsgId).create();
-            } catch (PulsarClientException ple) {
+            } catch (final PulsarClientException ple) {
                 ple.printStackTrace();
                 throw new RuntimeException("Unable to create a Pulsar reader!");
             }

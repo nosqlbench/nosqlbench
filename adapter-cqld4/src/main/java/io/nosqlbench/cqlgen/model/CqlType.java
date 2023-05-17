@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package io.nosqlbench.cqlgen.model;
 
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.api.labels.Labeled;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
-public class CqlType implements NBNamedElement, Labeled {
+public class CqlType implements NBNamedElement, NBLabeledElement {
 
     private String name;
     private CqlKeyspaceDef keyspace;
@@ -42,6 +42,7 @@ public class CqlType implements NBNamedElement, Labeled {
         return keyspace;
     }
 
+    @Override
     public String getName() {
         return this.name;
     }
@@ -56,11 +57,11 @@ public class CqlType implements NBNamedElement, Labeled {
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return Map.of(
+    public NBLabels getLabels() {
+        return NBLabels.forKV(
             "keyspace", keyspace.getName(),
             "type","type",
-            "name",name
+            "name", name
         );
     }
 
@@ -73,12 +74,12 @@ public class CqlType implements NBNamedElement, Labeled {
     }
 
     public String getFullName() {
-        return keyspace.getName()+"."+getName();
+        return keyspace.getName()+ '.' + this.name;
     }
 
     public void getReferenceErrors(List<String> errors) {
         if (!defined) {
-            errors.add("type " + this.getName() + " was referenced but not defined.");
+            errors.add("type " + this.name + " was referenced but not defined.");
         }
     }
 
@@ -88,6 +89,6 @@ public class CqlType implements NBNamedElement, Labeled {
     }
 
     public void setDefined() {
-        this.defined=true;
+        this.defined =true;
     }
 }

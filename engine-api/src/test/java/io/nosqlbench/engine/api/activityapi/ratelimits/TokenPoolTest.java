@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import org.junit.jupiter.api.Test;
@@ -25,11 +26,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TokenPoolTest {
 
-    ActivityDef def = new ActivityDef(ParameterMap.parseOrException("alias=testing"));
+    ActivityDef adef = new ActivityDef(ParameterMap.parseOrException("alias=testing"));
+    NBLabeledElement def = NBLabeledElement.forMap(this.adef.getParams().getStringStringMap());
+
 
     @Test
     public void testBackfillFullRate() {
-        ThreadDrivenTokenPool p = new ThreadDrivenTokenPool(new RateSpec(10000000, 1.1), def);
+        ThreadDrivenTokenPool p = new ThreadDrivenTokenPool(new RateSpec(10000000, 1.1), this.def);
         assertThat(p.refill(1000000L)).isEqualTo(1000000L);
         assertThat(p.getWaitPool()).isEqualTo(0L);
         assertThat(p.refill(100L)).isEqualTo(1000100);
@@ -60,10 +63,10 @@ public class TokenPoolTest {
         assertThat(p.getWaitTime()).isEqualTo(10000000L);
 
         RateSpec s2 = new RateSpec(1000000L, 1.10D);
-        p.apply(new NBNamedElement() {
+        p.apply(new NBLabeledElement() {
             @Override
-            public String getName() {
-                return "test";
+            public NBLabels getLabels() {
+                return NBLabels.forKV("name","test");
             }
         },s2);
 

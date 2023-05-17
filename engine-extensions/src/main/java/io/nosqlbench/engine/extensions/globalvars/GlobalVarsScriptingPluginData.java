@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package io.nosqlbench.engine.extensions.globalvars;
 
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import org.apache.logging.log4j.Logger;
 
-import javax.script.ScriptContext;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service(value = ScriptingPluginInfo.class, selector = "globalvars")
@@ -34,8 +34,8 @@ public class GlobalVarsScriptingPluginData implements ScriptingPluginInfo<Concur
     }
 
     @Override
-    public ConcurrentHashMap<String, Object> getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
-        ConcurrentHashMap<String, Object> map = SharedState.gl_ObjectMap;
+    public ConcurrentHashMap<String, Object> getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+        final ConcurrentHashMap<String, Object> map = SharedState.gl_ObjectMap;
         return map;
     }
 

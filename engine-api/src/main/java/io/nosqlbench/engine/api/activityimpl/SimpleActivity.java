@@ -17,6 +17,8 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
@@ -54,6 +56,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.AnnotatedType;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -62,8 +65,9 @@ import java.util.stream.Collectors;
 /**
  * A default implementation of an Activity, suitable for building upon.
  */
-public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObserver {
-    private final static Logger logger = LogManager.getLogger("ACTIVITY");
+public class SimpleActivity implements Activity {
+    private static final Logger logger = LogManager.getLogger("ACTIVITY");
+    private final NBLabeledElement parentLabels;
 
     protected ActivityDef activityDef;
     private final List<AutoCloseable> closeables = new ArrayList<>();
@@ -80,15 +84,18 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     private ActivityInstrumentation activityInstrumentation;
     private PrintWriter console;
     private long startedAtMillis;
-    private int nameEnumerator = 0;
+    private int nameEnumerator;
     private ErrorMetrics errorMetrics;
     private NBErrorHandler errorHandler;
     private ActivityMetricProgressMeter progressMeter;
     private String workloadSource = "unspecified";
     private final RunStateTally tally = new RunStateTally();
+    private final NBLabels labels;
 
-    public SimpleActivity(ActivityDef activityDef) {
+    public SimpleActivity(ActivityDef activityDef, NBLabeledElement parentLabels) {
+        labels = parentLabels.getLabels().and("activity",activityDef.getAlias());
         this.activityDef = activityDef;
+        this.parentLabels = parentLabels;
         if (activityDef.getAlias().equals(ActivityDef.DEFAULT_ALIAS)) {
             Optional<String> workloadOpt = activityDef.getParams().getOptionalString(
                 "workload",
@@ -99,13 +106,14 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             } else {
                 activityDef.getParams().set("alias",
                     activityDef.getActivityType().toUpperCase(Locale.ROOT)
-                        + nameEnumerator++);
+                        + nameEnumerator);
+                nameEnumerator++;
             }
         }
     }
 
-    public SimpleActivity(String activityDefString) {
-        this(ActivityDef.parseActivityDef(activityDefString));
+    public SimpleActivity(String activityDefString, NBLabeledElement parentLabels) {
+        this(ActivityDef.parseActivityDef(activityDefString),parentLabels);
     }
 
     @Override
@@ -114,7 +122,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     }
 
     public synchronized NBErrorHandler getErrorHandler() {
-        if (errorHandler == null) {
+        if (null == this.errorHandler) {
             errorHandler = new NBErrorHandler(
                 () -> activityDef.getParams().getOptionalString("errors").orElse("stop"),
                 () -> getExceptionMetrics());
@@ -122,13 +130,15 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         return errorHandler;
     }
 
+    @Override
     public synchronized RunState getRunState() {
         return runState;
     }
 
+    @Override
     public synchronized void setRunState(RunState runState) {
         this.runState = runState;
-        if (runState == RunState.Running) {
+        if (RunState.Running == runState) {
             this.startedAtMillis = System.currentTimeMillis();
         }
     }
@@ -194,7 +204,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
     }
 
     public String toString() {
-        return getAlias() + ":" + getRunState() + ":" + getRunStateTally().toString();
+        return getAlias() + ':' + this.runState + ':' + this.tally;
     }
 
     @Override
@@ -243,7 +253,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
     @Override
     public synchronized RateLimiter getCycleRateLimiter(Supplier<? extends RateLimiter> s) {
-        if (cycleLimiter == null) {
+        if (null == this.cycleLimiter) {
             cycleLimiter = s.get();
         }
         return cycleLimiter;
@@ -261,7 +271,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
     @Override
     public synchronized RateLimiter getStrideRateLimiter(Supplier<? extends RateLimiter> s) {
-        if (strideLimiter == null) {
+        if (null == this.strideLimiter) {
             strideLimiter = s.get();
         }
         return strideLimiter;
@@ -275,7 +285,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
     @Override
     public Timer getResultTimer() {
-        return ActivityMetrics.timer(getActivityDef(), "result", getParams().getOptionalInteger("hdr_digits").orElse(4));
+        return ActivityMetrics.timer(this, "result", getParams().getOptionalInteger("hdr_digits").orElse(4));
     }
 
     @Override
@@ -285,7 +295,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
     @Override
     public synchronized RateLimiter getPhaseRateLimiter(Supplier<? extends RateLimiter> supplier) {
-        if (phaseLimiter == null) {
+        if (null == this.phaseLimiter) {
             phaseLimiter = supplier.get();
         }
         return phaseLimiter;
@@ -293,7 +303,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
     @Override
     public synchronized ActivityInstrumentation getInstrumentation() {
-        if (activityInstrumentation == null) {
+        if (null == this.activityInstrumentation) {
             activityInstrumentation = new CoreActivityInstrumentation(this);
         }
         return activityInstrumentation;
@@ -301,8 +311,8 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
     @Override
     public synchronized PrintWriter getConsoleOut() {
-        if (this.console == null) {
-            this.console = new PrintWriter(System.out);
+        if (null == console) {
+            this.console = new PrintWriter(System.out, false, StandardCharsets.UTF_8);
         }
         return this.console;
     }
@@ -319,8 +329,8 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
     @Override
     public synchronized ErrorMetrics getExceptionMetrics() {
-        if (errorMetrics == null) {
-            errorMetrics = new ErrorMetrics(this.getActivityDef());
+        if (null == this.errorMetrics) {
+            errorMetrics = new ErrorMetrics(this);
         }
         return errorMetrics;
     }
@@ -334,15 +344,15 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
         activityDef.getParams().getOptionalNamedParameter("striderate")
             .map(RateSpec::new)
-            .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "strides", strideLimiter, spec));
+            .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this, "strides", strideLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate")
             .map(RateSpec::new).ifPresent(
-                spec -> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
+                spec -> cycleLimiter = RateLimiters.createOrUpdate(this, "cycles", cycleLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("phaserate")
             .map(RateSpec::new)
-            .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "phases", phaseLimiter, spec));
+            .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this, "phases", phaseLimiter, spec));
 
     }
 
@@ -369,13 +379,13 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 //            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
             getParams().setSilently("cycles", getParams().getOptionalString("stride").orElseThrow());
         } else {
-            if (getActivityDef().getCycleCount() == 0) {
+            if (0 == activityDef.getCycleCount()) {
                 throw new RuntimeException(
                     "You specified cycles, but the range specified means zero cycles: " + getParams().get("cycles")
                 );
             }
             long stride = getParams().getOptionalLong("stride").orElseThrow();
-            long cycles = getActivityDef().getCycleCount();
+            long cycles = this.activityDef.getCycleCount();
             if (cycles < stride) {
                 throw new RuntimeException(
                     "The specified cycles (" + cycles + ") are less than the stride (" + stride + "). This means there aren't enough cycles to cause a stride to be executed." +
@@ -384,25 +394,25 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             }
         }
 
-        long cycleCount = getActivityDef().getCycleCount();
-        long stride = getActivityDef().getParams().getOptionalLong("stride").orElseThrow();
+        long cycleCount = this.activityDef.getCycleCount();
+        long stride = this.activityDef.getParams().getOptionalLong("stride").orElseThrow();
 
-        if (stride > 0 && (cycleCount % stride) != 0) {
+        if (0 < stride && 0 != cycleCount % stride) {
             logger.warn(() -> "The stride does not evenly divide cycles. Only full strides will be executed," +
-                "leaving some cycles unused. (stride=" + stride + ", cycles=" + cycleCount + ")");
+                "leaving some cycles unused. (stride=" + stride + ", cycles=" + cycleCount + ')');
         }
 
         Optional<String> threadSpec = activityDef.getParams().getOptionalString("threads");
         if (threadSpec.isPresent()) {
             String spec = threadSpec.get();
             int processors = Runtime.getRuntime().availableProcessors();
-            if (spec.equalsIgnoreCase("auto")) {
+            if ("auto".equalsIgnoreCase(spec)) {
                 int threads = processors * 10;
                 if (threads > activityDef.getCycleCount()) {
                     threads = (int) activityDef.getCycleCount();
-                    logger.info("setting threads to " + threads + " (auto) [10xCORES, cycle count limited]");
+                    logger.info("setting threads to {} (auto) [10xCORES, cycle count limited]", threads);
                 } else {
-                    logger.info("setting threads to " + threads + " (auto) [10xCORES]");
+                    logger.info("setting threads to {} (auto) [10xCORES]", threads);
                 }
 //                activityDef.setThreads(threads);
                 activityDef.getParams().setSilently("threads", threads);
@@ -423,18 +433,15 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
                     + ", you should have more cycles than threads.");
             }
 
-        } else {
-            if (cycleCount > 1000) {
-                logger.warn(() -> "For testing at scale, it is highly recommended that you " +
-                    "set threads to a value higher than the default of 1." +
-                    " hint: you can use threads=auto for reasonable default, or" +
-                    " consult the topic on threads with `help threads` for" +
-                    " more information.");
-
-            }
+        } else if (1000 < cycleCount) {
+            logger.warn(() -> "For testing at scale, it is highly recommended that you " +
+                "set threads to a value higher than the default of 1." +
+                " hint: you can use threads=auto for reasonable default, or" +
+                " consult the topic on threads with `help threads` for" +
+                " more information.");
         }
 
-        if (activityDef.getCycleCount() > 0 && seq.getOps().size() == 0) {
+        if (0 < this.activityDef.getCycleCount() && 0 == seq.getOps().size()) {
             throw new BasicError("You have configured a zero-length sequence and non-zero cycles. Tt is not possible to continue with this activity.");
         }
     }
@@ -443,7 +450,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
      * Given a function that can create an op of type <O> from a CommandTemplate, generate
      * an indexed sequence of ready to call operations.
      *
-     * This method works almost exactly like the {@link #createOpSequenceFromCommands(Function, boolean)},
+     * This method works almost exactly like the ,
      * except that it uses the {@link CommandTemplate} semantics, which are more general and allow
      * for map-based specification of operations with bindings in each field.
      *
@@ -491,12 +498,12 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
-                if (ratio == 0) {
-                    logger.info(() -> "skipped mapping op '" + pop.getName() + "'");
+                if (0 == ratio) {
+                    logger.info(() -> "skipped mapping op '" + pop.getName() + '\'');
                     continue;
                 }
                 String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
-                boolean dryrun = dryrunSpec.equalsIgnoreCase("op");
+                boolean dryrun = "op".equalsIgnoreCase(dryrunSpec);
 
                 DriverAdapter adapter = adapters.get(i);
                 OpMapper opMapper = adapter.getOpMapper();
@@ -512,8 +519,8 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 //                }
                 planner.addOp((OpDispenser<? extends O>) dispenser, ratio);
             }
-            if (dryrunCount > 0) {
-                logger.warn("initialized " + dryrunCount + " op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.");
+            if (0 < dryrunCount) {
+                logger.warn("initialized {} op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.", dryrunCount);
             }
 
 
@@ -533,7 +540,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         List<Function<Map<String, Object>, Map<String, Object>>> parsers,
         boolean strict
     ) {
-        Function<OpTemplate, ParsedOp> f = t -> new ParsedOp(t, cfg, parsers);
+        Function<OpTemplate, ParsedOp> f = t -> new ParsedOp(t, cfg, parsers, this);
         Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
 
         return createOpSequence(opTemplateOFunction, strict, Optional.empty());
@@ -541,7 +548,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
     protected List<ParsedOp> loadParsedOps(NBConfiguration cfg, Optional<DriverAdapter> defaultAdapter) {
         List<ParsedOp> parsedOps = loadOpTemplates(defaultAdapter).stream().map(
-            ot -> new ParsedOp(ot, cfg, List.of())
+            ot -> new ParsedOp(ot, cfg, List.of(), this)
         ).toList();
         return parsedOps;
     }
@@ -555,35 +562,35 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         List<OpTemplate> unfilteredOps = opsDocList.getOps();
         List<OpTemplate> filteredOps = opsDocList.getOps(tagfilter);
 
-        if (filteredOps.size() == 0) {
-            if (unfilteredOps.size() > 0) { // There were no ops, and it was because they were all filtered out
+        if (0 == filteredOps.size()) {
+            // There were no ops, and it *wasn't* because they were all filtered out.
+            // In this case, let's try to synthesize the ops as long as at least a default driver was provided
+            // But if there were no ops, and there was no default driver provided, we can't continue
+            // There were no ops, and it was because they were all filtered out
+            if (0 < unfilteredOps.size()) {
                 throw new BasicError("There were no active op templates with tag filter '"
                     + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
-            } else {
-                // There were no ops, and it *wasn't* because they were all filtered out.
-
-                // In this case, let's try to synthesize the ops as long as at least a default driver was provided
-                if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
-                    filteredOps = sotp.getSyntheticOpTemplates(opsDocList, getActivityDef().getParams());
-                    Objects.requireNonNull(filteredOps);
-                    if (filteredOps.size() == 0) {
-                        throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + "'" +
-                            " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
-                    }
-                } else { // But if there were no ops, and there was no default driver provided, we can't continue
-                    throw new BasicError("""
-                        No op templates were provided. You must provide one of these activity parameters:
-                        1) workload=some.yaml
-                        2) op='inline template'
-                        3) driver=stdout (or any other drive that can synthesize ops)""");
-                }
             }
-            if (filteredOps.size() == 0) {
-                throw new BasicError("There were no active op templates with tag filter '" + tagfilter + "'");
+            if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
+                filteredOps = sotp.getSyntheticOpTemplates(opsDocList, this.activityDef.getParams());
+                Objects.requireNonNull(filteredOps);
+                if (0 == filteredOps.size()) {
+                    throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + '\'' +
+                        " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
+                }
+            } else {
+                throw new BasicError("""
+                    No op templates were provided. You must provide one of these activity parameters:
+                    1) workload=some.yaml
+                    2) op='inline template'
+                    3) driver=stdout (or any other drive that can synthesize ops)""");
+            }
+            if (0 == filteredOps.size()) {
+                throw new BasicError("There were no active op templates with tag filter '" + tagfilter + '\'');
             }
         }
 
-        if (filteredOps.size() == 0) {
+        if (0 == filteredOps.size()) {
             throw new OpConfigError("No op templates found. You must provide either workload=... or op=..., or use " +
                 "a default driver (driver=___). This includes " +
                 ServiceLoader.load(DriverAdapter.class).stream()
@@ -670,7 +677,8 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
             if (stmt.isPresent()) {
                 workloadSource = "commandline:" + stmt.get();
                 return OpsLoader.loadString(stmt.get(), OpTemplateFormat.inline, activityDef.getParams(), null);
-            } else if (op_yaml_loc.isPresent()) {
+            }
+            if (op_yaml_loc.isPresent()) {
                 workloadSource = "yaml:" + op_yaml_loc.get();
                 return OpsLoader.loadPath(op_yaml_loc.get(), activityDef.getParams(), "activities");
             }
@@ -685,7 +693,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
 
     @Override
     public synchronized ProgressMeterDisplay getProgressMeter() {
-        if (progressMeter == null) {
+        if (null == this.progressMeter) {
             this.progressMeter = new ActivityMetricProgressMeter(this);
         }
         return this.progressMeter;
@@ -700,7 +708,7 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
      */
     @Override
     public int getMaxTries() {
-        return getActivityDef().getParams().getOptionalInteger("maxtries").orElse(10);
+        return this.activityDef.getParams().getOptionalInteger("maxtries").orElse(10);
     }
 
     @Override
@@ -708,9 +716,8 @@ public class SimpleActivity implements Activity, ProgressCapable, ActivityDefObs
         return tally;
     }
 
-
     @Override
-    public String getName() {
-        return this.activityDef.getAlias();
+    public NBLabels getLabels() {
+        return this.labels;
     }
 }

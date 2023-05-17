@@ -18,6 +18,8 @@ package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.errors.MVELCompilationError;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -30,7 +32,7 @@ import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@inheritDoc}
+ *
  * See {@link OpDispenser} for details on how to use this type.
  * <p>
  * Some details are tracked per op template, which aligns to the life-cycle of the op dispenser.
@@ -38,11 +40,12 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> The type of operation
  */
-public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T> {
+public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>, NBLabeledElement {
 
     private final String opName;
     private Serializable expectedResultExpression;
     protected final DriverAdapter<T, S> adapter;
+    private final NBLabels labels;
     private boolean instrument;
     private Histogram resultSizeHistogram;
     private Timer successTimer;
@@ -50,24 +53,23 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
     private final String[] timerStarts;
     private final String[] timerStops;
 
-    protected BaseOpDispenser(DriverAdapter<T, S> adapter, ParsedOp op) {
-        this.opName = op.getName();
+    protected BaseOpDispenser(final DriverAdapter<T, S> adapter, final ParsedOp op) {
+        opName = op.getName();
         this.adapter = adapter;
-        timerStarts = op.takeOptionalStaticValue("start-timers", String.class)
+        labels = op.getLabels();
+
+        this.timerStarts = op.takeOptionalStaticValue("start-timers", String.class)
                 .map(s -> s.split(", *"))
                 .orElse(null);
 
-        timerStops = op.takeOptionalStaticValue("stop-timers", String.class)
+        this.timerStops = op.takeOptionalStaticValue("stop-timers", String.class)
                 .map(s -> s.split(", *"))
                 .orElse(null);
 
-        if (timerStarts != null) {
-            for (String timerStart : timerStarts) {
-                ThreadLocalNamedTimers.addTimer(op, timerStart);
-            }
-        }
-        configureInstrumentation(op);
-        configureResultExpectations(op);
+        if (null != timerStarts)
+            for (final String timerStart : this.timerStarts) ThreadLocalNamedTimers.addTimer(op, timerStart);
+        this.configureInstrumentation(op);
+        this.configureResultExpectations(op);
     }
 
     public Serializable getExpectedResultExpression() {
@@ -91,55 +93,47 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
     }
 
     String getOpName() {
-        return opName;
+        return this.opName;
     }
 
     public DriverAdapter<T, S> getAdapter() {
-        return adapter;
+        return this.adapter;
     }
 
-    protected String getDefaultMetricsPrefix(ParsedOp pop) {
-        return pop.getStaticConfigOr("alias", "UNKNOWN") + "-" + pop.getName() + "--";
-    }
-
-    private void configureInstrumentation(ParsedOp pop) {
-        this.instrument = pop.takeStaticConfigOr("instrument", false);
-        if (instrument) {
-            this.successTimer = ActivityMetrics.timer(getDefaultMetricsPrefix(pop) + "success");
-            this.errorTimer = ActivityMetrics.timer(getDefaultMetricsPrefix(pop) + "error");
-            this.resultSizeHistogram = ActivityMetrics.histogram(getDefaultMetricsPrefix(pop) + "resultset-size");
+    private void configureInstrumentation(final ParsedOp pop) {
+        instrument = pop.takeStaticConfigOr("instrument", false);
+        if (this.instrument) {
+            final int hdrDigits = pop.getStaticConfigOr("hdr_digits", 4).intValue();
+            successTimer = ActivityMetrics.timer(pop, "success",hdrDigits);
+            errorTimer = ActivityMetrics.timer(pop, "error", hdrDigits);
+            resultSizeHistogram = ActivityMetrics.histogram(pop, "resultset-size", hdrDigits);
         }
     }
 
     @Override
-    public void onStart(long cycleValue) {
-        if (timerStarts != null) {
-            ThreadLocalNamedTimers.TL_INSTANCE.get().start(timerStarts);
-        }
+    public void onStart(final long cycleValue) {
+        if (null != timerStarts) ThreadLocalNamedTimers.TL_INSTANCE.get().start(this.timerStarts);
     }
 
     @Override
-    public void onSuccess(long cycleValue, long nanoTime, long resultSize) {
-        if (instrument) {
-            successTimer.update(nanoTime, TimeUnit.NANOSECONDS);
-            if (resultSize > -1) {
-                resultSizeHistogram.update(resultSize);
-            }
+    public void onSuccess(final long cycleValue, final long nanoTime, final long resultSize) {
+        if (this.instrument) {
+            this.successTimer.update(nanoTime, TimeUnit.NANOSECONDS);
+            if (-1 < resultSize) this.resultSizeHistogram.update(resultSize);
         }
-        if (timerStops != null) {
-            ThreadLocalNamedTimers.TL_INSTANCE.get().stop(timerStops);
-        }
+        if (null != timerStops) ThreadLocalNamedTimers.TL_INSTANCE.get().stop(this.timerStops);
     }
 
     @Override
-    public void onError(long cycleValue, long resultNanos, Throwable t) {
+    public void onError(final long cycleValue, final long resultNanos, final Throwable t) {
 
-        if (instrument) {
-            errorTimer.update(resultNanos, TimeUnit.NANOSECONDS);
-        }
-        if (timerStops != null) {
-            ThreadLocalNamedTimers.TL_INSTANCE.get().stop(timerStops);
-        }
+        if (this.instrument) this.errorTimer.update(resultNanos, TimeUnit.NANOSECONDS);
+        if (null != timerStops) ThreadLocalNamedTimers.TL_INSTANCE.get().stop(this.timerStops);
+    }
+
+    @Override
+    public NBLabels getLabels() {
+        return this.labels;
     }
 
 }

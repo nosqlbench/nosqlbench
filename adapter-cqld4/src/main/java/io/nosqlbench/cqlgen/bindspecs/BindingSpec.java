@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.bindspecs;
 
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 public interface BindingSpec {
 
@@ -35,7 +35,7 @@ public interface BindingSpec {
      * This is
      * @return
      */
-    Labeled getTarget();
+    NBLabeledElement getTarget();
 
     String getTypedef();
 }

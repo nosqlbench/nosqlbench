@@ -19,6 +19,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
 import io.nosqlbench.api.metadata.ScenarioMetadataAware;
@@ -38,6 +40,7 @@ import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Engine.Builder;
 import org.graalvm.polyglot.EnvironmentAccess;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotAccess;
@@ -53,14 +56,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-public class Scenario implements Callable<ExecutionMetricsResult> {
+public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElement {
 
     private final String commandLine;
     private final String reportSummaryTo;
@@ -76,9 +76,14 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
     private ExecutionMetricsResult result;
 
     public Optional<ExecutionMetricsResult> getResultIfComplete() {
-        return Optional.ofNullable(this.result);
+        return Optional.ofNullable(result);
     }
 
+
+    @Override
+    public NBLabels getLabels() {
+        return NBLabels.forKV("scenario", this.scenarioName);
+    }
 
     public enum State {
         Scheduled,
@@ -97,7 +102,7 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
     private ScriptParams scenarioScriptParams;
     private String scriptfile;
     private Engine engine = Engine.Graalvm;
-    private boolean wantsStackTraces = false;
+    private boolean wantsStackTraces;
     private boolean wantsCompiledScript;
     private long startedAtMillis = -1L;
     private long endedAtMillis = -1L;
@@ -107,16 +112,16 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
     }
 
     public Scenario(
-        String scenarioName,
-        String scriptfile,
-        Engine engine,
-        String progressInterval,
-        boolean wantsStackTraces,
-        boolean wantsCompiledScript,
-        String reportSummaryTo,
-        String commandLine,
-        Path logsPath,
-        Maturity minMaturity) {
+        final String scenarioName,
+        final String scriptfile,
+        final Engine engine,
+        final String progressInterval,
+        final boolean wantsStackTraces,
+        final boolean wantsCompiledScript,
+        final String reportSummaryTo,
+        final String commandLine,
+        final Path logsPath,
+        final Maturity minMaturity) {
 
         this.scenarioName = scenarioName;
         this.scriptfile = scriptfile;
@@ -130,53 +135,53 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
         this.minMaturity = minMaturity;
     }
 
-    public Scenario(String name, Engine engine, String reportSummaryTo, Maturity minMaturity) {
-        this.scenarioName = name;
+    public Scenario(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
+        scenarioName = name;
         this.reportSummaryTo = reportSummaryTo;
         this.engine = engine;
-        this.commandLine = "";
+        commandLine = "";
         this.minMaturity = minMaturity;
-        this.logsPath = Path.of("logs");
+        logsPath = Path.of("logs");
     }
 
-    public Scenario setLogger(Logger logger) {
+    public Scenario setLogger(final Logger logger) {
         this.logger = logger;
         return this;
     }
 
     public Logger getLogger() {
-        return logger;
+        return this.logger;
     }
 
-    public Scenario addScriptText(String scriptText) {
-        scripts.add(scriptText);
+    public Scenario addScriptText(final String scriptText) {
+        this.scripts.add(scriptText);
         return this;
     }
 
 
-    public Scenario addScriptFiles(String... args) {
-        for (String scriptFile : args) {
-            Path scriptPath = Paths.get(scriptFile);
+    public Scenario addScriptFiles(final String... args) {
+        for (final String scriptFile : args) {
+            final Path scriptPath = Paths.get(scriptFile);
             byte[] bytes = new byte[0];
             try {
                 bytes = Files.readAllBytes(scriptPath);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
-            ByteBuffer bb = ByteBuffer.wrap(bytes);
-            Charset utf8 = StandardCharsets.UTF_8;
-            String scriptData = utf8.decode(bb).toString();
-            addScriptText(scriptData);
+            final ByteBuffer bb = ByteBuffer.wrap(bytes);
+            final Charset utf8 = StandardCharsets.UTF_8;
+            final String scriptData = utf8.decode(bb).toString();
+            this.addScriptText(scriptData);
         }
         return this;
     }
 
-    private void initializeScriptingEngine(ScenarioController scenarioController) {
+    private void initializeScriptingEngine(final ScenarioController scenarioController) {
 
-        logger.debug("Using engine " + engine.toString());
-        MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
+        this.logger.debug("Using engine {}", this.engine.toString());
+        final MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
 
-        Context.Builder contextSettings = Context.newBuilder("js")
+        final Context.Builder contextSettings = Context.newBuilder("js")
             .allowHostAccess(HostAccess.ALL)
             .allowNativeAccess(true)
             .allowCreateThread(true)
@@ -190,183 +195,171 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
             .option("js.ecmascript-version", "2020")
             .option("js.nashorn-compat", "true");
 
-        org.graalvm.polyglot.Engine.Builder engineBuilder = org.graalvm.polyglot.Engine.newBuilder();
+        final Builder engineBuilder = org.graalvm.polyglot.Engine.newBuilder();
         engineBuilder.option("engine.WarnInterpreterOnly", "false");
-        org.graalvm.polyglot.Engine polyglotEngine = engineBuilder.build();
+        final org.graalvm.polyglot.Engine polyglotEngine = engineBuilder.build();
 
         // TODO: add in, out, err for this scenario
-        this.scriptEngine = GraalJSScriptEngine.create(polyglotEngine, contextSettings);
+        scriptEngine = GraalJSScriptEngine.create(polyglotEngine, contextSettings);
 
 
-        if (!progressInterval.equals("disabled")) {
-            activityProgressIndicator = new ActivityProgressIndicator(scenarioController, progressInterval);
-        }
+        if (!"disabled".equals(progressInterval))
+            this.activityProgressIndicator = new ActivityProgressIndicator(scenarioController, this.progressInterval);
 
-        scriptEnv = new ScenarioContext(scenarioController);
-        scriptEngine.setContext(scriptEnv);
+        this.scriptEnv = new ScenarioContext(scenarioName,scenarioController);
+        this.scriptEngine.setContext(this.scriptEnv);
 
-        scriptEngine.put("params", scenarioScriptParams);
+        this.scriptEngine.put("params", this.scenarioScriptParams);
 
 //            scriptEngine.put("scenario", scenarioController);
 //            scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
 //            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
 
-        scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
-        scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
-        scriptEngine.put("activities", new ActivityBindings(scenarioController));
+        this.scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
+        this.scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
+        this.scriptEngine.put("activities", new ActivityBindings(scenarioController));
 
-        for (ScriptingPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
+        for (final ScriptingPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
             if (!extensionDescriptor.isAutoLoading()) {
-                logger.info(() -> "Not loading " + extensionDescriptor + ", autoloading is false");
+                this.logger.info(() -> "Not loading " + extensionDescriptor + ", autoloading is false");
                 continue;
             }
 
-            Logger extensionLogger =
+            final Logger extensionLogger =
                 LogManager.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
-            Object extensionObject = extensionDescriptor.getExtensionObject(
+            final Object extensionObject = extensionDescriptor.getExtensionObject(
                 extensionLogger,
                 metricRegistry,
-                scriptEnv
+                this.scriptEnv
             );
-            ScenarioMetadataAware.apply(extensionObject, getScenarioMetadata());
-            logger.trace(() -> "Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
+            ScenarioMetadataAware.apply(extensionObject, this.getScenarioMetadata());
+            this.logger.trace(() -> "Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
                 " class=" + extensionObject.getClass().getSimpleName());
-            scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
+            this.scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
         }
     }
 
     private synchronized ScenarioMetadata getScenarioMetadata() {
-        if (this.scenarioMetadata == null) {
-            this.scenarioMetadata = new ScenarioMetadata(
-                this.startedAtMillis,
-                this.scenarioName,
-                SystemId.getNodeId(),
-                SystemId.getNodeFingerprint()
-            );
-        }
-        return scenarioMetadata;
+        if (null == this.scenarioMetadata) scenarioMetadata = new ScenarioMetadata(
+            startedAtMillis,
+            scenarioName,
+            SystemId.getNodeId(),
+            SystemId.getNodeFingerprint()
+        );
+        return this.scenarioMetadata;
     }
 
     private synchronized void runScenario() {
-        scenarioShutdownHook = new ScenarioShutdownHook(this);
-        Runtime.getRuntime().addShutdownHook(scenarioShutdownHook);
+        this.scenarioShutdownHook = new ScenarioShutdownHook(this);
+        Runtime.getRuntime().addShutdownHook(this.scenarioShutdownHook);
 
-        state = State.Running;
-        startedAtMillis = System.currentTimeMillis();
+        this.state = State.Running;
+        this.startedAtMillis = System.currentTimeMillis();
         Annotators.recordAnnotation(
             Annotation.newBuilder()
-                .session(this.scenarioName)
+                .session(scenarioName)
                 .now()
                 .layer(Layer.Scenario)
-                .detail("engine", this.engine.toString())
+                .detail("engine", engine.toString())
                 .build()
         );
 
-        logger.debug("Running control script for " + getScenarioName() + ".");
-        scenarioController = new ScenarioController(this);
+        this.logger.debug("Running control script for {}.", scenarioName);
+        this.scenarioController = new ScenarioController(this);
         try {
-            initializeScriptingEngine(scenarioController);
-            executeScenarioScripts();
-            long awaitCompletionTime = 86400 * 365 * 1000L;
-            logger.debug("Awaiting completion of scenario and activities for " + awaitCompletionTime + " millis.");
-            scenarioController.awaitCompletion(awaitCompletionTime);
-        } catch (Exception e) {
-            this.error=e;
+            this.initializeScriptingEngine(this.scenarioController);
+            this.executeScenarioScripts();
+            final long awaitCompletionTime = 86400 * 365 * 1000L;
+            this.logger.debug("Awaiting completion of scenario and activities for {} millis.", awaitCompletionTime);
+            this.scenarioController.awaitCompletion(awaitCompletionTime);
+        } catch (final Exception e) {
+            error =e;
         } finally {
-            scenarioController.shutdown();
+            this.scenarioController.shutdown();
         }
 
-        Runtime.getRuntime().removeShutdownHook(scenarioShutdownHook);
-        var runHook = scenarioShutdownHook;
-        scenarioShutdownHook = null;
+        Runtime.getRuntime().removeShutdownHook(this.scenarioShutdownHook);
+        final var runHook = this.scenarioShutdownHook;
+        this.scenarioShutdownHook = null;
         runHook.run();
-        logger.debug("removing scenario shutdown hook");
+        this.logger.debug("removing scenario shutdown hook");
     }
 
-    public void notifyException(Thread t, Throwable e) {
-        this.error=new RuntimeException("in thread " + t.getName() + ", " +e, e);
+    public void notifyException(final Thread t, final Throwable e) {
+        error =new RuntimeException("in thread " + t.getName() + ", " +e, e);
     }
     private void executeScenarioScripts() {
-        for (String script : scripts) {
+        for (final String script : this.scripts)
             try {
                 Object result = null;
-                if (scriptEngine instanceof Compilable compilableEngine && wantsCompiledScript) {
-                    logger.debug("Using direct script compilation");
-                    CompiledScript compiled = compilableEngine.compile(script);
-                    logger.debug("-> invoking main scenario script (compiled)");
+                if ((scriptEngine instanceof Compilable compilableEngine) && this.wantsCompiledScript) {
+                    this.logger.debug("Using direct script compilation");
+                    final CompiledScript compiled = compilableEngine.compile(script);
+                    this.logger.debug("-> invoking main scenario script (compiled)");
                     result = compiled.eval();
-                    logger.debug("<- scenario script completed (compiled)");
+                    this.logger.debug("<- scenario script completed (compiled)");
+                } else if ((null != scriptfile) && !this.scriptfile.isEmpty()) {
+                    final String filename = this.scriptfile.replace("_SESSION_", this.scenarioName);
+                    this.logger.debug("-> invoking main scenario script (interpreted from {})", filename);
+                    final Path written = Files.write(
+                        Path.of(filename),
+                        script.getBytes(StandardCharsets.UTF_8),
+                        StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.CREATE
+                    );
+                    final BufferedReader reader = Files.newBufferedReader(written);
+                    this.scriptEngine.eval(reader);
+                    this.logger.debug("<- scenario control script completed (interpreted) from {})", filename);
                 } else {
-                    if (scriptfile != null && !scriptfile.isEmpty()) {
-                        String filename = scriptfile.replace("_SESSION_", scenarioName);
-                        logger.debug("-> invoking main scenario script (" +
-                            "interpreted from " + filename + ")");
-                        Path written = Files.write(
-                            Path.of(filename),
-                            script.getBytes(StandardCharsets.UTF_8),
-                            StandardOpenOption.TRUNCATE_EXISTING,
-                            StandardOpenOption.CREATE
-                        );
-                        BufferedReader reader = Files.newBufferedReader(written);
-                        scriptEngine.eval(reader);
-                        logger.debug("<- scenario control script completed (interpreted) " +
-                            "from " + filename + ")");
-                    } else {
-                        logger.debug("-> invoking main scenario script (interpreted)");
-                        result = scriptEngine.eval(script);
-                        logger.debug("<- scenario control script completed (interpreted)");
-                    }
+                    this.logger.debug("-> invoking main scenario script (interpreted)");
+                    result = this.scriptEngine.eval(script);
+                    this.logger.debug("<- scenario control script completed (interpreted)");
                 }
 
-                if (result != null) {
-                    logger.debug("scenario result: type(" + result.getClass().getCanonicalName() + "): value:" + result);
-                }
+                if (null != result)
+                    this.logger.debug("scenario result: type({}): value:{}", result.getClass().getCanonicalName(), result);
                 System.err.flush();
                 System.out.flush();
-            } catch (Exception e) {
-                this.error=e;
-                this.state = State.Errored;
-                logger.error("Error in scenario, shutting down. (" + e + ")");
+            } catch (final Exception e) {
+                error = e;
+                state = State.Errored;
+                this.logger.error("Error in scenario, shutting down. ({})", e);
                 try {
-                    this.scenarioController.forceStopScenario(5000, false);
-                } catch (Exception eInner) {
-                    logger.debug("Found inner exception while forcing stop with rethrow=false: " + eInner);
+                    scenarioController.forceStopScenario(5000, false);
+                } catch (final Exception eInner) {
+                    this.logger.debug("Found inner exception while forcing stop with rethrow=false: {}", eInner);
                 } finally {
                     throw new RuntimeException(e);
                 }
             } finally {
                 System.out.flush();
                 System.err.flush();
-                endedAtMillis = System.currentTimeMillis();
+                this.endedAtMillis = System.currentTimeMillis();
             }
-        }
     }
 
     public void finish() {
-        logger.debug("finishing scenario");
-        endedAtMillis = System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
-        if (this.state == State.Running) {
-            this.state = State.Finished;
-        }
+        this.logger.debug("finishing scenario");
+        this.endedAtMillis = System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
+        if (State.Running == this.state) state = State.Finished;
 
-        if (scenarioShutdownHook != null) {
+        if (null != scenarioShutdownHook) {
             // If this method was called while the shutdown hook is defined, then it means
             // that the scenario was ended before the hook was uninstalled normally.
-            this.state = State.Interrupted;
-            logger.warn("Scenario was interrupted by process exit, shutting down");
-        } else {
-            logger.info("Scenario completed successfully, with " + scenarioController.getActivityExecutorMap().size() + " logical activities.");
-        }
+            state = State.Interrupted;
+            this.logger.warn("Scenario was interrupted by process exit, shutting down");
+        } else
+            this.logger.info("Scenario completed successfully, with {} logical activities.", this.scenarioController.getActivityExecutorMap().size());
 
-        logger.info(() -> "scenario state: " + this.state);
+        this.logger.info(() -> "scenario state: " + state);
 
         // We report the scenario state via annotation even for short runs
-        Annotation annotation = Annotation.newBuilder()
-            .session(this.scenarioName)
-            .interval(this.startedAtMillis, endedAtMillis)
+        final Annotation annotation = Annotation.newBuilder()
+            .session(scenarioName)
+            .interval(startedAtMillis, this.endedAtMillis)
             .layer(Layer.Scenario)
-            .label("state", this.state.toString())
-            .detail("command_line", this.commandLine)
+            .label("state", state.toString())
+            .detail("command_line", commandLine)
             .build();
 
         Annotators.recordAnnotation(annotation);
@@ -374,11 +367,11 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
     }
 
     public long getStartedAtMillis() {
-        return startedAtMillis;
+        return this.startedAtMillis;
     }
 
     public long getEndedAtMillis() {
-        return endedAtMillis;
+        return this.endedAtMillis;
     }
 
     /**
@@ -400,37 +393,38 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
      *
      * @return
      */
+    @Override
     public synchronized ExecutionMetricsResult call() {
-        if (result == null) {
+        if (null == result) {
             try {
-                runScenario();
-            } catch (Exception e) {
-                this.error=e;
+                this.runScenario();
+            } catch (final Exception e) {
+                error =e;
             } finally {
-                logger.debug((this.error==null ? "NORMAL" : "ERRORED") + " scenario run");
+                this.logger.debug("{} scenario run", null == this.error ? "NORMAL" : "ERRORED");
             }
 
-            String iolog = scriptEnv.getTimedLog();
-            this.result = new ExecutionMetricsResult(this.startedAtMillis, this.endedAtMillis, iolog, error);
-            result.reportMetricsSummaryToLog();
-            doReportSummaries(reportSummaryTo, result);
+            final String iolog = this.scriptEnv.getTimedLog();
+            result = new ExecutionMetricsResult(startedAtMillis, endedAtMillis, iolog, this.error);
+            this.result.reportMetricsSummaryToLog();
+            this.doReportSummaries(this.reportSummaryTo, this.result);
         }
 
-        return result;
+        return this.result;
     }
 
-    private void doReportSummaries(String reportSummaryTo, ExecutionMetricsResult result) {
-        List<PrintStream> fullChannels = new ArrayList<>();
-        List<PrintStream> briefChannels = new ArrayList<>();
+    private void doReportSummaries(final String reportSummaryTo, final ExecutionMetricsResult result) {
+        final List<PrintStream> fullChannels = new ArrayList<>();
+        final List<PrintStream> briefChannels = new ArrayList<>();
 
 
-        String[] destinationSpecs = reportSummaryTo.split(", *");
+        final String[] destinationSpecs = reportSummaryTo.split(", *");
 
-        for (String spec : destinationSpecs) {
-            if (spec != null && !spec.isBlank()) {
-                String[] split = spec.split(":", 2);
-                String summaryTo = split[0];
-                long summaryWhen = split.length == 2 ? Long.parseLong(split[1]) * 1000L : 0;
+        for (final String spec : destinationSpecs)
+            if ((null != spec) && !spec.isBlank()) {
+                final String[] split = spec.split(":", 2);
+                final String summaryTo = split[0];
+                final long summaryWhen = (2 == split.length) ? (Long.parseLong(split[1]) * 1000L) : 0;
 
                 PrintStream out = null;
                 switch (summaryTo.toLowerCase()) {
@@ -442,83 +436,85 @@ public class Scenario implements Callable<ExecutionMetricsResult> {
                         out = System.err;
                         break;
                     default:
-                        String outName = summaryTo
-                            .replaceAll("_SESSION_", getScenarioName())
-                            .replaceAll("_LOGS_", logsPath.toString());
+                        final String outName = summaryTo
+                            .replaceAll("_SESSION_", scenarioName)
+                            .replaceAll("_LOGS_", this.logsPath.toString());
                         try {
                             out = new PrintStream(new FileOutputStream(outName));
                             break;
-                        } catch (FileNotFoundException e) {
+                        } catch (final FileNotFoundException e) {
                             throw new RuntimeException(e);
                         }
                 }
 
 
-                if (result.getElapsedMillis() > summaryWhen) {
-                    fullChannels.add(out);
-                } else {
-                    logger.debug("Summarizing counting metrics only to " + spec + " with scenario duration of " + summaryWhen + "ms (<" + summaryWhen + ")");
+                if (result.getElapsedMillis() > summaryWhen) fullChannels.add(out);
+                else {
+                    this.logger.debug("Summarizing counting metrics only to {} with scenario duration of {}ms (<{})", spec, summaryWhen, summaryWhen);
                     briefChannels.add(out);
                 }
             }
-        }
         fullChannels.forEach(result::reportMetricsSummaryTo);
 //        briefChannels.forEach(result::reportCountsTo);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Scenario scenario = (Scenario) o;
-        return getScenarioName() != null ? getScenarioName().equals(scenario.getScenarioName()) : scenario.getScenarioName() == null;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if ((null == o) || (this.getClass() != o.getClass())) {
+            return false;
+        }
+        final Scenario scenario = (Scenario) o;
+        return Objects.equals(this.scenarioName, scenario.scenarioName);
     }
 
     @Override
     public int hashCode() {
-        return getScenarioName() != null ? getScenarioName().hashCode() : 0;
+        return (null != this.scenarioName) ? scenarioName.hashCode() : 0;
     }
 
     public String getScenarioName() {
-        return scenarioName;
+        return this.scenarioName;
     }
 
     public ScenarioController getScenarioController() {
-        return scenarioController;
+        return this.scenarioController;
     }
 
     public String getScriptText() {
-        return scripts.stream().collect(Collectors.joining());
+        return this.scripts.stream().collect(Collectors.joining());
     }
 
     public Optional<List<String>> getIOLog() {
-        return Optional.ofNullable(scriptEnv).map(ScriptEnvBuffer::getTimeLogLines);
+        return Optional.ofNullable(this.scriptEnv).map(ScriptEnvBuffer::getTimeLogLines);
     }
 
     public String toString() {
-        return "name:'" + this.getScenarioName() + "'";
+        return "name:'" + scenarioName + '\'';
     }
 
-    public void addScenarioScriptParams(ScriptParams scenarioScriptParams) {
+    public void addScenarioScriptParams(final ScriptParams scenarioScriptParams) {
         this.scenarioScriptParams = scenarioScriptParams;
     }
 
-    public void addScenarioScriptParams(Map<String, String> scriptParams) {
-        addScenarioScriptParams(new ScriptParams() {{
-            putAll(scriptParams);
+    public void addScenarioScriptParams(final Map<String, String> scriptParams) {
+        this.addScenarioScriptParams(new ScriptParams() {{
+            this.putAll(scriptParams);
         }});
     }
 
     public State getScenarioState() {
-        return state;
+        return this.state;
     }
 
     public void enableCharting() {
-        MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
+        final MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
     }
 
     public String getReportSummaryTo() {
-        return reportSummaryTo;
+        return this.reportSummaryTo;
     }
 }
 

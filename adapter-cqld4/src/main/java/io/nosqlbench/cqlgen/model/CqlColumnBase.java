@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package io.nosqlbench.cqlgen.model;
 
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 import java.util.Map;
 
-public abstract class CqlColumnBase implements NBNamedElement, Labeled {
+public abstract class CqlColumnBase implements NBNamedElement, NBLabeledElement {
 
     private String name;
     private String typedef;
@@ -43,6 +44,7 @@ public abstract class CqlColumnBase implements NBNamedElement, Labeled {
         this.typedef = type;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -61,15 +63,12 @@ public abstract class CqlColumnBase implements NBNamedElement, Labeled {
     }
 
     @Override
-    public Map<String, String> getLabels() {
-        return Map.of(
-            "name", name,
-            "type", "column"
-        );
+    public NBLabels getLabels() {
+        return NBLabels.forKV("name", name, "type", "column");
     }
 
     public boolean isCounter() {
-        return getTrimmedTypedef().equalsIgnoreCase("counter");
+        return "counter".equalsIgnoreCase(this.getTrimmedTypedef());
     }
 
     public void setName(String name) {
@@ -77,11 +76,11 @@ public abstract class CqlColumnBase implements NBNamedElement, Labeled {
     }
 
     public String getSyntax() {
-        return getName() + " " + getTrimmedTypedef();
+        return this.name + ' ' + getTrimmedTypedef();
     }
 
     public String getFullName() {
-        return getParentFullName() + "." + getName();
+        return getParentFullName() + '.' + this.name;
     }
 
     protected abstract String getParentFullName();

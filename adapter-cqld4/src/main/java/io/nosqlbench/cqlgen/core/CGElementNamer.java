@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.core;
 
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -28,14 +28,14 @@ import java.util.regex.Pattern;
 
 public class CGElementNamer implements Function<Map<String, String>, String> {
 
-    public final static String _DEFAULT_TEMPLATE = "[PREFIX-][OPTYPE-][KEYSPACE__][TABLE][-DATATYPE]";
+    public static final String _DEFAULT_TEMPLATE = "[PREFIX-][OPTYPE-][KEYSPACE__][TABLE][-DATATYPE]";
 
     // for convenient reference
-    public final static String PREFIX = "PREFIX";
-    public final static String OPTYPE = "OPTYPE";
-    public final static String KEYSPACE = "KEYSPACE";
-    public final static String TABLE = "TABLE";
-    public final static String DATATYPE = "DATATYPE";
+    public static final String PREFIX = "PREFIX";
+    public static final String OPTYPE = "OPTYPE";
+    public static final String KEYSPACE = "KEYSPACE";
+    public static final String TABLE = "TABLE";
+    public static final String DATATYPE = "DATATYPE";
 
     private final List<Section> sections = new ArrayList<>();
     private final String spec;
@@ -47,17 +47,17 @@ public class CGElementNamer implements Function<Map<String, String>, String> {
         Pattern pattern = Pattern.compile("(?<prefix>[^\\]]+)?\\[(?<section>(?<pre>.*?)(?<name>[A-Z]+)(?<required>!)?(?<post>.*?))?]");
         Matcher scanner = pattern.matcher(template);
         while (scanner.find()) {
-            if (scanner.group("prefix")!=null) {
+            if (null != scanner.group("prefix")) {
                 String prefix = scanner.group("prefix");
                 sections.add(new Section(null, prefix, true));
             }
-            if (scanner.group("section")!=null) {
+            if (null != scanner.group("section")) {
                 Section section = new Section(
                     scanner.group("name").toLowerCase(),
                     scanner.group("pre") +
                         scanner.group("name")
                         + scanner.group("post"),
-                    scanner.group("required") != null);
+                    null != scanner.group("required"));
                 sections.add(section);
             }
         }
@@ -94,39 +94,42 @@ public class CGElementNamer implements Function<Map<String, String>, String> {
         return value;
     }
 
-    public String apply(Labeled element, String... keysAndValues) {
+    public String apply(NBLabeledElement element, String... keysAndValues) {
+
         LinkedHashMap<String, String> mylabels = new LinkedHashMap<>();
         for (int idx = 0; idx < keysAndValues.length; idx += 2) {
             mylabels.put(keysAndValues[idx], keysAndValues[idx + 1]);
         }
-        mylabels.putAll(element.getLabels());
+        mylabels.putAll(element.getLabels().asMap());
         return apply(mylabels);
     }
 
-    private final static class Section implements Function<Map<String, String>, String> {
+    private static final class Section implements Function<Map<String, String>, String> {
         String name;
         String template;
         boolean required;
 
         public Section(String name, String template, boolean required) {
-            this.name = (name!=null ? name.toLowerCase() : null);
+            this.name = null != name ? name.toLowerCase() : null;
             this.template = template.toLowerCase();
             this.required = required;
         }
 
         @Override
         public String apply(Map<String, String> labels) {
-            if (name==null) {
+            if (null == this.name) {
                 return template;
-            } else if (labels.containsKey(name)) {
-                return template.replace(name, labels.get(name));
-            } else if (labels.containsKey(name.toUpperCase())) {
-                return template.replace(name, labels.get(name.toUpperCase()));
-            } else if (required) {
-                throw new RuntimeException("Section label '" + name + "' was not provided for template, but it is required.");
-            } else {
-                return "";
             }
+            if (labels.containsKey(name)) {
+                return template.replace(name, labels.get(name));
+            }
+            if (labels.containsKey(name.toUpperCase())) {
+                return template.replace(name, labels.get(name.toUpperCase()));
+            }
+            if (required) {
+                throw new RuntimeException("Section label '" + name + "' was not provided for template, but it is required.");
+            }
+            return "";
         }
 
         @Override

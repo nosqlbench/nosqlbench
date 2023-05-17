@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 package io.nosqlbench.engine.extensions.s3uploader;
 
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
 import io.nosqlbench.api.metadata.ScenarioMetadataAware;
 import org.apache.logging.log4j.Logger;
-
-import javax.script.ScriptContext;
 
 @Service(value = ScriptingPluginInfo.class, selector = "s3")
 public class S3UploaderPluginData implements ScriptingPluginInfo<S3Uploader>, ScenarioMetadataAware {
@@ -35,14 +34,14 @@ public class S3UploaderPluginData implements ScriptingPluginInfo<S3Uploader>, Sc
     }
 
     @Override
-    public S3Uploader getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
-        S3Uploader uploader = new S3Uploader(logger, metricRegistry, scriptContext);
-        ScenarioMetadataAware.apply(uploader,scenarioMetadata);
+    public S3Uploader getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+        final S3Uploader uploader = new S3Uploader(logger, metricRegistry, scriptContext);
+        ScenarioMetadataAware.apply(uploader, this.scenarioMetadata);
         return uploader;
     }
 
     @Override
-    public void setScenarioMetadata(ScenarioMetadata metadata) {
-        this.scenarioMetadata = metadata;
+    public void setScenarioMetadata(final ScenarioMetadata metadata) {
+        scenarioMetadata = metadata;
     }
 }

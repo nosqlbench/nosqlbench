@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,28 @@
 
 package io.nosqlbench.engine.api.metrics;
 
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.ConvenientSnapshot;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
-import io.nosqlbench.api.engine.metrics.NicerHistogram;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class NicerHistogramTest {
+public class NBMetricHistogramTest {
 
     @Test
     public void testNicerHistogramValues() {
-        NicerHistogram nh = new NicerHistogram("testhisto",new DeltaHdrHistogramReservoir("testhisto",4));
-        for (int i = 1; i <= 100; i++) {
+        NBMetricHistogram nh = new NBMetricHistogram(NBLabels.forKV("name","testhisto"), new DeltaHdrHistogramReservoir(
+                NBLabels.forKV("name", "testhisto"), 4));
+        for (int i = 1; 100 >= i; i++) {
             nh.update(i);
         }
         ConvenientSnapshot snapshot = nh.getSnapshot();
         assertThat(snapshot.getMax()).isEqualTo(100);
 
         nh.getDeltaSnapshot(500); // Just to reset
-        for (int i=1; i<= 200; i++ ) {
+        for (int i = 1; 200 >= i; i++) {
             nh.update(i);
         }
         ConvenientSnapshot deltaSnapshot1 = nh.getDeltaSnapshot(500);
@@ -43,7 +45,7 @@ public class NicerHistogramTest {
 
         ConvenientSnapshot cachedSnapshot = nh.getSnapshot();
         assertThat(cachedSnapshot.getMax()).isEqualTo(200);
-        for (int i=1; i<= 300; i++ ) {
+        for (int i = 1; 300 >= i; i++) {
             nh.update(i);
         }
         ConvenientSnapshot stillCachedSnapshot = nh.getSnapshot();

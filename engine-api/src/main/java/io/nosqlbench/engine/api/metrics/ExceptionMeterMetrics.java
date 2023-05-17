@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Meter;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 
 import java.util.ArrayList;
@@ -30,28 +30,26 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ExceptionMeterMetrics {
     private final ConcurrentHashMap<String, Meter> meters = new ConcurrentHashMap<>();
     private final Meter allerrors;
-    private final ActivityDef activityDef;
+    private final NBLabeledElement parentLabels;
 
-    public ExceptionMeterMetrics(ActivityDef activityDef) {
-        this.activityDef = activityDef;
-        allerrors = ActivityMetrics.meter(activityDef, "errormeters.ALL");
+    public ExceptionMeterMetrics(final NBLabeledElement parentLabels) {
+        this.parentLabels = parentLabels;
+        this.allerrors = ActivityMetrics.meter(parentLabels, "errormeters.ALL");
     }
 
-    public void mark(String name) {
-        Meter c = meters.get(name);
-        if (c == null) {
-            synchronized (meters) {
-                c = meters.computeIfAbsent(
-                    name,
-                    k -> ActivityMetrics.meter(activityDef, "errormeters." + name)
-                );
-            }
+    public void mark(final String name) {
+        Meter c = this.meters.get(name);
+        if (null == c) synchronized (this.meters) {
+            c = this.meters.computeIfAbsent(
+                name,
+                k -> ActivityMetrics.meter(this.parentLabels, "errormeters." + name)
+            );
         }
         c.mark();
-        allerrors.mark();
+        this.allerrors.mark();
     }
 
     public List<Meter> getMeters() {
-        return new ArrayList<>(meters.values());
+        return new ArrayList<>(this.meters.values());
     }
 }

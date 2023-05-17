@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,34 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics;
+package io.nosqlbench.api.engine.metrics.instruments;
 
 import com.codahale.metrics.Histogram;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.engine.metrics.*;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDeltaHistogramAttachment, HistogramAttachment {
+public class NBMetricHistogram extends Histogram implements DeltaSnapshotter, HdrDeltaHistogramAttachment, HistogramAttachment, NBLabeledElement {
 
     private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
-    private long cacheExpiryMillis = 0L;
-    private long cacheTimeMillis = 0L;
-    private final String metricName;
+    private final NBLabels labels;
+    private long cacheExpiryMillis;
+    private long cacheTimeMillis;
     private List<Histogram> mirrors;
 
-    public NicerHistogram(String metricName, DeltaHdrHistogramReservoir hdrHistogramReservoir) {
+    public NBMetricHistogram(NBLabels labels, DeltaHdrHistogramReservoir hdrHistogramReservoir) {
         super(hdrHistogramReservoir);
-        this.metricName = metricName;
+        this.labels = labels;
+        this.hdrDeltaReservoir = hdrHistogramReservoir;
+    }
+
+    public NBMetricHistogram(String name, DeltaHdrHistogramReservoir hdrHistogramReservoir) {
+        super(hdrHistogramReservoir);
+        this.labels = NBLabels.forKV("name",name);
         this.hdrDeltaReservoir = hdrHistogramReservoir;
     }
 
@@ -50,11 +59,11 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDe
     public ConvenientSnapshot getSnapshot() {
         if (System.currentTimeMillis() < cacheExpiryMillis) {
             return new ConvenientSnapshot(hdrDeltaReservoir.getLastSnapshot());
-        } else {
-            return new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());
         }
+        return new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());
     }
 
+    @Override
     public ConvenientSnapshot getDeltaSnapshot(long cacheTimeMillis) {
         this.cacheTimeMillis = cacheTimeMillis;
         cacheExpiryMillis = System.currentTimeMillis() + this.cacheTimeMillis;
@@ -63,19 +72,19 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDe
     }
 
     @Override
-    public synchronized NicerHistogram attachHdrDeltaHistogram() {
-        if (mirrors == null) {
+    public synchronized NBMetricHistogram attachHdrDeltaHistogram() {
+        if (null == this.mirrors) {
             mirrors = new CopyOnWriteArrayList<>();
         }
         DeltaHdrHistogramReservoir mirrorReservoir = this.hdrDeltaReservoir.copySettings();
-        NicerHistogram mirror = new NicerHistogram("mirror-" + this.metricName, mirrorReservoir);
+        NBMetricHistogram mirror = new NBMetricHistogram("mirror-" + this.labels.linearizeValues("name"), mirrorReservoir);
         mirrors.add(mirror);
         return mirror;
     }
 
     @Override
     public Histogram attachHistogram(Histogram histogram) {
-        if (mirrors == null) {
+        if (null == this.mirrors) {
             mirrors = new CopyOnWriteArrayList<>();
         }
         mirrors.add(histogram);
@@ -85,7 +94,7 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDe
     @Override
     public void update(long value) {
         super.update(value);
-        if (mirrors != null) {
+        if (null != this.mirrors) {
             for (Histogram mirror : mirrors) {
                 mirror.update(value);
             }
@@ -97,4 +106,8 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDe
         return hdrDeltaReservoir.getNextHdrHistogram();
     }
 
+    @Override
+    public NBLabels getLabels() {
+        return this.labels;
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,25 @@
 
 package io.nosqlbench.cqlgen.bindspecs;
 
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 public class BindingSpecImpl implements BindingSpec {
-    private Labeled target;
+    private NBLabeledElement target;
     private double cardinality;
     private String typedef;
 
-    public BindingSpecImpl(Labeled target) {
+    public BindingSpecImpl(final NBLabeledElement target) {
         this.target = target;
     }
 
     @Override
-    public Labeled getTarget() {
-        return target;
+    public NBLabeledElement getTarget() {
+        return this.target;
     }
 
     @Override
     public String getTypedef() {
-        return typedef;
+        return this.typedef;
     }
 
     @Override
@@ -42,7 +42,7 @@ public class BindingSpecImpl implements BindingSpec {
         return BindingSpec.super.getCardinality();
     }
 
-    public void setTarget(Labeled target) {
+    public void setTarget(final NBLabeledElement target) {
         this.target = target;
     }
 

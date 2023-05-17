@@ -26,7 +26,7 @@ import java.io.PrintWriter;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-final class DeltaHistogramSnapshot extends Snapshot {
+public final class DeltaHistogramSnapshot extends Snapshot {
     private final Histogram histogram;
 
     DeltaHistogramSnapshot(Histogram histogram) {

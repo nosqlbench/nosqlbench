@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@
 package io.nosqlbench.engine.extensions.example;
 
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
-
-import javax.script.ScriptContext;
 
 @Service(value = ScriptingPluginInfo.class, selector = "adder")
 public class ExamplePluginData implements ScriptingPluginInfo<ExamplePlugin> {
@@ -33,7 +32,7 @@ public class ExamplePluginData implements ScriptingPluginInfo<ExamplePlugin> {
     }
 
     @Override
-    public ExamplePlugin getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public ExamplePlugin getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
         return new ExamplePlugin();
     }
 

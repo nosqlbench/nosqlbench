@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.transformers.namecache;
 
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -28,31 +28,29 @@ public class NamedTable {
     private final Map<String, NamedColumn> columns = new LinkedHashMap<>();
     private String alias;
 
-    public NamedTable(String tablename) {
+    public NamedTable(final String tablename) {
         this.tablename = tablename;
     }
 
-    public NamedColumn column(String name) {
-        return this.columns.computeIfAbsent(name, NamedColumn::new);
+    public NamedColumn column(final String name) {
+        return columns.computeIfAbsent(name, NamedColumn::new);
     }
 
-    public NamedTable alias(String alias) {
+    public NamedTable alias(final String alias) {
         this.alias = alias;
         return this;
     }
 
-    public String computeAlias(Labeled labeled, Function<Labeled,String> namer) {
-        if (this.alias==null) {
-            this.alias = namer.apply(labeled);
-        }
-        return this.alias;
+    public String computeAlias(final NBLabeledElement labeled, final Function<NBLabeledElement,String> namer) {
+        if (null == this.alias) alias = namer.apply(labeled);
+        return alias;
     }
 
     public String getAlias() {
-        return this.alias;
+        return alias;
     }
 
     public Collection<NamedColumn> columns() {
-        return columns.values();
+        return this.columns.values();
     }
 }

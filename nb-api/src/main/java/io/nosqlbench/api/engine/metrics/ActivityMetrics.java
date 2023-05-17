@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,27 @@
 package io.nosqlbench.api.engine.metrics;
 
 import com.codahale.metrics.*;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.engine.activityapi.core.MetricRegistryService;
+import io.nosqlbench.api.engine.metrics.instruments.*;
 import io.nosqlbench.api.engine.util.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.script.ScriptContext;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 public class ActivityMetrics {
 
-    private final static Logger logger = LogManager.getLogger(ActivityMetrics.class);
+    private static final Logger logger = LogManager.getLogger(ActivityMetrics.class);
 
     public static final String HDRDIGITS_PARAM = "hdr_digits";
     public static final int DEFAULT_HDRDIGITS = 4;
@@ -56,48 +59,35 @@ public class ActivityMetrics {
         ActivityMetrics._HDRDIGITS = hdrDigits;
     }
 
-    private ActivityMetrics() {
-    }
-
     /**
      * Register a named metric for an activity, synchronized on the activity
      *
-     * @param named    The activity def that the metric will be for
-     * @param name           The full metric name
-     * @param metricProvider A function to actually create the metric if needed
+     * @param named
+     *     The activity def that the metric will be for
+     * @param metricFamilyName
+     *     The full metric name
+     * @param metricProvider
+     *     A function to actually create the metric if needed
      * @return a Metric, or null if the metric for the name was already present
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private static Metric register(NBNamedElement named, String name, MetricProvider metricProvider) {
-        String fullMetricName = named.getName() + "." + name;
-        Metric metric = get().getMetrics().get(fullMetricName);
-        if (metric == null) {
-            synchronized (named) {
-                metric = get().getMetrics().get(fullMetricName);
-                if (metric == null) {
-                    metric = metricProvider.getMetric();
-                    return get().register(fullMetricName, metric);
-                }
-            }
-        }
-        return metric;
-    }
+    private static Metric register(NBLabels labels, MetricProvider metricProvider) {
 
-    private static Metric register(ScriptContext context, String name, MetricProvider metricProvider) {
-        Metric metric = get().getMetrics().get(name);
-        if (metric == null) {
-            synchronized (context) {
-                metric = get().getMetrics().get(name);
-                if (metric == null) {
+        final String graphiteName = labels.linearizeValues('.',"[activity]","[space]","[op]","name");
+        Metric metric = get().getMetrics().get(graphiteName);
+
+        if (null == metric) {
+            synchronized (labels) {
+                metric = get().getMetrics().get(graphiteName);
+                if (null == metric) {
                     metric = metricProvider.getMetric();
-                    Metric registered = get().register(name, metric);
-                    logger.info(() -> "registered scripting metric: " + name);
+                    Metric registered = get().register(graphiteName, metric);
+                    logger.debug(() -> "registered metric: " + graphiteName);
                     return registered;
                 }
             }
         }
         return metric;
-
     }
 
     /**
@@ -109,31 +99,23 @@ public class ActivityMetrics {
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
      * that only one of them succeeds.</p>
      *
-     * @param named an associated activity def
-     * @param name        a simple, descriptive name for the timer
+     * @param named
+     *     an associated activity def
+     * @param metricFamilyName
+     *     a simple, descriptive name for the timer
      * @return the timer, perhaps a different one if it has already been registered
      */
-    public static Timer timer(NBNamedElement named, String name, int hdrdigits) {
-        String fullMetricName = named.getName() + "." + name;
-        Timer registeredTimer = (Timer) register(named, name, () ->
-            new NicerTimer(fullMetricName,
+    public static Timer timer(NBLabeledElement parent, String metricFamilyName, int hdrdigits) {
+        final NBLabels labels = parent.getLabels().and("name",metricFamilyName);
+
+        Timer registeredTimer = (Timer) register(labels, () ->
+            new NBMetricTimer(labels,
                 new DeltaHdrHistogramReservoir(
-                    fullMetricName,
+                    labels,
                     hdrdigits
                 )
             ));
         return registeredTimer;
-    }
-
-    public static Timer timer(String fullMetricName) {
-        NicerTimer timer = get().register(fullMetricName, new NicerTimer(
-            fullMetricName,
-            new DeltaHdrHistogramReservoir(
-                fullMetricName,
-                _HDRDIGITS
-            ))
-        );
-        return timer;
     }
 
     /**
@@ -145,31 +127,22 @@ public class ActivityMetrics {
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
      * that only one of them succeeds.</p>
      *
-     * @param named an associated activity def
-     * @param name        a simple, descriptive name for the histogram
+     * @param named
+     *     an associated activity def
+     * @param metricFamilyName
+     *     a simple, descriptive name for the histogram
      * @return the histogram, perhaps a different one if it has already been registered
      */
-    public static Histogram histogram(NBNamedElement named, String name, int hdrdigits) {
-        String fullMetricName = named.getName() + "." + name;
-        return (Histogram) register(named, name, () ->
-            new NicerHistogram(
-                fullMetricName,
+    public static Histogram histogram(NBLabeledElement labeled, String metricFamilyName, int hdrdigits) {
+        final NBLabels labels = labeled.getLabels().and("name", metricFamilyName);
+        return (Histogram) register(labels, () ->
+            new NBMetricHistogram(
+                labels,
                 new DeltaHdrHistogramReservoir(
-                    fullMetricName,
+                    labels,
                     hdrdigits
                 )
             ));
-    }
-
-    public static Histogram histogram(String fullname) {
-        NicerHistogram histogram = get().register(fullname, new NicerHistogram(
-            fullname,
-            new DeltaHdrHistogramReservoir(
-                fullname,
-                _HDRDIGITS
-            )
-        ));
-        return histogram;
     }
 
     /**
@@ -177,12 +150,15 @@ public class ActivityMetrics {
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
      * that only one of them succeeds.</p>
      *
-     * @param named an associated activity def
-     * @param name        a simple, descriptive name for the counter
+     * @param named
+     *     an associated activity def
+     * @param name
+     *     a simple, descriptive name for the counter
      * @return the counter, perhaps a different one if it has already been registered
      */
-    public static Counter counter(NBNamedElement named, String name) {
-        return (Counter) register(named, name, Counter::new);
+    public static Counter counter(NBLabeledElement parent, String metricFamilyName) {
+        final NBLabels labels = parent.getLabels().and("name",metricFamilyName);
+        return (Counter) register(labels, () -> new NBMetricCounter(labels));
     }
 
     /**
@@ -190,20 +166,23 @@ public class ActivityMetrics {
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
      * that only one of them succeeds.</p>
      *
-     * @param named an associated activity def
-     * @param name        a simple, descriptive name for the meter
+     * @param named
+     *     an associated activity def
+     * @param metricFamilyName
+     *     a simple, descriptive name for the meter
      * @return the meter, perhaps a different one if it has already been registered
      */
-    public static Meter meter(NBNamedElement named, String name) {
-        return (Meter) register(named, name, Meter::new);
+    public static Meter meter(NBLabeledElement parent, String metricFamilyName) {
+        final NBLabels labels = parent.getLabels().and("name",metricFamilyName);
+        return (Meter) register(labels, () -> new NBMetricMeter(labels));
     }
 
     private static MetricRegistry get() {
-        if (registry != null) {
+        if (null != ActivityMetrics.registry) {
             return registry;
         }
         synchronized (ActivityMetrics.class) {
-            if (registry == null) {
+            if (null == ActivityMetrics.registry) {
                 registry = lookupRegistry();
             }
         }
@@ -211,15 +190,11 @@ public class ActivityMetrics {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Gauge<T> gauge(NBNamedElement named, String name, Gauge<T> gauge) {
-        return (Gauge<T>) register(named, name, () -> gauge);
-    }
+    public static <T> Gauge<T> gauge(NBLabeledElement parent, String metricFamilyName, Gauge<T> gauge) {
+        final NBLabels labels = parent.getLabels().and("name",metricFamilyName);
 
-    @SuppressWarnings("unchecked")
-    public static <T> Gauge<T> gauge(ScriptContext scriptContext, String name, Gauge<T> gauge) {
-        return (Gauge<T>) register(scriptContext, name, () -> gauge);
+        return (Gauge<T>) register(labels, () -> new NBMetricGauge(labels,gauge));
     }
-
 
     private static MetricRegistry lookupRegistry() {
         ServiceLoader<MetricRegistryService> metricRegistryServices =
@@ -227,13 +202,12 @@ public class ActivityMetrics {
         List<MetricRegistryService> mrss = new ArrayList<>();
         metricRegistryServices.iterator().forEachRemaining(mrss::add);
 
-        if (mrss.size() == 1) {
+        if (1 == mrss.size()) {
             return mrss.get(0).getMetricRegistry();
-        } else {
-            String infoMsg = "Unable to load a dynamic MetricRegistry via ServiceLoader, using the default.";
-            logger.info(infoMsg);
-            return new MetricRegistry();
         }
+        final String infoMsg = "Unable to load a dynamic MetricRegistry via ServiceLoader, using the default.";
+        logger.info(infoMsg);
+        return new MetricRegistry();
 
     }
 
@@ -245,10 +219,14 @@ public class ActivityMetrics {
     /**
      * Add a histogram interval logger to matching metrics in this JVM instance.
      *
-     * @param sessionName The name for the session to be annotated in the histogram log
-     * @param pattern     A regular expression pattern to filter out metric names for logging
-     * @param filename    A file to log the histogram data in
-     * @param interval    How many seconds to wait between writing each interval histogram
+     * @param sessionName
+     *     The name for the session to be annotated in the histogram log
+     * @param pattern
+     *     A regular expression pattern to filter out metric names for logging
+     * @param filename
+     *     A file to log the histogram data in
+     * @param interval
+     *     How many seconds to wait between writing each interval histogram
      */
     public static void addHistoLogger(String sessionName, String pattern, String filename, String interval) {
         if (filename.contains("_SESSION_")) {
@@ -256,7 +234,7 @@ public class ActivityMetrics {
         }
         Pattern compiledPattern = Pattern.compile(pattern);
         File logfile = new File(filename);
-        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:'" + interval + "'"));
+        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:'" + interval + '\''));
 
         HistoIntervalLogger histoIntervalLogger =
             new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
@@ -268,10 +246,14 @@ public class ActivityMetrics {
     /**
      * Add a histogram stats logger to matching metrics in this JVM instance.
      *
-     * @param sessionName The name for the session to be annotated in the histogram log
-     * @param pattern     A regular expression pattern to filter out metric names for logging
-     * @param filename    A file to log the histogram data in
-     * @param interval    How many seconds to wait between writing each interval histogram
+     * @param sessionName
+     *     The name for the session to be annotated in the histogram log
+     * @param pattern
+     *     A regular expression pattern to filter out metric names for logging
+     * @param filename
+     *     A file to log the histogram data in
+     * @param interval
+     *     How many seconds to wait between writing each interval histogram
      */
     public static void addStatsLogger(String sessionName, String pattern, String filename, String interval) {
         if (filename.contains("_SESSION_")) {
@@ -279,7 +261,7 @@ public class ActivityMetrics {
         }
         Pattern compiledPattern = Pattern.compile(pattern);
         File logfile = new File(filename);
-        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + "'"));
+        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + '\''));
 
         HistoStatsLogger histoStatsLogger =
             new HistoStatsLogger(sessionName, logfile, compiledPattern, intervalMillis, TimeUnit.NANOSECONDS);
@@ -293,14 +275,18 @@ public class ActivityMetrics {
      * get a view to both the enhanced histogram implementation as well as the classic implementation in the
      * same scenario.
      *
-     * @param sessionName The name of the session to be annotated in the classic histogram
-     * @param pattern     A regular expression pattern to filter out metric names for inclusion
-     * @param prefix      The name prefix to add to the classic histograms so that they fit into the existing metrics namespace
-     * @param interval    How frequently to update the histogram
+     * @param sessionName
+     *     The name of the session to be annotated in the classic histogram
+     * @param pattern
+     *     A regular expression pattern to filter out metric names for inclusion
+     * @param prefix
+     *     The name prefix to add to the classic histograms so that they fit into the existing metrics namespace
+     * @param interval
+     *     How frequently to update the histogram
      */
     public static void addClassicHistos(String sessionName, String pattern, String prefix, String interval) {
         Pattern compiledPattern = Pattern.compile(pattern);
-        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + "'"));
+        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + '\''));
 
         ClassicHistoListener classicHistoListener =
             new ClassicHistoListener(get(), sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
@@ -317,7 +303,8 @@ public class ActivityMetrics {
      * This should be called at the end of a process, so that open intervals can be finished, logs closed properly,
      * etc.
      *
-     * @param showChart whether to chart metrics on console
+     * @param showChart
+     *     whether to chart metrics on console
      */
     public static void closeMetrics(boolean showChart) {
         logger.trace("Closing all registered metrics closable objects.");
@@ -351,7 +338,7 @@ public class ActivityMetrics {
     }
 
     public static void removeActivityMetrics(NBNamedElement named) {
-        get().getMetrics().keySet().stream().filter(s -> s.startsWith(named.getName() + "."))
+        get().getMetrics().keySet().stream().filter(s -> s.startsWith(named.getName() + '.'))
             .forEach(get()::remove);
     }
 

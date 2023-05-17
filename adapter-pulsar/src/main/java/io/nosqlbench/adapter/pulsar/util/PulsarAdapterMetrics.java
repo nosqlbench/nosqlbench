@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.pulsar.dispensers.PulsarBaseOpDispenser;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Consumer;
@@ -34,11 +33,9 @@ import java.util.function.Function;
 
 public class PulsarAdapterMetrics {
 
-    private final static Logger logger = LogManager.getLogger("PulsarAdapterMetrics");
+    private static final Logger logger = LogManager.getLogger("PulsarAdapterMetrics");
 
     private final PulsarBaseOpDispenser pulsarBaseOpDispenser;
-    private final String defaultAdapterMetricsPrefix;
-
     /**
      * Pulsar adapter specific metrics
      */
@@ -63,76 +60,53 @@ public class PulsarAdapterMetrics {
     private Timer createTransactionTimer;
     private Timer commitTransactionTimer;
 
-    public PulsarAdapterMetrics(PulsarBaseOpDispenser pulsarBaseOpDispenser, String defaultMetricsPrefix) {
+    public PulsarAdapterMetrics(final PulsarBaseOpDispenser pulsarBaseOpDispenser) {
         this.pulsarBaseOpDispenser = pulsarBaseOpDispenser;
-        this.defaultAdapterMetricsPrefix = defaultMetricsPrefix;
     }
 
     public void initPulsarAdapterInstrumentation() {
         // Counter metrics
-        this.msgErrOutOfSeqCounter =
-            ActivityMetrics.counter(
-                pulsarBaseOpDispenser,
-                defaultAdapterMetricsPrefix + "err_msg_oos");
-        this.msgErrLossCounter =
-            ActivityMetrics.counter(
-                pulsarBaseOpDispenser,
-                defaultAdapterMetricsPrefix + "err_msg_loss");
-        this.msgErrDuplicateCounter =
-            ActivityMetrics.counter(
-                pulsarBaseOpDispenser,
-                defaultAdapterMetricsPrefix + "err_msg_dup");
+        msgErrOutOfSeqCounter =
+            ActivityMetrics.counter(this.pulsarBaseOpDispenser,"err_msg_oos");
+        msgErrLossCounter =
+            ActivityMetrics.counter(this.pulsarBaseOpDispenser, "err_msg_loss");
+        msgErrDuplicateCounter =
+            ActivityMetrics.counter(this.pulsarBaseOpDispenser, "err_msg_dup");
 
         // Histogram metrics
-        this.messageSizeHistogram =
-            ActivityMetrics.histogram(
-                pulsarBaseOpDispenser,
-                defaultAdapterMetricsPrefix + "message_size",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
-        this.e2eMsgProcLatencyHistogram =
-            ActivityMetrics.histogram(
-                pulsarBaseOpDispenser,
-                defaultAdapterMetricsPrefix + "e2e_msg_latency",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
-        this.payloadRttHistogram =
-            ActivityMetrics.histogram(
-                pulsarBaseOpDispenser,
-                defaultAdapterMetricsPrefix + "payload_rtt",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
+        messageSizeHistogram =
+            ActivityMetrics.histogram(this.pulsarBaseOpDispenser,
+                "message_size", ActivityMetrics.DEFAULT_HDRDIGITS);
+        e2eMsgProcLatencyHistogram = ActivityMetrics.histogram(this.pulsarBaseOpDispenser,
+            "e2e_msg_latency", ActivityMetrics.DEFAULT_HDRDIGITS);
+        payloadRttHistogram = ActivityMetrics.histogram(this.pulsarBaseOpDispenser,
+            "payload_rtt", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // Timer metrics
-        this.bindTimer =
-            ActivityMetrics.timer(
-                pulsarBaseOpDispenser,
-                defaultAdapterMetricsPrefix + "bind",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
-        this.executeTimer =
-            ActivityMetrics.timer(
-                pulsarBaseOpDispenser,
-                defaultAdapterMetricsPrefix + "execute",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
-        this.createTransactionTimer =
-            ActivityMetrics.timer(
-                pulsarBaseOpDispenser,
-                defaultAdapterMetricsPrefix + "create_transaction",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
-        this.commitTransactionTimer =
-            ActivityMetrics.timer(
-                pulsarBaseOpDispenser,
-                defaultAdapterMetricsPrefix + "commit_transaction",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
+        bindTimer =
+            ActivityMetrics.timer(this.pulsarBaseOpDispenser,
+                "bind", ActivityMetrics.DEFAULT_HDRDIGITS);
+        executeTimer =
+            ActivityMetrics.timer(this.pulsarBaseOpDispenser,
+                "execute", ActivityMetrics.DEFAULT_HDRDIGITS);
+        createTransactionTimer =
+            ActivityMetrics.timer(this.pulsarBaseOpDispenser,
+                "create_transaction", ActivityMetrics.DEFAULT_HDRDIGITS);
+        commitTransactionTimer =
+            ActivityMetrics.timer(this.pulsarBaseOpDispenser,
+                "commit_transaction", ActivityMetrics.DEFAULT_HDRDIGITS);
     }
 
-    public Counter getMsgErrOutOfSeqCounter() { return this.msgErrOutOfSeqCounter; }
-    public Counter getMsgErrLossCounter() { return this.msgErrLossCounter; }
-    public Counter getMsgErrDuplicateCounter() { return this.msgErrDuplicateCounter; }
-    public Histogram getMessageSizeHistogram() { return this.messageSizeHistogram; }
-    public Histogram getE2eMsgProcLatencyHistogram() { return this.e2eMsgProcLatencyHistogram; }
-    public Histogram getPayloadRttHistogram() { return payloadRttHistogram; }
-    public Timer getBindTimer() { return bindTimer; }
-    public Timer getExecuteTimer() { return executeTimer; }
-    public Timer getCreateTransactionTimer() { return createTransactionTimer; }
-    public Timer getCommitTransactionTimer() { return commitTransactionTimer; }
+    public Counter getMsgErrOutOfSeqCounter() { return msgErrOutOfSeqCounter; }
+    public Counter getMsgErrLossCounter() { return msgErrLossCounter; }
+    public Counter getMsgErrDuplicateCounter() { return msgErrDuplicateCounter; }
+    public Histogram getMessageSizeHistogram() { return messageSizeHistogram; }
+    public Histogram getE2eMsgProcLatencyHistogram() { return e2eMsgProcLatencyHistogram; }
+    public Histogram getPayloadRttHistogram() { return this.payloadRttHistogram; }
+    public Timer getBindTimer() { return this.bindTimer; }
+    public Timer getExecuteTimer() { return this.executeTimer; }
+    public Timer getCreateTransactionTimer() { return this.createTransactionTimer; }
+    public Timer getCommitTransactionTimer() { return this.commitTransactionTimer; }
 
 
     //////////////////////////////////////
@@ -143,7 +117,7 @@ public class PulsarAdapterMetrics {
         private final Producer<?> producer;
         private final Function<ProducerStats, Object> valueExtractor;
 
-        ProducerGaugeImpl(Producer<?> producer, Function<ProducerStats, Object> valueExtractor) {
+        ProducerGaugeImpl(final Producer<?> producer, final Function<ProducerStats, Object> valueExtractor) {
             this.producer = producer;
             this.valueExtractor = valueExtractor;
         }
@@ -152,33 +126,29 @@ public class PulsarAdapterMetrics {
         public Object getValue() {
             // see Pulsar bug https://github.com/apache/pulsar/issues/10100
             // we need to synchronize on producer otherwise we could receive corrupted data
-            synchronized(producer) {
-                return valueExtractor.apply(producer.getStats());
+            synchronized(this.producer) {
+                return this.valueExtractor.apply(this.producer.getStats());
             }
         }
     }
-    private static Gauge<Object> producerSafeExtractMetric(Producer<?> producer, Function<ProducerStats, Object> valueExtractor) {
+    private static Gauge<Object> producerSafeExtractMetric(final Producer<?> producer, final Function<ProducerStats, Object> valueExtractor) {
         return new ProducerGaugeImpl(producer, valueExtractor);
     }
 
-    public void registerProducerApiMetrics(Producer<?> producer, String pulsarApiMetricsPrefix) {
-        String metricsPrefix = defaultAdapterMetricsPrefix;
-        if (!StringUtils.isBlank(pulsarApiMetricsPrefix)) {
-            metricsPrefix = pulsarApiMetricsPrefix;
-        }
+    public void registerProducerApiMetrics(final Producer<?> producer) {
 
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_bytes_sent",
-            producerSafeExtractMetric(producer, (s -> s.getTotalBytesSent() + s.getNumBytesSent())));
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_msg_sent",
-            producerSafeExtractMetric(producer, (s -> s.getTotalMsgsSent() + s.getNumMsgsSent())));
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_send_failed",
-            producerSafeExtractMetric(producer, (s -> s.getTotalSendFailed() + s.getNumSendFailed())));
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_ack_received",
-            producerSafeExtractMetric(producer,(s -> s.getTotalAcksReceived() + s.getNumAcksReceived())));
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "send_bytes_rate",
-            producerSafeExtractMetric(producer, ProducerStats::getSendBytesRate));
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "send_msg_rate",
-            producerSafeExtractMetric(producer, ProducerStats::getSendMsgsRate));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "total_bytes_sent",
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> s.getTotalBytesSent() + s.getNumBytesSent()));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser,  "total_msg_sent",
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> s.getTotalMsgsSent() + s.getNumMsgsSent()));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser,  "total_send_failed",
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> s.getTotalSendFailed() + s.getNumSendFailed()));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser,  "total_ack_received",
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> s.getTotalAcksReceived() + s.getNumAcksReceived()));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser,  "send_bytes_rate",
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, ProducerStats::getSendBytesRate));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser,  "send_msg_rate",
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, ProducerStats::getSendMsgsRate));
     }
 
 
@@ -190,7 +160,7 @@ public class PulsarAdapterMetrics {
         private final Consumer<?> consumer;
         private final Function<ConsumerStats, Object> valueExtractor;
 
-        ConsumerGaugeImpl(Consumer<?> consumer, Function<ConsumerStats, Object> valueExtractor) {
+        ConsumerGaugeImpl(final Consumer<?> consumer, final Function<ConsumerStats, Object> valueExtractor) {
             this.consumer = consumer;
             this.valueExtractor = valueExtractor;
         }
@@ -200,32 +170,28 @@ public class PulsarAdapterMetrics {
             // see Pulsar bug https://github.com/apache/pulsar/issues/10100
             // - this is a bug report for producer stats.
             // - assume this also applies to consumer stats.
-            synchronized(consumer) {
-                return valueExtractor.apply(consumer.getStats());
+            synchronized(this.consumer) {
+                return this.valueExtractor.apply(this.consumer.getStats());
             }
         }
     }
-    static Gauge<Object> consumerSafeExtractMetric(Consumer<?> consumer, Function<ConsumerStats, Object> valueExtractor) {
+    static Gauge<Object> consumerSafeExtractMetric(final Consumer<?> consumer, final Function<ConsumerStats, Object> valueExtractor) {
         return new ConsumerGaugeImpl(consumer, valueExtractor);
     }
 
-    public void registerConsumerApiMetrics(Consumer<?> consumer, String pulsarApiMetricsPrefix) {
-        String metricsPrefix = defaultAdapterMetricsPrefix;
-        if (!StringUtils.isBlank(pulsarApiMetricsPrefix)) {
-            metricsPrefix = pulsarApiMetricsPrefix;
-        }
+    public void registerConsumerApiMetrics(final Consumer<?> consumer, final String pulsarApiMetricsPrefix) {
 
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_bytes_recv",
-            consumerSafeExtractMetric(consumer, (s -> s.getTotalBytesReceived() + s.getNumBytesReceived())));
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_msg_recv",
-            consumerSafeExtractMetric(consumer, (s -> s.getTotalMsgsReceived() + s.getNumMsgsReceived())));
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_recv_failed",
-            consumerSafeExtractMetric(consumer, (s -> s.getTotalReceivedFailed() + s.getNumReceiveFailed())));
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "total_acks_sent",
-            consumerSafeExtractMetric(consumer,(s -> s.getTotalAcksSent() + s.getNumAcksSent())));
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "recv_bytes_rate",
-            consumerSafeExtractMetric(consumer, ConsumerStats::getRateBytesReceived));
-        ActivityMetrics.gauge(pulsarBaseOpDispenser, metricsPrefix + "recv_msg_rate",
-            consumerSafeExtractMetric(consumer, ConsumerStats::getRateMsgsReceived));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "total_bytes_recv",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> s.getTotalBytesReceived() + s.getNumBytesReceived()));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "total_msg_recv",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> s.getTotalMsgsReceived() + s.getNumMsgsReceived()));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "total_recv_failed",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> s.getTotalReceivedFailed() + s.getNumReceiveFailed()));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "total_acks_sent",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> s.getTotalAcksSent() + s.getNumAcksSent()));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "recv_bytes_rate",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, ConsumerStats::getRateBytesReceived));
+        ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "recv_msg_rate",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, ConsumerStats::getRateMsgsReceived));
     }
 }

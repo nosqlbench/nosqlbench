@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.config.NBLabeledElement;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,27 +24,27 @@ public class TestableHybridRateLimiter extends HybridRateLimiter {
 
     private final AtomicLong clock;
 
-    public TestableHybridRateLimiter(AtomicLong clock, RateSpec rateSpec, NBNamedElement def) {
+    public TestableHybridRateLimiter(final AtomicLong clock, final RateSpec rateSpec, final NBLabeledElement def) {
         super(def, "test", rateSpec);
-        applyRateSpec(rateSpec);
-        setLabel("test");
+        this.applyRateSpec(rateSpec);
+        this.setLabel("test");
         this.clock = clock;
-        init(def);
+        this.init(def);
     }
 
-    public long setClock(long newValue) {
-        long oldValue = clock.get();
-        clock.set(newValue);
+    public long setClock(final long newValue) {
+        final long oldValue = this.clock.get();
+        this.clock.set(newValue);
         return oldValue;
     }
 
     public long getClock() {
-        return clock.get();
+        return this.clock.get();
     }
 
     @Override
     protected long getNanoClockTime() {
-        return clock.get();
+        return this.clock.get();
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,23 @@
  */
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.ScenarioController;
+import io.nosqlbench.api.config.LabeledScenarioContext;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
+import io.nosqlbench.engine.core.lifecycle.scenario.ScenarioController;
 
-public class ScenarioContext extends ScriptEnvBuffer {
+public class ScenarioContext extends ScriptEnvBuffer implements LabeledScenarioContext {
 
     private final ScenarioController sc;
+    private final String contextName;
 
-    public ScenarioContext(ScenarioController sc) {
+    public ScenarioContext(String contextName, ScenarioController sc) {
+        this.contextName = contextName;
         this.sc = sc;
+    }
+
+    public String getContextName() {
+        return this.contextName;
     }
 
     @Override
@@ -43,4 +51,8 @@ public class ScenarioContext extends ScriptEnvBuffer {
         super.setAttribute(name, value, scope);
     }
 
+    @Override
+    public NBLabels getLabels() {
+        return NBLabels.forKV("scenario", this.contextName);
+    }
 }

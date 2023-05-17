@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.core;
 
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
@@ -46,8 +47,8 @@ public interface ActivityType<A extends Activity> {
      * @return a distinct Activity instance for each call
      */
     @SuppressWarnings("unchecked")
-    default A getActivity(ActivityDef activityDef) {
-        SimpleActivity activity = new SimpleActivity(activityDef);
+    default A getActivity(final ActivityDef activityDef, final NBLabeledElement parentLabels) {
+        final SimpleActivity activity = new SimpleActivity(activityDef, parentLabels);
         return (A) activity;
     }
 
@@ -59,31 +60,25 @@ public interface ActivityType<A extends Activity> {
      * @param activities  a map of existing activities
      * @return a distinct activity instance for each call
      */
-    default Activity getAssembledActivity(ActivityDef activityDef, Map<String, Activity> activities) {
-        A activity = getActivity(activityDef);
+    default Activity getAssembledActivity(final ActivityDef activityDef, final Map<String, Activity> activities, final NBLabeledElement labels) {
+        final A activity = this.getActivity(activityDef, labels);
 
-        InputDispenser inputDispenser = getInputDispenser(activity);
-        if (inputDispenser instanceof ActivitiesAware) {
-            ((ActivitiesAware) inputDispenser).setActivitiesMap(activities);
-        }
+        final InputDispenser inputDispenser = this.getInputDispenser(activity);
+        if (inputDispenser instanceof ActivitiesAware) ((ActivitiesAware) inputDispenser).setActivitiesMap(activities);
         activity.setInputDispenserDelegate(inputDispenser);
 
-        ActionDispenser actionDispenser = getActionDispenser(activity);
-        if (actionDispenser instanceof ActivitiesAware) {
+        final ActionDispenser actionDispenser = this.getActionDispenser(activity);
+        if (actionDispenser instanceof ActivitiesAware)
             ((ActivitiesAware) actionDispenser).setActivitiesMap(activities);
-        }
         activity.setActionDispenserDelegate(actionDispenser);
 
-        OutputDispenser outputDispenser = getOutputDispenser(activity).orElse(null);
-        if (outputDispenser !=null && outputDispenser instanceof ActivitiesAware) {
+        final OutputDispenser outputDispenser = this.getOutputDispenser(activity).orElse(null);
+        if ((null != outputDispenser) && (outputDispenser instanceof ActivitiesAware))
             ((ActivitiesAware) outputDispenser).setActivitiesMap(activities);
-        }
         activity.setOutputDispenserDelegate(outputDispenser);
 
-        MotorDispenser motorDispenser = getMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser);
-        if (motorDispenser instanceof ActivitiesAware) {
-            ((ActivitiesAware) motorDispenser).setActivitiesMap(activities);
-        }
+        final MotorDispenser motorDispenser = this.getMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser);
+        if (motorDispenser instanceof ActivitiesAware) ((ActivitiesAware) motorDispenser).setActivitiesMap(activities);
         activity.setMotorDispenserDelegate(motorDispenser);
 
         return activity;
@@ -95,7 +90,7 @@ public interface ActivityType<A extends Activity> {
      * @param activity The activity instance that will parameterize the returned MarkerDispenser instance.
      * @return an instance of MarkerDispenser
      */
-    default Optional<OutputDispenser> getOutputDispenser(A activity) {
+    default Optional<OutputDispenser> getOutputDispenser(final A activity) {
         return CoreServices.getOutputDispenser(activity);
     }
 
@@ -105,7 +100,7 @@ public interface ActivityType<A extends Activity> {
      * @param activity The activity instance that will parameterize the returned ActionDispenser instance.
      * @return an instance of ActionDispenser
      */
-    default ActionDispenser getActionDispenser(A activity) {
+    default ActionDispenser getActionDispenser(final A activity) {
         return new CoreActionDispenser(activity);
     }
 
@@ -116,15 +111,15 @@ public interface ActivityType<A extends Activity> {
      * @param activity the Activity instance which will parameterize this InputDispenser
      * @return the InputDispenser for the associated activity
      */
-    default InputDispenser getInputDispenser(A activity) {
+    default InputDispenser getInputDispenser(final A activity) {
         return CoreServices.getInputDispenser(activity);
     }
 
     default <T> MotorDispenser<T> getMotorDispenser(
-            A activity,
-            InputDispenser inputDispenser,
-            ActionDispenser actionDispenser,
-            OutputDispenser outputDispenser) {
+        final A activity,
+        final InputDispenser inputDispenser,
+        final ActionDispenser actionDispenser,
+        final OutputDispenser outputDispenser) {
         return new CoreMotorDispenser<T> (activity, inputDispenser, actionDispenser, outputDispenser);
     }
 

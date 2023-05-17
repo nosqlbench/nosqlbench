@@ -17,6 +17,8 @@ package io.nosqlbench.engine.core.lifecycle.scenario;
 
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
@@ -38,7 +40,7 @@ import java.util.stream.Collectors;
  * A ScenarioController provides a way to start Activities,
  * modify them while running, and forceStopMotors, pause or restart them.
  */
-public class ScenarioController {
+public class ScenarioController implements NBLabeledElement {
 
     private static final Logger logger = LogManager.getLogger(ScenarioController.class);
     private static final Logger scenariologger = LogManager.getLogger("SCENARIO");
@@ -81,7 +83,7 @@ public class ScenarioController {
 
     private synchronized ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
         if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
-            Activity activity = this.activityLoader.loadActivity(activityDef);
+            Activity activity = this.activityLoader.loadActivity(activityDef, this);
             ActivityExecutor executor = new ActivityExecutor(activity, this.scenario.getScenarioName());
             Future<ExecutionResult> startedActivity = activitiesExecutor.submit(executor);
             ActivityRuntimeInfo activityRuntimeInfo = new ActivityRuntimeInfo(activity, startedActivity, executor);
@@ -161,7 +163,7 @@ public class ScenarioController {
 
     public boolean isRunningActivity(ActivityDef activityDef) {
         ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
-        return (runtimeInfo != null && runtimeInfo.isRunning());
+        return (null != runtimeInfo) && runtimeInfo.isRunning();
     }
 
     public boolean isRunningActivity(Map<String, String> activityDefMap) {
@@ -187,11 +189,11 @@ public class ScenarioController {
             .build());
 
         ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
-        if (runtimeInfo == null) {
+        if (null == runtimeInfo) {
             throw new RuntimeException("could not stop missing activity:" + activityDef);
         }
 
-        scenariologger.debug("STOP " + activityDef.getAlias());
+        scenariologger.debug("STOP {}", activityDef.getAlias());
 
         runtimeInfo.stopActivity();
     }
@@ -217,7 +219,7 @@ public class ScenarioController {
      * @param spec The name of the activity that is already known to the scenario
      */
     public synchronized void stop(String spec) {
-        logger.debug("request->STOP '" + spec + "'");
+        logger.debug("request->STOP '{}'", spec);
         List<String> aliases = Arrays.asList(spec.split("[,; ]"));
         List<String> matched = aliases.stream()
             .map(String::trim)
@@ -225,7 +227,7 @@ public class ScenarioController {
             .flatMap(aspec -> getMatchingAliases(aspec).stream()).collect(Collectors.toList());
         for (String alias : matched) {
             ActivityDef adef = aliasToDef(alias);
-            scenariologger.debug("STOP " + adef.getAlias());
+            scenariologger.debug("STOP {}", adef.getAlias());
             stop(adef);
         }
     }
@@ -248,11 +250,11 @@ public class ScenarioController {
             .build());
 
         ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
-        if (runtimeInfo == null) {
+        if (null == runtimeInfo) {
             throw new RuntimeException("could not force stop missing activity:" + activityDef);
         }
 
-        scenariologger.debug("FORCE STOP " + activityDef.getAlias());
+        scenariologger.debug("FORCE STOP {}", activityDef.getAlias());
 
         runtimeInfo.forceStopActivity();
     }
@@ -278,7 +280,7 @@ public class ScenarioController {
      * @param spec The name of the activity that is already known to the scenario
      */
     public synchronized void forceStop(String spec) {
-        logger.debug("request->STOP '" + spec + "'");
+        logger.debug("request->STOP '{}'", spec);
         List<String> aliases = Arrays.asList(spec.split("[,; ]"));
         List<String> matched = aliases.stream()
             .map(String::trim)
@@ -286,7 +288,7 @@ public class ScenarioController {
             .flatMap(aspec -> getMatchingAliases(aspec).stream()).collect(Collectors.toList());
         for (String alias : matched) {
             ActivityDef adef = aliasToDef(alias);
-            scenariologger.debug("STOP " + adef.getAlias());
+            scenariologger.debug("STOP {}", adef.getAlias());
             forceStop(adef);
         }
     }
@@ -295,15 +297,16 @@ public class ScenarioController {
     private List<String> getMatchingAliases(String pattern) {
         Pattern matcher;
         // If the pattern is an alphanumeric name, the require it to match as a fully-qualified literal
+        // It is not, so the user is wanting to do a flexible match
         if (pattern.matches("[a-zA-Z_][a-zA-Z0-9_.]*")) {
-            matcher = Pattern.compile("^" + pattern + "$");
-        } else { // It is not, so the user is wanting to do a flexible match
+            matcher = Pattern.compile('^' + pattern + '$');
+        } else {
             matcher = Pattern.compile(pattern);
         }
 
         List<String> matching = activityInfoMap.keySet().stream()
             .filter(a -> Pattern.matches(pattern, a))
-            .peek(p -> logger.debug("MATCH " + pattern + " -> " + p))
+            .peek(p -> logger.debug("MATCH {} -> {}", pattern, p))
             .collect(Collectors.toList());
         return matching;
     }
@@ -314,12 +317,12 @@ public class ScenarioController {
      * @param waitMillis time to wait, in milliseconds
      */
     public void waitMillis(long waitMillis) {
-        scenariologger.debug("WAITMILLIS " + waitMillis);
+        scenariologger.debug("WAITMILLIS {}", waitMillis);
 
-        logger.trace("#> waitMillis(" + waitMillis + ")");
+        logger.trace("#> waitMillis({})", waitMillis);
         long endTime = System.currentTimeMillis() + waitMillis;
 
-        while (waitMillis > 0L) {
+        while (0L < waitMillis) {
             try {
                 Thread.sleep(waitMillis);
             } catch (InterruptedException spurrious) {
@@ -347,7 +350,7 @@ public class ScenarioController {
      * @param waitTimeMillis grace period during which an activity may cooperatively shut down
      */
     public synchronized void forceStopScenario(int waitTimeMillis, boolean rethrow) {
-        logger.debug("force stopping scenario " + this.scenario.getScenarioName());
+        logger.debug("force stopping scenario {}", this.scenario.getScenarioName());
         activityInfoMap.values().forEach(a -> a.getActivityExecutor().forceStopActivity(10000));
         logger.debug("Scenario force stopped.");
     }
@@ -369,17 +372,14 @@ public class ScenarioController {
         boolean completed = true;
         for (ActivityRuntimeInfo activityRuntimeInfo : this.activityInfoMap.values()) {
             ExecutionResult activityResult = activityRuntimeInfo.awaitResult(waitTimeMillis);
-            if (activityResult == null) {
-                logger.error("Unable to retrieve activity result for " + activityRuntimeInfo.getActivity().getAlias());
+            if (null == activityResult) {
+                logger.error("Unable to retrieve activity result for {}", activityRuntimeInfo.getActivity().getAlias());
                 completed = false;
-            } else {
-                if (activityResult.getException()!=null) {
-                    if (activityResult.getException() instanceof RuntimeException e) {
-                        throw e;
-                    } else {
-                        throw new RuntimeException(activityResult.getException());
-                    }
+            } else if (null != activityResult.getException()) {
+                if (activityResult.getException() instanceof RuntimeException e) {
+                    throw e;
                 }
+                throw new RuntimeException(activityResult.getException());
             }
         }
         return completed;
@@ -388,9 +388,8 @@ public class ScenarioController {
     private ActivityDef aliasToDef(String alias) {
         if (alias.contains("=")) {
             return ActivityDef.parseActivityDef(alias);
-        } else {
-            return ActivityDef.parseActivityDef("alias=" + alias + ";");
         }
+        return ActivityDef.parseActivityDef("alias=" + alias + ';');
     }
 
     public void await(Map<String, String> activityDefMap) {
@@ -417,10 +416,10 @@ public class ScenarioController {
 
     public boolean awaitActivity(ActivityDef activityDef, long timeoutMs) {
         ActivityRuntimeInfo ari = this.activityInfoMap.get(activityDef.getAlias());
-        if (ari == null) {
+        if (null == ari) {
             throw new RuntimeException("Could not await missing activity: " + activityDef.getAlias());
         }
-        scenariologger.debug("AWAIT/before alias=" + activityDef.getAlias());
+        scenariologger.debug("AWAIT/before alias={}", activityDef.getAlias());
         ExecutionResult result = null;
         Future<ExecutionResult> future=null;
         try {
@@ -437,7 +436,7 @@ public class ScenarioController {
         } catch (TimeoutException e) {
             throw new RuntimeException(e);
         }
-        return (result != null);
+        return null != result;
     }
 
     /**
@@ -465,7 +464,7 @@ public class ScenarioController {
     }
 
     public void notifyException(Thread t, Throwable e) {
-        logger.error("Uncaught exception in activity lifecycle thread:" + e, e);
+        logger.error("Uncaught exception in activity lifecycle thread:{}", e, e);
         scenario.notifyException(t,e);
         throw new RuntimeException(e);
     }
@@ -486,8 +485,13 @@ public class ScenarioController {
                 }
             }
         } catch (Exception e) {
-            logger.warn("There was an exception while trying to shutdown the ScenarioController:" + e,e);
+            logger.warn("There was an exception while trying to shutdown the ScenarioController:{}", e, e);
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public NBLabels getLabels() {
+        return this.scenario.getLabels();
     }
 }

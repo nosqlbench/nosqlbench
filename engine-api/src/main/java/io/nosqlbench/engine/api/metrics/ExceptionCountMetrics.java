@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Counter;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 
 import java.util.ArrayList;
@@ -30,28 +30,26 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ExceptionCountMetrics {
     private final ConcurrentHashMap<String, Counter> counters = new ConcurrentHashMap<>();
     private final Counter allerrors;
-    private final ActivityDef activityDef;
+    private final NBLabeledElement parentLabels;
 
-    public ExceptionCountMetrics(ActivityDef activityDef) {
-        this.activityDef = activityDef;
-        allerrors=ActivityMetrics.counter(activityDef, "errorcounts.ALL");
+    public ExceptionCountMetrics(final NBLabeledElement parentLabels) {
+        this.parentLabels = parentLabels;
+        this.allerrors =ActivityMetrics.counter(parentLabels, "errorcounts.ALL");
     }
 
-    public void count(String name) {
-        Counter c = counters.get(name);
-        if (c == null) {
-            synchronized (counters) {
-                c = counters.computeIfAbsent(
-                    name,
-                    k -> ActivityMetrics.counter(activityDef, "errorcounts." + name)
-                );
-            }
+    public void count(final String name) {
+        Counter c = this.counters.get(name);
+        if (null == c) synchronized (this.counters) {
+            c = this.counters.computeIfAbsent(
+                name,
+                k -> ActivityMetrics.counter(this.parentLabels, "errorcounts." + name)
+            );
         }
         c.inc();
-        allerrors.inc();
+        this.allerrors.inc();
     }
 
     public List<Counter> getCounters() {
-        return new ArrayList<>(counters.values());
+        return new ArrayList<>(this.counters.values());
     }
 }

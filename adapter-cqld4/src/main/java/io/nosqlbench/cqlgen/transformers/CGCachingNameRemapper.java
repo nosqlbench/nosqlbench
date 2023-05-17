@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package io.nosqlbench.cqlgen.transformers;
 
-import io.nosqlbench.api.labels.Labeled;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Combinations;
 
 import java.util.HashMap;
@@ -60,19 +61,19 @@ public class CGCachingNameRemapper {
         Objects.requireNonNull(type);
         String name = labels.get("name");
         Objects.requireNonNull(name);
-        String canonical = type+"-"+name;
+        String canonical = type+ '-' +name;
         String prefix = prefixmap.getOrDefault(type,"");
         if (!remapped.containsKey(canonical)) {
-            long indexForType=indexforType(type);
-            String newname = (prefix!=null?prefix:"")+namefunc.apply(indexForType);
+            long indexForType= indexforType(type);
+            String newname = (null != prefix ?prefix:"")+ namefunc.apply(indexForType);
             remapped.put(canonical,newname);
         }
         return remapped.get(canonical);
     }
 
-    public synchronized String nameFor(Labeled element) {
-        Map<String, String> labels = element.getLabels();
-        return nameFor(labels);
+    public synchronized String nameFor(NBLabeledElement element) {
+        NBLabels labels = element.getLabels();
+        return nameFor(labels.asMap());
     }
 
     //    public Function<String, String> mapperForType(Labeled cqlTable, String prefix) {

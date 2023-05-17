@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package io.nosqlbench.engine.core.lifecycle;
 
 import com.codahale.metrics.*;
+import com.codahale.metrics.ConsoleReporter.Builder;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import io.nosqlbench.engine.core.logging.Log4JMetricsReporter;
+import io.nosqlbench.api.engine.metrics.reporters.Log4JMetricsReporter;
+import io.nosqlbench.api.engine.metrics.reporters.Log4JMetricsReporter.LoggingLevel;
 import io.nosqlbench.engine.core.metrics.NBMetricsSummary;
 
 import java.io.ByteArrayOutputStream;
@@ -48,74 +50,66 @@ public class ExecutionMetricsResult extends ExecutionResult {
         MetricAttribute.M15_RATE
     );
 
-    public ExecutionMetricsResult(long startedAt, long endedAt, String iolog, Exception error) {
+    public ExecutionMetricsResult(final long startedAt, final long endedAt, final String iolog, final Exception error) {
         super(startedAt, endedAt, iolog, error);
     }
 
     public String getMetricsSummary() {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        try (PrintStream ps = new PrintStream(os)) {
-            ConsoleReporter.Builder builder = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try (final PrintStream ps = new PrintStream(os)) {
+            final Builder builder = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
                 .convertDurationsTo(TimeUnit.MICROSECONDS)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .filter(MetricFilter.ALL)
                 .outputTo(ps);
-            Set<MetricAttribute> disabled = new HashSet<>(INTERVAL_ONLY_METRICS);
-            if (this.getElapsedMillis()<60000) {
-                disabled.addAll(OVER_ONE_MINUTE_METRICS);
-            }
+            final Set<MetricAttribute> disabled = new HashSet<>(ExecutionMetricsResult.INTERVAL_ONLY_METRICS);
+            if (60000 > this.getElapsedMillis()) disabled.addAll(ExecutionMetricsResult.OVER_ONE_MINUTE_METRICS);
             builder.disabledMetricAttributes(disabled);
-            ConsoleReporter consoleReporter = builder.build();
+            final ConsoleReporter consoleReporter = builder.build();
             consoleReporter.report();
             consoleReporter.close();
         }
-        String result = os.toString(StandardCharsets.UTF_8);
+        final String result = os.toString(StandardCharsets.UTF_8);
         return result;
     }
 
     public void reportToConsole() {
-        String summaryReport = getMetricsSummary();
+        final String summaryReport = this.getMetricsSummary();
         System.out.println(summaryReport);
     }
 
 
-    public void reportMetricsSummaryTo(PrintStream out) {
-        out.println(getMetricsSummary());
+    public void reportMetricsSummaryTo(final PrintStream out) {
+        out.println(this.getMetricsSummary());
     }
 
     public void reportMetricsSummaryToLog() {
-        logger.debug("-- WARNING: Metrics which are taken per-interval (like histograms) will not have --");
-        logger.debug("-- active data on this last report. (The workload has already stopped.) Record   --");
-        logger.debug("-- metrics to an external format to see values for each reporting interval.      --");
-        logger.debug("-- BEGIN METRICS DETAIL --");
-        Log4JMetricsReporter reporter = Log4JMetricsReporter.forRegistry(ActivityMetrics.getMetricRegistry())
-            .withLoggingLevel(Log4JMetricsReporter.LoggingLevel.DEBUG)
+        ExecutionResult.logger.debug("-- WARNING: Metrics which are taken per-interval (like histograms) will not have --");
+        ExecutionResult.logger.debug("-- active data on this last report. (The workload has already stopped.) Record   --");
+        ExecutionResult.logger.debug("-- metrics to an external format to see values for each reporting interval.      --");
+        ExecutionResult.logger.debug("-- BEGIN METRICS DETAIL --");
+        final Log4JMetricsReporter reporter = Log4JMetricsReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+            .withLoggingLevel(LoggingLevel.DEBUG)
             .convertDurationsTo(TimeUnit.MICROSECONDS)
             .convertRatesTo(TimeUnit.SECONDS)
             .filter(MetricFilter.ALL)
-            .outputTo(logger)
+            .outputTo(ExecutionResult.logger)
             .build();
         reporter.report();
         reporter.close();
-        logger.debug("-- END METRICS DETAIL --");
+        ExecutionResult.logger.debug("-- END METRICS DETAIL --");
     }
 
-    public void reportMetricsCountsTo(PrintStream printStream) {
-        StringBuilder sb = new StringBuilder();
+    public void reportMetricsCountsTo(final PrintStream printStream) {
+        final StringBuilder sb = new StringBuilder();
 
         ActivityMetrics.getMetricRegistry().getMetrics().forEach((k, v) -> {
             if (v instanceof Counting counting) {
-                long count = counting.getCount();
-                if (count > 0) {
-                    NBMetricsSummary.summarize(sb, k, v);
-                }
+                final long count = counting.getCount();
+                if (0 < count) NBMetricsSummary.summarize(sb, k, v);
             } else if (v instanceof Gauge<?> gauge) {
-                Object value = gauge.getValue();
-                if (value instanceof Number n) {
-                    if (n.doubleValue() != 0) {
-                        NBMetricsSummary.summarize(sb, k, v);
-                    }
-                }
+                final Object value = gauge.getValue();
+                if (value instanceof Number n) if (0 != n.doubleValue()) NBMetricsSummary.summarize(sb, k, v);
             }
         });
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,18 @@
  */
 
 package io.nosqlbench.adapter.s4j.util;
+
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class S4JAdapterMetrics implements NBNamedElement {
+public class S4JAdapterMetrics implements NBLabeledElement {
 
-    private final static Logger logger = LogManager.getLogger("S4JAdapterMetrics");
+    private static final Logger logger = LogManager.getLogger("S4JAdapterMetrics");
 
     private final String defaultAdapterMetricsPrefix;
 
@@ -36,7 +38,6 @@ public class S4JAdapterMetrics implements NBNamedElement {
         this.defaultAdapterMetricsPrefix = defaultMetricsPrefix;
     }
 
-    @Override
     public String getName() {
         return "S4JAdapterMetrics";
     }
@@ -65,4 +66,9 @@ public class S4JAdapterMetrics implements NBNamedElement {
     public Timer getBindTimer() { return bindTimer; }
     public Timer getExecuteTimer() { return executeTimer; }
     public Histogram getMessagesizeHistogram() { return messageSizeHistogram; }
+
+    @Override
+    public NBLabels getLabels() {
+        return NBLabels.forKV("name", getName());
+    }
 }

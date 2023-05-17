@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package io.nosqlbench.adapter.http.core;
 
 import com.codahale.metrics.Histogram;
-import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 
-public class HttpMetrics implements NBNamedElement {
+public class HttpMetrics implements NBLabeledElement {
     private final HttpSpace space;
     final Histogram statusCodeHistogram;
 
@@ -29,8 +30,12 @@ public class HttpMetrics implements NBNamedElement {
         statusCodeHistogram = ActivityMetrics.histogram(this, "statuscode",space.getHdrDigits());
     }
 
-    @Override
     public String getName() {
-        return "http"+(space.getName().equals("default")?"":"-"+space.getName());
+        return "http"+("default".equals(this.space.getSpaceName())?"": '-' + space.getSpaceName());
+    }
+
+    @Override
+    public NBLabels getLabels() {
+        return space.getLabels();
     }
 }

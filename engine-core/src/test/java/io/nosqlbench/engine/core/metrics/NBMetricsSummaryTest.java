@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.core.metrics;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import org.junit.jupiter.api.Test;
 
@@ -26,12 +27,10 @@ public class NBMetricsSummaryTest {
 
     @Test
     public void testFormat() {
-        StringBuilder sb = new StringBuilder();
-        Timer timer = new Timer(new DeltaHdrHistogramReservoir("test", 4));
+        final StringBuilder sb = new StringBuilder();
+        final Timer timer = new Timer(new DeltaHdrHistogramReservoir(NBLabels.forKV("name","test"), 4));
 
-        for (int i = 0; i < 100000; i++) {
-            timer.update((i % 1000) + 1, TimeUnit.MILLISECONDS);
-        }
+        for (int i = 0; 100000 > i; i++) timer.update(i % 1000 + 1, TimeUnit.MILLISECONDS);
 
         NBMetricsSummary.summarize(sb, "test", timer);
 

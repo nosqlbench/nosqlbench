@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package io.nosqlbench.engine.core.metrics;
 import com.codahale.metrics.*;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
+import io.nosqlbench.api.engine.metrics.reporters.PromPushReporter;
 import io.nosqlbench.engine.api.activityapi.core.Shutdownable;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.core.lifecycle.process.ShutdownManager;
-import io.nosqlbench.engine.core.logging.Log4JMetricsReporter;
+import io.nosqlbench.api.engine.metrics.reporters.Log4JMetricsReporter;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -34,7 +35,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class MetricReporters implements Shutdownable {
-    private final static Logger logger = LogManager.getLogger(MetricReporters.class);
+    private static final Logger logger = LogManager.getLogger(MetricReporters.class);
     private static final MetricReporters instance = new MetricReporters();
 
     private final List<PrefixedRegistry> metricRegistries = new ArrayList<>();
@@ -55,7 +56,7 @@ public class MetricReporters implements Shutdownable {
 
     public MetricReporters addGraphite(String dest, String prefix) {
         logger.debug(() -> "Adding graphite reporter to " + dest + " with prefix " + prefix);
-        if (dest.indexOf(":")>=0) {
+        if (0 <= dest.indexOf(':')) {
             String[] split = dest.split(":");
             addGraphite(split[0],Integer.valueOf(split[1]),prefix);
         } else {
@@ -101,7 +102,7 @@ public class MetricReporters implements Shutdownable {
         for (PrefixedRegistry prefixedRegistry : metricRegistries) {
 
             Graphite graphite = new Graphite(new InetSocketAddress(host, graphitePort));
-            String _prefix = prefixedRegistry.prefix != null ? (!prefixedRegistry.prefix.isEmpty() ? globalPrefix + "." + prefixedRegistry.prefix : globalPrefix) : globalPrefix;
+            String _prefix = null != prefixedRegistry.prefix ? !prefixedRegistry.prefix.isEmpty() ? globalPrefix + '.' + prefixedRegistry.prefix : globalPrefix : globalPrefix;
             GraphiteReporter graphiteReporter = GraphiteReporter.forRegistry(prefixedRegistry.metricRegistry)
                     .prefixedWith(_prefix)
                     .convertRatesTo(TimeUnit.SECONDS)
@@ -113,6 +114,30 @@ public class MetricReporters implements Shutdownable {
         }
         return this;
     }
+
+    public MetricReporters addPromPush(final String reportPromPushTo, final String prefix) {
+
+        logger.debug(() -> "Adding prompush reporter to " + reportPromPushTo + " with prefix label to " + prefix);
+
+        if (metricRegistries.isEmpty()) {
+            throw new RuntimeException("There are no metric registries.");
+        }
+
+        for (PrefixedRegistry prefixedRegistry : metricRegistries) {
+            final PromPushReporter promPushReporter =
+                new PromPushReporter(
+                    reportPromPushTo,
+                    prefixedRegistry.metricRegistry,
+                    "prompush",
+                    MetricFilter.ALL,
+                    TimeUnit.SECONDS,
+                    TimeUnit.NANOSECONDS
+                    );
+            scheduledReporters.add(promPushReporter);
+        }
+        return this;
+    }
+
 
     public MetricReporters addLogger() {
         logger.debug("Adding log4j reporter for metrics");
@@ -164,12 +189,14 @@ public class MetricReporters implements Shutdownable {
         return this;
     }
 
+    @Override
     public void shutdown() {
         for (ScheduledReporter reporter : scheduledReporters) {
             reporter.report();
             reporter.stop();
         }
     }
+
 
     private class PrefixedRegistry {
         public String prefix;

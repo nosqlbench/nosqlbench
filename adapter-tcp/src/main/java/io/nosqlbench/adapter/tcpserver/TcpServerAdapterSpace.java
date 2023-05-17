@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,23 +23,24 @@ import io.nosqlbench.api.config.standard.Param;
 import io.nosqlbench.api.engine.util.SSLKsFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import java.net.ServerSocket;
+
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.IOException;
-import java.io.Writer;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import javax.net.ServerSocketFactory;
-import javax.net.ssl.SSLServerSocketFactory;
 
-public class TcpServerAdapterSpace implements AutoCloseable{
+public class TcpServerAdapterSpace implements AutoCloseable {
 
 
     private final static Logger logger = LogManager.getLogger(TcpServerAdapterSpace.class);
@@ -187,7 +188,7 @@ public class TcpServerAdapterSpace implements AutoCloseable{
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            try (Writer runWriter = new OutputStreamWriter(outputStream);) {
+            try (Writer runWriter = new OutputStreamWriter(outputStream)) {
                 while (running ) {
                     if(!sourceQueue.isEmpty()) {
                         try {
