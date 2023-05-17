@@ -160,7 +160,7 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
         // For producer, cycleObj represents a "message" (ProducerRecord)
         assert null != cycleObj;
 
-        if (this.kafkaSpace.isShuttigDown()) {
+        if (this.kafkaSpace.isShuttingDown()) {
             if (this.transactionEnabled) try {
                 this.producer.abortTransaction();
                 if (OpTimeTrackKafkaProducer.logger.isDebugEnabled())
@@ -221,16 +221,11 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
 
         }
         catch ( final ProducerFencedException | OutOfOrderSequenceException |
-                      UnsupportedOperationException | AuthorizationException e) {
+                      UnsupportedOperationException | AuthorizationException | IllegalStateException e) {
             if (OpTimeTrackKafkaProducer.logger.isDebugEnabled())
                 OpTimeTrackKafkaProducer.logger.debug("Fatal error when sending a message ({}) - {}, {}",
                     cycle, this.producer, message);
             throw new KafkaAdapterUnexpectedException(e);
-        }
-        catch (final IllegalStateException | KafkaException e) {
-            if (this.transactionEnabled) {
-
-            }
         }
         catch (final Exception e) {
             throw new KafkaAdapterUnexpectedException(e);
@@ -252,8 +247,9 @@ public class OpTimeTrackKafkaProducer extends OpTimeTrackKafkaClient {
         catch (final IllegalStateException ise) {
             // If a producer is already closed, that's fine.
         }
-        catch (final Exception e) {
-            e.printStackTrace();
+        catch (final Exception ex) {
+            logger.error(ex);
+            ex.printStackTrace();
         }
     }
 

@@ -18,57 +18,41 @@ package io.nosqlbench.adapter.s4j.util;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.adapter.s4j.dispensers.S4JBaseOpDispenser;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class S4JAdapterMetrics implements NBLabeledElement {
+public class S4JAdapterMetrics  {
 
     private static final Logger logger = LogManager.getLogger("S4JAdapterMetrics");
 
-    private final String defaultAdapterMetricsPrefix;
+    private final S4JBaseOpDispenser s4jBaseOpDispenser;
 
     private Histogram messageSizeHistogram;
     private Timer bindTimer;
     private Timer executeTimer;
 
-    public S4JAdapterMetrics(String defaultMetricsPrefix) {
-        this.defaultAdapterMetricsPrefix = defaultMetricsPrefix;
-    }
-
-    public String getName() {
-        return "S4JAdapterMetrics";
+    public S4JAdapterMetrics(final S4JBaseOpDispenser s4jBaseOpDispenser) {
+        this.s4jBaseOpDispenser = s4jBaseOpDispenser;
     }
 
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
         this.messageSizeHistogram =
-            ActivityMetrics.histogram(
-                this,
-                defaultAdapterMetricsPrefix + "message_size",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
+            ActivityMetrics.histogram(this.s4jBaseOpDispenser,
+                "message_size", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // Timer metrics
         this.bindTimer =
-            ActivityMetrics.timer(
-                this,
-                defaultAdapterMetricsPrefix + "bind",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
+            ActivityMetrics.timer(this.s4jBaseOpDispenser,
+                "bind", ActivityMetrics.DEFAULT_HDRDIGITS);
         this.executeTimer =
-            ActivityMetrics.timer(
-                this,
-                defaultAdapterMetricsPrefix + "execute",
-                ActivityMetrics.DEFAULT_HDRDIGITS);
+            ActivityMetrics.timer(this.s4jBaseOpDispenser,
+                "execute", ActivityMetrics.DEFAULT_HDRDIGITS);
     }
 
     public Timer getBindTimer() { return bindTimer; }
     public Timer getExecuteTimer() { return executeTimer; }
     public Histogram getMessagesizeHistogram() { return messageSizeHistogram; }
-
-    @Override
-    public NBLabels getLabels() {
-        return NBLabels.forKV("name", getName());
-    }
 }
