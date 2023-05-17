@@ -21,12 +21,10 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.errors.ExpectedResultVerificationError;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.CountErrorHandler;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.CounterErrorHandler;
-import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.ExpectedResultVerificationErrorHandler;
 import io.nosqlbench.util.NBMock;
 import io.nosqlbench.util.NBMock.LogAppender;
 import org.apache.logging.log4j.Level;
@@ -185,8 +183,7 @@ class NBErrorHandlerTest {
     void testExpectedResultVerificationErrorHandler(String name, Exception error, String log, long retriesCount, long errorsCount, Logger logger) {
         // given
         NBMock.LogAppender appender = NBMock.registerTestLogger(ERROR_HANDLER_APPENDER_NAME, logger, Level.INFO);
-
-        var errorMetrics = new ErrorMetrics(ActivityDef.parseActivityDef("alias=testalias_result_verification_" + name));
+        var errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_result_verification_" + name));
         var eh = new NBErrorHandler(() -> "verifyexpected", () -> errorMetrics);
         var retries = errorMetrics.getExceptionExpectedResultVerificationMetrics().getVerificationRetries();
         var errors = errorMetrics.getExceptionExpectedResultVerificationMetrics().getVerificationErrors();
