@@ -49,8 +49,7 @@ public abstract  class VeniceBaseOpDispenser extends BaseOpDispenser<VeniceOp, V
 
         this.parsedOp = op;
         this.veniceSpace = veniceSpace;
-        String defaultMetricsPrefix = parsedOp.getLabels().linearize("activity");
-        this.veniceAdapterMetrics = new VeniceAdapterMetrics(defaultMetricsPrefix);
+        this.veniceAdapterMetrics = new VeniceAdapterMetrics(this);
         veniceAdapterMetrics.initVeniceAdapterInstrumentation();
     }
 
