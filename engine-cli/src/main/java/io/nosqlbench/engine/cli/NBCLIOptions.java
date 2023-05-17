@@ -350,11 +350,6 @@ public class NBCLIOptions {
                     showStackTraces = true;
                     arglist.removeFirst();
                     break;
-                case NBCLIOptions.DASH_VVV_TRACE:
-                    this.consoleLevel = NBLogLevel.TRACE;
-                    showStackTraces = true;
-                    arglist.removeFirst();
-                    break;
                 case NBCLIOptions.ENABLE_DEDICATED_VERIFICATION_LOGGER:
                     enableDedicatedVerificationLogger();
                     break;
