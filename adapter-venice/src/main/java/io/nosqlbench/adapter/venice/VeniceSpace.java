@@ -88,8 +88,7 @@ public class VeniceSpace implements  AutoCloseable {
             client.close();
         }
         catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Unexpected error when shutting down NB S4J space.");
+           logger.error("Unexpected error when shutting down NB S4J space.", e);
         }
     }
 
