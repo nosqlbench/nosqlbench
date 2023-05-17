@@ -20,7 +20,6 @@ package io.nosqlbench.adapter.s4j.util;
 import com.datastax.oss.pulsar.jms.PulsarJMSConstants;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.nosqlbench.adapter.s4j.S4JOpType;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +29,9 @@ import javax.jms.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class S4JAdapterUtil {
 
@@ -66,12 +67,6 @@ public class S4JAdapterUtil {
             this.label = label;
         }
     }
-    public static boolean isValidDocLevelParam(String param) {
-        return Arrays.stream(DOC_LEVEL_PARAMS.values()).anyMatch(t -> t.label.equals(param));
-    }
-    public static String getValidDocLevelParamList() {
-        return Arrays.stream(DOC_LEVEL_PARAMS.values()).map(t -> t.label).collect(Collectors.joining(", "));
-    }
 
     // JMS Destination Types
     public enum JMS_DEST_TYPES {
@@ -82,12 +77,6 @@ public class S4JAdapterUtil {
         JMS_DEST_TYPES(String label) {
             this.label = label;
         }
-    }
-    public static boolean isValidJmsDestType(String type) {
-        return Arrays.stream(JMS_DEST_TYPES.values()).anyMatch(t -> t.label.equals(type));
-    }
-    public static String getValidJmsDestTypeList() {
-        return Arrays.stream(JMS_DEST_TYPES.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
     // Standard JMS message headers (by JMS specification)
@@ -107,12 +96,16 @@ public class S4JAdapterUtil {
         JMS_MSG_HEADER_STD(String label) {
             this.label = label;
         }
+
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label)
+            .collect(Collectors.toUnmodifiableSet());
+
+        public static boolean isValidLabel(String label) {
+            return LABELS.contains(label);
+        }
     }
     public static boolean isValidStdJmsMsgHeader(String header) {
-        return Arrays.stream(JMS_MSG_HEADER_STD.values()).anyMatch(t -> t.label.equals(header));
-    }
-    public static String getValidStdJmsMsgHeaderList() {
-        return Arrays.stream(JMS_MSG_HEADER_STD.values()).map(t -> t.label).collect(Collectors.joining(", "));
+        return JMS_MSG_HEADER_STD.isValidLabel(header);
     }
 
     // JMS defined message properties (by JMS specification)
@@ -133,12 +126,6 @@ public class S4JAdapterUtil {
             this.label = label;
         }
     }
-    public static boolean isValidJmsDfndMsgProp(String property) {
-        return Arrays.stream(JMS_DEFINED_MSG_PROPERTY.values()).anyMatch(t -> t.label.equals(property));
-    }
-    public static String getValidJmsDfndMsgPropList() {
-        return Arrays.stream(JMS_DEFINED_MSG_PROPERTY.values()).map(t -> t.label).collect(Collectors.joining(", "));
-    }
 
     public final static String NB_MSG_SEQ_PROP = "NBMsgSeqProp";
     public final static String NB_MSG_SIZE_PROP = "NBMsgSize";
@@ -155,12 +142,16 @@ public class S4JAdapterUtil {
         JMS_SESSION_MODES(String label) {
             this.label = label;
         }
-    }
-    public static boolean isValidJmsSessionMode(String mode) {
-        return Arrays.stream(JMS_SESSION_MODES.values()).anyMatch(t -> t.label.equals(mode));
+
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label)
+            .collect(Collectors.toUnmodifiableSet());
+
+        public static boolean isValidLabel(String label) {
+            return LABELS.contains(label);
+        }
     }
     public static String getValidJmsSessionModeList() {
-        return Arrays.stream(JMS_SESSION_MODES.values()).map(t -> t.label).collect(Collectors.joining(", "));
+        return StringUtils.join(JMS_SESSION_MODES.LABELS, ", ");
     }
 
     // JMS Message Types
@@ -175,12 +166,16 @@ public class S4JAdapterUtil {
         JMS_MESSAGE_TYPES(String label) {
             this.label = label;
         }
+
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label)
+            .collect(Collectors.toUnmodifiableSet());
+
+        public static boolean isValidLabel(String label) {
+            return LABELS.contains(label);
+        }
     }
     public static boolean isValidJmsMessageType(String type) {
-        return Arrays.stream(JMS_MESSAGE_TYPES.values()).anyMatch(t -> t.label.equals(type));
-    }
-    public static String getValidJmsMessageTypeList() {
-        return Arrays.stream(JMS_MESSAGE_TYPES.values()).map(t -> t.label).collect(Collectors.joining(", "));
+        return JMS_MESSAGE_TYPES.isValidLabel(type);
     }
 
     // JMS Message Types
@@ -198,12 +193,16 @@ public class S4JAdapterUtil {
         JMS_MSG_PROP_TYPES(String label) {
             this.label = label;
         }
-    }
-    public static boolean isValidJmsMsgPropType(String type) {
-        return Arrays.stream(JMS_MSG_PROP_TYPES.values()).anyMatch(t -> t.label.equals(type));
+
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label)
+            .collect(Collectors.toUnmodifiableSet());
+
+        public static boolean isValidLabel(String label) {
+            return LABELS.contains(label);
+        }
     }
     public static String getValidJmsMsgPropTypeList() {
-        return Arrays.stream(JMS_MSG_PROP_TYPES.values()).map(t -> t.label).collect(Collectors.joining(", "));
+        return StringUtils.join(JMS_MESSAGE_TYPES.LABELS, ", ");
     }
 
     ///////
@@ -307,18 +306,11 @@ public class S4JAdapterUtil {
     }
 
     ///////
-    // Calculate a unique cache key from a series of input parameters
-    public static String buildCacheKey(String... keyParts) {
-        return String.join("::", keyParts);
-    }
-
-
-    ///////
     // Pause the execution of the current thread
     public static void pauseCurThreadExec(int pauseInSec) {
         if (pauseInSec > 0) {
             try {
-                Thread.sleep(pauseInSec * 1000);
+                Thread.sleep(pauseInSec * 1000L);
             }
             catch (InterruptedException ie) {
                 ie.printStackTrace();

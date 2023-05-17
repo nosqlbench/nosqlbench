@@ -120,7 +120,7 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
 
     @Override
     void cycleMsgProcess(final long cycle, final Object cycleObj) {
-        if (this.kafkaSpace.isShuttigDown()) return;
+        if (this.kafkaSpace.isShuttingDown()) return;
 
         synchronized (this) {
             final ConsumerRecords<String, String> records = this.consumer.poll(this.msgPoolIntervalInMs);
@@ -225,8 +225,9 @@ public class OpTimeTrackKafkaConsumer extends OpTimeTrackKafkaClient {
         catch (final IllegalStateException ise) {
             // If a consumer is already closed, that's fine.
         }
-        catch (final Exception e) {
-            e.printStackTrace();
+        catch (final Exception ex) {
+            logger.error(ex);
+            ex.printStackTrace();
         }
     }
 }

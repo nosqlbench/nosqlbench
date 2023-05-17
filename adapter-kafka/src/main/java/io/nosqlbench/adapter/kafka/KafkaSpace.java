@@ -16,8 +16,8 @@
 
 package io.nosqlbench.adapter.kafka;
 
-import io.nosqlbench.adapter.kafka.exception.KafkaAdapterUnexpectedException;
-import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaClient;
+import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaConsumer;
+import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaProducer;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
 import io.nosqlbench.adapter.kafka.util.KafkaClientConf;
 import io.nosqlbench.api.config.standard.ConfigModel;
@@ -29,8 +29,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 public class KafkaSpace implements  AutoCloseable {
 
@@ -41,7 +43,6 @@ public class KafkaSpace implements  AutoCloseable {
 
     // TODO: currently this NB Kafka driver only supports String type for message key and value
     //       add schema support in the future
-    private final ConcurrentHashMap<String, OpTimeTrackKafkaClient> opTimeTrackKafkaClients = new ConcurrentHashMap<>();
 
     private final String bootstrapSvr;
     private final String kafkaClientConfFileName;
@@ -74,6 +75,18 @@ public class KafkaSpace implements  AutoCloseable {
     private long totalCycleNum;
 
     private AtomicBoolean beingShutdown = new AtomicBoolean(false);
+
+
+    public record ProducerCacheKey(String producerName, String topicName, String clientId) {
+    }
+    private final ConcurrentHashMap<ProducerCacheKey, OpTimeTrackKafkaProducer> producers =
+        new ConcurrentHashMap<>();
+
+    public record ConsumerCacheKey(String consumerName, List<String> topicList, String clientId) {
+    }
+    private final ConcurrentHashMap<ConsumerCacheKey, OpTimeTrackKafkaConsumer> consumers =
+        new ConcurrentHashMap<>();
+
 
     public KafkaSpace(String spaceName, NBConfiguration cfg) {
         this.spaceName = spaceName;
@@ -115,11 +128,16 @@ public class KafkaSpace implements  AutoCloseable {
             .asReadOnly();
     }
 
-    public OpTimeTrackKafkaClient getOpTimeTrackKafkaClient(String cacheKey) {
-        return opTimeTrackKafkaClients.get(cacheKey);
+    public OpTimeTrackKafkaProducer getOpTimeTrackKafkaProducer(
+        ProducerCacheKey key,
+        Supplier<OpTimeTrackKafkaProducer> producerSupplier) {
+            return producers.computeIfAbsent(key, __ -> producerSupplier.get());
     }
-    public void addOpTimeTrackKafkaClient(String cacheKey, OpTimeTrackKafkaClient client) {
-        opTimeTrackKafkaClients.put(cacheKey, client);
+
+    public OpTimeTrackKafkaConsumer getOpTimeTrackKafkaConsumer(
+        ConsumerCacheKey key,
+        Supplier<OpTimeTrackKafkaConsumer> consumerSupplier) {
+            return consumers.computeIfAbsent(key, __ -> consumerSupplier.get());
     }
 
     public long getActivityStartTimeMills() { return this.activityStartTimeMills; }
@@ -135,23 +153,27 @@ public class KafkaSpace implements  AutoCloseable {
     public long getTotalCycleNum() { return totalCycleNum; }
     public void setTotalCycleNum(long cycleNum) { totalCycleNum = cycleNum; }
 
-    public boolean isShuttigDown() {
+    public boolean isShuttingDown() {
         return beingShutdown.get();
     }
     public void shutdownSpace() {
         try {
             beingShutdown.set(true);
 
-            for (OpTimeTrackKafkaClient client : opTimeTrackKafkaClients.values()) {
-                client.close();
+            for (OpTimeTrackKafkaProducer producer : producers.values()) {
+                producer.close();
+            }
+
+            for (OpTimeTrackKafkaConsumer consumer : consumers.values()) {
+                consumer.close();
             }
 
             // Pause 5 seconds before closing producers/consumers
             KafkaAdapterUtil.pauseCurThreadExec(5);
         }
-        catch (Exception e) {
-            e.printStackTrace();
-            throw new KafkaAdapterUnexpectedException("Unexpected error when shutting down NB S4J space.");
+        catch (Exception ex) {
+            String exp = "Unexpected error when shutting down the Kafka adaptor space";
+            logger.error(exp, ex);
         }
     }
 }

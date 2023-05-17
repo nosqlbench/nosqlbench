@@ -36,7 +36,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.LongFunction;
-import java.util.stream.Collectors;
 
 public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
 
@@ -97,52 +96,6 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
         return defaultGrpNamePrefix + '-' + grpIdx;
     }
 
-    private OpTimeTrackKafkaClient getOrCreateOpTimeTrackKafkaConsumer(
-        final long cycle,
-        final List<String> topicNameList,
-        final String groupId)
-    {
-        final String topicNameListStr = topicNameList.stream()
-            .collect(Collectors.joining("::"));
-
-        final String cacheKey = KafkaAdapterUtil.buildCacheKey(
-            "consumer-" + cycle % this.kafkaClntCnt, topicNameListStr, groupId );
-
-        OpTimeTrackKafkaClient opTimeTrackKafkaClient = this.kafkaSpace.getOpTimeTrackKafkaClient(cacheKey);
-        if (null == opTimeTrackKafkaClient) {
-            final Properties consumerConfProps = new Properties();
-            consumerConfProps.putAll(this.consumerClientConfMap);
-            consumerConfProps.put("group.id", groupId);
-
-            final KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConfProps);
-            synchronized (this) {
-                consumer.subscribe(topicNameList);
-            }
-            if (MessageConsumerOpDispenser.logger.isDebugEnabled())
-                MessageConsumerOpDispenser.logger.debug("Kafka consumer created: {}/{} -- {}, {}, {}",
-                    cacheKey,
-                    consumer,
-                    topicNameList,
-                    this.autoCommitEnabled,
-                    this.maxMsgCntPerCommit);
-
-            opTimeTrackKafkaClient = new OpTimeTrackKafkaConsumer(
-                this.kafkaSpace,
-                this.asyncAPI,
-                this.msgPollIntervalInSec,
-                this.autoCommitEnabled,
-                this.maxMsgCntPerCommit,
-                consumer,
-                this.kafkaAdapterMetrics,
-                EndToEndStartingTimeSource.valueOf(this.e2eStartTimeSrcParamStrFunc.apply(cycle).toUpperCase()),
-                this::getReceivedMessageSequenceTracker,
-                this.seqTrackingFunc.apply(cycle));
-            this.kafkaSpace.addOpTimeTrackKafkaClient(cacheKey, opTimeTrackKafkaClient);
-        }
-
-        return opTimeTrackKafkaClient;
-    }
-
     private ReceivedMessageSequenceTracker getReceivedMessageSequenceTracker(final String topicName) {
         return this.receivedMessageSequenceTrackersForTopicThreadLocal.get()
             .computeIfAbsent(topicName, k -> this.createReceivedMessageSequenceTracker());
@@ -159,8 +112,46 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
         assert StringUtils.isNotBlank(explicitTopicListStr);
 
         return Arrays.stream(StringUtils.split(explicitTopicListStr, ','))
-            .filter(s -> StringUtils.isNotBlank(s))
+            .filter(StringUtils::isNotBlank)
             .toList();
+    }
+
+    private OpTimeTrackKafkaConsumer getTimeTrackKafkaConsumer(final long cycle,
+                                                               final List<String> topicNameList,
+                                                               final String groupId)
+    {
+        final String consumerName = "consumer-" + cycle % this.kafkaClntCnt;
+        KafkaSpace.ConsumerCacheKey consumerCacheKey =
+            new KafkaSpace.ConsumerCacheKey(consumerName, topicNameList, groupId);
+
+        return kafkaSpace.getOpTimeTrackKafkaConsumer(consumerCacheKey, () -> {
+            final Properties consumerConfProps = new Properties();
+            consumerConfProps.putAll(this.consumerClientConfMap);
+            consumerConfProps.put("group.id", groupId);
+
+            final KafkaConsumer<String, String> consumer = new KafkaConsumer<>(consumerConfProps);
+            synchronized (this) {
+                consumer.subscribe(topicNameList);
+            }
+            if (MessageConsumerOpDispenser.logger.isDebugEnabled())
+                MessageConsumerOpDispenser.logger.debug(
+                    "Kafka consumer created: {} -- autoCommitEnabled: {}, maxMsgCntPerCommit: {}",
+                    consumer,
+                    this.autoCommitEnabled,
+                    this.maxMsgCntPerCommit);
+
+            return new OpTimeTrackKafkaConsumer(
+                this.kafkaSpace,
+                this.asyncAPI,
+                this.msgPollIntervalInSec,
+                this.autoCommitEnabled,
+                this.maxMsgCntPerCommit,
+                consumer,
+                this.kafkaAdapterMetrics,
+                EndToEndStartingTimeSource.valueOf(this.e2eStartTimeSrcParamStrFunc.apply(cycle).toUpperCase()),
+                this::getReceivedMessageSequenceTracker,
+                this.seqTrackingFunc.apply(cycle));
+        });
     }
 
     @Override
@@ -171,7 +162,7 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
             "Effective consumer group name and/or topic names  are needed for creating a consumer!");
 
         final OpTimeTrackKafkaClient opTimeTrackKafkaConsumer =
-            this.getOrCreateOpTimeTrackKafkaConsumer(cycle, topicNameList, groupId);
+            this.getTimeTrackKafkaConsumer(cycle, topicNameList, groupId);
 
         return new KafkaOp(
             this.kafkaAdapterMetrics,

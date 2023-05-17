@@ -20,7 +20,6 @@ import io.nosqlbench.adapter.kafka.KafkaSpace;
 import io.nosqlbench.adapter.kafka.exception.KafkaAdapterInvalidParamException;
 import io.nosqlbench.adapter.kafka.ops.KafkaOp;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterMetrics;
-import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil.DOC_LEVEL_PARAMS;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
@@ -133,5 +132,4 @@ public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, Kaf
     public String getName() {
         return "KafkaBaseOpDispenser";
     }
-
 }

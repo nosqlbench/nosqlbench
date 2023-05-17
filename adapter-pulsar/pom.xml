@@ -34,7 +34,10 @@
     </description>
 
     <properties>
+        <!-- Pulsar version 2.11.x causes NB S4J failure due to version conflict (S4J right now is on version 2.10.3)
         <pulsar.version>2.11.1</pulsar.version>
+        -->
+        <pulsar.version>2.10.4</pulsar.version>
     </properties>
 
     <dependencies>
