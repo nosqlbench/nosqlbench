@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.function.LongFunction;
 public class ReadSingleKeyOpDispenser extends VeniceBaseOpDispenser {
 
-    private final static Logger logger = LogManager.getLogger("MessageProducerOpDispenser");
+    private final static Logger logger = LogManager.getLogger("ReadSingleKeyOpDispenser");
     private final LongFunction<String> keyStrFunc;
 
     private static final String KEY_OP_PARAM = "key";
