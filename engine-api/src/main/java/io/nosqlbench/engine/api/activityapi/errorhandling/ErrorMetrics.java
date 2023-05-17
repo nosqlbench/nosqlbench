@@ -62,10 +62,9 @@ public class ErrorMetrics {
     }
 
     public synchronized ExceptionExpectedResultVerificationMetrics getExceptionExpectedResultVerificationMetrics() {
-        if (exceptionExpectedResultVerificationMetrics == null) {
-            exceptionExpectedResultVerificationMetrics = new ExceptionExpectedResultVerificationMetrics(activityDef);
-        }
-        return exceptionExpectedResultVerificationMetrics;
+        if (null == exceptionExpectedResultVerificationMetrics)
+            this.exceptionExpectedResultVerificationMetrics = new ExceptionExpectedResultVerificationMetrics(this.parentLabels);
+        return this.exceptionExpectedResultVerificationMetrics;
     }
 
     public interface Aware {

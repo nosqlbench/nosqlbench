@@ -17,7 +17,6 @@
 package io.nosqlbench.engine.core.logging;
 
 import io.nosqlbench.api.logging.NBLogLevel;
-import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.ExpectedResultVerificationErrorHandler;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Filter;
