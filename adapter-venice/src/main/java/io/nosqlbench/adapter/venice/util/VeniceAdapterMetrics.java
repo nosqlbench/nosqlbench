@@ -18,25 +18,26 @@ package io.nosqlbench.adapter.venice.util;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.adapter.venice.dispensers.VeniceBaseOpDispenser;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class VeniceAdapterMetrics implements NBLabeledElement {
+public class VeniceAdapterMetrics {
 
     private static final Logger logger = LogManager.getLogger("VeniceAdapterMetrics");
-
-    private final String defaultAdapterMetricsPrefix;
 
     private Timer executeTimer;
 
     private Counter foundCounter;
     private Counter notFoundCounter;
 
-    public VeniceAdapterMetrics(String defaultMetricsPrefix) {
-        this.defaultAdapterMetricsPrefix = defaultMetricsPrefix;
+    private final VeniceBaseOpDispenser veniceBaseOpDispenser;
+
+    public VeniceAdapterMetrics(VeniceBaseOpDispenser veniceBaseOpDispenser) {
+        this.veniceBaseOpDispenser = veniceBaseOpDispenser;
     }
 
     public String getName() {
@@ -47,20 +48,17 @@ public class VeniceAdapterMetrics implements NBLabeledElement {
 
         this.executeTimer =
             ActivityMetrics.timer(
-                this,
-                defaultAdapterMetricsPrefix + "execute",
+                veniceBaseOpDispenser,"execute",
                 ActivityMetrics.DEFAULT_HDRDIGITS);
 
 
         this.foundCounter =
             ActivityMetrics.counter(
-                this,
-                defaultAdapterMetricsPrefix + "found");
+                veniceBaseOpDispenser,"found");
 
         this.notFoundCounter =
             ActivityMetrics.counter(
-                this,
-                defaultAdapterMetricsPrefix + "notFound");
+                veniceBaseOpDispenser, "notFound");
     }
 
     public Timer getExecuteTimer() { return executeTimer; }
@@ -73,8 +71,4 @@ public class VeniceAdapterMetrics implements NBLabeledElement {
         return notFoundCounter;
     }
 
-    @Override
-    public NBLabels getLabels() {
-        return NBLabels.forKV();
-    }
 }
