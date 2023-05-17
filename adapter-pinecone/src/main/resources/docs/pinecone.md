@@ -13,13 +13,7 @@ ops:
     # The number of results to return for each query.
     top_k: int_query_topk
     # You can use vector metadata to limit your search. See https://www.pinecone.io/docs/metadata-filtering/
-    filters:
-      - filter_field: query_filter_field
-        operator: [$lt, $gt, $eq, ...]
-        comparator: query_compval
-      - filter_field: query_filter_field
-        operator: [$lt, $gt, $eq, ...]
-        comparator: query_compval
+    filter: <field operator compval>
     # Indicates whether vector values are included in the response.
     include_values: boolean
     # Indicates whether metadata is included in the response as well as the ids.
@@ -29,13 +23,7 @@ ops:
         values: csv_separated_floats
         top_k: int_val
         namespace: string_val
-        filters:
-          - filter_field: query_vector_filter_field
-            operator: comparison_operator
-            comparator: comparator_val
-          - filter_field: query_filter_field
-            operator: [$lt, $gt, $eq, ...]
-            comparator: query_compval
+        filter: <field operator compval>
         sparse_values:
           indices: list_of_ints
           values: list_of_floats
@@ -43,13 +31,7 @@ ops:
         values: csv_separated_floats
         top_k: int_val
         namespace: string_val
-        filters:
-          - filter_field: query_vector_filter_field
-            operator: comparison_operator
-            comparator: comparator_val
-          - filter_field: query_vector_filter_field
-            operator: comparison_operator
-            comparator: comparator_val
+        filter: <field operator compval>
         sparse_values:
           indices: list_of_ints
           values: list_of_floats

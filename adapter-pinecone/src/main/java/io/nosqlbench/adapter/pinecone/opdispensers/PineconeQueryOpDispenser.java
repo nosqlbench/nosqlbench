@@ -1,5 +1,7 @@
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
+import com.google.protobuf.Struct;
+import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
@@ -11,12 +13,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class PineconeQueryOpDispenser extends PineconeOpDispenser {
     private static final Logger LOGGER = LogManager.getLogger(PineconeQueryOpDispenser.class);
-    private final LongFunction<QueryRequest> queryRequestFunc;
+    private final LongFunction<QueryRequest.Builder> queryRequestFunc;
+    private final LongFunction<Collection<QueryVector>> queryVectorFunc;
+
 
     /**
      * Create a new PineconeQueryOpDispenser subclassed from {@link PineconeOpDispenser}.
@@ -32,32 +37,10 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
                                     LongFunction<String> targetFunction) {
         super(adapter, op, pcFunction, targetFunction);
         queryRequestFunc = createQueryRequestFunc(op);
+        queryVectorFunc = createQueryVectorFunc(op);
     }
 
-     /*
-     float[] rawVector = {1.0F, 2.0F, 3.0F};
-     QueryVector queryVector = QueryVector.newBuilder()
-     .addAllValues(Floats.asList(rawVector))
-     .setFilter(Struct.newBuilder()
-     .putFields("some_field", Value.newBuilder()
-     .setStructValue(Struct.newBuilder()
-     .putFields("$lt", Value.newBuilder()
-     .setNumberValue(3)
-     .build()))
-     .build())
-     .build())
-     .setNamespace("default-namespace")
-     .build();
-
-     QueryRequest queryRequest = QueryRequest.newBuilder()
-     .addQueries(queryVector)
-     .setNamespace("default-namespace")
-     .setTopK(2)
-     .setIncludeMetadata(true)
-     .build();
-     }
-     */
-    private LongFunction<QueryRequest> createQueryRequestFunc(ParsedOp op) {
+    private LongFunction<QueryRequest.Builder> createQueryRequestFunc(ParsedOp op) {
         LongFunction<QueryRequest.Builder> rFunc = l -> QueryRequest.newBuilder();
 
         Optional<LongFunction<String>> nFunc = op.getAsOptionalFunction("namespace", String.class);
@@ -94,31 +77,49 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
             LongFunction<String> af = vFunc.get();
             LongFunction<ArrayList<Float>> alf = l -> {
                 String[] vals = af.apply(l).split(",");
-                ArrayList<Float> fVals = new ArrayList<Float>();
-                for (int i = 0; i < vals.length; i++) {
-                    fVals.add(Float.valueOf(vals[i]));
+                ArrayList<Float> fVals = new ArrayList<>();
+                for (String val : vals) {
+                    fVals.add(Float.valueOf(val));
                 }
                 return fVals;
             };
             rFunc = l -> finalFunc.apply(l).addAllVector(alf.apply(l));
         }
-        //TODO: Add filters
-        //TODO: IF the above values are not populated we need to create and add the query vectors
-        //LongFunction<QueryRequest.Builder> returnFunc = rFunc;
-        //rFunc = l -> returnFunc.apply(l).addQueries(queryVectorFunc.apply(l));
+
+        Optional<LongFunction<String>> filterFunction = op.getAsOptionalFunction("filter", String.class);
+        if (filterFunction.isPresent()) {
+            LongFunction<QueryRequest.Builder> finalFunc = rFunc;
+            LongFunction<Struct> builtFilter = l -> {
+                String[] filterFields = filterFunction.get().apply(l).split(" ");
+                return Struct.newBuilder().putFields(filterFields[0],
+                        Value.newBuilder().setStructValue(Struct.newBuilder().putFields(filterFields[1],
+                                        Value.newBuilder().setNumberValue(Integer.valueOf(filterFields[2])).build()))
+                                .build()).build();
+            };
+            rFunc = l -> finalFunc.apply(l).setFilter(builtFilter.apply(l));
+        }
+
         LongFunction<QueryRequest.Builder> finalRFunc = rFunc;
-        return l -> finalRFunc.apply(l).build();
+        return l -> finalRFunc.apply(l);
     }
 
-    private LongFunction<QueryVector> createQueryVectorFunc(ParsedOp op) {
-        LongFunction<QueryVector.Builder> vFunc = l -> QueryVector.newBuilder();
-        LongFunction<QueryVector.Builder> finalVFunc = vFunc;
-        return l -> finalVFunc.apply(l).build();
+    private LongFunction<Collection<QueryVector>> createQueryVectorFunc(ParsedOp op) {
+        //Optional<LongFunction<Collection<Map<String,String>>>> baseFunc = op.getAsOptionalFunction("query_vectors", String.class);
+
+       // LongFunction<QueryVector.Builder> vFunc = l -> QueryVector.newBuilder();
+       // LongFunction<QueryVector.Builder> finalVFunc = vFunc;
+        //return l -> finalVFunc.apply(l).build();
+        return l -> null;
     }
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeQueryOp(pcFunction.apply(value).getConnection(targetFunction.apply(value)),
-            queryRequestFunc.apply(value));
+        QueryRequest.Builder qrb = queryRequestFunc.apply(value);
+        Collection<QueryVector> vectors = queryVectorFunc.apply(value);
+        if (vectors != null) {
+            qrb.addAllQueries(vectors);
+        }
+
+        return new PineconeQueryOp(pcFunction.apply(value).getConnection(targetFunction.apply(value)), qrb.build());
     }
 }

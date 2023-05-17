@@ -25,7 +25,7 @@ public class PineconeSpace {
     private final PineconeClient client;
     private final PineconeClientConfig config;
 
-    private final Map<String,PineconeConnection> connections = new HashMap<String,PineconeConnection>();
+    private final Map<String,PineconeConnection> connections = new HashMap<>();
 
     /**
      * Create a new PineconeSpace Object which stores all stateful contextual information needed to interact

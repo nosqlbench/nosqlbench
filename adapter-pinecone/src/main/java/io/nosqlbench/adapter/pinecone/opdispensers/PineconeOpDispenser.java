@@ -21,7 +21,6 @@ import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.pinecone.PineconeConnection;
 
 import java.util.function.LongFunction;
 

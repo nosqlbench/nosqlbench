@@ -8,6 +8,8 @@ import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.nb.annotations.Service;
 
+import java.util.function.Function;
+
 @Service(value = DriverAdapter.class, selector = "pinecone")
 public class PineconeDriverAdapter extends BaseDriverAdapter<PineconeOp, PineconeSpace> {
 
@@ -16,6 +18,11 @@ public class PineconeDriverAdapter extends BaseDriverAdapter<PineconeOp, Pinecon
         DriverSpaceCache<? extends PineconeSpace> spaceCache = getSpaceCache();
         NBConfiguration adapterConfig = getConfiguration();
         return new PineconeOpMapper(this, spaceCache, adapterConfig);
+    }
+
+    @Override
+    public Function<String, ? extends PineconeSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (s) -> new PineconeSpace(s,cfg);
     }
 
 }

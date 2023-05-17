@@ -8,7 +8,6 @@ import io.nosqlbench.adapter.pinecone.ops.PineconeDescribeIndexStatsOp;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.pinecone.proto.DescribeIndexStatsRequest;
-import jakarta.ws.rs.NotSupportedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +43,7 @@ public class PineconeDescribeIndexStatsOpDispenser extends PineconeOpDispenser {
                 String[] filterFields = filterFunction.get().apply(l).split(" ");
                 return Struct.newBuilder().putFields(filterFields[0],
                         Value.newBuilder().setStructValue(Struct.newBuilder().putFields(filterFields[1],
-                                        Value.newBuilder().setNumberValue(Integer.valueOf(filterFields[2])).build()))
+                                        Value.newBuilder().setNumberValue(Integer.parseInt(filterFields[2])).build()))
                                 .build()).build();
             };
             rFunc = l -> finalFunc.apply(l).setFilter(builtFilter.apply(l));

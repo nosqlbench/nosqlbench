@@ -5,7 +5,6 @@ import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeFetchOp;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.pinecone.PineconeConnection;
 import io.pinecone.proto.FetchRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
