@@ -141,12 +141,12 @@ public class PineconeOpMapperTest {
                  values: "1.0,2.0,3.0"
                  namespace: "test_namespace"
                  metadata:
-                  - key1: val1
-                  - key2: val2
-                  - key3: val3
+                  key1: "val1"
+                  key2: 2
+                  key3: 3
                  sparse_values:
-                  indices: list_of_ints
-                  values: list_of_floats
+                  indices: "1,2,3"
+                  values: "1.1,2.2,3.3"
             """);
         OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
         assert(dispenser instanceof PineconeUpdateOpDispenser);
@@ -160,22 +160,22 @@ public class PineconeOpMapperTest {
         ParsedOp pop = parsedOpFor("""
             ops:
               op1:
-                 type: "upsert"
-                 index: "test-index"
-                    upsert_vectors:
-                     - id: 1
-                       values: csv_separated_floats
-                       sparse_values:
-                         indices: list_of_ints
-                         values: list_of_floats
-                       metadata:
-                         - key1: val1
-                         - key2: val2
-                     - id: 2
-                       values: csv_separated_floats
-                       sparse_values:
-                         indices: list_of_ints
-                         values: list_of_floats
+                type: "upsert"
+                index: "test-index"
+                upsert_vectors:
+                 - id: 1
+                   values: "1.0,2.0,3.0"
+                   sparse_values:
+                     indices: "1,2,3"
+                     values: "4.0,5.0,6.0"
+                   metadata:
+                     key1: "val1"
+                     key2: 2
+                 - id: 2
+                   values: "7.0,8.0,9.0"
+                   sparse_values:
+                     indices: "4,5,6"
+                     values: "1.1,2.2,3.3"
             """);
         OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
         assert(dispenser instanceof PineconeUpsertOpDispenser);
