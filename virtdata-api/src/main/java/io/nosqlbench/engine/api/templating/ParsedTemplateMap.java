@@ -973,6 +973,17 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return new LinkedHashMap<String,Object>(ParamsParser.parseToMap(mapsrc,mainField));
     }
 
+    public List<Map<String, Object>> parseStaticCmdMaps(String key, String mainField) {
+        Object mapsSrc = getStaticValue(key);
+        List<Map<String,Object>> maps = new ArrayList<>();
+        for (String spec : mapsSrc.toString().split("; +")) {
+            LinkedHashMap<String, Object> map = new LinkedHashMap<>(ParamsParser.parseToMap(spec, mainField));
+            maps.add(map);
+        }
+        return maps;
+    }
+
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("protomap:\n");

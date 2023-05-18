@@ -911,6 +911,10 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, NBLabeledElement,
         return tmap.parseStaticCmdMap(key, mainField);
     }
 
+    public List<Map<String, Object>> parseStaticCmdMaps(String key, String mainField) {
+        return tmap.parseStaticCmdMaps(key, mainField);
+    }
+
     @Override
     public String toString() {
         return this.tmap.toString();
