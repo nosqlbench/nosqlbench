@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,21 +59,21 @@ public class ServiceSelector<T> implements Predicate<ServiceLoader.Provider<? ex
         return false;
     }
 
-    public T getOne() {
-        List<? extends T> services = getAll();
-        if (services.size() == 0) {
+    public ServiceLoader.Provider<? extends T> getOneProvider() {
+        List<? extends ServiceLoader.Provider<? extends T>> providers = getAllProviders();
+        if (providers.size()==0 || providers.size()>1) {
             throw new RuntimeException("You requested exactly one instance of a service by name '" + name + "', but got " +
-                (services.stream().map(s -> s.getClass().getSimpleName())).collect(Collectors.joining(",")) + " (" + services.stream().count() + ")");
-        } else if (services.size()==1) {
-            return services.get(0);
+                (providers.stream().map(s -> s.getClass().getSimpleName())).collect(Collectors.joining(",")) + " (" + providers.stream().count() + ")");
         }
-        throw new RuntimeException("You requested exactly one instance of a service by name '" + name + "', but got " +
-            (services.stream().map(s -> s.getClass().getSimpleName())).collect(Collectors.joining(",")) + " (" + services.stream().count() + ")");
-
+        return providers.get(0);
     }
 
-    public List<? extends T> getAll() {
-        List<? extends T> services = loader
+    public T getOne() {
+        return getOneProvider().get();
+    }
+
+    public List<? extends ServiceLoader.Provider<? extends T>> getAllProviders() {
+        List<? extends ServiceLoader.Provider<? extends T>> providers = loader
             .stream()
             .peek(l -> {
                     if (l.type().getAnnotation(Service.class) == null) {
@@ -86,9 +86,14 @@ public class ServiceSelector<T> implements Predicate<ServiceLoader.Provider<? ex
             )
             .filter(l -> l.type().getAnnotation(Service.class) != null)
             .filter(l -> l.type().getAnnotation(Service.class).selector().equals(name))
+            .toList();
+        return providers;
+    }
+    public List<? extends T> getAll() {
+        List<? extends ServiceLoader.Provider<? extends T>> providers = getAllProviders();
+        return providers.stream()
             .map(ServiceLoader.Provider::get)
             .toList();
-        return services;
     }
 
     public Optional<? extends T> get() {

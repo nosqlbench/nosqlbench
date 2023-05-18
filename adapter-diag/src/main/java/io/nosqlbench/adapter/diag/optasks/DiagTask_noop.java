@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,21 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
-import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
+import io.nosqlbench.nb.annotations.Service;
 
 import java.util.Map;
 
 @Service(value= DiagTask.class,selector = "noop")
-public class DiagTask_noop implements DiagTask {
+public class DiagTask_noop extends BaseDiagTask {
 
     private String name;
 
     @Override
     public void applyConfig(NBConfiguration cfg) {
-        this.name = cfg.get("name",String.class);
     }
 
     @Override
@@ -46,8 +45,4 @@ public class DiagTask_noop implements DiagTask {
         return Map.of();
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
 }

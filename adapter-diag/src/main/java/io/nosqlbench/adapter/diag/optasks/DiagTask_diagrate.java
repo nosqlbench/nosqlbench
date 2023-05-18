@@ -16,8 +16,6 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
@@ -27,7 +25,7 @@ import io.nosqlbench.nb.annotations.Service;
 import java.util.Map;
 
 @Service(value = DiagTask.class, selector = "diagrate")
-public class DiagTask_diagrate implements DiagTask, NBReconfigurable, NBLabeledElement {
+public class DiagTask_diagrate extends BaseDiagTask implements NBReconfigurable {
     private String name;
     private RateLimiter rateLimiter;
     private RateSpec rateSpec;
@@ -72,16 +70,5 @@ public class DiagTask_diagrate implements DiagTask, NBReconfigurable, NBLabeledE
     public Map<String, Object> apply(Long aLong, Map<String, Object> stringObjectMap) {
         rateLimiter.maybeWaitForOp();
         return stringObjectMap;
-    }
-
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public NBLabels getLabels() {
-        return NBLabels.forKV("diagop", name);
     }
 }

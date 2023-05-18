@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.api.annotations;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
 
-public enum Category {
-    datetime,
-    state,
-    distributions,
-    diagnostics,
-    conversion,
-    collections,
-    premade,
-    nulls,
-    functional,
-    statistics,
-    general,
-    objects,
-    periodic,
-    experimental
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+
+import java.util.function.LongToDoubleFunction;
+
+@ThreadSafeMapper
+@Categories({Category.general})
+public class Mul implements LongToDoubleFunction {
+    private final double factor;
+
+    public Mul(double factor) {
+        this.factor = factor;
+    }
+
+    @Override
+    public double applyAsDouble(long value) {
+        return factor * value;
+    }
 }

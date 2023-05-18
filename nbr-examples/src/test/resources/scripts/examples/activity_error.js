@@ -15,19 +15,17 @@
  */
 
 activitydef1 = {
-    "alias" : "activity_error",
-    "driver" : "diag",
-    "cycles" : "0..1500000",
-    "threads" : "1",
-    "targetrate" : "10",
-    "op" : {
-        "log": "type=log modulo=1"
-    }
+    "alias": "activity_error",
+    "driver": "diag",
+    "cycles": "0..1500000",
+    "threads": "1",
+    "targetrate": "10",
+    "op": "log: modulo=1"
 };
 
 print('starting activity activity_error');
 scenario.start(activitydef1);
 scenario.waitMillis(2000);
-activities.activity_error.threads="unparsable";
+activities.activity_error.threads = "unparsable";
 scenario.awaitActivity("activity_error");
 print("awaited activity");

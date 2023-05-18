@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,10 +62,13 @@ public class DiagOpDispenser extends BaseOpDispenser<DiagOp,DiagSpace> implement
             taskcfg.computeIfAbsent("name",l -> taskname);
             taskcfg.computeIfAbsent("type",l -> taskname);
             String optype = taskcfg.remove("type").toString();
+            String opname = taskcfg.get("name").toString();
 
             // Dynamically load the named task instance, based on the op field key AKA the taskname
             // and ensure that exactly one is found or throw an error
             DiagTask task = ServiceSelector.of(optype, ServiceLoader.load(DiagTask.class)).getOne();
+            task.setLabelsFrom(op);
+            task.setName(opname);
 
             // Load the configuration model of the dynamically loaded task for type-safe configuration
             NBConfigModel cfgmodel = task.getConfigModel();

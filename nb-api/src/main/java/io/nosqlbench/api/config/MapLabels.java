@@ -123,7 +123,14 @@ public class MapLabels implements NBLabels {
     }
 
     public String toString() {
-        return this.linearize("name");
+        StringBuilder sb = new StringBuilder("{");
+        labels.forEach((k,v) -> {
+            sb.append(k).append(":\\\"").append(v).append("\\\"").append(",");
+        });
+        sb.setLength(sb.length()-",".length());
+        sb.append("}");
+
+        return sb.toString();
     }
 
     @Override

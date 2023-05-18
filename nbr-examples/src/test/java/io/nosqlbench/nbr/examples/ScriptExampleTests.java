@@ -56,7 +56,7 @@ public class ScriptExampleTests {
         String scenarioName = "scenario " + scriptname;
         System.out.println("=".repeat(29) + " Running integration test for example scenario: " + scenarioName);
         ScenariosExecutor executor = new ScenariosExecutor(ScriptExampleTests.class.getSimpleName() + ":" + scriptname, 1);
-        Scenario s = new Scenario(scenarioName, Scenario.Engine.Graalvm,"stdout:300", Maturity.Any);
+        Scenario s = Scenario.forTesting(scenarioName, Scenario.Engine.Graalvm,"stdout:300", Maturity.Any);
 
         s.addScenarioScriptParams(paramsMap);
 
@@ -261,7 +261,7 @@ public class ScriptExampleTests {
     public void testErrorPropagationFromAdapterOperation() {
         ExecutionMetricsResult scenarioResult = runScenario(
             "basicdiag",
-            "type", "diag", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
+            "driver", "diag", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
         );
     }
 

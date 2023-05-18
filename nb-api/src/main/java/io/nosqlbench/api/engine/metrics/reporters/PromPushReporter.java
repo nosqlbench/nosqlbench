@@ -74,6 +74,7 @@ public class PromPushReporter extends ScheduledReporter {
             }
         PromPushReporter.logger.debug("formatted {} metrics in prom expo format", total);
         final String exposition = sb.toString();
+        logger.trace(() -> "prom exposition format:\n" + exposition);
 
         final double backoffRatio=1.5;
         final double maxBackoffSeconds=10;

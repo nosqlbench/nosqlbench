@@ -208,6 +208,21 @@ automatically. It also imports a base dashboard for nosqlbench and configures gr
 export to share with a central DataStax grafana instance (grafana can be found on localhost:3000
 with the default credentials admin/admin).
 
+### Metrics Labeling
+
+Metrics have attached labels which identify which session, scenario, activity, and operation
+they are attached to. Not all labels will be present, as metrics are instanced at different
+levels and may or may not be op or activity specific.
+
+By default, labels are added automatically to metrics. You can change this if needed.
+
+    # add labels to metrics, in addition to the default ones
+    --add-labels label1=value1,label2=value2,...
+
+    # replace the initial set of labels
+    --set-labels label1=value1,label2=value2,...
+
+The default labels include appname, command, scenario, activity, op, and name.
 
 ### Summary Reporting
 
