@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapter.kafka.util;
 
-import com.amazonaws.util.Base64;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public enum KafkaAdapterUtil {
     ;
@@ -50,12 +48,6 @@ public enum KafkaAdapterUtil {
         DOC_LEVEL_PARAMS(final String label) {
             this.label = label;
         }
-    }
-    public static boolean isValidDocLevelParam(final String param) {
-        return Arrays.stream(DOC_LEVEL_PARAMS.values()).anyMatch(t -> t.label.equals(param));
-    }
-    public static String getValidDocLevelParamList() {
-        return Arrays.stream(DOC_LEVEL_PARAMS.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
 
     public static final String NB_MSG_SEQ_PROP = "NBMsgSeqProp";
@@ -80,13 +72,6 @@ public enum KafkaAdapterUtil {
     public static List<Object> convertJsonToObjList(final String jsonStr) throws Exception {
         final ObjectMapper mapper = new ObjectMapper();
         return Arrays.asList(mapper.readValue(jsonStr, Object[].class));
-    }
-
-    public static String buildCacheKey(final String... keyParts) {
-        final String combinedStr = Arrays.stream(keyParts)
-            .filter(StringUtils::isNotBlank)
-            .collect(Collectors.joining("::"));
-        return Base64.encodeAsString(combinedStr.getBytes(StandardCharsets.UTF_8));
     }
 
     public static void pauseCurThreadExec(final int pauseInSec) {

@@ -142,15 +142,6 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
         return new Scenario(name,null,engine,"console:10s",true,true,reportSummaryTo,"",Path.of("logs"),minMaturity, NBLabeledElement.forKV("test-name","name"));
     }
 
-//    public Scenario(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
-//        scenarioName = name;
-//        this.reportSummaryTo = reportSummaryTo;
-//        this.engine = engine;
-//        commandLine = "";
-//        this.minMaturity = minMaturity;
-//        logsPath = Path.of("logs");
-//    }
-//
     public Scenario setLogger(final Logger logger) {
         this.logger = logger;
         return this;
@@ -217,10 +208,6 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
         this.scriptEngine.setContext(this.scriptEnv);
 
         this.scriptEngine.put("params", this.scenarioScriptParams);
-
-//            scriptEngine.put("scenario", scenarioController);
-//            scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
-//            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
 
         this.scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
         this.scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));

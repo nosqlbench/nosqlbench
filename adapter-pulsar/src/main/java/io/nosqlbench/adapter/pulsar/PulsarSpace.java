@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapter.pulsar;
 
-import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.adapter.pulsar.util.PulsarClientConf;
 import io.nosqlbench.api.config.standard.ConfigModel;
@@ -54,10 +53,12 @@ public class PulsarSpace implements  AutoCloseable {
 
     public record ProducerCacheKey(String producerName, String topicName) {
     }
-
     private final ConcurrentHashMap<ProducerCacheKey, Producer<?>> producers = new ConcurrentHashMap<>();
 
-    public record ConsumerCacheKey(String consumerName, String subscriptionName, List<String> topicNameList, String topicPattern) {
+    public record ConsumerCacheKey(String consumerName,
+                                   String subscriptionName,
+                                   List<String> topicNameList,
+                                   String topicPattern) {
     }
     private final ConcurrentHashMap<ConsumerCacheKey, Consumer<?>> consumers = new ConcurrentHashMap<>();
 
@@ -100,11 +101,18 @@ public class PulsarSpace implements  AutoCloseable {
     public int getProducerSetCnt() { return producers.size(); }
     public int getConsumerSetCnt() { return consumers.size(); }
     public int getReaderSetCnt() { return readers.size(); }
-    public Producer<?> getProducer(ProducerCacheKey key, Supplier<Producer<?>> producerSupplier) { return producers.computeIfAbsent(key, __ -> producerSupplier.get()); }
 
-    public Consumer<?> getConsumer(ConsumerCacheKey key, Supplier<Consumer<?>> consumerSupplier) { return consumers.computeIfAbsent(key, __ -> consumerSupplier.get()); }
+    public Producer<?> getProducer(ProducerCacheKey key, Supplier<Producer<?>> producerSupplier) {
+        return producers.computeIfAbsent(key, __ -> producerSupplier.get());
+    }
 
-    public Reader<?> getReader(ReaderCacheKey key, Supplier<Reader<?>> readerSupplier) { return readers.computeIfAbsent(key, __ -> readerSupplier.get()); }
+    public Consumer<?> getConsumer(ConsumerCacheKey key, Supplier<Consumer<?>> consumerSupplier) {
+        return consumers.computeIfAbsent(key, __ -> consumerSupplier.get());
+    }
+
+    public Reader<?> getReader(ReaderCacheKey key, Supplier<Reader<?>> readerSupplier) {
+        return readers.computeIfAbsent(key, __ -> readerSupplier.get());
+    }
 
 
     /**
@@ -185,9 +193,9 @@ public class PulsarSpace implements  AutoCloseable {
             if (pulsarAdmin != null) pulsarAdmin.close();
             if (pulsarClient != null) pulsarClient.close();
         }
-        catch (Exception e) {
-            throw new PulsarAdapterUnexpectedException(
-                "Unexpected error when shutting down the Pulsar space \"" + spaceName + "\"!");
+        catch (Exception ex) {
+            String exp = "Unexpected error when shutting down the Pulsar adaptor space";
+            logger.error(exp, ex);
         }
     }
 

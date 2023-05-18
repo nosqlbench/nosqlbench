@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.s4j.dispensers;
 
+import com.datastax.oss.pulsar.jms.PulsarJMSContext;
 import io.nosqlbench.adapter.s4j.S4JSpace;
 import io.nosqlbench.adapter.s4j.ops.S4JOp;
 import io.nosqlbench.adapter.s4j.util.*;
@@ -30,7 +31,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.jms.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -42,12 +42,6 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
     protected final ParsedOp parsedOp;
     protected final S4JSpace s4jSpace;
     protected final S4JAdapterMetrics s4jAdapterMetrics;
-
-    private final ConcurrentHashMap<String, JMSContext> connLvlJmsContexts = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, S4JJMSContextWrapper> sessionLvlJmsContexts = new ConcurrentHashMap<>();
-    protected final ConcurrentHashMap<String, Destination> jmsDestinations = new ConcurrentHashMap<>();
-    protected final ConcurrentHashMap<String, JMSProducer> jmsProducers = new ConcurrentHashMap<>();
-    protected final ConcurrentHashMap<String, JMSConsumer> jmsConsumers = new ConcurrentHashMap<>();
 
     // Doc-level parameter: temporary_dest (default: false)
     protected final boolean temporaryDest;
@@ -73,11 +67,9 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
 
         this.parsedOp = op;
         this.s4jSpace = s4jSpace;
-        this.connLvlJmsContexts.putAll(s4jSpace.getConnLvlJmsContexts());
-        this.sessionLvlJmsContexts.putAll(s4jSpace.getSessionLvlJmsContexts());
 
         String defaultMetricsPrefix = parsedOp.getLabels().linearize("activity");
-        this.s4jAdapterMetrics = new S4JAdapterMetrics(defaultMetricsPrefix);
+        this.s4jAdapterMetrics = new S4JAdapterMetrics(this);
         s4jAdapterMetrics.initS4JAdapterInstrumentation();
 
         this.destNameStrFunc = destNameStrFunc;
@@ -102,7 +94,7 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
         LongFunction<Boolean> booleanLongFunction;
         booleanLongFunction = l -> parsedOp.getOptionalStaticConfig(paramName, String.class)
             .filter(Predicate.not(String::isEmpty))
-            .map(value -> BooleanUtils.toBoolean(value))
+            .map(BooleanUtils::toBoolean)
             .orElse(defaultValue);
         logger.info("{}: {}", paramName, booleanLongFunction.apply(0));
         return  booleanLongFunction;
@@ -133,7 +125,7 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
         LongFunction<Integer> integerLongFunction;
         integerLongFunction = l -> parsedOp.getOptionalStaticValue(paramName, String.class)
             .filter(Predicate.not(String::isEmpty))
-            .map(value -> NumberUtils.toInt(value))
+            .map(NumberUtils::toInt)
             .map(value -> {
                 if (0 > value) return 0;
                 return value;
@@ -164,10 +156,71 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
         return stringLongFunction;
     }
 
+    public S4JJMSContextWrapper getS4jJmsContextWrapper(long curCycle) {
+        return getS4jJmsContextWrapper(curCycle, null);
+    }
+
+    // Get the next JMSContext Wrapper in the following approach
+    // - The JMSContext wrapper pool has the following sequence (assuming 3 [c]onnections and 2 [s]essions per connection):
+    //   c0s0, c0s1, c1s0, c1s1, c2s0, c2s1
+    // - When getting the next JMSContext wrapper, always get from the next connection, starting from the first session
+    //   When reaching the end of connection, move back to the first connection, but get the next session.
+    //   e.g. first: c0s0   (0)
+    //        next:  c1s0   (1)
+    //        next:  c2s0   (2)
+    //        next:  c0s1   (3)
+    //        next:  c1s1   (4)
+    //        next:  c2s1   (5)
+    //        next:  c0s0   (6)  <-- repeat the pattern
+    //        next:  c1s0   (7)
+    //        next:  c2s0   (8)
+    //        next:  c0s1   (9)
+    //        ... ...
+    public S4JJMSContextWrapper getS4jJmsContextWrapper(
+        long curCycle,
+        Map<String, Object> overrideS4jConfMap)
+    {
+        int totalConnNum = s4jSpace.getMaxNumConn();
+        int totalSessionPerConnNum = s4jSpace.getMaxNumSessionPerConn();
+
+        int connSeqNum =  (int) curCycle % totalConnNum;
+        int sessionSeqNum = ( (int)(curCycle / totalConnNum) ) % totalSessionPerConnNum;
+
+        JMSContext connLvlJmsContext = s4jSpace.getConnLvlJMSContext(s4jSpace.getConnLvlJmsContextIdentifier(connSeqNum));
+        // Connection level JMSContext objects should be already created during the initialization phase
+        assert (connLvlJmsContext != null);
+
+        String jmsSessionContextIdStr = s4jSpace.getSessionLvlJmsContextIdentifier(connSeqNum, sessionSeqNum);
+        S4JSpace.JMSGenObjCacheKey jmsContextWrapperCacheKey =
+            new S4JSpace.JMSGenObjCacheKey(jmsSessionContextIdStr);
+
+        return s4jSpace.getS4JJMSContextWrapper(jmsContextWrapperCacheKey, () -> {
+            JMSContext jmsContext = null;
+
+            if (overrideS4jConfMap == null || overrideS4jConfMap.isEmpty()) {
+                jmsContext = connLvlJmsContext.createContext(connLvlJmsContext.getSessionMode());
+            } else {
+                jmsContext = ((PulsarJMSContext) connLvlJmsContext).createContext(
+                    connLvlJmsContext.getSessionMode(), overrideS4jConfMap);
+            }
+
+            S4JJMSContextWrapper s4JJMSContextWrapper =
+                new S4JJMSContextWrapper(jmsSessionContextIdStr, jmsContext);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("[Session level JMSContext] {} -- {}",
+                    Thread.currentThread().getName(),
+                    s4JJMSContextWrapper);
+            }
+
+            return s4JJMSContextWrapper;
+        });
+    }
+
     /**
      * If the JMS destination that corresponds to a topic exists, reuse it; Otherwise, create it
      */
-    public Destination getOrCreateJmsDestination(
+    public Destination getJmsDestination(
         S4JJMSContextWrapper s4JJMSContextWrapper,
         boolean tempDest,
         String destType,
@@ -176,54 +229,58 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
         String jmsContextIdStr = s4JJMSContextWrapper.getJmsContextIdentifer();
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
 
-        // Regular, non-temporary destination
-        if (!tempDest) {
-            String destinationCacheKey = S4JAdapterUtil.buildCacheKey(jmsContextIdStr, destType, destName);
-            Destination destination = jmsDestinations.get(destinationCacheKey);
+        S4JSpace.JMSDestinationCacheKey destinationCacheKey =
+            new S4JSpace.JMSDestinationCacheKey(jmsContextIdStr, destType, destName);
 
-            if (null == destination) {
+        return s4jSpace.getJmsDestination(destinationCacheKey, () -> {
+            Destination destination;
+
+           // Regular, non-temporary destination
+            if (!tempDest) {
                 if (StringUtils.equalsIgnoreCase(destType, S4JAdapterUtil.JMS_DEST_TYPES.QUEUE.label)) {
                     destination = jmsContext.createQueue(destName);
                 } else {
                     destination = jmsContext.createTopic(destName);
                 }
-
-                jmsDestinations.put(destinationCacheKey, destination);
+            }
+            // Temporary destination
+            else {
+                if (StringUtils.equalsIgnoreCase(destType, S4JAdapterUtil.JMS_DEST_TYPES.QUEUE.label)) {
+                    destination = jmsContext.createTemporaryQueue();
+                }
+                else {
+                    destination = jmsContext.createTemporaryTopic();
+                }
             }
 
             return destination;
-        }
-        // Temporary destination
-
-        if (StringUtils.equalsIgnoreCase(destType, S4JAdapterUtil.JMS_DEST_TYPES.QUEUE.label)) {
-            return jmsContext.createTemporaryQueue();
-        }
-        return jmsContext.createTemporaryTopic();
+        });
     }
 
     // Get simplified NB thread name
     private String getSimplifiedNBThreadName(String fullThreadName) {
         assert StringUtils.isNotBlank(fullThreadName);
-
-        if (StringUtils.contains(fullThreadName, '/')) return StringUtils.substringAfterLast(fullThreadName, "/");
-        return fullThreadName;
+        if (StringUtils.contains(fullThreadName, '/'))
+            return StringUtils.substringAfterLast(fullThreadName, "/");
+        else
+            return fullThreadName;
     }
-
 
     /**
      * If the JMS producer that corresponds to a destination exists, reuse it; Otherwise, create it
      */
-    public JMSProducer getOrCreateJmsProducer(
+    public JMSProducer getJmsProducer(
         S4JJMSContextWrapper s4JJMSContextWrapper,
         boolean asyncApi) throws JMSException
     {
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
-        String producerCacheKey = S4JAdapterUtil.buildCacheKey(
-            getSimplifiedNBThreadName(Thread.currentThread().getName()), "producer");
-        JMSProducer jmsProducer = jmsProducers.get(producerCacheKey);
+        S4JSpace.JMSGenObjCacheKey producerCacheKey =
+            new S4JSpace.JMSGenObjCacheKey(
+                String.join("::",
+            getSimplifiedNBThreadName(Thread.currentThread().getName()), "producer"));
 
-        if (null == jmsProducer) {
-            jmsProducer = jmsContext.createProducer();
+        return s4jSpace.getJmsProducer(producerCacheKey, () -> {
+            JMSProducer jmsProducer = jmsContext.createProducer();
 
             if (asyncApi) {
                 jmsProducer.setAsync(new S4JCompletionListener(s4jSpace, this));
@@ -234,16 +291,14 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
                     producerCacheKey, jmsProducer, s4JJMSContextWrapper);
             }
 
-            jmsProducers.put(producerCacheKey, jmsProducer);
-        }
-
-        return jmsProducer;
+            return jmsProducer;
+        });
     }
 
     /**
      * If the JMS consumer that corresponds to a destination(, subscription, message selector) exists, reuse it; Otherwise, create it
      */
-    public JMSConsumer getOrCreateJmsConsumer(
+    public JMSConsumer getJmsConsumer(
         S4JJMSContextWrapper s4JJMSContextWrapper,
         Destination destination,
         String destType,
@@ -258,11 +313,15 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
     {
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
         boolean isTopic = StringUtils.equalsIgnoreCase(destType, S4JAdapterUtil.JMS_DEST_TYPES.TOPIC.label);
-        String consumerCacheKey = S4JAdapterUtil.buildCacheKey(
-            getSimplifiedNBThreadName(Thread.currentThread().getName()), "consumer");
 
-        JMSConsumer jmsConsumer = jmsConsumers.get(consumerCacheKey);
-        if (null == jmsConsumer) {
+        S4JSpace.JMSGenObjCacheKey consumerCacheKey =
+            new S4JSpace.JMSGenObjCacheKey(
+                String.join("::",
+                    getSimplifiedNBThreadName(Thread.currentThread().getName()), "consumer"));
+
+        return s4jSpace.getJmsConsumer(consumerCacheKey, () -> {
+            JMSConsumer jmsConsumer;
+
             if (isTopic) {
                 if (!durable && !shared)
                     jmsConsumer = jmsContext.createConsumer(destination, msgSelector, nonLocal);
@@ -271,8 +330,8 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
                         throw new RuntimeException("Subscription name is required for receiving messages from a durable or shared topic!");
                     }
 
-                    if (durable && !shared) jmsConsumer = jmsContext.createDurableConsumer(
-                        (Topic) destination, subName, msgSelector, nonLocal);
+                    if (durable && !shared)
+                        jmsConsumer = jmsContext.createDurableConsumer((Topic) destination, subName, msgSelector, nonLocal);
                     else if (!durable)
                         jmsConsumer = jmsContext.createSharedConsumer((Topic) destination, subName, msgSelector);
                     else jmsConsumer = jmsContext.createSharedDurableConsumer((Topic) destination, subName, msgSelector);
@@ -291,10 +350,8 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
                     consumerCacheKey, jmsConsumer, s4JJMSContextWrapper);
             }
 
-            jmsConsumers.put(consumerCacheKey, jmsConsumer);
-        }
-
-        return jmsConsumer;
+            return jmsConsumer;
+        });
     }
 
     protected boolean commitTransaction(int txnBatchNum, int jmsSessionMode, long curCycleNum) {
@@ -320,6 +377,6 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
             s4jSpace.incTxnBatchTrackingCnt();
         }
 
-        return !commitTransaction;
+        return commitTransaction;
     }
 }

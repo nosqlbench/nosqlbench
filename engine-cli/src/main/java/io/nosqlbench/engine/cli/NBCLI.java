@@ -23,6 +23,7 @@ import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.reporters.PromPushReporter;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.logging.NBLogLevel;
 import io.nosqlbench.api.metadata.SessionNamer;
@@ -84,7 +85,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
     private NBLabels labels;
     private String sessionName;
-
     public NBCLI(final String commandName) {
         this.commandName = commandName;
     }
@@ -166,6 +166,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             .setMaxLogs(globalOptions.getLogsMax())
             .setLogsDirectory(globalOptions.getLogsDirectory())
             .setAnsiEnabled(globalOptions.isEnableAnsi())
+            .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
             .activate();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
 

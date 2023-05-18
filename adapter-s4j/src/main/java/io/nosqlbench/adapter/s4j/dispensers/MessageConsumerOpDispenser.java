@@ -81,13 +81,13 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
         this.noLocal =
             parsedOp.getStaticConfigOr("no_local", Boolean.FALSE);
         this.readTimeout =
-            parsedOp.getStaticConfigOr("read_timeout", Integer.valueOf(0));
+            parsedOp.getStaticConfigOr("read_timeout", 0);
         this.recvNoWait =
             parsedOp.getStaticConfigOr("no_wait", Boolean.FALSE);
         this.msgAckRatio =
-            parsedOp.getStaticConfigOr("msg_ack_ratio", Float.valueOf(1.0f));
+            parsedOp.getStaticConfigOr("msg_ack_ratio", 1.0f);
         this.slowAckInSec =
-            parsedOp.getStaticConfigOr("slow_ack_in_sec", Integer.valueOf(0));
+            parsedOp.getStaticConfigOr("slow_ack_in_sec", 0);
         this.localMsgSelectorFunc =
             lookupOptionalStrOpValueFunc("msg_selector");
 
@@ -123,14 +123,13 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
 
     @Override
     public MessageConsumerOp apply(long cycle) {
-        S4JJMSContextWrapper s4JJMSContextWrapper =
-            s4jSpace.getOrCreateS4jJmsContextWrapper(cycle, this.combinedS4jConfigObjMap);
+        S4JJMSContextWrapper s4JJMSContextWrapper = getS4jJmsContextWrapper(cycle, this.combinedS4jConfigObjMap);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
-        boolean commitTransact = !super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), cycle);
+        boolean commitTransact = super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), cycle);
 
         Destination destination;
         try {
-            destination = getOrCreateJmsDestination(
+            destination = getJmsDestination(
                 s4JJMSContextWrapper, temporaryDest, destType, destNameStrFunc.apply(cycle));
         }
         catch (JMSRuntimeException jmsRuntimeException) {
@@ -139,7 +138,7 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
 
         JMSConsumer jmsConsumer;
         try {
-            jmsConsumer = getOrCreateJmsConsumer(
+            jmsConsumer = getJmsConsumer(
                 s4JJMSContextWrapper,
                 destination,
                 destType,

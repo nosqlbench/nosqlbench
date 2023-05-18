@@ -172,7 +172,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
                         if (value != null) {
                             String destType = StringUtils.substringBefore(value, ':');
                             String destName = StringUtils.substringAfter(value, ':');
-                            outMessage.setJMSReplyTo(getOrCreateJmsDestination(s4JJMSContextWrapper,false, destType, destName));
+                            outMessage.setJMSReplyTo(getJmsDestination(s4JJMSContextWrapper,false, destType, destName));
                         }
                     }
                     // Ignore these headers - handled by S4J API automatically
@@ -279,13 +279,13 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
             throw new S4JAdapterInvalidParamException("Message payload must be specified and can't be empty!");
         }
 
-        S4JJMSContextWrapper s4JJMSContextWrapper = s4jSpace.getOrCreateS4jJmsContextWrapper(cycle);
+        S4JJMSContextWrapper s4JJMSContextWrapper = getS4jJmsContextWrapper(cycle);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
-        boolean commitTransaction = !super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), cycle);
+        boolean commitTransaction = super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), cycle);
 
         Destination destination;
         try {
-            destination = getOrCreateJmsDestination(s4JJMSContextWrapper, temporaryDest, destType, destName);
+            destination = getJmsDestination(s4JJMSContextWrapper, temporaryDest, destType, destName);
         }
         catch (JMSRuntimeException jmsRuntimeException) {
             throw new S4JAdapterUnexpectedException("Unable to create the JMS destination!");
@@ -293,7 +293,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
 
         JMSProducer producer;
         try {
-            producer = getOrCreateJmsProducer(s4JJMSContextWrapper, asyncAPI);
+            producer = getJmsProducer(s4JJMSContextWrapper, asyncAPI);
         }
         catch (JMSException jmsException) {
             throw new S4JAdapterUnexpectedException("Unable to create the JMS producer!");

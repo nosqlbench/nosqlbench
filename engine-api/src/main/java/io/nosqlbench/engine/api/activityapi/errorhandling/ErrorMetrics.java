@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityapi.errorhandling;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
+import io.nosqlbench.engine.api.metrics.ExceptionExpectedResultVerificationMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionMeterMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionTimerMetrics;
@@ -32,6 +33,7 @@ public class ErrorMetrics {
     private ExceptionHistoMetrics exceptionHistoMetrics;
     private ExceptionMeterMetrics exceptionMeterMetrics;
     private ExceptionTimerMetrics exceptionTimerMetrics;
+    private ExceptionExpectedResultVerificationMetrics exceptionExpectedResultVerificationMetrics;
 
     public ErrorMetrics(final NBLabeledElement parentLabels) {
         this.parentLabels = parentLabels;
@@ -57,6 +59,12 @@ public class ErrorMetrics {
         if (null == exceptionTimerMetrics)
             this.exceptionTimerMetrics = new ExceptionTimerMetrics(this.parentLabels, ActivityDef.parseActivityDef(""));
         return this.exceptionTimerMetrics;
+    }
+
+    public synchronized ExceptionExpectedResultVerificationMetrics getExceptionExpectedResultVerificationMetrics() {
+        if (null == exceptionExpectedResultVerificationMetrics)
+            this.exceptionExpectedResultVerificationMetrics = new ExceptionExpectedResultVerificationMetrics(this.parentLabels);
+        return this.exceptionExpectedResultVerificationMetrics;
     }
 
     public interface Aware {

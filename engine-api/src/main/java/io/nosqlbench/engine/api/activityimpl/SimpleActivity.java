@@ -19,7 +19,6 @@ package io.nosqlbench.engine.api.activityimpl;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
-import io.nosqlbench.api.config.params.ParamsParser;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
@@ -330,7 +329,6 @@ public class SimpleActivity implements Activity {
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate")
             .map(RateSpec::new).ifPresent(
                 spec -> cycleLimiter = RateLimiters.createOrUpdate(this, "cycles", cycleLimiter, spec));
-
     }
 
     /**

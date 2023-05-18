@@ -21,11 +21,14 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.errors.MVELCompilationError;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.engine.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import org.mvel2.MVEL;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -40,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>, NBLabeledElement {
 
     private final String opName;
+    private Serializable expectedResultExpression;
     protected final DriverAdapter<T, S> adapter;
     private final NBLabels labels;
     private boolean instrument;
@@ -65,6 +69,27 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
         if (null != timerStarts)
             for (final String timerStart : this.timerStarts) ThreadLocalNamedTimers.addTimer(op, timerStart);
         this.configureInstrumentation(op);
+        this.configureResultExpectations(op);
+    }
+
+    public Serializable getExpectedResultExpression() {
+        return expectedResultExpression;
+    }
+
+    private void configureResultExpectations(ParsedOp op) {
+        op.getOptionalStaticValue("expected-result", String.class)
+            .map(this::compileExpectedResultExpression)
+            .ifPresent(result -> this.expectedResultExpression = result);
+    }
+
+    private Serializable compileExpectedResultExpression(String expectedResultExpression) {
+        try {
+            return MVEL.compileExpression(expectedResultExpression);
+        } catch (Exception e) {
+            throw new MVELCompilationError(
+                String.format("Failed to compile expected-result expression: \"%s\"", expectedResultExpression), e
+            );
+        }
     }
 
     String getOpName() {
