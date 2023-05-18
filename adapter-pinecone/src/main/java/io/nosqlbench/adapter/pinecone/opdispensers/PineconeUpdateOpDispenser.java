@@ -71,7 +71,7 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
                 else if (val instanceof Number) targetval = Value.newBuilder().setNumberValue((((Number) val).doubleValue())).build();
                 metadata_map.put(key, targetval);
             };
-            Map<String, String> metadata_values_map = mapLongFunction.apply(l);
+            Map<String, Object> metadata_values_map = mapLongFunction.apply(l);
             metadata_values_map.forEach(stringToValue);
             return UpdateRequest.newBuilder().getSetMetadataBuilder().putAllFields(metadata_map).build();
         }).orElse(null);
