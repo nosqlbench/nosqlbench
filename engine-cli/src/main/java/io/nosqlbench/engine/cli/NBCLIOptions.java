@@ -127,6 +127,7 @@ public class NBCLIOptions {
 
     private static final String DEFAULT_CONSOLE_PATTERN = "TERSE";
     private static final String DEFAULT_LOGFILE_PATTERN = "VERBOSE";
+    private final static String ENABLE_DEDICATED_VERIFICATION_LOGGER = "--enable-dedicated-verification-logging";
 
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
@@ -190,6 +191,7 @@ public class NBCLIOptions {
     private String graphitelogLevel = "info";
     private boolean wantsListCommands;
     private boolean wantsListApps;
+    private boolean dedicatedVerificationLogger;
 
     public boolean isWantsListApps() {
         return this.wantsListApps;
@@ -230,6 +232,14 @@ public class NBCLIOptions {
 
     public String getGraphiteLogLevel() {
         return graphitelogLevel;
+    }
+
+    public boolean isDedicatedVerificationLogger() {
+        return this.dedicatedVerificationLogger;
+    }
+
+    public void enableDedicatedVerificationLogger() {
+        this.dedicatedVerificationLogger = true;
     }
 
     public enum Mode {
@@ -338,6 +348,10 @@ public class NBCLIOptions {
                 case NBCLIOptions.DASH_VVV_TRACE:
                     this.consoleLevel = NBLogLevel.TRACE;
                     showStackTraces = true;
+                    arglist.removeFirst();
+                    break;
+                case NBCLIOptions.ENABLE_DEDICATED_VERIFICATION_LOGGER:
+                    enableDedicatedVerificationLogger();
                     arglist.removeFirst();
                     break;
                 case NBCLIOptions.ANNOTATE_EVENTS:

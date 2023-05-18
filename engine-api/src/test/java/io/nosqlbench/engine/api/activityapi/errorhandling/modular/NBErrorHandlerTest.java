@@ -21,6 +21,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.errors.ExpectedResultVerificationError;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.CountErrorHandler;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.CounterErrorHandler;
@@ -30,8 +31,12 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -173,5 +178,54 @@ class NBErrorHandlerTest {
         appender.cleanup(logger);
     }
 
+    @ParameterizedTest(name = "Error with {0}")
+    @MethodSource
+    void testExpectedResultVerificationErrorHandler(String name, Exception error, String log, long retriesCount, long errorsCount, Logger logger) {
+        // given
+        NBMock.LogAppender appender = NBMock.registerTestLogger(ERROR_HANDLER_APPENDER_NAME, logger, Level.INFO);
+        var errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_result_verification_" + name));
+        var eh = new NBErrorHandler(() -> "verifyexpected", () -> errorMetrics);
+        var retries = errorMetrics.getExceptionExpectedResultVerificationMetrics().getVerificationRetries();
+        var errors = errorMetrics.getExceptionExpectedResultVerificationMetrics().getVerificationErrors();
+
+        assertThat(retries.getCount()).isEqualTo(0);
+        assertThat(errors.getCount()).isEqualTo(0);
+
+        // when
+        eh.handleError(error, 1, 2);
+
+        // then
+        assertThat(retries.getCount()).isEqualTo(retriesCount);
+        assertThat(errors.getCount()).isEqualTo(errorsCount);
+
+        logger.getContext().stop(); // force any async appenders to flush
+        logger.getContext().start(); // resume processing
+
+        assertThat(appender.getFirstEntry()).contains(log);
+        appender.cleanup(logger);
+    }
+
+    @SuppressWarnings("unused")
+    private static Stream<Arguments> testExpectedResultVerificationErrorHandler() {
+        Logger logger = (Logger) LogManager.getLogger("VERIFY");
+        return Stream.of(
+            Arguments.of(
+                "retries left",
+                new ExpectedResultVerificationError(5, "expected"),
+                "Cycle: 1 Verification of result did not pass. 5 retries left.",
+                1,
+                0,
+                logger
+            ),
+            Arguments.of(
+                "no retries left",
+                new ExpectedResultVerificationError(0, "expected"),
+                "Cycle: 1 Verification of result did not pass following expression: expected",
+                0,
+                1,
+                logger
+            )
+        );
+    }
 
 }

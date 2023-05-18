@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ import io.nosqlbench.adapter.cqld4.exceptions.UndefinedResultSetException;
 import io.nosqlbench.adapter.cqld4.exceptions.UnexpectedPagingException;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 
@@ -42,7 +44,7 @@ import java.util.Map;
 // TODO: add rows histogram resultSetSizeHisto
 
 
-public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture, OpGenerator, OpResultSize {
+public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture, OpGenerator, OpResultSize {
 
     private final CqlSession session;
     private final int maxPages;
@@ -53,6 +55,8 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
     private ResultSet rs;
     private Cqld4CqlOp nextOp;
     private final RSProcessors processors;
+
+    private final ThreadLocal<List<Row>> results = new ThreadLocal<>();
 
     public Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors) {
         this.session = session;
@@ -71,7 +75,7 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
         this.processors = processors;
     }
 
-    public final ResultSet apply(long cycle) {
+    public final List<Row> apply(long cycle) {
 
         Statement<?> stmt = getStmt();
         rs = session.execute(stmt);
@@ -97,22 +101,29 @@ public abstract class Cqld4CqlOp implements CycleOp<ResultSet>, VariableCapture,
 
         Iterator<Row> reader = rs.iterator();
         int pages = 0;
+        // TODO/MVEL: An optimization to this would be to collect the results in a result set processor,
+        // but allow/require this processor to be added to an op _only_ in the event that it would
+        // be needed by a downstream consumer like the MVEL expected result evaluator
+
+        var resultRows = new ArrayList<Row>();
         while (true) {
             int pageRows = rs.getAvailableWithoutFetching();
             for (int i = 0; i < pageRows; i++) {
                 Row row = reader.next();
+                resultRows.add(row);
                 processors.buffer(row);
             }
             if (pages++ > maxPages) {
                 throw new UnexpectedPagingException(rs, getQueryString(), pages, maxPages, stmt.getPageSize());
             }
             if (rs.isFullyFetched()) {
+                results.set(resultRows);
                 break;
             }
             totalRows += pageRows;
         }
         processors.flush();
-        return rs;
+        return results.get();
     }
 
     @Override

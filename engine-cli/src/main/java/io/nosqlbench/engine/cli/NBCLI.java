@@ -161,6 +161,7 @@ public class NBCLI implements Function<String[], Integer> {
             .setMaxLogs(globalOptions.getLogsMax())
             .setLogsDirectory(globalOptions.getLogsDirectory())
             .setAnsiEnabled(globalOptions.isEnableAnsi())
+            .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
             .activate();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
 

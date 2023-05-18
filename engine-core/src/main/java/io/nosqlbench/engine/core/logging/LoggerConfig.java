@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
@@ -87,6 +88,7 @@ public class LoggerConfig extends ConfigurationFactory {
     private int maxLogfiles = 100;
     private String logfileLocation;
     private boolean ansiEnabled;
+    private boolean isDedicatedVerificationLoggerEnabled = false;
 
 
     public LoggerConfig() {
@@ -104,6 +106,11 @@ public class LoggerConfig extends ConfigurationFactory {
 
     public LoggerConfig setLogfileLevel(NBLogLevel level) {
         this.fileLevel = level;
+        return this;
+    }
+
+    public LoggerConfig setDedicatedVerificationLogger(boolean enabled) {
+        this.isDedicatedVerificationLoggerEnabled = enabled;
         return this;
     }
 
@@ -208,6 +215,11 @@ public class LoggerConfig extends ConfigurationFactory {
                             .add(logfileLayout)
                             .addComponent(triggeringPolicy);
             builder.add(logsAppenderBuilder);
+
+            if (isDedicatedVerificationLoggerEnabled) {
+                var verificationLogfilePath = loggerDir.resolve(filebase + "_verification.log").toString();
+                addResultVerificationLoggingChannel(builder, verificationLogfilePath);
+            }
 
             rootBuilder.add(
                     builder.newAppenderRef("SCENARIO_APPENDER")
@@ -366,5 +378,24 @@ public class LoggerConfig extends ConfigurationFactory {
     public LoggerConfig setLogsDirectory(Path logsDirectory) {
         this.loggerDir = logsDirectory;
         return this;
+    }
+
+    private void addResultVerificationLoggingChannel(ConfigurationBuilder<BuiltConfiguration> builder, String verificationLogfilePath) {
+        var appenderName = "RESULTVERIFYLOG";
+        var appender = builder
+            .newAppender(appenderName, FileAppender.PLUGIN_NAME)
+            .addAttribute("append", false)
+            .addAttribute("fileName", verificationLogfilePath)
+            .add(builder
+                .newLayout("PatternLayout")
+                .addAttribute("pattern", "%d %p %C{1.} [%t] %m%n")
+            );
+        var logger = builder
+            .newLogger("VERIFY", Level.INFO)
+            .add(builder.newAppenderRef(appenderName))
+            .addAttribute("additivity", false);
+
+        builder.add(appender);
+        builder.add(logger);
     }
 }

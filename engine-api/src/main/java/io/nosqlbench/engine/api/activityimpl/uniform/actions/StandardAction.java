@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform.actions;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.errors.ExpectedResultVerificationError;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
@@ -29,7 +30,9 @@ import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mvel2.MVEL;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -87,7 +90,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
         while (op != null) {
 
             int tries = 0;
-            while (tries++ <= maxTries) {
+            while (tries++ < maxTries) {
                 Throwable error = null;
                 long startedAt = System.nanoTime();
 
@@ -103,6 +106,13 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                     } else {
                         throw new RuntimeException("The op implementation did not implement any active logic. Implement " +
                             "one of [RunnableOp, CycleOp, or ChainingOp]");
+                    }
+                    var expectedResultExpression = dispenser.getExpectedResultExpression();
+                    if (shouldVerifyExpectedResultFor(op, expectedResultExpression)) {
+                        var verified = MVEL.executeExpression(expectedResultExpression, result, boolean.class);
+                        if (!verified) {
+                            throw new ExpectedResultVerificationError(maxTries - tries, expectedResultExpression);
+                        }
                     }
                 } catch (Exception e) {
                     error = e;
@@ -138,5 +148,9 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
+    }
+
+    private boolean shouldVerifyExpectedResultFor(Op op, Serializable expectedResultExpression) {
+        return !(op instanceof RunnableOp) && expectedResultExpression != null;
     }
 }
