@@ -77,11 +77,11 @@ public class ParsedOpTest {
         final OpTemplate opTemplate = stmtsDocs.getOps().get(0);
         final ParsedOp parsedOp = new ParsedOp(opTemplate, cfg, List.of(), NBLabeledElement.forMap(Map.of()));
 
-        assertThat(parsedOp.getAsFunctionOr("d1","invalid").apply(1L)).isEqualTo("one");
-        assertThat(parsedOp.getAsFunctionOr("s1","invalid").apply(1L)).isEqualTo("static-one");
-        assertThat(parsedOp.getAsFunctionOr("ps1","invalid").apply(1L)).isEqualTo("param-one");
-        assertThat(parsedOp.getAsFunctionOr("puppy","invalid").apply(1L)).isEqualTo("dog");
-        assertThat(parsedOp.getAsFunctionOr("surname","invalid").apply(1L)).isEqualTo("yes");
+        assertThat(parsedOp.getAsFunctionOr("d1", "invalid").apply(1L)).isEqualTo("one");
+        assertThat(parsedOp.getAsFunctionOr("s1", "invalid").apply(1L)).isEqualTo("static-one");
+        assertThat(parsedOp.getAsFunctionOr("ps1", "invalid").apply(1L)).isEqualTo("param-one");
+        assertThat(parsedOp.getAsFunctionOr("puppy", "invalid").apply(1L)).isEqualTo("dog");
+        assertThat(parsedOp.getAsFunctionOr("surname", "invalid").apply(1L)).isEqualTo("yes");
 
     }
 
@@ -101,7 +101,7 @@ public class ParsedOpTest {
                     "field3-template", "pre-{dyna1}-post",
                     "field4-map-template", Map.of(
                         "subfield1-object", "{{Identity(); ToString()}}"
-                    ),"field5-map-literal", Map.of(
+                    ), "field5-map-literal", Map.of(
                         "subfield2-literal", "LiteralValue"
                     )
                 ),
@@ -119,8 +119,8 @@ public class ParsedOpTest {
         final LongFunction<? extends String> f1 = parsedOp.getAsRequiredFunction("field1-literal");
         final LongFunction<? extends String> f2 = parsedOp.getAsRequiredFunction("field2-object");
         final LongFunction<? extends String> f3 = parsedOp.getAsRequiredFunction("field3-template");
-        final LongFunction<? extends Map> f4 = parsedOp.getAsRequiredFunction("field4-map-template",Map.class);
-        final LongFunction<? extends Map> f5 = parsedOp.getAsRequiredFunction("field5-map-literal",Map.class);
+        final LongFunction<? extends Map> f4 = parsedOp.getAsRequiredFunction("field4-map-template", Map.class);
+        final LongFunction<? extends Map> f5 = parsedOp.getAsRequiredFunction("field5-map-literal", Map.class);
         assertThat(f1.apply(1)).isNotNull();
         assertThat(f2.apply(2)).isNotNull();
         assertThat(f3.apply(3)).isNotNull();
@@ -157,6 +157,51 @@ public class ParsedOpTest {
         final LongFunction<Object[]> ab = this.pc.newArrayBinder("dyna1", "dyna1", "identity", "identity");
         final Object[] objects = ab.apply(3);
         assertThat(objects).isEqualTo(new Object[]{"three", "three", 3L, 3L});
+    }
+
+    @Test
+    public void testLayeredListBinder() {
+        ParsedOp pc = new ParsedOp(
+            new OpData().applyFields(
+                Map.of(
+                    "op", Map.of(
+                        "alist", List.of(
+                            List.of(
+                                "item1",
+                                "item2-{dyna1}"
+                            ),
+                            Map.of(
+                                "akey", "avalue",
+                                "akey2", "a {dyna1} value2"
+                            )
+                        )
+                    ),
+                    "bindings", Map.of(
+                        "dyna1", "NumberNameToString()"
+                    )
+                )
+            ),
+            ConfigModel.of(ParsedOpTest.class)
+                .add(Param.defaultTo("testcfg", "testval"))
+                .asReadOnly()
+                .apply(Map.of()),
+            List.of(),
+            NBLabeledElement.forMap(Map.of())
+        );
+
+        Map<String, Object> result = pc.getTemplateMap().apply(1);
+        assertThat(result).isEqualTo(
+            Map.of(
+                "alist", List.of(
+                    List.of("item1", "item2-one"),
+                    Map.of(
+                        "akey", "avalue",
+                        "akey2", "a one value2"
+                    )
+                )
+            )
+        );
+
     }
 
 
