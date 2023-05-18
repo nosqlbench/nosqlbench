@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.activitytype.diag;
+package io.nosqlbench.virtdata.library.basics.shared.periodic;
 
-public class DiagDummyError extends RuntimeException {
-    public DiagDummyError(String s) {
-        super(s);
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+
+import java.util.function.DoubleUnaryOperator;
+
+@ThreadSafeMapper
+@Categories(Category.periodic)
+public class Sin implements DoubleUnaryOperator {
+
+    @Override
+    public double applyAsDouble(double operand) {
+        return Math.sin(operand);
     }
 }
