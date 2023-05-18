@@ -55,6 +55,9 @@ public class ActivityProgressIndicator implements Runnable {
     }
 
     private void parseProgressSpec(String interval) {
+        if (interval==null) {
+            throw new RuntimeException("can't parse progress spec if it is null");
+        }
         String[] parts = interval.split(":");
         switch (parts.length) {
             case 2:
