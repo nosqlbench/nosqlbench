@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityimpl;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.config.params.ParamsParser;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
@@ -79,7 +80,6 @@ public class SimpleActivity implements Activity {
     private RunState runState = RunState.Uninitialized;
     private RateLimiter strideLimiter;
     private RateLimiter cycleLimiter;
-    private RateLimiter phaseLimiter;
     private ActivityController activityController;
     private ActivityInstrumentation activityInstrumentation;
     private PrintWriter console;
@@ -278,27 +278,8 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
-    public RateLimiter getPhaseLimiter() {
-        return phaseLimiter;
-    }
-
-
-    @Override
     public Timer getResultTimer() {
         return ActivityMetrics.timer(this, "result", getParams().getOptionalInteger("hdr_digits").orElse(4));
-    }
-
-    @Override
-    public void setPhaseLimiter(RateLimiter rateLimiter) {
-        this.phaseLimiter = rateLimiter;
-    }
-
-    @Override
-    public synchronized RateLimiter getPhaseRateLimiter(Supplier<? extends RateLimiter> supplier) {
-        if (null == this.phaseLimiter) {
-            phaseLimiter = supplier.get();
-        }
-        return phaseLimiter;
     }
 
     @Override
@@ -349,10 +330,6 @@ public class SimpleActivity implements Activity {
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate")
             .map(RateSpec::new).ifPresent(
                 spec -> cycleLimiter = RateLimiters.createOrUpdate(this, "cycles", cycleLimiter, spec));
-
-        activityDef.getParams().getOptionalNamedParameter("phaserate")
-            .map(RateSpec::new)
-            .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this, "phases", phaseLimiter, spec));
 
     }
 
@@ -675,8 +652,13 @@ public class SimpleActivity implements Activity {
             Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
             Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
             if (stmt.isPresent()) {
+                String op = stmt.get();
                 workloadSource = "commandline:" + stmt.get();
-                return OpsLoader.loadString(stmt.get(), OpTemplateFormat.inline, activityDef.getParams(), null);
+                if (op.startsWith("{")||op.startsWith("[")) {
+                    return OpsLoader.loadString(stmt.get(), OpTemplateFormat.json, activityDef.getParams(), null);
+                } else {
+                    return OpsLoader.loadString(stmt.get(), OpTemplateFormat.inline, activityDef.getParams(), null);
+                }
             }
             if (op_yaml_loc.isPresent()) {
                 workloadSource = "yaml:" + op_yaml_loc.get();

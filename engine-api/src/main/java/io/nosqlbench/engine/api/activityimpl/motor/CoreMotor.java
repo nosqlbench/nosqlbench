@@ -215,16 +215,13 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                 strideRateLimiter.start();
             }
 
-
             long strideDelay = 0L;
             long cycleDelay = 0L;
-            long phaseDelay = 0L;
 
             // Reviewer Note: This separate of code paths was used to avoid impacting the
             // previously logic for the SyncAction type. It may be consolidated later once
             // the async action is proven durable
             if (action instanceof AsyncAction) {
-
 
                 @SuppressWarnings("unchecked")
                 AsyncAction<D> async = (AsyncAction) action;
@@ -387,12 +384,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                             long cycleStart = System.nanoTime();
                             try {
                                 logger.trace(()->"cycle " + cyclenum);
-
-                                // runCycle
-                                long phaseStart = System.nanoTime();
                                 result = sync.runCycle(cyclenum);
-                                long phaseEnd = System.nanoTime();
-
                             } catch (Exception e) {
                                 motorState.enterState(Errored);
                                 throw e;

@@ -158,32 +158,7 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
      */
     RateLimiter getStrideRateLimiter(Supplier<? extends RateLimiter> supplier);
 
-    /**
-     * Get the current phase rate limiter for this activity.
-     * The phase rate limiter is used to throttle the rate at which
-     * new phases are dispatched across all threads in an activity.
-     * @return The stride {@link RateLimiter}
-     */
-    RateLimiter getPhaseLimiter();
-
     Timer getResultTimer();
-
-    /**
-     * Set the phase rate limiter for this activity. This method should only
-     * be used in a non-concurrent context. Otherwise, the supplier version
-     * {@link #getPhaseRateLimiter(Supplier)}} should be used.
-     * @param rateLimiter The phase {@link RateLimiter} for this activity.
-     */
-    void setPhaseLimiter(RateLimiter rateLimiter);
-
-    /**
-     * Get or create the phase {@link RateLimiter} in a concurrent-safe
-     * way. Implementations should ensure that this method is synchronized or
-     * that each requester gets the same phase rate limiter for the activity.
-     * @param supplier A {@link RateLimiter} {@link Supplier}
-     * @return An extant or newly created phase {@link RateLimiter}
-     */
-    RateLimiter getPhaseRateLimiter(Supplier<? extends RateLimiter> supplier);
 
     /**
      * Get or create the instrumentation needed for this activity. This provides
