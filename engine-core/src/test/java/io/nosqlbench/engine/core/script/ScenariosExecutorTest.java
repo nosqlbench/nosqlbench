@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public class ScenariosExecutorTest {
     @Disabled
     public void testAwaitOnTime() {
         ScenariosExecutor e = new ScenariosExecutor(ScenariosExecutorTest.class.getSimpleName(), 1);
-        Scenario s = new Scenario("testing", Scenario.Engine.Graalvm,"stdout:3000", Maturity.Any);
+        Scenario s = Scenario.forTesting("testing", Scenario.Engine.Graalvm,"stdout:3000", Maturity.Any);
         s.addScriptText("load('classpath:scripts/asyncs.js');\nsetTimeout(\"print('waited')\",5000);\n");
         e.execute(s);
         ScenariosResults scenariosResults = e.awaitAllResults();

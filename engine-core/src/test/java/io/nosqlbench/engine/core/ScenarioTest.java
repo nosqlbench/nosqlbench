@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public class ScenarioTest {
     @Test
     public void shouldLoadScriptText() {
         ScriptEnvBuffer buffer = new ScriptEnvBuffer();
-        Scenario scenario = new Scenario("testing", Scenario.Engine.Graalvm, "stdout:300", Maturity.Any);
+        Scenario scenario = Scenario.forTesting("testing", Scenario.Engine.Graalvm, "stdout:300", Maturity.Any);
         scenario.addScriptText("print('loaded script environment...');\n");
         try {
             var result=scenario.call();
