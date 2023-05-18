@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,9 +90,7 @@ public class VirtDataConversions {
 
         List<Class<?>> resultTypes = new ArrayList<>();
         resultTypes.add(functionType);
-        for (Class<?> aClass : resultSignature) {
-            resultTypes.add(aClass);
-        }
+        Collections.addAll(resultTypes, resultSignature);
         List<Class<?>> toSignature = linearizeSignature(resultTypes);
 
         signature.addAll(fromSignature);
@@ -335,9 +333,7 @@ public class VirtDataConversions {
         Class<?>[] argTypes = new Class[generics.length + 2];
         argTypes[0] = fromClass;
         argTypes[1] = toClass;
-        for (int i = 0; i < generics.length; i++) {
-            argTypes[i + 2] = generics[i];
-        }
+        System.arraycopy(generics, 0, argTypes, 2, generics.length);
 
         try {
             return hostclass.getMethod("adapt", argTypes);
@@ -354,9 +350,6 @@ public class VirtDataConversions {
                     if (generics.length < typeParameters.length) {
                         throw new RuntimeException("You must provide " + typeParameters.length + " generic parameter types for " + toClass.getCanonicalName());
                     }
-//                    if (generics[i].isPrimitive()) {
-//                        throw new RuntimeException("You must declare non-primitive types in generic parameter placeholders, not " + generics[i].getSimpleName());
-//                    }
                     genericsBuffer.append(generics[i].getSimpleName());
                     genericsBuffer.append(",");
                 }
@@ -384,19 +377,6 @@ public class VirtDataConversions {
             throw new BasicError("adapter method is not implemented on class " + hostclass.getCanonicalName() + ":\n" + forInstance);
         }
     }
-
-//    private static void assertOutputAssignable(Object result, Class<?> clazz) {
-//        if (!ClassUtils.isAssignable(result.getClass(), clazz, true)) {
-//            throw new InvalidParameterException("Unable to assign type of " + result.getClass().getCanonicalName()
-//                    + " to " + clazz.getCanonicalName());
-//        }
-//
-////        if (!clazz.isAssignableFrom(result.getClass())) {
-////            throw new InvalidParameterException("Unable to assign type of " + result.getClass().getCanonicalName()
-////                    + " to " + clazz.getCanonicalName());
-////        }
-//    }
-//
 
     /**
      * Given a base object and a wanted type to convert it to, assert that the type of the base object is assignable to
@@ -444,16 +424,5 @@ public class VirtDataConversions {
 
         return (T) (base);
     }
-//
-//    /**
-//     * Throw an error indicating a narrowing conversion was attempted for strict conversion.
-//     * @param func The source function to convert from
-//     * @param targetClass The target class which was requested
-//     */
-//    private static void throwNarrowingError(Object func, Class<?> targetClass) {
-//        throw new BasicError("Converting from " + func.getClass().getCanonicalName() + " to " + targetClass.getCanonicalName() +
-//                " is not allowed when strict conversion is requested.");
-//    }
-
 
 }
