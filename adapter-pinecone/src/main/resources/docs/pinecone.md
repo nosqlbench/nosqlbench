@@ -67,7 +67,7 @@ ops:
     id: string_id
     values: list_of_floats
     namespace: update_namespace
-    set_metadata:
+    metadata:
       - key1: val1
       - key2: val2
       - key3: val3

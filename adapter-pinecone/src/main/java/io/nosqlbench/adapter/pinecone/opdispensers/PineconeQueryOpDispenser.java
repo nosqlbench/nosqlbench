@@ -9,12 +9,11 @@ import io.nosqlbench.adapter.pinecone.ops.PineconeQueryOp;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.pinecone.proto.QueryRequest;
 import io.pinecone.proto.QueryVector;
+import io.pinecone.proto.SparseValues;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.LongFunction;
 
 public class PineconeQueryOpDispenser extends PineconeOpDispenser {
@@ -93,33 +92,69 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
                 String[] filterFields = filterFunction.get().apply(l).split(" ");
                 return Struct.newBuilder().putFields(filterFields[0],
                         Value.newBuilder().setStructValue(Struct.newBuilder().putFields(filterFields[1],
-                                        Value.newBuilder().setNumberValue(Integer.valueOf(filterFields[2])).build()))
+                                        Value.newBuilder().setNumberValue(Integer.parseInt(filterFields[2])).build()))
                                 .build()).build();
             };
             rFunc = l -> finalFunc.apply(l).setFilter(builtFilter.apply(l));
         }
 
-        LongFunction<QueryRequest.Builder> finalRFunc = rFunc;
-        return l -> finalRFunc.apply(l);
+        return rFunc;
     }
 
     private LongFunction<Collection<QueryVector>> createQueryVectorFunc(ParsedOp op) {
-        //Optional<LongFunction<Collection<Map<String,String>>>> baseFunc = op.getAsOptionalFunction("query_vectors", String.class);
-
-       // LongFunction<QueryVector.Builder> vFunc = l -> QueryVector.newBuilder();
-       // LongFunction<QueryVector.Builder> finalVFunc = vFunc;
-        //return l -> finalVFunc.apply(l).build();
-        return l -> null;
+        Optional<LongFunction<List>> baseFunc =
+            op.getAsOptionalFunction("query_vectors", List.class);
+        return baseFunc.<LongFunction<Collection<QueryVector>>>map(listLongFunction -> l -> {
+            List<QueryVector> returnVectors = new ArrayList<>();
+            List<Map<String, Object>> vectors = listLongFunction.apply(l);
+            for (Map<String, Object> vector : vectors) {
+                QueryVector.Builder qvb = QueryVector.newBuilder();
+                String[] rawValues = ((String) vector.get("values")).split(",");
+                ArrayList<Float> floatValues = new ArrayList<>();
+                for (String val : rawValues) {
+                    floatValues.add(Float.valueOf(val));
+                }
+                qvb.addAllValues(floatValues);
+                qvb.setNamespace((String) vector.get("namespace"));
+                if (vector.containsKey("top_k")) {
+                    qvb.setTopK((Integer) vector.get("top_k"));
+                }
+                if (vector.containsKey("filter")) {
+                    String[] rawVals = ((String)vector.get("filter")).split(" ");
+                    qvb.setFilter(Struct.newBuilder().putFields(rawVals[0],
+                        Value.newBuilder().setStructValue(Struct.newBuilder().putFields(rawVals[1],
+                                Value.newBuilder().setNumberValue(Integer.parseInt(rawVals[2])).build()))
+                            .build()).build());
+                }
+                if (vector.containsKey("sparse_values")) {
+                    Map<String,String> sparse_values = (Map<String, String>) vector.get("sparse_values");
+                    rawValues = ((String) sparse_values.get("values")).split(",");
+                    floatValues = new ArrayList<>();
+                    for (String val : rawValues) {
+                        floatValues.add(Float.valueOf(val));
+                    }
+                    rawValues = sparse_values.get("indices").split(",");
+                    List<Integer> intValues = new ArrayList<>();
+                    for (String val : rawValues) {
+                        intValues.add(Integer.valueOf(val));
+                    }
+                    qvb.setSparseValues(SparseValues.newBuilder()
+                        .addAllValues(floatValues)
+                        .addAllIndices(intValues)
+                        .build());
+                }
+                returnVectors.add(qvb.build());
+            }
+            return returnVectors;
+        }).orElse(null);
     }
 
     @Override
     public PineconeOp apply(long value) {
         QueryRequest.Builder qrb = queryRequestFunc.apply(value);
-        Collection<QueryVector> vectors = queryVectorFunc.apply(value);
-        if (vectors != null) {
-            qrb.addAllQueries(vectors);
+        if (queryVectorFunc != null) {
+            qrb.addAllQueries(queryVectorFunc.apply(value));
         }
-
         return new PineconeQueryOp(pcFunction.apply(value).getConnection(targetFunction.apply(value)), qrb.build());
     }
 }

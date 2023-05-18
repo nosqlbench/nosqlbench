@@ -1,10 +1,7 @@
 package io.nosqlbench.adapter.pinecone;
 
-import io.nosqlbench.adapter.pinecone.opdispensers.PineconeDeleteOpDispenser;
-import io.nosqlbench.adapter.pinecone.opdispensers.PineconeQueryOpDispenser;
-import io.nosqlbench.adapter.pinecone.ops.PineconeDeleteOp;
-import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
-import io.nosqlbench.adapter.pinecone.ops.PineconeQueryOp;
+import io.nosqlbench.adapter.pinecone.opdispensers.*;
+import io.nosqlbench.adapter.pinecone.ops.*;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
@@ -102,29 +99,89 @@ public class PineconeOpMapperTest {
 
     @Test
     public void testDescribeIndexStatsOpDispenser() {
+        ParsedOp pop = parsedOpFor("""
+            ops:
+              op1:
+                 type: "describeindexstats"
+                 index: "test-index"
+                 filter: "value $gt 10"
+            """);
+        OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
+        assert(dispenser instanceof PineconeDescribeIndexStatsOpDispenser);
+        PineconeOp op = dispenser.apply(0);
+        assert(op instanceof PineconeDescribeIndexStatsOp);
 
     }
 
     @Test
     public void testFetchOpDispenser() {
+        ParsedOp pop = parsedOpFor("""
+            ops:
+              op1:
+                 type: "fetch"
+                 index: "test-index"
+                 ids: "1.0,2.0,3.0"
+                 namespace: "test-namespace"
+            """);
+        OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
+        assert(dispenser instanceof PineconeFetchOpDispenser);
+        PineconeOp op = dispenser.apply(0);
+        assert(op instanceof PineconeFetchOp);
 
     }
 
     @Test
     public void testUpdateOpDispenser() {
+        ParsedOp pop = parsedOpFor("""
+            ops:
+              op1:
+                 type: "update"
+                 index: "test-index"
+                 id: "id"
+                 values: "1.0,2.0,3.0"
+                 namespace: "test_namespace"
+                 metadata:
+                  - key1: val1
+                  - key2: val2
+                  - key3: val3
+                 sparse_values:
+                  indices: list_of_ints
+                  values: list_of_floats
+            """);
+        OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
+        assert(dispenser instanceof PineconeUpdateOpDispenser);
+        PineconeOp op = dispenser.apply(0);
+        assert(op instanceof PineconeUpdateOp);
 
     }
 
     @Test
     public void testUpsertOpDispenser() {
+        ParsedOp pop = parsedOpFor("""
+            ops:
+              op1:
+                 type: "upsert"
+                 index: "test-index"
+                    upsert_vectors:
+                     - id: 1
+                       values: csv_separated_floats
+                       sparse_values:
+                         indices: list_of_ints
+                         values: list_of_floats
+                       metadata:
+                         - key1: val1
+                         - key2: val2
+                     - id: 2
+                       values: csv_separated_floats
+                       sparse_values:
+                         indices: list_of_ints
+                         values: list_of_floats
+            """);
+        OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
+        assert(dispenser instanceof PineconeUpsertOpDispenser);
+        PineconeOp op = dispenser.apply(0);
+        assert(op instanceof PineconeUpsertOp);
 
     }
-
-    @Test
-    public void testQueryOpDispenserComplex() {
-
-    }
-
-
 
 }
