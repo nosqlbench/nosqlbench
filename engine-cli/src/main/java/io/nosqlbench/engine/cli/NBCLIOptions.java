@@ -352,6 +352,7 @@ public class NBCLIOptions {
                     break;
                 case NBCLIOptions.ENABLE_DEDICATED_VERIFICATION_LOGGER:
                     enableDedicatedVerificationLogger();
+                    arglist.removeFirst();
                     break;
                 case NBCLIOptions.ANNOTATE_EVENTS:
                     arglist.removeFirst();
