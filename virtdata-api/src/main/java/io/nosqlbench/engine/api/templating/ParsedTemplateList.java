@@ -19,36 +19,58 @@ package io.nosqlbench.engine.api.templating;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.LongFunction;
 
 public class ParsedTemplateList implements LongFunction<List<?>> {
-    private final List<Object> protolist = new ArrayList<>();
+    private final Object[] protolist;
     private final int[] dynamic_idx;
     private final LongFunction<?>[] functions;
     private final List<CapturePoint> captures = new ArrayList<>();
 
-    public ParsedTemplateList(List<Object> sublist, Map<String, String> bindings, List<Map<String, Object>> cfgsources) {
+    public ParsedTemplateList(List<Object> list, Map<String, String> bindings, List<Map<String, Object>> cfgsources) {
 
         List<LongFunction<?>> funcs = new ArrayList<>();
         List<Integer> dindexes = new ArrayList<>();
+        protolist = new Object[list.size()];
 
-        for (int i = 0; i < sublist.size(); i++) {
-            Object item = sublist.get(i);
+        for (int i = 0; i < list.size(); i++) {
+            Object item = list.get(i);
             Templatizer.Result result = Templatizer.make(bindings, item, null, cfgsources);
             this.captures.addAll(result.getCaptures());
-            switch (result.getType()) {
-                case literal:
-                    protolist.add(result.getValue());
-                    break;
-                case bindref:
-                case concat:
-                    protolist.add(null);
+
+            if (item instanceof String string) {
+                switch (result.getType()) {
+                    case literal:
+                        protolist[i]=string;
+                        break;
+                    case bindref:
+                    case concat:
+                        funcs.add(result.getFunction());
+                        dindexes.add(i);
+                }
+            } else if (item instanceof List sublist) {
+                ParsedTemplateList listTemplate = new ParsedTemplateList(sublist, bindings, cfgsources);
+                if (listTemplate.isStatic()) {
+                    protolist[i]=sublist;
+                } else {
                     funcs.add(result.getFunction());
                     dindexes.add(i);
-                    break;
+                }
+            } else if (item instanceof Map submap) {
+                ParsedTemplateMap mapTemplate = new ParsedTemplateMap("anonymous", submap, bindings, cfgsources);
+                if (mapTemplate.isStatic()) {
+                    protolist[i]=submap;
+                } else {
+                    funcs.add(result.getFunction());
+                    dindexes.add(i);
+                }
+            } else {
+                protolist[i]=item;
             }
+
         }
         this.dynamic_idx = dindexes.stream().mapToInt(Integer::intValue).toArray();
         this.functions = funcs.toArray(new LongFunction<?>[0]);
@@ -57,12 +79,12 @@ public class ParsedTemplateList implements LongFunction<List<?>> {
 
     @Override
     public List<?> apply(long value) {
-        List<Object> list = new ArrayList<>(protolist);
+        Object[] resultAry=new Object[protolist.length];
+        System.arraycopy(protolist,0,resultAry,0,protolist.length);
         for (int i = 0; i < dynamic_idx.length; i++) {
-            Object obj = functions[i].apply(value);
-            list.set(dynamic_idx[i], obj);
+            resultAry[dynamic_idx[i]]=functions[i].apply(value);
         }
-        return list;
+        return Arrays.asList(resultAry);
     }
 
     public boolean isStatic() {
