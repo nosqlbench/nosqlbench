@@ -97,6 +97,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-venice</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-s4j</artifactId>
             <version>${revision}</version>
         </dependency>
