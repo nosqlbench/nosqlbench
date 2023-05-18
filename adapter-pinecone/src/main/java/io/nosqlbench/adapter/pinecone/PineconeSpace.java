@@ -39,12 +39,12 @@ public class PineconeSpace {
         this.environment = cfg.get("environment");
         this.projectName = cfg.get("projectName");
         this.name = name;
-
         config = new PineconeClientConfig()
             .withApiKey(apiKey)
             .withEnvironment(environment)
             .withProjectName(projectName);
-
+        LOGGER.info(this.name + ": Creating new Pinecone Client with api key " + apiKey + ", environment "
+            + environment + " and project name " + projectName);
         this.client = new PineconeClient(config);
     }
 
@@ -58,6 +58,7 @@ public class PineconeSpace {
     public synchronized PineconeConnection getConnection(String index) {
         PineconeConnection connection = connections.get(index);
         if (connection == null) {
+            LOGGER.info("Creating new Pinecone Connection to Index " + index);
             PineconeConnectionConfig connectionConfig = new PineconeConnectionConfig().withIndexName(index);
             connection = client.connect(connectionConfig);
             connections.put(index, connection);

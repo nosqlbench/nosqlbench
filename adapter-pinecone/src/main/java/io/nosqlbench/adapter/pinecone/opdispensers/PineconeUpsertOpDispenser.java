@@ -8,10 +8,8 @@ import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.adapter.pinecone.ops.PineconeUpsertOp;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.pinecone.proto.SparseValues;
-import io.pinecone.proto.UpdateRequest;
 import io.pinecone.proto.UpsertRequest;
 import io.pinecone.proto.Vector;
-import jakarta.ws.rs.NotSupportedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
