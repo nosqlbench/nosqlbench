@@ -1,6 +1,7 @@
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
 import com.google.protobuf.Struct;
+import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
@@ -11,8 +12,8 @@ import io.pinecone.proto.UpdateRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.LongFunction;
 
 public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
@@ -40,30 +41,42 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
     }
 
     private LongFunction<SparseValues> createSparseValuesFunction(ParsedOp op) {
-        return null;
+        Optional<LongFunction<Map>> mFunc = op.getAsOptionalFunction("sparse_values", Map.class);
+        return mFunc.<LongFunction<SparseValues>>map(mapLongFunction -> l -> {
+            Map<String, String> sparse_values_map = mapLongFunction.apply(l);
+            String[] rawValues = (sparse_values_map.get("values")).split(",");
+            ArrayList floatValues = new ArrayList<>();
+            for (String val : rawValues) {
+                floatValues.add(Float.valueOf(val));
+            }
+            rawValues = sparse_values_map.get("indices").split(",");
+            List<Integer> intValues = new ArrayList<>();
+            for (String val : rawValues) {
+                intValues.add(Integer.valueOf(val));
+            }
+            return SparseValues.newBuilder()
+                .addAllValues(floatValues)
+                .addAllIndices(intValues)
+                .build();
+        }).orElse(null);
     }
 
     private LongFunction<Struct> createUpdateMetadataFunction(ParsedOp op) {
-        //new Struct.newBuilder(
-        //    UpdateRequest.newBuilder().getSetMetadataBuilder().putAllFields(Map<String,Value>)))
-        return null;
+        Optional<LongFunction<Map>> mFunc = op.getAsOptionalFunction("metadata", Map.class);
+        return mFunc.<LongFunction<Struct>>map(mapLongFunction -> l -> {
+            Map<String, Value> metadata_map = new HashMap<String,Value>();
+            BiConsumer<String,Object> stringToValue = (key, val) -> {
+                Value targetval = null;
+                if (val instanceof String) targetval = Value.newBuilder().setStringValue((String)val).build();
+                else if (val instanceof Number) targetval = Value.newBuilder().setNumberValue((((Number) val).doubleValue())).build();
+                metadata_map.put(key, targetval);
+            };
+            Map<String, String> metadata_values_map = mapLongFunction.apply(l);
+            metadata_values_map.forEach(stringToValue);
+            return UpdateRequest.newBuilder().getSetMetadataBuilder().putAllFields(metadata_map).build();
+        }).orElse(null);
     }
 
-    /*
-      update-example:
-    type: update
-    index: update_index
-    id: string_id
-    values: list_of_floats
-    namespace: update_namespace
-    metadata:
-      - key1: val1
-      - key2: val2
-      - key3: val3
-    sparse_values:
-      indices: list_of_ints
-      values: list_of_floats
-     */
     private LongFunction<UpdateRequest.Builder> createUpdateRequestFunction(ParsedOp op) {
         LongFunction<UpdateRequest.Builder> rFunc = l -> UpdateRequest.newBuilder();
 

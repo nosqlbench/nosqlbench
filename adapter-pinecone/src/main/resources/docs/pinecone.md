@@ -68,9 +68,9 @@ ops:
     values: list_of_floats
     namespace: update_namespace
     metadata:
-      - key1: val1
-      - key2: val2
-      - key3: val3
+      key1: val1
+      key2: val2
+      key3: val3
     sparse_values:
       indices: list_of_ints
       values: list_of_floats
@@ -87,8 +87,8 @@ ops:
           indices: list_of_ints
           values: list_of_floats
         metadata:
-          - key1: val1
-          - key2: val2
+          key1: val1
+          key2: val2
       - id: 2
         values: csv_separated_floats
         sparse_values:
