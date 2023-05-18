@@ -2,7 +2,10 @@ package io.nosqlbench.adapter.pinecone;
 
 import io.nosqlbench.adapter.pinecone.opdispensers.PineconeDeleteOpDispenser;
 import io.nosqlbench.adapter.pinecone.opdispensers.PineconeQueryOpDispenser;
+import io.nosqlbench.adapter.pinecone.ops.PineconeDeleteOp;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
+import io.nosqlbench.adapter.pinecone.ops.PineconeQueryOp;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityconfig.OpsLoader;
 import io.nosqlbench.engine.api.activityconfig.yaml.OpTemplate;
@@ -41,7 +44,8 @@ public class PineconeOpMapperTest {
     private static ParsedOp parsedOpFor(String yaml) {
         OpsDocList docs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
         OpTemplate opTemplate = docs.getOps().get(0);
-        return new ParsedOp(opTemplate, cfg, List.of(adapter.getPreprocessor()));
+        NBLabeledElement parent = NBLabeledElement.EMPTY;
+        return new ParsedOp(opTemplate, cfg, List.of(adapter.getPreprocessor()), parent);
     }
 
     @Test
@@ -74,6 +78,8 @@ public class PineconeOpMapperTest {
                 """);
         OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
         assert(dispenser instanceof PineconeQueryOpDispenser);
+        PineconeOp op = dispenser.apply(0);
+        assert(op instanceof PineconeQueryOp);
     }
 
     @Test
@@ -91,6 +97,7 @@ public class PineconeOpMapperTest {
         OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
         assert(dispenser instanceof PineconeDeleteOpDispenser);
         PineconeOp op = dispenser.apply(0);
+        assert(op instanceof PineconeDeleteOp);
     }
 
     @Test

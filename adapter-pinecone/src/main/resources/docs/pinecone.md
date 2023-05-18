@@ -72,12 +72,8 @@ ops:
       - key2: val2
       - key3: val3
     sparse_values:
-      - sparse_id: 1
-        indices: list_of_ints
-        values: list_of_floats
-      - sparse_id: 2
-        indices: list_of_ints
-        values: list_of_floats
+      indices: list_of_ints
+      values: list_of_floats
 
 # A pinecone upsert op
   upsert-example:
@@ -87,23 +83,14 @@ ops:
     upsert_vectors:
       - id: 1
         values: csv_separated_floats
-        top_k: int_val
-        namespace: string_val
-        filter:
-          filter_field: query_vector_filter_field
-          operator: comparison_operator
-          comparator: comparator_val
         sparse_values:
           indices: list_of_ints
           values: list_of_floats
+        metadata:
+          - key1: val1
+          - key2: val2
       - id: 2
         values: csv_separated_floats
-        top_k: int_val
-        namespace: string_val
-        filter:
-          filter_field: query_vector_filter_field
-          operator: comparison_operator
-          comparator: comparator_val
         sparse_values:
           indices: list_of_ints
           values: list_of_floats
