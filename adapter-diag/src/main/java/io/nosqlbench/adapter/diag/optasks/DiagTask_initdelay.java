@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,10 @@ import java.util.Map;
  * of this owning operation for a number of milliseconds.
  */
 @Service(value= DiagTask.class,selector = "initdelay")
-public class DiagTask_initdelay implements DiagTask {
-
-    private String name;
+public class DiagTask_initdelay extends BaseDiagTask {
 
     @Override
     public void applyConfig(NBConfiguration cfg) {
-        this.name = cfg.get("name",String.class);
         long initdelay = cfg.get("initdelay",long.class);
         try {
             Thread.sleep(initdelay);
@@ -54,12 +51,6 @@ public class DiagTask_initdelay implements DiagTask {
 
     @Override
     public Map<String, Object> apply(Long aLong, Map<String, Object> stringObjectMap) {
-
         return Map.of();
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 }

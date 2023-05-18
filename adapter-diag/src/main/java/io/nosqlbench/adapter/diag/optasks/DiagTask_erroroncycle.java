@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,12 @@ import java.util.Map;
  * of this owning operation for a number of milliseconds.
  */
 @Service(value = DiagTask.class, selector = "erroroncycle")
-public class DiagTask_erroroncycle implements DiagTask {
+public class DiagTask_erroroncycle extends BaseDiagTask {
 
-    private String name;
     private long error_on_cycle;
 
     @Override
     public void applyConfig(NBConfiguration cfg) {
-        this.name = cfg.get("name", String.class);
         error_on_cycle = cfg.get("erroroncycle", long.class);
     }
 
@@ -54,10 +52,5 @@ public class DiagTask_erroroncycle implements DiagTask {
             throw new RuntimeException("Diag was requested to stop on cycle " + error_on_cycle);
         }
         return Map.of();
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 }
