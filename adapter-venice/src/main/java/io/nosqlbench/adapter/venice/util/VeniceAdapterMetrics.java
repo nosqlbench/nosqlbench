@@ -17,10 +17,9 @@
 package io.nosqlbench.adapter.venice.util;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.venice.dispensers.VeniceBaseOpDispenser;
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,7 +50,6 @@ public class VeniceAdapterMetrics {
                 veniceBaseOpDispenser,"execute",
                 ActivityMetrics.DEFAULT_HDRDIGITS);
 
-
         this.foundCounter =
             ActivityMetrics.counter(
                 veniceBaseOpDispenser,"found");
@@ -70,5 +68,4 @@ public class VeniceAdapterMetrics {
     public Counter getNotFoundCounter() {
         return notFoundCounter;
     }
-
 }

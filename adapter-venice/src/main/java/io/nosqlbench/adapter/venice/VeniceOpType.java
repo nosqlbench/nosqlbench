@@ -18,7 +18,8 @@ package io.nosqlbench.adapter.venice;
 
 public enum VeniceOpType {
     // read a single key
-    ReadSingleKey
+    ReadSingleKey,
+    Write
 }
 
 
