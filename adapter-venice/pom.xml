@@ -33,7 +33,7 @@
     </description>
 
     <properties>
-        <venice.version>0.4.17-alpha-9</venice.version>
+        <venice.version>0.4.17-alpha-12</venice.version>
     </properties>
 
     <dependencies>
@@ -53,6 +53,30 @@
         <dependency>
             <groupId>com.linkedin.venice</groupId>
             <artifactId>venice-client-common</artifactId>
+            <version>${venice.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.sonatype.oss</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.helix</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.conscrypt</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.linkedin.venice</groupId>
+            <artifactId>venice-producer</artifactId>
             <version>${venice.version}</version>
             <exclusions>
                 <exclusion>

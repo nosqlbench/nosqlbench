@@ -61,6 +61,8 @@ public class VeniceOpMapper implements OpMapper<VeniceOp> {
             return switch (opType.enumId) {
                 case ReadSingleKey ->
                     new ReadSingleKeyOpDispenser(adapter, op, veniceSpace);
+                case Write ->
+                    new WriteOpDispenser(adapter, op, veniceSpace);
             };
         }
     }

@@ -17,53 +17,48 @@
 package io.nosqlbench.adapter.venice.ops;
 
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import com.linkedin.venice.client.store.AvroGenericStoreClient;
+import com.linkedin.venice.producer.DurableWrite;
+import com.linkedin.venice.producer.online.OnlineVeniceProducer;
 import io.nosqlbench.adapter.venice.VeniceSpace;
 import io.nosqlbench.adapter.venice.util.VeniceAdapterMetrics;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
 
 
-public class ReadSingleKeyOp extends VeniceOp {
+public class WriteOp extends VeniceOp {
 
     private final static Logger logger = LogManager.getLogger("ReadSingleKeyOp");
 
-    private final AvroGenericStoreClient<Object, Object> client;
+    private final OnlineVeniceProducer<Object, Object> producer;
     private final Object key;
+    private final Object value;
     private final Timer executeTimer;
-    private Counter foundCounter;
-    private Counter notFoundCounter;
 
-    public ReadSingleKeyOp(VeniceAdapterMetrics veniceAdapterMetrics,
-                           VeniceSpace veniceSpace,
-                           Object key) {
+    public WriteOp(VeniceAdapterMetrics veniceAdapterMetrics,
+                   VeniceSpace veniceSpace,
+                   Object key,
+                   Object value) {
         super(veniceAdapterMetrics, veniceSpace);
-        this.client = veniceSpace.getClient();
+        this.producer = veniceSpace.getProducer();
         this.key = key;
+        this.value = value;
         this.executeTimer = veniceAdapterMetrics.getExecuteTimer();
-        this.foundCounter = veniceAdapterMetrics.getFoundCounter();
-        this.notFoundCounter = veniceAdapterMetrics.getNotFoundCounter();
     }
 
     @Override
     public Object apply(long value) {
         Object callValue;
         try (Timer.Context time = executeTimer.time();) {
-            CompletableFuture<Object> handle = client.get(key);
+            CompletableFuture<DurableWrite> handle = producer.asyncPut(this.key, this.value);
             callValue = handle.join();
             if (logger.isDebugEnabled()) {
-                logger.debug("ReadSingleKeyOp key={} value={} latency {}", key, callValue);
+                logger.debug("Write key={} value={} res {}", key, callValue, callValue);
             }
-        }
-        if (callValue != null) {
-            foundCounter.inc();
-        } else {
-            notFoundCounter.inc();
         }
         return null;
     }
