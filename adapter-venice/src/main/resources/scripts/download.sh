@@ -9,7 +9,7 @@ rm -Rf $BINDIR
 mkdir $BINDIR
 pushd $BINDIR
 cd $BINDIR
-curl -L -O $AVROTOOLSURL
+curl -L -O $VENICETOOLSURL
 popd
 
 

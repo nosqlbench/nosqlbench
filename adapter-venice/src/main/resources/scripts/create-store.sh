@@ -3,7 +3,7 @@
 # Use ./download.sh in order to download the binaries needed to run this script.
 
 set -x -e
-HERE=$(realpath $0)
+HERE=$(dirname $0)
 cd $HERE
 
 jar=binaries/*admin-tool-all*.jar
