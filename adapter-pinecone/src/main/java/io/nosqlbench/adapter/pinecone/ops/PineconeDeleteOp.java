@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 public class PineconeDeleteOp extends PineconeOp {
 
-    private static final Logger LOGGER = LogManager.getLogger(PineconeDeleteOp.class);
+    private static final Logger logger = LogManager.getLogger(PineconeDeleteOp.class);
 
     private final DeleteRequest request;
 
@@ -44,10 +44,10 @@ public class PineconeDeleteOp extends PineconeOp {
     public void run() {
         try {
             DeleteResponse response = connection.getBlockingStub().delete(request);
-            LOGGER.info(response.toString());
+            logger.info(response.toString());
         } catch (Exception e) {
-            LOGGER.error("Exception %s caught trying to do delete", e.getMessage());
-            LOGGER.error(e.getStackTrace());
+            logger.error("Exception %s caught trying to do delete", e.getMessage());
+            logger.error(e.getStackTrace());
         }
     }
 }

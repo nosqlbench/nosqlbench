@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class PineconeSpace {
 
-    private final static Logger LOGGER = LogManager.getLogger(PineconeSpace.class);
+    private final static Logger logger = LogManager.getLogger(PineconeSpace.class);
     private final String apiKey;
     private final String environment;
     private final String projectName;
@@ -59,7 +59,7 @@ public class PineconeSpace {
             .withApiKey(apiKey)
             .withEnvironment(environment)
             .withProjectName(projectName);
-        LOGGER.info(this.name + ": Creating new Pinecone Client with api key " + apiKey + ", environment "
+        logger.info(this.name + ": Creating new Pinecone Client with api key " + apiKey + ", environment "
             + environment + " and project name " + projectName);
         this.client = new PineconeClient(config);
     }
@@ -74,7 +74,7 @@ public class PineconeSpace {
     public synchronized PineconeConnection getConnection(String index) {
         PineconeConnection connection = connections.get(index);
         if (connection == null) {
-            LOGGER.info("Creating new Pinecone Connection to Index " + index);
+            logger.info("Creating new Pinecone Connection to Index " + index);
             PineconeConnectionConfig connectionConfig = new PineconeConnectionConfig().withIndexName(index);
             connection = client.connect(connectionConfig);
             connections.put(index, connection);

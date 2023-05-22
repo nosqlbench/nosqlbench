@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 public class PineconeUpsertOp extends PineconeOp {
 
-    private static final Logger LOGGER = LogManager.getLogger(PineconeUpsertOp.class);
+    private static final Logger logger = LogManager.getLogger(PineconeUpsertOp.class);
 
     private final UpsertRequest request;
 
@@ -44,10 +44,10 @@ public class PineconeUpsertOp extends PineconeOp {
     public void run() {
         try {
             UpsertResponse response = connection.getBlockingStub().upsert(request);
-            LOGGER.info("Put " + response.getUpsertedCount() + " vectors into the index");
+            logger.info("Put " + response.getUpsertedCount() + " vectors into the index");
         } catch (Exception e) {
-            LOGGER.error("Exception %s caught trying to do upsert", e.getMessage());
-            LOGGER.error(e.getStackTrace());
+            logger.error("Exception %s caught trying to do upsert", e.getMessage());
+            logger.error(e.getStackTrace());
         }
     }
 }

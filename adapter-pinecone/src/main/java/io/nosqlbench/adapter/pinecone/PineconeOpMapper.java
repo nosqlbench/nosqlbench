@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.function.LongFunction;
 
 public class PineconeOpMapper implements OpMapper<PineconeOp> {
-    private static final Logger LOGGER = LogManager.getLogger(PineconeOpMapper.class);
+    private static final Logger logger = LogManager.getLogger(PineconeOpMapper.class);
     private final PineconeDriverAdapter adapter;
     private final DriverSpaceCache<? extends PineconeSpace> spaceCache;
     private final NBConfiguration cfg;
@@ -64,7 +64,7 @@ public class PineconeOpMapper implements OpMapper<PineconeOp> {
 
         TypeAndTarget<PineconeOpTypes, String> opType = op.getTypeAndTarget(PineconeOpTypes.class, String.class, "type", "index");
 
-        LOGGER.info(() -> "Using " + opType.enumId + " statement form for '" + op.getName());
+        logger.info(() -> "Using " + opType.enumId + " statement form for '" + op.getName());
 
         return switch (opType.enumId) {
             case query ->

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 public class PineconeFetchOp extends PineconeOp {
 
-    private static final Logger LOGGER = LogManager.getLogger(PineconeFetchOp.class);
+    private static final Logger logger = LogManager.getLogger(PineconeFetchOp.class);
 
     private final FetchRequest request;
 
@@ -46,8 +46,8 @@ public class PineconeFetchOp extends PineconeOp {
             FetchResponse response = connection.getBlockingStub().fetch(request);
             // Do soemething with the response...
         } catch (Exception e) {
-            LOGGER.error("Exception %s caught trying to do Fetch", e.getMessage());
-            LOGGER.error(e.getStackTrace());
+            logger.error("Exception %s caught trying to do Fetch", e.getMessage());
+            logger.error(e.getStackTrace());
         }
     }
 }

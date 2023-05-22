@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 public class PineconeQueryOp extends PineconeOp {
 
-    private static final Logger LOGGER = LogManager.getLogger(PineconeQueryOp.class);
+    private static final Logger logger = LogManager.getLogger(PineconeQueryOp.class);
 
     private final QueryRequest request;
 
@@ -44,11 +44,11 @@ public class PineconeQueryOp extends PineconeOp {
     public void run() {
         try {
             QueryResponse response = connection.getBlockingStub().query(request);
-            LOGGER.info("got query result ids: "
+            logger.info("got query result ids: "
                 + response.getResultsList().get(0).getMatchesList());
         } catch (Exception e) {
-            LOGGER.error("Exception %s caught trying to do Query", e.getMessage());
-            LOGGER.error(e.getStackTrace());
+            logger.error("Exception %s caught trying to do Query", e.getMessage());
+            logger.error(e.getStackTrace());
         }
     }
 }

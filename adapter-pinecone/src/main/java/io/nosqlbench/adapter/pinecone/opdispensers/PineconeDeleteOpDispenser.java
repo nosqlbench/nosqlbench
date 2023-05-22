@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.util.function.LongFunction;
 
 
 public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
-    private static final Logger LOGGER = LogManager.getLogger(PineconeDeleteOpDispenser.class);
+    private static final Logger logger = LogManager.getLogger(PineconeDeleteOpDispenser.class);
     private final LongFunction<DeleteRequest> deleteRequestFunc;
 
     /**
@@ -53,7 +53,9 @@ public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeDeleteOp(pcFunction.apply(value).getConnection(targetFunction.apply(value)),
+        return new PineconeDeleteOp(pcFunction
+                .apply(value)
+                .getConnection(targetFunction.apply(value)),
             deleteRequestFunc.apply(value));
     }
 
