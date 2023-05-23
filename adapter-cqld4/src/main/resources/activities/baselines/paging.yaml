@@ -1,0 +1,47 @@
+description: |
+  TODO
+
+bindings:
+  id: Shuffle(0,10); Template("{}-{}", Hash(), Hash());
+  date: Shuffle(0,31); ToString();
+  timestamp: AddHashRange(0L,2592000L); Mul(1000); StartingEpochMillis("2023-04-01 12:00:00"); ToJavaInstant();
+  value: Shuffle(0,50); Template("value-{}-{}-{}", Hash(), Hash(), Hash());
+
+blocks:
+  schema:
+    params:
+      prepared: false
+    ops:
+      create-keyspace: |
+        CREATE KEYSPACE IF NOT EXISTS TEMPLATE(keyspace, baselines)
+        WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1': 'TEMPLATE(rf,3)'}
+        AND durable_writes = true;
+      create-table : |
+        CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,test) (
+          id text,
+          date text,
+          timestamp timestamp,
+          value text,
+          PRIMARY KEY((id), date, timestamp)
+        ) WITH CLUSTERING ORDER BY (date DESC, timestamp DESC)
+        AND compaction = { 'class':'LeveledCompactionStrategy' }
+        AND compression = { 'class': 'LZ4Compressor', 'chunk_length_in_kb': 4 };
+  rampup:
+    params:
+      cl: TEMPLATE(write_cl,LOCAL_ONE)
+      prepared: true
+      page_size: 100
+      maxpages: 100
+    ops: |
+      INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,test) (id, date, timestamp, value)
+      VALUES ({id}, {date}, {timestamp}, {value})
+  main-read:
+    params:
+      cl: TEMPLATE(read_cl, LOCAL_ONE)
+      prepared: true
+    statements:
+      select:
+        op: |
+          SELECT * FROM baselines.test
+          WHERE id={id}
+          ORDER BY date DESC, timestamp DESC
