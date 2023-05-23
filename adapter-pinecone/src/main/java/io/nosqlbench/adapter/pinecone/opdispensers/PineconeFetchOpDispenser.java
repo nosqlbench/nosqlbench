@@ -77,7 +77,8 @@ public class PineconeFetchOpDispenser extends PineconeOpDispenser {
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeFetchOp(pcFunction.apply(value).getConnection(targetFunction.apply(value)),
+        return new PineconeFetchOp(pcFunction.apply(value)
+            .getConnection(targetFunction.apply(value)),
             fetchRequestFunc.apply(value));
     }
 }

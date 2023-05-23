@@ -20,8 +20,11 @@ import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.pinecone.proto.DescribeIndexStatsRequest;
 import io.pinecone.proto.DescribeIndexStatsResponse;
 import io.pinecone.PineconeConnection;
+import io.pinecone.proto.NamespaceSummary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Map;
 
 public class PineconeDescribeIndexStatsOp extends PineconeOp {
 
@@ -44,7 +47,12 @@ public class PineconeDescribeIndexStatsOp extends PineconeOp {
     public void run() {
         try {
             DescribeIndexStatsResponse response = connection.getBlockingStub().describeIndexStats(request);
-            // Do soemething with the response...
+            if (logger.isDebugEnabled()) {
+                logger.debug("Vector counts:");
+                for (Map.Entry<String, NamespaceSummary> namespace : response.getNamespacesMap().entrySet()) {
+                    logger.debug(namespace.getKey() + ": " + namespace.getValue().getVectorCount());
+                }
+            }
         } catch (Exception e) {
             logger.error("Exception %s caught trying to do DescribeIndexStats", e.getMessage());
             logger.error(e.getStackTrace());

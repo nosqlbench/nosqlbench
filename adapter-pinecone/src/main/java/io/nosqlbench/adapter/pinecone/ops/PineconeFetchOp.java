@@ -20,8 +20,11 @@ import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.pinecone.proto.FetchRequest;
 import io.pinecone.PineconeConnection;
 import io.pinecone.proto.FetchResponse;
+import io.pinecone.proto.Vector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Map;
 
 public class PineconeFetchOp extends PineconeOp {
 
@@ -44,7 +47,11 @@ public class PineconeFetchOp extends PineconeOp {
     public void run() {
         try {
             FetchResponse response = connection.getBlockingStub().fetch(request);
-            // Do soemething with the response...
+            if (logger.isDebugEnabled()) {
+                for (Map.Entry<String, Vector> vectors: response.getVectorsMap().entrySet()) {
+                    logger.debug(vectors.getKey() + ": " + vectors.getValue().toString());
+                }
+            }
         } catch (Exception e) {
             logger.error("Exception %s caught trying to do Fetch", e.getMessage());
             logger.error(e.getStackTrace());

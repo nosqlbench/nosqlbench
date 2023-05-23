@@ -44,7 +44,7 @@ public class PineconeUpsertOp extends PineconeOp {
     public void run() {
         try {
             UpsertResponse response = connection.getBlockingStub().upsert(request);
-            logger.info("Put " + response.getUpsertedCount() + " vectors into the index");
+            logger.debug("Put " + response.getUpsertedCount() + " vectors into the index");
         } catch (Exception e) {
             logger.error("Exception %s caught trying to do upsert", e.getMessage());
             logger.error(e.getStackTrace());

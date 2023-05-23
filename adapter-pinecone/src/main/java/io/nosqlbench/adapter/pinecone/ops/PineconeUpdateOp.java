@@ -44,7 +44,7 @@ public class PineconeUpdateOp extends PineconeOp {
     public void run() {
         try {
             UpdateResponse response = connection.getBlockingStub().update(request);
-            // Do soemething with the response...
+            logger.debug("UpdateResponse succesful: " + response.toString());
         } catch (Exception e) {
             logger.error("Exception %s caught trying to do Update", e.getMessage());
             logger.error(e.getStackTrace());

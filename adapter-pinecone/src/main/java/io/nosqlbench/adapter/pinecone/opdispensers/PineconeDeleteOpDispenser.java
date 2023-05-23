@@ -53,9 +53,8 @@ public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeDeleteOp(pcFunction
-                .apply(value)
-                .getConnection(targetFunction.apply(value)),
+        return new PineconeDeleteOp(pcFunction.apply(value)
+            .getConnection(targetFunction.apply(value)),
             deleteRequestFunc.apply(value));
     }
 

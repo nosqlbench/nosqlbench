@@ -20,6 +20,8 @@ import io.nosqlbench.engine.api.templating.ParsedOp;
 import io.pinecone.proto.QueryRequest;
 import io.pinecone.PineconeConnection;
 import io.pinecone.proto.QueryResponse;
+import io.pinecone.proto.ScoredVector;
+import io.pinecone.proto.SingleQueryResults;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,8 +46,13 @@ public class PineconeQueryOp extends PineconeOp {
     public void run() {
         try {
             QueryResponse response = connection.getBlockingStub().query(request);
-            logger.info("got query result ids: "
-                + response.getResultsList().get(0).getMatchesList());
+            if (logger.isDebugEnabled()) {
+                for (SingleQueryResults results : response.getResultsList()) {
+                    for (ScoredVector scored : results.getMatchesList()) {
+                        logger.debug(scored.getId() + ": " + scored.getScore());
+                    }
+                }
+            }
         } catch (Exception e) {
             logger.error("Exception %s caught trying to do Query", e.getMessage());
             logger.error(e.getStackTrace());

@@ -70,7 +70,8 @@ public class PineconeDescribeIndexStatsOpDispenser extends PineconeOpDispenser {
 
     @Override
     public PineconeOp apply(long value) {
-        return new PineconeDescribeIndexStatsOp(pcFunction.apply(value).getConnection(targetFunction.apply(value)),
+        return new PineconeDescribeIndexStatsOp(pcFunction.apply(value)
+            .getConnection(targetFunction.apply(value)),
             indexStatsRequestFunc.apply(value));
     }
 }
