@@ -27,7 +27,12 @@ cd adapter-venice/src/main/resources/scripts
 ./create-store.sh store1
 ```
 
-Then you can populate the store with some data using NB:
+The script creates a Venice store with the given Key and Value schemas defined in the key.avsc and value.avsc files.
+Please ensure that you set the same schemas on your workload configuration files (keySchema and valueSchema).
+
+Then you can populate the store with some data using NB.
+
+Open a new terminal and run:
 
 ```bash
 java -jar nb5/target/nb5.jar run driver=venice  workload=adapter-venice/src/main/resources/venice_writer.yaml store_name=store1 router_url=http://localhost:7777 cycles=100000 -v --report-summary-to stdout:60  --report-csv-to reports
