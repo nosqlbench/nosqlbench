@@ -29,8 +29,7 @@
 
 <name>${project.artifactId}</name>
 <description>
-    An nosqlbench ActivityType (AT) driver module;
-    Provides basic formatting and output to stdout or files.
+    An nosqlbench adapter driver module for the Pinecone Vector DB driver
 </description>
 
 <dependencies>
