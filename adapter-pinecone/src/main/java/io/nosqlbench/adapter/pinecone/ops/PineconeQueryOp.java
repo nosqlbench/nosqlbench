@@ -44,18 +44,13 @@ public class PineconeQueryOp extends PineconeOp {
 
     @Override
     public void run() {
-        try {
-            QueryResponse response = connection.getBlockingStub().query(request);
-            if (logger.isDebugEnabled()) {
-                for (SingleQueryResults results : response.getResultsList()) {
-                    for (ScoredVector scored : results.getMatchesList()) {
-                        logger.debug(scored.getId() + ": " + scored.getScore());
-                    }
+        QueryResponse response = connection.getBlockingStub().query(request);
+        if (logger.isDebugEnabled()) {
+            for (SingleQueryResults results : response.getResultsList()) {
+                for (ScoredVector scored : results.getMatchesList()) {
+                    logger.debug(scored.getId() + ": " + scored.getScore());
                 }
             }
-        } catch (Exception e) {
-            logger.error("Exception %s caught trying to do Query", e.getMessage());
-            logger.error(e.getStackTrace());
         }
     }
 }

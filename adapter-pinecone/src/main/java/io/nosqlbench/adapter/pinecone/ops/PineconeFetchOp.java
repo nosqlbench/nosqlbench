@@ -45,16 +45,11 @@ public class PineconeFetchOp extends PineconeOp {
 
     @Override
     public void run() {
-        try {
-            FetchResponse response = connection.getBlockingStub().fetch(request);
-            if (logger.isDebugEnabled()) {
-                for (Map.Entry<String, Vector> vectors: response.getVectorsMap().entrySet()) {
-                    logger.debug(vectors.getKey() + ": " + vectors.getValue().toString());
-                }
+        FetchResponse response = connection.getBlockingStub().fetch(request);
+        if (logger.isDebugEnabled()) {
+            for (Map.Entry<String, Vector> vectors: response.getVectorsMap().entrySet()) {
+                logger.debug(vectors.getKey() + ": " + vectors.getValue().toString());
             }
-        } catch (Exception e) {
-            logger.error("Exception %s caught trying to do Fetch", e.getMessage());
-            logger.error(e.getStackTrace());
         }
     }
 }

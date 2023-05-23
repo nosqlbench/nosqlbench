@@ -45,17 +45,12 @@ public class PineconeDescribeIndexStatsOp extends PineconeOp {
 
     @Override
     public void run() {
-        try {
-            DescribeIndexStatsResponse response = connection.getBlockingStub().describeIndexStats(request);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Vector counts:");
-                for (Map.Entry<String, NamespaceSummary> namespace : response.getNamespacesMap().entrySet()) {
-                    logger.debug(namespace.getKey() + ": " + namespace.getValue().getVectorCount());
-                }
+        DescribeIndexStatsResponse response = connection.getBlockingStub().describeIndexStats(request);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Vector counts:");
+            for (Map.Entry<String, NamespaceSummary> namespace : response.getNamespacesMap().entrySet()) {
+                logger.debug(namespace.getKey() + ": " + namespace.getValue().getVectorCount());
             }
-        } catch (Exception e) {
-            logger.error("Exception %s caught trying to do DescribeIndexStats", e.getMessage());
-            logger.error(e.getStackTrace());
         }
     }
 
