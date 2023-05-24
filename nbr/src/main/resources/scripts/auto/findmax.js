@@ -26,6 +26,27 @@ function printf(args) {
     java.lang.System.out.printf(arguments[0],values);
 }
 
+const SCRIPT_PARAMS = ["profile", "sample_time", "sample_incr", "sample_max", "averageof",
+                       "min_stride", "rate_base", "rate_step", "rate_incr", "testrate_cutoff",
+                       "bestrate_cutoff", "latency_cutoff", "latency_pctile"];
+
+function filterScriptParams(activitydef) {
+    var def = {};
+    for (var p in activitydef) {
+        var isScriptParam = false;
+        for (i in SCRIPT_PARAMS) {
+            if (p == SCRIPT_PARAMS[i]) {
+                isScriptParam = true;
+                break;
+            }
+        }
+        if (!isScriptParam) {
+            def[p] = activitydef[p]
+        }
+    }
+    return def;
+}
+
 if ("TEMPLATE(showhelp,false)" === "true") {
     var helpdata = files.read("docs/findmax.md");
     printf(helpdata);
@@ -141,10 +162,10 @@ var driver = "TEMPLATE(driver,cql)";
 var yaml_file = "TEMPLATE(yaml_file,cql-iot)";
 
 // //  CREATE SCHEMA
-// schema_activitydef = params.withDefaults({
+// schema_activitydef = filterScriptParams(params.withDefaults({
 //     driver: driver,
 //     yaml: yaml_file
-// });
+// }));
 //
 // schema_activitydef.alias = "findmax_schema";
 // schema_activitydef.threads = "1";
@@ -154,12 +175,12 @@ var yaml_file = "TEMPLATE(yaml_file,cql-iot)";
 // scenario.run(schema_activitydef);
 
 //  START ITERATING ACTIVITY
-activitydef = params.withDefaults({
+activitydef = filterScriptParams(params.withDefaults({
     driver: driver,
     yaml: yaml_file,
     threads: "auto",
     cyclerate: "1.0:1.1"
-});
+}));
 
 activitydef.alias = "findmax";
 activitydef.cycles = "1000000000";

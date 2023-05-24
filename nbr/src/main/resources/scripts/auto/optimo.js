@@ -16,6 +16,26 @@ function printf(args) {
     java.lang.System.out.printf(arguments[0], values);
 }
 
+const SCRIPT_PARAMS = ["sample_time", "sample_incr", "sample_max", "min_stride", "averageof",
+                       "latency_cutoff", "latency_pctile"];
+
+function filterScriptParams(activitydef) {
+    var def = {};
+    for (var p in activitydef) {
+        var isScriptParam = false;
+        for (i in SCRIPT_PARAMS) {
+            if (p == SCRIPT_PARAMS[i]) {
+                isScriptParam = true;
+                break;
+            }
+        }
+        if (!isScriptParam) {
+            def[p] = activitydef[p]
+        }
+    }
+    return def;
+}
+
 function as_js(ref) {
     if (JSON.stringify(ref)) {
         return ref;
@@ -106,10 +126,10 @@ let activity_type = "TEMPLATE(activity_type,cql)";
 let yaml_file = "TEMPLATE(yaml_file,cql-iot)";
 
 //  CREATE SCHEMA
-schema_activitydef = params.withDefaults({
+schema_activitydef = filterScriptParams(params.withDefaults({
     type: activity_type,
     yaml: yaml_file
-});
+}));
 schema_activitydef.alias = "optimo_schema";
 schema_activitydef.threads = "1";
 schema_activitydef.tags = "TEMPLATE(schematags,block:'schema.*')";
@@ -119,13 +139,13 @@ print("Creating schema with schematags:" + schema_activitydef.tags);
 scenario.run(schema_activitydef);
 
 //  START ITERATING ACTIVITY
-activitydef = params.withDefaults({
+activitydef = filterScriptParams(params.withDefaults({
     type: activity_type,
     yaml: yaml_file,
     threads: "50",
     async: 10,
     speculative: "none"
-});
+}));
 activitydef.alias = "optimo";
 activitydef.cycles = "1000000000";
 activitydef.recycles = "1000000000";
