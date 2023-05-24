@@ -22,16 +22,11 @@ import io.nosqlbench.adapter.venice.util.*;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.avro.Schema;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
 import java.util.function.LongFunction;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public abstract  class VeniceBaseOpDispenser extends BaseOpDispenser<VeniceOp, VeniceSpace> {
 
@@ -65,5 +60,20 @@ public abstract  class VeniceBaseOpDispenser extends BaseOpDispenser<VeniceOp, V
         return stringLongFunction;
     }
 
+    protected Schema lookupAvroSchema(String paramName) {
+        String schema = parsedOp.getStaticValueOr(paramName, "");
+        try {
+
+            if (schema.isEmpty()) {
+                schema = Schema.Type.STRING.getName();
+                logger.info("{}: {} (default)", paramName, schema);
+            } else {
+                logger.info("{}: {}", paramName, schema);
+            }
+            return AvroUtils.parseAvroSchema(schema);
+        } catch (Exception err) {
+            throw new IllegalArgumentException("Cannot parse avro schema "+schema);
+        }
+    }
 
 }

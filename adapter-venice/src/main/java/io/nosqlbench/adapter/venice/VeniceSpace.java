@@ -16,9 +16,13 @@
 
 package io.nosqlbench.adapter.venice;
 
+import com.linkedin.venice.authentication.jwt.ClientAuthenticationProviderToken;
 import com.linkedin.venice.client.store.AvroGenericStoreClient;
 import com.linkedin.venice.client.store.ClientConfig;
 import com.linkedin.venice.client.store.ClientFactory;
+import com.linkedin.venice.producer.online.OnlineProducerFactory;
+import com.linkedin.venice.producer.online.OnlineVeniceProducer;
+import com.linkedin.venice.utils.VeniceProperties;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
@@ -39,8 +43,11 @@ public class VeniceSpace implements  AutoCloseable {
 
     private long veniceActivityStartTimeMills;
     private final String token;
+    private ClientConfig clientConfig;
 
     private AvroGenericStoreClient<Object, Object> client;
+
+    private OnlineVeniceProducer<Object, Object> producer;
 
 
     public VeniceSpace(String spaceName, NBConfiguration cfg) {
@@ -71,24 +78,46 @@ public class VeniceSpace implements  AutoCloseable {
             .asReadOnly();
     }
 
-    public AvroGenericStoreClient<Object, Object> getClient() {
+    public synchronized AvroGenericStoreClient<Object, Object> getClient() {
+        if (client == null) {
+            client = ClientFactory.getAndStartGenericAvroClient(clientConfig);
+        }
         return client;
     }
 
+    public synchronized OnlineVeniceProducer<Object, Object> getProducer() {
+        if (producer == null) {
+            VeniceProperties properties = VeniceProperties.empty();
+            producer = OnlineProducerFactory.createProducer(clientConfig, properties,null);
+        }
+        return producer;
+    }
+
     public void initializeSpace() {
-        ClientConfig clientConfig = ClientConfig.defaultGenericClientConfig(storeName);
+        this.clientConfig = ClientConfig.defaultGenericClientConfig(storeName);
         clientConfig.setVeniceURL(routerUrl);
         clientConfig.setForceClusterDiscoveryAtStartTime(true);
-        clientConfig.setToken(token);
-        client = ClientFactory.getAndStartGenericAvroClient(clientConfig);
+        if (token != null && !token.isEmpty()) {
+            clientConfig.setAuthenticationProvider(ClientAuthenticationProviderToken.TOKEN(token));
+        }
     }
 
     public void shutdownSpace() {
         try {
-            client.close();
+            if (client != null) {
+                client.close();
+            }
         }
         catch (Exception e) {
            logger.error("Unexpected error when shutting down NB S4J space.", e);
+        }
+        try {
+            if (producer != null) {
+                producer.close();
+            }
+        }
+        catch (Exception e) {
+            logger.error("Unexpected error when shutting down NB S4J space.", e);
         }
     }
 

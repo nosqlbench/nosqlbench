@@ -17,48 +17,52 @@
 package io.nosqlbench.adapter.venice.dispensers;
 
 import io.nosqlbench.adapter.venice.VeniceSpace;
-import io.nosqlbench.adapter.venice.ops.ReadSingleKeyOp;
+import io.nosqlbench.adapter.venice.ops.WriteOp;
 import io.nosqlbench.adapter.venice.util.AvroUtils;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.avro.Schema;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.function.LongFunction;
-public class ReadSingleKeyOpDispenser extends VeniceBaseOpDispenser {
+
+public class WriteOpDispenser extends VeniceBaseOpDispenser {
 
     private final static Logger logger = LogManager.getLogger("ReadSingleKeyOpDispenser");
     private final LongFunction<String> keyStrFunc;
-
+    private final LongFunction<String> valueStrFunc;
     private final Schema keySchema;
 
-    private static final String KEY_SCHEMA_OP_PARAM = "keySchema";
+    private final Schema valueSchema;
 
     private static final String KEY_OP_PARAM = "key";
+    private static final String VALUE_OP_PARAM = "value";
 
-    public ReadSingleKeyOpDispenser(DriverAdapter adapter,
-                                      ParsedOp op,
-                                      VeniceSpace s4jSpace) {
+    private static final String VALUE_SCHEMA_OP_PARAM = "valueSchema";
+    private static final String KEY_SCHEMA_OP_PARAM = "keySchema";
+
+
+    public WriteOpDispenser(DriverAdapter adapter,
+                            ParsedOp op,
+                            VeniceSpace s4jSpace) {
         super(adapter, op, s4jSpace);
         this.keyStrFunc = lookupMandtoryStrOpValueFunc(KEY_OP_PARAM);
         this.keySchema = lookupAvroSchema(KEY_SCHEMA_OP_PARAM);
+        this.valueStrFunc = lookupMandtoryStrOpValueFunc(VALUE_OP_PARAM);
+        this.valueSchema = lookupAvroSchema(VALUE_SCHEMA_OP_PARAM);
     }
 
     @Override
-    public ReadSingleKeyOp apply(long cycle) {
+    public WriteOp apply(long cycle) {
         String key = keyStrFunc.apply(cycle);
+        String value = valueStrFunc.apply(cycle);
         Object encodedKey = AvroUtils.encodeToAvro(keySchema, key);
-        return new ReadSingleKeyOp(
+        Object encodedValue = AvroUtils.encodeToAvro(valueSchema, value);
+        return new WriteOp(
             veniceAdapterMetrics,
             veniceSpace,
-            encodedKey);
+            encodedKey,
+            encodedValue);
     }
 }
