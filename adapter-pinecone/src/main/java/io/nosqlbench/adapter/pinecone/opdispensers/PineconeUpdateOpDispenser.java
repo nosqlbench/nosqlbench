@@ -56,6 +56,15 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
         sparseValuesFunc = createSparseValuesFunction(op);
     }
 
+    /**
+     * @param op the ParsedOp from which the SparseValues object will be built
+     * @return a SparseValues Object to be added to a Pinecone UpdateRequest
+     *
+     * This method interrogates the subsection of the ParsedOp defined for SparseValues parameters and constructs
+     * a SparseValues Object based on the included values, or returns null if this section is not populated. The
+     * base function returns either the SparseValues Object or null, while the interior function builds the SparseValues
+     * with a Builder pattern based on the values contained in the source ParsedOp.
+     */
     private LongFunction<SparseValues> createSparseValuesFunction(ParsedOp op) {
         Optional<LongFunction<Map>> mFunc = op.getAsOptionalFunction("sparse_values", Map.class);
         return mFunc.<LongFunction<SparseValues>>map(mapLongFunction -> l -> {
@@ -77,6 +86,15 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
         }).orElse(null);
     }
 
+    /**
+     * @param op the ParsedOp from which the Metadata objects will be built
+     * @return an Metadata Struct to be added to a Pinecone UpdateRequest
+     *
+     * This method interrogates the subsection of the ParsedOp defined for metadata parameters and constructs
+     * a Metadata Struct based on the included values, or returns null if this section is not populated. The
+     * base function returns either the Metadata Struct or null, while the interior function builds the Metadata
+     * with a Builder pattern based on the values contained in the source ParsedOp.
+     */
     private LongFunction<Struct> createUpdateMetadataFunction(ParsedOp op) {
         Optional<LongFunction<Map>> mFunc = op.getAsOptionalFunction("metadata", Map.class);
         return mFunc.<LongFunction<Struct>>map(mapLongFunction -> l -> {
@@ -93,6 +111,19 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
         }).orElse(null);
     }
 
+    /**
+     * @param op The ParsedOp used to build the Request
+     * @return A function that will take a long (the current cycle) and return a Pinecone UpdateRequest Builder
+     *
+     * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
+     * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
+     * For each method in the chain a function is created here and added to the chain of functions
+     * called at time of instantiation.
+     *
+     * The Metadata and SparseValues objects used by the UpdateRequest are sufficiently sophisticated in their own
+     * building process that they have been broken out into separate methods. At runtime they are built separately
+     * and then added to the build chain by the builder returned by this method.
+     */
     private LongFunction<UpdateRequest.Builder> createUpdateRequestFunction(ParsedOp op) {
         LongFunction<UpdateRequest.Builder> rFunc = l -> UpdateRequest.newBuilder();
 

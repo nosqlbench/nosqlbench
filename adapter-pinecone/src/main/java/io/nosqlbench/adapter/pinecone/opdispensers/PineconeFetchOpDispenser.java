@@ -50,6 +50,15 @@ public class PineconeFetchOpDispenser extends PineconeOpDispenser {
         fetchRequestFunc = createFetchRequestFunction(op);
     }
 
+    /**
+     * @param op The ParsedOp used to build the Request
+     * @return A function that will take a long (the current cycle) and return a Pinecone FetchRequest
+     *
+     * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
+     * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
+     * For each method in the chain a function is created here and added to the chain of functions
+     * called at time of instantiation.
+     */
     private LongFunction<FetchRequest> createFetchRequestFunction(ParsedOp op) {
         LongFunction<FetchRequest.Builder> rFunc = l -> FetchRequest.newBuilder();
 

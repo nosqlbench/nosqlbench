@@ -58,6 +58,15 @@ public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
             deleteRequestFunc.apply(value));
     }
 
+    /**
+     * @param op The ParsedOp used to build the Request
+     * @return A function that will take a long (the current cycle) and return a Pinecone DeleteRequest
+     *
+     * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
+     * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
+     * For each method in the chain a function is created here and added to the chain of functions
+     * called at time of instantiation.
+     */
     private LongFunction<DeleteRequest> createDeleteRequestFunction(ParsedOp op) {
         LongFunction<DeleteRequest.Builder> rFunc = l -> DeleteRequest.newBuilder();
 

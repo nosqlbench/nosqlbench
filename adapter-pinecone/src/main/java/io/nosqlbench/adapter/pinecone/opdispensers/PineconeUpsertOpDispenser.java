@@ -55,6 +55,15 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
         upsertVectorFunc = createUpsertRequestVectorsFunc(op);
     }
 
+    /**
+     * @param op the ParsedOp from which the Vector objects will be built
+     * @return an Iterable Collection of Vector objects to be added to a Pinecone UpsertRequest
+     *
+     * This method interrogates the subsection of the ParsedOp defined for Vector parameters and constructs
+     * a list of Vectors based on the included values, or returns null if this section is not populated. The
+     * base function returns either the List of vectors or null, while the interior function builds the vectors
+     * with a Builder pattern based on the values contained in the source ParsedOp.
+     */
     private LongFunction<Collection<Vector>> createUpsertRequestVectorsFunc(ParsedOp op) {
         Optional<LongFunction<List>> baseFunc =
             op.getAsOptionalFunction("upsert_vectors", List.class);
@@ -104,6 +113,19 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
         }).orElse(null);
     }
 
+    /**
+     * @param op The ParsedOp used to build the Request
+     * @return A function that will take a long (the current cycle) and return a Pinecone UpsertRequest Builder
+     *
+     * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
+     * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
+     * For each method in the chain a function is created here and added to the chain of functions
+     * called at time of instantiation.
+     *
+     * The Vector objects used by the UpsertRequest are sufficiently sophisticated in their own
+     * building process that they have been broken out into a separate method. At runtime they are built separately
+     * and then added to the build chain by the builder returned by this method.
+     */
     private LongFunction<UpsertRequest.Builder> createUpsertRequestFunc(ParsedOp op) {
         LongFunction<UpsertRequest.Builder> rFunc = l -> UpsertRequest.newBuilder();
 

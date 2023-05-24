@@ -55,6 +55,19 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
         queryVectorFunc = createQueryVectorFunc(op);
     }
 
+    /**
+     * @param op The ParsedOp used to build the Request
+     * @return A function that will take a long (the current cycle) and return a Pinecone QueryRequest Builder
+     *
+     * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
+     * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
+     * For each method in the chain a function is created here and added to the chain of functions
+     * called at time of instantiation.
+     *
+     * The QueryVector objects used by the QueryRequest as sufficiently sophisticated in their own building process
+     * that it has been broken out into a separate method. At runtime they are built separately and then added
+     * to the build chain by the builder returned by this method.
+     */
     private LongFunction<QueryRequest.Builder> createQueryRequestFunc(ParsedOp op) {
         LongFunction<QueryRequest.Builder> rFunc = l -> QueryRequest.newBuilder();
 
@@ -117,6 +130,15 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
         return rFunc;
     }
 
+    /**
+     * @param op the ParsedOp from which the Query Vector objects will be built
+     * @return an Iterable Collection of QueryVector objects to be added to a Pinecone QueryRequest
+     *
+     * This method interrogates the subsection of the ParsedOp defined for QueryVector parameters and constructs
+     * a list of QueryVectors based on the included values, or returns null if this section is not populated. The
+     * base function returns either the List of vectors or null, while the interior function builds the vectors
+     * with a Builder pattern based on the values contained in the source ParsedOp.
+     */
     private LongFunction<Collection<QueryVector>> createQueryVectorFunc(ParsedOp op) {
         Optional<LongFunction<List>> baseFunc =
             op.getAsOptionalFunction("query_vectors", List.class);
