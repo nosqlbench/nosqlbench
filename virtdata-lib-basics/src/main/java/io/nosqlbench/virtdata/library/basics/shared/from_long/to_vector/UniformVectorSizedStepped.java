@@ -58,7 +58,7 @@ public class UniformVectorSizedStepped implements LongFunction<List<Double>> {
         this.funcs = new LongToDoubleFunction[dim];
         for (int i = 0; i < dim; i++) {
             if (i<dims.length/2) {
-                funcs[i]=new HashedDoubleRange(dims[i<<1].doubleValue(),dims[i<<1].doubleValue()+1);
+                funcs[i]=new HashedDoubleRange(dims[i<<1].doubleValue(),dims[(i<<1)+1].doubleValue());
             } else {
                 funcs[i]=new HashedDoubleRange(0.0d,1.0d);
             }
