@@ -2,6 +2,24 @@
 function printa(arg) { java.lang.System.out.print(arg); }
 //function println(arg) { java.lang.System.out.println(arg); }
 
+const SCRIPT_PARAMS = ["sample_seconds", "latency_percentile", "latency_threshold", "minimum_ratio", "averageof"];
+
+function filterScriptParams(activitydef) {
+    var def = {};
+    for (var p in activitydef) {
+        var isScriptParam = false;
+        for (i in SCRIPT_PARAMS) {
+            if (p == SCRIPT_PARAMS[i]) {
+                isScriptParam = true;
+                break;
+            }
+        }
+        if (!isScriptParam) {
+            def[p] = activitydef[p]
+        }
+    }
+    return def;
+}
 
 if ("TEMPLATE(showhelp,false)" === "true") {
     var helpdata = files.read("docs/findmax.md");
@@ -43,9 +61,9 @@ var baserate = scriptingmetrics.newGauge("findmax.base_rate", 0.0);
 
 //  CREATE SCHEMA
 
-schema_activitydef = params.withDefaults({
+schema_activitydef = filterScriptParams(params.withDefaults({
     type: "diag"
-});
+}));
 schema_activitydef.alias="findmax_schema";
 schema_activitydef.threads="1";
 schema_activitydef.tags="TEMPLATE(schematags,block:\"schema.*\")";
@@ -56,10 +74,10 @@ scenario.run(schema_activitydef);
 //  START ITERATING ACTIVITY
 
 
-activitydef = params.withDefaults({
+activitydef = filterScriptParams(params.withDefaults({
     type: "diag",
     threads: "50"
-});
+}));
 activitydef.alias="findmax";
 activitydef.cycles="1000000000";
 activitydef.recycles="1000000000";

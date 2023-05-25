@@ -32,6 +32,25 @@ function printf(args) {
     java.lang.System.out.printf(arguments[0], values);
 }
 
+const SCRIPT_PARAMS = ["sample_seconds", "max_rate", "rate_step"];
+
+function filterScriptParams(activitydef) {
+    var def = {};
+    for (var p in activitydef) {
+        var isScriptParam = false;
+        for (i in SCRIPT_PARAMS) {
+            if (p == SCRIPT_PARAMS[i]) {
+                isScriptParam = true;
+                break;
+            }
+        }
+        if (!isScriptParam) {
+            def[p] = activitydef[p]
+        }
+    }
+    return def;
+}
+
 var workload = "TEMPLATE(workload,UNSPECIFIED)";
 if (workload=="UNSPECIFIED") {
  print("workload was unspecified. Please set workload and try again.");
@@ -50,14 +69,14 @@ printf("max_rate=%d\n", max_rate);
 
 var rate_step = 10000;
 rate_step = 0 + TEMPLATE(rate_step,rate_step);
-printf("rate_increment=%d\n", rate_step);
+printf("rate_step=%d\n", rate_step);
 
 var driver = "TEMPLATE(driver,diag)"
 printf("driver=%s\n",driver);
 
 
 print("starting activity for stepup analysis");
-var activitydef = params.withDefaults({
+var activitydef = filterScriptParams(params.withDefaults({
     'alias': 'stepup',
     'driver': driver,
     'tags':'any(block:main.*,block:main)',
@@ -65,7 +84,7 @@ var activitydef = params.withDefaults({
     'cycles': '1t',
     'stride': '1000',
     'striderate': '1:1.05:restart'
-});
+}));
 
 var csvlogger = csvoutput.open('stepup_metrics/stepup_rates.csv', 'time', 'workload', 'rate', 'ops')
 var csvhistologger=csvmetrics.log("stepup_metrics");
