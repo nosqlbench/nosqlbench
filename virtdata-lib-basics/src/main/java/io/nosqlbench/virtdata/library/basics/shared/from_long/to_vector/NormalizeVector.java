@@ -37,9 +37,9 @@ public class NormalizeVector implements Function<List<Double>,List<Double>> {
         for (Double scalar : doubles) {
             accumulator+=scalar*scalar;
         }
-        double vectorLen = Math.sqrt(accumulator);
+        double scalarLen = Math.sqrt(accumulator);
         for (double scalarComponent : doubles) {
-            unit.add(scalarComponent/vectorLen);
+            unit.add(scalarComponent/scalarLen);
         }
         return unit;
     }

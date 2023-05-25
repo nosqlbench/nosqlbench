@@ -16,8 +16,10 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,13 +44,26 @@ public class UniformVectorSteppedTest {
     @Test
     public void testUniformVectorSteppedHasRanges() {
         UniformVectorSizedStepped f3 = new UniformVectorSizedStepped(4,3.0,5.0,7.0,9.0);
+        DoubleSummaryStatistics[] dssa = new DoubleSummaryStatistics[] {
+            new DoubleSummaryStatistics(),
+            new DoubleSummaryStatistics(),
+            new DoubleSummaryStatistics(),
+            new DoubleSummaryStatistics()
+        };
         for (int i = 0; i < 1000; i++) {
             List<Double> v4 = f3.apply(i);
-            assertThat(v4.get(0)).isBetween(3.0d,5.0d);
-            assertThat(v4.get(1)).isBetween(7.0d,9.0d);
-            assertThat(v4.get(2)).isBetween(0.0d,1.0d);
-            assertThat(v4.get(3)).isBetween(0.0d,1.0d);
+            for (int j = 0; j <= 3; j++) {
+                dssa[j].accept(v4.get(j));
+            }
         }
+        assertThat(dssa[0].getMin()).isCloseTo(3.0d, Offset.offset(0.1d));
+        assertThat(dssa[0].getMax()).isCloseTo(5.0d, Offset.offset(0.1d));
+        assertThat(dssa[1].getMin()).isCloseTo(7.0d, Offset.offset(0.1d));
+        assertThat(dssa[1].getMax()).isCloseTo(9.0d, Offset.offset(0.1d));
+        assertThat(dssa[2].getMin()).isCloseTo(0.0d, Offset.offset(0.1d));
+        assertThat(dssa[2].getMax()).isCloseTo(1.0d, Offset.offset(0.1d));
+        assertThat(dssa[3].getMin()).isCloseTo(0.0d, Offset.offset(0.1d));
+        assertThat(dssa[3].getMax()).isCloseTo(1.0d, Offset.offset(0.1d));
     }
 
 }
