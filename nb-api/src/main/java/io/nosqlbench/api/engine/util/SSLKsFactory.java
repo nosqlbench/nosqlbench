@@ -22,9 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
@@ -53,6 +51,23 @@ public class SSLKsFactory implements NBMapConfigurable {
     public static final String SSL = "ssl";
     public static final String DEFAULT_TLSVERSION = "TLSv1.2";
 
+    private static final TrustManager[] trustAllCerts = new TrustManager[]{
+            new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                }
+
+                @Override
+                public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                }
+
+                @Override
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return new java.security.cert.X509Certificate[]{};
+                }
+            }
+    };
+
     /**
      * Consider: https://gist.github.com/artem-smotrakov/bd14e4bde4d7238f7e5ab12c697a86a3
      */
@@ -73,6 +88,7 @@ public class SSLKsFactory implements NBMapConfigurable {
 
     public SocketFactory createSocketFactory(NBConfiguration cfg) {
         SSLContext context = getContext(cfg);
+
         if (context == null) {
             throw new IllegalArgumentException("SSL is not enabled.");
         }
@@ -91,11 +107,12 @@ public class SSLKsFactory implements NBMapConfigurable {
             boolean activeSSLValidation = true;
             if (cfg.getOptional("sslValidation").isPresent() && cfg.getOptional("sslValidation")
                     .get().equals("false")) {
-                logger.trace("sslValidation=false, skipping SSL validation.");
+                logger.warn("sslValidation=false, skipping SSL validation.  " +
+                        "THIS OPTION SHOULD ONLY BE TESTING AND NON-PROD ENVIRONMENTS");
                 activeSSLValidation = false;
             }
 
-            if (activeSSLValidation && sslParam.get().equals("jdk")) {
+            if (sslParam.get().equals("jdk")) {
 
                 final char[] keyStorePassword = cfg.getOptional("kspass")
                         .map(String::toCharArray)
@@ -123,10 +140,10 @@ public class SSLKsFactory implements NBMapConfigurable {
                     }
                 }).orElse(null);
 
-            } else if (activeSSLValidation && sslParam.get().equals("openssl")) {
+            } else if (sslParam.get().equals("openssl")) {
                 try {
-                    CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
+                    CertificateFactory cf = CertificateFactory.getInstance("X.509");
                     keyStore = KeyStore.getInstance("JKS");
                     keyStore.load(null, null);
 
@@ -135,9 +152,8 @@ public class SSLKsFactory implements NBMapConfigurable {
                             return cf.generateCertificate(is);
                         } catch (Exception e) {
                             throw new RuntimeException(
-                                    String.format("Unable to load cert from %s: " + e, certFilePath),
-                                    e
-                            );
+                                    String.format("Unable to load cert from %s: due to:%s ", certFilePath,
+                                            e.getMessage()), e);
                         }
                     }).orElse(null);
 
@@ -180,7 +196,7 @@ public class SSLKsFactory implements NBMapConfigurable {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if (activeSSLValidation) {
+            } else {
                 throw new RuntimeException("The 'ssl' parameter must have one of jdk, or openssl");
             }
 
@@ -197,13 +213,18 @@ public class SSLKsFactory implements NBMapConfigurable {
             try {
                 tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 tmf.init(trustStore != null ? trustStore : keyStore);
+
             } catch (Exception e) {
                 throw new RuntimeException("Unable to init TrustManagerFactory: " + e.getMessage(), e);
             }
 
             try {
                 SSLContext sslContext = SSLContext.getInstance(tlsVersion);
-                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+                if (!activeSSLValidation) {
+                    sslContext.init(kmf.getKeyManagers(), trustAllCerts, new SecureRandom());
+                } else {
+                    sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+                }
                 return sslContext;
             } catch (Exception e) {
                 throw new RuntimeException(e);
