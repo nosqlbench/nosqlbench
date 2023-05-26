@@ -1,5 +1,35 @@
-# pinecone driver
+# pinecone driver adapter
+The pinecone driver adapter is a nb adapter for the pinecone driver, an open source Java driver for connecting to and
+performing operations on an instance of a Pinecone Vector database. The driver is hosted on github at
+https://github.com/pinecone-io/pinecone-java-client
 
+## activity parameters
+The following parameters must be supplied to the adapter at runtime in order to successfully connect to an
+instance of the Pinecone database:
+
+* api key - In order to use the pinecone database you must have an account. Once the account is created you can request
+            an api key. This key will need to be provided any time a database connection is desired.
+* environment - When an Index is created in the database the environment must be specified as well. The adapter will
+                use the default value of us-east-1 if none is provided at runtime.
+* project name - A project name must also be provided at time of index creation. This name then needs to be provided
+                 to the adapter at runtime.
+
+## Op Templates
+
+The Pinecone adapter supports all operations supported by the Java driver published by Pinecone.
+The official Pinecone API reference can be found at
+https://docs.pinecone.io/reference/describe_index_stats_post
+
+The operations include:
+
+* Delete
+* DescribeIndexStats
+* Fetch
+* Query
+* Update
+* Upsert
+
+## Examples
 ```yaml
 ops:
   # A pinecone query op
