@@ -29,7 +29,7 @@ import java.util.function.Function;
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class NormalizeVector implements Function<List<Double>,List<Double>> {
+public class NormalizeDoubleVectorList implements Function<List<Double>,List<Double>> {
     @Override
     public List<Double> apply(List<Double> doubles) {
         ArrayList<Double> unit = new ArrayList<>(doubles.size());
