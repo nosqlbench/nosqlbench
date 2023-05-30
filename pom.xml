@@ -111,6 +111,7 @@
         <module>adapter-s4j</module>
         <module>adapter-kafka</module>
         <module>adapter-jdbc</module>
+        <module>adapter-pinecone</module>
 
         <!-- VIRTDATA MODULES -->
         <module>virtdata-api</module>

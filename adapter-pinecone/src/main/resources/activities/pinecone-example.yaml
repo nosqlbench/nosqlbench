@@ -1,0 +1,19 @@
+bindings:
+  vector: Need function to generate a list of float values here
+  comparator: Uniform(1,1000) -> int
+
+blocks:
+  query:
+    ops:
+      query-op1:
+        query: "test-index"
+        vector: {vector}
+        namespace: "test-namespace"
+        top_k: 10
+        filters:
+          - filter_field: "value"
+            operator: "$lt"
+            comparator: {comparator}
+        include_values: true
+        include_metadata: true
+
