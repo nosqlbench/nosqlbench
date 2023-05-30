@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.pinecone;
 
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
+import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.engine.api.activityimpl.OpMapper;
 import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
@@ -39,6 +40,11 @@ public class PineconeDriverAdapter extends BaseDriverAdapter<PineconeOp, Pinecon
     @Override
     public Function<String, ? extends PineconeSpace> getSpaceInitializer(NBConfiguration cfg) {
         return (s) -> new PineconeSpace(s,cfg);
+    }
+
+    @Override
+    public NBConfigModel getConfigModel() {
+        return super.getConfigModel().add(PineconeSpace.getConfigModel());
     }
 
 }
