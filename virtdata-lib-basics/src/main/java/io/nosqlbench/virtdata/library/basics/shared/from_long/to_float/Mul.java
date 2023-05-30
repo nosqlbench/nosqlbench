@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_float;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
-import java.util.function.LongFunction;
+import java.util.function.LongToDoubleFunction;
 
 @ThreadSafeMapper
 @Categories({Category.general})
-public class Mul implements LongFunction<Float> {
-    private final float factor;
+public class Mul implements LongToDoubleFunction {
+    private final double factor;
 
-    public Mul(float factor) {
+    public Mul(double factor) {
         this.factor = factor;
     }
 
     @Override
-    public Float apply(long value) {
+    public double applyAsDouble(long value) {
         return factor * value;
     }
 }

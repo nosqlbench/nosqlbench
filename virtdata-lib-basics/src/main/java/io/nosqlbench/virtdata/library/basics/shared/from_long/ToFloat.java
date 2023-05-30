@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,37 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
+package io.nosqlbench.virtdata.library.basics.shared.from_long;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 
 import java.util.function.LongFunction;
 
-@ThreadSafeMapper
-@Categories({Category.general})
-public class Mul implements LongFunction<Float> {
-    private final float factor;
 
-    public Mul(float factor) {
-        this.factor = factor;
+/**
+ * Wrap any function producing a valid numeric value as a float.
+ */
+@Categories(Category.conversion)
+@ThreadSafeMapper
+public class ToFloat implements LongFunction<Float> {
+
+    private final LongFunction<Float> func;
+
+    ToFloat(Object funcOrValue) {
+        if (funcOrValue instanceof Number number) {
+            final float afloat = number.floatValue();
+            this.func = l -> afloat;
+        } else {
+            this.func = VirtDataConversions.adaptFunction(funcOrValue,LongFunction.class,Float.class);
+        }
+
     }
 
     @Override
     public Float apply(long value) {
-        return factor * value;
+        return func.apply(value);
     }
 }

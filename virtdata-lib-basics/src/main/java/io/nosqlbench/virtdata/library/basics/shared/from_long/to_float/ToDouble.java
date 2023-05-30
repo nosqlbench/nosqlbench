@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2022 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_float;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
-import java.util.function.LongFunction;
+import java.util.function.LongToDoubleFunction;
 
+/**
+ * Convert the input value to a double.
+ */
 @ThreadSafeMapper
-@Categories({Category.general})
-public class Mul implements LongFunction<Float> {
-    private final float factor;
-
-    public Mul(float factor) {
-        this.factor = factor;
-    }
+@Categories({Category.conversion})
+public class ToDouble implements LongToDoubleFunction {
 
     @Override
-    public Float apply(long value) {
-        return factor * value;
+    public double applyAsDouble(long value) {
+        return (double) value;
     }
 }

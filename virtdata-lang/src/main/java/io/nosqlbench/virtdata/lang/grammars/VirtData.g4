@@ -29,13 +29,11 @@ floatValue: FLOAT;
 booleanValue: BOOLEAN;
 
 LONG : '-'? INT ('l'|'L') ;
-DOUBLE    :   ('-'? INT '.' '0'* INT EXP? | '-'? INT EXP | '-'? INT ) ('d'|'D') ;
+DOUBLE
+    :   ('-'? INT '.' '0'* INT EXP? | '-'? INT EXP | '-'? INT ) ('d'|'D') ;
 INTEGER : '-'? INT ;
 FLOAT
-    :    '-'? INT '.' ZINT EXP?   // 1.35, 1.35E-9, 0.3, -4.5
-    |   '-'? INT EXP            // 1e10 -3e4
-    |   '-'? INT    // -3, 45
-    ;
+    :   ('-'? INT '.' '0'* INT EXP? | '-'? INT EXP | '-'? INT ) ('f'|'F')? ;
 BOOLEAN : 'true' | 'false';
 
 fragment INT :   '0' | [1-9] [0-9]* ; // no leading zeros
