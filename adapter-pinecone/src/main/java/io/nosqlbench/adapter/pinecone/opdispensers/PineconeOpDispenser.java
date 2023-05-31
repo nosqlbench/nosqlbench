@@ -16,12 +16,17 @@
 
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
+import com.google.protobuf.ListValue;
+import com.google.protobuf.Struct;
+import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
+import java.util.List;
+import java.util.Map;
 import java.util.function.LongFunction;
 
 public abstract class PineconeOpDispenser extends BaseOpDispenser<PineconeOp, PineconeSpace> {
@@ -36,5 +41,38 @@ public abstract class PineconeOpDispenser extends BaseOpDispenser<PineconeOp, Pi
         this.pcFunction = pcFunction;
         this.targetFunction = targetFunction;
     }
+
+    protected LongFunction<Struct> buildFilterStruct(LongFunction<Map> filterFunction) {
+        return  l -> {
+            Map<String,Object> filterFields = filterFunction.apply(l);
+            Value comparatorVal;
+            Object comparator = filterFields.get("comparator");
+            if (comparator instanceof String) {
+                comparatorVal = Value.newBuilder().setStringValue((String) comparator).build();
+            } else if (comparator instanceof Number) {
+                comparatorVal = Value.newBuilder().setNumberValue((Double) comparator).build();
+            } else if (comparator instanceof List) {
+                comparatorVal = Value.newBuilder().setListValue(generateListValue((List) comparator)).build();
+            } else {
+                throw new RuntimeException("Invalid type for filter comparator specified");
+            }
+            return Struct.newBuilder().putFields((String) filterFields.get("filterfield"),
+                Value.newBuilder().setStructValue(
+                        Struct.newBuilder().putFields((String) filterFields.get("operator"),
+                            comparatorVal))
+                    .build()).build();
+        };
+    }
+
+    protected ListValue generateListValue(List comparator) {
+        ListValue.Builder listValueBuilder = ListValue.newBuilder();
+        for (Object entry : comparator) {
+            Value value = Value.newBuilder().setStringValue(String.valueOf(entry)).build();
+            listValueBuilder.addValues(value);
+        }
+        return listValueBuilder.build();
+    }
+
+
 
 }

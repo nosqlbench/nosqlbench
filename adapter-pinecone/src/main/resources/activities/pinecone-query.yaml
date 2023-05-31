@@ -12,3 +12,7 @@ blocks:
         topk: 10
         include_values: true
         include_metadata: true
+        filter:
+          filterfield: "category"
+          operator: "$eq"
+          comparator: "movies"

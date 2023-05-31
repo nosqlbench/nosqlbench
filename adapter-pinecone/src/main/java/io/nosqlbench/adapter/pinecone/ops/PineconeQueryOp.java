@@ -46,6 +46,9 @@ public class PineconeQueryOp extends PineconeOp {
     public void run() {
         QueryResponse response = connection.getBlockingStub().query(request);
         if (logger.isDebugEnabled()) {
+            for (ScoredVector scored : response.getMatchesList()) {
+                logger.debug(scored.getId() + ": " + scored.getScore());
+            }
             for (SingleQueryResults results : response.getResultsList()) {
                 for (ScoredVector scored : results.getMatchesList()) {
                     logger.debug(scored.getId() + ": " + scored.getScore());

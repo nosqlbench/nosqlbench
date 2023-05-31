@@ -8,5 +8,9 @@ blocks:
       op1:
         delete: "test-index"
         namespace: "example_namespace"
-        ids: "item_0,item_6"
+        #ids: "item_0,item_6"
         deleteall: false
+        filter:
+          filterfield: "category"
+          operator: "$eq"
+          comparator: "sports"

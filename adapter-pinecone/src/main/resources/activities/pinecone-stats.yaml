@@ -1,0 +1,10 @@
+scenarios:
+  default:
+    fetch: run driver=pinecone tags==blocks:describeindexstats cycles=1
+
+blocks:
+  describeindexstats:
+    ops:
+      op1:
+        describeindexstats: "test-index"
+        #filter: ""
