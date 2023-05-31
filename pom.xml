@@ -65,6 +65,7 @@
         <module.adapter-pulsar>adapter-pulsar</module.adapter-pulsar>
         <module.adapter-s4j>adapter-s4j</module.adapter-s4j>
         <module.adapter-kafka>adapter-kafka</module.adapter-kafka>
+        <module.adapter-kafka>adapter-s4r</module.adapter-kafka>
         <module.adapter-jdbc>adapter-jdbc</module.adapter-jdbc>
 
         <!-- VIRTDATA MODULES -->
