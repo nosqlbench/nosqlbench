@@ -1,0 +1,12 @@
+scenarios:
+  default:
+    delete: run driver=pinecone tags==blocks:delete cycles=1
+
+blocks:
+  delete:
+    ops:
+      op1:
+        delete: "test-index"
+        namespace: "example_namespace"
+        ids: "item_0,item_6"
+        deleteall: false
