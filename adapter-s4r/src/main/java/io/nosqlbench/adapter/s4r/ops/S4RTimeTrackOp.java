@@ -22,8 +22,6 @@ import io.nosqlbench.adapter.s4r.S4RSpace;
 import io.nosqlbench.adapter.s4r.util.S4RAdapterMetrics;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.CycleOp;
 
-import java.io.IOException;
-
 public abstract class S4RTimeTrackOp implements CycleOp<Object> {
     private final S4RAdapterMetrics s4rAdapterMetrics;
     protected final S4RSpace s4RSpace;

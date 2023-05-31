@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapter.s4r.dispensers;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import io.nosqlbench.adapter.s4r.S4RSpace;
@@ -41,10 +40,10 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
 
     private final static Logger logger = LogManager.getLogger("AmqpMsgSendOpDispenser");
 
-    private boolean publisherConfirm ;
+    private final boolean publisherConfirm ;
     // Only relevant when 'publisherConfirm' is true
     // - default to "individual" confirm
-    private String confirmMode;
+    private final String confirmMode;
 
     // Only relevant when 'publisherConfirm' is true and 'confirmMode' is 'batch'
     // - default to 100
@@ -103,7 +102,7 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
             new S4RSpace.AmqpSenderChannelKey(connSeqNum, channelSeqNum, senderSeqNum);
 
         return s4rSpace.getAmqpSenderChannel(amqpConnChannelKey, () -> {
-            Channel channel = null;
+            Channel channel;
 
             try {
                 channel = getChannelWithExchange(
@@ -156,7 +155,7 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
             throw new S4RAdapterInvalidParamException("Message payload must be specified and can't be empty!");
         }
 
-        Channel channel = null;
+        Channel channel;
         String exchangeName = getEffectiveExchangeName(cycle);
 
         try {
