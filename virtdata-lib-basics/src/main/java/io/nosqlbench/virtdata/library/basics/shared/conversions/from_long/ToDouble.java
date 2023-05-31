@@ -21,39 +21,39 @@ import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 
-import java.util.function.LongFunction;
+import java.util.function.LongToDoubleFunction;
 
 
 /**
- * Create a float by converting values. This function works in the following modes:
+ * Create a double by converting values. This function works in the following modes:
  * <UL>
- *     <LI>If a float is provided, then the long input is scaled to be between 0.0f and the value provided,
+ *     <LI>If a double is provided, then the long input is scaled to be between 0.0f and the value provided,
  *     as a fraction of the highest possible long.</LI>
- *     <LI>If any other type of number is provided, then this function returns the equivalent float value.</LI>
+ *     <LI>If any other type of number is provided, then this function returns the equivalent double value.</LI>
  *     <LI>Otherwise, the input is assumed to be a function which takes a long input, and, if necessary,
- *     adapts to return a float with an appropriate type conversion.</LI>
+ *     adapts to return a double with an appropriate type conversion.</LI>
  * </UL>
  */
 @Categories(Category.conversion)
 @ThreadSafeMapper
-public class ToFloat implements LongFunction<Float> {
+public class ToDouble implements LongToDoubleFunction {
 
-    private final LongFunction<Float> func;
+    private final LongToDoubleFunction func;
 
-    ToFloat(Object func) {
-        if (func instanceof Float afloat) {
-            float scale = afloat.floatValue();
-            this.func = l -> (float) (l % scale);
+    ToDouble(Object func) {
+        if (func instanceof Double aDouble) {
+            double scale = aDouble.doubleValue();
+            this.func = l -> (double) (l % scale);
         } else if (func instanceof Number number) {
-            final float afloat = number.floatValue();
-            this.func = l -> afloat;
+            final double aDouble = number.doubleValue();
+            this.func = l -> aDouble;
         } else {
-            this.func = VirtDataConversions.adaptFunction(func, LongFunction.class, Float.class);
+            this.func = VirtDataConversions.adaptFunction(func, LongToDoubleFunction.class);
         }
     }
 
     @Override
-    public Float apply(long value) {
-        return func.apply(value);
+    public double applyAsDouble(long value) {
+        return func.applyAsDouble(value);
     }
 }

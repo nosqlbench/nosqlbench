@@ -20,7 +20,7 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashedDoubleRange;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashRange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class WeightedLongs implements LongFunction<Long> {
     private final String valuesAndWeights;
     private double[] unitWeights; // Positional weights after parsing and unit weight normalization
     private double[] cumulativeWeights;
-    private final HashedDoubleRange unitRange = new HashedDoubleRange(0.0D, 1.0D);
+    private final HashRange unitRange = new HashRange(0.0D, 1.0D);
     private long[] values;
 
     @Example({"WeightedLongs('1:10;3;5;12345;1","Yield 1 62.5% of the time, 3 31.25% of the time, and 12345 6.2% of the time"})

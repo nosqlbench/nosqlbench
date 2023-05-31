@@ -24,7 +24,7 @@ public class FloatArg implements ArgType {
         this.floatValue = floatValue;
     }
 
-    public double getFloatValue() {
+    public float getFloatValue() {
         return floatValue;
     }
 

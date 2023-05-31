@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2022 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,36 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.from_long;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_float;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
 import java.util.function.LongFunction;
 
-
-/**
- * Wrap any function producing a valid numeric value as a float.
- */
-@Categories(Category.conversion)
 @ThreadSafeMapper
-public class ToFloat implements LongFunction<Float> {
+@Categories({Category.general})
+public class HashRange implements LongFunction<Float> {
 
-    private final LongFunction<Float> func;
+    private final float min;
+    private final float max;
+    private final float interval;
+    private final static float MAX_FLOAT_VIA_LONG = (float) Long.MAX_VALUE;
+    private final Hash hash = new Hash();
 
-    ToFloat(Object funcOrValue) {
-        if (funcOrValue instanceof Number number) {
-            final float afloat = number.floatValue();
-            this.func = l -> afloat;
-        } else {
-            this.func = VirtDataConversions.adaptFunction(funcOrValue,LongFunction.class,Float.class);
-        }
-
+    public HashRange(float min, float max) {
+        this.min = min;
+        this.max = max;
+        this.interval = max - min;
     }
 
     @Override
     public Float apply(long value) {
-        return func.apply(value);
+        long hashed = hash.applyAsLong(value);
+        float unitScale = ((float) hashed) / MAX_FLOAT_VIA_LONG;
+        float valueScaled =interval*unitScale + min;
+        return valueScaled;
     }
 }

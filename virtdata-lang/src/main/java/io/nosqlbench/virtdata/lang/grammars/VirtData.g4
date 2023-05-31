@@ -9,8 +9,8 @@ expression : (lvalue ASSIGN)? virtdataCall ;
 
 virtdataCall :
  ( inputType TYPEARROW )?
- ( funcName '(' (arg (',' arg )* )? ')' )
- ( TYPEARROW outputType )?
+ ( funcName '(' (WS? arg ( WS? ',' WS? arg )* WS? )? WS? ')' )
+ ( TYPEARROW outputType )? WS?
  ;
 
 lvalue : ID;

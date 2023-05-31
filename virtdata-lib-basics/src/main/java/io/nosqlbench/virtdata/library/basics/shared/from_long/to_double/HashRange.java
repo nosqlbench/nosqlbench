@@ -49,7 +49,7 @@ import java.util.function.LongToDoubleFunction;
  */
 @ThreadSafeMapper
 @Categories({Category.general})
-public class HashedDoubleRange implements LongToDoubleFunction {
+public class HashRange implements LongToDoubleFunction {
 
     private final double min;
     private final double max;
@@ -57,7 +57,7 @@ public class HashedDoubleRange implements LongToDoubleFunction {
     private final static double MAX_DOUBLE_VIA_LONG = (double) Long.MAX_VALUE;
     private final Hash hash = new Hash();
 
-    public HashedDoubleRange(double min, double max) {
+    public HashRange(double min, double max) {
         this.min = min;
         this.max = max;
         this.interval = max - min;

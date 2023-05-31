@@ -24,19 +24,30 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import java.util.function.Function;
 import java.util.List;
 
+/**
+ * Convert the incoming object List, Number, or Array to a CqlVector
+ * using {@link CqlVector.Builder#add(Object[])}}. If any numeric value
+ * is passed in, then it becomes the only component of a 1D vector.
+ * Otherwise, the individual values are added as vector components.
+ */
 @ThreadSafeMapper
 @Categories(Category.experimental)
 public class ToCqlVector implements Function<Object, CqlVector> {
 
     @Override
     public CqlVector apply(Object object) {
+        Object[] ary = null;
         if (object instanceof List list) {
-            CqlVector.Builder vbuilder = CqlVector.builder();
-            vbuilder.add(list.toArray());
-            return vbuilder.build();
+            ary = list.toArray();
+        } else if (object instanceof Number number) {
+            ary = new Object[]{number.floatValue()};
+        } else if (object.getClass().isArray()) {
+            ary = (Object[]) object;
         } else {
-            // handle ary types, etc
             throw new RuntimeException("Unsupported input type for CqlVector: " + object.getClass().getCanonicalName());
         }
+        CqlVector.Builder vbuilder = CqlVector.builder();
+        vbuilder.add(ary);
+        return vbuilder.build();
     }
 }

@@ -19,7 +19,7 @@ package io.nosqlbench.virtdata.library.basics.shared.stateful;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashedDoubleRange;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashRange;
 
 import java.util.function.LongFunction;
 
@@ -34,7 +34,7 @@ public class NullOrLoad implements LongFunction<Object> {
 
     private final String varname;
     private final double ratio;
-    private final HashedDoubleRange rangefunc = new HashedDoubleRange(0.0D,1.0D);
+    private final HashRange rangefunc = new HashRange(0.0D,1.0D);
     private final Load load;
 
     public NullOrLoad(double ratio, String varname) {
