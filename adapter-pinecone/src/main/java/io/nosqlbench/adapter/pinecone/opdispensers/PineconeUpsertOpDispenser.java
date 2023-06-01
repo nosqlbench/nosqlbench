@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
+import com.google.protobuf.ListValue;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
@@ -98,16 +99,8 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
                         .build());
                 }
                 if (vector.containsKey("metadata")) {
-                    Map<String, Value> metadata_map = new HashMap<>();
-                    BiConsumer<String,Object> stringToValue = (key, val) -> {
-                        Value targetval = null;
-                        if (val instanceof String) targetval = Value.newBuilder().setStringValue((String)val).build();
-                        else if (val instanceof Number) targetval = Value.newBuilder().setNumberValue((((Number) val).doubleValue())).build();
-                        metadata_map.put(key, targetval);
-                    };
                     Map<String, Object> metadata_values_map = (Map<String, Object>) vector.get("metadata");
-                    metadata_values_map.forEach(stringToValue);
-                    vb.setMetadata(Struct.newBuilder().putAllFields(metadata_map).build());
+                    vb.setMetadata(Struct.newBuilder().putAllFields(generateMetadataMap(metadata_values_map)).build());
                 }
                 returnVectors.add(vb.build());
             }

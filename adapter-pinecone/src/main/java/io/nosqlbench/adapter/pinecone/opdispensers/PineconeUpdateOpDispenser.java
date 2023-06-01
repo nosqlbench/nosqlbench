@@ -98,16 +98,9 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
     private LongFunction<Struct> createUpdateMetadataFunction(ParsedOp op) {
         Optional<LongFunction<Map>> mFunc = op.getAsOptionalFunction("metadata", Map.class);
         return mFunc.<LongFunction<Struct>>map(mapLongFunction -> l -> {
-            Map<String, Value> metadata_map = new HashMap<String,Value>();
-            BiConsumer<String,Object> stringToValue = (key, val) -> {
-                Value targetval = null;
-                if (val instanceof String) targetval = Value.newBuilder().setStringValue((String)val).build();
-                else if (val instanceof Number) targetval = Value.newBuilder().setNumberValue((((Number) val).doubleValue())).build();
-                metadata_map.put(key, targetval);
-            };
             Map<String, Object> metadata_values_map = mapLongFunction.apply(l);
-            metadata_values_map.forEach(stringToValue);
-            return UpdateRequest.newBuilder().getSetMetadataBuilder().putAllFields(metadata_map).build();
+            return UpdateRequest.newBuilder().getSetMetadataBuilder()
+                .putAllFields(generateMetadataMap(metadata_values_map)).build();
         }).orElse(null);
     }
 
