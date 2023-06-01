@@ -111,6 +111,7 @@
         <module>adapter-pulsar</module>
         <module>adapter-s4j</module>
         <module>adapter-kafka</module>
+        <module>adapter-s4r</module>
         <module>adapter-jdbc</module>
         <module>adapter-pinecone</module>
 
