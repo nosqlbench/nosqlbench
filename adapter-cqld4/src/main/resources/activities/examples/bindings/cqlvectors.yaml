@@ -15,6 +15,6 @@ bindings:
   # create a HOF CqlVector binding
   hof_vary_vector: CqlVector(ListSizedHashed(HashRange(3,5)->int,HashRange(0.0f,1.0f)))
   # create a normalized vectors of dimension 10
-  hof_ten_unit: MyCqlVector(ListSizedHashed(10,HashRange(0.0f,1.0f))); NormalizeVector();
+  hof_ten_unit: CqlVector(ListSizedHashed(10,HashRange(0.0f,1.0f))); NormalizeVector();
 
 
