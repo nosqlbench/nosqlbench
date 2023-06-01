@@ -1,6 +1,6 @@
 scenarios:
   default:
-    query: run driver=pinecone tags==blocks:upsert cycles=1000
+    upsert: run driver=pinecone tags==blocks:upsert cycles=1000
 
 blocks:
   upsert:

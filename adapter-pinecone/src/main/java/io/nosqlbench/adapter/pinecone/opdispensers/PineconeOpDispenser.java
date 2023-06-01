@@ -88,9 +88,9 @@ public abstract class PineconeOpDispenser extends BaseOpDispenser<PineconeOp, Pi
     }
 
     protected Map<String, Value> generateMetadataMap(Map<String, Object> metadata_values_map) {
-        Map<String, Value> metadata_map = new HashMap<String,Value>();
+        Map<String, Value> metadata_map = new HashMap<>();
         BiConsumer<String,Object> stringToValue = (key, val) -> {
-            Value targetval = null;
+            Value targetval;
             if (val instanceof String) targetval = Value.newBuilder().setStringValue((String)val).build();
             else if (val instanceof Number) targetval = Value.newBuilder().setNumberValue((((Number) val).doubleValue())).build();
             else if (val instanceof List) targetval = Value.newBuilder().setListValue(generateListValue((List) val)).build();

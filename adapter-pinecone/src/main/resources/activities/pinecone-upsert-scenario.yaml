@@ -1,0 +1,20 @@
+scenarios:
+  default:
+    upsert: run driver=pinecone tags==blocks:upsert cycles=1000 cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+
+bindings:
+  id: Mod(<<keycount:1000000000>>); ToString() -> String
+  vector_value: ListSizedHashed(<<dimensions:5>>,HashRange(0.0f,100.0f) -> float); ToString() -> String
+  city: Cities()
+
+blocks:
+  upsert:
+    ops:
+      op1:
+        upsert: "test-index"
+        namespace: "example_namespace"
+        upsert_vectors:
+          - id: {id}
+            values: {vector_value}
+            metadata:
+              city: {city}
