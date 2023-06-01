@@ -80,10 +80,10 @@ public class Cqld4Space implements AutoCloseable {
         helpers.applyConfig(cqlHelperCfg);
 
         // add user-provided parameters
-        NBConfiguration driverCfg = getDriverOptionsModel().extractConfig(cfg);
-        if (!driverCfg.isEmpty()) {
+        NBConfiguration nbActivityDriverOptions = getDriverOptionsModel().extractConfig(cfg);
+        if (!nbActivityDriverOptions.isEmpty()) {
             Map<String, Object> remapped = new LinkedHashMap<>();
-            driverCfg.getMap().forEach((k, v) -> remapped.put(k.substring("driver.".length()), v));
+            nbActivityDriverOptions.getMap().forEach((k, v) -> remapped.put(k.substring("driver.".length()), v));
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String remappedViaSerdesToSatisfyObtuseConfigAPI = gson.toJson(remapped);
             DriverConfigLoader userProvidedOptions = DriverConfigLoader.fromString(remappedViaSerdesToSatisfyObtuseConfigAPI);
@@ -94,9 +94,7 @@ public class Cqld4Space implements AutoCloseable {
         DriverConfigLoader cfgDefaults = resolveConfigLoader(cfg).orElse(DriverConfigLoader.fromMap(OptionsMap.driverDefaults()));
         dcl = new CompositeDriverConfigLoader(dcl, cfgDefaults);
 
-        builder.withConfigLoader(dcl);
-
-        int port = cfg.getOptional(int.class, "port").orElse(9042);
+//        int port = cfg.getOptional(int.class, "port").orElse(9042);
 
         Optional<String> scb = cfg.getOptional(String.class, "secureconnectbundle", "scb");
         scb.flatMap(s -> NBIO.all().pathname(s).first().map(Content::getInputStream))
@@ -107,20 +105,18 @@ public class Cqld4Space implements AutoCloseable {
             .map(s -> Arrays.asList(s.split(",")))
             .map(
                 sl -> sl.stream()
-                    .map(n -> new InetSocketAddress(n, port))
+                    .map(n -> new InetSocketAddress(n, cfg.getOptional(int.class, "port").orElse(9042)))
                     .collect(Collectors.toList())
             );
 
-        if (scb.isEmpty()) {
-            if (contactPointsOption.isPresent()) {
-                builder.addContactPoints(contactPointsOption.get());
-                Optional<String> localdc = cfg.getOptional("localdc");
-                builder.withLocalDatacenter(localdc.orElseThrow(
-                    () -> new BasicError("Starting with driver 4.0, you must specify the local datacenter name with any specified contact points. Example: (use caution) localdc=datacenter1")
-                ));
-            } else {
-                builder.addContactPoints(List.of(new InetSocketAddress("localhost", port)));
-            }
+        if (contactPointsOption.isPresent()) {
+            builder.addContactPoints(contactPointsOption.get());
+            Optional<String> localdc = cfg.getOptional("localdc");
+            builder.withLocalDatacenter(localdc.orElseThrow(
+                () -> new BasicError("Starting with driver 4.0, you must specify the local datacenter name with any specified contact points. Example: (use caution) localdc=datacenter1")
+            ));
+        } else {
+            builder.addContactPoints(List.of(new InetSocketAddress("localhost", cfg.getOptional(int.class, "port").orElse(9042))));
         }
 
 //        builder.withCompression(ProtocolOptions.Compression.NONE);
@@ -203,6 +199,7 @@ public class Cqld4Space implements AutoCloseable {
             builder.withSslContext(ctx);
         }
 
+        builder.withConfigLoader(dcl);
         CqlSession session = builder.build();
         return session;
     }
@@ -244,9 +241,9 @@ public class Cqld4Space implements AutoCloseable {
 
             // URLs
             try {
-                Optional<Content<?>> removeconf = NBIO.remote().pathname(driverconfig).first();
-                if (removeconf.isPresent()) {
-                    loaders.add(DriverConfigLoader.fromUrl(removeconf.get().getURI().toURL()));
+                Optional<Content<?>> remoteconf = NBIO.remote().pathname(driverconfig).first();
+                if (remoteconf.isPresent()) {
+                    loaders.add(DriverConfigLoader.fromUrl(remoteconf.get().getURI().toURL()));
                     continue;
                 }
             } catch (Exception e) {
@@ -284,7 +281,7 @@ public class Cqld4Space implements AutoCloseable {
             .add(Param.optional("localdc"))
             .add(Param.optional(List.of("secureconnectbundle", "scb")))
             .add(Param.optional(List.of("hosts", "host")))
-            .add(Param.defaultTo("port",9042))
+            .add(Param.defaultTo("port", 9042))
             .add(Param.optional("driverconfig", String.class))
             .add(Param.optional("username", String.class, "user name (see also password and passfile)"))
             .add(Param.optional("userfile", String.class, "file to load the username from"))

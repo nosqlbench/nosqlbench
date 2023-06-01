@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class VirtDataComposer {
         Object[] fargs = fcall.getArguments();
         Object[][] params = new Object[fargs.length][];
 
-        for (int pos = 0; pos <fargs.length; pos++) {
+        for (int pos = 0; pos <fargs.length; pos++) { // Resolve functions recursively if needed
             Object param = fargs[pos];
             if (param instanceof FunctionCall) {
 

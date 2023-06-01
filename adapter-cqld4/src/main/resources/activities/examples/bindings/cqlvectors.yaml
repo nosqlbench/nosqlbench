@@ -8,13 +8,13 @@ scenarios:
   hof-tenunit: run driver=stdout bindings='"'hof_ten.*' cycles=10 format=readout
 
 bindings:
-#  # default provides a 5-component vector, with unit-interval values. (Not normalized)
-#  simple_vector: CqlVector()
-#  # create a HOF CqlVector(dim 4) binding which composes around a long -> list function
-#  hof_vector: CqlVector(ListSizedHashed(4,HashRange(0.0f,1.0f)))
-#  # create a HOF CqlVector binding
-#  hof_vary_vector: CqlVector(ListSizedHashed(HashRange(3,5)->int,HashRange(0.0f,1.0f)))
+  # default provides a 5-component vector, with unit-interval values. (Not normalized)
+  simple_vector: CqlVector()
+  # create a HOF CqlVector(dim 4) binding which composes around a long -> list function
+  hof_vector: CqlVector(ListSizedHashed(4,HashRange(0.0f,1.0f)))
+  # create a HOF CqlVector binding
+  hof_vary_vector: CqlVector(ListSizedHashed(HashRange(3,5)->int,HashRange(0.0f,1.0f)))
   # create a normalized vectors of dimension 10
-  hof_ten_unit: CqlVector(NormalizeVector(ListSizedHashed(10,HashRange(0.0f,1.0f))))
+  hof_ten_unit: MyCqlVector(ListSizedHashed(10,HashRange(0.0f,1.0f))); NormalizeVector();
 
 

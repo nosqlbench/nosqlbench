@@ -21,15 +21,13 @@ import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.ListSizedHashed;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_float.HashRange;
 
 import java.util.List;
 import java.util.function.LongFunction;
 
 /**
  * Create a new CqlVector from a composed function, where the inner function
- * is a list generation function.
+ * is a list generation function that must take a long (cycle) input.
  */
 @ThreadSafeMapper
 @Categories(Category.HOF)
@@ -41,15 +39,15 @@ public class CqlVector implements LongFunction<com.datastax.oss.driver.api.core.
     public CqlVector(Object func) {
         this.func = VirtDataConversions.adaptFunction(func,LongFunction.class, List.class);
     }
-
-    @Example({"CqlVector()","Create a default 5-component vector with unit-interval components."})
-    public CqlVector() {
-        this(new ListSizedHashed(5, new HashRange(0.0f, 1.0f)));
-    }
+//
+//    @Example({"CqlVector()","Create a default 5-component vector with unit-interval components."})
+//    public CqlVector() {
+//        this(new ListSizedHashed(5, new HashRange(0.0f, 1.0f)));
+//    }
 
     @Override
-    public com.datastax.oss.driver.api.core.data.CqlVector apply(long value) {
-        List components = func.apply(value);
+    public com.datastax.oss.driver.api.core.data.CqlVector apply(long cycle) {
+        List components = func.apply(cycle);
         com.datastax.oss.driver.api.core.data.CqlVector.Builder vbuilder = com.datastax.oss.driver.api.core.data.CqlVector.builder();
         vbuilder.add(components.toArray());
         return vbuilder.build();
