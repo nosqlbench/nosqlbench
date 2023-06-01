@@ -59,7 +59,7 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
     /**
      * @param op the ParsedOp from which the SparseValues object will be built
      * @return a SparseValues Object to be added to a Pinecone UpdateRequest
-     *
+     * <p>
      * This method interrogates the subsection of the ParsedOp defined for SparseValues parameters and constructs
      * a SparseValues Object based on the included values, or returns null if this section is not populated. The
      * base function returns either the SparseValues Object or null, while the interior function builds the SparseValues
@@ -88,8 +88,8 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
 
     /**
      * @param op the ParsedOp from which the Metadata objects will be built
-     * @return an Metadata Struct to be added to a Pinecone UpdateRequest
-     *
+     * @return a Metadata Struct to be added to a Pinecone UpdateRequest
+     * <p>
      * This method interrogates the subsection of the ParsedOp defined for metadata parameters and constructs
      * a Metadata Struct based on the included values, or returns null if this section is not populated. The
      * base function returns either the Metadata Struct or null, while the interior function builds the Metadata
@@ -114,14 +114,14 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
     /**
      * @param op The ParsedOp used to build the Request
      * @return A function that will take a long (the current cycle) and return a Pinecone UpdateRequest Builder
-     *
+     * <p>
      * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
      * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
      * For each method in the chain a function is created here and added to the chain of functions
      * called at time of instantiation.
-     *
+     * <p>
      * The Metadata and SparseValues objects used by the UpdateRequest are sufficiently sophisticated in their own
-     * building process that they have been broken out into separate methods. At runtime they are built separately
+     * building process that they have been broken out into separate methods. At runtime, they are built separately
      * and then added to the build chain by the builder returned by this method.
      */
     private LongFunction<UpdateRequest.Builder> createUpdateRequestFunction(ParsedOp op) {
@@ -145,14 +145,7 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
         if (vFunc.isPresent()) {
             LongFunction<UpdateRequest.Builder> finalFunc = rFunc;
             LongFunction<String> af = vFunc.get();
-            LongFunction<ArrayList<Float>> alf = l -> {
-                String[] vals = af.apply(l).split(",");
-                ArrayList<Float> fVals = new ArrayList<>();
-                for (String val : vals) {
-                    fVals.add(Float.valueOf(val));
-                }
-                return fVals;
-            };
+            LongFunction<ArrayList<Float>> alf = extractFloatVals(af);
             rFunc = l -> finalFunc.apply(l).addAllValues(alf.apply(l));
         }
 

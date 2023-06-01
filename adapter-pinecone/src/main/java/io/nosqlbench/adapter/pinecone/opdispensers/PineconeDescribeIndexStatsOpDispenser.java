@@ -17,7 +17,6 @@
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
 import com.google.protobuf.Struct;
-import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeDescribeIndexStatsOp;
@@ -54,7 +53,7 @@ public class PineconeDescribeIndexStatsOpDispenser extends PineconeOpDispenser {
     /**
      * @param op The ParsedOp used to build the Request
      * @return A function that will take a long (the current cycle) and return a Pinecone DescribeIndexStatsRequest
-     *
+     * <p>
      * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
      * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
      * For each method in the chain a function is created here and added to the chain of functions

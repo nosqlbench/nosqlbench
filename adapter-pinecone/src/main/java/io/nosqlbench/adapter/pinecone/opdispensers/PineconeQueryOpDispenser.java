@@ -102,14 +102,8 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
         if (vFunc.isPresent()) {
             LongFunction<QueryRequest.Builder> finalFunc = rFunc;
             LongFunction<String> af = vFunc.get();
-            LongFunction<ArrayList<Float>> alf = l -> {
-                String[] vals = af.apply(l).split(",");
-                ArrayList<Float> fVals = new ArrayList<>();
-                for (String val : vals) {
-                    fVals.add(Float.valueOf(val));
-                }
-                return fVals;
-            };
+
+            LongFunction<ArrayList<Float>> alf = extractFloatVals(af);
             rFunc = l -> finalFunc.apply(l).addAllVector(alf.apply(l));
         }
 
@@ -122,6 +116,7 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
 
         return rFunc;
     }
+
 
     /**
      * @param op the ParsedOp from which the Query Vector objects will be built
@@ -151,14 +146,12 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
                     qvb.setTopK((Integer) vector.get("top_k"));
                 }
                 if (vector.containsKey("filter")) {
-                    LongFunction<Struct> builtFilter = buildFilterStruct(l2 -> {
-                        return (Map) vector.get("filter");
-                    });
+                    LongFunction<Struct> builtFilter = buildFilterStruct(l2 -> (Map) vector.get("filter"));
                     qvb.setFilter(builtFilter.apply(l));
                 }
                 if (vector.containsKey("sparse_values")) {
                     Map<String,String> sparse_values = (Map<String, String>) vector.get("sparse_values");
-                    rawValues = ((String) sparse_values.get("values")).split(",");
+                    rawValues = sparse_values.get("values").split(",");
                     floatValues = new ArrayList<>();
                     for (String val : rawValues) {
                         floatValues.add(Float.valueOf(val));

@@ -58,7 +58,7 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
     /**
      * @param op the ParsedOp from which the Vector objects will be built
      * @return an Iterable Collection of Vector objects to be added to a Pinecone UpsertRequest
-     *
+     * <p>
      * This method interrogates the subsection of the ParsedOp defined for Vector parameters and constructs
      * a list of Vectors based on the included values, or returns null if this section is not populated. The
      * base function returns either the List of vectors or null, while the interior function builds the vectors
@@ -82,7 +82,7 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
                 vb.addAllValues(floatValues);
                 if (vector.containsKey("sparse_values")) {
                     Map<String,String> sparse_values = (Map<String, String>) vector.get("sparse_values");
-                    rawValues = ((String) sparse_values.get("values")).split(",");
+                    rawValues = sparse_values.get("values").split(",");
                     floatValues = new ArrayList<>();
                     for (String val : rawValues) {
                         floatValues.add(Float.valueOf(val));
@@ -98,7 +98,7 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
                         .build());
                 }
                 if (vector.containsKey("metadata")) {
-                    Map<String, Value> metadata_map = new HashMap<String, Value>();
+                    Map<String, Value> metadata_map = new HashMap<>();
                     BiConsumer<String,Object> stringToValue = (key, val) -> {
                         Value targetval = null;
                         if (val instanceof String) targetval = Value.newBuilder().setStringValue((String)val).build();
@@ -118,14 +118,14 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
     /**
      * @param op The ParsedOp used to build the Request
      * @return A function that will take a long (the current cycle) and return a Pinecone UpsertRequest Builder
-     *
+     * <p>
      * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
      * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
      * For each method in the chain a function is created here and added to the chain of functions
      * called at time of instantiation.
-     *
+     * <p>
      * The Vector objects used by the UpsertRequest are sufficiently sophisticated in their own
-     * building process that they have been broken out into a separate method. At runtime they are built separately
+     * building process that they have been broken out into a separate method. At runtime, they are built separately
      * and then added to the build chain by the builder returned by this method.
      */
     private LongFunction<UpsertRequest.Builder> createUpsertRequestFunc(ParsedOp op) {

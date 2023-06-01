@@ -40,7 +40,7 @@ public class PineconeOpMapper implements OpMapper<PineconeOp> {
      * Create a new PineconeOpMapper implementing the {@link OpMapper} interface.
      *
      * @param adapter       The associated {@link PineconeDriverAdapter}
-     * @param spaceCache    A cached context Object of thpe {@link PineconeSpace})
+     * @param spaceCache    A cached context Object of the {@link PineconeSpace})
      * @param cfg           The configuration ({@link NBConfiguration}) for this nb run
      */
     public PineconeOpMapper(PineconeDriverAdapter adapter,

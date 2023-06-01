@@ -25,6 +25,7 @@ import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.LongFunction;
@@ -73,6 +74,16 @@ public abstract class PineconeOpDispenser extends BaseOpDispenser<PineconeOp, Pi
         return listValueBuilder.build();
     }
 
+    protected LongFunction<ArrayList<Float>> extractFloatVals(LongFunction<String> af) {
+        return l -> {
+            String[] vals = af.apply(l).split(",");
+            ArrayList<Float> fVals = new ArrayList<>();
+            for (String val : vals) {
+                fVals.add(Float.valueOf(val));
+            }
+            return fVals;
+        };
+    }
 
 
 }

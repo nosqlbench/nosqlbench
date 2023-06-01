@@ -16,9 +16,7 @@
 
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
-import com.google.protobuf.ListValue;
 import com.google.protobuf.Struct;
-import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeDeleteOp;
