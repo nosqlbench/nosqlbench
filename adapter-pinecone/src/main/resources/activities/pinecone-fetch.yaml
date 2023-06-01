@@ -1,0 +1,11 @@
+scenarios:
+  default:
+    fetch: run driver=pinecone tags==blocks:fetch cycles=1
+
+blocks:
+  fetch:
+    ops:
+      op1:
+        fetch: "test-index"
+        namespace: "example_namespace"
+        ids: "item_2,item_3,item_4"

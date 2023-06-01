@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
+import com.google.protobuf.ListValue;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
@@ -27,7 +28,10 @@ import io.pinecone.proto.DeleteRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 
@@ -61,7 +65,6 @@ public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
     /**
      * @param op The ParsedOp used to build the Request
      * @return A function that will take a long (the current cycle) and return a Pinecone DeleteRequest
-     *
      * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
      * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
      * For each method in the chain a function is created here and added to the chain of functions
@@ -95,22 +98,15 @@ public class PineconeDeleteOpDispenser extends PineconeOpDispenser {
             rFunc = l -> finalFunc.apply(l).setDeleteAll(af.apply(l));
         }
 
-        Optional<LongFunction<String>> filterFunction = op.getAsOptionalFunction("filter", String.class);
+        Optional<LongFunction<Map>> filterFunction = op.getAsOptionalFunction("filter", Map.class);
         if (filterFunction.isPresent()) {
             LongFunction<DeleteRequest.Builder> finalFunc = rFunc;
-            LongFunction<Struct> builtFilter = l -> {
-                String[] filterFields = filterFunction.get().apply(l).split(" ");
-                return Struct.newBuilder().putFields(filterFields[0],
-                    Value.newBuilder().setStructValue(Struct.newBuilder().putFields(filterFields[1],
-                            Value.newBuilder().setNumberValue(Integer.parseInt(filterFields[2])).build()))
-                            .build()).build();
-            };
+            LongFunction<Struct> builtFilter = buildFilterStruct(filterFunction.get());
             rFunc = l -> finalFunc.apply(l).setFilter(builtFilter.apply(l));
         }
 
         LongFunction<DeleteRequest.Builder> finalRFunc = rFunc;
         return l -> finalRFunc.apply(l).build();
     }
-
 
 }

@@ -64,31 +64,40 @@ public class PineconeOpMapperTest {
     @Test
     public void testQueryOpDispenserSimple() {
         ParsedOp pop = parsedOpFor("""
-                ops:
-                  op1:
-                     type: "query"
-                     index: "test-index"
-                     vector: "1.0,2.0,3.0"
+            ops:
+              op1:
+                 type: "query"
+                 index: "test-index"
+                 vector: "1.0,2.0,3.0"
+                 namespace: "test-namespace"
+                 top_k: 10
+                 filter:
+                   filterfield: "field"
+                   operator: "$gt"
+                   comparator: 2.0
+                 include_values: true
+                 include_metadata: true
+                 query_vectors:
+                   - id: 1
+                     values: "1.0,2.0,3.0"
+                     top_k: 8
                      namespace: "test-namespace"
-                     top_k: 10
-                     filter: "value $lt 2"
-                     include_values: true
-                     include_metadata: true
-                     query_vectors:
-                       - id: 1
-                         values: "1.0,2.0,3.0"
-                         top_k: 8
-                         namespace: "test-namespace"
-                         filter: "value $lt 2"
-                         sparse_values:
-                           indices: "1,2,3"
-                           values: "1.0,2.0,3.0"
-                       - id: 2
-                         values: "4.0,5.0,6.0"
-                         top_k: 11
-                         namespace: "test-namespace"
-                         filter: "value $gt 10"
-                """);
+                     filter:
+                       filterfield: "field"
+                       operator: "$lt"
+                       comparator: 9.0
+                     sparse_values:
+                       indices: "1,2,3"
+                       values: "1.0,2.0,3.0"
+                   - id: 2
+                     values: "4.0,5.0,6.0"
+                     top_k: 11
+                     namespace: "test-namespace"
+                     filter:
+                       filterfield: "field"
+                       operator: "$eq"
+                       comparator: "val"
+            """);
         OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
         assert(dispenser instanceof PineconeQueryOpDispenser);
         PineconeOp op = dispenser.apply(0);
@@ -105,7 +114,10 @@ public class PineconeOpMapperTest {
                  ids: "1.0,2.0,3.0"
                  namespace: "test-namespace"
                  deleteall: true
-                 filter: "value $gt 10"
+                 filter:
+                   filterfield: "key"
+                   operator: "$eq"
+                   comparator: "val"
             """);
         OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
         assert(dispenser instanceof PineconeDeleteOpDispenser);
@@ -120,7 +132,13 @@ public class PineconeOpMapperTest {
               op1:
                  type: "describeindexstats"
                  index: "test-index"
-                 filter: "value $gt 10"
+                 filter:
+                   filterfield: "color"
+                   operator: "$eq"
+                   comparator:
+                     - "green"
+                     - "yellow"
+                     - "red"
             """);
         OpDispenser<? extends PineconeOp> dispenser = mapper.apply(pop);
         assert(dispenser instanceof PineconeDescribeIndexStatsOpDispenser);

@@ -72,6 +72,8 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
             List<Map<String, Object>> vectors = listLongFunction.apply(l);
             for (Map<String, Object> vector : vectors) {
                 Vector.Builder vb = Vector.newBuilder();
+                // No need to check for key, it is invalid if id is not there, let it throw an exception
+                vb.setId(vector.get("id").toString());
                 String[] rawValues = ((String) vector.get("values")).split(",");
                 ArrayList<Float> floatValues = new ArrayList<>();
                 for (String val : rawValues) {
