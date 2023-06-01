@@ -77,7 +77,7 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
             rFunc = l -> finalFunc.apply(l).setNamespace(af.apply(l));
         }
 
-        Optional<LongFunction<Integer>> tFunc = op.getAsOptionalFunction("topk", Integer.class);
+        Optional<LongFunction<Integer>> tFunc = op.getAsOptionalFunction("top_k", Integer.class);
         if (tFunc.isPresent()) {
             LongFunction<QueryRequest.Builder> finalFunc = rFunc;
             LongFunction<Integer> af = tFunc.get();
