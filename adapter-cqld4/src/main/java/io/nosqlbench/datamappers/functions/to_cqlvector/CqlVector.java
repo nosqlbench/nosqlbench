@@ -35,15 +35,10 @@ public class CqlVector implements LongFunction<com.datastax.oss.driver.api.core.
 
     private final LongFunction<List<?>> func;
 
-    @Example({"CqlVector(ListSized(2,HashedRange(0.2f, 5.0f)","Create a 2-component vector with the given range of values."})
+    @Example({"CqlVector(ListSized(2,HashedRange(0.2f, 5.0f)", "Create a 2-component vector with the given range of values."})
     public CqlVector(Object func) {
-        this.func = VirtDataConversions.adaptFunction(func,LongFunction.class, List.class);
+        this.func = VirtDataConversions.adaptFunction(func, LongFunction.class, List.class);
     }
-//
-//    @Example({"CqlVector()","Create a default 5-component vector with unit-interval components."})
-//    public CqlVector() {
-//        this(new ListSizedHashed(5, new HashRange(0.0f, 1.0f)));
-//    }
 
     @Override
     public com.datastax.oss.driver.api.core.data.CqlVector apply(long cycle) {

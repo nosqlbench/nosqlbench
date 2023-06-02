@@ -27,7 +27,7 @@ public class ToNormalizedVectorTest {
 
     @Test
     public void testNormalizeBasic() {
-        NormalizeDoubleVectorList normalize = new NormalizeDoubleVectorList();
+        NormalizeDoubleListVector normalize = new NormalizeDoubleListVector();
         List<Double> normalized = normalize.apply(List.of(1.0d));
         for (int i = 0; i < normalized.size(); i++) {
             assertThat(normalized.get(i)).isCloseTo(1.0d, Offset.offset(0.00001d));

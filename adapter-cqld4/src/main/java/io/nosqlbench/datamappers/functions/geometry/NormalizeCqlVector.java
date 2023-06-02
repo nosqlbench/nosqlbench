@@ -20,8 +20,10 @@ import com.datastax.oss.driver.api.core.data.CqlVector;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.NormalizeDoubleVectorList;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.NormalizeFloatVectorList;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.NormalizeDoubleListVector;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.NormalizeFloatListVector;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,29 +35,33 @@ import java.util.function.Function;
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class NormalizeVector implements Function<com.datastax.oss.driver.api.core.data.CqlVector ,List> {
-    private final NormalizeDoubleVectorList ndv = new NormalizeDoubleVectorList();
-    private final NormalizeFloatVectorList nfv = new NormalizeFloatVectorList();
+public class NormalizeCqlVector implements Function<com.datastax.oss.driver.api.core.data.CqlVector, com.datastax.oss.driver.api.core.data.CqlVector> {
+    private final NormalizeDoubleListVector ndv = new NormalizeDoubleListVector();
+    private final NormalizeFloatListVector nfv = new NormalizeFloatListVector();
 
+    private final static Logger logger = LogManager.getLogger(NormalizeCqlVector.class);
 
     @Override
-    public List apply(CqlVector cqlVector) {
+    public com.datastax.oss.driver.api.core.data.CqlVector apply(CqlVector cqlVector) {
+
+        CqlVector.Builder builder = CqlVector.builder();
         Iterable values = cqlVector.getValues();
         List<Object> list = new ArrayList<>();
         values.forEach(list::add);
 
-        if (list.size()==0) {
-            return List.of();
+        if (list.isEmpty()) {
+            builder.add(List.of());
         } else if (list.get(0) instanceof Float) {
             List<Float> floats = new ArrayList<>();
-            list.forEach(o -> floats.add((Float)o));
-            return nfv.apply(floats);
+            list.forEach(o -> floats.add((Float) o));
+            builder.add(nfv.apply(floats));
         } else if (list.get(0) instanceof Double) {
             List<Double> doubles = new ArrayList<>();
             list.forEach(o -> doubles.add((Double) o));
-            return ndv.apply(doubles);
+            builder.add(ndv.apply(doubles));
         } else {
             throw new RuntimeException("Only Doubles and Floats are recognized.");
         }
+        return builder.build();
     }
 }

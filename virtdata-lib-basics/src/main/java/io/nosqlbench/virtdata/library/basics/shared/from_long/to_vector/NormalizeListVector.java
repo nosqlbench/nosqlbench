@@ -29,9 +29,9 @@ import java.util.function.Function;
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class NormalizeVector implements Function<List,List> {
-    private final NormalizeDoubleVectorList ndv = new NormalizeDoubleVectorList();
-    private final NormalizeFloatVectorList nfv = new NormalizeFloatVectorList();
+public class NormalizeListVector implements Function<List,List> {
+    private final NormalizeDoubleListVector ndv = new NormalizeDoubleListVector();
+    private final NormalizeFloatListVector nfv = new NormalizeFloatListVector();
 
     @Override
     public List apply(List list) {
@@ -39,7 +39,7 @@ public class NormalizeVector implements Function<List,List> {
             return List.of();
         } else if (list.get(0) instanceof Float) {
             return nfv.apply(list);
-        } else if (list.get(1) instanceof Double) {
+        } else if (list.get(0) instanceof Double) {
             return ndv.apply(list);
         } else {
             throw new RuntimeException("Only Doubles and Floats are recognized.");

@@ -17,12 +17,16 @@
 package io.nosqlbench.virtdata.api.bindings;
 
 import io.nosqlbench.api.errors.BasicError;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.TypeVariable;
 import java.security.InvalidParameterException;
 import java.util.*;
-import java.util.List;
-import java.util.function.*;
+import java.util.function.LongFunction;
 
 public class VirtDataConversions {
 
@@ -33,7 +37,7 @@ public class VirtDataConversions {
         LongFunction(LongFunction.class, long.class, Object.class),
         LongUnaryOperator(java.util.function.LongUnaryOperator.class, long.class, long.class),
         IntFunction(java.util.function.IntFunction.class, int.class, Object.class),
-        IntToDoubleFunction(java.util.function.IntToDoubleFunction.class,int.class,double.class),
+        IntToDoubleFunction(java.util.function.IntToDoubleFunction.class, int.class, double.class),
         IntToLongFunction(java.util.function.IntToLongFunction.class, int.class, long.class),
         IntUnaryOperator(java.util.function.IntUnaryOperator.class, int.class, int.class),
         DoubleFunction(java.util.function.DoubleFunction.class, double.class, Object.class),
@@ -45,6 +49,7 @@ public class VirtDataConversions {
         private final Class<?> functionClazz;
         private final Class<?> inputClazz;
         private final Class<?> outputClazz;
+
 
         FuncType(Class<?> functionClazz, Class<?> inputClazz, Class<?> outputClazz) {
             this.functionClazz = functionClazz;
@@ -62,6 +67,8 @@ public class VirtDataConversions {
         }
 
     }
+
+    private static final Logger logger = LogManager.getLogger(VirtDataConversions.class);
 
     public static <F, T> List<T> adaptFunctionList(F[] funcs, Class<T> functionType, Class<Object>... resultSignature) {
         List<T> functions = new ArrayList<>();
@@ -83,6 +90,7 @@ public class VirtDataConversions {
      * @return An instance of T
      */
     public static <F, T> T adaptFunction(F func, Class<T> functionType, Class<?>... resultSignature) {
+
         FuncType funcType = FuncType.valueOf(func.getClass());
 
         List<Class<?>> signature = new ArrayList<>();
@@ -96,6 +104,7 @@ public class VirtDataConversions {
         signature.addAll(fromSignature);
         signature.addAll(toSignature);
 
+        logger.debug("Adapting function from " + fromSignature + " to " + toSignature);
         if (fromSignature.equals(toSignature)) {
             return (T) func;
         }
@@ -108,8 +117,11 @@ public class VirtDataConversions {
         Method adapter = null;
         Class<?> hostclass = NBFunctionConverter.class;
         try {
+            logger.debug("Looking for adapter method for " + hostclass.getCanonicalName() + " with signature " + signature);
             adapter = NBFunctionConverter.class.getMethod("adapt", methodSignature);
         } catch (NoSuchMethodException e) {
+
+            logger.debug("No adapter method found for " + hostclass.getCanonicalName() + " with signature " + signature);
             StringBuilder example = new StringBuilder();
 
 
@@ -134,6 +146,8 @@ public class VirtDataConversions {
 
         }
 
+        logger.debug("Found adapter method for " + hostclass.getCanonicalName() + " with signature " + signature);
+
         FuncType fromType = FuncType.valueOf(func.getClass());
         if (fromType.functionClazz.getTypeParameters().length > 0) {
             TypeVariable<? extends Class<?>>[] funcParms = func.getClass().getTypeParameters();
@@ -148,6 +162,8 @@ public class VirtDataConversions {
         T result = null;
 
         try {
+            logger.debug("Invoking adapter method for " + hostclass.getCanonicalName() + " with signature "
+                    + signature + " and args " + Arrays.toString(args));
             result = (T) adapter.invoke(null, args);
             return result;
         } catch (IllegalArgumentException e) {
@@ -161,9 +177,10 @@ public class VirtDataConversions {
 
     /**
      * Slice the incoming object list into a set of functions, based on a grouping interval and an offset.
-     * @param mod The grouping interval, or modulo to slice the function groups into
+     *
+     * @param mod    The grouping interval, or modulo to slice the function groups into
      * @param offset The offset within the group for the provided function
-     * @param funcs A list of source objects to convert to functions.
+     * @param funcs  A list of source objects to convert to functions.
      * @return
      */
     public static <T> List<T> getFunctions(int mod, int offset, Class<? extends T> functionType, Object... funcs) {
@@ -171,7 +188,7 @@ public class VirtDataConversions {
 //            throw new RuntimeException("uneven division of functions, where multiples of " + mod + " are expected.");
 //        }
         List<T> functions = new ArrayList<>();
-        for (int i = offset; i < funcs.length; i+=mod) {
+        for (int i = offset; i < funcs.length; i += mod) {
             Object func = funcs[i];
             T longFunction = VirtDataConversions.adaptFunction(func, functionType, Object.class);
             functions.add(longFunction);
