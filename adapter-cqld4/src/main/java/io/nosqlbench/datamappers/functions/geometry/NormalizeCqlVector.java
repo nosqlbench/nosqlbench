@@ -22,8 +22,6 @@ import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.NormalizeDoubleListVector;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.NormalizeFloatListVector;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +37,6 @@ public class NormalizeCqlVector implements Function<com.datastax.oss.driver.api.
     private final NormalizeDoubleListVector ndv = new NormalizeDoubleListVector();
     private final NormalizeFloatListVector nfv = new NormalizeFloatListVector();
 
-    private final static Logger logger = LogManager.getLogger(NormalizeCqlVector.class);
-
     @Override
     public com.datastax.oss.driver.api.core.data.CqlVector apply(CqlVector cqlVector) {
 
@@ -50,15 +46,21 @@ public class NormalizeCqlVector implements Function<com.datastax.oss.driver.api.
         values.forEach(list::add);
 
         if (list.isEmpty()) {
+
             builder.add(List.of());
         } else if (list.get(0) instanceof Float) {
             List<Float> floats = new ArrayList<>();
             list.forEach(o -> floats.add((Float) o));
-            builder.add(nfv.apply(floats));
+            for (Float fv : floats) {
+                builder.add(fv);
+            }
+
         } else if (list.get(0) instanceof Double) {
             List<Double> doubles = new ArrayList<>();
             list.forEach(o -> doubles.add((Double) o));
-            builder.add(ndv.apply(doubles));
+            for (Double dv : doubles) {
+                builder.add(dv);
+            }
         } else {
             throw new RuntimeException("Only Doubles and Floats are recognized.");
         }
