@@ -1,10 +1,11 @@
 scenarios:
   default:
-    upsert: run driver=pinecone tags==blocks:upsert cycles=1000 cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    upsert: run driver=pinecone tags==block:upsert cycles===TEMPLATE(upsert-cycles,10000000) threads=auto
+    query: run driver=pinecone tags==block:query cycles===TEMPLATE(query-cycles,10000000) threads=auto
 
 bindings:
   id: Mod(<<keycount:1000000000>>); ToString() -> String
-  vector_value: ListSizedHashed(<<dimensions:5>>,HashRange(0.0f,100.0f) -> float); ToString() -> String
+  vector_value: ListSizedHashed(<<dimensions:5>>,HashRange(0.0f,100.0f) -> float)
   city: Cities()
 
 blocks:
@@ -14,7 +15,7 @@ blocks:
         upsert: "test-index"
         namespace: "example_namespace"
         upsert_vectors:
-          - id: {id}
-            values: {vector_value}
+          - id: "{id}"
+            values: "{vector_value}"
             metadata:
-              city: {city}
+              city: "{city}"

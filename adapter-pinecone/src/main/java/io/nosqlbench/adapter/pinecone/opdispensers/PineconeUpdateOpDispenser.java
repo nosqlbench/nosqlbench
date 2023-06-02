@@ -17,7 +17,6 @@
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
 import com.google.protobuf.Struct;
-import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
@@ -28,8 +27,9 @@ import io.pinecone.proto.UpdateRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
@@ -69,19 +69,9 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
         Optional<LongFunction<Map>> mFunc = op.getAsOptionalFunction("sparse_values", Map.class);
         return mFunc.<LongFunction<SparseValues>>map(mapLongFunction -> l -> {
             Map<String, String> sparse_values_map = mapLongFunction.apply(l);
-            String[] rawValues = (sparse_values_map.get("values")).split(",");
-            ArrayList floatValues = new ArrayList<>();
-            for (String val : rawValues) {
-                floatValues.add(Float.valueOf(val));
-            }
-            rawValues = sparse_values_map.get("indices").split(",");
-            List<Integer> intValues = new ArrayList<>();
-            for (String val : rawValues) {
-                intValues.add(Integer.valueOf(val));
-            }
             return SparseValues.newBuilder()
-                .addAllValues(floatValues)
-                .addAllIndices(intValues)
+                .addAllValues(getVectorValues(sparse_values_map.get("values")))
+                .addAllIndices(getIndexValues(sparse_values_map.get("indices")))
                 .build();
         }).orElse(null);
     }
@@ -134,11 +124,11 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
             rFunc = l -> finalFunc.apply(l).setId(af.apply(l));
         }
 
-        Optional<LongFunction<String>> vFunc = op.getAsOptionalFunction("values", String.class);
+        Optional<LongFunction<Object>> vFunc = op.getAsOptionalFunction("values", Object.class);
         if (vFunc.isPresent()) {
             LongFunction<UpdateRequest.Builder> finalFunc = rFunc;
-            LongFunction<String> af = vFunc.get();
-            LongFunction<ArrayList<Float>> alf = extractFloatVals(af);
+            LongFunction<Object> af = vFunc.get();
+            LongFunction<List<Float>> alf = extractFloatVals(af);
             rFunc = l -> finalFunc.apply(l).addAllValues(alf.apply(l));
         }
 

@@ -16,9 +16,7 @@
 
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
-import com.google.protobuf.ListValue;
 import com.google.protobuf.Struct;
-import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
@@ -31,7 +29,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.LongFunction;
 
 public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
@@ -75,27 +72,12 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
                 Vector.Builder vb = Vector.newBuilder();
                 // No need to check for key, it is invalid if id is not there, let it throw an exception
                 vb.setId(vector.get("id").toString());
-                String[] rawValues = ((String) vector.get("values")).split(",");
-                ArrayList<Float> floatValues = new ArrayList<>();
-                for (String val : rawValues) {
-                    floatValues.add(Float.valueOf(val));
-                }
-                vb.addAllValues(floatValues);
+                vb.addAllValues(getVectorValues(vector.get("values")));
                 if (vector.containsKey("sparse_values")) {
                     Map<String,String> sparse_values = (Map<String, String>) vector.get("sparse_values");
-                    rawValues = sparse_values.get("values").split(",");
-                    floatValues = new ArrayList<>();
-                    for (String val : rawValues) {
-                        floatValues.add(Float.valueOf(val));
-                    }
-                    rawValues = sparse_values.get("indices").split(",");
-                    List<Integer> intValues = new ArrayList<>();
-                    for (String val : rawValues) {
-                        intValues.add(Integer.valueOf(val));
-                    }
                     vb.setSparseValues(SparseValues.newBuilder()
-                        .addAllValues(floatValues)
-                        .addAllIndices(intValues)
+                        .addAllValues(getVectorValues(sparse_values.get("values")))
+                        .addAllIndices(getIndexValues(sparse_values.get("indices")))
                         .build());
                 }
                 if (vector.containsKey("metadata")) {

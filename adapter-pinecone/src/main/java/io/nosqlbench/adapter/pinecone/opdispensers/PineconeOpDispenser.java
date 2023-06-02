@@ -76,15 +76,8 @@ public abstract class PineconeOpDispenser extends BaseOpDispenser<PineconeOp, Pi
         return listValueBuilder.build();
     }
 
-    protected LongFunction<ArrayList<Float>> extractFloatVals(LongFunction<String> af) {
-        return l -> {
-            String[] vals = af.apply(l).split(",");
-            ArrayList<Float> fVals = new ArrayList<>();
-            for (String val : vals) {
-                fVals.add(Float.valueOf(val));
-            }
-            return fVals;
-        };
+    protected LongFunction<List<Float>> extractFloatVals(LongFunction<Object> af) {
+        return l -> this.getVectorValues(af.apply(l));
     }
 
     protected Map<String, Value> generateMetadataMap(Map<String, Object> metadata_values_map) {
@@ -100,6 +93,43 @@ public abstract class PineconeOpDispenser extends BaseOpDispenser<PineconeOp, Pi
         };
         metadata_values_map.forEach(stringToValue);
         return metadata_map;
+    }
+
+    protected List<Float> getVectorValues(Object rawVectorValues) {
+        List<Float> floatValues;
+        if (rawVectorValues instanceof String) {
+            floatValues = new ArrayList<>();
+            String[] rawValues = (((String) rawVectorValues).split(","));
+            for (String val : rawValues) {
+                floatValues.add(Float.valueOf(val));
+            }
+        } else if (rawVectorValues instanceof List) {
+            floatValues = switch (((List<?>) rawVectorValues).get(0).getClass().getSimpleName()) {
+                case "Float" -> (List<Float>) rawVectorValues;
+                case "Double" -> ((List<Double>) rawVectorValues).stream().map(Double::floatValue).toList();
+                case "String" -> ((List<String>) rawVectorValues).stream().map(Float::parseFloat).toList();
+                default -> throw new RuntimeException("Invalid type specified for values");
+            };
+        } else {
+            throw new RuntimeException("Invalid type specified for values");
+        }
+        return floatValues;
+    }
+
+    protected List<Integer> getIndexValues(Object rawIndexValues) {
+        List<Integer> intValues;
+        if (rawIndexValues instanceof String) {
+            intValues = new ArrayList<>();
+            String[] rawValues = (((String) rawIndexValues).split(","));
+            for (String val : rawValues) {
+                intValues.add(Integer.valueOf(val));
+            }
+        } else if (rawIndexValues instanceof List) {
+            intValues = (List<Integer>) rawIndexValues;
+        }else {
+            throw new RuntimeException("Invalid type specified for Index values");
+        }
+        return intValues;
     }
 
 }

@@ -98,12 +98,12 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
             rFunc = l -> finalFunc.apply(l).setIncludeValues(af.apply(l));
         }
 
-        Optional<LongFunction<String>> vFunc = op.getAsOptionalFunction("vector", String.class);
+        Optional<LongFunction<Object>> vFunc = op.getAsOptionalFunction("vector", Object.class);
         if (vFunc.isPresent()) {
             LongFunction<QueryRequest.Builder> finalFunc = rFunc;
-            LongFunction<String> af = vFunc.get();
+            LongFunction<Object> af = vFunc.get();
 
-            LongFunction<ArrayList<Float>> alf = extractFloatVals(af);
+            LongFunction<List<Float>> alf = extractFloatVals(af);
             rFunc = l -> finalFunc.apply(l).addAllVector(alf.apply(l));
         }
 
@@ -135,12 +135,7 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
             List<Map<String, Object>> vectors = listLongFunction.apply(l);
             for (Map<String, Object> vector : vectors) {
                 QueryVector.Builder qvb = QueryVector.newBuilder();
-                String[] rawValues = ((String) vector.get("values")).split(",");
-                ArrayList<Float> floatValues = new ArrayList<>();
-                for (String val : rawValues) {
-                    floatValues.add(Float.valueOf(val));
-                }
-                qvb.addAllValues(floatValues);
+                qvb.addAllValues(getVectorValues(vector.get("values")));
                 qvb.setNamespace((String) vector.get("namespace"));
                 if (vector.containsKey("top_k")) {
                     qvb.setTopK((Integer) vector.get("top_k"));
@@ -151,19 +146,9 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
                 }
                 if (vector.containsKey("sparse_values")) {
                     Map<String,String> sparse_values = (Map<String, String>) vector.get("sparse_values");
-                    rawValues = sparse_values.get("values").split(",");
-                    floatValues = new ArrayList<>();
-                    for (String val : rawValues) {
-                        floatValues.add(Float.valueOf(val));
-                    }
-                    rawValues = sparse_values.get("indices").split(",");
-                    List<Integer> intValues = new ArrayList<>();
-                    for (String val : rawValues) {
-                        intValues.add(Integer.valueOf(val));
-                    }
                     qvb.setSparseValues(SparseValues.newBuilder()
-                        .addAllValues(floatValues)
-                        .addAllIndices(intValues)
+                        .addAllValues(getVectorValues(sparse_values.get("values")))
+                        .addAllIndices(getIndexValues(sparse_values.get("indices")))
                         .build());
                 }
                 returnVectors.add(qvb.build());

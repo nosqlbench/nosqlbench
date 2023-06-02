@@ -57,7 +57,7 @@ public class PineconeDescribeIndexStatsOpDispenser extends PineconeOpDispenser {
      * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
      * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
      * For each method in the chain a function is created here and added to the chain of functions
-     * called at time of instantiation. Additionally some of the arguments to the builder methods require
+     * called at time of instantiation. Additionally, some of the arguments to the builder methods require
      * creation through their own builder process. In these cases the pattern adopted includes multiple layers of
      * functions in order to build all objects in the correct manner and ordering.
      */
