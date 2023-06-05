@@ -1,0 +1,39 @@
+bindings:
+  mytext_val: AlphaNumericString(100)
+  myexname: CSVFrequencySampler('csv/exchange_names.csv', 'name')
+  myroutingkey: CSVFrequencySampler('csv/routing_keys.csv', 'name')
+
+
+# Doc-level parameters (must be static)
+params:
+  # whether to do publisher confirm (for reliable publishing)
+  # - default: false
+  publisher_confirm: "false"
+  #publisher_confirm: "true"
+  # If 'publisher_confirm' is true, use one of the following 3 confirm modes:
+  # - individual (wait_for_confirm individually)
+  # - batch (wait_for_confirm in batch)
+  # - async [default]
+  confirm_mode: "aysnc"
+  #confirm_mode: "individual"
+  #confirm_mode: "batch"
+
+  # Only relevant when 'publisher_confirm' is true and 'confirm_mode' is "batch"
+  confirm_batch_num: 100
+  # default timeout value (in milliseconds)
+  # - only relevant when publisher_confirm' is true and 'confirm_mode' is NOT "async"
+  dft_confirm_timeout_ms: 1000
+
+
+blocks:
+  msg-send-block:
+    ops:
+      AmqpMsgSender:
+        #exchange_names: "{myexname}"
+        exchange_names: "alpha"
+
+        routing_key: "{myroutingkey}"
+
+        ## (Optional) Kafka message value.
+        #  - message key and value can't be both empty at the same time
+        message: "{mytext_val}"

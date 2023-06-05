@@ -18,7 +18,7 @@
 : "${SKIP_TESTS:=1}"
 (
   cd "$(git rev-parse --show-toplevel)" && \
-    mvn clean install "-DskipTests" -pl adapters-api,adapter-kafka,nb5 && \
+    mvn clean install "-DskipTests" -pl adapters-api,adapter-s4r,nb5 && \
     [[ ${SKIP_TESTS} -ne 1 ]] && \
-    mvn test -pl adapters-api,adapter-kafka
+    mvn test -pl adapters-api,adapter-s4r
 )

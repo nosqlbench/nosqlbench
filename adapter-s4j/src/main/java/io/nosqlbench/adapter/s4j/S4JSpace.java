@@ -67,7 +67,7 @@ public class S4JSpace implements  AutoCloseable {
     private final int sessionMode;
 
     // Whether to do strict error handling while sending/receiving messages
-    // - Yes: any error returned from the Pulsar server while doing message receiving/sending will trigger NB execution stop
+    // - Yes: any error returned from the JMS/Pulsar server while doing message receiving/sending will trigger NB execution stop
     // - No: pause the current thread that received the error message for 1 second and then continue processing
     private boolean strictMsgErrorHandling;
 
@@ -212,10 +212,8 @@ public class S4JSpace implements  AutoCloseable {
 
     public long getTotalOpResponseCnt() { return totalOpResponseCnt.get();}
     public long incTotalOpResponseCnt() { return totalOpResponseCnt.incrementAndGet();}
-    public void resetTotalOpResponseCnt() { totalOpResponseCnt.set(0); }
 
     public long getTotalNullMsgRecvdCnt() { return nullMsgRecvCnt.get();}
-    public void resetTotalNullMsgRecvdCnt() { nullMsgRecvCnt.set(0); }
 
     public long incTotalNullMsgRecvdCnt() { return nullMsgRecvCnt.incrementAndGet(); }
 
@@ -252,9 +250,7 @@ public class S4JSpace implements  AutoCloseable {
                 }
             }
             catch (JMSRuntimeException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("[ERROR] Unable to initialize JMS connection factory with the following configuration parameters: {}", s4JClientConnInfo.toString());
-                }
+                logger.error("Unable to initialize JMS connection factory with the following configuration parameters: {}", s4JClientConnInfo.toString());
                 throw new S4JAdapterUnexpectedException("Unable to initialize JMS connection factory with the following error message: " + e.getCause());
             }
             catch (Exception e) {

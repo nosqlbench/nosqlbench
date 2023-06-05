@@ -115,6 +115,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-s4r</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-jdbc</artifactId>
             <version>${revision}</version>
         </dependency>
