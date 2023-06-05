@@ -17,7 +17,6 @@
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
 import com.google.protobuf.Struct;
-import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
@@ -58,14 +57,14 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
     /**
      * @param op The ParsedOp used to build the Request
      * @return A function that will take a long (the current cycle) and return a Pinecone QueryRequest Builder
-     *
+     * <p>
      * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
      * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
      * For each method in the chain a function is created here and added to the chain of functions
      * called at time of instantiation.
-     *
+     * <p>
      * The QueryVector objects used by the QueryRequest as sufficiently sophisticated in their own building process
-     * that it has been broken out into a separate method. At runtime they are built separately and then added
+     * that it has been broken out into a separate method. At runtime, they are built separately and then added
      * to the build chain by the builder returned by this method.
      */
     private LongFunction<QueryRequest.Builder> createQueryRequestFunc(ParsedOp op) {
@@ -114,16 +113,10 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
             rFunc = l -> finalFunc.apply(l).addAllVector(alf.apply(l));
         }
 
-        Optional<LongFunction<String>> filterFunction = op.getAsOptionalFunction("filter", String.class);
+        Optional<LongFunction<Map>> filterFunction = op.getAsOptionalFunction("filter", Map.class);
         if (filterFunction.isPresent()) {
             LongFunction<QueryRequest.Builder> finalFunc = rFunc;
-            LongFunction<Struct> builtFilter = l -> {
-                String[] filterFields = filterFunction.get().apply(l).split(" ");
-                return Struct.newBuilder().putFields(filterFields[0],
-                        Value.newBuilder().setStructValue(Struct.newBuilder().putFields(filterFields[1],
-                                        Value.newBuilder().setNumberValue(Integer.parseInt(filterFields[2])).build()))
-                                .build()).build();
-            };
+            LongFunction<Struct> builtFilter = buildFilterStruct(filterFunction.get());
             rFunc = l -> finalFunc.apply(l).setFilter(builtFilter.apply(l));
         }
 
@@ -133,7 +126,7 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
     /**
      * @param op the ParsedOp from which the Query Vector objects will be built
      * @return an Iterable Collection of QueryVector objects to be added to a Pinecone QueryRequest
-     *
+     * <p>
      * This method interrogates the subsection of the ParsedOp defined for QueryVector parameters and constructs
      * a list of QueryVectors based on the included values, or returns null if this section is not populated. The
      * base function returns either the List of vectors or null, while the interior function builds the vectors
@@ -158,11 +151,10 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
                     qvb.setTopK((Integer) vector.get("top_k"));
                 }
                 if (vector.containsKey("filter")) {
-                    String[] rawVals = ((String)vector.get("filter")).split(" ");
-                    qvb.setFilter(Struct.newBuilder().putFields(rawVals[0],
-                        Value.newBuilder().setStructValue(Struct.newBuilder().putFields(rawVals[1],
-                                Value.newBuilder().setNumberValue(Integer.parseInt(rawVals[2])).build()))
-                            .build()).build());
+                    LongFunction<Struct> builtFilter = buildFilterStruct(l2 -> {
+                        return (Map) vector.get("filter");
+                    });
+                    qvb.setFilter(builtFilter.apply(l));
                 }
                 if (vector.containsKey("sparse_values")) {
                     Map<String,String> sparse_values = (Map<String, String>) vector.get("sparse_values");

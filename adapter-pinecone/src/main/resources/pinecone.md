@@ -43,7 +43,10 @@ ops:
     # The number of results to return for each query.
     top_k: int_query_topk
     # You can use vector metadata to limit your search. See https://www.pinecone.io/docs/metadata-filtering/
-    filter: <field operator compval>
+    filter:
+      filterfield: metadata_field
+      operator: [$lt, $eq, $gt, ...]
+      comparator: value
     # Indicates whether vector values are included in the response.
     include_values: boolean
     # Indicates whether metadata is included in the response as well as the ids.
@@ -53,7 +56,10 @@ ops:
         values: csv_separated_floats
         top_k: int_val
         namespace: string_val
-        filter: <field operator compval>
+        filter:
+          filterfield: metadata_field
+          operator: [$lt, $eq, $gt, ...]
+          comparator: value
         sparse_values:
           indices: list_of_ints
           values: list_of_floats
@@ -61,7 +67,10 @@ ops:
         values: csv_separated_floats
         top_k: int_val
         namespace: string_val
-        filter: <field operator compval>
+        filter:
+          filterfield: metadata_field
+          operator: [$lt, $eq, $gt, ...]
+          comparator: value
         sparse_values:
           indices: list_of_ints
           values: list_of_floats
@@ -76,13 +85,19 @@ ops:
     namespace: delete_namespace
     ids: csv_list_of_vectors_to_delete
     deleteall: [true,false]
-    filter: <field operator compval>
+    filter:
+      filterfield: metadata_field
+      operator: [$lt, $eq, $gt, ...]
+      comparator: value
 
 # A describe index stats op. Specify metadata filters to narrow the range of indices described.
   describe-index-stats-example:
     type: describe-index-stats
     index: describe_index
-    filter: <field operator compval>
+    filter:
+      filterfield: metadata_field
+      operator: [$lt, $eq, $gt, ...]
+      comparator: value
 
 # A pinecone fetch op
   fetch-example:

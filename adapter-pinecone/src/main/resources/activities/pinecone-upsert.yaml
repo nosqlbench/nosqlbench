@@ -1,0 +1,22 @@
+scenarios:
+  default:
+    query: run driver=pinecone tags==blocks:upsert cycles=1000
+
+blocks:
+  upsert:
+    ops:
+      op1:
+        upsert: "test-index"
+        namespace: "example_namespace"
+        upsert_vectors:
+          - id: "item_0"
+            values: "0.8238042071878214,0.6579519242642494,0.2772098082162267,0.11434681368630942,0.7496610470760962,0.08914691629812001,0.13249049306247204,0.8875869003282576,0.21615924382746318,0.8454796243176312"
+            metadata:
+              category: "sports"
+              colors: "blue,red,green"
+              games_played: 100
+          - id: "item_1"
+            values: "0.45058789301987323,0.41195231042505165,0.07228720002814844,0.24340801453997024,0.4010484623888162,0.9761375066056239,0.6844972055528982,0.4376943130598503,0.5966792562087805,0.7210604043175083"
+            metadata:
+              category: "music"
+              colors: "purple,green,yellow"
