@@ -25,6 +25,7 @@ import com.datastax.oss.driver.api.core.data.CqlDuration;
 import com.datastax.oss.driver.api.core.data.CqlVector;
 import com.datastax.oss.driver.api.core.data.TupleValue;
 import com.datastax.oss.driver.api.core.data.UdtValue;
+import com.datastax.oss.driver.api.core.type.CqlVectorType;
 import com.datastax.oss.driver.api.core.type.DataType;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.api.errors.OpConfigError;
@@ -57,8 +58,14 @@ public class CQLD4PreparedStmtDiagnostics {
                                                Object colval, DataType coltype) {
 
         return switch (coltype.getProtocolCode()) {
-            // TODO - need to handle 'custom' more specifically, interim change for vector search.
-            case CUSTOM -> bound.setCqlVector(colname, (CqlVector<?>) colval);
+            case CUSTOM -> {
+                if (coltype instanceof CqlVectorType) {
+                    yield bound.setCqlVector(colname, (CqlVector<?>) colval);
+                }
+                throw new RuntimeException("Unhandled CUSTOM type for diagnostic: "
+                        + coltype.getClass().getSimpleName());
+
+            }
             case ASCII, VARCHAR -> bound.setString(colname, (String) colval);
             case BIGINT, COUNTER -> bound.setLong(colname, (long) colval);
             case BLOB -> bound.setByteBuffer(colname, (ByteBuffer) colval);
