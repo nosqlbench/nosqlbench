@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,9 @@ public class HashRange implements LongToDoubleFunction {
     private final Hash hash = new Hash();
 
     public HashRange(double min, double max) {
+        if (min>max) {
+            throw new RuntimeException("min must be less than or equal to max");
+        }
         this.min = min;
         this.max = max;
         this.interval = max - min;

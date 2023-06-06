@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,7 @@ public class HashRange implements LongToIntFunction {
 
     @Example({"HashRange(32L)","map the input to a number in the range 0-31, inclusive, of type int"})
     public HashRange(int width) {
-        this.width=width;
-        this.minValue=0L;
+        this(0,width);
     }
 
     @Example({"HashRange(35L,39L)","map the input to a number in the range 35-38, inclusive, of type int"})

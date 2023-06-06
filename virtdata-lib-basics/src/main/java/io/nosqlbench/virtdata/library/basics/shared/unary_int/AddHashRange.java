@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ public class AddHashRange implements IntUnaryOperator {
     }
 
     public AddHashRange(int minValue, int maxValue) {
+        if (minValue>maxValue) {
+            throw new RuntimeException("minValue must be equal to or greater than maxValue");
+        }
         this.hashRange = new io.nosqlbench.virtdata.library.basics.shared.unary_int.HashRange(minValue, maxValue);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,7 @@ public class HashRange implements LongUnaryOperator {
     private final Hash hash = new Hash();
 
     public HashRange(long width) {
-        this.minValue=0L;
-        this.width=width;
+        this(0L,width);
     }
 
     public HashRange(long minValue, long maxValue) {
