@@ -27,11 +27,10 @@ import java.util.function.LongToDoubleFunction;
 /**
  * Create a double by converting values. This function works in the following modes:
  * <UL>
- *     <LI>If a double is provided, then the long input is scaled to be between 0.0f and the value provided,
- *     as a fraction of the highest possible long.</LI>
- *     <LI>If any other type of number is provided, then this function returns the equivalent double value.</LI>
- *     <LI>Otherwise, the input is assumed to be a function which takes a long input, and, if necessary,
- *     adapts to return a double with an appropriate type conversion.</LI>
+ * <LI>If you pass a function that produces a numeric type, then the result of this function
+ * is evaluated for the input cycle and converted to a double.</LI>
+ * <LI>If you pass any numeric value which is not a function, then this value is converted and
+ * returned for every cycle as a fixed value.</LI>
  * </UL>
  */
 @Categories(Category.conversion)
@@ -41,10 +40,7 @@ public class ToDouble implements LongToDoubleFunction {
     private final LongToDoubleFunction func;
 
     ToDouble(Object func) {
-        if (func instanceof Double aDouble) {
-            double scale = aDouble.doubleValue();
-            this.func = l -> (double) (l % scale);
-        } else if (func instanceof Number number) {
+        if (func instanceof Number number) {
             final double aDouble = number.doubleValue();
             this.func = l -> aDouble;
         } else {
