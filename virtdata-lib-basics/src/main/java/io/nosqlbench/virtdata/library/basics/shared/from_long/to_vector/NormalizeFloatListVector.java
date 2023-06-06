@@ -29,16 +29,16 @@ import java.util.function.Function;
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class NormalizeVector implements Function<List<Double>,List<Double>> {
+public class NormalizeFloatListVector implements Function<List<Float>,List<Float>> {
     @Override
-    public List<Double> apply(List<Double> doubles) {
-        ArrayList<Double> unit = new ArrayList<>(doubles.size());
-        double accumulator = 0.0d;
-        for (Double scalar : doubles) {
+    public List<Float> apply(List<Float> floats) {
+        ArrayList<Float> unit = new ArrayList<>(floats.size());
+        float accumulator = 0.0f;
+        for (float scalar : floats) {
             accumulator+=scalar*scalar;
         }
-        double scalarLen = Math.sqrt(accumulator);
-        for (double scalarComponent : doubles) {
+        float scalarLen = (float) Math.sqrt(accumulator);
+        for (float scalarComponent : floats) {
             unit.add(scalarComponent/scalarLen);
         }
         return unit;

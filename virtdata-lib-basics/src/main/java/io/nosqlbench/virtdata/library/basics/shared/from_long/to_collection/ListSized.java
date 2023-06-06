@@ -59,10 +59,6 @@ public class ListSized implements LongFunction<List<Object>> {
         }
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
-    public ListSized(int size, Object... funcs) {
-        this.sizeFunc = (s) -> size;
-        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
-    }
 
     @Override
     public List<Object> apply(long value) {

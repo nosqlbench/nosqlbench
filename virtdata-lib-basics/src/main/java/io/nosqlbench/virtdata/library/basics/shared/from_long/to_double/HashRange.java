@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import java.util.function.LongToDoubleFunction;
  */
 @ThreadSafeMapper
 @Categories({Category.general})
-public class HashedDoubleRange implements LongToDoubleFunction {
+public class HashRange implements LongToDoubleFunction {
 
     private final double min;
     private final double max;
@@ -57,7 +57,10 @@ public class HashedDoubleRange implements LongToDoubleFunction {
     private final static double MAX_DOUBLE_VIA_LONG = (double) Long.MAX_VALUE;
     private final Hash hash = new Hash();
 
-    public HashedDoubleRange(double min, double max) {
+    public HashRange(double min, double max) {
+        if (min>max) {
+            throw new RuntimeException("min must be less than or equal to max");
+        }
         this.min = min;
         this.max = max;
         this.interval = max - min;

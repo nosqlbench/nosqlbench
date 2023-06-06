@@ -21,7 +21,7 @@ import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.api.bindings.VALUE;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashedDoubleRange;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashRange;
 
 import java.util.function.Function;
 
@@ -36,7 +36,7 @@ public class UnsetOrPass implements Function<Object,Object> {
 
     private final String varname;
     private final double ratio;
-    private final HashedDoubleRange rangefunc = new HashedDoubleRange(0.0D,1.0D);
+    private final HashRange rangefunc = new HashRange(0.0D,1.0D);
 
     public UnsetOrPass(double ratio, String varname) {
         if (ratio<0.0D || ratio >1.0D) {

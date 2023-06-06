@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,10 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import java.util.function.LongUnaryOperator;
 
 /**
- * Return a value within a range, pseudo-randomly. This is equivalent to
- * returning a value with in range between 0 and some maximum value, but
- * with a minimum value added.
+ * The various HashRange functions take an input long, hash it to a random
+ * long value, and then use to interpolate a fractional value between the minimum
+ * and maximum values. To select a specific type of HashRange function,
+ * simply use the same datatype in the min and max values you wish to have on output.
  *
  * You can specify hash ranges as small as a single-element range, like
  * (5,5), or as wide as the relevant data type allows.
@@ -40,8 +41,7 @@ public class HashRange implements LongUnaryOperator {
     private final Hash hash = new Hash();
 
     public HashRange(long width) {
-        this.minValue=0L;
-        this.width=width;
+        this(0L,width);
     }
 
     public HashRange(long minValue, long maxValue) {

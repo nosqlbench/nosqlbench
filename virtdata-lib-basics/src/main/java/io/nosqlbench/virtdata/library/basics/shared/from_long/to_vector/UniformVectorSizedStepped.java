@@ -20,7 +20,7 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashedDoubleRange;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashRange;
 
 import java.util.Arrays;
 import java.util.List;
@@ -58,9 +58,9 @@ public class UniformVectorSizedStepped implements LongFunction<List<Double>> {
         this.funcs = new LongToDoubleFunction[dim];
         for (int i = 0; i < dim; i++) {
             if (i<dims.length/2) {
-                funcs[i]=new HashedDoubleRange(dims[i<<1].doubleValue(),dims[(i<<1)+1].doubleValue());
+                funcs[i]=new HashRange(dims[i<<1].doubleValue(),dims[(i<<1)+1].doubleValue());
             } else {
-                funcs[i]=new HashedDoubleRange(0.0d,1.0d);
+                funcs[i]=new HashRange(0.0d,1.0d);
             }
         }
     }

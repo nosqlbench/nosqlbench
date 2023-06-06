@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.basics.tests.long_double;
+package io.nosqlbench.datamappers.functions.to_cqlvector;
 
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashRange;
+import com.datastax.oss.driver.api.core.data.CqlVector;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HashedDoubleRangeTest {
+public class ToCqlVectorTest {
+
 
     @Test
-    public void testBasicRanges() {
-        HashRange r = new HashRange(0.0D, 100.0D);
-        for(long i=1;i<1000;i++) {
-            assertThat(r.applyAsDouble(i)).isBetween(0.0D,100.0D);
-        }
+    public void testDoubleListToCqlVector() {
+        ToCqlVector toCqlVector = new ToCqlVector();
+        assertThat(toCqlVector.apply(List.of(123.d,456.d))).isInstanceOf(CqlVector.class);
+    }
 
+    @Test
+    public void testFloatListToCqlVector() {
+        ToCqlVector toCqlVector = new ToCqlVector();
+        assertThat(toCqlVector.apply(List.of(123.f,456.f))).isInstanceOf(CqlVector.class);
     }
 
 }

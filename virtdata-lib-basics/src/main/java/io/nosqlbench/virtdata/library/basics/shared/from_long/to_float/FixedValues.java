@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2022 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,39 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_float;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
 
 @ThreadSafeMapper
 @Categories({Category.general})
-public class Mul implements LongFunction<Float> {
-    private final float factor;
+public class FixedValues implements LongFunction<Float> {
 
-    public Mul(float factor) {
-        this.factor = factor;
+    private final float[] fixedValues;
+
+    @Example({"FixedValues(3.0,53.0,73d)", "Yield 3D, 53D, 73D, 3D, 53D, 73D, 3D, ..."})
+    public FixedValues(Object... values) {
+        this.fixedValues = new float[values.length];
+        for (int i = 0; i < values.length; i++) {
+            Object value = values[i];
+            if (value instanceof Number number) {
+                fixedValues[i]=number.floatValue();
+            } else {
+                throw new RuntimeException("Not a number: " + value);
+            }
+        }
     }
 
     @Override
     public Float apply(long value) {
-        return factor * value;
+        int index = (int) (value % Integer.MAX_VALUE) % fixedValues.length;
+        return fixedValues[index];
     }
+
+
 }

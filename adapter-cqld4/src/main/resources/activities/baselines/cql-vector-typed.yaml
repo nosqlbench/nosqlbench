@@ -1,0 +1,94 @@
+min_version: "5.17.3"
+
+description: |
+  A workload with a float vector data type.
+  The CQL Key-Value workload demonstrates the simplest possible schema with payload data where value is of the float vector data   type. This is useful for measuring
+  system capacity most directly in terms of raw operations. As a reference point, it provides some insight around types of
+  workloads that are constrained around messaging, threading, and tasking, rather than bulk throughput.
+  During preload, all keys are set with a value. During the main phase of the workload, random keys from the known
+  population are replaced with new values which never repeat. During the main phase, random partitions are selected for
+  upsert, with row values never repeating.
+
+scenarios:
+  default:
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=100
+    main: run driver=cql tags=='block:main.*' cycles===TEMPLATE(main-cycles,10000000) threads=5
+  drop-tables:
+    schema: run driver=cql tags==block:drop-tables threads==1 cycles==UNDEF
+  truncate: run driver=cql tags==block:truncate-tables cycles===1 threads=1
+  reads: run driver=cql tags==block:main-read cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
+bindings:
+  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
+  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
+  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
+  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+  vector_value: CqlVector(ListSizedHashed(<<dimensions:5>>,HashRange(0.0f,100.0f)); NormalizeCqlVector();
+
+blocks:
+  drop-tables:
+    ops:
+      drop-table-vectors:
+        raw: |
+          DROP TABLE IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors);
+
+  schema:
+    params:
+      prepared: false
+    ops:
+      create-keyspace:
+        raw: |
+          CREATE KEYSPACE IF NOT EXISTS TEMPLATE(keyspace,baselines)
+          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'};
+      create-table:
+        raw: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (
+            key TEXT,
+            value vector<float,<<dimensions:5>>>,
+            PRIMARY KEY (key)
+          );
+      create-sai-index:
+        raw: |
+          CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (value) USING 'StorageAttachedIndex';
+
+  truncate-tables:
+    params:
+      prepared: false
+    ops:
+      truncate-vectors:
+        raw: |
+          TRUNCATE TABLE TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors);
+
+  rampup:
+    params:
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    ops:
+      rampup-insert:
+        prepared: |
+          INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
+          (key, value) VALUES ({seq_key},{vector_value});
+
+  main-read:
+    params:
+      ratio: TEMPLATE(read_ratio,90)
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+      instrument: true
+    ops:
+      main-select-ann-limit:
+        prepared: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) ORDER BY value ANN OF {vector_value} LIMIT TEMPLATE(select_limit,2);
+      main-select-pk-ann-limit:
+        prepared: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) WHERE KEY={rw_key} ORDER BY value ANN OF {vector_value} LIMIT TEMPLATE(select_limit,2);
+
+  main-write:
+    params:
+      ratio: TEMPLATE(write_ratio,10)
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+      instrument: true
+    ops:
+      main-insert:
+        prepared: |
+          INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
+          (key, value) VALUES ({rw_key}, {vector_value});

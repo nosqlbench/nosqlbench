@@ -14,36 +14,25 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.unary_int;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_float;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
-import java.util.function.IntUnaryOperator;
+import java.util.function.LongToDoubleFunction;
 
-/**
- * Adds a pseudo-random value within the specified range to the input.
- */
 @ThreadSafeMapper
 @Categories({Category.general})
-public class AddHashRange implements IntUnaryOperator {
+public class Mul implements LongToDoubleFunction {
+    private final double factor;
 
-    private final io.nosqlbench.virtdata.library.basics.shared.unary_int.HashRange hashRange;
-
-    public AddHashRange(int maxValue) {
-        this(0, maxValue);
-    }
-
-    public AddHashRange(int minValue, int maxValue) {
-        if (minValue>maxValue) {
-            throw new RuntimeException("minValue must be equal to or greater than maxValue");
-        }
-        this.hashRange = new io.nosqlbench.virtdata.library.basics.shared.unary_int.HashRange(minValue, maxValue);
+    public Mul(double factor) {
+        this.factor = factor;
     }
 
     @Override
-    public int applyAsInt(int operand) {
-        return operand + hashRange.applyAsInt(operand);
+    public double applyAsDouble(long value) {
+        return factor * value;
     }
 }

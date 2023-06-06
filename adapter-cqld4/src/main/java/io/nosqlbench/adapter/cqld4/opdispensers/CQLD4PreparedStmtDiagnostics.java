@@ -22,8 +22,10 @@ import com.datastax.oss.driver.api.core.cql.ColumnDefinition;
 import com.datastax.oss.driver.api.core.cql.ColumnDefinitions;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.data.CqlDuration;
+import com.datastax.oss.driver.api.core.data.CqlVector;
 import com.datastax.oss.driver.api.core.data.TupleValue;
 import com.datastax.oss.driver.api.core.data.UdtValue;
+import com.datastax.oss.driver.api.core.type.CqlVectorType;
 import com.datastax.oss.driver.api.core.type.DataType;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.api.errors.OpConfigError;
@@ -50,84 +52,82 @@ import static com.datastax.oss.protocol.internal.ProtocolConstants.DataType.*;
  * explaining more specifically what the problem was that caused the original error to be thrown.
  */
 public class CQLD4PreparedStmtDiagnostics {
-    private final static Logger logger = LogManager.getLogger(CQLD4PreparedStmtDiagnostics.class);
+    private static final Logger logger = LogManager.getLogger(CQLD4PreparedStmtDiagnostics.class);
 
-    public static BoundStatement bindStatement(BoundStatement bound, CqlIdentifier colname, Object colval, DataType coltype) {
+    public static BoundStatement bindStatement(BoundStatement bound, CqlIdentifier colname,
+                                               Object colval, DataType coltype) {
 
-//        if (coltype instanceof PrimitiveType pt) {
-        try {
-            BoundStatement reproduce_error_with_custom_dataType = switch (coltype.getProtocolCode()) {
-                case CUSTOM -> throw new OpConfigError("Error with Custom DataType");
-                case ASCII, VARCHAR -> bound.setString(colname, (String) colval);
-                case BIGINT, COUNTER -> bound.setLong(colname, (long) colval);
-                case BLOB -> bound.setByteBuffer(colname, (ByteBuffer) colval);
-                case BOOLEAN -> bound.setBoolean(colname, (boolean) colval);
-                case DECIMAL -> bound.setBigDecimal(colname, (BigDecimal) colval);
-                case DOUBLE -> bound.setDouble(colname, (double) colval);
-                case FLOAT -> bound.setFloat(colname, (float) colval);
-                case INT -> bound.setInt(colname, (int) colval);
-                case SMALLINT -> bound.setShort(colname, (short) colval);
-                case TINYINT -> bound.setByte(colname, (byte) colval);
-                case TIMESTAMP -> bound.setInstant(colname, (Instant) colval);
-                case TIMEUUID, UUID -> bound.setUuid(colname, (UUID) colval);
-                case VARINT -> bound.setBigInteger(colname, (BigInteger) colval);
-                case INET -> bound.setInetAddress(colname, (InetAddress) colval);
-                case DATE -> bound.setLocalDate(colname, (LocalDate) colval);
-                case TIME -> bound.setLocalTime(colname, (LocalTime) colval);
-                case DURATION -> bound.setCqlDuration(colname, (CqlDuration) colval);
-                case LIST -> bound.setList(colname, (List) colval, ((List) colval).get(0).getClass());
-                case MAP -> {
-                    Map map = (Map) colval;
-                    Set<Map.Entry> entries = map.entrySet();
-                    Optional<Map.Entry> first = entries.stream().findFirst();
-                    if (first.isPresent()) {
-                        yield bound.setMap(colname, map, first.get().getKey().getClass(), first.get().getValue().getClass());
-                    } else {
-                        yield bound.setMap(colname, map, Object.class, Object.class);
-                    }
+        return switch (coltype.getProtocolCode()) {
+            case CUSTOM -> {
+                if (coltype instanceof CqlVectorType) {
+                    yield bound.setCqlVector(colname, (CqlVector<?>) colval);
                 }
-                case SET -> {
-                    Set set = (Set) colval;
-                    Optional first = set.stream().findFirst();
-                    if (first.isPresent()) {
-                        yield bound.setSet(colname, set, first.get().getClass());
-                    } else {
-                        yield bound.setSet(colname, Set.of(), Object.class);
-                    }
-                }
-                case UDT -> {
-                    UdtValue udt = (UdtValue) colval;
-                    yield bound.setUdtValue(colname, udt);
-                }
-                case TUPLE -> {
-                    TupleValue tuple = (TupleValue) colval;
-                    yield bound.setTupleValue(colname, tuple);
-                }
-                default -> throw new RuntimeException("Unknown CQL type for diagnostic (type:'" + coltype + "',code:'" + coltype.getProtocolCode() + "'");
-            };
-            return reproduce_error_with_custom_dataType;
+                throw new RuntimeException("Unhandled CUSTOM type for diagnostic: "
+                        + coltype.getClass().getSimpleName());
 
-        } catch (Exception e) {
-            throw e;
-        }
-
-//        }
-//        throw new IllegalStateException("Unexpected value: " + coltype);
-
+            }
+            case ASCII, VARCHAR -> bound.setString(colname, (String) colval);
+            case BIGINT, COUNTER -> bound.setLong(colname, (long) colval);
+            case BLOB -> bound.setByteBuffer(colname, (ByteBuffer) colval);
+            case BOOLEAN -> bound.setBoolean(colname, (boolean) colval);
+            case DECIMAL -> bound.setBigDecimal(colname, (BigDecimal) colval);
+            case DOUBLE -> bound.setDouble(colname, (double) colval);
+            case FLOAT -> bound.setFloat(colname, (float) colval);
+            case INT -> bound.setInt(colname, (int) colval);
+            case SMALLINT -> bound.setShort(colname, (short) colval);
+            case TINYINT -> bound.setByte(colname, (byte) colval);
+            case TIMESTAMP -> bound.setInstant(colname, (Instant) colval);
+            case TIMEUUID, UUID -> bound.setUuid(colname, (UUID) colval);
+            case VARINT -> bound.setBigInteger(colname, (BigInteger) colval);
+            case INET -> bound.setInetAddress(colname, (InetAddress) colval);
+            case DATE -> bound.setLocalDate(colname, (LocalDate) colval);
+            case TIME -> bound.setLocalTime(colname, (LocalTime) colval);
+            case DURATION -> bound.setCqlDuration(colname, (CqlDuration) colval);
+            case LIST -> bound.setList(colname, (List) colval, ((List) colval).get(0).getClass());
+            case MAP -> {
+                Map map = (Map) colval;
+                Set<Map.Entry> entries = map.entrySet();
+                Optional<Map.Entry> first = entries.stream().findFirst();
+                if (first.isPresent()) {
+                    yield bound.setMap(colname, map, first.get().getKey().getClass(), first.get().getValue().getClass());
+                } else {
+                    yield bound.setMap(colname, map, Object.class, Object.class);
+                }
+            }
+            case SET -> {
+                Set set = (Set) colval;
+                Optional first = set.stream().findFirst();
+                if (first.isPresent()) {
+                    yield bound.setSet(colname, set, first.get().getClass());
+                } else {
+                    yield bound.setSet(colname, Set.of(), Object.class);
+                }
+            }
+            case UDT -> {
+                UdtValue udt = (UdtValue) colval;
+                yield bound.setUdtValue(colname, udt);
+            }
+            case TUPLE -> {
+                TupleValue tuple = (TupleValue) colval;
+                yield bound.setTupleValue(colname, tuple);
+            }
+            default -> throw new RuntimeException("Unknown CQL type for diagnostic " +
+                    "(type:'" + coltype + "',code:'" + coltype.getProtocolCode() + "'");
+        };
     }
 
     public static Cqld4CqlOp rebindWithDiagnostics(
-        PreparedStatement preparedStmt,
-        LongFunction<Object[]> fieldsF,
-        long cycle,
-        Exception exception
+            PreparedStatement preparedStmt,
+            LongFunction<Object[]> fieldsF,
+            long cycle,
+            Exception exception
     ) {
         logger.error(exception);
         ColumnDefinitions defs = preparedStmt.getVariableDefinitions();
         Object[] values = fieldsF.apply(cycle);
         if (defs.size() != values.length) {
             throw new OpConfigError("There are " + defs.size() + " anchors in statement '" + preparedStmt.getQuery() + "'" +
-                "but " + values.length + " values were provided. These must match.");
+                    "but " + values.length + " values were provided. These must match.");
         }
 
         BoundStatement bound = preparedStmt.bind();
@@ -143,11 +143,11 @@ public class CQLD4PreparedStmtDiagnostics {
                 String fullValue = value.toString();
                 String valueToPrint = fullValue.length() > 100 ? fullValue.substring(0, 100) + " ... (abbreviated for console, since the size is " + fullValue.length() + ")" : fullValue;
                 String errormsg = String.format(
-                    "Unable to bind column '%s' to cql type '%s' with value '%s' (class '%s')",
-                    defname,
-                    type.asCql(false, false),
-                    valueToPrint,
-                    value.getClass().getCanonicalName()
+                        "Unable to bind column '%s' to cql type '%s' with value '%s' (class '%s')",
+                        defname,
+                        type.asCql(false, false),
+                        valueToPrint,
+                        value.getClass().getCanonicalName()
                 );
                 logger.error(errormsg);
                 throw new OpConfigError(errormsg, e);

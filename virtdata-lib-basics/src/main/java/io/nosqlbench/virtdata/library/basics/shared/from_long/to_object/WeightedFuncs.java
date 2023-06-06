@@ -21,7 +21,7 @@ import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.AliasSamplerDoubleInt;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.EvProbD;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashedDoubleRange;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashRange;
 import io.nosqlbench.virtdata.api.bindings.VirtDataFunctions;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class WeightedFuncs implements LongFunction<Object> {
 
     private final LongFunction<Object>[] funcs;
     private final AliasSamplerDoubleInt functionSampler;
-    private final HashedDoubleRange unitSampler = new HashedDoubleRange(0.0d, 1.0d);
+    private final HashRange unitSampler = new HashRange(0.0d, 1.0d);
 
     public WeightedFuncs(Object... weightsAndFuncs) {
         List<EvProbD> probabilities = new ArrayList<>();

@@ -14,37 +14,39 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.unary_int;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_float;
 
-import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
-import java.util.function.IntUnaryOperator;
+import java.util.function.LongFunction;
 
 @ThreadSafeMapper
 @Categories({Category.general})
-public class HashRange implements IntUnaryOperator {
+public class HashRange implements LongFunction<Float> {
 
-    private final int minValue;
-    private final int  width;
+    private final float min;
+    private final float max;
+    private final float interval;
+    private final static float MAX_FLOAT_VIA_LONG = (float) Long.MAX_VALUE;
     private final Hash hash = new Hash();
 
-    public HashRange(int width) {
-        this(0,width);
-    }
-
-    public HashRange(int minValue, int maxValue) {
-        if (maxValue<minValue) {
-            throw new BasicError("HashRange must have min and max value in that order.");
+    public HashRange(float min, float max) {
+        if (min>max) {
+            throw new RuntimeException("max must be greater than or equal to min");
         }
-        this.minValue = minValue;
-        this.width = (maxValue - minValue) +1;
+        this.min = min;
+        this.max = max;
+        this.interval = max - min;
     }
 
     @Override
-    public int applyAsInt(int operand) {
-        return minValue + (hash.applyAsInt(operand) & width);
+    public Float apply(long value) {
+        long hashed = hash.applyAsLong(value);
+        float unitScale = ((float) hashed) / MAX_FLOAT_VIA_LONG;
+        float valueScaled =interval*unitScale + min;
+        return valueScaled;
     }
 }

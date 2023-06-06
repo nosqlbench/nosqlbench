@@ -55,6 +55,10 @@ import java.util.function.*;
  */
 public class NBFunctionConverter {
 
+    public static LongToIntFunction adapt(LongFunction<Float> f, Float i1, LongToIntFunction i2) {
+        return v -> f.apply(v).intValue();
+    }
+
     public static LongFunction<Object> adapt(DoubleToIntFunction f, LongFunction<Integer> i1, Object i2) {
         return f::applyAsInt;
     }

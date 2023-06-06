@@ -30,5 +30,6 @@ public enum Category {
     general,
     objects,
     periodic,
-    experimental
+    experimental,
+    HOF
 }

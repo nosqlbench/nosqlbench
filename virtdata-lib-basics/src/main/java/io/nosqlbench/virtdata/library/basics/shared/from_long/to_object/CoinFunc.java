@@ -20,7 +20,7 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashedDoubleRange;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashRange;
 import io.nosqlbench.virtdata.api.bindings.VirtDataFunctions;
 
 import java.util.function.Function;
@@ -54,7 +54,7 @@ public class CoinFunc implements Function<Long, Object> {
     private final double threshold;
     private final LongFunction first;
     private final LongFunction second;
-    private final HashedDoubleRange cointoss = new HashedDoubleRange(0.0d, 1.0d);
+    private final HashRange cointoss = new HashRange(0.0d, 1.0d);
 
 
     @Example({"CoinFunc(0.15,NumberNameToString(),Combinations('A:1:B:23'))", "use the first function 15% of the time"})
