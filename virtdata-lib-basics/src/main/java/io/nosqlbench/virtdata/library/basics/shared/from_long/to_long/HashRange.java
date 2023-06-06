@@ -41,7 +41,8 @@ public class HashRange implements LongUnaryOperator {
     private final Hash hash = new Hash();
 
     public HashRange(long width) {
-        this(0L,width);
+        this.minValue=0L;
+        this.width=width;
     }
 
     public HashRange(long minValue, long maxValue) {
