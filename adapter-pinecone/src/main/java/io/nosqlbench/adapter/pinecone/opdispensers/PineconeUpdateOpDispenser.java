@@ -17,7 +17,6 @@
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
 import com.google.protobuf.Struct;
-import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
@@ -28,8 +27,9 @@ import io.pinecone.proto.UpdateRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
@@ -59,7 +59,7 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
     /**
      * @param op the ParsedOp from which the SparseValues object will be built
      * @return a SparseValues Object to be added to a Pinecone UpdateRequest
-     *
+     * <p>
      * This method interrogates the subsection of the ParsedOp defined for SparseValues parameters and constructs
      * a SparseValues Object based on the included values, or returns null if this section is not populated. The
      * base function returns either the SparseValues Object or null, while the interior function builds the SparseValues
@@ -69,27 +69,17 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
         Optional<LongFunction<Map>> mFunc = op.getAsOptionalFunction("sparse_values", Map.class);
         return mFunc.<LongFunction<SparseValues>>map(mapLongFunction -> l -> {
             Map<String, String> sparse_values_map = mapLongFunction.apply(l);
-            String[] rawValues = (sparse_values_map.get("values")).split(",");
-            ArrayList floatValues = new ArrayList<>();
-            for (String val : rawValues) {
-                floatValues.add(Float.valueOf(val));
-            }
-            rawValues = sparse_values_map.get("indices").split(",");
-            List<Integer> intValues = new ArrayList<>();
-            for (String val : rawValues) {
-                intValues.add(Integer.valueOf(val));
-            }
             return SparseValues.newBuilder()
-                .addAllValues(floatValues)
-                .addAllIndices(intValues)
+                .addAllValues(getVectorValues(sparse_values_map.get("values")))
+                .addAllIndices(getIndexValues(sparse_values_map.get("indices")))
                 .build();
         }).orElse(null);
     }
 
     /**
      * @param op the ParsedOp from which the Metadata objects will be built
-     * @return an Metadata Struct to be added to a Pinecone UpdateRequest
-     *
+     * @return a Metadata Struct to be added to a Pinecone UpdateRequest
+     * <p>
      * This method interrogates the subsection of the ParsedOp defined for metadata parameters and constructs
      * a Metadata Struct based on the included values, or returns null if this section is not populated. The
      * base function returns either the Metadata Struct or null, while the interior function builds the Metadata
@@ -98,30 +88,23 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
     private LongFunction<Struct> createUpdateMetadataFunction(ParsedOp op) {
         Optional<LongFunction<Map>> mFunc = op.getAsOptionalFunction("metadata", Map.class);
         return mFunc.<LongFunction<Struct>>map(mapLongFunction -> l -> {
-            Map<String, Value> metadata_map = new HashMap<String,Value>();
-            BiConsumer<String,Object> stringToValue = (key, val) -> {
-                Value targetval = null;
-                if (val instanceof String) targetval = Value.newBuilder().setStringValue((String)val).build();
-                else if (val instanceof Number) targetval = Value.newBuilder().setNumberValue((((Number) val).doubleValue())).build();
-                metadata_map.put(key, targetval);
-            };
             Map<String, Object> metadata_values_map = mapLongFunction.apply(l);
-            metadata_values_map.forEach(stringToValue);
-            return UpdateRequest.newBuilder().getSetMetadataBuilder().putAllFields(metadata_map).build();
+            return UpdateRequest.newBuilder().getSetMetadataBuilder()
+                .putAllFields(generateMetadataMap(metadata_values_map)).build();
         }).orElse(null);
     }
 
     /**
      * @param op The ParsedOp used to build the Request
      * @return A function that will take a long (the current cycle) and return a Pinecone UpdateRequest Builder
-     *
+     * <p>
      * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
      * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
      * For each method in the chain a function is created here and added to the chain of functions
      * called at time of instantiation.
-     *
+     * <p>
      * The Metadata and SparseValues objects used by the UpdateRequest are sufficiently sophisticated in their own
-     * building process that they have been broken out into separate methods. At runtime they are built separately
+     * building process that they have been broken out into separate methods. At runtime, they are built separately
      * and then added to the build chain by the builder returned by this method.
      */
     private LongFunction<UpdateRequest.Builder> createUpdateRequestFunction(ParsedOp op) {
@@ -141,18 +124,11 @@ public class PineconeUpdateOpDispenser extends PineconeOpDispenser {
             rFunc = l -> finalFunc.apply(l).setId(af.apply(l));
         }
 
-        Optional<LongFunction<String>> vFunc = op.getAsOptionalFunction("values", String.class);
+        Optional<LongFunction<Object>> vFunc = op.getAsOptionalFunction("values", Object.class);
         if (vFunc.isPresent()) {
             LongFunction<UpdateRequest.Builder> finalFunc = rFunc;
-            LongFunction<String> af = vFunc.get();
-            LongFunction<ArrayList<Float>> alf = l -> {
-                String[] vals = af.apply(l).split(",");
-                ArrayList<Float> fVals = new ArrayList<>();
-                for (String val : vals) {
-                    fVals.add(Float.valueOf(val));
-                }
-                return fVals;
-            };
+            LongFunction<Object> af = vFunc.get();
+            LongFunction<List<Float>> alf = extractFloatVals(af);
             rFunc = l -> finalFunc.apply(l).addAllValues(alf.apply(l));
         }
 

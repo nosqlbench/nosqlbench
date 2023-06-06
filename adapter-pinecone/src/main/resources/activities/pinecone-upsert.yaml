@@ -1,6 +1,6 @@
 scenarios:
   default:
-    query: run driver=pinecone tags==blocks:upsert cycles=1000
+    upsert: run driver=pinecone tags==blocks:upsert cycles=1000
 
 blocks:
   upsert:
@@ -10,7 +10,17 @@ blocks:
         namespace: "example_namespace"
         upsert_vectors:
           - id: "item_0"
-            values: "0.8238042071878214,0.6579519242642494,0.2772098082162267,0.11434681368630942,0.7496610470760962,0.08914691629812001,0.13249049306247204,0.8875869003282576,0.21615924382746318,0.8454796243176312"
+            values:
+              - 0.8238042071878214
+              - 0.6579519242642494
+              - 0.2772098082162267
+              - 0.11434681368630942
+              - 0.7496610470760962
+              - 0.08914691629812001
+              - 0.13249049306247204
+              - 0.8875869003282576
+              - 0.21615924382746318
+              - 0.8454796243176312
             metadata:
               category: "sports"
               colors: "blue,red,green"

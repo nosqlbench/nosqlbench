@@ -65,7 +65,7 @@ public class PineconeSpace {
     }
 
     /**
-     * Connections are index-specific so we need to allow for multiple connection management across indices.
+     * Connections are index-specific, so we need to allow for multiple connection management across indices.
      * However, note that a single connection object is thread safe and can be used by multiple clients.
      *
      * @param index     The database index for which a connection is being requested
