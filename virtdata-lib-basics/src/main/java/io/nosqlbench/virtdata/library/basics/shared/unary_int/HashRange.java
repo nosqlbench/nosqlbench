@@ -32,7 +32,8 @@ public class HashRange implements IntUnaryOperator {
     private final Hash hash = new Hash();
 
     public HashRange(int width) {
-        this(0,width);
+        this.minValue=0;
+        this.width=width;
     }
 
     public HashRange(int minValue, int maxValue) {

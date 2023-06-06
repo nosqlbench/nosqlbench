@@ -35,7 +35,8 @@ public class HashRange implements LongToIntFunction {
 
     @Example({"HashRange(32L)","map the input to a number in the range 0-31, inclusive, of type int"})
     public HashRange(int width) {
-        this(0,width);
+        this.minValue=0;
+        this.width=width;
     }
 
     @Example({"HashRange(35L,39L)","map the input to a number in the range 35-38, inclusive, of type int"})
