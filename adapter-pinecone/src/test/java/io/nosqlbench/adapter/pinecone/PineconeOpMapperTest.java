@@ -198,7 +198,10 @@ public class PineconeOpMapperTest {
                 index: "test-index"
                 upsert_vectors:
                  - id: 1
-                   values: "1.0,2.0,3.0"
+                   values:
+                     - 1.0
+                     - 2.0
+                     - 3.0
                    sparse_values:
                      indices: "1,2,3"
                      values: "4.0,5.0,6.0"
@@ -206,7 +209,10 @@ public class PineconeOpMapperTest {
                      key1: "val1"
                      key2: 2
                  - id: 2
-                   values: "7.0,8.0,9.0"
+                   values:
+                     - 7.0
+                     - 8.0
+                     - 9.0
                    sparse_values:
                      indices: "4,5,6"
                      values: "1.1,2.2,3.3"

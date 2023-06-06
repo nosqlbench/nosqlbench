@@ -9,10 +9,6 @@ blocks:
         query: "test-index"
         vector: "0.8602578079921012,0.12103044768221516,0.7737329191858439,0.4521093269320254,0.29351661477669416,0.4261807015226558,0.14131665592103335,0.882370813029422,0.4412833140430886,0.9916525700115515"
         namespace: "example_namespace"
-        top_k: 10
+        top_k: 1000
         include_values: true
         include_metadata: true
-        filter:
-          filterfield: "category"
-          operator: "$eq"
-          comparator: "movies"

@@ -17,7 +17,6 @@
 package io.nosqlbench.adapter.pinecone.opdispensers;
 
 import com.google.protobuf.Struct;
-import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
@@ -30,7 +29,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.LongFunction;
 
 public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
@@ -58,7 +56,7 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
     /**
      * @param op the ParsedOp from which the Vector objects will be built
      * @return an Iterable Collection of Vector objects to be added to a Pinecone UpsertRequest
-     *
+     * <p>
      * This method interrogates the subsection of the ParsedOp defined for Vector parameters and constructs
      * a list of Vectors based on the included values, or returns null if this section is not populated. The
      * base function returns either the List of vectors or null, while the interior function builds the vectors
@@ -74,40 +72,17 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
                 Vector.Builder vb = Vector.newBuilder();
                 // No need to check for key, it is invalid if id is not there, let it throw an exception
                 vb.setId(vector.get("id").toString());
-                String[] rawValues = ((String) vector.get("values")).split(",");
-                ArrayList<Float> floatValues = new ArrayList<>();
-                for (String val : rawValues) {
-                    floatValues.add(Float.valueOf(val));
-                }
-                vb.addAllValues(floatValues);
+                vb.addAllValues(getVectorValues(vector.get("values")));
                 if (vector.containsKey("sparse_values")) {
                     Map<String,String> sparse_values = (Map<String, String>) vector.get("sparse_values");
-                    rawValues = ((String) sparse_values.get("values")).split(",");
-                    floatValues = new ArrayList<>();
-                    for (String val : rawValues) {
-                        floatValues.add(Float.valueOf(val));
-                    }
-                    rawValues = sparse_values.get("indices").split(",");
-                    List<Integer> intValues = new ArrayList<>();
-                    for (String val : rawValues) {
-                        intValues.add(Integer.valueOf(val));
-                    }
                     vb.setSparseValues(SparseValues.newBuilder()
-                        .addAllValues(floatValues)
-                        .addAllIndices(intValues)
+                        .addAllValues(getVectorValues(sparse_values.get("values")))
+                        .addAllIndices(getIndexValues(sparse_values.get("indices")))
                         .build());
                 }
                 if (vector.containsKey("metadata")) {
-                    Map<String, Value> metadata_map = new HashMap<String, Value>();
-                    BiConsumer<String,Object> stringToValue = (key, val) -> {
-                        Value targetval = null;
-                        if (val instanceof String) targetval = Value.newBuilder().setStringValue((String)val).build();
-                        else if (val instanceof Number) targetval = Value.newBuilder().setNumberValue((((Number) val).doubleValue())).build();
-                        metadata_map.put(key, targetval);
-                    };
                     Map<String, Object> metadata_values_map = (Map<String, Object>) vector.get("metadata");
-                    metadata_values_map.forEach(stringToValue);
-                    vb.setMetadata(Struct.newBuilder().putAllFields(metadata_map).build());
+                    vb.setMetadata(Struct.newBuilder().putAllFields(generateMetadataMap(metadata_values_map)).build());
                 }
                 returnVectors.add(vb.build());
             }
@@ -118,14 +93,14 @@ public class PineconeUpsertOpDispenser extends PineconeOpDispenser {
     /**
      * @param op The ParsedOp used to build the Request
      * @return A function that will take a long (the current cycle) and return a Pinecone UpsertRequest Builder
-     *
+     * <p>
      * The pattern used here is to accommodate the way Request types are constructed for Pinecone.
      * Requests use a Builder pattern, so at time of instantiation the methods should be chained together.
      * For each method in the chain a function is created here and added to the chain of functions
      * called at time of instantiation.
-     *
+     * <p>
      * The Vector objects used by the UpsertRequest are sufficiently sophisticated in their own
-     * building process that they have been broken out into a separate method. At runtime they are built separately
+     * building process that they have been broken out into a separate method. At runtime, they are built separately
      * and then added to the build chain by the builder returned by this method.
      */
     private LongFunction<UpsertRequest.Builder> createUpsertRequestFunc(ParsedOp op) {

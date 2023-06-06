@@ -7,4 +7,10 @@ blocks:
     ops:
       op1:
         describeindexstats: "test-index"
-        #filter: ""
+        filter:
+          filterfield: "colors"
+          operator: "$in"
+          comparator:
+            - "blue"
+            - "red"
+            - "green"

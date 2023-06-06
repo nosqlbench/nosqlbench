@@ -77,7 +77,7 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
             rFunc = l -> finalFunc.apply(l).setNamespace(af.apply(l));
         }
 
-        Optional<LongFunction<Integer>> tFunc = op.getAsOptionalFunction("topk", Integer.class);
+        Optional<LongFunction<Integer>> tFunc = op.getAsOptionalFunction("top_k", Integer.class);
         if (tFunc.isPresent()) {
             LongFunction<QueryRequest.Builder> finalFunc = rFunc;
             LongFunction<Integer> af = tFunc.get();
@@ -98,18 +98,12 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
             rFunc = l -> finalFunc.apply(l).setIncludeValues(af.apply(l));
         }
 
-        Optional<LongFunction<String>> vFunc = op.getAsOptionalFunction("vector", String.class);
+        Optional<LongFunction<Object>> vFunc = op.getAsOptionalFunction("vector", Object.class);
         if (vFunc.isPresent()) {
             LongFunction<QueryRequest.Builder> finalFunc = rFunc;
-            LongFunction<String> af = vFunc.get();
-            LongFunction<ArrayList<Float>> alf = l -> {
-                String[] vals = af.apply(l).split(",");
-                ArrayList<Float> fVals = new ArrayList<>();
-                for (String val : vals) {
-                    fVals.add(Float.valueOf(val));
-                }
-                return fVals;
-            };
+            LongFunction<Object> af = vFunc.get();
+
+            LongFunction<List<Float>> alf = extractFloatVals(af);
             rFunc = l -> finalFunc.apply(l).addAllVector(alf.apply(l));
         }
 
@@ -122,6 +116,7 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
 
         return rFunc;
     }
+
 
     /**
      * @param op the ParsedOp from which the Query Vector objects will be built
@@ -140,37 +135,20 @@ public class PineconeQueryOpDispenser extends PineconeOpDispenser {
             List<Map<String, Object>> vectors = listLongFunction.apply(l);
             for (Map<String, Object> vector : vectors) {
                 QueryVector.Builder qvb = QueryVector.newBuilder();
-                String[] rawValues = ((String) vector.get("values")).split(",");
-                ArrayList<Float> floatValues = new ArrayList<>();
-                for (String val : rawValues) {
-                    floatValues.add(Float.valueOf(val));
-                }
-                qvb.addAllValues(floatValues);
+                qvb.addAllValues(getVectorValues(vector.get("values")));
                 qvb.setNamespace((String) vector.get("namespace"));
                 if (vector.containsKey("top_k")) {
                     qvb.setTopK((Integer) vector.get("top_k"));
                 }
                 if (vector.containsKey("filter")) {
-                    LongFunction<Struct> builtFilter = buildFilterStruct(l2 -> {
-                        return (Map) vector.get("filter");
-                    });
+                    LongFunction<Struct> builtFilter = buildFilterStruct(l2 -> (Map) vector.get("filter"));
                     qvb.setFilter(builtFilter.apply(l));
                 }
                 if (vector.containsKey("sparse_values")) {
                     Map<String,String> sparse_values = (Map<String, String>) vector.get("sparse_values");
-                    rawValues = ((String) sparse_values.get("values")).split(",");
-                    floatValues = new ArrayList<>();
-                    for (String val : rawValues) {
-                        floatValues.add(Float.valueOf(val));
-                    }
-                    rawValues = sparse_values.get("indices").split(",");
-                    List<Integer> intValues = new ArrayList<>();
-                    for (String val : rawValues) {
-                        intValues.add(Integer.valueOf(val));
-                    }
                     qvb.setSparseValues(SparseValues.newBuilder()
-                        .addAllValues(floatValues)
-                        .addAllIndices(intValues)
+                        .addAllValues(getVectorValues(sparse_values.get("values")))
+                        .addAllIndices(getIndexValues(sparse_values.get("indices")))
                         .build());
                 }
                 returnVectors.add(qvb.build());

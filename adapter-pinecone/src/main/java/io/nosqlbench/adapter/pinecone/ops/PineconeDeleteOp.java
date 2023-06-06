@@ -17,10 +17,9 @@
 package io.nosqlbench.adapter.pinecone.ops;
 
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import io.pinecone.PineconeException;
+import io.pinecone.PineconeConnection;
 import io.pinecone.proto.DeleteRequest;
 import io.pinecone.proto.DeleteResponse;
-import io.pinecone.PineconeConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,6 +43,6 @@ public class PineconeDeleteOp extends PineconeOp {
     @Override
     public void run() {
         DeleteResponse response = connection.getBlockingStub().delete(request);
-        logger.debug("Pincecone delete request successful: " + response.toString());
+        logger.debug("Pinecone delete request successful: " + response.toString());
     }
 }
