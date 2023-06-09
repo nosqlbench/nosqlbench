@@ -31,19 +31,20 @@ import java.util.function.LongFunction;
  */
 @ThreadSafeMapper
 @Categories(Category.HOF)
-public class CqlVector implements LongFunction<com.datastax.oss.driver.api.core.data.CqlVector> {
+public class CqlVectorV1 implements LongFunction<com.datastax.oss.driver.api.core.data.CqlVector> {
 
     private final LongFunction<List<?>> func;
 
     @Example({"CqlVector(ListSized(2,HashedRange(0.2f, 5.0f)", "Create a 2-component vector with the given range of values."})
-    public CqlVector(Object func) {
+    public CqlVectorV1(Object func) {
         this.func = VirtDataConversions.adaptFunction(func, LongFunction.class, List.class);
     }
 
     @Override
     public com.datastax.oss.driver.api.core.data.CqlVector apply(long cycle) {
         List components = func.apply(cycle);
-        com.datastax.oss.driver.api.core.data.CqlVector vector = new com.datastax.oss.driver.api.core.data.CqlVector<>(components);
-        return vector;
+        com.datastax.oss.driver.api.core.data.CqlVector.Builder vbuilder = com.datastax.oss.driver.api.core.data.CqlVector.builder();
+        vbuilder.add(components.toArray());
+        return vbuilder.build();
     }
 }

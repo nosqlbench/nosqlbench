@@ -21,8 +21,8 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
-import java.util.function.Function;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Convert the incoming object List, Number, or Array to a CqlVector
@@ -32,7 +32,7 @@ import java.util.List;
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class ToCqlVector implements Function<Object, CqlVector> {
+public class ToCqlVectorV1 implements Function<Object, CqlVector> {
 
     @Override
     public CqlVector apply(Object object) {
@@ -46,6 +46,8 @@ public class ToCqlVector implements Function<Object, CqlVector> {
         } else {
             throw new RuntimeException("Unsupported input type for CqlVector: " + object.getClass().getCanonicalName());
         }
-        return CqlVector.of(ary);
+        CqlVector.Builder vbuilder = CqlVector.builder();
+        vbuilder.add(ary);
+        return vbuilder.build();
     }
 }

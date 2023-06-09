@@ -33,28 +33,38 @@ import java.util.function.Function;
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class NormalizeCqlVector implements Function<CqlVector, CqlVector> {
+public class NormalizeCqlVectorV1 implements Function<CqlVector, CqlVector> {
     private final NormalizeDoubleListVector ndv = new NormalizeDoubleListVector();
     private final NormalizeFloatListVector nfv = new NormalizeFloatListVector();
 
     @Override
     public CqlVector apply(CqlVector cqlVector) {
 
-        List<Object> list = cqlVector.getValues();
+        CqlVector.Builder builder = CqlVector.builder();
+        Iterable values = cqlVector.getValues();
+        List<Object> list = new ArrayList<>();
+        for (Object element : list) {
+            list.add(element);
+        }
+
         if (list.isEmpty()) {
-            return CqlVector.of();
         } else if (list.get(0) instanceof Float) {
-            List<Float> srcDoubles = new ArrayList<>(list.size());
-            list.forEach(o -> srcDoubles.add((Float) o));
-            List<Float> doubles = nfv.apply(srcDoubles);
-            return new CqlVector(doubles);
+            List<Float> srcfloats = new ArrayList<>(list.size());
+            list.forEach(o -> srcfloats.add((Float) o));
+            List<Float> floats = nfv.apply(srcfloats);
+            for (Float fv : floats) {
+                builder.add(fv);
+            }
         } else if (list.get(0) instanceof Double) {
             List<Double> srcDoubles = new ArrayList<>();
             list.forEach(o -> srcDoubles.add((Double) o));
             List<Double> doubles = ndv.apply(srcDoubles);
-            return new CqlVector(doubles);
+            for (Double dv : doubles) {
+                builder.add(dv);
+            }
         } else {
             throw new RuntimeException("Only Doubles and Floats are recognized.");
         }
+        return builder.build();
     }
 }
