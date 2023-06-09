@@ -41,9 +41,8 @@ public class NormalizeCqlVectorV1 implements Function<CqlVector, CqlVector> {
     public CqlVector apply(CqlVector cqlVector) {
 
         CqlVector.Builder builder = CqlVector.builder();
-        Iterable values = cqlVector.getValues();
         List<Object> list = new ArrayList<>();
-        for (Object element : list) {
+        for (Object element : cqlVector) {
             list.add(element);
         }
 
