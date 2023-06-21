@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.vladsch.flexmark</groupId>
             <artifactId>flexmark-ext-yaml-front-matter</artifactId>
-            <version>0.64.6</version>
+            <version>0.64.8</version>
         </dependency>
         <dependency>
             <groupId>com.vladsch.flexmark</groupId>
