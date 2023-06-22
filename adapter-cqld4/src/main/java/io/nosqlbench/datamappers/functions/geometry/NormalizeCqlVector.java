@@ -44,9 +44,9 @@ public class NormalizeCqlVector implements Function<CqlVector, CqlVector> {
         if (list.isEmpty()) {
             return CqlVector.of();
         } else if (list.get(0) instanceof Float) {
-            List<Float> srcDoubles = new ArrayList<>(list.size());
-            list.forEach(o -> srcDoubles.add((Float) o));
-            List<Float> doubles = nfv.apply(srcDoubles);
+            List<Float> srcFloats = new ArrayList<>(list.size());
+            list.forEach(o -> srcFloats.add((Float) o));
+            List<Float> doubles = nfv.apply(srcFloats);
             return new CqlVector(doubles);
         } else if (list.get(0) instanceof Double) {
             List<Double> srcDoubles = new ArrayList<>();
