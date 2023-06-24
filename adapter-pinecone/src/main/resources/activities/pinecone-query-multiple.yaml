@@ -31,6 +31,8 @@ blocks:
               - 0.9916525700115515
             namespace: "example_namespace"
             top_k: 3
+            include_values: true
+            include_metadata: true
             filter:
               filterfield: "category"
               operator: "$eq"
