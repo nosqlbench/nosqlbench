@@ -58,7 +58,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
         this.msgHeaderRawJsonStrFunc = lookupOptionalStrOpValueFunc(MSG_HEADER_OP_PARAM);
         this.msgPropRawJsonStrFunc = lookupOptionalStrOpValueFunc(MSG_PROP_OP_PARAM);
         this.msgBodyRawJsonStrFunc = lookupMandtoryStrOpValueFunc(MSG_BODY_OP_PARAM);
-        this.msgTypeFunc = lookupMandtoryStrOpValueFunc(MSG_TYPE_OP_PARAM);
+        this.msgTypeFunc = lookupOptionalStrOpValueFunc(MSG_TYPE_OP_PARAM);
     }
 
     private Message createAndSetMessagePayload(
@@ -305,7 +305,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
             logger.warn(
                 "The specified JMS message type {} is not valid, use the default TextMessage type!",
                 jmsMsgType);
-            jmsMsgType = S4JAdapterUtil.JMS_MESSAGE_TYPES.TEXT.label;
+            jmsMsgType = S4JAdapterUtil.JMS_MESSAGE_TYPES.BYTE.label;
         }
 
 

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.s4j.util;
 
+import io.nosqlbench.adapter.s4j.exception.S4JAdapterUnexpectedException;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -60,7 +61,8 @@ public class S4JClientConf {
 
 
 
-    public S4JClientConf(String webSvcUrl, String pulsarSvcUrl, String s4jConfFileName) {
+    public S4JClientConf(String webSvcUrl, String pulsarSvcUrl, String s4jConfFileName)
+    throws S4JAdapterUnexpectedException {
 
         //////////////////
         // Read related Pulsar client configuration settings from a file
@@ -156,12 +158,9 @@ public class S4JClientConf {
                     }
                 }
             }
-        } catch (IOException ioe) {
-            logger.error("Can't read the specified config properties file: " + fileName);
-            ioe.printStackTrace();
-        } catch (ConfigurationException cex) {
-            logger.error("Error loading configuration items from the specified config properties file: " + fileName + ":" + cex.getMessage());
-            cex.printStackTrace();
+        } catch (IOException | ConfigurationException ex) {
+            ex.printStackTrace();
+            throw new S4JAdapterUnexpectedException("Can't read the specified config properties file: " + fileName);
         }
     }
 
