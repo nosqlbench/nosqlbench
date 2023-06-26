@@ -16,9 +16,7 @@
 
 package io.nosqlbench.adapter.s4r.dispensers;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
 import io.nosqlbench.adapter.s4r.S4RSpace;
 import io.nosqlbench.adapter.s4r.exception.S4RAdapterUnexpectedException;
 import io.nosqlbench.adapter.s4r.ops.S4RTimeTrackOp;
@@ -26,7 +24,6 @@ import io.nosqlbench.adapter.s4r.util.S4RAdapterMetrics;
 import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,8 +43,6 @@ public abstract  class AmqpBaseOpDispenser extends BaseOpDispenser<S4RTimeTrackO
 
     protected final Map<String, String> s4rConfMap = new HashMap<>();
     protected final String exchangeType;
-    protected final LongFunction<String> exchangeNameFunc;
-
     protected AmqpBaseOpDispenser(final DriverAdapter adapter,
                                   final ParsedOp op,
                                   final S4RSpace s4RSpace) {
@@ -63,7 +58,6 @@ public abstract  class AmqpBaseOpDispenser extends BaseOpDispenser<S4RTimeTrackO
         s4rConfMap.putAll(s4RSpace.getS4rClientConf().getS4rConfMap());
 
         this.exchangeType = s4RSpace.getAmqpExchangeType();
-        this.exchangeNameFunc = lookupMandtoryStrOpValueFunc("exchange_name");
 
         s4rSpace.setTotalCycleNum(NumberUtils.toLong(this.parsedOp.getStaticConfig("cycles", String.class)));
         s4rSpace.setTotalThreadNum(NumberUtils.toInt(this.parsedOp.getStaticConfig("threads", String.class)));
@@ -86,32 +80,19 @@ public abstract  class AmqpBaseOpDispenser extends BaseOpDispenser<S4RTimeTrackO
         return stringLongFunction;
     }
 
-    protected Channel getChannelWithExchange(Connection amqpConnection,
-                                             long connSeqNum,
-                                             long channelSeqNum,
-                                             String exchangeName)
-    throws IOException {
-        Channel channel = amqpConnection.createChannel();
-        if (channel == null) {
-            throw new S4RAdapterUnexpectedException("No AMQP channel is available!");
+    protected void declareExchange(Channel channel, String exchangeName, String exchangeType) {
+        try {
+            // Declaring the same exchange multiple times on one channel is considered as a no-op
+            channel.exchangeDeclare(exchangeName, exchangeType);
+            if (logger.isTraceEnabled()) {
+                logger.debug("Declared the AMQP exchange \"{}\" on channel \"{}\".",
+                    exchangeName, channel);
+            }
+        } catch (IOException e) {
+            String errMsg = String.format("Failed to declare the AMQP exchange \"%s\" on channel \"%s\"!",
+                exchangeName, channel);
+            throw new S4RAdapterUnexpectedException(errMsg);
         }
-        if (logger.isDebugEnabled()) {
-            logger.debug("AMQP channel created -- {} [{},{}] ",
-                channel,
-                connSeqNum,
-                channelSeqNum);
-        }
-
-        AMQP.Exchange.DeclareOk declareOk =
-            channel.exchangeDeclare(exchangeName, s4rSpace.getAmqpExchangeType());
-        if (logger.isDebugEnabled()) {
-            logger.debug("AMQP exchange declared -- [name: {}, type: {}] {}",
-                exchangeName,
-                exchangeType,
-                declareOk);
-        }
-
-        return channel;
     }
 
     protected long getConnSeqNum(long cycle) {
@@ -122,9 +103,24 @@ public abstract  class AmqpBaseOpDispenser extends BaseOpDispenser<S4RTimeTrackO
         return (cycle / s4rSpace.getAmqpConnNum()) % s4rSpace.getAmqpConnChannelNum();
     }
 
-    protected String getEffectiveExchangeName(long cycle) {
-        String exchangeNameInput = exchangeNameFunc.apply(cycle);
-        return (StringUtils.isBlank(exchangeNameInput) ? "exchange-" + getConnChannelSeqNum(cycle) : exchangeNameInput);
+    protected long getChannelExchangeSeqNum(long cycle) {
+        return (cycle / ((long) s4rSpace.getAmqpConnNum() *
+                                s4rSpace.getAmqpConnChannelNum())
+               ) % s4rSpace.getAmqpChannelExchangeNum();
+    }
+
+    protected String getEffectiveExchangeNameByCycle(long cycle) {
+        return getEffectiveExchangeName(
+            getConnSeqNum(cycle),
+            getConnChannelSeqNum(cycle),
+            getChannelExchangeSeqNum(cycle));
+    }
+    protected String getEffectiveExchangeName(long connSeqNum, long channelSeqNum,  long exchangeSeqNum) {
+        return String.format(
+            "exchange-%d-%d-%d",
+            connSeqNum,
+            channelSeqNum,
+            exchangeSeqNum);
     }
 
     public String getName() {

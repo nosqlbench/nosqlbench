@@ -1,0 +1,13 @@
+bindings:
+  mytext_val: AlphaNumericString(100)
+
+params:
+  publisher_confirm: false
+
+blocks:
+  msg-send-block:
+    ops:
+      op1:
+        AmqpMsgSender: ""
+        routing_key: "routing-test"
+        message: "{mytext_val}"

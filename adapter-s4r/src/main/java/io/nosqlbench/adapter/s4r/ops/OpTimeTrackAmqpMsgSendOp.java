@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
 
@@ -40,8 +41,8 @@ public class OpTimeTrackAmqpMsgSendOp extends S4RTimeTrackOp {
     private final String confirmMode;
     private final int confirmBatchNum;
 
-    private static final ThreadLocal<Integer>
-        publishConfirmBatchTrackingCnt = ThreadLocal.withInitial(() -> 0);
+    private static final ConcurrentHashMap<Channel, Integer>
+        channelPublishConfirmBathTracking = new ConcurrentHashMap<>();
 
     public OpTimeTrackAmqpMsgSendOp(S4RAdapterMetrics s4rAdapterMetrics,
                                     S4RSpace s4rSpace,
@@ -73,33 +74,39 @@ public class OpTimeTrackAmqpMsgSendOp extends S4RTimeTrackOp {
                 routingKey,
                 null,
                 msgPayload.getBytes(StandardCharsets.UTF_8));
+            if (logger.isTraceEnabled()) {
+                logger.trace("Successfully published message (({}) {}) via the current channel: {}",
+                    cycle, msgPayload, channel);
+            }
 
             if (publishConfirm) {
                 // Individual publish confirm
                 if (StringUtils.containsIgnoreCase(confirmMode, S4RAdapterUtil.AMQP_PUB_CONFIRM_MODE.INDIVIDUAL.label)) {
                     channel.waitForConfirms(S4RAdapterUtil.DFT_AMQP_PUBLISH_CONFIRM_TIMEOUT_MS);
+                    if (logger.isTraceEnabled()) {
+                        logger.debug("Sync ack received for an individual published message: {}", cycle);
+                    }
                 }
                 // Batch publish confirm
                 else if (StringUtils.containsIgnoreCase(confirmMode, S4RAdapterUtil.AMQP_PUB_CONFIRM_MODE.BATCH.label)) {
-                    int publishConfirmTrackingCnt = publishConfirmBatchTrackingCnt.get();
+                    int publishConfirmTrackingCnt =
+                        channelPublishConfirmBathTracking.getOrDefault(channel, 0);
+
                     if ( (publishConfirmTrackingCnt > 0) &&
                          ( (publishConfirmTrackingCnt % (confirmBatchNum - 1) == 0)  ||
                            (publishConfirmTrackingCnt == (s4RSpace.getTotalCycleNum() - 1)) ) )  {
-                        synchronized (this) {
-                            channel.waitForConfirms(S4RAdapterUtil.DFT_AMQP_PUBLISH_CONFIRM_TIMEOUT_MS);
+                        channel.waitForConfirms(S4RAdapterUtil.DFT_AMQP_PUBLISH_CONFIRM_TIMEOUT_MS);
+                        if (logger.isTraceEnabled()) {
+                            logger.debug("Sync ack received for a batch of published message: {}, {}",
+                                cycle, publishConfirmTrackingCnt);
                         }
                     }
                     else {
-                        publishConfirmBatchTrackingCnt.set(publishConfirmTrackingCnt+1);
+                        channelPublishConfirmBathTracking.put(channel, publishConfirmTrackingCnt+1);
                     }
                 }
                 // Async publish confirm
                 // - Do nothing here. See "channel.addConfirmListener" code in 'AmqpMsgSendOpDispenser'
-            }
-
-            if (logger.isTraceEnabled()) {
-                logger.trace("Successfully published message ({}) via the current channel: {}",
-                    msgPayload, channel);
             }
         }
         catch (IllegalStateException ex) {

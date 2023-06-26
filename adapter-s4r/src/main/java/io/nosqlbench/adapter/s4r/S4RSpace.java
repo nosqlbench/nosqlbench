@@ -27,14 +27,18 @@ import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -71,13 +75,16 @@ public class S4RSpace implements  AutoCloseable {
     // Maximum number of AMQP channels per connection
     private final int amqpConnChannelNum;
 
+    // Maximum number of AMQP exchanges per channel
+    private final int amqpChannelExchangeNum;
+
     // Max number of queues (per exchange)
     // - only relevant with message receivers
     private final int amqpExchangeQueueNum;
 
     // Max number of message clients (senders or receivers)
     // - for senders, this is the number of message senders per exchange
-    // - for recievers, this is the number of message receivers per queue
+    // - for receivers, this is the number of message receivers per queue
     //   (there could be multiple queues per exchange)
     private final int amqpMsgClntNum;
 
@@ -91,18 +98,9 @@ public class S4RSpace implements  AutoCloseable {
 
     private final ConcurrentHashMap<Long, Connection> amqpConnections = new ConcurrentHashMap<>();
 
-    ///////////////////////////////////
-    // NOTE: Do NOT mix sender and receiver workload in one NB workload
-    ///////////////////////////////////
-
-    // Amqp Channels for senders
-    public record AmqpSenderChannelKey(Long connId, Long channelId, Long senderId) { }
-    private final ConcurrentHashMap<AmqpSenderChannelKey, Channel> amqpSenderChannels = new ConcurrentHashMap<>();
-
-    // Amqp Channels for receivers
-    public record AmqpReceiverChannelKey(Long connId, Long channelId, Long queueId, Long consumerId) { }
-    private final ConcurrentHashMap<AmqpReceiverChannelKey, Channel> amqpReceiverChannels = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<AmqpReceiverChannelKey, Set<String>> amqpRecvChannelQueueSetMap = new ConcurrentHashMap<>();
+    // Amqp connection/chanel/exchange combination for a sender
+    public record AmqpChannelKey(Long connId, Long channelId) { }
+    private final ConcurrentHashMap<AmqpChannelKey, Channel> amqpChannels = new ConcurrentHashMap<>();
 
     // Whether to do strict error handling while sending/receiving messages
     // - Yes: any error returned from the AMQP server (or AMQP compatible sever like Pulsar) while doing
@@ -129,6 +127,8 @@ public class S4RSpace implements  AutoCloseable {
             NumberUtils.toInt(cfg.getOptional("num_conn").orElse("1"));
         this.amqpConnChannelNum =
             NumberUtils.toInt(cfg.getOptional("num_channel").orElse("1"));
+        this.amqpChannelExchangeNum =
+            NumberUtils.toInt(cfg.getOptional("num_exchange").orElse("1"));
         this.amqpExchangeQueueNum =
             NumberUtils.toInt(cfg.getOptional("num_queue").orElse("1"));
         this.amqpMsgClntNum =
@@ -155,6 +155,12 @@ public class S4RSpace implements  AutoCloseable {
                 .setDescription("Maximum number of AMQP connections."))
             .add(Param.defaultTo("num_channel", 1)
                 .setDescription("Maximum number of AMQP channels per connection"))
+            .add(Param.defaultTo("num_exchange", 1)
+                .setDescription("Maximum number of AMQP exchanges per channel."))
+            .add(Param.defaultTo("num_queue", 1)
+                .setDescription("Max number of queues per exchange (only relevant for receivers)."))
+            .add(Param.defaultTo("num_msg_clnt", 1)
+                .setDescription("Max number of message clients per exchange (sender) or per queue (receiver)."))
             .add(Param.defaultTo("max_op_time", 0)
                 .setDescription("Maximum time (in seconds) to run NB Kafka testing scenario."))
             .add(Param.defaultTo("strict_msg_error_handling", false)
@@ -164,16 +170,10 @@ public class S4RSpace implements  AutoCloseable {
 
     public Connection getAmqpConnection(Long id) { return amqpConnections.get(id); }
 
-    public Channel getAmqpSenderChannel(
-        AmqpSenderChannelKey key,
+    public Channel getAmqpChannels(
+        AmqpChannelKey key,
         Supplier<Channel> channelSupplier) {
-            return amqpSenderChannels.computeIfAbsent(key, __ -> channelSupplier.get());
-    }
-
-    public Channel getAmqpReceiverChannel(
-        AmqpReceiverChannelKey key,
-        Supplier<Channel> channelSupplier) {
-        return amqpReceiverChannels.computeIfAbsent(key, __ -> channelSupplier.get());
+            return amqpChannels.computeIfAbsent(key, __ -> channelSupplier.get());
     }
 
     public long getActivityStartTimeMills() { return this.activityStartTimeMills; }
@@ -183,7 +183,8 @@ public class S4RSpace implements  AutoCloseable {
     public String getAmqpExchangeType() { return amqpExchangeType; }
     public int getAmqpConnNum() { return this.amqpConnNum; }
     public int getAmqpConnChannelNum() { return this.amqpConnChannelNum; }
-    public int getAmqpExchangeQueueNum() { return this.amqpConnNum; }
+    public int getAmqpChannelExchangeNum() { return this.amqpChannelExchangeNum; }
+    public int getAmqpExchangeQueueNum() { return this.amqpExchangeQueueNum; }
     public int getAmqpMsgClntNum() { return this.amqpMsgClntNum; }
 
     public boolean isStrictMsgErrorHandling() { return  this.strictMsgErrorHandling; }
@@ -218,19 +219,50 @@ public class S4RSpace implements  AutoCloseable {
             try {
                 s4rConnFactory = new ConnectionFactory();
 
-                String passWord = cfg.get("jwtToken");
-                s4rConnFactory.setPassword(cfgMap.get(""));
-                s4rConnFactory.setPassword(passWord);
-
-                String amqpServerHost = cfg.get("amqpSrvHost");
+                String amqpServerHost = cfgMap.get("amqpSrvHost");
+                if (StringUtils.isBlank(amqpServerHost)) {
+                    String errMsg = "AMQP server host (\"amqpSrvHost\") must be specified!";
+                    throw new S4RAdapterInvalidParamException(errMsg);
+                }
                 s4rConnFactory.setHost(amqpServerHost);
 
-                int amqpServerPort = Integer.parseInt(cfg.get("amqpSrvPort"));
-                s4rConnFactory.setPort(amqpServerPort);
+                String amqpSrvPortCfg = cfgMap.get("amqpSrvPort");
+                if (StringUtils.isBlank(amqpSrvPortCfg)) {
+                    String errMsg = "AMQP server port (\"amqpSrvPort\") must be specified!";
+                    throw new S4RAdapterInvalidParamException(errMsg);
+                }
+                s4rConnFactory.setPort(Integer.parseInt(amqpSrvPortCfg));
 
-                String amqpVirtualHost = cfg.get("virtualHost");
+                String amqpVirtualHost = cfgMap.get("virtualHost");
+                if (StringUtils.isBlank(amqpVirtualHost)) {
+                    String errMsg = "AMQP virtual host (\"virtualHost\") must be specified!";
+                    throw new S4RAdapterInvalidParamException(errMsg);
+                }
                 s4rConnFactory.setVirtualHost(amqpVirtualHost);
 
+                String userNameCfg = cfgMap.get("amqpUser");
+
+                String passWordCfg = cfgMap.get("amqpPassword");
+                if (StringUtils.isNotBlank(passWordCfg)) {
+                    String passWord = passWordCfg;
+                    if (StringUtils.startsWith(passWordCfg, "file://")
+                        && StringUtils.length(passWordCfg) > 7) {
+                        String jwtTokenFile = StringUtils.substring(passWordCfg, 7);
+                        passWord = FileUtils.readFileToString(new File(jwtTokenFile), "UTF-8");
+                    }
+
+                    if (StringUtils.isNotBlank(passWord)) {
+                        if (StringUtils.isBlank(userNameCfg)) {
+                            s4rConnFactory.setUsername("");
+                        }
+                        s4rConnFactory.setPassword(passWord);
+                    }
+                }
+
+                String useTlsCfg = cfgMap.get("useTls");
+                if (StringUtils.isNotBlank(useTlsCfg) && Boolean.parseBoolean(useTlsCfg)) {
+                    s4rConnFactory.useSslProtocol();
+                }
 
                 for (int i = 0; i < getAmqpConnNum(); i++) {
                     Connection connection = s4rConnFactory.newConnection();
@@ -243,7 +275,7 @@ public class S4RSpace implements  AutoCloseable {
                             connection);
                     }
                 }
-            } catch (IOException|TimeoutException  ex) {
+            } catch (IOException|TimeoutException|NoSuchAlgorithmException|KeyManagementException  ex) {
                 logger.error("Unable to establish AMQP connections with the following configuration parameters: {}",
                     s4rClientConnInfo.toString());
                 throw new S4RAdapterUnexpectedException(ex);
@@ -255,11 +287,7 @@ public class S4RSpace implements  AutoCloseable {
         try {
             beingShutdown.set(true);
 
-            for (Channel channel : amqpSenderChannels.values()) {
-                channel.close();
-            }
-
-            for (Channel channel : amqpReceiverChannels.values()) {
+            for (Channel channel : amqpChannels.values()) {
                 channel.close();
             }
 

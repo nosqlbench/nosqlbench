@@ -1,62 +1,92 @@
-# Overview
+- [1. Overview](#1-overview)
+- [2. NB S4R Usage](#2-nb-s4r-usage)
+    - [2.1. CLI Examples](#21-cli-examples)
+    - [2.2. CLI parameters](#22-cli-parameters)
+    - [2.3. Workload Definition](#23-workload-definition)
+    - [2.4. Configuration Properties](#24-configuration-properties)
+        - [2.4.1. Global Properties File](#241-global-properties-file)
+        - [2.4.2. Scenario Document Level Properties](#242-scenario-document-level-properties)
 
-This NB Kafka adapter allows publishing messages to or consuming messages from
-* a Kafka cluster, or
-* a Pulsar cluster with [S4K](https://github.com/datastax/starlight-for-kafka) or [KoP](https://github.com/streamnative/kop) Kafka Protocol handler for Pulsar.
+---
 
-At high level, this adapter supports the following Kafka functionalities
-* Publishing messages to one Kafka topic with sync. or async. message-send acknowledgements (from brokers)
-* Subscribing messages from one or multiple Kafka topics with sync. or async. message-recv acknowlegements (to brokers) (aka, message commits)
-    * auto message commit
-    * manual message commit with a configurable number of message commits in one batch
-* Kafka Transaction support
+# 1. Overview
 
-## Example NB Yaml
-* [kafka_producer.yaml](./s4r_producer.yaml)
-*
-* [kafka_consumer.yaml](./s4r_consumer.yaml)
+This NB S4R adapter allows sending messages to or receiving messages from
+* an AMQP 0-9-1 based server (e.g. RabbitMQ), or
+* a Pulsar cluster with [S4R](https://github.com/datastax/starlight-for-rabbitmq) AMQP (0-9-1) Protocol handler for Pulsar.
 
-# Usage
+At high level, this adapter supports the following AMQP 0-9-1 functionalities
+* Creating AMQP connections and channels
+* Declaring AMQP exchanges
+    * The following exchange types are supported: `direct`, `fanout`, `topic`, and `headers`
+* Sending messages to AMQP exchanges with sync. or async. publisher confirms
+    * For sync confirms, it supports both single and batch confirms
+    * Supports message-send based on routing keys
+* Declaring and binding AMQP queues
+    * Supports message-receive based on binding keys
+* Receiving messages from AMQP queues with async. consumer acks
+
+# 2. NB S4R Usage
+
+## 2.1. CLI Examples
 
 ```bash
-## Kafka Producer
-$ <nb_cmd> run driver=kafka -vv cycles=100 threads=2 num_clnt=2 yaml=s4r_producer.yaml config=s4r_config.properties bootstrap_server=PLAINTEXT://localhost:9092
+## AMQP Message Sender
+$ <nb_cmd> run driver=s4r -vv cycles=200 strict_msg_error_handling=0 \
+  threads=8 num_conn=1 num_channel=2 num_exchange=2 num_msg_clnt=2 \
+  workload=./s4r_msg_sender.yaml \
+  config=./s4r_config.properties
 
-## Kafka Consumer
-$ <nb_cmd> run driver=kafka -vv cycles=100 threads=4 num_clnt=2 num_cons_grp=2 yaml=s4r_producer.yaml config=s4r_config.properties bootstrap_server=PLAINTEXT://localhost:9092
+## AMQP Message Receiver
+$ <nb_cmd> run driver=s4r -vv cycles=200 strict_msg_error_handling=0 \
+  threads=8 num_conn=1 num_channel=2 num_exchange=2 num_queue=2 num_msg_clnt=2 \
+  workload=./s4r_msg_receiver.yaml \
+  config=./s4r_config.properties
 ```
 
-## NB Kafka adapter specific CLI parameters
+## 2.2. CLI parameters
 
-* `num_clnt`: the number of Kafka clients to publish messages to or to receive messages from
-    * For producer workload, this is the number of the producer threads to publish messages to the same topic
-        * Can have multiple producer threads for one topic/partition (`KafkaProducer` is thread-safe)
-        * `threads` and `num_clnt` values MUST be the same.
-    * For consumer workload, this is the partition number of a topic
-        * Consumer workload supports to subscribe from multiple topics. If so, it requires all topics having the same partition number.
-        * Only one consumer thread for one topic/partition (`KafkaConsumer` is NOT thread-safe)
-        * `threads` MUST be equal to `num_clnt`*`num_cons_grp`
+The following CLI parameters are unique to the S4R adapter:
 
-* `num_cons_grp`: the number of consumer groups
-    * Only relevant for consumer workload
+* `num_conn`: the number of AMQP connections to create
+* `num_channel`: the number of AMQP channels to create for each connection
+* `num_exchange`: the number of AMQP exchanges to create for each channel
+* `num_queue`: the number of AMQP queues to create for each channel (only relevant for message receiver workload)
+* `num_msg_client`: the number of message clients to create for each channel
+    * for message sender workload, it is the number of message publishers for each exchange
+    * for message receiver workload, it is the number of message consumers for each queue
 
+## 2.3. Workload Definition
 
+The example workload YAML files can be found from:
 
-For the Kafka NB adapter, Document level parameters can only be statically bound; and currently, the following Document level configuration parameters are supported:
+* [s4r_msg_sender.yaml](s4r_msg_sender.yaml)
+* [s4r_msg_receiver.yaml](s4r_msg_receiver.yaml)
 
-* `async_api` (boolean):
-    * When true, use async Kafka client API.
-* `seq_tracking` (boolean):
-    * When true, a sequence number is created as part of each message's properties
-    * This parameter is used in conjunction with the next one in order to simulate abnormal message processing errors and then be able to detect such errors successfully.
-* `seqerr_simu`:
-    * A list of error simulation types separated by comma (,)
-    * Valid error simulation types
-        * `out_of_order`: simulate message out of sequence
-        * `msg_loss`: simulate message loss
-        * `msg_dup`: simulate message duplication
-    * This value should be used only for testing purposes. It is not recommended to use this parameter in actual testing environments.
-* `e2e_starting_time_source`:
-    * Starting timestamp for end-to-end operation. When specified, will update the `e2e_msg_latency` histogram with the calculated end-to-end latency. The latency is calculated by subtracting the starting time from the current time. The starting time is determined from a configured starting time source. The unit of the starting time is milliseconds since epoch.
-    * The possible values for `e2e_starting_time_source`:
-        * `message_publish_time` : uses the message publishing timestamp as the starting time. The message publishing time, in this case, [is computed by the Kafka client on record generation](https://kafka.apache.org/34/javadoc/org/apache/kafka/clients/producer/ProducerRecord.html). This is the case, as [`CreateTime` is the default](https://docs.confluent.io/platform/current/installation/configuration/topic-configs.html#message-timestamp-type).
+## 2.4. Configuration Properties
+
+### 2.4.1. Global Properties File
+
+A global S4R properties file can be specified via the `config` CLI parameter. It includes the following required properties:
+* `amqpSrvHost`: AMQP server host (e.g. An Astra Streaming cluster with S4R enabled)
+* `amqpSrvPort`: AMQP server port (for S4R enabled Astra Streaming, it is 5671)
+* `virtualHost`: AMQP server virtual host (for S4R enabled Astra Streaming, it is "<tenant>/rabbitmq")
+* `amqpUser`: AMQP user (for S4R enabled Astra Streaming, it is an empty string)
+* `amqpPassword`: AMQP password (for S4R enabled Astra Streaming, it is the JWT token file path)
+* `useTls`: whether to use TLS (for S4R enabled Astra Streaming, it is true)
+* `exchangeType`: AMQP exchange type (e.g. `direct`, `fanout`, `topic`, or `headers`)
+
+An example of this file can be found from: [s4r_config.properties](./s4r_config.properties)
+
+### 2.4.2. Scenario Document Level Properties
+
+For message sender workload, the following Document level configuration parameters are supported in the YAML file:
+* `publisher_confirm`: whether to use publisher confirms
+* `confirm_mode`: When `publisher_confirm` is true, the following 3 confirm modes are supported:
+    * `individual`: wait for confirm individually
+    * `batch`: wait for confirm in batch
+    * `async`: [default] no wait for confirm
+* `confirm_batch_num`: batch size for waiting for **sync** publisher confirms
+    * Only relevant when `publisher_confirm` is true and `confirm_mode` is "batch"
+* `dft_confirm_timeout_ms`: batch size for waiting for publisher confirms
+    * Only relevant when `publisher_confirm` is true and `confirm_mode` is **NOT** "async"

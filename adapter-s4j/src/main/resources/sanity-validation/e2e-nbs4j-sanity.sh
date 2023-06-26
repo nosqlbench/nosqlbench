@@ -1,5 +1,21 @@
 #! /usr/local/bin/bash
 
+##
+#  Copyright (c) 2022-2023 nosqlbench
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+##
+
 CUR_SCRIPT_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${CUR_SCRIPT_FOLDER}/utilities.sh"
 
@@ -86,12 +102,12 @@ sanityS4jMsgReceiverYamlFile="${CUR_SCRIPT_FOLDER}/sanity-msg-receiver-queue.yam
 
 read -r -d '' nbs4jMsgSendCmd << EOM
 java -jar ${NB5JAR} run driver=s4j -vv --logs-dir=${nbExecLogDir} \
-    cycles=1000 threads=4 num_conn=2 num_session=2 \
+    cycles=200 threads=4 num_conn=2 num_session=2 \
     session_mode=\"client_ack\" strict_msg_error_handling=\"false\" \
     service_url=${brokerSvcUrl} \
     web_url=${webSvcUrl} \
     config=${sanityS4jCfgPropFile} \
-    yaml=${sanityS4jMsgSenderYamlFile}
+    workload=${sanityS4jMsgSenderYamlFile}
 EOM
 debugMsg "nbs4jMsgSendCmd=${nbs4jMsgSendCmd}" "${sanityTestMainLogFile}"
 
@@ -111,12 +127,12 @@ sleep 5
 
 read -r -d '' nbs4jMsgRecvCmd << EOM
 java -jar ${NB5JAR} run driver=s4j -vv --logs-dir=${nbExecLogDir} \
-  cycles=1000 threads=4 num_conn=2 num_session=2 \
+  cycles=200 threads=4 num_conn=2 num_session=2 \
   session_mode=\"client_ack\" strict_msg_error_handling=\"false\" \
   service_url=${brokerSvcUrl} \
   web_url=${webSvcUrl} \
   config=${sanityS4jCfgPropFile} \
-  yaml=${sanityS4jMsgReceiverYamlFile}
+  workload=${sanityS4jMsgReceiverYamlFile}
 EOM
 debugMsg "nbs4jMsgRecvCmd=${nbs4jMsgRecvCmd}"  "${sanityTestMainLogFile}"
 
