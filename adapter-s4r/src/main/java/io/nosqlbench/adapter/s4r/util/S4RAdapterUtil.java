@@ -16,31 +16,16 @@
 
 package io.nosqlbench.adapter.s4r.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class S4RAdapterUtil {
     private static final Logger logger = LogManager.getLogger(S4RAdapterUtil.class);
-
-    ///////
-    // Valid document level parameters for JMS NB yaml file
-    public enum DOC_LEVEL_PARAMS {
-        // Blocking message producing or consuming
-        ASYNC_API("async_api");
-        public final String label;
-
-        DOC_LEVEL_PARAMS(final String label) {
-            this.label = label;
-        }
-    }
 
     public enum AMQP_EXCHANGE_TYPES {
         DIRECT("direct"),
@@ -83,18 +68,13 @@ public class S4RAdapterUtil {
         }
     }
     public static String getValidAmqpPublisherConfirmModeList() {
-        return StringUtils.join(AMQP_EXCHANGE_TYPES.LABELS, ", ");
+        return StringUtils.join(AMQP_PUB_CONFIRM_MODE.LABELS, ", ");
     }
 
     // At least 20 messages in a publishing batch
-    public static int AMQP_PUBLISH_CONFIRM_BATCH_NUM_MIN = 20;
+    public static int AMQP_PUBLISH_CONFIRM_BATCH_NUM_MIN = 10;
     public static int DFT_AMQP_PUBLISH_CONFIRM_BATCH_NUM = 100;
     public static int DFT_AMQP_PUBLISH_CONFIRM_TIMEOUT_MS = 1000;
-
-    public static Map<String, String> convertJsonToMap(final String jsonStr) throws Exception {
-        final ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(jsonStr, new TypeReference<Map<String, String>>(){});
-    }
 
     public static void pauseCurThreadExec(final int pauseInSec) {
         if (0 < pauseInSec) try {

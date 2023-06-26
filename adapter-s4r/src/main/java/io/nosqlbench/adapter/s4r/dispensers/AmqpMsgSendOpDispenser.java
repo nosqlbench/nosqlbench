@@ -68,7 +68,8 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
             .orElse(S4RAdapterUtil.AMQP_PUB_CONFIRM_MODE.INDIVIDUAL.label);
         if (! S4RAdapterUtil.AMQP_PUB_CONFIRM_MODE.isValidLabel(confirmMode)) {
             throw new S4RAdapterInvalidParamException("confirm_mode",
-                "Must be one following valid values: '" + S4RAdapterUtil.getValidAmqpPublisherConfirmModeList() + "'");
+                "The provided value \"" + confirmMode + "\" is not one of following valid values: '" +
+                    S4RAdapterUtil.getValidAmqpPublisherConfirmModeList() + "'");
         }
 
         confirmBatchNum = parsedOp
@@ -86,62 +87,87 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
     }
 
     private long getExchangeSenderSeqNum(long cycle) {
-        return (cycle / ((long) s4rSpace.getAmqpConnNum() * s4rSpace.getAmqpConnChannelNum()))
-            % s4rSpace.getAmqpMsgClntNum();
+        return (cycle / ((long) s4rSpace.getAmqpConnNum() *
+                                s4rSpace.getAmqpConnChannelNum() *
+                                s4rSpace.getAmqpChannelExchangeNum())
+               ) % s4rSpace.getAmqpMsgClntNum();
     }
 
-    private Channel getAmqpChannelForSender(long cycle,
-                                            String exchangeName) {
+    private String getEffectiveSenderNameByCycle(long cycle) {
+        return getEffectiveSenderNameByCycle(
+            getConnSeqNum(cycle),
+            getConnChannelSeqNum(cycle),
+            getChannelExchangeSeqNum(cycle),
+            getExchangeSenderSeqNum(cycle));
+    }
+    private String getEffectiveSenderNameByCycle(long connSeqNum,
+                                                 long channelSeqNum,
+                                                 long exchangeSeqNum,
+                                                 long senderSeqNum) {
+        return String.format(
+            "sender-%d-%d-%d-%d",
+            connSeqNum,
+            channelSeqNum,
+            exchangeSeqNum,
+            senderSeqNum);
+    }
+
+    private Channel getAmqpChannelForSender(long cycle) {
         long connSeqNum = getConnSeqNum(cycle);
         long channelSeqNum = getConnChannelSeqNum(cycle);
-        long senderSeqNum = getExchangeSenderSeqNum(cycle);
 
-        Connection amqpConnection = s4rSpace.getAmqpConnection(cycle % connSeqNum);
+        Connection amqpConnection = s4rSpace.getAmqpConnection(connSeqNum);
+        S4RSpace.AmqpChannelKey senderKey = new S4RSpace.AmqpChannelKey(connSeqNum, channelSeqNum);
 
-        S4RSpace.AmqpSenderChannelKey amqpConnChannelKey =
-            new S4RSpace.AmqpSenderChannelKey(connSeqNum, channelSeqNum, senderSeqNum);
-
-        return s4rSpace.getAmqpSenderChannel(amqpConnChannelKey, () -> {
-            Channel channel;
+        return s4rSpace.getAmqpChannels(senderKey, () -> {
+            Channel channel = null;
 
             try {
-                channel = getChannelWithExchange(
-                    amqpConnection,
-                    connSeqNum,
-                    channelSeqNum,
-                    exchangeName);
+                channel = amqpConnection.createChannel();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Created channel for amqp connection: {}, channel: {}",
+                        amqpConnection, channel);
+                }
+            }
+            catch (IOException ex) {
+                // Do not throw exception here, just log it and return null
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to create channel for amqp connection: " + amqpConnection, ex);
+                }
+            }
 
-                if (publisherConfirm) {
+            try {
+                if ((channel != null) && publisherConfirm) {
                     channel.confirmSelect();
 
-                    boolean asyncConfirm = false;
                     if (StringUtils.equalsIgnoreCase(confirmMode, S4RAdapterUtil.AMQP_PUB_CONFIRM_MODE.ASYNC.label)) {
-                        asyncConfirm = true;
-
                         channel.addConfirmListener((sequenceNumber, multiple) -> {
                             // code when message is confirmed
                             if (logger.isTraceEnabled()) {
-                                logger.debug("Async ack of message publish received: {}, {}",
+                                logger.debug("Async ack received for a published message: {}, {}",
                                     sequenceNumber, multiple);
                             }
                         }, (sequenceNumber, multiple) -> {
                             // code when message is nack-ed
                             if (logger.isTraceEnabled()) {
-                                logger.debug("Async n-ack of message publish received: {}, {}",
+                                logger.debug("Async n-ack received of a published message: {}, {}",
                                     sequenceNumber, multiple);
                             }
                         });
                     }
 
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Publisher Confirms enabled on AMQP channel (sync: {}) -- {}",
-                            !asyncConfirm,
+                    if (logger.isTraceEnabled()) {
+                        logger.debug("Publisher Confirms is enabled on AMQP channel: {}({}), {}",
+                            confirmMode,
+                            confirmBatchNum,
                             channel);
                     }
                 }
 
             } catch (IOException ex) {
-                throw new S4RAdapterUnexpectedException("Unexpected error when creating the AMQP channel!");
+                throw new S4RAdapterUnexpectedException(
+                    "Failed to enable publisher acknowledgement on the AMQP channel (" +
+                        channel + ")!");
             }
 
             return channel;
@@ -155,15 +181,17 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
             throw new S4RAdapterInvalidParamException("Message payload must be specified and can't be empty!");
         }
 
-        Channel channel;
-        String exchangeName = getEffectiveExchangeName(cycle);
+        Channel channel = getAmqpChannelForSender(cycle);
+        if (channel == null) {
+            throw new S4RAdapterUnexpectedException(
+                String.format(
+                    "Failed to get AMQP channel for sender %s [%d]!",
+                    getEffectiveSenderNameByCycle(cycle),
+                    cycle));
+        }
 
-        try {
-            channel = getAmqpChannelForSender(cycle, exchangeName);
-        }
-        catch (Exception ex) {
-            throw new S4RAdapterUnexpectedException("Unable to create the AMQP channel for sending messages!");
-        }
+        String exchangeName = getEffectiveExchangeNameByCycle(cycle);
+        declareExchange(channel, exchangeName, s4rSpace.getAmqpExchangeType());
 
         return new OpTimeTrackAmqpMsgSendOp(
             s4rAdapterMetrics,

@@ -31,27 +31,16 @@ import java.nio.charset.StandardCharsets;
 public class OpTimeTrackAmqpMsgRecvOp extends S4RTimeTrackOp {
 
     private final static Logger logger = LogManager.getLogger("OpTimeTrackAmqpMsgRecvOp");
-
     private final String queueName;
-    private final String bindingKey;
+
 
     public OpTimeTrackAmqpMsgRecvOp(S4RAdapterMetrics s4rAdapterMetrics,
                                     S4RSpace s4rSpace,
                                     Channel channel,
                                     String exchangeName,
-                                    String queueName,
-                                    String bindingKey) {
+                                    String queueName) {
         super(s4rAdapterMetrics, s4rSpace, channel, exchangeName);
         this.queueName = queueName;
-        this.bindingKey = bindingKey;
-
-        try {
-            channel.queueBind(queueName, exchangeName, bindingKey);
-        }
-        catch (IOException ex) {
-            throw new S4RAdapterUnexpectedException("Unable to bind queue (\"" + queueName + "\") to " +
-                "exchange (\""  + exchangeName + "\")!");
-        }
     }
 
     @Override
@@ -59,20 +48,26 @@ public class OpTimeTrackAmqpMsgRecvOp extends S4RTimeTrackOp {
         try {
             Consumer receiver = new DefaultConsumer(channel) {
                 @Override
-                public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-                                           byte[] body) throws IOException {
+                public void handleDelivery(
+                    String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
+                {
+                    String routingKey = envelope.getRoutingKey();
+                    String contentType = properties.getContentType();
+                    String msgPayload = new String(body, StandardCharsets.UTF_8);
+
                     if (logger.isTraceEnabled()) {
-                        String msgPayload = new String(body, StandardCharsets.UTF_8);
-                        logger.trace("Successfully received message ({}) via consumer ({}) in the current channel: {}",
+                        logger.trace(
+                            "Successfully received message ({}) via consumer ({}/{}/{}) in the current channel: {}",
                             msgPayload,
                             consumerTag,
+                            routingKey,
+                            contentType,
                             channel);
                     }
                 }
             };
 
-            channel.basicConsume(queueName, receiver);
-
+            channel.basicConsume(queueName, true, receiver);
         }
         catch (IOException e) {
             throw  new S4RAdapterUnexpectedException(
