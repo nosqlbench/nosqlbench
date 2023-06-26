@@ -1,0 +1,6 @@
+blocks:
+  msg-recv-block:
+    ops:
+      op1:
+        AmqpMsgReceiver: ""
+        binding_key: "binding-test"
