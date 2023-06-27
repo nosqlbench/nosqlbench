@@ -1,17 +1,17 @@
 - [1. Overview](#1-overview)
 - [2. NB S4R Usage](#2-nb-s4r-usage)
-    - [2.1. CLI Examples](#21-cli-examples)
+    - [2.1. Workload Definition](#21-workload-definition)
+        - [2.1.1. Named Scenarios](#211-named-scenarios)
     - [2.2. CLI parameters](#22-cli-parameters)
-    - [2.3. Workload Definition](#23-workload-definition)
-    - [2.4. Configuration Properties](#24-configuration-properties)
-        - [2.4.1. Global Properties File](#241-global-properties-file)
-        - [2.4.2. Scenario Document Level Properties](#242-scenario-document-level-properties)
+    - [2.3. Configuration Properties](#23-configuration-properties)
+        - [2.3.1. Global Properties File](#231-global-properties-file)
+        - [2.3.2. Scenario Document Level Properties](#232-scenario-document-level-properties)
 
 ---
 
 # 1. Overview
 
-This NB S4R adapter allows sending messages to or receiving messages from
+The NB S4R adapter allows sending messages to or receiving messages from
 * an AMQP 0-9-1 based server (e.g. RabbitMQ), or
 * a Pulsar cluster with [S4R](https://github.com/datastax/starlight-for-rabbitmq) AMQP (0-9-1) Protocol handler for Pulsar.
 
@@ -28,20 +28,40 @@ At high level, this adapter supports the following AMQP 0-9-1 functionalities
 
 # 2. NB S4R Usage
 
-## 2.1. CLI Examples
+## 2.1. Workload Definition
 
+There are two main types of workloads supported by the S4R adapter:
+* Message sender workload (see [s4r_msg_sender.yaml](scenarios/s4r_msg_sender.yaml))
+* Message receiver workload (see [s4r_msg_receiver.yaml](scenarios/s4r_msg_receiver.yaml))
+
+Below are examples of running the message sender and receiver workloads separately.
 ```bash
-## AMQP Message Sender
 $ <nb_cmd> run driver=s4r -vv cycles=200 strict_msg_error_handling=0 \
   threads=8 num_conn=1 num_channel=2 num_exchange=2 num_msg_clnt=2 \
-  workload=./s4r_msg_sender.yaml \
-  config=./s4r_config.properties
+  workload=/path/to/s4r_msg_sender.yaml \
+  config=/path/to/s4r_config.properties
+```
 
-## AMQP Message Receiver
+```bash
 $ <nb_cmd> run driver=s4r -vv cycles=200 strict_msg_error_handling=0 \
   threads=8 num_conn=1 num_channel=2 num_exchange=2 num_queue=2 num_msg_clnt=2 \
-  workload=./s4r_msg_receiver.yaml \
-  config=./s4r_config.properties
+  workload=/path/to/s4r_msg_receiver.yaml \
+  config=/path/to/s4r_config.properties
+```
+
+### 2.1.1. Named Scenarios
+
+For workload execution convenience, NB engine has the concept of **named scenario** ([doc](https://docs.nosqlbench.io/workloads-101/11-named-scenarios/)).
+
+For NB S4R adapter, the following yaml file is used to define the named scenarios: [nbs4r_msg_proc_named.yaml](scenarios/nbs4r_msg_proc_named.yaml)
+
+The CLI command to execute the S4R named scenarios is as simple as below:
+```bash
+# for message sender workload
+$ <nb_cmd> nbs4r_msg_proc_named msg_send
+
+# for message receiver workload
+$ <nb_cmd> nbs4r_msg_proc_named msg_recv
 ```
 
 ## 2.2. CLI parameters
@@ -56,16 +76,9 @@ The following CLI parameters are unique to the S4R adapter:
     * for message sender workload, it is the number of message publishers for each exchange
     * for message receiver workload, it is the number of message consumers for each queue
 
-## 2.3. Workload Definition
+## 2.3. Configuration Properties
 
-The example workload YAML files can be found from:
-
-* [s4r_msg_sender.yaml](s4r_msg_sender.yaml)
-* [s4r_msg_receiver.yaml](s4r_msg_receiver.yaml)
-
-## 2.4. Configuration Properties
-
-### 2.4.1. Global Properties File
+### 2.3.1. Global Properties File
 
 A global S4R properties file can be specified via the `config` CLI parameter. It includes the following required properties:
 * `amqpSrvHost`: AMQP server host (e.g. An Astra Streaming cluster with S4R enabled)
@@ -76,9 +89,9 @@ A global S4R properties file can be specified via the `config` CLI parameter. It
 * `useTls`: whether to use TLS (for S4R enabled Astra Streaming, it is true)
 * `exchangeType`: AMQP exchange type (e.g. `direct`, `fanout`, `topic`, or `headers`)
 
-An example of this file can be found from: [s4r_config.properties](./s4r_config.properties)
+An example of this file can be found from: [s4r_config.properties](conf/s4r_config.properties)
 
-### 2.4.2. Scenario Document Level Properties
+### 2.3.2. Scenario Document Level Properties
 
 For message sender workload, the following Document level configuration parameters are supported in the YAML file:
 * `publisher_confirm`: whether to use publisher confirms
@@ -88,5 +101,5 @@ For message sender workload, the following Document level configuration paramete
     * `async`: [default] no wait for confirm
 * `confirm_batch_num`: batch size for waiting for **sync** publisher confirms
     * Only relevant when `publisher_confirm` is true and `confirm_mode` is "batch"
-* `dft_confirm_timeout_ms`: batch size for waiting for publisher confirms
-    * Only relevant when `publisher_confirm` is true and `confirm_mode` is **NOT** "async"
+* `dft_confirm_timeout_ms`: default timeout in milliseconds for waiting publisher confirms
+    * Only relevant when `publisher_confirm` is true and `confirm_mode` is "individual" or "batch"
