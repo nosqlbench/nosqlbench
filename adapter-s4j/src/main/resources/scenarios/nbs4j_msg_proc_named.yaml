@@ -1,8 +1,8 @@
 scenarios:
   msg_send:
-    - run driver=s4j cycles=100 threads=4 num_conn=2 num_session=2 session_mode=client_ack config=../conf/s4j_config.properties service_url=pulsar://localhost:6650 web_url=http://localhost:8080
+    op: run driver=s4j cycles=100 threads=4 num_conn=2 num_session=2 session_mode=client_ack config=../conf/s4j_config.properties service_url=pulsar://localhost:6650 web_url=http://localhost:8080
   msg_recv:
-    - run driver=s4j cycles=100 threads=4 num_conn=2 num_session=2 session_mode=client_ack config=../conf/s4j_config.properties service_url=pulsar://localhost:6650 web_url=http://localhost:8080
+    op: run driver=s4j cycles=100 threads=4 num_conn=2 num_session=2 session_mode=client_ack config=../conf/s4j_config.properties service_url=pulsar://localhost:6650 web_url=http://localhost:8080
 
 bindings:
   mykey: Mod(5); ToString(); Prefix("key-")

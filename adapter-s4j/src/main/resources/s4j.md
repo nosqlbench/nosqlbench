@@ -51,7 +51,7 @@ Other NB engine parameters are straight forward:
 
 # 3. NB S4J Driver Configuration Parameter File
 
-The S4J API has a list of configuration options that can be found here: https://docs.datastax.com/en/streaming/starlight-for-jms/3.2/reference/pulsar-jms-reference.html.
+The S4J API has a list of configuration options that can be found here: https://docs.datastax.com/en/streaming/starlight-for-jms/latest/reference/pulsar-jms-reference.html.
 
 The NB S4J driver supports these configuration options via a config property file, an example of which is listed below. The configuration parameters in this file are grouped into several groups. The comments below explain how the grouping works.
 
