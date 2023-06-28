@@ -31,8 +31,8 @@ while [[ 1 -eq 1 ]]; do
        cycles="${CYCLES}" \
        threads=1 \
        num_clnt=1 \
-       yaml="${SCRIPT_DIR}/kafka_producer.yaml" \
-       config="${SCRIPT_DIR}/kafka_config.properties" \
+       yaml="${SCRIPT_DIR}/scenarios/kafka_producer.yaml" \
+       config="${SCRIPT_DIR}/conf/kafka_config.properties" \
        bootstrap_server=PLAINTEXT://localhost:9092
   sleep 10
 done

@@ -85,7 +85,7 @@ public class PulsarSpace implements  AutoCloseable {
                 .setDescription("Pulsar broker service URL."))
             .add(Param.defaultTo("web_url", "http://localhost:8080")
                 .setDescription("Pulsar web service URL."))
-            .add(Param.defaultTo("config", "config.properties")
+            .add(Param.defaultTo("config", "conf/pulsar_config.properties")
                 .setDescription("Pulsar client connection configuration property file."))
             .add(Param.defaultTo("cyclerate_per_thread", false)
                 .setDescription("Apply cycle rate per NB thread"))
@@ -130,7 +130,7 @@ public class PulsarSpace implements  AutoCloseable {
         try {
             Map clientConfMap = pulsarClientConf.getClientConfMapRaw();
 
-            // Override "client.serviceUrl" setting in config.properties
+            // Override "client.serviceUrl" setting in pulsar_config.properties
             clientConfMap.remove("serviceUrl");
             clientBuilder.loadConf(clientConfMap).serviceUrl(pulsarSvcUrl);
 

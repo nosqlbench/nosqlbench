@@ -86,16 +86,6 @@ public abstract class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, Pu
         this.totalCycleNum = NumberUtils.toLong(this.parsedOp.getStaticValue("cycles"));
     }
 
-    public String getName() {
-        return "PulsarBaseOpDispenser";
-    }
-
-
-    @Override
-    public NBLabels getLabels() {
-        return NBLabels.forKV("name", this.getName());
-    }
-
     public PulsarSpace getPulsarSpace() { return this.pulsarSpace; }
 
     protected LongFunction<Boolean> lookupStaticBoolConfigValueFunc(final String paramName, final boolean defaultValue) {
@@ -210,7 +200,7 @@ public abstract class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, Pu
     }
 
 
-    // A configuration parameter can be set either at the global level (config.properties file),
+    // A configuration parameter can be set either at the global level (pulsar_config.properties file),
     //   or at the cycle level (<nb_scenario>.yaml file).
     // If set at both levels, cycle level setting takes precedence
     private String getEffectiveConValue(final String confCategory, final String confParamName, final String cycleConfValue) {

@@ -31,6 +31,6 @@ java -jar nb5/target/nb5.jar \
      threads=1 \
      num_clnt=1 \
      num_cons_grp=1 \
-     yaml="${SCRIPT_DIR}/kafka_consumer.yaml" \
-     config="${SCRIPT_DIR}/kafka_config.properties" \
+     yaml="${SCRIPT_DIR}/scenarios/kafka_consumer.yaml" \
+     config="${SCRIPT_DIR}/conf/kafka_config.properties" \
      bootstrap_server=PLAINTEXT://localhost:9092
