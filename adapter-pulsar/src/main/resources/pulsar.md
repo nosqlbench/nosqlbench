@@ -1,6 +1,6 @@
 ---
 weight: 0
-title: S4R
+title: Pulsar
 ---
 
 - [1. Overview](#1-overview)
