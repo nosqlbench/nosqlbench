@@ -1,5 +1,5 @@
 bindings:
-  myroutingkey: CSVFrequencySampler('csv/routing_keys.csv', 'name')
+  mybindingkey: CSVFrequencySampler('csv/binding_keys.csv', 'name')
 
 # Doc-level parameters (must be static)
 params:
@@ -9,4 +9,4 @@ blocks:
     ops:
       op1:
         AmqpMsgReceiver: ""
-        binding_key: "{myroutingkey}"
+        binding_key: "{mybindingkey}"
