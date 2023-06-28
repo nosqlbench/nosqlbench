@@ -18,13 +18,13 @@ package io.nosqlbench.engine.api.activityimpl.uniform.actions;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.errors.ExpectedResultVerificationError;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
@@ -32,7 +32,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mvel2.MVEL;
 
-import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -108,7 +107,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                             "one of [RunnableOp, CycleOp, or ChainingOp]");
                     }
                     var expectedResultExpression = dispenser.getExpectedResultExpression();
-                    if (shouldVerifyExpectedResultFor(op, expectedResultExpression)) {
+                    if (expectedResultExpression!=null) {
                         var verified = MVEL.executeExpression(expectedResultExpression, result, boolean.class);
                         if (!verified) {
                             throw new ExpectedResultVerificationError(maxTries - tries, expectedResultExpression);
@@ -150,7 +149,4 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     public void onActivityDefUpdate(ActivityDef activityDef) {
     }
 
-    private boolean shouldVerifyExpectedResultFor(Op op, Serializable expectedResultExpression) {
-        return !(op instanceof RunnableOp) && expectedResultExpression != null;
-    }
 }
