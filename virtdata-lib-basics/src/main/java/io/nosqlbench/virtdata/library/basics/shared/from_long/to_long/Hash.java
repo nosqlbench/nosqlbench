@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.murmur.Murmur3F;
 
@@ -34,6 +35,10 @@ import java.util.function.LongUnaryOperator;
 @ThreadSafeMapper
 @Categories({Category.general, Category.general})
 public class Hash implements LongUnaryOperator {
+
+    @Example({"Hash()","Create a hash function that takes a long and returns a positive long value"})
+    Hash() {
+    }
 
     private final transient ThreadLocal<Murmur3F> murmur3f_TL = ThreadLocal.withInitial(Murmur3F::new);
 
