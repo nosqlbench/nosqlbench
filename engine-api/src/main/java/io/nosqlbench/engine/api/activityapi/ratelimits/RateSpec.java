@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,11 @@ public class RateSpec {
     public double burstRatio = DEFAULT_BURST_RATIO;
     public Verb verb = Verb.start;
 
+    /**
+     * Rate limiters can be put into motion in different modes to suit different scenarios. This is
+     * mostly to support advanced scripting capability. When the verb is not specified in a {@link RateSpec},
+     * then it is started immediately as a user would expect.
+     */
     public enum Verb {
         /**
          * Specify that a rate limiter should only be configured without affecting its running state.
@@ -123,9 +128,9 @@ public class RateSpec {
          */
         configure,
         /**
-         * The default SetAction is start. This means that the rate limiter should be started at the time
+         * The default behavior for a rate limiter. This means that the rate limiter should be started at the time
          * this rate spec is applied. The start time of a rate limiter is significant in that it determines
-         * both the calculated average rate as well as the accumulated wait time from slow callers. In order
+         * both the calculated average rate and the accumulated wait time from slow callers. In order
          * to start, a rate limiter will be configured automatically, if the provided rate spec would cause
          * a change to the configuration. If a rate limiter is started that is already running, an error should
          * be thrown. If it is desired to ignore this condition, the restart should be used instead.
