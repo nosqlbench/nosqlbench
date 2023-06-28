@@ -285,14 +285,16 @@ public enum PulsarAdapterUtil {
             this.label = label;
         }
 
-        private static final Set<String> LABELS = Stream.of(SUBSCRIPTION_TYPE.values()).map(v -> v.label)
+        private static final Set<String> LABELS = Stream.of(SUBSCRIPTION_TYPE.values())
+            .map(v -> v.label)
             .collect(Collectors.toUnmodifiableSet());
 
         public static boolean isValidLabel(final String label) {
             return SUBSCRIPTION_TYPE.LABELS.contains(label);
         }
 
-        private static final String TYPE_LIST = Stream.of(COMPRESSION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
+        private static final String TYPE_LIST =
+            Stream.of(SUBSCRIPTION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
     }
     public static boolean isValidSubscriptionType(final String item) {
         return SUBSCRIPTION_TYPE.isValidLabel(item);

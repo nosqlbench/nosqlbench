@@ -32,7 +32,7 @@ while [[ 1 -eq 1 ]]; do
        cycles="${CYCLES}" \
        cyclerate="${CYCLERATE}" \
        threads=1 \
-       yaml="${SCRIPT_DIR}/yaml_examples/producer_4KB_workload.yaml" \
-       config="${SCRIPT_DIR}/config.properties"
+       yaml="${SCRIPT_DIR}/scenarios/producer_4KB_workload.yaml" \
+       config="${SCRIPT_DIR}/conf/pulsar_config.properties"
   sleep 10
 done
