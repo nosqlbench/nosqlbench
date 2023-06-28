@@ -37,7 +37,7 @@ import java.util.function.LongUnaryOperator;
 public class Hash implements LongUnaryOperator {
 
     @Example({"Hash()","Create a hash function that takes a long and returns a positive long value"})
-    Hash() {
+    public Hash() {
     }
 
     private final transient ThreadLocal<Murmur3F> murmur3f_TL = ThreadLocal.withInitial(Murmur3F::new);
