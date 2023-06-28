@@ -1,3 +1,7 @@
+---
+weight: 0
+title: S4R
+---
 - [1. Overview](#1-overview)
 - [2. NB S4R Usage](#2-nb-s4r-usage)
     - [2.1. Workload Definition](#21-workload-definition)
