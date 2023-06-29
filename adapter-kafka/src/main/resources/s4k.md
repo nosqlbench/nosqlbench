@@ -1,6 +1,6 @@
 ---
 weight: 0
-title: S4J
+title: Kafka
 ---
 - [1. Overview](#1-overview)
     - [1.1. Example NB Yaml](#11-example-nb-yaml)
