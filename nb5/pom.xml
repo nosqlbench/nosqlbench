@@ -115,7 +115,7 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-s4r</artifactId>
+            <artifactId>adapter-amqp</artifactId>
             <version>${revision}</version>
         </dependency>
 
