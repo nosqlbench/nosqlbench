@@ -1,0 +1,55 @@
+scenarios:
+  msg_send: run driver=amqp cycles=200 threads=16 num_conn=2 num_channel=2 num_exchange=2 num_msg_clnt=2 config=../conf/amqp_config.properties
+  msg_recv: run driver=amqp cycles=200 threads=16 num_conn=1 num_channel=2 num_exchange=2 num_queue=2 num_msg_clnt=2 config=../conf/amqp_config.properties
+
+bindings:
+  mytext_val: AlphaNumericString(100)
+
+  ### Routing key for publishers to exchanges
+  # dynamic routing key
+  #myroutingkey: CSVFrequencySampler('csv/routing_keys.csv', 'name')
+
+  ### Binding key for receivers to queues
+  # dynamic binding key
+  #mybindingkey: CSVFrequencySampler('csv/binding_keys.csv', 'name')
+
+params:
+  # whether to do publisher confirm (for reliable publishing)
+  # - default: false
+  publisher_confirm: false
+  #publisher_confirm: true
+
+  # If 'publisher_confirm' is true, use one of the following 3 confirm modes:
+  # - individual (wait_for_confirm individually)
+  # - batch (wait_for_confirm in batch)
+  # - async [default]
+  #confirm_mode: async
+  #confirm_mode: individual
+  #confirm_mode: batch
+
+  # Only relevant when 'publisher_confirm' is true and 'confirm_mode' is "batch"
+  #confirm_batch_num: 10
+  # default timeout value (in milliseconds)
+  # - only relevant when publisher_confirm' is true and 'confirm_mode' is NOT "async"
+  #dft_confirm_timeout_ms: 1000
+
+
+blocks:
+  msg_send:
+    ops:
+      op1:
+        AmqpMsgSender: ""
+        message: "{mytext_val}"
+        # dynamic routing key
+        #routing_key: "{myroutingkey}"
+        # static routing key
+        routing_key: "alpha"
+
+  msg_recv:
+    ops:
+      op1:
+        AmqpMsgReceiver: ""
+        # dynamic routing key
+        #binding_key: "{mybindingkey}"
+        # static routing key
+        binding_key: "bk1"
