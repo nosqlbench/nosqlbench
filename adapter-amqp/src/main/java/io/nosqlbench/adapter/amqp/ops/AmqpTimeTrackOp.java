@@ -23,8 +23,8 @@ import io.nosqlbench.adapter.amqp.util.AmqpAdapterMetrics;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.CycleOp;
 
 public abstract class AmqpTimeTrackOp implements CycleOp<Object> {
-    private final AmqpAdapterMetrics s4rAdapterMetrics;
-    protected final AmqpSpace s4RSpace;
+    private final AmqpAdapterMetrics amqpAdapterMetrics;
+    protected final AmqpSpace amqpSpace;
     protected final Channel channel;
     protected final String exchangeName;
 
@@ -37,17 +37,17 @@ public abstract class AmqpTimeTrackOp implements CycleOp<Object> {
 
     protected Object cycleObj;
 
-    public AmqpTimeTrackOp(AmqpAdapterMetrics s4rAdapterMetrics,
-                           AmqpSpace s4RSpace,
+    public AmqpTimeTrackOp(AmqpAdapterMetrics amqpAdapterMetrics,
+                           AmqpSpace amqpSpace,
                            Channel channel,
                            String exchangeName)
     {
-        this.s4rAdapterMetrics = s4rAdapterMetrics;
-        this.s4RSpace = s4RSpace;
+        this.amqpAdapterMetrics = amqpAdapterMetrics;
+        this.amqpSpace = amqpSpace;
         this.channel = channel;
         this.exchangeName = exchangeName;
-        this.activityStartTime = s4RSpace.getActivityStartTimeMills();
-        this.maxOpTimeInSec = s4RSpace.getMaxOpTimeInSec();
+        this.activityStartTime = amqpSpace.getActivityStartTimeMills();
+        this.maxOpTimeInSec = amqpSpace.getMaxOpTimeInSec();
     }
 
     @Override

@@ -37,24 +37,24 @@ public class AmqpMsgRecvOpDispenser extends AmqpBaseOpDispenser {
     private final LongFunction<String> bindingKeyFunc;
     public AmqpMsgRecvOpDispenser(DriverAdapter adapter,
                                   ParsedOp op,
-                                  AmqpSpace s4rSpace) {
-        super(adapter, op, s4rSpace);
+                                  AmqpSpace amqpSpace) {
+        super(adapter, op, amqpSpace);
         bindingKeyFunc = lookupOptionalStrOpValueFunc("binding_key", null);
     }
 
     private long getExchangeQueueSeqNum(long cycle) {
-        return (cycle / ((long) s4rSpace.getAmqpConnNum() *
-                                s4rSpace.getAmqpConnChannelNum() *
-                                s4rSpace.getAmqpChannelExchangeNum())
-               ) % s4rSpace.getAmqpExchangeQueueNum();
+        return (cycle / ((long) amqpSpace.getAmqpConnNum() *
+                                amqpSpace.getAmqpConnChannelNum() *
+                                amqpSpace.getAmqpChannelExchangeNum())
+               ) % amqpSpace.getAmqpExchangeQueueNum();
     }
 
     private long getQueueReceiverSeqNum(long cycle) {
-        return (cycle / ((long) s4rSpace.getAmqpConnNum() *
-                                s4rSpace.getAmqpConnChannelNum() *
-                                s4rSpace.getAmqpChannelExchangeNum() *
-                                s4rSpace.getAmqpExchangeQueueNum())
-               ) % s4rSpace.getAmqpMsgClntNum();
+        return (cycle / ((long) amqpSpace.getAmqpConnNum() *
+                                amqpSpace.getAmqpConnChannelNum() *
+                                amqpSpace.getAmqpChannelExchangeNum() *
+                                amqpSpace.getAmqpExchangeQueueNum())
+               ) % amqpSpace.getAmqpMsgClntNum();
     }
 
     private String getEffectiveQueueNameByCycle(long cycle) {
@@ -94,10 +94,10 @@ public class AmqpMsgRecvOpDispenser extends AmqpBaseOpDispenser {
         long connSeqNum = getConnSeqNum(cycle);
         long channelSeqNum = getConnChannelSeqNum(cycle);
 
-        Connection amqpConnection = s4rSpace.getAmqpConnection(connSeqNum);
+        Connection amqpConnection = amqpSpace.getAmqpConnection(connSeqNum);
         AmqpSpace.AmqpChannelKey amqpConnChannelKey = new AmqpSpace.AmqpChannelKey(connSeqNum, channelSeqNum);
 
-        return s4rSpace.getAmqpChannels(amqpConnChannelKey, () -> {
+        return amqpSpace.getAmqpChannels(amqpConnChannelKey, () -> {
             Channel channel = null;
 
             try {
@@ -131,7 +131,7 @@ public class AmqpMsgRecvOpDispenser extends AmqpBaseOpDispenser {
         }
 
         String exchangeName = getEffectiveExchangeNameByCycle(cycle);
-        declareExchange(channel, exchangeName, s4rSpace.getAmqpExchangeType());
+        declareExchange(channel, exchangeName, amqpSpace.getAmqpExchangeType());
 
         boolean durable = true;
         boolean exclusive = true;
@@ -179,8 +179,8 @@ public class AmqpMsgRecvOpDispenser extends AmqpBaseOpDispenser {
         }
 
         return new OpTimeTrackAmqpMsgRecvOp(
-            s4rAdapterMetrics,
-            s4rSpace,
+            amqpAdapterMetrics,
+            amqpSpace,
             channel,
             exchangeName,
             queueName);

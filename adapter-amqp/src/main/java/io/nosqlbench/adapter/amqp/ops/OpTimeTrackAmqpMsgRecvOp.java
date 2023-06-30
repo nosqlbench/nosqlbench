@@ -34,12 +34,12 @@ public class OpTimeTrackAmqpMsgRecvOp extends AmqpTimeTrackOp {
     private final String queueName;
 
 
-    public OpTimeTrackAmqpMsgRecvOp(AmqpAdapterMetrics s4rAdapterMetrics,
-                                    AmqpSpace s4rSpace,
+    public OpTimeTrackAmqpMsgRecvOp(AmqpAdapterMetrics amqpAdapterMetrics,
+                                    AmqpSpace amqpSpace,
                                     Channel channel,
                                     String exchangeName,
                                     String queueName) {
-        super(s4rAdapterMetrics, s4rSpace, channel, exchangeName);
+        super(amqpAdapterMetrics, amqpSpace, channel, exchangeName);
         this.queueName = queueName;
     }
 
