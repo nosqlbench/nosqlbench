@@ -37,13 +37,13 @@ public class AmqpClientConf {
     private static final Logger logger = LogManager.getLogger(AmqpClientConf.class);
 
     // https://docs.datastax.com/en/streaming/starlight-for-rabbitmq/2.10.1.x/configuration/configuration.html
-    private final Map<String, String> s4rConfMap = new HashMap<>();
+    private final Map<String, String> configMap = new HashMap<>();
 
 
     public AmqpClientConf(final String clientConfFileName) {
 
         //////////////////
-        // Read related S4R client configuration settings from a file
+        // Read related AMQP client configuration settings from a file
         this.readRawConfFromFile(clientConfFileName);
     }
 
@@ -68,7 +68,7 @@ public class AmqpClientConf {
 
                 // Get client connection specific configuration settings, removing "topic." prefix
                 if (!StringUtils.isBlank(confVal))
-                    this.s4rConfMap.put(confKey, confVal);
+                    this.configMap.put(confKey, confVal);
             }
         } catch (final IOException ioe) {
             AmqpClientConf.logger.error("Can't read the specified config properties file: {}", fileName);
@@ -79,11 +79,11 @@ public class AmqpClientConf {
         }
     }
 
-    public Map<String, String> getS4rConfMap() { return this.s4rConfMap; }
+    public Map<String, String> getConfigMap() { return this.configMap; }
 
     public String toString() {
         return new ToStringBuilder(this).
-            append("s4rConfMap", this.s4rConfMap).
+            append("configMap", this.configMap).
             toString();
     }
 }

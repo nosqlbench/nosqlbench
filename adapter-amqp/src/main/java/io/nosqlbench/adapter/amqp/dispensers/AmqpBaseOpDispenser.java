@@ -38,29 +38,29 @@ public abstract  class AmqpBaseOpDispenser extends BaseOpDispenser<AmqpTimeTrack
     private static final Logger logger = LogManager.getLogger(AmqpBaseOpDispenser.class);
 
     protected final ParsedOp parsedOp;
-    protected final AmqpAdapterMetrics s4rAdapterMetrics;
-    protected final AmqpSpace s4rSpace;
+    protected final AmqpAdapterMetrics amqpAdapterMetrics;
+    protected final AmqpSpace amqpSpace;
 
-    protected final Map<String, String> s4rConfMap = new HashMap<>();
+    protected final Map<String, String> amqpConfMap = new HashMap<>();
     protected final String exchangeType;
     protected AmqpBaseOpDispenser(final DriverAdapter adapter,
                                   final ParsedOp op,
-                                  final AmqpSpace s4RSpace) {
+                                  final AmqpSpace amqpSpace) {
 
         super(adapter, op);
 
         parsedOp = op;
-        this.s4rSpace = s4RSpace;
+        this.amqpSpace = amqpSpace;
 
-        s4rAdapterMetrics = new AmqpAdapterMetrics(this, this);
-        s4rAdapterMetrics.initS4JAdapterInstrumentation();
+        amqpAdapterMetrics = new AmqpAdapterMetrics(this, this);
+        amqpAdapterMetrics.initS4JAdapterInstrumentation();
 
-        s4rConfMap.putAll(s4RSpace.getS4rClientConf().getS4rConfMap());
+        amqpConfMap.putAll(amqpSpace.getAmqpClientConf().getConfigMap());
 
-        this.exchangeType = s4RSpace.getAmqpExchangeType();
+        this.exchangeType = amqpSpace.getAmqpExchangeType();
 
-        s4rSpace.setTotalCycleNum(NumberUtils.toLong(this.parsedOp.getStaticConfig("cycles", String.class)));
-        s4rSpace.setTotalThreadNum(NumberUtils.toInt(this.parsedOp.getStaticConfig("threads", String.class)));
+        this.amqpSpace.setTotalCycleNum(NumberUtils.toLong(this.parsedOp.getStaticConfig("cycles", String.class)));
+        this.amqpSpace.setTotalThreadNum(NumberUtils.toInt(this.parsedOp.getStaticConfig("threads", String.class)));
     }
 
     protected LongFunction<String> lookupMandtoryStrOpValueFunc(String paramName) {
@@ -96,17 +96,17 @@ public abstract  class AmqpBaseOpDispenser extends BaseOpDispenser<AmqpTimeTrack
     }
 
     protected long getConnSeqNum(long cycle) {
-        return cycle % s4rSpace.getAmqpConnNum();
+        return cycle % amqpSpace.getAmqpConnNum();
     }
 
     protected long getConnChannelSeqNum(long cycle) {
-        return (cycle / s4rSpace.getAmqpConnNum()) % s4rSpace.getAmqpConnChannelNum();
+        return (cycle / amqpSpace.getAmqpConnNum()) % amqpSpace.getAmqpConnChannelNum();
     }
 
     protected long getChannelExchangeSeqNum(long cycle) {
-        return (cycle / ((long) s4rSpace.getAmqpConnNum() *
-                                s4rSpace.getAmqpConnChannelNum())
-               ) % s4rSpace.getAmqpChannelExchangeNum();
+        return (cycle / ((long) amqpSpace.getAmqpConnNum() *
+                                amqpSpace.getAmqpConnChannelNum())
+               ) % amqpSpace.getAmqpChannelExchangeNum();
     }
 
     protected String getEffectiveExchangeNameByCycle(long cycle) {

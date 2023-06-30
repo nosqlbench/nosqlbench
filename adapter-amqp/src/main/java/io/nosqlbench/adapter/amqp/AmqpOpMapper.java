@@ -46,7 +46,7 @@ public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp> {
     @Override
     public OpDispenser<? extends AmqpTimeTrackOp> apply(ParsedOp op) {
         String spaceName = op.getStaticConfigOr("space", "default");
-        AmqpSpace s4RSpace = spaceCache.get(spaceName);
+        AmqpSpace amqpSpace = spaceCache.get(spaceName);
 
         /*
          * If the user provides a body element, then they want to provide the JSON or
@@ -61,9 +61,9 @@ public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp> {
 
             return switch (opType.enumId) {
                 case AmqpMsgSender ->
-                    new AmqpMsgSendOpDispenser(adapter, op, s4RSpace);
+                    new AmqpMsgSendOpDispenser(adapter, op, amqpSpace);
                 case AmqpMsgReceiver ->
-                    new AmqpMsgRecvOpDispenser(adapter, op, s4RSpace);
+                    new AmqpMsgRecvOpDispenser(adapter, op, amqpSpace);
             };
         }
     }

@@ -47,38 +47,38 @@ public class AmqpAdapterMetrics {
 
     // end-to-end latency
     private Histogram e2eMsgProcLatencyHistogram;
-    private final AmqpBaseOpDispenser s4rBaseOpDispenser;
+    private final AmqpBaseOpDispenser amqpBaseOpDispenser;
 
-    public AmqpAdapterMetrics(final AmqpBaseOpDispenser s4rBaseOpDispenser, final NBLabeledElement labeledParent) {
-        this.s4rBaseOpDispenser = s4rBaseOpDispenser;
+    public AmqpAdapterMetrics(final AmqpBaseOpDispenser amqpBaseOpDispenser, final NBLabeledElement labeledParent) {
+        this.amqpBaseOpDispenser = amqpBaseOpDispenser;
         labels=labeledParent.getLabels().and("name", AmqpAdapterMetrics.class.getSimpleName());
     }
 
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
         messageSizeHistogram =
-            ActivityMetrics.histogram(this.s4rBaseOpDispenser,
+            ActivityMetrics.histogram(this.amqpBaseOpDispenser,
                 "message_size", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // Timer metrics
         bindTimer =
-            ActivityMetrics.timer(this.s4rBaseOpDispenser,
+            ActivityMetrics.timer(this.amqpBaseOpDispenser,
                     "bind", ActivityMetrics.DEFAULT_HDRDIGITS);
         executeTimer =
-            ActivityMetrics.timer(this.s4rBaseOpDispenser,
+            ActivityMetrics.timer(this.amqpBaseOpDispenser,
                      "execute", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // End-to-end metrics
         // Latency
         e2eMsgProcLatencyHistogram =
-            ActivityMetrics.histogram(this.s4rBaseOpDispenser, "e2e_msg_latency", ActivityMetrics.DEFAULT_HDRDIGITS);
+            ActivityMetrics.histogram(this.amqpBaseOpDispenser, "e2e_msg_latency", ActivityMetrics.DEFAULT_HDRDIGITS);
         // Error metrics
         msgErrOutOfSeqCounter =
-            ActivityMetrics.counter(this.s4rBaseOpDispenser, "err_msg_oos");
+            ActivityMetrics.counter(this.amqpBaseOpDispenser, "err_msg_oos");
         msgErrLossCounter =
-            ActivityMetrics.counter(this.s4rBaseOpDispenser, "err_msg_loss");
+            ActivityMetrics.counter(this.amqpBaseOpDispenser, "err_msg_loss");
         msgErrDuplicateCounter =
-            ActivityMetrics.counter(this.s4rBaseOpDispenser, "err_msg_dup");
+            ActivityMetrics.counter(this.amqpBaseOpDispenser, "err_msg_dup");
     }
 
     public Timer getBindTimer() { return bindTimer; }

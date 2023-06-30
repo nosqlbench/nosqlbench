@@ -51,7 +51,7 @@ public class AmqpSpace implements  AutoCloseable {
     private final String spaceName;
     private final NBConfiguration cfg;
 
-    private final AmqpClientConf s4rClientConf;
+    private final AmqpClientConf amqpClientConf;
 
     ///////////////////////////////////////////////////////////////////
     // NOTE: in this driver, we assume:
@@ -91,7 +91,7 @@ public class AmqpSpace implements  AutoCloseable {
 
     private final AtomicBoolean beingShutdown = new AtomicBoolean(false);
 
-    private ConnectionFactory s4rConnFactory;
+    private ConnectionFactory amqpConnFactory;
 
     // Default to "direct" type
     private String amqpExchangeType = AmqpAdapterUtil.AMQP_EXCHANGE_TYPES.DIRECT.label;
@@ -108,7 +108,7 @@ public class AmqpSpace implements  AutoCloseable {
     // - No: pause the current thread that received the error message for 1 second and then continue processing
     private final boolean strictMsgErrorHandling;
 
-    // Maximum time length to execute S4R operations (e.g. message send or consume)
+    // Maximum time length to execute AMQP operations (e.g. message send or consume)
     // - when NB execution passes this threshold, it is simply NoOp
     // - 0 means no maximum time constraint. AmqpTimeTrackOp is always executed until NB execution cycle finishes
     private final long maxOpTimeInSec;
@@ -121,8 +121,8 @@ public class AmqpSpace implements  AutoCloseable {
         this.spaceName = spaceName;
         this.cfg = cfg;
 
-        String s4rClientConfFileName = cfg.get("config");
-        this.s4rClientConf = new AmqpClientConf(s4rClientConfFileName);
+        String amqpClientConfFileName = cfg.get("config");
+        this.amqpClientConf = new AmqpClientConf(amqpClientConfFileName);
         this.amqpConnNum =
             NumberUtils.toInt(cfg.getOptional("num_conn").orElse("1"));
         this.amqpConnChannelNum =
@@ -139,7 +139,7 @@ public class AmqpSpace implements  AutoCloseable {
             BooleanUtils.toBoolean(cfg.getOptional("strict_msg_error_handling").orElse("false"));
         this.activityStartTimeMills = System.currentTimeMillis();
 
-        this.initializeSpace(s4rClientConf);
+        this.initializeSpace(amqpClientConf);
     }
 
     @Override
@@ -150,7 +150,7 @@ public class AmqpSpace implements  AutoCloseable {
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(AmqpSpace.class)
             .add(Param.defaultTo("config", "config.properties")
-                .setDescription("S4R client connection configuration property file."))
+                .setDescription("AMQP client connection configuration property file."))
             .add(Param.defaultTo("num_conn", 1)
                 .setDescription("Maximum number of AMQP connections."))
             .add(Param.defaultTo("num_channel", 1)
@@ -178,7 +178,7 @@ public class AmqpSpace implements  AutoCloseable {
 
     public long getActivityStartTimeMills() { return this.activityStartTimeMills; }
     public long getMaxOpTimeInSec() { return this.maxOpTimeInSec; }
-    public AmqpClientConf getS4rClientConf() { return s4rClientConf; }
+    public AmqpClientConf getAmqpClientConf() { return amqpClientConf; }
 
     public String getAmqpExchangeType() { return amqpExchangeType; }
     public int getAmqpConnNum() { return this.amqpConnNum; }
@@ -195,8 +195,8 @@ public class AmqpSpace implements  AutoCloseable {
     public long getTotalThreadNum() { return totalThreadNum; }
     public void setTotalThreadNum(long threadNum) { totalThreadNum = threadNum; }
 
-    public void initializeSpace(AmqpClientConf s4rClientConnInfo) {
-        Map<String, String> cfgMap = s4rClientConnInfo.getS4rConfMap();
+    public void initializeSpace(AmqpClientConf amqpClientConf) {
+        Map<String, String> cfgMap = amqpClientConf.getConfigMap();
 
         if  (amqpConnNum < 1) {
             String errMsg = "AMQP connection number (\"num_conn\") must be a positive number!";
@@ -215,30 +215,30 @@ public class AmqpSpace implements  AutoCloseable {
             throw new AmqpAdapterInvalidParamException(errMsg);
         }
 
-        if (s4rConnFactory == null) {
+        if (amqpConnFactory == null) {
             try {
-                s4rConnFactory = new ConnectionFactory();
+                amqpConnFactory = new ConnectionFactory();
 
                 String amqpServerHost = cfgMap.get("amqpSrvHost");
                 if (StringUtils.isBlank(amqpServerHost)) {
                     String errMsg = "AMQP server host (\"amqpSrvHost\") must be specified!";
                     throw new AmqpAdapterInvalidParamException(errMsg);
                 }
-                s4rConnFactory.setHost(amqpServerHost);
+                amqpConnFactory.setHost(amqpServerHost);
 
                 String amqpSrvPortCfg = cfgMap.get("amqpSrvPort");
                 if (StringUtils.isBlank(amqpSrvPortCfg)) {
                     String errMsg = "AMQP server port (\"amqpSrvPort\") must be specified!";
                     throw new AmqpAdapterInvalidParamException(errMsg);
                 }
-                s4rConnFactory.setPort(Integer.parseInt(amqpSrvPortCfg));
+                amqpConnFactory.setPort(Integer.parseInt(amqpSrvPortCfg));
 
                 String amqpVirtualHost = cfgMap.get("virtualHost");
                 if (StringUtils.isBlank(amqpVirtualHost)) {
                     String errMsg = "AMQP virtual host (\"virtualHost\") must be specified!";
                     throw new AmqpAdapterInvalidParamException(errMsg);
                 }
-                s4rConnFactory.setVirtualHost(amqpVirtualHost);
+                amqpConnFactory.setVirtualHost(amqpVirtualHost);
 
                 String userNameCfg = cfgMap.get("amqpUser");
 
@@ -253,19 +253,19 @@ public class AmqpSpace implements  AutoCloseable {
 
                     if (StringUtils.isNotBlank(passWord)) {
                         if (StringUtils.isBlank(userNameCfg)) {
-                            s4rConnFactory.setUsername("");
+                            amqpConnFactory.setUsername("");
                         }
-                        s4rConnFactory.setPassword(passWord);
+                        amqpConnFactory.setPassword(passWord);
                     }
                 }
 
                 String useTlsCfg = cfgMap.get("useTls");
                 if (StringUtils.isNotBlank(useTlsCfg) && Boolean.parseBoolean(useTlsCfg)) {
-                    s4rConnFactory.useSslProtocol();
+                    amqpConnFactory.useSslProtocol();
                 }
 
                 for (int i = 0; i < getAmqpConnNum(); i++) {
-                    Connection connection = s4rConnFactory.newConnection();
+                    Connection connection = amqpConnFactory.newConnection();
                     amqpConnections.put((long) i, connection);
 
                     if (logger.isDebugEnabled()) {
@@ -277,7 +277,7 @@ public class AmqpSpace implements  AutoCloseable {
                 }
             } catch (IOException|TimeoutException|NoSuchAlgorithmException|KeyManagementException  ex) {
                 logger.error("Unable to establish AMQP connections with the following configuration parameters: {}",
-                    s4rClientConnInfo.toString());
+                    amqpClientConf.toString());
                 throw new AmqpAdapterUnexpectedException(ex);
             }
         }
@@ -299,7 +299,7 @@ public class AmqpSpace implements  AutoCloseable {
             AmqpAdapterUtil.pauseCurThreadExec(5);
         }
         catch (Exception ex) {
-            String exp = "Unexpected error when shutting down the S4R adaptor space";
+            String exp = "Unexpected error when shutting down the AMQP adaptor space";
             logger.error(exp, ex);
         }
     }

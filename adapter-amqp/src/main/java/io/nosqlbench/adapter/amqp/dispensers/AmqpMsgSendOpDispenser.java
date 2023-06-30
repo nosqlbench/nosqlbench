@@ -54,8 +54,8 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
 
     public AmqpMsgSendOpDispenser(DriverAdapter adapter,
                                   ParsedOp op,
-                                  AmqpSpace s4rSpace) {
-        super(adapter, op, s4rSpace);
+                                  AmqpSpace amqpSpace) {
+        super(adapter, op, amqpSpace);
 
         publisherConfirm = parsedOp
             .getOptionalStaticConfig("publisher_confirm", String.class)
@@ -87,10 +87,10 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
     }
 
     private long getExchangeSenderSeqNum(long cycle) {
-        return (cycle / ((long) s4rSpace.getAmqpConnNum() *
-                                s4rSpace.getAmqpConnChannelNum() *
-                                s4rSpace.getAmqpChannelExchangeNum())
-               ) % s4rSpace.getAmqpMsgClntNum();
+        return (cycle / ((long) amqpSpace.getAmqpConnNum() *
+                                amqpSpace.getAmqpConnChannelNum() *
+                                amqpSpace.getAmqpChannelExchangeNum())
+               ) % amqpSpace.getAmqpMsgClntNum();
     }
 
     private String getEffectiveSenderNameByCycle(long cycle) {
@@ -116,10 +116,10 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
         long connSeqNum = getConnSeqNum(cycle);
         long channelSeqNum = getConnChannelSeqNum(cycle);
 
-        Connection amqpConnection = s4rSpace.getAmqpConnection(connSeqNum);
+        Connection amqpConnection = amqpSpace.getAmqpConnection(connSeqNum);
         AmqpSpace.AmqpChannelKey senderKey = new AmqpSpace.AmqpChannelKey(connSeqNum, channelSeqNum);
 
-        return s4rSpace.getAmqpChannels(senderKey, () -> {
+        return amqpSpace.getAmqpChannels(senderKey, () -> {
             Channel channel = null;
 
             try {
@@ -191,11 +191,11 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
         }
 
         String exchangeName = getEffectiveExchangeNameByCycle(cycle);
-        declareExchange(channel, exchangeName, s4rSpace.getAmqpExchangeType());
+        declareExchange(channel, exchangeName, amqpSpace.getAmqpExchangeType());
 
         return new OpTimeTrackAmqpMsgSendOp(
-            s4rAdapterMetrics,
-            s4rSpace,
+            amqpAdapterMetrics,
+            amqpSpace,
             channel,
             exchangeName,
             msgPayload,

@@ -44,8 +44,8 @@ public class OpTimeTrackAmqpMsgSendOp extends AmqpTimeTrackOp {
     private static final ConcurrentHashMap<Channel, Integer>
         channelPublishConfirmBathTracking = new ConcurrentHashMap<>();
 
-    public OpTimeTrackAmqpMsgSendOp(AmqpAdapterMetrics s4rAdapterMetrics,
-                                    AmqpSpace s4rSpace,
+    public OpTimeTrackAmqpMsgSendOp(AmqpAdapterMetrics amqpAdapterMetrics,
+                                    AmqpSpace amqpSpace,
                                     Channel channel,
                                     String exchangeName,
                                     String message,
@@ -53,7 +53,7 @@ public class OpTimeTrackAmqpMsgSendOp extends AmqpTimeTrackOp {
                                     boolean publishConfirm,
                                     String confirmMode,
                                     int confirmBatchNum) {
-        super(s4rAdapterMetrics, s4rSpace, channel, exchangeName);
+        super(amqpAdapterMetrics, amqpSpace, channel, exchangeName);
         this.cycleObj = message;
         this.routingKey = routingKey;
         this.publishConfirm = publishConfirm;
@@ -94,7 +94,7 @@ public class OpTimeTrackAmqpMsgSendOp extends AmqpTimeTrackOp {
 
                     if ( (publishConfirmTrackingCnt > 0) &&
                          ( (publishConfirmTrackingCnt % (confirmBatchNum - 1) == 0)  ||
-                           (publishConfirmTrackingCnt == (s4RSpace.getTotalCycleNum() - 1)) ) )  {
+                           (publishConfirmTrackingCnt == (amqpSpace.getTotalCycleNum() - 1)) ) )  {
                         channel.waitForConfirms(AmqpAdapterUtil.DFT_AMQP_PUBLISH_CONFIRM_TIMEOUT_MS);
                         if (logger.isTraceEnabled()) {
                             logger.debug("Sync ack received for a batch of published message: {}, {}",
