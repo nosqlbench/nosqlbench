@@ -27,12 +27,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class NormalizeCqlVectorTest {
 
     @Test
-    public void normalizeCqlVectorFloats() {
-        CqlVector square = CqlVector.of(1.0f, 1.0f);
-        NormalizeCqlVector nv = new NormalizeCqlVector();
-        CqlVector normaled = nv.apply(square);
+    public void normalizeCqlFloatVectorFloats() {
+        CqlVector square = CqlVector.newInstance(1.0f, 1.0f);
+        NormalizeCqlFloatVector nv = new NormalizeCqlFloatVector();
+        CqlVector normalized = nv.apply(square);
 
-        List sides = normaled.getValues();
+        List sides = normalized.stream().toList();
         assertThat(sides.size()).isEqualTo(2);
         assertThat(sides.get(0)).isInstanceOf(Float.class);
         assertThat(sides.get(1)).isInstanceOf(Float.class);
@@ -42,39 +42,11 @@ public class NormalizeCqlVectorTest {
 
     @Test
     public void normalizeCqlVectorDoubles() {
-        CqlVector square = CqlVector.of(1.0d, 1.0d);
-        NormalizeCqlVector nv = new NormalizeCqlVector();
-        CqlVector normaled = nv.apply(square);
+        CqlVector square = CqlVector.newInstance(1.0d, 1.0d);
+        NormalizeCqlFloatVector nv = new NormalizeCqlFloatVector();
+        CqlVector normalized = nv.apply(square);
 
-        List sides = normaled.getValues();
-        assertThat(sides.size()).isEqualTo(2);
-        assertThat(sides.get(0)).isInstanceOf(Double.class);
-        assertThat(sides.get(1)).isInstanceOf(Double.class);
-        assertThat(((Double)sides.get(0)).doubleValue()).isCloseTo(0.707, Offset.offset(0.001d));
-        assertThat(((Double)sides.get(1)).doubleValue()).isCloseTo(0.707, Offset.offset(0.001d));
-    }
-
-    @Test
-    public void normalizeCqlVectorFloatsV1() {
-        CqlVector square = CqlVector.of(1.0f, 1.0f);
-        NormalizeCqlVectorV1 nv = new NormalizeCqlVectorV1();
-        CqlVector normaled = nv.apply(square);
-
-        List sides = normaled.getValues();
-        assertThat(sides.size()).isEqualTo(2);
-        assertThat(sides.get(0)).isInstanceOf(Float.class);
-        assertThat(sides.get(1)).isInstanceOf(Float.class);
-        assertThat(((Float)sides.get(0)).doubleValue()).isCloseTo(0.707, Offset.offset(0.001d));
-        assertThat(((Float)sides.get(1)).doubleValue()).isCloseTo(0.707, Offset.offset(0.001d));
-    }
-
-    @Test
-    public void normalizeCqlVectorDoublesV1() {
-        CqlVector square = CqlVector.of(1.0d, 1.0d);
-        NormalizeCqlVectorV1 nv = new NormalizeCqlVectorV1();
-        CqlVector normaled = nv.apply(square);
-
-        List sides = normaled.getValues();
+        List sides = normalized.stream().toList();
         assertThat(sides.size()).isEqualTo(2);
         assertThat(sides.get(0)).isInstanceOf(Double.class);
         assertThat(sides.get(1)).isInstanceOf(Double.class);

@@ -20,7 +20,6 @@ import com.datastax.oss.driver.api.core.data.CqlVector;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.NormalizeDoubleListVector;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.NormalizeFloatListVector;
 
 import java.util.ArrayList;
@@ -28,33 +27,22 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Normalize a vector in List<Number> form, calling the appropriate conversion function
- * depending on the component (Class) type of the incoming List values.
+ * Normalize a vector in {@link CqlVector<Float>} form. This presumes that the input type is
+ * Float, since we lose the type bounds on what is contained in the CQL type. If this doesn't match,
+ * then you will arbitrarily increase your storage cost, or otherwise haven truncation errors
+ * in your values.
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class NormalizeCqlVector implements Function<CqlVector, CqlVector> {
-    private final NormalizeDoubleListVector ndv = new NormalizeDoubleListVector();
+public class NormalizeCqlFloatVector implements Function<CqlVector<? extends Number>, CqlVector<? extends Number>> {
     private final NormalizeFloatListVector nfv = new NormalizeFloatListVector();
 
     @Override
-    public CqlVector apply(CqlVector cqlVector) {
-
-        List<Object> list = cqlVector.getValues();
-        if (list.isEmpty()) {
-            return CqlVector.of();
-        } else if (list.get(0) instanceof Float) {
-            List<Float> srcFloats = new ArrayList<>(list.size());
-            list.forEach(o -> srcFloats.add((Float) o));
-            List<Float> floats = nfv.apply(srcFloats);
-            return new CqlVector(floats);
-        } else if (list.get(0) instanceof Double) {
-            List<Double> srcDoubles = new ArrayList<>();
-            list.forEach(o -> srcDoubles.add((Double) o));
-            List<Double> doubles = ndv.apply(srcDoubles);
-            return new CqlVector(doubles);
-        } else {
-            throw new RuntimeException("Only Doubles and Floats are recognized.");
-        }
+    public CqlVector apply(CqlVector<? extends Number> cqlVector) {
+        int size = cqlVector.size();
+        final List<Float> newVector = new ArrayList<>(size);
+        cqlVector.forEach(v -> newVector.add(v.floatValue()));
+        List<Float> normalized = nfv.apply(newVector);
+        return CqlVector.newInstance(normalized);
     }
 }

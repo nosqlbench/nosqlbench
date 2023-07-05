@@ -26,26 +26,33 @@ import java.util.List;
 
 /**
  * Convert the incoming object List, Number, or Array to a CqlVector
- * using {@link CqlVector.Builder#add(Object[])}}. If any numeric value
+ * using {@link CqlVector#newInstance(Number...)}}. If any numeric value
  * is passed in, then it becomes the only component of a 1D vector.
  * Otherwise, the individual values are added as vector components.
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
 public class ToCqlVector implements Function<Object, CqlVector> {
-
     @Override
     public CqlVector apply(Object object) {
-        Object[] ary = null;
         if (object instanceof List list) {
-            ary = list.toArray();
-        } else if (object instanceof Number number) {
-            ary = new Object[]{number.floatValue()};
-        } else if (object.getClass().isArray()) {
-            ary = (Object[]) object;
+            if (list.size()==0) {
+                return CqlVector.newInstance();
+            }
+            Class<?> componentType = list.get(0).getClass();
+            if (componentType.equals(Float.TYPE)) {
+                return CqlVector.newInstance(((List<Float>) list).toArray(new Float[list.size()]));
+            } else if (componentType.equals(Double.TYPE)) {
+                return CqlVector.newInstance(((List<Double>)list).toArray(new Double[list.size()]));
+            } else if (componentType.equals(Long.TYPE)) {
+                return CqlVector.newInstance(((List<Long>)list).toArray(new Long[list.size()]));
+            } else if (componentType.equals(Integer.TYPE)) {
+                return CqlVector.newInstance(((List<Integer>)list).toArray(new Integer[list.size()]));
+            } else {
+                throw new RuntimeException("Unable to convert List of " + componentType.getSimpleName() + " to a CqlVector");
+            }
         } else {
             throw new RuntimeException("Unsupported input type for CqlVector: " + object.getClass().getCanonicalName());
         }
-        return CqlVector.of(ary);
     }
 }
