@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import com.datastax.oss.driver.api.core.data.CqlDuration;
 import com.datastax.oss.driver.api.core.data.CqlVector;
 import com.datastax.oss.driver.api.core.data.TupleValue;
 import com.datastax.oss.driver.api.core.data.UdtValue;
-import com.datastax.oss.driver.api.core.type.CqlVectorType;
 import com.datastax.oss.driver.api.core.type.DataType;
+import com.datastax.oss.driver.api.core.type.VectorType;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
@@ -54,13 +54,17 @@ import static com.datastax.oss.protocol.internal.ProtocolConstants.DataType.*;
 public class CQLD4PreparedStmtDiagnostics {
     private static final Logger logger = LogManager.getLogger(CQLD4PreparedStmtDiagnostics.class);
 
-    public static BoundStatement bindStatement(BoundStatement bound, CqlIdentifier colname,
-                                               Object colval, DataType coltype) {
-
+    public static BoundStatement bindStatement(
+        BoundStatement bound,
+        CqlIdentifier colname,
+        Object colval,
+        DataType coltype
+    ) {
         return switch (coltype.getProtocolCode()) {
             case CUSTOM -> {
-                if (coltype instanceof CqlVectorType) {
-                    yield bound.setCqlVector(colname, (CqlVector<?>) colval);
+                if (coltype instanceof VectorType ct) {
+                    if (colval instanceof CqlVector cv)
+                    yield bound.setVector(colname, cv, cv.get(0).getClass());
                 }
                 throw new RuntimeException("Unhandled CUSTOM type for diagnostic: "
                         + coltype.getClass().getSimpleName());
