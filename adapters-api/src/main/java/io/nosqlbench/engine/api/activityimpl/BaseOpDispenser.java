@@ -77,7 +77,7 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
     }
 
     private void configureResultExpectations(ParsedOp op) {
-        op.getOptionalStaticValue("expected-result", String.class)
+        op.takeOptionalStaticValue("expected-result", String.class)
             .map(this::compileExpectedResultExpression)
             .ifPresent(result -> this.expectedResultExpression = result);
     }
