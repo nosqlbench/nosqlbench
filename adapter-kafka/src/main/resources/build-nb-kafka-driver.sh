@@ -20,5 +20,5 @@
   cd "$(git rev-parse --show-toplevel)" && \
     mvn clean install "-DskipTests" -pl adapters-api,adapter-kafka,nb5 && \
     [[ ${SKIP_TESTS} -ne 1 ]] && \
-    mvn test -pl adapters-api,adapter-pulsar
+    mvn test -pl adapters-api,adapter-kafka
 )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +96,8 @@ public class VirtDataFunctionResolver {
 //                    }
 //                })
                 .collect(Collectors.toList());
+
+        Collections.sort(matchingConstructors,new ArgsComparator(parameters));
 
         if (returnType != null && inputType != null && matchingConstructors.size() > 1) {
             throw new RuntimeException(

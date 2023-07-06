@@ -1,0 +1,34 @@
+scenarios:
+  msg_pub: run driver=kafka cycles=1000 threads=2 num_clnt=2 config=../conf/kafka_config.properties bootstrap_server=localhost:9092
+  msg_sub: run driver=kafka cycles=1000 threads=4 num_clnt=2 num_cons_grp=2 config=../conf/s4j_config.properties bootstrap_server=localhost:9092
+
+bindings:
+  mykey: Mod(5); ToString(); Prefix("key-")
+  mytext_val: AlphaNumericString(30)
+  random_text_val1: AlphaNumericString(10)
+  random_text_val2: AlphaNumericString(20)
+
+# document level parameters that apply to all Pulsar client types:
+params:
+  async_api: "true"
+
+blocks:
+  msg_pub:
+    ops:
+      op1:
+        MessageProduce: "persistent://nbtest/default/s4ktest"
+        txn_batch_num: 1
+        msg_header: |
+          {
+            "header-1": "{random_text_val1}",
+            "header-2": "{random_text_val2}"
+          }
+        msg_key: "{mykey}"
+        msg_body: "{mytext_val}"
+
+  msg_sub:
+    ops:
+      op1:
+        MessageConsume: "persistent://nbtest/default/s4ktest"
+        msg_poll_interval: "10"
+        manual_commit_batch_num: "0"

@@ -115,7 +115,19 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-amqp</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-jdbc</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-pinecone</artifactId>
             <version>${revision}</version>
         </dependency>
 

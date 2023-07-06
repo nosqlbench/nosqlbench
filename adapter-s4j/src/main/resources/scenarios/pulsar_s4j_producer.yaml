@@ -16,7 +16,7 @@ blocks:
   msg-produce-block:
     ops:
       op1:
-        ## The value represents the destination (queue or topic) name)
+        ## The value represents the destination (queue or topic) name
         MessageProduce: "mys4jtest_t"
 
         ## (Optional) JMS headers (in JSON format).

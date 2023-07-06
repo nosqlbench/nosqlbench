@@ -94,7 +94,7 @@
             <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
-                <version>4.7.3</version>
+                <version>4.7.4</version>
             </dependency>
 
             <!-- due to https://github.com/oshi/oshi/issues/1289 -->
@@ -131,13 +131,13 @@
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-graphite</artifactId>
-                <version>4.2.18</version>
+                <version>4.2.19</version>
             </dependency>
 
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-core</artifactId>
-                <version>4.2.18</version>
+                <version>4.2.19</version>
             </dependency>
 
             <dependency>
@@ -200,13 +200,13 @@
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
                 <artifactId>snappy-java</artifactId>
-                <version>1.1.2.6</version>
+                <version>1.1.10.1</version>
             </dependency>
 
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.92.Final</version>
+                <version>4.1.94.Final</version>
             </dependency>
 
             <dependency>
@@ -232,7 +232,7 @@
             <dependency>
                 <groupId>com.github.docker-java</groupId>
                 <artifactId>docker-java-api</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -262,7 +262,7 @@
             <dependency>
                 <groupId>com.github.docker-java</groupId>
                 <artifactId>docker-java-transport-okhttp</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -275,7 +275,7 @@
             <dependency>
                 <groupId>com.github.docker-java</groupId>
                 <artifactId>docker-java</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -288,7 +288,7 @@
             <dependency>
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core-java11</artifactId>
-                <version>6.4.1</version>
+                <version>6.4.2</version>
             </dependency>
 
             <dependency>
@@ -300,7 +300,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.457</version>
+                <version>1.12.481</version>
             </dependency>
 
             <dependency>

@@ -1,0 +1,33 @@
+bindings:
+  mytext_val: AlphaNumericString(100)
+  myroutingkey: CSVFrequencySampler('csv/routing_keys.csv', 'name')
+
+
+# Doc-level parameters (must be static)
+params:
+  # whether to do publisher confirm (for reliable publishing)
+  # - default: false
+  publisher_confirm: true
+  #publisher_confirm: true
+  # If 'publisher_confirm' is true, use one of the following 3 confirm modes:
+  # - individual (wait_for_confirm individually)
+  # - batch (wait_for_confirm in batch)
+  # - async [default]
+  #confirm_mode: async
+  #confirm_mode: individual
+  confirm_mode: batch
+
+  # Only relevant when 'publisher_confirm' is true and 'confirm_mode' is "batch"
+  confirm_batch_num: 10
+  # default timeout value (in milliseconds)
+  # - only relevant when publisher_confirm' is true and 'confirm_mode' is NOT "async"
+  dft_confirm_timeout_ms: 1000
+
+
+blocks:
+  msg-send-block:
+    ops:
+      op1:
+        AmqpMsgSender: ""
+        routing_key: "{myroutingkey}"
+        message: "{mytext_val}"

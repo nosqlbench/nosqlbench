@@ -37,7 +37,7 @@
     </description>
 
     <properties>
-        <s4j.version>3.2.1</s4j.version>
+        <s4j.version>4.0.1</s4j.version>
     </properties>
 
     <dependencies>

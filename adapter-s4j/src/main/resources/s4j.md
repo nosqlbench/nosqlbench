@@ -2,9 +2,21 @@
 weight: 0
 title: S4J
 ---
+- [1. Overview](#1-overview)
+- [2. Execute NB S4J Workload](#2-execute-nb-s4j-workload)
+- [3. NB S4J Driver Configuration Parameter File](#3-nb-s4j-driver-configuration-parameter-file)
+- [4. NB S4J Scenario Definition File](#4-nb-s4j-scenario-definition-file)
+    - [4.1. Document Level Parameters](#41-document-level-parameters)
+    - [4.2. NB S4J Workload Types](#42-nb-s4j-workload-types)
+        - [4.2.1. Publish Messages to a JMS Destination, Queue or Topic](#421-publish-messages-to-a-jms-destination-queue-or-topic)
+        - [4.2.2. Receiving Messages from a JMS Destination, Queue or Topic](#422-receiving-messages-from-a-jms-destination-queue-or-topic)
+    - [4.3. S4J Named Scenario](#43-s4j-named-scenario)
+
+---
+
 # 1. Overview
 
-This driver is similar to [NB Pulsar driver](../../../../driver-pulsar/src/main/resources/pulsar.md) that allows NB based workload generation and performance testing against a Pulsar cluster. It also follows a similar pattern to configure and connect to the Pulsar cluster for workload execution.
+This driver is similar to [NB Pulsar driver](../../../../adapter-pulsar/src/main/resources/pulsar.md) that allows NB based workload generation and performance testing against a Pulsar cluster. It also follows a similar pattern to configure and connect to the Pulsar cluster for workload execution.
 
 However, the major difference is instead of simulating native Pulsar client workloads, the NB S4J driver allows simulating JMS oriented workloads (that follows JMS spec 2.0 and 1.1) to be executed on the Pulsar cluster. Under the hood, this is achieved through DataStax's [Starlight for JMS API] (https://github.com/datastax/pulsar-jms).
 
@@ -39,7 +51,7 @@ Other NB engine parameters are straight forward:
 
 # 3. NB S4J Driver Configuration Parameter File
 
-The S4J API has a list of configuration options that can be found here: https://docs.datastax.com/en/fast-pulsar-jms/docs/1.1/pulsar-jms-reference.html#_configuration_options.
+The S4J API has a list of configuration options that can be found here: https://docs.datastax.com/en/streaming/starlight-for-jms/latest/reference/pulsar-jms-reference.html.
 
 The NB S4J driver supports these configuration options via a config property file, an example of which is listed below. The configuration parameters in this file are grouped into several groups. The comments below explain how the grouping works.
 
@@ -137,6 +149,8 @@ The NB S4J driver supports 2 types of JMS operations:
 
 ### 4.2.1. Publish Messages to a JMS Destination, Queue or Topic
 
+***NOTE**: Please see [pulsar_s4j_producer.yaml](scenarios/pulsar_s4j_producer.yaml) as the complete example.*
+
 The NB S4J statement block for publishing messages to a JMS destination (either a Queue or a topic) has the following format.
 * Optionally, you can specify the JMS headers (**msg_header**) and properties (**msg_property**) via valid JSON strings in key: value format.
 * The default message type (**msg_type**) is "byte". But optionally, you can specify other message types such as "text", "map", etc.
@@ -171,6 +185,8 @@ blocks:
 ```
 
 ###  4.2.2. Receiving Messages from a JMS Destination, Queue or Topic
+
+***NOTE**: Please see [pulsar_s4j_consumer.yaml](scenarios/pulsar_s4j_consumer.yaml) as the complete example.*
 
 The generic NB S4J statement block for receiving messages to a JMS destination (either a Queue or a topic) has the following format. All the statement specific parameters are listed as below.
 * **msg_selector**: Message selector string
@@ -236,4 +252,22 @@ blocks:
             "maxDelayMs":"20",
             "multiplier":"1.2"
           }
+```
+
+## 4.3. S4J Named Scenario
+
+For workload execution convenience, NB engine has the concept of **named scenario** ([doc](https://docs.nosqlbench.io/workloads-101/11-named-scenarios/)).
+
+For NB S4R adapter, the following yaml file is used to define the named scenarios: [nbs4j_msg_proc_named.yaml](scenarios/nbs4j_msg_proc_named.yaml)
+
+The CLI command to execute the S4J named scenarios (against an AS streaming tenant) is as simple as below. By default,
+the scenarios will be executed against localhost.
+```bash
+# for message sender workload
+$ <nb_cmd> nbs4j_msg_proc_named msg_send service_url=pulsar+ssl://pulsar-gcp-uscentral1.streaming.datastax.com:6651 web_url=https://pulsar-gcp-uscentral1.api.streaming.datastax.com
+
+
+# for message receiver workload
+$ <nb_cmd> nbs4j_msg_proc_named msg_recv service_url=pulsar+ssl://pulsar-gcp-uscentral1.streaming.datastax.com:6651 web_url=https://pulsar-gcp-uscentral1.api.streaming.datastax.com
+
 ```

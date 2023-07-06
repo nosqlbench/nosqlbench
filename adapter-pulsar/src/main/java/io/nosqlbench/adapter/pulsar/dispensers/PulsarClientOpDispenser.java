@@ -16,25 +16,21 @@
 
 package io.nosqlbench.adapter.pulsar.dispensers;
 
-import com.codahale.metrics.Timer;
 import com.codahale.metrics.Timer.Context;
 import io.nosqlbench.adapter.pulsar.PulsarSpace;
-import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
+import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil.DOC_LEVEL_PARAMS;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.metrics.EndToEndMetricsAdapterUtil;
 import io.nosqlbench.engine.api.metrics.EndToEndMetricsAdapterUtil.MSG_SEQ_ERROR_SIMU_TYPE;
 import io.nosqlbench.engine.api.templating.ParsedOp;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.PulsarClient;
-import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.Schema;
 import org.apache.pulsar.client.api.transaction.Transaction;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.function.LongFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -93,13 +89,10 @@ public abstract class PulsarClientOpDispenser extends PulsarBaseOpDispenser {
                     .newTransaction()
                     .build()
                     .get();
-            } catch (final ExecutionException | InterruptedException err) {
+            } catch (Exception err) {
                 if (PulsarClientOpDispenser.logger.isWarnEnabled())
                     PulsarClientOpDispenser.logger.warn("Error while starting a new transaction", err);
-                throw new RuntimeException(err);
-            } catch (final PulsarClientException err) {
-                throw new RuntimeException("Transactions are not enabled on Pulsar Client, " +
-                    "please set client.enableTransaction=true in your Pulsar Client configuration");
+                throw new PulsarAdapterUnexpectedException(err);
             }
         };
     }

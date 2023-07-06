@@ -18,8 +18,10 @@ package io.nosqlbench.adapter.venice.dispensers;
 
 import io.nosqlbench.adapter.venice.VeniceSpace;
 import io.nosqlbench.adapter.venice.ops.ReadSingleKeyOp;
+import io.nosqlbench.adapter.venice.util.AvroUtils;
 import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.templating.ParsedOp;
+import org.apache.avro.Schema;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -36,6 +38,10 @@ public class ReadSingleKeyOpDispenser extends VeniceBaseOpDispenser {
     private final static Logger logger = LogManager.getLogger("ReadSingleKeyOpDispenser");
     private final LongFunction<String> keyStrFunc;
 
+    private final Schema keySchema;
+
+    private static final String KEY_SCHEMA_OP_PARAM = "keySchema";
+
     private static final String KEY_OP_PARAM = "key";
 
     public ReadSingleKeyOpDispenser(DriverAdapter adapter,
@@ -43,14 +49,16 @@ public class ReadSingleKeyOpDispenser extends VeniceBaseOpDispenser {
                                       VeniceSpace s4jSpace) {
         super(adapter, op, s4jSpace);
         this.keyStrFunc = lookupMandtoryStrOpValueFunc(KEY_OP_PARAM);
+        this.keySchema = lookupAvroSchema(KEY_SCHEMA_OP_PARAM);
     }
 
     @Override
     public ReadSingleKeyOp apply(long cycle) {
         String key = keyStrFunc.apply(cycle);
+        Object encodedKey = AvroUtils.encodeToAvro(keySchema, key);
         return new ReadSingleKeyOp(
             veniceAdapterMetrics,
             veniceSpace,
-            key);
+            encodedKey);
     }
 }

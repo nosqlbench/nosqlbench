@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.venice.ops;
 
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import com.linkedin.venice.client.store.AvroGenericStoreClient;
 import io.nosqlbench.adapter.venice.VeniceSpace;
@@ -33,15 +34,14 @@ public class ReadSingleKeyOp extends VeniceOp {
     private final static Logger logger = LogManager.getLogger("ReadSingleKeyOp");
 
     private final AvroGenericStoreClient<Object, Object> client;
-    private final String key;
+    private final Object key;
     private final Timer executeTimer;
-
     private Counter foundCounter;
     private Counter notFoundCounter;
 
     public ReadSingleKeyOp(VeniceAdapterMetrics veniceAdapterMetrics,
                            VeniceSpace veniceSpace,
-                           String key) {
+                           Object key) {
         super(veniceAdapterMetrics, veniceSpace);
         this.client = veniceSpace.getClient();
         this.key = key;
@@ -57,7 +57,7 @@ public class ReadSingleKeyOp extends VeniceOp {
             CompletableFuture<Object> handle = client.get(key);
             callValue = handle.join();
             if (logger.isDebugEnabled()) {
-                logger.debug("ReadSingleKeyOp key={} value={}", key, callValue);
+                logger.debug("ReadSingleKeyOp key={} value={} latency {}", key, callValue);
             }
         }
         if (callValue != null) {

@@ -20,19 +20,19 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
-import java.util.function.LongToDoubleFunction;
+import java.util.function.LongFunction;
 
 @ThreadSafeMapper
 @Categories({Category.general})
-public class Mul implements LongToDoubleFunction {
-    private final double factor;
+public class Mul implements LongFunction<Float> {
+    private final float factor;
 
-    public Mul(double factor) {
+    public Mul(float factor) {
         this.factor = factor;
     }
 
     @Override
-    public double applyAsDouble(long value) {
+    public Float apply(long value) {
         return factor * value;
     }
 }

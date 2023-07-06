@@ -1,0 +1,20 @@
+description: |
+  A small collection of binding functions for the CqlVector type.
+scenarios:
+  default: run driver=stdout cycles=10 format=readout
+  simple: run driver=stdout bindings='simple.*' cycles=10 format=readout
+  hof-four: run driver=stdout bindings=hof_vector cycles=10 format=readout
+  hof-vary: run driver=stdout bindings='hof_vary.*' cycles=10 format=readout
+  hof-tenunit: run driver=stdout bindings='"'hof_ten.*' cycles=10 format=readout
+
+bindings:
+  # default provides a 5-component vector, with unit-interval values. (Not normalized)
+  simple_vector: CqlVector()
+  # create a HOF CqlVector(dim 4) binding which composes around a long -> list function
+  hof_vector: CqlVector(ListSizedHashed(4,HashRange(0.0f,1.0f)))
+  # create a HOF CqlVector binding
+  hof_vary_vector: CqlVector(ListSizedHashed(HashRange(3,5)->int,HashRange(0.0f,1.0f)))
+  # create a normalized vectors of dimension 10
+  hof_ten_unit: CqlVector(ListSizedHashed(10,HashRange(0.0f,1.0f))); NormalizeCqlVector();
+
+

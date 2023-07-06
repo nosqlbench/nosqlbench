@@ -49,13 +49,14 @@ public class KafkaSpace implements  AutoCloseable {
     private final KafkaClientConf kafkaClientConf;
 
     // Whether to do strict error handling while sending/receiving messages
-    // - Yes: any error returned from the Pulsar server while doing message receiving/sending will trigger NB execution stop
+    // - Yes: any error returned from the Kafka server (or Kafka compatible server like Pulsar) while doing message
+    //        receiving/sending will trigger NB execution stop
     // - No: pause the current thread that received the error message for 1 second and then continue processing
     private final boolean strictMsgErrorHandling;
 
-    // Maximum time length to execute S4J operations (e.g. message send or consume)
+    // Maximum time length to execute Kafka operations (e.g. message send or consume)
     // - when NB execution passes this threshold, it is simply NoOp
-    // - 0 means no maximum time constraint. S4JOp is always executed until NB execution cycle finishes
+    // - 0 means no maximum time constraint. KafkaOp is always executed until NB execution cycle finishes
     private final long maxOpTimeInSec;
     private final long activityStartTimeMills;
 

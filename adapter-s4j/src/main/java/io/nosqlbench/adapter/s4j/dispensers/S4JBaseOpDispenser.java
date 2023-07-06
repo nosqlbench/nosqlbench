@@ -68,7 +68,6 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
         this.parsedOp = op;
         this.s4jSpace = s4jSpace;
 
-        String defaultMetricsPrefix = parsedOp.getLabels().linearize("activity");
         this.s4jAdapterMetrics = new S4JAdapterMetrics(this);
         s4jAdapterMetrics.initS4JAdapterInstrumentation();
 

@@ -1,0 +1,26 @@
+scenarios:
+  msg_send: run driver=s4j cycles=100 threads=4 num_conn=2 num_session=2 session_mode=client_ack config=../conf/s4j_config.properties service_url=pulsar://localhost:6650 web_url=http://localhost:8080
+  msg_recv: run driver=s4j cycles=100 threads=4 num_conn=2 num_session=2 session_mode=client_ack config=../conf/s4j_config.properties service_url=pulsar://localhost:6650 web_url=http://localhost:8080
+
+bindings:
+  mykey: Mod(5); ToString(); Prefix("key-")
+  mytext_val: AlphaNumericString(30)
+
+# document level parameters that apply to all Pulsar client types:
+params:
+  temporary_dest: "false"
+  dest_type: "queue"
+  async_api: "true"
+
+blocks:
+  msg_send:
+    ops:
+      op1:
+        MessageProduce: "persistent://nbtest/default/mys4jtest_t"
+        msg_body: "{mytext_val}"
+
+  msg_recv:
+    ops:
+      op1:
+        MessageConsume: "persistent://nbtest/default/mys4jtest_t"
+        subscription_name: "nbs4j-sub"

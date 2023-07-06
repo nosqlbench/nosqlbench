@@ -1,0 +1,12 @@
+bindings:
+  mybindingkey: CSVFrequencySampler('csv/binding_keys.csv', 'name')
+
+# Doc-level parameters (must be static)
+params:
+
+blocks:
+  msg-recv-block:
+    ops:
+      op1:
+        AmqpMsgReceiver: ""
+        binding_key: "{mybindingkey}"

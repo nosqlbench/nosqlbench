@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,33 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
-import java.util.function.LongToDoubleFunction;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 /**
- * Convert the input value to a double.
+ * Normalize a vector.
  */
 @ThreadSafeMapper
-@Categories({Category.conversion})
-public class ToDouble implements LongToDoubleFunction {
-
+@Categories(Category.experimental)
+public class NormalizeFloatListVector implements Function<List<Float>,List<Float>> {
     @Override
-    public double applyAsDouble(long value) {
-        return (double) value;
+    public List<Float> apply(List<Float> floats) {
+        ArrayList<Float> unit = new ArrayList<>(floats.size());
+        float accumulator = 0.0f;
+        for (float scalar : floats) {
+            accumulator+=scalar*scalar;
+        }
+        float scalarLen = (float) Math.sqrt(accumulator);
+        for (float scalarComponent : floats) {
+            unit.add(scalarComponent/scalarLen);
+        }
+        return unit;
     }
 }

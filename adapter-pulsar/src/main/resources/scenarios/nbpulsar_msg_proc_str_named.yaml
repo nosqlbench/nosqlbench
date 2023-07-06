@@ -1,0 +1,31 @@
+scenarios:
+  msg_pub: run driver=pulsar cycles=200 threads=2 config=../conf/pulsar_config.properties service_url=pulsar://localhost:6650 web_url=http://localhost:8080
+  msg_sub: run driver=pulsar cycles=200 threads=2 config=../conf/pulsar_config.properties service_url=pulsar://localhost:6650 web_url=http://localhost:8080
+
+bindings:
+  mykey: NumberNameToString()
+  mypropval: AlphaNumericString(5)
+  myvalue: AlphaNumericString(20)
+
+params:
+  async_api: "true"
+
+blocks:
+  msg_pub:
+    ops:
+      op1:
+        MessageProduce: "persistent://nbtest/default/ptest_str"
+        msg_key: "{mykey}"
+        msg_prop: |
+          {
+            "prop1": "{mypropval}"
+          }
+        msg_value: "{myvalue}"
+
+  msg_sub:
+    ops:
+      op1:
+        MessageConsume: "persistent://nbtest/default/ptest_str"
+        subscriptionName: "mynbsub_str"
+        # Case sensitive -- valid values: Exclusive, Shared, Failover, Key_Shared
+        subscriptionType: "Shared"
