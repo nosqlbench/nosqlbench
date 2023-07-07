@@ -178,8 +178,8 @@ public class SSLKsFactoryTest {
         NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
 
         assertThatExceptionOfType(RuntimeException.class)
-            .isThrownBy(() -> SSLKsFactory.get().getContext(sslCfg))
-            .withMessageMatching("Unable to init KeyManagerFactory. Please check.*");
+                .isThrownBy(() -> SSLKsFactory.get().getContext(sslCfg))
+                .withMessageMatching("Unable to init KeyManagerFactory. Please check.*");
     }
 
     @Test
@@ -194,6 +194,62 @@ public class SSLKsFactoryTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> SSLKsFactory.get().getContext(sslCfg))
                 .withMessageMatching("Unable to load the truststore: .*");
+    }
+
+    @Test
+    void testSSLValidationActive() {
+        {
+            final String[] params1 = {
+                    "ssl=openssl",
+                    "certFilePath=src/test/resources/ssl/client_cert.pem",
+                    "keyFilePath=src/test/resources/ssl/client.key",
+                    "sslValidation=true"
+            };
+            ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params1));
+            NBConfiguration sslCfg1 = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
+            assertThat(SSLKsFactory.get().getContext(sslCfg1)).isNotNull();
+        }
+
+        {
+            final String[] params2 = {
+                    "ssl=jdk",
+                    "keystore=src/test/resources/ssl/client_diff_password.p12",
+                    "kspass=nosqlbench_client",
+                    "keyPassword=nosqlbench",
+                    "sslValidation=true"
+            };
+            ActivityDef activityDef2 = ActivityDef.parseActivityDef(String.join(";", params2));
+            NBConfiguration sslCfg2 = SSLKsFactory.get().getConfigModel().extractConfig(activityDef2.getParams());
+            assertThat(SSLKsFactory.get().getContext(sslCfg2)).isNotNull();
+        }
+    }
+
+    @Test
+    void testSSLValidationNotActive() {
+        {
+            final String[] params1 = {
+                    "ssl=openssl",
+                    "certFilePath=src/test/resources/ssl/client_cert.pem",
+                    "keyFilePath=src/test/resources/ssl/client.key",
+                    "sslValidation=false"
+            };
+            ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params1));
+            NBConfiguration sslCfg1 = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
+            assertThat(SSLKsFactory.get().getContext(sslCfg1)).isNotNull();
+        }
+
+        {
+            final String[] params2 = {
+                    "ssl=jdk",
+                    "keystore=src/test/resources/ssl/client_diff_password.p12",
+                    "kspass=nosqlbench_client",
+                    "keyPassword=nosqlbench",
+                    "sslValidation=false"
+            };
+            ActivityDef activityDef2 = ActivityDef.parseActivityDef(String.join(";", params2));
+            NBConfiguration sslCfg2 = SSLKsFactory.get().getConfigModel().extractConfig(activityDef2.getParams());
+            assertThat(SSLKsFactory.get().getContext(sslCfg2)).isNotNull();
+        }
     }
 
     @Test
@@ -241,16 +297,16 @@ public class SSLKsFactoryTest {
     @Test
     public void testOpenSSLGetContextWithMissingCertError() {
         String[] params = {
-            "ssl=openssl",
-            "caCertFilePath=src/test/resources/ssl/cacert.crt",
-            "keyFilePath=src/test/resources/ssl/client.key"
+                "ssl=openssl",
+                "caCertFilePath=src/test/resources/ssl/cacert.crt",
+                "keyFilePath=src/test/resources/ssl/client.key"
         };
         ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
         NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
         assertThatExceptionOfType(RuntimeException.class)
-            .isThrownBy(() -> SSLKsFactory.get().getContext(sslCfg))
-            .withMessageContaining("Unable to load key from")
-            .withCauseInstanceOf(IllegalArgumentException.class);
+                .isThrownBy(() -> SSLKsFactory.get().getContext(sslCfg))
+                .withMessageContaining("Unable to load key from")
+                .withCauseInstanceOf(IllegalArgumentException.class);
     }
 
 }

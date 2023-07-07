@@ -54,3 +54,8 @@ For `openssl` type, the following options are available:
 
     Examples:
     - `keyFilePath=file.key`
+- **sslValidation** - optional boolean flag to enable/disable SSLValidation.
+
+    Examples:
+    - `sslValidation=true` (the default)
+    - `sslValidation=false`
