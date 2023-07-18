@@ -27,6 +27,7 @@ import java.util.function.Function;
 
 public class StrInterpolator implements Function<String, String> {
     private final static Logger logger = LogManager.getLogger(StrInterpolator.class);
+
     private final MultiMap multimap = new MultiMap();
     private final StringSubstitutor substitutor =
         new StringSubstitutor(multimap, "<<", ">>", '\\')
@@ -57,11 +58,6 @@ public class StrInterpolator implements Function<String, String> {
 
     @Override
     public String apply(String raw) {
-        if (raw.contains("<<")) {
-            logger.warn("Deprecated use of '<<...>>' detected as template variable, use TEMPLATE(...) form.  '<<...>>' " +
-                "are reserved in YAML spec for anchors and aliases.");
-        }
-
         String after = substitutor.replace(substitutor2.replace(raw));
         while (!after.equals(raw)) {
             raw = after;
@@ -70,7 +66,7 @@ public class StrInterpolator implements Function<String, String> {
         return after;
     }
 
-    public Map<String, String> checkpointAccesses() {
+    public Map<String,String> checkpointAccesses() {
         return multimap.checkpointAccesses();
     }
 
@@ -84,8 +80,8 @@ public class StrInterpolator implements Function<String, String> {
 
         private final List<Map<String, ?>> maps = new ArrayList<>();
         private final String warnPrefix = "UNSET";
-        private final Map<String, String> accesses = new LinkedHashMap<>();
-        private final Map<String, String> extractedDefaults = new LinkedHashMap<>();
+        private final Map<String,String> accesses = new LinkedHashMap<>();
+        private final Map<String,String> extractedDefaults = new LinkedHashMap<>();
 
         public void add(Map<String, ?> addedMap) {
             maps.add(addedMap);
@@ -100,7 +96,7 @@ public class StrInterpolator implements Function<String, String> {
                 key = parts[0];
                 value = parts[1];
                 if (!extractedDefaults.containsKey(key)) {
-                    extractedDefaults.put(key, value);
+                    extractedDefaults.put(key,value);
                 }
             }
 
@@ -111,7 +107,7 @@ public class StrInterpolator implements Function<String, String> {
                     break;
                 }
             }
-            value = (value == null ? extractedDefaults.get(key) : value);
+            value = (value==null? extractedDefaults.get(key) : value);
 
             value = (value != null) ? value : warnPrefix + ":" + key;
 
@@ -120,14 +116,14 @@ public class StrInterpolator implements Function<String, String> {
 //                    " Template variables must resolve to a single value.");
 //            }
 
-            accesses.put(key, value);
+            accesses.put(key,value);
             logger.debug("Template parameter '" + key + "' applied as '" + value + "'");
             return value;
 
         }
 
-        public Map<String, String> checkpointAccesses() {
-            LinkedHashMap<String, String> accesses = new LinkedHashMap<>(this.accesses);
+        public Map<String,String> checkpointAccesses() {
+            LinkedHashMap<String,String> accesses = new LinkedHashMap<>(this.accesses);
             logger.debug("removed template params after applying:" + accesses);
             this.accesses.clear();
             return accesses;
