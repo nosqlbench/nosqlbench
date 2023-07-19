@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.cqld4.exceptions;
 
 
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 
 /**
@@ -27,16 +28,16 @@ import com.datastax.oss.driver.api.core.cql.ResultSet;
  */
 public class ChangeUnappliedCycleException extends CqlGenericCycleException {
 
-    private final ResultSet resultSet;
+    private final AsyncResultSet resultSet;
     private final String queryString;
 
-    public ChangeUnappliedCycleException(ResultSet resultSet, String queryString) {
+    public ChangeUnappliedCycleException(AsyncResultSet resultSet, String queryString) {
         super("Operation was not applied:" + queryString);
         this.resultSet = resultSet;
         this.queryString = queryString;
     }
 
-    public ResultSet getResultSet() {
+    public AsyncResultSet getResultSet() {
         return resultSet;
     }
     public String getQueryString() { return queryString; }

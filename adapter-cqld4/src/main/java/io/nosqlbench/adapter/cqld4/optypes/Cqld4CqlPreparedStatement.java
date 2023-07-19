@@ -20,11 +20,14 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 
+import java.util.Map;
+
 public class Cqld4CqlPreparedStatement extends Cqld4CqlOp {
 
     private final BoundStatement stmt;
 
-    public Cqld4CqlPreparedStatement(CqlSession session, BoundStatement stmt, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors) {
+    public Cqld4CqlPreparedStatement(CqlSession session, BoundStatement stmt, int maxPages,
+                                     boolean retryReplace, int maxLwtRetries, RSProcessors processors) {
         super(session, maxPages, retryReplace, maxLwtRetries, processors);
         this.stmt = stmt;
     }
@@ -37,4 +40,5 @@ public class Cqld4CqlPreparedStatement extends Cqld4CqlOp {
     public String getQueryString() {
         return stmt.getPreparedStatement().getQuery();
     }
+
 }

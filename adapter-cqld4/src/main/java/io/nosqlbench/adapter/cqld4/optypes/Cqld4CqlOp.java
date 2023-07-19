@@ -17,21 +17,24 @@
 package io.nosqlbench.adapter.cqld4.optypes;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.core.cql.Statement;
-import io.nosqlbench.adapter.cqld4.*;
+import io.nosqlbench.adapter.cqld4.Cqld4CqlReboundStatement;
+import io.nosqlbench.adapter.cqld4.LWTRebinder;
+import io.nosqlbench.adapter.cqld4.RSProcessors;
 import io.nosqlbench.adapter.cqld4.exceptions.ChangeUnappliedCycleException;
 import io.nosqlbench.adapter.cqld4.exceptions.ExceededRetryReplaceException;
-import io.nosqlbench.adapter.cqld4.exceptions.UndefinedResultSetException;
 import io.nosqlbench.adapter.cqld4.exceptions.UnexpectedPagingException;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 // TODO: add statement filtering
@@ -50,80 +53,95 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
     private final int maxPages;
     private final boolean retryReplace;
     private final int maxLwtRetries;
-    private int retryReplaceCount =0;
-
-    private ResultSet rs;
-    private Cqld4CqlOp nextOp;
     private final RSProcessors processors;
-
     private final ThreadLocal<List<Row>> results = new ThreadLocal<>();
+    private int retryReplaceCount = 0;
+    private Cqld4CqlOp nextOp;
 
     public Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors) {
         this.session = session;
         this.maxPages = maxPages;
         this.retryReplace = retryReplace;
-        this.maxLwtRetries =maxLwtRetries;
+        this.maxLwtRetries = maxLwtRetries;
         this.processors = processors;
     }
 
-    protected Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, int retryRplaceCount, RSProcessors processors) {
+    protected Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries,
+                         int retryRplaceCount, RSProcessors processors) {
         this.session = session;
         this.maxPages = maxPages;
         this.retryReplace = retryReplace;
-        this.maxLwtRetries =maxLwtRetries;
-        this.retryReplaceCount=retryRplaceCount;
+        this.maxLwtRetries = maxLwtRetries;
+        this.retryReplaceCount = retryRplaceCount;
         this.processors = processors;
     }
 
     public final List<Row> apply(long cycle) {
 
-        Statement<?> stmt = getStmt();
-        rs = session.execute(stmt);
-        processors.start(cycle, rs);
-        int totalRows = 0;
-
-        if (!rs.wasApplied()) {
-            if (!retryReplace) {
-                throw new ChangeUnappliedCycleException(rs, getQueryString());
-            } else {
-                retryReplaceCount++;
-                if (retryReplaceCount >maxLwtRetries) {
-                    throw new ExceededRetryReplaceException(rs,getQueryString(), retryReplaceCount);
+        final Statement<?> stmt = getStmt();
+        final CompletionStage<AsyncResultSet> statementStage = session.executeAsync(stmt);
+        final List<Row> completeRowSet = new ArrayList<>();
+        statementStage.whenComplete(
+            (rs, ex) -> {
+                if (ex != null) {
+                    throw new RuntimeException("Failed to obtain statement result set.", ex);
                 }
-                Row one = rs.one();
-                processors.buffer(one);
-                totalRows++;
-                nextOp = this.rebindLwt(stmt, one);
-            }
-        }
+                processors.start(cycle, rs);
 
-        // Paginated Op
+                final AtomicInteger totalRows = new AtomicInteger();
+                final AtomicInteger pages = new AtomicInteger(1);
 
-        Iterator<Row> reader = rs.iterator();
-        int pages = 0;
-        // TODO/MVEL: An optimization to this would be to collect the results in a result set processor,
-        // but allow/require this processor to be added to an op _only_ in the event that it would
-        // be needed by a downstream consumer like the MVEL expected result evaluator
+                if (!rs.wasApplied()) {
+                    if (!retryReplace) {
+                        throw new ChangeUnappliedCycleException(rs, getQueryString());
+                    } else {
+                        retryReplaceCount++;
+                        if (retryReplaceCount > maxLwtRetries) {
+                            throw new ExceededRetryReplaceException(rs, getQueryString(), retryReplaceCount);
+                        }
+                        Row one = rs.one();
+                        processors.buffer(one);
+                        totalRows.getAndIncrement();
+                        nextOp = this.rebindLwt(stmt, one);
+                    }
+                }
+                completeRowSet.addAll(captureCurrentPage(rs));
 
-        var resultRows = new ArrayList<Row>();
-        while (true) {
-            int pageRows = rs.getAvailableWithoutFetching();
-            for (int i = 0; i < pageRows; i++) {
-                Row row = reader.next();
-                resultRows.add(row);
-                processors.buffer(row);
-            }
-            if (pages++ > maxPages) {
-                throw new UnexpectedPagingException(rs, getQueryString(), pages, maxPages, stmt.getPageSize());
-            }
-            if (rs.isFullyFetched()) {
-                results.set(resultRows);
-                break;
-            }
-            totalRows += pageRows;
-        }
+                while (rs.hasMorePages()) {
+
+                    if (pages.getAndIncrement() > maxPages) {
+                        throw new UnexpectedPagingException(rs, getQueryString(), pages.get(), maxPages,
+                            stmt.getPageSize());
+                    }
+
+                    final CompletionStage<AsyncResultSet> pagedStage = rs.fetchNextPage();
+                    pagedStage.whenComplete(
+                        (rsPaged, err) -> {
+                            if (err != null) {
+                                throw new RuntimeException("Failed to obtain paged result set", err);
+                            }
+                            completeRowSet.addAll(captureCurrentPage(rsPaged));
+                        });
+                }
+            });
+
+        results.set(completeRowSet);
         processors.flush();
+
         return results.get();
+    }
+
+
+    private List<Row> captureCurrentPage(AsyncResultSet rs) {
+        Iterable<Row> rows = rs.currentPage();
+        List<Row> resultRows = new ArrayList<>();
+        if (rows.iterator().hasNext()) {
+            for (Row row : rows) {
+                processors.buffer(row);
+                resultRows.add(row);
+            }
+        }
+        return resultRows;
     }
 
     @Override
@@ -133,12 +151,8 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
         return next;
     }
 
-    @Override
     public Map<String, ?> capture() {
-        if (rs == null) {
-            throw new UndefinedResultSetException(this);
-        }
-        return null;
+        throw new NotImplementedException("Not implemented for Cqld4CqlOp");
     }
 
     public abstract Statement<?> getStmt();

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.cqld4.processors;
 
-import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import io.nosqlbench.adapter.cqld4.ResultSetProcessor;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
@@ -32,7 +32,7 @@ public class CqlFieldCaptureProcessor implements ResultSetProcessor {
     }
 
     @Override
-    public void start(long cycle, ResultSet container) {
+    public void start(long cycle, AsyncResultSet container) {
 
     }
 

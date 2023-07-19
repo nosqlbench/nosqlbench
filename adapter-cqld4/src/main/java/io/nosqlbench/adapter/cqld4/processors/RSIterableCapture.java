@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.cqld4.processors;
 
-import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import io.nosqlbench.adapter.cqld4.ResultSetProcessor;
 
@@ -31,9 +31,10 @@ public class RSIterableCapture implements ResultSetProcessor {
     private ArrayList<Row> rows = new ArrayList<>();
 
     @Override
-    public void start(long cycle, ResultSet container) {
+    public void start(long cycle, AsyncResultSet container) {
         this.cycle = cycle;
-        rows = new ArrayList<Row>(container.getAvailableWithoutFetching());
+        // todo - check if size is available from container ...
+        rows = new ArrayList<Row>();
     }
 
     @Override

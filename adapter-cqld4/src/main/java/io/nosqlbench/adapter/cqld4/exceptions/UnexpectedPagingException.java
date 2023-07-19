@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.cqld4.exceptions;
 
-import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 
 /**
  * <p>This is not a core exception. It was added to the CQL activity type
@@ -35,14 +35,14 @@ import com.datastax.oss.driver.api.core.cql.ResultSet;
  */
 public class UnexpectedPagingException extends RuntimeException {
 
-    private final ResultSet resultSet;
+    private final AsyncResultSet resultSet;
     private final String queryString;
     private final int fetchSize;
     private final int fetchedPages;
     private final int maxpages;
 
     public UnexpectedPagingException(
-            ResultSet resultSet,
+            AsyncResultSet resultSet,
             String queryString,
             int fetchedPages,
             int maxpages,
@@ -54,7 +54,7 @@ public class UnexpectedPagingException extends RuntimeException {
         this.fetchSize = fetchSize;
     }
 
-    public ResultSet getResultSet() {
+    public AsyncResultSet getResultSet() {
         return resultSet;
     }
 
