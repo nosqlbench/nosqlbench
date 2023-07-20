@@ -246,8 +246,13 @@
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>1.69</version>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>1.75</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>32.1.1-jre</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -397,7 +402,7 @@
             <dependency>
                 <groupId>org.graalvm.sdk</groupId>
                 <artifactId>graal-sdk</artifactId>
-                <version>22.3.2</version>
+                <version>22.3.3</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
@@ -483,7 +488,6 @@
             <artifactId>junit-jupiter</artifactId>
             <version>5.9.2</version>
         </dependency>
-
     </dependencies>
 
     <build>
