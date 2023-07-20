@@ -24,6 +24,8 @@ import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.adapter.cqld4.Cqld4CqlReboundStatement;
 import io.nosqlbench.adapter.cqld4.LWTRebinder;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
+import io.nosqlbench.adapter.cqld4.exceptions.ChangeUnappliedCycleException;
+import io.nosqlbench.adapter.cqld4.exceptions.ExceededRetryReplaceException;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
@@ -76,35 +78,23 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
         this.retryReplaceCount = retryRplaceCount;
         this.processors = processors;
     }
-
-    private CompletionStage<List<Row>> collect(AsyncResultSet resultSet, List<Row> rowList, final long cycle) {
-
-        final List<Row> rows = rowList;
-        for (Row row : resultSet.currentPage()) {
-            rows.add(row);
-            processors.buffer(row);
-        }
-
-        if (resultSet.hasMorePages()) {
-            return resultSet.fetchNextPage().thenCompose(rs -> collect(rs, rows, cycle));
-        } else {
-            processors.start(cycle, resultSet);
-            return CompletableFuture.completedStage(rows);
-        }
-    }
-
+    
     public final List<Row> apply(long cycle) {
 
-        final Statement<?> stmt = getStmt();
-        final List<Row> completeRowSet = new ArrayList<>();
-        logger.debug("apply() invoked, statement obtained, executing async with page size: " + stmt.getPageSize() + " thread local rows: ");
+        Statement<?> statement = getStmt();
+        List<Row> completeRowSet = new ArrayList<>();
+        logger.debug("apply() invoked, statement obtained, executing async with page size: " + statement.getPageSize() + " thread local rows: ");
 
-        final CompletionStage<AsyncResultSet> statementStage = session.executeAsync(stmt);
-        final CompletionStage<List<Row>> collectedRowsFuture = statementStage.thenCompose
-            (rs -> collect(rs, completeRowSet, cycle));
+        CompletionStage<AsyncResultSet> statementStage = session.executeAsync(statement);
+        CompletionStage<List<Row>> collectedRowsFuture = statementStage.thenCompose
+            (rs -> {
+                if (!rs.wasApplied()) {
+                    handleRebindLWT(rs, statement);
+                }
+                return collect(rs, completeRowSet, cycle);
+            });
 
         collectedRowsFuture.whenComplete((rs, ex) -> {
-
             if (ex != null) {
                 throw new RuntimeException("Failed to obtain statement result set.", ex);
             }
@@ -115,6 +105,7 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
             results.set(completeRowSet);
             processors.flush();
         });
+
         return results.get();
     }
 
@@ -136,6 +127,36 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
     private Cqld4CqlOp rebindLwt(Statement<?> stmt, Row row) {
         BoundStatement rebound = LWTRebinder.rebindUnappliedStatement(stmt, row);
         return new Cqld4CqlReboundStatement(session, maxPages, retryReplace, maxLwtRetries, retryReplaceCount, rebound, processors);
+    }
+
+    private CompletionStage<List<Row>> collect(AsyncResultSet resultSet, List<Row> rowList, final long cycle) {
+
+        final List<Row> rows = rowList;
+        for (Row row : resultSet.currentPage()) {
+            rows.add(row);
+            processors.buffer(row);
+        }
+
+        if (resultSet.hasMorePages()) {
+            return resultSet.fetchNextPage().thenCompose(rs -> collect(rs, rows, cycle));
+        } else {
+            processors.start(cycle, resultSet);
+            return CompletableFuture.completedStage(rows);
+        }
+    }
+
+    private void handleRebindLWT(AsyncResultSet resultSet, Statement<?> statement) {
+        if (!retryReplace) {
+            throw new ChangeUnappliedCycleException(resultSet, getQueryString());
+        } else {
+            retryReplaceCount++;
+            if (retryReplaceCount > maxLwtRetries) {
+                throw new ExceededRetryReplaceException(resultSet, getQueryString(), retryReplaceCount);
+            }
+            Row one = resultSet.one();
+            processors.buffer(one);
+            nextOp = this.rebindLwt(statement, one);
+        }
     }
 
 }
