@@ -24,17 +24,16 @@ import com.datastax.oss.driver.api.core.cql.Statement;
 import io.nosqlbench.adapter.cqld4.Cqld4CqlReboundStatement;
 import io.nosqlbench.adapter.cqld4.LWTRebinder;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
-import io.nosqlbench.adapter.cqld4.exceptions.ChangeUnappliedCycleException;
-import io.nosqlbench.adapter.cqld4.exceptions.ExceededRetryReplaceException;
-import io.nosqlbench.adapter.cqld4.exceptions.UnexpectedPagingException;
 import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 // TODO: add statement filtering
@@ -48,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture, OpGenerator, OpResultSize {
+    private final static Logger logger = LogManager.getLogger(Cqld4CqlOp.class);
 
     private final CqlSession session;
     private final int maxPages;
@@ -57,6 +57,7 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
     private final ThreadLocal<List<Row>> results = new ThreadLocal<>();
     private int retryReplaceCount = 0;
     private Cqld4CqlOp nextOp;
+
 
     public Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors) {
         this.session = session;
@@ -76,72 +77,45 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
         this.processors = processors;
     }
 
+    private CompletionStage<List<Row>> collect(AsyncResultSet resultSet, List<Row> rowList, final long cycle) {
+
+        final List<Row> rows = rowList;
+        for (Row row : resultSet.currentPage()) {
+            rows.add(row);
+            processors.buffer(row);
+        }
+
+        if (resultSet.hasMorePages()) {
+            return resultSet.fetchNextPage().thenCompose(rs -> collect(rs, rows, cycle));
+        } else {
+            processors.start(cycle, resultSet);
+            return CompletableFuture.completedStage(rows);
+        }
+    }
+
     public final List<Row> apply(long cycle) {
 
         final Statement<?> stmt = getStmt();
-        final CompletionStage<AsyncResultSet> statementStage = session.executeAsync(stmt);
         final List<Row> completeRowSet = new ArrayList<>();
-        statementStage.whenComplete(
-            (rs, ex) -> {
-                if (ex != null) {
-                    throw new RuntimeException("Failed to obtain statement result set.", ex);
-                }
-                processors.start(cycle, rs);
+        logger.debug("apply() invoked, statement obtained, executing async with page size: " + stmt.getPageSize() + " thread local rows: ");
 
-                final AtomicInteger totalRows = new AtomicInteger();
-                final AtomicInteger pages = new AtomicInteger(1);
+        final CompletionStage<AsyncResultSet> statementStage = session.executeAsync(stmt);
+        final CompletionStage<List<Row>> collectedRowsFuture = statementStage.thenCompose
+            (rs -> collect(rs, completeRowSet, cycle));
 
-                if (!rs.wasApplied()) {
-                    if (!retryReplace) {
-                        throw new ChangeUnappliedCycleException(rs, getQueryString());
-                    } else {
-                        retryReplaceCount++;
-                        if (retryReplaceCount > maxLwtRetries) {
-                            throw new ExceededRetryReplaceException(rs, getQueryString(), retryReplaceCount);
-                        }
-                        Row one = rs.one();
-                        processors.buffer(one);
-                        totalRows.getAndIncrement();
-                        nextOp = this.rebindLwt(stmt, one);
-                    }
-                }
-                completeRowSet.addAll(captureCurrentPage(rs));
+        collectedRowsFuture.whenComplete((rs, ex) -> {
 
-                while (rs.hasMorePages()) {
-
-                    if (pages.getAndIncrement() > maxPages) {
-                        throw new UnexpectedPagingException(rs, getQueryString(), pages.get(), maxPages,
-                            stmt.getPageSize());
-                    }
-
-                    final CompletionStage<AsyncResultSet> pagedStage = rs.fetchNextPage();
-                    pagedStage.whenComplete(
-                        (rsPaged, err) -> {
-                            if (err != null) {
-                                throw new RuntimeException("Failed to obtain paged result set", err);
-                            }
-                            completeRowSet.addAll(captureCurrentPage(rsPaged));
-                        });
-                }
-            });
-
-        results.set(completeRowSet);
-        processors.flush();
-
-        return results.get();
-    }
-
-
-    private List<Row> captureCurrentPage(AsyncResultSet rs) {
-        Iterable<Row> rows = rs.currentPage();
-        List<Row> resultRows = new ArrayList<>();
-        if (rows.iterator().hasNext()) {
-            for (Row row : rows) {
-                processors.buffer(row);
-                resultRows.add(row);
+            if (ex != null) {
+                throw new RuntimeException("Failed to obtain statement result set.", ex);
             }
-        }
-        return resultRows;
+
+            logger.info("\n\n--- Rows collected for cycle: " + cycle + " count: "
+                + rs.size() + " dt: " + System.nanoTime());
+
+            results.set(completeRowSet);
+            processors.flush();
+        });
+        return results.get();
     }
 
     @Override

@@ -33,8 +33,6 @@ public class RSIterableCapture implements ResultSetProcessor {
     @Override
     public void start(long cycle, AsyncResultSet container) {
         this.cycle = cycle;
-        // todo - check if size is available from container ...
-        rows = new ArrayList<Row>();
     }
 
     @Override

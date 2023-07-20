@@ -1,5 +1,5 @@
 description: |
-  A cql-starter workload. 
+  A cql-starter workload.
   * Cassandra: 3.x, 4.x.
   * DataStax Enterprise: 6.8.x.
   * DataStax Astra.
@@ -28,6 +28,16 @@ bindings:
   rampup_message: ToString();
   time: ElapsedNanoTime(); Mul(1000); ToJavaInstant();
   ts: ElapsedNanoTime(); Mul(1000);
+d: |
+  create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,test) (
+    id text,
+    date text,
+    timestamp timestamp,
+    value text,
+    PRIMARY KEY((id), date, timestamp)
+  ) WITH CLUSTERING ORDER BY (date DESC, timestamp DESC)
+  AND compaction = { 'class':'LeveledCompactionStrategy' }
+  AND compression = { 'class': 'LZ4Compressor', 'chunk_length_in_kb': 4 };
 
 
 blocks:
@@ -41,9 +51,9 @@ blocks:
         AND durable_writes = true;
       create-table: |
         create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
-        machine_id UUID,  
-        message text,    
-        time timestamp,          
+        machine_id UUID,
+        message text,
+        time timestamp,
         PRIMARY KEY ((machine_id), time)
         ) WITH CLUSTERING ORDER BY (time DESC);
 
@@ -53,9 +63,9 @@ blocks:
     ops:
       create-table-astra: |
         create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
-        machine_id UUID, 
+        machine_id UUID,
         message text,
-        time timestamp, 
+        time timestamp,
         PRIMARY KEY ((machine_id), time)
         ) WITH CLUSTERING ORDER BY (time DESC);
 
@@ -65,7 +75,7 @@ blocks:
       idempotent: true
     ops:
       insert-rampup: |
-        insert into  <<keyspace:starter>>.<<table:cqlstarter>> (machine_id, message, time) 
+        insert into  <<keyspace:starter>>.<<table:cqlstarter>> (machine_id, message, time)
         values ({machine_id}, {rampup_message}, {time}) using timestamp {ts};
 
   rampdown:
