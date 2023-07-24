@@ -101,11 +101,6 @@
             <artifactId>bcprov-jdk18on</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>
