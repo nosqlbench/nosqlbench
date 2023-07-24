@@ -78,12 +78,12 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
         this.retryReplaceCount = retryRplaceCount;
         this.processors = processors;
     }
-    
+
     public final List<Row> apply(long cycle) {
 
         Statement<?> statement = getStmt();
         List<Row> completeRowSet = new ArrayList<>();
-        logger.debug("apply() invoked, statement obtained, executing async with page size: " + statement.getPageSize() + " thread local rows: ");
+        logger.trace(() -> "apply() invoked, statement obtained, executing async with page size: " + statement.getPageSize() + " thread local rows: ");
 
         CompletionStage<AsyncResultSet> statementStage = session.executeAsync(statement);
         CompletionStage<List<Row>> collectedRowsFuture = statementStage.thenCompose
@@ -99,7 +99,7 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
                 throw new RuntimeException("Failed to obtain statement result set.", ex);
             }
 
-            logger.info("\n\n--- Rows collected for cycle: " + cycle + " count: "
+            logger.trace(() -> "\n\n--- Rows collected for cycle: " + cycle + " count: "
                 + rs.size() + " dt: " + System.nanoTime());
 
             results.set(completeRowSet);
