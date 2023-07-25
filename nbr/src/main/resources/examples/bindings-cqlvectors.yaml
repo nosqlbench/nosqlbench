@@ -1,0 +1,7 @@
+scenarios:
+ default:
+  vectors: run driver=stdout cycles=10 threads=1 format=readout
+
+bindings:
+    hfv768raw: HashedFloatVectors(768); Stringify();
+    hfv768cql: HashedFloatVectors(768); ToCqlVector();
