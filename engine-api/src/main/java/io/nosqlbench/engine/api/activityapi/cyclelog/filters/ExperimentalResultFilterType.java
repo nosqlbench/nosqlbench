@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.filters;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.util.SimpleConfig;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.api.spi.SimpleServiceLoader;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.tristate;
 
+import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.MutableCycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
+import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultValueFilterType;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.CoreResultValueFilter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultFilterDispenser;
-import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultValueFilterType;
-import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.MutableCycleResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Predicate;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package io.nosqlbench.engine.api.activityapi.core.ops.fluent;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.*;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;

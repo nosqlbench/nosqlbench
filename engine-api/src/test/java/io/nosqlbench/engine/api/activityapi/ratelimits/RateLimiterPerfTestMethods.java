@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
+import io.nosqlbench.engine.api.util.Colors;
 import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.api.testutils.Bounds;
@@ -29,9 +30,6 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static io.nosqlbench.engine.api.util.Colors.ANSI_Blue;
-import static io.nosqlbench.engine.api.util.Colors.ANSI_Reset;
 
 public class RateLimiterPerfTestMethods {
 
@@ -142,12 +140,12 @@ public class RateLimiterPerfTestMethods {
 
             System.out.println(rl);
 
-            System.out.println(ANSI_Blue +
+            System.out.println(Colors.ANSI_Blue +
                     String.format(
                             "spec: %s\n count: %9d, duration %.5fS, acquires/s %.3f, nanos/op: %f\n delay: %d (%.5fS)",
                             rl.getRateSpec(),
                             count, duration, acqops, 1_000_000_000.0d / acqops, divDelay, divDelay / 1_000_000_000.0d) +
-                    ANSI_Reset);
+                    Colors.ANSI_Reset);
 
         }
 

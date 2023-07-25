@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package io.nosqlbench.engine.api.activityimpl.marker;
 
-import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
+import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.output.Output;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class CoreOutputTest {
         ct4.onCycleResult(1,1);
         ct4.onCycleResult(2,2);
         ct4.onCycleResult(3,3);
-        assertThat(r.segments).hasSize(1);
+        Assertions.assertThat(r.segments).hasSize(1);
 
         long[] cycles = StreamSupport.stream(r.segments.get(0).spliterator(), false)
                 .mapToLong(CycleResult::getCycle).toArray();

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
@@ -23,8 +24,8 @@ import io.nosqlbench.api.config.standard.NBReconfigurable;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
-import io.nosqlbench.engine.api.activityconfig.OpsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
+import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
+import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +38,7 @@ import java.util.Optional;
 public class StandardActivityType<A extends StandardActivity<?,?>> extends SimpleActivity implements ActivityType<A> {
 
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
-    private final Map<String,DriverAdapter> adapters = new HashMap<>();
+    private final Map<String, DriverAdapter> adapters = new HashMap<>();
 
     public StandardActivityType(final DriverAdapter<?,?> adapter, final ActivityDef activityDef, final NBLabeledElement parentLabels) {
         super(activityDef

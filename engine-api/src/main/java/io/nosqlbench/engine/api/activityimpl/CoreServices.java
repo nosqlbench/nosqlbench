@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
+import io.nosqlbench.engine.api.util.SimpleConfig;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultFilterDispenser;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultValueFilterType;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
-import io.nosqlbench.engine.api.util.SimpleConfig;
 
 import java.util.Optional;
 import java.util.function.Predicate;

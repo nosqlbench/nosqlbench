@@ -18,32 +18,33 @@ package io.nosqlbench.engine.api.activityimpl.uniform.actions;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.errors.ExpectedResultVerificationError;
+import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
+import io.nosqlbench.adapters.api.evalcontext.CycleFunction;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.errors.ResultVerificationError;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityimpl.OpDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mvel2.MVEL;
 
-import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 /**
  * This is the generified version of an Action. All driver adapters us this, as opposed
  * to previous NB versions where it was implemented for each driver.
- *
+ * <p>
  * This allows the API to be consolidated so that the internal machinery of NB
  * works in a very consistent and uniform way for all users and drivers.
  *
- * @param <A> The type of activity
- * @param <R> The type of operation
+ * @param <A>
+ *     The type of activity
+ * @param <R>
+ *     The type of operation
  */
 public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> implements SyncAction, ActivityDefObserver {
     private final static Logger logger = LogManager.getLogger("ACTION");

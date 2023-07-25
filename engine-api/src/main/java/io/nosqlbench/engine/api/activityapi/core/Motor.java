@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.api.activityapi.core;
 
-import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityimpl.MotorState;
+import io.nosqlbench.engine.api.activityapi.input.Input;
 
 /**
  * The core threading harness within an activity.

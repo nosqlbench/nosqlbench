@@ -17,18 +17,18 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
-import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ParameterMap;
+import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 
 import java.io.InputStream;
 import java.io.PrintWriter;

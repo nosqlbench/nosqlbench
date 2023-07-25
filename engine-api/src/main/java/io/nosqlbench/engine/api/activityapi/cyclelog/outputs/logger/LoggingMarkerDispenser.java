@@ -16,7 +16,6 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.outputs.logger;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.core.Activity;

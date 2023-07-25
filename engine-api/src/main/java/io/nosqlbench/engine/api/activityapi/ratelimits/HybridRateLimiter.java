@@ -18,12 +18,7 @@ package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.engine.api.activityapi.core.Startable;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters.BurstRateGauge;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters.RateGauge;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters.WaitTimeGauge;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

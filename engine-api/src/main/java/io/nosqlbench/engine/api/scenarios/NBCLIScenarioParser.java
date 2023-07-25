@@ -16,11 +16,11 @@
 
 package io.nosqlbench.engine.api.scenarios;
 
-import io.nosqlbench.engine.api.activityconfig.OpsLoader;
-import io.nosqlbench.engine.api.activityconfig.rawyaml.RawOpsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
-import io.nosqlbench.engine.api.activityconfig.yaml.Scenarios;
-import io.nosqlbench.engine.api.templating.StrInterpolator;
+import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
+import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
+import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
+import io.nosqlbench.adapters.api.activityconfig.yaml.Scenarios;
+import io.nosqlbench.adapters.api.templating.StrInterpolator;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.content.NBPathsAPI;
