@@ -25,11 +25,13 @@ import io.nosqlbench.api.errors.ExpectedResultVerificationError;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.CountErrorHandler;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.CounterErrorHandler;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.util.NBMock;
 import io.nosqlbench.util.NBMock.LogAppender;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -188,15 +190,15 @@ class NBErrorHandlerTest {
         var retries = errorMetrics.getExceptionExpectedResultVerificationMetrics().getVerificationRetries();
         var errors = errorMetrics.getExceptionExpectedResultVerificationMetrics().getVerificationErrors();
 
-        assertThat(retries.getCount()).isEqualTo(0);
-        assertThat(errors.getCount()).isEqualTo(0);
+        Assertions.assertThat(retries.getCount()).isEqualTo(0);
+        Assertions.assertThat(errors.getCount()).isEqualTo(0);
 
         // when
         eh.handleError(error, 1, 2);
 
         // then
-        assertThat(retries.getCount()).isEqualTo(retriesCount);
-        assertThat(errors.getCount()).isEqualTo(errorsCount);
+        Assertions.assertThat(retries.getCount()).isEqualTo(retriesCount);
+        Assertions.assertThat(errors.getCount()).isEqualTo(errorsCount);
 
         logger.getContext().stop(); // force any async appenders to flush
         logger.getContext().start(); // resume processing
@@ -211,7 +213,7 @@ class NBErrorHandlerTest {
         return Stream.of(
             Arguments.of(
                 "retries left",
-                new ExpectedResultVerificationError(5, "expected"),
+                new ResultMismatchError("error-message", 5, "<expression>"),
                 "Cycle: 1 Verification of result did not pass. 5 retries left.",
                 1,
                 0,
@@ -219,8 +221,8 @@ class NBErrorHandlerTest {
             ),
             Arguments.of(
                 "no retries left",
-                new ExpectedResultVerificationError(0, "expected"),
-                "Cycle: 1 Verification of result did not pass following expression: expected",
+                new ResultMismatchError("error-message", 0, "<expression>"),
+                "Cycle: 1 Verification of result did not pass following expression: <expression>",
                 0,
                 1,
                 logger

@@ -294,10 +294,10 @@ public class InlineTokenPool {
 
         if (debugthis) {
             System.out.print(this);
-            System.out.print(ANSI_BrightBlue + " adding=" + allocatedToActivePool);
+            System.out.print(Colors.ANSI_BrightBlue + " adding=" + allocatedToActivePool);
             if (0 < allocatedToOverflowPool)
-                System.out.print(ANSI_Red + " OVERFLOW:" + allocatedToOverflowPool + ANSI_Reset);
-            if (0 < burstFill) System.out.print(ANSI_BrightGreen + " BACKFILL:" + burstFill + ANSI_Reset);
+                System.out.print(Colors.ANSI_Red + " OVERFLOW:" + allocatedToOverflowPool + Colors.ANSI_Reset);
+            if (0 < burstFill) System.out.print(Colors.ANSI_BrightGreen + " BACKFILL:" + burstFill + Colors.ANSI_Reset);
             System.out.println();
         }
 

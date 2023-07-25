@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl.marker;
 
+import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.CycleResultSegmentsReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 

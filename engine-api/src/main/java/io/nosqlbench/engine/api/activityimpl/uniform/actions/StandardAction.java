@@ -107,12 +107,16 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                         throw new RuntimeException("The op implementation did not implement any active logic. Implement " +
                             "one of [RunnableOp, CycleOp, or ChainingOp]");
                     }
-                    var expectedResultExpression = dispenser.getExpectedResultExpression();
-                    if (shouldVerifyExpectedResultFor(op, expectedResultExpression)) {
-                        var verified = MVEL.executeExpression(expectedResultExpression, result, boolean.class);
-                        if (!verified) {
-                            throw new ExpectedResultVerificationError(maxTries - tries, expectedResultExpression);
+
+                    CycleFunction<Boolean> verifier = dispenser.getVerifier();
+                    try {
+                        verifier.setVariable("result", result);
+                        Boolean isGood = verifier.apply(cycle);
+                        if (!isGood) {
+                            throw new ResultVerificationError("result verification failed", maxTries - tries, verifier.getExpressionDetails());
                         }
+                    } catch (Exception e) {
+                        throw new ResultVerificationError(e, maxTries - tries, verifier.getExpressionDetails());
                     }
                 } catch (Exception e) {
                     error = e;
@@ -150,7 +154,4 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     public void onActivityDefUpdate(ActivityDef activityDef) {
     }
 
-    private boolean shouldVerifyExpectedResultFor(Op op, Serializable expectedResultExpression) {
-        return !(op instanceof RunnableOp) && expectedResultExpression != null;
-    }
 }
