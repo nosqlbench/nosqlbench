@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.api.annotations;
+package io.nosqlbench.virtdata.library.basics.shared.vectors.primitive;
 
-public enum Category {
-    datetime,
-    state,
-    distributions,
-    diagnostics,
-    conversion,
-    collections,
-    premade,
-    nulls,
-    functional,
-    statistics,
-    general,
-    objects,
-    periodic,
-    experimental,
-    combinitoric,
-    vectors,
-    HOF
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class HashedDoubleVectorsTest {
+
+    @Test
+    public void testHashedDoubleVectors() {
+        HashedDoubleVectors hdv1 = new HashedDoubleVectors(10000);
+        double[] doubles = hdv1.apply(1L);
+        System.out.println(Arrays.toString(doubles));
+    }
+
 }

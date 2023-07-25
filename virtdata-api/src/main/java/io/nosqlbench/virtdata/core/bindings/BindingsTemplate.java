@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,11 +89,12 @@ public class BindingsTemplate {
      *
      * @param bindPairs A map of named binding specifiers
      */
-    public void addFieldBindings(Map<String, String> bindPairs) {
+    public BindingsTemplate addFieldBindings(Map<String, String> bindPairs) {
         for (Map.Entry<String, String> e : bindPairs.entrySet()) {
             this.bindPointNames.add(e.getKey());
             this.specifiers.add(e.getValue());
         }
+        return this;
     }
 
     public String getDiagnostics() {

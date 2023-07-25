@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.basics.shared.util.CharsetMapping;
+import io.nosqlbench.virtdata.library.basics.shared.util.Combiner;
 
 import java.nio.CharBuffer;
 import java.util.function.LongFunction;
@@ -52,8 +52,8 @@ public class Combinations implements LongFunction<String> {
     @Example({"Combinations('0-9A-F;0-9A-F;0-9A-F;0-9A-F;')","two bytes of hexadecimal"})
     @Example({"Combinations('A-9')","upper case alphanumeric"})
     public Combinations(String spec) {
-        this.charsets = CharsetMapping.parseSpec(spec);
-        this.modulo = computeRadixFactors(this.charsets);
+        this.charsets = Combiner.parseSpec(spec);
+        this.modulo = Combiner.computeRadixFactors(this.charsets);
     }
 
     @Override
@@ -67,17 +67,6 @@ public class Combinations implements LongFunction<String> {
             cb.put(cs, c);
         }
         return cb.toString();
-    }
-
-    private long[] computeRadixFactors(char[][] charsets) {
-        long modulo = 1L;
-        long[] m = new long[charsets.length];
-        for (int i = charsets.length-1; i >=0; i--) {
-            m[i] = modulo;
-            modulo = Math.multiplyExact(modulo, charsets[i].length);
-        }
-//        m[m.length-1]=modulo;
-        return m;
     }
 
 }

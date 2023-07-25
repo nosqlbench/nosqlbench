@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.api.annotations;
+package io.nosqlbench.virtdata.library.basics.shared.vectors.primitive;
 
-public enum Category {
-    datetime,
-    state,
-    distributions,
-    diagnostics,
-    conversion,
-    collections,
-    premade,
-    nulls,
-    functional,
-    statistics,
-    general,
-    objects,
-    periodic,
-    experimental,
-    combinitoric,
-    vectors,
-    HOF
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class DoubleVectorTest {
+
+    @Test
+    public void testCombinedDoubleVector() {
+        DoubleVectors doubleVector = new DoubleVectors("0-9*12");
+        assertThat(doubleVector.apply(1L)).isEqualTo(new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1});
+    }
+
 }

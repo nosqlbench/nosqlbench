@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.Hash;
-import io.nosqlbench.virtdata.library.basics.shared.util.CharsetMapping;
+import io.nosqlbench.virtdata.library.basics.shared.util.Combiner;
 
 import java.nio.CharBuffer;
 import java.util.function.LongFunction;
@@ -143,7 +143,7 @@ public class CharBufImage implements LongFunction<CharBuffer> {
     }
 
     private CharBuffer genBuf(String chars, int size, long seed) {
-        char[] charset = CharsetMapping.rangeFor(chars);
+        char[] charset = Combiner.rangeFor(chars);
 
         CharBuffer newimage = CharBuffer.allocate(size);
 

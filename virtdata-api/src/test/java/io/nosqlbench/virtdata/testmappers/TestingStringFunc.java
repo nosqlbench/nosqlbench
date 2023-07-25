@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.api.annotations;
+package io.nosqlbench.virtdata.testmappers;
 
-public enum Category {
-    datetime,
-    state,
-    distributions,
-    diagnostics,
-    conversion,
-    collections,
-    premade,
-    nulls,
-    functional,
-    statistics,
-    general,
-    objects,
-    periodic,
-    experimental,
-    combinitoric,
-    vectors,
-    HOF
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+
+import java.util.function.LongFunction;
+
+@ThreadSafeMapper
+public class TestingStringFunc implements LongFunction<String> {
+
+    private final String stringValue;
+
+    public TestingStringFunc(String stringValue) {
+        this.stringValue = stringValue;
+    }
+
+    @Override
+    public String apply(long value) {
+        return stringValue;
+    }
 }

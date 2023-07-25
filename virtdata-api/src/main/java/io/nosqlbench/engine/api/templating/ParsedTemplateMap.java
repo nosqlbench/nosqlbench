@@ -84,8 +84,26 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      * when rendering the full map with dynamic values.
      */
     private final LinkedHashMap<String, Object> protomap = new LinkedHashMap<>();
+
+    /**
+     * Any auxiliary source of values to be applied beyond what is specified directly in the op fields.
+     * This includes, for example, the activity parameters which are allowed by the config model on
+     * an adapter. This means that you can specify defaults for an op field outside of the workload/op
+     * templates simply by providing them on the command line or activity parameters otherwise.
+     * This is exactly how the required op field `driver` works.
+     */
     private final List<Map<String, Object>> cfgsources;
-    private Map<String, Object> specmap;
+
+    /**
+     * This remembers the original template object so that diagnostic and debugging views
+     * may see the original specifiers, whether they are literals of any type, or a string
+     * value which is recognized as being or containing some dynamic span, i.e. bind points.
+     */
+    private Map<String, Object> originalTemplateObject;
+
+    /**
+     * The bindings definitions from the raw op template data structure.
+     */
     private Map<String, String> bindings;
     private final String name;
 
@@ -100,7 +118,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     // fields. This seems like the saner and less confusing approach, so implementing
     // op field references should be left until it is requested if at all
     private void applyTemplateFields(Map<String, Object> map, Map<String, String> bindings) {
-        this.specmap = map;
+        this.originalTemplateObject = map;
         this.bindings = bindings;
         map.forEach((k, v) -> {
             if (v instanceof CharSequence charvalue) {
@@ -701,9 +719,84 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return false;
     }
 
+    public Optional<ParsedTemplateString> takeAsOptionalStringTemplate(String field) {
+        Optional<ParsedTemplateString> asStringTemplate = this.getAsStringTemplate(field);
+        if (asStringTemplate.isPresent()) {
+            originalTemplateObject.remove(field);
+            return asStringTemplate;
+        }
+        return Optional.empty();
+    }
+
+    public <V> Optional<V> takeAsOptionalRawSpecifier(String field) {
+        if (dynamics.containsKey(name)) {
+            Object value = statics.remove(name);
+            protomap.remove(name);
+            return (Optional<V>) Optional.of(value);
+        }
+        if (statics.containsKey(name)) {
+            Object value = statics.remove(name);
+            protomap.remove(name);
+            return (Optional<V>) Optional.of(value);
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Take the value of the specified field from the dynamic or static layers, or reference it
+     * from the config layer without removal. Then, flatten any string, list, or map structures
+     * into a map of strings with names injected as needed. Then, convert the values to string
+     * templates and return that.
+     * @param fieldname the field to take the templates from
+     * @return A map of templates, or an empty map if the field is not defined or is empty.
+     */
+    public Map<String,ParsedTemplateString> takeAsNamedTemplates(String fieldname) {
+        Object entry = originalTemplateObject.get(fieldname);
+        if (entry !=null) {
+            dynamics.remove(fieldname);
+            statics.remove(fieldname);
+            protomap.remove(fieldname);
+        }
+
+        if (entry==null) {
+            for (Map<String, Object> cfgsource : cfgsources) {
+                if (cfgsource.containsKey(fieldname)) {
+                    entry = cfgsource.get(fieldname);
+                    break;
+                }
+            }
+        }
+
+        if (entry==null) {
+            return Map.of();
+        }
+
+        Map<String,Object> elements = new LinkedHashMap<>();
+        if (entry instanceof CharSequence chars) {
+            elements.put(this.getName()+"-verifier-0",chars.toString());
+        } else if (entry instanceof List list) {
+            for (int i = 0; i < list.size(); i++) {
+                elements.put(this.getName()+"-verifier-"+i,list.get(0));
+            }
+        } else if (entry instanceof Map map) {
+            map.forEach((k,v) -> {
+                elements.put(this.getName()+"-verifier-"+k,v);
+            });
+        }
+        Map<String,ParsedTemplateString> parsedStringTemplates
+            = new LinkedHashMap<>();
+        elements.forEach((k,v) -> {
+            if (v instanceof CharSequence chars) {
+                parsedStringTemplates.put(k,new ParsedTemplateString(chars.toString(), this.bindings));
+            }
+        });
+        return parsedStringTemplates;
+    }
+
+
     public Optional<ParsedTemplateString> getAsStringTemplate(String fieldname) {
-        if (specmap.containsKey(fieldname)) {
-            Object fval = specmap.get(fieldname);
+        if (originalTemplateObject.containsKey(fieldname)) {
+            Object fval = originalTemplateObject.get(fieldname);
             if (fval instanceof CharSequence) {
                 return Optional.of(new ParsedTemplateString(fval.toString(), this.bindings));
             } else {
@@ -993,11 +1086,12 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 .append(k)
                 .append("->")
                 .append(
-                    v ==null? specmap.get(k) : v.toString()
+                    v ==null? originalTemplateObject.get(k) : v.toString()
                 ).append("\n");
 
         }
         return sb.toString();
     }
+
 
 }

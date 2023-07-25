@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.api.annotations;
+package io.nosqlbench.virtdata.library.basics.shared.vectors.primitive;
 
-public enum Category {
-    datetime,
-    state,
-    distributions,
-    diagnostics,
-    conversion,
-    collections,
-    premade,
-    nulls,
-    functional,
-    statistics,
-    general,
-    objects,
-    periodic,
-    experimental,
-    combinitoric,
-    vectors,
-    HOF
+public class UnitSteps extends DoubleSequence {
+    public UnitSteps(long cardinality) {
+        super(cardinality);
+    }
+
+    @Override
+    public double applyAsDouble(long value) {
+        return ((double)value%cardinality) / (double)cardinality;
+    }
 }
