@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.rest.services.openapi;
+package io.nosqlbench.virtdata.library.basics.tests.long_long;
 
+import io.nosqlbench.virtdata.library.basics.shared.unary_int.SignalPID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
-public class OpenApiLoaderTest {
-    private final static Logger logger = LogManager.getLogger(OpenApiLoaderTest.class);
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class SignalPIDTest {
+    private final static Logger logger = LogManager.getLogger(SignalPIDTest.class);
+
     @Test
-    public void testYamlGenerator() {
-        String openidpath = "stargate.yaml";
-        String filterJson = "{\n" +
-            "'POST /api/rest/v1/auth' : {}\n" +
-            "}\n";
-
-        String result = OpenApiLoader.generateWorkloadFromFilepath(openidpath, filterJson);
-        logger.debug(result);
-
+    public void testSignalPIDIdentity() {
+        final Long currentProcessId = ProcessHandle.current().pid();
+        assertThat(new SignalPID().apply(1L)).isEqualTo(currentProcessId);
+        assertThat(new SignalPID().apply(2L)).isEqualTo(currentProcessId);
     }
 
 }

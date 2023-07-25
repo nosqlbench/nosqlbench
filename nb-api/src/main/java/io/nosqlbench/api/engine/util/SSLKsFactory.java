@@ -22,9 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
@@ -45,10 +43,30 @@ public class SSLKsFactory implements NBMapConfigurable {
 
     private static final SSLKsFactory instance = new SSLKsFactory();
 
-    private static final Pattern CERT_PATTERN = Pattern.compile("-+BEGIN\\s+.*CERTIFICATE[^-]*-+(?:\\s|\\r|\\n){1,10}([a-z0-9+/=\\r\\n]+)-+END\\s+.*CERTIFICATE[^-]*-+", Pattern.CASE_INSENSITIVE);
-    private static final Pattern KEY_PATTERN = Pattern.compile("-+BEGIN\\s+.*PRIVATE\\s+KEY[^-]*-+(?:\\s|\\r|\\n){1,10}([a-z0-9+/=\\r\\n]+)-+END\\s+.*PRIVATE\\s+KEY[^-]*-+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern CERT_PATTERN = Pattern.compile("-+BEGIN\\s+.*CERTIFICATE[^-]*-+(?:\\s|\\r|\\n)" +
+            "{1,10}([a-z0-9+/=\\r\\n]+)-+END\\s+.*CERTIFICATE[^-]*-+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern KEY_PATTERN = Pattern.compile("-+BEGIN\\s+.*PRIVATE\\s+KEY[^-]*-+(?:\\s|\\r|\\n)" +
+            "{1,10}([a-z0-9+/=\\r\\n]+)-+END\\s+.*PRIVATE\\s+KEY[^-]*-+", Pattern.CASE_INSENSITIVE);
+
     public static final String SSL = "ssl";
     public static final String DEFAULT_TLSVERSION = "TLSv1.2";
+
+    private static final TrustManager[] trustAllCerts = new TrustManager[]{
+            new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                }
+
+                @Override
+                public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                }
+
+                @Override
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return new java.security.cert.X509Certificate[]{};
+                }
+            }
+    };
 
     /**
      * Consider: https://gist.github.com/artem-smotrakov/bd14e4bde4d7238f7e5ab12c697a86a3
@@ -70,6 +88,7 @@ public class SSLKsFactory implements NBMapConfigurable {
 
     public SocketFactory createSocketFactory(NBConfiguration cfg) {
         SSLContext context = getContext(cfg);
+
         if (context == null) {
             throw new IllegalArgumentException("SSL is not enabled.");
         }
@@ -81,18 +100,26 @@ public class SSLKsFactory implements NBMapConfigurable {
         if (sslParam.isPresent()) {
             String tlsVersion = cfg.getOptional("tlsversion").orElse(DEFAULT_TLSVERSION);
 
-            KeyStore keyStore;
+            KeyStore keyStore = null;
             char[] keyPassword = null;
-            KeyStore trustStore;
+            KeyStore trustStore = null;
+
+            boolean activeSSLValidation = true;
+            if (cfg.getOptional("sslValidation").isPresent() && cfg.getOptional("sslValidation")
+                    .get().equals("false")) {
+                logger.warn("sslValidation=false, skipping SSL validation.  " +
+                        "THIS OPTION SHOULD ONLY BE TESTING AND NON-PROD ENVIRONMENTS");
+                activeSSLValidation = false;
+            }
 
             if (sslParam.get().equals("jdk")) {
 
                 final char[] keyStorePassword = cfg.getOptional("kspass")
-                    .map(String::toCharArray)
-                    .orElse(null);
+                        .map(String::toCharArray)
+                        .orElse(null);
                 keyPassword = cfg.getOptional("keyPassword", "keypassword")
-                    .map(String::toCharArray)
-                    .orElse(keyStorePassword);
+                        .map(String::toCharArray)
+                        .orElse(keyStorePassword);
 
                 keyStore = cfg.getOptional("keystore").map(ksPath -> {
                     try {
@@ -105,9 +132,9 @@ public class SSLKsFactory implements NBMapConfigurable {
                 trustStore = cfg.getOptional("truststore").map(tsPath -> {
                     try {
                         return KeyStore.getInstance(new File(tsPath),
-                            cfg.getOptional("tspass")
-                                .map(String::toCharArray)
-                                .orElse(null));
+                                cfg.getOptional("tspass")
+                                        .map(String::toCharArray)
+                                        .orElse(null));
                     } catch (Exception e) {
                         throw new RuntimeException("Unable to load the truststore: " + e, e);
                     }
@@ -115,8 +142,8 @@ public class SSLKsFactory implements NBMapConfigurable {
 
             } else if (sslParam.get().equals("openssl")) {
                 try {
-                    CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
+                    CertificateFactory cf = CertificateFactory.getInstance("X.509");
                     keyStore = KeyStore.getInstance("JKS");
                     keyStore.load(null, null);
 
@@ -125,9 +152,8 @@ public class SSLKsFactory implements NBMapConfigurable {
                             return cf.generateCertificate(is);
                         } catch (Exception e) {
                             throw new RuntimeException(
-                                String.format("Unable to load cert from %s: " + e, certFilePath),
-                                e
-                            );
+                                    String.format("Unable to load cert from %s: due to:%s ", certFilePath,
+                                            e.getMessage()), e);
                         }
                     }).orElse(null);
 
@@ -135,37 +161,33 @@ public class SSLKsFactory implements NBMapConfigurable {
                         keyStore.setCertificateEntry("certFile", cert);
 
                     File keyFile = cfg.getOptional("keyfilepath").map(File::new)
-                        .orElse(null);
+                            .orElse(null);
 
                     if (keyFile != null) {
                         try {
                             keyPassword = cfg.getOptional("keyPassword", "keypassword")
-                                .map(String::toCharArray)
-                                .orElse("temp_key_password".toCharArray());
+                                    .map(String::toCharArray)
+                                    .orElse("temp_key_password".toCharArray());
 
                             KeyFactory kf = KeyFactory.getInstance("RSA");
                             PrivateKey key = kf.generatePrivate(new PKCS8EncodedKeySpec(loadKeyFromPem(keyFile)));
                             keyStore.setKeyEntry("key", key, keyPassword,
-                                cert != null ? new Certificate[]{cert} : null);
+                                    cert != null ? new Certificate[]{cert} : null);
                         } catch (Exception e) {
-                            throw new RuntimeException(String.format("Unable to load key from %s: " + e,
-                                keyFile),
-                                e);
+                            throw new RuntimeException(String.format("Unable to load key from: %s due to: %s ",
+                                    keyFile, e.getMessage()), e);
                         }
                     }
 
                     trustStore = cfg.getOptional("caCertFilePath", "cacertfilepath").map(caCertFilePath -> {
-                        try (InputStream is = new FileInputStream(new File(caCertFilePath))) {
+                        try (InputStream is = new FileInputStream(caCertFilePath)) {
                             KeyStore ts = KeyStore.getInstance("JKS");
                             ts.load(null, null);
-
-                            Certificate caCert = cf.generateCertificate(is);
-                            ts.setCertificateEntry("caCertFile", caCert);
+                            ts.setCertificateEntry("caCertFile", cf.generateCertificate(is));
                             return ts;
                         } catch (Exception e) {
-                            throw new RuntimeException(String.format("Unable to load caCert from %s: " + e,
-                                caCertFilePath),
-                                e);
+                            throw new RuntimeException(String.format("Unable to load caCert from: %s due to: %s",
+                                    caCertFilePath, e.getMessage()), e);
                         }
                     }).orElse(null);
 
@@ -183,20 +205,26 @@ public class SSLKsFactory implements NBMapConfigurable {
                 kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
                 kmf.init(keyStore, keyPassword);
             } catch (Exception e) {
-                throw new RuntimeException("Unable to init KeyManagerFactory. Please check password and location: " + e, e);
+                throw new RuntimeException("Unable to init KeyManagerFactory. Please check password and location: "
+                        + e.getMessage(), e);
             }
 
             TrustManagerFactory tmf;
             try {
                 tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 tmf.init(trustStore != null ? trustStore : keyStore);
+
             } catch (Exception e) {
-                throw new RuntimeException("Unable to init TrustManagerFactory: " + e, e);
+                throw new RuntimeException("Unable to init TrustManagerFactory: " + e.getMessage(), e);
             }
 
             try {
                 SSLContext sslContext = SSLContext.getInstance(tlsVersion);
-                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+                if (!activeSSLValidation) {
+                    sslContext.init(kmf.getKeyManagers(), trustAllCerts, new SecureRandom());
+                } else {
+                    sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+                }
                 return sslContext;
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -229,18 +257,19 @@ public class SSLKsFactory implements NBMapConfigurable {
 
     public NBConfigModel getConfigModel() {
         return ConfigModel.of(SSLKsFactory.class,
-            Param.optional("ssl")
-                .setDescription("Enable ssl and set the mode")
-                .setRegex("jdk|openssl"),
-            Param.defaultTo("tlsversion", DEFAULT_TLSVERSION),
-            Param.optional("kspass"),
-            Param.optional("keyPassword"),
-            Param.optional("keystore"),
-            Param.optional("truststore"),
-            Param.optional("tspass"),
-            Param.optional(List.of("keyFilePath","keyfilepath")),
-            Param.optional("caCertFilePath"),
-            Param.optional("certFilePath")
+                Param.optional("ssl")
+                        .setDescription("Enable ssl and set the mode")
+                        .setRegex("jdk|openssl"),
+                Param.defaultTo("tlsversion", DEFAULT_TLSVERSION),
+                Param.optional("kspass"),
+                Param.optional("keyPassword"),
+                Param.optional("keystore"),
+                Param.optional("truststore"),
+                Param.optional("tspass"),
+                Param.optional(List.of("keyFilePath", "keyfilepath")),
+                Param.optional("caCertFilePath"),
+                Param.optional("certFilePath"),
+                Param.optional("sslValidation")
         ).asReadOnly();
     }
 }
