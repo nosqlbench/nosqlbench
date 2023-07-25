@@ -1,0 +1,2064 @@
+[
+  {
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "engine.DisableCodeSharing",
+  "help": "Option to force disable code sharing for this engine, even if the context was created with an explicit engine. This option is intended for testing purposes only.",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "engine.ForceCodeSharing",
+  "help": "Option to force enable code sharing for this engine, even if the context was created with a bound engine. This option is intended for testing purposes only.",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "engine.InstrumentExceptionsAreThrown",
+  "help": "Propagates exceptions thrown by instruments. (default: true)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "String",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": ""
+  },
+  "name": "engine.PreinitializeContexts",
+  "help": "Preinitialize language contexts for given languages.",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": true,
+  "deprecationMessage": "",
+  "usageSyntax": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "engine.RelaxStaticObjectSafetyChecks",
+  "help": "On property accesses, the Static Object Model does not perform shape checks and uses unsafe casts",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "engine.SafepointALot",
+  "help": "Repeadly submits thread local actions and collects statistics about safepoint intervals in the process. Prints event and interval statistics when the context is closed for each thread. This option significantly slows down execution and is therefore intended for testing purposes only.",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "engine.ShowInternalStackFrames",
+  "help": "Show internal frames specific to the language implementation in stack traces.",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "engine.SpecializationStatistics",
+  "help": "Enables specialization statistics for nodes generated with Truffle DSL and prints the result on exit. In order for this flag to be functional -Atruffle.dsl.GenerateSpecializationStatistics\u003dtrue needs to be set at build time. Enabling this flag and the compiler option has major implications on the performance and footprint of the interpreter. Do not use in production environments.",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "strategy",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": false
+    },
+    "defaultValue": "DEFAULT"
+  },
+  "name": "engine.StaticObjectStorageStrategy",
+  "help": "Set the storage strategy used by the Static Object Model. Accepted values are: [\u0027default\u0027, \u0027array-based\u0027, \u0027field-based\u0027]",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "default|array-based|field-based"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "engine.TraceCodeSharing",
+  "help": "Enables printing of code sharing related information to the logger. This option is intended to support debugging language implementations.",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Long",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 0
+  },
+  "name": "engine.TraceStackTraceInterval",
+  "help": "Prints the stack trace for all threads for a time interval. By default 0, which disables the output.",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "[1, inf)"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "engine.TraceThreadLocalActions",
+  "help": "Traces thread local events and when they are processed on the individual threads.Prints messages with the [engine] [tl] prefix. ",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "engine.TriggerUncaughtExceptionHandlerForCancel",
+  "help": "Propagates cancel execution exception into UncaughtExceptionHandler. For testing purposes only.",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "engine.UseConservativeContextReferences",
+  "help": "Enables conservative context references. This allows invalid sharing between contexts. For testing purposes only.",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": true,
+  "deprecationMessage": "Has no longer any effect. Scheduled for removal in in 22.1.",
+  "usageSyntax": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "engine.UsePreInitializedContext",
+  "help": "Use pre-initialized context when it\u0027s available (default: true).",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "engine.WarnInterpreterOnly",
+  "help": "Print warning when the engine is using a default Truffle runtime (default: true).",
+  "category": "USER",
+  "stability": "STABLE",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.agent-can-block",
+  "help": "Determines whether agents can block or not. (default:true)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.annex-b",
+  "help": "Enable ECMAScript Annex B features. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.async-stack-traces",
+  "help": "Include async function frames in stack traces. (default:true)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.atomics",
+  "help": "Enable ECMAScript Atomics. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.await-optimization",
+  "help": "Use PromiseResolve for Await. (default:true)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.bigint",
+  "help": "Provide an implementation of the BigInt proposal. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.bind-member-functions",
+  "help": "Bind functions returned by Value.getMember to the receiver object. (default:true)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "CharsetName",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": false
+    },
+    "defaultValue": ""
+  },
+  "name": "js.charset",
+  "help": "Charset used for decoding/encoding of the input/output streams. (default:)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "UTF-8|UTF-32|\u003cname\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.class-fields",
+  "help": "Enable the class public and private fields proposal. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "commonjs-require-globals",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": false
+    },
+    "defaultValue": {}
+  },
+  "name": "js.commonjs-core-modules-replacements",
+  "help": "Npm packages used to replace global Node.js builtins. (default:{})",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cname\u003e:\u003cmodule\u003e,..."
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.commonjs-require",
+  "help": "Enable CommonJS require emulation. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "String",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": ""
+  },
+  "name": "js.commonjs-require-cwd",
+  "help": "CommonJS default current working directory. (default:)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cpath\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.console",
+  "help": "Provide \u0027console\u0027 global property. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.const-as-var",
+  "help": "Parse const declarations as a var (legacy compatibility option). (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.debug-builtin",
+  "help": "Provide a non-API Debug builtin. Behaviour will likely change. Don\u0027t depend on this in production code. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "String",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": "Debug"
+  },
+  "name": "js.debug-property-name",
+  "help": "The name used for the Graal.js debug builtin. (default:Debug)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cname\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.direct-byte-buffer",
+  "help": "Use direct (off-heap) byte buffer for typed arrays. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.disable-eval",
+  "help": "User code is not allowed to parse code via e.g. eval(). (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.disable-with",
+  "help": "User code is not allowed to use the \u0027with\u0027 statement. (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "ecmascript-version",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": false
+    },
+    "defaultValue": 13
+  },
+  "name": "js.ecmascript-version",
+  "help": "ECMAScript version to be compatible with. Default is \u0027latest\u0027 (latest supported version), staged features are in \u0027staging\u0027. (default:13)",
+  "category": "USER",
+  "stability": "STABLE",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "latest|staging|[5, 13]|[2015, 2022]"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.error-cause",
+  "help": "Enable the error cause proposal. Allows an error to be chained with a cause using the optional options parameter. (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.esm-bare-specifier-relative-lookup",
+  "help": "Resolve ESM bare specifiers relative to the importing module\u0027s path instead of attempting an absolute path lookup. (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.esm-eval-returns-exports",
+  "help": "Eval of an ES module through the polyglot API returns its exported symbols. (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.foreign-hash-properties",
+  "help": "Allow getting/setting non-JS hash entries using the `[]` and `.` operators. (default:true)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.foreign-object-prototype",
+  "help": "Non-JS objects have prototype (Object/Function/Array.prototype) set. (default:true)",
+  "category": "EXPERT",
+  "stability": "STABLE",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Long",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 65535
+  },
+  "name": "js.function-arguments-limit",
+  "help": "Maximum number of arguments for functions. (default:65535)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cint\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Integer",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 4
+  },
+  "name": "js.function-cache-limit",
+  "help": "Maximum allowed size of a function cache. (default:4)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cint\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Integer",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 256
+  },
+  "name": "js.function-constructor-cache-size",
+  "help": "Maximum size of the parsing cache used by the Function constructor to avoid re-parsing known sources. (default:256)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cint\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.function-statement-error",
+  "help": "Treat hoistable function statements in blocks as an error (in ES5 mode). (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.global-arguments",
+  "help": "Provide \u0027arguments\u0027 global property. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.global-property",
+  "help": "Provide \u0027global\u0027 global property. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.graal-builtin",
+  "help": "Provide \u0027Graal\u0027 global property. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.import-assertions",
+  "help": "Enable import assertions (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.interop-complete-promises",
+  "help": "Resolve promises when crossing a polyglot language boundary. (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.intl-402",
+  "help": "Enable ECMAScript Internationalization API. (default:true)",
+  "category": "USER",
+  "stability": "STABLE",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.java-package-globals",
+  "help": "Provide Java package globals: Packages, java, javafx, javax, com, org, edu. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.json-modules",
+  "help": "Enable loading of json modules (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.lazy-translation",
+  "help": "Translate function bodies lazily. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.load",
+  "help": "Provide \u0027load\u0027 global function. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.load-from-classpath",
+  "help": "Allow \u0027load\u0027 to access \u0027classpath:\u0027 URLs. Do not use with untrusted code. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.load-from-url",
+  "help": "Allow \u0027load\u0027 to access URLs. Do not use with untrusted code. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "String",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": ""
+  },
+  "name": "js.locale",
+  "help": "Use a specific default locale for locale-sensitive operations. (default:)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003clocale\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Integer",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 10000000
+  },
+  "name": "js.max-apply-argument-length",
+  "help": "Maximum allowed number of arguments allowed in an apply function. (default:10000000)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cint\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Integer",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 32766
+  },
+  "name": "js.max-prototype-chain-length",
+  "help": "Maximum allowed length of a prototype chain. (default:32766)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cint\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Integer",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 1073741823
+  },
+  "name": "js.max-typed-array-length",
+  "help": "Maximum allowed length for TypedArrays. (default:1073741823)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cint\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.mle-mode",
+  "help": "Provide a non-API MLE builtin. Behaviour will likely change. Don\u0027t depend on this in production code. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.nashorn-compat",
+  "help": "Provide compatibility with the OpenJDK Nashorn engine. Do not use with untrusted code. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.new-set-methods",
+  "help": "Enable new Set methods. (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.operator-overloading",
+  "help": "Enable operator overloading (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.parse-only",
+  "help": "Only parse source code, do not run it. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.performance",
+  "help": "Provide \u0027performance\u0027 global property. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.polyglot-builtin",
+  "help": "Provide \u0027Polyglot\u0027 global property. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.polyglot-evalfile",
+  "help": "Provide \u0027Polyglot.evalFile\u0027 function. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.print",
+  "help": "Provide \u0027print\u0027 global function. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.print-no-newline",
+  "help": "Print function will not print new line char. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.private-fields-in",
+  "help": "Enable private field in in operator (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.profile-time",
+  "help": "Enable time profiling. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.profile-time-print-cumulative",
+  "help": "Print cumulative time when time profiling is enabled. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Integer",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 5
+  },
+  "name": "js.property-cache-limit",
+  "help": "Maximum allowed size of a property cache. (default:5)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cint\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Integer",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 128
+  },
+  "name": "js.regex-cache-size",
+  "help": "Maximum size of the regex cache used by the RegExp constructor to avoid re-parsing known sources. (default:128)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cint\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.regex-regression-test-mode",
+  "help": "Test mode for TRegex. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.regex.always-eager",
+  "help": "Always match capture groups eagerly. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.regex.dump-automata",
+  "help": "Produce ASTs and automata in JSON, DOT (GraphViz) and LaTeX formats. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.regex.step-execution",
+  "help": "Trace the execution of automata in JSON files. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.regexp-match-indices",
+  "help": "Enable RegExp Match Indices property. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.regexp-static-result",
+  "help": "Provide last RegExp match in RegExp global var, e.g. RegExp.$1. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.scope-optimization",
+  "help": "Allow scope optimizations around closures. (default:true)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.script-engine-global-scope-import",
+  "help": "Enable ScriptEngine-specific global scope import function. (default:false)",
+  "category": "INTERNAL",
+  "stability": "STABLE",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.scripting",
+  "help": "Enable scripting features (Nashorn compatibility option). (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.shared-array-buffer",
+  "help": "Enable ECMAScript SharedArrayBuffer. (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.shebang",
+  "help": "Allow parsing files starting with #!. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.shell",
+  "help": "Provide global functions for js shell. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Integer",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 10
+  },
+  "name": "js.stack-trace-limit",
+  "help": "Number of stack frames to capture. (default:10)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "[0, inf)"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.strict",
+  "help": "Enforce strict mode. (default:false)",
+  "category": "USER",
+  "stability": "STABLE",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.string-lazy-substrings",
+  "help": "Allow lazy substrings. (default:true)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Integer",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 1073741799
+  },
+  "name": "js.string-length-limit",
+  "help": "Maximum string length. (default:1073741799)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cchars\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.syntax-extensions",
+  "help": "Enable Nashorn syntax extensions. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.temporal",
+  "help": "Enable JavaScript Temporal API. (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.test-clone-uninitialized",
+  "help": "Test uninitialized cloning. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.test262-mode",
+  "help": "Expose global property $262 needed to run the Test262 harness. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.testV8-mode",
+  "help": "Expose internals needed to run the TestV8 harness. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Long",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 1000000
+  },
+  "name": "js.timer-resolution",
+  "help": "Resolution of timers (performance.now() and Date built-ins) in nanoseconds. Fuzzy time is used when set to 0. (default:1000000)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cnanoseconds\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "ZoneId",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": false
+    },
+    "defaultValue": ""
+  },
+  "name": "js.timezone",
+  "help": "Set custom time zone ID. (default:)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cTimeZoneID\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.top-level-await",
+  "help": "Enable top-level-await. (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "UnhandledRejectionsTrackingMode",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": "NONE"
+  },
+  "name": "js.unhandled-rejections",
+  "help": "Configure unhandled promise rejections tracking. Accepted values: \u0027none\u0027, unhandled rejections are not tracked. \u0027warn\u0027, a warning is printed to stderr when an unhandled rejection is detected. \u0027throw\u0027, an exception is thrown when an unhandled rejection is detected. \u0027handler\u0027, the handler function set with Graal.setUnhandledPromiseRejectionHandler will be called with the rejection value and promise respectively as arguments. (default:none)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "none|warn|throw|handler"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.use-utc-for-legacy-dates",
+  "help": "Determines what time zone (UTC or local time zone) should be used when UTC offset is absent in a parsed date. (default:true)",
+  "category": "EXPERT",
+  "stability": "STABLE",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.v8-compat",
+  "help": "Provide compatibility with the Google V8 engine. (default:false)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.v8-legacy-const",
+  "help": "Emulate v8 behavior when trying to mutate const variables in non-strict mode. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.v8-realm-builtin",
+  "help": "Provide Realm builtin compatible with V8\u0027s d8 shell. (default:false)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.validate-regexp-literals",
+  "help": "Validate regexp literals at parse time. (default:true)",
+  "category": "INTERNAL",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": true
+  },
+  "name": "js.wasm-bigint",
+  "help": "Enable wasm i64 to javascript BigInt support (default:true)",
+  "category": "USER",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false"
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.webassembly",
+  "help": "Enable WebAssembly JavaScript API. (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Boolean",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": false
+  },
+  "name": "js.zone-rules-based-time-zones",
+  "help": "Use ZoneRulesProvider instead of time-zone data from ICU4J. (default:false)",
+  "category": "EXPERT",
+  "stability": "EXPERIMENTAL",
+  "deprecated": false,
+  "deprecationMessage": ""
+},
+{
+  "key": {
+    "type": {
+      "name": "Enable",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": false
+    },
+    "defaultValue": {
+      "enabled": false
+    }
+  },
+  "name": "cpusampler",
+  "help": "Enable/Disable the CPU sampler, or enable with specific Output - as specified by the Output option (default: false). Choosing an output with this options defaults to printing the output to std out, except for the flamegraph which is printed to a flamegraph.svg file.",
+  "category": "USER",
+  "stability": "STABLE",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "true|false|\u003cOutput\u003e"
+},
+{
+  "key": {
+    "type": {
+      "name": "Long",
+      "converter": {},
+      "validator": {},
+      "isOptionMap": false,
+      "isDefaultType": true
+    },
+    "defaultValue": 0
+  },
+  "name": "cpusampler.Delay",
+  "help": "Delay the sampling for this many milliseconds (default: 0).",
+  "category": "USER",
+  "stability": "STABLE",
+  "deprecated": false,
+  "deprecationMessage": "",
+  "usageSyntax": "\u003cms\u003e"
+}
+]
