@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class TreeTracker1024 {
     public long getLowestCompleted() {
         long lowestCompleted=base;
         int lowestBucket = (int) ranges.getLowestCompleted();
-        lowestCompleted += (lowestBucket+1) * 32;
+        lowestCompleted += (lowestBucket+1) * 32L;
         lowestCompleted += buckets[lowestBucket+1].getLowestCompleted();
         return lowestCompleted;
     }

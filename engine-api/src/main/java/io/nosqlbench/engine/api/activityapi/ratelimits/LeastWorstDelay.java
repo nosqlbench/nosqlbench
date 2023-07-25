@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,12 +67,12 @@ public class LeastWorstDelay {
         if (nanos > 0) {
             if (nanos > sleepThreshold) {
                 try {
-                    System.out.println(String.format("sleeping for %.9fS", ((double) nanos / 1E9)));
+                    System.out.printf("sleeping for %.9fS%n", ((double) nanos / 1E9));
                     Thread.sleep((nanos / 1000000), (int) (nanos % 1000000));
                 } catch (InterruptedException ignored) {
                 }
             } else if (nanos > parkThreshold) {
-                System.out.println(String.format("parking for %.9fS", ((double) nanos / 1E9)));
+                System.out.printf("parking for %.9fS%n", ((double) nanos / 1E9));
                 LockSupport.parkNanos(nanos);
             }
         }
