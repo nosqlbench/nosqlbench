@@ -139,10 +139,10 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
     }
 
     public static Scenario forTesting(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
-        return new Scenario(name,null,engine,"console:10s",true,true,reportSummaryTo,"",Path.of("logs"),minMaturity, NBLabeledElement.forKV("test-name","name"));
+        return new Scenario(name, null, engine, "console:10s", true, true, reportSummaryTo, "", Path.of("logs"), minMaturity, NBLabeledElement.forKV("test-name", "name"));
     }
 
-//    public Scenario(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
+    //    public Scenario(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
 //        scenarioName = name;
 //        this.reportSummaryTo = reportSummaryTo;
 //        this.engine = engine;
@@ -199,8 +199,8 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
             .allowAllAccess(true)
             .allowEnvironmentAccess(EnvironmentAccess.INHERIT)
             .allowPolyglotAccess(PolyglotAccess.ALL)
-            .option("js.ecmascript-version", "2020")
-            .option("js.nashorn-compat", "true");
+            .option("js.ecmascript-version", "2022")
+            .option("js.nashorn-compat", "false");
 
         final Builder engineBuilder = org.graalvm.polyglot.Engine.newBuilder();
         engineBuilder.option("engine.WarnInterpreterOnly", "false");
@@ -213,15 +213,10 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
         if (!"disabled".equals(progressInterval))
             this.activityProgressIndicator = new ActivityProgressIndicator(scenarioController, this.progressInterval);
 
-        this.scriptEnv = new ScenarioContext(scenarioName,scenarioController);
+        this.scriptEnv = new ScenarioContext(scenarioName, scenarioController);
         this.scriptEngine.setContext(this.scriptEnv);
 
         this.scriptEngine.put("params", this.scenarioScriptParams);
-
-//            scriptEngine.put("scenario", scenarioController);
-//            scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
-//            scriptEngine.put("activities", new NashornActivityBindings(scenarioController));
-
         this.scriptEngine.put("scenario", new PolyglotScenarioController(scenarioController));
         this.scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
         this.scriptEngine.put("activities", new ActivityBindings(scenarioController));
@@ -280,7 +275,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
             this.logger.debug("Awaiting completion of scenario and activities for {} millis.", awaitCompletionTime);
             this.scenarioController.awaitCompletion(awaitCompletionTime);
         } catch (final Exception e) {
-            error =e;
+            error = e;
         } finally {
             this.scenarioController.shutdown();
         }
@@ -293,8 +288,9 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
     }
 
     public void notifyException(final Thread t, final Throwable e) {
-        error =new RuntimeException("in thread " + t.getName() + ", " +e, e);
+        error = new RuntimeException("in thread " + t.getName() + ", " + e, e);
     }
+
     private void executeScenarioScripts() {
         for (final String script : this.scripts)
             try {
@@ -383,13 +379,13 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
 
     /**
      * This should be the only way to get a ScenarioResult for a Scenario.
-     *
+     * <p>
      * The lifecycle of a scenario includes the lifecycles of all of the following:
      * <OL>
      * <LI>The scenario control script, executing within a graaljs context.</LI>
      * <LI>The lifecycle of every activity which is started within the scenario.</LI>
      * </OL>
-     *
+     * <p>
      * All of these run asynchronously within the scenario, however the same thread that calls
      * the scenario is the one which executes the control script. A scenario ends when all
      * of the following conditions are met:
@@ -406,12 +402,14 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
             try {
                 this.runScenario();
             } catch (final Exception e) {
-                error =e;
+                error = e;
             } finally {
                 this.logger.debug("{} scenario run", null == this.error ? "NORMAL" : "ERRORED");
             }
+            if (this.scriptEnv == null) {
 
-            final String iolog = this.scriptEnv.getTimedLog();
+            }
+            String iolog = error != null ? error.toString() : this.scriptEnv.getTimedLog();
             result = new ExecutionMetricsResult(startedAtMillis, endedAtMillis, iolog, this.error);
             this.result.reportMetricsSummaryToLog();
             this.doReportSummaries(this.reportSummaryTo, this.result);
