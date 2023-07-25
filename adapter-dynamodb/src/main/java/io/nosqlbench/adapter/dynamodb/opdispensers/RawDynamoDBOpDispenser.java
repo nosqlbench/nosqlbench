@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import io.nosqlbench.adapter.dynamodb.DynamoDBSpace;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.adapter.dynamodb.optypes.RawDynamodOp;
-import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
@@ -36,12 +36,10 @@ public class RawDynamoDBOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDB
         this.ddb = ddb;
 
         String bodytype = pop.getValueType("body").getSimpleName();
-        switch (bodytype) {
-            case "String":
-                jsonFunction=pop.getAsRequiredFunction("body");
-                break;
-            default:
-                throw new RuntimeException("Unable to create body mapping function from type '" + bodytype + "'");
+        if (bodytype.equals("String")) {
+            jsonFunction = pop.getAsRequiredFunction("body");
+        } else {
+            throw new RuntimeException("Unable to create body mapping function from type '" + bodytype + "'");
         }
     }
 

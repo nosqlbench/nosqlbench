@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.nosqlbench.adapter.dynamodb.optypes;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
 /**
  * https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadWriteCapacityMode.html?icmpid=docs_dynamodb_help_panel_hp_capacity#HowItWorks.ProvisionedThroughput.Manual

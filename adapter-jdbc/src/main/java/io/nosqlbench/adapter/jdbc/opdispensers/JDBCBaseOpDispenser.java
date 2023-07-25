@@ -18,9 +18,9 @@ package io.nosqlbench.adapter.jdbc.opdispensers;
 
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
-import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

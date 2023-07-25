@@ -16,12 +16,11 @@
 
 package io.nosqlbench.adapter.pulsar.ops;
 
-import com.codahale.metrics.Timer;
 import com.codahale.metrics.Timer.Context;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterAsyncOperationFailedException;
 import io.nosqlbench.adapter.pulsar.exception.PulsarAdapterUnexpectedException;
 import io.nosqlbench.adapter.pulsar.util.*;
-import io.nosqlbench.engine.api.metrics.ReceivedMessageSequenceTracker;
+import io.nosqlbench.adapters.api.metrics.ReceivedMessageSequenceTracker;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

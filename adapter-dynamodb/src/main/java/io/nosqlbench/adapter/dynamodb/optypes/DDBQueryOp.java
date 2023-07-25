@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.OpResultSize;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.OpResultSize;
 
 public class DDBQueryOp extends DynamoDBOp implements OpResultSize {
 

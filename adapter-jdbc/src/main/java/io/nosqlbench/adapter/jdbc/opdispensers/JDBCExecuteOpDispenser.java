@@ -19,8 +19,8 @@ package io.nosqlbench.adapter.jdbc.opdispensers;
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCExecuteOp;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.sql.Connection;
 import java.util.function.LongFunction;
