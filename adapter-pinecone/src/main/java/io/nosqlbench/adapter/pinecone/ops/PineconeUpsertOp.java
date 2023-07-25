@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.pinecone.ops;
 
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.pinecone.proto.UpsertRequest;
 import io.pinecone.PineconeConnection;
 import io.pinecone.proto.UpsertResponse;
@@ -41,8 +41,10 @@ public class PineconeUpsertOp extends PineconeOp {
     }
 
     @Override
-    public void run() {
+    public Object apply(long value) {
         UpsertResponse response = connection.getBlockingStub().upsert(request);
         logger.debug("Put " + response.getUpsertedCount() + " vectors into the index");
+        return response;
     }
+
 }

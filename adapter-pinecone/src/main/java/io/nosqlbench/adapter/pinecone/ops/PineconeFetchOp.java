@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.pinecone.ops;
 
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.pinecone.proto.FetchRequest;
 import io.pinecone.PineconeConnection;
 import io.pinecone.proto.FetchResponse;
@@ -44,12 +44,13 @@ public class PineconeFetchOp extends PineconeOp {
     }
 
     @Override
-    public void run() {
+    public Object apply(long value) {
         FetchResponse response = connection.getBlockingStub().fetch(request);
         if (logger.isDebugEnabled()) {
             for (Map.Entry<String, Vector> vectors: response.getVectorsMap().entrySet()) {
                 logger.debug(vectors.getKey() + ": " + vectors.getValue().toString());
             }
         }
+        return response;
     }
 }

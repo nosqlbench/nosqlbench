@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.pinecone.ops;
 
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.pinecone.proto.DescribeIndexStatsRequest;
 import io.pinecone.proto.DescribeIndexStatsResponse;
 import io.pinecone.PineconeConnection;
@@ -43,8 +43,8 @@ public class PineconeDescribeIndexStatsOp extends PineconeOp {
         this.request = request;
     }
 
-    @Override
-    public void run() {
+     @Override
+    public Object apply(long value) {
         DescribeIndexStatsResponse response = connection.getBlockingStub().describeIndexStats(request);
         if (logger.isDebugEnabled()) {
             logger.debug("Vector counts:");
@@ -52,6 +52,6 @@ public class PineconeDescribeIndexStatsOp extends PineconeOp {
                 logger.debug(namespace.getKey() + ": " + namespace.getValue().getVectorCount());
             }
         }
+        return response;
     }
-
 }

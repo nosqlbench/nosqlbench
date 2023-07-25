@@ -22,8 +22,8 @@ import com.google.protobuf.Value;
 import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
-import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
