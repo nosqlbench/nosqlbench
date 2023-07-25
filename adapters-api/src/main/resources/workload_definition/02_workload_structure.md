@@ -387,9 +387,7 @@ blocks:
   {
     "name": "namedblock1--op2",
     "op": {
-      "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
-    },
-    "params": {
+      "stmt": "insert into bar.table (a,b,c) values (1,2,3);",
       "type": "batch"
     },
     "tags": {
@@ -462,9 +460,7 @@ blocks:
   {
     "name": "block1--op2",
     "op": {
-      "stmt": "insert into bar.table (a,b,c) values (1,2,3);"
-    },
-    "params": {
+      "stmt": "insert into bar.table (a,b,c) values (1,2,3);",
       "type": "batch"
     },
     "tags": {
