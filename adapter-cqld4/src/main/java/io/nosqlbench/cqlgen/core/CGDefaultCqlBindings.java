@@ -21,8 +21,8 @@ import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.cqlgen.api.BindingsLibrary;
 import io.nosqlbench.cqlgen.binders.Binding;
 import io.nosqlbench.cqlgen.model.CqlColumnBase;
-import io.nosqlbench.engine.api.activityconfig.OpsLoader;
-import io.nosqlbench.engine.api.activityconfig.yaml.OpsDocList;
+import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
+import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 
 import java.io.File;
 import java.io.InputStream;

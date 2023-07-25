@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.cqld4.opdispensers;
+package io.nosqlbench.adapter.cqld4.diagnostics;
 
 import com.datastax.oss.driver.api.core.CqlIdentifier;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
@@ -25,8 +25,10 @@ import com.datastax.oss.driver.api.core.data.CqlDuration;
 import com.datastax.oss.driver.api.core.data.CqlVector;
 import com.datastax.oss.driver.api.core.data.TupleValue;
 import com.datastax.oss.driver.api.core.data.UdtValue;
-import com.datastax.oss.driver.api.core.type.CqlVectorType;
 import com.datastax.oss.driver.api.core.type.DataType;
+import com.datastax.oss.driver.api.core.type.VectorType;
+import com.datastax.oss.driver.api.core.type.codec.ExtraTypeCodecs;
+import com.datastax.oss.driver.api.core.type.codec.TypeCodec;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
@@ -41,9 +43,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongFunction;
 
 import static com.datastax.oss.protocol.internal.ProtocolConstants.DataType.*;
+
 
 /**
  * This should only be used when there is an exception thrown by some higher level logic.
@@ -53,18 +57,28 @@ import static com.datastax.oss.protocol.internal.ProtocolConstants.DataType.*;
  */
 public class CQLD4PreparedStmtDiagnostics {
     private static final Logger logger = LogManager.getLogger(CQLD4PreparedStmtDiagnostics.class);
+    private static final ConcurrentHashMap<VectorType, TypeCodec<float[]>> vectorCodecs = new ConcurrentHashMap<>();
 
-    public static BoundStatement bindStatement(BoundStatement bound, CqlIdentifier colname,
-                                               Object colval, DataType coltype) {
-
+    public static BoundStatement bindStatement(
+        BoundStatement bound,
+        CqlIdentifier colname,
+        Object colval,
+        DataType coltype
+    ) {
         return switch (coltype.getProtocolCode()) {
             case CUSTOM -> {
-                if (coltype instanceof CqlVectorType) {
-                    yield bound.setCqlVector(colname, (CqlVector<?>) colval);
+                if (coltype instanceof VectorType vt) {
+                    if (colval instanceof CqlVector cv) {
+                        yield bound.setVector(colname, cv, cv.get(0).getClass());
+                    } else if (colval instanceof float[] floatAry) {
+                        TypeCodec<float[]> codec = vectorCodecs.computeIfAbsent(vt, v -> ExtraTypeCodecs.floatVectorToArray(v.getDimensions()));
+                        yield bound.set(colname, floatAry, codec);
+                    } else {
+                        throw new RuntimeException("Unrecognized vector Java type to bind to " + coltype.asCql(true, true) + " value=" +colval.getClass().getSimpleName());
+                    }
+                } else {
+                    throw new RuntimeException("Unrecognized custom type for diagnostics: " + coltype.asCql(true, true) + " value= " +colval.getClass().getSimpleName());
                 }
-                throw new RuntimeException("Unhandled CUSTOM type for diagnostic: "
-                        + coltype.getClass().getSimpleName());
-
             }
             case ASCII, VARCHAR -> bound.setString(colname, (String) colval);
             case BIGINT, COUNTER -> bound.setLong(colname, (long) colval);
@@ -112,22 +126,22 @@ public class CQLD4PreparedStmtDiagnostics {
                 yield bound.setTupleValue(colname, tuple);
             }
             default -> throw new RuntimeException("Unknown CQL type for diagnostic " +
-                    "(type:'" + coltype + "',code:'" + coltype.getProtocolCode() + "'");
+                "(type:'" + coltype + "',code:'" + coltype.getProtocolCode() + "'");
         };
     }
 
     public static Cqld4CqlOp rebindWithDiagnostics(
-            PreparedStatement preparedStmt,
-            LongFunction<Object[]> fieldsF,
-            long cycle,
-            Exception exception
+        PreparedStatement preparedStmt,
+        LongFunction<Object[]> fieldsF,
+        long cycle,
+        Exception exception
     ) {
         logger.error(exception);
         ColumnDefinitions defs = preparedStmt.getVariableDefinitions();
         Object[] values = fieldsF.apply(cycle);
         if (defs.size() != values.length) {
             throw new OpConfigError("There are " + defs.size() + " anchors in statement '" + preparedStmt.getQuery() + "'" +
-                    "but " + values.length + " values were provided. These must match.");
+                "but " + values.length + " values were provided. These must match.");
         }
 
         BoundStatement bound = preparedStmt.bind();
@@ -143,11 +157,11 @@ public class CQLD4PreparedStmtDiagnostics {
                 String fullValue = value.toString();
                 String valueToPrint = fullValue.length() > 100 ? fullValue.substring(0, 100) + " ... (abbreviated for console, since the size is " + fullValue.length() + ")" : fullValue;
                 String errormsg = String.format(
-                        "Unable to bind column '%s' to cql type '%s' with value '%s' (class '%s')",
-                        defname,
-                        type.asCql(false, false),
-                        valueToPrint,
-                        value.getClass().getCanonicalName()
+                    "Unable to bind column '%s' to cql type '%s' with value '%s' (class '%s')",
+                    defname,
+                    type.asCql(false, false),
+                    valueToPrint,
+                    value.getClass().getCanonicalName()
                 );
                 logger.error(errormsg);
                 throw new OpConfigError(errormsg, e);

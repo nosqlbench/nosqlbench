@@ -23,7 +23,7 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.NormalizeDoubleListVector;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.NormalizeFloatListVector;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -33,37 +33,28 @@ import java.util.function.Function;
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class NormalizeCqlVector implements Function<com.datastax.oss.driver.api.core.data.CqlVector, com.datastax.oss.driver.api.core.data.CqlVector> {
+public class NormalizeCqlVector implements Function<CqlVector, CqlVector> {
     private final NormalizeDoubleListVector ndv = new NormalizeDoubleListVector();
     private final NormalizeFloatListVector nfv = new NormalizeFloatListVector();
 
     @Override
-    public com.datastax.oss.driver.api.core.data.CqlVector apply(CqlVector cqlVector) {
-
-        CqlVector.Builder builder = CqlVector.builder();
-        Iterable values = cqlVector.getValues();
-        List<Object> list = new ArrayList<>();
-        values.forEach(list::add);
-
-        if (list.isEmpty()) {
-
-            builder.add(List.of());
-        } else if (list.get(0) instanceof Float) {
-            List<Float> floats = new ArrayList<>();
-            list.forEach(o -> floats.add((Float) o));
-            for (Float fv : floats) {
-                builder.add(fv);
-            }
-
-        } else if (list.get(0) instanceof Double) {
-            List<Double> doubles = new ArrayList<>();
-            list.forEach(o -> doubles.add((Double) o));
-            for (Double dv : doubles) {
-                builder.add(dv);
-            }
-        } else {
-            throw new RuntimeException("Only Doubles and Floats are recognized.");
+    public CqlVector apply(CqlVector cqlVector) {
+        double[] vals = new double[cqlVector.size()];
+        double accumulator= 0.0d;
+        for (int i = 0; i < vals.length; i++) {
+            vals[i]=cqlVector.get(i).doubleValue();
+            accumulator+=vals[i]*vals[i];
         }
-        return builder.build();
+        double factor = 1.0d/Math.sqrt(Arrays.stream(vals).map(d -> d * d).sum());
+
+        if (cqlVector.get(0) instanceof Float) {
+            List<Float> list = Arrays.stream(vals).mapToObj(d -> Float.valueOf((float) (d * factor))).toList();
+            return CqlVector.newInstance(list);
+        } else if (cqlVector.get(0) instanceof Double) {
+            List<Double> list = Arrays.stream(vals).mapToObj(d -> Double.valueOf((float) (d * factor))).toList();
+            return CqlVector.newInstance(list);
+        } else {
+            throw new RuntimeException(NormalizeCqlVector.class.getCanonicalName()+ " only supports Double and Float type");
+        }
     }
 }

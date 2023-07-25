@@ -43,8 +43,7 @@ public class CqlVector implements LongFunction<com.datastax.oss.driver.api.core.
     @Override
     public com.datastax.oss.driver.api.core.data.CqlVector apply(long cycle) {
         List components = func.apply(cycle);
-        com.datastax.oss.driver.api.core.data.CqlVector.Builder vbuilder = com.datastax.oss.driver.api.core.data.CqlVector.builder();
-        vbuilder.add(components.toArray());
-        return vbuilder.build();
+        com.datastax.oss.driver.api.core.data.CqlVector vector = com.datastax.oss.driver.api.core.data.CqlVector.newInstance(components);
+        return vector;
     }
 }

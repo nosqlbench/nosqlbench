@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.datamappers.functions.to_cqlvector;
+package io.nosqlbench.datamappers.functions.to_cqlvector.from_number_list;
 
 import com.datastax.oss.driver.api.core.data.CqlVector;
-import io.nosqlbench.datamappers.functions.to_cqlvector.from_number_list.ToCqlVector;
-import org.junit.jupiter.api.Test;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.List;
+import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.assertThat;
+@ThreadSafeMapper
+@Categories(Category.experimental)
+public class ToCqlVector implements Function<List, CqlVector> {
 
-public class ToCqlVectorTest {
-
-
-    @Test
-    public void testDoubleListToCqlVector() {
-        ToCqlVector toCqlVector = new ToCqlVector();
-        assertThat(toCqlVector.apply(List.of(123.d,456.d))).isInstanceOf(CqlVector.class);
+    @Override
+    public CqlVector apply(List objects) {
+        if (objects.size()==0) {
+            throw new RuntimeException("Empty lists are not supported for vectors.");
+        }
+        return CqlVector.newInstance((List<Number>)objects);
     }
-
-    @Test
-    public void testFloatListToCqlVector() {
-        ToCqlVector toCqlVector = new ToCqlVector();
-        assertThat(toCqlVector.apply(List.of(123.f,456.f))).isInstanceOf(CqlVector.class);
-    }
-
 }
