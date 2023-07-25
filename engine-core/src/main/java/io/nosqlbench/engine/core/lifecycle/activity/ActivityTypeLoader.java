@@ -19,7 +19,7 @@ package io.nosqlbench.engine.core.lifecycle.activity;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.api.system.NBEnvironment;

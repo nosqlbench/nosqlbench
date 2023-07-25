@@ -80,9 +80,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.codehaus.groovy</groupId>
+                <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy</artifactId>
-                <version>3.0.14</version>
+                <version>4.0.13</version>
             </dependency>
 
             <dependency>
@@ -352,7 +352,7 @@
             <dependency>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-runtime</artifactId>
-                <version>4.12.0</version>
+                <version>4.13.0</version>
             </dependency>
 
             <dependency>
@@ -734,6 +734,7 @@
                     </includes>
                     <excludes>
                         <exclude>**/generated/**</exclude>
+                        <exclude>**/jmh_generated/**</exclude>
                     </excludes>
                     <addLicenseHeaders>true</addLicenseHeaders>
                     <copyrightMessage>Copyright (c) 2022 nosqlbench</copyrightMessage>
@@ -812,7 +813,7 @@
                 <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
-                    <version>4.12.0</version>
+                    <version>4.13.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
