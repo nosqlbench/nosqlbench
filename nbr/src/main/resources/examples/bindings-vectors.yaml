@@ -4,34 +4,25 @@ scenarios:
 
 bindings:
 
+    # create double and float vectors which high dispersion across the number
+    # of dimensions specified. These are not yet enumerable, but they are
+    # deterministic
+    hdv1: HashedDoubleVectors(13); Stringify();
+    hfv1: HashedFloatVectors(13); Stringify();
+
+    # specify the sizer function and the double function
+    hdvn2: HashedDoubleVectors(long->HashRange(1,5)->int,long->HashRange(2.0d,3.0d)->double); NormalizeDoubleVector(); Stringify();
+
+    # specify the sizer function and the range of doubles to use
+    hdv3: HashedDoubleVectors(long->HashRange(1,5)->int,long->HashRange(2.0d,3.0d)->double); Stringify();
+
+    hdv4: HashedDoubleVectors(13,0.0d,1.0d); Stringify();
+    hfv4: HashedFloatVectors(13,0.0f,1.0f); Stringify();
+
+
     # create a simple 2-d vector from a step function over the unit interval
     # of 10 steps (the maximum number of characters per digit)
     v2d: DoubleVectors('0-2*2')
-    # Combinations('a-z') [0]['a','b','c'....'z']
-    # Combinations('a-z;A-Z')
-    # [0]['a','b',...] (len 26)
-    # [1]['A','B',...] (len 26)
-    # 'aA', 'aB', 'aC'
-    # Combinations('a-z*1000')
-    # 26^1000
-    # 2^63
-    #
-    # [0]['a','b',...] (len 26)
-    # [1]['a','b',...] (len 26)
-    # ...
-    # [998]['a','b',...] (len 26)
-    # [999]['a','b',...] (len 26)
-    # DoubleVectors('0-9') [0.0], [0.1], [0.2], ... [0.9]
-    # DoubleVectors('0-9*3')[234] [0.0,0.0,0.0], [0.0,0.0,0.1], ....
-    # doubleVectorsFunction(999) -> [0.9,0.9,0.9]
-    # doubleVectorsLabelFunction(999) -> "999"
-    # "999" -> [ ... ]
-    # 999L -> "999"
-    # 999L -> [ .. ]
-
-
-
-
 
     # use Stringify() to visualize the value of numeric array types
     v2d_str: DoubleVectors('0-2*2'); Stringify()
