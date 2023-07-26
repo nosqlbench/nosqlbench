@@ -316,7 +316,7 @@
             <dependency>
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core-java11</artifactId>
-                <version>6.4.3</version>
+                <version>6.4.4</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
