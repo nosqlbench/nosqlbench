@@ -748,6 +748,7 @@
                     </includes>
                     <excludes>
                         <exclude>**/generated/**</exclude>
+                        <exclude>**/jmh_generated/**</exclude>
                     </excludes>
                     <addLicenseHeaders>true</addLicenseHeaders>
                     <copyrightMessage>Copyright (c) 2022 nosqlbench</copyrightMessage>
