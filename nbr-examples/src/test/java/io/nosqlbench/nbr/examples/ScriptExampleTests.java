@@ -125,10 +125,9 @@ public class ScriptExampleTests {
     }
 
     @Test
-    public void testExtensionCsvLogger() {
+    public void testExtensionCsvMetrics() {
         ExecutionMetricsResult scenarioResult = runScenario("extension_csvmetrics");
-        assertThat(scenarioResult.getIOLog()).contains("started new " +
-            "csvlogger: logs/csvmetricstestdir");
+        assertThat(scenarioResult.getIOLog()).contains("started new csvmetrics: logs/csvmetricstestdir");
     }
 
     @Test
