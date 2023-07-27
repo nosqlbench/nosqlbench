@@ -1,0 +1,15 @@
+format: HD5
+sourceFile: /home/username/data.h5
+datasets:
+  - name: dataset1
+    type: string
+  - name: dataset2
+    type: int
+embedding: word2vec
+writer: [astra, file]
+astra:
+  database: test
+  keyspace: test
+  table: test
+  scb: /home/username/scb
+file: /home/username/data
