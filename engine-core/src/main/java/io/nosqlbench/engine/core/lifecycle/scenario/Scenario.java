@@ -200,7 +200,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
             .allowEnvironmentAccess(EnvironmentAccess.INHERIT)
             .allowPolyglotAccess(PolyglotAccess.ALL)
             .option("js.ecmascript-version", "2022")
-            .option("js.nashorn-compat", "false");
+            .option("js.nashorn-compat", "true");
 
         final Builder engineBuilder = org.graalvm.polyglot.Engine.newBuilder();
         engineBuilder.option("engine.WarnInterpreterOnly", "false");
