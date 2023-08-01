@@ -47,8 +47,8 @@ public class LoaderConfig {
         return configMap.get(key).toString();
     }
 
-    public List<Map<String,String>> getDatasets() {
-        return (List<Map<String,String>>) configMap.get("datasets");
+    public List<String> getDatasets() {
+        return (List<String>) configMap.get("datasets");
     }
 
     public String getFormat() {
