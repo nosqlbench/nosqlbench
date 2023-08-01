@@ -18,20 +18,20 @@
 package io.nosqlbench.loader.hdf;
 
 import io.nosqlbench.loader.hdf.config.LoaderConfig;
-import io.nosqlbench.loader.hdf.readers.HdfReaderTypes;
 import io.nosqlbench.loader.hdf.readers.Hdf5Reader;
 import io.nosqlbench.loader.hdf.readers.HdfReader;
 import io.nosqlbench.loader.hdf.writers.AstraVectorWriter;
 import io.nosqlbench.loader.hdf.writers.FileVectorWriter;
 import io.nosqlbench.loader.hdf.writers.VectorWriter;
-import io.nosqlbench.loader.hdf.writers.VectorWriterTypes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-
 public class HdfLoader {
     private static final Logger logger = LogManager.getLogger(HdfLoader.class);
+    public static final String FILEWRITER = "filewriter";
+    public static final String ASTRA = "astra";
+    public static final String HDF5 = "hdf5";
+    public static final String HDF4 = "hdf4";
 
     public static void main (String[] args) {
         if (args.length == 0) {
@@ -44,7 +44,7 @@ public class HdfLoader {
             VectorWriter writer = null;
 
             String format = config.getFormat();
-            switch (HdfReaderTypes.valueOf(format)) {
+            switch (format.toLowerCase()) {
                 case HDF4 -> {
                     logger.info("HDF4 format not yet supported");
                     System.exit(1);
@@ -59,13 +59,9 @@ public class HdfLoader {
             }
 
             String writerType = config.getWriter();
-            switch (VectorWriterTypes.valueOf(writerType)) {
-                case filewriter -> {
-                    writer = new FileVectorWriter(config);
-                }
-                case astra -> {
-                    writer = new AstraVectorWriter(config);
-                }
+            switch (writerType.toLowerCase()) {
+                case FILEWRITER -> writer = new FileVectorWriter(config);
+                case ASTRA -> writer = new AstraVectorWriter(config);
                 default -> {
                     logger.info("Unknown writer type: " + writerType);
                     System.exit(1);

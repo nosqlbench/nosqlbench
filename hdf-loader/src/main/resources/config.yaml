@@ -1,12 +1,12 @@
-format: HD5
-sourceFile: /home/username/data.h5
+format: HDF5
+sourceFile: /home/mwolters138/Downloads/embeddings.h5
 datasets:
   - name: dataset1
     type: string
   - name: dataset2
     type: int
 embedding: word2vec
-writer: [astra, file]
+writer: filewriter
 astra:
   database: test
   keyspace: test

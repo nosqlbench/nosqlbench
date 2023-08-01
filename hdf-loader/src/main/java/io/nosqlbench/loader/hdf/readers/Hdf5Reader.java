@@ -80,6 +80,11 @@ public class Hdf5Reader implements HdfReader {
                     H5.H5Tclose(datatypeId);
                     H5.H5Dclose(datasetId);
 
+                    // Now you have the data, and you can convert it into vector embeddings
+                    //INDArray dataArray = Nd4j.create(data);
+                    //WordVectors wordVectors = new WordVectorsImpl();
+                    //wordVectors.setLookupTable(dataArray);
+                    //WordVectorSerializer.writeWordVectors(wordVectors, "vector_embeddings.txt");
 
                     queue.put(vector);
                 } catch (HDF5Exception e) {
