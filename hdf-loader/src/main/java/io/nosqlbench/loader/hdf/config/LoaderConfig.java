@@ -74,4 +74,8 @@ public class LoaderConfig {
     public int getThreads() {
         return (int) configMap.getOrDefault("threads", 1);
     }
+
+    public int getQueueSize() {
+        return (int) configMap.getOrDefault("queueSize", 1000);
+    }
 }

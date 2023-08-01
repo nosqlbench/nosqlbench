@@ -22,6 +22,7 @@ import io.nosqlbench.loader.hdf.writers.VectorWriter;
 
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
+import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
 import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,15 +30,18 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Hdf5Reader implements HdfReader {
     private static final Logger logger = LogManager.getLogger(Hdf5Reader.class);
     private VectorWriter writer;
     private final LoaderConfig config;
     private final ExecutorService executorService;
+    private final LinkedBlockingQueue<float[]> queue;
     public Hdf5Reader(LoaderConfig config) {
         this.config = config;
         executorService = Executors.newFixedThreadPool(config.getThreads());
+        queue = new LinkedBlockingQueue<>(config.getQueueSize());
     }
 
     @Override
@@ -57,12 +61,31 @@ public class Hdf5Reader implements HdfReader {
                     int datasetId = H5.H5Dopen(fileId, dataset.get("name"));
                     // Get the dataspace of the dataset
                     int dataspaceId = H5.H5Dget_space(datasetId);
-
                     // Get the number of dimensions in the dataspace
                     int numDimensions = H5.H5Sget_simple_extent_ndims(dataspaceId);
+                    float[] vector = new float[numDimensions];
                     long[] dims = new long[numDimensions];
-                } catch (HDF5LibraryException e) {
+                    // Get the datatype of the dataset
+                    int datatypeId = H5.H5Dget_type(datasetId);
+                    // Get the size of each dimension
+                    H5.H5Sget_simple_extent_dims(dataspaceId, dims, null);
+
+                    // Read the data from the dataset
+                    double[] data = new double[(int) dims[0]];
+                    H5.H5Dread(datasetId, datatypeId, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                        HDF5Constants.H5P_DEFAULT, data);
+
+                    // Close the dataspace, datatype, and dataset
+                    H5.H5Sclose(dataspaceId);
+                    H5.H5Tclose(datatypeId);
+                    H5.H5Dclose(datasetId);
+
+
+                    queue.put(vector);
+                } catch (HDF5Exception e) {
                     logger.error(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             });
         }

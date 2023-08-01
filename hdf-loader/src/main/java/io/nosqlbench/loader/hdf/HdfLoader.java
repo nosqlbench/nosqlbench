@@ -18,13 +18,13 @@
 package io.nosqlbench.loader.hdf;
 
 import io.nosqlbench.loader.hdf.config.LoaderConfig;
-import io.nosqlbench.loader.hdf.readers.HdfReaders;
+import io.nosqlbench.loader.hdf.readers.HdfReaderTypes;
 import io.nosqlbench.loader.hdf.readers.Hdf5Reader;
 import io.nosqlbench.loader.hdf.readers.HdfReader;
 import io.nosqlbench.loader.hdf.writers.AstraVectorWriter;
 import io.nosqlbench.loader.hdf.writers.FileVectorWriter;
 import io.nosqlbench.loader.hdf.writers.VectorWriter;
-import io.nosqlbench.loader.hdf.writers.VectorWriters;
+import io.nosqlbench.loader.hdf.writers.VectorWriterTypes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +44,7 @@ public class HdfLoader {
             VectorWriter writer = null;
 
             String format = config.getFormat();
-            switch (HdfReaders.valueOf(format)) {
+            switch (HdfReaderTypes.valueOf(format)) {
                 case HDF4 -> {
                     logger.info("HDF4 format not yet supported");
                     System.exit(1);
@@ -59,7 +59,7 @@ public class HdfLoader {
             }
 
             String writerType = config.getWriter();
-            switch (VectorWriters.valueOf(writerType)) {
+            switch (VectorWriterTypes.valueOf(writerType)) {
                 case filewriter -> {
                     writer = new FileVectorWriter(config);
                 }

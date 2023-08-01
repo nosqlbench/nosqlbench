@@ -15,9 +15,9 @@
  *
  */
 
-package io.nosqlbench.loader.hdf.writers;
+package io.nosqlbench.loader.hdf.readers;
 
-public enum VectorWriters {
-    astra,
-    filewriter
+public enum HdfReaderTypes {
+    HDF4,
+    HDF5
 }

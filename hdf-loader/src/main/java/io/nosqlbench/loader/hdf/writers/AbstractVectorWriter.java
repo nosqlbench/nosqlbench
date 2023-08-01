@@ -15,9 +15,10 @@
  *
  */
 
-package io.nosqlbench.loader.hdf.readers;
+package io.nosqlbench.loader.hdf.writers;
 
-public enum HdfReaders {
-    HDF4,
-    HDF5
+import java.util.concurrent.LinkedBlockingQueue;
+
+public abstract class AbstractVectorWriter implements VectorWriter {
+    protected LinkedBlockingQueue<float[]> queue;
 }
