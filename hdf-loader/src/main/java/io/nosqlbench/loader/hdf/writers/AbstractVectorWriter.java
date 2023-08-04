@@ -21,4 +21,26 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public abstract class AbstractVectorWriter implements VectorWriter {
     protected LinkedBlockingQueue<float[]> queue;
+
+    public void setQueue(LinkedBlockingQueue<float[]> queue) {
+        this.queue = queue;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                float[] vector = queue.take();
+                if (vector.length==0) {
+                    break;
+                }
+                writeVector(vector);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    protected abstract void writeVector(float[] vector);
+
 }

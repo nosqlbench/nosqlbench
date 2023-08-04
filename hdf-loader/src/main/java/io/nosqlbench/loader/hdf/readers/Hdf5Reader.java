@@ -17,16 +17,17 @@
 
 package io.nosqlbench.loader.hdf.readers;
 
+import io.jhdf.HdfFile;
+import io.jhdf.api.Dataset;
+import io.jhdf.api.Group;
+import io.jhdf.api.Node;
+import io.jhdf.object.datatype.DataType;
 import io.nosqlbench.loader.hdf.config.LoaderConfig;
 import io.nosqlbench.loader.hdf.writers.VectorWriter;
-
-import ncsa.hdf.hdf5lib.H5;
-import ncsa.hdf.hdf5lib.HDF5Constants;
-import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
-import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -40,6 +41,7 @@ public class Hdf5Reader implements HdfReader {
     private final LoaderConfig config;
     private final ExecutorService executorService;
     private final LinkedBlockingQueue<float[]> queue;
+    private List<String> datasets;
     public Hdf5Reader(LoaderConfig config) {
         this.config = config;
         executorService = Executors.newFixedThreadPool(config.getThreads());
@@ -49,76 +51,44 @@ public class Hdf5Reader implements HdfReader {
     @Override
     public void setWriter(VectorWriter writer) {
         this.writer = writer;
+        writer.setQueue(queue);
+        Thread t = new Thread(writer);
+        t.start();
+    }
+
+    public void extractDatasets(Group parent) {
+        Map<String, Node> nodes = parent.getChildren();
+        for (String key : nodes.keySet()) {
+            Node node = nodes.get(key);
+            if (node instanceof Dataset) {
+                datasets.add(((Dataset)node).getPath());
+            } else if (node.isGroup()) {
+                extractDatasets((Group) node);
+            }
+        }
     }
 
     @Override
-    public void read() throws HDF5LibraryException {
-        String sourceFile = config.getSourceFile();
-        int fileId = H5.H5Fopen(sourceFile, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
-        List<String> datasets = config.getDatasets();
+    public void read()   {
+        HdfFile hdfFile = new HdfFile(Paths.get(config.getSourceFile()));
+        datasets = config.getDatasets();
         if (datasets.get(0).equalsIgnoreCase(ALL)) {
-            try {
-                int numObjects = H5.H5Fget_obj_count(fileId, HDF5Constants.H5F_OBJ_ALL);
-                String[] objNames = new String[numObjects];
-                int[] objTypes = new int[numObjects];
-                long[] refArray = new long[numObjects];
-                //H5.H5Fget_obj_ids(fileId, HDF5Constants.H5F_OBJ_ALL, numObjects, objNames, objTypes);
-                H5.H5Gget_obj_info_all(fileId, null, objNames, objTypes, refArray);
-
-                for (int i = 0; i < numObjects; i++) {
-                    String objName = objNames[i];
-                    int objType = objTypes[i];
-                    if (objType == HDF5Constants.H5G_DATASET) {
-                        datasets.add(objName);
-                    }
-                }
-            } catch (HDF5Exception e) {
-                logger.error("Error getting all datasets from file: " + sourceFile, e);
-            }
+            extractDatasets(hdfFile);
         }
-        for (String dataset : config.getDatasets()) {
-            if (dataset.equalsIgnoreCase(ALL)) {
+        for (String ds : datasets) {
+            if (ds.equalsIgnoreCase(ALL)) {
                 continue;
             }
-            executorService.submit(() -> {
-                // Your lambda code that runs in a separate thread for each object
-                logger.info("Processing dataset: " + dataset);
-                try {
-                    int datasetId = H5.H5Dopen(fileId, dataset);
-                    // Get the dataspace of the dataset
-                    int dataspaceId = H5.H5Dget_space(datasetId);
-                    // Get the number of dimensions in the dataspace
-                    int numDimensions = H5.H5Sget_simple_extent_ndims(dataspaceId);
-                    float[] vector = new float[numDimensions];
-                    long[] dims = new long[numDimensions];
-                    // Get the datatype of the dataset
-                    int datatypeId = H5.H5Dget_type(datasetId);
-                    // Get the size of each dimension
-                    H5.H5Sget_simple_extent_dims(dataspaceId, dims, null);
+            //executorService.submit(() -> {
+                logger.info("Processing dataset: " + ds);
+                Dataset dataset = hdfFile.getDatasetByPath(ds);
+                DataType dataType = dataset.getDataType();
+                long l = dataset.getSize();
+                int[] dims = dataset.getDimensions();
 
-                    // Read the data from the dataset
-                    double[] data = new double[(int) dims[0]];
-                    H5.H5Dread(datasetId, datatypeId, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, data);
+                //queue.put(vector);
 
-                    // Close the dataspace, datatype, and dataset
-                    H5.H5Sclose(dataspaceId);
-                    H5.H5Tclose(datatypeId);
-                    H5.H5Dclose(datasetId);
-
-                    // Now you have the data, and you can convert it into vector embeddings
-                    //INDArray dataArray = Nd4j.create(data);
-                    //WordVectors wordVectors = new WordVectorsImpl();
-                    //wordVectors.setLookupTable(dataArray);
-                    //WordVectorSerializer.writeWordVectors(wordVectors, "vector_embeddings.txt");
-
-                    queue.put(vector);
-                } catch (HDF5Exception e) {
-                    logger.error(e);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+           // });
         }
     }
 }

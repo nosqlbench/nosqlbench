@@ -1,5 +1,5 @@
 format: HDF5
-sourceFile: /home/mwolters138/Downloads/NEONDSTowerTemperatureData.hdf5
+sourceFile: /home/mwolters138/Downloads/NEONDSImagingSpectrometerData.h5 #h5ex_t_arrayatt.h5
 datasets:
   - all
 embedding: word2vec

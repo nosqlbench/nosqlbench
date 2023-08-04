@@ -49,9 +49,7 @@ public class HdfLoader {
                     logger.info("HDF4 format not yet supported");
                     System.exit(1);
                 }
-                case HDF5 -> {
-                    reader = new Hdf5Reader(config);
-                }
+                case HDF5 -> reader = new Hdf5Reader(config);
                 default -> {
                     logger.info("Unknown format: " + format);
                     System.exit(1);

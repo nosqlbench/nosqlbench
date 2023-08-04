@@ -53,17 +53,16 @@
         </dependency>
 
         <dependency>
-            <groupId>org.hdfgroup</groupId>
-            <artifactId>hdf-java</artifactId>
-            <version>2.6.1</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.datastax.oss</groupId>
             <artifactId>java-driver-core</artifactId>
             <version>4.16.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.jhdf</groupId>
+            <artifactId>jhdf</artifactId>
+            <version>0.6.10</version>
+        </dependency>
     </dependencies>
 
 </project>

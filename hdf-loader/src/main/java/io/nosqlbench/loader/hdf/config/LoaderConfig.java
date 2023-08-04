@@ -71,6 +71,10 @@ public class LoaderConfig {
         return (String) configMap.get("sourceFile");
     }
 
+    public String getTargetFile() {
+        return (String) configMap.getOrDefault("targetFile", "./vectors.txt");
+    }
+
     public int getThreads() {
         return (int) configMap.getOrDefault("threads", 1);
     }

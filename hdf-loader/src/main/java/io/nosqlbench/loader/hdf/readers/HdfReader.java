@@ -18,10 +18,9 @@
 package io.nosqlbench.loader.hdf.readers;
 
 import io.nosqlbench.loader.hdf.writers.VectorWriter;
-import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 public interface HdfReader {
     void setWriter(VectorWriter writer);
 
-    void read() throws HDF5LibraryException;
+    void read();
 }

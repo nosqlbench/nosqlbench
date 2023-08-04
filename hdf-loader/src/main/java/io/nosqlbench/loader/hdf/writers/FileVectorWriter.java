@@ -18,8 +18,33 @@
 package io.nosqlbench.loader.hdf.writers;
 
 import io.nosqlbench.loader.hdf.config.LoaderConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class FileVectorWriter implements VectorWriter {
-    public FileVectorWriter(LoaderConfig config) {
+import java.io.*;
+
+public class FileVectorWriter extends AbstractVectorWriter {
+    private static final Logger logger = LogManager.getLogger(FileVectorWriter.class);
+    private final BufferedWriter targetFile;
+    public FileVectorWriter(LoaderConfig config) throws IOException {
+        String targetFileName = config.getTargetFile();
+        targetFile = new BufferedWriter(new FileWriter(targetFileName));
+    }
+
+    @Override
+    protected void writeVector(float[] vector) {
+        try {
+            targetFile.write("[");
+            for (int i = 0; i < vector.length; i++) {
+                targetFile.write(String.valueOf(vector[i]));
+                if (i < vector.length - 1) {
+                    targetFile.write(",");
+                }
+            }
+            targetFile.write("]");
+            targetFile.write("\n");
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 }

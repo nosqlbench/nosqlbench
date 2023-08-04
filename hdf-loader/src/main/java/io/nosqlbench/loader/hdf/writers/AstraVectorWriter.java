@@ -18,9 +18,13 @@
 package io.nosqlbench.loader.hdf.writers;
 
 import io.nosqlbench.loader.hdf.config.LoaderConfig;
-import com.datastax.oss.driver.api.core.data.CqlVector;
 
 public class AstraVectorWriter extends AbstractVectorWriter {
     public AstraVectorWriter(LoaderConfig config) {
+    }
+
+    @Override
+    protected void writeVector(float[] vector) {
+
     }
 }

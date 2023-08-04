@@ -17,5 +17,8 @@
 
 package io.nosqlbench.loader.hdf.writers;
 
-public interface VectorWriter {
+import java.util.concurrent.LinkedBlockingQueue;
+
+public interface VectorWriter extends Runnable {
+    void setQueue(LinkedBlockingQueue<float[]> queue);
 }
