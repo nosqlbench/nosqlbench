@@ -1,12 +1,13 @@
 format: HDF5
-sourceFile: /home/mwolters138/Downloads/NEONDSImagingSpectrometerData.h5 #h5ex_t_arrayatt.h5
+sourceFile: /home/mwolters138/Downloads/embeddings.h5 #NEONDSImagingSpectrometerData.h5 #h5ex_t_arrayatt.h5
 datasets:
   - all
 embedding: word2vec
-writer: filewriter
+writer: astra #filewriter
 astra:
-  database: test
-  keyspace: test
-  table: test
-  scb: /home/username/scb
-file: /home/username/data
+  scb: /home/mwolters138/Dev/testing/secure-connect-vector-correctness.zip
+  clientId: IvpdaZejwNuvWeupsIkWTHeL
+  clientSecret: .bxut2-OQL,dWunZeQbjZC0vMHd88UWXKS.xT,nl95zQC0B0xU9FzSWK3HSUGO11o_7pr7wG7+EMaZqegkKlr4fZ54__furPMtWPGiPp,2cZ1q15vrWwc9_-AcgeCbuf
+  keyspace: baselines768dot
+  query: INSERT INTO vectors(key, value) VALUES (?,?)
+targetFile: /home/mwolters138/vectors.txt

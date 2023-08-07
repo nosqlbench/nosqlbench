@@ -23,6 +23,8 @@ import io.jhdf.api.Group;
 import io.jhdf.api.Node;
 import io.jhdf.object.datatype.DataType;
 import io.nosqlbench.loader.hdf.config.LoaderConfig;
+import io.nosqlbench.loader.hdf.embedding.EmbeddingGenerator;
+import io.nosqlbench.loader.hdf.embedding.EmbeddingGeneratorFactory;
 import io.nosqlbench.loader.hdf.writers.VectorWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +35,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import static io.nosqlbench.loader.hdf.embedding.EmbeddingGeneratorFactory.*;
 
 public class Hdf5Reader implements HdfReader {
     private static final Logger logger = LogManager.getLogger(Hdf5Reader.class);
@@ -83,12 +87,24 @@ public class Hdf5Reader implements HdfReader {
                 logger.info("Processing dataset: " + ds);
                 Dataset dataset = hdfFile.getDatasetByPath(ds);
                 DataType dataType = dataset.getDataType();
-                long l = dataset.getSize();
-                int[] dims = dataset.getDimensions();
 
-                //queue.put(vector);
+                int[] dims = dataset.getDimensions();
+                Object data = dataset.getData();
+
+                String type = dataset.getJavaType().getSimpleName();
+                EmbeddingGenerator generator = getGenerator(dataset.getJavaType().getSimpleName());
+                float[][] vectors = generator.generateEmbeddingFrom(data);
+                for (int i = 0; i < dims[0]; i++) {
+                    try {
+                        queue.put(vectors[i]);
+                    } catch (InterruptedException e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                }
 
            // });
         }
+        hdfFile.close();
+        writer.shutdown();
     }
 }

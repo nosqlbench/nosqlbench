@@ -15,12 +15,8 @@
  *
  */
 
-package io.nosqlbench.loader.hdf.writers;
+package io.nosqlbench.loader.hdf.embedding;
 
-import java.util.concurrent.LinkedBlockingQueue;
-
-public interface VectorWriter extends Runnable {
-    void setQueue(LinkedBlockingQueue<float[]> queue);
-
-    void shutdown();
+public interface EmbeddingGenerator {
+    public float[][] generateEmbeddingFrom(Object o);
 }

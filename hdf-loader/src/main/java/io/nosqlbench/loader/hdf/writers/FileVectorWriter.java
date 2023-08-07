@@ -47,4 +47,9 @@ public class FileVectorWriter extends AbstractVectorWriter {
             logger.error(e.getMessage(), e);
         }
     }
+
+    @Override
+    public void shutdown() {
+        shutdown = true;
+    }
 }

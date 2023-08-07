@@ -63,6 +63,13 @@
             <artifactId>jhdf</artifactId>
             <version>0.6.10</version>
         </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-api</artifactId>
+            <version>5.17.3-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

@@ -21,6 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public abstract class AbstractVectorWriter implements VectorWriter {
     protected LinkedBlockingQueue<float[]> queue;
+    protected boolean shutdown = false;
 
     public void setQueue(LinkedBlockingQueue<float[]> queue) {
         this.queue = queue;
@@ -28,7 +29,7 @@ public abstract class AbstractVectorWriter implements VectorWriter {
 
     @Override
     public void run() {
-        while (true) {
+        while (!shutdown || !queue.isEmpty()) {
             try {
                 float[] vector = queue.take();
                 if (vector.length==0) {
