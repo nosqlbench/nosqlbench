@@ -17,6 +17,9 @@
 
 package io.nosqlbench.loader.hdf.embedding;
 
+//import org.deeplearning4j.models.word2vec.Word2Vec;
+//import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
+
 public class StringEmbeddingGenerator implements EmbeddingGenerator {
 
         @Override

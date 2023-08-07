@@ -19,6 +19,7 @@ package io.nosqlbench.loader.hdf.writers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.oss.driver.api.core.data.CqlVector;
 import io.nosqlbench.loader.hdf.config.LoaderConfig;
 
 import java.nio.file.Paths;
@@ -40,7 +41,13 @@ public class AstraVectorWriter extends AbstractVectorWriter {
 
     @Override
     protected void writeVector(float[] vector) {
-        session.execute(insert_vector.bind(getPartitionValue(vector), vector));
+        Float[] vector2 = new Float[vector.length];
+        for (int i = 0; i < vector.length; i++) {
+            vector2[i] = vector[i];
+        }
+        CqlVector.Builder vectorBuilder = CqlVector.builder();
+        vectorBuilder.add((Object[]) vector2);
+        session.execute(insert_vector.bind(getPartitionValue(vector), vectorBuilder.build()));
     }
 
     private String getPartitionValue(float[] vector) {
