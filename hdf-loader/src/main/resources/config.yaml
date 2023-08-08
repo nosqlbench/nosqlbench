@@ -1,9 +1,9 @@
 format: HDF5
-sourceFile: /home/mwolters138/Downloads/embeddings.h5 #NEONDSImagingSpectrometerData.h5 #h5ex_t_arrayatt.h5
+sourceFile: /home/mwolters138/Downloads/NEONDSImagingSpectrometerData.h5 #h5ex_t_arrayatt.h5
 datasets:
   - all
 embedding: word2vec
-writer: astra #filewriter
+writer: filewriter
 astra:
   scb: /home/mwolters138/Dev/testing/secure-connect-vector-correctness.zip
   clientId: IvpdaZejwNuvWeupsIkWTHeL

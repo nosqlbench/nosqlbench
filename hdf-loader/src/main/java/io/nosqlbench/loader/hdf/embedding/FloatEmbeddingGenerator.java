@@ -20,7 +20,27 @@ package io.nosqlbench.loader.hdf.embedding;
 public class FloatEmbeddingGenerator implements EmbeddingGenerator {
 
         @Override
-        public float[][] generateEmbeddingFrom(Object o) {
-            return (float[][]) o;
+        public float[][] generateEmbeddingFrom(Object o, int[] dims) {
+            switch (dims.length) {
+                case 1:
+                    return new float[][]{new float[]{(float) o}};
+                case 2: return (float[][]) o;
+                case 3: return flatten(o, dims);
+                default:
+                    throw new RuntimeException("unsupported embedding dimensionality: " + dims.length);
+            }
+        }
+
+        private float[][] flatten(Object o, int[] dims) {
+            float[][][] arr = (float[][][]) o;
+            float[][] flat = new float[dims[0]][dims[1] * dims[2]];
+            for (int i = 0; i < dims[0]; i++) {
+                for (int j = 0; j < dims[1]; j++) {
+                    for (int k = 0; k < dims[2]; k++) {
+                        flat[i][j * dims[2] + k] = arr[i][j][k];
+                    }
+                }
+            }
+            return flat;
         }
 }

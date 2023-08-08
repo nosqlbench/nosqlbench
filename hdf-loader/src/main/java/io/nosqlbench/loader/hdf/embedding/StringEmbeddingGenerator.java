@@ -23,7 +23,7 @@ package io.nosqlbench.loader.hdf.embedding;
 public class StringEmbeddingGenerator implements EmbeddingGenerator {
 
         @Override
-        public float[][] generateEmbeddingFrom(Object o) {
+        public float[][] generateEmbeddingFrom(Object o, int[] dims) {
             return null;
         }
 }

@@ -18,5 +18,5 @@
 package io.nosqlbench.loader.hdf.embedding;
 
 public interface EmbeddingGenerator {
-    public float[][] generateEmbeddingFrom(Object o);
+    public float[][] generateEmbeddingFrom(Object o, int[] dims);
 }

@@ -24,19 +24,20 @@ import io.jhdf.api.Node;
 import io.jhdf.object.datatype.DataType;
 import io.nosqlbench.loader.hdf.config.LoaderConfig;
 import io.nosqlbench.loader.hdf.embedding.EmbeddingGenerator;
-import io.nosqlbench.loader.hdf.embedding.EmbeddingGeneratorFactory;
 import io.nosqlbench.loader.hdf.writers.VectorWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static io.nosqlbench.loader.hdf.embedding.EmbeddingGeneratorFactory.*;
+import static io.nosqlbench.loader.hdf.embedding.EmbeddingGeneratorFactory.getGenerator;
 
 public class Hdf5Reader implements HdfReader {
     private static final Logger logger = LogManager.getLogger(Hdf5Reader.class);
@@ -48,7 +49,7 @@ public class Hdf5Reader implements HdfReader {
     private List<String> datasets;
     public Hdf5Reader(LoaderConfig config) {
         this.config = config;
-        executorService = Executors.newFixedThreadPool(config.getThreads());
+        executorService = Executors.newCachedThreadPool();
         queue = new LinkedBlockingQueue<>(config.getQueueSize());
     }
 
@@ -79,11 +80,12 @@ public class Hdf5Reader implements HdfReader {
         if (datasets.get(0).equalsIgnoreCase(ALL)) {
             extractDatasets(hdfFile);
         }
+        List<Future<?>> futures = new ArrayList<>();
         for (String ds : datasets) {
             if (ds.equalsIgnoreCase(ALL)) {
                 continue;
             }
-            //executorService.submit(() -> {
+            Future<?> future = executorService.submit(() -> {
                 logger.info("Processing dataset: " + ds);
                 Dataset dataset = hdfFile.getDatasetByPath(ds);
                 DataType dataType = dataset.getDataType();
@@ -93,7 +95,7 @@ public class Hdf5Reader implements HdfReader {
 
                 String type = dataset.getJavaType().getSimpleName();
                 EmbeddingGenerator generator = getGenerator(dataset.getJavaType().getSimpleName());
-                float[][] vectors = generator.generateEmbeddingFrom(data);
+                float[][] vectors = generator.generateEmbeddingFrom(data, dims);
                 for (int i = 0; i < dims[0]; i++) {
                     try {
                         queue.put(vectors[i]);
@@ -101,8 +103,15 @@ public class Hdf5Reader implements HdfReader {
                         logger.error(e.getMessage(), e);
                     }
                 }
-
-           // });
+            });
+            futures.add(future);
+        }
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
         }
         hdfFile.close();
         writer.shutdown();
