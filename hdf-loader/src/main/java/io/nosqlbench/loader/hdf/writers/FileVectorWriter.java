@@ -43,6 +43,7 @@ public class FileVectorWriter extends AbstractVectorWriter {
             }
             targetFile.write("]");
             targetFile.write("\n");
+            targetFile.flush();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }

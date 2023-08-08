@@ -24,6 +24,6 @@ public class StringEmbeddingGenerator implements EmbeddingGenerator {
 
         @Override
         public float[][] generateEmbeddingFrom(Object o, int[] dims) {
-            return null;
+            return new float[][]{{0.0f, 1.0f},{1.0f, 0.0f}}; //TODO
         }
 }
