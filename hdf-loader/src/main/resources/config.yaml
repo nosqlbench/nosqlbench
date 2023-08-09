@@ -1,9 +1,9 @@
 format: HDF5
-sourceFile: /home/mwolters138/Documents/hdf5/datasets/deep-image-96-angular.hdf5
+sourceFile: /home/mwolters138/Documents/hdf5/datasets/pass/glove-25-angular.hdf5
 datasets:
   - all
 embedding: word2vec
-writer: filewriter
+writer: noop
 astra:
   scb: /home/mwolters138/Dev/testing/secure-connect-vector-correctness.zip
   clientId: IvpdaZejwNuvWeupsIkWTHeL

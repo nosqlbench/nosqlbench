@@ -22,6 +22,7 @@ import io.nosqlbench.loader.hdf.readers.Hdf5Reader;
 import io.nosqlbench.loader.hdf.readers.HdfReader;
 import io.nosqlbench.loader.hdf.writers.AstraVectorWriter;
 import io.nosqlbench.loader.hdf.writers.FileVectorWriter;
+import io.nosqlbench.loader.hdf.writers.NoopVectorWriter;
 import io.nosqlbench.loader.hdf.writers.VectorWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,6 +31,7 @@ public class HdfLoader {
     private static final Logger logger = LogManager.getLogger(HdfLoader.class);
     public static final String FILEWRITER = "filewriter";
     public static final String ASTRA = "astra";
+    public static final String NOOP = "noop";
     public static final String HDF5 = "hdf5";
     public static final String HDF4 = "hdf4";
 
@@ -60,6 +62,7 @@ public class HdfLoader {
             switch (writerType.toLowerCase()) {
                 case FILEWRITER -> writer = new FileVectorWriter(config);
                 case ASTRA -> writer = new AstraVectorWriter(config);
+                case NOOP -> writer = new NoopVectorWriter();
                 default -> {
                     logger.info("Unknown writer type: " + writerType);
                     System.exit(1);

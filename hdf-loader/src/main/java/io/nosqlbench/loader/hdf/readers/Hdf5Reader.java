@@ -21,7 +21,6 @@ import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
 import io.jhdf.api.Group;
 import io.jhdf.api.Node;
-import io.jhdf.object.datatype.DataType;
 import io.nosqlbench.loader.hdf.config.LoaderConfig;
 import io.nosqlbench.loader.hdf.embedding.EmbeddingGenerator;
 import io.nosqlbench.loader.hdf.writers.VectorWriter;
@@ -57,8 +56,6 @@ public class Hdf5Reader implements HdfReader {
     public void setWriter(VectorWriter writer) {
         this.writer = writer;
         writer.setQueue(queue);
-        Thread t = new Thread(writer);
-        t.start();
     }
 
     public void extractDatasets(Group parent) {
@@ -66,8 +63,9 @@ public class Hdf5Reader implements HdfReader {
         for (String key : nodes.keySet()) {
             Node node = nodes.get(key);
             if (node instanceof Dataset) {
-                datasets.add(((Dataset)node).getPath());
-            } else if (node.isGroup()) {
+                datasets.add(node.getPath());
+            }
+            else if (node.isGroup()) {
                 extractDatasets((Group) node);
             }
         }
@@ -81,6 +79,7 @@ public class Hdf5Reader implements HdfReader {
             extractDatasets(hdfFile);
         }
         List<Future<?>> futures = new ArrayList<>();
+        Future<?> writerFuture = executorService.submit(writer);
         for (String ds : datasets) {
             if (ds.equalsIgnoreCase(ALL)) {
                 continue;
@@ -89,13 +88,42 @@ public class Hdf5Reader implements HdfReader {
                 logger.info("Processing dataset: " + ds);
                 Dataset dataset = hdfFile.getDatasetByPath(ds);
                 int[] dims = dataset.getDimensions();
-                EmbeddingGenerator generator = getGenerator(dataset.getJavaType().getSimpleName());
-                float[][] vectors = generator.generateEmbeddingFrom(dataset.getData(), dims);
-                for (int i = 0; i < dims[0]; i++) {
-                    try {
-                        queue.put(vectors[i]);
-                    } catch (InterruptedException e) {
-                        logger.error(e.getMessage(), e);
+                String type = dataset.getJavaType().getSimpleName().toLowerCase();
+                EmbeddingGenerator generator = getGenerator(type);
+                Object data;
+                if (dataset.getSizeInBytes() > Integer.MAX_VALUE) {
+                    // TODO: For now this will be implemented to handle numeric types with
+                    // 2 dimensions where the 1st dimension is the number of vectors and the 2nd
+                    // dimension is the number of dimensions in the vector.
+                    long[] sliceOffset = new long[dims.length];
+                    int[] sliceDimensions = new int[dims.length];
+                    sliceDimensions[1] = dims[1];
+                    int noOfSlices = (int) (dataset.getSizeInBytes() / Integer.MAX_VALUE) + 1;
+                    int sliceSize = dims[0] / noOfSlices;
+                    for (int i = 0; i < noOfSlices; i++) {
+                        sliceOffset[0] = (long) i * sliceSize;
+                        sliceDimensions[0] = sliceSize;
+                        data = dataset.getData(sliceOffset, sliceDimensions);
+                        float[][] vectors = generator.generateEmbeddingFrom(data, dims);
+                        for (float[] vector : vectors) {
+                            try {
+                                queue.put(vector);
+                            } catch (InterruptedException e) {
+                                logger.error(e.getMessage(), e);
+                            }
+                        }
+                    }
+                } else {
+                    data = dataset.getData();
+                    float[][] vectors = generator.generateEmbeddingFrom(data, dims);
+                    int i = 1;
+                    for (float[] vector : vectors) {
+                        i++;
+                        try {
+                            queue.put(vector);
+                        } catch (InterruptedException e) {
+                            logger.error(e.getMessage(), e);
+                        }
                     }
                 }
             });
@@ -110,5 +138,6 @@ public class Hdf5Reader implements HdfReader {
         }
         hdfFile.close();
         writer.shutdown();
+        executorService.shutdown();
     }
 }
