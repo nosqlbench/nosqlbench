@@ -17,13 +17,41 @@
 
 package io.nosqlbench.loader.hdf.embedding;
 
-//import org.deeplearning4j.models.word2vec.Word2Vec;
-//import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
+import org.deeplearning4j.models.word2vec.Word2Vec;
+import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
+import org.deeplearning4j.text.sentenceiterator.CollectionSentenceIterator;
+import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
+import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
+import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
+
+import java.util.Arrays;
 
 public class StringEmbeddingGenerator implements EmbeddingGenerator {
+    private TokenizerFactory tokenizerFactory= new DefaultTokenizerFactory();
 
         @Override
         public float[][] generateEmbeddingFrom(Object o, int[] dims) {
-            return new float[][]{{0.0f, 1.0f},{1.0f, 0.0f}}; //TODO
+            switch (dims.length) {
+                case 1 -> {
+                    return generateWordEmbeddings((String[]) o);
+                }
+                default -> throw new RuntimeException("unsupported embedding dimensionality: " + dims.length);
+            }
+
         }
+
+    private float[][] generateWordEmbeddings(String[] text) {
+        SentenceIterator iter = new CollectionSentenceIterator(Arrays.asList(text));
+        /*Word2Vec vec = new Word2Vec.Builder()
+            .minWordFrequency(1)
+            .iterations(1)
+            .layerSize(targetDims)
+            .seed(42)
+            .windowSize(5)
+            .iterate(iter)
+            .tokenizerFactory(tokenizerFactory)
+            .build();
+*/
+        return null;
+    }
 }

@@ -79,6 +79,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-nlp</artifactId>
+            <version>1.0.0-M2.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.jhdf</groupId>
             <artifactId>jhdf</artifactId>
             <version>0.6.10</version>

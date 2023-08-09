@@ -24,7 +24,8 @@ public class EmbeddingGeneratorFactory {
     private static final Map<String,EmbeddingGenerator> generators = new HashMap<>();
 
     public static EmbeddingGenerator getGenerator(String type) {
-        switch (type.toLowerCase()) {
+        String typeLower = type.equalsIgnoreCase("short") ? "int" : type.toLowerCase();
+        switch (typeLower) {
             case "string" -> {
                 if (!generators.containsKey(type)) {
                     generators.put(type, new StringEmbeddingGenerator());
@@ -37,9 +38,9 @@ public class EmbeddingGeneratorFactory {
                 }
                 return generators.get(type);
             }
-            case "short" -> {
+            case "int" -> {
                 if (!generators.containsKey(type)) {
-                    generators.put(type, new ShortEmbeddingGenerator());
+                    generators.put(type, new IntEmbeddingGenerator());
                 }
                 return generators.get(type);
             }

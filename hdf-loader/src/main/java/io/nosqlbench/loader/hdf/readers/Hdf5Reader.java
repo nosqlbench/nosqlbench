@@ -88,14 +88,9 @@ public class Hdf5Reader implements HdfReader {
             Future<?> future = executorService.submit(() -> {
                 logger.info("Processing dataset: " + ds);
                 Dataset dataset = hdfFile.getDatasetByPath(ds);
-                DataType dataType = dataset.getDataType();
-
                 int[] dims = dataset.getDimensions();
-                Object data = dataset.getData();
-
-                String type = dataset.getJavaType().getSimpleName();
                 EmbeddingGenerator generator = getGenerator(dataset.getJavaType().getSimpleName());
-                float[][] vectors = generator.generateEmbeddingFrom(data, dims);
+                float[][] vectors = generator.generateEmbeddingFrom(dataset.getData(), dims);
                 for (int i = 0; i < dims[0]; i++) {
                     try {
                         queue.put(vectors[i]);

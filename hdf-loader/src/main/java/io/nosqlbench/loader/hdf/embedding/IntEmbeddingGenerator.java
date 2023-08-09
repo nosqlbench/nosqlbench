@@ -17,14 +17,14 @@
 
 package io.nosqlbench.loader.hdf.embedding;
 
-public class ShortEmbeddingGenerator implements EmbeddingGenerator {
+public class IntEmbeddingGenerator implements EmbeddingGenerator {
     @Override
     public float[][] generateEmbeddingFrom(Object o, int[] dims) {
         switch (dims.length) {
             case 1 -> {
                 float[] arr = new float[dims[0]];
                 for (int i = 0; i < dims[0]; i++) {
-                    arr[i] = ((short[]) o)[i];
+                    arr[i] = ((int[]) o)[i];
                 }
                 return new float[][]{arr};
             }
@@ -32,7 +32,7 @@ public class ShortEmbeddingGenerator implements EmbeddingGenerator {
                 float[][] arr = new float[dims[0]][dims[1]];
                 for (int i = 0; i < dims[0]; i++) {
                     for (int j = 0; j < dims[1]; j++) {
-                        arr[i][j] = ((short[][]) o)[i][j];
+                        arr[i][j] = ((int[][]) o)[i][j];
                     }
                 }
                 return arr;
@@ -46,7 +46,7 @@ public class ShortEmbeddingGenerator implements EmbeddingGenerator {
     }
 
     private float[][] flatten(Object o, int[] dims) {
-        short[][][] arr = (short[][][]) o;
+        int[][][] arr = (int[][][]) o;
         float[][] flat = new float[dims[0]][dims[1] * dims[2]];
         for (int i = 0; i < dims[0]; i++) {
             for (int j = 0; j < dims[1]; j++) {

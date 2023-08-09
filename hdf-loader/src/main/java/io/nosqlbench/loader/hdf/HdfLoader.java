@@ -71,6 +71,5 @@ public class HdfLoader {
             logger.error(e);
             System.exit(1);
         }
-
     }
 }
