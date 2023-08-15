@@ -184,12 +184,12 @@
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
                 <artifactId>snappy-java</artifactId>
-                <version>1.1.10.1</version>
+                <version>1.1.10.3</version>
             </dependency>
             <dependency>
                 <groupId>com.datastax.oss</groupId>
                 <artifactId>java-driver-query-builder</artifactId>
-                <version>4.16.0</version>
+                <version>4.17.0</version>
             </dependency>
             <dependency>
                 <groupId>org.snakeyaml</groupId>
@@ -199,7 +199,7 @@
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
                 <artifactId>snappy-java</artifactId>
-                <version>1.1.10.1</version>
+                <version>1.1.10.3</version>
             </dependency>
             <dependency>
                 <groupId>com.esri.geometry</groupId>
@@ -209,7 +209,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.94.Final</version>
+                <version>4.1.95.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
@@ -231,7 +231,7 @@
             <dependency>
                 <groupId>com.github.docker-java</groupId>
                 <artifactId>docker-java-api</artifactId>
-                <version>3.3.1</version>
+                <version>3.3.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -293,7 +293,7 @@
             <dependency>
                 <groupId>com.github.docker-java</groupId>
                 <artifactId>docker-java-transport-okhttp</artifactId>
-                <version>3.3.1</version>
+                <version>3.3.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -304,7 +304,7 @@
             <dependency>
                 <groupId>com.github.docker-java</groupId>
                 <artifactId>docker-java</artifactId>
-                <version>3.3.1</version>
+                <version>3.3.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -316,7 +316,7 @@
             <dependency>
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core-java11</artifactId>
-                <version>6.4.3</version>
+                <version>6.4.4</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -326,7 +326,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.498</version>
+                <version>1.12.507</version>
             </dependency>
             <dependency>
                 <groupId>com.elega9t</groupId>
@@ -397,7 +397,7 @@
             <dependency>
                 <groupId>org.graalvm.sdk</groupId>
                 <artifactId>graal-sdk</artifactId>
-                <version>22.3.2</version>
+                <version>22.3.3</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
@@ -408,12 +408,12 @@
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
-                <version>22.3.2</version>
+                <version>22.3.3</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.tools</groupId>
                 <artifactId>profiler</artifactId>
-                <version>22.3.2</version>
+                <version>22.3.3</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
