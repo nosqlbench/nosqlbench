@@ -38,6 +38,12 @@ public class EmbeddingGeneratorFactory {
                 }
                 return generators.get(type);
             }
+            case "double" -> {
+                if (!generators.containsKey(type)) {
+                    generators.put(type, new DoubleEmbeddingGenerator());
+                }
+                return generators.get(type);
+            }
             default -> throw new RuntimeException("Unknown embedding type: " + type);
         }
     }

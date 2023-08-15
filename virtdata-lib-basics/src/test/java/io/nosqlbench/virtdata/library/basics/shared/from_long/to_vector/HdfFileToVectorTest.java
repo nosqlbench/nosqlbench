@@ -17,5 +17,29 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector;
 
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
 public class HdfFileToVectorTest {
+    @Test
+    public void testHdfFileToVector() {
+        final float[][] results = new float[][]{
+            {0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f},
+            {2.0f,1.6666666f,2.4f,3.2857144f,4.2222223f,5.181818f,6.1538463f},
+            {4.0f,2.3333333f,2.8f,3.5714285f,4.4444447f,5.3636365f,6.3076925f},
+            {6.0f,3.0f,3.2f,3.857143f,4.6666665f,5.5454545f,6.4615383f}
+        };
+
+        HdfFileToVector hdfFileToVector = new HdfFileToVector(
+            "src/test/resources/data/h5ex_t_float.h5", "/DS1");
+
+        List<Float> read;
+        for (int i = 0; i < 4; i++) {
+            read = hdfFileToVector.apply(i);
+            for (int j = 0; j < 7; j++) {
+                assert (read.get(j) == results[i][j]);
+            }
+        }
+    }
 }
