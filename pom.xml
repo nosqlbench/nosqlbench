@@ -77,6 +77,7 @@
         <module.virtdata-lib-random>virtdata-lib-random</module.virtdata-lib-random>
         <module.virtdata-lib-curves4>virtdata-lib-curves4</module.virtdata-lib-curves4>
         <module.virtdata-lib-realer>virtdata-lib-realer</module.virtdata-lib-realer>
+        <module.virtdata-lib-realer>virtdata-lib-hdf5</module.virtdata-lib-realer>
         <module.virtdata-userlibs>virtdata-userlibs</module.virtdata-userlibs>
     </properties>
     <modules>
@@ -125,6 +126,7 @@
         <module>virtdata-lib-random</module>
         <module>virtdata-lib-curves4</module>
         <module>virtdata-lib-realer</module>
+        <module>virtdata-lib-hdf5</module>
         <module>virtdata-userlibs</module>
 
         <!-- Documentation -->
