@@ -46,6 +46,7 @@ public class Hdf5Reader implements HdfReader {
     private final ExecutorService executorService;
     private final LinkedBlockingQueue<float[]> queue;
     private List<String> datasets;
+    private final float[] SHUTDOWN = new float[0];
     public Hdf5Reader(LoaderConfig config) {
         this.config = config;
         executorService = Executors.newCachedThreadPool();
@@ -79,7 +80,7 @@ public class Hdf5Reader implements HdfReader {
             extractDatasets(hdfFile);
         }
         List<Future<?>> futures = new ArrayList<>();
-        Future<?> writerFuture = executorService.submit(writer);
+        executorService.submit(writer);
         for (String ds : datasets) {
             if (ds.equalsIgnoreCase(ALL)) {
                 continue;
@@ -92,6 +93,7 @@ public class Hdf5Reader implements HdfReader {
                 EmbeddingGenerator generator = getGenerator(type);
                 Object data;
                 if (dataset.getSizeInBytes() > Integer.MAX_VALUE) {
+                    logger.info("slicing large dataset: " + ds);
                     // TODO: For now this will be implemented to handle numeric types with
                     // 2 dimensions where the 1st dimension is the number of vectors and the 2nd
                     // dimension is the number of dimensions in the vector.
@@ -116,9 +118,7 @@ public class Hdf5Reader implements HdfReader {
                 } else {
                     data = dataset.getData();
                     float[][] vectors = generator.generateEmbeddingFrom(data, dims);
-                    int i = 1;
                     for (float[] vector : vectors) {
-                        i++;
                         try {
                             queue.put(vector);
                         } catch (InterruptedException e) {
@@ -138,6 +138,11 @@ public class Hdf5Reader implements HdfReader {
         }
         hdfFile.close();
         writer.shutdown();
+        try {
+            queue.put(SHUTDOWN);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         executorService.shutdown();
     }
 }

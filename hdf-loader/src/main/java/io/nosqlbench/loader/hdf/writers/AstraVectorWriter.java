@@ -21,12 +21,15 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.data.CqlVector;
 import io.nosqlbench.loader.hdf.config.LoaderConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Paths;
 import java.util.Map;
 
 public class AstraVectorWriter extends AbstractVectorWriter {
-    private CqlSession session;
+    private static final Logger logger = LogManager.getLogger(AstraVectorWriter.class);
+    private final CqlSession session;
     PreparedStatement insert_vector;
 
     public AstraVectorWriter(LoaderConfig config) {
@@ -36,9 +39,10 @@ public class AstraVectorWriter extends AbstractVectorWriter {
             .withAuthCredentials(astraParams.get("clientId"), astraParams.get("clientSecret"))
             .withKeyspace(astraParams.get("keyspace"))
             .build();
+        logger.info("Astra session initialized");
         insert_vector = session.prepare(astraParams.get("query"));
     }
-
+//TODO: this is insanely slow. Needs work on threading/batching
     @Override
     protected void writeVector(float[] vector) {
         Float[] vector2 = new Float[vector.length];
@@ -46,7 +50,7 @@ public class AstraVectorWriter extends AbstractVectorWriter {
             vector2[i] = vector[i];
         }
         CqlVector.Builder vectorBuilder = CqlVector.builder();
-        vectorBuilder.add((Object[]) vector2);
+        vectorBuilder.add(vector2);
         session.execute(insert_vector.bind(getPartitionValue(vector), vectorBuilder.build()));
     }
 

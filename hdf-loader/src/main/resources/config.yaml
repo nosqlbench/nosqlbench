@@ -3,11 +3,11 @@ sourceFile: /home/mwolters138/Documents/hdf5/datasets/pass/glove-25-angular.hdf5
 datasets:
   - all
 embedding: word2vec
-writer: noop
+writer: filewriter
 astra:
   scb: /home/mwolters138/Dev/testing/secure-connect-vector-correctness.zip
   clientId: IvpdaZejwNuvWeupsIkWTHeL
   clientSecret: .bxut2-OQL,dWunZeQbjZC0vMHd88UWXKS.xT,nl95zQC0B0xU9FzSWK3HSUGO11o_7pr7wG7+EMaZqegkKlr4fZ54__furPMtWPGiPp,2cZ1q15vrWwc9_-AcgeCbuf
-  keyspace: baselines768dot
-  query: INSERT INTO vectors(key, value) VALUES (?,?)
+  keyspace: baselines128dot
+  query: INSERT INTO vectors25(key, value) VALUES (?,?)
 targetFile: /home/mwolters138/vectors.txt

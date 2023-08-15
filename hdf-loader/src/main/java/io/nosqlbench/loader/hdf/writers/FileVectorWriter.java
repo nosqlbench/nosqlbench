@@ -29,6 +29,7 @@ public class FileVectorWriter extends AbstractVectorWriter {
     public FileVectorWriter(LoaderConfig config) throws IOException {
         String targetFileName = config.getTargetFile();
         targetFile = new BufferedWriter(new FileWriter(targetFileName));
+        logger.info("Writing to file: " + targetFileName);
     }
 
     @Override

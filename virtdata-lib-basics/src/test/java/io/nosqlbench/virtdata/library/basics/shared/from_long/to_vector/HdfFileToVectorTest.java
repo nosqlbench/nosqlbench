@@ -15,22 +15,7 @@
  *
  */
 
-package io.nosqlbench.loader.hdf.writers;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-public class NoopVectorWriter extends AbstractVectorWriter {
-    private static final Logger logger = LogManager.getLogger(NoopVectorWriter.class);
-
-    @Override
-    protected void writeVector(float[] vector) {
-        //No-op
-        logger.debug(vector);
-    }
-
-    @Override
-    public void shutdown() {
-        shutdown = true;
-    }
+public class HdfFileToVectorTest {
 }

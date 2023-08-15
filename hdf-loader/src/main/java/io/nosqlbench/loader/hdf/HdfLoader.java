@@ -42,6 +42,7 @@ public class HdfLoader {
         }
         try {
             LoaderConfig config = new LoaderConfig(args[0]);
+            logger.info("Starting loader with config: " + config);
             HdfReader reader = null;
             VectorWriter writer = null;
 
@@ -51,7 +52,10 @@ public class HdfLoader {
                     logger.info("HDF4 format not yet supported");
                     System.exit(1);
                 }
-                case HDF5 -> reader = new Hdf5Reader(config);
+                case HDF5 -> {
+                    logger.info("HDF5 format selected");
+                    reader = new Hdf5Reader(config);
+                }
                 default -> {
                     logger.info("Unknown format: " + format);
                     System.exit(1);
@@ -59,6 +63,7 @@ public class HdfLoader {
             }
 
             String writerType = config.getWriter();
+            logger.info("Using writer type: " + writerType);
             switch (writerType.toLowerCase()) {
                 case FILEWRITER -> writer = new FileVectorWriter(config);
                 case ASTRA -> writer = new AstraVectorWriter(config);
@@ -69,6 +74,7 @@ public class HdfLoader {
                 }
             }
             reader.setWriter(writer);
+            logger.info("Starting main read loop");
             reader.read();
         } catch (Exception e) {
             logger.error(e);
