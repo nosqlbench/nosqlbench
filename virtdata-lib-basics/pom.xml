@@ -87,12 +87,7 @@
             <artifactId>jhdf</artifactId>
             <version>0.6.10</version>
         </dependency>
-        <dependency>
-            <groupId>io.jhdf</groupId>
-            <artifactId>jhdf</artifactId>
-            <version>0.6.10</version>
-            <scope>compile</scope>
-        </dependency>
+
     </dependencies>
 
 </project>
