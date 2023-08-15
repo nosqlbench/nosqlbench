@@ -25,6 +25,7 @@ public class EmbeddingGeneratorFactory {
 
     public static EmbeddingGenerator getGenerator(String type) {
         String typeLower = type.equalsIgnoreCase("short") ? "int" : type.toLowerCase();
+        if (typeLower.equals("integer")) typeLower = "int";
         switch (typeLower) {
             case "string" -> {
                 if (!generators.containsKey(type)) {
@@ -35,6 +36,12 @@ public class EmbeddingGeneratorFactory {
             case "float" -> {
                 if (!generators.containsKey(type)) {
                     generators.put(type, new FloatEmbeddingGenerator());
+                }
+                return generators.get(type);
+            }
+            case "double" -> {
+                if (!generators.containsKey(type)) {
+                    generators.put(type, new DoubleEmbeddingGenerator());
                 }
                 return generators.get(type);
             }

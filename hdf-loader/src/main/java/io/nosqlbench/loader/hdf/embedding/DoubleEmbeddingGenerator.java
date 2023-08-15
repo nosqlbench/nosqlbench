@@ -17,25 +17,44 @@
 
 package io.nosqlbench.loader.hdf.embedding;
 
-public class FloatEmbeddingGenerator implements EmbeddingGenerator {
+public class DoubleEmbeddingGenerator implements EmbeddingGenerator {
 
         @Override
         public float[][] generateEmbeddingFrom(Object o, int[] dims) {
             return switch (dims.length) {
-                case 1 -> new float[][]{(float[]) o};
-                case 2 -> (float[][]) o;
+                case 1 -> new float[][]{convertToFloat((double[]) o)};
+                case 2 -> convertToFloats((double[][]) o);
                 case 3 -> flatten(o, dims);
                 default -> throw new RuntimeException("unsupported embedding dimensionality: " + dims.length);
             };
         }
 
+    private float[][] convertToFloats(double[][] o) {
+        float[][] floats = new float[o.length][];
+        for (int i = 0; i < o.length; i++) {
+            floats[i] = convertToFloat(o[i]);
+        }
+        return floats;
+    }
+
+    public float[] convertToFloat(double[] doubleArray) {
+        if (doubleArray == null) {
+            return null;
+        }
+        float[] floatArray = new float[doubleArray.length];
+        for (int i = 0; i < doubleArray.length; i++) {
+            floatArray[i] = (float) doubleArray[i];
+        }
+        return floatArray;
+    }
+
         private float[][] flatten(Object o, int[] dims) {
-            float[][][] arr = (float[][][]) o;
+            double[][][] arr = (double[][][]) o;
             float[][] flat = new float[dims[0]][dims[1] * dims[2]];
             for (int i = 0; i < dims[0]; i++) {
                 for (int j = 0; j < dims[1]; j++) {
                     for (int k = 0; k < dims[2]; k++) {
-                        flat[i][j * dims[2] + k] = arr[i][j][k];
+                        flat[i][j * dims[2] + k] = (float)arr[i][j][k];
                     }
                 }
             }
