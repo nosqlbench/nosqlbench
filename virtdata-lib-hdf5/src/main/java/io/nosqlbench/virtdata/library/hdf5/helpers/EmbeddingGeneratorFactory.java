@@ -15,7 +15,7 @@
  *
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.embedding;
+package io.nosqlbench.virtdata.library.hdf5.helpers;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -15,13 +15,13 @@
  *
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.embedding;
+package io.nosqlbench.virtdata.library.hdf5.helpers;
 
 import java.util.List;
 
 public class IntEmbeddingGenerator implements EmbeddingGenerator {
     @Override
-    public List<Float> generateEmbeddingFrom(Object o, int[] dims) {
+    public List<Float> generateListEmbeddingFrom(Object o, int[] dims) {
         // in this case o will always be int[1][x]
         int[] vector = ((int[][]) o)[0];
         Float[] vector2 = new Float[vector.length];
@@ -29,5 +29,15 @@ public class IntEmbeddingGenerator implements EmbeddingGenerator {
             vector2[i] = (float) vector[i];
         }
         return List.of(vector2);
+    }
+
+    @Override
+    public float[] generateArrayEmbeddingFrom(Object o, int[] dims) {
+        int[] vector = ((int[][]) o)[0];
+        float[] vector2 = new float[vector.length];
+        for (int i = 0; i < vector.length; i++) {
+            vector2[i] = (float) vector[i];
+        }
+        return vector2;
     }
 }

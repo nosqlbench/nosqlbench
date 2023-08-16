@@ -39,6 +39,12 @@
             <version>${revision}</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.jhdf</groupId>
+            <artifactId>jhdf</artifactId>
+            <version>0.6.10</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -56,8 +62,16 @@
                 <includes>
                     <include>**</include>
                 </includes>
+                <excludes>
+                    <exclude>h5ex_t_float.h5</exclude>
+                </excludes>
             </resource>
-
+            <resource>
+                <directory>src/test/resources</directory>
+                <excludes>
+                    <exclude>h5ex_t_float.h5</exclude>
+                </excludes>
+            </resource>
         </resources>
     </build>
 

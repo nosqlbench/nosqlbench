@@ -15,18 +15,15 @@
  *
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector;
+package io.nosqlbench.virtdata.library.hdf5.from_long.to_array;
 
-import io.jhdf.HdfFile;
-import io.jhdf.api.Dataset;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.embedding.EmbeddingGenerator;
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector.embedding.EmbeddingGeneratorFactory;
+import io.nosqlbench.virtdata.library.hdf5.from_long.AbstractHdfFileToVector;
+import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGenerator;
+import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGeneratorFactory;
 
-import java.nio.file.Paths;
-import java.util.List;
 import java.util.function.LongFunction;
 
 /**
@@ -36,33 +33,22 @@ import java.util.function.LongFunction;
  * written this class will only work for datasets with 2 dimensions where the 1st dimension
  * specifies the number of vectors and the 2nd dimension specifies the number of elements in
  * each vector. Only datatypes short, int, and float are supported at this time.
+ * <p>
+ * This implementation is specific to returning an array of floats
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class HdfFileToVector implements LongFunction<List<Float>> {
-    private final HdfFile hdfFile;
-    private final Dataset dataset;
-    private final int[] dims;
+public class HdfFileToVectorArray extends AbstractHdfFileToVector implements LongFunction<float[]> {
     private final EmbeddingGenerator embeddingGenerator;
 
-    public HdfFileToVector(String filename, String datasetName) {
-        hdfFile = new HdfFile(Paths.get(filename));
-        //TODO: implement a function to get the dataset by name only without needing the full path
-        dataset = hdfFile.getDatasetByPath(datasetName);
-        dims = dataset.getDimensions();
+    public HdfFileToVectorArray(String filename, String datasetName) {
+        super(filename, datasetName);
         embeddingGenerator = EmbeddingGeneratorFactory.getGenerator(dataset.getJavaType().getSimpleName().toLowerCase());
     }
     @Override
-    public List<Float> apply(long l) {
-        long[] sliceOffset = new long[dims.length];
-        sliceOffset[0] = (l % dims[0]);
-        int[] sliceDimensions = new int[dims.length];
-        sliceDimensions[0] = 1;
-        // Do we want to give the option of reducing vector dimensions here?
-        sliceDimensions[1] = dims[1];
-        Object data = dataset.getData(sliceOffset, sliceDimensions);
-
-        return embeddingGenerator.generateEmbeddingFrom(data, dims);
+    public float[] apply(long l) {
+        Object data = getDataFrom(l);
+        return embeddingGenerator.generateArrayEmbeddingFrom(data, dims);
     }
 
 }

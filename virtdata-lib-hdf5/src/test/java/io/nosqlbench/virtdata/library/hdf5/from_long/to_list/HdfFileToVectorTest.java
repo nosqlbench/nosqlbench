@@ -15,19 +15,17 @@
  *
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector;
+package io.nosqlbench.virtdata.library.hdf5.from_long.to_list;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
 import static com.datastax.oss.protocol.internal.ProtocolConstants.ErrorCode.READ_TIMEOUT;
-import static org.apache.logging.log4j.core.impl.ThrowableFormatOptions.FILE_NAME;
 
 public class HdfFileToVectorTest {
     private static final int CONNECT_TIMEOUT = 100;
@@ -47,7 +45,7 @@ public class HdfFileToVectorTest {
             CONNECT_TIMEOUT,
             READ_TIMEOUT);
 
-        HdfFileToVector hdfFileToVector = new HdfFileToVector(
+        HdfFileToVectorList hdfFileToVector = new HdfFileToVectorList(
             "h5ex_t_float.h5",
             "/DS1");
 
