@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,13 @@ activitydef = {
     "alias" : "csvmetrics",
     "driver" : "diag",
     "cycles" : "50000",
-    "threads" : "20",
-    "op": '{"log":"level=debug,interval=1000"}',
-    "targetrate" : "10000.0"
+    "threads" : "1",
+    "op": "log: level=debug",
+    "rate" : "100.0"
 };
 scenario.start(activitydef);
+scenario.waitMillis(500);
+
 csvlogger.add(metrics.csvmetrics.cycles.servicetime);
 csvlogger.start(500,"MILLISECONDS");
 
