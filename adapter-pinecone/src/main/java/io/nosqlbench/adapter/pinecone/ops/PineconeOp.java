@@ -16,10 +16,10 @@
 
 package io.nosqlbench.adapter.pinecone.ops;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.RunnableOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.pinecone.PineconeConnection;
 
-public abstract class PineconeOp implements RunnableOp {
+public abstract class PineconeOp implements CycleOp {
     protected final PineconeConnection connection;
 
     public PineconeOp(PineconeConnection connection) {

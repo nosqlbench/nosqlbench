@@ -15,11 +15,12 @@
  */
 package io.nosqlbench.engine.core.lifecycle.activity;
 
+import io.nosqlbench.engine.api.activityapi.core.*;
+import io.nosqlbench.engine.api.activityimpl.MotorState;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.ParameterMap;
-import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateImage;
@@ -41,7 +42,7 @@ import java.util.stream.Collectors;
  *
  * <p>In order to allow for dynamic thread management, which is not easily supported as an explicit feature
  * of most executor services, threads are started as long-running processes and managed via state signaling.
- * The {@link RunState} enum, {@link io.nosqlbench.engine.api.activityimpl.MotorState} type, and {@link RunStateTally}
+ * The {@link RunState} enum, {@link MotorState} type, and {@link RunStateTally}
  * state tracking class are used together to represent valid states and transitions, contain and transition state atomically,
  * and provide blocking conditions for observers, respectively.</p>
  *

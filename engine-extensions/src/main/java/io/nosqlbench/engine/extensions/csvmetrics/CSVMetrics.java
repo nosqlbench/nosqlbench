@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.codahale.metrics.MetricRegistry;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class CSVMetrics {
@@ -80,6 +81,7 @@ public class CSVMetrics {
     }
 
     public CSVMetrics add(Metric metric) {
+        Objects.requireNonNull(metric);
         filter.add(metric);
         return this;
     }

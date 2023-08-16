@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package io.nosqlbench.engine.api.activityapi.core;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 
 import java.util.concurrent.Future;
 
@@ -80,8 +82,8 @@ public interface ActivityInstrumentation {
     /**
      * The bind timer keeps track of how long it takes for NoSQLBench to create an instance
      * of an executable operation, given the cycle. This is usually done by using an
-     * {@link io.nosqlbench.engine.api.activityapi.planning.OpSequence} in conjunction with
-     * an {@link io.nosqlbench.engine.api.activityimpl.OpDispenser}. This is named for "binding
+     * {@link OpSequence} in conjunction with
+     * an {@link OpDispenser}. This is named for "binding
      * a cycle to an operation".
      * @return a new or existing {@link Timer}
      */

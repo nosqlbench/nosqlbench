@@ -18,7 +18,6 @@ package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.testutils.Perf;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec.Verb;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +32,7 @@ import java.util.function.Function;
  */
 public class TestRateLimiterPerf1E7 {
 
-    private final Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(NBLabeledElement.forKV("alias","tokenrl"),"hybrid", rs.withVerb(Verb.configure));
+    private final Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(NBLabeledElement.forKV("alias","tokenrl"),"hybrid", rs.withVerb(RateSpec.Verb.configure));
     private final RateLimiterPerfTestMethods methods = new RateLimiterPerfTestMethods();
 
     // 160 threads at 10_000_000 ops/s

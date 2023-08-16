@@ -21,7 +21,7 @@ import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.adapter.pinecone.ops.PineconeUpdateOp;
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.pinecone.proto.SparseValues;
 import io.pinecone.proto.UpdateRequest;
 import org.apache.logging.log4j.LogManager;

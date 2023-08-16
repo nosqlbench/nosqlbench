@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.api.activityimpl.marker;
 
+import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.CycleResultSegmentsReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsIntervalSegment;
-import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 
 
 import java.util.Arrays;
@@ -206,7 +206,7 @@ public class ByteTrackerExtent implements CycleResultSegmentsReadable {
         }
 
         ByteTrackerExtent newLastExtent = new ByteTrackerExtent(
-                lastExtent.getMin() + size, lastExtent.getMin() + (size * 2)
+                lastExtent.getMin() + size, lastExtent.getMin() + (size * 2L)
         );
 
         if (!lastExtent.getNextExtent().compareAndSet(null, newLastExtent)) {

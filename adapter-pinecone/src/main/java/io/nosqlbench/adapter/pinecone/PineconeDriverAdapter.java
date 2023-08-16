@@ -19,10 +19,10 @@ package io.nosqlbench.adapter.pinecone;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.engine.api.activityimpl.OpMapper;
-import io.nosqlbench.engine.api.activityimpl.uniform.BaseDriverAdapter;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.OpMapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.nb.annotations.Service;
 
 import java.util.function.Function;

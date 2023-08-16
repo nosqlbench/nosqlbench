@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.jdbc.optypes;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.RunnableOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

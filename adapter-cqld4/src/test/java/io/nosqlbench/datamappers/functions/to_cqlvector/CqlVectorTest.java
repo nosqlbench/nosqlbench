@@ -16,12 +16,9 @@
 
 package io.nosqlbench.datamappers.functions.to_cqlvector;
 
-import io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.ListSized;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.ListSizedStepped;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_float.HashRange;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,13 +26,11 @@ public class CqlVectorTest {
 
     @Test
     public void testCqlVector() {
-        CqlVector func = new CqlVector(new ListSized(2, new HashRange(0.2f, 5.0f)));
-        com.datastax.oss.driver.api.core.data.CqlVector result = func.apply(23L);
-        List<Object> values = new ArrayList<>();
-        for (Object value : result.getValues()) {
-            values.add(value);
+        CqlVector func = new CqlVector(new ListSizedStepped(2, new HashRange(0.2f, 5.0f)));
+        com.datastax.oss.driver.api.core.data.CqlVector vector = func.apply(23L);
+        for (Object value : vector) {
+            assertThat(value).isInstanceOf(Float.class);
         }
-        assertThat(values.get(0)).isInstanceOf(Float.class);
     }
 
 }

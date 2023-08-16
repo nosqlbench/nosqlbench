@@ -78,9 +78,9 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.codehaus.groovy</groupId>
+                <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy</artifactId>
-                <version>3.0.18</version>
+                <version>4.0.13</version>
             </dependency>
             <dependency>
                 <groupId>org.snakeyaml</groupId>
@@ -265,11 +265,6 @@
                 <version>3.6.4</version>
             </dependency>
             <dependency>
-                <groupId>com.datastax.oss</groupId>
-                <artifactId>java-driver-core</artifactId>
-                <version>4.16.0</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.tinkerpop</groupId>
                 <artifactId>tinkergraph-gremlin</artifactId>
                 <version>3.6.4</version>
@@ -371,7 +366,7 @@
             <dependency>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-runtime</artifactId>
-                <version>4.12.0</version>
+                <version>4.13.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -827,7 +822,7 @@
                 <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
-                    <version>4.12.0</version>
+                    <version>4.13.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

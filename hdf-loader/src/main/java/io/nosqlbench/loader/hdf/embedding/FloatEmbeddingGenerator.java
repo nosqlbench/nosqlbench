@@ -12,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package io.nosqlbench.loader.hdf.embedding;
@@ -34,9 +33,7 @@ public class FloatEmbeddingGenerator implements EmbeddingGenerator {
             float[][] flat = new float[dims[0]][dims[1] * dims[2]];
             for (int i = 0; i < dims[0]; i++) {
                 for (int j = 0; j < dims[1]; j++) {
-                    for (int k = 0; k < dims[2]; k++) {
-                        flat[i][j * dims[2] + k] = arr[i][j][k];
-                    }
+                    if (dims[2] >= 0) System.arraycopy(arr[i][j], 0, flat[i], j * dims[2] + 0, dims[2]);
                 }
             }
             return flat;

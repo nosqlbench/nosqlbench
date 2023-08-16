@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class CSVMetricsPlugin {
      */
     public CSVMetrics log(String filename) {
         CSVMetrics csvMetrics = new CSVMetrics(filename, logger, metricRegistry);
-        writeStdout("started new csvlogger: " + filename + "\n");
+        writeStdout("started new csvmetrics: " + filename + "\n");
         return csvMetrics;
     }
 

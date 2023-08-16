@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import io.nosqlbench.adapter.mongodb.core.MongoSpace;
 import io.nosqlbench.adapter.mongodb.core.MongodbDriverAdapter;
-import io.nosqlbench.engine.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
@@ -33,7 +33,7 @@ import java.util.function.LongFunction;
 public class MongoDbUpdateOpDispenser extends BaseOpDispenser<Op, MongoSpace> {
     private final LongFunction<MongoSpace> spaceF;
     private final LongFunction<Op> opF;
-    private LongFunction<String> collectionF;
+    private final LongFunction<String> collectionF;
 
     public MongoDbUpdateOpDispenser(MongodbDriverAdapter adapter, ParsedOp pop, LongFunction<String> collectionF) {
         super(adapter, pop);

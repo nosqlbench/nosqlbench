@@ -72,6 +72,11 @@
             <version>2.13.11</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

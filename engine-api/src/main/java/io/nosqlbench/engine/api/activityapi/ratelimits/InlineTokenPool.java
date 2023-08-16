@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.engine.api.util.Colors;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
@@ -25,15 +26,12 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static io.nosqlbench.engine.api.util.Colors.*;
 
 /**
  * <h2>Synopsis</h2>
@@ -294,10 +292,10 @@ public class InlineTokenPool {
 
         if (debugthis) {
             System.out.print(this);
-            System.out.print(ANSI_BrightBlue + " adding=" + allocatedToActivePool);
+            System.out.print(Colors.ANSI_BrightBlue + " adding=" + allocatedToActivePool);
             if (0 < allocatedToOverflowPool)
-                System.out.print(ANSI_Red + " OVERFLOW:" + allocatedToOverflowPool + ANSI_Reset);
-            if (0 < burstFill) System.out.print(ANSI_BrightGreen + " BACKFILL:" + burstFill + ANSI_Reset);
+                System.out.print(Colors.ANSI_Red + " OVERFLOW:" + allocatedToOverflowPool + Colors.ANSI_Reset);
+            if (0 < burstFill) System.out.print(Colors.ANSI_BrightGreen + " BACKFILL:" + burstFill + Colors.ANSI_Reset);
             System.out.println();
         }
 

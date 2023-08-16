@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.pinecone.ops;
 
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.pinecone.proto.QueryRequest;
 import io.pinecone.PineconeConnection;
 import io.pinecone.proto.QueryResponse;
@@ -43,7 +43,7 @@ public class PineconeQueryOp extends PineconeOp {
     }
 
     @Override
-    public void run() {
+    public Object apply(long value) {
         QueryResponse response = connection.getBlockingStub().query(request);
         if (logger.isDebugEnabled()) {
             for (ScoredVector scored : response.getMatchesList()) {
@@ -55,5 +55,6 @@ public class PineconeQueryOp extends PineconeOp {
                 }
             }
         }
+        return response;
     }
 }

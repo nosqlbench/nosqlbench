@@ -21,7 +21,7 @@ import io.nosqlbench.adapter.pinecone.PineconeDriverAdapter;
 import io.nosqlbench.adapter.pinecone.PineconeSpace;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.adapter.pinecone.ops.PineconeQueryOp;
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.pinecone.proto.QueryRequest;
 import io.pinecone.proto.QueryVector;
 import io.pinecone.proto.SparseValues;

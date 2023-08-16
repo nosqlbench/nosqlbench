@@ -18,7 +18,6 @@ package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.testutils.Perf;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec.Verb;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +38,7 @@ public class TestRateLimiterPerf1E8 {
         rs -> new HybridRateLimiter(
             this.def,
             "hybrid",
-            rs.withVerb(Verb.configure)
+            rs.withVerb(RateSpec.Verb.configure)
         );
     private final RateLimiterPerfTestMethods methods = new RateLimiterPerfTestMethods();
 

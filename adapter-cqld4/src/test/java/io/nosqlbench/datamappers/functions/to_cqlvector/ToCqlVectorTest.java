@@ -17,6 +17,7 @@
 package io.nosqlbench.datamappers.functions.to_cqlvector;
 
 import com.datastax.oss.driver.api.core.data.CqlVector;
+import io.nosqlbench.datamappers.functions.to_cqlvector.from_number_list.ToCqlVector;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

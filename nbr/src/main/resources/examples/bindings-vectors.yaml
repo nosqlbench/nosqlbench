@@ -1,0 +1,53 @@
+scenarios:
+ default:
+  vectors: run driver=stdout cycles=10 threads=1 format=readout
+
+bindings:
+
+    # create double and float vectors which high dispersion across the number
+    # of dimensions specified. These are not yet enumerable, but they are
+    # deterministic
+    hdv1: HashedDoubleVectors(13); Stringify();
+    hfv1: HashedFloatVectors(13); Stringify();
+
+    # specify the sizer function and the double function
+    hdvn2: HashedDoubleVectors(long->HashRange(1,5)->int,long->HashRange(2.0d,3.0d)->double); NormalizeDoubleVector(); Stringify();
+
+    # specify the sizer function and the range of doubles to use
+    hdv3: HashedDoubleVectors(long->HashRange(1,5)->int,long->HashRange(2.0d,3.0d)->double); Stringify();
+
+    hdv4: HashedDoubleVectors(13,0.0d,1.0d); Stringify();
+    hfv4: HashedFloatVectors(13,0.0f,1.0f); Stringify();
+
+
+    # create a simple 2-d vector from a step function over the unit interval
+    # of 10 steps (the maximum number of characters per digit)
+    v2d: DoubleVectors('0-2*2')
+
+    # use Stringify() to visualize the value of numeric array types
+    v2d_str: DoubleVectors('0-2*2'); Stringify()
+
+    # normalize!
+    v2dn: DoubleVectors('0-2*2'); NormalizeDoubleVector();
+
+    # normalize and stringify
+    v2dn_str: DoubleVectors('0-2*2'); NormalizeDoubleVector(); Stringify();
+
+    # create a double vector based on 10 values per digit, by 10 digits.
+    # this determines that the step function should be 0.1 per step, wrapping,
+    # then maps this to a combinitoric model based on charset cardinality
+    v1d: DoubleVectors('0-9*10');
+
+    v1dn: DoubleVectors('0-9*10'); NormalizeDoubleVector();
+
+    v1d_str: DoubleVectors('0-9*10'); Stringify();
+    v1dn_str: DoubleVectors('0-9*10'); NormalizeDoubleVector(); Stringify();
+    v1d_cql: DoubleVectors('0-9*10'); ToCqlVector();
+
+    v_09_10f: FloatVectors('0-9*10');
+    unit_v_f_n: FloatVectors('0-9*10'); NormalizeFloatVector();
+    v_az_3: DoubleVectors('a-z*3');
+    unit_v_d_n: DoubleVectors('a-z*5'); NormalizeDoubleVector();
+
+
+

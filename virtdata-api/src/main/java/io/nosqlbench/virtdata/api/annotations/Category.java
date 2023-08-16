@@ -31,5 +31,7 @@ public enum Category {
     objects,
     periodic,
     experimental,
+    combinitoric,
+    vectors,
     HOF
 }

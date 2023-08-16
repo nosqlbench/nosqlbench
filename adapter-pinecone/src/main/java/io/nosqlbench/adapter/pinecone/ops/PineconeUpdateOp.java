@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.pinecone.ops;
 
-import io.nosqlbench.engine.api.templating.ParsedOp;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.pinecone.proto.UpdateRequest;
 import io.pinecone.PineconeConnection;
 import io.pinecone.proto.UpdateResponse;
@@ -41,8 +41,9 @@ public class PineconeUpdateOp extends PineconeOp {
     }
 
     @Override
-    public void run() {
+    public Object apply(long value) {
         UpdateResponse response = connection.getBlockingStub().update(request);
         logger.debug("UpdateResponse successful: " + response.toString());
+        return response;
     }
 }

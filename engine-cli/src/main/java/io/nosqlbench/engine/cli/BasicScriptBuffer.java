@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.engine.api.templating.StrInterpolator;
+import io.nosqlbench.adapters.api.templating.StrInterpolator;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import org.apache.logging.log4j.Logger;

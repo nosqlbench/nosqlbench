@@ -26,7 +26,7 @@ import io.nosqlbench.adapter.cqld4.exceptions.ChangeUnappliedCycleException;
 import io.nosqlbench.adapter.cqld4.exceptions.ExceededRetryReplaceException;
 import io.nosqlbench.adapter.cqld4.exceptions.UndefinedResultSetException;
 import io.nosqlbench.adapter.cqld4.exceptions.UnexpectedPagingException;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;

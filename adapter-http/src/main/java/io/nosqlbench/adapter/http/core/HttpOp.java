@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package io.nosqlbench.adapter.http.core;
 
 import io.nosqlbench.adapter.http.errors.InvalidResponseBodyException;
 import io.nosqlbench.adapter.http.errors.InvalidStatusCodeException;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.RunnableOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;

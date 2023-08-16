@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +54,6 @@ public class ListSizedStepped implements LongFunction<List<Object>> {
         } else {
             this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
         }
-        this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
-    }
-    public ListSizedStepped(int size, Object... funcs) {
-        this.sizeFunc = s -> size;
         this.valueFuncs = VirtDataConversions.adaptFunctionList(funcs, LongFunction.class, Object.class);
     }
 

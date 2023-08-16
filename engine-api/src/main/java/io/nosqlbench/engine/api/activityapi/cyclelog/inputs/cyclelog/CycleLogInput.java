@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegmentBuffer;
-import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
-import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleResultsRLEBufferReadable;
-import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.util.SimpleConfig;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
+import io.nosqlbench.engine.api.activityapi.input.Input;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;

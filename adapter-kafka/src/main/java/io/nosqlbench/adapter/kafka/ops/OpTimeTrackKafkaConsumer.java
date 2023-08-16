@@ -21,7 +21,7 @@ import io.nosqlbench.adapter.kafka.KafkaSpace;
 import io.nosqlbench.adapter.kafka.util.EndToEndStartingTimeSource;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterMetrics;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
-import io.nosqlbench.engine.api.metrics.ReceivedMessageSequenceTracker;
+import io.nosqlbench.adapters.api.metrics.ReceivedMessageSequenceTracker;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;

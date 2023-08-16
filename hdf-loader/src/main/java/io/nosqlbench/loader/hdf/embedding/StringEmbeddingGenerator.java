@@ -12,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package io.nosqlbench.loader.hdf.embedding;
@@ -25,9 +24,10 @@ import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFac
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class StringEmbeddingGenerator implements EmbeddingGenerator {
-    private TokenizerFactory tokenizerFactory= new DefaultTokenizerFactory();
+    private final TokenizerFactory tokenizerFactory= new DefaultTokenizerFactory();
 
         @Override
         public float[][] generateEmbeddingFrom(Object o, int[] dims) {
@@ -41,7 +41,7 @@ public class StringEmbeddingGenerator implements EmbeddingGenerator {
         }
 
     private float[][] generateWordEmbeddings(String[] text) {
-        SentenceIterator iter = new CollectionSentenceIterator(Arrays.asList(text));
+        SentenceIterator iter = new CollectionSentenceIterator(Collections.singletonList(text));
         /*Word2Vec vec = new Word2Vec.Builder()
             .minWordFrequency(1)
             .iterations(1)

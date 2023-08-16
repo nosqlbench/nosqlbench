@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.nosqlbench.adapter.cqld4.optypes;
 
 import com.datastax.oss.driver.api.core.cql.ResultSet;
-import io.nosqlbench.engine.api.activityimpl.uniform.flowtypes.*;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
 
 import java.util.Map;
 

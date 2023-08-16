@@ -16,14 +16,14 @@
 
 package io.nosqlbench.engine.api.activityapi.core;
 
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 
 import java.util.Map;
 import java.util.Optional;
@@ -120,7 +120,7 @@ public interface ActivityType<A extends Activity> {
         final InputDispenser inputDispenser,
         final ActionDispenser actionDispenser,
         final OutputDispenser outputDispenser) {
-        return new CoreMotorDispenser<T> (activity, inputDispenser, actionDispenser, outputDispenser);
+        return new CoreMotorDispenser<T>(activity, inputDispenser, actionDispenser, outputDispenser);
     }
 
     /**

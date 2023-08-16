@@ -16,11 +16,11 @@
 
 package io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers;
 
-import io.nosqlbench.api.errors.ExpectedResultVerificationError;
+import io.nosqlbench.api.errors.ResultMismatchError;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
-import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorHandler;
 import io.nosqlbench.engine.api.metrics.ExceptionExpectedResultVerificationMetrics;
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorHandler;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,9 +38,9 @@ public class ExpectedResultVerificationErrorHandler implements ErrorHandler, Err
 
     @Override
     public ErrorDetail handleError(String name, Throwable t, long cycle, long durationInNanos, ErrorDetail detail) {
-        if (t instanceof ExpectedResultVerificationError erve) {
+        if (t instanceof ResultMismatchError erve) {
             if (erve.getTriesLeft() == 0) {
-                logger.warn("Cycle: {} Verification of result did not pass following expression: {}", cycle, erve.getExpectedResultExpression());
+                logger.warn("Cycle: {} Verification of result did not pass following expression: {}", cycle, erve.getExpressionDetails());
                 exceptionExpectedResultVerificationMetrics.countVerificationErrors();
             } else {
                 logger.info("Cycle: {} Verification of result did not pass. {} retries left.", cycle, erve.getTriesLeft());

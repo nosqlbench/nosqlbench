@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,16 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.script.bindings;
 
 import com.codahale.metrics.*;
-import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.core.metrics.MetricMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * A view of metrics objects as an object tree.
@@ -82,7 +84,7 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
 
     @Override
     public void onGaugeRemoved(String name) {
-        metrics.findOwner(name).remove(name);
+        metrics.findOrCreateDottedParentPath(name).remove(name);
         logger.debug("gauge removed: " + name);
     }
 
@@ -94,7 +96,7 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
 
     @Override
     public void onCounterRemoved(String name) {
-        metrics.findOwner(name).remove(name);
+        metrics.findOrCreateDottedParentPath(name).remove(name);
         logger.debug("counter removed: " + name);
     }
 
@@ -106,7 +108,7 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
 
     @Override
     public void onHistogramRemoved(String name) {
-        metrics.findOwner(name).remove(name);
+        metrics.findOrCreateDottedParentPath(name).remove(name);
         logger.debug("histogram removed: " + name);
     }
 
@@ -118,7 +120,7 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
 
     @Override
     public void onMeterRemoved(String name) {
-        metrics.findOwner(name).remove(name);
+        metrics.findOrCreateDottedParentPath(name).remove(name);
         logger.debug("meter removed: " + name);
 
     }
@@ -131,7 +133,7 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
 
     @Override
     public void onTimerRemoved(String name) {
-        metrics.findOwner(name).remove(name);
+        metrics.findOrCreateDottedParentPath(name).remove(name);
         logger.debug("timer removed: " + name);
     }
 
@@ -154,4 +156,21 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
         return totalMap;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PolyglotMetricRegistryBindings that = (PolyglotMetricRegistryBindings) o;
+
+        if (!registry.equals(that.registry)) return false;
+        return Objects.equals(metrics, that.metrics);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = registry.hashCode();
+        result = 31 * result + (metrics != null ? metrics.hashCode() : 0);
+        return result;
+    }
 }

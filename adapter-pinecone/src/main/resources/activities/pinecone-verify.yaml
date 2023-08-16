@@ -1,0 +1,36 @@
+scenarios:
+  default:
+    mixed: run driver=pinecone cycles=1000 apiKey=2f55b2f0-670f-4c51-9073-4d37142b761a projectName=a850334 environment=us-east-1-aws tags='block:main-.*'
+
+bindings:
+  id: Mod(<<keycount:1000000000>>); ToString() -> String
+  vector_value: CircleVectors(100000, "io.nosqlbench.virtdata.library.basics.shared.vectors.algorithms.GoldenAngle")
+  state: StateCodes()
+
+blocks:
+#  main-write:
+#    params:
+#      ratio: 1
+#    ops:
+#      op1:
+#        upsert: "circles"
+#        namespace: "example_namespace"
+#        upsert_vectors:
+#          - id: "{id}"
+#            values: "{vector_value}"
+#            metadata:
+#              state: "{state}"
+  main-read:
+    params:
+      ratio: 1
+    ops:
+      op1:
+        query: "circles"
+        vector: "{vector_value}"
+        namespace: "example_namespace"
+        top_k: 1
+        include_values: true
+        include_metadata: true
+        #result should be type QueryResponse
+        verifier: |
+          result.getMatchesList().get(0).getValuesList()=={vector_value}
