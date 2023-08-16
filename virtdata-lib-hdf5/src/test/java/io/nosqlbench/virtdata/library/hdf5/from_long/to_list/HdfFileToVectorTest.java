@@ -17,21 +17,14 @@
 
 package io.nosqlbench.virtdata.library.hdf5.from_long.to_list;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
-import static com.datastax.oss.protocol.internal.ProtocolConstants.ErrorCode.READ_TIMEOUT;
-
 public class HdfFileToVectorTest {
-    private static final int CONNECT_TIMEOUT = 100;
 
     @Test
-    public void testHdfFileToVector() throws IOException {
+    public void testHdfFileToVector() {
         final float[][] results = new float[][]{
             {0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f},
             {2.0f,1.6666666f,2.4f,3.2857144f,4.2222223f,5.181818f,6.1538463f},
@@ -39,14 +32,8 @@ public class HdfFileToVectorTest {
             {6.0f,3.0f,3.2f,3.857143f,4.6666665f,5.5454545f,6.4615383f}
         };
 
-        FileUtils.copyURLToFile(
-            new URL("https://support.hdfgroup.org/ftp/HDF5/examples/files/exbyapi/h5ex_t_float.h5"),
-            new File("h5ex_t_float.h5"),
-            CONNECT_TIMEOUT,
-            READ_TIMEOUT);
-
         HdfFileToVectorList hdfFileToVector = new HdfFileToVectorList(
-            "h5ex_t_float.h5",
+            "src/test/resources/h5ex_t_float.h5",
             "/DS1");
 
         List<Float> read;
@@ -56,7 +43,5 @@ public class HdfFileToVectorTest {
                 assert (read.get(j) == results[i][j]);
             }
         }
-
-        new File("h5ex_t_float.h5").delete();
     }
 }

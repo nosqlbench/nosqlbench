@@ -48,31 +48,15 @@
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.md</include>
-                    <include>**/*.yaml</include>
-                    <include>**/*.txt</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-                <includes>
-                    <include>**</include>
-                </includes>
-                <excludes>
-                    <exclude>h5ex_t_float.h5</exclude>
-                </excludes>
-            </resource>
-            <resource>
+        <testResources>
+            <testResource>
                 <directory>src/test/resources</directory>
                 <excludes>
                     <exclude>h5ex_t_float.h5</exclude>
                 </excludes>
-            </resource>
-        </resources>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
     </build>
 
 </project>
