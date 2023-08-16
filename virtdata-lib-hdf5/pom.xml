@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2022-2023 nosqlbench
+  ~ Copyright (c) 2023 nosqlbench
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,9 +17,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>adapter-mongodb</artifactId>
-    <packaging>jar</packaging>
-
     <parent>
         <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
@@ -27,23 +24,39 @@
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
-    <name>${project.artifactId}</name>
-    <description>
-        An nosqlbench DriverAdapter module for MongoDB
-    </description>
+    <artifactId>virtdata-lib-hdf5</artifactId>
+    <packaging>jar</packaging>
+    <name>virtdata-lib-hdf5</name>
+    <url>http://nosqlbench.io/</url>
+
+    <description>With inspiration from other libraries</description>
 
     <dependencies>
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
+            <artifactId>virtdata-lib-basics</artifactId>
             <version>${revision}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver-sync</artifactId>
-            <version>4.10.2</version>
+            <groupId>io.jhdf</groupId>
+            <artifactId>jhdf</artifactId>
+            <version>0.6.10</version>
         </dependency>
+
     </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <excludes>
+                    <exclude>h5ex_t_float.h5</exclude>
+                </excludes>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+    </build>
 
 </project>

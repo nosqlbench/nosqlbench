@@ -66,6 +66,13 @@
             <artifactId>virtdata-lib-curves4</artifactId>
             <version>${revision}</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-lib-hdf5</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>docsys</artifactId>
