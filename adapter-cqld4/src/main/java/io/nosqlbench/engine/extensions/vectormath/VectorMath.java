@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapters.api.evalcontext;
+package io.nosqlbench.engine.extensions.vectormath;
 
-import groovy.lang.Binding;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
+import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.oss.driver.shaded.guava.common.collect.Sets;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public class GroovyBooleanCycleFunction extends GroovyCycleFunction<Boolean> {
-
-    public GroovyBooleanCycleFunction(String name, ParsedTemplateString template, List<String> imports, Binding binding) {
-        super(name, template, imports, binding);
+public class VectorMath {
+    public double computeRecall(List<Row> rows, List<Long> expectedRowIds) {
+        Set<String> found = rows.stream().map(r -> r.getString("key")).collect(Collectors.toSet());
+        Set<String> expected = expectedRowIds.stream().map(String::valueOf).collect(Collectors.toSet());
+        return ((double)Sets.intersection(found,expected).size()/(double)expected.size());
     }
-
-    @Override
-    public Boolean apply(long value) {
-        return super.apply(value);
-    }
-
 }

@@ -18,7 +18,7 @@ package io.nosqlbench.engine.extensions.globalvars;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import org.apache.logging.log4j.Logger;

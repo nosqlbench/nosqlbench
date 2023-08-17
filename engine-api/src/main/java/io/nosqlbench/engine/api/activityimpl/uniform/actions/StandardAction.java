@@ -112,6 +112,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                     CycleFunction<Boolean> verifier = dispenser.getVerifier();
                     try {
                         verifier.setVariable("result", result);
+                        verifier.setVariable("cycle",cycle);
                         Boolean isGood = verifier.apply(cycle);
                         if (!isGood) {
                             throw new ResultVerificationError("result verification failed", maxTries - tries, verifier.getExpressionDetails());

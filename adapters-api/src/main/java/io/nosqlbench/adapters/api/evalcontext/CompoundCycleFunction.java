@@ -20,9 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
 
 public class CompoundCycleFunction<T> implements CycleFunction<T> {
-
     private final List<CycleFunction<T>> functions = new ArrayList<>();
     private final BinaryOperator<T> reducer;
 
@@ -65,5 +65,11 @@ public class CompoundCycleFunction<T> implements CycleFunction<T> {
         for (CycleFunction<T> function : functions) {
             function.setVariable(name, value);
         }
+    }
+
+    @Override
+    public String toString() {
+        return this.functions.size() + " cycle functions:\n" +
+            this.functions.stream().map(Object::toString).collect(Collectors.joining("\n","","\n"));
     }
 }

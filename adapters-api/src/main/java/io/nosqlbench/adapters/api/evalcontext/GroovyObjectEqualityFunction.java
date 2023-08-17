@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapters.api.evalcontext;
 
+import groovy.lang.Binding;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 
 import java.util.List;
@@ -32,8 +33,8 @@ public class GroovyObjectEqualityFunction extends GroovyCycleFunction<Boolean> {
 
     private Object result;
 
-    public GroovyObjectEqualityFunction(String name, ParsedTemplateString template, List<String> imports) {
-        super(name, template, imports);
+    public GroovyObjectEqualityFunction(String name, ParsedTemplateString template, List<String> imports, Binding binding) {
+        super(name, template, imports, binding);
     }
 
     @Override

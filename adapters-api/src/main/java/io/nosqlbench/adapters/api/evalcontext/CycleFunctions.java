@@ -55,5 +55,12 @@ public class CycleFunctions {
         @Override
         public <V> void setVariable(String name, V value) {
         }
+
+        @Override
+        public String toString() {
+            return "NOOP(" + this.getExpressionDetails()+")";
+        }
+
     }
+
 }
