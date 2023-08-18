@@ -21,7 +21,7 @@ import java.util.List;
 public class FloatEmbeddingGenerator implements EmbeddingGenerator {
 
         @Override
-        public List<Float> generateListEmbeddingFrom(Object o, int[] dims) {
+        public List<Float> generateFloatListEmbeddingFrom(Object o, int[] dims) {
             // in this case o will always be float[1][x]
             float[] vector = ((float[][]) o)[0];
             Float[] vector2 = new Float[vector.length];
@@ -32,8 +32,48 @@ public class FloatEmbeddingGenerator implements EmbeddingGenerator {
         }
 
     @Override
-    public float[] generateArrayEmbeddingFrom(Object o, int[] dims) {
+    public float[] generateFloatArrayEmbeddingFrom(Object o, int[] dims) {
             return ((float[][]) o)[0];
+    }
+
+    @Override
+    public List<Long> generateLongListEmbeddingFrom(Object o, int[] dims) {
+        float[] vector = ((float[][]) o)[0];
+        Long[] vector2 = new Long[vector.length];
+        for (int i = 0; i < vector.length; i++) {
+            vector2[i] = (long) vector[i];
+        }
+        return List.of(vector2);
+    }
+
+    @Override
+    public long[] generateLongArrayEmbeddingFrom(Object o, int[] dims) {
+        float[] vector = ((float[][]) o)[0];
+        long[] vector2 = new long[vector.length];
+        for (int i = 0; i < vector.length; i++) {
+            vector2[i] = (long) vector[i];
+        }
+        return vector2;
+    }
+
+    @Override
+    public List<Integer> generateIntListEmbeddingFrom(Object o, int[] dims) {
+        float[] vector = ((float[][]) o)[0];
+        Integer[] vector2 = new Integer[vector.length];
+        for (int i = 0; i < vector.length; i++) {
+            vector2[i] = (int) vector[i];
+        }
+        return List.of(vector2);
+    }
+
+    @Override
+    public int[] generateIntArrayEmbeddingFrom(Object o, int[] dims) {
+        float[] vector = ((float[][]) o)[0];
+        int[] vector2 = new int[vector.length];
+        for (int i = 0; i < vector.length; i++) {
+            vector2[i] = (int) vector[i];
+        }
+        return vector2;
     }
 
 }

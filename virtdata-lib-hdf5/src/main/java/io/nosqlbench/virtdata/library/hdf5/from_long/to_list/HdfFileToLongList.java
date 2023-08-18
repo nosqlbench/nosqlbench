@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.hdf5.from_long.to_array;
+package io.nosqlbench.virtdata.library.hdf5.from_long.to_list;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.hdf5.from_long.AbstractHdfFileToVector;
+import io.nosqlbench.virtdata.library.hdf5.from_long.AbstractHdfFileToVectorType;
 import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGenerator;
 import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGeneratorFactory;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 /**
@@ -33,21 +34,21 @@ import java.util.function.LongFunction;
  * specifies the number of vectors and the 2nd dimension specifies the number of elements in
  * each vector. Only datatypes short, int, and float are supported at this time.
  * <p>
- * This implementation is specific to returning an array of floats
+ * This implementation is specific to returning a List of Longs
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class HdfFileToVectorArray extends AbstractHdfFileToVector implements LongFunction<float[]> {
+public class HdfFileToLongList extends AbstractHdfFileToVectorType implements LongFunction<List<Long>> {
     private final EmbeddingGenerator embeddingGenerator;
 
-    public HdfFileToVectorArray(String filename, String datasetName) {
+    public HdfFileToLongList(String filename, String datasetName) {
         super(filename, datasetName);
         embeddingGenerator = EmbeddingGeneratorFactory.getGenerator(dataset.getJavaType().getSimpleName().toLowerCase());
     }
     @Override
-    public float[] apply(long l) {
+    public List<Long> apply(long l) {
         Object data = getDataFrom(l);
-        return embeddingGenerator.generateArrayEmbeddingFrom(data, dims);
+        return embeddingGenerator.generateLongListEmbeddingFrom(data, dims);
     }
 
 }

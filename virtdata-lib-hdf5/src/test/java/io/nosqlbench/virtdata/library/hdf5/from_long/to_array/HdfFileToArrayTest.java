@@ -29,7 +29,7 @@ public class HdfFileToArrayTest {
             {6.0f,3.0f,3.2f,3.857143f,4.6666665f,5.5454545f,6.4615383f}
         };
 
-        HdfFileToVectorArray hdfFileToVector = new HdfFileToVectorArray(
+        HdfFileToFloatArray hdfFileToVector = new HdfFileToFloatArray(
             "src/test/resources/h5ex_t_float.h5",
             "/DS1");
 
