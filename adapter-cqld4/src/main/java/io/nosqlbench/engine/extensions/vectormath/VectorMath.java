@@ -17,16 +17,32 @@
 package io.nosqlbench.engine.extensions.vectormath;
 
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.shaded.guava.common.collect.Sets;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class VectorMath {
-    public double computeRecall(List<Row> rows, List<Long> expectedRowIds) {
-        Set<String> found = rows.stream().map(r -> r.getString("key")).collect(Collectors.toSet());
-        Set<String> expected = expectedRowIds.stream().map(String::valueOf).collect(Collectors.toSet());
-        return ((double)Sets.intersection(found,expected).size()/(double)expected.size());
+
+    public static long[] rowsToLongArray(String fieldName, List<Row> rows) {
+        return rows.stream().mapToLong(r -> r.getLong(fieldName)).toArray();
     }
+
+    public static int[] rowListToIntArray(String fieldName, List<Row> rows) {
+        return rows.stream().mapToInt(r -> r.getInt(fieldName)).toArray();
+    }
+
+    public double computeRecall(long[] referenceIndexes, long[] sampleIndexes) {
+        Arrays.sort(referenceIndexes);
+        Arrays.sort(sampleIndexes);
+        long[] intersection = Intersections.find(referenceIndexes,sampleIndexes);
+        return (double)intersection.length/(double)referenceIndexes.length;
+    }
+
+    public double computeRecall(int[] referenceIndexes, int[] sampleIndexes) {
+        Arrays.sort(referenceIndexes);
+        Arrays.sort(sampleIndexes);
+        int[] intersection = Intersections.find(referenceIndexes,sampleIndexes);
+        return (double)intersection.length/(double)referenceIndexes.length;
+    }
+
 }
