@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.extensions;
+package io.nosqlbench.api.extensions;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;

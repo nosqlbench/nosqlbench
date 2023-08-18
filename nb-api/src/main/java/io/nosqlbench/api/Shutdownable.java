@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.nosqlbench.api;
 
-package io.nosqlbench.engine.api.extensions;
-
-/**
- * Any object can be a sandbox extension. This is primarily a tagging interface.
- */
-public interface SandboxPlugin {
+public interface Shutdownable {
+    void shutdown();
 }

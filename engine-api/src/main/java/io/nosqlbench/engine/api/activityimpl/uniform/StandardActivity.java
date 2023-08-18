@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.api.Shutdownable;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.standard.*;
@@ -194,7 +195,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
     /**
      * This is done here since driver adapters are intended to keep all of their state within
-     * dedicated <em>state space</em> types. Any space which implements {@link io.nosqlbench.engine.api.activityapi.core.Shutdownable}
+     * dedicated <em>state space</em> types. Any space which implements {@link Shutdownable}
      * will be closed when this activity shuts down.
      */
     @Override

@@ -18,12 +18,10 @@ package io.nosqlbench.adapters.api.activityimpl;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import groovy.lang.Binding;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.adapters.api.evalcontext.CycleFunction;
-import io.nosqlbench.adapters.api.evalcontext.CycleFunctions;
-import io.nosqlbench.adapters.api.evalcontext.GroovyBooleanCycleFunction;
-import io.nosqlbench.adapters.api.evalcontext.GroovyObjectEqualityFunction;
+import io.nosqlbench.adapters.api.evalcontext.*;
 import io.nosqlbench.adapters.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.api.config.NBLabeledElement;
@@ -51,6 +49,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>, NBLabeledElement {
     private final static Logger logger = LogManager.getLogger(BaseOpDispenser.class);
     public static final String VERIFIER = "verifier";
+    public static final String VERIFIER_INIT = "verifier-init";
     public static final String EXPECTED_RESULT = "expected-result";
     public static final String VERIFIER_IMPORTS = "verifier-imports";
     public static final String START_TIMERS = "start-timers";
@@ -97,8 +96,7 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
         this.configureInstrumentation(op);
         this.configureVerifierImports(op);
         List<CycleFunction<Boolean>> verifiers = new ArrayList<>();
-        verifiers.addAll(configureEqualityVerifier(op));
-        verifiers.addAll(configureAssertionVerifiers(op));
+        verifiers = configureVerifiers(op);
         this._verifier = CycleFunctions.of((a, b) -> a && b, verifiers, true);
         this.tlVerifier = ThreadLocal.withInitial(() -> _verifier.newInstance());
     }
@@ -123,35 +121,49 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
         }
     }
 
-    private List<? extends CycleFunction<Boolean>> configureAssertionVerifiers(ParsedOp op) {
+    private List<CycleFunction<Boolean>> configureVerifiers(ParsedOp op) {
+        Binding variables = new Binding();
+
+        Map<String, ParsedTemplateString> initBlocks = op.getTemplateMap().takeAsNamedTemplates(VERIFIER_INIT);
+        List<CycleFunction<?>> verifierInitFunctions = new ArrayList<>();
+        try {
+            initBlocks.forEach((initName, stringTemplate) -> {
+                GroovyCycleFunction<?> initFunction =
+                    new GroovyCycleFunction<>(initName,stringTemplate,verifierImports,variables);
+                logger.info("configured verifier init:" + initFunction);
+                initFunction.setVariable("_parsed_op",op);
+                initFunction.apply(0L);
+            });
+        } catch (Exception e) {
+            throw new OpConfigError("error in verifier-init:" + e.getMessage(),e);
+        }
+
         Map<String, ParsedTemplateString> namedVerifiers = op.getTemplateMap().takeAsNamedTemplates(VERIFIER);
         List<CycleFunction<Boolean>> verifierFunctions = new ArrayList<>();
         try {
             namedVerifiers.forEach((verifierName,stringTemplate) -> {
                 GroovyBooleanCycleFunction verifier =
-                    new GroovyBooleanCycleFunction(verifierName, stringTemplate, verifierImports);
+                    new GroovyBooleanCycleFunction(verifierName, stringTemplate, verifierImports, variables);
                 logger.info("configured verifier:" + verifier);
                 verifierFunctions.add(verifier);
             });
-            return verifierFunctions;
         } catch (Exception gre) {
             throw new OpConfigError("error in verifier:" + gre.getMessage(), gre);
         }
-    }
 
-    private List<? extends CycleFunction<Boolean>> configureEqualityVerifier(ParsedOp op) {
         try {
-            return op.takeAsOptionalStringTemplate(EXPECTED_RESULT)
-                .map(tpl -> new GroovyObjectEqualityFunction(op.getName()+"-"+EXPECTED_RESULT, tpl, verifierImports))
+             op.takeAsOptionalStringTemplate(EXPECTED_RESULT)
+                .map(tpl -> new GroovyObjectEqualityFunction(op.getName()+"-"+EXPECTED_RESULT, tpl, verifierImports, variables))
                 .map(vl -> {
                     logger.info("Configured equality verifier: " + vl);
                     return vl;
                 })
-                .map(v -> List.of(v))
-                .orElse(List.of());
+                 .ifPresent(verifierFunctions::add);
         } catch (Exception gre) {
             throw new OpConfigError("error in verifier:" + gre.getMessage(), gre);
         }
+
+        return verifierFunctions;
     }
 
     String getOpName() {

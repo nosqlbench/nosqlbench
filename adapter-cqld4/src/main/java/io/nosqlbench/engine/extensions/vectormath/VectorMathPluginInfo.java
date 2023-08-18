@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.extensions.optimizers;
+package io.nosqlbench.engine.extensions.vectormath;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
@@ -22,17 +22,15 @@ import io.nosqlbench.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ScriptingPluginInfo.class, selector = "optimos")
-public class BobyqaOptimizerPluginData implements ScriptingPluginInfo<BobyqaOptimizerPlugin> {
-
+@Service(value = ScriptingPluginInfo.class,selector = "vectormath")
+public class VectorMathPluginInfo implements ScriptingPluginInfo<VectorMath> {
     @Override
     public String getDescription() {
-        return "Allows use of the BOBYQA optimizer in scripts.";
+        return "various methods and utilities for working with vector math in a scripted environment";
     }
 
     @Override
-    public BobyqaOptimizerPlugin getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
-        return new BobyqaOptimizerPlugin(logger, metricRegistry, scriptContext);
+    public VectorMath getExtensionObject(Logger logger, MetricRegistry metricRegistry, LabeledScenarioContext scriptContext) {
+        return new VectorMath();
     }
-
 }

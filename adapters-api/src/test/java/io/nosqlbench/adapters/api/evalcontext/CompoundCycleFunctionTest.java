@@ -25,8 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CompoundCycleFunctionTest {
 
-    private final GroovyCycleFunction<Boolean> truthy = new GroovyCycleFunction<>("truthy", "true;", Map.of(), List.of());
-    private final GroovyCycleFunction<Boolean> falsy = new GroovyCycleFunction<>("falsy", "false;", Map.of(), List.of());
+    private final GroovyCycleFunction<Boolean> truthy = new GroovyCycleFunction<>("truthy", "true;", Map.of(), List.of(),null);
+    private final GroovyCycleFunction<Boolean> falsy = new GroovyCycleFunction<>("falsy", "false;", Map.of(), List.of(), null);
 
     @Test
     public void testReducerFirstOrLastResult() {

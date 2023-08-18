@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.api.activityapi.core;
 
-public interface Shutdownable {
-    void shutdown();
+package io.nosqlbench.api.extensions;
+
+/**
+ * Any object can be a sandbox extension. This is primarily a tagging interface.
+ */
+public interface SandboxPlugin {
 }

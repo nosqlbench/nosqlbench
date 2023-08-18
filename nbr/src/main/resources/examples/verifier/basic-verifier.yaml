@@ -1,0 +1,25 @@
+scenarios:
+  default:
+    step1: run driver=stdout cycles=10
+
+bindings:
+  number: Identity()
+  number_name: NumberNameToString()
+
+ops:
+  vop1:
+    stmt: "number:{number} name:{number_name}\n"
+    verifier-imports:
+      - "io.nosqlbench.api.engine.metrics.ActivityMetrics"
+    verifier-init: |
+      recallHisto = ActivityMetrics.histogram(_parsed_op,"recall-histo",4);
+    verifier: |
+      if (recallHisto!=null) {
+       print("recallHisto is defined!\n");
+       recallHisto.update(cycle);
+      } else {
+       print("recallHisto is not defined!\n");
+      }
+      return true;
+      // double recall = vectormath.computeRecall(result,result)
+

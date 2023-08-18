@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario.script;
-
-import io.nosqlbench.engine.api.extensions.ScriptingPluginInfo;
+package io.nosqlbench.api.extensions;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -20,6 +20,8 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.api.extensions.SandboxExtensionFinder;
+import io.nosqlbench.api.extensions.ScriptingPluginInfo;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
@@ -37,6 +39,7 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
     private final static Logger logger = LogManager.getLogger(GroovyBooleanCycleFunction.class);
     private final String name;
     private final List<String> imports;
+    private final List<String> enabledServices = new ArrayList<>(List.of("vectormath"));
 
     protected String scriptText; // Groovy script as provided
     protected final Script script; // Groovy Script as compiled
@@ -45,34 +48,63 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
 
     /**
      * Instantiate a cycle function from basic types
-     * @param scriptText The raw script text, not including any bind point or capture point syntax
-     * @param bindingSpecs The names and recipes of bindings which are referenced in the scriptText
-     * @param imports The package imports to be installed into the execution environment
+     *
+     * @param scriptText
+     *     The raw script text, not including any bind point or capture point syntax
+     * @param bindingSpecs
+     *     The names and recipes of bindings which are referenced in the scriptText
+     * @param imports
+     *     The package imports to be installed into the execution environment
      */
-    public GroovyCycleFunction(String name, String scriptText, Map<String,String> bindingSpecs, List<String> imports) {
+    public GroovyCycleFunction(String name, String scriptText, Map<String, String> bindingSpecs, List<String> imports, Binding binding) {
         this.name = name;
-        this.scriptText =scriptText;
+        this.scriptText = scriptText;
         this.imports = imports;
 
         // scripting env variable bindings
-        this.variableBindings = new Binding();
+        this.variableBindings = binding!=null? binding : new Binding();
 
         // virtdata bindings to be evaluated at cycle time
         this.bindingFunctions = new BindingsTemplate().addFieldBindings(bindingSpecs).resolveBindings();
 
-        this.script = compileScript(this.scriptText, imports);
+        this.script = compileScript(this.scriptText, imports, binding);
+        addServices();
     }
 
-    public GroovyCycleFunction(String name, ParsedTemplateString template, List<String> imports) {
+    private void addServices() {
+        for (final ScriptingPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
+            if (!extensionDescriptor.isAutoLoading()) {
+                logger.info(() -> "Not loading " + extensionDescriptor + ", autoloading is false");
+                continue;
+            }
+            if (!enabledServices.isEmpty() && !enabledServices.contains(extensionDescriptor.getBaseVariableName())) {
+                logger.info(()->"Not loading " + extensionDescriptor + ", not included in subset.");
+                continue;
+            }
+            final Logger extensionLogger =
+                LogManager.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
+            final Object extensionObject = extensionDescriptor.getExtensionObject(
+                extensionLogger,
+                null,
+                null
+            );
+            logger.trace(() -> "Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
+                " class=" + extensionObject.getClass().getSimpleName());
+            setVariable(extensionDescriptor.getBaseVariableName(), extensionObject);
+        }
+    }
+
+    public GroovyCycleFunction(String name, ParsedTemplateString template, List<String> imports, Binding binding) {
         this(
             name,
             template.getPositionalStatement(),
             resolveBindings(template.getBindPoints()),
-            imports
+            imports,
+            binding
         );
     }
 
-    private Script compileScript(String scriptText, List<String> imports) {
+    private Script compileScript(String scriptText, List<String> imports, Binding binding) {
         // add classes which are in the imports to the groovy evaluation context
         String[] verifiedClasses = expandClassNames(imports);
 
@@ -80,7 +112,7 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
         ImportCustomizer importer = new ImportCustomizer().addImports(verifiedClasses);
         compilerConfiguration.addCompilationCustomizers(importer);
 
-        GroovyShell gshell = new GroovyShell(new Binding(), compilerConfiguration);
+        GroovyShell gshell = new GroovyShell(binding!=null? binding:new Binding(), compilerConfiguration);
         return gshell.parse(scriptText);
     }
 
@@ -122,24 +154,30 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
     @Override
     public T apply(long value) {
         Map<String, Object> values = bindingFunctions.getAllMap(value);
-        values.forEach((k,v)-> variableBindings.setVariable(k,v));
-        T result= (T) script.run();
+        values.forEach((k, v) -> variableBindings.setVariable(k, v));
+        T result = (T) script.run();
         return result;
     }
 
+    /**
+     * Create an instance of an executable function which is based on the current one, with all of
+     * the per-cycle bindings as well as the variable bindings duplicated (shared).
+     * @return
+     */
     @Override
     public CycleFunction<T> newInstance() {
-        return new GroovyCycleFunction<T>(name, scriptText, bindingFunctions,imports);
+        return new GroovyCycleFunction<T>(name, scriptText, bindingFunctions, imports, this.variableBindings.getVariables());
     }
 
-    private GroovyCycleFunction(String name, String scriptText, Bindings bindingFunctions, List<String> imports) {
+    private GroovyCycleFunction(String name, String scriptText, Bindings bindingFunctions, List<String> imports, Map originalBinding) {
         this.name = name;
         this.scriptText = scriptText;
         this.bindingFunctions = bindingFunctions;
         this.imports = imports;
 
-        this.script = compileScript(scriptText,imports);
-        this.variableBindings=script.getBinding();
+        this.script = compileScript(scriptText, imports, new Binding());
+        this.variableBindings = script.getBinding();
+        originalBinding.forEach((k,v) -> variableBindings.setVariable(k.toString(),v));
     }
 
 

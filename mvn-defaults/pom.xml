@@ -41,6 +41,7 @@
         <maven.compiler.target>17</maven.compiler.target>
 
         <PROG>nb5</PROG>
+        <maven.plugin.validation>VERBOSE</maven.plugin.validation>
     </properties>
 
     <name>${project.artifactId}</name>
@@ -180,31 +181,10 @@
                 <artifactId>lz4-java</artifactId>
                 <version>1.4.1</version>
             </dependency>
-            <!-- For CQL compression option -->
-            <dependency>
-                <groupId>org.xerial.snappy</groupId>
-                <artifactId>snappy-java</artifactId>
-                <version>1.1.10.3</version>
-            </dependency>
             <dependency>
                 <groupId>com.datastax.oss</groupId>
                 <artifactId>java-driver-query-builder</artifactId>
                 <version>4.17.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.snakeyaml</groupId>
-                <artifactId>snakeyaml-engine</artifactId>
-                <version>2.6</version>
-            </dependency>
-            <dependency>
-                <groupId>org.xerial.snappy</groupId>
-                <artifactId>snappy-java</artifactId>
-                <version>1.1.10.3</version>
-            </dependency>
-            <dependency>
-                <groupId>com.esri.geometry</groupId>
-                <artifactId>esri-geometry-api</artifactId>
-                <version>2.2.4</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
@@ -243,16 +223,6 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>4.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>1.69</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>2.15.2</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
