@@ -19,7 +19,7 @@ package io.nosqlbench.virtdata.library.hdf5.from_long.to_list;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.hdf5.from_long.AbstractHdfFileToVector;
+import io.nosqlbench.virtdata.library.hdf5.from_long.AbstractHdfFileToVectorType;
 import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGenerator;
 import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGeneratorFactory;
 
@@ -39,17 +39,17 @@ import java.util.function.LongFunction;
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class HdfFileToVectorList extends AbstractHdfFileToVector implements LongFunction<List<Float>> {
+public class HdfFileToFloatList extends AbstractHdfFileToVectorType implements LongFunction<List<Float>> {
     private final EmbeddingGenerator embeddingGenerator;
 
-    public HdfFileToVectorList(String filename, String datasetName) {
+    public HdfFileToFloatList(String filename, String datasetName) {
         super(filename, datasetName);
         embeddingGenerator = EmbeddingGeneratorFactory.getGenerator(dataset.getJavaType().getSimpleName().toLowerCase());
     }
     @Override
     public List<Float> apply(long l) {
         Object data = getDataFrom(l);
-        return embeddingGenerator.generateListEmbeddingFrom(data, dims);
+        return embeddingGenerator.generateFloatListEmbeddingFrom(data, dims);
     }
 
 }

@@ -22,14 +22,13 @@ import io.nosqlbench.api.content.NBIO;
 
 import java.nio.file.Paths;
 
-public abstract class AbstractHdfFileToVector {
+public abstract class AbstractHdfFileToVectorType {
     protected final HdfFile hdfFile;
     protected final Dataset dataset;
     protected final int[] dims;
 
-    public AbstractHdfFileToVector(String filename, String datasetName) {
-        //hdfFile = new HdfFile(NBIO.all().search(filename).first().get().asPath());
-        hdfFile = new HdfFile(Paths.get(filename));
+    public AbstractHdfFileToVectorType(String filename, String datasetName) {
+        hdfFile = new HdfFile(NBIO.all().search(filename).first().get().asPath());
         //TODO: implement a function to get the dataset by name only without needing the full path
         dataset = hdfFile.getDatasetByPath(datasetName);
         dims = dataset.getDimensions();

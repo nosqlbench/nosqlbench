@@ -19,7 +19,15 @@ package io.nosqlbench.virtdata.library.hdf5.helpers;
 import java.util.List;
 
 public interface EmbeddingGenerator {
-    List<Float> generateListEmbeddingFrom(Object o, int[] dims);
+    List<Float> generateFloatListEmbeddingFrom(Object o, int[] dims);
 
-    float[] generateArrayEmbeddingFrom(Object o, int[] dims);
+    float[] generateFloatArrayEmbeddingFrom(Object o, int[] dims);
+
+    List<Long> generateLongListEmbeddingFrom(Object data, int[] dims);
+
+    long[] generateLongArrayEmbeddingFrom(Object data, int[] dims);
+
+    List<Integer> generateIntListEmbeddingFrom(Object data, int[] dims);
+
+    int[] generateIntArrayEmbeddingFrom(Object data, int[] dims);
 }
