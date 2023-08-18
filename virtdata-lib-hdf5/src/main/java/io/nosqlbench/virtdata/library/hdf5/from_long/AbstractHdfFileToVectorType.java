@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.library.hdf5.from_long;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import io.nosqlbench.api.content.NBIO;
 
 import java.nio.file.Paths;
 
@@ -27,8 +28,7 @@ public abstract class AbstractHdfFileToVectorType {
     protected final int[] dims;
 
     public AbstractHdfFileToVectorType(String filename, String datasetName) {
-        //hdfFile = new HdfFile(NBIO.all().search(filename).first().get().asPath());
-        hdfFile = new HdfFile(Paths.get(filename));
+        hdfFile = new HdfFile(NBIO.all().search(filename).first().get().asPath());
         //TODO: implement a function to get the dataset by name only without needing the full path
         dataset = hdfFile.getDatasetByPath(datasetName);
         dims = dataset.getDimensions();
