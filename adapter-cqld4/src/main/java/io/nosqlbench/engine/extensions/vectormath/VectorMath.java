@@ -23,26 +23,47 @@ import java.util.List;
 
 public class VectorMath {
 
-    public static long[] rowsToLongArray(String fieldName, List<Row> rows) {
+    public static long[] rowFieldsToLongArray(String fieldName, List<Row> rows) {
         return rows.stream().mapToLong(r -> r.getLong(fieldName)).toArray();
+    }
+
+    public static String[] rowFieldsToStringArray(String fieldName, List<Row> rows) {
+        return rows.stream().map(r -> r.getString(fieldName)).toArray(String[]::new);
+    }
+
+    public static long[] stringArrayAsALongArray(String[] strings) {
+        long[] longs = new long[strings.length];
+        for (int i = 0; i < longs.length; i++) {
+            longs[i]=Long.parseLong(strings[i]);
+        }
+        return longs;
+    }
+
+    public static int[] stringArrayAsIntArray(String[] strings) {
+        int[] ints = new int[strings.length];
+        for (int i = 0; i < ints.length; i++) {
+            ints[i]=Integer.parseInt(strings[i]);
+        }
+        return ints;
     }
 
     public static int[] rowListToIntArray(String fieldName, List<Row> rows) {
         return rows.stream().mapToInt(r -> r.getInt(fieldName)).toArray();
     }
 
-    public double computeRecall(long[] referenceIndexes, long[] sampleIndexes) {
+    public static double computeRecall(long[] referenceIndexes, long[] sampleIndexes) {
         Arrays.sort(referenceIndexes);
         Arrays.sort(sampleIndexes);
         long[] intersection = Intersections.find(referenceIndexes,sampleIndexes);
         return (double)intersection.length/(double)referenceIndexes.length;
     }
 
-    public double computeRecall(int[] referenceIndexes, int[] sampleIndexes) {
+    public static double computeRecall(int[] referenceIndexes, int[] sampleIndexes) {
         Arrays.sort(referenceIndexes);
         Arrays.sort(sampleIndexes);
         int[] intersection = Intersections.find(referenceIndexes,sampleIndexes);
         return (double)intersection.length/(double)referenceIndexes.length;
     }
+
 
 }

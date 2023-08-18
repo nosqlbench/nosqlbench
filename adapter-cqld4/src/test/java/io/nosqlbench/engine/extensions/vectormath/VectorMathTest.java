@@ -17,15 +17,13 @@
 package io.nosqlbench.engine.extensions.vectormath;
 
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 class VectorMathTest {
 
     private VectorMath vm = new VectorMath();
 
     @Test
     void computeRecallForRowListVsLongIndexList() {
-        new VectorMath();
+        VectorMath.computeRecall(new long[]{}, new long[]{});
     }
 
     @Test
