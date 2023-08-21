@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.databricks</groupId>
             <artifactId>sjsonnet_2.13</artifactId>
-            <version>0.4.4</version>
+            <version>0.4.5</version>
         </dependency>
 
         <dependency>
