@@ -43,7 +43,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-dynamodb</artifactId>
-            <version>1.12.507</version>
+            <version>1.12.518</version>
         </dependency>
 
     </dependencies>
