@@ -168,7 +168,7 @@
             <dependency>
                 <groupId>org.openjdk.jmh</groupId>
                 <artifactId>jmh-generator-annprocess</artifactId>
-                <version>1.36</version>
+                <version>1.37</version>
             </dependency>
             <dependency>
                 <groupId>com.mitchtalmadge</groupId>
