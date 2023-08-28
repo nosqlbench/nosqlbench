@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,61 @@
 package io.nosqlbench.nb.api;
 
 import io.nosqlbench.api.metadata.SystemId;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SystemIdTest {
+    private static final Logger logger = LogManager.getLogger(SystemIdTest.class);
 
     @Test
     public void testHostInfo() {
-        String info = SystemId.getHostSummary();
-        System.out.println(info);
+        String hostSummary = SystemId.getHostSummary();
+        logger.info("host summary: " + hostSummary);
     }
 
     @Test
     public void testNostId() {
-        String info = SystemId.getNodeId();
-        assertThat(info).matches("\\d+\\.\\d+\\.\\d+\\.\\d+");
+        String nodeId = SystemId.getNodeId();
+        assertThat(nodeId).matches("\\d+\\.\\d+\\.\\d+\\.\\d+");
+        logger.info("node id: " + nodeId);
     }
 
     @Test
     public void testNodeFingerprint() {
-        String hash = SystemId.getNodeFingerprint();
-        assertThat(hash).matches("[A-Z0-9]+");
+        String nodeFingerprint = SystemId.getNodeFingerprint();
+        assertThat(nodeFingerprint).matches("[A-Z0-9]+");
+        logger.info("node fingerprint: " + nodeFingerprint);
+    }
+
+    @Test
+    public void testBrailleNodeId() {
+        String brailleNodeId = SystemId.getBrailleNodeId();
+        assertThat(brailleNodeId).matches("[⠀-⣿]{4}"); // note, that is not a space. It is the starting braille value of empty
+        logger.info("braille node id: " + brailleNodeId);
+    }
+
+    @Test
+    public void testPackedNodeId() {
+        String packedNodeId = SystemId.getPackedNodeId();
+        assertThat(packedNodeId).matches("[0-9A-Za-z_-]+");
+        logger.info("packed node id: " + packedNodeId);
+    }
+
+    @Test
+    public void testGenSessionCode() {
+        String sessionCode=SystemId.genSessionCode(234L);
+        assertThat(sessionCode).matches("[0-9a-zA-Z~-]+_[0-9a-zA-Z~-]+");
+        logger.info("session code: " + sessionCode);
+    }
+
+    @Test
+    public void testGenSessionBits() {
+        String sessionBits = SystemId.genSessionBits();
+        assertThat(sessionBits).matches("[⠀-⣿]+:[⠀-⣿]+");
+        logger.info("session bits: " + sessionBits);
     }
 
 }

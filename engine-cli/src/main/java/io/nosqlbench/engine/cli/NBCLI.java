@@ -86,6 +86,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
     private NBLabels labels;
     private String sessionName;
+    private String sessionCode;
+    private long sessionTime;
 
     public NBCLI(final String commandName) {
         this.commandName = commandName;
@@ -153,10 +155,17 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 //        logger = LogManager.getLogger("NBCLI");
 
         NBCLI.loggerConfig.setConsoleLevel(NBLogLevel.ERROR);
-
+        this.sessionTime = System.currentTimeMillis();
         final NBCLIOptions globalOptions = new NBCLIOptions(args, Mode.ParseGlobalsOnly);
-        this.labels=NBLabels.forKV("command",commandName).and(globalOptions.getLabelMap());
-        this.sessionName = SessionNamer.format(globalOptions.getSessionName());
+
+        this.sessionCode = SystemId.genSessionCode(sessionTime);
+        this.sessionName = SessionNamer.format(globalOptions.getSessionName(),sessionTime).replaceAll("SESSIONCODE",sessionCode);
+        this.labels = NBLabels.forKV("command", commandName, "appname", "nosqlbench")
+                .andInstances("node",SystemId.getNodeId())
+                .andInstances("nodeid",SystemId.getPackedNodeId())
+//                .andInstances("sesscode",sessionCode)
+                .andInstances("session",sessionName)
+                .and(globalOptions.getLabelMap());
 
         NBCLI.loggerConfig
                 .setSessionName(sessionName)
