@@ -163,12 +163,12 @@
             <dependency>
                 <groupId>org.openjdk.jmh</groupId>
                 <artifactId>jmh-core</artifactId>
-                <version>1.36</version>
+                <version>1.37</version>
             </dependency>
             <dependency>
                 <groupId>org.openjdk.jmh</groupId>
                 <artifactId>jmh-generator-annprocess</artifactId>
-                <version>1.36</version>
+                <version>1.37</version>
             </dependency>
             <dependency>
                 <groupId>com.mitchtalmadge</groupId>
@@ -232,12 +232,12 @@
             <dependency>
                 <groupId>org.apache.tinkerpop</groupId>
                 <artifactId>gremlin-core</artifactId>
-                <version>3.6.4</version>
+                <version>3.7.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.tinkerpop</groupId>
                 <artifactId>tinkergraph-gremlin</artifactId>
-                <version>3.6.4</version>
+                <version>3.7.0</version>
             </dependency>
             <dependency>
                 <groupId>com.github.docker-java</groupId>
@@ -291,7 +291,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.518</version>
+                <version>1.12.519</version>
             </dependency>
             <dependency>
                 <groupId>com.elega9t</groupId>
