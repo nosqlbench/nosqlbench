@@ -98,22 +98,22 @@ public class SimpleActivity implements Activity {
         this.parentLabels = parentLabels;
         if (activityDef.getAlias().equals(ActivityDef.DEFAULT_ALIAS)) {
             Optional<String> workloadOpt = activityDef.getParams().getOptionalString(
-                "workload",
-                "yaml"
+                    "workload",
+                    "yaml"
             );
             if (workloadOpt.isPresent()) {
                 activityDef.getParams().set("alias", workloadOpt.get());
             } else {
                 activityDef.getParams().set("alias",
-                    activityDef.getActivityType().toUpperCase(Locale.ROOT)
-                        + nameEnumerator);
+                        activityDef.getActivityType().toUpperCase(Locale.ROOT)
+                                + nameEnumerator);
                 nameEnumerator++;
             }
         }
     }
 
     public SimpleActivity(String activityDefString, NBLabeledElement parentLabels) {
-        this(ActivityDef.parseActivityDef(activityDefString),parentLabels);
+        this(ActivityDef.parseActivityDef(activityDefString), parentLabels);
     }
 
     @Override
@@ -124,8 +124,8 @@ public class SimpleActivity implements Activity {
     public synchronized NBErrorHandler getErrorHandler() {
         if (null == this.errorHandler) {
             errorHandler = new NBErrorHandler(
-                () -> activityDef.getParams().getOptionalString("errors").orElse("stop"),
-                () -> getExceptionMetrics());
+                    () -> activityDef.getParams().getOptionalString("errors").orElse("stop"),
+                    () -> getExceptionMetrics());
         }
         return errorHandler;
     }
@@ -324,12 +324,12 @@ public class SimpleActivity implements Activity {
     public synchronized void initOrUpdateRateLimiters(ActivityDef activityDef) {
 
         activityDef.getParams().getOptionalNamedParameter("striderate")
-            .map(RateSpec::new)
-            .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this, "strides", strideLimiter, spec));
+                .map(RateSpec::new)
+                .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this, "strides", strideLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate")
-            .map(RateSpec::new).ifPresent(
-                spec -> cycleLimiter = RateLimiters.createOrUpdate(this, "cycles", cycleLimiter, spec));
+                .map(RateSpec::new).ifPresent(
+                        spec -> cycleLimiter = RateLimiters.createOrUpdate(this, "cycles", cycleLimiter, spec));
 
     }
 
@@ -338,7 +338,8 @@ public class SimpleActivity implements Activity {
      * length of the sequence as determined by the provided ratios. Also, modify the ActivityDef with reasonable
      * defaults when requested.
      *
-     * @param seq - The {@link OpSequence} to derive the defaults from
+     * @param seq
+     *         - The {@link OpSequence} to derive the defaults from
      */
     public synchronized void setDefaultsFromOpSequence(OpSequence<?> seq) {
         Optional<String> strideOpt = getParams().getOptionalString("stride");
@@ -358,15 +359,15 @@ public class SimpleActivity implements Activity {
         } else {
             if (0 == activityDef.getCycleCount()) {
                 throw new RuntimeException(
-                    "You specified cycles, but the range specified means zero cycles: " + getParams().get("cycles")
+                        "You specified cycles, but the range specified means zero cycles: " + getParams().get("cycles")
                 );
             }
             long stride = getParams().getOptionalLong("stride").orElseThrow();
             long cycles = this.activityDef.getCycleCount();
             if (cycles < stride) {
                 throw new RuntimeException(
-                    "The specified cycles (" + cycles + ") are less than the stride (" + stride + "). This means there aren't enough cycles to cause a stride to be executed." +
-                        " If this was intended, then set stride low enough to allow it."
+                        "The specified cycles (" + cycles + ") are less than the stride (" + stride + "). This means there aren't enough cycles to cause a stride to be executed." +
+                                " If this was intended, then set stride low enough to allow it."
                 );
             }
         }
@@ -376,7 +377,7 @@ public class SimpleActivity implements Activity {
 
         if (0 < stride && 0 != cycleCount % stride) {
             logger.warn(() -> "The stride does not evenly divide cycles. Only full strides will be executed," +
-                "leaving some cycles unused. (stride=" + stride + ", cycles=" + cycleCount + ')');
+                    "leaving some cycles unused. (stride=" + stride + ", cycles=" + cycleCount + ')');
         }
 
         Optional<String> threadSpec = activityDef.getParams().getOptionalString("threads");
@@ -407,15 +408,15 @@ public class SimpleActivity implements Activity {
 
             if (activityDef.getThreads() > activityDef.getCycleCount()) {
                 logger.warn(() -> "threads=" + activityDef.getThreads() + " and cycles=" + activityDef.getCycleSummary()
-                    + ", you should have more cycles than threads.");
+                        + ", you should have more cycles than threads.");
             }
 
         } else if (1000 < cycleCount) {
             logger.warn(() -> "For testing at scale, it is highly recommended that you " +
-                "set threads to a value higher than the default of 1." +
-                " hint: you can use threads=auto for reasonable default, or" +
-                " consult the topic on threads with `help threads` for" +
-                " more information.");
+                    "set threads to a value higher than the default of 1." +
+                    " hint: you can use threads=auto for reasonable default, or" +
+                    " consult the topic on threads with `help threads` for" +
+                    " more information.");
         }
 
         if (0 < this.activityDef.getCycleCount() && 0 == seq.getOps().size()) {
@@ -426,11 +427,11 @@ public class SimpleActivity implements Activity {
     /**
      * Given a function that can create an op of type <O> from a CommandTemplate, generate
      * an indexed sequence of ready to call operations.
-     *
+     * <p>
      * This method works almost exactly like the ,
      * except that it uses the {@link CommandTemplate} semantics, which are more general and allow
      * for map-based specification of operations with bindings in each field.
-     *
+     * <p>
      * It is recommended to use the CommandTemplate form
      * than the
      *
@@ -440,8 +441,8 @@ public class SimpleActivity implements Activity {
      * @return
      */
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSequenceFromCommands(
-        Function<CommandTemplate, OpDispenser<O>> opinit,
-        boolean strict
+            Function<CommandTemplate, OpDispenser<O>> opinit,
+            boolean strict
     ) {
         Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
         Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
@@ -450,10 +451,10 @@ public class SimpleActivity implements Activity {
     }
 
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromParsedOps(
-        Map<String, DriverAdapter> adapterCache,
-        Map<String, OpMapper<Op>> mapperCache,
-        List<DriverAdapter> adapters,
-        List<ParsedOp> pops
+            Map<String, DriverAdapter> adapterCache,
+            Map<String, OpMapper<Op>> mapperCache,
+            List<DriverAdapter> adapters,
+            List<ParsedOp> pops
     ) {
         try {
 
@@ -466,9 +467,9 @@ public class SimpleActivity implements Activity {
             }
 
             SequencerType sequencerType = getParams()
-                .getOptionalString("seq")
-                .map(SequencerType::valueOf)
-                .orElse(SequencerType.bucket);
+                    .getOptionalString("seq")
+                    .map(SequencerType::valueOf)
+                    .orElse(SequencerType.bucket);
             SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
             int dryrunCount = 0;
@@ -512,10 +513,10 @@ public class SimpleActivity implements Activity {
 
 
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromCommands(
-        Function<ParsedOp, OpDispenser<? extends O>> opinit,
-        NBConfiguration cfg,
-        List<Function<Map<String, Object>, Map<String, Object>>> parsers,
-        boolean strict
+            Function<ParsedOp, OpDispenser<? extends O>> opinit,
+            NBConfiguration cfg,
+            List<Function<Map<String, Object>, Map<String, Object>>> parsers,
+            boolean strict
     ) {
         Function<OpTemplate, ParsedOp> f = t -> new ParsedOp(t, cfg, parsers, this);
         Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
@@ -525,7 +526,7 @@ public class SimpleActivity implements Activity {
 
     protected List<ParsedOp> loadParsedOps(NBConfiguration cfg, Optional<DriverAdapter> defaultAdapter) {
         List<ParsedOp> parsedOps = loadOpTemplates(defaultAdapter).stream().map(
-            ot -> new ParsedOp(ot, cfg, List.of(), this)
+                ot -> new ParsedOp(ot, cfg, List.of(), this)
         ).toList();
         return parsedOps;
     }
@@ -546,21 +547,21 @@ public class SimpleActivity implements Activity {
             // There were no ops, and it was because they were all filtered out
             if (0 < unfilteredOps.size()) {
                 throw new BasicError("There were no active op templates with tag filter '"
-                    + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
+                        + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
             }
             if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
                 filteredOps = sotp.getSyntheticOpTemplates(opsDocList, this.activityDef.getParams());
                 Objects.requireNonNull(filteredOps);
                 if (0 == filteredOps.size()) {
                     throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + '\'' +
-                        " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
+                            " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
                 }
             } else {
                 throw new BasicError("""
-                    No op templates were provided. You must provide one of these activity parameters:
-                    1) workload=some.yaml
-                    2) op='inline template'
-                    3) driver=stdout (or any other drive that can synthesize ops)""");
+                        No op templates were provided. You must provide one of these activity parameters:
+                        1) workload=some.yaml
+                        2) op='inline template'
+                        3) driver=stdout (or any other drive that can synthesize ops)""");
             }
             if (0 == filteredOps.size()) {
                 throw new BasicError("There were no active op templates with tag filter '" + tagfilter + '\'');
@@ -569,19 +570,19 @@ public class SimpleActivity implements Activity {
 
         if (0 == filteredOps.size()) {
             throw new OpConfigError("No op templates found. You must provide either workload=... or op=..., or use " +
-                "a default driver (driver=___). This includes " +
-                ServiceLoader.load(DriverAdapter.class).stream()
-                    .filter(p -> {
-                        AnnotatedType[] annotatedInterfaces = p.type().getAnnotatedInterfaces();
-                        for (AnnotatedType ai : annotatedInterfaces) {
-                            if (ai.getType().equals(SyntheticOpTemplateProvider.class)) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    })
-                    .map(d -> d.get().getAdapterName())
-                    .collect(Collectors.joining(",")));
+                    "a default driver (driver=___). This includes " +
+                    ServiceLoader.load(DriverAdapter.class).stream()
+                            .filter(p -> {
+                                AnnotatedType[] annotatedInterfaces = p.type().getAnnotatedInterfaces();
+                                for (AnnotatedType ai : annotatedInterfaces) {
+                                    if (ai.getType().equals(SyntheticOpTemplateProvider.class)) {
+                                        return true;
+                                    }
+                                }
+                                return false;
+                            })
+                            .map(d -> d.get().getAdapterName())
+                            .collect(Collectors.joining(",")));
         }
 
         return filteredOps;
@@ -590,7 +591,7 @@ public class SimpleActivity implements Activity {
     /**
      * Given a function that can create an op of type <O> from an OpTemplate, generate
      * an indexed sequence of ready to call operations.
-     *
+     * <p>
      * This method uses the following conventions to derive the sequence:
      *
      * <OL>
@@ -604,9 +605,11 @@ public class SimpleActivity implements Activity {
      * where the sequence length is the sum of the ratios.</LI>
      * </OL>
      *
-     * @param <O>            A holder for an executable operation for the native driver used by this activity.
-     * @param opinit         A function to map an OpTemplate to the executable operation form required by
-     *                       the native driver for this activity.
+     * @param <O>
+     *         A holder for an executable operation for the native driver used by this activity.
+     * @param opinit
+     *         A function to map an OpTemplate to the executable operation form required by
+     *         the native driver for this activity.
      * @param defaultAdapter
      * @return The sequence of operations as determined by filtering and ratios
      */
@@ -624,9 +627,9 @@ public class SimpleActivity implements Activity {
         }
 
         SequencerType sequencerType = getParams()
-            .getOptionalString("seq")
-            .map(SequencerType::valueOf)
-            .orElse(SequencerType.bucket);
+                .getOptionalString("seq")
+                .map(SequencerType::valueOf)
+                .orElse(SequencerType.bucket);
         SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
         try {
@@ -654,7 +657,7 @@ public class SimpleActivity implements Activity {
             if (stmt.isPresent()) {
                 String op = stmt.get();
                 workloadSource = "commandline:" + stmt.get();
-                if (op.startsWith("{")||op.startsWith("[")) {
+                if (op.startsWith("{") || op.startsWith("[")) {
                     return OpsLoader.loadString(stmt.get(), OpTemplateFormat.json, activityDef.getParams(), null);
                 } else {
                     return OpsLoader.loadString(stmt.get(), OpTemplateFormat.inline, activityDef.getParams(), null);
@@ -670,7 +673,6 @@ public class SimpleActivity implements Activity {
         } catch (Exception e) {
             throw new OpConfigError("Error loading op templates: " + e, workloadSource, e);
         }
-
     }
 
     @Override

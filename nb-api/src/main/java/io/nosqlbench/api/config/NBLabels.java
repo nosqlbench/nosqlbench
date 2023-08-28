@@ -131,14 +131,14 @@ public interface NBLabels {
      * @param labelName The named label to modify
      * @param transform A Lambda which will modify the existing value.
      * @return A new NBLabels value, separate from the original
-     * @@throws RuntimeException if either the key is not found or the values is null.
+     * @throws RuntimeException if either the key is not found or the values is null.
      */
     NBLabels modifyValue(String labelName, Function<String,String> transform);
 
     /**
      * Create a new NBLabels value with the additional keys and values appended.
      *
-     * @param labelsAndValues
+     * @param typeLabelsAndValues
      *     Keys and values in "key1", "value1", "key2", "value2", ... form
      * @return A new NBLabels instance
      */
@@ -147,9 +147,7 @@ public interface NBLabels {
     NBLabels and(NBLabels labels);
     /**
      * Create a new NBLabels value with the additional keys and values appended.
-     *
-     * @param labels
-     *     a map of keys and values
+     * @param typeLabelsAndValues a map of keys and values
      * @return A new NBLabels instance
      */
     NBLabels andTypes(Map<String, String> typeLabelsAndValues);
@@ -166,7 +164,7 @@ public interface NBLabels {
      * @throws RuntimeException
      *     if the specified label does not exist in the set, or the value is null.
      */
-    String only(String name);
+    String valueOf(String name);
 
     /**
      * Return a map representation of the label set, regardless of the underlying form.

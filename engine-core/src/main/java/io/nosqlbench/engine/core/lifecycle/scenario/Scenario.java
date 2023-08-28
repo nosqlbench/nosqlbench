@@ -80,7 +80,6 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
         return Optional.ofNullable(result);
     }
 
-
     @Override
     public NBLabels getLabels() {
         return this.parentComponent.getLabels().andTypes("scenario", this.scenarioName);
@@ -142,15 +141,6 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
         return new Scenario(name, null, engine, "console:10s", true, true, reportSummaryTo, "", Path.of("logs"), minMaturity, NBLabeledElement.forKV("test-name", "name"));
     }
 
-    //    public Scenario(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
-//        scenarioName = name;
-//        this.reportSummaryTo = reportSummaryTo;
-//        this.engine = engine;
-//        commandLine = "";
-//        this.minMaturity = minMaturity;
-//        logsPath = Path.of("logs");
-//    }
-//
     public Scenario setLogger(final Logger logger) {
         this.logger = logger;
         return this;

@@ -95,7 +95,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
      * for scenario encapsulation and concurrent testing.
      *
      * @param args
-     *     Command Line Args
+     *         Command Line Args
      */
     public static void main(final String[] args) {
         try {
@@ -157,17 +157,17 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         this.sessionName = SessionNamer.format(globalOptions.getSessionName());
 
         NBCLI.loggerConfig
-            .setSessionName(sessionName)
-            .setConsoleLevel(globalOptions.getConsoleLogLevel())
-            .setConsolePattern(globalOptions.getConsoleLoggingPattern())
-            .setLogfileLevel(globalOptions.getScenarioLogLevel())
-            .setLogfilePattern(globalOptions.getLogfileLoggingPattern())
-            .setLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
-            .setMaxLogs(globalOptions.getLogsMax())
-            .setLogsDirectory(globalOptions.getLogsDirectory())
-            .setAnsiEnabled(globalOptions.isEnableAnsi())
-            .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
-            .activate();
+                .setSessionName(sessionName)
+                .setConsoleLevel(globalOptions.getConsoleLogLevel())
+                .setConsolePattern(globalOptions.getConsoleLoggingPattern())
+                .setLogfileLevel(globalOptions.getScenarioLogLevel())
+                .setLogfilePattern(globalOptions.getLogfileLoggingPattern())
+                .setLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
+                .setMaxLogs(globalOptions.getLogsMax())
+                .setLogsDirectory(globalOptions.getLogsDirectory())
+                .setAnsiEnabled(globalOptions.isEnableAnsi())
+                .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
+                .activate();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
 
         NBCLI.logger = LogManager.getLogger("NBCLI");
@@ -210,17 +210,16 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         final String reportPromPushTo = globalOptions.wantsReportPromPushTo();
 
 
-
         final int mOpts = (dockerMetrics ? 1 : 0)
-            + ((null != dockerMetricsAt) ? 1 : 0)
-            + ((null != reportGraphiteTo) ? 1 : 0);
+                + ((null != dockerMetricsAt) ? 1 : 0)
+                + ((null != reportGraphiteTo) ? 1 : 0);
 
         if ((1 < mOpts) && ((null == reportGraphiteTo) || (null == annotatorsConfig)))
             throw new BasicError("You have multiple conflicting options which attempt to set\n" +
-                " the destination for metrics and annotations. Please select only one of\n" +
-                " --docker-metrics, --docker-metrics-at <addr>, or other options like \n" +
-                " --report-graphite-to <addr> and --annotators <config>\n" +
-                " For more details, see run 'nb help docker-metrics'");
+                    " the destination for metrics and annotations. Please select only one of\n" +
+                    " --docker-metrics, --docker-metrics-at <addr>, or other options like \n" +
+                    " --report-graphite-to <addr> and --annotators <config>\n" +
+                    " For more details, see run 'nb help docker-metrics'");
 
         String graphiteMetricsAddress = null;
 
@@ -229,18 +228,18 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             NBCLI.logger.info("Docker metrics is enabled. Docker must be installed for this to work");
             final DockerMetricsManager dmh = new DockerMetricsManager();
             final Map<String, String> dashboardOptions = Map.of(
-                DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
-                DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag(),
-                DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays()),
-                DockerMetricsManager.GRAPHITE_SAMPLE_EXPIRY, "10m",
-                DockerMetricsManager.GRAPHITE_CACHE_SIZE, "5000",
-                DockerMetricsManager.GRAPHITE_LOG_LEVEL, globalOptions.getGraphiteLogLevel(),
-                DockerMetricsManager.GRAPHITE_LOG_FORMAT, "logfmt"
+                    DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
+                    DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag(),
+                    DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays()),
+                    DockerMetricsManager.GRAPHITE_SAMPLE_EXPIRY, "10m",
+                    DockerMetricsManager.GRAPHITE_CACHE_SIZE, "5000",
+                    DockerMetricsManager.GRAPHITE_LOG_LEVEL, globalOptions.getGraphiteLogLevel(),
+                    DockerMetricsManager.GRAPHITE_LOG_FORMAT, "logfmt"
 
             );
             dmh.startMetrics(dashboardOptions);
             final String warn = "Docker Containers are started, for grafana and prometheus, hit" +
-                " these urls in your browser: http://<host>:3000 and http://<host>:9090";
+                    " these urls in your browser: http://<host>:3000 and http://<host>:9090";
             NBCLI.logger.warn(warn);
             graphiteMetricsAddress = "localhost";
         } else if (null != dockerMetricsAt) graphiteMetricsAddress = dockerMetricsAt;
@@ -313,19 +312,19 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             NBCLI.logger.debug(() -> "user requests to copy out " + resourceToCopy);
 
             Optional<Content<?>> tocopy = NBIO.classpath()
-                .searchPrefixes("activities")
-                .searchPrefixes(options.wantsIncludes())
-                .pathname(resourceToCopy).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
+                    .searchPrefixes("activities")
+                    .searchPrefixes(options.wantsIncludes())
+                    .pathname(resourceToCopy).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
 
             if (tocopy.isEmpty()) tocopy = NBIO.classpath()
-                .searchPrefixes().searchPrefixes(options.wantsIncludes())
-                .searchPrefixes(options.wantsIncludes())
-                .pathname(resourceToCopy).first();
+                    .searchPrefixes().searchPrefixes(options.wantsIncludes())
+                    .searchPrefixes(options.wantsIncludes())
+                    .pathname(resourceToCopy).first();
 
             final Content<?> data = tocopy.orElseThrow(
-                () -> new BasicError(
-                    "Unable to find " + resourceToCopy +
-                        " in classpath to copy out")
+                    () -> new BasicError(
+                            "Unable to find " + resourceToCopy +
+                                    " in classpath to copy out")
             );
 
             final Path writeTo = Path.of(data.asPath().getFileName().toString());
@@ -363,7 +362,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         if (options.wantsTopicalHelp()) {
             final Optional<String> helpDoc = MarkdownFinder.forHelpTopic(options.wantsTopicalHelpFor());
             System.out.println(helpDoc.orElseThrow(
-                () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
+                    () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
             ));
             return NBCLI.EXIT_OK;
         }
@@ -410,13 +409,13 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         for (
-            final LoggerConfigData histoLogger : options.getHistoLoggerConfigs())
+                final LoggerConfigData histoLogger : options.getHistoLoggerConfigs())
             ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
         for (
-            final LoggerConfigData statsLogger : options.getStatsLoggerConfigs())
+                final LoggerConfigData statsLogger : options.getStatsLoggerConfigs())
             ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
         for (
-            final LoggerConfigData classicConfigs : options.getClassicHistoConfigs())
+                final LoggerConfigData classicConfigs : options.getClassicHistoConfigs())
             ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
 
         // intentionally not shown for warn-only
@@ -442,8 +441,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             this);
 
         final ScriptBuffer buffer = new BasicScriptBuffer()
-            .add(options.getCommands()
-                .toArray(new Cmd[0]));
+                .add(options.getCommands()
+                        .toArray(new Cmd[0]));
         final String scriptData = buffer.getParsedScript();
 
         if (options.wantsShowScript()) {
