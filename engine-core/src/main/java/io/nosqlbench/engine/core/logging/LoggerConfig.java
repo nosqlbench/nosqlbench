@@ -66,6 +66,7 @@ public class LoggerConfig extends ConfigurationFactory {
      * we squelch them to some reasonable level so they aren't a nuisance.
      */
     public static Map<String, Level> BUILTIN_OVERRIDES = Map.of(
+            // ERROR StatusConsoleListener Unable to locate appender "SCENARIO_APPENDER" for logger config "oshi.util"
             "oshi.util", Level.INFO
     );
 
