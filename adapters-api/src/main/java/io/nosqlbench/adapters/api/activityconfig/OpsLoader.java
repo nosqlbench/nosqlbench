@@ -114,7 +114,8 @@ public class OpsLoader {
             stderrStream,
             new os.Path(Path.of(System.getProperty("user.dir"))),
             Option.empty(),
-            Option.empty()
+            Option.empty(),
+            null
         );
 
         String stdoutOutput = stdoutBuffer.toString(StandardCharsets.UTF_8);
