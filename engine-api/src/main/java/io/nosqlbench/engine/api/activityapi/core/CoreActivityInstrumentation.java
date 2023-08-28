@@ -27,9 +27,9 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
 
     private static final String STRICTMETRICNAMES = "strictmetricnames";
 
-    private static final String WAIT_TIME = ".waittime";
-    private static final String SERVICE_TIME = ".servicetime";
-    private static final String RESPONSE_TIME = ".responsetime";
+    private static final String WAIT_TIME = "_waittime";
+    private static final String SERVICE_TIME = "_servicetime";
+    private static final String RESPONSE_TIME = "_responsetime";
 
     private final Activity activity;
     private final ActivityDef def;
@@ -106,7 +106,7 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
 
     @Override
     public synchronized Timer getOrCreateResultSuccessTimer() {
-        return ActivityMetrics.timer(this.activity,"result-success", this.activity.getHdrDigits());
+        return ActivityMetrics.timer(this.activity,"result_success", this.activity.getHdrDigits());
     }
 
     @Override
