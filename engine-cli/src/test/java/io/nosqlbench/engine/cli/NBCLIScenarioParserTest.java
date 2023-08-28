@@ -103,10 +103,11 @@ public class NBCLIScenarioParserTest {
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
-                "alias", "scenariotest_templatetest_withtemplate",
+                "alias", "with_template",
                 "cycles", "20",
                 "cycles-test", "20",
                 "driver", "stdout",
+                "labels","workload:scenario_test",
                 "workload", "scenario-test"
         ));
     }
@@ -117,9 +118,10 @@ public class NBCLIScenarioParserTest {
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
-                "alias", "scenariotest_schemaonly_schema",
+                "alias", "schema",
                 "cycles-test", "20",
                 "driver", "stdout",
+                "labels","workload:scenario_test",
                 "tags", "block:\"schema.*\"",
                 "workload", "scenario-test"
         ));
@@ -158,7 +160,7 @@ public class NBCLIScenarioParserTest {
     @Test
     public void testSanitizer() {
         String sanitized = NBCLIScenarioParser.sanitize("A-b,c_d");
-        assertThat(sanitized).isEqualTo("Abcd");
+        assertThat(sanitized).isEqualTo("A_bc_d");
     }
 
     @Test
@@ -167,9 +169,10 @@ public class NBCLIScenarioParserTest {
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
-                "alias", "scenariotest_schemaonly_schema",
+                "alias", "schema",
                 "cycles-test", "20",
                 "driver", "stdout",
+                "labels","workload:scenario_test",
                 "tags", "block:\"schema.*\"",
                 "workload", "scenario-test"
         ));

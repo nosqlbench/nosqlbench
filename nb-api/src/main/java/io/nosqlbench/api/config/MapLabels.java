@@ -16,33 +16,65 @@
 
 package io.nosqlbench.api.config;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public class MapLabels implements NBLabels {
     private final Map<String,String> labels;
+    private String[] instanceFields = new String[0];
 
-    public MapLabels(final Map<String, String> labels) {
+    public MapLabels(final Map<String, String> labels, String... instanceFields) {
+        verifyValidNamesAndValues(labels);
+//        verifyValidValues(labels);
         this.labels = Collections.unmodifiableMap(labels);
+        this.instanceFields = instanceFields;
     }
 
-    public MapLabels(final Map<String,String> parentLabels, final Map<String,String> childLabels) {
-        final Map<String,String> combined = new LinkedHashMap<>();
-        parentLabels.forEach(combined::put);
+
+    public MapLabels(final Map<String,String> parentLabels, final Map<String,String> childLabels, String... instanceFields) {
+        final Map<String, String> combined = new LinkedHashMap<>(parentLabels);
         childLabels.forEach((k,v) -> {
             if (combined.containsKey(k))
                 throw new RuntimeException("Can't overlap label keys (for instance " + k + ") between parent and child elements. parent:" + parentLabels + ", child:" + childLabels);
             combined.put(k,v);
         });
+        verifyValidNamesAndValues(combined);
+//        verifyValidValues(combined);
+        this.instanceFields = instanceFields;
         labels=Collections.unmodifiableMap(combined);
     }
+
+    private final Pattern validNamesPattern = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]+");
+    private void verifyValidNamesAndValues(Map<String, String> labels) {
+        labels.forEach((label,value) -> {
+            if (!validNamesPattern.matcher(label).matches()) {
+                throw new RuntimeException("Invalid label name '" + label + "', only a-z,A-Z,_ are allowed as the initial character, and a-z,A-Z,0-9,_ are allowed after.");
+            }
+//            if (!validNamesPattern.matcher(value).matches()) {
+//                throw new RuntimeException("Invalid label value '" + value + "', only a-z,A-Z,_ are allowed as the initial character, and a-z,A-Z,0-9,_ are allowed after.");
+//            }
+        });
+    }
+
+    private void verifyValidValues(Map<String, String> labels) {
+        for (String value : labels.values()) {
+            if (!validNamesPattern.matcher(value).matches()) {
+                throw new RuntimeException("Invalid label value '" + value + "', only a-z,A-Z,_ are allowed as the initial character, and a-z,A-Z,0-9,_ are allowed after.");
+            }
+        }
+    }
+
+
 
     @Override
     public String linearizeValues(final char delim, final String... included) {
         final StringBuilder sb = new StringBuilder();
         final List<String> includedNames = new ArrayList<>();
         if (0 < included.length) Collections.addAll(includedNames, included);
-        else this.labels.keySet().forEach(includedNames::add);
+        else includedNames.addAll(this.labels.keySet());
 
         for (String includedName : includedNames) {
             final boolean optional= includedName.startsWith("[") && includedName.endsWith("]");
@@ -65,7 +97,7 @@ public class MapLabels implements NBLabels {
 
         final List<String> includedNames = new ArrayList<>();
         if (0 < included.length) Collections.addAll(includedNames, included);
-        else this.labels.keySet().forEach(includedNames::add);
+        else includedNames.addAll(this.labels.keySet());
         String rawName = null;
         if (null != bareName) {
             rawName = this.labels.get(bareName);
@@ -92,14 +124,28 @@ public class MapLabels implements NBLabels {
     }
 
     @Override
-    public NBLabels and(final String... labelsAndValues) {
-        if (0 != (labelsAndValues.length % 2))
-            throw new RuntimeException("Must provide even number of keys and values: " + Arrays.toString(labelsAndValues));
-        final Map<String,String> childLabels = new LinkedHashMap<>();
-        for (int i = 0; i < labelsAndValues.length; i+=2) childLabels.put(labelsAndValues[i], labelsAndValues[i + 1]);
+    public MapLabels andTypes(final String... labelsAndValues) {
+        final Map<String, String> childLabels = getStringStringMap(labelsAndValues);
         return new MapLabels(labels,childLabels);
     }
 
+    @Override
+    public MapLabels and(NBLabels labels) {
+        return new MapLabels(this.labels,labels.asMap(), concat(this.instanceFields,labels.getInstanceFields()));
+    }
+
+
+    @Override
+    public MapLabels andInstances(final String... labelsAndValues) {
+        final Map<String, String> childLabels = getStringStringMap(labelsAndValues);
+        String[] childInstanceFields = getNamesArray(labelsAndValues);
+        return new MapLabels(this.labels,childLabels,concat(this.instanceFields,getNamesArray(labelsAndValues)));
+    }
+
+    @Override
+    public MapLabels andInstances(Map<String, String> instanceLabelsAndValues) {
+        return new MapLabels(this.labels,instanceLabelsAndValues,instanceLabelsAndValues.keySet().toArray(new String[0]));
+    }
     @Override
     public NBLabels modifyName(final String nameToModify, final Function<String, String> transform) {
         if (!this.labels.containsKey(nameToModify))
@@ -134,7 +180,7 @@ public class MapLabels implements NBLabels {
     }
 
     @Override
-    public String only(final String name) {
+    public String valueOf(final String name) {
         if (!this.labels.containsKey(name))
             throw new RuntimeException("The specified key does not exist: '" + name + '\'');
         final String only = labels.get(name);
@@ -148,7 +194,55 @@ public class MapLabels implements NBLabels {
     }
 
     @Override
-    public NBLabels and(final Map<String, String> moreLabels) {
+    public NBLabels onlyTypes() {
+        Map<String,String> typesOnlyMap = new LinkedHashMap<>(this.labels);
+        for (String instanceField : this.instanceFields) {
+            typesOnlyMap.remove(instanceField);
+        }
+        return new MapLabels(typesOnlyMap);
+    }
+
+    @Override
+    public NBLabels onlyInstances() {
+        Map<String,String> instancesOnlyMap = new LinkedHashMap<>();
+        for (String instanceField : this.instanceFields) {
+            instancesOnlyMap.put(instanceField,this.labels.get(instanceField));
+        }
+        return new MapLabels(instancesOnlyMap);
+    }
+
+    @Override
+    public String[] getInstanceFields() {
+        return instanceFields;
+    }
+
+    @Override
+    public NBLabels andTypes(final Map<String, String> moreLabels) {
         return new MapLabels(this.labels, moreLabels);
     }
+
+    private String[] concat(String[] a, String[] b) {
+        String[] c = new String[a.length+b.length];
+        System.arraycopy(a,0,c,0,a.length);
+        System.arraycopy(b,0,c,a.length,b.length);
+        return c;
+    }
+
+    private static String[] getNamesArray(final String... labelsAndValues) {
+        String[] keys = new String[labelsAndValues.length>>1];
+        for (int i = 0; i < keys.length; i++) {
+            keys[i]=labelsAndValues[i<<1];
+        }
+        return keys;
+    }
+    @NotNull
+    private static Map<String, String> getStringStringMap(String[] labelsAndValues) {
+        if (0 != (labelsAndValues.length % 2))
+            throw new RuntimeException("Must provide even number of keys and values: " + Arrays.toString(labelsAndValues));
+        final Map<String,String> childLabels = new LinkedHashMap<>();
+        for (int i = 0; i < labelsAndValues.length; i+=2) childLabels.put(labelsAndValues[i], labelsAndValues[i + 1]);
+        return childLabels;
+    }
+
+
 }

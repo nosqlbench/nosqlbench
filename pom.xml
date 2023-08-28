@@ -61,7 +61,7 @@
         <module.adapter-tcp>adapter-tcp</module.adapter-tcp>
         <module.adapter-dynamodb>adapter-dynamodb</module.adapter-dynamodb>
         <module.adapter-mongodb>adapter-mongodb</module.adapter-mongodb>
-        <module.adapter-venice>adapter-venice</module.adapter-venice>
+<!--        <module.adapter-venice>adapter-venice</module.adapter-venice>-->
         <module.adapter-pulsar>adapter-pulsar</module.adapter-pulsar>
         <module.adapter-s4j>adapter-s4j</module.adapter-s4j>
         <module.adapter-kafka>adapter-kafka</module.adapter-kafka>
@@ -102,7 +102,7 @@
         <module>adapters-api</module>
 
         <!-- driver modules -->
-        <module>adapter-venice</module>
+<!--        <module>adapter-venice</module>-->
         <module>adapter-diag</module>
         <module>adapter-stdout</module>
         <module>adapter-cqld4</module>

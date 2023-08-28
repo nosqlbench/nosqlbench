@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,16 @@ package io.nosqlbench.api.annotations;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 public class MutableAnnotation implements Annotation {
 
@@ -42,12 +46,10 @@ public class MutableAnnotation implements Annotation {
     private long end = 0L;
 
     @Expose
-    private Map<String, String> labels = new LinkedHashMap<>();
-
-    @Expose
     private Map<String, String> details = new LinkedHashMap<>();
 
     private final ZoneId zoneid = ZoneId.of("GMT");
+    private NBLabeledElement element;
 
     public MutableAnnotation(
             TimeZone timezone,
@@ -55,48 +57,38 @@ public class MutableAnnotation implements Annotation {
             Layer layer,
             long start,
             long end,
-            LinkedHashMap<String, String> labels,
+            NBLabeledElement element,
             LinkedHashMap<String, String> details) {
-        setLabels(labels);
+        setElement(element);
         setSession(session);
         setLayer(layer);
         setStart(start);
         setEnd(end);
         setDetails(details);
-        labels.put("appname", "nosqlbench");
+    }
+
+    private void setElement(NBLabeledElement element) {
+        this.element = element;
     }
 
     public void setSession(String sessionName) {
         this.session = sessionName;
-        this.labels.put("session", sessionName);
     }
 
     public void setStart(long intervalStart) {
         this.start = intervalStart;
-        this.labels.put("span", getSpan().toString());
     }
 
     public void setEnd(long intervalEnd) {
         this.end = intervalEnd;
-        this.labels.put("span", getSpan().toString());
-    }
-
-    public void setLabels(Map<String, String> labels) {
-        this.labels = labels;
     }
 
     public void setLayer(Layer layer) {
         this.layer = layer;
-        this.labels.put("layer", layer.toString());
     }
 
     public void setDetails(Map<String, String> details) {
         this.details = details;
-    }
-
-    @Override
-    public String getSession() {
-        return session;
     }
 
     @Override
@@ -115,11 +107,8 @@ public class MutableAnnotation implements Annotation {
     }
 
     @Override
-    public Map<String, String> getLabels() {
-//        if (!labels.containsKey("span")) {
-//            labels.put("span",getSpan().toString());
-//        }
-        return labels;
+    public NBLabels getLabels() {
+        return element.getLabels();
     }
 
     @Override
@@ -130,7 +119,6 @@ public class MutableAnnotation implements Annotation {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("session: ").append(getSession()).append("\n");
 
         ZonedDateTime startTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
         ZonedDateTime endTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
@@ -144,17 +132,17 @@ public class MutableAnnotation implements Annotation {
         }
         sb.append("]\n");
 
-        sb.append("span:").append(getSpan()).append("\n");
+        sb.append("span:").append(getTemporal()).append("\n");
         sb.append("details:\n");
         formatMap(sb, getDetails());
         sb.append("labels:\n");
-        formatMap(sb, getLabels());
+        formatMap(sb, getLabels().asMap());
         return sb.toString();
     }
 
     private void formatMap(StringBuilder sb, Map<String, String> details) {
         details.forEach((k, v) -> {
-            sb.append(" ").append(k).append(": ");
+            sb.append(" ").append(k).append(":");
             if (v.contains("\n")) {
                 sb.append("\n");
 
@@ -164,7 +152,7 @@ public class MutableAnnotation implements Annotation {
                 }
 //                Arrays.stream(lines).sequential().map(s -> "  "+s+"\n").forEach(sb::append);
             } else {
-                sb.append(v).append("\n");
+                sb.append(" ").append(v).append("\n");
             }
         });
     }
@@ -173,8 +161,8 @@ public class MutableAnnotation implements Annotation {
         return this;
     }
 
-    public Span getSpan() {
-        return (getStart() == getEnd()) ? Span.instant : Span.interval;
+    public Temporal getTemporal() {
+        return (getStart() == getEnd()) ? Temporal.instant : Temporal.interval;
     }
 
     public String asJson() {

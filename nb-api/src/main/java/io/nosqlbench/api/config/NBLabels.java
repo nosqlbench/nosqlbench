@@ -131,27 +131,29 @@ public interface NBLabels {
      * @param labelName The named label to modify
      * @param transform A Lambda which will modify the existing value.
      * @return A new NBLabels value, separate from the original
-     * @@throws RuntimeException if either the key is not found or the values is null.
+     * @throws RuntimeException if either the key is not found or the values is null.
      */
     NBLabels modifyValue(String labelName, Function<String,String> transform);
 
     /**
      * Create a new NBLabels value with the additional keys and values appended.
      *
-     * @param labelsAndValues
+     * @param typeLabelsAndValues
      *     Keys and values in "key1", "value1", "key2", "value2", ... form
      * @return A new NBLabels instance
      */
-    NBLabels and(String... labelsAndValues);
+    NBLabels andTypes(String... typeLabelsAndValues);
 
+    NBLabels and(NBLabels labels);
     /**
      * Create a new NBLabels value with the additional keys and values appended.
-     *
-     * @param labels
-     *     a map of keys and values
+     * @param typeLabelsAndValues a map of keys and values
      * @return A new NBLabels instance
      */
-    NBLabels and(Map<String, String> labels);
+    NBLabels andTypes(Map<String, String> typeLabelsAndValues);
+    NBLabels andInstances(String... instanceLabelsAndValues);
+
+    NBLabels andInstances(Map<String,String> instanceLabelsAndValues);
 
     /**
      * Return the value of the specified label key.
@@ -162,7 +164,7 @@ public interface NBLabels {
      * @throws RuntimeException
      *     if the specified label does not exist in the set, or the value is null.
      */
-    String only(String name);
+    String valueOf(String name);
 
     /**
      * Return a map representation of the label set, regardless of the underlying form.
@@ -170,4 +172,13 @@ public interface NBLabels {
      * @return a {@link Map} of keys and values, in deterministic order
      */
     Map<String, String> asMap();
+
+    /**
+     * @return a new set of labels which includes only those which are not using per-instance semantics.
+     */
+    NBLabels onlyTypes();
+    NBLabels onlyInstances();
+
+    String[] getInstanceFields();
+
 }

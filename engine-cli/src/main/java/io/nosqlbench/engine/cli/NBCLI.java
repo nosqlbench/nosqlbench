@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.cli;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
 import io.nosqlbench.api.config.NBLabeledElement;
@@ -84,6 +86,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
     private NBLabels labels;
     private String sessionName;
+    private String sessionCode;
+    private long sessionTime;
 
     public NBCLI(final String commandName) {
         this.commandName = commandName;
@@ -95,7 +99,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
      * for scenario encapsulation and concurrent testing.
      *
      * @param args
-     *     Command Line Args
+     *         Command Line Args
      */
     public static void main(final String[] args) {
         try {
@@ -151,23 +155,30 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 //        logger = LogManager.getLogger("NBCLI");
 
         NBCLI.loggerConfig.setConsoleLevel(NBLogLevel.ERROR);
-
+        this.sessionTime = System.currentTimeMillis();
         final NBCLIOptions globalOptions = new NBCLIOptions(args, Mode.ParseGlobalsOnly);
-        this.labels=NBLabels.forKV("command",commandName).and(globalOptions.getLabelMap());
-        this.sessionName = SessionNamer.format(globalOptions.getSessionName());
+
+        this.sessionCode = SystemId.genSessionCode(sessionTime);
+        this.sessionName = SessionNamer.format(globalOptions.getSessionName(),sessionTime).replaceAll("SESSIONCODE",sessionCode);
+        this.labels = NBLabels.forKV("command", commandName, "appname", "nosqlbench")
+                .andInstances("node",SystemId.getNodeId())
+                .andInstances("nodeid",SystemId.getPackedNodeId())
+//                .andInstances("sesscode",sessionCode)
+                .andInstances("session",sessionName)
+                .and(globalOptions.getLabelMap());
 
         NBCLI.loggerConfig
-            .setSessionName(sessionName)
-            .setConsoleLevel(globalOptions.getConsoleLogLevel())
-            .setConsolePattern(globalOptions.getConsoleLoggingPattern())
-            .setLogfileLevel(globalOptions.getScenarioLogLevel())
-            .setLogfilePattern(globalOptions.getLogfileLoggingPattern())
-            .setLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
-            .setMaxLogs(globalOptions.getLogsMax())
-            .setLogsDirectory(globalOptions.getLogsDirectory())
-            .setAnsiEnabled(globalOptions.isEnableAnsi())
-            .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
-            .activate();
+                .setSessionName(sessionName)
+                .setConsoleLevel(globalOptions.getConsoleLogLevel())
+                .setConsolePattern(globalOptions.getConsoleLoggingPattern())
+                .setLogfileLevel(globalOptions.getScenarioLogLevel())
+                .setLogfilePattern(globalOptions.getLogfileLoggingPattern())
+                .setLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
+                .setMaxLogs(globalOptions.getLogsMax())
+                .setLogsDirectory(globalOptions.getLogsDirectory())
+                .setAnsiEnabled(globalOptions.isEnableAnsi())
+                .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
+                .activate();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
 
         NBCLI.logger = LogManager.getLogger("NBCLI");
@@ -210,17 +221,16 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         final String reportPromPushTo = globalOptions.wantsReportPromPushTo();
 
 
-
         final int mOpts = (dockerMetrics ? 1 : 0)
-            + ((null != dockerMetricsAt) ? 1 : 0)
-            + ((null != reportGraphiteTo) ? 1 : 0);
+                + ((null != dockerMetricsAt) ? 1 : 0)
+                + ((null != reportGraphiteTo) ? 1 : 0);
 
         if ((1 < mOpts) && ((null == reportGraphiteTo) || (null == annotatorsConfig)))
             throw new BasicError("You have multiple conflicting options which attempt to set\n" +
-                " the destination for metrics and annotations. Please select only one of\n" +
-                " --docker-metrics, --docker-metrics-at <addr>, or other options like \n" +
-                " --report-graphite-to <addr> and --annotators <config>\n" +
-                " For more details, see run 'nb help docker-metrics'");
+                    " the destination for metrics and annotations. Please select only one of\n" +
+                    " --docker-metrics, --docker-metrics-at <addr>, or other options like \n" +
+                    " --report-graphite-to <addr> and --annotators <config>\n" +
+                    " For more details, see run 'nb help docker-metrics'");
 
         String graphiteMetricsAddress = null;
 
@@ -229,28 +239,44 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             NBCLI.logger.info("Docker metrics is enabled. Docker must be installed for this to work");
             final DockerMetricsManager dmh = new DockerMetricsManager();
             final Map<String, String> dashboardOptions = Map.of(
-                DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
-                DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag(),
-                DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays()),
-                DockerMetricsManager.GRAPHITE_SAMPLE_EXPIRY, "10m",
-                DockerMetricsManager.GRAPHITE_CACHE_SIZE, "5000",
-                DockerMetricsManager.GRAPHITE_LOG_LEVEL, globalOptions.getGraphiteLogLevel(),
-                DockerMetricsManager.GRAPHITE_LOG_FORMAT, "logfmt"
+                    DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
+                    DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag(),
+                    DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays()),
+                    DockerMetricsManager.GRAPHITE_SAMPLE_EXPIRY, "10m",
+                    DockerMetricsManager.GRAPHITE_CACHE_SIZE, "5000",
+                    DockerMetricsManager.GRAPHITE_LOG_LEVEL, globalOptions.getGraphiteLogLevel(),
+                    DockerMetricsManager.GRAPHITE_LOG_FORMAT, "logfmt"
 
             );
             dmh.startMetrics(dashboardOptions);
             final String warn = "Docker Containers are started, for grafana and prometheus, hit" +
-                " these urls in your browser: http://<host>:3000 and http://<host>:9090";
+                    " these urls in your browser: http://<host>:3000 and http://<host>:9090";
             NBCLI.logger.warn(warn);
             graphiteMetricsAddress = "localhost";
-        } else if (null != dockerMetricsAt) graphiteMetricsAddress = dockerMetricsAt;
+        } else if (null != dockerMetricsAt) {
+            graphiteMetricsAddress = dockerMetricsAt;
+        }
 
-        if (null != graphiteMetricsAddress) {
-            reportGraphiteTo = graphiteMetricsAddress + ":9109";
-            annotatorsConfig = "[{type:'log',level:'info'},{type:'grafana',baseurl:'http://" + graphiteMetricsAddress + ":3000" +
-                "/'," +
-                "tags:'appname:nosqlbench',timeoutms:5000,onerror:'warn'}]";
-        } else annotatorsConfig = "[{type:'log',level:'info'}]";
+        if (annotatorsConfig == null || annotatorsConfig.isBlank()) {
+            List<Map<String, String>> annotatorsConfigs = new ArrayList<>();
+            annotatorsConfigs.add(Map.of(
+                    "type", "log",
+                    "level", "info"
+            ));
+
+            if (null != graphiteMetricsAddress) {
+                reportGraphiteTo = graphiteMetricsAddress + ":9109";
+                annotatorsConfigs.add(Map.of(
+                        "type", "grafana",
+                        "baseurl", "http://" + graphiteMetricsAddress + ":3000",
+                        "tags", "appname:nosqlbench",
+                        "timeoutms", "5000",
+                        "onerror", "warn"
+                ));
+            }
+            Gson gson = new GsonBuilder().create();
+            annotatorsConfig = gson.toJson(annotatorsConfigs);
+        }
 
         final NBCLIOptions options = new NBCLIOptions(args);
         NBCLI.logger = LogManager.getLogger("NBCLI");
@@ -313,19 +339,19 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             NBCLI.logger.debug(() -> "user requests to copy out " + resourceToCopy);
 
             Optional<Content<?>> tocopy = NBIO.classpath()
-                .searchPrefixes("activities")
-                .searchPrefixes(options.wantsIncludes())
-                .pathname(resourceToCopy).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
+                    .searchPrefixes("activities")
+                    .searchPrefixes(options.wantsIncludes())
+                    .pathname(resourceToCopy).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
 
             if (tocopy.isEmpty()) tocopy = NBIO.classpath()
-                .searchPrefixes().searchPrefixes(options.wantsIncludes())
-                .searchPrefixes(options.wantsIncludes())
-                .pathname(resourceToCopy).first();
+                    .searchPrefixes().searchPrefixes(options.wantsIncludes())
+                    .searchPrefixes(options.wantsIncludes())
+                    .pathname(resourceToCopy).first();
 
             final Content<?> data = tocopy.orElseThrow(
-                () -> new BasicError(
-                    "Unable to find " + resourceToCopy +
-                        " in classpath to copy out")
+                    () -> new BasicError(
+                            "Unable to find " + resourceToCopy +
+                                    " in classpath to copy out")
             );
 
             final Path writeTo = Path.of(data.asPath().getFileName().toString());
@@ -363,7 +389,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         if (options.wantsTopicalHelp()) {
             final Optional<String> helpDoc = MarkdownFinder.forHelpTopic(options.wantsTopicalHelpFor());
             System.out.println(helpDoc.orElseThrow(
-                () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
+                    () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
             ));
             return NBCLI.EXIT_OK;
         }
@@ -378,12 +404,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         NBCLI.logger.debug("initializing annotators with config:'{}'", annotatorsConfig);
         Annotators.init(annotatorsConfig);
         Annotators.recordAnnotation(
-            Annotation.newBuilder()
-                .session(sessionName)
-                .now()
-                .layer(Layer.CLI)
-                .detail("cli", String.join("\n", args))
-                .build()
+                Annotation.newBuilder()
+                        .element(this)
+                        .now()
+                        .layer(Layer.Session)
+                        .detail("cli", String.join("\n", args))
+                        .build()
         );
 
         if ((null != reportPromPushTo) || (null != reportGraphiteTo) || (null != options.wantsReportCsvTo())) {
@@ -410,13 +436,13 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         for (
-            final LoggerConfigData histoLogger : options.getHistoLoggerConfigs())
+                final LoggerConfigData histoLogger : options.getHistoLoggerConfigs())
             ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
         for (
-            final LoggerConfigData statsLogger : options.getStatsLoggerConfigs())
+                final LoggerConfigData statsLogger : options.getStatsLoggerConfigs())
             ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
         for (
-            final LoggerConfigData classicConfigs : options.getClassicHistoConfigs())
+                final LoggerConfigData classicConfigs : options.getClassicHistoConfigs())
             ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
 
         // intentionally not shown for warn-only
@@ -429,21 +455,21 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         final Scenario scenario = new Scenario(
-            sessionName,
-            options.getScriptFile(),
-            options.getScriptingEngine(),
-            options.getProgressSpec(),
-            options.wantsStackTraces(),
-            options.wantsCompileScript(),
-            options.getReportSummaryTo(),
-            String.join("\n", args),
-            options.getLogsDirectory(),
-            Maturity.Unspecified,
-            this);
+                sessionName,
+                options.getScriptFile(),
+                options.getScriptingEngine(),
+                options.getProgressSpec(),
+                options.wantsStackTraces(),
+                options.wantsCompileScript(),
+                options.getReportSummaryTo(),
+                String.join("\n", args),
+                options.getLogsDirectory(),
+                Maturity.Unspecified,
+                this);
 
         final ScriptBuffer buffer = new BasicScriptBuffer()
-            .add(options.getCommands()
-                .toArray(new Cmd[0]));
+                .add(options.getCommands()
+                        .toArray(new Cmd[0]));
         final String scriptData = buffer.getParsedScript();
 
         if (options.wantsShowScript()) {

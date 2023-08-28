@@ -31,13 +31,13 @@ for (i = 0; i < 5; i++) {
         print("scenario exited prematurely, aborting.");
         break;
     }
-    print("backlogging, cycles=" + metrics.co_cycle_delay_bursty.cycles.servicetime.count +
-        " waittime=" + metrics.co_cycle_delay_bursty.cycles.waittime.value +
+    print("backlogging, cycles=" + metrics.co_cycle_delay_bursty.cycles_servicetime.count +
+        " waittime=" + metrics.co_cycle_delay_bursty.cycles_waittime.value +
         " diagrate=" + activities.co_cycle_delay_bursty.diagrate +
         " cyclerate=" + activities.co_cycle_delay_bursty.cyclerate
     );
 }
-print('step1 metrics.waittime=' + metrics.co_cycle_delay_bursty.cycles.waittime.value);
+print('step1 metrics.waittime=' + metrics.co_cycle_delay_bursty.cycles_waittime.value);
 activities.co_cycle_delay_bursty.diagrate = "10000";
 
 for (i = 0; i < 10; i++) {
@@ -45,19 +45,19 @@ for (i = 0; i < 10; i++) {
         print("scenario exited prematurely, aborting.");
         break;
     }
-    print("recovering, cycles=" + metrics.co_cycle_delay_bursty.cycles.servicetime.count +
-        " waittime=" + metrics.co_cycle_delay_bursty.cycles.waittime.value +
+    print("recovering, cycles=" + metrics.co_cycle_delay_bursty.cycles_servicetime.count +
+        " waittime=" + metrics.co_cycle_delay_bursty.cycles_waittime.value +
         " diagrate=" + activities.co_cycle_delay_bursty.diagrate +
         " cyclerate=" + activities.co_cycle_delay_bursty.cyclerate
     );
 
     scenario.waitMillis(1000);
-    if (metrics.co_cycle_delay_bursty.cycles.waittime.value < 50000000) {
+    if (metrics.co_cycle_delay_bursty.cycles_waittime.value < 50000000) {
         print("waittime trended back down as expected, exiting on iteration " + i);
         break;
     }
 }
 //scenario.awaitActivity("co_cycle_delay");
-print('step2 metrics.waittime=' + metrics.co_cycle_delay_bursty.cycles.waittime.value);
+print('step2 metrics.waittime=' + metrics.co_cycle_delay_bursty.cycles_waittime.value);
 scenario.stop(co_cycle_delay_bursty);
 print("stopped activity co_cycle_delay_bursty");

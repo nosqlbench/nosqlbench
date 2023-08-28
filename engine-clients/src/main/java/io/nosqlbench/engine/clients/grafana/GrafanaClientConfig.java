@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,6 +126,8 @@ public class GrafanaClientConfig {
 
     private URI makeUri(String pathAndQuery) {
         try {
+            String baseUri = getBaseUri().toString();
+            baseUri = (!baseUri.endsWith("/")&&!pathAndQuery.startsWith("/")) ? baseUri+"/" : baseUri;
             return new URI(getBaseUri().toString() + pathAndQuery);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
@@ -145,13 +147,16 @@ public class GrafanaClientConfig {
 
     public GrafanaClientConfig setBaseUri(String baseuri) {
         try {
+            baseuri = baseuri.endsWith("/") ? baseuri : baseuri + "/";
             URI uri = new URI(baseuri);
             String userinfo = uri.getRawUserInfo();
             if (userinfo != null) {
                 String[] unpw = userinfo.split(":");
                 basicAuth(unpw[0], unpw.length == 2 ? unpw[1] : "");
-                uri = new URI(baseuri.replace(userinfo + "@", ""));
+                String expanded = baseuri.replace(userinfo + "@", "");
+                uri = new URI(expanded);
             }
+
             this.baseUrl = uri;
 
         } catch (URISyntaxException e) {

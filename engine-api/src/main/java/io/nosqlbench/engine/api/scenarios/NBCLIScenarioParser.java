@@ -46,7 +46,7 @@ public class NBCLIScenarioParser {
 
     private final static Logger logger = LogManager.getLogger("SCENARIOS");
     private static final String SEARCH_IN = "activities";
-    public static final String WORKLOAD_SCENARIO_STEP = "WORKLOAD_SCENARIO_STEP";
+    public static final String WORKLOAD_SCENARIO_STEP = "STEP";
 
     public static boolean isFoundWorkload(String workload, String... includes) {
         Optional<Content<?>> found = NBIO.all()
@@ -190,8 +190,9 @@ public class NBCLIScenarioParser {
                     buildingCmd.put("alias", "alias=" + WORKLOAD_SCENARIO_STEP);
                 }
 
+                // TODO: simplify this
                 String alias = buildingCmd.get("alias");
-                for (String token : new String[]{"WORKLOAD", "SCENARIO", "STEP"}) {
+                for (String token : new String[]{"STEP"}) {
                     if (!alias.contains(token)) {
                         logger.warn("Your alias template '" + alias + "' does not contain " + token + ", which will " +
                             "cause your metrics to be combined under the same name. It is strongly advised that you " +
@@ -206,6 +207,7 @@ public class NBCLIScenarioParser {
                 alias = alias.replaceAll("STEP", sanitize(stepName));
                 alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
                 buildingCmd.put("alias", alias);
+                buildingCmd.put("labels","labels=workload:"+sanitize(workloadToken));
 
                 logger.debug(() -> "rebuilt command: " + String.join(" ", buildingCmd.values()));
                 buildCmdBuffer.addAll(buildingCmd.values());
@@ -219,7 +221,12 @@ public class NBCLIScenarioParser {
     public static String sanitize(String word) {
         String sanitized = word;
         sanitized = sanitized.replaceAll("\\..+$", "");
-        sanitized = sanitized.replaceAll("[^a-zA-Z0-9]+", "");
+        sanitized = sanitized.replaceAll("-","_");
+        sanitized = sanitized.replaceAll("[^a-zA-Z0-9_]+", "");
+
+        if (!word.equals(sanitized)) {
+            logger.warn("The identifier or value '" + word + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
+        }
         return sanitized;
     }
 
@@ -326,7 +333,7 @@ public class NBCLIScenarioParser {
 
                 OpsDocList stmts = null;
                 try {
-                    stmts = OpsLoader.loadContent(content, Map.of());
+                    stmts = OpsLoader.loadContent(content, new LinkedHashMap<>());
                     if (stmts.getStmtDocs().size() == 0) {
                         logger.warn("Encountered yaml with no docs in '" + referenced + "'");
                         continue;

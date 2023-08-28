@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ print("measured cycle increment per second is expected to adjust to 1000");
 
 print('cyclerate now:' + activities.cycle_rate_change.cyclerate);
 
-var lastcount=metrics.cycle_rate_change.cycles.servicetime.count;
+var lastcount=metrics.cycle_rate_change.cycles_servicetime.count;
 for(i=0;i<20;i++) {
     scenario.waitMillis(1000);
-    var nextcount=metrics.cycle_rate_change.cycles.servicetime.count;
+    var nextcount=metrics.cycle_rate_change.cycles_servicetime.count;
     var cycles = (nextcount - lastcount);
     print("new this second: " + (nextcount - lastcount));
-    print(" waittime: " + metrics.cycle_rate_change.cycles.waittime.value);
+    print(" waittime: " + metrics.cycle_rate_change.cycles_waittime.value);
     lastcount=nextcount;
     if (cycles>700 && cycles<1300) {
         print("cycles adjusted, exiting on iteration " + i);

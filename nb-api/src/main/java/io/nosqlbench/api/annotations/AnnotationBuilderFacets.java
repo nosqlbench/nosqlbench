@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,19 @@
 
 package io.nosqlbench.api.annotations;
 
+import io.nosqlbench.api.config.NBLabeledElement;
+
 public interface AnnotationBuilderFacets {
 
     interface All extends
-            WantsSession, WantsInterval, WantsLayer, WantsLabels, WantsMoreDetailsOrBuild, WantsMoreLabelsOrDetails {
+        WantsLabeledElement, WantsInterval, WantsLayer, WantsMoreDetailsOrBuild {
     }
 
-    interface WantsSession {
+    interface WantsLabeledElement {
         /**
          * The session is the global name of a NoSQLBench process which run a scenario. It is required.
          */
-        WantsInterval session(String session);
+        WantsInterval element(NBLabeledElement element);
     }
 
     interface WantsInterval {
@@ -50,22 +52,11 @@ public interface AnnotationBuilderFacets {
     }
 
     interface WantsLayer {
-        WantsMoreLabelsOrDetails layer(Layer layer);
-    }
-
-    interface WantsLabels {
-        WantsMoreLabelsOrDetails label(String name, String value);
-    }
-
-    interface WantsMoreLabelsOrDetails {
-        WantsMoreLabelsOrDetails label(String name, String value);
-
-        WantsMoreDetailsOrBuild detail(String name, String value);
+        WantsMoreDetailsOrBuild layer(Layer layer);
     }
 
     interface WantsMoreDetailsOrBuild {
         WantsMoreDetailsOrBuild detail(String name, String value);
-
         Annotation build();
     }
 

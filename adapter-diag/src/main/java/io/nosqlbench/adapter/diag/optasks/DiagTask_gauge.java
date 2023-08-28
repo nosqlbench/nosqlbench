@@ -171,6 +171,6 @@ public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double> {
 
     @Override
     public NBLabels getLabels() {
-        return super.getLabels().and("stat",this.stat.toString());
+        return super.getLabels().andTypes("stat",this.stat.toString());
     }
 }

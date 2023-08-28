@@ -51,7 +51,7 @@ public class KafkaAdapterMetrics {
 
     public KafkaAdapterMetrics(final KafkaBaseOpDispenser kafkaBaseOpDispenser, final NBLabeledElement labeledParent) {
         this.kafkaBaseOpDispenser = kafkaBaseOpDispenser;
-        labels=labeledParent.getLabels().and("name",KafkaAdapterMetrics.class.getSimpleName());
+        labels=labeledParent.getLabels().andTypes("name",KafkaAdapterMetrics.class.getSimpleName());
     }
 
     public void initS4JAdapterInstrumentation() {

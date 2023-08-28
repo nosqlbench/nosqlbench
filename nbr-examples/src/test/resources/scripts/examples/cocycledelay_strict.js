@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,18 @@ co_cycle_delay = {
 print('starting activity co_cycle_delay');
 scenario.start(co_cycle_delay);
 scenario.waitMillis(4000);
-print('step1 cycles.waittime=' + metrics.co_cycle_delay.cycles.waittime.value);
+print('step1 cycles_waittime=' + metrics.co_cycle_delay.cycles_waittime.value);
 activities.co_cycle_delay.diagrate="10000";
 for(i=0;i<5;i++) {
     if (! scenario.isRunningActivity('co_cycle_delay')) {
         print("scenario exited prematurely, aborting.");
         break;
     }
-    print("iteration " + i + " waittime now " + metrics.co_cycle_delay.cycles.waittime.value);
+    print("iteration " + i + " waittime now " + metrics.co_cycle_delay.cycles_waittime.value);
     scenario.waitMillis(1000);
 }
 
 
 //scenario.awaitActivity("co_cycle_delay");
-print('step2 cycles.waittime=' + metrics.co_cycle_delay.cycles.waittime.value);
+print('step2 cycles_waittime=' + metrics.co_cycle_delay.cycles_waittime.value);
 print("awaited activity");
