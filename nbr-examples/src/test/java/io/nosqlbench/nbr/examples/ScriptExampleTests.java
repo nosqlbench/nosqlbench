@@ -158,7 +158,7 @@ public class ScriptExampleTests {
             "logs/histostats.csv"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains("min,p25,p50,p75,p90,p95,");
-        assertThat(logdata.split("Tag=testhistostatslogger.cycles.servicetime,").length).isGreaterThanOrEqualTo(1);
+        assertThat(logdata.split("Tag=testhistostatslogger.cycles_servicetime,").length).isGreaterThanOrEqualTo(1);
     }
 
     @Test
@@ -179,7 +179,7 @@ public class ScriptExampleTests {
         List<String> strings = Files.readAllLines(Paths.get("hdrhistodata.log"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains(",HIST");
-        assertThat(logdata.split("Tag=testhistologger.cycles.servicetime,").length).isGreaterThanOrEqualTo(1);
+        assertThat(logdata.split("Tag=testhistologger.cycles_servicetime,").length).isGreaterThanOrEqualTo(1);
     }
 
     @Test
@@ -241,8 +241,8 @@ public class ScriptExampleTests {
     @Test
     public void testReportedCoDelayStrict() {
         ExecutionMetricsResult scenarioResult = runScenario("cocycledelay_strict");
-        assertThat(scenarioResult.getIOLog()).contains("step1 cycles.waittime=");
-        assertThat(scenarioResult.getIOLog()).contains("step2 cycles.waittime=");
+        assertThat(scenarioResult.getIOLog()).contains("step1 cycles_waittime=");
+        assertThat(scenarioResult.getIOLog()).contains("step2 cycles_waittime=");
         String iolog = scenarioResult.getIOLog();
         System.out.println(iolog);
         // TODO: ensure that waittime is staying the same or increasing

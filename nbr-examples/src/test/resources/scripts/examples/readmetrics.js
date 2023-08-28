@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ activitydef = {
 scenario.start(activitydef);
 
 scenario.waitMillis(500);
-while (metrics.testactivity.cycles.servicetime.count < 1000) {
-    print('waiting 10ms because cycles<10000 : ' + metrics.testactivity.cycles.servicetime.count);
+while (metrics.testactivity.cycles_servicetime.count < 1000) {
+    print('waiting 10ms because cycles<10000 : ' + metrics.testactivity.cycles_servicetime.count);
     scenario.waitMillis(10);
 
 }
 scenario.stop(activitydef);
-print("count: " + metrics.testactivity.cycles.servicetime.count);
+print("count: " + metrics.testactivity.cycles_servicetime.count);

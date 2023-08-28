@@ -27,7 +27,7 @@ activitydef = {
 scenario.start(activitydef);
 scenario.waitMillis(500);
 
-csvlogger.add(metrics.csvmetrics.cycles.servicetime);
+csvlogger.add(metrics.csvmetrics.cycles_servicetime);
 csvlogger.start(500,"MILLISECONDS");
 
 scenario.waitMillis(2000);
