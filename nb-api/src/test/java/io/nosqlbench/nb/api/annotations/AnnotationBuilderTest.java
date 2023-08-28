@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package io.nosqlbench.nb.api.annotations;
 
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
+import io.nosqlbench.api.config.NBLabeledElement;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,36 +31,31 @@ public class AnnotationBuilderTest {
     public void testBasicAnnotation() {
 
         Annotation an1 = Annotation.newBuilder()
-                .session("test-session")
+            .element(NBLabeledElement.forKV("test_element","value"))
                 .at(time)
                 .layer(Layer.Scenario)
-                .label("labelka", "labelvb")
-                .label("labelkc", "labelvd")
                 .detail("detailk1", "detailv1")
                 .detail("detailk2", "detailv21\ndetailv22")
                 .detail("detailk3", "v1\nv2\nv3\n")
                 .build();
 
         String represented = an1.toString();
-        assertThat(represented).isEqualTo("session: test-session\n" +
-                "[2020-09-13T12:26:40Z]\n" +
-                "span:instant\n" +
-                "details:\n" +
-                " detailk1: detailv1\n" +
-                " detailk2: \n" +
-                "  detailv21\n" +
-                "  detailv22\n" +
-                " detailk3: \n" +
-                "  v1\n" +
-                "  v2\n" +
-                "  v3\n" +
-                "labels:\n" +
-                " layer: Scenario\n" +
-                " labelka: labelvb\n" +
-                " labelkc: labelvd\n" +
-                " session: test-session\n" +
-                " span: instant\n" +
-                " appname: nosqlbench\n");
+        assertThat(represented).isEqualTo(
+                """
+                [2020-09-13T12:26:40Z]
+                span:instant
+                details:
+                 detailk1: detailv1
+                 detailk2:
+                  detailv21
+                  detailv22
+                 detailk3:
+                  v1
+                  v2
+                  v3
+                labels:
+                 test_element: value
+                """);
 
     }
 

@@ -19,6 +19,8 @@ package io.nosqlbench.api.engine.metrics.reporters;
 import com.codahale.metrics.*;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -34,8 +36,9 @@ import java.util.Map;
  *     exposition format</a>
  */
 
-public enum PromExpositionFormat {
-;
+public class PromExpositionFormat {
+
+    private final static Logger logger = LogManager.getLogger("METRICS");
     public static String format(final Clock clock, final Metric... metrics) {
         return PromExpositionFormat.format(clock, new StringBuilder(), metrics).toString();
     }
@@ -64,7 +67,7 @@ public enum PromExpositionFormat {
 
             if (metric instanceof final Counting counting) {
                 buffer.append("# TYPE ")
-                    .append(labels.modifyValue("name", n -> n+"_total").only("name")).append(" counter\n");
+                    .append(labels.modifyValue("name", n -> n+"_total").valueOf("name")).append(" counter\n");
 
                 final long count = counting.getCount();
                 buffer
@@ -77,12 +80,12 @@ public enum PromExpositionFormat {
             }
             if (metric instanceof final Sampling sampling) {
                 // Use the summary form
-                buffer.append("# TYPE ").append(labels.only("name")).append(" summary\n");
+                buffer.append("# TYPE ").append(labels.valueOf("name")).append(" summary\n");
                 final Snapshot snapshot = sampling.getSnapshot();
                 for (final double quantile : new double[]{0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999}) {
                     final double value = snapshot.getValue(quantile);
                     buffer
-                        .append(labels.and("quantile", String.valueOf(quantile)).linearize("name"))
+                        .append(labels.andTypes("quantile", String.valueOf(quantile)).linearize("name"))
                         .append(' ')
                         .append(value)
                         .append('\n');
@@ -92,25 +95,25 @@ public enum PromExpositionFormat {
                     .append(' ')
                     .append(snapshotCount)
                     .append('\n');
-                buffer.append("# TYPE ").append(labels.only("name")).append("_max").append(" gauge\n");
+                buffer.append("# TYPE ").append(labels.valueOf("name")).append("_max").append(" gauge\n");
                 final long maxValue = snapshot.getMax();
                 buffer.append(labels.modifyValue("name",n->n+"_max").linearize("name"))
                     .append(' ')
                     .append(maxValue)
                     .append('\n');
-                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_min").only("name")).append(" gauge\n");
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_min").valueOf("name")).append(" gauge\n");
                 final long minValue = snapshot.getMin();
                 buffer.append(labels.modifyValue("name",n->n+"_min").linearize("name"))
                     .append(' ')
                     .append(minValue)
                     .append('\n');
-                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_mean").only("name")).append(" gauge\n");
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_mean").valueOf("name")).append(" gauge\n");
                 final double meanValue = snapshot.getMean();
                 buffer.append(labels.modifyValue("name",n->n+"_mean").linearize("name"))
                     .append(' ')
                     .append(meanValue)
                     .append('\n');
-                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_stdev").only("name")).append(" gauge\n");
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_stdev").valueOf("name")).append(" gauge\n");
                 final double stdDev = snapshot.getStdDev();
                 buffer.append(labels.modifyValue("name",n->n+"_stdev").linearize("name"))
                     .append(' ')
@@ -119,7 +122,7 @@ public enum PromExpositionFormat {
 
             }
             if (metric instanceof final Gauge gauge) {
-                buffer.append("# TYPE ").append(labels.only("name")).append(" gauge\n");
+                buffer.append("# TYPE ").append(labels.valueOf("name")).append(" gauge\n");
                 final Object value = gauge.getValue();
                 if (value instanceof final Number number) {
                     final double doubleValue = number.doubleValue();
@@ -143,28 +146,28 @@ public enum PromExpositionFormat {
                     );
             }
             if (metric instanceof final Metered meter) {
-                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_1mRate").only("name")).append(" gauge\n");
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_1mRate").valueOf("name")).append(" gauge\n");
                 final double oneMinuteRate = meter.getOneMinuteRate();
                 buffer.append(labels.modifyValue("name",n->n+"_1mRate").linearize("name"))
                     .append(' ')
                     .append(oneMinuteRate)
                     .append('\n');
 
-                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_5mRate").only("name")).append(" gauge\n");
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_5mRate").valueOf("name")).append(" gauge\n");
                 final double fiveMinuteRate = meter.getFiveMinuteRate();
                 buffer.append(labels.modifyValue("name",n->n+"_5mRate").linearize("name"))
                     .append(' ')
                     .append(fiveMinuteRate)
                     .append('\n');
 
-                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_15mRate").only("name")).append(" gauge\n");
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_15mRate").valueOf("name")).append(" gauge\n");
                 final double fifteenMinuteRate = meter.getFifteenMinuteRate();
                 buffer.append(labels.modifyValue("name",n->n+"_15mRate").linearize("name"))
                     .append(' ')
                     .append(fifteenMinuteRate)
                     .append('\n');
 
-                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_meanRate").only("name")).append(" gauge\n");
+                buffer.append("# TYPE ").append(labels.modifyValue("name",n->n+"_meanRate").valueOf("name")).append(" gauge\n");
                 final double meanRate = meter.getMeanRate();
                 buffer.append(labels.modifyValue("name",n->n+"_meanRate").linearize("name"))
                     .append(' ')
@@ -176,8 +179,6 @@ public enum PromExpositionFormat {
         }
 
         return buffer;
-
-
     }
 
     public static String labels(final Map<String, String> labels, final String... additional) {
@@ -219,6 +220,18 @@ public enum PromExpositionFormat {
                     writer.append(c);
             }
         }
+    }
+
+    private static String sanitize(String word) {
+        String sanitized = word;
+        sanitized = sanitized.replaceAll("\\..+$", "");
+        sanitized = sanitized.replaceAll("-","_");
+        sanitized = sanitized.replaceAll("[^a-zA-Z0-9_]+", "");
+
+        if (!word.equals(sanitized)) {
+            logger.warn("The identifier or value '" + word + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
+        }
+        return sanitized;
     }
 
 }

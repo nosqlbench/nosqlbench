@@ -91,7 +91,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
         while (op != null) {
 
             int tries = 0;
-            while (tries++ < maxTries) {
+            while (++tries < maxTries) {
                 Throwable error = null;
                 long startedAt = System.nanoTime();
 

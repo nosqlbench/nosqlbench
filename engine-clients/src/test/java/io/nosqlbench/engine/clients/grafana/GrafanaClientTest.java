@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class GrafanaClientTest {
         client.getConfig().basicAuth("admin", "admin");
         GAnnotation a = new GAnnotation();
         a.setDashboardId(2);
-        a.setText("testingAnnotation");
+        a.addText("testingAnnotation");
         GAnnotation created = client.createAnnotation(a);
         logger.info(created);
     }

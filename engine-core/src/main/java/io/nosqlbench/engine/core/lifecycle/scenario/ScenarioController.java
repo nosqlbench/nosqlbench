@@ -68,15 +68,6 @@ public class ScenarioController implements NBLabeledElement {
      * @param activityDef string in alias=value1;driver=value2;... format
      */
     public synchronized void start(ActivityDef activityDef) {
-        Annotators.recordAnnotation(Annotation.newBuilder()
-            .session(scenario.getScenarioName())
-            .now()
-            .layer(Layer.Activity)
-            .label("alias", activityDef.getAlias())
-            .detail("command", "start")
-            .detail("params", activityDef.toString())
-            .build());
-
         doStartActivity(activityDef);
     }
 
@@ -84,6 +75,14 @@ public class ScenarioController implements NBLabeledElement {
     private synchronized ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
         if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
             Activity activity = this.activityLoader.loadActivity(activityDef, this);
+
+            Annotators.recordAnnotation(Annotation.newBuilder()
+                .element(activity)
+                .now()
+                .layer(Layer.Activity)
+                .detail("params", activityDef.toString())
+                .build());
+
             ActivityExecutor executor = new ActivityExecutor(activity, this.scenario.getScenarioName());
             Future<ExecutionResult> startedActivity = activitiesExecutor.submit(executor);
             ActivityRuntimeInfo activityRuntimeInfo = new ActivityRuntimeInfo(activity, startedActivity, executor);
@@ -125,14 +124,6 @@ public class ScenarioController implements NBLabeledElement {
      * @param activityDef A definition for an activity to run
      */
     public synchronized void run(ActivityDef activityDef, long timeoutMs) {
-        Annotators.recordAnnotation(Annotation.newBuilder()
-            .session(this.scenario.getScenarioName())
-            .now()
-            .layer(Layer.Activity)
-            .label("alias", activityDef.getAlias())
-            .detail("command", "run")
-            .detail("params", activityDef.toString())
-            .build());
 
         doStartActivity(activityDef);
         awaitActivity(activityDef, timeoutMs);
@@ -179,14 +170,6 @@ public class ScenarioController implements NBLabeledElement {
      * @param activityDef An activity def, including at least the alias parameter.
      */
     public synchronized void stop(ActivityDef activityDef) {
-        Annotators.recordAnnotation(Annotation.newBuilder()
-            .session(this.scenario.getScenarioName())
-            .now()
-            .layer(Layer.Activity)
-            .label("alias", activityDef.getAlias())
-            .detail("command", "stop")
-            .detail("params", activityDef.toString())
-            .build());
 
         ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
         if (null == runtimeInfo) {
@@ -196,6 +179,14 @@ public class ScenarioController implements NBLabeledElement {
         scenariologger.debug("STOP {}", activityDef.getAlias());
 
         runtimeInfo.stopActivity();
+        Annotators.recordAnnotation(Annotation.newBuilder()
+            .element(runtimeInfo.getActivity())
+            .now()
+            .layer(Layer.Activity)
+            .detail("command", "stop")
+            .detail("params", activityDef.toString())
+            .build());
+
     }
 
     /**
@@ -240,19 +231,20 @@ public class ScenarioController implements NBLabeledElement {
      * @param activityDef An activity def, including at least the alias parameter.
      */
     public synchronized void forceStop(ActivityDef activityDef) {
-        Annotators.recordAnnotation(Annotation.newBuilder()
-            .session(this.scenario.getScenarioName())
-            .now()
-            .layer(Layer.Activity)
-            .label("alias", activityDef.getAlias())
-            .detail("command", "forceStop")
-            .detail("params", activityDef.toString())
-            .build());
 
         ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
+
         if (null == runtimeInfo) {
             throw new RuntimeException("could not force stop missing activity:" + activityDef);
         }
+
+        Annotators.recordAnnotation(Annotation.newBuilder()
+            .element(runtimeInfo.getActivity())
+            .now()
+            .layer(Layer.Activity)
+            .detail("command", "forceStop")
+            .detail("params", activityDef.toString())
+            .build());
 
         scenariologger.debug("FORCE STOP {}", activityDef.getAlias());
 

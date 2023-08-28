@@ -17,6 +17,7 @@
 package io.nosqlbench.adapters.api.templating;
 
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
+import io.nosqlbench.api.config.NBLabelSpec;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.fieldreaders.DynamicFieldReader;
@@ -328,19 +329,19 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, NBLabeledElement,
      *     The activity configuration, used to resolve nested config parameters
      * @param preprocessors
      *     Map->Map transformers.
-     * @param labels
      */
     public ParsedOp(
         OpTemplate opTemplate,
         NBConfiguration activityCfg,
         List<Function<Map<String, Object>, Map<String, Object>>> preprocessors,
-        NBLabeledElement parent) {
+        NBLabeledElement parent
+    ) {
         this._opTemplate = opTemplate;
         this.activityCfg = activityCfg;
-        labels=parent.getLabels().and("op", this.getName());
 
         Map<String, Object> map = opTemplate.getOp().orElseThrow(() ->
             new OpConfigError("ParsedOp constructor requires a non-null value for the op field, but it was missing."));
+
         for (Function<Map<String, Object>, Map<String, Object>> preprocessor : preprocessors) {
             map = preprocessor.apply(map);
         }
@@ -353,6 +354,19 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, NBLabeledElement,
             activityCfg.getMap())
         );
 
+        NBLabels opLabels = parent.getLabels().andTypes("op", this.getName());
+        if (tmap.isStatic("labels")) {
+            Object labelSpecObject = tmap.takeStaticValue("labels", Object.class);
+            if (labelSpecObject instanceof String labelsSpec) {
+                NBLabels op_specific_labels = NBLabelSpec.parseLabels(labelsSpec);
+                opLabels=opLabels.and(op_specific_labels);
+            } else {
+                throw new OpConfigError("parsing labels as type '" + labelSpecObject.getClass().getSimpleName() +"' is not supported.");
+            }
+        } else if (tmap.isDynamic("labels")) {
+            throw new OpConfigError("Labels may not be dynamic.");
+        }
+        this.labels=opLabels;
     }
 
 

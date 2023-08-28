@@ -69,7 +69,7 @@ public class RawOpDef extends RawOpFields {
             Object op = map.remove(keyName);
             if (op instanceof CharSequence s) {
                 if (!keyName.equals("stmt")) {
-                    logger.warn("Used implied stmt field under name '" + keyName + "'. You can just use 'stmt: ... "+ s +"' or the equivalent to avoid this warning.");
+                    logger.info("Used implied stmt field under name '" + keyName + "'. You can just use 'stmt: ... "+ s +"' or the equivalent to avoid this warning.");
                 }
                 map.put("stmt",s.toString());
 //                setOp(new LinkedHashMap<String,Object>(Map.of("stmt",s.toString())));
@@ -79,7 +79,7 @@ public class RawOpDef extends RawOpFields {
         }
         if (found.size() > 1) {
             throw new BasicError("You used " + found + " as an op name, but only one of these is allowed at a time.");
-        } else if ((getName() == null || getName().isEmpty()) && op == null && map.size() > 0) {
+        } else if ((getName() == null || getName().isEmpty()) && op == null && !map.isEmpty()) {
             Map.Entry<String, Object> first = map.entrySet().iterator().next();
             setName(first.getKey());
             setOp(first.getValue());
@@ -90,7 +90,7 @@ public class RawOpDef extends RawOpFields {
 
         if (_op) {
             if (_params) {
-                if (map.size() > 0) {
+                if (!map.isEmpty()) {
                     throw new OpConfigError("If you have scoped op and params, you may not have dangling fields. Op template named '" + this.getName() + "' is invalid. Move dangling params ("+ map.keySet() +") under another field.");
                 }
             } else { // no params. Op was a scoped field and there are dangling fields, so assume they belong to params

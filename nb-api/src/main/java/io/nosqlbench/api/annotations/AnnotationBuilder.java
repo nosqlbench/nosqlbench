@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package io.nosqlbench.api.annotations;
 
+import io.nosqlbench.api.config.NBLabeledElement;
+
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.TimeZone;
@@ -24,15 +26,15 @@ public class AnnotationBuilder implements AnnotationBuilderFacets.All {
     private String session;
     private long start;
     private long end;
-    private final LinkedHashMap<String, String> labels = new LinkedHashMap<>();
     private final LinkedHashMap<String, String> details = new LinkedHashMap<>();
     private Layer layer;
     private final TimeZone timezone = TimeZone.getTimeZone(ZoneId.of("GMT"));
 
+    private NBLabeledElement element;
+
     @Override
     public AnnotationBuilder layer(Layer layer) {
         this.layer = layer;
-        this.label("layer", layer.toString());
         return this;
     }
 
@@ -69,12 +71,6 @@ public class AnnotationBuilder implements AnnotationBuilderFacets.All {
 
 
     @Override
-    public AnnotationBuilder label(String name, String value) {
-        this.labels.put(name, value);
-        return this;
-    }
-
-    @Override
     public AnnotationBuilderFacets.WantsMoreDetailsOrBuild detail(String name, String value) {
         this.details.put(name, value);
         return this;
@@ -82,14 +78,13 @@ public class AnnotationBuilder implements AnnotationBuilderFacets.All {
 
     @Override
     public Annotation build() {
-        return new MutableAnnotation(timezone, session, layer, start, end, labels, details).asReadOnly();
+        return new MutableAnnotation(timezone, session, layer, start, end, element, details).asReadOnly();
 
     }
 
     @Override
-    public AnnotationBuilderFacets.WantsInterval session(String session) {
-        this.session = session;
+    public AnnotationBuilderFacets.WantsInterval element(NBLabeledElement element) {
+        this.element = element;
         return this;
     }
-
 }
