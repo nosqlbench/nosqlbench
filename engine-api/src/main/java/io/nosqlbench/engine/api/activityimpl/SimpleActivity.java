@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.NBLabelSpec;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
@@ -93,7 +94,13 @@ public class SimpleActivity implements Activity {
     private final NBLabels labels;
 
     public SimpleActivity(ActivityDef activityDef, NBLabeledElement parentLabels) {
-        labels = parentLabels.getLabels().and("activity",activityDef.getAlias());
+        NBLabels activityLabels = parentLabels.getLabels()
+                .andTypes("activity", activityDef.getAlias());
+        Optional<String> auxLabelSpec = activityDef.getParams().getOptionalString("labels");
+        if (auxLabelSpec.isPresent()) {
+            activityLabels = activityLabels.and(NBLabelSpec.parseLabels(auxLabelSpec.get()));
+        }
+        this.labels = activityLabels;
         this.activityDef = activityDef;
         this.parentLabels = parentLabels;
         if (activityDef.getAlias().equals(ActivityDef.DEFAULT_ALIAS)) {
