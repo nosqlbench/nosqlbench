@@ -138,7 +138,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
     }
 
     public static Scenario forTesting(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
-        return new Scenario(name, null, engine, "console:10s", true, true, reportSummaryTo, "", Path.of("logs"), minMaturity, NBLabeledElement.forKV("test-name", "name"));
+        return new Scenario(name, null, engine, "console:10s", true, true, reportSummaryTo, "", Path.of("logs"), minMaturity, NBLabeledElement.forKV("test_name", "name"));
     }
 
     public Scenario setLogger(final Logger logger) {
@@ -249,7 +249,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
         this.startedAtMillis = System.currentTimeMillis();
         Annotators.recordAnnotation(
             Annotation.newBuilder()
-                .session(scenarioName)
+                .element(this)
                 .now()
                 .layer(Layer.Scenario)
                 .detail("engine", engine.toString())
@@ -348,10 +348,10 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
 
         // We report the scenario state via annotation even for short runs
         final Annotation annotation = Annotation.newBuilder()
-            .session(scenarioName)
+            .element(this)
             .interval(startedAtMillis, this.endedAtMillis)
             .layer(Layer.Scenario)
-            .label("state", state.toString())
+//            .labels("state", state.toString())
             .detail("command_line", commandLine)
             .build();
 

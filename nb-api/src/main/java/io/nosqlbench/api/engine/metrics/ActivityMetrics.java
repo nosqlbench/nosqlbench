@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -106,7 +105,8 @@ public class ActivityMetrics {
      * @return the timer, perhaps a different one if it has already been registered
      */
     public static Timer timer(NBLabeledElement parent, String metricFamilyName, int hdrdigits) {
-        final NBLabels labels = parent.getLabels().and("name",metricFamilyName);
+        final NBLabels labels = parent.getLabels().andTypes("name",sanitize(metricFamilyName));
+
 
         Timer registeredTimer = (Timer) register(labels, () ->
             new NBMetricTimer(labels,
@@ -134,7 +134,7 @@ public class ActivityMetrics {
      * @return the histogram, perhaps a different one if it has already been registered
      */
     public static Histogram histogram(NBLabeledElement labeled, String metricFamilyName, int hdrdigits) {
-        final NBLabels labels = labeled.getLabels().and("name", metricFamilyName);
+        final NBLabels labels = labeled.getLabels().andTypes("name", sanitize(metricFamilyName));
         return (Histogram) register(labels, () ->
             new NBMetricHistogram(
                 labels,
@@ -157,7 +157,7 @@ public class ActivityMetrics {
      * @return the counter, perhaps a different one if it has already been registered
      */
     public static Counter counter(NBLabeledElement parent, String metricFamilyName) {
-        final NBLabels labels = parent.getLabels().and("name",metricFamilyName);
+        final NBLabels labels = parent.getLabels().andTypes("name",metricFamilyName);
         return (Counter) register(labels, () -> new NBMetricCounter(labels));
     }
 
@@ -173,7 +173,7 @@ public class ActivityMetrics {
      * @return the meter, perhaps a different one if it has already been registered
      */
     public static Meter meter(NBLabeledElement parent, String metricFamilyName) {
-        final NBLabels labels = parent.getLabels().and("name",metricFamilyName);
+        final NBLabels labels = parent.getLabels().andTypes("name",sanitize(metricFamilyName));
         return (Meter) register(labels, () -> new NBMetricMeter(labels));
     }
 
@@ -191,7 +191,7 @@ public class ActivityMetrics {
 
     @SuppressWarnings("unchecked")
     public static <T> Gauge<T> gauge(NBLabeledElement parent, String metricFamilyName, Gauge<T> gauge) {
-        final NBLabels labels = parent.getLabels().and("name",metricFamilyName);
+        final NBLabels labels = parent.getLabels().andTypes("name",sanitize(metricFamilyName));
 
         return (Gauge<T>) register(labels, () -> new NBMetricGauge(labels,gauge));
     }
@@ -340,6 +340,18 @@ public class ActivityMetrics {
     public static void removeActivityMetrics(NBNamedElement named) {
         get().getMetrics().keySet().stream().filter(s -> s.startsWith(named.getName() + '.'))
             .forEach(get()::remove);
+    }
+
+    public static String sanitize(String word) {
+        String sanitized = word;
+        sanitized = sanitized.replaceAll("\\..+$", "");
+        sanitized = sanitized.replaceAll("-","_");
+        sanitized = sanitized.replaceAll("[^a-zA-Z0-9_]+", "");
+
+        if (!word.equals(sanitized)) {
+            logger.warn("The identifier or value '" + word + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
+        }
+        return sanitized;
     }
 
 }

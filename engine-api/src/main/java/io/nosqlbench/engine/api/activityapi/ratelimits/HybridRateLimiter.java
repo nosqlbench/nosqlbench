@@ -152,9 +152,9 @@ public class HybridRateLimiter implements RateLimiter {
 
 
     protected void init(final NBLabeledElement activityDef) {
-        delayGauge = ActivityMetrics.gauge(activityDef, this.label + ".waittime", new RateLimiters.WaitTimeGauge(this));
-        avgRateGauge = ActivityMetrics.gauge(activityDef, this.label + ".config.cyclerate", new RateLimiters.RateGauge(this));
-        burstRateGauge = ActivityMetrics.gauge(activityDef, this.label + ".config.burstrate", new RateLimiters.BurstRateGauge(this));
+        delayGauge = ActivityMetrics.gauge(activityDef, this.label + "_waittime", new RateLimiters.WaitTimeGauge(this));
+        avgRateGauge = ActivityMetrics.gauge(activityDef, this.label + "_config_cyclerate", new RateLimiters.RateGauge(this));
+        burstRateGauge = ActivityMetrics.gauge(activityDef, this.label + "_config_burstrate", new RateLimiters.BurstRateGauge(this));
     }
 
     @Override

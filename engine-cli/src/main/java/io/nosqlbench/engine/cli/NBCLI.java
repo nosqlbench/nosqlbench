@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.cli;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
 import io.nosqlbench.api.config.NBLabeledElement;
@@ -242,14 +244,30 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                     " these urls in your browser: http://<host>:3000 and http://<host>:9090";
             NBCLI.logger.warn(warn);
             graphiteMetricsAddress = "localhost";
-        } else if (null != dockerMetricsAt) graphiteMetricsAddress = dockerMetricsAt;
+        } else if (null != dockerMetricsAt) {
+            graphiteMetricsAddress = dockerMetricsAt;
+        }
 
-        if (null != graphiteMetricsAddress) {
-            reportGraphiteTo = graphiteMetricsAddress + ":9109";
-            annotatorsConfig = "[{type:'log',level:'info'},{type:'grafana',baseurl:'http://" + graphiteMetricsAddress + ":3000" +
-                "/'," +
-                "tags:'appname:nosqlbench',timeoutms:5000,onerror:'warn'}]";
-        } else annotatorsConfig = "[{type:'log',level:'info'}]";
+        if (annotatorsConfig == null || annotatorsConfig.isBlank()) {
+            List<Map<String, String>> annotatorsConfigs = new ArrayList<>();
+            annotatorsConfigs.add(Map.of(
+                    "type", "log",
+                    "level", "info"
+            ));
+
+            if (null != graphiteMetricsAddress) {
+                reportGraphiteTo = graphiteMetricsAddress + ":9109";
+                annotatorsConfigs.add(Map.of(
+                        "type", "grafana",
+                        "baseurl", "http://" + graphiteMetricsAddress + ":3000",
+                        "tags", "appname:nosqlbench",
+                        "timeoutms", "5000",
+                        "onerror", "warn"
+                ));
+            }
+            Gson gson = new GsonBuilder().create();
+            annotatorsConfig = gson.toJson(annotatorsConfigs);
+        }
 
         final NBCLIOptions options = new NBCLIOptions(args);
         NBCLI.logger = LogManager.getLogger("NBCLI");
@@ -377,12 +395,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         NBCLI.logger.debug("initializing annotators with config:'{}'", annotatorsConfig);
         Annotators.init(annotatorsConfig);
         Annotators.recordAnnotation(
-            Annotation.newBuilder()
-                .session(sessionName)
-                .now()
-                .layer(Layer.CLI)
-                .detail("cli", String.join("\n", args))
-                .build()
+                Annotation.newBuilder()
+                        .element(this)
+                        .now()
+                        .layer(Layer.Session)
+                        .detail("cli", String.join("\n", args))
+                        .build()
         );
 
         if ((null != reportPromPushTo) || (null != reportGraphiteTo) || (null != options.wantsReportCsvTo())) {
@@ -428,17 +446,17 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         final Scenario scenario = new Scenario(
-            sessionName,
-            options.getScriptFile(),
-            options.getScriptingEngine(),
-            options.getProgressSpec(),
-            options.wantsStackTraces(),
-            options.wantsCompileScript(),
-            options.getReportSummaryTo(),
-            String.join("\n", args),
-            options.getLogsDirectory(),
-            Maturity.Unspecified,
-            this);
+                sessionName,
+                options.getScriptFile(),
+                options.getScriptingEngine(),
+                options.getProgressSpec(),
+                options.wantsStackTraces(),
+                options.wantsCompileScript(),
+                options.getReportSummaryTo(),
+                String.join("\n", args),
+                options.getLogsDirectory(),
+                Maturity.Unspecified,
+                this);
 
         final ScriptBuffer buffer = new BasicScriptBuffer()
                 .add(options.getCommands()

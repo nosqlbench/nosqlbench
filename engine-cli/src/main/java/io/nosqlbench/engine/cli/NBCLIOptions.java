@@ -16,20 +16,19 @@
 
 package io.nosqlbench.engine.cli;
 
+import io.nosqlbench.api.config.NBLabelSpec;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.util.Unit;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.logging.NBLogLevel;
-import io.nosqlbench.api.system.NBEnvironment;
+import io.nosqlbench.api.system.NBStatePath;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.cli.Cmd.CmdType;
 import io.nosqlbench.engine.core.lifecycle.scenario.Scenario.Engine;
 import io.nosqlbench.nb.annotations.Maturity;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,14 +43,13 @@ public class NBCLIOptions {
 
 
     private static final String NB_STATE_DIR = "--statedir";
-    private static final String NB_STATEDIR_PATHS = "$NBSTATEDIR:$PWD/.nosqlbench:$HOME/.nosqlbench";
     public static final String ARGS_FILE_DEFAULT = "$NBSTATEDIR/argsfile";
     private static final String INCLUDE = "--include";
 
     private static final String userHome = System.getProperty("user.home");
 
 
-    private static final Map<String,String> DEFAULT_LABELS=Map.of("appname","nosqlbench");
+    private static final Map<String, String> DEFAULT_LABELS = Map.of("appname", "nosqlbench");
     private static final String METRICS_PREFIX = "--metrics-prefix";
     private static final String ANNOTATE_EVENTS = "--annotate";
     private static final String ANNOTATORS_CONFIG = "--annotators";
@@ -136,7 +134,7 @@ public class NBCLIOptions {
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
 
-    private final Map<String,String> labels = new LinkedHashMap<>(DEFAULT_LABELS);
+    private NBLabels labels = NBLabels.forKV();
     private final List<Cmd> cmdList = new ArrayList<>();
     private int logsMax;
     private boolean wantsVersionShort;
@@ -151,7 +149,8 @@ public class NBCLIOptions {
     private int reportInterval = 10;
     private String metricsPrefix = "nosqlbench";
     private String wantsMetricsForActivity;
-    private String sessionName = "";
+    private String sessionName = "SESSIONCODE";
+    //    private String sessionName = "scenario_%tY%tm%td_%tH%tM%tS_%tL";
     private boolean showScript;
     private NBLogLevel consoleLevel = NBLogLevel.WARN;
     private final List<String> histoLoggerConfigs = new ArrayList<>();
@@ -185,9 +184,8 @@ public class NBCLIOptions {
     private String[] annotateEvents = {"ALL"};
     private String dockerMetricsHost;
     private String annotatorsConfig = "";
-    private String statedirs = NBCLIOptions.NB_STATEDIR_PATHS;
+    private String statedirs = NBStatePath.NB_STATEDIR_PATHS;
     private Path statepath;
-    private final List<String> statePathAccesses = new ArrayList<>();
     private final String hdrForChartFileName = NBCLIOptions.DEFAULT_CHART_HDR_LOG_NAME;
     private String dockerPromRetentionDays = "3650d";
     private String reportSummaryTo = NBCLIOptions.REPORT_SUMMARY_TO_DEFAULT;
@@ -210,8 +208,8 @@ public class NBCLIOptions {
         return this.annotatorsConfig;
     }
 
-    public Map<String,String> getLabelMap() {
-        return Collections.unmodifiableMap(this.labels);
+    public NBLabels getLabelMap() {
+        return this.labels;
     }
 
     public String getChartHdrFileName() {
@@ -305,8 +303,7 @@ public class NBCLIOptions {
                     nonincludes.addLast(arglist.removeFirst());
             }
         }
-        statedirs = (null != this.statedirs) ? statedirs : NBCLIOptions.NB_STATEDIR_PATHS;
-        setStatePath();
+        this.statepath = NBStatePath.initialize(statedirs);
 
         arglist = nonincludes;
         nonincludes = new LinkedList<>();
@@ -336,7 +333,7 @@ public class NBCLIOptions {
                 case NBCLIArgsFile.ARGS_FILE_REQUIRED:
                 case NBCLIArgsFile.ARGS_PIN:
                 case NBCLIArgsFile.ARGS_UNPIN:
-                    if (null == this.statepath) this.setStatePath();
+                    this.statepath = NBStatePath.initialize(statedirs);
                     arglist = argsfile.process(arglist);
                     break;
                 case NBCLIOptions.ANSI:
@@ -487,63 +484,13 @@ public class NBCLIOptions {
     }
 
     private void setLabels(String labeldata) {
-        this.labels.clear();
+        this.labels = NBLabels.forKV();
         addLabels(labeldata);
     }
 
     private void addLabels(String labeldata) {
-        Map<String,String> newLabels = parseLabels(labeldata);
-        this.labels.putAll(newLabels);
-    }
-
-    private Map<String, String> parseLabels(String labeldata) {
-        Map<String,String> setLabelsTo = new LinkedHashMap<>();
-        for (String component : labeldata.split("[,; ]")) {
-            String[] parts = component.split("\\W", 2);
-            if (parts.length!=2) {
-                throw new BasicError("Unable to parse labels to set:" + labeldata);
-            }
-            setLabelsTo.put(parts[0],parts[1]);
-        }
-        return setLabelsTo;
-    }
-
-
-    private Path setStatePath() {
-        if (0 < statePathAccesses.size())
-            throw new BasicError("The state dir must be set before it is used by other\n" +
-                    " options. If you want to change the statedir, be sure you do it before\n" +
-                    " dependent options. These parameters were called before this --statedir:\n" +
-                    this.statePathAccesses.stream().map(s -> "> " + s).collect(Collectors.joining("\n")));
-        if (null != this.statepath) return statepath;
-
-        final List<String> paths = NBEnvironment.INSTANCE.interpolateEach(":", this.statedirs);
-        Path selected = null;
-
-        for (final String pathName : paths) {
-            final Path path = Path.of(pathName);
-            if (Files.exists(path)) {
-                if (Files.isDirectory(path)) {
-                    selected = path;
-                    break;
-                }
-                System.err.println("ERROR: possible state dir path is not a directory: '" + path + '\'');
-            }
-        }
-        if (null == selected) selected = Path.of(paths.get(paths.size() - 1));
-
-        if (!Files.exists(selected)) try {
-            Files.createDirectories(
-                    selected,
-                    PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---"))
-            );
-        } catch (final IOException e) {
-            throw new BasicError("Could not create state directory at '" + selected + "': " + e.getMessage());
-        }
-
-        NBEnvironment.INSTANCE.put(NBEnvironment.NBSTATEDIR, selected.toString());
-
-        return selected;
+        NBLabels newLabels = NBLabelSpec.parseLabels(labeldata);
+        this.labels = this.labels.and(newLabels);
     }
 
     private void parseAllOptions(final String[] args) {
@@ -846,14 +793,10 @@ public class NBCLIOptions {
 
     public String getProgressSpec() {
         final ProgressSpec spec = this.parseProgressSpec(progressSpec);// sanity check
-        //                System.err.println("Console is already logging info or more, so progress data on console is " +
-        //                        "suppressed.");
         if (IndicatorMode.console == spec.indicatorMode)
             if (consoleLevel.isGreaterOrEqualTo(NBLogLevel.INFO)) spec.indicatorMode = IndicatorMode.logonly;
-            else //                System.err.println("Command line includes script calls, so progress data on console is " +
-                //                        "suppressed.");
-                if (cmdList.stream().anyMatch(cmd -> CmdType.script == cmd.getCmdType()))
-                    spec.indicatorMode = IndicatorMode.logonly;
+            else if (cmdList.stream().anyMatch(cmd -> CmdType.script == cmd.getCmdType()))
+                spec.indicatorMode = IndicatorMode.logonly;
         return spec.toString();
     }
 

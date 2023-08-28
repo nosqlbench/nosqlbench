@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package io.nosqlbench.api.annotations;
 
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
+
 import java.util.Map;
 
 /**
@@ -30,11 +33,7 @@ import java.util.Map;
  * NoSQLBench. It is up to the downstream consumers to map these
  * to concrete fields or identifiers as appropriate.
  */
-public interface Annotation {
-    /**
-     * @return The named session that the annotation is associated with
-     */
-    String getSession();
+public interface Annotation extends NBLabeledElement {
 
     /**
      * If this is the same as {@link #getEnd()}, then the annotation is
@@ -74,7 +73,7 @@ public interface Annotation {
      *
      * @return The labels map
      */
-    Map<String, String> getLabels();
+    NBLabels getLabels();
 
     /**
      * The details are an ordered map of all the content that you would want the user to see.
@@ -83,15 +82,15 @@ public interface Annotation {
      */
     Map<String, String> getDetails();
 
-    static AnnotationBuilderFacets.WantsSession newBuilder() {
+    static AnnotationBuilderFacets.WantsLabeledElement newBuilder() {
         return new AnnotationBuilder();
     }
 
     /**
-     * This should return {@link Span#interval} if the span of time is not an instant, and
-     * {@link Span#instant}, otherwise.
+     * This should return {@link Temporal#interval} if the span of time is not an instant, and
+     * {@link Temporal#instant}, otherwise.
      */
-    Span getSpan();
+    Temporal getTemporal();
 
     String asJson();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,8 +121,8 @@ public class GAnnotation {
         return text;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void addText(String text) {
+        this.text = this.text == null ? text : this.text + "\n" + text;
     }
 
     public String getMetric() {

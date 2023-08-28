@@ -15,6 +15,8 @@
  */
 package io.nosqlbench.engine.core.lifecycle.activity;
 
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityimpl.MotorState;
 import io.nosqlbench.api.annotations.Annotation;
@@ -51,7 +53,7 @@ import java.util.stream.Collectors;
  * This allows the state tracking to work consistently for all observers.</p>
  */
 
-public class ActivityExecutor implements ActivityController, ParameterMap.Listener, ProgressCapable, Callable<ExecutionResult> {
+public class ActivityExecutor implements NBLabeledElement, ActivityController, ParameterMap.Listener, ProgressCapable, Callable<ExecutionResult> {
 
     // TODO Encapsulate valid state transitions to be only modifiable within the appropriate type view.
 
@@ -99,12 +101,9 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         logger.info(() -> "stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
 
         Annotators.recordAnnotation(Annotation.newBuilder()
-            .session(sessionId)
+            .element(this)
             .interval(this.startedAt, this.stoppedAt)
             .layer(Layer.Activity)
-            .label("alias", getActivityDef().getAlias())
-            .label("driver", getActivityDef().getActivityType())
-            .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
             .detail("params", getActivityDef().toString())
             .build()
         );
@@ -126,12 +125,9 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         logger.info(() -> "stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
 
         Annotators.recordAnnotation(Annotation.newBuilder()
-            .session(sessionId)
+                .element(this)
             .interval(this.startedAt, this.stoppedAt)
             .layer(Layer.Activity)
-            .label("alias", getActivityDef().getAlias())
-            .label("driver", getActivityDef().getActivityType())
-            .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
             .detail("params", getActivityDef().toString())
             .build()
         );
@@ -505,12 +501,9 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
 
         logger.info(() -> "starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
         Annotators.recordAnnotation(Annotation.newBuilder()
-            .session(sessionId)
+            .element(this)
             .now()
             .layer(Layer.Activity)
-            .label("alias", getActivityDef().getAlias())
-            .label("driver", getActivityDef().getActivityType())
-            .label("workload", getActivityDef().getParams().getOptionalString("workload").orElse("none"))
             .detail("params", getActivityDef().toString())
             .build()
         );
@@ -533,4 +526,8 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     }
 
 
+    @Override
+    public NBLabels getLabels() {
+        return activity.getLabels();
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import io.nosqlbench.api.annotations.Annotator;
 import io.nosqlbench.api.config.params.ParamsParser;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.api.errors.OnError;
 import io.nosqlbench.api.metadata.SystemId;
 import io.nosqlbench.engine.clients.grafana.GrafanaClient;
 import io.nosqlbench.engine.clients.grafana.GrafanaClientConfig;
 import io.nosqlbench.engine.clients.grafana.transfer.GAnnotation;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.api.errors.OnError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 @Service(value = Annotator.class, selector = "grafana")
 public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
@@ -58,8 +59,11 @@ public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
             ga.setTime(annotation.getStart());
             ga.setTimeEnd(annotation.getEnd());
 
-            annotation.getLabels().forEach((k, v) -> {
+            annotation.getLabels().onlyTypes().asMap().forEach((k, v) -> {
                 ga.getTags().add(k + ":" + v);
+            });
+            annotation.getLabels().onlyInstances().asMap().forEach((k,v)->{
+                ga.addText(" " + k + ":" + v);
             });
             ga.getTags().add("layer:" + annotation.getLayer().toString());
 
@@ -69,15 +73,12 @@ public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
                 ga.getTags().add("span:interval");
             }
 
-            Map<String, String> labels = annotation.getLabels();
+            Map<String, String> labels = annotation.getLabels().asMap();
 
             Optional.ofNullable(labels.get("alertId"))
                 .map(Integer::parseInt).ifPresent(ga::setAlertId);
 
-            ga.setText(annotation.toString());
-
-            annotation.getSession();
-
+            ga.addText(annotation.toString());
 
             // Target
             Optional.ofNullable(labels.get("type"))
@@ -175,7 +176,8 @@ public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
     public NBConfigModel getConfigModel() {
         return ConfigModel.of(this.getClass())
             .add(Param.required("baseurl", String.class)
-                .setDescription("The base url of the grafana node, like http://localhost:3000/"))
+                .setDescription("The base url of the grafana node, like http://localhost:3000/")
+                    .setRegex(Pattern.compile("http.+\\\\/")))
             .add(Param.defaultTo("apikeyfile", "$NBSTATEDIR/grafana/grafana_apikey")
                 .setDescription("The file that contains the api key, supersedes apikey"))
             .add(Param.optional("apikey", String.class)
