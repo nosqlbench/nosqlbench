@@ -16,6 +16,9 @@
 
 package io.nosqlbench.api.engine.metrics.reporters;
 
+import io.nosqlbench.api.config.params.ParamsParser;
+import io.nosqlbench.api.config.standard.*;
+
 import com.codahale.metrics.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,19 +31,24 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
+import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
-public class PromPushReporter extends ScheduledReporter {
+public class PromPushReporter extends ScheduledReporter implements NBConfigurable {
     private static final Logger logger = LogManager.getLogger(PromPushReporter.class);
     private HttpClient client;
     private final URI uri;
+    private String bearerToken;
+    private boolean needsAuth;
 
     public PromPushReporter(
         final String targetUriSpec,
@@ -48,12 +56,49 @@ public class PromPushReporter extends ScheduledReporter {
         String name,
         MetricFilter filter,
         TimeUnit rateUnit,
-        TimeUnit durationUnit
+        TimeUnit durationUnit,
+        final String config
     ) {
         super(registry, name, filter, rateUnit, durationUnit);
         uri = URI.create(targetUriSpec);
+        needsAuth = false;
+        ConfigLoader loader = new ConfigLoader();
+        List<Map> configs = loader.load(config, Map.class);
+        if (configs != null) {
+            for (Map cmap : configs) {
+                NBConfiguration cfg = this.getConfigModel().apply(cmap);
+                this.applyConfig(cfg);
+            }
+        }
     }
 
+    @Override
+    public NBConfigModel getConfigModel() {
+        return ConfigModel.of(this.getClass())
+            .add(Param.defaultTo("apikeyfile", "$NBSTATEDIR/prompush/prompush_apikey")
+                .setDescription("The file that contains the api key, supersedes apikey"))
+            .add(Param.optional("apikey", String.class)
+                .setDescription("The api key to use"))
+            .asReadOnly();
+    }
+
+    @Override
+    public void applyConfig(NBConfiguration cfg) {
+        Path keyfilePath = null;
+        Optional<String> optionalApikeyfile = cfg.getEnvOptional("apikeyfile");
+        Optional<String> optionalApikey = cfg.getOptional("apikey");
+        bearerToken = null;
+        if (optionalApikeyfile.isPresent()) {
+            keyfilePath = optionalApikeyfile.map(Path::of).orElseThrow();
+            PromPushReporter.logger.info("Reading Bearer Token from %s", keyfilePath);
+            PromPushKeyFileReader keyfile = new PromPushKeyFileReader(keyfilePath);
+            bearerToken = "Bearer " + keyfile.get();
+        } else if (optionalApikey.isPresent()) {
+            bearerToken = "Bearer " + optionalApikey.get();
+        }
+        needsAuth = (null != bearerToken);
+    }
+    
     @Override
     public synchronized void report(
         SortedMap<String, Gauge> gauges,
@@ -88,7 +133,11 @@ public class PromPushReporter extends ScheduledReporter {
         while (0 < remainingRetries) {
             remainingRetries--;
             final HttpClient client = getCachedClient();
-            final HttpRequest request = HttpRequest.newBuilder().uri(uri).POST(BodyPublishers.ofString(exposition)).build();
+            final HttpRequest.Builder rb = HttpRequest.newBuilder().uri(uri);
+            if ( needsAuth ) {
+                rb.setHeader("Authorization", bearerToken );
+            }
+            final HttpRequest request = rb.POST(BodyPublishers.ofString(exposition)).build();
             final BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
             HttpResponse<String> response = null;
             try {
