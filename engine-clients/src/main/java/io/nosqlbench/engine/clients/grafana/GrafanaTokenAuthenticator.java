@@ -34,4 +34,8 @@ public class GrafanaTokenAuthenticator implements BundledApp {
     public int applyAsInt(String[] value) {
         return 0;
     }
+
+    public GrafanaTokenAuthenticator() {
+
+    }
 }
