@@ -74,4 +74,17 @@ public class SystemIdTest {
         logger.info("session bits: " + sessionBits);
     }
 
+    @Test
+    public void testRadixExpansion() {
+        long base=64L;
+        long value=1L;
+        String image="1";
+        for (int i = 0; i < 11; i++) {
+            value= (long) Math.pow(base,i);
+            image = "1"+"0".repeat(i);
+            String rendered = SystemId.packLong(value);
+            assertThat(rendered).isEqualTo(image);
+        }
+    }
+
 }

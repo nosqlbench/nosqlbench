@@ -18,10 +18,10 @@ package io.nosqlbench.api.metadata;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import joptsimple.internal.Strings;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
-import oshi.hardware.NetworkIF;
 
 import java.net.*;
 import java.nio.charset.StandardCharsets;
@@ -48,32 +48,6 @@ public class SystemId {
         return getMainInetAddrDirect().map(InetAddress::getHostAddress).orElse("UNKNOWN_HOST_ID");
     }
 
-    private static String getNodeIdOSHI() {
-        SystemInfo sysinfo = new SystemInfo();
-        HardwareAbstractionLayer hal = sysinfo.getHardware();
-        List<NetworkIF> interfaces = hal.getNetworkIFs();
-
-        Optional<String> first = interfaces.stream()
-            .filter(i -> !i.getName().startsWith("docker"))
-            .filter(i -> !i.getName().equals("lo"))
-            .sorted((o1, o2) -> {
-                if (o1.getName().startsWith("e") && o2.getName().startsWith("e")) {
-                    return 0;
-                }
-                if (o1.getName().startsWith("e")) {
-                    return -1;
-                }
-                if (o2.getName().startsWith("e")) {
-                    return 1;
-                }
-                return 0;
-            })
-            .flatMap(iface -> Arrays.stream(iface.getIPv4addr().clone()))
-            .filter(addr -> !(addr.startsWith("127.")))
-            .findFirst();
-        String systemID = first.orElse("UNKNOWN_SYSTEM_ID");
-        return systemID;
-    }
 
     private static Optional<InetAddress> getMainInetAddrDirect() {
         List<NetworkInterface> ifaces = getInterfacesDirect();
@@ -195,7 +169,7 @@ public class SystemId {
         StringBuilder buf = new StringBuilder(4);
         for (int i = 0; i < 4; i++) {
             int mask = value & 0xF;
-            value >>= 8;
+            value >>>= 8;
             int charat = '⠀' + mask;
             buf.append((char) charat);
         }
@@ -206,7 +180,7 @@ public class SystemId {
         StringBuilder buf = new StringBuilder(8);
         for (int i = 0; i < 8; i++) {
             int mask = (int) value & 0xF;
-            value >>= 8;
+            value >>>= 8;
             int charat = '⠀' + mask;
             buf.append((char) charat);
         }
@@ -214,7 +188,7 @@ public class SystemId {
     }
 
     public static String genSessionCode(long epochMillis) {
-        return pack(epochMillis) + "_" + getPackedNodeId();
+        return packLong(epochMillis) + "_" + getPackedNodeId();
     }
 
     public static String getPackedNodeId() {
@@ -227,17 +201,27 @@ public class SystemId {
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
-        return pack((addr[0] << 24) + (addr[1] << 16) + (addr[2] << 8) + addr[3]);
+        return packLong(
+            ((long) (addr[0] & 0xFF) << 24)
+                + ((long) (addr[1] & 0xFF) << 16)
+                + ((long) (addr[2] & 0xFF) << 8)
+                + (addr[3] & 0xFF)
+
+        );
     }
 
-    public static String pack(long bitfield) {
-        StringBuilder sb = new StringBuilder(11);
-        while (bitfield > 0) {
+    public static String packLong(long bitfield) {
+        String[] symbols =new String[12];
+        int i = 11;
+        for (; i >0 ; i--) {
             long tail = bitfield & 0b00111111;
-            bitfield >>= 6;
-            sb.append(radixSymbols.charAt((int) tail));
+            symbols[i]=""+radixSymbols.charAt((int) tail);
+            bitfield >>>= 6;
+            if (bitfield==0) break;
         }
-        return sb.toString();
+
+        String result = Strings.join(Arrays.copyOfRange(symbols, i, symbols.length), "");
+        return result;
     }
 
     public static String genSessionBits() {
