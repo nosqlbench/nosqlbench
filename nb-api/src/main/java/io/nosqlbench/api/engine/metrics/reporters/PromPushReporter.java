@@ -37,6 +37,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,11 +65,18 @@ public class PromPushReporter extends ScheduledReporter implements NBConfigurabl
         needsAuth = false;
         ConfigLoader loader = new ConfigLoader();
         List<Map> configs = loader.load(config, Map.class);
+        NBConfigModel cm = this.getConfigModel();
         if (configs != null) {
+            logger.info("PromPushReporter process configuration: %s", config);
             for (Map cmap : configs) {
-                NBConfiguration cfg = this.getConfigModel().apply(cmap);
+                NBConfiguration cfg = cm.apply(cmap);
                 this.applyConfig(cfg);
             }
+        } else {
+            logger.info("PromPushReporter default configuration");
+            HashMap<String,String> junk = new HashMap<>(Map.of());
+            NBConfiguration cfg = cm.apply(junk);
+            this.applyConfig(cfg);
         }
     }
 
@@ -90,7 +98,7 @@ public class PromPushReporter extends ScheduledReporter implements NBConfigurabl
         bearerToken = null;
         if (optionalApikeyfile.isPresent()) {
             keyfilePath = optionalApikeyfile.map(Path::of).orElseThrow();
-            PromPushReporter.logger.info("Reading Bearer Token from %s", keyfilePath);
+            logger.info("Reading Bearer Token from %s", keyfilePath);
             PromPushKeyFileReader keyfile = new PromPushKeyFileReader(keyfilePath);
             bearerToken = "Bearer " + keyfile.get();
         } else if (optionalApikey.isPresent()) {
