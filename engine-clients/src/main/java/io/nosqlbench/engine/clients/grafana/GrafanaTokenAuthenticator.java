@@ -18,14 +18,13 @@ package io.nosqlbench.engine.clients.grafana;
 
 import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.api.system.NBEnvironment;
-import io.nosqlbench.nb.annotations.Service;
 import picocli.CommandLine;
 
-@Service(value = BundledApp.class,selector = "grafana-apikey")
-@CommandLine.Command(
-    name="gafana-apikey",
-    description = "create and cache a grafana apikey for a given grafana server"
-)
+//@Service(value = BundledApp.class,selector = "grafana-apikey")
+//@CommandLine.Command(
+//    name="gafana-apikey",
+//    description = "create and cache a grafana apikey for a given grafana server"
+//)
 public class GrafanaTokenAuthenticator implements BundledApp {
 
     @CommandLine.Parameters
