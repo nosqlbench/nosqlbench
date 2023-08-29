@@ -18,15 +18,16 @@ blocks:
         include_metadata: false
         verifier-imports:
           - "io.nosqlbench.api.engine.metrics.ActivityMetrics"
-          - "io.nosqlbench.engine.extensions.vectormath.Intersections"
+          - "io.nosqlbench.engine.extensions.vectormath.PineconeIntersections"
+          - "io.nosqlbench.engine.extensions.vectormath.PineconeVectorMath"
         verifier-init: |
           recallHisto = ActivityMetrics.histogram(_parsed_op,"recall-histo",4);
         verifier: |
-          found_string_ids=pinecone_vectormath.idsToStringArray(result);
-          found_int_ids=pinecone_vectormath.stringArrayAsIntArray(found_string_ids);
+          found_string_ids=PineconeVectorMath.idsToStringArray(result);
+          found_int_ids=PineconeVectorMath.stringArrayAsIntArray(found_string_ids);
           print(found_int_ids)
           print({validation_set})
-          recall = pinecone_vectormath.computeRecall(found_int_ids, {validation_set})
+          recall = PineconeVectorMath.computeRecall(found_int_ids, {validation_set})
           print(recall)
           recallHisto.update((long)(recall*1000000.0));
           return true;
