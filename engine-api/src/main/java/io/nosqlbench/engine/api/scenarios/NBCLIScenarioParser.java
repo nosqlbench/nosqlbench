@@ -207,7 +207,7 @@ public class NBCLIScenarioParser {
                 alias = alias.replaceAll("STEP", sanitize(stepName));
                 alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
                 buildingCmd.put("alias", alias);
-                buildingCmd.put("labels","labels=workload:"+sanitize(workloadToken));
+                buildingCmd.put("labels","labels=workload:$"+sanitize(workloadToken));
 
                 logger.debug(() -> "rebuilt command: " + String.join(" ", buildingCmd.values()));
                 buildCmdBuffer.addAll(buildingCmd.values());
@@ -221,11 +221,12 @@ public class NBCLIScenarioParser {
     public static String sanitize(String word) {
         String sanitized = word;
         sanitized = sanitized.replaceAll("\\..+$", "");
+        String shortened = sanitized;
         sanitized = sanitized.replaceAll("-","_");
         sanitized = sanitized.replaceAll("[^a-zA-Z0-9_]+", "");
 
-        if (!word.equals(sanitized)) {
-            logger.warn("The identifier or value '" + word + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
+        if (!shortened.equals(sanitized)) {
+            logger.warn("The identifier or value '" + shortened + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
         }
         return sanitized;
     }

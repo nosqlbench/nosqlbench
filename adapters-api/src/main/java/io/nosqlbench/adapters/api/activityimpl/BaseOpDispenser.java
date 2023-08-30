@@ -180,7 +180,7 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
             final int hdrDigits = pop.getStaticConfigOr("hdr_digits", 4).intValue();
             successTimer = ActivityMetrics.timer(pop, "success", hdrDigits);
             errorTimer = ActivityMetrics.timer(pop, "error", hdrDigits);
-            resultSizeHistogram = ActivityMetrics.histogram(pop, "resultset-size", hdrDigits);
+            resultSizeHistogram = ActivityMetrics.histogram(pop, "resultset_size", hdrDigits);
         }
     }
 
