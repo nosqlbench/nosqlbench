@@ -98,6 +98,9 @@ public class HttpOp implements CycleOp {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode json = mapper.readTree(response.body());
 
+            if (json.get("hits") == null) {
+               return null;
+            }
             Iterable<JsonNode> hits = json.get("hits").get("hits");
 
             // get length from hits iterator
