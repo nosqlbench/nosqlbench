@@ -45,6 +45,7 @@ import java.util.Map;
 
 
 public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture, OpGenerator, OpResultSize {
+    private final static Logger logger = LogManager.getLogger(Cqld4CqlOp.class);
 
     private final CqlSession session;
     private final int maxPages;
