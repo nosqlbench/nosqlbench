@@ -59,12 +59,20 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
 
     private final ThreadLocal<List<Row>> results = new ThreadLocal<>();
 
-    public Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, RSProcessors processors) {
+    public Cqld4CqlOp(
+        CqlSession session,
+        int maxPages,
+        boolean retryReplace,
+        int maxLwtRetries,
+        RSProcessors processors,
+        CqlOpMetrics metrics
+    ) {
         this.session = session;
         this.maxPages = maxPages;
         this.retryReplace = retryReplace;
         this.maxLwtRetries =maxLwtRetries;
         this.processors = processors;
+        this.metrics = metrics;
     }
 
     protected Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, int retryRplaceCount, RSProcessors processors) {
@@ -74,59 +82,47 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
         this.maxLwtRetries =maxLwtRetries;
         this.retryReplaceCount=retryRplaceCount;
         this.processors = processors;
+        this.metrics = metrics;
     }
 
     public final List<Row> apply(long cycle) {
 
-        Statement<?> stmt = getStmt();
-        rs = session.execute(stmt);
-        processors.start(cycle, rs);
-        int totalRows = 0;
+        Statement<?> statement = getStmt();
+        logger.trace(() -> "apply() invoked, statement obtained, executing async with page size: " + statement.getPageSize() + " thread local rows: ");
+        CompletionStage<AsyncResultSet> statementStage = session.executeAsync(statement);
 
-        if (!rs.wasApplied()) {
-            if (!retryReplace) {
-                throw new ChangeUnappliedCycleException(rs, getQueryString());
-            } else {
-                retryReplaceCount++;
-                if (retryReplaceCount >maxLwtRetries) {
-                    throw new ExceededRetryReplaceException(rs,getQueryString(), retryReplaceCount);
-                }
-                Row one = rs.one();
-                processors.buffer(one);
-                totalRows++;
-                nextOp = this.rebindLwt(stmt, one);
+        CompletionStage<List<Row>> rowsStage = statementStage.thenCompose((rs) -> {
+            processors.start(cycle, rs);
+            ArrayList<Row> completeRowSet = new ArrayList<>();
+            if (!rs.wasApplied()) {
+                handleRebindLWT(rs, statement);
             }
+            return collect(rs, completeRowSet, cycle);
+        }).exceptionally(throwable -> {
+            if (throwable instanceof RuntimeException tre) throw tre;
+            throw new RuntimeException(throwable);
+        });
+
+        try {
+            return rowsStage.toCompletableFuture().get(3, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            if (e instanceof RuntimeException re) throw re;
+            throw new RuntimeException(e);
+        } finally {
+            processors.flush();
+            metrics.recordFetchedPages(fetchedPages);
+            metrics.recordFetchedRows(fetchedRows);
+            metrics.recordFetchedBytes(fetchedBytes);
         }
 
-        // Paginated Op
-
-        Iterator<Row> reader = rs.iterator();
-        int pages = 0;
-        // TODO/MVEL: An optimization to this would be to collect the results in a result set processor,
-        // but allow/require this processor to be added to an op _only_ in the event that it would
-        // be needed by a downstream consumer like the MVEL expected result evaluator
-
-        var resultRows = new ArrayList<Row>();
-        while (true) {
-            int pageRows = rs.getAvailableWithoutFetching();
-            for (int i = 0; i < pageRows; i++) {
-                Row row = reader.next();
-                resultRows.add(row);
-                processors.buffer(row);
-            }
-            if (pages++ > maxPages) {
-                throw new UnexpectedPagingException(rs, getQueryString(), pages, maxPages, stmt.getPageSize());
-            }
-            if (rs.isFullyFetched()) {
-                results.set(resultRows);
-                break;
-            }
-            totalRows += pageRows;
-        }
-        processors.flush();
-        return results.get();
+//            logger.trace(() -> "\n\n--- Rows collected for cycle: " + cycle + " count: "
+//                + rs.size() + " dt: " + System.nanoTime());
+//
+//            results.set(completeRowSet);
+//            processors.flush();
     }
 
+    //    private BiFunction<AsyncResultSet,Throwable> handler
     @Override
     public Op getNextOp() {
         Op next = nextOp;
@@ -134,12 +130,8 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
         return next;
     }
 
-    @Override
     public Map<String, ?> capture() {
-        if (rs == null) {
-            throw new UndefinedResultSetException(this);
-        }
-        return null;
+        throw new NotImplementedException("Not implemented for Cqld4CqlOp");
     }
 
     public abstract Statement<?> getStmt();
@@ -148,7 +140,44 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
 
     private Cqld4CqlOp rebindLwt(Statement<?> stmt, Row row) {
         BoundStatement rebound = LWTRebinder.rebindUnappliedStatement(stmt, row);
-        return new Cqld4CqlReboundStatement(session, maxPages, retryReplace, maxLwtRetries, retryReplaceCount, rebound, processors);
+        return new Cqld4CqlReboundStatement(session, maxPages, retryReplace, maxLwtRetries, retryReplaceCount, rebound, processors, metrics);
+    }
+
+    private CompletionStage<List<Row>> collect(AsyncResultSet resultSet, ArrayList<Row> rowList, final long cycle) {
+        fetchedBytes+=resultSet.getExecutionInfo().getResponseSizeInBytes();
+        if (++fetchedPages > maxPages) {
+            throw new UnexpectedPagingException(resultSet, getQueryString(), fetchedPages, maxPages, getStmt().getPageSize());
+        }
+        int remaining = resultSet.remaining();
+        fetchedRows += remaining;
+        rowList.ensureCapacity(rowList.size() + remaining);
+        for (Row row : resultSet.currentPage()) {
+            rowList.add(row);
+            processors.buffer(row);
+        }
+        if (resultSet.hasMorePages()) {
+            return resultSet.fetchNextPage().thenCompose(rs -> collect(rs, rowList, cycle));
+        } else {
+            processors.start(cycle, resultSet);
+            return CompletableFuture.completedStage(rowList);
+        }
+    }
+
+    private void handleRebindLWT(AsyncResultSet resultSet, Statement<?> statement) {
+        if (++lwtRetries < maxLwtRetries) {
+            throw new ExceededRetryReplaceException(resultSet, getQueryString(), lwtRetries);
+        }
+        if (!retryReplace) {
+            throw new ChangeUnappliedCycleException(resultSet, getQueryString());
+        } else {
+            retryReplaceCount++;
+            if (retryReplaceCount > maxLwtRetries) {
+                throw new ExceededRetryReplaceException(resultSet, getQueryString(), retryReplaceCount);
+            }
+            Row one = resultSet.one();
+            processors.buffer(one);
+            nextOp = this.rebindLwt(statement, one);
+        }
     }
 
 }

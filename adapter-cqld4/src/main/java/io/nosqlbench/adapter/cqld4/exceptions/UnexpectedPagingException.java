@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.cqld4.exceptions;
 
-import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 
 /**
  * <p>This is not a core exception. It was added to the CQL activity type
@@ -35,14 +35,14 @@ import com.datastax.oss.driver.api.core.cql.ResultSet;
  */
 public class UnexpectedPagingException extends RuntimeException {
 
-    private final ResultSet resultSet;
+    private final AsyncResultSet resultSet;
     private final String queryString;
     private final int fetchSize;
     private final int fetchedPages;
     private final int maxpages;
 
     public UnexpectedPagingException(
-            ResultSet resultSet,
+            AsyncResultSet resultSet,
             String queryString,
             int fetchedPages,
             int maxpages,
@@ -54,16 +54,15 @@ public class UnexpectedPagingException extends RuntimeException {
         this.fetchSize = fetchSize;
     }
 
-    public ResultSet getResultSet() {
+    public AsyncResultSet getResultSet() {
         return resultSet;
     }
 
     public String getMessage() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Additional paging would be required to read the results from this query fully" +
-                ", but the user has not explicitly indicated that paging was expected.")
-                .append(" fetched/allowed: ").append(fetchedPages).append("/").append(maxpages)
-                .append(" fetchSize(").append(fetchSize).append("): ").append(queryString);
-        return sb.toString();
+        String sb = "Additional paging would be required to read the results from this query fully" +
+            ", but the user has not explicitly indicated that paging was expected." +
+            " fetched/allowed: " + fetchedPages + "/" + maxpages +
+            " fetchSize(" + fetchSize + "): " + queryString;
+        return sb;
     }
 }

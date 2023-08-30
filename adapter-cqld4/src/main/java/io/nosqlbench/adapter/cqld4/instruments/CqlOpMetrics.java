@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.cqld4;
+package io.nosqlbench.adapter.cqld4.instruments;
 
-public class Cqld4OpMetrics {
-    public void onStart() {
+public interface CqlOpMetrics {
 
-    }
+    void recordFetchedPages(int fetchedPages);
 
-    public void onSuccess() {
+    void recordFetchedRows(int fetchedRows);
 
-    }
+    void recordFetchedBytes(int fetchedBytes);
 }

@@ -16,9 +16,9 @@
 
 package io.nosqlbench.adapter.cqld4;
 
-import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import io.nosqlbench.adapters.api.activityimpl.uniform.ResultProcessor;
 
-public interface ResultSetProcessor extends ResultProcessor<ResultSet, Row> {
+public interface ResultSetProcessor extends ResultProcessor<AsyncResultSet, Row> {
 }

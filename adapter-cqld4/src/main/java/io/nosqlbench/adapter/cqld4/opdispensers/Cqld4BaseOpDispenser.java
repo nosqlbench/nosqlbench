@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.cqld4.opdispensers;
 
+import com.codahale.metrics.Histogram;
 import com.datastax.dse.driver.api.core.graph.FluentGraphStatement;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.DefaultConsistencyLevel;
@@ -23,12 +24,13 @@ import com.datastax.oss.driver.api.core.config.DriverExecutionProfile;
 import com.datastax.oss.driver.api.core.cql.*;
 import com.datastax.oss.driver.api.core.metadata.Node;
 import com.datastax.oss.driver.api.core.metadata.token.Token;
-import io.nosqlbench.adapter.cqld4.Cqld4OpMetrics;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
+import io.nosqlbench.adapter.cqld4.instruments.CqlOpMetrics;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,15 +39,17 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, Cqld4Space> {
+public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, Cqld4Space> implements CqlOpMetrics {
 
     private final static Logger logger = LogManager.getLogger("CQLD4");
 
     private final int maxpages;
-    private final Cqld4OpMetrics metrics = new Cqld4OpMetrics();
     private final LongFunction<CqlSession> sessionFunc;
     private final boolean isRetryReplace;
     private final int maxLwtRetries;
+    private final Histogram rowsHistogram;
+    private final Histogram pagesHistogram;
+    private final Histogram payloadBytesHistogram;
 
     public Cqld4BaseOpDispenser(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, ParsedOp op) {
         super(adapter, op);
@@ -53,6 +57,9 @@ public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, C
         this.maxpages = op.getStaticConfigOr("maxpages", 1);
         this.isRetryReplace = op.getStaticConfigOr("retryreplace", false);
         this.maxLwtRetries = op.getStaticConfigOr("maxlwtretries", 1);
+        this.rowsHistogram = ActivityMetrics.histogram(op, "rows", op.getStaticConfigOr("hdr_digits", 3));
+        this.pagesHistogram = ActivityMetrics.histogram(op, "pages", op.getStaticConfigOr("hdr_digits", 3));
+        this.payloadBytesHistogram = ActivityMetrics.histogram(op, "payload_bytes", op.getStaticConfigOr("hdr_digits", 3));
     }
 
     public int getMaxPages() {
@@ -76,7 +83,7 @@ public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, C
      * All implementations of a CQL Statement Dispenser should be using the method
      * provided by this function. This ensures that {@link Statement}-level attributes
      * are handled uniformly and in one place.
-     *
+     * <p>
      * This takes the base statement function and decorates it optionally with each
      * additional qualified modifier, short-circuiting those which are not specified.
      * This allows default behavior to take precedence as well as avoids unnecessary calling
@@ -136,5 +143,18 @@ public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, C
         return sb.toString();
     }
 
+    @Override
+    public void recordFetchedRows(int rows) {
+        rowsHistogram.update(rows);
+    }
 
+    @Override
+    public void recordFetchedPages(int pages) {
+        pagesHistogram.update(pages);
+    }
+
+    @Override
+    public void recordFetchedBytes(int bytes) {
+        payloadBytesHistogram.update(bytes);
+    }
 }
