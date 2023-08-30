@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
@@ -189,11 +190,32 @@ public class ActivityMetrics {
         return registry;
     }
 
+    /**
+     * This variant creates a named metric for all of the stats which may be needed, name with metricname_average,
+     * and so on. It uses the same data reservoir for all views, but only returns one of them as a handle to the metric.
+     * This has the effect of leaving some of the metric objects unreferencable from the caller side. This may need
+     * to be changed in a future update in the even that full inventory management is required on metric objects here.
+     * @param parent The labeled element the metric pertains to
+     * @param metricFamilyName The name of the measurement
+     * @return One of the created metrics, suitable for calling {@link DoubleSummaryGauge#accept(double)} on.
+     */
+    public static DoubleSummaryGauge summaryGauge(NBLabeledElement parent, String metricFamilyName) {
+        DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
+        DoubleSummaryGauge anyGauge = null;
+        for (DoubleSummaryGauge.Stat statName: DoubleSummaryGauge.Stat.values()){
+            final NBLabels labels = parent.getLabels()
+                .andTypes("name",sanitize(metricFamilyName))
+                .modifyValue("name", n -> n+"_"+statName.name().toLowerCase());
+            anyGauge= (DoubleSummaryGauge) register(labels, () -> new DoubleSummaryGauge(labels,statName,stats));
+        }
+        return anyGauge;
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> Gauge<T> gauge(NBLabeledElement parent, String metricFamilyName, Gauge<T> gauge) {
         final NBLabels labels = parent.getLabels().andTypes("name",sanitize(metricFamilyName));
 
-        return (Gauge<T>) register(labels, () -> new NBMetricGauge(labels,gauge));
+        return (Gauge<T>) register(labels, () -> new NBMetricGaugeWrapper<>(labels,gauge));
     }
 
     private static MetricRegistry lookupRegistry() {
