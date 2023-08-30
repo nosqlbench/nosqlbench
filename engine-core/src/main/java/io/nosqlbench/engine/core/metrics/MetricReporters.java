@@ -115,7 +115,7 @@ public class MetricReporters implements Shutdownable {
         return this;
     }
 
-    public MetricReporters addPromPush(final String reportPromPushTo, final String prefix) {
+    public MetricReporters addPromPush(final String reportPromPushTo, final String prefix, final String config) {
 
         logger.debug(() -> "Adding prompush reporter to " + reportPromPushTo + " with prefix label to " + prefix);
 
@@ -131,7 +131,8 @@ public class MetricReporters implements Shutdownable {
                     "prompush",
                     MetricFilter.ALL,
                     TimeUnit.SECONDS,
-                    TimeUnit.NANOSECONDS
+                    TimeUnit.NANOSECONDS,
+                    config
                     );
             scheduledReporters.add(promPushReporter);
         }
