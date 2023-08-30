@@ -233,6 +233,9 @@ public class HttpConsoleFormats {
         if (contentType.toLowerCase().startsWith("text")) {
             return true;
         }
+        if (contentType.toLowerCase().startsWith("application/json")) {
+            return true;
+        }
         return PRINTABLE.contains(contentType.split("/")[0].toLowerCase());
     }
 

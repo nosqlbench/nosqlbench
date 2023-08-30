@@ -215,6 +215,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         final String dockerMetricsAt = globalOptions.wantsDockerMetricsAt();
         String reportGraphiteTo = globalOptions.wantsReportGraphiteTo();
         String annotatorsConfig = globalOptions.getAnnotatorsConfig();
+        String promPushConfig = globalOptions.getPromPushConfig();
         final String reportPromPushTo = globalOptions.wantsReportPromPushTo();
 
 
@@ -413,7 +414,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             final MetricReporters reporters = MetricReporters.getInstance();
             reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
 
-            if (null != reportPromPushTo) reporters.addPromPush(reportPromPushTo, options.wantsMetricsPrefix());
+            if (null != reportPromPushTo) reporters.addPromPush(reportPromPushTo, options.wantsMetricsPrefix(), promPushConfig);
             if (null != reportGraphiteTo) reporters.addGraphite(reportGraphiteTo, options.wantsMetricsPrefix());
             if (null != options.wantsReportCsvTo())
                 reporters.addCSVReporter(options.wantsReportCsvTo(), options.wantsMetricsPrefix());

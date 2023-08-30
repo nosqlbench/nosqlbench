@@ -18,26 +18,7 @@ package io.nosqlbench.engine.extensions.vectormath;
 
 import java.util.Arrays;
 
-public class Intersections {
-
-    public static long count(long[] reference, long[] sample) {
-        int a_index = 0, b_index = 0, matches = 0;
-        long a_element, b_element;
-        while (a_index < reference.length && b_index < sample.length) {
-            a_element = reference[a_index];
-            b_element = sample[b_index];
-            if (a_element == b_element) {
-                ++matches;
-                a_index++;
-                b_index++;
-            } else if (b_element < a_element) {
-                b_index++;
-            } else {
-                a_index++;
-            }
-        }
-        return matches;
-    }
+public class PineconeIntersections {
 
     public static long[] find(long[] reference, long[] sample) {
         long[] result = new long[reference.length];
@@ -79,25 +60,6 @@ public class Intersections {
             }
         }
         return Arrays.copyOfRange(result,0,acc_index+1);
-    }
-
-    public static int count(int[] reference, int[] sample) {
-        int a_index = 0, b_index = 0, matches = 0;
-        int a_element, b_element;
-        while (a_index < reference.length && b_index < sample.length) {
-            a_element = reference[a_index];
-            b_element = sample[b_index];
-            if (a_element == b_element) {
-                ++matches;
-                a_index++;
-                b_index++;
-            } else if (b_element < a_element) {
-                b_index++;
-            } else {
-                a_index++;
-            }
-        }
-        return matches;
     }
 
     public static int[] resize(int[] arr) {
