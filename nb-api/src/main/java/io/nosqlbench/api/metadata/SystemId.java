@@ -188,6 +188,10 @@ public class SystemId {
     }
 
     public static String genSessionCode(long epochMillis) {
+        return packLong(epochMillis);
+    }
+
+    public static String genSessionAndNodeCode(long epochMillis) {
         return packLong(epochMillis) + "_" + getPackedNodeId();
     }
 
