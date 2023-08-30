@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.cqld4.processors;
 
-import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import io.nosqlbench.adapter.cqld4.ResultSetProcessor;
 
@@ -28,12 +28,11 @@ import java.util.ArrayList;
 public class RSIterableCapture implements ResultSetProcessor {
 
     private long cycle;
-    private ArrayList<Row> rows = new ArrayList<>();
+    private final ArrayList<Row> rows = new ArrayList<>();
 
     @Override
-    public void start(long cycle, ResultSet container) {
+    public void start(long cycle, AsyncResultSet container) {
         this.cycle = cycle;
-        rows = new ArrayList<Row>(container.getAvailableWithoutFetching());
     }
 
     @Override

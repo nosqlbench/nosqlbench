@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.cqld4;
 
-import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 
 import java.util.Map;
@@ -29,7 +29,7 @@ public class Cqld4PrintProcessor implements ResultSetProcessor {
     }
 
     @Override
-    public void start(long cycle, ResultSet container) {
+    public void start(long cycle, AsyncResultSet container) {
         sb.setLength(0);
         sb.append("c[").append(cycle).append("] ");
     }

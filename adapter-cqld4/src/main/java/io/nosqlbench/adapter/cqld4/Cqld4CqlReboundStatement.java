@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,23 @@ package io.nosqlbench.adapter.cqld4;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.Statement;
+import io.nosqlbench.adapter.cqld4.instruments.CqlOpMetrics;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 
 public class Cqld4CqlReboundStatement extends Cqld4CqlOp {
     private final BoundStatement stmt;
 
-    public Cqld4CqlReboundStatement(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, int lwtRetryCount, BoundStatement rebound, RSProcessors processors) {
-        super(session,maxPages,retryReplace,maxLwtRetries,lwtRetryCount, processors);
+    public Cqld4CqlReboundStatement(
+        CqlSession session,
+        int maxPages,
+        boolean retryReplace,
+        int maxLwtRetries,
+        int lwtRetryCount,
+        BoundStatement rebound,
+        RSProcessors processors,
+        CqlOpMetrics metrics
+    ) {
+        super(session,maxPages,retryReplace,maxLwtRetries,lwtRetryCount, processors, metrics);
         this.stmt = rebound;
     }
 

@@ -80,16 +80,21 @@ public class PromExpositionFormat {
             }
             if (metric instanceof final Sampling sampling) {
                 // Use the summary form
-                buffer.append("# TYPE ").append(labels.valueOf("name")).append(" summary\n");
+                buffer.append("# TYPE ").append(labels.valueOf("name")).append(" histogram\n");
                 final Snapshot snapshot = sampling.getSnapshot();
                 for (final double quantile : new double[]{0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999}) {
                     final double value = snapshot.getValue(quantile);
                     buffer
-                        .append(labels.andTypes("quantile", String.valueOf(quantile)).linearize("name"))
+                        .append(labels.modifyValue("name",n -> n+"_bucket").andTypes("le", String.valueOf(quantile)).linearize("name"))
+//                        .append(labels.andTypes("quantile", String.valueOf(quantile)).linearize("name"))
                         .append(' ')
                         .append(value)
                         .append('\n');
                 }
+                buffer.append(labels.modifyValue("name",n->n+"_bucket").andTypes("le","+Inf").linearize("name"))
+                    .append(' ')
+                    .append(snapshot.getMax())
+                    .append('\n');
                 final double snapshotCount =snapshot.size();
                 buffer.append(labels.modifyValue("name",n->n+"_count").linearize("name"))
                     .append(' ')

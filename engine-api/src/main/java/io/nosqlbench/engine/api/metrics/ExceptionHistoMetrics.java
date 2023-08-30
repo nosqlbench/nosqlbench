@@ -39,7 +39,7 @@ public class ExceptionHistoMetrics {
     public ExceptionHistoMetrics(final NBLabeledElement parentLabels, final ActivityDef activityDef) {
         this.parentLabels = parentLabels;
         this.activityDef = activityDef;
-        this.allerrors = ActivityMetrics.histogram(parentLabels, "errorhistos.ALL", activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4));
+        this.allerrors = ActivityMetrics.histogram(parentLabels, "errorhistos_ALL", activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4));
     }
 
     public void update(final String name, final long magnitude) {
@@ -47,7 +47,7 @@ public class ExceptionHistoMetrics {
         if (null == h) synchronized (this.histos) {
             h = this.histos.computeIfAbsent(
                 name,
-                k -> ActivityMetrics.histogram(this.parentLabels, "errorhistos." + name, this.activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
+                errName -> ActivityMetrics.histogram(this.parentLabels, "errorhistos_"+errName, this.activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
             );
         }
         h.update(magnitude);

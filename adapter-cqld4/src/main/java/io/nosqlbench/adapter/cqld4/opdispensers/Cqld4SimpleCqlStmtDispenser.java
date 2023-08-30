@@ -47,7 +47,8 @@ public class Cqld4SimpleCqlStmtDispenser extends Cqld4BaseOpDispenser {
             (SimpleStatement) stmtFunc.apply(value),
             getMaxPages(),
             isRetryReplace(),
-            getMaxLwtRetries()
+            getMaxLwtRetries(),
+            this
         );
     }
 

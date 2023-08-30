@@ -69,14 +69,15 @@ public class PromExpositionFormatTest {
         assertThat(formatted).matches(Pattern.compile("""
             # TYPE mynameismud_total counter
             mynameismud_total\\{label3="value3"} 0 \\d+
-            # TYPE mynameismud summary
-            mynameismud\\{label3="value3",quantile="0.5"} 18463.0
-            mynameismud\\{label3="value3",quantile="0.75"} 27727.0
-            mynameismud\\{label3="value3",quantile="0.9"} 33279.0
-            mynameismud\\{label3="value3",quantile="0.95"} 35135.0
-            mynameismud\\{label3="value3",quantile="0.98"} 36223.0
-            mynameismud\\{label3="value3",quantile="0.99"} 36607.0
-            mynameismud\\{label3="value3",quantile="0.999"} 36927.0
+            # TYPE mynameismud histogram
+            mynameismud_bucket\\{label3="value3",le="0.5"} 18463.0
+            mynameismud_bucket\\{label3="value3",le="0.75"} 27727.0
+            mynameismud_bucket\\{label3="value3",le="0.9"} 33279.0
+            mynameismud_bucket\\{label3="value3",le="0.95"} 35135.0
+            mynameismud_bucket\\{label3="value3",le="0.98"} 36223.0
+            mynameismud_bucket\\{label3="value3",le="0.99"} 36607.0
+            mynameismud_bucket\\{label3="value3",le="0.999"} 36927.0
+            mynameismud_bucket\\{label3="value3",le="\\+Inf"} 36991
             mynameismud_count\\{label3="value3"} 1000.0
             # TYPE mynameismud_max gauge
             mynameismud_max\\{label3="value3"} 36991
@@ -102,14 +103,15 @@ public class PromExpositionFormatTest {
         assertThat(formatted).matches(Pattern.compile("""
             # TYPE monsieurmarius_total counter
             monsieurmarius_total\\{label4="value4"} 1000 \\d+
-            # TYPE monsieurmarius summary
-            monsieurmarius\\{label4="value4",quantile="0.5"} 18463.0
-            monsieurmarius\\{label4="value4",quantile="0.75"} 27727.0
-            monsieurmarius\\{label4="value4",quantile="0.9"} 33279.0
-            monsieurmarius\\{label4="value4",quantile="0.95"} 35135.0
-            monsieurmarius\\{label4="value4",quantile="0.98"} 36223.0
-            monsieurmarius\\{label4="value4",quantile="0.99"} 36607.0
-            monsieurmarius\\{label4="value4",quantile="0.999"} 36927.0
+            # TYPE monsieurmarius histogram
+            monsieurmarius_bucket\\{label4="value4",le="0.5"} 18463.0
+            monsieurmarius_bucket\\{label4="value4",le="0.75"} 27727.0
+            monsieurmarius_bucket\\{label4="value4",le="0.9"} 33279.0
+            monsieurmarius_bucket\\{label4="value4",le="0.95"} 35135.0
+            monsieurmarius_bucket\\{label4="value4",le="0.98"} 36223.0
+            monsieurmarius_bucket\\{label4="value4",le="0.99"} 36607.0
+            monsieurmarius_bucket\\{label4="value4",le="0.999"} 36927.0
+            monsieurmarius_bucket\\{label4="value4",le="\\+Inf"} 36991
             monsieurmarius_count\\{label4="value4"} 1000.0
             # TYPE monsieurmarius_max gauge
             monsieurmarius_max\\{label4="value4"} 36991
@@ -152,7 +154,7 @@ public class PromExpositionFormatTest {
     @Test
     public void testGaugeFormat() {
         Gauge cosetteGauge = () -> 1500;
-        NBMetricGauge nbMetricGauge = new NBMetricGauge(NBLabels.forKV("name","cosette","label6", "value6"), cosetteGauge);
+        NBMetricGauge nbMetricGauge = new NBMetricGaugeWrapper(NBLabels.forKV("name","cosette","label6", "value6"), cosetteGauge);
         String formatted = PromExpositionFormat.format(nowclock, nbMetricGauge);
 
         assertThat(formatted).matches(Pattern.compile("""
@@ -161,7 +163,7 @@ public class PromExpositionFormatTest {
             """));
 
         Gauge cosetteGauge2 = () -> "2000.0";
-        NBMetricGauge nbMetricGauge2 = new NBMetricGauge(NBLabels.forKV("name","cosette2","label7", "value7"), cosetteGauge2);
+        NBMetricGauge nbMetricGauge2 = new NBMetricGaugeWrapper(NBLabels.forKV("name","cosette2","label7", "value7"), cosetteGauge2);
         String formatted2 = PromExpositionFormat.format(nowclock, nbMetricGauge2);
 
         assertThat(formatted2).matches(Pattern.compile("""
@@ -172,7 +174,7 @@ public class PromExpositionFormatTest {
         final int number = 3000;
         final CharSequence charSequence = Integer.toString(number);
         Gauge cosetteGauge3 = () -> charSequence;
-        NBMetricGauge nbMetricGauge3 = new NBMetricGauge(NBLabels.forKV("name","cosette3","label8", "value8"), cosetteGauge3);
+        NBMetricGauge nbMetricGauge3 = new NBMetricGaugeWrapper(NBLabels.forKV("name","cosette3","label8", "value8"), cosetteGauge3);
         String formatted3 = PromExpositionFormat.format(nowclock, nbMetricGauge3);
 
         assertThat(formatted3).matches(Pattern.compile("""

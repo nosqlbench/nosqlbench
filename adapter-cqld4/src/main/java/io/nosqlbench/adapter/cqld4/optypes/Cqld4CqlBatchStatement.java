@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@ package io.nosqlbench.adapter.cqld4.optypes;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BatchStatement;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
+import io.nosqlbench.adapter.cqld4.instruments.CqlOpMetrics;
 
 public class Cqld4CqlBatchStatement extends Cqld4CqlOp {
 
     private final BatchStatement stmt;
 
-    public Cqld4CqlBatchStatement(CqlSession session, BatchStatement stmt, int maxPage, int maxLwtRetries, boolean retryReplace) {
-        super(session,maxPage,retryReplace,maxLwtRetries,new RSProcessors());
+    public Cqld4CqlBatchStatement(CqlSession session, BatchStatement stmt, int maxPage, int maxLwtRetries, boolean retryReplace, CqlOpMetrics metrics) {
+        super(session,maxPage,retryReplace,maxLwtRetries,new RSProcessors(), metrics);
         this.stmt = stmt;
     }
 

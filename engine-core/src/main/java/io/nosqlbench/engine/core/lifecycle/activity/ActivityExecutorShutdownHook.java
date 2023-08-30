@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.cqld4;
+package io.nosqlbench.engine.core.lifecycle.activity;
 
-public class Cqld4OpMetrics {
-    public void onStart() {
+public class ActivityExecutorShutdownHook extends Thread {
 
+    private final ActivityExecutor activityExecutor;
+    public ActivityExecutorShutdownHook(ActivityExecutor activityExecutor) {
+        this.activityExecutor = activityExecutor;
     }
 
-    public void onSuccess() {
-
+    @Override
+    public void run() {
+        activityExecutor.finish();
     }
+
 }

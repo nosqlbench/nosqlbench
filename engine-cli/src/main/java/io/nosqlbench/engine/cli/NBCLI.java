@@ -160,11 +160,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
         this.sessionCode = SystemId.genSessionCode(sessionTime);
         this.sessionName = SessionNamer.format(globalOptions.getSessionName(),sessionTime).replaceAll("SESSIONCODE",sessionCode);
-        this.labels = NBLabels.forKV("command", commandName, "appname", "nosqlbench")
+        this.labels = NBLabels.forKV("appname", "nosqlbench")
                 .andInstances("node",SystemId.getNodeId())
-                .andInstances("nodeid",SystemId.getPackedNodeId())
-//                .andInstances("sesscode",sessionCode)
-                .andInstances("session",sessionName)
                 .and(globalOptions.getLabelMap());
 
         NBCLI.loggerConfig

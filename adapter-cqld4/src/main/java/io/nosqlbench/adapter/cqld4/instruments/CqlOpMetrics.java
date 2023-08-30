@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.cqld4;
+package io.nosqlbench.adapter.cqld4.instruments;
 
-import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
-import com.datastax.oss.driver.api.core.cql.Row;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ResultProcessor;
+public interface CqlOpMetrics {
 
-public interface ResultSetProcessor extends ResultProcessor<AsyncResultSet, Row> {
+    void recordFetchedPages(int fetchedPages);
+
+    void recordFetchedRows(int fetchedRows);
+
+    void recordFetchedBytes(int fetchedBytes);
 }

@@ -15,8 +15,6 @@
  */
 package io.nosqlbench.engine.core.lifecycle.scenario;
 
-import io.nosqlbench.api.annotations.Annotation;
-import io.nosqlbench.api.annotations.Layer;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
@@ -24,10 +22,12 @@ import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
-import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
-import io.nosqlbench.engine.core.lifecycle.activity.*;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesExceptionHandler;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivityExecutor;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivityLoader;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivityRuntimeInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,14 +75,6 @@ public class ScenarioController implements NBLabeledElement {
     private synchronized ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
         if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
             Activity activity = this.activityLoader.loadActivity(activityDef, this);
-
-            Annotators.recordAnnotation(Annotation.newBuilder()
-                .element(activity)
-                .now()
-                .layer(Layer.Activity)
-                .detail("params", activityDef.toString())
-                .build());
-
             ActivityExecutor executor = new ActivityExecutor(activity, this.scenario.getScenarioName());
             Future<ExecutionResult> startedActivity = activitiesExecutor.submit(executor);
             ActivityRuntimeInfo activityRuntimeInfo = new ActivityRuntimeInfo(activity, startedActivity, executor);
@@ -177,16 +169,7 @@ public class ScenarioController implements NBLabeledElement {
         }
 
         scenariologger.debug("STOP {}", activityDef.getAlias());
-
         runtimeInfo.stopActivity();
-        Annotators.recordAnnotation(Annotation.newBuilder()
-            .element(runtimeInfo.getActivity())
-            .now()
-            .layer(Layer.Activity)
-            .detail("command", "stop")
-            .detail("params", activityDef.toString())
-            .build());
-
     }
 
     /**
@@ -237,15 +220,6 @@ public class ScenarioController implements NBLabeledElement {
         if (null == runtimeInfo) {
             throw new RuntimeException("could not force stop missing activity:" + activityDef);
         }
-
-        Annotators.recordAnnotation(Annotation.newBuilder()
-            .element(runtimeInfo.getActivity())
-            .now()
-            .layer(Layer.Activity)
-            .detail("command", "forceStop")
-            .detail("params", activityDef.toString())
-            .build());
-
         scenariologger.debug("FORCE STOP {}", activityDef.getAlias());
 
         runtimeInfo.forceStopActivity();

@@ -30,6 +30,7 @@ import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
+import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +46,8 @@ import java.util.stream.Collectors;
  * <p>In order to allow for dynamic thread management, which is not easily supported as an explicit feature
  * of most executor services, threads are started as long-running processes and managed via state signaling.
  * The {@link RunState} enum, {@link MotorState} type, and {@link RunStateTally}
- * state tracking class are used together to represent valid states and transitions, contain and transition state atomically,
+ * state tracking class are used together to represent valid states and transitions, contain and transition state
+ * atomically,
  * and provide blocking conditions for observers, respectively.</p>
  *
  * <P>Some basic rules and invariants must be observed for consistent concurrent behavior.
@@ -70,6 +72,8 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
     private long startedAt = 0L;
     private long stoppedAt = 0L;
 
+    private ActivityExecutorShutdownHook shutdownHook = null;
+
     public ActivityExecutor(Activity activity, String sessionId) {
         this.activity = activity;
         this.activityDef = activity.getActivityDef();
@@ -87,7 +91,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
     /**
      * Simply stop the motors
      */
-     public void stopActivity() {
+    public void stopActivity() {
         logger.info(() -> "stopping activity in progress: " + this.getActivityDef().getAlias());
 
         activity.setRunState(RunState.Stopping);
@@ -125,7 +129,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         logger.info(() -> "stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
 
         Annotators.recordAnnotation(Annotation.newBuilder()
-                .element(this)
+            .element(this)
             .interval(this.startedAt, this.stoppedAt)
             .layer(Layer.Activity)
             .detail("params", getActivityDef().toString())
@@ -389,6 +393,17 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
 
     @Override
     public ExecutionResult call() throws Exception {
+        shutdownHook=new ActivityExecutorShutdownHook(this);
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
+        long startAt = System.currentTimeMillis();
+
+        Annotators.recordAnnotation(Annotation.newBuilder()
+            .element(this)
+            .now()
+            .layer(Layer.Activity)
+            .detail("event", "start-activity")
+            .detail("params", activityDef.toString())
+            .build());
 
         try {
             // instantiate and configure fixtures that need to be present
@@ -402,11 +417,13 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         } catch (Exception e) {
             this.exception = e;
         } finally {
+            stoppedAt=System.currentTimeMillis();
             activity.shutdownActivity();
             activity.closeAutoCloseables();
+            ExecutionResult result = new ExecutionResult(startedAt, stoppedAt, "", exception);
+            finish();
+            return result;
         }
-        ExecutionResult result = new ExecutionResult(startedAt, stoppedAt, "", exception);
-        return result;
     }
 
     /**
@@ -530,4 +547,23 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
     public NBLabels getLabels() {
         return activity.getLabels();
     }
+
+    public synchronized void finish() {
+        if (shutdownHook!=null) {
+            logger.warn("Activity was interrupted by process exit, shutting down");
+        }
+        shutdownHook=null;
+        stoppedAt = System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
+
+        Annotators.recordAnnotation(Annotation.newBuilder()
+            .element(this)
+            .interval(startedAt, stoppedAt)
+            .layer(Layer.Activity)
+            .detail("event", "stop-activity")
+            .detail("params", activityDef.toString())
+            .build());
+    }
+
 }
+
+

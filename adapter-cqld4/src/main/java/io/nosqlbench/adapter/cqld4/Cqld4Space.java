@@ -290,6 +290,8 @@ public class Cqld4Space implements AutoCloseable {
             .add(Param.optional("whitelist", String.class, "list of whitelist hosts addresses"))
             .add(Param.optional("showstmt", Boolean.class, "show the contents of the statement in the log"))
             .add(Param.optional("cloud_proxy_address", String.class, "Cloud Proxy Address"))
+            .add(Param.optional("maxpages", Integer.class, "Maximum number of pages allowed per CQL request"))
+            .add(Param.optional("maxretryreplace", Integer.class, "Maximum number of retry replaces with LWT for a CQL request"))
             .add(SSLKsFactory.get().getConfigModel())
             .add(getDriverOptionsModel())
             .add(new OptionHelpers(new OptionsMap()).getConfigModel())
