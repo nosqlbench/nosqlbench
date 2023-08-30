@@ -16,15 +16,16 @@
 
 package io.nosqlbench.adapter.http.core;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nosqlbench.adapter.http.errors.InvalidResponseBodyException;
 import io.nosqlbench.adapter.http.errors.InvalidStatusCodeException;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
 import org.apache.logging.log4j.core.tools.picocli.CommandLine;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -95,25 +96,24 @@ public class HttpOp implements CycleOp {
             }
         }
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode json = mapper.readTree(response.body());
+            JsonParser parser = new JsonParser();
+            JsonObject json = parser.parse(response.body()).getAsJsonObject();
 
-            if (json.get("hits") == null) {
-               return null;
+            if (!json.has("hits") || !json.getAsJsonObject("hits").has("hits")) {
+                return null;
             }
-            Iterable<JsonNode> hits = json.get("hits").get("hits");
+            JsonArray hits = json.getAsJsonObject("hits").getAsJsonArray("hits");
 
-            // get length from hits iterator
-            int count = (int)StreamSupport.stream(Spliterators.spliteratorUnknownSize(hits.iterator(), 0), false).count();
-
+            int count = hits.size();
             int[] keys = new int[count];
-            int i=0;
-            for (JsonNode hit : hits) {
-                keys[i]= hit.get("_source").get("key").asInt();
+            int i = 0;
+            for (JsonElement element : hits) {
+                JsonObject hit = element.getAsJsonObject();
+                keys[i] = hit.getAsJsonObject("_source").get("key").getAsInt();
                 i++;
             }
             return keys;
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
