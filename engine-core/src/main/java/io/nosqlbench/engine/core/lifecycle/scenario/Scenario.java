@@ -351,8 +351,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
             .element(this)
             .interval(startedAtMillis, this.endedAtMillis)
             .layer(Layer.Scenario)
-//            .labels("state", state.toString())
-            .detail("command_line", commandLine)
+            .detail("event","stop-scenario")
             .build();
 
         Annotators.recordAnnotation(annotation);
