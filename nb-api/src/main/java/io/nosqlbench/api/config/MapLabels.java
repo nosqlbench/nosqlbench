@@ -47,7 +47,7 @@ public class MapLabels implements NBLabels {
         labels=Collections.unmodifiableMap(combined);
     }
 
-    private final Pattern validNamesPattern = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]+");
+    private final Pattern validNamesPattern = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*");
     private void verifyValidNamesAndValues(Map<String, String> labels) {
         labels.forEach((label,value) -> {
             if (!validNamesPattern.matcher(label).matches()) {
