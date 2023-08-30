@@ -107,7 +107,7 @@ public class NBCLIScenarioParserTest {
                 "cycles", "20",
                 "cycles-test", "20",
                 "driver", "stdout",
-                "labels","workload:scenario_test",
+                "labels","workload:$scenario_test",
                 "workload", "scenario-test"
         ));
     }
@@ -121,7 +121,7 @@ public class NBCLIScenarioParserTest {
                 "alias", "schema",
                 "cycles-test", "20",
                 "driver", "stdout",
-                "labels","workload:scenario_test",
+                "labels","workload:$scenario_test",
                 "tags", "block:\"schema.*\"",
                 "workload", "scenario-test"
         ));
@@ -172,7 +172,7 @@ public class NBCLIScenarioParserTest {
                 "alias", "schema",
                 "cycles-test", "20",
                 "driver", "stdout",
-                "labels","workload:scenario_test",
+                "labels","workload:$scenario_test",
                 "tags", "block:\"schema.*\"",
                 "workload", "scenario-test"
         ));

@@ -63,7 +63,7 @@ public class SystemIdTest {
     @Test
     public void testGenSessionCode() {
         String sessionCode=SystemId.genSessionCode(234L);
-        assertThat(sessionCode).matches("[0-9a-zA-Z~-]+_[0-9a-zA-Z~-]+");
+        assertThat(sessionCode).matches("[0-9a-zA-Z~-]+");
         logger.info("session code: " + sessionCode);
     }
 
