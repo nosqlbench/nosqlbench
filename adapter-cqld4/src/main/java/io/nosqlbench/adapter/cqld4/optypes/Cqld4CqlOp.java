@@ -78,17 +78,25 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
         this.session = session;
         this.maxPages = maxPages;
         this.retryReplace = retryReplace;
-        this.maxLwtRetries =maxLwtRetries;
+        this.maxLwtRetries = maxLwtRetries;
         this.processors = processors;
         this.metrics = metrics;
     }
 
-    protected Cqld4CqlOp(CqlSession session, int maxPages, boolean retryReplace, int maxLwtRetries, int retryRplaceCount, RSProcessors processors) {
+    protected Cqld4CqlOp(
+        CqlSession session,
+        int maxPages,
+        boolean retryReplace,
+        int maxLwtRetries,
+        int retryReplaceCount,
+        RSProcessors processors,
+        CqlOpMetrics metrics
+    ) {
         this.session = session;
         this.maxPages = maxPages;
         this.retryReplace = retryReplace;
-        this.maxLwtRetries =maxLwtRetries;
-        this.retryReplaceCount=retryRplaceCount;
+        this.maxLwtRetries = maxLwtRetries;
+        this.retryReplaceCount = retryReplaceCount;
         this.processors = processors;
         this.metrics = metrics;
     }
