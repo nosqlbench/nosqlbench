@@ -120,7 +120,7 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
         });
 
         try {
-            return rowsStage.toCompletableFuture().get(3, TimeUnit.SECONDS);
+            return rowsStage.toCompletableFuture().get(300, TimeUnit.SECONDS);
         } catch (Exception e) {
             if (e instanceof RuntimeException re) throw re;
             throw new RuntimeException(e);
