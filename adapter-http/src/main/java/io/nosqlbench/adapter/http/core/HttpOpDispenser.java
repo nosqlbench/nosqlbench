@@ -46,9 +46,10 @@ public class HttpOpDispenser extends BaseOpDispenser<HttpOp, HttpSpace> {
         LongFunction<HttpRequest.Builder> builderF = l -> HttpRequest.newBuilder();
         LongFunction<String> bodyF = op.getAsFunctionOr("body", null);
         LongFunction<HttpRequest.BodyPublisher> bodyPublisherF =
-            l -> Optional.ofNullable(bodyF.apply(l)).map(HttpRequest.BodyPublishers::ofString).orElse(
-                HttpRequest.BodyPublishers.noBody()
-            );
+            l -> Optional.ofNullable(bodyF.apply(l))
+                .map(s -> s + "\n")  // the elastic _bulk endpoint requires a newline at the end of the body
+                .map(HttpRequest.BodyPublishers::ofString)
+                .orElse(HttpRequest.BodyPublishers.noBody());
 
         LongFunction<String> methodF = op.getAsFunctionOr("method", "GET");
         LongFunction<HttpRequest.Builder> initBuilderF =

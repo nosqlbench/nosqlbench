@@ -18,16 +18,27 @@ package io.nosqlbench.adapter.http.core;
 
 import io.nosqlbench.adapter.http.errors.InvalidResponseBodyException;
 import io.nosqlbench.adapter.http.errors.InvalidStatusCodeException;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
+import org.apache.logging.log4j.core.tools.picocli.CommandLine;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Spliterators;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 
-public class HttpOp implements RunnableOp {
+public class HttpOp implements CycleOp {
 
     public final Pattern ok_status;
     public final Pattern ok_body;
@@ -46,15 +57,15 @@ public class HttpOp implements RunnableOp {
     }
 
     @Override
-    public void run() {
+    public Object apply(long value) {
         HttpResponse.BodyHandler<String> bodyreader = HttpResponse.BodyHandlers.ofString();
         HttpResponse<String> response = null;
         Exception error = null;
         long startat = System.nanoTime();
         try {
             CompletableFuture<HttpResponse<String>> responseFuture = client.sendAsync(request, bodyreader);
-             response = responseFuture.get(space.getTimeoutMillis(), TimeUnit.MILLISECONDS);
-             space.getHttpMetrics().statusCodeHistogram.update(response.statusCode());
+            response = responseFuture.get(space.getTimeoutMillis(), TimeUnit.MILLISECONDS);
+            space.getHttpMetrics().statusCodeHistogram.update(response.statusCode());
 
             if (ok_status != null) {
                 if (!ok_status.matcher(String.valueOf(response.statusCode())).matches()) {
@@ -83,6 +94,27 @@ public class HttpOp implements RunnableOp {
             if (error!=null) {
                 throw new RuntimeException(error);
             }
+        }
+        try {
+            JsonParser parser = new JsonParser();
+            JsonObject json = parser.parse(response.body()).getAsJsonObject();
+
+            if (!json.has("hits") || !json.getAsJsonObject("hits").has("hits")) {
+                return null;
+            }
+            JsonArray hits = json.getAsJsonObject("hits").getAsJsonArray("hits");
+
+            int count = hits.size();
+            int[] keys = new int[count];
+            int i = 0;
+            for (JsonElement element : hits) {
+                JsonObject hit = element.getAsJsonObject();
+                keys[i] = hit.getAsJsonObject("_source").get("key").getAsInt();
+                i++;
+            }
+            return keys;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
     }
