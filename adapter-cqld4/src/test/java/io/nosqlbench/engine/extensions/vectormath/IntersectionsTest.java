@@ -33,4 +33,15 @@ class IntersectionsTest {
         assertThat(result).isEqualTo(new long[]{4,5});
     }
 
+    @Test
+    public void testCountIntIntersection() {
+        long result = Intersections.count(new int[]{1,3,5,7,9}, new int[]{1,2,3,9,10});
+        assertThat(result).isEqualTo(3L);
+    }
+    @Test
+    public void testCountLongIntersection() {
+        long result = Intersections.count(new long[]{1,3,5,7,9}, new long[]{1,2,3,9,10});
+        assertThat(result).isEqualTo(3);
+    }
+
 }
