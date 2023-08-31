@@ -103,7 +103,6 @@ public class NBCLIOptions {
     private static final String DASH_VVV_TRACE = "-vvv";
     private static final String REPORT_INTERVAL = "--report-interval";
     private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
-
     private static final String REPORT_PROMPUSH_TO = "--report-prompush-to";
     private static final String GRAPHITE_LOG_LEVEL = "--graphite-log-level";
     private static final String REPORT_CSV_TO = "--report-csv-to";
@@ -134,7 +133,8 @@ public class NBCLIOptions {
 
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
-
+    private static final String FILECACHE_PATTERN = "--filecache-pattern";
+    private static final String FILECACHE_EXPIRY = "--filecache-expiry";
     private NBLabels labels = NBLabels.forKV();
     private final List<Cmd> cmdList = new ArrayList<>();
     private int logsMax;
@@ -197,6 +197,8 @@ public class NBCLIOptions {
     private boolean wantsListCommands;
     private boolean wantsListApps;
     private boolean dedicatedVerificationLogger;
+    private String filecachePattern = ".*";
+    private long filecacheExpiry = 10L;
 
     public boolean isWantsListApps() {
         return this.wantsListApps;
@@ -630,6 +632,14 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     this.wantsToCopyWorkload = this.readWordOrThrow(arglist, "workload to copy");
                     break;
+                case FILECACHE_PATTERN:
+                    arglist.removeFirst();
+                    this.filecachePattern = this.readWordOrThrow(arglist, "filecache regex pattern");
+                    break;
+                case FILECACHE_EXPIRY:
+                    arglist.removeFirst();
+                    this.filecacheExpiry = Long.parseLong(this.readWordOrThrow(arglist,"filecache expiry seconds"));
+                    break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
             }
@@ -908,6 +918,14 @@ public class NBCLIOptions {
 
     public String getDockerPromTag() {
         return this.docker_prom_tag;
+    }
+
+    public long getFilecacheExpiry() {
+        return filecacheExpiry;
+    }
+
+    public String getFileCachePattern() {
+        return filecachePattern;
     }
 
     public static class LoggerConfigData {

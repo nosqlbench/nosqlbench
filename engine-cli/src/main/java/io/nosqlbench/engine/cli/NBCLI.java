@@ -22,8 +22,7 @@ import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
-import io.nosqlbench.api.content.Content;
-import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.api.content.*;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.logging.NBLogLevel;
@@ -210,6 +209,9 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             }
         }
 
+        if (globalOptions.getFilecacheExpiry()>0) {
+            NBIO.addContentResolver(new URIResolverCache(ResolverForURL.INSTANCE,globalOptions.getFileCachePattern(), globalOptions.getFilecacheExpiry()));
+        }
 
         final boolean dockerMetrics = globalOptions.wantsDockerMetrics();
         final String dockerMetricsAt = globalOptions.wantsDockerMetricsAt();

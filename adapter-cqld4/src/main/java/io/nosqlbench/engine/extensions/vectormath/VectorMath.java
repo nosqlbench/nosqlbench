@@ -31,7 +31,7 @@ public class VectorMath {
         return rows.stream().map(r -> r.getString(fieldName)).toArray(String[]::new);
     }
 
-    public static long[] stringArrayAsALongArray(String[] strings) {
+    public static long[] stringArrayAsLongArray(String[] strings) {
         long[] longs = new long[strings.length];
         for (int i = 0; i < longs.length; i++) {
             longs[i]=Long.parseLong(strings[i]);

@@ -21,6 +21,7 @@ import io.nosqlbench.api.errors.BasicError;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,13 +32,13 @@ import java.util.Optional;
  */
 public class URIResolver implements ContentResolver {
 
-    private List<ContentResolver> loaders = new ArrayList<>();
+    private LinkedList<ContentResolver> loaders = new LinkedList<>();
 
-    private static final List<ContentResolver> EVERYWHERE = List.of(
+    private static final LinkedList<ContentResolver> EVERYWHERE = new LinkedList<>(List.of(
         ResolverForURL.INSTANCE,
         ResolverForFilesystem.INSTANCE,
         ResolverForClasspath.INSTANCE
-    );
+    ));
 
     private List<String> extensions;
     private List<Path> extraPaths;
@@ -154,6 +155,10 @@ public class URIResolver implements ContentResolver {
             return null;
         }
         throw new BasicError("Error while loading content '" + candidatePath + "', only one is allowed, but " + contents.size() + " were found");
+    }
+
+    public void prepend(ContentResolver resolver) {
+        this.loaders.addFirst(resolver);
     }
 
     public String toString() {
