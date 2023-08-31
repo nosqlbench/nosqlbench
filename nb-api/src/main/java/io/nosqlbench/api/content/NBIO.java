@@ -16,6 +16,7 @@
 
 package io.nosqlbench.api.content;
 
+import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.errors.BasicError;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -42,19 +43,23 @@ import java.util.stream.Collectors;
 public class NBIO implements NBPathsAPI.Facets {
 
     private static String[] globalIncludes = new String[0];
+    private static final List<ContentResolver> extraResolvers = new LinkedList<>();
 
     public synchronized static void addGlobalIncludes(String[] globalIncludes) {
         NBIO.globalIncludes = globalIncludes;
     }
+    public synchronized static void addContentResolver(ContentResolver resolver) {
+        NBIO.extraResolvers.add(resolver);
+    }
 
-    private URIResolver resolver;
+    protected URIResolver resolver;
 
-    private List<String> names = new ArrayList<>();
+    protected List<String> names = new ArrayList<>();
     //    private List<String> extensions = new ArrayList<>();
-    private List<Set<String>> extensionSets = new ArrayList<>();
+    protected List<Set<String>> extensionSets = new ArrayList<>();
     private Set<String> prefixes = new HashSet<>(Arrays.asList(globalIncludes));
 
-    private NBIO() {
+    protected NBIO() {
     }
 
     private NBIO(URIResolver resolver,
@@ -164,6 +169,7 @@ public class NBIO implements NBPathsAPI.Facets {
     @Override
     public NBPathsAPI.GetPrefixes allContent() {
         this.resolver = URIResolvers.inFS().inCP().inURLs();
+        extraResolvers.forEach(resolver::prepend);
         return this;
     }
 
@@ -247,7 +253,7 @@ public class NBIO implements NBPathsAPI.Facets {
      */
     @Override
     public NBPathsAPI.GetExtensions extensionSet(String... extensions) {
-        if (extensions.length==0) {
+        if (extensions.length == 0) {
             return this;
         }
         return this.extensionSets(
@@ -266,7 +272,7 @@ public class NBIO implements NBPathsAPI.Facets {
     @Override
     public NBPathsAPI.GetExtensions extensionSets(Set<String>... cosets) {
         for (Set<String> coset : cosets) {
-            if (coset.size()==0) {
+            if (coset.size() == 0) {
                 throw new RuntimeException("Extension co-set can not be empty.");
             }
             for (String entry : coset) {
@@ -374,8 +380,7 @@ public class NBIO implements NBPathsAPI.Facets {
      */
     @Override
     public Content<?> one() {
-
-        if (extensionSets.size()==0) {
+        if (extensionSets.size() == 0) {
             for (String name : names) {
                 Content<?> found = resolver.resolveOne(name);
                 if (found != null) {
@@ -390,12 +395,10 @@ public class NBIO implements NBPathsAPI.Facets {
                 }
 
                 for (Set<String> extensionSet : extensionSets) {
-                    for (String es : extensionSet) {
-                        for (String extension : extensionSet) {
-                            found = resolver.resolveOne(name + extension);
-                            if (found != null) {
-                                return found;
-                            }
+                    for (String extension : extensionSet) {
+                        found = resolver.resolveOne(name + extension);
+                        if (found != null) {
+                            return found;
                         }
                     }
                 }
@@ -490,7 +493,7 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
     public static Set<String> expandSynonymPaths(List<String> names, List<Set<String>> suffixSets) {
-        if (suffixSets.size()==0) {
+        if (suffixSets.size() == 0) {
             return new LinkedHashSet<>(names);
         }
         Set<String> newnames = new LinkedHashSet<>();
@@ -628,4 +631,5 @@ public class NBIO implements NBPathsAPI.Facets {
             ", extensionSets=" + extensionSets +
             '}';
     }
+
 }
