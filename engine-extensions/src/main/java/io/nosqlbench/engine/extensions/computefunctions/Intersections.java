@@ -14,11 +14,30 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.extensions.vectormath;
+package io.nosqlbench.engine.extensions.computefunctions;
 
 import java.util.Arrays;
 
 public class Intersections {
+
+    public static int count(int[] reference, int[] sample) {
+        int a_index = 0, b_index = 0, matches = 0;
+        int a_element, b_element;
+        while (a_index < reference.length && b_index < sample.length) {
+            a_element = reference[a_index];
+            b_element = sample[b_index];
+            if (a_element == b_element) {
+                ++matches;
+                a_index++;
+                b_index++;
+            } else if (b_element < a_element) {
+                b_index++;
+            } else {
+                a_index++;
+            }
+        }
+        return matches;
+    }
 
     public static long count(long[] reference, long[] sample) {
         int a_index = 0, b_index = 0, matches = 0;
@@ -37,27 +56,6 @@ public class Intersections {
             }
         }
         return matches;
-    }
-
-    public static long[] find(long[] reference, long[] sample) {
-        long[] result = new long[reference.length];
-        int a_index = 0, b_index = 0, acc_index = -1;
-        long a_element, b_element;
-        while (a_index < reference.length && b_index < sample.length) {
-            a_element = reference[a_index];
-            b_element = sample[b_index];
-            if (a_element == b_element) {
-                result = resize(result);
-                result[++acc_index] = a_element;
-                a_index++;
-                b_index++;
-            } else if (b_element < a_element) {
-                b_index++;
-            } else {
-                a_index++;
-            }
-        }
-        return Arrays.copyOfRange(result,0,acc_index+1);
     }
 
     public static int[] find(int[] reference, int[] sample) {
@@ -80,15 +78,16 @@ public class Intersections {
         }
         return Arrays.copyOfRange(result,0,acc_index+1);
     }
-
-    public static int count(int[] reference, int[] sample) {
-        int a_index = 0, b_index = 0, matches = 0;
-        int a_element, b_element;
+    public static long[] find(long[] reference, long[] sample) {
+        long[] result = new long[reference.length];
+        int a_index = 0, b_index = 0, acc_index = -1;
+        long a_element, b_element;
         while (a_index < reference.length && b_index < sample.length) {
             a_element = reference[a_index];
             b_element = sample[b_index];
             if (a_element == b_element) {
-                ++matches;
+                result = resize(result);
+                result[++acc_index] = a_element;
                 a_index++;
                 b_index++;
             } else if (b_element < a_element) {
@@ -97,25 +96,22 @@ public class Intersections {
                 a_index++;
             }
         }
-        return matches;
+        return Arrays.copyOfRange(result,0,acc_index+1);
     }
 
-    public static int[] resize(int[] arr) {
+    private static int[] resize(int[] arr) {
         int len = arr.length;
         int[] copy = new int[len + 1];
-        for (int i = 0; i < len; i++) {
-            copy[i] = arr[i];
-        }
+        System.arraycopy(arr, 0, copy, 0, len);
         return copy;
     }
 
-    public static long[] resize(long[] arr) {
+    private static long[] resize(long[] arr) {
         int len = arr.length;
         long[] copy = new long[len + 1];
-        for (int i = 0; i < len; i++) {
-            copy[i] = arr[i];
-        }
+        System.arraycopy(arr, 0, copy, 0, len);
         return copy;
     }
+
 
 }

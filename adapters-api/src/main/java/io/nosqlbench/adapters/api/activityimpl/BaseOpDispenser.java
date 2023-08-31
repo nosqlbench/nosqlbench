@@ -68,7 +68,8 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
     /**
      * package imports used with "verifiers" or "expected-result" are accumulated here
      */
-    private final List verifierImports = new ArrayList();
+    private final List<String> verifierImports = new ArrayList<>();
+    private final List<Class<?>> verifierStaticImports = new ArrayList<>();
     /**
      * optional invokable functions which throw exceptions when results are not verifiable.
      * This variable is kept here for diagnostics and debugging. The actual instance used within
@@ -129,7 +130,7 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
         try {
             initBlocks.forEach((initName, stringTemplate) -> {
                 GroovyCycleFunction<?> initFunction =
-                    new GroovyCycleFunction<>(initName,stringTemplate,verifierImports,variables);
+                    new GroovyCycleFunction<>(initName,stringTemplate,verifierImports,verifierStaticImports,variables);
                 logger.info("configured verifier init:" + initFunction);
                 initFunction.setVariable("_parsed_op",op);
                 initFunction.apply(0L);
@@ -143,7 +144,7 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
         try {
             namedVerifiers.forEach((verifierName,stringTemplate) -> {
                 GroovyBooleanCycleFunction verifier =
-                    new GroovyBooleanCycleFunction(verifierName, stringTemplate, verifierImports, variables);
+                    new GroovyBooleanCycleFunction(verifierName, stringTemplate, verifierImports, verifierStaticImports, variables);
                 logger.info("configured verifier:" + verifier);
                 verifierFunctions.add(verifier);
             });
@@ -153,7 +154,7 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
 
         try {
              op.takeAsOptionalStringTemplate(EXPECTED_RESULT)
-                .map(tpl -> new GroovyObjectEqualityFunction(op.getName()+"-"+EXPECTED_RESULT, tpl, verifierImports, variables))
+                .map(tpl -> new GroovyObjectEqualityFunction(op.getName()+"-"+EXPECTED_RESULT, tpl, verifierImports, verifierStaticImports, variables))
                 .map(vl -> {
                     logger.info("Configured equality verifier: " + vl);
                     return vl;

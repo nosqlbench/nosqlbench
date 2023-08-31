@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.extensions.vectormath;
+package io.nosqlbench.engine.extensions.computefunctions;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 class IntersectionsTest {
+
 
     @Test
     public void testIntegerIntersection() {
@@ -43,5 +45,6 @@ class IntersectionsTest {
         long result = Intersections.count(new long[]{1,3,5,7,9}, new long[]{1,2,3,9,10});
         assertThat(result).isEqualTo(3);
     }
+
 
 }

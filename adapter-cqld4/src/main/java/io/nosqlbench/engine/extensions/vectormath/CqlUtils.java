@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapters.api.evalcontext;
+package io.nosqlbench.engine.extensions.vectormath;
 
-import groovy.lang.Binding;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
+import com.datastax.oss.driver.api.core.cql.Row;
 
 import java.util.List;
 
-public class GroovyBooleanCycleFunction extends GroovyCycleFunction<Boolean> {
+public class CqlUtils {
 
-    public GroovyBooleanCycleFunction(String name, ParsedTemplateString template, List<String> imports, List<Class<?>> staticSymbolImports, Binding binding) {
-        super(name, template, imports, staticSymbolImports, binding);
+    public static long[] cqlRowFieldsToLongArray(String fieldName, List<Row> rows) {
+        return rows.stream().mapToLong(r -> r.getLong(fieldName)).toArray();
     }
 
-    @Override
-    public Boolean apply(long value) {
-        return super.apply(value);
+    public static String[] cqlRowFieldsToStringArray(String fieldName, List<Row> rows) {
+        return rows.stream().map(r -> r.getString(fieldName)).toArray(String[]::new);
     }
+
+    public static int[] cqlRowListToIntArray(String fieldName, List<Row> rows) {
+        return rows.stream().mapToInt(r -> r.getInt(fieldName)).toArray();
+    }
+
 
 }

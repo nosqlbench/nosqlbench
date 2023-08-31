@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.extensions.example;
+package io.nosqlbench.engine.extensions.scriptingutils;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
@@ -22,18 +22,15 @@ import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ComputeFunctionsPluginInfo.class, selector = "adder")
-public class ExamplePluginData implements ComputeFunctionsPluginInfo<ExamplePlugin> {
-
+@Service(value = ComputeFunctionsPluginInfo.class,selector = "pinecone_utils")
+public class PineconeScriptingUtilsPluginInfo implements ComputeFunctionsPluginInfo<PineconeScriptingUtils> {
     @Override
     public String getDescription() {
-        return "This is an example of a dynamically loadable script extension. It just adds two ints when" +
-                "you call the getSum(...) method.";
+        return "various methods and utilities for working with vector math in a scripted environment";
     }
 
     @Override
-    public ExamplePlugin getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
-        return new ExamplePlugin();
+    public PineconeScriptingUtils getExtensionObject(Logger logger, MetricRegistry metricRegistry, LabeledScenarioContext scriptContext) {
+        return new PineconeScriptingUtils();
     }
-
 }

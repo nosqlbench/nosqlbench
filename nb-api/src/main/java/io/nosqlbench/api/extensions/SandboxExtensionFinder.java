@@ -23,14 +23,14 @@ import java.util.ServiceLoader;
 
 public class SandboxExtensionFinder {
 
-    private final static List<ScriptingPluginInfo<?>> extensionDescriptors = new ArrayList<>();
+    private final static List<ComputeFunctionsPluginInfo<?>> extensionDescriptors = new ArrayList<>();
 
-    public static List<ScriptingPluginInfo<?>> findAll() {
+    public static List<ComputeFunctionsPluginInfo<?>> findAll() {
         if (extensionDescriptors.isEmpty()) {
             synchronized (SandboxExtensionFinder.class) {
                 if (extensionDescriptors.isEmpty()) {
-                    ServiceLoader<ScriptingPluginInfo> loader =
-                            ServiceLoader.load(ScriptingPluginInfo.class);
+                    ServiceLoader<ComputeFunctionsPluginInfo> loader =
+                            ServiceLoader.load(ComputeFunctionsPluginInfo.class);
                     loader.iterator().forEachRemaining(extensionDescriptors::add);
                 }
             }

@@ -21,7 +21,7 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.api.extensions.SandboxExtensionFinder;
-import io.nosqlbench.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
@@ -39,12 +39,14 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
     private final static Logger logger = LogManager.getLogger(GroovyBooleanCycleFunction.class);
     private final String name;
     private final List<String> imports;
-    private final List<String> enabledServices = new ArrayList<>(List.of("vectormath"));
+//    private final List<String> enabledServices = new ArrayList<>(List.of("vectormath"));
+    private final List<String> enabledServices = new ArrayList<>();
 
     protected String scriptText; // Groovy script as provided
     protected final Script script; // Groovy Script as compiled
     protected final Binding variableBindings; // Groovy binding layer
     protected final Bindings bindingFunctions; // NB bindings
+    private final List<Class<?>> staticImports;
 
     /**
      * Instantiate a cycle function from basic types
@@ -56,10 +58,11 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
      * @param imports
      *     The package imports to be installed into the execution environment
      */
-    public GroovyCycleFunction(String name, String scriptText, Map<String, String> bindingSpecs, List<String> imports, Binding binding) {
+    public GroovyCycleFunction(String name, String scriptText, Map<String, String> bindingSpecs, List<String> imports, List<Class<?>> staticImports, Binding binding) {
         this.name = name;
         this.scriptText = scriptText;
         this.imports = imports;
+        this.staticImports = staticImports;
 
         // scripting env variable bindings
         this.variableBindings = binding!=null? binding : new Binding();
@@ -67,12 +70,13 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
         // virtdata bindings to be evaluated at cycle time
         this.bindingFunctions = new BindingsTemplate().addFieldBindings(bindingSpecs).resolveBindings();
 
-        this.script = compileScript(this.scriptText, imports, binding);
+        this.script = compileScript(this.scriptText, imports, staticImports, binding);
         addServices();
     }
 
     private void addServices() {
-        for (final ScriptingPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
+        for (final ComputeFunctionsPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
+            staticImports.addAll(extensionDescriptor.autoImportStaticMethodClasses());
             if (!extensionDescriptor.isAutoLoading()) {
                 logger.info(() -> "Not loading " + extensionDescriptor + ", autoloading is false");
                 continue;
@@ -94,26 +98,33 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
         }
     }
 
-    public GroovyCycleFunction(String name, ParsedTemplateString template, List<String> imports, Binding binding) {
+    public GroovyCycleFunction(String name, ParsedTemplateString template, List<String> imports, List<Class<?>> staticImports, Binding binding) {
         this(
             name,
             template.getPositionalStatement(),
             resolveBindings(template.getBindPoints()),
             imports,
+            staticImports,
             binding
         );
     }
 
-    private Script compileScript(String scriptText, List<String> imports, Binding binding) {
+    private Script compileScript(String scriptText, List<String> imports, List<Class<?>> staticImports, Binding binding) {
         // add classes which are in the imports to the groovy evaluation context
         String[] verifiedClasses = expandClassNames(imports);
+        String[] verifiedStaticImports = expandStaticImports(staticImports);
 
         CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
         ImportCustomizer importer = new ImportCustomizer().addImports(verifiedClasses);
+        importer.addStaticStars(verifiedStaticImports);
         compilerConfiguration.addCompilationCustomizers(importer);
 
         GroovyShell gshell = new GroovyShell(binding!=null? binding:new Binding(), compilerConfiguration);
         return gshell.parse(scriptText);
+    }
+
+    private String[] expandStaticImports(List<Class<?>> staticImports) {
+        return staticImports.stream().map(Class::getCanonicalName).toArray(String[]::new);
     }
 
     private static Map<String, String> resolveBindings(List<BindPoint> bindPoints) {
@@ -166,16 +177,17 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
      */
     @Override
     public CycleFunction<T> newInstance() {
-        return new GroovyCycleFunction<T>(name, scriptText, bindingFunctions, imports, this.variableBindings.getVariables());
+        return new GroovyCycleFunction<T>(name, scriptText, bindingFunctions, imports, staticImports, this.variableBindings.getVariables());
     }
 
-    private GroovyCycleFunction(String name, String scriptText, Bindings bindingFunctions, List<String> imports, Map originalBinding) {
+    private GroovyCycleFunction(String name, String scriptText, Bindings bindingFunctions, List<String> imports, List<Class<?>> staticImports, Map originalBinding) {
         this.name = name;
         this.scriptText = scriptText;
         this.bindingFunctions = bindingFunctions;
         this.imports = imports;
+        this.staticImports = staticImports;
 
-        this.script = compileScript(scriptText, imports, new Binding());
+        this.script = compileScript(scriptText, imports, staticImports, new Binding());
         this.variableBindings = script.getBinding();
         originalBinding.forEach((k,v) -> variableBindings.setVariable(k.toString(),v));
     }

@@ -18,12 +18,12 @@ package io.nosqlbench.engine.extensions.optimizers;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ScriptingPluginInfo.class, selector = "optimos")
-public class BobyqaOptimizerPluginData implements ScriptingPluginInfo<BobyqaOptimizerPlugin> {
+@Service(value = ComputeFunctionsPluginInfo.class, selector = "optimos")
+public class BobyqaOptimizerPluginData implements ComputeFunctionsPluginInfo<BobyqaOptimizerPlugin> {
 
     @Override
     public String getDescription() {

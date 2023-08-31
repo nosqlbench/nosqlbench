@@ -33,8 +33,8 @@ public class GroovyObjectEqualityFunction extends GroovyCycleFunction<Boolean> {
 
     private Object result;
 
-    public GroovyObjectEqualityFunction(String name, ParsedTemplateString template, List<String> imports, Binding binding) {
-        super(name, template, imports, binding);
+    public GroovyObjectEqualityFunction(String name, ParsedTemplateString template, List<String> imports, List<Class<?>> staticImports, Binding binding) {
+        super(name, template, imports, staticImports, binding);
     }
 
     @Override

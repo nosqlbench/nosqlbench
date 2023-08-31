@@ -18,7 +18,9 @@ package io.nosqlbench.engine.extensions.scriptingmetrics;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
 import org.apache.logging.log4j.Logger;
 
 public class ScriptingMetrics {
@@ -27,17 +29,30 @@ public class ScriptingMetrics {
     private final LabeledScenarioContext scriptContext;
 
     public ScriptingMetrics(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
-
         this.logger = logger;
         this.metricRegistry = metricRegistry;
         this.scriptContext = scriptContext;
     }
 
-    public ScriptingGauge newGauge(final String name, final double initialValue) {
+    public ScriptingGauge newStaticGauge(final String name, final double initialValue) {
         final ScriptingGauge scriptingGauge = new ScriptingGauge(name, initialValue);
         ActivityMetrics.gauge(this.scriptContext,name, scriptingGauge);
         this.logger.info(() -> "registered scripting gauge:" + name);
         return scriptingGauge;
     }
+
+    public DoubleSummaryGauge newSummaryGauge(final String name) {
+        final DoubleSummaryGauge summaryGauge = ActivityMetrics.summaryGauge(scriptContext,name);
+        this.logger.info(() -> "registered summmary gauge:" + name);
+        return summaryGauge;
+    }
+
+    public DoubleSummaryGauge newSummaryGauge(NBLabeledElement context, final String name) {
+        final DoubleSummaryGauge summaryGauge = ActivityMetrics.summaryGauge(context,name);
+        this.logger.info(() -> "registered summmary gauge:" + name);
+        return summaryGauge;
+    }
+
+
 
 }

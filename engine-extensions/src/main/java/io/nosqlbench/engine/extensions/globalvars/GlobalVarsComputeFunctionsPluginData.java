@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,29 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.extensions.vectormath;
+package io.nosqlbench.engine.extensions.globalvars;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ScriptingPluginInfo.class,selector = "pinecone_vectormath")
-public class PineconeVectorMathPluginInfo implements ScriptingPluginInfo<PineconeVectorMath> {
+import java.util.concurrent.ConcurrentHashMap;
+
+@Service(value = ComputeFunctionsPluginInfo.class, selector = "globalvars")
+public class GlobalVarsComputeFunctionsPluginData implements ComputeFunctionsPluginInfo<ConcurrentHashMap<String, Object>> {
+
     @Override
     public String getDescription() {
-        return "various methods and utilities for working with vector math in a scripted environment";
+        return "The global access map from shared state";
     }
 
     @Override
-    public PineconeVectorMath getExtensionObject(Logger logger, MetricRegistry metricRegistry, LabeledScenarioContext scriptContext) {
-        return new PineconeVectorMath();
+    public ConcurrentHashMap<String, Object> getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+        final ConcurrentHashMap<String, Object> map = SharedState.gl_ObjectMap;
+        return map;
     }
+
 }

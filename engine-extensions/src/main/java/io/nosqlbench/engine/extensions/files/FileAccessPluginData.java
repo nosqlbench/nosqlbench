@@ -18,12 +18,12 @@ package io.nosqlbench.engine.extensions.files;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ScriptingPluginInfo.class, selector = "files")
-public class FileAccessPluginData implements ScriptingPluginInfo<FileAccess> {
+@Service(value = ComputeFunctionsPluginInfo.class, selector = "files")
+public class FileAccessPluginData implements ComputeFunctionsPluginInfo<FileAccess> {
 
     @Override
     public String getDescription() {

@@ -25,7 +25,7 @@ import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
 import io.nosqlbench.api.metadata.ScenarioMetadataAware;
 import io.nosqlbench.api.metadata.SystemId;
-import io.nosqlbench.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
@@ -211,7 +211,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
         this.scriptEngine.put("metrics", new PolyglotMetricRegistryBindings(metricRegistry));
         this.scriptEngine.put("activities", new ActivityBindings(scenarioController));
 
-        for (final ScriptingPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
+        for (final ComputeFunctionsPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
             if (!extensionDescriptor.isAutoLoading()) {
                 this.logger.info(() -> "Not loading " + extensionDescriptor + ", autoloading is false");
                 continue;

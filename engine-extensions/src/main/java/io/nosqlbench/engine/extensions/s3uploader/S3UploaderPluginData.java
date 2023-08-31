@@ -18,14 +18,14 @@ package io.nosqlbench.engine.extensions.s3uploader;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
 import io.nosqlbench.api.metadata.ScenarioMetadataAware;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ScriptingPluginInfo.class, selector = "s3")
-public class S3UploaderPluginData implements ScriptingPluginInfo<S3Uploader>, ScenarioMetadataAware {
+@Service(value = ComputeFunctionsPluginInfo.class, selector = "s3")
+public class S3UploaderPluginData implements ComputeFunctionsPluginInfo<S3Uploader>, ScenarioMetadataAware {
     private ScenarioMetadata scenarioMetadata;
 
     @Override

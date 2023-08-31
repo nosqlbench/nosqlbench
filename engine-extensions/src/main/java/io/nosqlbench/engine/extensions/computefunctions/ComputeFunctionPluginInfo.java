@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,30 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.extensions.globalvars;
+package io.nosqlbench.engine.extensions.computefunctions;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import org.apache.logging.log4j.Logger;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 
-@Service(value = ScriptingPluginInfo.class, selector = "globalvars")
-public class GlobalVarsScriptingPluginData implements ScriptingPluginInfo<ConcurrentHashMap<String, Object>> {
-
+@Service(value = ComputeFunctionsPluginInfo.class,selector = "compute")
+public class ComputeFunctionPluginInfo implements ComputeFunctionsPluginInfo<ComputeFunctions> {
     @Override
     public String getDescription() {
-        return "The global access map from shared state";
+        return "Various small math utilities.";
     }
 
     @Override
-    public ConcurrentHashMap<String, Object> getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
-        final ConcurrentHashMap<String, Object> map = SharedState.gl_ObjectMap;
-        return map;
+    public ComputeFunctions getExtensionObject(Logger logger, MetricRegistry metricRegistry, LabeledScenarioContext scriptContext) {
+        return new ComputeFunctions();
     }
 
+    @Override
+    public List<Class<?>> autoImportStaticMethodClasses() {
+        return List.of(ComputeFunctions.class);
+    }
 }

@@ -18,12 +18,12 @@ package io.nosqlbench.engine.extensions.histostatslogger;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ScriptingPluginInfo.class, selector = "histostatslogger")
-public class HistoStatsPluginData implements ScriptingPluginInfo<HistoStatsPlugin> {
+@Service(value = ComputeFunctionsPluginInfo.class, selector = "histostatslogger")
+public class HistoStatsPluginData implements ComputeFunctionsPluginInfo<HistoStatsPlugin> {
 
     @Override
     public String getDescription() {
