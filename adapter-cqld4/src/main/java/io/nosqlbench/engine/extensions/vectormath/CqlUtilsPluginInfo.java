@@ -18,12 +18,12 @@ package io.nosqlbench.engine.extensions.vectormath;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
+import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ComputeFunctionsPluginInfo.class,selector = "cql_utils")
-public class CqlUtilsPluginInfo implements ComputeFunctionsPluginInfo<CqlUtils> {
+@Service(value = ScriptingExtensionPluginInfo.class,selector = "cql_utils")
+public class CqlUtilsPluginInfo implements ScriptingExtensionPluginInfo<CqlUtils> {
     @Override
     public String getDescription() {
         return "various methods and utilities for working with vector math in a scripted environment";

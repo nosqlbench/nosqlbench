@@ -18,14 +18,14 @@ package io.nosqlbench.engine.extensions.conversions;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
+import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
-@Service(value = ComputeFunctionsPluginInfo.class,selector = "convert")
-public class ConversionUtilsPluginInfo implements ComputeFunctionsPluginInfo<ConverterUtils> {
+@Service(value = ScriptingExtensionPluginInfo.class,selector = "convert")
+public class ConversionUtilsPluginInfo implements ScriptingExtensionPluginInfo<ConverterUtils> {
     @Override
     public String getDescription() {
         return "Utilities to convert between common basic data types";

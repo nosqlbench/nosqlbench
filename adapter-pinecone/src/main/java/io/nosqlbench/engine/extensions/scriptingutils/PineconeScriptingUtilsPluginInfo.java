@@ -18,12 +18,12 @@ package io.nosqlbench.engine.extensions.scriptingutils;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
+import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ComputeFunctionsPluginInfo.class,selector = "pinecone_utils")
-public class PineconeScriptingUtilsPluginInfo implements ComputeFunctionsPluginInfo<PineconeScriptingUtils> {
+@Service(value = ScriptingExtensionPluginInfo.class,selector = "pinecone_utils")
+public class PineconeScriptingUtilsPluginInfo implements ScriptingExtensionPluginInfo<PineconeScriptingUtils> {
     @Override
     public String getDescription() {
         return "various methods and utilities for working with vector math in a scripted environment";

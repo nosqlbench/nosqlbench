@@ -32,7 +32,7 @@ import java.util.List;
  *     Each scenario gets its own instance of an object from this SandboxPlugin
  * </p>
  */
-public interface ComputeFunctionsPluginInfo<T> {
+public interface ScriptingExtensionPluginInfo<T> {
 
     /**
      * @return a brief description of this extension.

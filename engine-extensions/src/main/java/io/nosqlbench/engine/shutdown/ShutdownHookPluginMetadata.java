@@ -18,12 +18,12 @@ package io.nosqlbench.engine.shutdown;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
+import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value= ComputeFunctionsPluginInfo.class,selector = "shutdown")
-public class ShutdownHookPluginMetadata implements ComputeFunctionsPluginInfo<ShutdownHookPlugin> {
+@Service(value= ScriptingExtensionPluginInfo.class,selector = "shutdown")
+public class ShutdownHookPluginMetadata implements ScriptingExtensionPluginInfo<ShutdownHookPlugin> {
 
     @Override
     public String getDescription() {

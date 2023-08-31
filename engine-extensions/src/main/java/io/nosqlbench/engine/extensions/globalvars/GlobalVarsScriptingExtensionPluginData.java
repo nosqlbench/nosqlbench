@@ -18,15 +18,15 @@ package io.nosqlbench.engine.extensions.globalvars;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
+import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service(value = ComputeFunctionsPluginInfo.class, selector = "globalvars")
-public class GlobalVarsComputeFunctionsPluginData implements ComputeFunctionsPluginInfo<ConcurrentHashMap<String, Object>> {
+@Service(value = ScriptingExtensionPluginInfo.class, selector = "globalvars")
+public class GlobalVarsScriptingExtensionPluginData implements ScriptingExtensionPluginInfo<ConcurrentHashMap<String, Object>> {
 
     @Override
     public String getDescription() {

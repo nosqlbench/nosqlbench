@@ -18,14 +18,14 @@ package io.nosqlbench.engine.extensions.computefunctions;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ComputeFunctionsPluginInfo;
+import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
-@Service(value = ComputeFunctionsPluginInfo.class,selector = "compute")
-public class ComputeFunctionPluginInfo implements ComputeFunctionsPluginInfo<ComputeFunctions> {
+@Service(value = ScriptingExtensionPluginInfo.class,selector = "compute")
+public class ComputeFunctionPluginInfo implements ScriptingExtensionPluginInfo<ComputeFunctions> {
     @Override
     public String getDescription() {
         return "Various small math utilities.";
