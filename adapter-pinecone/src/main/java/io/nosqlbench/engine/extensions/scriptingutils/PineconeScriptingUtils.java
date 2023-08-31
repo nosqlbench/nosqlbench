@@ -21,11 +21,11 @@ import io.pinecone.proto.ScoredVector;
 
 public class PineconeScriptingUtils {
 
-    public static String[] responseIdsToStringArray(QueryResponse response) {
+    public String[] responseIdsToStringArray(QueryResponse response) {
         return response.getMatchesList().stream().map(ScoredVector::getId).toArray(String[]::new);
     }
 
-    public static int[] responseIdsToIntArray(QueryResponse response) {
+    public int[] responseIdsToIntArray(QueryResponse response) {
         return response.getMatchesList().stream().mapToInt(r -> Integer.parseInt(r.getId())).toArray();
     }
 
