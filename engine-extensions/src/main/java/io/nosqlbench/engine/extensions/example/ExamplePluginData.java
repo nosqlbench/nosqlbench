@@ -18,12 +18,12 @@ package io.nosqlbench.engine.extensions.example;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ScriptingPluginInfo.class, selector = "adder")
-public class ExamplePluginData implements ScriptingPluginInfo<ExamplePlugin> {
+@Service(value = ScriptingExtensionPluginInfo.class, selector = "adder")
+public class ExamplePluginData implements ScriptingExtensionPluginInfo<ExamplePlugin> {
 
     @Override
     public String getDescription() {

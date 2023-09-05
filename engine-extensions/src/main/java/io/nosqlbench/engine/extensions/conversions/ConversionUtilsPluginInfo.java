@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.shutdown;
+package io.nosqlbench.engine.extensions.conversions;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
@@ -22,16 +22,22 @@ import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value= ScriptingExtensionPluginInfo.class,selector = "shutdown")
-public class ShutdownHookPluginMetadata implements ScriptingExtensionPluginInfo<ShutdownHookPlugin> {
+import java.util.List;
 
+@Service(value = ScriptingExtensionPluginInfo.class,selector = "convert")
+public class ConversionUtilsPluginInfo implements ScriptingExtensionPluginInfo<ConverterUtils> {
     @Override
     public String getDescription() {
-        return "Register shutdown hooks in the form of javascript functions.";
+        return "Utilities to convert between common basic data types";
     }
 
     @Override
-    public ShutdownHookPlugin getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
-        return new ShutdownHookPlugin(logger,metricRegistry,scriptContext);
+    public ConverterUtils getExtensionObject(Logger logger, MetricRegistry metricRegistry, LabeledScenarioContext scriptContext) {
+        return new ConverterUtils();
+    }
+
+    @Override
+    public List<Class<?>> autoImportStaticMethodClasses() {
+        return List.of(ConverterUtils.class);
     }
 }

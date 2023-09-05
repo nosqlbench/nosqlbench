@@ -21,6 +21,8 @@ import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
+
 /**
  * Any implementation of a SandboxExtension that is found in the runtime
  * can be automatically loaded into the scenario scripting sandbox.
@@ -30,7 +32,7 @@ import org.apache.logging.log4j.Logger;
  *     Each scenario gets its own instance of an object from this SandboxPlugin
  * </p>
  */
-public interface ScriptingPluginInfo<T> {
+public interface ScriptingExtensionPluginInfo<T> {
 
     /**
      * @return a brief description of this extension.
@@ -60,5 +62,9 @@ public interface ScriptingPluginInfo<T> {
      */
      default boolean isAutoLoading() {
         return true;
+    }
+
+    default List<Class<?>> autoImportStaticMethodClasses() {
+         return List.of();
     }
 }

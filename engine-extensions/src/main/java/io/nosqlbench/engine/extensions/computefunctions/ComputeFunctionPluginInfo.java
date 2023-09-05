@@ -14,23 +14,30 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.extensions.vectormath;
+package io.nosqlbench.engine.extensions.computefunctions;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ScriptingPluginInfo.class,selector = "pinecone_vectormath")
-public class PineconeVectorMathPluginInfo implements ScriptingPluginInfo<PineconeVectorMath> {
+import java.util.List;
+
+@Service(value = ScriptingExtensionPluginInfo.class,selector = "compute")
+public class ComputeFunctionPluginInfo implements ScriptingExtensionPluginInfo<ComputeFunctions> {
     @Override
     public String getDescription() {
-        return "various methods and utilities for working with vector math in a scripted environment";
+        return "Various small math utilities.";
     }
 
     @Override
-    public PineconeVectorMath getExtensionObject(Logger logger, MetricRegistry metricRegistry, LabeledScenarioContext scriptContext) {
-        return new PineconeVectorMath();
+    public ComputeFunctions getExtensionObject(Logger logger, MetricRegistry metricRegistry, LabeledScenarioContext scriptContext) {
+        return new ComputeFunctions();
+    }
+
+    @Override
+    public List<Class<?>> autoImportStaticMethodClasses() {
+        return List.of(ComputeFunctions.class);
     }
 }

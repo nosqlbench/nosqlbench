@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.shutdown;
+package io.nosqlbench.engine.extensions.globalvars;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import org.apache.logging.log4j.Logger;
 
-@Service(value= ScriptingExtensionPluginInfo.class,selector = "shutdown")
-public class ShutdownHookPluginMetadata implements ScriptingExtensionPluginInfo<ShutdownHookPlugin> {
+import java.util.concurrent.ConcurrentHashMap;
+
+@Service(value = ScriptingExtensionPluginInfo.class, selector = "globalvars")
+public class GlobalVarsScriptingExtensionPluginData implements ScriptingExtensionPluginInfo<ConcurrentHashMap<String, Object>> {
 
     @Override
     public String getDescription() {
-        return "Register shutdown hooks in the form of javascript functions.";
+        return "The global access map from shared state";
     }
 
     @Override
-    public ShutdownHookPlugin getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
-        return new ShutdownHookPlugin(logger,metricRegistry,scriptContext);
+    public ConcurrentHashMap<String, Object> getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+        final ConcurrentHashMap<String, Object> map = SharedState.gl_ObjectMap;
+        return map;
     }
+
 }

@@ -14,27 +14,22 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.extensions.vectormath;
+package io.nosqlbench.engine.extensions.conversions;
 
-import org.junit.jupiter.api.Test;
-class VectorMathTest {
-
-    private VectorMath vm = new VectorMath();
-
-    @Test
-    void computeRecallForRowListVsLongIndexList() {
-        VectorMath.computeRecall(new long[]{}, new long[]{});
+public class ConverterUtils {
+    public static int[] toIntArray(String[] strings) {
+        int[] ints = new int[strings.length];
+        for (int i = 0; i < ints.length; i++) {
+            ints[i]=Integer.parseInt(strings[i]);
+        }
+        return ints;
     }
 
-    @Test
-    void computeRecallForRowListVsIntIndexList() {
-    }
-
-    @Test
-    void computeRecallForRowListVsIntIndexArray() {
-    }
-
-    @Test
-    void computeRecallForRowListVsLongIndexArray() {
+    public static long[] toLongArray(String[] strings) {
+        long[] longs = new long[strings.length];
+        for (int i = 0; i < longs.length; i++) {
+            longs[i]=Long.parseLong(strings[i]);
+        }
+        return longs;
     }
 }

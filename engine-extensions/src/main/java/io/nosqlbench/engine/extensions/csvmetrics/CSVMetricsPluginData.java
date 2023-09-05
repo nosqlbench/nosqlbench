@@ -18,12 +18,12 @@ package io.nosqlbench.engine.extensions.csvmetrics;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.extensions.ScriptingPluginInfo;
+import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ScriptingPluginInfo.class, selector = "csvmetrics")
-public class CSVMetricsPluginData implements ScriptingPluginInfo<CSVMetricsPlugin> {
+@Service(value = ScriptingExtensionPluginInfo.class, selector = "csvmetrics")
+public class CSVMetricsPluginData implements ScriptingExtensionPluginInfo<CSVMetricsPlugin> {
 
     @Override
     public String getDescription() {

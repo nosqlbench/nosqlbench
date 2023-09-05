@@ -36,7 +36,7 @@ public class GroovyBooleanCycleFunctionTest {
             Map.of("numbername", "NumberNameToString()")
         );
         List<String> imports = List.of();
-        GroovyBooleanCycleFunction function = new GroovyBooleanCycleFunction("test1", parsedTemplate, imports, null);
+        GroovyBooleanCycleFunction function = new GroovyBooleanCycleFunction("test1", parsedTemplate, imports, List.of(), null);
         Boolean result = function.apply(2);
         assertThat(result).isTrue();
     }
@@ -49,7 +49,7 @@ public class GroovyBooleanCycleFunctionTest {
             Map.of("numbername", "NumberNameToString()")
         );
         List<String> imports = List.of();
-        GroovyCycleFunction function = new GroovyBooleanCycleFunction("test2", parsedTemplate, imports, null);
+        GroovyCycleFunction function = new GroovyBooleanCycleFunction("test2", parsedTemplate, imports, List.of(),null);
         System.out.println(function);
         assertThatThrownBy(() -> function.apply(3L)).isInstanceOf(MissingPropertyException.class);
     }

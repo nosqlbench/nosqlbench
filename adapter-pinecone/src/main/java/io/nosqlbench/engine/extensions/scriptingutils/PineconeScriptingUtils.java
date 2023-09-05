@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.extensions.scriptingmetrics;
+package io.nosqlbench.engine.extensions.scriptingutils;
 
-import com.codahale.metrics.Gauge;
+import io.pinecone.proto.QueryResponse;
+import io.pinecone.proto.ScoredVector;
 
-public class ScriptingGauge implements Gauge<Double> {
-    private double value;
-    public ScriptingGauge(String name, double initialValue) {
-        value = initialValue;
+public class PineconeScriptingUtils {
+
+    public String[] responseIdsToStringArray(QueryResponse response) {
+        return response.getMatchesList().stream().map(ScoredVector::getId).toArray(String[]::new);
     }
-    public void update(double value) {
-        this.value = value;
+
+    public int[] responseIdsToIntArray(QueryResponse response) {
+        return response.getMatchesList().stream().mapToInt(r -> Integer.parseInt(r.getId())).toArray();
     }
-    @Override
-    public Double getValue() {
-        return value;
-    }
+
 }
