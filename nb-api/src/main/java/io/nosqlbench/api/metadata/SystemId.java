@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.stream.*;
 
 public class SystemId {
 
@@ -60,6 +61,7 @@ public class SystemId {
                 if (o2.getName().startsWith("e")) return 1;
                 return 0;
             }).findFirst();
+
         if (first.isEmpty()) return Optional.empty();
 
         Optional<InetAddress> firstInetAddrForInterface = first.get().getInterfaceAddresses().stream()
@@ -70,9 +72,21 @@ public class SystemId {
                 if (i2 instanceof Inet4Address) return 1;
                 return 0;
             }).findFirst();
-        return firstInetAddrForInterface;
-    }
 
+        if (firstInetAddrForInterface.orElse(null).getHostAddress().contains(".")) return firstInetAddrForInterface;
+
+        Optional<InetAddress> firstIpAddress = ifaces.stream()
+            .flatMap(i4 -> {
+                Iterator<InetAddress> iterator = i4.getInetAddresses().asIterator();
+                return StreamSupport.stream(
+                                            Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED),
+                                            false
+                                            );
+            }).filter(j4 -> j4.getHostAddress().contains("."))
+            .findFirst();
+
+        return firstIpAddress;
+    }
 
     /**
      * Using this to bypass OSHI because it calls logger init before we want it.
