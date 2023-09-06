@@ -74,7 +74,7 @@ public class SystemId {
             }).findFirst();
 
         if ( firstInetAddrForInterface.isPresent() &&
-             firstInetAddrForInterface.orElse(null).getHostAddress().contains(".")) return firstInetAddrForInterface;
+             firstInetAddrForInterface.get().getHostAddress().contains(".")) return firstInetAddrForInterface;
 
         Optional<InetAddress> firstIpAddress = ifaces.stream()
             .flatMap(i4 -> {
