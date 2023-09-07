@@ -33,5 +33,5 @@ package io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes;
  * </p>
  */
 // TODO: optimize the runtime around the specific op type
-public interface Op extends OpResultSize {
+public interface Op {
 }
