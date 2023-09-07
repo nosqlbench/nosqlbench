@@ -34,7 +34,7 @@ public class ExceptionMeterMetrics {
 
     public ExceptionMeterMetrics(final NBLabeledElement parentLabels) {
         this.parentLabels = parentLabels;
-        this.allerrors = ActivityMetrics.meter(parentLabels, "errormeters.ALL");
+        this.allerrors = ActivityMetrics.meter(parentLabels, "errormeters_ALL");
     }
 
     public void mark(final String name) {
@@ -42,7 +42,7 @@ public class ExceptionMeterMetrics {
         if (null == c) synchronized (this.meters) {
             c = this.meters.computeIfAbsent(
                 name,
-                k -> ActivityMetrics.meter(this.parentLabels, "errormeters." + name)
+                k -> ActivityMetrics.meter(this.parentLabels, "errormeters_" + name)
             );
         }
         c.mark();
