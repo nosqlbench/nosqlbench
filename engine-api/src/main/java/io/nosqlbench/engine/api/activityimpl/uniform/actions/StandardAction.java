@@ -127,7 +127,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                     resultTimer.update(nanos, TimeUnit.NANOSECONDS);
                     if (error == null) {
                         resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
-                        dispenser.onSuccess(cycle, nanos, op.getResultSize());
+                        dispenser.onSuccess(cycle, nanos);
                         break;
                     } else {
                         ErrorDetail detail = errorHandler.handleError(error, cycle, nanos);

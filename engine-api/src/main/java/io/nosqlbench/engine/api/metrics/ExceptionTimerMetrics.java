@@ -51,7 +51,7 @@ public class ExceptionTimerMetrics {
         if (null == timer) synchronized (this.timers) {
             timer = this.timers.computeIfAbsent(
                 name,
-                k -> ActivityMetrics.timer(this.parentLabels, "errortimers." + name, this.activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
+                k -> ActivityMetrics.timer(this.parentLabels, "errortimers_" + name, this.activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
             );
         }
         timer.update(nanosDuration, TimeUnit.NANOSECONDS);

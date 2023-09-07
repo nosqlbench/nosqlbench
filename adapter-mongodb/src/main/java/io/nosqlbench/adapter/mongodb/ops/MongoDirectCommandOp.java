@@ -54,8 +54,4 @@ public class MongoDirectCommandOp implements CycleOp<Document> {
         return document;
     }
 
-    @Override
-    public long getResultSize() {
-        return resultSize;
-    }
 }

@@ -18,6 +18,6 @@ package io.nosqlbench.adapters.api.activityimpl;
 
 public interface OpResultTracker {
     void onStart(long cycleValue);
-    void onSuccess(long cycleValue, long nanoTime, long resultsize);
+    void onSuccess(long cycleValue, long nanoTime);
     void onError(long cycleValue, long resultNanos, Throwable t);
 }

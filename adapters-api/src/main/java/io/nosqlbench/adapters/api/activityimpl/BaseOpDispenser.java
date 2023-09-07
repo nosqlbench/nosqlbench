@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapters.api.activityimpl;
 
-import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import groovy.lang.Binding;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
@@ -59,7 +58,6 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
     protected final DriverAdapter<T, S> adapter;
     private final NBLabels labels;
     private boolean instrument;
-    private Histogram resultSizeHistogram;
     private Timer successTimer;
     private Timer errorTimer;
     private final String[] timerStarts;
@@ -181,7 +179,6 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
             final int hdrDigits = pop.getStaticConfigOr("hdr_digits", 4).intValue();
             successTimer = ActivityMetrics.timer(pop, "success", hdrDigits);
             errorTimer = ActivityMetrics.timer(pop, "error", hdrDigits);
-            resultSizeHistogram = ActivityMetrics.histogram(pop, "resultset_size", hdrDigits);
         }
     }
 
@@ -191,10 +188,9 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
     }
 
     @Override
-    public void onSuccess(final long cycleValue, final long nanoTime, final long resultSize) {
+    public void onSuccess(final long cycleValue, final long nanoTime) {
         if (this.instrument) {
             this.successTimer.update(nanoTime, TimeUnit.NANOSECONDS);
-            if (-1 < resultSize) this.resultSizeHistogram.update(resultSize);
         }
         if (null != timerStops) ThreadLocalNamedTimers.TL_INSTANCE.get().stop(this.timerStops);
     }

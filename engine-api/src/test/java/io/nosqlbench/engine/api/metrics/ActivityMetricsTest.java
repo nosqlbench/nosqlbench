@@ -34,20 +34,20 @@ public class ActivityMetricsTest {
 
         int extant = ActivityMetrics.getMetricRegistry().getMetrics().size();
 
-        ActivityMetrics.mountSubRegistry("aprefixhere.",r1);
+        ActivityMetrics.mountSubRegistry("aprefixhere_",r1);
         Map<String, Metric> metrics = ActivityMetrics.getMetricRegistry().getMetrics();
-        assertThat(metrics).containsKey("aprefixhere.counter1");
+        assertThat(metrics).containsKey("aprefixhere_counter1");
         assertThat(metrics).hasSize(extant+1);
 
         r1.counter("counter2");
         metrics = ActivityMetrics.getMetricRegistry().getMetrics();
         assertThat(metrics).hasSize(extant+2);
-        assertThat(metrics).containsKey("aprefixhere.counter2");
+        assertThat(metrics).containsKey("aprefixhere_counter2");
 
         r1.remove("counter1");
         metrics = ActivityMetrics.getMetricRegistry().getMetrics();
         assertThat(metrics).hasSize(extant+1);
-        assertThat(metrics).containsKey("aprefixhere.counter2");
+        assertThat(metrics).containsKey("aprefixhere_counter2");
 
         r1.remove("counter2");
         metrics = ActivityMetrics.getMetricRegistry().getMetrics();
