@@ -18,6 +18,24 @@ package io.nosqlbench.engine.extensions.computefunctions;
 
 import java.util.Arrays;
 
+/**
+ * <P>A collection of compute functions related to vector search relevancy.
+ * These are based on arrays of indices of vectors, where the expected data is from known KNN test data,
+ * and the actual data is from a vector search query.</P>
+ *
+ * <P>Variations of these functions have a limit parameter, which allows for derivation of relevancy
+ * measurements for a smaller query without having to run a separate test for each K value.
+ * If you are using test vectors from a computed KNN test data with for K=100, you can compute
+ * metrics "@K" for any size up to and including K=100. This simply uses a partial view of the result
+ * to do exactly what would have been done for a test where you actually query for that K limit.
+ * <STRONG>This assumes that the result rank is stable irrespective of the limit AND the results
+ * are passed to these functions as ranked in results.</STRONG></P>
+ *
+ * <P>The array indices passed to these functions should not be sorted before-hand as a general rule.</P>
+ * Yet, no provision is made for duplicate entries. If you have duplicate indices in either array,
+ * these methods will yield incorrect results as they rely on the <EM>two-pointer</EM> method and do not
+ * elide duplicates internally.
+ */
 public class ComputeFunctions {
 
     /**
@@ -32,6 +50,34 @@ public class ComputeFunctions {
         long[] intersection = Intersections.find(referenceIndexes, sampleIndexes);
         return (double) intersection.length / (double) referenceIndexes.length;
     }
+    public static double recall(long[] referenceIndexes, long[] sampleIndexes, int limit) {
+        if (sampleIndexes.length<limit) {
+            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + sampleIndexes.length + ", limit=" + limit);
+        }
+        sampleIndexes=Arrays.copyOfRange(sampleIndexes,0,limit);
+        Arrays.sort(referenceIndexes);
+        Arrays.sort(sampleIndexes);
+        long[] intersection = Intersections.find(referenceIndexes, sampleIndexes);
+        return (double) intersection.length / (double) referenceIndexes.length;
+    }
+
+    public static double precision(long[] referenceIndexes, long[] sampleIndexes) {
+        Arrays.sort(referenceIndexes);
+        Arrays.sort(sampleIndexes);
+        long[] intersection = Intersections.find(referenceIndexes, sampleIndexes);
+        return (double) intersection.length / (double) sampleIndexes.length;
+    }
+
+    public static double precision(long[] referenceIndexes, long[] sampleIndexes, int limit) {
+        if (sampleIndexes.length<limit) {
+            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + sampleIndexes.length + ", limit=" + limit);
+        }
+        sampleIndexes=Arrays.copyOfRange(sampleIndexes,0,limit);
+        Arrays.sort(referenceIndexes);
+        Arrays.sort(sampleIndexes);
+        long[] intersection = Intersections.find(referenceIndexes, sampleIndexes);
+        return (double) intersection.length / (double) sampleIndexes.length;
+    }
 
     /**
      * Compute the recall as the proportion of matching indices divided by the expected indices
@@ -42,8 +88,35 @@ public class ComputeFunctions {
     public static double recall(int[] referenceIndexes, int[] sampleIndexes) {
         Arrays.sort(referenceIndexes);
         Arrays.sort(sampleIndexes);
-        int intersection = Intersections.count(referenceIndexes, sampleIndexes);
+        int intersection = Intersections.count(referenceIndexes, sampleIndexes, referenceIndexes.length);
         return (double) intersection / (double) referenceIndexes.length;
+    }
+    public static double recall(int[] referenceIndexes, int[] sampleIndexes, int limit) {
+        if (sampleIndexes.length<limit) {
+            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + sampleIndexes.length + ", limit=" + limit);
+        }
+        sampleIndexes=Arrays.copyOfRange(sampleIndexes,0,limit);
+        Arrays.sort(referenceIndexes);
+        Arrays.sort(sampleIndexes);
+        int intersection = Intersections.count(referenceIndexes, sampleIndexes, referenceIndexes.length);
+        return (double) intersection / (double) referenceIndexes.length;
+    }
+
+    public static double precision(int[] referenceIndexes, int[] sampleIndexes) {
+        Arrays.sort(referenceIndexes);
+        Arrays.sort(sampleIndexes);
+        int intersection = Intersections.count(referenceIndexes, sampleIndexes);
+        return (double) intersection / (double) sampleIndexes.length;
+    }
+    public static double precision(int[] referenceIndexes, int[] sampleIndexes, int limit) {
+        if (sampleIndexes.length<limit) {
+            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + sampleIndexes.length + ", limit=" + limit);
+        }
+        sampleIndexes=Arrays.copyOfRange(sampleIndexes,0,limit);
+        Arrays.sort(referenceIndexes);
+        Arrays.sort(sampleIndexes);
+        int intersection = Intersections.count(referenceIndexes, sampleIndexes);
+        return (double) intersection / (double) sampleIndexes.length;
     }
 
     /**
@@ -51,6 +124,9 @@ public class ComputeFunctions {
      */
     public static long[] intersection(long[] a, long[] b) {
         return Intersections.find(a,b);
+    }
+    public static long[] intersection(long[] a, long[] b, int limit) {
+        return Intersections.find(a, b, limit);
     }
 
     /**
@@ -60,12 +136,24 @@ public class ComputeFunctions {
         return Intersections.find(reference, sample);
     }
 
+    public static int[] intersection(int[] reference, int[] sample, int limit) {
+        return Intersections.find(reference,sample,limit);
+    }
+
     /**
      * Compute the size of the intersection of two int arrays
      */
     public static int intersectionSize(int[] reference, int[] sample) {
         return Intersections.count(reference, sample);
     }
-
+    public static int intersectionSize(int[] reference, int[] sample, int limit) {
+        return Intersections.count(reference, sample, limit);
+    }
+    public static int intersectionSize(long[] reference, long[] sample) {
+        return Intersections.count(reference, sample);
+    }
+    public static int intersectionSize(long[] reference, long[] sample, int limit) {
+        return Intersections.count(reference, sample, limit);
+    }
 
 }

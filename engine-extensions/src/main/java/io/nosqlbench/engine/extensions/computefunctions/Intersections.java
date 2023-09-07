@@ -21,9 +21,12 @@ import java.util.Arrays;
 public class Intersections {
 
     public static int count(int[] reference, int[] sample) {
+        return count(reference,sample,reference.length);
+    }
+    public static int count(int[] reference, int[] sample, int limit) {
         int a_index = 0, b_index = 0, matches = 0;
         int a_element, b_element;
-        while (a_index < reference.length && b_index < sample.length) {
+        while (a_index < reference.length && a_index < limit && b_index < sample.length && b_index < limit) {
             a_element = reference[a_index];
             b_element = sample[b_index];
             if (a_element == b_element) {
@@ -39,10 +42,13 @@ public class Intersections {
         return matches;
     }
 
-    public static long count(long[] reference, long[] sample) {
+    public static int count(long[] reference, long[] sample) {
+        return count(reference, sample, reference.length);
+    }
+    public static int count(long[] reference, long[] sample, int limit) {
         int a_index = 0, b_index = 0, matches = 0;
         long a_element, b_element;
-        while (a_index < reference.length && b_index < sample.length) {
+        while (a_index < reference.length && a_index < limit && b_index < sample.length && b_index < limit) {
             a_element = reference[a_index];
             b_element = sample[b_index];
             if (a_element == b_element) {
@@ -59,10 +65,14 @@ public class Intersections {
     }
 
     public static int[] find(int[] reference, int[] sample) {
+        return find(reference,sample,reference.length);
+    }
+
+    public static int[] find(int[] reference, int[] sample, int limit) {
         int[] result = new int[reference.length];
         int a_index = 0, b_index = 0, acc_index = -1;
         int a_element, b_element;
-        while (a_index < reference.length && b_index < sample.length) {
+        while (a_index < reference.length && a_index < limit && b_index < sample.length && b_index < limit) {
             a_element = reference[a_index];
             b_element = sample[b_index];
             if (a_element == b_element) {
@@ -78,11 +88,15 @@ public class Intersections {
         }
         return Arrays.copyOfRange(result,0,acc_index+1);
     }
+
     public static long[] find(long[] reference, long[] sample) {
+        return find(reference, sample, reference.length);
+    }
+    public static long[] find(long[] reference, long[] sample, int limit) {
         long[] result = new long[reference.length];
         int a_index = 0, b_index = 0, acc_index = -1;
         long a_element, b_element;
-        while (a_index < reference.length && b_index < sample.length) {
+        while (a_index < reference.length && a_index < limit && b_index < sample.length && b_index < limit) {
             a_element = reference[a_index];
             b_element = sample[b_index];
             if (a_element == b_element) {
