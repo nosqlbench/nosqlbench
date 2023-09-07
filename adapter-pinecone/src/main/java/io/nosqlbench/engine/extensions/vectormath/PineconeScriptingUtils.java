@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.extensions.scriptingutils;
+package io.nosqlbench.engine.extensions.vectormath;
 
+import com.google.protobuf.Descriptors;
 import io.pinecone.proto.QueryResponse;
 import io.pinecone.proto.ScoredVector;
 
@@ -27,6 +28,25 @@ public class PineconeScriptingUtils {
 
     public int[] responseIdsToIntArray(QueryResponse response) {
         return response.getMatchesList().stream().mapToInt(r -> Integer.parseInt(r.getId())).toArray();
+    }
+
+    public long[] responseIdsToLongArray(QueryResponse response) {
+        return response.getMatchesList().stream().mapToLong(r -> Long.parseLong(r.getId())).toArray();
+    }
+
+    public String[] responseFieldToStringArray(String fieldname, QueryResponse response) {
+        return response.getMatchesList().stream().map(r -> r.getMetadata().getFieldsMap()
+            .get(fieldname).getStringValue()).toArray(String[]::new);
+    }
+
+    public int[] responseFieldToIntArray(String fieldname, QueryResponse response) {
+        return response.getMatchesList().stream().mapToInt(r -> Integer.parseInt(r.getMetadata()
+            .getFieldsMap().get(fieldname).getStringValue())).toArray();
+    }
+
+    public long[] responseFieldToLongArray(String fieldname, QueryResponse response) {
+        return response.getMatchesList().stream().mapToLong(r -> Long.parseLong(r.getMetadata()
+            .getFieldsMap().get(fieldname).getStringValue())).toArray();
     }
 
 }
