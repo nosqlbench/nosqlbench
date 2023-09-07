@@ -189,4 +189,33 @@ public class ComputeFunctions {
         return 2.0d * ((recallAtK * precisionAtK) / (recallAtK + precisionAtK));
     }
 
+    /**
+     * Reciprocal Rank - The multiplicative inverse of the first rank which is relevant.
+     */
+    public static double RR(long[] reference, long[] sample, int limit) {
+        int firstRank = Intersections.firstMatchingIndex(reference, sample, limit);
+        if (firstRank >= 0) {
+            return 1.0d / (firstRank+1);
+        } else {
+            return 0.0;
+        }
+    }
+
+    public static double RR(long[] reference, long[] sample) {
+        return RR(reference, sample, reference.length);
+    }
+
+    public static double RR(int[] reference, int[] sample, int limit) {
+        int firstRank = Intersections.firstMatchingIndex(reference, sample, limit);
+        if (firstRank >= 0) {
+            return 1.0d / (firstRank+1);
+        } else {
+            return 0.0;
+        }
+    }
+
+    public static double RR(int[] reference, int[] sample) {
+        return RR(reference, sample, reference.length);
+    }
+
 }

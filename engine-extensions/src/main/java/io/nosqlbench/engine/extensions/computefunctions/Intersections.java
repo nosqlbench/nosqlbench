@@ -20,6 +20,32 @@ import java.util.Arrays;
 
 public class Intersections {
 
+    /**
+     * Return a non-negative index of the first value in the sample array which is present in the reference array,
+     * OR, return a negative number. This returns array index which start at 0, not rank, which is starts at 1.
+     */
+    public static int firstMatchingIndex(long[] reference, long[] sample, int limit) {
+        Arrays.sort(reference);
+        int maxIndex = Math.min(sample.length, limit);
+        int foundAt=-1;
+        for (int index = 0; index < maxIndex; index++) {
+            foundAt = Arrays.binarySearch(reference, sample[index]);
+            if (foundAt>=0) break;
+        }
+        return foundAt;
+    }
+
+    public static int firstMatchingIndex(int[] reference, int[] sample, int limit) {
+        Arrays.sort(reference);
+        int maxIndex = Math.min(sample.length, limit);
+        int foundAt=-1;
+        for (int index = 0; index < maxIndex; index++) {
+            foundAt = Arrays.binarySearch(reference, sample[index]);
+            if (foundAt>=0) break;
+        }
+        return foundAt;
+    }
+
     public static int count(int[] reference, int[] sample) {
         return count(reference,sample,reference.length);
     }

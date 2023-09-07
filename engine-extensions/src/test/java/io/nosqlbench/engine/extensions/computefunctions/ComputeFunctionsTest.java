@@ -78,4 +78,15 @@ class ComputeFunctionsTest {
         }
 
     }
+
+    @Test
+    public void testReciprocalRank() {
+        assertThat(ComputeFunctions.RR(intsBy3_369,highInts56789))
+            .as("relevant results in rank 2 should yield RR=0.5")
+            .isCloseTo(0.5d,offset);
+
+        assertThat(ComputeFunctions.RR(highInts56789,lowInts01234))
+            .as("no relevant results should yield RR=0.0")
+            .isCloseTo(0.0d,offset);
+    }
 }
