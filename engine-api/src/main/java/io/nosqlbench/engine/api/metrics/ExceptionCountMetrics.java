@@ -34,7 +34,7 @@ public class ExceptionCountMetrics {
 
     public ExceptionCountMetrics(final NBLabeledElement parentLabels) {
         this.parentLabels = parentLabels;
-        this.allerrors =ActivityMetrics.counter(parentLabels, "errorcounts.ALL");
+        this.allerrors =ActivityMetrics.counter(parentLabels, "errors_ALL");
     }
 
     public void count(final String name) {
@@ -42,7 +42,7 @@ public class ExceptionCountMetrics {
         if (null == c) synchronized (this.counters) {
             c = this.counters.computeIfAbsent(
                 name,
-                k -> ActivityMetrics.counter(this.parentLabels, "errorcounts." + name)
+                k -> ActivityMetrics.counter(this.parentLabels, "errors_" + name)
             );
         }
         c.inc();

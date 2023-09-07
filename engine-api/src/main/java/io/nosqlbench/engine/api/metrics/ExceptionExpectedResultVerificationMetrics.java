@@ -31,8 +31,8 @@ public class ExceptionExpectedResultVerificationMetrics {
 
     public ExceptionExpectedResultVerificationMetrics(final NBLabeledElement parentLabels) {
         this.parentLabels = parentLabels;
-        verificationRetries = ActivityMetrics.counter(parentLabels, "verificationcounts.RETRIES");
-        verificationErrors = ActivityMetrics.counter(parentLabels, "verificationcounts.ERRORS");
+        verificationRetries = ActivityMetrics.counter(parentLabels, "verificationcounts_RETRIES");
+        verificationErrors = ActivityMetrics.counter(parentLabels, "verificationcounts_ERRORS");
     }
 
     public void countVerificationRetries() {
