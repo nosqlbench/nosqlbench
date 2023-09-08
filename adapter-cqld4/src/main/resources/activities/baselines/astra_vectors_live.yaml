@@ -25,7 +25,7 @@ scenarios:
   #  await_index: run tags='block:await_index' # This would need to exit when a condition is met
   #  stop_search_and_index: stop search_and_index
     # only possible if we have a triggering event to indicated
-    live_search: run tags='block:search'  labels='target:astra'
+    # live_search: run tags='block:search' labels='target:astra' threads=1 cycles=TEMPLATE(search_cycles,10000)
     search_and_rewrite: run tags='block:search_and_rewrite' labels='target:astra'
     search_and_invalidate: run tags='block:search_and_invalidate' labels='target:astra'
 
@@ -73,29 +73,29 @@ blocks:
   search_and_index:
     ops:
       select_ann_limit:
-        stmt: |
+        prepared: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
           ORDER BY value ANN OF {test_floatlist} LIMIT TEMPLATE(select_limit,100);
         tags:
           optype: select
         verifier-init: |
           relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op,"group","relevancy");
-          for (int k in new int[]{1,2,5,10,25,50,100}) {
-            relevancy.addFunction(recall("recall",k));
-            relevancy.addFunction(precision("precision",k);
-            relevancy.addFunction(reciprocal_rank("RR",k));
-            relevancy.addFunction(average_precision("AP",k));
-            relevancy.addFunction(F1("F1",k));
+          for (int k in List.of(1,2,3,5,10,25,50,75,100)) {
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
           }
         verifier: |
-          # driver-specific function
-          actual_indices=cqlRowListToIntArray("id",result))
-          # driver-agnostic function
+          // driver-specific function
+          actual_indices=cql_utils.cqlStringColumnToIntArray("key",result);
+          // driver-agnostic function
           relevancy.accept({relevant_indices},actual_indices);
-          # because we are "verifying" although this needs to be reorganized
+          // because we are "verifying" although this needs to be reorganized
           return true;
       insert_rewrite:
-        stmt: |
+        prepared: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
           (key, value) VALUES ({id},{train_floatlist});
         tags:

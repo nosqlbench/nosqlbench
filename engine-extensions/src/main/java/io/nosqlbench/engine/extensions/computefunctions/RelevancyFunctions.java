@@ -22,19 +22,64 @@ import io.nosqlbench.engine.extensions.computefunctions.relavency.*;
 import java.util.Map;
 
 public class RelevancyFunctions {
-    public static Recall recall(String name, int k, Map<String,String> labels) {
+    public static Recall recall(String name, int k, Map<String, String> labels) {
         return new Recall(name, k, labels);
     }
-    public static Precision precision(String name, int k, Map<String,String> labels) {
+
+    public static Recall recall(String name, int k, Object... labels) {
+        return new Recall(name, k, labels);
+    }
+
+    public static Recall recall(String name, int k) {
+        return new Recall(name, k);
+    }
+
+    public static Precision precision(String name, int k, Map<String, String> labels) {
         return new Precision(name, k, labels);
     }
-    public static F1 F1(String name, int k, Map<String,String> labels) {
+
+    public static Precision precision(String name, int k, Object... labels) {
+        return new Precision(name, k, labels);
+    }
+
+    public static Precision precision(String name, int k) {
+        return new Precision(name, k);
+    }
+
+    public static F1 F1(String name, int k, Map<String, String> labels) {
         return new F1(name, k, labels);
     }
-    public static AveragePrecision average_precision(String name, int k, Map<String,String> labels) {
+
+    public static F1 F1(String name, int k, Object... labels) {
+        return new F1(name, k, labels);
+    }
+
+    public static F1 F1(String name, int k) {
+        return new F1(name, k);
+    }
+
+    public static AveragePrecision average_precision(String name, int k, Map<String, String> labels) {
         return new AveragePrecision(name, k, labels);
     }
-    public static ReciprocalRank rank_reciprocal(String name, int k, Map<String,String> labels) {
-        return new ReciprocalRank(name, k, NBLabels.forKV("k",k).andTypes(labels));
+
+    public static AveragePrecision average_precision(String name, int k, Object... labels) {
+        return new AveragePrecision(name, k, labels);
     }
+
+    public static AveragePrecision average_precision(String name, int k) {
+        return new AveragePrecision(name, k);
+    }
+
+    public static ReciprocalRank reciprocal_rank(String name, int k, Map<String, String> labels) {
+        return new ReciprocalRank(name, k, labels);
+    }
+
+    public static ReciprocalRank reciprocal_rank(String name, int k, Object... labels) {
+        return new ReciprocalRank(name, k, labels);
+    }
+
+    public static ReciprocalRank rank_reciprocal(String name, int k) {
+        return new ReciprocalRank(name, k, NBLabels.forKV("k", k));
+    }
+
 }

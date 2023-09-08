@@ -29,7 +29,7 @@ public class ReciprocalRank extends BaseRelevancyFunction {
         this.k = k;
     }
     public ReciprocalRank(String name, int k, Object... labels) {
-        super(name, NBLabels.forKV("k",k).andTypes(labels));
+        super(name, NBLabels.forKV("k",k).and(NBLabels.forKV(labels)));
         this.k = k;
     }
 
@@ -37,4 +37,10 @@ public class ReciprocalRank extends BaseRelevancyFunction {
     public double apply(int[] relevant, int[] actual) {
         return ComputeFunctions.reciprocal_rank(relevant,actual,k);
     }
+
+    @Override
+    public String getUniqueName() {
+        return getName()+"_"+k;
+    }
+
 }

@@ -19,6 +19,7 @@ package io.nosqlbench.engine.extensions.vectormath;
 import com.datastax.oss.driver.api.core.cql.Row;
 
 import java.util.List;
+import java.util.Objects;
 
 public class CqlUtils {
 
@@ -32,6 +33,10 @@ public class CqlUtils {
 
     public static int[] cqlRowListToIntArray(String fieldName, List<Row> rows) {
         return rows.stream().mapToInt(r -> r.getInt(fieldName)).toArray();
+    }
+
+    public static int[] cqlStringColumnToIntArray(String fieldName, List<Row> rows) {
+        return rows.stream().mapToInt(r -> Integer.parseInt(Objects.requireNonNull(r.getString(fieldName)))).toArray();
     }
 
 

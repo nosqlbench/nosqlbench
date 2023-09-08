@@ -20,5 +20,11 @@ import io.nosqlbench.api.config.NBLabeledElement;
 
 public interface RelevancyFunction extends NBLabeledElement {
     double apply(int[] relevant, int[] actual);
-    String getName();
+
+    /**
+     * Return a name which identifies this function in terms of its parameters. This is a temporary
+     * work-around until the graphite uniqueness semantics are removed and label set uniqueness works.
+     * @return A string which can be used to identify if the metric exists yet.
+     */
+    String getUniqueName();
 }

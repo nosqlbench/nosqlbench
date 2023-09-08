@@ -24,8 +24,8 @@ import java.util.Map;
 public class Recall extends BaseRelevancyFunction {
     private final int k;
 
-    public Recall(String name, int k, Object...labeldata) {
-        super(name, NBLabels.forKV("k",k).andTypes(labeldata));
+    public Recall(String name, int k, Object...labels) {
+        super(name, NBLabels.forKV("k",k).and(NBLabels.forKV(labels)));
         this.k = k;
     }
     public Recall(String name, int k, Map<String,String> labels) {
@@ -36,5 +36,10 @@ public class Recall extends BaseRelevancyFunction {
     @Override
     public double apply(int[] relevant, int[] actual) {
         return ComputeFunctions.recall(relevant,actual,k);
+    }
+
+    @Override
+    public String getUniqueName() {
+        return getName()+"_"+k;
     }
 }

@@ -59,6 +59,9 @@ public class ScriptingMetrics {
     public RelevancyMeasures newRelevancyMeasures(NBLabeledElement parent, Map<String,String> labels) {
         return new RelevancyMeasures(parent,labels);
     }
+    public RelevancyMeasures newRelevancyMeasures(NBLabeledElement parent, Object... labels) {
+        return new RelevancyMeasures(parent,labels);
+    }
 
 
 

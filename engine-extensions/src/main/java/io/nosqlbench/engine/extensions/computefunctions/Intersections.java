@@ -30,9 +30,9 @@ public class Intersections {
         int foundAt = -1;
         for (int index = 0; index < maxIndex; index++) {
             foundAt = Arrays.binarySearch(reference, sample[index]);
-            if (foundAt >= 0) break;
+            if (foundAt >= 0) return index;
         }
-        return foundAt;
+        return -1;
     }
 
     public static int firstMatchingIndex(int[] reference, int[] sample, int limit) {
@@ -41,9 +41,9 @@ public class Intersections {
         int foundAt = -1;
         for (int index = 0; index < maxIndex; index++) {
             foundAt = Arrays.binarySearch(reference, sample[index]);
-            if (foundAt >= 0) break;
+            if (foundAt >= 0) return index;
         }
-        return foundAt;
+        return -1;
     }
 
     public static int count(int[] reference, int[] sample) {

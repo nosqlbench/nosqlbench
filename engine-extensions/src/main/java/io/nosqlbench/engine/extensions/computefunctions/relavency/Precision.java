@@ -29,7 +29,7 @@ public class Precision extends BaseRelevancyFunction {
         this.k = k;
     }
     public Precision(String name, int k, Object... labels) {
-        super(name, NBLabels.forKV("k",k).andTypes(labels));
+        super(name, NBLabels.forKV("k",k).and(NBLabels.forKV(labels)));
         this.k = k;
     }
 
@@ -37,4 +37,10 @@ public class Precision extends BaseRelevancyFunction {
     public double apply(int[] relevant, int[] actual) {
         return ComputeFunctions.precision(relevant, actual, k);
     }
+
+    @Override
+    public String getUniqueName() {
+        return getName()+"_"+k;
+    }
+
 }

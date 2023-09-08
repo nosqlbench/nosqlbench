@@ -29,7 +29,7 @@ public class F1 extends BaseRelevancyFunction {
         this.k = k;
     }
     public F1(String name, int k, Object... labels) {
-        super(name, NBLabels.forKV("k",k).andTypes(labels));
+        super(name, NBLabels.forKV("k",k).and(NBLabels.forKV(labels)));
         this.k = k;
     }
 
@@ -37,5 +37,11 @@ public class F1 extends BaseRelevancyFunction {
     public double apply(int[] relevant, int[] actual) {
         return ComputeFunctions.F1(relevant,actual,k);
     }
+
+    @Override
+    public String getUniqueName() {
+        return getName()+"_"+k;
+    }
+
 
 }

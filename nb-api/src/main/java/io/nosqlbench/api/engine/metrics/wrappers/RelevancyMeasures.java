@@ -40,6 +40,11 @@ public class RelevancyMeasures implements NBLabeledElement {
         this.parent = parent;
         this.labels = labels;
     }
+
+    public RelevancyMeasures(NBLabeledElement parent, Object... labels) {
+        this.parent = parent;
+        this.labels = NBLabels.forKV(labels);
+    }
     public RelevancyMeasures(NBLabeledElement parent, Map<String,String> labels) {
         this(parent,NBLabels.forMap(labels));
     }
@@ -50,9 +55,9 @@ public class RelevancyMeasures implements NBLabeledElement {
     }
 
     public RelevancyMeasures addFunction(RelevancyFunction... f) {
-        for (RelevancyFunction function : this.functions) {
+        for (RelevancyFunction function : f) {
             this.functions.add(function);
-            DoubleSummaryGauge gauge = ActivityMetrics.summaryGauge(function, function.getName());
+            DoubleSummaryGauge gauge = ActivityMetrics.summaryGauge(function, function.getUniqueName());
             this.gauges.add(gauge);
         }
         return this;

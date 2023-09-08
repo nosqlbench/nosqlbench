@@ -19,19 +19,13 @@ package io.nosqlbench.engine.extensions.computefunctions.relavency;
 import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.wrappers.RelevancyFunction;
 
-import java.util.Map;
-
 public abstract class BaseRelevancyFunction implements RelevancyFunction {
     private final String name;
     private final NBLabels labels;
-    public BaseRelevancyFunction(String name, Object... labeldata) {
-        this.name = name;
-        this.labels = NBLabels.forKV(labeldata);
-    }
 
-    public BaseRelevancyFunction(String name, Map<String,String> labels) {
+    public BaseRelevancyFunction(String name, NBLabels labels) {
         this.name = name;
-        this.labels = NBLabels.forMap(labels);
+        this.labels = labels;
     }
 
     @Override
