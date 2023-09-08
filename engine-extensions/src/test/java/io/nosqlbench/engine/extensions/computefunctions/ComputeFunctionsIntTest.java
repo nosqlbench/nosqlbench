@@ -104,16 +104,6 @@ class ComputeFunctionsIntTest {
         int result = Intersections.count(oddInts37195, ints12390);
         assertThat(result).isEqualTo(2L);
     }
-    @Test
-    public void testMasking() {
-        assertThat(Intersections.mask(ints12390,highInts56789))
-            .as("the last actual is relevant and should have a 1 in the mask")
-            .isEqualTo(new int[]{0,0,0,0,1});
-
-        assertThat(Intersections.mask(allInts,allInts))
-            .as("the last actual is relevant and should have a 1 in the mask")
-            .isEqualTo(new int[]{1,1,1,1,1,1,1,1,1,1});
-    }
 
     @Test
     public void testAP() {

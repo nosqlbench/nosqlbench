@@ -98,7 +98,7 @@ public class ComputeFunctions {
     public static double recall(int[] relevant, int[] actual) {
         Arrays.sort(relevant);
         Arrays.sort(actual);
-        int intersection = Intersections.count(relevant, actual, relevant.length);
+        int intersection = Intersections.count(relevant, actual);
         return (double) intersection / (double) relevant.length;
     }
 
@@ -109,7 +109,7 @@ public class ComputeFunctions {
         actual = Arrays.copyOfRange(actual, 0, k);
         Arrays.sort(relevant);
         Arrays.sort(actual);
-        int intersection = Intersections.count(relevant, actual, relevant.length);
+        int intersection = Intersections.count(relevant, actual);
         return (double) intersection / (double) relevant.length;
     }
 
