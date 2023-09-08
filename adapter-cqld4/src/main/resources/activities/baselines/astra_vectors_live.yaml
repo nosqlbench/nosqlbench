@@ -1,0 +1,128 @@
+description: |
+  This is a template for live vector search testing.
+  The goals of this test are to:
+  1. establish basic recall metrics on a knn computed dataset
+  2.
+
+  schema: Install the schema required to run the test
+  rampup: Measure how long it takes to load a set of embeddings
+  search_and_index: Measure how the system responds to queries while it
+   is indexing recently ingested data.
+  #? await_index: Pause and wait for the system to complete compactions or index processing
+  search: Run vector search with a set of default (or overridden) parameters
+  search_and_rewrite: Run the same search operations as above, but while rewriting the data
+  search_and_invalidate: Run the same search operations as above, but while overwriting the data
+   with different content using the same vector id.
+  In all of these phases, it is important to instance the metrics with distinct names.
+  Also, aggregates of recall should include total aggregate as well as a moving average.
+
+scenarios:
+  default:
+    schema: run tags='block:schema' labels='target:astra' threads===1
+    rampup: run tags='block:rampup' labels='target:astra' threads=100 cycles=TEMPLATE(trainsize)
+    search_and_index: run tags='block:search_and_index,optype=select' labels='target:astra' cycles=TEMPLATE(testsize)
+    # one activity or two? data leap-frog? or concurrency separate for both?
+  #  await_index: run tags='block:await_index' # This would need to exit when a condition is met
+  #  stop_search_and_index: stop search_and_index
+    # only possible if we have a triggering event to indicated
+    live_search: run tags='block:search'  labels='target:astra'
+    search_and_rewrite: run tags='block:search_and_rewrite' labels='target:astra'
+    search_and_invalidate: run tags='block:search_and_invalidate' labels='target:astra'
+
+params:
+  driver: cqld4
+
+bindings:
+  id: ToString()
+  # This
+  test_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/test"); ToCqlVector();
+  relevant_indices: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
+  distance_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/distance")
+  train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train"); ToCqlVector();
+  synthetic_vectors: HashedFloatVectors(TEMPLATE(dimensions));
+
+blocks:
+  schema:
+    params:
+      cl: TEMPLATE(cl,LOCAL_QUORUM)
+      prepared: false
+    ops:
+#      create-keyspace: |
+#        CREATE KEYSPACE IF NOT EXISTS TEMPLATE(keyspace,baselines)
+#        WITH replication = {'class': 'NetworkTopologyStrategy', 'TEMPLATE(region)': '3'};
+      create-table: |
+        CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (
+          key TEXT,
+          value vector<float,TEMPLATE(dimensions)>,
+          PRIMARY KEY (key)
+        );
+      create-sai-index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (value) USING 'StorageAttachedIndex'
+        WITH OPTIONS = {'similarity_function' : 'TEMPLATE(similarity_function,cosine)'};
+#       WITH OPTIONS = {'maximum_node_connections' : TEMPLATE(M,16), 'construction_beam_width' : TEMPLATE(ef,100), 'similarity_function' : 'TEMPLATE(similarity_function,dot_product)'};
+  rampup:
+    params:
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+      prepared: true
+    ops:
+      insert: |
+        INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
+        (key, value) VALUES ({id},{train_floatlist});
+#  await_index:
+#    ops:
+  search_and_index:
+    ops:
+      select_ann_limit:
+        stmt: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
+          ORDER BY value ANN OF {test_floatlist} LIMIT TEMPLATE(select_limit,100);
+        tags:
+          optype: select
+        verifier-init: |
+          relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op,"group","relevancy");
+          for (int k in new int[]{1,2,5,10,25,50,100}) {
+            relevancy.addFunction(recall("recall",k));
+            relevancy.addFunction(precision("precision",k);
+            relevancy.addFunction(reciprocal_rank("RR",k));
+            relevancy.addFunction(average_precision("AP",k));
+            relevancy.addFunction(F1("F1",k));
+          }
+        verifier: |
+          # driver-specific function
+          actual_indices=cqlRowListToIntArray("id",result))
+          # driver-agnostic function
+          relevancy.accept({relevant_indices},actual_indices);
+          # because we are "verifying" although this needs to be reorganized
+          return true;
+      insert_rewrite:
+        stmt: |
+          INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
+          (key, value) VALUES ({id},{train_floatlist});
+        tags:
+          optype: insert
+
+  #        verifier-init: |
+#        verifier: |
+  search_and_rewrite:
+    ops:
+      select_ann_limit:
+        stmt: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) ORDER BY value ANN OF {test_vector} LIMIT TEMPLATE(select_limit,100);
+        verifier-init: |
+          scriptingmetrics.newSummaryGauge(_parsed_op,"recall")
+#        verifier: |
+      upsert_same:
+        stmt: |
+          INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
+          (key, value) VALUES ({rw_key},{train_vector});
+  search_and_invalidate:
+    ops:
+      select_ann_limit:
+        stmt: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) ORDER BY value ANN OF {test_vector} LIMIT TEMPLATE(select_limit,100);
+#        verifier-init: |
+#        verifier: |
+      upsert_random: |
+        INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
+        (key, value) VALUES ({rw_key},{train_vector});
+

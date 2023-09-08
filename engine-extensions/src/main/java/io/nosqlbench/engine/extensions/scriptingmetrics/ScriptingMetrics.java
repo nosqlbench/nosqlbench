@@ -21,7 +21,10 @@ import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
+import io.nosqlbench.api.engine.metrics.wrappers.RelevancyMeasures;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Map;
 
 public class ScriptingMetrics {
     private final Logger logger;
@@ -51,6 +54,10 @@ public class ScriptingMetrics {
         final DoubleSummaryGauge summaryGauge = ActivityMetrics.summaryGauge(context,name);
         this.logger.info(() -> "registered summmary gauge:" + name);
         return summaryGauge;
+    }
+
+    public RelevancyMeasures newRelevancyMeasures(NBLabeledElement parent, Map<String,String> labels) {
+        return new RelevancyMeasures(parent,labels);
     }
 
 

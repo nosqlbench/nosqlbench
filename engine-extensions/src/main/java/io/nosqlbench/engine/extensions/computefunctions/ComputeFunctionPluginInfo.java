@@ -38,6 +38,6 @@ public class ComputeFunctionPluginInfo implements ScriptingExtensionPluginInfo<C
 
     @Override
     public List<Class<?>> autoImportStaticMethodClasses() {
-        return List.of(ComputeFunctions.class);
+        return List.of(ComputeFunctions.class, RelevancyFunctions.class);
     }
 }

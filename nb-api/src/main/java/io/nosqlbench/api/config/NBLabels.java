@@ -94,7 +94,7 @@ public interface NBLabels {
      *     label data
      * @return a new NBLabels instance
      */
-    static NBLabels forMap(final Map<String, String> labels) {
+    static NBLabels forMap(final Map<String,String> labels) {
         return new MapLabels(labels);
     }
 
@@ -105,11 +105,11 @@ public interface NBLabels {
      *     Keys and values such as "key1", "value1", "key2", "value2", ...
      * @return a new NBLabels instance
      */
-    static NBLabels forKV(final String... keysAndValues) {
+    static NBLabels forKV(final Object... keysAndValues) {
         if (0 != (keysAndValues.length % 2))
             throw new RuntimeException("keys and values must be provided in pairs, not as: " + Arrays.toString(keysAndValues));
-        final LinkedHashMap<String, String> labels = new LinkedHashMap<>(keysAndValues.length >> 1);
-        for (int i = 0; i < keysAndValues.length; i += 2) labels.put(keysAndValues[i], keysAndValues[i + 1]);
+        final LinkedHashMap<String,String> labels = new LinkedHashMap<>(keysAndValues.length >> 1);
+        for (int i = 0; i < keysAndValues.length; i += 2) labels.put(keysAndValues[i].toString(), keysAndValues[i + 1].toString());
         return new MapLabels(labels);
     }
 
@@ -142,7 +142,7 @@ public interface NBLabels {
      *     Keys and values in "key1", "value1", "key2", "value2", ... form
      * @return A new NBLabels instance
      */
-    NBLabels andTypes(String... typeLabelsAndValues);
+    NBLabels andTypes(Object... typeLabelsAndValues);
 
     NBLabels and(NBLabels labels);
     /**
@@ -151,7 +151,7 @@ public interface NBLabels {
      * @return A new NBLabels instance
      */
     NBLabels andTypes(Map<String, String> typeLabelsAndValues);
-    NBLabels andInstances(String... instanceLabelsAndValues);
+    NBLabels andInstances(Object... instanceLabelsAndValues);
 
     NBLabels andInstances(Map<String,String> instanceLabelsAndValues);
 

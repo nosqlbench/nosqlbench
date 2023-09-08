@@ -131,30 +131,6 @@ public class ComputeFunctions {
         return (double) intersection / (double) actual.length;
     }
 
-    /**
-     * Compute the intersection of two long arrays
-     */
-    public static long[] intersection(long[] a, long[] b) {
-        return Intersections.find(a, b);
-    }
-
-    /**
-     * Compute the intersection of two int arrays
-     */
-    public static int[] intersection(int[] a, int[] b) {
-        return Intersections.find(a, b);
-    }
-
-    /**
-     * Compute the size of the intersection of two int arrays
-     */
-    public static int intersectionSize(int[] a, int[] b) {
-        return Intersections.count(a, b);
-    }
-
-    public static int intersectionSize(long[] a, long[] b) {
-        return Intersections.count(a, b);
-    }
 
     public static double F1(int[] relevant, int[] actual) {
         return F1(relevant, actual, relevant.length);
@@ -229,6 +205,9 @@ public class ComputeFunctions {
         return stats.getAverage();
     }
 
+    public static double average_precision(long[] relevant, long[] actual) {
+      return average_precision(relevant, actual, actual.length);
+    }
     public static double average_precision(long[] relevant, long[] actual, int k) {
         int maxK = Math.min(k,actual.length);
         HashSet<Long> refset = new HashSet<>(relevant.length);

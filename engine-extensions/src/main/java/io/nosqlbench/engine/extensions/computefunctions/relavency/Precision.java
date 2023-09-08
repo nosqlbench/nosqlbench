@@ -14,33 +14,27 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics.instruments;
+package io.nosqlbench.engine.extensions.computefunctions.relavency;
 
 import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.engine.extensions.computefunctions.ComputeFunctions;
 
-import java.util.function.DoubleConsumer;
+import java.util.Map;
 
-public class CompoundGaugeFunction implements NBMetricGauge<Double>, DoubleConsumer {
+public class Precision extends BaseRelevancyFunction {
+    private final int k;
 
-    private final NBLabels labels;
-    private final String name;
-
-    public CompoundGaugeFunction(NBLabels labels, String name) {
-        this.labels = labels;
-        this.name = name;
+    public Precision(String name, int k, Map<String,String> labels) {
+        super(name,NBLabels.forKV("k",labels).andTypes(labels));
+        this.k = k;
     }
-    @Override
-    public Double getValue() {
-        return null;
-    }
-
-    @Override
-    public NBLabels getLabels() {
-        return null;
+    public Precision(String name, int k, Object... labels) {
+        super(name, NBLabels.forKV("k",k).andTypes(labels));
+        this.k = k;
     }
 
     @Override
-    public void accept(double value) {
-
+    public double apply(int[] relevant, int[] actual) {
+        return ComputeFunctions.precision(relevant, actual, k);
     }
 }

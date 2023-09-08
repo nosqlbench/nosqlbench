@@ -124,8 +124,8 @@ public class MapLabels implements NBLabels {
     }
 
     @Override
-    public MapLabels andTypes(final String... labelsAndValues) {
-        final Map<String, String> childLabels = getStringStringMap(labelsAndValues);
+    public MapLabels andTypes(final Object... labelsAndValues) {
+        final Map<String,String> childLabels = getStringStringMap(labelsAndValues);
         return new MapLabels(labels,childLabels);
     }
 
@@ -136,8 +136,8 @@ public class MapLabels implements NBLabels {
 
 
     @Override
-    public MapLabels andInstances(final String... labelsAndValues) {
-        final Map<String, String> childLabels = getStringStringMap(labelsAndValues);
+    public MapLabels andInstances(final Object... labelsAndValues) {
+        final Map<String,String> childLabels = getStringStringMap(labelsAndValues);
         String[] childInstanceFields = getNamesArray(labelsAndValues);
         return new MapLabels(this.labels,childLabels,concat(this.instanceFields,getNamesArray(labelsAndValues)));
     }
@@ -228,19 +228,19 @@ public class MapLabels implements NBLabels {
         return c;
     }
 
-    private static String[] getNamesArray(final String... labelsAndValues) {
+    private static String[] getNamesArray(final Object... labelsAndValues) {
         String[] keys = new String[labelsAndValues.length>>1];
         for (int i = 0; i < keys.length; i++) {
-            keys[i]=labelsAndValues[i<<1];
+            keys[i]=labelsAndValues[i<<1].toString();
         }
         return keys;
     }
     @NotNull
-    private static Map<String, String> getStringStringMap(String[] labelsAndValues) {
+    private static Map<String, String> getStringStringMap(Object[] labelsAndValues) {
         if (0 != (labelsAndValues.length % 2))
             throw new RuntimeException("Must provide even number of keys and values: " + Arrays.toString(labelsAndValues));
-        final Map<String,String> childLabels = new LinkedHashMap<>();
-        for (int i = 0; i < labelsAndValues.length; i+=2) childLabels.put(labelsAndValues[i], labelsAndValues[i + 1]);
+        final Map<String, String> childLabels = new LinkedHashMap<>();
+        for (int i = 0; i < labelsAndValues.length; i+=2) childLabels.put(labelsAndValues[i].toString(), labelsAndValues[i + 1].toString());
         return childLabels;
     }
 
