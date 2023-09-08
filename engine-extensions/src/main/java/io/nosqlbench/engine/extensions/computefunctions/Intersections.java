@@ -27,10 +27,10 @@ public class Intersections {
     public static int firstMatchingIndex(long[] reference, long[] sample, int limit) {
         Arrays.sort(reference);
         int maxIndex = Math.min(sample.length, limit);
-        int foundAt=-1;
+        int foundAt = -1;
         for (int index = 0; index < maxIndex; index++) {
             foundAt = Arrays.binarySearch(reference, sample[index]);
-            if (foundAt>=0) break;
+            if (foundAt >= 0) break;
         }
         return foundAt;
     }
@@ -38,17 +38,18 @@ public class Intersections {
     public static int firstMatchingIndex(int[] reference, int[] sample, int limit) {
         Arrays.sort(reference);
         int maxIndex = Math.min(sample.length, limit);
-        int foundAt=-1;
+        int foundAt = -1;
         for (int index = 0; index < maxIndex; index++) {
             foundAt = Arrays.binarySearch(reference, sample[index]);
-            if (foundAt>=0) break;
+            if (foundAt >= 0) break;
         }
         return foundAt;
     }
 
     public static int count(int[] reference, int[] sample) {
-        return count(reference,sample,reference.length);
+        return count(reference, sample, reference.length);
     }
+
     public static int count(int[] reference, int[] sample, int limit) {
         int a_index = 0, b_index = 0, matches = 0;
         int a_element, b_element;
@@ -71,6 +72,7 @@ public class Intersections {
     public static int count(long[] reference, long[] sample) {
         return count(reference, sample, reference.length);
     }
+
     public static int count(long[] reference, long[] sample, int limit) {
         int a_index = 0, b_index = 0, matches = 0;
         long a_element, b_element;
@@ -91,8 +93,62 @@ public class Intersections {
     }
 
     public static int[] find(int[] reference, int[] sample) {
-        return find(reference,sample,reference.length);
+        return find(reference, sample, reference.length);
     }
+
+    public static int[] mask(int[] reference, int[] sample) {
+        return mask(reference,sample,sample.length);
+    }
+    public static int[] mask(int[] reference, int[] sample, int limit) {
+        int[] mask = new int[sample.length];
+        int relevant_idx = 0, actual_idx = 0, acc_index = -1;
+        int relevant_element, actual_element;
+
+        while (relevant_idx < reference.length && relevant_idx < limit && actual_idx < sample.length && actual_idx < limit) {
+            relevant_element = reference[relevant_idx];
+            actual_element = sample[actual_idx];
+            if (relevant_element == actual_element) {
+                mask[actual_idx] = 1;
+                relevant_idx++;
+                actual_idx++;
+            } else if (actual_element < relevant_element) {
+                actual_idx++;
+            } else {
+                relevant_idx++;
+            }
+        }
+        return mask;
+    }
+
+    /**
+     * Compare the actual indices to the relevant indices, and return an array
+     * containing the ordered set of indices of the actual array which appear
+     * in the relevant array. A perfect result looks like counting from zero.
+     * @param relevant The array of relevant indices
+     * @param actual The array of actual indices
+     * @param limit limit the indices to the first [limit] items
+     * @return An array of relevant indices in the actual array.
+     */
+    public static int[] findIndirect(int[] relevant, int[] actual, int limit) {
+        int[] result = new int[actual.length];
+        int a_index = 0, b_index = 0, acc_index = -1;
+        int a_element, b_element;
+        while (a_index < relevant.length && a_index < limit && b_index < actual.length && b_index < limit) {
+            a_element = relevant[a_index];
+            b_element = actual[b_index];
+            if (a_element == b_element) {
+                result[++acc_index] = b_index;
+                a_index++;
+                b_index++;
+            } else if (b_element < a_element) {
+                b_index++;
+            } else {
+                a_index++;
+            }
+        }
+        return Arrays.copyOfRange(result, 0, acc_index + 1);
+    }
+
 
     public static int[] find(int[] reference, int[] sample, int limit) {
         int[] result = new int[limit];
@@ -102,7 +158,6 @@ public class Intersections {
             a_element = reference[a_index];
             b_element = sample[b_index];
             if (a_element == b_element) {
-                result = resize(result);
                 result[++acc_index] = a_element;
                 a_index++;
                 b_index++;
@@ -112,12 +167,13 @@ public class Intersections {
                 a_index++;
             }
         }
-        return Arrays.copyOfRange(result,0,acc_index+1);
+        return Arrays.copyOfRange(result, 0, acc_index + 1);
     }
 
     public static long[] find(long[] reference, long[] sample) {
         return find(reference, sample, reference.length);
     }
+
     public static long[] find(long[] reference, long[] sample, int limit) {
         long[] result = new long[limit];
         int a_index = 0, b_index = 0, acc_index = -1;
@@ -126,7 +182,6 @@ public class Intersections {
             a_element = reference[a_index];
             b_element = sample[b_index];
             if (a_element == b_element) {
-                result = resize(result);
                 result[++acc_index] = a_element;
                 a_index++;
                 b_index++;
@@ -136,22 +191,22 @@ public class Intersections {
                 a_index++;
             }
         }
-        return Arrays.copyOfRange(result,0,acc_index+1);
+        return Arrays.copyOfRange(result, 0, acc_index + 1);
     }
-
-    private static int[] resize(int[] arr) {
-        int len = arr.length;
-        int[] copy = new int[len + 1];
-        System.arraycopy(arr, 0, copy, 0, len);
-        return copy;
-    }
-
-    private static long[] resize(long[] arr) {
-        int len = arr.length;
-        long[] copy = new long[len + 1];
-        System.arraycopy(arr, 0, copy, 0, len);
-        return copy;
-    }
+//
+//    private static int[] resize(int[] arr) {
+//        int len = arr.length;
+//        int[] copy = new int[len + 1];
+//        System.arraycopy(arr, 0, copy, 0, len);
+//        return copy;
+//    }
+//
+//    private static long[] resize(long[] arr) {
+//        int len = arr.length;
+//        long[] copy = new long[len + 1];
+//        System.arraycopy(arr, 0, copy, 0, len);
+//        return copy;
+//    }
 
 
 }

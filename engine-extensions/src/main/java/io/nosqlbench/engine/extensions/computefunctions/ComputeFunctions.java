@@ -17,6 +17,8 @@
 package io.nosqlbench.engine.extensions.computefunctions;
 
 import java.util.Arrays;
+import java.util.DoubleSummaryStatistics;
+import java.util.HashSet;
 
 /**
  * <P>A collection of compute functions related to vector search relevancy.
@@ -29,7 +31,8 @@ import java.util.Arrays;
  * metrics "@K" for any size up to and including K=100. This simply uses a partial view of the result
  * to do exactly what would have been done for a test where you actually query for that K limit.
  * <STRONG>This assumes that the result rank is stable irrespective of the limit AND the results
- * are passed to these functions as ranked in results.</STRONG></P>
+ * are passed to these functions as ranked in results.</STRONG></P> Some of the methods apply K to the
+ * expected (relevant) indices, others to the actual (response) indices, depending on what is appropriate.
  *
  * <P>The array indices passed to these functions should not be sorted before-hand as a general rule.</P>
  * Yet, no provision is made for duplicate entries. If you have duplicate indices in either array,
@@ -192,7 +195,7 @@ public class ComputeFunctions {
     /**
      * Reciprocal Rank - The multiplicative inverse of the first rank which is relevant.
      */
-    public static double RR(long[] reference, long[] sample, int limit) {
+    public static double reciprocal_rank(long[] reference, long[] sample, int limit) {
         int firstRank = Intersections.firstMatchingIndex(reference, sample, limit);
         if (firstRank >= 0) {
             return 1.0d / (firstRank+1);
@@ -201,11 +204,11 @@ public class ComputeFunctions {
         }
     }
 
-    public static double RR(long[] reference, long[] sample) {
-        return RR(reference, sample, reference.length);
+    public static double reciprocal_rank(long[] reference, long[] sample) {
+        return reciprocal_rank(reference, sample, reference.length);
     }
 
-    public static double RR(int[] reference, int[] sample, int limit) {
+    public static double reciprocal_rank(int[] reference, int[] sample, int limit) {
         int firstRank = Intersections.firstMatchingIndex(reference, sample, limit);
         if (firstRank >= 0) {
             return 1.0d / (firstRank+1);
@@ -214,8 +217,47 @@ public class ComputeFunctions {
         }
     }
 
-    public static double RR(int[] reference, int[] sample) {
-        return RR(reference, sample, reference.length);
+    public static double reciprocal_rank(int[] reference, int[] sample) {
+        return reciprocal_rank(reference, sample, reference.length);
     }
 
+    public static double average_precision(int[] reference, int[] sample) {
+        return average_precision(reference,sample,reference.length);
+    }
+
+    public static double average_precision(int[] reference, int[] sample, int k) {
+        int maxK = Math.min(k,sample.length);
+        HashSet<Integer> refset = new HashSet<>(reference.length);
+        for (Integer i : reference) {
+            refset.add(i);
+        }
+        int relevant=0;
+        DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
+        for (int i = 0; i < maxK; i++) {
+            if (refset.contains(sample[i])){
+                relevant++;
+                double precisionAtIdx = (double) relevant / (i+1);
+                stats.accept(precisionAtIdx);
+            }
+        }
+        return stats.getAverage();
+    }
+
+    public static double average_precision(long[] reference, long[] sample, int k) {
+        int maxK = Math.min(k,sample.length);
+        HashSet<Long> refset = new HashSet<>(reference.length);
+        for (Long i : reference) {
+            refset.add(i);
+        }
+        int relevant=0;
+        DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
+        for (int i = 0; i < maxK; i++) {
+            if (refset.contains(sample[i])){
+                relevant++;
+                double precisionAtIdx = (double) relevant / (i+1);
+                stats.accept(precisionAtIdx);
+            }
+        }
+        return stats.getAverage();
+    }
 }

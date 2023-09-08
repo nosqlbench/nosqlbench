@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ComputeFunctionsTest {
+class ComputeFunctionsIntTest {
 
     private final static Offset<Double> offset=Offset.offset(0.001d);
     private final static int[] allInts =new int[]{0,1,2,3,4,5,6,7,8,9};
@@ -33,7 +33,10 @@ class ComputeFunctionsTest {
     private final static int[] highInts56789 = new int[]{5,6,7,8,9};
 
     private final static int[] intsBy3_369 = new int[]{3,6,9};
-    private final static int[] intsBy3_693 = new int[]{3,6,9};
+    private final static int[] intsBy3_693 = new int[]{6,9,3};
+    private final static int[] midInts45678 = new int[]{4,5,6,7,8};
+    private final static int[] ints12390 = new int[]{1,2,3,9,0};
+
     @Test
     void testRecallIntArrays() {
         assertThat(ComputeFunctions.recall(evenInts86204,oddInts37195))
@@ -81,12 +84,49 @@ class ComputeFunctionsTest {
 
     @Test
     public void testReciprocalRank() {
-        assertThat(ComputeFunctions.RR(intsBy3_369,highInts56789))
+        assertThat(ComputeFunctions.reciprocal_rank(intsBy3_369,highInts56789))
             .as("relevant results in rank 2 should yield RR=0.5")
             .isCloseTo(0.5d,offset);
 
-        assertThat(ComputeFunctions.RR(highInts56789,lowInts01234))
+        assertThat(ComputeFunctions.reciprocal_rank(highInts56789,lowInts01234))
             .as("no relevant results should yield RR=0.0")
             .isCloseTo(0.0d,offset);
     }
+
+    @Test
+    public void testIntegerIntersection() {
+        int[] result = Intersections.find(lowInts01234,midInts45678);
+        assertThat(result).isEqualTo(new int[]{4});
+    }
+
+    @Test
+    public void testCountIntIntersection() {
+        int result = Intersections.count(oddInts37195, ints12390);
+        assertThat(result).isEqualTo(2L);
+    }
+    @Test
+    public void testMasking() {
+        assertThat(Intersections.mask(ints12390,highInts56789))
+            .as("the last actual is relevant and should have a 1 in the mask")
+            .isEqualTo(new int[]{0,0,0,0,1});
+
+        assertThat(Intersections.mask(allInts,allInts))
+            .as("the last actual is relevant and should have a 1 in the mask")
+            .isEqualTo(new int[]{1,1,1,1,1,1,1,1,1,1});
+    }
+
+    @Test
+    public void testAP() {
+        double ap1 = ComputeFunctions.average_precision(new int[]{1, 2, 3, 4, 5, 6}, new int[]{3, 11, 5, 12, 1});
+        assertThat(ap1)
+            .as("")
+            .isCloseTo(0.755d,offset);
+
+        double ap2 = ComputeFunctions.average_precision(ints12390, intsBy3_369);
+        assertThat(ap2)
+            .as("")
+            .isCloseTo(0.833,offset);
+    }
+
+
 }
