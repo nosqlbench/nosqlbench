@@ -127,20 +127,5 @@ public class Intersections {
         }
         return Arrays.copyOfRange(result, 0, acc_index + 1);
     }
-//
-//    private static int[] resize(int[] arr) {
-//        int len = arr.length;
-//        int[] copy = new int[len + 1];
-//        System.arraycopy(arr, 0, copy, 0, len);
-//        return copy;
-//    }
-//
-//    private static long[] resize(long[] arr) {
-//        int len = arr.length;
-//        long[] copy = new long[len + 1];
-//        System.arraycopy(arr, 0, copy, 0, len);
-//        return copy;
-//    }
-
 
 }
