@@ -88,30 +88,6 @@ public class Intersections {
         return matches;
     }
 
-    public static int[] mask(int[] reference, int[] sample) {
-        return mask(reference,sample,sample.length);
-    }
-    public static int[] mask(int[] reference, int[] sample, int limit) {
-        int[] mask = new int[sample.length];
-        int relevant_idx = 0, actual_idx = 0, acc_index = -1;
-        int relevant_element, actual_element;
-
-        while (relevant_idx < reference.length && relevant_idx < limit && actual_idx < sample.length && actual_idx < limit) {
-            relevant_element = reference[relevant_idx];
-            actual_element = sample[actual_idx];
-            if (relevant_element == actual_element) {
-                mask[actual_idx] = 1;
-                relevant_idx++;
-                actual_idx++;
-            } else if (actual_element < relevant_element) {
-                actual_idx++;
-            } else {
-                relevant_idx++;
-            }
-        }
-        return mask;
-    }
-
     public static int[] find(int[] reference, int[] sample) {
         int[] result = new int[sample.length];
         int a_index = 0, b_index = 0, acc_index = -1;
