@@ -20,7 +20,7 @@ scenarios:
   default:
     schema: run tags='block:schema' labels='target:astra' threads===1
     rampup: run tags='block:rampup' labels='target:astra' threads=100 cycles=TEMPLATE(trainsize)
-    search_and_index: run tags='block:search_and_index,optype=select' labels='target:astra' cycles=TEMPLATE(testsize)
+    search_and_index: run tags='block:search_and_index,optype=select' labels='target:astra' cycles=TEMPLATE(testsize) threads=2000 testsize=1000000 errors=count
     # one activity or two? data leap-frog? or concurrency separate for both?
   #  await_index: run tags='block:await_index' # This would need to exit when a condition is met
   #  stop_search_and_index: stop search_and_index

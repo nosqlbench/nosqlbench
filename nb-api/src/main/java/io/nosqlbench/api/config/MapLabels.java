@@ -245,4 +245,8 @@ public class MapLabels implements NBLabels {
     }
 
 
+    @Override
+    public NBLabels getLabels() {
+        return this;
+    }
 }
