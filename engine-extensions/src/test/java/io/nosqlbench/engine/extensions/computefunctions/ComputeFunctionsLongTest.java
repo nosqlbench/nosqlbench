@@ -92,12 +92,6 @@ class ComputeFunctionsLongTest {
             .isCloseTo(0.0d,offset);
     }
 
-//    @Test
-//    public void testLongIntersection() {
-//        int[] result = Intersections.find(lowInts01234,midInts45678);
-//        assertThat(result).isEqualTo(new int[]{4,5});
-//    }
-
     @Test
     public void testCountLongIntersection() {
         long result = Intersections.count(longs_37195, longs_12390);
