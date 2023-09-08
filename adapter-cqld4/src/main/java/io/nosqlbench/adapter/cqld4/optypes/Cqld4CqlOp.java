@@ -36,9 +36,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 
 // TODO: add statement filtering
@@ -121,9 +119,15 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
 
         try {
             return rowsStage.toCompletableFuture().get(300, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            if (e instanceof RuntimeException re) throw re;
-            throw new RuntimeException(e);
+        } catch (ExecutionException exe) {
+            Throwable ee = exe.getCause();
+            if (ee instanceof RuntimeException re) {
+                throw re;
+            } else throw new NBExecutionException(exe);
+        } catch (InterruptedException ie) {
+            throw new NBInterruptedException(ie);
+        } catch (TimeoutException e) {
+            throw new NBTimeoutException(e);
         } finally {
             processors.flush();
             metrics.recordFetchedPages(fetchedPages);
