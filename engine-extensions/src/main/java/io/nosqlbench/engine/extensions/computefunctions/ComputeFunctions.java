@@ -44,91 +44,91 @@ public class ComputeFunctions {
     /**
      * Compute the recall as the proportion of matching indices divided by the expected indices
      *
-     * @param referenceIndexes
+     * @param relevant
      *     long array of indices
-     * @param sampleIndexes
+     * @param actual
      *     long array of indices
      * @return a fractional measure of matching vs expected indices
      */
-    public static double recall(long[] referenceIndexes, long[] sampleIndexes) {
-        Arrays.sort(referenceIndexes);
-        Arrays.sort(sampleIndexes);
-        long[] intersection = Intersections.find(referenceIndexes, sampleIndexes);
-        return (double) intersection.length / (double) referenceIndexes.length;
+    public static double recall(long[] relevant, long[] actual) {
+        Arrays.sort(relevant);
+        Arrays.sort(actual);
+        long[] intersection = Intersections.find(relevant, actual);
+        return (double) intersection.length / (double) relevant.length;
     }
 
-    public static double recall(long[] referenceIndexes, long[] sampleIndexes, int limit) {
-        if (sampleIndexes.length < limit) {
-            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + sampleIndexes.length + ", limit=" + limit);
+    public static double recall(long[] relevant, long[] actual, int k) {
+        if (actual.length < k) {
+            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + actual.length + ", limit=" + k);
         }
-        sampleIndexes = Arrays.copyOfRange(sampleIndexes, 0, limit);
-        Arrays.sort(referenceIndexes);
-        Arrays.sort(sampleIndexes);
-        long[] intersection = Intersections.find(referenceIndexes, sampleIndexes);
-        return (double) intersection.length / (double) referenceIndexes.length;
+        actual = Arrays.copyOfRange(actual, 0, k);
+        Arrays.sort(relevant);
+        Arrays.sort(actual);
+        long[] intersection = Intersections.find(relevant, actual);
+        return (double) intersection.length / (double) relevant.length;
     }
 
-    public static double precision(long[] referenceIndexes, long[] sampleIndexes) {
-        Arrays.sort(referenceIndexes);
-        Arrays.sort(sampleIndexes);
-        long[] intersection = Intersections.find(referenceIndexes, sampleIndexes);
-        return (double) intersection.length / (double) sampleIndexes.length;
+    public static double precision(long[] relevant, long[] actual) {
+        Arrays.sort(relevant);
+        Arrays.sort(actual);
+        long[] intersection = Intersections.find(relevant, actual);
+        return (double) intersection.length / (double) actual.length;
     }
 
-    public static double precision(long[] referenceIndexes, long[] sampleIndexes, int limit) {
-        if (sampleIndexes.length < limit) {
-            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + sampleIndexes.length + ", limit=" + limit);
+    public static double precision(long[] relevant, long[] actual, int k) {
+        if (actual.length < k) {
+            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + actual.length + ", limit=" + k);
         }
-        sampleIndexes = Arrays.copyOfRange(sampleIndexes, 0, limit);
-        Arrays.sort(referenceIndexes);
-        Arrays.sort(sampleIndexes);
-        long[] intersection = Intersections.find(referenceIndexes, sampleIndexes);
-        return (double) intersection.length / (double) sampleIndexes.length;
+        actual = Arrays.copyOfRange(actual, 0, k);
+        Arrays.sort(relevant);
+        Arrays.sort(actual);
+        long[] intersection = Intersections.find(relevant, actual);
+        return (double) intersection.length / (double) actual.length;
     }
 
     /**
      * Compute the recall as the proportion of matching indices divided by the expected indices
      *
-     * @param referenceIndexes
+     * @param relevant
      *     int array of indices
-     * @param sampleIndexes
+     * @param actual
      *     int array of indices
      * @return a fractional measure of matching vs expected indices
      */
-    public static double recall(int[] referenceIndexes, int[] sampleIndexes) {
-        Arrays.sort(referenceIndexes);
-        Arrays.sort(sampleIndexes);
-        int intersection = Intersections.count(referenceIndexes, sampleIndexes, referenceIndexes.length);
-        return (double) intersection / (double) referenceIndexes.length;
+    public static double recall(int[] relevant, int[] actual) {
+        Arrays.sort(relevant);
+        Arrays.sort(actual);
+        int intersection = Intersections.count(relevant, actual, relevant.length);
+        return (double) intersection / (double) relevant.length;
     }
 
-    public static double recall(int[] referenceIndexes, int[] sampleIndexes, int limit) {
-        if (sampleIndexes.length < limit) {
-            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + sampleIndexes.length + ", limit=" + limit);
+    public static double recall(int[] relevant, int[] actual, int k) {
+        if (actual.length < k) {
+            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + actual.length + ", limit=" + k);
         }
-        sampleIndexes = Arrays.copyOfRange(sampleIndexes, 0, limit);
-        Arrays.sort(referenceIndexes);
-        Arrays.sort(sampleIndexes);
-        int intersection = Intersections.count(referenceIndexes, sampleIndexes, referenceIndexes.length);
-        return (double) intersection / (double) referenceIndexes.length;
+        actual = Arrays.copyOfRange(actual, 0, k);
+        Arrays.sort(relevant);
+        Arrays.sort(actual);
+        int intersection = Intersections.count(relevant, actual, relevant.length);
+        return (double) intersection / (double) relevant.length;
     }
 
-    public static double precision(int[] referenceIndexes, int[] sampleIndexes) {
-        Arrays.sort(referenceIndexes);
-        Arrays.sort(sampleIndexes);
-        int intersection = Intersections.count(referenceIndexes, sampleIndexes);
-        return (double) intersection / (double) sampleIndexes.length;
+    public static double precision(int[] relevant, int[] actual) {
+        Arrays.sort(relevant);
+        Arrays.sort(actual);
+        int intersection = Intersections.count(relevant, actual);
+        return (double) intersection / (double) actual.length;
     }
 
-    public static double precision(int[] referenceIndexes, int[] sampleIndexes, int limit) {
-        if (sampleIndexes.length < limit) {
-            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + sampleIndexes.length + ", limit=" + limit);
+    public static double precision(int[] relevant, int[] actual, int k) {
+        if (actual.length < k) {
+            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + actual.length + ", limit=" + k);
         }
-        sampleIndexes = Arrays.copyOfRange(sampleIndexes, 0, limit);
-        Arrays.sort(referenceIndexes);
-        Arrays.sort(sampleIndexes);
-        int intersection = Intersections.count(referenceIndexes, sampleIndexes);
-        return (double) intersection / (double) sampleIndexes.length;
+        actual = Arrays.copyOfRange(actual, 0, k);
+        Arrays.sort(relevant);
+        Arrays.sort(actual);
+        int intersection = Intersections.count(relevant, actual);
+        return (double) intersection / (double) actual.length;
     }
 
     /**
@@ -138,65 +138,49 @@ public class ComputeFunctions {
         return Intersections.find(a, b);
     }
 
-    public static long[] intersection(long[] a, long[] b, int limit) {
-        return Intersections.find(a, b, limit);
-    }
-
     /**
      * Compute the intersection of two int arrays
      */
-    public static int[] intersection(int[] reference, int[] sample) {
-        return Intersections.find(reference, sample);
-    }
-
-    public static int[] intersection(int[] reference, int[] sample, int limit) {
-        return Intersections.find(reference, sample, limit);
+    public static int[] intersection(int[] a, int[] b) {
+        return Intersections.find(a, b);
     }
 
     /**
      * Compute the size of the intersection of two int arrays
      */
-    public static int intersectionSize(int[] reference, int[] sample) {
-        return Intersections.count(reference, sample);
+    public static int intersectionSize(int[] a, int[] b) {
+        return Intersections.count(a, b);
     }
 
-    public static int intersectionSize(int[] reference, int[] sample, int limit) {
-        return Intersections.count(reference, sample, limit);
+    public static int intersectionSize(long[] a, long[] b) {
+        return Intersections.count(a, b);
     }
 
-    public static int intersectionSize(long[] reference, long[] sample) {
-        return Intersections.count(reference, sample);
+    public static double F1(int[] relevant, int[] actual) {
+        return F1(relevant, actual, relevant.length);
     }
 
-    public static int intersectionSize(long[] reference, long[] sample, int limit) {
-        return Intersections.count(reference, sample, limit);
-    }
-
-    public static double F1(int[] reference, int[] sample) {
-        return F1(reference, sample, reference.length);
-    }
-
-    public static double F1(int[] reference, int[] sample, int limit) {
-        double recallAtK = recall(reference, sample, limit);
-        double precisionAtK = precision(reference, sample, limit);
+    public static double F1(int[] relevant, int[] actual, int k) {
+        double recallAtK = recall(relevant, actual, k);
+        double precisionAtK = precision(relevant, actual, k);
         return 2.0d * ((recallAtK * precisionAtK) / (recallAtK + precisionAtK));
     }
 
-    public static double F1(long[] reference, long[] sample) {
-        return F1(reference, sample, reference.length);
+    public static double F1(long[] relevant, long[] actual) {
+        return F1(relevant, actual, relevant.length);
     }
 
-    public static double F1(long[] reference, long[] sample, int limit) {
-        double recallAtK = recall(reference, sample, limit);
-        double precisionAtK = precision(reference, sample, limit);
+    public static double F1(long[] relevant, long[] actual, int k) {
+        double recallAtK = recall(relevant, actual, k);
+        double precisionAtK = precision(relevant, actual, k);
         return 2.0d * ((recallAtK * precisionAtK) / (recallAtK + precisionAtK));
     }
 
     /**
      * Reciprocal Rank - The multiplicative inverse of the first rank which is relevant.
      */
-    public static double reciprocal_rank(long[] reference, long[] sample, int limit) {
-        int firstRank = Intersections.firstMatchingIndex(reference, sample, limit);
+    public static double reciprocal_rank(long[] relevant, long[] actual, int k) {
+        int firstRank = Intersections.firstMatchingIndex(relevant, actual, k);
         if (firstRank >= 0) {
             return 1.0d / (firstRank+1);
         } else {
@@ -204,60 +188,63 @@ public class ComputeFunctions {
         }
     }
 
-    public static double reciprocal_rank(long[] reference, long[] sample) {
-        return reciprocal_rank(reference, sample, reference.length);
+    public static double reciprocal_rank(long[] relevant, long[] actual) {
+        return reciprocal_rank(relevant, actual, relevant.length);
     }
 
-    public static double reciprocal_rank(int[] reference, int[] sample, int limit) {
-        int firstRank = Intersections.firstMatchingIndex(reference, sample, limit);
-        if (firstRank >= 0) {
-            return 1.0d / (firstRank+1);
-        } else {
-            return 0.0;
+    /**
+     * RR as in M(RR)
+     */
+    public static double reciprocal_rank(int[] relevant, int[] actual, int k) {
+        int firstRank = Intersections.firstMatchingIndex(relevant, actual, k);
+        if (firstRank<0) {
+            return 0;
         }
+        return 1.0d / (firstRank+1);
     }
 
-    public static double reciprocal_rank(int[] reference, int[] sample) {
-        return reciprocal_rank(reference, sample, reference.length);
+    public static double reciprocal_rank(int[] relevant, int[] actual) {
+        return reciprocal_rank(relevant, actual, relevant.length);
     }
 
-    public static double average_precision(int[] reference, int[] sample) {
-        return average_precision(reference,sample,reference.length);
+    public static double average_precision(int[] relevant, int[] actual) {
+        return average_precision(relevant,actual,relevant.length);
     }
 
-    public static double average_precision(int[] reference, int[] sample, int k) {
-        int maxK = Math.min(k,sample.length);
-        HashSet<Integer> refset = new HashSet<>(reference.length);
-        for (Integer i : reference) {
-            refset.add(i);
+    public static double average_precision(int[] relevant, int[] actual, int k) {
+        int maxK = Math.min(k,actual.length);
+        HashSet<Integer> relevantSet = new HashSet<>(relevant.length);
+        for (Integer i : relevant) {
+            relevantSet.add(i);
         }
-        int relevant=0;
+        int relevantCount=0;
         DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
         for (int i = 0; i < maxK; i++) {
-            if (refset.contains(sample[i])){
-                relevant++;
-                double precisionAtIdx = (double) relevant / (i+1);
+            if (relevantSet.contains(actual[i])){
+                relevantCount++;
+                double precisionAtIdx = (double) relevantCount / (i+1);
                 stats.accept(precisionAtIdx);
             }
         }
         return stats.getAverage();
     }
 
-    public static double average_precision(long[] reference, long[] sample, int k) {
-        int maxK = Math.min(k,sample.length);
-        HashSet<Long> refset = new HashSet<>(reference.length);
-        for (Long i : reference) {
+    public static double average_precision(long[] relevant, long[] actual, int k) {
+        int maxK = Math.min(k,actual.length);
+        HashSet<Long> refset = new HashSet<>(relevant.length);
+        for (Long i : relevant) {
             refset.add(i);
         }
-        int relevant=0;
+        int relevantCount=0;
         DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
         for (int i = 0; i < maxK; i++) {
-            if (refset.contains(sample[i])){
-                relevant++;
-                double precisionAtIdx = (double) relevant / (i+1);
+            if (refset.contains(actual[i])){
+                relevantCount++;
+                double precisionAtIdx = (double) relevantCount / (i+1);
                 stats.accept(precisionAtIdx);
             }
         }
         return stats.getAverage();
     }
+
 }

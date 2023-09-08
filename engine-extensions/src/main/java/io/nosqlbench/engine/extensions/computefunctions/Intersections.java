@@ -47,13 +47,9 @@ public class Intersections {
     }
 
     public static int count(int[] reference, int[] sample) {
-        return count(reference, sample, reference.length);
-    }
-
-    public static int count(int[] reference, int[] sample, int limit) {
         int a_index = 0, b_index = 0, matches = 0;
         int a_element, b_element;
-        while (a_index < reference.length && a_index < limit && b_index < sample.length && b_index < limit) {
+        while (a_index < reference.length && b_index < sample.length) {
             a_element = reference[a_index];
             b_element = sample[b_index];
             if (a_element == b_element) {
@@ -92,10 +88,6 @@ public class Intersections {
         return matches;
     }
 
-    public static int[] find(int[] reference, int[] sample) {
-        return find(reference, sample, reference.length);
-    }
-
     public static int[] mask(int[] reference, int[] sample) {
         return mask(reference,sample,sample.length);
     }
@@ -120,41 +112,11 @@ public class Intersections {
         return mask;
     }
 
-    /**
-     * Compare the actual indices to the relevant indices, and return an array
-     * containing the ordered set of indices of the actual array which appear
-     * in the relevant array. A perfect result looks like counting from zero.
-     * @param relevant The array of relevant indices
-     * @param actual The array of actual indices
-     * @param limit limit the indices to the first [limit] items
-     * @return An array of relevant indices in the actual array.
-     */
-    public static int[] findIndirect(int[] relevant, int[] actual, int limit) {
-        int[] result = new int[actual.length];
+    public static int[] find(int[] reference, int[] sample) {
+        int[] result = new int[sample.length];
         int a_index = 0, b_index = 0, acc_index = -1;
         int a_element, b_element;
-        while (a_index < relevant.length && a_index < limit && b_index < actual.length && b_index < limit) {
-            a_element = relevant[a_index];
-            b_element = actual[b_index];
-            if (a_element == b_element) {
-                result[++acc_index] = b_index;
-                a_index++;
-                b_index++;
-            } else if (b_element < a_element) {
-                b_index++;
-            } else {
-                a_index++;
-            }
-        }
-        return Arrays.copyOfRange(result, 0, acc_index + 1);
-    }
-
-
-    public static int[] find(int[] reference, int[] sample, int limit) {
-        int[] result = new int[limit];
-        int a_index = 0, b_index = 0, acc_index = -1;
-        int a_element, b_element;
-        while (a_index < reference.length && a_index < limit && b_index < sample.length && b_index < limit) {
+        while (a_index < reference.length && b_index < sample.length) {
             a_element = reference[a_index];
             b_element = sample[b_index];
             if (a_element == b_element) {
@@ -171,14 +133,10 @@ public class Intersections {
     }
 
     public static long[] find(long[] reference, long[] sample) {
-        return find(reference, sample, reference.length);
-    }
-
-    public static long[] find(long[] reference, long[] sample, int limit) {
-        long[] result = new long[limit];
+        long[] result = new long[sample.length];
         int a_index = 0, b_index = 0, acc_index = -1;
         long a_element, b_element;
-        while (a_index < reference.length && a_index < limit && b_index < sample.length && b_index < limit) {
+        while (a_index < reference.length && b_index < sample.length) {
             a_element = reference[a_index];
             b_element = sample[b_index];
             if (a_element == b_element) {
