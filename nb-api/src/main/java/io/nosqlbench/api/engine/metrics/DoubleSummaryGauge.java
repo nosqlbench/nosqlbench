@@ -20,12 +20,13 @@ import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 
 import java.util.DoubleSummaryStatistics;
+import java.util.function.DoubleConsumer;
 
 
 /**
  * Create a discrete stat reservoir as a gauge.
  */
-public class DoubleSummaryGauge implements NBMetricGauge<Double> {
+public class DoubleSummaryGauge implements NBMetricGauge<Double>, DoubleConsumer {
     private final NBLabels labels;
     private final Stat stat;
     private final DoubleSummaryStatistics stats;
