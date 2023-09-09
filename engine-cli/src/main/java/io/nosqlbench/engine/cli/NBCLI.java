@@ -418,7 +418,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             if (null != reportGraphiteTo) reporters.addGraphite(reportGraphiteTo, options.wantsMetricsPrefix());
             if (null != options.wantsReportCsvTo())
                 reporters.addCSVReporter(options.wantsReportCsvTo(), options.wantsMetricsPrefix());
-            reporters.addLogger();
+            if (options.wantsLoggedMetrics()) { reporters.addLogger(); }
             reporters.start(10, options.getReportInterval());
         }
 

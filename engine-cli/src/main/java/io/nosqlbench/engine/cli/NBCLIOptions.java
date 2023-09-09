@@ -104,6 +104,8 @@ public class NBCLIOptions {
     private static final String REPORT_INTERVAL = "--report-interval";
     private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
 
+    private static final String ENABLE_LOGGED_METRICS = "--enable-logged-metrics";
+    private static final String DISABLE_LOGGED_METRICS = "--disable-logged-metrics";
     private static final String REPORT_PROMPUSH_TO = "--report-prompush-to";
     private static final String GRAPHITE_LOG_LEVEL = "--graphite-log-level";
     private static final String REPORT_CSV_TO = "--report-csv-to";
@@ -197,7 +199,9 @@ public class NBCLIOptions {
     private boolean wantsListCommands;
     private boolean wantsListApps;
     private boolean dedicatedVerificationLogger;
+    private boolean wantsConsoleMetrics =true;
 
+    public boolean wantsLoggedMetrics() { return this.wantsConsoleMetrics; }
     public boolean isWantsListApps() {
         return this.wantsListApps;
     }
@@ -484,6 +488,14 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     String addLabeldata = arglist.removeFirst();
                     addLabels(addLabeldata);
+                    break;
+                case NBCLIOptions.ENABLE_LOGGED_METRICS:
+                    arglist.removeFirst();
+                    this.wantsConsoleMetrics =true;
+                    break;
+                case NBCLIOptions.DISABLE_LOGGED_METRICS:
+                    arglist.removeFirst();
+                    this.wantsConsoleMetrics =false;
                     break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
