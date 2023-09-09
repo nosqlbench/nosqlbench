@@ -291,7 +291,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.529</version>
+                <version>1.12.532</version>
             </dependency>
             <dependency>
                 <groupId>com.elega9t</groupId>
