@@ -43,7 +43,7 @@ public class OpDef extends OpTemplate {
 
     @Override
     public String getName() {
-        return block.getName() + "--" + rawOpDef.getName();
+        return block.getName() + "__" + rawOpDef.getName();
     }
 
     @Override
