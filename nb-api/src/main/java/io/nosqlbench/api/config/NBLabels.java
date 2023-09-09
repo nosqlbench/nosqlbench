@@ -35,7 +35,7 @@ import java.util.function.Function;
  * since these elements will be consulted frequently, such as when rendering metrics values.
  * </P>
  */
-public interface NBLabels extends NBLabeledElement {
+public interface NBLabels {
 
     /**
      * Create a string representation of the label data, including only the values.

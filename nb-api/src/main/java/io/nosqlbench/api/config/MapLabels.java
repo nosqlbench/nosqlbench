@@ -243,10 +243,4 @@ public class MapLabels implements NBLabels {
         for (int i = 0; i < labelsAndValues.length; i+=2) childLabels.put(labelsAndValues[i].toString(), labelsAndValues[i + 1].toString());
         return childLabels;
     }
-
-
-    @Override
-    public NBLabels getLabels() {
-        return this;
-    }
 }
