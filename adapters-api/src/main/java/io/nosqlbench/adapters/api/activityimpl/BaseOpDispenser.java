@@ -177,8 +177,8 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
         instrument = pop.takeStaticConfigOr("instrument", false);
         if (this.instrument) {
             final int hdrDigits = pop.getStaticConfigOr("hdr_digits", 4).intValue();
-            successTimer = ActivityMetrics.timer(pop, "success", hdrDigits);
-            errorTimer = ActivityMetrics.timer(pop, "error", hdrDigits);
+            successTimer = ActivityMetrics.timer(pop, ActivityMetrics.sanitize("successfor_"+getOpName()), hdrDigits);
+            errorTimer = ActivityMetrics.timer(pop, ActivityMetrics.sanitize("errorsfor_"+getOpName()), hdrDigits);
         }
     }
 
