@@ -16,15 +16,11 @@
 
 package io.nosqlbench.engine.api.activityapi.core.progress;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.util.Unit;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 
 import java.time.Instant;
-import java.util.function.Supplier;
 
 public class ActivityMetricProgressMeter implements ProgressMeterDisplay, CompletedMeter, RemainingMeter, ActiveMeter {
 
@@ -32,19 +28,12 @@ public class ActivityMetricProgressMeter implements ProgressMeterDisplay, Comple
     private final Instant startInstant;
     private final Timer bindTimer;
     private final Timer cyclesTimer;
-    private final Gauge<Double> pendingGauge;
-    private final Gauge<Double> currentGauge;
-    private final Gauge<Double> completeGauge;
 
     public ActivityMetricProgressMeter(Activity activity) {
         this.activity = activity;
         this.startInstant = Instant.ofEpochMilli(activity.getStartedAtMillis());
         this.bindTimer = activity.getInstrumentation().getOrCreateBindTimer();
         this.cyclesTimer = activity.getInstrumentation().getOrCreateCyclesServiceTimer();
-
-        this.pendingGauge = ActivityMetrics.gauge(activity,"ops_pending",new AuxGauge(activity, this::getRemainingCount));
-        this.currentGauge = ActivityMetrics.gauge(activity,"ops_active",new AuxGauge(activity, this::getActiveOps));
-        this.completeGauge = ActivityMetrics.gauge(activity, "ops_complete", new AuxGauge(activity, this::getCompletedCount));
     }
 
     @Override
@@ -86,7 +75,7 @@ public class ActivityMetricProgressMeter implements ProgressMeterDisplay, Comple
 
     @Override
     public String toString() {
-        return getSummary();
+        return getSummary().toString();
     }
 
     @Override
@@ -94,17 +83,5 @@ public class ActivityMetricProgressMeter implements ProgressMeterDisplay, Comple
         return cyclesTimer.getCount();
     }
 
-    private final static class AuxGauge implements Gauge<Double> {
-        private final NBLabeledElement parent;
-        private final Supplier<Double> source;
 
-        public AuxGauge(NBLabeledElement parent, Supplier<Double> source) {
-            this.parent = parent;
-            this.source =source;
-        }
-        @Override
-        public Double getValue() {
-            return source.get();
-        }
-    }
 }

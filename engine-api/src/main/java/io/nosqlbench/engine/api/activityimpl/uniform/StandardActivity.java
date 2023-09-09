@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
+import com.codahale.metrics.Gauge;
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
@@ -30,6 +31,8 @@ import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
@@ -56,6 +59,10 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
     private final NBConfigModel yamlmodel;
     private final ConcurrentHashMap<String, DriverAdapter> adapters = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, OpMapper<Op>> mappers = new ConcurrentHashMap<>();
+
+    private final Gauge<Double> pendingOpsGauge;
+    private final Gauge<Double> activeOpsGauge;
+    private final Gauge<Double> completeOpsGauge;
 
     public StandardActivity(ActivityDef activityDef, NBLabeledElement parentLabels) {
         super(activityDef, parentLabels);
@@ -144,6 +151,13 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             }
             throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
         }
+
+        this.pendingOpsGauge= ActivityMetrics.gauge(this,"ops_pending",
+                new NBFunctionGauge(this,() -> this.getProgressMeter().getSummary().pending()));
+        this.activeOpsGauge = ActivityMetrics.gauge(this,"ops_active",
+                new NBFunctionGauge(this,() -> this.getProgressMeter().getSummary().current()));
+        this.completeOpsGauge= ActivityMetrics.gauge(this,"ops_complete",
+                new NBFunctionGauge(this,() -> this.getProgressMeter().getSummary().complete()));
     }
 
     @Override

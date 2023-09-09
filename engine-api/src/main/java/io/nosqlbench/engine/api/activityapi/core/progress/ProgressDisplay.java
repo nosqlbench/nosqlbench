@@ -34,14 +34,16 @@ public class ProgressDisplay {
         if (meters.length == 0) {
             return "";
         } else if (meters.length == 1) {
-            return meters[0].getSummary();
+            return meters[0].getSummary().toString();
         } else {
             double total = 0d;
             for (ProgressMeterDisplay meter : meters) {
                 total += meter.getMaxValue();
             }
             return "PROGRESS:" + ProgressMeterDisplay.format(total / meters.length) + " (" +
-                Arrays.stream(meters).map(ProgressMeterDisplay::getSummary).collect(Collectors.joining(","));
+                Arrays.stream(meters).map(ProgressMeterDisplay::getSummary)
+                        .map(Object::toString)
+                        .collect(Collectors.joining(","));
         }
 
     }

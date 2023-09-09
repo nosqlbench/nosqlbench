@@ -48,29 +48,12 @@ public interface ProgressMeterDisplay {
         return formatted;
     }
 
-    default String getSummary() {
-
-        StringBuilder legend = new StringBuilder(getProgressName()).append(" (");
-        StringBuilder values = new StringBuilder("(");
-
-        if (this instanceof RemainingMeter remaining) {
-            legend.append("remaining,");
-            values.append(String.format("%.0f,",remaining.getRemainingCount()));
-        }
-        if (this instanceof ActiveMeter active) {
-            legend.append("active,");
-            values.append(String.format("%.0f,",active.getActiveOps()));
-        }
-        if (this instanceof CompletedMeter completed) {
-            legend.append("completed,");
-            values.append(String.format("%.0f,",completed.getCompletedCount()));
-        }
-        legend.setLength(legend.length()-1);
-        values.setLength(values.length()-1);
-
-//        legend.append(" ETA:").append(getETAInstant());
-        String formatted = legend.append(")=").append(values).append(") ").append(getRatioSummary()).toString();
-        return formatted;
+    default ProgressSummary getSummary() {
+        return new ProgressSummary(
+                getProgressName(),
+                (this instanceof RemainingMeter rm) ? rm.getRemainingCount() : -1.0,
+                (this instanceof ActiveMeter am) ? am.getActiveOps() : -1.0,
+                (this instanceof CompletedMeter cm) ? cm.getCompletedCount() : -1.0);
     }
 
     default long getProgressETAMillis() {
