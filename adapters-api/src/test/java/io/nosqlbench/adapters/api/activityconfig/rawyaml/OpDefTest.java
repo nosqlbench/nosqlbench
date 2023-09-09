@@ -73,7 +73,7 @@ public class OpDefTest {
         List<OpTemplate> ops = block1.getOps();
         assertThat(ops).hasSize(2);
         OpTemplate sdef1 = ops.get(0);
-        assertThat(sdef1.getName()).isEqualTo("doc1--block0--stmt1");
+        assertThat(sdef1.getName()).isEqualTo("doc1--block0__stmt1");
         assertThat(ops.get(0).getOp()).contains(Map.of("stmt","s1"));
     }
 
@@ -103,13 +103,13 @@ public class OpDefTest {
         assertThat(block1.getName()).isEqualTo("map-of-maps--block0");
         assertThat(block1.getOps()).hasSize(2);
         OpTemplate op0 = block1.getOps().get(0);
-        assertThat(op0.getName()).isEqualTo("map-of-maps--block0--s3");
+        assertThat(op0.getName()).isEqualTo("map-of-maps--block0__s3");
         assertThat(op0.getOp()).contains(Map.of("p1","v7","p2","v8"));
         assertThat(op0.getParams()).hasSize(0);
         assertThat(op0.getParams()).hasSize(0);
         OpTemplate op1 = block1.getOps().get(1);
         assertThat(op1.getParams()).containsAllEntriesOf(Map.of());
-        assertThat(op1.getName()).isEqualTo("map-of-maps--block0--s2");
+        assertThat(op1.getName()).isEqualTo("map-of-maps--block0__s2");
         assertThat(op1.getOp()).contains(Map.of("stmt","statement2"));
     }
 
@@ -124,7 +124,7 @@ public class OpDefTest {
         assertThat(block1.getName()).isEqualTo("string-statement--block0");
         assertThat(block1.getOps()).hasSize(1);
         OpTemplate op0 = block1.getOps().get(0);
-        assertThat(op0.getName()).isEqualTo("string-statement--block0--stmt1");
+        assertThat(op0.getName()).isEqualTo("string-statement--block0__stmt1");
         assertThat(op0.getOp()).contains(Map.of("stmt","test statement"));
     }
 
@@ -140,7 +140,7 @@ public class OpDefTest {
         OpTemplate op0 = block1.getOps().get(0);
         System.out.println(op0.getParams());
 
-        assertThat(op0.getName()).isEqualTo("list-of-named-map--block1--s1");
+        assertThat(op0.getName()).isEqualTo("list-of-named-map--block1__s1");
         assertThat(op0.getOp()).contains(Map.of("p1","v1","p2","v2"));
 //        System.out.println("here");
         // TODO: This needs to be clarified and the logic made less ambiguous

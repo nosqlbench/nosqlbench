@@ -43,32 +43,32 @@ public class OpDetailOverrideTest {
         OpsBlock doc1block0 = doc1.getBlocks().get(0);
         assertThat(doc1block0.getOps().size()).isEqualTo(1);
         OpTemplate s = doc1block0.getOps().get(0);
-        assertThat(s.getName()).isEqualTo("block0--stmt1");
+        assertThat(s.getName()).isEqualTo("block0__stmt1");
         assertThat(s.getStmt()).contains("globalstatement1");
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
-        assertThat(s.getTags()).isEqualTo(Map.of("block","block0","global_tag1","tag value","name","block0--stmt1"));
+        assertThat(s.getTags()).isEqualTo(Map.of("block","block0","global_tag1","tag value","name","block0__stmt1"));
 
         OpsBlock doc1block1 = doc1.getBlocks().get(1);
         List<OpTemplate> ops = doc1block1.getOps();
         assertThat(ops).hasSize(4);
 
         s = ops.get(0);
-        assertThat(s.getName()).isEqualTo("testblock1--stmt1");
+        assertThat(s.getName()).isEqualTo("testblock1__stmt1");
         assertThat(s.getStmt()).contains("astatement1");
-        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1--stmt1"));
+        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1__stmt1"));
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 
         s = ops.get(1);
-        assertThat(s.getName()).isEqualTo("testblock1--s2name");
+        assertThat(s.getName()).isEqualTo("testblock1__s2name");
         assertThat(s.getStmt()).contains("s2statement data");
-        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1--s2name"));
+        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1__s2name"));
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 
         s = ops.get(2);
-        assertThat(s.getName()).isEqualTo("testblock1--s3");
+        assertThat(s.getName()).isEqualTo("testblock1__s3");
         assertThat(s.getStmt()).contains("statement three");
         assertThat(s.getTags()).containsEntry("tname1", "tval1");
         assertThat(s.getTags()).containsEntry("global_tag1", "tag value");
@@ -76,9 +76,9 @@ public class OpDetailOverrideTest {
         assertThat(s.getParams()).hasSize(2);
 
         s = ops.get(3);
-        assertThat(s.getName()).isEqualTo("testblock1--s4");
+        assertThat(s.getName()).isEqualTo("testblock1__s4");
         assertThat(s.getStmt()).contains("statement 4");
-        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1--s4"));
+        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1__s4"));
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 

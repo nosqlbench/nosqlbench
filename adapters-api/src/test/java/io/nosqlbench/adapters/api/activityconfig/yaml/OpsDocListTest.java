@@ -87,11 +87,11 @@ public class OpsDocListTest {
 
         assertThat(ops1.get(0).getBindings()).containsExactly(MapEntry.entry("b2","b2d"),MapEntry.entry("b1","b1d"));
         assertThat(ops1.get(0).getParams()).containsExactly(MapEntry.entry("param1","value1"));
-        assertThat(ops1.get(0).getTags()).isEqualTo(Map.of("atagname","atagvalue","name","doc1--block0--stmt1","block","doc1--block0"));
+        assertThat(ops1.get(0).getTags()).isEqualTo(Map.of("atagname","atagvalue","name","doc1--block0__stmt1","block","doc1--block0"));
 
         assertThat(ops1.get(1).getBindings()).containsExactly(MapEntry.entry("b2","b2d"),MapEntry.entry("b1","b1d"));
         assertThat(ops1.get(1).getParams()).containsExactly(MapEntry.entry("param1","value1"));
-        assertThat(ops1.get(1).getTags()).isEqualTo(Map.of("atagname","atagvalue","name","doc1--block0--stmt2","block","doc1--block0"));
+        assertThat(ops1.get(1).getTags()).isEqualTo(Map.of("atagname","atagvalue","name","doc1--block0__stmt2","block","doc1--block0"));
 
     }
 
