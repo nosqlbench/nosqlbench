@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl.input;
 
+import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ public class AtomicInputTest {
 
     @Test
     public void testEmptyIntervalShouldNotProvideValues() {
-        AtomicInput i = new AtomicInput(ActivityDef.parseActivityDef("alias=foo,cycles=23..23"));
+        AtomicInput i = new AtomicInput(NBLabeledElement.EMPTY,ActivityDef.parseActivityDef("alias=foo,cycles=23..23"));
         CycleSegment inputSegment = i.getInputSegment(1);
         assertThat(inputSegment).isNull();
 

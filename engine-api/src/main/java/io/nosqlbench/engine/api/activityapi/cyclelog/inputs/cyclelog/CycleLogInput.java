@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog;
 
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegmentBuffer;
@@ -36,9 +38,10 @@ import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
-public class CycleLogInput implements Input, AutoCloseable, Iterable<CycleResultsSegment>, CanFilterResultValue {
+public class CycleLogInput implements Input, AutoCloseable, Iterable<CycleResultsSegment>, CanFilterResultValue, NBLabeledElement {
     private final static Logger logger = LogManager.getLogger(CycleLogInput.class);
     private final Iterator<CycleResultsSegment> cycleResultSegmentIterator;
+    private final NBLabeledElement parent;
     private RandomAccessFile raf;
     private MappedByteBuffer mbb;
     private Iterator<CycleResult> segmentIter;
@@ -49,6 +52,7 @@ public class CycleLogInput implements Input, AutoCloseable, Iterable<CycleResult
         mbb = initMappedBuffer(conf.getString("file").orElse(activity.getAlias()) + ".cyclelog");
         cycleResultSegmentIterator = iterator();
         segmentIter = cycleResultSegmentIterator.next().iterator();
+        this.parent = activity;
     }
 
     public CycleLogInput(String filename) {
@@ -67,6 +71,7 @@ public class CycleLogInput implements Input, AutoCloseable, Iterable<CycleResult
         mbb = initMappedBuffer(cycleFile.getPath());
         cycleResultSegmentIterator = new CycleResultsRLEBufferReadable(mbb).iterator();
         segmentIter = cycleResultSegmentIterator.next().iterator();
+        this.parent = NBLabeledElement.EMPTY;
     }
 
     @Override
@@ -152,4 +157,8 @@ public class CycleLogInput implements Input, AutoCloseable, Iterable<CycleResult
         return cycleResultsSegments.iterator();
     }
 
+    @Override
+    public NBLabels getLabels() {
+        return parent.getLabels();
+    }
 }

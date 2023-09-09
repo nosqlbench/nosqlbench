@@ -38,11 +38,11 @@ public class CoreMotorTest {
 
     @Test
     public void testBasicActivityMotor() {
-        final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
         final Activity activity = new SimpleActivity(
             ActivityDef.parseActivityDef("alias=foo"),
             NBLabeledElement.forMap(Map.of("testing","coremotor"))
             );
+        final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
         final Motor cm = new CoreMotor(activity, 5L, lockstepper);
         final AtomicLong observableAction = new AtomicLong(-3L);
         cm.setAction(this.getTestConsumer(observableAction));
@@ -60,8 +60,9 @@ public class CoreMotorTest {
 
     @Test
     public void testIteratorStride() {
+        SimpleActivity activity = new SimpleActivity("stride=3", NBLabeledElement.EMPTY);
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
-        final Motor cm1 = new CoreMotor(new SimpleActivity("stride=3",NBLabeledElement.EMPTY),1L, lockstepper);
+        final Motor cm1 = new CoreMotor(activity,1L, lockstepper);
         final AtomicLongArray ary = new AtomicLongArray(10);
         final Action a1 = this.getTestArrayConsumer(ary);
         cm1.setAction(a1);

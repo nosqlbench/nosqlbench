@@ -127,9 +127,10 @@ class ActivityExecutorTest {
         final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-dynamic-params;cycles=1000;initdelay=5000;");
         new ActivityTypeLoader().load(activityDef,NBLabeledElement.EMPTY);
 
-        this.getActivityMotorFactory(this.motorActionDelay(999), new AtomicInput(activityDef));
-
         Activity simpleActivity = new SimpleActivity(activityDef, NBLabeledElement.forMap(Map.of()));
+
+        this.getActivityMotorFactory(this.motorActionDelay(999), new AtomicInput(simpleActivity,activityDef));
+
         final InputDispenser inputDispenser = new CoreInputDispenser(simpleActivity);
         final ActionDispenser actionDispenser = new CoreActionDispenser(simpleActivity);
         final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(simpleActivity).orElse(null);

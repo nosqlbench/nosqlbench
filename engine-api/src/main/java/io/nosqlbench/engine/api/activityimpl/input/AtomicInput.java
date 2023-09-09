@@ -15,16 +15,20 @@
  */
 package io.nosqlbench.engine.api.activityimpl.input;
 
-import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
-import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
+import com.codahale.metrics.Gauge;
+import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.util.Unit;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.progress.CycleMeter;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
+import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.input.Input;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.engine.util.Unit;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
 import java.time.Instant;
@@ -44,7 +48,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * after the max value. They simply expose it to callers. It is up to the
  * caller to check the value to determine when the input is deemed "used up."</p>
  */
-public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable {
+public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable, Gauge<Long>, NBLabeledElement {
     private final static Logger logger = LogManager.getLogger(AtomicInput.class);
 
     private final AtomicLong cycleValue = new AtomicLong(0L);
@@ -56,10 +60,13 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
     private final long startedAt = System.currentTimeMillis();
 
     private final ActivityDef activityDef;
+    private final NBLabeledElement parent;
 
-    public AtomicInput(ActivityDef activityDef) {
+    public AtomicInput(NBLabeledElement parent, ActivityDef activityDef) {
+        this.parent = parent;
         this.activityDef = activityDef;
         onActivityDefUpdate(activityDef);
+        ActivityMetrics.gauge(this,"cycle", this);
     }
 
     @Override
@@ -140,7 +147,7 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
         this.recycleMax.set(recycles);
     }
 
-    public long getStarteAtMillis() {
+    public long getStartedAtMillis() {
         return this.startedAt;
     }
 
@@ -151,16 +158,29 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
 
     @Override
     public ProgressMeterDisplay getProgressMeter() {
-        return new AtomicInputProgress(activityDef.getAlias(), this);
+        return new AtomicInputProgress(this, activityDef.getAlias(), this);
     }
 
-    private static class AtomicInputProgress implements ProgressMeterDisplay, CycleMeter {
+    @Override
+    public NBLabels getLabels() {
+        return parent.getLabels();
+    }
+
+    @Override
+    public Long getValue() {
+        return this.cycleValue.get();
+    }
+
+    private static class AtomicInputProgress implements NBLabeledElement, ProgressMeterDisplay, CycleMeter {
         private final AtomicInput input;
         private final String name;
 
-        public AtomicInputProgress(String name, AtomicInput input) {
+        private final NBLabeledElement parent;
+
+        public AtomicInputProgress(NBLabeledElement parent, String name, AtomicInput input) {
             this.name = name;
             this.input = input;
+            this.parent = parent;
         }
 
         @Override
@@ -170,7 +190,7 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
 
         @Override
         public Instant getStartTime() {
-            return Instant.ofEpochMilli(input.getStarteAtMillis());
+            return Instant.ofEpochMilli(input.getStartedAtMillis());
         }
 
         @Override
@@ -207,6 +227,11 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
         @Override
         public long getRecyclesMax() {
             return input.recycleMax.get();
+        }
+
+        @Override
+        public NBLabels getLabels() {
+            return parent.getLabels();
         }
     }
 }
