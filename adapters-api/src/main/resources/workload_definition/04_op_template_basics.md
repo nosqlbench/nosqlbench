@@ -34,12 +34,12 @@ op: select * from bar.table;
 
 [
   {
-    "name": "block0--stmt1",
+    "name": "block0__stmt1",
     "op": {
       "stmt": "select * from bar.table;"
     },
     "tags": {
-      "name": "block0--stmt1",
+      "name": "block0__stmt1",
       "block": "block0"
     }
   }
@@ -72,12 +72,12 @@ ops:
 
 [
   {
-    "name": "block0--stmt1",
+    "name": "block0__stmt1",
     "op": {
       "stmt": "select * from bar.table;"
     },
     "tags": {
-      "name": "block0--stmt1",
+      "name": "block0__stmt1",
       "block": "block0"
     }
   }
@@ -115,12 +115,12 @@ ops:
 
 [
   {
-    "name": "block0--op1",
+    "name": "block0__op1",
     "op": {
       "stmt": "select * from bar.table;"
     },
     "tags": {
-      "name": "block0--op1",
+      "name": "block0__op1",
       "block": "block0"
     }
   }
@@ -157,12 +157,12 @@ ops:
 
 [
   {
-    "name": "block0--op1",
+    "name": "block0__op1",
     "op": {
       "stmt": "select * from bar.table;"
     },
     "tags": {
-      "name": "block0--op1",
+      "name": "block0__op1",
       "block": "block0"
     }
   }
@@ -195,12 +195,12 @@ ops:
 
 [
   {
-    "name": "block0--op1",
+    "name": "block0__op1",
     "op": {
       "stmt": "select * from bar.table;"
     },
     "tags": {
-      "name": "block0--op1",
+      "name": "block0__op1",
       "block": "block0"
     }
   }
@@ -236,12 +236,12 @@ ops:
 
 [
   {
-    "name": "block0--op1",
+    "name": "block0__op1",
     "op": {
       "stmt": "select * from bar.table;"
     },
     "tags": {
-      "name": "block0--op1",
+      "name": "block0__op1",
       "block": "block0"
     }
   }
@@ -309,7 +309,7 @@ ops:
       "binding1": "NumberNameToString();"
     },
     "description": "This is just an example operation",
-    "name": "block0--special-op-name",
+    "name": "block0__special-op-name",
     "op": {
       "stmt": "select * from ks1.tb1;"
     },
@@ -318,7 +318,7 @@ ops:
     },
     "tags": {
       "block": "schema",
-      "name": "block0--special-op-name",
+      "name": "block0__special-op-name",
       "block": "block0"
     }
   }
@@ -347,7 +347,7 @@ params:
   prepared: true # set prepared true by default for all contained op templates
 
 blocks:
-  block-named-fred:
+  block_named_fred:
     bindings:
       binding1: NumberNameToString();
     tags:
@@ -377,7 +377,7 @@ blocks:
     "prepared": true
   },
   "blocks": {
-    "block-named-fred": {
+    "block_named_fred": {
       "bindings": {
         "binding1": "NumberNameToString();"
       },
@@ -408,7 +408,7 @@ blocks:
     "bindings": {
       "binding1": "NumberNameToString();"
     },
-    "name": "block-named-fred--special-op-name",
+    "name": "block_named_fred__special-op-name",
     "op": {
       "stmt": "select * from ks1.tb1;"
     },
@@ -418,8 +418,8 @@ blocks:
     "tags": {
       "block": "schema",
       "docleveltag": "is-tagging-everything",
-      "name": "block-named-fred--special-op-name",
-      "block": "block-named-fred"
+      "name": "block_named_fred__special-op-name",
+      "block": "block_named_fred"
     }
   }
 ]

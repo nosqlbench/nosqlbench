@@ -42,13 +42,13 @@ ops:
 
 [
   {
-    "name": "block0--special-op-name",
+    "name": "block0__special-op-name",
     "op": {
       "stmt": "select * from ks1.tb1;"
     },
     "tags": {
       "block": "block0",
-      "name": "block0--special-op-name"
+      "name": "block0__special-op-name"
     }
   }
 ]
@@ -93,14 +93,14 @@ ops:
 
 [
   {
-    "name": "block0--op1",
+    "name": "block0__op1",
     "op": {
       "field1": "select * from ks1.tb1;",
       "field2": "field 2 value"
     },
     "tags": {
       "block": "block0",
-      "name": "block0--op1"
+      "name": "block0__op1"
     }
   }
 ]
@@ -139,14 +139,14 @@ ops:
 
 [
   {
-    "name": "block0--op1",
+    "name": "block0__op1",
     "op": {
       "field1": "select * from ks1.tb1;",
       "field2": "field 2 value"
     },
     "tags": {
       "block": "block0",
-      "name": "block0--op1"
+      "name": "block0__op1"
     }
   }
 ]
@@ -188,7 +188,7 @@ ops:
 
 [
   {
-    "name": "block0--op1",
+    "name": "block0__op1",
     "op": {
       "field1": "select * from ks1.tb1;",
       "field2": "field 2 value"
@@ -198,7 +198,7 @@ ops:
     },
     "tags": {
       "block": "block0",
-      "name": "block0--op1"
+      "name": "block0__op1"
     }
   }
 ]
@@ -240,7 +240,7 @@ ops:
 
 [
   {
-    "name": "block0--op1",
+    "name": "block0__op1",
     "op": {
       "field1": "select * from ks1.tb1;",
       "field2": "field 2 value"
@@ -250,7 +250,7 @@ ops:
     },
     "tags": {
       "block": "block0",
-      "name": "block0--op1"
+      "name": "block0__op1"
     }
   }
 ]
@@ -297,7 +297,7 @@ ops:
 
 [
   {
-    "name": "block0--op1",
+    "name": "block0__op1",
     "op": {
       "field1": "select * from ks1.tb1;",
       "field2": "field 2 value"
@@ -307,7 +307,7 @@ ops:
     },
     "tags": {
       "block": "block0",
-      "name": "block0--op1"
+      "name": "block0__op1"
     }
   }
 ]
@@ -345,13 +345,13 @@ ops: "my test op"
       "pname": "pvalue"
     },
     "tags": {
-      "name": "block0--stmt1",
+      "name": "block0__stmt1",
       "block": "block0"
     },
     "op": {
       "stmt": "my test op"
     },
-    "name": "block0--stmt1"
+    "name": "block0__stmt1"
   }
 ]
 ```
@@ -394,13 +394,13 @@ blocks:
       "pname": "pvalue"
     },
     "tags": {
-      "name": "block1--stmt1",
+      "name": "block1__stmt1",
       "block": "block1"
     },
     "op": {
       "stmt": "my test op"
     },
-    "name": "block1--stmt1"
+    "name": "block1__stmt1"
   }
 ]
 ```
@@ -450,13 +450,13 @@ blocks:
       "pname": "pvalue"
     },
     "tags": {
-      "name": "block1--op1",
+      "name": "block1__op1",
       "block": "block1"
     },
     "op": {
       "stmt": "my test op"
     },
-    "name": "block1--op1"
+    "name": "block1__op1"
   }
 ]
 ```
@@ -511,7 +511,7 @@ blocks:
 [
   {
     "tags": {
-      "name": "block1--op1",
+      "name": "block1__op1",
       "block": "block1"
     },
     "op": {
@@ -520,7 +520,7 @@ blocks:
         "pname": "pvalue"
       }
     },
-    "name": "block1--op1"
+    "name": "block1__op1"
   }
 ]
 ```
@@ -573,23 +573,23 @@ blocks:
 [
   {
     "tags": {
-      "name": "block1--op1",
+      "name": "block1__op1",
       "block": "block1"
     },
     "op": {
       "stmt": "my test op"
     },
-    "name": "block1--op1"
+    "name": "block1__op1"
   },
   {
     "tags": {
-      "name": "block1--params",
+      "name": "block1__params",
       "block": "block1"
     },
     "op": {
       "pname": "pvalue"
     },
-    "name": "block1--params"
+    "name": "block1__params"
   }
 ]
 ```

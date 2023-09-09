@@ -39,13 +39,13 @@ ops: "cycle number '{{NumberNameToString}}'"
 [
   {
     "tags": {
-      "name": "block0--stmt1",
+      "name": "block0__stmt1",
       "block": "block0"
     },
     "op": {
       "stmt": "cycle number '{{NumberNameToString}}'"
     },
-    "name": "block0--stmt1"
+    "name": "block0__stmt1"
   }
 ]
 ```
@@ -82,23 +82,23 @@ ops:
 [
   {
     "tags": {
-      "name": "block0--stmt1",
+      "name": "block0__stmt1",
       "block": "block0"
     },
     "op": {
       "stmt": "even cycle '{{NumberNameToString}}'"
     },
-    "name": "block0--stmt1"
+    "name": "block0__stmt1"
   },
   {
     "tags": {
-      "name": "block0--stmt2",
+      "name": "block0__stmt2",
       "block": "block0"
     },
     "op": {
       "stmt": "odd  cycle '{{NumberNameToString}}'"
     },
-    "name": "block0--stmt2"
+    "name": "block0__stmt2"
   }
 ]
 ```
@@ -135,23 +135,23 @@ ops:
 [
   {
     "tags": {
-      "name": "block0--myop1",
+      "name": "block0__myop1",
       "block": "block0"
     },
     "op": {
       "stmt": "even cycle '{{NumberNameToString}}'"
     },
-    "name": "block0--myop1"
+    "name": "block0__myop1"
   },
   {
     "tags": {
-      "name": "block0--myop2",
+      "name": "block0__myop2",
       "block": "block0"
     },
     "op": {
       "stmt": "odd  cycle '{{NumberNameToString}}'"
     },
-    "name": "block0--myop2"
+    "name": "block0__myop2"
   }
 ]
 ```
@@ -193,14 +193,14 @@ ops:
 [
   {
     "tags": {
-      "name": "block0--op1",
+      "name": "block0__op1",
       "block": "block0"
     },
     "op": {
       "opfield1": "opvalue1",
       "opfield2": "opvalue2"
     },
-    "name": "block0--op1"
+    "name": "block0__op1"
   }
 ]
 ```
@@ -244,7 +244,7 @@ ops:
 [
   {
     "tags": {
-      "name": "block0--op1",
+      "name": "block0__op1",
       "block": "block0"
     },
     "op": {
@@ -253,7 +253,7 @@ ops:
         "opvalue2"
       ]
     },
-    "name": "block0--op1"
+    "name": "block0__op1"
   }
 ]
 ```
@@ -303,7 +303,7 @@ ops:
 [
   {
     "tags": {
-      "name": "block0--op1",
+      "name": "block0__op1",
       "block": "block0"
     },
     "op": {
@@ -316,7 +316,7 @@ ops:
         "by_session_len/@1h"
       ]
     },
-    "name": "block0--op1"
+    "name": "block0__op1"
   }
 ]
 
@@ -376,7 +376,7 @@ ops:
       "user_index": "Mod(1000L); ToString();"
     },
     "tags": {
-      "name": "block0--op1",
+      "name": "block0__op1",
       "block": "block0"
     },
     "op": {
@@ -389,7 +389,7 @@ ops:
         "by_session_len/@1h"
       ]
     },
-    "name": "block0--op1"
+    "name": "block0__op1"
   }
 ]
 ```

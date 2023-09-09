@@ -375,23 +375,23 @@ blocks:
 
 [
   {
-    "name": "namedblock1--op1",
+    "name": "namedblock1__op1",
     "op": {
       "stmt": "select * from bar.table;"
     },
     "tags": {
-      "name": "namedblock1--op1",
+      "name": "namedblock1__op1",
       "block": "namedblock1"
     }
   },
   {
-    "name": "namedblock1--op2",
+    "name": "namedblock1__op2",
     "op": {
       "stmt": "insert into bar.table (a,b,c) values (1,2,3);",
       "type": "batch"
     },
     "tags": {
-      "name": "namedblock1--op2",
+      "name": "namedblock1__op2",
       "block": "namedblock1"
     }
   }
@@ -411,7 +411,7 @@ blocks:
       op2:
         type: batch
         stmt: insert into bar.table (a,b,c) values (1,2,3);
-  - name: this-is-block-2
+  - name: this_is_block_2
     ops:
       op3: select * from foo.table;
 
@@ -433,7 +433,7 @@ blocks:
       }
     },
     {
-      "name": "this-is-block-2",
+      "name": "this_is_block_2",
       "ops": {
         "op3": "select * from foo.table;"
       }
@@ -448,34 +448,34 @@ blocks:
 
 [
   {
-    "name": "block1--op1",
+    "name": "block1__op1",
     "op": {
       "stmt": "select * from bar.table;"
     },
     "tags": {
-      "name": "block1--op1",
+      "name": "block1__op1",
       "block": "block1"
     }
   },
   {
-    "name": "block1--op2",
+    "name": "block1__op2",
     "op": {
       "stmt": "insert into bar.table (a,b,c) values (1,2,3);",
       "type": "batch"
     },
     "tags": {
-      "name": "block1--op2",
+      "name": "block1__op2",
       "block": "block1"
     }
   },
   {
-    "name": "this-is-block-2--op3",
+    "name": "this_is_block_2__op3",
     "op": {
       "stmt": "select * from foo.table;"
     },
     "tags": {
-      "name": "this-is-block-2--op3",
-      "block": "this-is-block-2"
+      "name": "this_is_block_2__op3",
+      "block": "this_is_block_2"
     }
   }
 ]
@@ -518,12 +518,12 @@ blocks:
 
 [
   {
-    "name": "myblock--stmt1",
+    "name": "myblock__stmt1",
     "op": {
       "stmt": "test op"
     },
     "tags": {
-      "name": "myblock--stmt1",
+      "name": "myblock__stmt1",
       "block": "myblock"
     }
   }
