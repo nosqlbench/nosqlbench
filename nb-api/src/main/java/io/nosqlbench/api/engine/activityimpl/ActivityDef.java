@@ -17,7 +17,6 @@
 package io.nosqlbench.api.engine.activityimpl;
 
 import io.nosqlbench.api.config.NBNamedElement;
-import io.nosqlbench.api.engine.util.Unit;
 import io.nosqlbench.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,23 +39,27 @@ public class ActivityDef implements NBNamedElement {
 
     // milliseconds between cycles per thread, for slow tests only
     public static final String DEFAULT_ALIAS = "UNNAMEDACTIVITY";
-    public static final String DEFAULT_ATYPE = "stdout  ";
+    public static final String DEFAULT_ATYPE = "stdout";
     public static final String DEFAULT_CYCLES = "0";
+    public static final String DEFAULT_RECYCLES = "1";
     public static final int DEFAULT_THREADS = 1;
-    private static final Logger logger = LogManager.getLogger(ActivityDef.class);
+    public static final Logger logger = LogManager.getLogger(ActivityDef.class);
     // an alias with which to control the activity while it is running
-    private static final String FIELD_ALIAS = "alias";
+    public static final String FIELD_ALIAS = "alias";
     // a file or URL containing the activity: op templates, generator bindings, ...
-    private static final String FIELD_ATYPE = "type";
+    public static final String FIELD_ATYPE = "type";
     // cycles for this activity in either "M" or "N..M" form. "M" form implies "0..M"
-    private static final String FIELD_CYCLES = "cycles";
+    public static final String FIELD_CYCLES = "cycles";
+    public static final String FIELD_RECYCLES = "recycles";
     // initial thread concurrency for this activity
-    private static final String FIELD_THREADS = "threads";
-    private static final String[] field_list = {
-        FIELD_ALIAS, FIELD_ATYPE, FIELD_CYCLES, FIELD_THREADS
+    public static final String FIELD_THREADS = "threads";
+    public static final String[] field_list = {
+            FIELD_ALIAS, FIELD_ATYPE, FIELD_CYCLES, FIELD_THREADS, FIELD_RECYCLES
     };
     // parameter map has its own internal atomic map
     private final ParameterMap parameterMap;
+    private CyclesSpec cyclesSpec;
+    private CyclesSpec reCyclesSpec;
 
     public ActivityDef(ParameterMap parameterMap) {
         this.parameterMap = parameterMap;
@@ -107,34 +110,22 @@ public class ActivityDef implements NBNamedElement {
      * @return the long start cycle
      */
     public long getStartCycle() {
-        String cycles = parameterMap.getOptionalString("cycles").orElse(DEFAULT_CYCLES);
-        int rangeAt = cycles.indexOf("..");
-        String startCycle;
-        if (0 < rangeAt) {
-            startCycle = cycles.substring(0, rangeAt);
-        } else {
-            startCycle = "0";
-        }
-
-        return Unit.longCountFor(startCycle).orElseThrow(
-                () -> new RuntimeException("Unable to parse start cycles from " + startCycle)
-        );
+        return getCyclesSpec().first_inclusive();
     }
 
-    public void setStartCycle(long startCycle) {
-        parameterMap.set(FIELD_CYCLES, startCycle + ".." + getEndCycle());
+    public void setStartCycle(long firstCycleInclusive) {
+        cyclesSpec=getCyclesSpec().withFirst(firstCycleInclusive);
     }
 
-    public void setStartCycle(String startCycle) {
-        setStartCycle(Unit.longCountFor(startCycle).orElseThrow(
-                () -> new RuntimeException("Unable to convert start cycle '" + startCycle + "' to a value.")
-        ));
+    public void setStartCycle(String firstCycleInclusive) {
+        cyclesSpec=getCyclesSpec().withFirst(firstCycleInclusive);
     }
 
-    public void setEndCycle(String endCycle) {
-        setEndCycle(Unit.longCountFor(endCycle).orElseThrow(
-                () -> new RuntimeException("Unable to convert end cycle '" + endCycle + "' to a value.")
-        ));
+    public void setEndCycle(long lastCycleExclusive) {
+        cyclesSpec=getCyclesSpec().withLast(lastCycleExclusive);
+    }
+    public void setEndCycle(String lastCycleExclusive) {
+        cyclesSpec=getCyclesSpec().withLast(lastCycleExclusive);
     }
 
     /**
@@ -143,21 +134,7 @@ public class ActivityDef implements NBNamedElement {
      * @return the long end cycle
      */
     public long getEndCycle() {
-        String cycles = parameterMap.getOptionalString(FIELD_CYCLES).orElse(DEFAULT_CYCLES);
-        int rangeAt = cycles.indexOf("..");
-        String endCycle;
-        if (0 < rangeAt) {
-            endCycle = cycles.substring(rangeAt + 2);
-        } else {
-            endCycle = cycles;
-        }
-        return Unit.longCountFor(endCycle).orElseThrow(
-                () -> new RuntimeException("Unable to convert end cycle from " + endCycle)
-        );
-    }
-
-    public void setEndCycle(long endCycle) {
-        parameterMap.set(FIELD_CYCLES, getStartCycle() + ".." + endCycle);
+        return getCyclesSpec().last_exclusive();
     }
 
     /**
@@ -188,21 +165,32 @@ public class ActivityDef implements NBNamedElement {
 
     public void setCycles(String cycles) {
         parameterMap.set(FIELD_CYCLES, cycles);
+        this.cyclesSpec=CyclesSpec.parse(cycles);
         checkInvariants();
     }
 
     public String getCycleSummary() {
-        return "["
-                + getStartCycle()
-                + ".."
-                + getEndCycle()
-                + ")="
-                + getCycleCount();
+        return getCyclesSpec().summary();
     }
 
-    public long getCycleCount() {
-        return getEndCycle() - getStartCycle();
+    public synchronized long getCycleCount() {
+        return getCyclesSpec().cycle_count();
     }
+
+    public synchronized CyclesSpec getCyclesSpec() {
+        if (this.cyclesSpec==null) {
+            this.cyclesSpec = CyclesSpec.parse(parameterMap.getOptionalString(FIELD_CYCLES).orElse(DEFAULT_CYCLES));
+        }
+        return this.cyclesSpec;
+    }
+    public synchronized CyclesSpec getRecyclesSpec() {
+        if (this.reCyclesSpec==null) {
+            this.reCyclesSpec = CyclesSpec.parse(parameterMap.getOptionalString(FIELD_RECYCLES).orElse(DEFAULT_RECYCLES));
+        }
+        return this.reCyclesSpec;
+
+    }
+
 
     private void checkInvariants() {
         if (getStartCycle() >= getEndCycle()) {
