@@ -139,7 +139,7 @@ public class ComputeFunctions {
     public static double F1(int[] relevant, int[] actual, int k) {
         double recallAtK = recall(relevant, actual, k);
         double precisionAtK = precision(relevant, actual, k);
-        return 2.0d * ((recallAtK * precisionAtK) / (recallAtK + precisionAtK));
+        return (2.0d * (recallAtK * precisionAtK)) / (recallAtK + precisionAtK);
     }
 
     public static double F1(long[] relevant, long[] actual) {
@@ -149,7 +149,7 @@ public class ComputeFunctions {
     public static double F1(long[] relevant, long[] actual, int k) {
         double recallAtK = recall(relevant, actual, k);
         double precisionAtK = precision(relevant, actual, k);
-        return 2.0d * ((recallAtK * precisionAtK) / (recallAtK + precisionAtK));
+        return (2.0d * (recallAtK * precisionAtK)) / (recallAtK + precisionAtK);
     }
 
     /**
