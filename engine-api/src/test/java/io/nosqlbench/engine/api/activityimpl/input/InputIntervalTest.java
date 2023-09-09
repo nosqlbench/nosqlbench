@@ -25,7 +25,7 @@ public class InputIntervalTest {
 
     @Test
     public void testBasicInterval() {
-        InputInterval ii = new InputInterval(3,6);
+        InputInterval ii = new InputInterval(0L,3,6);
 
         CycleSegment s1 = ii.getInputSegment(1);
         assertThat(s1).isNotNull();

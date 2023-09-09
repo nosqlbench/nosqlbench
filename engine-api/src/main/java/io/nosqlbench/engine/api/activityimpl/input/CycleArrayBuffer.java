@@ -20,22 +20,24 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleArray;
 
 public class CycleArrayBuffer {
 
+    private final long recycle;
     long[] cycles;
-    int current=0;
+    int current = 0;
 
-    public CycleArrayBuffer(int len) {
+    public CycleArrayBuffer(int len, long recycle) {
         cycles = new long[len];
+        this.recycle = recycle;
     }
 
     public void append(long cycleNumber) {
-        cycles[current++]=cycleNumber;
+        cycles[current++] = cycleNumber;
     }
 
     public int remaining() {
-        return cycles.length-current;
+        return cycles.length - current;
     }
 
     public CycleArray getCycleArray() {
-        return new CycleArray(cycles);
+        return new CycleArray(recycle, cycles);
     }
 }

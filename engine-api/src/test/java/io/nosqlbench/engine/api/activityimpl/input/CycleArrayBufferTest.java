@@ -26,7 +26,7 @@ public class CycleArrayBufferTest {
 
     @Test
     public void testBasicBuffering() {
-        CycleArrayBuffer b = new CycleArrayBuffer(3);
+        CycleArrayBuffer b = new CycleArrayBuffer(3,0L);
         assertThat(b.remaining()).isEqualTo(3);
         b.append(4L);
         assertThat(b.remaining()).isEqualTo(2);

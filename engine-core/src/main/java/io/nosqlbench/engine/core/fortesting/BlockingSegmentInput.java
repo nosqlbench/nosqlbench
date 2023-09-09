@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ import java.util.concurrent.atomic.AtomicLong;
 public class BlockingSegmentInput implements Input {
 
     private final AtomicLong cycle = new AtomicLong(0L);
-    private final InputInterval inputInterval = new InputInterval(0,Long.MAX_VALUE);
+
+    private final InputInterval inputInterval = new InputInterval(0L, 0L, Long.MAX_VALUE);
 
     private CycleSegment segment;
 
@@ -38,14 +39,15 @@ public class BlockingSegmentInput implements Input {
     public synchronized CycleSegment getInputSegment(int segmentLength) {
         try {
             this.wait();
-        } catch (InterruptedException ignored){}
+        } catch (InterruptedException ignored) {
+        }
         CycleSegment toReturn = this.segment;
-        this.segment=null;
+        this.segment = null;
         return toReturn;
     }
 
     public void publishSegment(long... cycleValues) {
-        this.segment = new CycleArray.ArraySegment(cycleValues);
+        this.segment = new CycleArray.ArraySegment(cycleValues, 0L);
         synchronized (this) {
             this.notify();
         }

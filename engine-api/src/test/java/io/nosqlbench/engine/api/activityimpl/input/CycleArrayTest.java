@@ -27,7 +27,7 @@ public class CycleArrayTest {
     @Test
     public void testBasicArray() {
 
-        CycleArray a1 = new CycleArray(2,3,9);
+        CycleArray a1 = new CycleArray(0L, 2,3,9);
 
         CycleSegment s1 = a1.getInputSegment(1);
         assertThat(s1).isNotNull();

@@ -82,7 +82,7 @@ public class CycleLogInput implements Input, AutoCloseable, Iterable<CycleResult
     @Override
     public synchronized CycleSegment getInputSegment(int segmentLength) {
 
-        CycleSegmentBuffer csb = new CycleSegmentBuffer(segmentLength);
+        CycleSegmentBuffer csb = new CycleSegmentBuffer(segmentLength,0L);
 
         while (csb.remaining() > 0) {
 

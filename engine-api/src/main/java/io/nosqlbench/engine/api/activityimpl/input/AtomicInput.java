@@ -19,20 +19,16 @@ import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.CyclesSpec;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import io.nosqlbench.api.engine.util.Unit;
+import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
-import io.nosqlbench.engine.api.activityapi.core.progress.CycleMeter;
-import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.security.InvalidParameterException;
-import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Supplier;
 
 /**
  * <p>TODO: This documentation is out of date as of 2.0.0
@@ -51,12 +47,13 @@ import java.util.function.Supplier;
 public class AtomicInput implements Input, ActivityDefObserver, Gauge<Long>, NBLabeledElement {
     private final static Logger logger = LogManager.getLogger(AtomicInput.class);
 
-    private final AtomicLong cycleValue = new AtomicLong(0L);
-    private final AtomicLong min = new AtomicLong(0L);
-    private final AtomicLong max = new AtomicLong(Long.MAX_VALUE);
+    private final AtomicLong cycle_value = new AtomicLong(0L);
+    private final AtomicLong cycles_min = new AtomicLong(0L);
+    private final AtomicLong cycles_max = new AtomicLong(Long.MAX_VALUE);
 
-    private final AtomicLong recycleValue = new AtomicLong(0L);
-    private final AtomicLong recycleMax = new AtomicLong(0L);
+    private final AtomicLong recycles_min = new AtomicLong(0L);
+    private final AtomicLong recycle_value = new AtomicLong(0L);
+    private final AtomicLong recycles_max = new AtomicLong(0L);
     private final long startedAt = System.currentTimeMillis();
 
     private final ActivityDef activityDef;
@@ -66,85 +63,77 @@ public class AtomicInput implements Input, ActivityDefObserver, Gauge<Long>, NBL
         this.parent = parent;
         this.activityDef = activityDef;
         onActivityDefUpdate(activityDef);
-        ActivityMetrics.gauge(this,"cycle", this);
+        ActivityMetrics.gauge(this, "input_cycles_first", new NBFunctionGauge(this, () -> (double)this.cycles_min.get()));
+        ActivityMetrics.gauge(this, "input_cycles_last", new NBFunctionGauge(this, () -> (double)this.cycles_min.get()));
+        ActivityMetrics.gauge(this, "input_cycle", new NBFunctionGauge(this, () -> (double)this.cycle_value.get()));
+        ActivityMetrics.gauge(this, "input_cycles_total", new NBFunctionGauge(this, this::getTotalCycles));
+        ActivityMetrics.gauge(this, "input_recycles_first", new NBFunctionGauge(this, () -> (double)this.recycles_min.get()));
+        ActivityMetrics.gauge(this, "input_recycles_last", new NBFunctionGauge(this, () -> (double)this.recycles_max.get()));
+        ActivityMetrics.gauge(this, "input_recycle", new NBFunctionGauge(this, () -> (double) this.recycle_value.get()));
+        ActivityMetrics.gauge(this, "input_recycles_total", new NBFunctionGauge(this, this::getTotalRecycles));
+    }
+
+    private double getTotalRecycles() {
+        return 0.0d;
+    }
+
+    private double getTotalCycles() {
+        return 0.0d;
     }
 
     @Override
     public CycleSegment getInputSegment(int stride) {
         while (true) {
-            long current = this.cycleValue.get();
-            long next = current + stride;
-            if (next > max.get()) {
-                if (recycleValue.get() >= recycleMax.get()) {
-                    logger.trace(() -> "Exhausted input for " + activityDef.getAlias() + " at " + current + ", recycle " +
-                        "count " + recycleValue.get());
+            long currentStrideStart = this.cycle_value.get();
+            long nextStrideStart = currentStrideStart + stride;
+            if (nextStrideStart > cycles_max.get()) { // This indicates a stride boundary crossing the end
+                recycle_value.getAndIncrement();
+                if (recycle_value.get() >= recycles_max.get()) {
+                    logger.trace(() -> "Exhausted input for " + activityDef.getAlias() + " at " + currentStrideStart + ", recycle " +
+                            "count " + recycle_value.get());
                     return null;
                 } else {
-                    if (cycleValue.compareAndSet(current, min.get() + stride)) {
-                        recycleValue.getAndIncrement();
-                        logger.trace(() -> "recycling input for " + activityDef.getAlias() + " recycle:" + recycleValue.get());
-                        return new InputInterval.Segment(min.get(), min.get() + stride);
-                    }
+                    cycle_value.set(cycles_min.get());
+                    logger.trace(() -> "recycling input for " + activityDef.getAlias() + " recycle:" + recycle_value.get());
+                    continue;
                 }
             }
-            if (cycleValue.compareAndSet(current, next)) {
-                return new InputInterval.Segment(current, next);
+            if (cycle_value.compareAndSet(currentStrideStart, nextStrideStart)) {
+                return new InputInterval.Segment(recycle_value.get(), currentStrideStart, nextStrideStart);
             }
         }
     }
-
-//    @Override
-//    public double getProgress() {
-//        return (double) (cycleValue.get() - min.get());
-//    }
-//
-//    @Override
-//    public double getTotal() {
-//        return (double) (max.get() - min.get());
-//    }
-//
-//    @Override
-//    public AtomicInputProgress.Range getRange() {
-//        return new Range(this);
-//    }
-//
 
     @Override
     public String toString() {
         return "AtomicInput{" +
-            "cycleValue=" + cycleValue +
-            ", min=" + min +
-            ", max=" + max +
-            ", activity=" + activityDef.getAlias() +
-            '}';
+                "cycleValue=" + cycle_value +
+                ", min=" + cycles_min +
+                ", max=" + cycles_max +
+                ", activity=" + activityDef.getAlias() +
+                '}';
     }
 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
+        CyclesSpec recyclesSpec = activityDef.getRecyclesSpec();
+        CyclesSpec cyclesSpec = activityDef.getCyclesSpec();
 
-        if (activityDef.getCycleCount() == 0) {
-            if (activityDef.getParams().containsKey("cycles")) {
-                throw new RuntimeException("You specified cycles, but the range specified means zero cycles: " + activityDef.getParams().get("cycles"));
-            }
+        cycles_max.set(cyclesSpec.last_exclusive());
+        if (cycles_min.get() != cyclesSpec.first_inclusive()) {
+            logger.info(() -> "resetting cycle value to new start: cycle[" + cycles_min.get() + "->" + cyclesSpec.first_inclusive()+"] " +
+                    " start["+cycle_value.get()+"->"+ cycles_min.get()+"]");
+            cycles_min.set(cyclesSpec.first_inclusive());
+            cycle_value.set(cycles_min.get());
         }
 
-        long startCycle = activityDef.getStartCycle();
-        long endCycle = activityDef.getEndCycle();
-        if (startCycle > endCycle) {
-            throw new InvalidParameterException("min (" + min + ") must be less than or equal to max (" + max + ")");
+        recycles_max.set(recyclesSpec.last_exclusive());
+        if (recycles_min.get() != recyclesSpec.first_inclusive()) {
+            logger.info(() -> "resetting recycle value to new start: recycle[" + recycles_min.get() + "->" + recyclesSpec.first_inclusive()+"] " +
+                    " start["+recycle_value.get()+"->"+ recycles_min.get()+"]");
+            recycles_min.set(recyclesSpec.first_inclusive());
+            recycle_value.set(recyclesSpec.first_inclusive());
         }
-
-        if (max.get() != endCycle) {
-            max.set(endCycle);
-        }
-
-        if (min.get() != startCycle) {
-            min.set(startCycle);
-            cycleValue.set(min.get());
-        }
-
-        long recycles = activityDef.getParams().getOptionalString("recycles").flatMap(Unit::longCountFor).orElse(0L);
-        this.recycleMax.set(recycles);
     }
 
     public long getStartedAtMillis() {
@@ -163,70 +152,6 @@ public class AtomicInput implements Input, ActivityDefObserver, Gauge<Long>, NBL
 
     @Override
     public Long getValue() {
-        return this.cycleValue.get();
-    }
-
-    public static class AtomicInputProgress implements NBLabeledElement, ProgressMeterDisplay, CycleMeter {
-        private final AtomicInput input;
-        private final String name;
-
-        private final NBLabeledElement parent;
-
-        public AtomicInputProgress(NBLabeledElement parent, String name, AtomicInput input) {
-            this.name = name;
-            this.input = input;
-            this.parent = parent;
-        }
-
-        @Override
-        public String getProgressName() {
-            return name;
-        }
-
-        @Override
-        public Instant getStartTime() {
-            return Instant.ofEpochMilli(input.getStartedAtMillis());
-        }
-
-        @Override
-        public double getMaxValue() {
-            return ((double)input.recycleMax.get()+1.0d)*((double)input.max.get()-(double)input.min.get());
-        }
-
-        @Override
-        public double getCurrentValue() {
-            return ((double)input.recycleValue.get())*((double)input.max.get()-(double)input.min.get())
-                +(double)input.cycleValue.get()-(double)input.min.get();
-        }
-
-        @Override
-        public long getMinInputCycle() {
-            return input.min.get();
-        }
-
-        @Override
-        public long getCurrentInputCycle() {
-            return input.cycleValue.get();
-        }
-
-        @Override
-        public long getMaxInputCycle() {
-            return input.max.get();
-        }
-
-        @Override
-        public long getRecyclesCurrent() {
-            return input.recycleValue.get();
-        }
-
-        @Override
-        public long getRecyclesMax() {
-            return input.recycleMax.get();
-        }
-
-        @Override
-        public NBLabels getLabels() {
-            return parent.getLabels();
-        }
+        return this.cycle_value.get();
     }
 }

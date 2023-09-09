@@ -20,11 +20,13 @@ import java.util.Arrays;
 
 public class CycleSegmentBuffer {
 
+    private final long recycle;
     long[] cycleNumbers;
     int pos = 0;
 
-    public CycleSegmentBuffer(int size) {
+    public CycleSegmentBuffer(int size, long recycle) {
         cycleNumbers = new long[size];
+        this.recycle = recycle;
     }
 
     public void append(long cycleNumber) {
@@ -33,9 +35,9 @@ public class CycleSegmentBuffer {
 
     public CycleSegment toReadable() {
         if (pos == cycleNumbers.length) {
-            return new CycleArray.ArraySegment(cycleNumbers);
+            return new CycleArray.ArraySegment(cycleNumbers,recycle);
         } else {
-            return new CycleArray.ArraySegment(Arrays.copyOfRange(cycleNumbers, 0, pos));
+            return new CycleArray.ArraySegment(Arrays.copyOfRange(cycleNumbers, 0, pos), recycle);
         }
     }
 

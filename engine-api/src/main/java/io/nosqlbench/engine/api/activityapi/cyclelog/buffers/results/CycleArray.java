@@ -28,8 +28,10 @@ public class CycleArray implements Input {
 
     private final AtomicInteger offset=new AtomicInteger();
     private final long[] cycles;
+    private final long recycle;
 
-    public CycleArray(long... values) {
+    public CycleArray(long recycle, long... values) {
+        this.recycle = recycle;
         this.cycles = values;
     }
 
@@ -42,7 +44,7 @@ public class CycleArray implements Input {
                 return null;
             }
             if (offset.compareAndSet(current,nextOffset)) {
-                return new ArraySegment(Arrays.copyOfRange(cycles,current,nextOffset));
+                return new ArraySegment(Arrays.copyOfRange(cycles,current,nextOffset),recycle);
             }
             // in all other cases, there was a CAS race condition, and we want to retry
         }
@@ -51,10 +53,12 @@ public class CycleArray implements Input {
     public static class ArraySegment implements CycleSegment {
 
         private final long[] values;
+        private final long recycle;
         private int offset=0;
 
-        public ArraySegment(long[] values) {
+        public ArraySegment(long[] values, long recycle) {
             this.values = values;
+            this.recycle=recycle;
         }
 
         @Override
@@ -63,6 +67,11 @@ public class CycleArray implements Input {
                 return values[offset++];
             }
             return -100;
+        }
+
+        @Override
+        public long nextRecycle() {
+            return recycle;
         }
 
         @Override

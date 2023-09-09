@@ -26,11 +26,13 @@ public class InputInterval implements Input {
     private final long min;
     private final long nextMin;
     private final AtomicLong next;
+    private final long recycle;
 
-    public InputInterval(long min, long nextMin) {
+    public InputInterval(long currentRecycle, long min, long nextMin) {
         this.min = min;
         this.nextMin = nextMin;
         this.next = new AtomicLong(min);
+        this.recycle = currentRecycle;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class InputInterval implements Input {
                 return null;
             }
             if (next.compareAndSet(current,nextCurrent)) {
-                return new Segment(current,nextCurrent);
+                return new Segment(recycle,current,nextCurrent);
             }
             // in all other cases, there was a CAS race condition, and we want to retry
         }
@@ -56,12 +58,14 @@ public class InputInterval implements Input {
 
         private final long afterEnd;
         private final long start;
+        private final long recycle;
         private long next;
 
-        public Segment(long start, long afterEnd) {
+        public Segment(long currentRecycle, long start, long afterEnd) {
             this.start = start;
             this.afterEnd = afterEnd;
             this.next = start;
+            this.recycle = currentRecycle;
         }
 
         @Override
@@ -70,6 +74,11 @@ public class InputInterval implements Input {
                 return next++;
             }
             return -100;
+        }
+
+        @Override
+        public long nextRecycle() {
+            return recycle;
         }
 
         @Override

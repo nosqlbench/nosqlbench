@@ -32,6 +32,7 @@ public interface CycleSegment {
      * @return a positive and valid long cycle, or a negative indicator of end of input
      */
     long nextCycle();
+    long nextRecycle();
 
     /**
      * @return true if the input can provide no further cycles
@@ -54,4 +55,5 @@ public interface CycleSegment {
      * @return the next cycle that will be returned
      */
     long peekNextCycle();
+
 }
