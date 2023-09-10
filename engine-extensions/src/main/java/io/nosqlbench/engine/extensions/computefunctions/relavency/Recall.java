@@ -29,7 +29,7 @@ public class Recall extends BaseRelevancyFunction {
         this.k = k;
     }
     public Recall(String name, int k, Map<String,String> labels) {
-        super(name, NBLabels.forKV("k",labels).andTypes(labels));
+        super(name, NBLabels.forKV("k",labels).and(labels));
         this.k = k;
     }
 

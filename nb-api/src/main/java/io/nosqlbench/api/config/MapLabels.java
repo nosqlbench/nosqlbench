@@ -24,17 +24,15 @@ import java.util.regex.Pattern;
 
 public class MapLabels implements NBLabels {
     private final Map<String,String> labels;
-    private String[] instanceFields = new String[0];
 
     public MapLabels(final Map<String, String> labels, String... instanceFields) {
         verifyValidNamesAndValues(labels);
 //        verifyValidValues(labels);
         this.labels = Collections.unmodifiableMap(labels);
-        this.instanceFields = instanceFields;
     }
 
 
-    public MapLabels(final Map<String,String> parentLabels, final Map<String,String> childLabels, String... instanceFields) {
+    public MapLabels(final Map<String,String> parentLabels, final Map<String,String> childLabels) {
         final Map<String, String> combined = new LinkedHashMap<>(parentLabels);
         childLabels.forEach((k,v) -> {
             if (combined.containsKey(k))
@@ -43,7 +41,6 @@ public class MapLabels implements NBLabels {
         });
         verifyValidNamesAndValues(combined);
 //        verifyValidValues(combined);
-        this.instanceFields = instanceFields;
         labels=Collections.unmodifiableMap(combined);
     }
 
@@ -124,27 +121,14 @@ public class MapLabels implements NBLabels {
     }
 
     @Override
-    public MapLabels andTypes(final Object... labelsAndValues) {
+    public MapLabels and(final Object... labelsAndValues) {
         final Map<String,String> childLabels = getStringStringMap(labelsAndValues);
         return new MapLabels(labels,childLabels);
     }
 
     @Override
     public MapLabels and(NBLabels labels) {
-        return new MapLabels(this.labels,labels.asMap(), concat(this.instanceFields,labels.getInstanceFields()));
-    }
-
-
-    @Override
-    public MapLabels andInstances(final Object... labelsAndValues) {
-        final Map<String,String> childLabels = getStringStringMap(labelsAndValues);
-        String[] childInstanceFields = getNamesArray(labelsAndValues);
-        return new MapLabels(this.labels,childLabels,concat(this.instanceFields,getNamesArray(labelsAndValues)));
-    }
-
-    @Override
-    public MapLabels andInstances(Map<String, String> instanceLabelsAndValues) {
-        return new MapLabels(this.labels,instanceLabelsAndValues,instanceLabelsAndValues.keySet().toArray(new String[0]));
+        return new MapLabels(this.labels,labels.asMap());
     }
     @Override
     public NBLabels modifyName(final String nameToModify, final Function<String, String> transform) {
@@ -194,30 +178,7 @@ public class MapLabels implements NBLabels {
     }
 
     @Override
-    public NBLabels onlyTypes() {
-        Map<String,String> typesOnlyMap = new LinkedHashMap<>(this.labels);
-        for (String instanceField : this.instanceFields) {
-            typesOnlyMap.remove(instanceField);
-        }
-        return new MapLabels(typesOnlyMap);
-    }
-
-    @Override
-    public NBLabels onlyInstances() {
-        Map<String,String> instancesOnlyMap = new LinkedHashMap<>();
-        for (String instanceField : this.instanceFields) {
-            instancesOnlyMap.put(instanceField,this.labels.get(instanceField));
-        }
-        return new MapLabels(instancesOnlyMap);
-    }
-
-    @Override
-    public String[] getInstanceFields() {
-        return instanceFields;
-    }
-
-    @Override
-    public NBLabels andTypes(final Map<String, String> moreLabels) {
+    public NBLabels and(final Map<String, String> moreLabels) {
         return new MapLabels(this.labels, moreLabels);
     }
 

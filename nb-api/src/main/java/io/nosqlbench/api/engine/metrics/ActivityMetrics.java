@@ -106,7 +106,7 @@ public class ActivityMetrics {
      * @return the timer, perhaps a different one if it has already been registered
      */
     public static Timer timer(NBLabeledElement parent, String metricFamilyName, int hdrdigits) {
-        final NBLabels labels = parent.getLabels().andTypes("name",sanitize(metricFamilyName));
+        final NBLabels labels = parent.getLabels().and("name",sanitize(metricFamilyName));
 
 
         Timer registeredTimer = (Timer) register(labels, () ->
@@ -135,7 +135,7 @@ public class ActivityMetrics {
      * @return the histogram, perhaps a different one if it has already been registered
      */
     public static Histogram histogram(NBLabeledElement labeled, String metricFamilyName, int hdrdigits) {
-        final NBLabels labels = labeled.getLabels().andTypes("name", sanitize(metricFamilyName));
+        final NBLabels labels = labeled.getLabels().and("name", sanitize(metricFamilyName));
         return (Histogram) register(labels, () ->
             new NBMetricHistogram(
                 labels,
@@ -158,7 +158,7 @@ public class ActivityMetrics {
      * @return the counter, perhaps a different one if it has already been registered
      */
     public static Counter counter(NBLabeledElement parent, String metricFamilyName) {
-        final NBLabels labels = parent.getLabels().andTypes("name",metricFamilyName);
+        final NBLabels labels = parent.getLabels().and("name",metricFamilyName);
         return (Counter) register(labels, () -> new NBMetricCounter(labels));
     }
 
@@ -174,7 +174,7 @@ public class ActivityMetrics {
      * @return the meter, perhaps a different one if it has already been registered
      */
     public static Meter meter(NBLabeledElement parent, String metricFamilyName) {
-        final NBLabels labels = parent.getLabels().andTypes("name",sanitize(metricFamilyName));
+        final NBLabels labels = parent.getLabels().and("name",sanitize(metricFamilyName));
         return (Meter) register(labels, () -> new NBMetricMeter(labels));
     }
 
@@ -204,7 +204,7 @@ public class ActivityMetrics {
         DoubleSummaryGauge anyGauge = null;
         for (DoubleSummaryGauge.Stat statName: DoubleSummaryGauge.Stat.values()){
             final NBLabels labels = parent.getLabels()
-                .andTypes("name",sanitize(metricFamilyName))
+                .and("name",sanitize(metricFamilyName))
                 .modifyValue("name", n -> n+"_"+statName.name().toLowerCase());
             anyGauge= (DoubleSummaryGauge) register(labels, () -> new DoubleSummaryGauge(labels,statName,stats));
         }
@@ -213,7 +213,7 @@ public class ActivityMetrics {
 
     @SuppressWarnings("unchecked")
     public static <T> Gauge<T> gauge(NBLabeledElement parent, String metricFamilyName, Gauge<T> gauge) {
-        final NBLabels labels = parent.getLabels().andTypes("name",sanitize(metricFamilyName));
+        final NBLabels labels = parent.getLabels().and("name",sanitize(metricFamilyName));
 
         return (Gauge<T>) register(labels, () -> new NBMetricGaugeWrapper<>(labels,gauge));
     }

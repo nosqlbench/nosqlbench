@@ -95,7 +95,7 @@ public class SimpleActivity implements Activity {
 
     public SimpleActivity(ActivityDef activityDef, NBLabeledElement parentLabels) {
         NBLabels activityLabels = parentLabels.getLabels()
-                .andTypes("activity", activityDef.getAlias());
+                .and("activity", activityDef.getAlias());
         Optional<String> auxLabelSpec = activityDef.getParams().getOptionalString("labels");
         if (auxLabelSpec.isPresent()) {
             activityLabels = activityLabels.and(NBLabelSpec.parseLabels(auxLabelSpec.get()));

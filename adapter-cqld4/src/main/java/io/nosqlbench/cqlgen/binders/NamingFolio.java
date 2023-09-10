@@ -71,13 +71,13 @@ public class NamingFolio {
      * by name, type, table, keyspace. For now it just returns everything in fully qualified form.
      */
     public String nameFor(NBLabeledElement labeled, String... fields) {
-        NBLabels labelsPlus = labeled.getLabels().andTypes(fields);
+        NBLabels labelsPlus = labeled.getLabels().and(fields);
         String name = namer.apply(labelsPlus.asMap());
         return name;
     }
 
     public String nameFor(NBLabeledElement labeled, Map<String,String> fields) {
-        NBLabels labelsPlus = labeled.getLabels().andTypes(fields);
+        NBLabels labelsPlus = labeled.getLabels().and(fields);
         String name = namer.apply(labelsPlus.asMap());
         return name;
 

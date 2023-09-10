@@ -59,10 +59,10 @@ public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
             ga.setTime(annotation.getStart());
             ga.setTimeEnd(annotation.getEnd());
 
-            annotation.getLabels().onlyTypes().asMap().forEach((k, v) -> {
+            annotation.getLabels().asMap().forEach((k, v) -> {
                 ga.getTags().add(k + ":" + v);
             });
-            annotation.getLabels().onlyInstances().asMap().forEach((k,v)->{
+            annotation.getLabels().asMap().forEach((k,v)->{
                 ga.addText(" " + k + ":" + v);
             });
             ga.getTags().add("layer:" + annotation.getLayer().toString());

@@ -354,7 +354,7 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, NBLabeledElement,
             activityCfg.getMap())
         );
 
-        NBLabels opLabels = parent.getLabels().andTypes("op", this.getName());
+        NBLabels opLabels = parent.getLabels().and("op", this.getName());
         if (tmap.isStatic("labels")) {
             Object labelSpecObject = tmap.takeStaticValue("labels", Object.class);
             if (labelSpecObject instanceof String labelsSpec) {

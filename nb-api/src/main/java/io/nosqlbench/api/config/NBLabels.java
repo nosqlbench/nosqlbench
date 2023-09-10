@@ -142,7 +142,7 @@ public interface NBLabels {
      *     Keys and values in "key1", "value1", "key2", "value2", ... form
      * @return A new NBLabels instance
      */
-    NBLabels andTypes(Object... typeLabelsAndValues);
+    NBLabels and(Object... typeLabelsAndValues);
 
     NBLabels and(NBLabels labels);
     /**
@@ -150,10 +150,7 @@ public interface NBLabels {
      * @param typeLabelsAndValues a map of keys and values
      * @return A new NBLabels instance
      */
-    NBLabels andTypes(Map<String, String> typeLabelsAndValues);
-    NBLabels andInstances(Object... instanceLabelsAndValues);
-
-    NBLabels andInstances(Map<String,String> instanceLabelsAndValues);
+    NBLabels and(Map<String, String> typeLabelsAndValues);
 
     /**
      * Return the value of the specified label key.
@@ -176,9 +173,5 @@ public interface NBLabels {
     /**
      * @return a new set of labels which includes only those which are not using per-instance semantics.
      */
-    NBLabels onlyTypes();
-    NBLabels onlyInstances();
-
-    String[] getInstanceFields();
 
 }

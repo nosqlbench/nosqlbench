@@ -82,7 +82,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
 
     @Override
     public NBLabels getLabels() {
-        return this.parentComponent.getLabels().andTypes("scenario", this.scenarioName);
+        return this.parentComponent.getLabels().and("scenario", this.scenarioName);
     }
 
     public enum State {

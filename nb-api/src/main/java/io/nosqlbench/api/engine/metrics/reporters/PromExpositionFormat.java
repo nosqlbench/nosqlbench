@@ -85,13 +85,13 @@ public class PromExpositionFormat {
                 for (final double quantile : new double[]{0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999}) {
                     final double value = snapshot.getValue(quantile);
                     buffer
-                        .append(labels.modifyValue("name",n -> n+"_bucket").andTypes("le", String.valueOf(quantile)).linearize("name"))
+                        .append(labels.modifyValue("name",n -> n+"_bucket").and("le", String.valueOf(quantile)).linearize("name"))
 //                        .append(labels.andTypes("quantile", String.valueOf(quantile)).linearize("name"))
                         .append(' ')
                         .append(value)
                         .append('\n');
                 }
-                buffer.append(labels.modifyValue("name",n->n+"_bucket").andTypes("le","+Inf").linearize("name"))
+                buffer.append(labels.modifyValue("name",n->n+"_bucket").and("le","+Inf").linearize("name"))
                     .append(' ')
                     .append(snapshot.getMax())
                     .append('\n');

@@ -51,7 +51,7 @@ public class AmqpAdapterMetrics {
 
     public AmqpAdapterMetrics(final AmqpBaseOpDispenser amqpBaseOpDispenser, final NBLabeledElement labeledParent) {
         this.amqpBaseOpDispenser = amqpBaseOpDispenser;
-        labels=labeledParent.getLabels().andTypes("name", AmqpAdapterMetrics.class.getSimpleName());
+        labels=labeledParent.getLabels().and("name", AmqpAdapterMetrics.class.getSimpleName());
     }
 
     public void initS4JAdapterInstrumentation() {
