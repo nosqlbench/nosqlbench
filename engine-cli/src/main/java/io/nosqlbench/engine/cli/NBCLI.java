@@ -400,7 +400,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         NBCLI.logger.debug("initializing annotators with config:'{}'", annotatorsConfig);
-        Annotators.init(annotatorsConfig);
+        Annotators.init(annotatorsConfig, options.getAnnotateLabelSpec());
         Annotators.recordAnnotation(
                 Annotation.newBuilder()
                         .element(this)

@@ -27,14 +27,18 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.function.Function;
 
 public class MutableAnnotation implements Annotation {
 
     private final static Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
     private String session = "SESSION_UNNAMED";
     private final ZoneId GMT = ZoneId.of("GMT");
+
+    private final LinkedList<Function<NBLabels,NBLabels>> labelfuncs = new LinkedList<>();
 
     @Expose
     private Layer layer;
@@ -47,6 +51,8 @@ public class MutableAnnotation implements Annotation {
 
     @Expose
     private Map<String, String> details = new LinkedHashMap<>();
+
+    NBLabels labels = NBLabels.forKV();
 
     private final ZoneId zoneid = ZoneId.of("GMT");
     private NBLabeledElement element;
@@ -69,6 +75,7 @@ public class MutableAnnotation implements Annotation {
 
     private void setElement(NBLabeledElement element) {
         this.element = element;
+        this.labels = element.getLabels();
     }
 
     public void setSession(String sessionName) {
@@ -108,7 +115,16 @@ public class MutableAnnotation implements Annotation {
 
     @Override
     public NBLabels getLabels() {
-        return element.getLabels();
+        NBLabels labels= element.getLabels();
+        for (Function<NBLabels, NBLabels> f : labelfuncs) {
+            labels = f.apply(labels);
+        }
+        return labels;
+    }
+
+    @Override
+    public void applyLabelFunction(Function<NBLabels, NBLabels> labelfunc) {
+        labelfuncs.add(labelfunc);
     }
 
     @Override

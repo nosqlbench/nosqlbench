@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,10 @@ package io.nosqlbench.engine.core.annotation;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Annotator;
-import io.nosqlbench.api.config.standard.ConfigLoader;
-import io.nosqlbench.api.config.standard.NBConfigurable;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.config.standard.NBMapConfigurable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,6 +40,8 @@ public class Annotators {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private static List<Annotator> annotators;
+    private static NBLabelsFilter filter;
+    private static NBLabelsValidator validator;
 
     /**
      * Initialize the active annotators. This method must be called before any others.
@@ -50,7 +49,10 @@ public class Annotators {
      * @param annotatorsConfig A (possibly empty) set of annotator configurations, in any form
      *                         supported by {@link ConfigLoader}
      */
-    public synchronized static void init(String annotatorsConfig) {
+    public synchronized static void init(String annotatorsConfig, String annotateLabelSpec) {
+
+        filter = new NBLabelsFilter(annotateLabelSpec);
+        validator = new NBLabelsValidator(annotateLabelSpec);
 
         ConfigLoader loader = new ConfigLoader();
         annotators = new ArrayList<>();
@@ -120,6 +122,8 @@ public class Annotators {
     }
 
     public static synchronized void recordAnnotation(Annotation annotation) {
+        annotation.applyLabelFunction(filter);
+        annotation.applyLabelFunction(validator);
         for (Annotator annotator : getAnnotators()) {
             try {
                 logger.trace(() -> "calling annotator " + annotator.getClass().getAnnotation(Service.class).selector());

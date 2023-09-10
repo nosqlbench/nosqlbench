@@ -52,6 +52,8 @@ public class NBCLIOptions {
     private static final Map<String, String> DEFAULT_LABELS = Map.of("appname", "nosqlbench");
     private static final String METRICS_PREFIX = "--metrics-prefix";
     private static final String ANNOTATE_EVENTS = "--annotate";
+
+    private static final String ANNOTATE_LABELSPEC = "--annotate-labelspec";
     private static final String ANNOTATORS_CONFIG = "--annotators";
     private static final String PROMPUSH_CONFIG = "--prompush";
 
@@ -200,6 +202,7 @@ public class NBCLIOptions {
     private boolean wantsListApps;
     private boolean dedicatedVerificationLogger;
     private boolean wantsConsoleMetrics =true;
+    private String annotateLabelSpec="";
 
     public boolean wantsLoggedMetrics() { return this.wantsConsoleMetrics; }
     public boolean isWantsListApps() {
@@ -256,6 +259,10 @@ public class NBCLIOptions {
 
     public void enableDedicatedVerificationLogger() {
         this.dedicatedVerificationLogger = true;
+    }
+
+    public String getAnnotateLabelSpec() {
+        return annotateLabelSpec;
     }
 
     public enum Mode {
@@ -497,6 +504,9 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     this.wantsConsoleMetrics =false;
                     break;
+                case ANNOTATE_LABELSPEC:
+                    arglist.removeFirst();
+                    this.annotateLabelSpec = this.readWordOrThrow(arglist, "labels validator specification");
                 default:
                     nonincludes.addLast(arglist.removeFirst());
             }

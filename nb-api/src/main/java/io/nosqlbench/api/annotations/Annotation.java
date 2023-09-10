@@ -20,6 +20,7 @@ import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
 
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * This is a general purpose representation of an event that describes
@@ -75,6 +76,7 @@ public interface Annotation extends NBLabeledElement {
      */
     NBLabels getLabels();
 
+    void applyLabelFunction(Function<NBLabels,NBLabels> labelfunc);
     /**
      * The details are an ordered map of all the content that you would want the user to see.
      *

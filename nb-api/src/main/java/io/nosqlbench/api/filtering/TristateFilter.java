@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate;
+package io.nosqlbench.api.filtering;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * A tri-state filter allows for flexible configuration of
+ * <P>A tri-state filter allows for flexible configuration of
  * multi-phase filtering. It effectively allows a conditional behavior
  * for filtering logic that can answer "yes", "no", <em>and</em> "I don't know."
+ * </P>
  *
- * This can also be used to build classic bi-state filtering, such as
+ * <P>This can also be used to build classic bi-state filtering, such as
  * filters that use a boolean predicate to say "keep" or "discard." Where the
  * tri-state filtering pattern shines, however, is in the ability to combine
  * different filtering rules to build a sophisticated filter at run-time
- * that bi-state filtering would prevent.
+ * that bi-state filtering would prevent.</P>
  *
- * In contrast to the bi-state filter, the default policy that is applied when
+ * <P>In contrast to the bi-state filter, the default policy that is applied when
  * <em>not</em> matching an item with the predicate is to simply ignore it.
  * This means that in order to implement both matching and discarding
  * policies like a bi-state filter, you must do one of the following:
@@ -38,22 +39,22 @@ import java.util.function.Predicate;
  *     <li>Implement a default policy that overrides the "Ignore" action.</li>
  *     <li>Use both "keep" and "discard" predicates together in sequence.</li>
  * </ul>
+ * </P>
  *
- * The two techniques above are not mutually exclusive. In practice, tri-state
+ * <P>The two techniques above are not mutually exclusive. In practice, tri-state
  * filters are used to build up chains of filters which can delegate down
  * the chain if up-stream filters do not have enough information to make
  * a keep or discard determination. Even in chained filters will have a
- * default policy that will override the "ignore" outcome.
+ * default policy that will override the "ignore" outcome.</P>
  *
- * Filter chains that
+ * <P>Filter chains that
  * have a default "exclude" policy that overrides "ignore" policies are
  * called "exclusive" filters. Their counterparts are "inclusive" filters.
  * In other words, Exclusive tri-state filters include an element if and only
  * if there was a matching include rule before any matching exclude rules
- * or the end of the filter chain.
- * Inclusive tri-state filters exclude an element if and only if there was
- * a matching exclude rule before any matching include rules or the end of
- * the filter chain.
+ * or the end of the filter chain, whereas inclusive tri-state filters exclude
+ * an element if and only if there was a matching exclude rule before any matching
+ * include rules or the end of the filter chain.</P>
  */
 public interface TristateFilter<T> extends Function<T, TristateFilter.Policy> {
 
@@ -62,9 +63,8 @@ public interface TristateFilter<T> extends Function<T, TristateFilter.Policy> {
 
     /**
      * The filter action determines what action is taken for a given
-     * element that matches the predicate. If the whether to include or exclude a result
      * of the filter matching. If the filter does not match, then neither
-     * include nor exclude are presumed. See the class docs for more details.
+     * element that matches the predicate.
      */
     enum Policy {
         Keep,
@@ -74,11 +74,17 @@ public interface TristateFilter<T> extends Function<T, TristateFilter.Policy> {
 
     /**
      * Create a predicate that will override any Ignore outcomes with the provided policy.
-     * @param defaultPolicy The policy that will override non-actionable outcomes
+     *
+     * @param defaultPolicy
+     *         The policy that will override non-actionable outcomes
      * @return a Predicate that can be used to filter elements
      */
     default Predicate<T> toDefaultingPredicate(Policy defaultPolicy) {
-        return new DefaultingPredicate<>(this,defaultPolicy);
+        return new DefaultingPredicate<>(this, defaultPolicy);
+    }
+
+    default TristateFilter<T> toDefaultingFilter(Policy defaultPolicy) {
+        return new DefaultingTriStateFilter(this,defaultPolicy);
     }
 
     class DefaultingPredicate<T> implements Predicate<T> {
@@ -93,10 +99,10 @@ public interface TristateFilter<T> extends Function<T, TristateFilter.Policy> {
         @Override
         public boolean test(T t) {
             Policy policyResult = filter.apply(t);
-            if (policyResult==Policy.Ignore) {
-                policyResult= defaultPolicy;
+            if (policyResult == Policy.Ignore) {
+                policyResult = defaultPolicy;
             }
-            return policyResult==Policy.Keep;
+            return policyResult == Policy.Keep;
         }
     }
 
@@ -104,11 +110,13 @@ public interface TristateFilter<T> extends Function<T, TristateFilter.Policy> {
     /**
      * Create a predicate that will return true if and only if the filter
      * outcome matches the provided policy.
-     * @param matchingPolicy The policy that will signal true in the predicate.
+     *
+     * @param matchingPolicy
+     *         The policy that will signal true in the predicate.
      * @return a Predicate that can be used to filter elements
      */
     default Predicate<T> toMatchingPredicate(Policy matchingPolicy) {
-        return new MatchingPredicate<>(this,matchingPolicy);
+        return new MatchingPredicate<>(this, matchingPolicy);
     }
 
     class MatchingPredicate<T> implements Predicate<T> {
@@ -122,9 +130,25 @@ public interface TristateFilter<T> extends Function<T, TristateFilter.Policy> {
 
         @Override
         public boolean test(T t) {
-            return filter.apply(t)==matchOn;
+            return filter.apply(t) == matchOn;
         }
     }
 
 
+    class DefaultingTriStateFilter<U> implements TristateFilter<U> {
+        private final TristateFilter<U> wrappedFilter;
+        private final Policy defaultPolicy;
+
+        public DefaultingTriStateFilter(TristateFilter<U> innerFilter, Policy defaultPolicy) {
+            this.wrappedFilter = innerFilter;
+            this.defaultPolicy = defaultPolicy;
+        }
+
+        @Override
+        public Policy apply(U cycleResult) {
+            Policy policy = wrappedFilter.apply(cycleResult);
+            if (policy!=Policy.Ignore) return policy;
+            return defaultPolicy;
+        }
+    }
 }

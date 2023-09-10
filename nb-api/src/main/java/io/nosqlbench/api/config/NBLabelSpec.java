@@ -33,14 +33,14 @@ public class NBLabelSpec {
                 throw new BasicError("Unable to parse labels to set:" + labeldata);
             }
             if (parts[1].startsWith("#")) {
-                buf = buf.and(NBLabels.forKV().andInstances(parts[0], parts[1].substring(1)));
+                buf = buf.and(NBLabels.forKV().and(parts[0], parts[1].substring(1)));
             } else if (parts[1].startsWith("$")) {
-                buf = buf.and(NBLabels.forKV().andTypes(parts[0], parts[1].substring(1)));
+                buf = buf.and(NBLabels.forKV().and(parts[0], parts[1].substring(1)));
             } else {
 //                if (parts[1].matches(".*[0-9]+.*")) {
 //                    throw new BasicError("You have specified an auxiliary tag which contains numbers in its value (" + component + "), but you have not designated it as a dimension, as in " + parts[0] + ":$" + parts[1] + " or an instance value, as in " + parts[0] + ":#" + parts[1]);
 //                }
-                buf = buf.and(NBLabels.forKV().andTypes(parts[0], parts[1]));
+                buf = buf.and(NBLabels.forKV().and(parts[0], parts[1]));
             }
         }
         return buf;

@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityapi.cyclelog.tristate;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.MutableCycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.ResultFilteringSieve;
-import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.TristateFilter;
+import io.nosqlbench.api.filtering.TristateFilter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import org.junit.jupiter.api.Test;
 

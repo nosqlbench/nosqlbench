@@ -153,6 +153,9 @@ public class MapLabels implements NBLabels {
     }
 
     public String toString() {
+        if (labels.size()==0) {
+            return "{}";
+        }
         StringBuilder sb = new StringBuilder("{");
         labels.forEach((k,v) -> {
             sb.append(k).append(":\\\"").append(v).append("\\\"").append(",");
@@ -203,5 +206,20 @@ public class MapLabels implements NBLabels {
         final Map<String, String> childLabels = new LinkedHashMap<>();
         for (int i = 0; i < labelsAndValues.length; i+=2) childLabels.put(labelsAndValues[i].toString(), labelsAndValues[i + 1].toString());
         return childLabels;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MapLabels mapLabels = (MapLabels) o;
+
+        return Objects.equals(labels, mapLabels.labels);
+    }
+
+    @Override
+    public int hashCode() {
+        return labels != null ? labels.hashCode() : 0;
     }
 }

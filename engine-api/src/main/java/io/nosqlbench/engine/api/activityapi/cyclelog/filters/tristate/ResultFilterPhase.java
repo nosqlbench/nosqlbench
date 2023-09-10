@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate;
 
+import io.nosqlbench.api.filtering.TristateFilter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 
 import java.util.function.Predicate;
