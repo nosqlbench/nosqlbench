@@ -49,7 +49,7 @@ public class NBLabelsValidator implements Function<NBLabels, NBLabels> {
         missingFields.removeIf(keyset::contains);
         extraneousFields.removeIf(extra -> !keyset.contains(extra));
 
-        Result result = new Result(config, missingFields, extraneousFields);
+        Result result = new Result(labels, config, missingFields, extraneousFields);
         if (!result.isError()) {
             return labels;
         }
@@ -58,7 +58,7 @@ public class NBLabelsValidator implements Function<NBLabels, NBLabels> {
     }
 
 
-    record Result(String config, LinkedList<String> missingFields, LinkedList<String> extraneousFields) {
+    record Result(NBLabels labels, String config, LinkedList<String> missingFields, LinkedList<String> extraneousFields) {
         public boolean isError() {
             return !missingFields.isEmpty() || !extraneousFields.isEmpty();
         }

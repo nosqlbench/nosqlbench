@@ -124,6 +124,8 @@ public class Annotators {
     public static synchronized void recordAnnotation(Annotation annotation) {
         annotation.applyLabelFunction(filter);
         annotation.applyLabelFunction(validator);
+        // sanity check here first
+        annotation.getLabels();
         for (Annotator annotator : getAnnotators()) {
             try {
                 logger.trace(() -> "calling annotator " + annotator.getClass().getAnnotation(Service.class).selector());

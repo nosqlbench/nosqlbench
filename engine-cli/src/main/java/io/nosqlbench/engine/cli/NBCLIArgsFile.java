@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -465,6 +465,11 @@ public class NBCLIArgsFile {
                 args.addAll(Arrays.asList(words));
             } else {
                 args.add(line);
+            }
+            if ((args.peekLast().startsWith("\"") && args.peekLast().endsWith("\""))||(
+                    (args.peekLast().startsWith("'") && args.peekLast().endsWith("'")))) {
+                String unquote = args.removeLast();
+                args.addLast(unquote.substring(1, unquote.length()-1));
             }
         }
         return args;

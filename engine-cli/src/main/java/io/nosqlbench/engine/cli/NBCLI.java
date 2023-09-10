@@ -282,6 +282,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         NBIO.addGlobalIncludes(options.wantsIncludes());
 
         ActivityMetrics.setHdrDigits(options.getHdrDigits());
+        ActivityMetrics.setLabelValidator(options.getAnnotateLabelSpec());
 
         if (options.wantsBasicHelp()) {
             System.out.println(this.loadHelpFile("basic.md"));

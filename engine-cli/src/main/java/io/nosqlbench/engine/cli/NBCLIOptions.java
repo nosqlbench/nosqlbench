@@ -54,6 +54,8 @@ public class NBCLIOptions {
     private static final String ANNOTATE_EVENTS = "--annotate";
 
     private static final String ANNOTATE_LABELSPEC = "--annotate-labelspec";
+    private static final String METRICS_LABELSPEC = "--metrics-labelspec";
+    private static final String LABELSPEC = "--labelspec";
     private static final String ANNOTATORS_CONFIG = "--annotators";
     private static final String PROMPUSH_CONFIG = "--prompush";
 
@@ -86,6 +88,7 @@ public class NBCLIOptions {
 
     private static final String SET_LABELS = "--set-labels";
     private static final String ADD_LABELS = "--add-labels";
+    private static final String ADD_LABEL = "--add-label";
 
     // Execution
     private static final String EXPORT_CYCLE_LOG = "--export-cycle-log";
@@ -201,10 +204,14 @@ public class NBCLIOptions {
     private boolean wantsListCommands;
     private boolean wantsListApps;
     private boolean dedicatedVerificationLogger;
-    private boolean wantsConsoleMetrics =true;
-    private String annotateLabelSpec="";
+    private boolean wantsConsoleMetrics = true;
+    private String annotateLabelSpec = "";
+    private String metricsLabelSpec = "";
 
-    public boolean wantsLoggedMetrics() { return this.wantsConsoleMetrics; }
+    public boolean wantsLoggedMetrics() {
+        return this.wantsConsoleMetrics;
+    }
+
     public boolean isWantsListApps() {
         return this.wantsListApps;
     }
@@ -263,6 +270,10 @@ public class NBCLIOptions {
 
     public String getAnnotateLabelSpec() {
         return annotateLabelSpec;
+    }
+
+    public String getMetricsLabelSpec() {
+        return metricsLabelSpec;
     }
 
     public enum Mode {
@@ -491,22 +502,34 @@ public class NBCLIOptions {
                     String setLabelData = arglist.removeFirst();
                     setLabels(setLabelData);
                     break;
-                case NBCLIOptions.ADD_LABELS:
+                case ADD_LABELS:
+                case ADD_LABEL:
                     arglist.removeFirst();
                     String addLabeldata = arglist.removeFirst();
                     addLabels(addLabeldata);
                     break;
                 case NBCLIOptions.ENABLE_LOGGED_METRICS:
                     arglist.removeFirst();
-                    this.wantsConsoleMetrics =true;
+                    this.wantsConsoleMetrics = true;
                     break;
                 case NBCLIOptions.DISABLE_LOGGED_METRICS:
                     arglist.removeFirst();
-                    this.wantsConsoleMetrics =false;
+                    this.wantsConsoleMetrics = false;
+                    break;
+                case LABELSPEC:
+                    arglist.removeFirst();
+                    String labelspec = this.readWordOrThrow(arglist, "label validator specification for metric labels and annotation tags");
+                    this.annotateLabelSpec = labelspec;
+                    this.metricsLabelSpec = labelspec;
                     break;
                 case ANNOTATE_LABELSPEC:
                     arglist.removeFirst();
-                    this.annotateLabelSpec = this.readWordOrThrow(arglist, "labels validator specification");
+                    this.annotateLabelSpec = this.readWordOrThrow(arglist, "labels validator specification for annotation tags from labels");
+                    break;
+                case METRICS_LABELSPEC:
+                    arglist.remove();
+                    this.metricsLabelSpec = this.readWordOrThrow(arglist, "labels validator specification for metric labels");
+                    break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
             }

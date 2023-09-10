@@ -53,6 +53,8 @@ public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
 
     @Override
     public void recordAnnotation(Annotation annotation) {
+        // sanity check here first, before going into the error policy
+
         try {
             GAnnotation ga = new GAnnotation();
 

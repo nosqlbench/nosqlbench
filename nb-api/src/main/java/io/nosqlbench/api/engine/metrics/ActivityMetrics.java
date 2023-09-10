@@ -20,6 +20,7 @@ import com.codahale.metrics.*;
 import io.nosqlbench.api.config.NBLabeledElement;
 import io.nosqlbench.api.config.NBLabels;
 import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.api.config.standard.NBLabelsFilter;
 import io.nosqlbench.api.engine.activityapi.core.MetricRegistryService;
 import io.nosqlbench.api.engine.metrics.instruments.*;
 import io.nosqlbench.api.engine.util.Unit;
@@ -49,6 +50,8 @@ public class ActivityMetrics {
         return true;
     };
     private static final List<MetricsCloseable> metricsCloseables = new ArrayList<>();
+    private static NBLabelsFilter labelValidator;
+    private static NBLabelsFilter labelFilter;
 
 
     public static int getHdrDigits() {
@@ -72,6 +75,9 @@ public class ActivityMetrics {
      */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private static Metric register(NBLabels labels, MetricProvider metricProvider) {
+
+        labels = labelFilter.apply(labels);
+        labels = labelValidator.apply(labels);
 
         final String graphiteName = labels.linearizeValues('.',"[activity]","[space]","[op]","name");
         Metric metric = get().getMetrics().get(graphiteName);
@@ -337,6 +343,11 @@ public class ActivityMetrics {
                 metricsCloseable.chart();
             }
         }
+    }
+
+    public static void setLabelValidator(String annotateLabelSpec) {
+        labelValidator = new NBLabelsFilter(annotateLabelSpec);
+        labelFilter = new NBLabelsFilter(annotateLabelSpec);
     }
 
     private interface MetricProvider {
