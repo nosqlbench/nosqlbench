@@ -35,11 +35,11 @@ The NB Pulsar driver allows you to simulate and run different types of workloads
     * Negative acknowledgement and acknowledgement timeout redelivery backoff policy
 
 
-## 1.1. Issues Tracker
+## 1.1. Issues Tracker {#11-issues-tracker}
 
 If you have issues or new requirements for this driver, please add them at the [pulsar issues tracker](https://github.com/nosqlbench/nosqlbench/issues/new?labels=pulsar).
 
-# 2. Execute the NB Pulsar Driver Workload
+# 2. Execute the NB Pulsar Driver Workload {#2-execute-the-nb-pulsar-driver-workload}
 
 In order to run a NB Pulsar driver workload, it follows similar command as other NB driver types. But it does have its unique execution parameters. The general command has the following format:
 
@@ -52,7 +52,7 @@ In the above command, make sure the driver type is **pulsar** and provide the fo
 * ***service_url***: Pulsar native protocol service url and default to "pulsar://localhost:6650"
 * ***config***: Pulsar schema/client/producer/consumer related configuration (as a property file)
 
-## 2.1. NB Pulsar Driver Yaml File High Level Structure
+## 2.1. NB Pulsar Driver Yaml File High Level Structure {#21-nb-pulsar-driver-yaml-file-high-level-structure}
 
 Just like other NB driver types, the actual NB Pulsar workload is defined in a YAML file with the following high level structure:
 
@@ -84,7 +84,7 @@ blocks:
 * ***params***: This section defines **Document level** configuration parameters that apply to all OpTemplate blocks.
 * ***blocks***: This section defines the OpTemplate blocks that are needed to execute Pulsar specific workloads. Each OpTemplate block may contain multiple OpTemplates.
 
-## 2.2. NB Pulsar Driver Configuration Parameters
+## 2.2. NB Pulsar Driver Configuration Parameters {#22-nb-pulsar-driver-configuration-parameters}
 
 The NB Pulsar driver configuration parameters can be set at 3 different levels:
 * Global level
@@ -95,7 +95,7 @@ The NB Pulsar driver configuration parameters can be set at 3 different levels:
 
 Please **NOTE** that when a parameter is specified at multiple levels, the one at the lowest level takes precedence.
 
-### 2.2.1. Global Level Parameters
+### 2.2.1. Global Level Parameters {#221-global-level-parameters}
 
 The parameters at this level are those listed in the command line config properties file.
 
@@ -152,7 +152,7 @@ categories of the configuration parameters:
     * This section defines all configuration parameters that are related with defining a Pulsar Consumer object.
         * See [Pulsar Doc Reference](http://pulsar.apache.org/docs/en/client-libraries-java/#configure-consumer)
 
-### 2.2.2. Document Level Parameters
+### 2.2.2. Document Level Parameters {#222-document-level-parameters}
 
 For the Pulsar NB driver, Document level parameters can only be statically bound; and currently, the following Document level configuration parameters are supported:
 
@@ -180,7 +180,7 @@ For the Pulsar NB driver, Document level parameters can only be statically bound
         * `message_event_time` : uses the message event timestamp as the starting time
         * `message_property_e2e_starting_time` : uses a message property `e2e_starting_time` as the starting time.
 
-# 3. NB Pulsar Driver OpTemplates
+# 3. NB Pulsar Driver OpTemplates {#3-nb-pulsar-driver-optemplates}
 
 For the NB Pulsar driver, each OpTemplate has the following format:
 ```yaml
@@ -214,9 +214,9 @@ Its value is mandatory and depending on the actual identifier, its value can be 
 
 Each Pulsar `OpType` may have optional Op specific parameters. Please refer to [here](yaml_examples) for the example NB Pulsar YAML files for each OpType
 
-# 4. Message Generation and Schema Support
+# 4. Message Generation and Schema Support {#4-message-generation-and-schema-support}
 
-## 4.1. Message Generation
+## 4.1. Message Generation {#41-message-generation}
 
 A Pulsar message has three main components: message key, message properties, and message payload. Among them, message payload is mandatory when creating a message.
 
@@ -244,7 +244,7 @@ For `msg_value`, its value can be either
 * a plain simple text, or
 * a JSON string that follows the specified "value" Avro schema (when Avro schema or KeyValue schema is used)
 
-## 4.2. Schema Support
+## 4.2. Schema Support {#42-schema-support}
 
 The NB Pulsar driver supports the following Pulsar schema types:
 * Primitive schema types

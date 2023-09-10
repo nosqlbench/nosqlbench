@@ -6,21 +6,21 @@ title: S4J
 - [2. Execute NB S4J Workload](#2-execute-nb-s4j-workload)
 - [3. NB S4J Driver Configuration Parameter File](#3-nb-s4j-driver-configuration-parameter-file)
 - [4. NB S4J Scenario Definition File](#4-nb-s4j-scenario-definition-file)
-    - [4.1. Document Level Parameters](#41-document-level-parameters)
-    - [4.2. NB S4J Workload Types](#42-nb-s4j-workload-types)
-        - [4.2.1. Publish Messages to a JMS Destination, Queue or Topic](#421-publish-messages-to-a-jms-destination-queue-or-topic)
-        - [4.2.2. Receiving Messages from a JMS Destination, Queue or Topic](#422-receiving-messages-from-a-jms-destination-queue-or-topic)
-    - [4.3. S4J Named Scenario](#43-s4j-named-scenario)
+  - [4.1. Document Level Parameters](#41-document-level-parameters)
+  - [4.2. NB S4J Workload Types](#42-nb-s4j-workload-types)
+    - [4.2.1. Publish Messages to a JMS Destination, Queue or Topic](#421-publish-messages-to-a-jms-destination-queue-or-topic)
+    - [4.2.2. Receiving Messages from a JMS Destination, Queue or Topic](#422-receiving-messages-from-a-jms-destination-queue-or-topic)
+  - [4.3. S4J Named Scenario](#43-s4j-named-scenario)
 
 ---
 
-# 1. Overview
+# 1. Overview {#1-overview}
 
 This driver is similar to [NB Pulsar driver](../../../../adapter-pulsar/src/main/resources/pulsar.md) that allows NB based workload generation and performance testing against a Pulsar cluster. It also follows a similar pattern to configure and connect to the Pulsar cluster for workload execution.
 
 However, the major difference is instead of simulating native Pulsar client workloads, the NB S4J driver allows simulating JMS oriented workloads (that follows JMS spec 2.0 and 1.1) to be executed on the Pulsar cluster. Under the hood, this is achieved through DataStax's [Starlight for JMS API] (https://github.com/datastax/pulsar-jms).
 
-# 2. Execute NB S4J Workload
+# 2. Execute NB S4J Workload {#2-execute-nb-s4j-workload}
 
 The following is an example of executing a NB S4J workload (defined as *pulsar_s4j.yaml*)
 
@@ -31,16 +31,16 @@ $ <nb_cmd> run driver=s4j cycles=10000 threads=4 num_conn=2 num_session=2 sessio
 In the above NB CLI command, the S4J driver specific parameters are listed as below:
 * num_conn: the number of JMS connections to be created
 * num_session: the number of JMS sessions per JMS connection
-    * Note that multiple JMS sessions can be created from one JMS connection, and they share the same connection characteristics.
+  * Note that multiple JMS sessions can be created from one JMS connection, and they share the same connection characteristics.
 * session_mode: the session mode used when creating a JMS session
 * web_url: the URL of the Pulsar web service
 * service_url: the URL of the Pulsar native protocol service
 * (optional) strict_msg_error_handling: whether to do strict error handling
-    * when true, Pulsar client error will not stop NB S4J execution
-    * otherwise, any Pulsar client error will stop NB S4J execution
+  * when true, Pulsar client error will not stop NB S4J execution
+  * otherwise, any Pulsar client error will stop NB S4J execution
 * (optional) max_s4jop_time: maximum time (in seconds) to execute the actual S4J operations (e.g. message sending or receiving). If NB execution time is beyond this limit, each NB cycle is just a no-op. Please NOTE:
-    * this is useful when controlled NB execution is needed with NB CLI scripting.
-    * if this parameter is not specified or the value is 0, it means no time limitation. Every single NB cycle will trigger an actual S4J operation.
+  * this is useful when controlled NB execution is needed with NB CLI scripting.
+  * if this parameter is not specified or the value is 0, it means no time limitation. Every single NB cycle will trigger an actual S4J operation.
 * (optional) track_msg_cnt: When set to true (with default as false), the S4J driver will keep track of the confirmed response count for message sending and receiving.
 
 Other NB engine parameters are straight forward:
@@ -49,7 +49,7 @@ Other NB engine parameters are straight forward:
 * yamL: the NB S4J scenario definition yaml file
 * config: specify the file that contains the connection parameters used by the S4J API
 
-# 3. NB S4J Driver Configuration Parameter File
+# 3. NB S4J Driver Configuration Parameter File {#3-nb-s4j-driver-configuration-parameter-file}
 
 The S4J API has a list of configuration options that can be found here: https://docs.datastax.com/en/streaming/starlight-for-jms/latest/reference/pulsar-jms-reference.html.
 
@@ -104,7 +104,7 @@ producer.blockIfQueueFull=true
 #...
 ```
 
-# 4. NB S4J Scenario Definition File
+# 4. NB S4J Scenario Definition File {#4-nb-s4j-scenario-definition-file}
 
 Like any NB scenario yaml file, the NB S4J yaml file is composed of 3 major components:
 * bindings: define NB bindings
@@ -120,7 +120,7 @@ blocks:
  ... ...
 ```
 
-## 4.1. Document Level Parameters
+## 4.1. Document Level Parameters {#41-document-level-parameters}
 
 The parameters defined in this section will be applicable to all statement blocks. An example of some common parameters that can be set at the document level is listed below:
 * temporary_dest: whether JMS workload is dealing with a temporary destination
@@ -139,15 +139,15 @@ params:
 
 Please **NOTE** that the above parameters won't necessarily be specified at the document level. If they're specified at the statement level, they will only impact the statement within which they're specified.
 
-## 4.2. NB S4J Workload Types
+## 4.2. NB S4J Workload Types {#42-nb-s4j-workload-types}
 
 The NB S4J driver supports 2 types of JMS operations:
 * One for message producing/sending/publishing
-    * this is identified by NB Op identifier ***MessageProduce***
+  * this is identified by NB Op identifier ***MessageProduce***
 * One for message consuming/receiving/subscribing
-    * this is identified by NB Op identifier ***MessageConsume***
+  * this is identified by NB Op identifier ***MessageConsume***
 
-### 4.2.1. Publish Messages to a JMS Destination, Queue or Topic
+### 4.2.1. Publish Messages to a JMS Destination, Queue or Topic {#421-publish-messages-to-a-jms-destination-queue-or-topic}
 
 ***NOTE**: Please see [pulsar_s4j_producer.yaml](scenarios/pulsar_s4j_producer.yaml) as the complete example.*
 
@@ -184,7 +184,7 @@ blocks:
         msg_body: "{mytext_val}"
 ```
 
-###  4.2.2. Receiving Messages from a JMS Destination, Queue or Topic
+###  4.2.2. Receiving Messages from a JMS Destination, Queue or Topic {#422-receiving-messages-from-a-jms-destination-queue-or-topic}
 
 ***NOTE**: Please see [pulsar_s4j_consumer.yaml](scenarios/pulsar_s4j_consumer.yaml) as the complete example.*
 
@@ -192,15 +192,15 @@ The generic NB S4J statement block for receiving messages to a JMS destination (
 * **msg_selector**: Message selector string
 * **no_local**: Only applicable to a Topic as the destination. This allows a subscriber to inhibit the delivery of messages published by its own connection.
 * **read_timeout**: The timeout value for receiving a message from a destination
-    * This setting only works if **no_wait** is false
-    * If the **read_timeout** value is 0, it behaves the same as **no_wait** is true
+  * This setting only works if **no_wait** is false
+  * If the **read_timeout** value is 0, it behaves the same as **no_wait** is true
 * **no_wait**: Whether to receive the next message immediately if one is available
 * **msg_ack_ratio**: the ratio of the received messages being acknowledged
 * **slow_ack_in_sec**: whether to simulate a slow consumer (pause before acknowledging after receiving a message)
-    * value 0 means no simulation (consumer acknowledges right away)
+  * value 0 means no simulation (consumer acknowledges right away)
 * negative ack/ack timeout/deadletter topic related settings
-    * The settings here (as the scenario specific settings) will be merged with the
-    *    global settings in *s4j_config.properties* file
+  * The settings here (as the scenario specific settings) will be merged with the
+  *    global settings in *s4j_config.properties* file
 
 ```yaml
 blocks:
@@ -254,7 +254,7 @@ blocks:
           }
 ```
 
-## 4.3. S4J Named Scenario
+## 4.3. S4J Named Scenario {#43-s4j-named-scenario}
 
 For workload execution convenience, NB engine has the concept of **named scenario** ([doc](https://docs.nosqlbench.io/workloads-101/11-named-scenarios/)).
 
