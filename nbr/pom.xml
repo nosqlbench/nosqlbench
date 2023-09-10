@@ -45,12 +45,6 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-docs</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
             <artifactId>engine-core</artifactId>
             <version>${revision}</version>
         </dependency>

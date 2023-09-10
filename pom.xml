@@ -45,7 +45,6 @@
         <module.engine-extensions>engine-extensions</module.engine-extensions>
         <module.engine-docker>engine-docker</module.engine-docker>
         <module.engine-cli>engine-cli</module.engine-cli>
-        <module.engine-docs>engine-docs</module.engine-docs>
 
         <module.nb5>nb5</module.nb5>
         <module.nbr>nbr</module.nbr>
@@ -96,7 +95,6 @@
         <module>engine-core</module>
         <module>engine-extensions</module>
         <module>engine-docker</module>
-        <module>engine-docs</module>
         <module>engine-clients</module>
         <module>engine-cli</module>
         <module>adapters-api</module>
