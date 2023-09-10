@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.filters;
 
-import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.TristateFilter;
+import io.nosqlbench.api.filtering.TristateFilter;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 
 import java.util.function.IntPredicate;
