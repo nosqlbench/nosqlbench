@@ -122,8 +122,8 @@ public class Annotators {
     }
 
     public static synchronized void recordAnnotation(Annotation annotation) {
-        annotation.applyLabelFunction(filter);
-        annotation.applyLabelFunction(validator);
+        if (filter!=null) annotation.applyLabelFunction(filter);
+        if (validator!=null) annotation.applyLabelFunction(validator);
         // sanity check here first
         annotation.getLabels();
         for (Annotator annotator : getAnnotators()) {

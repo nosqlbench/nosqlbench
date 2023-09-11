@@ -76,8 +76,8 @@ public class ActivityMetrics {
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private static Metric register(NBLabels labels, MetricProvider metricProvider) {
 
-        labels = labelFilter.apply(labels);
-        labels = labelValidator.apply(labels);
+        labels = labelFilter!=null ? labelFilter.apply(labels) : labels;
+        labels = labelValidator != null ? labelValidator.apply(labels) : labels;
 
         final String graphiteName = labels.linearizeValues('.',"[activity]","[space]","[op]","name");
         Metric metric = get().getMetrics().get(graphiteName);
