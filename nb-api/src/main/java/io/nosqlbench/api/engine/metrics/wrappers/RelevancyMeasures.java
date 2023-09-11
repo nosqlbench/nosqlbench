@@ -57,6 +57,7 @@ public class RelevancyMeasures implements NBLabeledElement {
     public RelevancyMeasures addFunction(RelevancyFunction... f) {
         for (RelevancyFunction function : f) {
             this.functions.add(function);
+            function.prependLabels(this);
             DoubleSummaryGauge gauge = ActivityMetrics.summaryGauge(function, function.getUniqueName());
             this.gauges.add(gauge);
         }

@@ -71,11 +71,8 @@ blocks:
       insert: |
         INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
         (key, value) VALUES ({id},{train_floatlist});
-#  await_index:
-#    ops:
   search_and_index:
     ops:
-      select_ann_limit_borked:
       select_ann_limit:
         prepared: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)

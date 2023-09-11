@@ -16,12 +16,13 @@
 
 package io.nosqlbench.engine.extensions.computefunctions.relavency;
 
+import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.wrappers.RelevancyFunction;
 
 public abstract class BaseRelevancyFunction implements RelevancyFunction {
     private final String name;
-    private final NBLabels labels;
+    private NBLabels labels;
 
     public BaseRelevancyFunction(String name, NBLabels labels) {
         this.name = name;
@@ -35,5 +36,11 @@ public abstract class BaseRelevancyFunction implements RelevancyFunction {
 
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public void prependLabels(NBLabeledElement prepend) {
+        this.labels = prepend.getLabels().and(this.labels);
+
     }
 }

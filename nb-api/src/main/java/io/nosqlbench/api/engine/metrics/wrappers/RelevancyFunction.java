@@ -27,4 +27,6 @@ public interface RelevancyFunction extends NBLabeledElement {
      * @return A string which can be used to identify if the metric exists yet.
      */
     String getUniqueName();
+
+    void prependLabels(NBLabeledElement prepend);
 }
