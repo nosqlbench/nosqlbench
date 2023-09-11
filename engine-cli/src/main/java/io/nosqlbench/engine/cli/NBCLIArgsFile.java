@@ -181,7 +181,7 @@ public class NBCLIArgsFile {
             }
         }
         pinAndUnpin();
-        return composed;
+        return new LinkedList<>(composed.stream().filter(s -> !s.startsWith("#")).toList());
     }
 
     private void pinAndUnpin() {
@@ -213,8 +213,7 @@ public class NBCLIArgsFile {
             LinkedHashSet<String> toUnpin,
             LinkedHashSet<String> extant) {
 
-        LinkedHashSet<String> merged = new LinkedHashSet<>();
-        merged.addAll(extant);
+        LinkedHashSet<String> merged = new LinkedHashSet<>(extant);
 
         for (String arg : toPin) {
             if (argsToUnpin.contains(arg)) {
@@ -234,6 +233,10 @@ public class NBCLIArgsFile {
                 if (logger != null) {
                     logger.warn(() -> "Requested to pin argument again: '" + toAdd + "', ignoring");
                 }
+            } else if (merged.stream().anyMatch(l -> l.matches("# *"+toAdd))) {
+                if (logger != null) {
+                    logger.warn(() -> "Requested to pin argument which is already commented (disabled?): '" + toAdd + "'");
+                }
             } else {
                 if (logger != null) {
                     logger.info(() -> "Pinning option '" + toAdd + "' to '" + this.argsPath.toString() + "'");
@@ -248,6 +251,10 @@ public class NBCLIArgsFile {
                     logger.info(() -> "Unpinning '" + toDel + "' from '" + this.argsPath.toString() + "'");
                 }
                 merged.remove(toDel);
+            } else if (merged.stream().anyMatch(l -> l.matches("# *"+toDel))) {
+                if (logger != null) {
+                    logger.warn(() -> "Requested to unpin argument which is commented (disabled?): '" + toDel + "'. If you want to purge this option completely, edit " + argsPath.toString());
+                }
             } else {
                 if (logger != null) {
                     logger.warn(() -> "Requested to unpin argument '" + toDel + "' which was not found in " + argsPath.toString());
@@ -280,7 +287,7 @@ public class NBCLIArgsFile {
                 .collect(Collectors.toList());
 
         LinkedList<String> inArgvForm = linesToArgs(interpolated);
-        this.args.addAll(inArgvForm);
+        this.args.addAll(inArgvForm.stream().filter(l -> !l.startsWith("#")).toList());
         return concat(inArgvForm, commandline);
     }
 
@@ -336,7 +343,7 @@ public class NBCLIArgsFile {
             throw new RuntimeException(e);
         }
         List<String> content = lines.stream()
-                .filter(s -> !s.startsWith("#"))
+//                .filter(s -> !s.startsWith("#"))
                 .filter(s -> !s.startsWith("/"))
                 .filter(s -> !s.isBlank())
                 .filter(s -> !s.isEmpty())
@@ -460,6 +467,7 @@ public class NBCLIArgsFile {
     LinkedList<String> linesToArgs(Collection<String> lines) {
         LinkedList<String> args = new LinkedList<>();
         for (String line : lines) {
+//            if (line.startsWith("#")) continue;
             if (line.startsWith("-")) {
                 String[] words = line.split(" ", 2);
                 args.addAll(Arrays.asList(words));
