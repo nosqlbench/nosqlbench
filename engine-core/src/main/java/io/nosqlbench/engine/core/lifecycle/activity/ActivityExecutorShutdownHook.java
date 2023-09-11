@@ -25,7 +25,7 @@ public class ActivityExecutorShutdownHook extends Thread {
 
     @Override
     public void run() {
-        activityExecutor.finish();
+        activityExecutor.finish(false);
     }
 
 }

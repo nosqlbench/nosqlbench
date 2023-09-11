@@ -421,7 +421,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             activity.shutdownActivity();
             activity.closeAutoCloseables();
             ExecutionResult result = new ExecutionResult(startedAt, stoppedAt, "", exception);
-            finish();
+            finish(true);
             return result;
         }
     }
@@ -548,11 +548,15 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         return activity.getLabels();
     }
 
-    public synchronized void finish() {
-        if (shutdownHook!=null) {
-            logger.warn("Activity was interrupted by process exit, shutting down");
+    public synchronized void finish(boolean graceful) {
+        if (graceful) {
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
+        } else {
+            logger.warn("Activity was interrupted by process exit, shutting down ungracefully. Annotations are still submitted.");
         }
-        shutdownHook=null;
+        if (shutdownHook==null) return; // In case of a race condition, only prevented by object monitor
+        else shutdownHook=null;
+
         stoppedAt = System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
 
         Annotators.recordAnnotation(Annotation.newBuilder()
