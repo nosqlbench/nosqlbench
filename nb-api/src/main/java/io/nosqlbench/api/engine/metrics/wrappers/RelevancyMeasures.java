@@ -16,8 +16,8 @@
 
 package io.nosqlbench.api.engine.metrics.wrappers;
 
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
 

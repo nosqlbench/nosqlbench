@@ -24,7 +24,7 @@ import io.nosqlbench.api.errors.ResultMismatchError;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.CountErrorHandler;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.CounterErrorHandler;
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.util.NBMock;
 import io.nosqlbench.util.NBMock.LogAppender;
 import org.apache.logging.log4j.Level;

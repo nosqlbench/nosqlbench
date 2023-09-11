@@ -16,7 +16,7 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
 import io.nosqlbench.api.config.LabeledScenarioContext;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import io.nosqlbench.engine.core.lifecycle.scenario.ScenarioController;
 

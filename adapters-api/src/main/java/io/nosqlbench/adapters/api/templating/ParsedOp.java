@@ -17,9 +17,9 @@
 package io.nosqlbench.adapters.api.templating;
 
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.api.config.NBLabelSpec;
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabelSpec;
+import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.config.fieldreaders.DynamicFieldReader;
 import io.nosqlbench.api.config.fieldreaders.StaticFieldReader;
 import io.nosqlbench.api.config.standard.NBConfigError;

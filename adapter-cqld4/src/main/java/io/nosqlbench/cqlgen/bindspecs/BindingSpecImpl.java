@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.bindspecs;
 
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 
 public class BindingSpecImpl implements BindingSpec {
     private NBLabeledElement target;

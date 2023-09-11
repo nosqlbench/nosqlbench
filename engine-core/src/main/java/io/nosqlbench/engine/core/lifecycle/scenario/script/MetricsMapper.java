@@ -16,7 +16,7 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
 import com.codahale.metrics.*;
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;

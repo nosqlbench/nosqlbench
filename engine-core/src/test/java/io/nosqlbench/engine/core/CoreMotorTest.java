@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core;
 
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.Activity;

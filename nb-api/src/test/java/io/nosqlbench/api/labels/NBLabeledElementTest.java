@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.config;
+package io.nosqlbench.api.labels;
 
+import io.nosqlbench.api.labels.NBLabels;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class MapLabelsTest {
-
-    @Test
-    public void testLinearizeValues() {
-        final MapLabels l1 = new MapLabels(Map.of("key_a", "value_a", "key_c", "value_c"));
-        final String result = l1.linearizeValues('_', "key_a", "[key_b]", "key_c");
-        assertThat(result).isEqualTo("value_a_value_c");
-    }
-
+public class NBLabeledElementTest {
 
     @Test
-    public void testInvalidCharacters() {
-        assertThatThrownBy(() -> new MapLabels(Map.of("a-b","c-d"))).isOfAnyClassIn(RuntimeException.class);
+    public void testBasicNameScenario() {
+        final NBLabels labels = NBLabels.forKV("name", "testname","label1","labelvalue1");
+        assertThat(labels.linearize("name")).isEqualTo("testname{label1=\"labelvalue1\"}");
     }
-
 
 }

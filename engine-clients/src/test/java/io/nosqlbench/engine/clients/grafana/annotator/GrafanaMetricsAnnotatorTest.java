@@ -18,8 +18,8 @@ package io.nosqlbench.engine.clients.grafana.annotator;
 
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.system.NBStatePath;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

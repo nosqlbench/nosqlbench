@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import io.nosqlbench.engine.api.util.Colors;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.api.testutils.Bounds;
 import io.nosqlbench.api.testutils.Perf;

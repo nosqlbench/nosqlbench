@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.config.NBLabelSpec;
+import io.nosqlbench.api.labels.NBLabelSpec;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
@@ -29,8 +29,8 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;

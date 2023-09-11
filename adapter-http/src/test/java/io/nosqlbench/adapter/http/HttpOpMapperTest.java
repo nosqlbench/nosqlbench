@@ -18,7 +18,7 @@ package io.nosqlbench.adapter.http;
 
 import io.nosqlbench.adapter.http.core.HttpOpMapper;
 import io.nosqlbench.adapter.http.core.HttpSpace;
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;

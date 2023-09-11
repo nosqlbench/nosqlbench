@@ -16,7 +16,7 @@
 
 package io.nosqlbench.api.annotations;
 
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 
 import java.time.ZoneId;
 import java.util.LinkedHashMap;

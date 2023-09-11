@@ -15,8 +15,8 @@
  */
 package io.nosqlbench.engine.core.lifecycle.scenario;
 
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.config.standard;
+package io.nosqlbench.api.labels;
 
-import io.nosqlbench.api.config.NBLabels;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class NBLabelsValidatorTest {
 

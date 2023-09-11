@@ -18,7 +18,7 @@ package io.nosqlbench.api.engine.metrics.reporters;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.api.engine.metrics.instruments.*;
 import org.junit.jupiter.api.Test;

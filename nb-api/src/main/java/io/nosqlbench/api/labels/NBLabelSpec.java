@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.config;
+package io.nosqlbench.api.labels;
 
 import io.nosqlbench.api.errors.BasicError;
 

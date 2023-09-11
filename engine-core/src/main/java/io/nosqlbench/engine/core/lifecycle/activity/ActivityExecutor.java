@@ -15,8 +15,8 @@
  */
 package io.nosqlbench.engine.core.lifecycle.activity;
 
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityimpl.MotorState;
 import io.nosqlbench.api.annotations.Annotation;
@@ -30,7 +30,6 @@ import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
-import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

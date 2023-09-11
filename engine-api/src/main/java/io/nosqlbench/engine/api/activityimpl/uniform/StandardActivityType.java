@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.NBReconfigurable;

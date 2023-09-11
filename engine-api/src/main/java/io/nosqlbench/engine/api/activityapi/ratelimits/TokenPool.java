@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 
 public interface TokenPool {
 

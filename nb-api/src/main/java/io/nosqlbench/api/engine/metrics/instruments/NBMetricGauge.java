@@ -17,7 +17,7 @@
 package io.nosqlbench.api.engine.metrics.instruments;
 
 import com.codahale.metrics.Gauge;
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 
 public interface NBMetricGauge<T> extends Gauge<T>, NBLabeledElement {
 

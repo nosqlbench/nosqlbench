@@ -16,7 +16,7 @@
 
 package io.nosqlbench.api.engine.metrics;
 
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 
 import java.util.DoubleSummaryStatistics;

@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Counter;
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 
 import java.util.ArrayList;

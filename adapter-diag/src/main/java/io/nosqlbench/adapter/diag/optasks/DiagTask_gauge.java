@@ -17,7 +17,7 @@
 package io.nosqlbench.adapter.diag.optasks;
 
 import com.codahale.metrics.Gauge;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.nb.annotations.Service;

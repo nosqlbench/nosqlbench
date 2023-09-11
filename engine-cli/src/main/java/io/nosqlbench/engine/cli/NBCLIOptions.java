@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.api.config.NBLabelSpec;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabelSpec;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.util.Unit;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.logging.NBLogLevel;

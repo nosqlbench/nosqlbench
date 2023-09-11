@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 
 import java.util.concurrent.atomic.AtomicLong;
 

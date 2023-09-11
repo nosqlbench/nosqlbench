@@ -18,8 +18,8 @@ package io.nosqlbench.api.engine.metrics;
 
 import com.codahale.metrics.Reservoir;
 import com.codahale.metrics.Snapshot;
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabels;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogWriter;
 import org.HdrHistogram.Recorder;

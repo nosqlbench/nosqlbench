@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.model;
 
-import io.nosqlbench.api.config.NBLabels;
+import io.nosqlbench.api.labels.NBLabels;
 
 public class CqlTableColumn extends CqlColumnBase {
 

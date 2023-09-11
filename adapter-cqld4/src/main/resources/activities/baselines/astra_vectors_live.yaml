@@ -34,8 +34,6 @@ scenarios:
 params:
   driver: cqld4
   instrument: true
-  labels:
-    k:
 
 bindings:
   id: ToString()
@@ -78,13 +76,7 @@ blocks:
   search_and_index:
     ops:
       select_ann_limit_borked:
-        raw: |
-          SELECT (nonextant) FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
-          ORDER BY value ANN OF {test_floatlist} LIMIT TEMPLATE(select_limit,100);
-        tags:
-          optype: select
       select_ann_limit:
-        ratio: 99
         prepared: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
           ORDER BY value ANN OF {test_floatlist} LIMIT TEMPLATE(select_limit,100);
@@ -92,12 +84,19 @@ blocks:
           optype: select
         verifier-init: |
           relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op,"group","relevancy");
-          for (int k in List.of(1,2,3,5,10,25,50,75,100)) {
+          for (int k in List.of(100)) {
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
-            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+          }
+          for (int k in List.of(1,2,3,5,10,25,50,75)) {
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("s_recall",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("s_precision",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("s_F1",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("s_RR",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("s_AP",k));
           }
         verifier: |
           // driver-specific function

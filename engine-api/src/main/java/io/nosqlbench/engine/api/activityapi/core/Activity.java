@@ -24,7 +24,7 @@ import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;

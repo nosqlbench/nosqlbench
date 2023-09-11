@@ -16,9 +16,6 @@
 
 package io.nosqlbench.api.labels;
 
-import io.nosqlbench.api.config.NBLabeledElement;
-import io.nosqlbench.api.config.NBLabels;
-
 import java.util.HashMap;
 import java.util.Map;
 

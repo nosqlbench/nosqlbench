@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.config.standard;
+package io.nosqlbench.api.labels;
 
-import io.nosqlbench.api.config.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,6 +25,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+/**
+ * Validate a set of labels to ensure conformance to a labeling standard.
+ * <OL>
+ *     <LI>Required label names are specified as "+label"</LI>
+ *     <LI>Disallowed label names are specified as "-label"</LI>
+ *     <LI>Other specifiers or formats are ignored by this validator.</LI>
+ * </OL>
+ */
 public class NBLabelsValidator implements Function<NBLabels, NBLabels> {
     private final static Logger logger = LogManager.getLogger(NBLabelsValidator.class);
 
@@ -41,41 +48,24 @@ public class NBLabelsValidator implements Function<NBLabels, NBLabels> {
         }
     }
 
-    @Override
-    public NBLabels apply(NBLabels labels) {
+    public NBLabelsResult applyForResult(NBLabels labels) {
         Set<String> keyset = labels.asMap().keySet();
         LinkedList<String> missingFields = new LinkedList<>(requiredFields);
         LinkedList<String> extraneousFields = new LinkedList<>(disallowedFields);
         missingFields.removeIf(keyset::contains);
         extraneousFields.removeIf(extra -> !keyset.contains(extra));
-
-        Result result = new Result(labels, config, missingFields, extraneousFields);
+        return new NBLabelsResult(labels, config, missingFields, extraneousFields);
+    }
+    @Override
+    public NBLabels apply(NBLabels labels) {
+        NBLabelsResult result = applyForResult(labels);
         if (!result.isError()) {
             return labels;
         }
         logger.warn(result);
         throw new RuntimeException(result.toString());
+
     }
 
 
-    record Result(NBLabels labels, String config, LinkedList<String> missingFields, LinkedList<String> extraneousFields) {
-        public boolean isError() {
-            return !missingFields.isEmpty() || !extraneousFields.isEmpty();
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder err = new StringBuilder();
-            if (!missingFields.isEmpty()) {
-                err.append("The label set is missing required label names: ").append(missingFields).append("\n");
-            }
-            if (!extraneousFields.isEmpty()) {
-                err.append("The label set has disallowed label names: ").append(extraneousFields).append("\n");
-            }
-            if (!err.isEmpty()) {
-                err.append("This is controlled by the labeling policy: '").append(config).append("'\n");
-            }
-            return err.toString();
-        }
-    }
 }

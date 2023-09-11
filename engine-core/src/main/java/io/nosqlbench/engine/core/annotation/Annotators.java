@@ -19,6 +19,8 @@ package io.nosqlbench.engine.core.annotation;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.api.config.standard.*;
+import io.nosqlbench.api.labels.NBLabelsFilter;
+import io.nosqlbench.api.labels.NBLabelsValidator;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Annotator;

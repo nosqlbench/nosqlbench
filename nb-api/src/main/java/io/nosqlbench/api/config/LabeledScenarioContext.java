@@ -16,6 +16,8 @@
 
 package io.nosqlbench.api.config;
 
+import io.nosqlbench.api.labels.NBLabeledElement;
+
 import javax.script.ScriptContext;
 
 public interface LabeledScenarioContext extends ScriptContext, NBLabeledElement {

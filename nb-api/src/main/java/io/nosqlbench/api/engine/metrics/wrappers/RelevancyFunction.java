@@ -16,7 +16,7 @@
 
 package io.nosqlbench.api.engine.metrics.wrappers;
 
-import io.nosqlbench.api.config.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabeledElement;
 
 public interface RelevancyFunction extends NBLabeledElement {
     double apply(int[] relevant, int[] actual);
