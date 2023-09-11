@@ -20,7 +20,9 @@ scenarios:
   default:
     schema: run tags='block:schema' labels='target:astra' threads===1
     rampup: run tags='block:rampup' labels='target:astra' threads=100 cycles=TEMPLATE(trainsize)
-    search_and_index: run tags='block:search_and_index,optype=select' labels='target:astra' cycles=TEMPLATE(testsize) threads=2000 testsize=1000000 errors=count
+#  search_and_index: run tags='block:search_and_index,optype=select' labels='target:astra' cycles=TEMPLATE(testsize) threads=2000 testsize=10000000 errors=count,warn stride=100 striderate=25
+#    search_and_index: run tags='block:search_and_index,optype=select' labels='target:astra' cycles=TEMPLATE(testsize) threads=1000 testsize=10000000 errors=count,retry stride=100 striderate=17.5
+    search_and_index: run tags='block:search_and_index,optype=select' labels='target:astra' cycles=TEMPLATE(testsize) threads=10 testsize=10000000 errors=count,retry stride=100 striderate=17.5
     # one activity or two? data leap-frog? or concurrency separate for both?
   #  await_index: run tags='block:await_index' # This would need to exit when a condition is met
   #  stop_search_and_index: stop search_and_index
@@ -31,6 +33,9 @@ scenarios:
 
 params:
   driver: cqld4
+  instrument: true
+  labels:
+    k:
 
 bindings:
   id: ToString()
@@ -72,7 +77,14 @@ blocks:
 #    ops:
   search_and_index:
     ops:
+      select_ann_limit_borked:
+        raw: |
+          SELECT (nonextant) FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
+          ORDER BY value ANN OF {test_floatlist} LIMIT TEMPLATE(select_limit,100);
+        tags:
+          optype: select
       select_ann_limit:
+        ratio: 99
         prepared: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
           ORDER BY value ANN OF {test_floatlist} LIMIT TEMPLATE(select_limit,100);
