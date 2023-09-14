@@ -17,17 +17,22 @@ description: |
   Also, aggregates of recall should include total aggregate as well as a moving average.
 
 scenarios:
-  default:
-    schema: run tags='block:schema' labels='target:astra' threads===1
-    rampup: run tags='block:rampup' labels='target:astra' threads=100 cycles=TEMPLATE(trainsize)
-#  search_and_index: run tags='block:search_and_index,optype=select' labels='target:astra' cycles=TEMPLATE(testsize) threads=2000 testsize=10000000 errors=count,warn stride=100 striderate=25
-#    search_and_index: run tags='block:search_and_index,optype=select' labels='target:astra' cycles=TEMPLATE(testsize) threads=1000 testsize=10000000 errors=count,retry stride=100 striderate=17.5
-    search_and_index: run tags='block:search_and_index,optype=select' labels='target:astra' cycles=TEMPLATE(testsize) threads=10 testsize=10000000 errors=count,retry stride=100 striderate=17.5
+  astra_vectors:
+    drop: run tags='block:drop' labels='target:astra' threads===1 cycles===2 driverconfig=app.conf
+    schema: run tags='block:schema' labels='target:astra' threads===1 cycles===2
+    rampup: run tags='block:rampup' labels='target:astra' threads=100 cycles=TEMPLATE(trainsize) errors=counter
+    search_and_index_unthrottled: >-
+      run tags='block:search_and_index,optype=select' labels='target:astra'
+      cycles=TEMPLATE(testsize) threads=10 errors=count,retry stride=500 errors=counter
+    search_and_index: >-
+      run alias=search_and_index tags='block:search_and_index,optype=select' labels='target:astra'
+      cycles=TEMPLATE(testsize) errors=count,retry stride=100 striderate=17.5
+      errors=counter threads=500
     # one activity or two? data leap-frog? or concurrency separate for both?
-  #  await_index: run tags='block:await_index' # This would need to exit when a condition is met
-  #  stop_search_and_index: stop search_and_index
+    #  await_index: run tags='block:await_index' # This would need to exit when a condition is met
+    #  stop_search_and_index: stop search_and_index
     # only possible if we have a triggering event to indicated
-    # live_search: run tags='block:search' labels='target:astra' threads=1 cycles=TEMPLATE(search_cycles,10000)
+    # live_search: run tags='block:search' labels='target:astra' threads=1 cycles=TEMPLATE(testsize,10000)
     search_and_rewrite: run tags='block:search_and_rewrite' labels='target:astra'
     search_and_invalidate: run tags='block:search_and_invalidate' labels='target:astra'
 
@@ -45,24 +50,33 @@ bindings:
   synthetic_vectors: HashedFloatVectors(TEMPLATE(dimensions));
 
 blocks:
+  drop:
+    params:
+      cl: TEMPLATE(cl,LOCAL_QUORUM)
+      prepared: false
+    ops:
+      drop_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors);
+      drop_table: |
+        DROP TABLE IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors);
   schema:
     params:
       cl: TEMPLATE(cl,LOCAL_QUORUM)
       prepared: false
     ops:
-#      create-keyspace: |
-#        CREATE KEYSPACE IF NOT EXISTS TEMPLATE(keyspace,baselines)
-#        WITH replication = {'class': 'NetworkTopologyStrategy', 'TEMPLATE(region)': '3'};
-      create-table: |
+      #      create_keyspace: |
+      #        CREATE KEYSPACE IF NOT EXISTS TEMPLATE(keyspace,baselines)
+      #        WITH replication = {'class': 'NetworkTopologyStrategy', 'TEMPLATE(region)': '3'};
+      create_table: |
         CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (
           key TEXT,
           value vector<float,TEMPLATE(dimensions)>,
           PRIMARY KEY (key)
         );
-      create-sai-index: |
+      create_sai_index: |
         CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (value) USING 'StorageAttachedIndex'
         WITH OPTIONS = {'similarity_function' : 'TEMPLATE(similarity_function,cosine)'};
-#       WITH OPTIONS = {'maximum_node_connections' : TEMPLATE(M,16), 'construction_beam_width' : TEMPLATE(ef,100), 'similarity_function' : 'TEMPLATE(similarity_function,dot_product)'};
+  #       WITH OPTIONS = {'maximum_node_connections' : TEMPLATE(M,16), 'construction_beam_width' : TEMPLATE(ef,100), 'similarity_function' : 'TEMPLATE(similarity_function,dot_product)'};
   rampup:
     params:
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
@@ -71,6 +85,8 @@ blocks:
       insert: |
         INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
         (key, value) VALUES ({id},{train_floatlist});
+  #  await_index:
+  #    ops:
   search_and_index:
     ops:
       select_ann_limit:
@@ -109,8 +125,6 @@ blocks:
         tags:
           optype: insert
 
-  #        verifier-init: |
-#        verifier: |
   search_and_rewrite:
     ops:
       select_ann_limit:
@@ -118,7 +132,7 @@ blocks:
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) ORDER BY value ANN OF {test_vector} LIMIT TEMPLATE(select_limit,100);
         verifier-init: |
           scriptingmetrics.newSummaryGauge(_parsed_op,"recall")
-#        verifier: |
+      #        verifier: |
       upsert_same:
         stmt: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
@@ -128,9 +142,10 @@ blocks:
       select_ann_limit:
         stmt: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) ORDER BY value ANN OF {test_vector} LIMIT TEMPLATE(select_limit,100);
-#        verifier-init: |
-#        verifier: |
+      #        verifier-init: |
+      #        verifier: |
       upsert_random: |
         INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
         (key, value) VALUES ({rw_key},{train_vector});
+
 
