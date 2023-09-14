@@ -1,0 +1,157 @@
+min_version: "5.17.1"
+
+description: |
+  A tabular workload with partitions, clusters, and data fields
+  This workload contains partitioning and cluster along with a set
+  of 8 fields of varying length. The field values vary in size according
+  to the fibonacci sequence times a base size factor of 10, with
+  an additional 10% variance for each field.
+  The read patterns have a variety of field subsets specified.
+
+  During rampup, all rows will be written partition by partition,
+  filling in all rows of that partition before moving on to the next.
+  Example: With a partition size of 1000 and 1B rows, there will be
+  1000000 partitions.
+
+  During main phase, the read patterns are varied with different
+  field sets. As well, the number of rows which will be returned
+  is varied between 1 and 10.
+
+  By default, reads occur at the same ratio as writes, with main
+  phase writes writing full rows.
+
+  You can bulk up the size of the payloads by 10x with addzeroes='0',
+  by 100x with addzeroes='00', and so on, but if you want to go higher
+  than 100x, you'll need to modify the workload with a larger reference
+  file in the HashedFileExtractToString(...) bindings.
+
+scenarios:
+  default:
+    schema: run driver=jdbc tags==block:schema   cycles==UNDEF threads==1
+    rampup: run driver=jdbc tags==block:rampup   cycles===TEMPLATE(rampup-cycles,100) threads=auto
+    main:   run driver=jdbc tags==block:'main.*' cycles===TEMPLATE(main-cycles,100)   threads=auto
+
+params:
+  instrument: TEMPLATE(instrument,false)
+
+bindings:
+  # for ramp-up and verify phases
+  #
+  part_layout: Div(<<partsize:1000>>); ToString() -> String
+  clust_layout: Mod(<<partsize:1000>>); ToString() -> String
+  # todo: update these definitions to use the simpler 10,0.1, 20, 0.2, ...
+  data0: Add(10); HashedFileExtractToString('data/lorem_ipsum_full.txt',9TEMPLATE(addzeroes,),11TEMPLATE(addzeroes,))
+  data1: Add(20); HashedFileExtractToString('data/lorem_ipsum_full.txt',18TEMPLATE(addzeroes,),22TEMPLATE(addzeroes,))
+  data2: Add(30); HashedFileExtractToString('data/lorem_ipsum_full.txt',27TEMPLATE(addzeroes,),33TEMPLATE(addzeroes,))
+  data3: Add(40); HashedFileExtractToString('data/lorem_ipsum_full.txt',45TEMPLATE(addzeroes,),55TEMPLATE(addzeroes,))
+  data4: Add(50); HashedFileExtractToString('data/lorem_ipsum_full.txt',72TEMPLATE(addzeroes,),88TEMPLATE(addzeroes,))
+  data5: Add(60); HashedFileExtractToString('data/lorem_ipsum_full.txt',107TEMPLATE(addzeroes,),143TEMPLATE(addzeroes,))
+  data6: Add(70); HashedFileExtractToString('data/lorem_ipsum_full.txt',189TEMPLATE(addzeroes,),231TEMPLATE(addzeroes,))
+  data7: Add(80); HashedFileExtractToString('data/lorem_ipsum_full.txt',306TEMPLATE(addzeroes,),374TEMPLATE(addzeroes,))
+
+  # for main phase
+  # for write
+  part_write: Hash(); Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
+  data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150) -> String
+
+  # for read
+  limit: Uniform(1,10) -> int
+  part_read: Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
+
+blocks:
+  schema:
+    params:
+      prepared: false
+    ops:
+      #drop-database:
+      #  execute: |
+      #    DROP DATABASE IF EXISTS TEMPLATE(database,baselines);
+      create-database:
+        execute: |
+          CREATE DATABASE IF NOT EXISTS TEMPLATE(database,baselines);
+      drop-table:
+        execute: |
+          DROP TABLE IF EXISTS TEMPLATE(database,baselines).TEMPLATE(table,tabular);
+      create-table:
+        execute: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) (
+           part STRING,
+           clust STRING,
+           data0 STRING, data1 STRING, data2 STRING, data3 STRING,
+           data4 STRING, data5 STRING, data6 STRING, data7 STRING,
+           PRIMARY KEY (part,clust)
+          );
+
+  rampup:
+    params:
+    ops:
+      rampup-insert:
+        update: |
+          INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          (part,clust,data0,data1,data2,data3,data4,data5,data6,data7)
+          VALUES (
+            '{part_layout}','{clust_layout}','{data0}','{data1}','{data2}',
+            '{data3}','{data4}','{data5}','{data6}','{data7}'
+          );
+
+  verify:
+    params:
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+    ops:
+      verify-select:
+        query: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_layout}'
+          AND clust='{clust_layout}'
+
+  main-read:
+    params:
+      ratio: TEMPLATE(read_ratio,1)
+    ops:
+      main-select-all:
+        query: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
+      main-select-01:
+        query: |
+          SELECT data0,data1 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
+      main-select-0246:
+        query: |
+          SELECT data0,data2,data4,data6 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
+      main-select-1357:
+        query: |
+          SELECT data1,data3,data5,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
+      main-select-0123:
+        query: |
+          SELECT data0,data1,data2,data3 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
+      main-select-4567:
+        query: |
+          SELECT data4,data5,data6,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
+      main-select-67:
+        query: |
+          SELECT data6,data7 FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
+      main-select:
+        query: |
+          SELECT data0,data1,data2,data3,data4,data5,data6,data7
+          FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          WHERE part='{part_read}' LIMIT {limit};
+  main-write:
+    params:
+      ratio: TEMPLATE(write_ratio,8)
+    ops:
+      main-write:
+        update: |
+          INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
+          (part, clust, data0,data1,data2,data3,data4,data5,data6,data7)
+          VALUES (
+            '{part_write}','{clust_write}','{data0}','{data1}','{data2}',
+            '{data3}','{data4}','{data5}','{data6}','{data7}'
+          );
