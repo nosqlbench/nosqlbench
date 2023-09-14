@@ -66,7 +66,6 @@
         <module.adapter-kafka>adapter-kafka</module.adapter-kafka>
         <module.adapter-kafka>adapter-amqp</module.adapter-kafka>
         <module.adapter-jdbc>adapter-jdbc</module.adapter-jdbc>
-        <module.adapter-pgvector>adapter-pgvector</module.adapter-pgvector>
 
         <!--        <module.hdf-loader>hdf-loader</module.hdf-loader>-->
 
