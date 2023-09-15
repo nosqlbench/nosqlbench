@@ -96,4 +96,8 @@ public interface Annotation extends NBLabeledElement {
 
     String asJson();
 
+    default long getDurationMillis() {
+        return getEndMillis()-getStartMillis();
+    }
+
 }

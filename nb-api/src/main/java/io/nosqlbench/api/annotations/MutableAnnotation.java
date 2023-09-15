@@ -88,6 +88,7 @@ public class MutableAnnotation implements Annotation {
 
     public void setEnd(long intervalEnd) {
         this.end = intervalEnd;
+        this.details.put("duration",String.valueOf(getDurationMillis()));
     }
 
     public void setLayer(Layer layer) {
@@ -136,8 +137,8 @@ public class MutableAnnotation implements Annotation {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        ZonedDateTime startTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
-        ZonedDateTime endTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
+        ZonedDateTime startTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStartMillis()), zoneid);
+        ZonedDateTime endTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStartMillis()), zoneid);
 
         sb.append("[");
         ZonedDateTime zonedStartTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
