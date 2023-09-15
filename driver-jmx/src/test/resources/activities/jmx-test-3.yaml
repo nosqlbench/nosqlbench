@@ -1,4 +1,0 @@
-statements:
-  - read1: readvar=Value as_type=int as_name=pending_tasks
-    url: service:jmx:rmi:///jndi/rmi://dsehost:7199/jmxrmi
-    object: org.apache.cassandra.metrics:type=Compaction,name=PendingTasks

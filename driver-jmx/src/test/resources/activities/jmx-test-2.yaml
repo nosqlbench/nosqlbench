@@ -1,8 +1,0 @@
-# (src/test/resources/activities/) jmx-test-2.yaml
-statements:
-  - explain1:
-     url: service:jmx:rmi:///jndi/rmi://dsehost:7199/jmxrmi
-     object: org.apache.cassandra.metrics:type=Compaction,name=PendingTasks
-     explain: object
-
-
