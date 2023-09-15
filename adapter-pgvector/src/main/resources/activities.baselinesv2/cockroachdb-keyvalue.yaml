@@ -1,0 +1,62 @@
+# run driver=jdbc workload="/path/to/postgresql-keyvalue.yaml" tags="block:schema" threads=AUTO cycles=4 url="jdbc:postgresql://host:port/database" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName=insectdb sslrootcert="/path/to/postgresql_certs/root.crt" -vv --show-stacktraces
+min_version: "5.17.1"
+
+description: |
+  A workload with only text keys and text values. This is based on the CQL keyvalue workloads as found
+  in cql-keyvalue2.yaml.
+
+scenarios:
+  default:
+    schema: run driver=jdbc workload="/path/to/postgresql-keyvalue.yaml" tags==block:schema   threads=1    cycles==UNDEF                        url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    rampup: run driver=jdbc workload="/path/to/postgresql-keyvalue.yaml" tags==block:rampup   threads=AUTO cycles===TEMPLATE(rampup-cycles,100) url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    main:   run driver=jdbc workload="/path/to/postgresql-keyvalue.yaml" tags==block:'main.*' threads=AUTO cycles===TEMPLATE(main-cycles,100)   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+
+params:
+  instrument: TEMPLATE(instrument,false)
+
+bindings:
+  seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString() -> String
+  seq_value: Hash(); Mod(TEMPLATE(valuecount,1000000000)); ToString() -> String
+  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
+  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+
+blocks:
+  schema:
+    ops:
+      drop-database:
+        execute: |
+          DROP DATABASE IF EXISTS TEMPLATE(database,baselines);
+      create-database:
+        execute: |
+          CREATE DATABASE IF NOT EXISTS TEMPLATE(database,baselines);
+      drop-table:
+        execute: |
+          DROP TABLE IF EXISTS TEMPLATE(database,baselines).TEMPLATE(table,keyvalue);
+      create-table:
+        execute: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(database,baselines).TEMPLATE(table,keyvalue)
+          (key STRING PRIMARY KEY, value STRING);
+
+  rampup:
+    params:
+    ops:
+      rampup-insert:
+        update: |
+          INSERT INTO TEMPLATE(database,baselines).TEMPLATE(table,keyvalue)
+          (key, value) VALUES ({seq_key},{seq_value});
+
+  main-read:
+    params:
+      ratio: TEMPLATE(read_ratio,5)
+    ops:
+      main-select:
+        query: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) WHERE key='{rw_key}';
+  main-write:
+    params:
+      ratio: TEMPLATE(write_ratio,5)
+    ops:
+      main-insert:
+        update: |
+          INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
+          (key, value) VALUES ('{rw_key}', '{rw_value}');
