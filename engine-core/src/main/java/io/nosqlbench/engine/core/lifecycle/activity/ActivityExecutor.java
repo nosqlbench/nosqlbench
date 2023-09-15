@@ -107,7 +107,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             .element(this)
             .interval(this.startedAt, this.stoppedAt)
             .layer(Layer.Activity)
-            .detail("params", getActivityDef().toString())
+            .addDetail("params", getActivityDef().toString())
             .build()
         );
     }
@@ -131,7 +131,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             .element(this)
             .interval(this.startedAt, this.stoppedAt)
             .layer(Layer.Activity)
-            .detail("params", getActivityDef().toString())
+            .addDetail("params", getActivityDef().toString())
             .build()
         );
     }
@@ -400,8 +400,8 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             .element(this)
             .now()
             .layer(Layer.Activity)
-            .detail("event", "start-activity")
-            .detail("params", activityDef.toString())
+            .addDetail("event", "start-activity")
+            .addDetail("params", activityDef.toString())
             .build());
 
         try {
@@ -520,7 +520,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             .element(this)
             .now()
             .layer(Layer.Activity)
-            .detail("params", getActivityDef().toString())
+            .addDetail("params", getActivityDef().toString())
             .build()
         );
 
@@ -562,8 +562,8 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             .element(this)
             .interval(startedAt, stoppedAt)
             .layer(Layer.Activity)
-            .detail("event", "stop-activity")
-            .detail("params", activityDef.toString())
+            .addDetail("event", "stop-activity")
+            .addDetail("params", activityDef.toString())
             .build());
     }
 

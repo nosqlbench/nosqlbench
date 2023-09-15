@@ -252,7 +252,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
                 .element(this)
                 .now()
                 .layer(Layer.Scenario)
-                .detail("engine", engine.toString())
+                .addDetail("engine", engine.toString())
                 .build()
         );
 
@@ -351,7 +351,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
             .element(this)
             .interval(startedAtMillis, this.endedAtMillis)
             .layer(Layer.Scenario)
-            .detail("event","stop-scenario")
+            .addDetail("event","stop-scenario")
             .build();
 
         Annotators.recordAnnotation(annotation);

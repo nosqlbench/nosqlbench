@@ -37,20 +37,20 @@ import java.util.function.Function;
 public interface Annotation extends NBLabeledElement {
 
     /**
-     * If this is the same as {@link #getEnd()}, then the annotation is
+     * If this is the same as {@link #getEndMillis()}, then the annotation is
      * for an instant in time.
      *
      * @return The beginning of the interval of time that the annotation describes
      */
-    long getStart();
+    long getStartMillis();
 
     /**
-     * If this is the same as {@link #getStart()}, then the annotation
+     * If this is the same as {@link #getStartMillis()}, then the annotation
      * is for an instant in time.
      *
      * @return The end of the interval of time that the annotation describes
      */
-    long getEnd();
+    long getEndMillis();
 
     /**
      * Annotations must be associated with a processing layer in NoSQLBench.

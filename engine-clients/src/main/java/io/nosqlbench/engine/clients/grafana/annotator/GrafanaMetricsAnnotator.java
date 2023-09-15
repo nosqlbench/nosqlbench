@@ -58,8 +58,8 @@ public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
         try {
             GAnnotation ga = new GAnnotation();
 
-            ga.setTime(annotation.getStart());
-            ga.setTimeEnd(annotation.getEnd());
+            ga.setTime(annotation.getStartMillis());
+            ga.setTimeEnd(annotation.getEndMillis());
 
             annotation.getLabels().asMap().forEach((k, v) -> {
                 ga.getTags().add(k + ":" + v);
@@ -69,7 +69,7 @@ public class GrafanaMetricsAnnotator implements Annotator, NBConfigurable {
             });
             ga.getTags().add("layer:" + annotation.getLayer().toString());
 
-            if (annotation.getStart() == annotation.getEnd()) {
+            if (annotation.getStartMillis() == annotation.getEndMillis()) {
                 ga.getTags().add("span:instant");
             } else {
                 ga.getTags().add("span:interval");

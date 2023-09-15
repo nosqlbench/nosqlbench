@@ -407,7 +407,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                         .element(this)
                         .now()
                         .layer(Layer.Session)
-                        .detail("cli", String.join("\n", args))
+                        .addDetail("cli", String.join("\n", args))
                         .build()
         );
 
