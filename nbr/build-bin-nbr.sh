@@ -22,7 +22,7 @@ set -x
 APPDIR=target/NB.AppDir
 JAR_NAME="nbr.jar"
 BIN_NAME="nbr"
-JAVA_VERSION="17"
+JAVA_VERSION="21"
 
 
 mkdir -p ${APPDIR}
@@ -38,20 +38,21 @@ rsync -av appimage/skel/ "${APPDIR}/"
 cp target/${JAR_NAME} "${APPDIR}/usr/bin/${JAR_NAME}"
 
 mkdir -p "${APPDIR}/usr/bin/jre"
-
-if [ "$JAVA_VERSION" == "17" ]
+jdkname="jdk${JAVA_VERSION}"
+if [ "${jdkname}" == "jdk21" ]
 then
-  if [ ! -d "cache/jdk17" ] ; then
-    printf "getting jdk17 once into cache/jdk17\n";
+  if [ ! -d "cache/${jdkname}" ] ; then
+    printf "getting ${jdkname} once into cache/${jdkname}\n";
+    filename='openjdk-21_linux-x64_bin.tar.gz'
     mkdir -p cache
     (cd cache && (
-      wget -c https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_x64_linux_hotspot_17.0.1_12.tar.gz
-      tar -xf OpenJDK17U-jdk_x64_linux_hotspot_17.0.1_12.tar.gz
-      mv jdk-17.0.1+12 jdk17
-      rm OpenJDK17U-jdk_x64_linux_hotspot_17.0.1_12.tar.gz
+      curl -O https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/${filename}
+      tar -xf ${filename}
+      mv jdk-21 jdk21
+      rm ${filename}
     ))
   fi
-  rsync -av cache/jdk17/ "${APPDIR}/usr/bin/jre/"
+  rsync -av cache/jdk21/ "${APPDIR}/usr/bin/jre/"
 else
   printf "Unknown java version indicated in $0"
   exit 2
