@@ -16,11 +16,14 @@
 
 package io.nosqlbench.virtdata.testmappers;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongUnaryOperator;
 
 @ThreadSafeMapper
+@Categories({Category.general})
 public class TestingRepeater implements LongUnaryOperator {
     private final int repeat;
 

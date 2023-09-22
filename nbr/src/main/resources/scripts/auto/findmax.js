@@ -148,15 +148,16 @@ if (latency_pctile > 1.0) {
     latency_pctile = (latency_pctile * 0.01);
 }
 
-var reporter_sampling_baserate = scriptingmetrics.newGauge("findmax.sampling.base_rate", rate_base + 0.0);
-var reporter_sampling_targetrate = scriptingmetrics.newGauge("findmax.sampling.target_rate", 0.0);
-var reporter_sampling_achievedrate = scriptingmetrics.newGauge("findmax.sampling.achieved_rate", 0.0);
-var reporter_sampling_minbound = scriptingmetrics.newGauge("findmax.sampling.lower_rate", 0.0);
-var reporter_sampling_maxbound = scriptingmetrics.newGauge("findmax.sampling.higher_rate", 0.0);
+var reporter_sampling_baserate = scriptingmetrics.newStaticGauge("findmax.sampling.base_rate", rate_base + 0.0);
+var reporter_sampling_baserate = scriptingmetrics.newStaticGauge("{activity=findmax,name=sampling_base_rate}", rate_base + 0.0);
+var reporter_sampling_targetrate = scriptingmetrics.newStaticGauge("findmax.sampling.target_rate", 0.0);
+var reporter_sampling_achievedrate = scriptingmetrics.newStaticGauge("findmax.sampling.achieved_rate", 0.0);
+var reporter_sampling_minbound = scriptingmetrics.newStaticGauge("findmax.sampling.lower_rate", 0.0);
+var reporter_sampling_maxbound = scriptingmetrics.newStaticGauge("findmax.sampling.higher_rate", 0.0);
 
 
-var reporter_params_baserate = scriptingmetrics.newGauge("findmax.params.base_rate", 0.0);
-var reporter_params_targetrate = scriptingmetrics.newGauge("findmax.params.target_rate", 0.0);
+var reporter_params_baserate = scriptingmetrics.newStaticGauge("findmax.params.base_rate", 0.0);
+var reporter_params_targetrate = scriptingmetrics.newStaticGauge("findmax.params.target_rate", 0.0);
 
 var driver = "TEMPLATE(driver,cql)";
 var yaml_file = "TEMPLATE(yaml_file,cql-iot)";

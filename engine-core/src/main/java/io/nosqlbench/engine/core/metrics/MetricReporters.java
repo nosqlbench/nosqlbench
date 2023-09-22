@@ -19,6 +19,8 @@ package io.nosqlbench.engine.core.metrics;
 import com.codahale.metrics.*;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
+import io.nosqlbench.api.engine.metrics.NBMetricsRegistry;
 import io.nosqlbench.api.engine.metrics.reporters.PromPushReporter;
 import io.nosqlbench.api.Shutdownable;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
@@ -49,7 +51,7 @@ public class MetricReporters implements Shutdownable {
         return instance;
     }
 
-    public MetricReporters addRegistry(String registryPrefix, MetricRegistry metricsRegistry) {
+    public MetricReporters addRegistry(String registryPrefix, MetricsRegistry metricsRegistry) {
         this.metricRegistries.add(new PrefixedRegistry(registryPrefix, metricsRegistry));
         return this;
     }
@@ -80,14 +82,19 @@ public class MetricReporters implements Shutdownable {
         }
 
         for (PrefixedRegistry prefixedRegistry : metricRegistries) {
-            CsvReporter csvReporter = CsvReporter.forRegistry(prefixedRegistry.metricRegistry)
+            if (prefixedRegistry.metricRegistry instanceof NBMetricsRegistry) {
+                CsvReporter csvReporter = CsvReporter.forRegistry(
+                    (NBMetricsRegistry)prefixedRegistry.metricRegistry)
                     .convertDurationsTo(TimeUnit.NANOSECONDS)
                     .convertRatesTo(TimeUnit.SECONDS)
                     .filter(ActivityMetrics.METRIC_FILTER)
                     .formatFor(Locale.US)
                     .build(csvDirectory);
 
-            scheduledReporters.add(csvReporter);
+                scheduledReporters.add(csvReporter);
+            } else {
+                //TODO: Add support for other types of registries
+            }
         }
     }
 
@@ -103,7 +110,7 @@ public class MetricReporters implements Shutdownable {
 
             Graphite graphite = new Graphite(new InetSocketAddress(host, graphitePort));
             String _prefix = null != prefixedRegistry.prefix ? !prefixedRegistry.prefix.isEmpty() ? globalPrefix + '.' + prefixedRegistry.prefix : globalPrefix : globalPrefix;
-            GraphiteReporter graphiteReporter = GraphiteReporter.forRegistry(prefixedRegistry.metricRegistry)
+            GraphiteReporter graphiteReporter = GraphiteReporter.forRegistry((NBMetricsRegistry)prefixedRegistry.metricRegistry)
                     .prefixedWith(_prefix)
                     .convertRatesTo(TimeUnit.SECONDS)
                     .convertDurationsTo(TimeUnit.NANOSECONDS)
@@ -127,7 +134,7 @@ public class MetricReporters implements Shutdownable {
             final PromPushReporter promPushReporter =
                 new PromPushReporter(
                     reportPromPushTo,
-                    prefixedRegistry.metricRegistry,
+                    (NBMetricsRegistry)prefixedRegistry.metricRegistry,
                     "prompush",
                     MetricFilter.ALL,
                     TimeUnit.SECONDS,
@@ -201,9 +208,9 @@ public class MetricReporters implements Shutdownable {
 
     private class PrefixedRegistry {
         public String prefix;
-        public MetricRegistry metricRegistry;
+        public MetricsRegistry metricRegistry;
 
-        public PrefixedRegistry(String prefix, MetricRegistry metricRegistry) {
+        public PrefixedRegistry(String prefix, MetricsRegistry metricRegistry) {
             this.prefix = prefix;
             this.metricRegistry = metricRegistry;
         }

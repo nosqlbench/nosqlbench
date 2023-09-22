@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.extensions.optimizers;
 
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
@@ -24,10 +25,10 @@ import javax.script.ScriptContext;
 public class BobyqaOptimizerPlugin {
 
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final MetricsRegistry metricRegistry;
     private final ScriptContext scriptContext;
 
-    public BobyqaOptimizerPlugin(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public BobyqaOptimizerPlugin(Logger logger, MetricsRegistry metricRegistry, ScriptContext scriptContext) {
         this.logger = logger;
         this.metricRegistry = metricRegistry;
         this.scriptContext = scriptContext;

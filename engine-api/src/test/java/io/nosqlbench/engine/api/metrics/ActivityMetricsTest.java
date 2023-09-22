@@ -17,8 +17,9 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Metric;
-import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
+import io.nosqlbench.api.engine.metrics.NBMetricsRegistry;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -29,7 +30,7 @@ public class ActivityMetricsTest {
 
     @Test
     public void testMountSubRegistry() throws Exception {
-        MetricRegistry r1 = new MetricRegistry();
+        MetricsRegistry r1 = new NBMetricsRegistry();
         r1.counter("counter1");
 
         int extant = ActivityMetrics.getMetricRegistry().getMetrics().size();

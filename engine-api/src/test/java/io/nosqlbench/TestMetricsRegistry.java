@@ -16,8 +16,9 @@
 
 package io.nosqlbench;
 
-import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.engine.activityapi.core.MetricRegistryService;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
+import io.nosqlbench.api.engine.metrics.NBMetricsRegistry;
 import io.nosqlbench.nb.annotations.Service;
 
 /**
@@ -26,10 +27,10 @@ import io.nosqlbench.nb.annotations.Service;
 @Service(value= MetricRegistryService.class, selector="test-registry")
 public class TestMetricsRegistry implements MetricRegistryService {
 
-    private final MetricRegistry metricRegistry = new MetricRegistry();
+    private final MetricsRegistry metricRegistry = new NBMetricsRegistry();
 
     @Override
-    public MetricRegistry getMetricRegistry() {
+    public MetricsRegistry getMetricRegistry() {
         return metricRegistry;
     }
 }

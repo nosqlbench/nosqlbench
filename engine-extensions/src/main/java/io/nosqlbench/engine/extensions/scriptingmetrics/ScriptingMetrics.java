@@ -18,6 +18,7 @@ package io.nosqlbench.engine.extensions.scriptingmetrics;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
@@ -28,10 +29,10 @@ import java.util.Map;
 
 public class ScriptingMetrics {
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final MetricsRegistry metricRegistry;
     private final LabeledScenarioContext scriptContext;
 
-    public ScriptingMetrics(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+    public ScriptingMetrics(final Logger logger, final MetricsRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
         this.logger = logger;
         this.metricRegistry = metricRegistry;
         this.scriptContext = scriptContext;

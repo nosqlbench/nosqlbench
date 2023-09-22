@@ -18,6 +18,7 @@ package io.nosqlbench.engine.extensions.histologger;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +33,8 @@ public class HdrHistoLogPluginData implements ScriptingExtensionPluginInfo<HdrHi
     }
 
     @Override
-    public HdrHistoLogPlugin getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+    public HdrHistoLogPlugin getExtensionObject(Logger logger, MetricsRegistry metricRegistry, LabeledScenarioContext scriptContext) {
         return new HdrHistoLogPlugin(logger,metricRegistry,scriptContext);
     }
+
 }

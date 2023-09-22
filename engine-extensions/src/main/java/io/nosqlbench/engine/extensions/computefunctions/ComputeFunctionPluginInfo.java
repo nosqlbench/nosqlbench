@@ -18,6 +18,7 @@ package io.nosqlbench.engine.extensions.computefunctions;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +33,7 @@ public class ComputeFunctionPluginInfo implements ScriptingExtensionPluginInfo<C
     }
 
     @Override
-    public ComputeFunctions getExtensionObject(Logger logger, MetricRegistry metricRegistry, LabeledScenarioContext scriptContext) {
+    public ComputeFunctions getExtensionObject(Logger logger, MetricsRegistry metricRegistry, LabeledScenarioContext scriptContext) {
         return new ComputeFunctions();
     }
 

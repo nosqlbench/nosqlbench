@@ -44,7 +44,7 @@ public class ActivityMetrics {
     public static final int DEFAULT_HDRDIGITS = 4;
     private static int _HDRDIGITS = DEFAULT_HDRDIGITS;
 
-    private static MetricRegistry registry;
+    private static MetricsRegistry registry;
 
     public static MetricFilter METRIC_FILTER = (name, metric) -> {
         return true;
@@ -184,7 +184,7 @@ public class ActivityMetrics {
         return (Meter) register(labels, () -> new NBMetricMeter(labels));
     }
 
-    private static MetricRegistry get() {
+    private static MetricsRegistry get() {
         if (null != ActivityMetrics.registry) {
             return registry;
         }
@@ -224,7 +224,7 @@ public class ActivityMetrics {
         return (Gauge<T>) register(labels, () -> new NBMetricGaugeWrapper<>(labels,gauge));
     }
 
-    private static MetricRegistry lookupRegistry() {
+    private static MetricsRegistry lookupRegistry() {
         ServiceLoader<MetricRegistryService> metricRegistryServices =
             ServiceLoader.load(MetricRegistryService.class);
         List<MetricRegistryService> mrss = new ArrayList<>();
@@ -235,12 +235,12 @@ public class ActivityMetrics {
         }
         final String infoMsg = "Unable to load a dynamic MetricRegistry via ServiceLoader, using the default.";
         logger.info(infoMsg);
-        return new MetricRegistry();
+        return new NBMetricsRegistry();
 
     }
 
 
-    public static MetricRegistry getMetricRegistry() {
+    public static MetricsRegistry getMetricRegistry() {
         return get();
     }
 
@@ -356,7 +356,8 @@ public class ActivityMetrics {
 
     public static void reportTo(PrintStream out) {
         out.println("====================  BEGIN-METRIC-LOG  ====================");
-        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(
+            (NBMetricsRegistry)ActivityMetrics.getMetricRegistry())
             .convertDurationsTo(TimeUnit.MICROSECONDS)
             .convertRatesTo(TimeUnit.SECONDS)
             .filter(MetricFilter.ALL)
@@ -366,7 +367,7 @@ public class ActivityMetrics {
         out.println("====================   END-METRIC-LOG   ====================");
     }
 
-    public static void mountSubRegistry(String mountPrefix, MetricRegistry subRegistry) {
+    public static void mountSubRegistry(String mountPrefix, MetricsRegistry subRegistry) {
         new MetricsRegistryMount(getMetricRegistry(), subRegistry, mountPrefix);
     }
 

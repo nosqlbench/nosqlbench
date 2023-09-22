@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.core.lifecycle;
 
 import com.codahale.metrics.*;
-import com.codahale.metrics.ConsoleReporter.Builder;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.NBMetricsRegistry;
 import io.nosqlbench.api.engine.metrics.reporters.Log4JMetricsReporter;
 import io.nosqlbench.api.engine.metrics.reporters.Log4JMetricsReporter.LoggingLevel;
 import io.nosqlbench.engine.core.metrics.NBMetricsSummary;
@@ -57,7 +57,7 @@ public class ExecutionMetricsResult extends ExecutionResult {
     public String getMetricsSummary() {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try (final PrintStream ps = new PrintStream(os)) {
-            final Builder builder = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+            final ConsoleReporter.Builder builder = ConsoleReporter.forRegistry((NBMetricsRegistry)ActivityMetrics.getMetricRegistry())
                 .convertDurationsTo(TimeUnit.MICROSECONDS)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .filter(MetricFilter.ALL)

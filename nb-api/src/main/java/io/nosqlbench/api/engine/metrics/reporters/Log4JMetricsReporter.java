@@ -17,6 +17,7 @@
 package io.nosqlbench.api.engine.metrics.reporters;
 
 import com.codahale.metrics.*;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -41,6 +42,11 @@ public class Log4JMetricsReporter extends ScheduledReporter {
      */
     public static Builder forRegistry(final MetricRegistry registry) {
         return new Builder(registry);
+    }
+
+    public static Builder forRegistry( MetricsRegistry registry) {
+        return null;
+        //TODO: Fix this
     }
 
     public enum LoggingLevel { TRACE, DEBUG, INFO, WARN, ERROR }

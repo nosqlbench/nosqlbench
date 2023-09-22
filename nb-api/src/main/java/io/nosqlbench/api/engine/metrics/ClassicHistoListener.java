@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public class ClassicHistoListener extends CapabilityHook<HistogramAttachment> {
     private final static Logger logger = LogManager.getLogger(ClassicHistoListener.class);
 
-    private final MetricRegistry metricsRegistry;
+    private final MetricsRegistry metricsRegistry;
     private final String sessionName;
     private final String prefix;
     private final Pattern pattern;
@@ -36,7 +36,7 @@ public class ClassicHistoListener extends CapabilityHook<HistogramAttachment> {
     private final TimeUnit nanoseconds;
     private final Map<String, Attachment> histos = new HashMap<>();
 
-    public ClassicHistoListener(MetricRegistry metricRegistry, String sessionName, String prefix, Pattern pattern, String interval, TimeUnit nanoseconds) {
+    public ClassicHistoListener(MetricsRegistry metricRegistry, String sessionName, String prefix, Pattern pattern, String interval, TimeUnit nanoseconds) {
         this.metricsRegistry = metricRegistry;
         this.sessionName = sessionName;
         this.prefix = prefix;

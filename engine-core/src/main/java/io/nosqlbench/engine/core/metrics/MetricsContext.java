@@ -16,8 +16,9 @@
 
 package io.nosqlbench.engine.core.metrics;
 
-import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.engine.activityapi.core.MetricRegistryService;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
+import io.nosqlbench.api.engine.metrics.NBMetricsRegistry;
 import io.nosqlbench.nb.annotations.Service;
 
 @Service(value = MetricRegistryService.class, selector = "metrics-context")
@@ -26,7 +27,7 @@ public class MetricsContext implements MetricRegistryService {
     private static MetricsContext instance;
 
     private final MetricReporters metricReporters = MetricReporters.getInstance();
-    private final MetricRegistry metrics = new NBMetricsRegistry();
+    private final MetricsRegistry metrics = new NBMetricsRegistry();
 
     public static MetricsContext getInstance() {
         synchronized (MetricsContext.class) {
@@ -41,7 +42,7 @@ public class MetricsContext implements MetricRegistryService {
         return metricReporters;
     }
 
-    public MetricRegistry getMetrics() {
+    public MetricsRegistry getMetrics() {
         return metrics;
     }
 
@@ -49,12 +50,12 @@ public class MetricsContext implements MetricRegistryService {
      * Convenience method to unclutter code. This will be used everywhere.
      * @return The default metric context.
      */
-    public static MetricRegistry metrics() {
+    public static MetricsRegistry metrics() {
         return getInstance().getMetrics();
     }
 
     @Override
-    public MetricRegistry getMetricRegistry() {
+    public MetricsRegistry getMetricRegistry() {
         return getMetrics();
     }
 }

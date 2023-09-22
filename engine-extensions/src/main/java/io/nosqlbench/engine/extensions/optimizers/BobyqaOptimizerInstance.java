@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.extensions.optimizers;
 
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -32,7 +33,7 @@ import java.util.function.Function;
 public class BobyqaOptimizerInstance {
 
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final MetricsRegistry metricRegistry;
     private final ScriptContext scriptContext;
 
     private int interpolations = 0;
@@ -49,7 +50,7 @@ public class BobyqaOptimizerInstance {
     private MVLogger mvLogger;
     private double guessSlew = 0.25d;
 
-    public BobyqaOptimizerInstance(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public BobyqaOptimizerInstance(Logger logger, MetricsRegistry metricRegistry, ScriptContext scriptContext) {
         this.logger = logger;
         this.metricRegistry = metricRegistry;
         this.scriptContext = scriptContext;

@@ -19,6 +19,8 @@ package io.nosqlbench.engine.extensions.csvmetrics;
 import com.codahale.metrics.CsvReporter;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
+import io.nosqlbench.api.engine.metrics.NBMetricsRegistry;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
@@ -27,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CSVMetrics {
 
-    private final MetricRegistry registry;
+    private final MetricsRegistry registry;
     private final File reportTo;
     CsvReporter reporter;
 
@@ -37,7 +39,7 @@ public class CSVMetrics {
      * @param logger an extension logger, to be used for logging extension-specific events
      * @param registry a MetricRegistry to report
      */
-    public CSVMetrics(String directory, Logger logger, MetricRegistry registry) {
+    public CSVMetrics(String directory, Logger logger, MetricsRegistry registry) {
         File reportTo = new File(directory);
         if (!reportTo.exists()) {
             if (!reportTo.mkdirs()) {
@@ -52,7 +54,7 @@ public class CSVMetrics {
         if (reporter!=null) {
             return;
         }
-        reporter = CsvReporter.forRegistry(registry)
+        reporter = CsvReporter.forRegistry((NBMetricsRegistry)registry)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .filter(filter)
@@ -68,7 +70,7 @@ public class CSVMetrics {
      * @param period a period between reporting intervals
      * @param timeUnit the actual timeunit for the period
      */
-    public CSVMetrics(String csvFile, Logger logger, MetricRegistry registry, long period, TimeUnit timeUnit) {
+    public CSVMetrics(String csvFile, Logger logger, MetricsRegistry registry, long period, TimeUnit timeUnit) {
         this(csvFile, logger, registry);
         reporter.start(period, timeUnit);
     }

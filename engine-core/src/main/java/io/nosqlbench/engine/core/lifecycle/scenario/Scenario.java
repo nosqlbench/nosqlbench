@@ -19,6 +19,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
@@ -176,7 +177,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
     private void initializeScriptingEngine(final ScenarioController scenarioController) {
 
         this.logger.debug("Using engine {}", this.engine.toString());
-        final MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
+        final MetricsRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
 
         final Context.Builder contextSettings = Context.newBuilder("js")
             .allowHostAccess(HostAccess.ALL)
@@ -504,7 +505,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
     }
 
     public void enableCharting() {
-        final MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
+        final MetricsRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
     }
 
     public String getReportSummaryTo() {

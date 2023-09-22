@@ -23,6 +23,7 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.addins.s3.s3urlhandler.S3ClientCache;
 import io.nosqlbench.addins.s3.s3urlhandler.S3UrlFields;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import io.nosqlbench.api.system.NBEnvironment;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
 import io.nosqlbench.api.metadata.ScenarioMetadataAware;
@@ -39,11 +40,11 @@ import java.util.Map;
 
 public class S3Uploader implements ScenarioMetadataAware {
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final MetricsRegistry metricRegistry;
     private final ScriptContext scriptContext;
     private ScenarioMetadata scenarioMetadata;
 
-    public S3Uploader(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public S3Uploader(Logger logger, MetricsRegistry metricRegistry, ScriptContext scriptContext) {
         this.logger = logger;
         this.metricRegistry = metricRegistry;
         this.scriptContext = scriptContext;

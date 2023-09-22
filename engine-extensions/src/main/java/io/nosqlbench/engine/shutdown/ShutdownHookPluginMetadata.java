@@ -18,6 +18,7 @@ package io.nosqlbench.engine.shutdown;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +32,7 @@ public class ShutdownHookPluginMetadata implements ScriptingExtensionPluginInfo<
     }
 
     @Override
-    public ShutdownHookPlugin getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+    public ShutdownHookPlugin getExtensionObject(final Logger logger, final MetricsRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
         return new ShutdownHookPlugin(logger,metricRegistry,scriptContext);
     }
 }

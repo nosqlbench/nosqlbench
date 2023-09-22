@@ -146,6 +146,10 @@
             <groupId>org.snakeyaml</groupId>
             <artifactId>snakeyaml-engine</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.mpierce.metrics.reservoir</groupId>
+            <artifactId>hdrhistogram-metrics-reservoir</artifactId>
+        </dependency>
 
     </dependencies>
 

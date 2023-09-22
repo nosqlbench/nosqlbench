@@ -16,11 +16,14 @@
 
 package io.nosqlbench.virtdata.core.templates;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
 
 @ThreadSafeMapper
+@Categories({Category.general})
 public class TestIdentity implements LongFunction<Object> {
 
     @Override

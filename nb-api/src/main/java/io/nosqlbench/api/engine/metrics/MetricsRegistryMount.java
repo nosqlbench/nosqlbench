@@ -20,13 +20,13 @@ import com.codahale.metrics.*;
 
 public class MetricsRegistryMount implements MetricRegistryListener {
 
-    private final MetricRegistry owningRegistry;
+    private final MetricsRegistry owningRegistry;
 
-    private final MetricRegistry mountedRegistry;
+    private final MetricsRegistry mountedRegistry;
     private final String mountedPrefix;
 
 
-    public MetricsRegistryMount(MetricRegistry owningRegistry, MetricRegistry mountedRegistry, String mountedPrefix) {
+    public MetricsRegistryMount(MetricsRegistry owningRegistry, MetricsRegistry mountedRegistry, String mountedPrefix) {
         this.owningRegistry = owningRegistry;
         this.mountedRegistry = mountedRegistry;
         this.mountedPrefix = mountedPrefix;

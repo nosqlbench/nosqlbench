@@ -18,16 +18,17 @@ package io.nosqlbench.engine.extensions.histologger;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
 public class HdrHistoLogPlugin {
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final MetricsRegistry metricRegistry;
     private final ScriptContext scriptContext;
 
-    public HdrHistoLogPlugin(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public HdrHistoLogPlugin(Logger logger, MetricsRegistry metricRegistry, ScriptContext scriptContext) {
         this.logger = logger;
         this.metricRegistry = metricRegistry;
         this.scriptContext = scriptContext;

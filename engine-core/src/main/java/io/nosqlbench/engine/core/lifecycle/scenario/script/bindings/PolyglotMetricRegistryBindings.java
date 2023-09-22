@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.script.bindings;
 
 import com.codahale.metrics.*;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import io.nosqlbench.engine.core.metrics.MetricMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,10 +36,10 @@ public class PolyglotMetricRegistryBindings implements ProxyObject, MetricRegist
 
     private final static Logger logger = LogManager.getLogger("METRICS");
 
-    private final MetricRegistry registry;
+    private final MetricsRegistry registry;
     MetricMap metrics = new MetricMap("ROOT",null);
 
-    public PolyglotMetricRegistryBindings(MetricRegistry registry) {
+    public PolyglotMetricRegistryBindings(MetricsRegistry registry) {
         this.registry = registry;
         registry.addListener(this);
     }

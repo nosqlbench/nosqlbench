@@ -16,8 +16,8 @@
 
 package io.nosqlbench.api.engine.activityapi.core;
 
-import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 
 public interface MetricRegistryService {
-    MetricRegistry getMetricRegistry();
+    MetricsRegistry getMetricRegistry();
 }

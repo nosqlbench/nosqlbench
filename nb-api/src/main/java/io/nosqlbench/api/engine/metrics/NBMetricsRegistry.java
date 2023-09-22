@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package io.nosqlbench.engine.core.metrics;
+package io.nosqlbench.api.engine.metrics;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Metric;
@@ -22,7 +23,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramReservoir;
 
-public class NBMetricsRegistry extends MetricRegistry {
+public class NBMetricsRegistry extends MetricRegistry implements MetricsRegistry {
 
     @Override
     public Timer timer(String name) {

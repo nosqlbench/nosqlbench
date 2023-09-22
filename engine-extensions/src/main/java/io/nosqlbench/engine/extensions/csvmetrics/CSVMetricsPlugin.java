@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.extensions.csvmetrics;
 
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
@@ -25,9 +26,9 @@ import java.io.IOException;
 public class CSVMetricsPlugin {
     private final ScriptContext context;
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final MetricsRegistry metricRegistry;
 
-    public CSVMetricsPlugin(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public CSVMetricsPlugin(Logger logger, MetricsRegistry metricRegistry, ScriptContext scriptContext) {
         this.logger = logger;
         this.metricRegistry = metricRegistry;
         this.context = scriptContext;

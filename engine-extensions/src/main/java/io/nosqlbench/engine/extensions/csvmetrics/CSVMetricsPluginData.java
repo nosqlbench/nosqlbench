@@ -18,6 +18,7 @@ package io.nosqlbench.engine.extensions.csvmetrics;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +32,7 @@ public class CSVMetricsPluginData implements ScriptingExtensionPluginInfo<CSVMet
     }
 
     @Override
-    public CSVMetricsPlugin getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+    public CSVMetricsPlugin getExtensionObject(final Logger logger, final MetricsRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
         return new CSVMetricsPlugin(logger, metricRegistry, scriptContext);
     }
 

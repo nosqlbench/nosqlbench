@@ -18,6 +18,7 @@ package io.nosqlbench.engine.extensions.s3uploader;
 
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
@@ -34,7 +35,7 @@ public class S3UploaderPluginData implements ScriptingExtensionPluginInfo<S3Uplo
     }
 
     @Override
-    public S3Uploader getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+    public S3Uploader getExtensionObject(final Logger logger, final MetricsRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
         final S3Uploader uploader = new S3Uploader(logger, metricRegistry, scriptContext);
         ScenarioMetadataAware.apply(uploader, this.scenarioMetadata);
         return uploader;
