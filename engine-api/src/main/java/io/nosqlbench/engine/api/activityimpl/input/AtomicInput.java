@@ -63,15 +63,14 @@ public class AtomicInput implements Input, ActivityDefObserver, Gauge<Long>, NBL
         this.parent = parent;
         this.activityDef = activityDef;
         onActivityDefUpdate(activityDef);
-
-        ActivityMetrics.register(new NBFunctionGauge(this, () -> (double)this.cycles_min.get(),"input_cycles_first"));
-        ActivityMetrics.register(new NBFunctionGauge(this, () -> (double)this.cycles_max.get(), "input_cycles_last"));
-        ActivityMetrics.register(new NBFunctionGauge(this, () -> (double)this.cycle_value.get(), "input_cycle"));
-        ActivityMetrics.register(new NBFunctionGauge(this, this::getTotalCycles, "input_cycles_total"));
-        ActivityMetrics.register(new NBFunctionGauge(this, () -> (double)this.recycles_min.get(), "input_recycles_first"));
-        ActivityMetrics.register(new NBFunctionGauge(this, () -> (double)this.recycles_max.get(), "input_recycles_last"));
-        ActivityMetrics.register(new NBFunctionGauge(this, () -> (double) this.recycle_value.get(),"input_recycle"));
-        ActivityMetrics.register(new NBFunctionGauge(this, this::getTotalRecycles,"input_recycles_total"));
+        ActivityMetrics.gauge(this, "input_cycles_first", new NBFunctionGauge(this, () -> (double)this.cycles_min.get()));
+        ActivityMetrics.gauge(this, "input_cycles_last", new NBFunctionGauge(this, () -> (double)this.cycles_max.get()));
+        ActivityMetrics.gauge(this, "input_cycle", new NBFunctionGauge(this, () -> (double)this.cycle_value.get()));
+        ActivityMetrics.gauge(this, "input_cycles_total", new NBFunctionGauge(this, this::getTotalCycles));
+        ActivityMetrics.gauge(this, "input_recycles_first", new NBFunctionGauge(this, () -> (double)this.recycles_min.get()));
+        ActivityMetrics.gauge(this, "input_recycles_last", new NBFunctionGauge(this, () -> (double)this.recycles_max.get()));
+        ActivityMetrics.gauge(this, "input_recycle", new NBFunctionGauge(this, () -> (double) this.recycle_value.get()));
+        ActivityMetrics.gauge(this, "input_recycles_total", new NBFunctionGauge(this, this::getTotalRecycles));
     }
 
     private double getTotalRecycles() {
