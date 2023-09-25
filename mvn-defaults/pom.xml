@@ -36,7 +36,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <javadoc.name>nosqlbench</javadoc.name>
-        <jacoco.version>0.8.8</jacoco.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
 
@@ -818,7 +817,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.version}</version>
+                    <version>0.8.10</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
