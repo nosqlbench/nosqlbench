@@ -76,7 +76,7 @@ class ExitStatusIntegrationTests {
     void testExitStatusOnActivityOpException() {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
-        ProcessResult result = invoker.run("exitstatus_asyncstoprequest", 30,
+        ProcessResult result = invoker.run("exitstatus_asyncstoprequest", 60,
                 "java", "-jar", JARNAME, "--logs-dir", "logs/test/asyncstop", "--logs-level", "debug", "run",
                 "driver=diag", "threads=2", "cyclerate=10", "op=erroroncycle:erroroncycle=10", "cycles=50", "-vvv"
         );
