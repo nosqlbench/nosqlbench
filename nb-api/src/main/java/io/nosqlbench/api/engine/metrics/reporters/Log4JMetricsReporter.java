@@ -46,8 +46,11 @@ public class Log4JMetricsReporter extends ScheduledReporter {
     }
 
     public static Builder forRegistry( MetricsRegistry registry) {
-        return new Builder((NBMetricsRegistry)registry);
-        //TODO: Fix this
+        if (registry instanceof NBMetricsRegistry) {
+            return new Builder((NBMetricsRegistry) registry);
+        } else {
+            throw new RuntimeException("MetricsRegistry type " + registry.getClass().getCanonicalName() + " is not supported.");
+        }
     }
 
     public enum LoggingLevel { TRACE, DEBUG, INFO, WARN, ERROR }

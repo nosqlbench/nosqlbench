@@ -355,16 +355,20 @@ public class ActivityMetrics {
     }
 
     public static void reportTo(PrintStream out) {
-        out.println("====================  BEGIN-METRIC-LOG  ====================");
-        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(
-            (NBMetricsRegistry)ActivityMetrics.getMetricRegistry())
-            .convertDurationsTo(TimeUnit.MICROSECONDS)
-            .convertRatesTo(TimeUnit.SECONDS)
-            .filter(MetricFilter.ALL)
-            .outputTo(out)
-            .build();
-        consoleReporter.report();
-        out.println("====================   END-METRIC-LOG   ====================");
+        MetricsRegistry registry = ActivityMetrics.getMetricRegistry();
+        if (registry instanceof NBMetricsRegistry) {
+            out.println("====================  BEGIN-METRIC-LOG  ====================");
+            ConsoleReporter consoleReporter = ConsoleReporter.forRegistry((NBMetricsRegistry)registry)
+                .convertDurationsTo(TimeUnit.MICROSECONDS)
+                .convertRatesTo(TimeUnit.SECONDS)
+                .filter(MetricFilter.ALL)
+                .outputTo(out)
+                .build();
+            consoleReporter.report();
+            out.println("====================   END-METRIC-LOG   ====================");
+        } else {
+            throw new RuntimeException("MetricsRegistry type " + registry.getClass().getCanonicalName() + " is not supported.");
+        }
     }
 
     public static void mountSubRegistry(String mountPrefix, MetricsRegistry subRegistry) {

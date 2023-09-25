@@ -54,11 +54,15 @@ public class CSVMetrics {
         if (reporter!=null) {
             return;
         }
-        reporter = CsvReporter.forRegistry((NBMetricsRegistry)registry)
+        if (registry instanceof NBMetricsRegistry) {
+            reporter = CsvReporter.forRegistry((NBMetricsRegistry) registry)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .filter(filter)
                 .build(reportTo);
+        } else {
+            throw new RuntimeException("MetricsRegistry type " + registry.getClass().getCanonicalName() + " is not supported.");
+        }
 
     }
 

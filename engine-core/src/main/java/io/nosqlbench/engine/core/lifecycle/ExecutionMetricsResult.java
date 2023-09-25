@@ -18,6 +18,7 @@ package io.nosqlbench.engine.core.lifecycle;
 
 import com.codahale.metrics.*;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.MetricsRegistry;
 import io.nosqlbench.api.engine.metrics.NBMetricsRegistry;
 import io.nosqlbench.api.engine.metrics.reporters.Log4JMetricsReporter;
 import io.nosqlbench.api.engine.metrics.reporters.Log4JMetricsReporter.LoggingLevel;
@@ -55,22 +56,27 @@ public class ExecutionMetricsResult extends ExecutionResult {
     }
 
     public String getMetricsSummary() {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        try (final PrintStream ps = new PrintStream(os)) {
-            final ConsoleReporter.Builder builder = ConsoleReporter.forRegistry((NBMetricsRegistry)ActivityMetrics.getMetricRegistry())
-                .convertDurationsTo(TimeUnit.MICROSECONDS)
-                .convertRatesTo(TimeUnit.SECONDS)
-                .filter(MetricFilter.ALL)
-                .outputTo(ps);
-            final Set<MetricAttribute> disabled = new HashSet<>(ExecutionMetricsResult.INTERVAL_ONLY_METRICS);
-            if (60000 > this.getElapsedMillis()) disabled.addAll(ExecutionMetricsResult.OVER_ONE_MINUTE_METRICS);
-            builder.disabledMetricAttributes(disabled);
-            final ConsoleReporter consoleReporter = builder.build();
-            consoleReporter.report();
-            consoleReporter.close();
+        MetricsRegistry registry = ActivityMetrics.getMetricRegistry();
+        if (registry instanceof NBMetricsRegistry) {
+            final ByteArrayOutputStream os = new ByteArrayOutputStream();
+            try (final PrintStream ps = new PrintStream(os)) {
+                final ConsoleReporter.Builder builder = ConsoleReporter.forRegistry((NBMetricsRegistry) registry)
+                    .convertDurationsTo(TimeUnit.MICROSECONDS)
+                    .convertRatesTo(TimeUnit.SECONDS)
+                    .filter(MetricFilter.ALL)
+                    .outputTo(ps);
+                final Set<MetricAttribute> disabled = new HashSet<>(ExecutionMetricsResult.INTERVAL_ONLY_METRICS);
+                if (60000 > this.getElapsedMillis()) disabled.addAll(ExecutionMetricsResult.OVER_ONE_MINUTE_METRICS);
+                builder.disabledMetricAttributes(disabled);
+                final ConsoleReporter consoleReporter = builder.build();
+                consoleReporter.report();
+                consoleReporter.close();
+            }
+            final String result = os.toString(StandardCharsets.UTF_8);
+            return result;
+        } else {
+            throw new RuntimeException("MetricsRegistry type " + registry.getClass().getCanonicalName() + " is not supported.");
         }
-        final String result = os.toString(StandardCharsets.UTF_8);
-        return result;
     }
 
     public void reportToConsole() {

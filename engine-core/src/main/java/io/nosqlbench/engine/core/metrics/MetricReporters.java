@@ -93,7 +93,8 @@ public class MetricReporters implements Shutdownable {
 
                 scheduledReporters.add(csvReporter);
             } else {
-                //TODO: Add support for other types of registries
+                throw new RuntimeException("MetricsRegistry type " +
+                    prefixedRegistry.metricRegistry.getClass().getCanonicalName() + " is not supported.");
             }
         }
     }
@@ -110,14 +111,19 @@ public class MetricReporters implements Shutdownable {
 
             Graphite graphite = new Graphite(new InetSocketAddress(host, graphitePort));
             String _prefix = null != prefixedRegistry.prefix ? !prefixedRegistry.prefix.isEmpty() ? globalPrefix + '.' + prefixedRegistry.prefix : globalPrefix : globalPrefix;
-            GraphiteReporter graphiteReporter = GraphiteReporter.forRegistry((NBMetricsRegistry)prefixedRegistry.metricRegistry)
+            if (prefixedRegistry.metricRegistry instanceof NBMetricsRegistry) {
+                GraphiteReporter graphiteReporter = GraphiteReporter.forRegistry((NBMetricsRegistry) prefixedRegistry.metricRegistry)
                     .prefixedWith(_prefix)
                     .convertRatesTo(TimeUnit.SECONDS)
                     .convertDurationsTo(TimeUnit.NANOSECONDS)
                     .filter(ActivityMetrics.METRIC_FILTER)
                     .build(graphite);
 
-            scheduledReporters.add(graphiteReporter);
+                scheduledReporters.add(graphiteReporter);
+            } else {
+                throw new RuntimeException("MetricsRegistry type " +
+                    prefixedRegistry.metricRegistry.getClass().getCanonicalName() + " is not supported.");
+            }
         }
         return this;
     }
@@ -131,17 +137,22 @@ public class MetricReporters implements Shutdownable {
         }
 
         for (PrefixedRegistry prefixedRegistry : metricRegistries) {
-            final PromPushReporter promPushReporter =
-                new PromPushReporter(
-                    reportPromPushTo,
-                    (NBMetricsRegistry)prefixedRegistry.metricRegistry,
-                    "prompush",
-                    MetricFilter.ALL,
-                    TimeUnit.SECONDS,
-                    TimeUnit.NANOSECONDS,
-                    config
+            if (prefixedRegistry.metricRegistry instanceof NBMetricsRegistry) {
+                final PromPushReporter promPushReporter =
+                    new PromPushReporter(
+                        reportPromPushTo,
+                        (NBMetricsRegistry) prefixedRegistry.metricRegistry,
+                        "prompush",
+                        MetricFilter.ALL,
+                        TimeUnit.SECONDS,
+                        TimeUnit.NANOSECONDS,
+                        config
                     );
-            scheduledReporters.add(promPushReporter);
+                scheduledReporters.add(promPushReporter);
+            } else {
+                throw new RuntimeException("MetricsRegistry type " +
+                    prefixedRegistry.metricRegistry.getClass().getCanonicalName() + " is not supported.");
+            }
         }
         return this;
     }
