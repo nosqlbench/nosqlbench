@@ -51,7 +51,7 @@ public class LongTreeTracker {
 
     /**
      * Apply an index value between 0 and 31 inclusive. Return the accumulator.
-     * If all 32 slots of this tracker have been isCycleCompleted, the returned value will
+     * If all 32 slots of this tracker have been completed, the returned value will
      * have LSB bit 2 set.
      * @param index a long value between 0 and 31 to mark as complete
      * @param image the long value which serves as the starting state of the bit field
@@ -62,19 +62,14 @@ public class LongTreeTracker {
 
         while (position > 0) {
             long applybt = 1L << position;
-//            System.out.println("applybt:\n" + diagString(applybt));
-//            System.out.print("image:\n" + this);
             image |= applybt;
-            long comask = applybt | (applybt & eens) >> 1 | (applybt & odds) << 1;
-//            System.out.println("comask:\n" + diagString(comask));
-            if ((comask & image) != comask) {
+            long co_mask = applybt | (applybt & eens) >> 1 | (applybt & odds) << 1;
+            if ((co_mask & image) != co_mask) {
                 break;
             }
             position >>= 1;
         }
-//        System.out.println("image:\n" + this);
-        // TODO Fix this test
-        return image;
+       return image;
     }
 
     public long setCompleted(long index) {
