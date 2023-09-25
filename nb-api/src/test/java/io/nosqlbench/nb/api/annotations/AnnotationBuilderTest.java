@@ -34,9 +34,9 @@ public class AnnotationBuilderTest {
             .element(NBLabeledElement.forKV("test_element","value"))
                 .at(time)
                 .layer(Layer.Scenario)
-                .detail("detailk1", "detailv1")
-                .detail("detailk2", "detailv21\ndetailv22")
-                .detail("detailk3", "v1\nv2\nv3\n")
+                .addDetail("detailk1", "detailv1")
+                .addDetail("detailk2", "detailv21\ndetailv22")
+                .addDetail("detailk3", "v1\nv2\nv3\n")
                 .build();
 
         String represented = an1.toString();

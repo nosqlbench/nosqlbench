@@ -56,7 +56,7 @@ public interface AnnotationBuilderFacets {
     }
 
     interface WantsMoreDetailsOrBuild {
-        WantsMoreDetailsOrBuild detail(String name, String value);
+        WantsMoreDetailsOrBuild addDetail(String name, String value);
         Annotation build();
     }
 

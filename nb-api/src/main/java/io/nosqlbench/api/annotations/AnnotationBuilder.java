@@ -71,7 +71,7 @@ public class AnnotationBuilder implements AnnotationBuilderFacets.All {
 
 
     @Override
-    public AnnotationBuilderFacets.WantsMoreDetailsOrBuild detail(String name, String value) {
+    public AnnotationBuilderFacets.WantsMoreDetailsOrBuild addDetail(String name, String value) {
         this.details.put(name, value);
         return this;
     }
