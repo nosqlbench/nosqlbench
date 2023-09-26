@@ -19,6 +19,7 @@ package io.nosqlbench.api.engine.metrics.instruments;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class NBFunctionGauge implements NBMetricGauge<Double> {
@@ -27,10 +28,13 @@ public class NBFunctionGauge implements NBMetricGauge<Double> {
     private final NBLabeledElement parent;
     private final NBLabels labels;
 
-    public NBFunctionGauge(NBLabeledElement parent, Supplier<Double> source, Object... labels) {
+    public NBFunctionGauge(NBLabeledElement parent, Supplier<Double> source, String metricFamilyName, Map<String,String> additionalLabels) {
         this.parent = parent;
-        this.labels = NBLabels.forKV(labels);
+        this.labels = NBLabels.forMap(additionalLabels).and("name",metricFamilyName);
         this.source = source;
+    }
+    public NBFunctionGauge(NBLabeledElement parent, Supplier<Double> source, String metricFamilyName) {
+        this(parent, source, metricFamilyName,Map.of());
     }
     @Override
     public Double getValue() {

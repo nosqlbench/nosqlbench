@@ -98,7 +98,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         for (OpTemplate ot : opTemplates) {
             ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
             String driverName = incompleteOpDef.takeOptionalStaticValue("driver", String.class)
-                .or(() -> incompleteOpDef.takeOptionalStaticValue("type",String.class))
+                .or(() -> incompleteOpDef.takeOptionalStaticValue("type", String.class))
                 .or(() -> defaultDriverOption)
                 .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
 
@@ -152,12 +152,14 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
         }
 
-        this.pendingOpsGauge= ActivityMetrics.gauge(this,"ops_pending",
-                new NBFunctionGauge(this,() -> this.getProgressMeter().getSummary().pending()));
-        this.activeOpsGauge = ActivityMetrics.gauge(this,"ops_active",
-                new NBFunctionGauge(this,() -> this.getProgressMeter().getSummary().current()));
-        this.completeOpsGauge= ActivityMetrics.gauge(this,"ops_complete",
-                new NBFunctionGauge(this,() -> this.getProgressMeter().getSummary().complete()));
+        this.pendingOpsGauge = ActivityMetrics.register(
+            new NBFunctionGauge(this, () -> this.getProgressMeter().getSummary().pending(), "ops_pending")
+        );
+        this.activeOpsGauge = ActivityMetrics.register(
+            new NBFunctionGauge(this, () -> this.getProgressMeter().getSummary().current(),"ops_active")
+        );
+        this.completeOpsGauge = ActivityMetrics.register(
+            new NBFunctionGauge(this, () -> this.getProgressMeter().getSummary().complete(),"ops_complete"));
     }
 
     @Override
@@ -217,7 +219,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
     public void shutdownActivity() {
         for (Map.Entry<String, DriverAdapter> entry : adapters.entrySet()) {
             String adapterName = entry.getKey();
-            DriverAdapter<?,?> adapter = entry.getValue();
+            DriverAdapter<?, ?> adapter = entry.getValue();
             adapter.getSpaceCache().getElements().forEach((spaceName, space) -> {
                 if (space instanceof AutoCloseable autocloseable) {
                     try {

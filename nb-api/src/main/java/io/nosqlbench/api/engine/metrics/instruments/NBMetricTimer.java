@@ -17,16 +17,15 @@
 package io.nosqlbench.api.engine.metrics.instruments;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.*;
+import io.nosqlbench.api.labels.NBLabels;
 import org.HdrHistogram.Histogram;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-public class NBMetricTimer extends Timer implements DeltaSnapshotter, HdrDeltaHistogramAttachment, TimerAttachment, NBLabeledElement {
+public class NBMetricTimer extends Timer implements DeltaSnapshotter, HdrDeltaHistogramAttachment, TimerAttachment, NBLabeledMetric {
     private final DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
     private long cacheExpiry;
     private List<Timer> mirrors;

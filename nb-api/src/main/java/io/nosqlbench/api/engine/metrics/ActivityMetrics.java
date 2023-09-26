@@ -76,10 +76,10 @@ public class ActivityMetrics {
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private static Metric register(NBLabels labels, MetricProvider metricProvider) {
 
-        labels = labelFilter!=null ? labelFilter.apply(labels) : labels;
+        labels = labelFilter != null ? labelFilter.apply(labels) : labels;
         labels = labelValidator != null ? labelValidator.apply(labels) : labels;
 
-        final String graphiteName = labels.linearizeValues('.',"[activity]","[space]","[op]","name");
+        final String graphiteName = labels.linearizeValues('.', "[activity]", "[space]", "[op]", "name");
         Metric metric = get().getMetrics().get(graphiteName);
 
         if (null == metric) {
@@ -94,6 +94,45 @@ public class ActivityMetrics {
             }
         }
         return metric;
+    }
+
+    /**
+     * Calls to this version of register must be done with a pre-built metric instrument.
+     * This means that it is not suitable for lazily creating metric objects directly on
+     * instances which are one of many. Instead, call this to register metrics at the start
+     * of an owning element.
+     *
+     * This version of register expects that you have fully labeled a metric, including
+     * addint the 'name' field, also known as the <em>metric family name</em> in some specifications.
+     *
+     * It is due to be replaced by a different registry format soon.
+     *
+     * @param labeledMetric
+     * @return the metric instance
+     */
+    public static <M extends NBLabeledMetric> M register(M labeledMetric) {
+        NBLabels labels = labeledMetric.getLabels();
+        labels = labelFilter != null ? labelFilter.apply(labels) : labels;
+        labels = labelValidator != null ? labelValidator.apply(labels) : labels;
+
+        final String graphiteName = labels.linearizeValues('.', "[activity]", "[space]", "[op]", "name");
+        Metric metric = get().getMetrics().get(graphiteName);
+
+        metric = get().getMetrics().get(graphiteName);
+        if (metric!=null) {
+            logger.warn("Metric already registered for '" + graphiteName + "', probably logic error which could invalidate metric values.");
+        } else {
+            get().register(graphiteName, labeledMetric);
+        }
+        return labeledMetric;
+    }
+
+    public static void unregister(NBLabeledElement element) {
+        final String graphiteName = element.getLabels().linearizeValues('.', "[activity]", "[space]", "[op]", "name");
+        if (!get().getMetrics().containsKey(graphiteName)) {
+            logger.warn("Removing non-extant metric by name: '"+ graphiteName + "'");
+        }
+        get().remove(graphiteName);
     }
 
     /**
@@ -112,7 +151,7 @@ public class ActivityMetrics {
      * @return the timer, perhaps a different one if it has already been registered
      */
     public static Timer timer(NBLabeledElement parent, String metricFamilyName, int hdrdigits) {
-        final NBLabels labels = parent.getLabels().and("name",sanitize(metricFamilyName));
+        final NBLabels labels = parent.getLabels().and("name", sanitize(metricFamilyName));
 
 
         Timer registeredTimer = (Timer) register(labels, () ->
@@ -164,7 +203,7 @@ public class ActivityMetrics {
      * @return the counter, perhaps a different one if it has already been registered
      */
     public static Counter counter(NBLabeledElement parent, String metricFamilyName) {
-        final NBLabels labels = parent.getLabels().and("name",metricFamilyName);
+        final NBLabels labels = parent.getLabels().and("name", metricFamilyName);
         return (Counter) register(labels, () -> new NBMetricCounter(labels));
     }
 
@@ -180,7 +219,7 @@ public class ActivityMetrics {
      * @return the meter, perhaps a different one if it has already been registered
      */
     public static Meter meter(NBLabeledElement parent, String metricFamilyName) {
-        final NBLabels labels = parent.getLabels().and("name",sanitize(metricFamilyName));
+        final NBLabels labels = parent.getLabels().and("name", sanitize(metricFamilyName));
         return (Meter) register(labels, () -> new NBMetricMeter(labels));
     }
 
@@ -201,27 +240,30 @@ public class ActivityMetrics {
      * and so on. It uses the same data reservoir for all views, but only returns one of them as a handle to the metric.
      * This has the effect of leaving some of the metric objects unreferencable from the caller side. This may need
      * to be changed in a future update in the even that full inventory management is required on metric objects here.
-     * @param parent The labeled element the metric pertains to
-     * @param metricFamilyName The name of the measurement
+     *
+     * @param parent
+     *     The labeled element the metric pertains to
+     * @param metricFamilyName
+     *     The name of the measurement
      * @return One of the created metrics, suitable for calling {@link DoubleSummaryGauge#accept(double)} on.
      */
     public static DoubleSummaryGauge summaryGauge(NBLabeledElement parent, String metricFamilyName) {
         DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
         DoubleSummaryGauge anyGauge = null;
-        for (DoubleSummaryGauge.Stat statName: DoubleSummaryGauge.Stat.values()){
+        for (DoubleSummaryGauge.Stat statName : DoubleSummaryGauge.Stat.values()) {
             final NBLabels labels = parent.getLabels()
-                .and("name",sanitize(metricFamilyName))
-                .modifyValue("name", n -> n+"_"+statName.name().toLowerCase());
-            anyGauge= (DoubleSummaryGauge) register(labels, () -> new DoubleSummaryGauge(labels,statName,stats));
+                .and("name", sanitize(metricFamilyName))
+                .modifyValue("name", n -> n + "_" + statName.name().toLowerCase());
+            anyGauge = (DoubleSummaryGauge) register(labels, () -> new DoubleSummaryGauge(labels, statName, stats));
         }
         return anyGauge;
     }
 
+
     @SuppressWarnings("unchecked")
     public static <T> Gauge<T> gauge(NBLabeledElement parent, String metricFamilyName, Gauge<T> gauge) {
-        final NBLabels labels = parent.getLabels().and("name",sanitize(metricFamilyName));
-
-        return (Gauge<T>) register(labels, () -> new NBMetricGaugeWrapper<>(labels,gauge));
+        final NBLabels labels = parent.getLabels().and("name", sanitize(metricFamilyName));
+        return (Gauge<T>) register(labels, () -> new NBMetricGaugeWrapper<>(labels, gauge));
     }
 
     private static MetricRegistry lookupRegistry() {
@@ -375,10 +417,11 @@ public class ActivityMetrics {
             .forEach(get()::remove);
     }
 
+
     public static String sanitize(String word) {
         String sanitized = word;
         sanitized = sanitized.replaceAll("\\..+$", "");
-        sanitized = sanitized.replaceAll("-","_");
+        sanitized = sanitized.replaceAll("-", "_");
         sanitized = sanitized.replaceAll("[^a-zA-Z0-9_]+", "");
 
         if (!word.equals(sanitized)) {
