@@ -133,4 +133,6 @@ public interface ActivityInstrumentation {
      * @return a new or existing {@link Histogram}
      */
     Histogram getOrCreateTriesHistogram();
+
+    Timer getOrCreateVerifierTimer();
 }
