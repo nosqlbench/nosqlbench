@@ -413,6 +413,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             // before threads start running such as metrics instruments
             activity.initActivity();
             startMotorExecutorService();
+            registerMetrics();
             startRunningActivityThreads();
             awaitMotorsAtLeastRunning();
             logger.debug("STARTED " + activityDef.getAlias());
@@ -421,6 +422,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             this.exception = e;
         } finally {
             stoppedAt=System.currentTimeMillis();
+            unregisterMetrics();
             activity.shutdownActivity();
             activity.closeAutoCloseables();
             ExecutionResult result = new ExecutionResult(startedAt, stoppedAt, "", exception);
@@ -446,19 +448,18 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         }
     }
 
-    public synchronized void startActivity() {
-        RunStateImage startable = tally.awaitNoneOther(1000L, RunState.Uninitialized, RunState.Stopped);
-        if (startable.isTimeout()) {
-            throw new RuntimeException("Unable to start activity '" + getActivity().getAlias() + "' which is in state " + startable);
-        }
-        startMotorExecutorService();
-        startRunningActivityThreads();
-        awaitMotorsAtLeastRunning();
-        registerMetrics();
-    }
+//    public synchronized void startActivity() {
+//        RunStateImage startable = tally.awaitNoneOther(1000L, RunState.Uninitialized, RunState.Stopped);
+//        if (startable.isTimeout()) {
+//            throw new RuntimeException("Unable to start activity '" + getActivity().getAlias() + "' which is in state " + startable);
+//        }
+//        startMotorExecutorService();
+//        startRunningActivityThreads();
+//        awaitMotorsAtLeastRunning();
+//    }
 
     private void registerMetrics() {
-        this.threadsGauge= threadsGauge = ActivityMetrics.register(new NBFunctionGauge(activity, () -> (double) this.motors.size(), "threads"));
+        this.threadsGauge = ActivityMetrics.register(new NBFunctionGauge(activity, () -> (double) this.motors.size(), "threads"));
     }
     private void unregisterMetrics() {
         ActivityMetrics.unregister(this.threadsGauge);
@@ -485,7 +486,6 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         } finally {
             logger.trace(() -> "finally shutting down activity " + this.getActivity().getAlias());
             this.stoppedAt = System.currentTimeMillis();
-            unregisterMetrics();
             activity.setRunState(RunState.Stopped);
         }
 

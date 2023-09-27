@@ -34,6 +34,7 @@ import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
+import java.util.prefs.BackingStoreException;
 import java.util.regex.Pattern;
 
 public class ActivityMetrics {
@@ -116,6 +117,10 @@ public class ActivityMetrics {
         labels = labelValidator != null ? labelValidator.apply(labels) : labels;
 
         final String graphiteName = labels.linearizeValues('.', "[activity]", "[space]", "[op]", "name");
+//        String sanitized = sanitize(graphiteName);
+//        if (!graphiteName.equals(sanitized)) {
+//            throw new RuntimeException("Attempted to register a metric which was not compatible with labeled metric forms. Submitted as '" + graphiteName + "', but should likely be '" + sanitized + "'");
+//        }
         Metric metric = get().getMetrics().get(graphiteName);
 
         metric = get().getMetrics().get(graphiteName);
@@ -420,7 +425,7 @@ public class ActivityMetrics {
 
     public static String sanitize(String word) {
         String sanitized = word;
-        sanitized = sanitized.replaceAll("\\..+$", "");
+        sanitized = sanitized.replaceAll("\\.", "__");
         sanitized = sanitized.replaceAll("-", "_");
         sanitized = sanitized.replaceAll("[^a-zA-Z0-9_]+", "");
 
