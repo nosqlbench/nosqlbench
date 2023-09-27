@@ -48,14 +48,17 @@ public class NBCLIScenarioParser {
     private static final String SEARCH_IN = "activities";
     public static final String WORKLOAD_SCENARIO_STEP = "STEP";
 
-    public static boolean isFoundWorkload(String workload, String... includes) {
-        Optional<Content<?>> found = NBIO.all()
-            .searchPrefixes("activities")
+    public static Optional<Content<?>> getWorkloadContentOptional(String workload, String... includes) {
+        return NBIO.all()
+            .searchPrefixes(SEARCH_IN)
             .searchPrefixes(includes)
             .pathname(workload)
             .extensionSet(RawOpsLoader.YAML_EXTENSIONS)
             .first();
-        return found.isPresent();
+    }
+
+    public static boolean isFoundWorkload(String workload, String... includes) {
+        return getWorkloadContentOptional(workload, includes).isPresent();
     }
 
     public static void parseScenarioCommand(LinkedList<String> arglist,
@@ -63,33 +66,37 @@ public class NBCLIScenarioParser {
                                             String... includes) {
 
         String workloadName = arglist.removeFirst();
-        Optional<Content<?>> found = NBIO.all()
-            .searchPrefixes("activities")
-            .searchPrefixes(includes)
-            .pathname(workloadName)
-            .extensionSet(RawOpsLoader.YAML_EXTENSIONS)
-            .first();
-//
-        Content<?> workloadContent = found.orElseThrow();
+
+        Content<?> workloadContent =
+            getWorkloadContentOptional(workloadName, includes).orElseThrow();
+
+        // Make sure that `workloadToken`:
+        // 1) include the file type ".yaml" that might be missing in the incoming "workloadName"
+        // 2) don't lose the relative path of the incoming "workloadName"
+        String workloadFileName = workloadContent.asPath().getFileName().toString();
+        String workloadToken = workloadFileName.substring(0, workloadFileName.indexOf(".yaml"));
+        workloadToken = workloadName.substring(0, workloadName.indexOf(workloadToken)) + workloadFileName;
+
+        String sanitizedWorkloadName = sanitize(workloadName);
 
 //        Optional<Path> workloadPathSearch = NBPaths.findOptionalPath(workloadName, "yaml", false, "activities");
 //        Path workloadPath = workloadPathSearch.orElseThrow();
 
         // Buffer in scenario names from CLI, only counting non-options non-parameters and non-reserved words
         List<String> scenarioNames = new ArrayList<>();
-        while (arglist.size() > 0
+        while (!arglist.isEmpty()
             && !arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")
             && !RESERVED_WORDS.contains(arglist.peekFirst())) {
             scenarioNames.add(arglist.removeFirst());
         }
-        if (scenarioNames.size() == 0) {
+        if (scenarioNames.isEmpty()) {
             scenarioNames.add("default");
         }
 
         // Parse CLI command into keyed parameters, in order
         LinkedHashMap<String, String> userProvidedParams = new LinkedHashMap<>();
-        while (arglist.size() > 0
+        while (!arglist.isEmpty()
             && arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")) {
             String[] arg = arglist.removeFirst().split("=", 2);
@@ -103,18 +110,11 @@ public class NBCLIScenarioParser {
         LinkedList<String> buildCmdBuffer = new LinkedList<>();
         StrInterpolator userParamsInterp = new StrInterpolator(userProvidedParams);
 
-
         for (String scenarioName : scenarioNames) {
-
             // Load in named scenario
-            Content<?> yamlWithNamedScenarios = NBIO.all()
-                .searchPrefixes(SEARCH_IN)
-                .searchPrefixes(includes)
-                .pathname(workloadName)
-                .extensionSet(RawOpsLoader.YAML_EXTENSIONS)
-                .first().orElseThrow();
+
             // TODO: The yaml needs to be parsed with arguments from each command independently to support template vars
-            OpsDocList scenariosYaml = OpsLoader.loadContent(yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
+            OpsDocList scenariosYaml = OpsLoader.loadContent(workloadContent, new LinkedHashMap<>(userProvidedParams));
             Scenarios scenarios = scenariosYaml.getDocScenarios();
 
             String[] nameparts = scenarioName.split("\\.",2);
@@ -144,7 +144,7 @@ public class NBCLIScenarioParser {
                 }
             }
 
-            if (namedSteps == null) {
+            if (namedSteps.isEmpty()) {
                 throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
                     + "', but you can pick from one of: " +
                     String.join(", ", scenarios.getScenarioNames()));
@@ -152,7 +152,6 @@ public class NBCLIScenarioParser {
 
             // each named command line step of the named scenario
             for (Map.Entry<String, String> cmdEntry : namedSteps.entrySet()) {
-
                 String stepName = cmdEntry.getKey();
                 String cmd = cmdEntry.getValue();
                 cmd = userParamsInterp.apply(cmd);
@@ -179,12 +178,10 @@ public class NBCLIScenarioParser {
                     .stream()
                     .filter(e -> e.getValue().toLowerCase().endsWith("=undef"))
                     .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
+                    .toList();
                 undefKeys.forEach(buildingCmd::remove);
 
-                if (!buildingCmd.containsKey("workload")) {
-                    buildingCmd.put("workload", "workload=" + workloadName);
-                }
+                buildingCmd.put("workload", "workload=" + workloadToken);
 
                 if (!buildingCmd.containsKey("alias")) {
                     buildingCmd.put("alias", "alias=" + WORKLOAD_SCENARIO_STEP);
@@ -200,14 +197,18 @@ public class NBCLIScenarioParser {
                     }
                 }
 
-                String workloadToken = workloadContent.asPath().getFileName().toString();
-
-                alias = alias.replaceAll("WORKLOAD", sanitize(workloadToken));
+                alias = alias.replaceAll("WORKLOAD", sanitizedWorkloadName);
                 alias = alias.replaceAll("SCENARIO", sanitize(scenarioName));
                 alias = alias.replaceAll("STEP", sanitize(stepName));
-                alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
+
+                // 'alias' needs to be sanitized since it will be used as part of the metrics names
+                if (alias.startsWith("alias=")) {
+                    alias = alias.substring("alias=".length());
+                }
+                alias = "alias=" + sanitize(alias);
+
                 buildingCmd.put("alias", alias);
-                buildingCmd.put("labels","labels=workload:$"+sanitize(workloadToken));
+                buildingCmd.put("labels","labels=workload:$" + sanitizedWorkloadName);
 
                 logger.debug(() -> "rebuilt command: " + String.join(" ", buildingCmd.values()));
                 buildCmdBuffer.addAll(buildingCmd.values());
@@ -215,7 +216,6 @@ public class NBCLIScenarioParser {
         }
         buildCmdBuffer.descendingIterator().forEachRemaining(arglist::addFirst);
         logger.debug(() -> "composed command line args to fulfill named scenario: " + arglist);
-
     }
 
     public static String sanitize(String word) {

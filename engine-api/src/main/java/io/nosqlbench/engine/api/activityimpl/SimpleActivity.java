@@ -52,6 +52,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTem
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.CommandTemplate;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -109,7 +110,7 @@ public class SimpleActivity implements Activity {
                     "yaml"
             );
             if (workloadOpt.isPresent()) {
-                activityDef.getParams().set("alias", workloadOpt.get());
+                activityDef.getParams().set("alias", NBCLIScenarioParser.sanitize(workloadOpt.get()));
             } else {
                 activityDef.getParams().set("alias",
                         activityDef.getActivityType().toUpperCase(Locale.ROOT)

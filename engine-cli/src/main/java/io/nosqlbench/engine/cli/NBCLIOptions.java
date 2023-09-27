@@ -157,7 +157,7 @@ public class NBCLIOptions {
     private int reportInterval = 10;
     private String metricsPrefix = "nosqlbench";
     private String wantsMetricsForActivity;
-    private String sessionName = "SESSIONCODE";
+    private String sessionName;
     //    private String sessionName = "scenario_%tY%tm%td_%tH%tM%tS_%tL";
     private boolean showScript;
     private NBLogLevel consoleLevel = NBLogLevel.WARN;

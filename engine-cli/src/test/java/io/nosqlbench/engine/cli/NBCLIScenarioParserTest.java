@@ -94,7 +94,7 @@ public class NBCLIScenarioParserTest {
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArg("driver")).isEqualTo("stdout");
         assertThat(cmds.get(0).getArg("cycles")).isEqualTo("10");
-        assertThat(cmds.get(0).getArg("workload")).isEqualTo("scenario-test");
+        assertThat(cmds.get(0).getArg("workload")).endsWith("scenario-test.yaml");
     }
 
     @Test
@@ -102,13 +102,14 @@ public class NBCLIScenarioParserTest {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "template-test", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
+        assertThat(cmds.get(0).getArg("workload")).endsWith("scenario-test.yaml");
+        cmds.get(0).getParams().remove("workload");
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
                 "alias", "with_template",
                 "cycles", "20",
                 "cycles-test", "20",
                 "driver", "stdout",
-                "labels","workload:$scenario_test",
-                "workload", "scenario-test"
+                "labels","workload:$scenario_test"
         ));
     }
 
@@ -117,13 +118,14 @@ public class NBCLIScenarioParserTest {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "schema-only", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
+        assertThat(cmds.get(0).getArg("workload")).endsWith("scenario-test.yaml");
+        cmds.get(0).getParams().remove("workload");
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
                 "alias", "schema",
                 "cycles-test", "20",
                 "driver", "stdout",
                 "labels","workload:$scenario_test",
-                "tags", "block:\"schema.*\"",
-                "workload", "scenario-test"
+                "tags", "block:\"schema.*\""
         ));
         NBCLIOptions opts1 = new NBCLIOptions(new String[]{"scenario-test", "schema-only", "doundef=20"});
         List<Cmd> cmds1 = opts1.getCommands();
@@ -168,13 +170,14 @@ public class NBCLIScenarioParserTest {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario-test", "schema-only", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
+        assertThat(cmds.get(0).getArg("workload")).endsWith("scenario-test.yaml");
+        cmds.get(0).getParams().remove("workload");
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
                 "alias", "schema",
                 "cycles-test", "20",
                 "driver", "stdout",
                 "labels","workload:$scenario_test",
-                "tags", "block:\"schema.*\"",
-                "workload", "scenario-test"
+                "tags", "block:\"schema.*\""
         ));
         NBCLIOptions opts1 = new NBCLIOptions(new String[]{"local/example-scenarios", "namedsteps.one", "testparam1=testvalue2"});
         List<Cmd> cmds1 = opts1.getCommands();

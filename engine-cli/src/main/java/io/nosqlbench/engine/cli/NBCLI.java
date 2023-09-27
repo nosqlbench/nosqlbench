@@ -86,7 +86,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
     private NBLabels labels;
     private String sessionName;
-    private String sessionCode;
     private long sessionTime;
 
     public NBCLI(final String commandName) {
@@ -143,6 +142,19 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
     }
 
+    public static String sanitize(String word) {
+        String sanitized = word;
+        sanitized = sanitized.replaceAll("\\..+$", "");
+        String shortened = sanitized;
+        sanitized = sanitized.replaceAll("-","_");
+        sanitized = sanitized.replaceAll("[^a-zA-Z0-9_]+", "");
+
+        if (!shortened.equals(sanitized)) {
+            logger.warn("The identifier or value '" + shortened + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
+        }
+        return sanitized;
+    }
+
     public Integer applyDirect(final String[] args) {
 
         // Initial logging config covers only command line parsing
@@ -158,8 +170,14 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         this.sessionTime = System.currentTimeMillis();
         final NBCLIOptions globalOptions = new NBCLIOptions(args, Mode.ParseGlobalsOnly);
 
-        this.sessionCode = SystemId.genSessionCode(sessionTime);
-        this.sessionName = SessionNamer.format(globalOptions.getSessionName(),sessionTime).replaceAll("SESSIONCODE",sessionCode);
+        // Session name by default is an auto-gen UUID unless explicitly set
+        // via the command line option "--session-name".
+        this.sessionName = String.valueOf(SessionNamer.getUUID());
+        String cliSessionName = globalOptions.getSessionName();
+        if (cliSessionName != null && !cliSessionName.isBlank()) {
+            this.sessionName = cliSessionName;
+        }
+
         this.labels = NBLabels.forKV("appname", "nosqlbench")
                 .and("node",SystemId.getNodeId())
                 .and(globalOptions.getLabelMap());
@@ -425,7 +443,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
         if (options.wantsEnableChart()) {
             NBCLI.logger.info("Charting enabled");
-            if (0 == options.getHistoLoggerConfigs().size()) {
+            if (options.getHistoLoggerConfigs().isEmpty()) {
                 NBCLI.logger.info("Adding default histologger configs");
                 final String pattern = ".*";
                 final String file = options.getChartHdrFileName();
@@ -482,13 +500,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             scenario.enableCharting();
         } else NBCLI.logger.info("Charting disabled");
 
-
-        // Execute Scenario!
-        if (0 == options.getCommands().size()) {
+        if (options.getCommands().isEmpty()) {
             NBCLI.logger.info("No commands provided. Exiting before scenario.");
             return NBCLI.EXIT_OK;
         }
 
+        // Execute Scenario!
         scenario.addScriptText(scriptData);
         final ScriptParams scriptParams = new ScriptParams();
         scriptParams.putAll(buffer.getCombinedParams());

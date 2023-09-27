@@ -17,8 +17,13 @@
 package io.nosqlbench.api.metadata;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 public class SessionNamer {
+
+    public static UUID getUUID() {
+        return UUID.randomUUID();
+    }
 
     public static String format(String sessionName, long sessionTimeMillis) {
         String nameTemplate = sessionName;
