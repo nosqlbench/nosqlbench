@@ -28,7 +28,7 @@ function printf(args) {
 
 const SCRIPT_PARAMS = ["profile", "sample_time", "sample_incr", "sample_max", "averageof",
                        "min_stride", "rate_base", "rate_step", "rate_incr", "testrate_cutoff",
-                       "bestrate_cutoff", "latency_cutoff", "latency_pctile"];
+                       "bestrate_cutoff", "latency_cutoff", "latency_pctile", "script_path"];
 
 function filterScriptParams(activitydef) {
     var def = {};
@@ -148,18 +148,18 @@ if (latency_pctile > 1.0) {
     latency_pctile = (latency_pctile * 0.01);
 }
 
-var reporter_sampling_baserate = scriptingmetrics.newGauge("findmax.sampling.base_rate", rate_base + 0.0);
-var reporter_sampling_targetrate = scriptingmetrics.newGauge("findmax.sampling.target_rate", 0.0);
-var reporter_sampling_achievedrate = scriptingmetrics.newGauge("findmax.sampling.achieved_rate", 0.0);
-var reporter_sampling_minbound = scriptingmetrics.newGauge("findmax.sampling.lower_rate", 0.0);
-var reporter_sampling_maxbound = scriptingmetrics.newGauge("findmax.sampling.higher_rate", 0.0);
+var reporter_sampling_baserate = scriptingmetrics.newStaticGauge("findmax_sampling_base_rate", rate_base + 0.0);
+var reporter_sampling_targetrate = scriptingmetrics.newStaticGauge("findmax_sampling_target_rate", 0.0);
+var reporter_sampling_achievedrate = scriptingmetrics.newStaticGauge("findmax_sampling_achieved_rate", 0.0);
+var reporter_sampling_minbound = scriptingmetrics.newStaticGauge("findmax_sampling_lower_rate", 0.0);
+var reporter_sampling_maxbound = scriptingmetrics.newStaticGauge("findmax_sampling_higher_rate", 0.0);
 
 
-var reporter_params_baserate = scriptingmetrics.newGauge("findmax.params.base_rate", 0.0);
-var reporter_params_targetrate = scriptingmetrics.newGauge("findmax.params.target_rate", 0.0);
+var reporter_params_baserate = scriptingmetrics.newStaticGauge("findmax_params_base_rate", 0.0);
+var reporter_params_targetrate = scriptingmetrics.newStaticGauge("findmax_params_target_rate", 0.0);
 
 var driver = "TEMPLATE(driver,cql)";
-var yaml_file = "TEMPLATE(yaml_file,cql-iot)";
+var yaml = "TEMPLATE(yaml,cql-iot)";
 
 // //  CREATE SCHEMA
 // schema_activitydef = filterScriptParams(params.withDefaults({
@@ -177,7 +177,7 @@ var yaml_file = "TEMPLATE(yaml_file,cql-iot)";
 //  START ITERATING ACTIVITY
 activitydef = filterScriptParams(params.withDefaults({
     driver: driver,
-    yaml: yaml_file,
+    yaml: yaml,
     threads: "auto",
     cyclerate: "1.0:1.1"
 }));
@@ -185,7 +185,7 @@ activitydef = filterScriptParams(params.withDefaults({
 activitydef.alias = "findmax";
 activitydef.cycles = "1000000000";
 activitydef.recycles = "1000000000";
-activitydef.tags = "TEMPLATE(maintags,block:main)";
+activitydef.tags = "TEMPLATE(tags,block:main)";
 
 function ops_s(iteration, results) {
     return results[iteration].ops_per_second;
