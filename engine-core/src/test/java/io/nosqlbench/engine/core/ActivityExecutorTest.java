@@ -171,18 +171,6 @@ class ActivityExecutorTest {
         }
     }
 
-    private MotorDispenser<?> getActivityMotorFactory(final Action lc, Input ls) {
-        return new MotorDispenser<>() {
-            @Override
-            public Motor getMotor(final ActivityDef activityDef, final int slotId) {
-                final Activity activity = new SimpleActivity(activityDef, NBLabeledElement.forMap(Map.of()));
-                final Motor<?> cm = new CoreMotor<>(activity, slotId, ls);
-                cm.setAction(lc);
-                return cm;
-            }
-        };
-    }
-
     private SyncAction motorActionDelay(long delay) {
         return new SyncAction() {
             @Override
