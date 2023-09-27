@@ -142,19 +142,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
     }
 
-    public static String sanitize(String word) {
-        String sanitized = word;
-        sanitized = sanitized.replaceAll("\\..+$", "");
-        String shortened = sanitized;
-        sanitized = sanitized.replaceAll("-","_");
-        sanitized = sanitized.replaceAll("[^a-zA-Z0-9_]+", "");
-
-        if (!shortened.equals(sanitized)) {
-            logger.warn("The identifier or value '" + shortened + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
-        }
-        return sanitized;
-    }
-
     public Integer applyDirect(final String[] args) {
 
         // Initial logging config covers only command line parsing
