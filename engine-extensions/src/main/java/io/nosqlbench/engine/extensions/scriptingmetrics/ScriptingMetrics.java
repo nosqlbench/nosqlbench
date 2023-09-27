@@ -17,7 +17,9 @@
 package io.nosqlbench.engine.extensions.scriptingmetrics;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import io.nosqlbench.api.config.LabeledScenarioContext;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
@@ -54,6 +56,12 @@ public class ScriptingMetrics {
         final DoubleSummaryGauge summaryGauge = ActivityMetrics.summaryGauge(context,name);
         this.logger.info(() -> "registered summmary gauge:" + name);
         return summaryGauge;
+    }
+
+    public Timer newTimer(final String name, final int hdrDigits) {
+        final Timer timer = ActivityMetrics.timer(scriptContext, name, hdrDigits);
+        this.logger.info(() -> "registered timer:" + name);
+        return timer;
     }
 
     public RelevancyMeasures newRelevancyMeasures(NBLabeledElement parent, Map<String,String> labels) {

@@ -154,9 +154,9 @@ var reporter_sampling_achievedrate = scriptingmetrics.newStaticGauge("findmax_sa
 var reporter_sampling_minbound = scriptingmetrics.newStaticGauge("findmax_sampling_lower_rate", 0.0);
 var reporter_sampling_maxbound = scriptingmetrics.newStaticGauge("findmax_sampling_higher_rate", 0.0);
 
-
 var reporter_params_baserate = scriptingmetrics.newStaticGauge("findmax_params_base_rate", 0.0);
 var reporter_params_targetrate = scriptingmetrics.newStaticGauge("findmax_params_target_rate", 0.0);
+var findmax_latency = scriptingmetrics.newTimer("findmax_latency", 4);
 
 var driver = "TEMPLATE(driver,cql)";
 var yaml = "TEMPLATE(yaml,cql-iot)";
@@ -249,31 +249,26 @@ function testCycleFun(params) {
     printf(" target rate is " + params.target_rate + " ops_s\n");
 
     var cycle_rate_specifier = "" + (params.target_rate) + ":1.1:restart";
-    // printf(" setting activities.findmax.cyclerate = %s\n",cycle_rate_specifier);
+    printf(" setting activities.findmax.cyclerate = %s\n",cycle_rate_specifier);
     activities.findmax.cyclerate = cycle_rate_specifier;
 
-    // if (params.iteration == 1) {
-    //     printf("\n settling load at base for %ds before active sampling.\n", sample_time);
-    //     scenario.waitMillis(sample_time * 1000);
-    // }
+    precount = metrics.findmax.input_cycles_total.getValue();
+    printf("precount: %f\n", precount);
 
-    precount = metrics.findmax.cycles.servicetime.count;
-    // printf("precount: %d\n", precount);
-
-    var snapshot_reader = metrics.findmax.result.deltaReader;
+    var snapshot_reader = metrics.findmax_latency.getDeltaReader();
     var old_data = snapshot_reader.getDeltaSnapshot(); // reset
 
-    // printf(">>>--- sampling performance for " + params.sample_seconds + " seconds...\n");
+    printf(">>>--- sampling performance for " + params.sample_seconds + " seconds...\n");
     scenario.waitMillis(params.sample_seconds * 1000);
-    // printf("---<<< sampled performance for " + params.sample_seconds + " seconds...\n");
+    printf("---<<< sampled performance for " + params.sample_seconds + " seconds...\n");
 
-    postcount = metrics.findmax.cycles.servicetime.count;
-    // printf("postcount: %d\n", postcount);
+    postcount = metrics.findmax.input_cycles_total.getValue();
+    printf("postcount: %f\n", postcount);
 
     var count = postcount - precount;
     var ops_per_second = count / params.sample_seconds;
 
-    printf(" calculated rate from count=%d sample_seconds=%d (pre=%d post=%d)\n", count, params.sample_seconds, precount, postcount);
+    printf(" calculated rate from count=%f sample_seconds=%f (pre=%f post=%f)\n", count, params.sample_seconds, precount, postcount);
 
     reporter_sampling_baserate.update(params.base);
     reporter_sampling_targetrate.update(params.target_rate)
