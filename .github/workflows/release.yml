@@ -24,8 +24,8 @@ jobs:
       - name: setup java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: 'oracle'
+          java-version: '21'
           java-package: jdk
           architecture: x64
 

@@ -38,7 +38,7 @@ public class GrafanaClientConfig {
     private URI baseUrl;
 
     @JsonProperty("timeoutms" )
-    private int timeoutms;
+    private int timeoutms = 20000;
 
     private final List<Authenticator> authenticators = new ArrayList<>();
     private final List<Supplier<Map<String, String>>> headerSources = new ArrayList<>();
