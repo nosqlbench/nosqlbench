@@ -26,7 +26,6 @@ java -jar nb5/target/nb5.jar \
      driver=pulsar \
      -vv \
      --report-interval 5 \
-     --docker-metrics \
      cycles=${CYCLES} \
      yaml="${SCRIPT_DIR}/scenarios/consumer_4KB_workload.yaml" \
      config="${SCRIPT_DIR}/conf/pulsar_config.properties"

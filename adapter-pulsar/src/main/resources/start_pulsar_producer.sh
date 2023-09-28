@@ -28,7 +28,6 @@ while [[ 1 -eq 1 ]]; do
        driver=pulsar \
        -vv \
        --report-interval 5 \
-       --docker-metrics \
        cycles="${CYCLES}" \
        cyclerate="${CYCLERATE}" \
        threads=1 \

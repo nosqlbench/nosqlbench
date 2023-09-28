@@ -27,7 +27,6 @@ while [[ 1 -eq 1 ]]; do
        driver=kafka \
        -vv \
        --report-interval 5 \
-       --docker-metrics \
        cycles="${CYCLES}" \
        threads=1 \
        num_clnt=1 \

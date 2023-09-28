@@ -42,11 +42,11 @@
             <version>${revision}</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-docker</artifactId>
-            <version>${revision}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.nosqlbench</groupId>-->
+<!--            <artifactId>engine-docker</artifactId>-->
+<!--            <version>${revision}</version>-->
+<!--        </dependency>-->
 
     </dependencies>
 

@@ -28,13 +28,13 @@ variables. When the NBSTATEDIR location is first needed,
 the paths are checked in order, and the first one found is used.
 If one is not found on the filesystem, the first expanded value
 is used to create the state directory.
- 
- 
+
+
 If the default argsfile is is present, it is loaded by nosqlbench when
 it starts even if you don't ask it to. That is, nosqlbench behaves as
  if your first set of command line arguments is
- 
-    --argsfile-optional "$NBSTATEDIR/argsfile    
+
+    --argsfile-optional "$NBSTATEDIR/argsfile
 
 Just as with the NBSTATEDIR location, the argsfile can also be used
 like a search path. That is, if the value provided is a colon-delimited
@@ -46,7 +46,6 @@ an argsfile when pinning options are used.
 
 An args file simply contains an argument on each line, like this:
 
-    --docker-metrics
     --annotate all
     --grafana-baseurl http://localhost:3000/
 
@@ -55,7 +54,7 @@ An args file simply contains an argument on each line, like this:
 It is possible to pin an option to the default args file by use of the
 `--pin` meta-option. This option will take the following command line
 argument and add it to the currently active args file. That means, if
-you use `--pin --docker-metrics`, then `--docker-metrics` is added to
+you use `--pin --annotate all`, then `--annotate all` is added to
 the args file. If there is an exact duplicate of the same option
 and value, then it is skipped, but if the option name is the same
 with a different value, then it is added at the end. This allows
@@ -98,7 +97,7 @@ parameter values, then you must provide the value as well, as in
 To simply set global defaults, you can run nosqlbench with a command
 line like this:
 
-    ./nb --pin --docker-metrics-at metricsnode --pin --annotate all
+    ./nb --pin --annotate all
 
 # Compatibility
 

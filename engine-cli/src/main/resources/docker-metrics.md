@@ -1,5 +1,11 @@
 # docker-metrics
 
+```
+NOTE: This feature has been removed and is no longer available.
+```
+
+---
+
 Enlist nosqlbench to stand up your metrics infrastructure using a local
 docker runtime:
 
