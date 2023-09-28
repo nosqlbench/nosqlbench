@@ -36,7 +36,7 @@ public class HashedDoubleRangeTest {
         HashRange r = new HashRange(-1.0D, 1.0D);
         for (long i = 1; i<1000; i++) {
             double result = r.applyAsDouble(i);
-            System.out.println(result);
+//            System.out.println(result);
             assertThat(result).isBetween(-1.0d, 1.0d);
         }
     }
