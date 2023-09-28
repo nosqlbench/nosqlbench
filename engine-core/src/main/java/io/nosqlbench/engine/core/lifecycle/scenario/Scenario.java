@@ -505,10 +505,6 @@ public class Scenario extends NBBaseComponent implements Callable<ExecutionMetri
         return this.state;
     }
 
-    public void enableCharting() {
-        final MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
-    }
-
     public String getReportSummaryTo() {
         return this.reportSummaryTo;
     }
