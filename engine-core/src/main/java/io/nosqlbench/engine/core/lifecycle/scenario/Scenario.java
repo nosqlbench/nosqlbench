@@ -19,6 +19,11 @@ import com.codahale.metrics.MetricRegistry;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
+import io.nosqlbench.api.config.NBComponent;
+import io.nosqlbench.api.config.standard.NBBaseComponent;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.extensions.SandboxExtensionFinder;
+import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
@@ -55,7 +60,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElement {
+public class Scenario extends NBBaseComponent implements Callable<ExecutionMetricsResult> {
 
     private final String reportSummaryTo;
     private final Path logsPath;
