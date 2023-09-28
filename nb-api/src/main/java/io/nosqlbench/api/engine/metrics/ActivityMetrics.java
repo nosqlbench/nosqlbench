@@ -44,7 +44,7 @@ public class ActivityMetrics {
     private static int _HDRDIGITS = DEFAULT_HDRDIGITS;
 
     private static MetricsRegistry defaultRegistry;
-    private static Map<String,MetricsRegistry> metricsRegistries = new HashMap();
+    private static final Map<String,MetricsRegistry> metricsRegistries = new HashMap<>();
 
     public static MetricFilter METRIC_FILTER = (name, metric) -> {
         return true;
@@ -76,21 +76,14 @@ public class ActivityMetrics {
     private static Metric register(NBLabels labels, MetricProvider metricProvider) {
         labels = labelFilter!=null ? labelFilter.apply(labels) : labels;
         labels = labelValidator != null ? labelValidator.apply(labels) : labels;
-        Metric metric = null;
-        if (labels.asMap().containsKey("registryService")) {
-            String registryService = labels.asMap().get("registryService");
-            MetricsRegistry registry = get(registryService);
-            final String metricName = registry.linearizeValuesForRegistry(labels);
-            metric = registry.getMetrics().get(metricName);
-            if (null == metric) {
-                metric = registerNew(labels, metricProvider, registryService, metricName);
-            }
-        } else {
-            final String graphiteName = labels.linearizeValues('.', "[activity]", "[space]", "[op]", "name");
-            metric = get().getMetrics().get(graphiteName);
-            if (null == metric) {
-                metric = registerNew(labels, metricProvider, null, graphiteName);
-            }
+
+        MetricsRegistry registry = (labels.asMap().containsKey("registryService"))
+            ? get(labels.asMap().get("registryService"))
+            : get();
+        final String metricName = registry.linearizeValuesForRegistry(labels);
+        Metric metric = registry.getMetrics().get(metricName);
+        if (null == metric) {
+            metric = registerNew(labels, metricProvider, labels.asMap().get("registryService"), metricName);
         }
         return metric;
     }
@@ -271,9 +264,10 @@ public class ActivityMetrics {
             }
         }
         if (null == toReturn) {
-            final String infoMsg = "Unable to load MetricRegistry " + registryService + " via ServiceLoader, using the default.";
+            final String infoMsg = "Unable to load MetricRegistry " + registryService +
+                " via ServiceLoader, using the default NBMetricsRegistry";
             logger.info(infoMsg);
-            return new NBMetricsRegistry();
+            toReturn = new NBMetricsRegistry();
         }
         return toReturn;
     }

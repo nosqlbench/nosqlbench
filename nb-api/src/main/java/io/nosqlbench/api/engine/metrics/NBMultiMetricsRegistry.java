@@ -24,7 +24,7 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.api.labels.NBLabels;
 import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramReservoir;
 
-public class NBMetricsRegistry extends MetricRegistry implements MetricsRegistry {
+public class NBMultiMetricsRegistry extends MetricRegistry implements MetricsRegistry {
 
     @Override
     public Timer timer(String name) {
@@ -34,7 +34,7 @@ public class NBMetricsRegistry extends MetricRegistry implements MetricsRegistry
 
     @Override
     public String linearizeValuesForRegistry(NBLabels labels) {
-        return labels.linearizeValues('.', "[activity]", "[space]", "[op]", "name");
+        return labels.linearizeValues('.');
     }
 
     @Override
