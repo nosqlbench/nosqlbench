@@ -174,4 +174,9 @@ public interface NBLabels {
      * @return a new set of labels which includes only those which are not using per-instance semantics.
      */
 
+    /**
+     * Render a string representation of the label set according to a registry specific naming format.
+     */
+    String linearizeValuesForRegistry(String registryName);
+
 }

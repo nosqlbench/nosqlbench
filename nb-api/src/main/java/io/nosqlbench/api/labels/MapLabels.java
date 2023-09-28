@@ -181,6 +181,12 @@ public class MapLabels implements NBLabels {
     }
 
     @Override
+    public String linearizeValuesForRegistry(String registryName) {
+        //TODO: Implement this. For now falling back to default prometheus format
+        return linearizeValues('.', "[activity]", "[space]", "[op]", "name");
+    }
+
+    @Override
     public NBLabels and(final Map<String, String> moreLabels) {
         return new MapLabels(this.labels, moreLabels);
     }

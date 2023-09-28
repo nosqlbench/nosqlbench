@@ -17,6 +17,7 @@
 package io.nosqlbench.api.engine.metrics;
 
 import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.config.NBNamedElement;
@@ -24,15 +25,13 @@ import io.nosqlbench.api.labels.NBLabelsFilter;
 import io.nosqlbench.api.engine.activityapi.core.MetricRegistryService;
 import io.nosqlbench.api.engine.metrics.instruments.*;
 import io.nosqlbench.api.engine.util.Unit;
+import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.DoubleSummaryStatistics;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -44,7 +43,8 @@ public class ActivityMetrics {
     public static final int DEFAULT_HDRDIGITS = 4;
     private static int _HDRDIGITS = DEFAULT_HDRDIGITS;
 
-    private static MetricsRegistry registry;
+    private static MetricsRegistry defaultRegistry;
+    private static Map<String,MetricsRegistry> metricsRegistries = new HashMap();
 
     public static MetricFilter METRIC_FILTER = (name, metric) -> {
         return true;
@@ -73,27 +73,35 @@ public class ActivityMetrics {
      *     A function to actually create the metric if needed
      * @return a Metric, or null if the metric for the name was already present
      */
-    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private static Metric register(NBLabels labels, MetricProvider metricProvider) {
-
         labels = labelFilter!=null ? labelFilter.apply(labels) : labels;
         labels = labelValidator != null ? labelValidator.apply(labels) : labels;
-
-        final String graphiteName = labels.linearizeValues('.',"[activity]","[space]","[op]","name");
-        Metric metric = get().getMetrics().get(graphiteName);
-
-        if (null == metric) {
-            synchronized (labels) {
-                metric = get().getMetrics().get(graphiteName);
-                if (null == metric) {
-                    metric = metricProvider.getMetric();
-                    Metric registered = get().register(graphiteName, metric);
-                    logger.debug(() -> "registered metric: " + graphiteName);
-                    return registered;
-                }
+        Metric metric = null;
+        if (labels.asMap().containsKey("registry")) {
+            String registryName = labels.asMap().get("registry");
+            final String metricName = labels.linearizeValuesForRegistry(registryName);
+            metric = get(registryName).getMetrics().get(metricName);
+            if (null == metric) {
+                metric = registerNew(labels, metricProvider, registryName, metricName);
+            }
+        } else {
+            final String graphiteName = labels.linearizeValues('.', "[activity]", "[space]", "[op]", "name");
+            metric = get().getMetrics().get(graphiteName);
+            if (null == metric) {
+                metric = registerNew(labels, metricProvider, null, graphiteName);
             }
         }
         return metric;
+    }
+
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    private static Metric registerNew(NBLabels labels, MetricProvider metricProvider, String registryName, String metricName) {
+        synchronized (labels) {
+            Metric registered = (registryName == null) ? get().register(metricName, metricProvider.getMetric()) :
+                get(registryName).register(metricName, metricProvider.getMetric());
+            logger.debug(() -> "registered metric: " + metricName);
+            return registered;
+        }
     }
 
     /**
@@ -185,12 +193,24 @@ public class ActivityMetrics {
     }
 
     private static MetricsRegistry get() {
-        if (null != ActivityMetrics.registry) {
-            return registry;
+        if (null != ActivityMetrics.defaultRegistry) {
+            return defaultRegistry;
         }
         synchronized (ActivityMetrics.class) {
-            if (null == ActivityMetrics.registry) {
-                registry = lookupRegistry();
+            if (null == ActivityMetrics.defaultRegistry) {
+                defaultRegistry = lookupRegistry();
+            }
+        }
+        return defaultRegistry;
+    }
+
+    private static MetricsRegistry get(String registryName) {
+        MetricsRegistry registry = metricsRegistries.get(registryName);
+        if (null == registry) {
+            synchronized (ActivityMetrics.class) {
+                if (null == (registry = metricsRegistries.get(registryName))) {
+                    registry = lookupRegistry(registryName);
+                }
             }
         }
         return registry;
@@ -239,9 +259,30 @@ public class ActivityMetrics {
 
     }
 
+    private static MetricsRegistry lookupRegistry(String registryName) {
+        ServiceLoader<MetricRegistryService> metricRegistryServices =
+            ServiceLoader.load(MetricRegistryService.class);
+        MetricsRegistry toReturn = null;
+        for (MetricRegistryService mrs : metricRegistryServices) {
+            metricsRegistries.put(((Service)mrs).selector(), mrs.getMetricRegistry());
+            if (((Service)mrs).selector().equals(registryName)) {
+                toReturn = mrs.getMetricRegistry();
+            }
+        }
+        if (null == toReturn) {
+            final String infoMsg = "Unable to load MetricRegistry " + registryName + " via ServiceLoader, using the default.";
+            logger.info(infoMsg);
+            return new NBMetricsRegistry();
+        }
+        return toReturn;
+    }
 
     public static MetricsRegistry getMetricRegistry() {
         return get();
+    }
+
+    public static MetricsRegistry getMetricRegistry(String registryName) {
+        return get(registryName);
     }
 
     /**
@@ -268,6 +309,9 @@ public class ActivityMetrics {
             new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
         logger.debug(() -> "attaching " + histoIntervalLogger + " to the metrics registry.");
         get().addListener(histoIntervalLogger);
+        for (MetricsRegistry metricsRegistry : metricsRegistries.values()) {
+            metricsRegistry.addListener(histoIntervalLogger);
+        }
         metricsCloseables.add(histoIntervalLogger);
     }
 
@@ -295,6 +339,9 @@ public class ActivityMetrics {
             new HistoStatsLogger(sessionName, logfile, compiledPattern, intervalMillis, TimeUnit.NANOSECONDS);
         logger.debug(() -> "attaching " + histoStatsLogger + " to the metrics registry.");
         get().addListener(histoStatsLogger);
+        for (MetricsRegistry metricsRegistry : metricsRegistries.values()) {
+            metricsRegistry.addListener(histoStatsLogger);
+        }
         metricsCloseables.add(histoStatsLogger);
     }
 
@@ -320,11 +367,17 @@ public class ActivityMetrics {
             new ClassicHistoListener(get(), sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
         logger.debug(() -> "attaching histo listener " + classicHistoListener + " to the metrics registry.");
         get().addListener(classicHistoListener);
+        for (MetricsRegistry metricsRegistry : metricsRegistries.values()) {
+            metricsRegistry.addListener(classicHistoListener);
+        }
 
         ClassicTimerListener classicTimerListener =
             new ClassicTimerListener(get(), sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
         logger.debug(() -> "attaching timer listener " + classicTimerListener + " to the metrics registry.");
         get().addListener(classicTimerListener);
+        for (MetricsRegistry metricsRegistry : metricsRegistries.values()) {
+            metricsRegistry.addListener(classicTimerListener);
+        }
     }
 
     /**
