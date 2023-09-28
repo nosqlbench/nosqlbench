@@ -25,6 +25,7 @@ import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.content.NBPathsAPI;
 import io.nosqlbench.api.errors.BasicError;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -199,14 +200,9 @@ public class NBCLIScenarioParser {
 
                 alias = alias.replaceAll("WORKLOAD", sanitizedWorkloadName);
                 alias = alias.replaceAll("SCENARIO", sanitize(scenarioName));
-                alias = alias.replaceAll("STEP", sanitize(stepName));
-
-                // 'alias' needs to be sanitized since it will be used as part of the metrics names
-                if (alias.startsWith("alias=")) {
-                    alias = alias.substring("alias=".length());
-                }
-                alias = "alias=" + sanitize(alias);
-
+                // "stepName" is a number in format '%03d'. Use "STEPxxx" as the actual step name
+                alias = alias.replaceAll("STEP", "STEP" + sanitize(stepName));
+                alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
                 buildingCmd.put("alias", alias);
                 buildingCmd.put("labels","labels=workload:$" + sanitizedWorkloadName);
 
@@ -220,6 +216,11 @@ public class NBCLIScenarioParser {
 
     public static String sanitize(String word) {
         String sanitized = word;
+
+        // if the word is a file path, then we only want the last part of it (the effective filename)
+        if (sanitized.contains("/"))
+            sanitized = StringUtils.substringAfterLast(word, "/");
+
         sanitized = sanitized.replaceAll("\\..+$", "");
         String shortened = sanitized;
         sanitized = sanitized.replaceAll("-","_");

@@ -86,6 +86,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
     private NBLabels labels;
     private String sessionName;
+    private String sessionCode;
     private long sessionTime;
 
     public NBCLI(final String commandName) {
@@ -157,17 +158,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         this.sessionTime = System.currentTimeMillis();
         final NBCLIOptions globalOptions = new NBCLIOptions(args, Mode.ParseGlobalsOnly);
 
-        // Session name by default is an auto-gen UUID unless explicitly set
-        // via the command line option "--session-name".
-        this.sessionName = String.valueOf(SessionNamer.getUUID());
-        String cliSessionName = globalOptions.getSessionName();
-        if (cliSessionName != null && !cliSessionName.isBlank()) {
-            this.sessionName = cliSessionName;
-        }
-
+        this.sessionCode = SystemId.genSessionCode(sessionTime);
+        this.sessionName = SessionNamer.format(globalOptions.getSessionName(),sessionTime).replaceAll("SESSIONCODE",sessionCode);
         this.labels = NBLabels.forKV("appname", "nosqlbench")
-                .and("node",SystemId.getNodeId())
-                .and(globalOptions.getLabelMap());
+            .and("node", SystemId.getNodeId())
+            .and("session", this.sessionName)
+            .and(globalOptions.getLabelMap());
 
         NBCLI.loggerConfig
                 .setSessionName(sessionName)
@@ -430,7 +426,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
         if (options.wantsEnableChart()) {
             NBCLI.logger.info("Charting enabled");
-            if (options.getHistoLoggerConfigs().isEmpty()) {
+            if (0 == options.getHistoLoggerConfigs().size()) {
                 NBCLI.logger.info("Adding default histologger configs");
                 final String pattern = ".*";
                 final String file = options.getChartHdrFileName();
@@ -487,7 +483,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             scenario.enableCharting();
         } else NBCLI.logger.info("Charting disabled");
 
-        if (options.getCommands().isEmpty()) {
+        if (0 == options.getCommands().size()) {
             NBCLI.logger.info("No commands provided. Exiting before scenario.");
             return NBCLI.EXIT_OK;
         }

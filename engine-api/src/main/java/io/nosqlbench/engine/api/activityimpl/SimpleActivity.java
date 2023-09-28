@@ -96,7 +96,7 @@ public class SimpleActivity implements Activity {
 
     public SimpleActivity(ActivityDef activityDef, NBLabeledElement parentLabels) {
         NBLabels activityLabels = parentLabels.getLabels()
-                .and("activity", activityDef.getAlias());
+                .and("activity", NBCLIScenarioParser.sanitize(activityDef.getAlias()));
         Optional<String> auxLabelSpec = activityDef.getParams().getOptionalString("labels");
         if (auxLabelSpec.isPresent()) {
             activityLabels = activityLabels.and(NBLabelSpec.parseLabels(auxLabelSpec.get()));
@@ -110,7 +110,7 @@ public class SimpleActivity implements Activity {
                     "yaml"
             );
             if (workloadOpt.isPresent()) {
-                activityDef.getParams().set("alias", NBCLIScenarioParser.sanitize(workloadOpt.get()));
+                activityDef.getParams().set("alias", workloadOpt.get());
             } else {
                 activityDef.getParams().set("alias",
                         activityDef.getActivityType().toUpperCase(Locale.ROOT)
