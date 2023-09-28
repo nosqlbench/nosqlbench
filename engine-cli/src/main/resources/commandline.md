@@ -198,10 +198,6 @@ a logfile will be created for this name.
 
     --session-name <name>
 
-Enlist nosqlbench to stand up your metrics infrastructure using a local docker runtime:
-
-    --docker-metrics
-
 When this option is set, nosqlbench will start graphite, prometheus, and grafana automatically on
 your local docker, configure them to work together, and point nosqlbench to send metrics the system
 automatically. It also imports a base dashboard for nosqlbench and configures grafana snapshot

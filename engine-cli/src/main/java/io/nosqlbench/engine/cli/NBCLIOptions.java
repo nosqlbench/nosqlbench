@@ -127,12 +127,6 @@ public class NBCLIOptions {
     private static final String LOG_LEVEL_OVERRIDE = "--log-level-override";
     private static final String ENABLE_CHART = "--enable-chart";
 
-    private static final String DOCKER_METRICS = "--docker-metrics";
-    private static final String DOCKER_METRICS_AT = "--docker-metrics-at";
-    private static final String DOCKER_GRAFANA_TAG = "--docker-grafana-tag";
-    private static final String DOCKER_PROM_TAG = "--docker-prom-tag";
-    private static final String DOCKER_PROM_RETENTION_DAYS = "--docker-prom-retention-days";
-
     private static final String GRAALJS_ENGINE = "--graaljs";
 
     private static final String DEFAULT_CONSOLE_PATTERN = "TERSE";
@@ -176,7 +170,6 @@ public class NBCLIOptions {
     private NBLogLevel logsLevel = NBLogLevel.INFO;
     private Map<String, String> logLevelsOverrides = new HashMap<>();
     private boolean enableChart;
-    private boolean dockerMetrics;
     private boolean wantsListScenarios;
     private boolean wantsListScripts;
     private String wantsToCopyWorkload;
@@ -184,19 +177,15 @@ public class NBCLIOptions {
     private final List<String> wantsToIncludePaths = new ArrayList<>();
     private Engine engine = Engine.Graalvm;
     private int hdr_digits = 3;
-    private String docker_grafana_tag = "7.3.4";
-    private String docker_prom_tag = "latest";
     private boolean showStackTraces;
     private boolean compileScript;
     private String scriptFile;
     private String[] annotateEvents = {"ALL"};
-    private String dockerMetricsHost;
     private String annotatorsConfig = "";
     private String promPushConfig = "";
     private String statedirs = NBStatePath.NB_STATEDIR_PATHS;
     private Path statepath;
     private final String hdrForChartFileName = NBCLIOptions.DEFAULT_CHART_HDR_LOG_NAME;
-    private String dockerPromRetentionDays = "3650d";
     private String reportSummaryTo = NBCLIOptions.REPORT_SUMMARY_TO_DEFAULT;
     private boolean enableAnsi = (null != System.getenv("TERM")) && !System.getenv("TERM").isEmpty();
     private Maturity minMaturity = Maturity.Unspecified;
@@ -234,10 +223,6 @@ public class NBCLIOptions {
 
     public String getChartHdrFileName() {
         return this.hdrForChartFileName;
-    }
-
-    public String getDockerPromRetentionDays() {
-        return dockerPromRetentionDays;
     }
 
     public String getReportSummaryTo() {
@@ -420,18 +405,6 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     this.workspacesDirectory = this.readWordOrThrow(arglist, "a workspaces directory");
                     break;
-                case NBCLIOptions.DOCKER_PROM_TAG:
-                    arglist.removeFirst();
-                    this.docker_prom_tag = this.readWordOrThrow(arglist, "prometheus docker tag");
-                    break;
-                case NBCLIOptions.DOCKER_PROM_RETENTION_DAYS:
-                    arglist.removeFirst();
-                    this.dockerPromRetentionDays = this.readWordOrThrow(arglist, "prometheus retention (3650d by default)");
-                    break;
-                case NBCLIOptions.DOCKER_GRAFANA_TAG:
-                    arglist.removeFirst();
-                    this.docker_grafana_tag = this.readWordOrThrow(arglist, "grafana docker tag");
-                    break;
                 case NBCLIOptions.VERSION:
                     arglist.removeFirst();
                     this.wantsVersionShort = true;
@@ -439,14 +412,6 @@ public class NBCLIOptions {
                 case NBCLIOptions.VERSION_COORDS:
                     arglist.removeFirst();
                     this.wantsVersionCoords = true;
-                    break;
-                case NBCLIOptions.DOCKER_METRICS_AT:
-                    arglist.removeFirst();
-                    this.dockerMetricsHost = this.readWordOrThrow(arglist, "docker metrics host");
-                    break;
-                case NBCLIOptions.DOCKER_METRICS:
-                    arglist.removeFirst();
-                    this.dockerMetrics = true;
                     break;
                 case NBCLIOptions.SESSION_NAME:
                     arglist.removeFirst();
@@ -794,14 +759,6 @@ public class NBCLIOptions {
         return this.enableChart;
     }
 
-    public boolean wantsDockerMetrics() {
-        return this.dockerMetrics;
-    }
-
-    public String wantsDockerMetricsAt() {
-        return this.dockerMetricsHost;
-    }
-
     public int getReportInterval() {
         return this.reportInterval;
     }
@@ -945,14 +902,6 @@ public class NBCLIOptions {
 
     public boolean wantsWorkloadsList() {
         return this.wantsWorkloadsList;
-    }
-
-    public String getDockerGrafanaTag() {
-        return this.docker_grafana_tag;
-    }
-
-    public String getDockerPromTag() {
-        return this.docker_prom_tag;
     }
 
     public static class LoggerConfigData {

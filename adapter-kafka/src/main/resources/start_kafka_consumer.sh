@@ -26,7 +26,6 @@ java -jar nb5/target/nb5.jar \
      driver=kafka \
      -vv \
      --report-interval 5 \
-     --docker-metrics \
      cycles=${CYCLES} \
      threads=1 \
      num_clnt=1 \
