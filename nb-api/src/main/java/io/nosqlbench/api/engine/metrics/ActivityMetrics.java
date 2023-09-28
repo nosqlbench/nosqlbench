@@ -77,12 +77,13 @@ public class ActivityMetrics {
         labels = labelFilter!=null ? labelFilter.apply(labels) : labels;
         labels = labelValidator != null ? labelValidator.apply(labels) : labels;
         Metric metric = null;
-        if (labels.asMap().containsKey("registry")) {
-            String registryName = labels.asMap().get("registry");
-            final String metricName = labels.linearizeValuesForRegistry(registryName);
-            metric = get(registryName).getMetrics().get(metricName);
+        if (labels.asMap().containsKey("registryService")) {
+            String registryService = labels.asMap().get("registryService");
+            MetricsRegistry registry = get(registryService);
+            final String metricName = registry.linearizeValuesForRegistry(labels);
+            metric = registry.getMetrics().get(metricName);
             if (null == metric) {
-                metric = registerNew(labels, metricProvider, registryName, metricName);
+                metric = registerNew(labels, metricProvider, registryService, metricName);
             }
         } else {
             final String graphiteName = labels.linearizeValues('.', "[activity]", "[space]", "[op]", "name");
@@ -95,10 +96,10 @@ public class ActivityMetrics {
     }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private static Metric registerNew(NBLabels labels, MetricProvider metricProvider, String registryName, String metricName) {
+    private static Metric registerNew(NBLabels labels, MetricProvider metricProvider, String registryService, String metricName) {
         synchronized (labels) {
-            Metric registered = (registryName == null) ? get().register(metricName, metricProvider.getMetric()) :
-                get(registryName).register(metricName, metricProvider.getMetric());
+            Metric registered = (registryService == null) ? get().register(metricName, metricProvider.getMetric()) :
+                get(registryService).register(metricName, metricProvider.getMetric());
             logger.debug(() -> "registered metric: " + metricName);
             return registered;
         }
@@ -204,12 +205,12 @@ public class ActivityMetrics {
         return defaultRegistry;
     }
 
-    private static MetricsRegistry get(String registryName) {
-        MetricsRegistry registry = metricsRegistries.get(registryName);
+    private static MetricsRegistry get(String registryService) {
+        MetricsRegistry registry = metricsRegistries.get(registryService);
         if (null == registry) {
             synchronized (ActivityMetrics.class) {
-                if (null == (registry = metricsRegistries.get(registryName))) {
-                    registry = lookupRegistry(registryName);
+                if (null == (registry = metricsRegistries.get(registryService))) {
+                    registry = lookupRegistry(registryService);
                 }
             }
         }
@@ -259,18 +260,18 @@ public class ActivityMetrics {
 
     }
 
-    private static MetricsRegistry lookupRegistry(String registryName) {
+    private static MetricsRegistry lookupRegistry(String registryService) {
         ServiceLoader<MetricRegistryService> metricRegistryServices =
             ServiceLoader.load(MetricRegistryService.class);
         MetricsRegistry toReturn = null;
         for (MetricRegistryService mrs : metricRegistryServices) {
             metricsRegistries.put(((Service)mrs).selector(), mrs.getMetricRegistry());
-            if (((Service)mrs).selector().equals(registryName)) {
+            if (((Service)mrs).selector().equals(registryService)) {
                 toReturn = mrs.getMetricRegistry();
             }
         }
         if (null == toReturn) {
-            final String infoMsg = "Unable to load MetricRegistry " + registryName + " via ServiceLoader, using the default.";
+            final String infoMsg = "Unable to load MetricRegistry " + registryService + " via ServiceLoader, using the default.";
             logger.info(infoMsg);
             return new NBMetricsRegistry();
         }
@@ -281,8 +282,8 @@ public class ActivityMetrics {
         return get();
     }
 
-    public static MetricsRegistry getMetricRegistry(String registryName) {
-        return get(registryName);
+    public static MetricsRegistry getMetricRegistry(String registryService) {
+        return get(registryService);
     }
 
     /**

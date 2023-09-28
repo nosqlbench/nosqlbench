@@ -18,6 +18,7 @@
 package io.nosqlbench.api.engine.metrics;
 
 import com.codahale.metrics.*;
+import io.nosqlbench.api.labels.NBLabels;
 
 import java.util.Map;
 import java.util.SortedMap;
@@ -83,4 +84,5 @@ public interface MetricsRegistry {
     public SortedMap<String, Timer> getTimers(MetricFilter filter);
 
 
+    String linearizeValuesForRegistry(NBLabels labels);
 }

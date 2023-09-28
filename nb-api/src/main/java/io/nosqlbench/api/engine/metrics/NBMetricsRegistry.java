@@ -21,6 +21,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.labels.NBLabels;
 import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramReservoir;
 
 public class NBMetricsRegistry extends MetricRegistry implements MetricsRegistry {
@@ -29,6 +30,12 @@ public class NBMetricsRegistry extends MetricRegistry implements MetricsRegistry
     public Timer timer(String name) {
         Timer timer = new Timer(new HdrHistogramReservoir());
         return getOrAddMetric(name, timer);
+    }
+
+    @Override
+    public String linearizeValuesForRegistry(NBLabels labels) {
+        //TODO: Implement this. For now falling back to default prometheus format
+        return labels.linearizeValues('.', "[activity]", "[space]", "[op]", "name");
     }
 
     @Override

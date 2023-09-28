@@ -180,11 +180,6 @@ public class MapLabels implements NBLabels {
         return Collections.unmodifiableMap(labels);
     }
 
-    @Override
-    public String linearizeValuesForRegistry(String registryName) {
-        //TODO: Implement this. For now falling back to default prometheus format
-        return linearizeValues('.', "[activity]", "[space]", "[op]", "name");
-    }
 
     @Override
     public NBLabels and(final Map<String, String> moreLabels) {
