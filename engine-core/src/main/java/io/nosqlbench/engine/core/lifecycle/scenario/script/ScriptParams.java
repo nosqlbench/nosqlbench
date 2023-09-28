@@ -159,7 +159,9 @@ public class ScriptParams extends HashMap<String, String> implements ProxyObject
     public Object getMemberKeys() {
         ArrayList<String> memberKeys = new ArrayList<>(super.keySet());
         memberKeys.add("withDefaults");
-        memberKeys.add("withOverride");
+        memberKeys.add("withOverrides");
+        //NOTE: Previously there was no 's' on the end of withOverride here but the checks above all use the plural form.
+        // I don't think this ever could have been working code.
         return memberKeys;
     }
 

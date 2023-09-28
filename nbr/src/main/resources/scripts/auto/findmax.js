@@ -28,7 +28,7 @@ function printf(args) {
 
 const SCRIPT_PARAMS = ["profile", "sample_time", "sample_incr", "sample_max", "averageof",
                        "min_stride", "rate_base", "rate_step", "rate_incr", "testrate_cutoff",
-                       "bestrate_cutoff", "latency_cutoff", "latency_pctile"];
+                       "bestrate_cutoff", "latency_cutoff", "latency_pctile", "script_path"];
 
 function filterScriptParams(activitydef) {
     var def = {};
@@ -148,37 +148,23 @@ if (latency_pctile > 1.0) {
     latency_pctile = (latency_pctile * 0.01);
 }
 
-var reporter_sampling_baserate = scriptingmetrics.newStaticGauge("findmax.sampling.base_rate", rate_base + 0.0);
-var reporter_sampling_baserate = scriptingmetrics.newStaticGauge("{activity=findmax,name=sampling_base_rate}", rate_base + 0.0);
-var reporter_sampling_targetrate = scriptingmetrics.newStaticGauge("findmax.sampling.target_rate", 0.0);
-var reporter_sampling_achievedrate = scriptingmetrics.newStaticGauge("findmax.sampling.achieved_rate", 0.0);
-var reporter_sampling_minbound = scriptingmetrics.newStaticGauge("findmax.sampling.lower_rate", 0.0);
-var reporter_sampling_maxbound = scriptingmetrics.newStaticGauge("findmax.sampling.higher_rate", 0.0);
+var reporter_sampling_baserate = scriptingmetrics.newStaticGauge("findmax_sampling_base_rate", rate_base + 0.0);
+var reporter_sampling_targetrate = scriptingmetrics.newStaticGauge("findmax_sampling_target_rate", 0.0);
+var reporter_sampling_achievedrate = scriptingmetrics.newStaticGauge("findmax_sampling_achieved_rate", 0.0);
+var reporter_sampling_minbound = scriptingmetrics.newStaticGauge("findmax_sampling_lower_rate", 0.0);
+var reporter_sampling_maxbound = scriptingmetrics.newStaticGauge("findmax_sampling_higher_rate", 0.0);
 
-
-var reporter_params_baserate = scriptingmetrics.newStaticGauge("findmax.params.base_rate", 0.0);
-var reporter_params_targetrate = scriptingmetrics.newStaticGauge("findmax.params.target_rate", 0.0);
+var reporter_params_baserate = scriptingmetrics.newStaticGauge("findmax_params_base_rate", 0.0);
+var reporter_params_targetrate = scriptingmetrics.newStaticGauge("findmax_params_target_rate", 0.0);
+var findmax_latency = scriptingmetrics.newTimer("findmax_latency", 4);
 
 var driver = "TEMPLATE(driver,cql)";
-var yaml_file = "TEMPLATE(yaml_file,cql-iot)";
-
-// //  CREATE SCHEMA
-// schema_activitydef = filterScriptParams(params.withDefaults({
-//     driver: driver,
-//     yaml: yaml_file
-// }));
-//
-// schema_activitydef.alias = "findmax_schema";
-// schema_activitydef.threads = "1";
-// schema_activitydef.tags = "TEMPLATE(schematags,block:'schema.*')";
-// printf("Creating schema with schematags: %s\n",schema_activitydef.tags.toString());
-//
-// scenario.run(schema_activitydef);
+var yaml = "TEMPLATE(yaml,cql-iot)";
 
 //  START ITERATING ACTIVITY
 activitydef = filterScriptParams(params.withDefaults({
     driver: driver,
-    yaml: yaml_file,
+    yaml: yaml,
     threads: "auto",
     cyclerate: "1.0:1.1"
 }));
@@ -186,7 +172,7 @@ activitydef = filterScriptParams(params.withDefaults({
 activitydef.alias = "findmax";
 activitydef.cycles = "1000000000";
 activitydef.recycles = "1000000000";
-activitydef.tags = "TEMPLATE(maintags,block:main)";
+activitydef.tags = "TEMPLATE(tags,block:main)";
 
 function ops_s(iteration, results) {
     return results[iteration].ops_per_second;
@@ -217,20 +203,20 @@ function as_pctile(val) {
 }
 
 scenario.start(activitydef);
-// raise_to_min_stride(activities.findmax, min_stride);
+raise_to_min_stride(activities.findmax, min_stride);
 
-// printf("\nwarming up client JIT for 10 seconds... \n");
-// activities.findmax.striderate = "" + (1000.0 / activities.findmax.stride) + ":1.1:restart";
-// scenario.waitMillis(10000);
-// activities.findmax.striderate = "" + (100.0 / activities.findmax.stride) + ":1.1:restart";
-// printf("commencing test\n");
+printf("\nwarming up client JIT for 10 seconds... \n");
+activities.findmax.striderate = "" + (1000.0 / activities.findmax.stride) + ":1.1:restart";
+scenario.waitMillis(10000);
+activities.findmax.striderate = "" + (100.0 / activities.findmax.stride) + ":1.1:restart";
+printf("commencing test\n");
 
-// function raise_to_min_stride(params, min_stride) {
-//     var multipler = (min_stride / params.stride);
-//     var newstride = (multipler * params.stride);
-//     printf("increasing minimum stride to %d ( %d x initial)\n", newstride, multipler);
-//     params.stride = newstride.toFixed(0);
-// }
+function raise_to_min_stride(params, min_stride) {
+    var multipler = (min_stride / params.stride);
+    var newstride = (multipler * params.stride);
+    printf("increasing minimum stride to %d ( %d x initial)\n", newstride, multipler);
+    params.stride = newstride.toFixed(0);
+}
 
 
 function testCycleFun(params) {
@@ -250,31 +236,26 @@ function testCycleFun(params) {
     printf(" target rate is " + params.target_rate + " ops_s\n");
 
     var cycle_rate_specifier = "" + (params.target_rate) + ":1.1:restart";
-    // printf(" setting activities.findmax.cyclerate = %s\n",cycle_rate_specifier);
+    printf(" setting activities.findmax.cyclerate = %s\n",cycle_rate_specifier);
     activities.findmax.cyclerate = cycle_rate_specifier;
 
-    // if (params.iteration == 1) {
-    //     printf("\n settling load at base for %ds before active sampling.\n", sample_time);
-    //     scenario.waitMillis(sample_time * 1000);
-    // }
+    precount = metrics.findmax.input_cycles_total.getValue();
+    printf("precount: %f\n", precount);
 
-    precount = metrics.findmax.cycles.servicetime.count;
-    // printf("precount: %d\n", precount);
-
-    var snapshot_reader = metrics.findmax.result.deltaReader;
+    var snapshot_reader = metrics.findmax_latency.getDeltaReader();
     var old_data = snapshot_reader.getDeltaSnapshot(); // reset
 
-    // printf(">>>--- sampling performance for " + params.sample_seconds + " seconds...\n");
+    printf(">>>--- sampling performance for " + params.sample_seconds + " seconds...\n");
     scenario.waitMillis(params.sample_seconds * 1000);
-    // printf("---<<< sampled performance for " + params.sample_seconds + " seconds...\n");
+    printf("---<<< sampled performance for " + params.sample_seconds + " seconds...\n");
 
-    postcount = metrics.findmax.cycles.servicetime.count;
-    // printf("postcount: %d\n", postcount);
+    postcount = metrics.findmax.input_cycles_total.getValue();
+    printf("postcount: %f\n", postcount);
 
     var count = postcount - precount;
     var ops_per_second = count / params.sample_seconds;
 
-    printf(" calculated rate from count=%d sample_seconds=%d (pre=%d post=%d)\n", count, params.sample_seconds, precount, postcount);
+    printf(" calculated rate from count=%f sample_seconds=%f (pre=%f post=%f)\n", count, params.sample_seconds, precount, postcount);
 
     reporter_sampling_baserate.update(params.base);
     reporter_sampling_targetrate.update(params.target_rate)

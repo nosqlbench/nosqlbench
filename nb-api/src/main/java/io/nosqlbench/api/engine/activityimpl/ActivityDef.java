@@ -22,7 +22,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -60,8 +63,13 @@ public class ActivityDef implements NBNamedElement {
     private final ParameterMap parameterMap;
     private CyclesSpec cyclesSpec;
     private CyclesSpec reCyclesSpec;
+    // parameters that do not belong as part of an activity definition
+    private static final Set<String> reservedParams = new HashSet<>(Arrays.asList("withDefaults","withOverrides"));
 
     public ActivityDef(ParameterMap parameterMap) {
+        for(String param : reservedParams) {
+            parameterMap.remove(param);
+        }
         this.parameterMap = parameterMap;
     }
 
