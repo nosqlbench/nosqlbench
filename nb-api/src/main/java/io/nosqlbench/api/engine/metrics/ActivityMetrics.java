@@ -381,14 +381,11 @@ public class ActivityMetrics {
      * @param showChart
      *     whether to chart metrics on console
      */
-    public static void closeMetrics(boolean showChart) {
+    public static void closeMetrics() {
         logger.trace("Closing all registered metrics closable objects.");
         for (MetricsCloseable metricsCloseable : metricsCloseables) {
             logger.trace(() -> "closing metrics closeable: " + metricsCloseable);
             metricsCloseable.closeMetrics();
-            if (showChart) {
-                metricsCloseable.chart();
-            }
         }
     }
 

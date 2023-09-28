@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,11 +125,6 @@ public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment
         } else {
             logger.debug("Not writing last partial interval <1s: " + this);
         }
-    }
-
-    @Override
-    public void chart() {
-       // nothing-to-do we only chart HistoIntervals not HistoStats
     }
 
     private static class WriterTarget implements Comparable<WriterTarget> {
