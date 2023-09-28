@@ -23,10 +23,10 @@ jobs:
         name: setup java
         with:
           node-version: '16'
-          java-version: '17'
+          java-version: '21'
           java-package: jdk
           architecture: x64
-          distribution: 'temurin'
+          distribution: 'oracle'
 
       - name: Cache Maven packages
         uses: actions/cache@v1

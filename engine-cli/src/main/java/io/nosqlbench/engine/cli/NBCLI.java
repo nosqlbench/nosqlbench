@@ -49,7 +49,6 @@ import io.nosqlbench.engine.core.lifecycle.scenario.script.MetricsMapper;
 import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosExecutor;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.ScriptParams;
-import io.nosqlbench.engine.docker.DockerMetricsManager;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.annotations.ServiceSelector;
@@ -211,50 +210,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             }
         }
 
-
-        final boolean dockerMetrics = globalOptions.wantsDockerMetrics();
-        final String dockerMetricsAt = globalOptions.wantsDockerMetricsAt();
         String reportGraphiteTo = globalOptions.wantsReportGraphiteTo();
         String annotatorsConfig = globalOptions.getAnnotatorsConfig();
         String promPushConfig = globalOptions.getPromPushConfig();
         final String reportPromPushTo = globalOptions.wantsReportPromPushTo();
 
-
-        final int mOpts = (dockerMetrics ? 1 : 0)
-                + ((null != dockerMetricsAt) ? 1 : 0)
-                + ((null != reportGraphiteTo) ? 1 : 0);
-
-        if ((1 < mOpts) && ((null == reportGraphiteTo) || (null == annotatorsConfig)))
-            throw new BasicError("You have multiple conflicting options which attempt to set\n" +
-                    " the destination for metrics and annotations. Please select only one of\n" +
-                    " --docker-metrics, --docker-metrics-at <addr>, or other options like \n" +
-                    " --report-graphite-to <addr> and --annotators <config>\n" +
-                    " For more details, see run 'nb help docker-metrics'");
-
         String graphiteMetricsAddress = null;
-
-        if (dockerMetrics) {
-            // Setup docker stack for local docker metrics
-            NBCLI.logger.info("Docker metrics is enabled. Docker must be installed for this to work");
-            final DockerMetricsManager dmh = new DockerMetricsManager();
-            final Map<String, String> dashboardOptions = Map.of(
-                    DockerMetricsManager.GRAFANA_TAG, globalOptions.getDockerGrafanaTag(),
-                    DockerMetricsManager.PROM_TAG, globalOptions.getDockerPromTag(),
-                    DockerMetricsManager.TSDB_RETENTION, String.valueOf(globalOptions.getDockerPromRetentionDays()),
-                    DockerMetricsManager.GRAPHITE_SAMPLE_EXPIRY, "10m",
-                    DockerMetricsManager.GRAPHITE_CACHE_SIZE, "5000",
-                    DockerMetricsManager.GRAPHITE_LOG_LEVEL, globalOptions.getGraphiteLogLevel(),
-                    DockerMetricsManager.GRAPHITE_LOG_FORMAT, "logfmt"
-
-            );
-            dmh.startMetrics(dashboardOptions);
-            final String warn = "Docker Containers are started, for grafana and prometheus, hit" +
-                    " these urls in your browser: http://<host>:3000 and http://<host>:9090";
-            NBCLI.logger.warn(warn);
-            graphiteMetricsAddress = "localhost";
-        } else if (null != dockerMetricsAt) {
-            graphiteMetricsAddress = dockerMetricsAt;
-        }
 
         if (annotatorsConfig == null || annotatorsConfig.isBlank()) {
             List<Map<String, String>> annotatorsConfigs = new ArrayList<>();
