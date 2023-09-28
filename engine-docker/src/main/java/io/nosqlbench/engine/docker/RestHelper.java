@@ -76,14 +76,12 @@ public class RestHelper {
             if (resp.statusCode()==412) {
                 logger.warn("Unable to configure dashboard, grafana precondition failed (status 412): " + resp.body());
                 String err = "When trying to configure grafana, any errors indicate that you may be trying to RE-configure an instance." +
-                    " This may be a bug. If you already have a docker stack running, you can just use '--report-graphite-to localhost:9109'\n" +
-                    " instead of --docker-metrics.";
+                    " This may be a bug. If you already have a docker stack running, you can just use '--report-graphite-to localhost:9109'.";
                 throw new BasicError(err);
             } else if (resp.statusCode()==401 && resp.body().contains("Invalid username")) {
                 logger.warn("Unable to configure dashboard, grafana authentication failed (status " + resp.statusCode() + "): " + resp.body());
                 String err = "Grafana does not have the same password as expected for a new container. We shouldn't be trying to add dashboards on an" +
-                    " existing container. This may be a bug. If you already have a docker stack running, you can just use '--report-graphite-to localhost:9109'" +
-                    " instead of --docker-metrics.";
+                    " existing container. This may be a bug. If you already have a docker stack running, you can just use '--report-graphite-to localhost:9109'.";
                 throw new BasicError(err);
             } else if (resp.statusCode()<200 || resp.statusCode()>200) {
                 logger.error("while trying to " + taskname +", received status code " + resp.statusCode() + " while trying to auto-configure grafana, with body:");

@@ -114,10 +114,6 @@ anywhere details would be.
 
 ## Annotation Implementations
 
-NoSQLBench comes with two built-in annotation implementations,
-which are configured automatically. By default, the logging
-annotator is enabled.
+NoSQLBench comes with a built-in annotation implementations, the logging annotator,
+which is configured automatically.
 
-If --docker-metrics is used, then the grafana annotator is enabled.
-In this case, if needed, default admin credentials will be used
-to create an API key, which will be cached on the local filesystem.

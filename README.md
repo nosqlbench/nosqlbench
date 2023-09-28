@@ -23,7 +23,6 @@ that are not found in any other tool.
 - You can generate virtual data sets of arbitrary size, with deterministic data and statistically shaped values.
 - You can design custom workloads that emulate your application, contained in a single file, based on statement
    templates - no IDE or coding required.
-- You can immediately plot your results in a docker and grafana stack on Linux with a single command line option.
 - When needed, you can open the access panels and rewire the runtime behavior of NoSQLBench to do advanced testing,
    including a full scripting environment with Javascript.
 
@@ -84,7 +83,7 @@ available, but more work is needed to support them fully. Here is what is suppor
 
 1. on Linux, all features are supported, for both `nb5.jar` as well as the appimage binary `nb`
 2. on Mac, all features are supported, with `nb5.jar`.
-3. On Windows, with `nb5.jar` all features are supported, except `--docker-metrics`.
+3. on Windows, all features are supported, with `nb5.jar`.
 
 ## Thanks
 
