@@ -57,4 +57,10 @@ public class Colors {
     public static String ANSI_BrightWhiteBG = (char) 27 + "[107m";
 
     public static String ANSI_Reset = (char) 27 + "[39;49m";
+
+    public static String ANSI_CURSOR_LEFT = (char) 27 + "[1D";
+
+    public static String ANSI_CURSOR_LEFT(int distance) {
+        return (char) 27 + "[" + distance + "D";
+    }
 }

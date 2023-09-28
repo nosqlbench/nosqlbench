@@ -68,8 +68,8 @@ public class MutableAnnotation implements Annotation {
         setElement(element);
         setSession(session);
         setLayer(layer);
-        setStart(start);
-        setEnd(end);
+        setStartMillis(start);
+        setEndMillis(end);
         setDetails(details);
     }
 
@@ -82,12 +82,13 @@ public class MutableAnnotation implements Annotation {
         this.session = sessionName;
     }
 
-    public void setStart(long intervalStart) {
+    public void setStartMillis(long intervalStart) {
         this.start = intervalStart;
     }
 
-    public void setEnd(long intervalEnd) {
+    public void setEndMillis(long intervalEnd) {
         this.end = intervalEnd;
+        this.details.put("duration",String.valueOf(getDurationMillis()));
     }
 
     public void setLayer(Layer layer) {
@@ -99,12 +100,12 @@ public class MutableAnnotation implements Annotation {
     }
 
     @Override
-    public long getStart() {
+    public long getStartMillis() {
         return start;
     }
 
     @Override
-    public long getEnd() {
+    public long getEndMillis() {
         return end;
     }
 
@@ -136,14 +137,14 @@ public class MutableAnnotation implements Annotation {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        ZonedDateTime startTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
-        ZonedDateTime endTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
+        ZonedDateTime startTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStartMillis()), zoneid);
+        ZonedDateTime endTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStartMillis()), zoneid);
 
         sb.append("[");
-        ZonedDateTime zonedStartTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStart()), zoneid);
+        ZonedDateTime zonedStartTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getStartMillis()), zoneid);
         sb.append(zonedStartTime.format(DateTimeFormatter.ISO_INSTANT));
-        if (getStart() != getEnd()) {
-            ZonedDateTime zonedEndTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getEnd()), zoneid);
+        if (getStartMillis() != getEndMillis()) {
+            ZonedDateTime zonedEndTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(getEndMillis()), zoneid);
             sb.append(" - ").append(zonedEndTime.format(DateTimeFormatter.ISO_INSTANT));
         }
         sb.append("]\n");
@@ -178,7 +179,7 @@ public class MutableAnnotation implements Annotation {
     }
 
     public Temporal getTemporal() {
-        return (getStart() == getEnd()) ? Temporal.instant : Temporal.interval;
+        return (getStartMillis() == getEndMillis()) ? Temporal.instant : Temporal.interval;
     }
 
     public String asJson() {

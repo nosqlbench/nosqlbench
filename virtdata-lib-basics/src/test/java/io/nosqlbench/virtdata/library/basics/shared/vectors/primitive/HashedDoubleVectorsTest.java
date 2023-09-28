@@ -16,19 +16,17 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.vectors.primitive;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class HashedDoubleVectorsTest {
-
+    private final static Logger logger = LogManager.getLogger(HashedDoubleVectorsTest.class);
     @Test
     public void testHashedDoubleVectors() {
         HashedDoubleVectors hdv1 = new HashedDoubleVectors(10000);
         double[] doubles = hdv1.apply(1L);
-        System.out.println(Arrays.toString(doubles));
+        logger.info("created " + doubles.length + " double vectors.");
     }
 
 }
