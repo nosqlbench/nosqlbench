@@ -400,9 +400,6 @@ public class Scenario extends NBBaseComponent implements Callable<ExecutionMetri
             } finally {
                 this.logger.debug("{} scenario run", null == this.error ? "NORMAL" : "ERRORED");
             }
-            if (this.scriptEnv == null) {
-
-            }
             String iolog = error != null ? error.toString() : this.scriptEnv.getTimedLog();
             result = new ExecutionMetricsResult(startedAtMillis, endedAtMillis, iolog, this.error);
             this.result.reportMetricsSummaryToLog();
@@ -483,7 +480,7 @@ public class Scenario extends NBBaseComponent implements Callable<ExecutionMetri
     }
 
     public String getScriptText() {
-        return this.scripts.stream().collect(Collectors.joining());
+        return String.join("", this.scripts);
     }
 
     public Optional<List<String>> getIOLog() {
