@@ -40,7 +40,6 @@
         <version>${revision}</version>
         <scope>compile</scope>
     </dependency>
-
     <dependency>
         <groupId>io.nosqlbench</groupId>
         <artifactId>adapters-api</artifactId>

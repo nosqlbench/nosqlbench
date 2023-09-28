@@ -39,11 +39,27 @@
             <artifactId>nb-annotations</artifactId>
             <version>${revision}</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapters-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-api</artifactId>
+            <version>5.21.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>engine-api</artifactId>
-            <version>${revision}</version>
+            <version>5.21.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 

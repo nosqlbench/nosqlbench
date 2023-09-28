@@ -16,8 +16,8 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.api.labels.NBLabeledElement;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
