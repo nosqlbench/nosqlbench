@@ -17,12 +17,12 @@
 package io.nosqlbench.adapter.diag;
 
 import io.nosqlbench.adapter.diag.optasks.DiagTask;
+import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.NBReconfigurable;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
-import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.annotations.ServiceSelector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

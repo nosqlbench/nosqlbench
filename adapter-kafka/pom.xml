@@ -38,11 +38,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>

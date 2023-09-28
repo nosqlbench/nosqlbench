@@ -16,9 +16,9 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfigurable;
 import io.nosqlbench.api.config.standard.NBReconfigurable;
+import io.nosqlbench.api.labels.NBLabeledElement;
 
 import java.util.Map;
 import java.util.function.BiFunction;

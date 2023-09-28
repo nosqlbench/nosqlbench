@@ -16,12 +16,12 @@
 
 package io.nosqlbench.adapter.diag;
 
-import io.nosqlbench.api.config.standard.NBConfigModel;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.config.standard.NBReconfigurable;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.api.config.standard.NBConfigModel;
+import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.api.config.standard.NBReconfigurable;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
