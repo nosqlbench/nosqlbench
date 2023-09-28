@@ -365,12 +365,13 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             return NBCLI.EXIT_OK;
         }
 
-        if (null != options.wantsMetricsForActivity()) {
-            final String metricsHelp = this.getMetricsHelpFor(options.wantsMetricsForActivity());
-            System.out.println("Available metric names for activity:" + options.wantsMetricsForActivity() + ':');
-            System.out.println(metricsHelp);
-            return NBCLI.EXIT_OK;
-        }
+//        disabled for now
+//        if (null != options.wantsMetricsForActivity()) {
+//            final String metricsHelp = this.getMetricsHelpFor(options.wantsMetricsForActivity());
+//            System.out.println("Available metric names for activity:" + options.wantsMetricsForActivity() + ':');
+//            System.out.println(metricsHelp);
+//            return NBCLI.EXIT_OK;
+//        }
 
         NBCLI.logger.debug("initializing annotators with config:'{}'", annotatorsConfig);
         Annotators.init(annotatorsConfig, options.getAnnotateLabelSpec());
