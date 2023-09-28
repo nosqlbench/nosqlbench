@@ -16,11 +16,9 @@
 
 package io.nosqlbench.api.labels;
 
-import io.nosqlbench.api.config.NBComponent;
-
 import java.util.Map;
 
-public interface NBLabeledElement extends NBComponent {
+public interface NBLabeledElement {
 
     NBLabeledElement EMPTY = forKV();
 

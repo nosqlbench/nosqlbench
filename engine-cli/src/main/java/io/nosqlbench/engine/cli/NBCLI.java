@@ -72,7 +72,7 @@ import java.util.ServiceLoader.Provider;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
+public class NBCLI implements Function<String[], Integer>, NBComponent {
 
     private static Logger logger;
     private static final LoggerConfig loggerConfig;
@@ -164,10 +164,11 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         final NBCLIOptions globalOptions = new NBCLIOptions(args, Mode.ParseGlobalsOnly);
 
         this.sessionCode = SystemId.genSessionCode(sessionTime);
-        this.sessionName = SessionNamer.format(globalOptions.getSessionName(),sessionTime).replaceAll("SESSIONCODE",sessionCode);
-        this.labels = NBLabels.forKV("appname", "nosqlbench")
-                .and("node",SystemId.getNodeId())
-                .and(globalOptions.getLabelMap());
+        this.sessionName = SessionNamer.format(globalOptions.getSessionName(), sessionTime).replaceAll("SESSIONCODE", sessionCode);
+        this.labels = NBLabels.forKV()
+            .and("appname", "nosqlbench")
+            .and("node", SystemId.getNodeId())
+            .and(globalOptions.getLabelMap());
 
         NBCLI.loggerConfig
             .setSessionName(sessionName)
@@ -598,5 +599,10 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
     @Override
     public NBLabels getLabels() {
         return labels;
+    }
+
+    @Override
+    public NBComponent getParent() {
+        return this;
     }
 }
