@@ -290,4 +290,8 @@ public class NBEnvironment {
         return interpolateWithTimestamp(rawText, millis, Map.of());
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName()+" : " + this.references.keySet();
+    }
 }
