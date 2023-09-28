@@ -98,7 +98,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
      * for scenario encapsulation and concurrent testing.
      *
      * @param args
-     *         Command Line Args
+     *     Command Line Args
      */
     public static void main(final String[] args) {
         try {

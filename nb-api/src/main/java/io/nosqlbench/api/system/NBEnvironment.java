@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -265,11 +265,11 @@ public class NBEnvironment {
      *     <li>Any token which exactly matches one of the keys in the provided map is substituted
      *     directly as is. No token sigil like '$' is used here, so if you want to support that
      *     as is, you need to provide the keys in your substitution map as such.</li>
-     *     <li>Any tokens in the form {@code %f} which is supported by the time fields in
-     *     {@link Formatter}</li> are honored and used with the timestamp provided.*
+     *     <li>Any token in the form {@code %f} which is supported by the time fields in
+     *     {@link Formatter}</li> are honored and used with the timestamp provided.
      *     <li>System Properties: Any token in the form {@code $word.word} will be taken as the name
-     *     of a system property to be substited.</li>
-     *     <li>Environment Variables: Any token in the form {@code $name}</li> will be takens as
+     *     of a system property to be substituted.</li>
+     *     <li>Environment Variables: Any token in the form {@code $name}</li> will be taken as
      *     an environment variable to be substituted.</li>
      * </ul>
      *
