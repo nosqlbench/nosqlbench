@@ -16,6 +16,8 @@
 
 package io.nosqlbench.api.config;
 
+import io.nosqlbench.api.labels.NBLabeledElement;
+
 /**
  * A Component is a functional element of the NoSQLBench runtime which is:
  * <UL>
@@ -29,5 +31,7 @@ package io.nosqlbench.api.config;
  *
  * This interface will start as a tagging interface, but will eventually include aspects of above by extension.
  */
-public interface NBComponent {
+public interface NBComponent extends NBLabeledElement {
+
+    NBComponent getParent();
 }
