@@ -161,19 +161,6 @@ var findmax_latency = scriptingmetrics.newTimer("findmax_latency", 4);
 var driver = "TEMPLATE(driver,cql)";
 var yaml = "TEMPLATE(yaml,cql-iot)";
 
-// //  CREATE SCHEMA
-// schema_activitydef = filterScriptParams(params.withDefaults({
-//     driver: driver,
-//     yaml: yaml_file
-// }));
-//
-// schema_activitydef.alias = "findmax_schema";
-// schema_activitydef.threads = "1";
-// schema_activitydef.tags = "TEMPLATE(schematags,block:'schema.*')";
-// printf("Creating schema with schematags: %s\n",schema_activitydef.tags.toString());
-//
-// scenario.run(schema_activitydef);
-
 //  START ITERATING ACTIVITY
 activitydef = filterScriptParams(params.withDefaults({
     driver: driver,
@@ -216,20 +203,20 @@ function as_pctile(val) {
 }
 
 scenario.start(activitydef);
-// raise_to_min_stride(activities.findmax, min_stride);
+raise_to_min_stride(activities.findmax, min_stride);
 
-// printf("\nwarming up client JIT for 10 seconds... \n");
-// activities.findmax.striderate = "" + (1000.0 / activities.findmax.stride) + ":1.1:restart";
-// scenario.waitMillis(10000);
-// activities.findmax.striderate = "" + (100.0 / activities.findmax.stride) + ":1.1:restart";
-// printf("commencing test\n");
+printf("\nwarming up client JIT for 10 seconds... \n");
+activities.findmax.striderate = "" + (1000.0 / activities.findmax.stride) + ":1.1:restart";
+scenario.waitMillis(10000);
+activities.findmax.striderate = "" + (100.0 / activities.findmax.stride) + ":1.1:restart";
+printf("commencing test\n");
 
-// function raise_to_min_stride(params, min_stride) {
-//     var multipler = (min_stride / params.stride);
-//     var newstride = (multipler * params.stride);
-//     printf("increasing minimum stride to %d ( %d x initial)\n", newstride, multipler);
-//     params.stride = newstride.toFixed(0);
-// }
+function raise_to_min_stride(params, min_stride) {
+    var multipler = (min_stride / params.stride);
+    var newstride = (multipler * params.stride);
+    printf("increasing minimum stride to %d ( %d x initial)\n", newstride, multipler);
+    params.stride = newstride.toFixed(0);
+}
 
 
 function testCycleFun(params) {
