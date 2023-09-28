@@ -29,7 +29,7 @@
     <name>${project.artifactId}</name>
 
     <description>
-        A JDBC driver for nosqlbench that includes PGVector. This provides the ability to inject synthetic data 
+        A JDBC driver for nosqlbench that includes PGVector. This provides the ability to inject synthetic data
         into a PostegreSQL® compatible database leveraging HikariCP.
     </description>
 
@@ -38,11 +38,6 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapters-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
