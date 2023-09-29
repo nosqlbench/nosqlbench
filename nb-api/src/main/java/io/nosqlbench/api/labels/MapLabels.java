@@ -121,6 +121,18 @@ public class MapLabels implements NBLabels {
     }
 
     @Override
+    public String linearizeAsMetrics() {
+        StringBuilder sb = new StringBuilder("{");
+        this.labels.forEach((k,v) -> {
+            sb.append(k).append(":\"").append(v).append("\",");
+        });
+        sb.setLength(sb.length()-",".length());
+        sb.append("}");
+        return sb.toString();
+
+    }
+
+    @Override
     public MapLabels and(final Object... labelsAndValues) {
         final Map<String,String> childLabels = getStringStringMap(labelsAndValues);
         return new MapLabels(labels,childLabels);
