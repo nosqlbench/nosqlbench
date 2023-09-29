@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
-import io.nosqlbench.api.config.NBComponent;
-import io.nosqlbench.api.config.standard.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.engine.cli.BasicScriptBuffer;

@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.config.NBComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;

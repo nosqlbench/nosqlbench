@@ -27,7 +27,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTem
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.api.Shutdownable;
-import io.nosqlbench.api.config.NBComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;

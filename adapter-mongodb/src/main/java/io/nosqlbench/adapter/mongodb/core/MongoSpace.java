@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import io.nosqlbench.components.NBNamedElement;
 import com.mongodb.client.MongoDatabase;
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.config.standard.ConfigModel;

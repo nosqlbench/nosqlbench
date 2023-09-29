@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle.activity;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.api.config.NBComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
