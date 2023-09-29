@@ -17,15 +17,14 @@
 package io.nosqlbench.api.engine.metrics.instruments;
 
 import com.codahale.metrics.Histogram;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.*;
+import io.nosqlbench.api.labels.NBLabels;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class NBMetricHistogram extends Histogram implements DeltaSnapshotter, HdrDeltaHistogramAttachment, HistogramAttachment, NBLabeledElement {
+public class NBMetricHistogram extends Histogram implements DeltaSnapshotter, HdrDeltaHistogramAttachment, HistogramAttachment, NBLabeledMetric {
 
     private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
     private final NBLabels labels;

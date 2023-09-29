@@ -15,6 +15,9 @@
  */
 package io.nosqlbench.engine.core.lifecycle.activity;
 
+import com.codahale.metrics.Gauge;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.engine.api.activityapi.core.*;
@@ -72,6 +75,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
     private long stoppedAt = 0L;
 
     private ActivityExecutorShutdownHook shutdownHook = null;
+    private NBFunctionGauge threadsGauge;
 
     public ActivityExecutor(Activity activity, String sessionId) {
         this.activity = activity;
@@ -409,6 +413,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             // before threads start running such as metrics instruments
             activity.initActivity();
             startMotorExecutorService();
+            registerMetrics();
             startRunningActivityThreads();
             awaitMotorsAtLeastRunning();
             logger.debug("STARTED " + activityDef.getAlias());
@@ -417,6 +422,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             this.exception = e;
         } finally {
             stoppedAt=System.currentTimeMillis();
+            unregisterMetrics();
             activity.shutdownActivity();
             activity.closeAutoCloseables();
             ExecutionResult result = new ExecutionResult(startedAt, stoppedAt, "", exception);
@@ -442,14 +448,22 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         }
     }
 
-    public synchronized void startActivity() {
-        RunStateImage startable = tally.awaitNoneOther(1000L, RunState.Uninitialized, RunState.Stopped);
-        if (startable.isTimeout()) {
-            throw new RuntimeException("Unable to start activity '" + getActivity().getAlias() + "' which is in state " + startable);
-        }
-        startMotorExecutorService();
-        startRunningActivityThreads();
-        awaitMotorsAtLeastRunning();
+//    public synchronized void startActivity() {
+//        RunStateImage startable = tally.awaitNoneOther(1000L, RunState.Uninitialized, RunState.Stopped);
+//        if (startable.isTimeout()) {
+//            throw new RuntimeException("Unable to start activity '" + getActivity().getAlias() + "' which is in state " + startable);
+//        }
+//        startMotorExecutorService();
+//        startRunningActivityThreads();
+//        awaitMotorsAtLeastRunning();
+//    }
+
+    private void registerMetrics() {
+        this.threadsGauge = ActivityMetrics.register(new NBFunctionGauge(activity, () -> (double) this.motors.size(), "threads"));
+    }
+    private void unregisterMetrics() {
+        ActivityMetrics.unregister(this.threadsGauge);
+        this.threadsGauge=null;
     }
 
     private boolean shutdownExecutorService(int secondsToWait) {
@@ -567,6 +581,16 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             .build());
     }
 
+    private class ThreadsGauge implements Gauge<Double> {
+        public ThreadsGauge(ActivityExecutor activityExecutor) {
+            ActivityExecutor ae = activityExecutor;
+        }
+
+        @Override
+        public Double getValue() {
+            return (double) ActivityExecutor.this.motors.size();
+        }
+    }
 }
 
 

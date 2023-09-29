@@ -55,4 +55,9 @@ public class ActivityMetricsTest {
 
     }
 
+    @Test
+    public void testSanityCheckSanitize() {
+        String result = ActivityMetrics.sanitize("test-dynamic-params.input_cycles_first");
+        assertThat(result).isEqualTo("test_dynamic_params__input_cycles_first");
+    }
 }

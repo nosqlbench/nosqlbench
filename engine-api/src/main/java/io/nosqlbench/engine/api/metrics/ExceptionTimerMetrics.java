@@ -41,7 +41,7 @@ public class ExceptionTimerMetrics {
 
         this.allerrors = ActivityMetrics.timer(
             parentLabels,
-            "errortimers.ALL",
+            "errortimers_ALL",
             activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4)
         );
     }
