@@ -28,10 +28,12 @@ class NBComponentLifecycleTest {
         TestComponent root = new TestComponent("role", "root");
         TestComponent node1 = new TestComponent(root, "node1", "node1");
         TestComponent node2 = new TestComponent(root, "node2", "node2");
-        TestComponent node3 = new TestComponent(root, "node3", "node3");
 
         try (NBComponentSubScope scope = new NBComponentSubScope(node1)) {
             System.out.println("node1 active");
+        }
+        try (NBComponentSubScope scope = new NBComponentSubScope(node2)) {
+            System.out.println("node2 active");
         }
 
         System.out.print("node1 inactive");

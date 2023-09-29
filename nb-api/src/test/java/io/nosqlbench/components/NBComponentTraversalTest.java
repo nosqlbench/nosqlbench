@@ -26,6 +26,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class NBComponentTraversalTest {
 
+    /**
+     * <pre>{@code
+     *  equivalent to
+     *      private final static NBComponent a = new TestComponent("name_a","a")
+     *         .attach(new TestComponent("name_1","1"))
+     *         .attach(new TestComponent("name_2","2")
+     *             .attach(new TestComponent("name_X","X"))
+     *             .attach(new TestComponent("name_Y","Y")));
+     * }</pre>
+     */
     private final static TestComponent a = new TestComponent("name_a","a");
     private final static TestComponent sub1 = new TestComponent(a, "name_1", "1");
     private final static TestComponent sub2 = new TestComponent(a, "name_2", "2");
