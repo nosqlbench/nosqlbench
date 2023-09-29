@@ -27,7 +27,7 @@ import java.util.*;
  * If the optional is empty, then it means some part of the command structure
  * was not recognized.
  */
-public class NBCLICommandParser {
+public class SessionCommandParser {
 
     private static final String FRAGMENT = "fragment";
     private static final String SCRIPT = "script";

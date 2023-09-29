@@ -131,9 +131,9 @@ public class BasicScriptBuffer implements ScriptBuffer {
         return scriptParams;
     }
 
-    public static String assemble(NBCLIOptions options) {
+    public static String assemble(List<Cmd> cmds) {
         ScriptBuffer script = new BasicScriptBuffer();
-        for (Cmd command : options.getCommands()) {
+        for (Cmd command : cmds) {
             script.add(command);
         }
         return script.getParsedScript();

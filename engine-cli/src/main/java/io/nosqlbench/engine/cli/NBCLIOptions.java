@@ -16,15 +16,14 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.api.labels.NBLabelSpec;
-import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.util.Unit;
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.api.labels.NBLabelSpec;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.logging.NBLogLevel;
 import io.nosqlbench.api.system.NBStatePath;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.cli.Cmd.CmdType;
-import io.nosqlbench.engine.core.lifecycle.scenario.Scenario.Engine;
 import io.nosqlbench.nb.annotations.Maturity;
 
 import java.io.File;
@@ -323,7 +322,7 @@ public class NBCLIOptions {
 
         // Now that statdirs is settled, auto load argsfile if it is present
         final NBCLIArgsFile argsfile = new NBCLIArgsFile();
-        argsfile.reserved(NBCLICommandParser.RESERVED_WORDS);
+        argsfile.reserved(SessionCommandParser.RESERVED_WORDS);
         argsfile.preload("--argsfile-optional", NBCLIOptions.ARGS_FILE_DEFAULT);
         arglist = argsfile.process(arglist);
 
@@ -645,7 +644,7 @@ public class NBCLIOptions {
             }
         }
         arglist = nonincludes;
-        final Optional<List<Cmd>> commands = NBCLICommandParser.parse(arglist);
+        final Optional<List<Cmd>> commands = SessionCommandParser.parse(arglist);
         if (commands.isPresent()) cmdList.addAll(commands.get());
         else {
             final String arg = arglist.peekFirst();

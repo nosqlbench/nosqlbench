@@ -18,38 +18,34 @@ package io.nosqlbench.engine.cli;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.logging.NBLogLevel;
 import io.nosqlbench.api.metadata.SessionNamer;
 import io.nosqlbench.api.metadata.SystemId;
-import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
-import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.engine.cli.NBCLIOptions.LoggerConfigData;
 import io.nosqlbench.engine.cli.NBCLIOptions.Mode;
 import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
+import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
-import io.nosqlbench.engine.core.lifecycle.process.ShutdownManager;
-import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosResults;
+import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.MetricsMapper;
+import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 import io.nosqlbench.engine.core.logging.LoggerConfig;
 import io.nosqlbench.engine.core.metadata.MarkdownFinder;
 import io.nosqlbench.engine.core.metrics.MetricReporters;
-import io.nosqlbench.engine.core.lifecycle.scenario.script.MetricsMapper;
-import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
-import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosExecutor;
-import io.nosqlbench.engine.core.lifecycle.scenario.script.ScriptParams;
-import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.annotations.ServiceSelector;
 import org.apache.logging.log4j.LogManager;
@@ -164,17 +160,17 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 .and(globalOptions.getLabelMap());
 
         NBCLI.loggerConfig
-                .setSessionName(sessionName)
-                .setConsoleLevel(globalOptions.getConsoleLogLevel())
-                .setConsolePattern(globalOptions.getConsoleLoggingPattern())
-                .setLogfileLevel(globalOptions.getScenarioLogLevel())
-                .setLogfilePattern(globalOptions.getLogfileLoggingPattern())
-                .setLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
-                .setMaxLogs(globalOptions.getLogsMax())
-                .setLogsDirectory(globalOptions.getLogsDirectory())
-                .setAnsiEnabled(globalOptions.isEnableAnsi())
-                .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
-                .activate();
+            .setSessionName(sessionName)
+            .setConsoleLevel(globalOptions.getConsoleLogLevel())
+            .setConsolePattern(globalOptions.getConsoleLoggingPattern())
+            .setLogfileLevel(globalOptions.getScenarioLogLevel())
+            .setLogfilePattern(globalOptions.getLogfileLoggingPattern())
+            .setLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
+            .setMaxLogs(globalOptions.getLogsMax())
+            .setLogsDirectory(globalOptions.getLogsDirectory())
+            .setAnsiEnabled(globalOptions.isEnableAnsi())
+            .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
+            .activate();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
 
         NBCLI.logger = LogManager.getLogger("NBCLI");
@@ -271,7 +267,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         if (options.getWantsListCommands()) {
-            NBCLICommandParser.RESERVED_WORDS.forEach(System.out::println);
+            SessionCommandParser.RESERVED_WORDS.forEach(System.out::println);
             return NBCLI.EXIT_OK;
         }
         if (options.wantsActivityTypes()) {
@@ -299,19 +295,19 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             NBCLI.logger.debug(() -> "user requests to copy out " + resourceToCopy);
 
             Optional<Content<?>> tocopy = NBIO.classpath()
-                    .searchPrefixes("activities")
-                    .searchPrefixes(options.wantsIncludes())
-                    .pathname(resourceToCopy).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
+                .searchPrefixes("activities")
+                .searchPrefixes(options.wantsIncludes())
+                .pathname(resourceToCopy).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
 
             if (tocopy.isEmpty()) tocopy = NBIO.classpath()
-                    .searchPrefixes().searchPrefixes(options.wantsIncludes())
-                    .searchPrefixes(options.wantsIncludes())
-                    .pathname(resourceToCopy).first();
+                .searchPrefixes().searchPrefixes(options.wantsIncludes())
+                .searchPrefixes(options.wantsIncludes())
+                .pathname(resourceToCopy).first();
 
             final Content<?> data = tocopy.orElseThrow(
-                    () -> new BasicError(
-                            "Unable to find " + resourceToCopy +
-                                    " in classpath to copy out")
+                () -> new BasicError(
+                    "Unable to find " + resourceToCopy +
+                        " in classpath to copy out")
             );
 
             final Path writeTo = Path.of(data.asPath().getFileName().toString());
@@ -349,7 +345,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         if (options.wantsTopicalHelp()) {
             final Optional<String> helpDoc = MarkdownFinder.forHelpTopic(options.wantsTopicalHelpFor());
             System.out.println(helpDoc.orElseThrow(
-                    () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
+                () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
             ));
             return NBCLI.EXIT_OK;
         }
@@ -365,23 +361,26 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         NBCLI.logger.debug("initializing annotators with config:'{}'", annotatorsConfig);
         Annotators.init(annotatorsConfig, options.getAnnotateLabelSpec());
         Annotators.recordAnnotation(
-                Annotation.newBuilder()
-                        .element(this)
-                        .now()
-                        .layer(Layer.Session)
-                        .addDetail("cli", String.join("\n", args))
-                        .build()
+            Annotation.newBuilder()
+                .element(this)
+                .now()
+                .layer(Layer.Session)
+                .addDetail("cli", String.join("\n", args))
+                .build()
         );
 
         if ((null != reportPromPushTo) || (null != reportGraphiteTo) || (null != options.wantsReportCsvTo())) {
             final MetricReporters reporters = MetricReporters.getInstance();
             reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
 
-            if (null != reportPromPushTo) reporters.addPromPush(reportPromPushTo, options.wantsMetricsPrefix(), promPushConfig);
+            if (null != reportPromPushTo)
+                reporters.addPromPush(reportPromPushTo, options.wantsMetricsPrefix(), promPushConfig);
             if (null != reportGraphiteTo) reporters.addGraphite(reportGraphiteTo, options.wantsMetricsPrefix());
             if (null != options.wantsReportCsvTo())
                 reporters.addCSVReporter(options.wantsReportCsvTo(), options.wantsMetricsPrefix());
-            if (options.wantsLoggedMetrics()) { reporters.addLogger(); }
+            if (options.wantsLoggedMetrics()) {
+                reporters.addLogger();
+            }
             reporters.start(10, options.getReportInterval());
         }
 
@@ -397,86 +396,42 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         for (
-                final LoggerConfigData histoLogger : options.getHistoLoggerConfigs())
+            final LoggerConfigData histoLogger : options.getHistoLoggerConfigs())
             ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
         for (
-                final LoggerConfigData statsLogger : options.getStatsLoggerConfigs())
+            final LoggerConfigData statsLogger : options.getStatsLoggerConfigs())
             ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
         for (
-                final LoggerConfigData classicConfigs : options.getClassicHistoConfigs())
+            final LoggerConfigData classicConfigs : options.getClassicHistoConfigs())
             ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
 
-        // intentionally not shown for warn-only
-        NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
-
-        final ScenariosExecutor scenariosExecutor = new ScenariosExecutor("executor-" + sessionName, 1);
         if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
             options.setWantsStackTraces(true);
             NBCLI.logger.debug(() -> "enabling stack traces since log level is " + options.getConsoleLogLevel());
         }
 
-        final Scenario scenario = new Scenario(
-                sessionName,
-                options.getScriptFile(),
-                options.getScriptingEngine(),
-                options.getProgressSpec(),
-                options.wantsStackTraces(),
-                options.wantsCompileScript(),
-                options.getReportSummaryTo(),
-                String.join("\n", args),
-                options.getLogsDirectory(),
-                Maturity.Unspecified,
-                this);
+        // intentionally not shown for warn-only
+        NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
 
-        final ScriptBuffer buffer = new BasicScriptBuffer()
-                .add(options.getCommands()
-                        .toArray(new Cmd[0]));
-        final String scriptData = buffer.getParsedScript();
-
-        if (options.wantsShowScript()) {
-            System.out.println("// Rendered Script");
-            System.out.println(scriptData);
-            return NBCLI.EXIT_OK;
-        }
-
-        if (options.wantsEnableChart()) {
-            NBCLI.logger.info("Charting enabled");
-            scenario.enableCharting();
-        } else NBCLI.logger.info("Charting disabled");
-
-
-        // Execute Scenario!
-        if (0 == options.getCommands().size()) {
-            NBCLI.logger.info("No commands provided. Exiting before scenario.");
-            return NBCLI.EXIT_OK;
-        }
-
-        scenario.addScriptText(scriptData);
-        final ScriptParams scriptParams = new ScriptParams();
-        scriptParams.putAll(buffer.getCombinedParams());
-        scenario.addScenarioScriptParams(scriptParams);
-
-        scenariosExecutor.execute(scenario);
-        final ScenariosResults scenariosResults = scenariosExecutor.awaitAllResults();
-        NBCLI.logger.debug(() -> "Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
-
-        ActivityMetrics.closeMetrics(options.wantsEnableChart());
-        scenariosResults.reportToLog();
-        ShutdownManager.shutdown();
-
-        NBCLI.logger.info(scenariosResults.getExecutionSummary());
-
-        if (scenariosResults.hasError()) {
-            final Exception exception = scenariosResults.getOne().getException();
-            NBCLI.logger.warn(scenariosResults.getExecutionSummary());
-            NBCLIErrorHandler.handle(exception, options.wantsStackTraces());
-            System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
-            return NBCLI.EXIT_ERROR;
-        }
-        NBCLI.logger.info(scenariosResults.getExecutionSummary());
-        return NBCLI.EXIT_OK;
+        /**
+         * At this point, the command stream from the CLI should be handed into the session, and the session should
+         * marshal and transform it for any scenario invocations directly.
+         */
+        NBSession session = new NBSession(
+            this,
+            sessionName,
+            options.getProgressSpec(),
+            options.getReportSummaryTo(),
+            options.getLogsDirectory(),
+            options.getScriptFile(),
+            options.wantsShowScript()
+        );
+        ExecutionResult sessionResult = session.apply(options.getCommands());
+        sessionResult.printSummary(System.out);
+        return sessionResult.getStatus().code;
 
     }
+
 
     private String loadHelpFile(final String filename) {
         final ClassLoader cl = this.getClass().getClassLoader();

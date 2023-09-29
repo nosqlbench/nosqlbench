@@ -154,9 +154,9 @@ public class Cmd {
                 logger.debug(() -> "freeform parameter:" + nextarg);
             } else if (nextarg.contains("=")) {
                 throw new InvalidParameterException(
-                        "command '" + cmdName + "' requires a value for " + arg.name + "" +
+                        "command '" + cmdName + "' requires a value for " + arg.name +
                                 ", but a named parameter was found instead: " + nextarg);
-            } else if (NBCLICommandParser.RESERVED_WORDS.contains(nextarg)) {
+            } else if (SessionCommandParser.RESERVED_WORDS.contains(nextarg)) {
                 throw new InvalidParameterException(
                         "command '" + cmdName + "' requires a value for " + arg.name
                                 + ", but a reserved word was found instead: " + nextarg);
@@ -167,7 +167,7 @@ public class Cmd {
         }
 
         while (arglist.size() > 0 &&
-                !NBCLICommandParser.RESERVED_WORDS.contains(arglist.peekFirst())
+                !SessionCommandParser.RESERVED_WORDS.contains(arglist.peekFirst())
                 && arglist.peekFirst().contains("=")) {
             String arg = arglist.removeFirst();
             String[] assigned = arg.split("=", 2);
