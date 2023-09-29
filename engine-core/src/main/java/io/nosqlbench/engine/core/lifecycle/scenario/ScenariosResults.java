@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,14 @@
 package io.nosqlbench.engine.core.lifecycle.scenario;
 
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class ScenariosResults {
 
@@ -73,6 +76,11 @@ public class ScenariosResults {
     public boolean hasError() {
         return this.scenarioResultMap.values().stream()
                 .anyMatch(r -> r.getException()!=null);
+    }
+
+    public Optional<Exception> getAnyError() {
+        return this.scenarioResultMap.values().stream()
+            .map(ExecutionResult::getException).filter(Objects::nonNull).findFirst();
     }
 
     public int getSize() {

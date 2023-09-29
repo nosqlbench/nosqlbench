@@ -21,22 +21,18 @@ import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
 import io.nosqlbench.api.metadata.ScenarioMetadataAware;
 import io.nosqlbench.api.metadata.SystemId;
-import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityProgressIndicator;
-import io.nosqlbench.api.extensions.SandboxExtensionFinder;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.ScenarioContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.ScriptParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.ActivityBindings;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.PolyglotMetricRegistryBindings;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.PolyglotScenarioController;
-import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Context;
@@ -58,14 +54,13 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElement {
 
-    private final String commandLine;
     private final String reportSummaryTo;
     private final Path logsPath;
-    private final Maturity minMaturity;
+    private final Invocation invocation;
+    private final String scriptfile;
     private Logger logger = LogManager.getLogger("SCENARIO");
 
     private State state = State.Scheduled;
@@ -80,6 +75,11 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
         return Optional.ofNullable(result);
     }
 
+    public enum Invocation {
+        RENDER_SCRIPT,
+        EXECUTE_SCRIPT
+    }
+
     @Override
     public NBLabels getLabels() {
         return this.parentComponent.getLabels().and("scenario", this.scenarioName);
@@ -92,6 +92,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
         Interrupted,
         Finished
     }
+
     private final List<String> scripts = new ArrayList<>();
     private ScriptEngine scriptEngine;
     private ScenarioController scenarioController;
@@ -100,10 +101,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
     private ScenarioContext scriptEnv;
     private final String scenarioName;
     private ScriptParams scenarioScriptParams;
-    private final String scriptfile;
-    private Engine engine = Engine.Graalvm;
-    private final boolean wantsStackTraces;
-    private final boolean wantsCompiledScript;
+    private final Engine engine = Engine.Graalvm;
     private long startedAtMillis = -1L;
     private long endedAtMillis = -1L;
 
@@ -113,32 +111,34 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
 
     public Scenario(
         final String scenarioName,
-        final String scriptfile,
-        final Engine engine,
         final String progressInterval,
-        final boolean wantsStackTraces,
-        final boolean wantsCompiledScript,
         final String reportSummaryTo,
-        final String commandLine,
         final Path logsPath,
-        final Maturity minMaturity,
-        NBLabeledElement parentComponent) {
-
+        String scriptfile,
+        NBComponent parentComponent,
+        Invocation invocation
+    ) {
+        super(parentComponent, NBLabels.forKV("scenario", scenarioName));
         this.scenarioName = scenarioName;
-        this.scriptfile = scriptfile;
-        this.engine = engine;
         this.progressInterval = progressInterval;
-        this.wantsStackTraces = wantsStackTraces;
-        this.wantsCompiledScript = wantsCompiledScript;
         this.reportSummaryTo = reportSummaryTo;
-        this.commandLine = commandLine;
         this.logsPath = logsPath;
-        this.minMaturity = minMaturity;
+        this.scriptfile = scriptfile;
         this.parentComponent = parentComponent;
+        this.invocation = invocation;
     }
 
-    public static Scenario forTesting(final String name, final Engine engine, final String reportSummaryTo, final Maturity minMaturity) {
-        return new Scenario(name, null, engine, "console:10s", true, true, reportSummaryTo, "", Path.of("logs"), minMaturity, NBLabeledElement.forKV("test_name", "name"));
+    public static Scenario forTesting(final String name, final String reportSummaryTo, NBComponent parent) {
+
+        return new Scenario(
+            name,
+            "console:10s",
+            reportSummaryTo,
+            Path.of("logs"),
+            "",
+            new NBBaseComponent(parent,NBLabels.forKV("test","testrun")),
+            Invocation.EXECUTE_SCRIPT
+        );
     }
 
     public Scenario setLogger(final Logger logger) {
@@ -351,7 +351,7 @@ public class Scenario implements Callable<ExecutionMetricsResult>, NBLabeledElem
             .element(this)
             .interval(startedAtMillis, this.endedAtMillis)
             .layer(Layer.Scenario)
-            .addDetail("event","stop-scenario")
+            .addDetail("event", "stop-scenario")
             .build();
 
         Annotators.recordAnnotation(annotation);

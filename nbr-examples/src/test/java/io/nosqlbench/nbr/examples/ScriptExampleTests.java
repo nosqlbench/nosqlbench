@@ -16,11 +16,11 @@
 
 package io.nosqlbench.nbr.examples;
 
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosExecutor;
 import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosResults;
-import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeAll;
@@ -56,7 +56,7 @@ public class ScriptExampleTests {
         String scenarioName = "scenario " + scriptname;
         System.out.println("=".repeat(29) + " Running integration test for example scenario: " + scenarioName);
         ScenariosExecutor executor = new ScenariosExecutor(ScriptExampleTests.class.getSimpleName() + ":" + scriptname, 1);
-        Scenario s = Scenario.forTesting(scenarioName, Scenario.Engine.Graalvm,"stdout:300", Maturity.Any);
+        Scenario s = Scenario.forTesting(scenarioName,"stdout:300", new TestComponent());
 
         s.addScenarioScriptParams(paramsMap);
 

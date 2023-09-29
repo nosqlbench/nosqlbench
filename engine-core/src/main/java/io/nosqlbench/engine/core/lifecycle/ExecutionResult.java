@@ -19,6 +19,8 @@ package io.nosqlbench.engine.core.lifecycle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.PrintStream;
+
 /**
  * Provide a result type back to a caller, including the start and end times,
  * any exception that occurred, and any content written to stdout or stderr equivalent
@@ -27,6 +29,22 @@ import org.apache.logging.log4j.Logger;
  */
 public class ExecutionResult {
     protected final static Logger logger = LogManager.getLogger(ExecutionResult.class);
+    protected final Status status;
+
+    public void printSummary(PrintStream out) {
+        out.println(this);
+    }
+
+    public enum Status {
+        OK(0),
+        WARNING(1),
+        ERROR(2);
+        public final int code;
+
+        Status(int code) {
+            this.code = code;
+        }
+    }
     protected final long startedAt;
     protected final long endedAt;
     protected final Exception exception;
@@ -37,7 +55,9 @@ public class ExecutionResult {
         this.endedAt = endedAt;
         this.exception = error;
         this.iolog = ((iolog != null) ? iolog + "\n\n" : "") + exception;
-        logger.debug("populating "+(error==null ? "NORMAL" : "ERROR")+" scenario result");
+        this.status = (error==null) ? Status.OK : Status.ERROR;
+        logger.debug("populating "+status+" scenario result");
+
 //        if (logger.isTraceEnabled()) {
 //            StackTraceElement[] st = Thread.currentThread().getStackTrace();
 //            for (int i = 0; i < st.length; i++) {
@@ -63,4 +83,10 @@ public class ExecutionResult {
     public Exception getException() {
         return exception;
     }
+
+    public Status getStatus() {
+        return this.status;
+    }
+
+
 }
