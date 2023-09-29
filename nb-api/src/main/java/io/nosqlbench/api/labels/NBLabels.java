@@ -170,6 +170,8 @@ public interface NBLabels {
      */
     Map<String, String> asMap();
 
+    String linearizeAsMetrics();
+
     /**
      * @return a new set of labels which includes only those which are not using per-instance semantics.
      */
