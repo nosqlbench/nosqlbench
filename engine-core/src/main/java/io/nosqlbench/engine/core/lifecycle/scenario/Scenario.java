@@ -290,7 +290,7 @@ public class Scenario extends NBBaseComponent implements Callable<ExecutionMetri
         for (final String script : this.scripts)
             try {
                 Object result = null;
-                if ((scriptEngine instanceof Compilable compilableEngine) && this.wantsCompiledScript) {
+                if ((scriptEngine instanceof Compilable compilableEngine)) {
                     this.logger.debug("Using direct script compilation");
                     final CompiledScript compiled = compilableEngine.compile(script);
                     this.logger.debug("-> invoking main scenario script (compiled)");

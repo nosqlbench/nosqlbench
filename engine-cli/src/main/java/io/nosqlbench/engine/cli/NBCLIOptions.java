@@ -126,8 +126,6 @@ public class NBCLIOptions {
     private static final String LOG_LEVEL_OVERRIDE = "--log-level-override";
     private static final String ENABLE_CHART = "--enable-chart";
 
-    private static final String GRAALJS_ENGINE = "--graaljs";
-
     private static final String DEFAULT_CONSOLE_PATTERN = "TERSE";
     private static final String DEFAULT_LOGFILE_PATTERN = "VERBOSE";
     private final static String ENABLE_DEDICATED_VERIFICATION_LOGGER = "--enable-dedicated-verification-logging";
@@ -174,7 +172,6 @@ public class NBCLIOptions {
     private String wantsToCopyWorkload;
     private boolean wantsWorkloadsList;
     private final List<String> wantsToIncludePaths = new ArrayList<>();
-    private Engine engine = Engine.Graalvm;
     private int hdr_digits = 3;
     private boolean showStackTraces;
     private boolean compileScript;
@@ -523,10 +520,6 @@ public class NBCLIOptions {
             final String word = arglist.peekFirst();
 
             switch (word) {
-                case NBCLIOptions.GRAALJS_ENGINE:
-                    this.engine = Engine.Graalvm;
-                    arglist.removeFirst();
-                    break;
                 case NBCLIOptions.COMPILE_SCRIPT:
                     arglist.removeFirst();
                     this.compileScript = true;
@@ -683,10 +676,6 @@ public class NBCLIOptions {
             levels.put(ll[0], ll[1]);
         });
         return levels;
-    }
-
-    public Engine getScriptingEngine() {
-        return this.engine;
     }
 
     public List<LoggerConfigData> getHistoLoggerConfigs() {
