@@ -18,16 +18,16 @@ package io.nosqlbench.engine.core;
 
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.engine.api.activityapi.core.*;
-import io.nosqlbench.engine.api.activityapi.input.Input;
+import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityapi.core.MotorDispenser;
+import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
-import io.nosqlbench.engine.api.activityimpl.input.AtomicInput;
 import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
-import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityExecutor;
@@ -127,7 +127,7 @@ class ActivityExecutorTest {
 
         Activity simpleActivity = new SimpleActivity(activityDef, NBLabeledElement.forMap(Map.of()));
 
-        this.getActivityMotorFactory(this.motorActionDelay(999), new AtomicInput(simpleActivity,activityDef));
+//        this.getActivityMotorFactory(this.motorActionDelay(999), new AtomicInput(simpleActivity,activityDef));
 
         final InputDispenser inputDispenser = new CoreInputDispenser(simpleActivity);
         final ActionDispenser actionDispenser = new CoreActionDispenser(simpleActivity);
