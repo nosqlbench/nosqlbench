@@ -57,6 +57,7 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
     private final String opName;
     protected final DriverAdapter<T, S> adapter;
     private final NBLabels labels;
+    public final Timer verifierTimer;
     private boolean instrument;
     private Timer successTimer;
     private Timer errorTimer;
@@ -97,7 +98,8 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
         List<CycleFunction<Boolean>> verifiers = new ArrayList<>();
         verifiers = configureVerifiers(op);
         this._verifier = CycleFunctions.of((a, b) -> a && b, verifiers, true);
-        this.tlVerifier = ThreadLocal.withInitial(() -> _verifier.newInstance());
+        this.tlVerifier = ThreadLocal.withInitial(_verifier::newInstance);
+        this.verifierTimer = ActivityMetrics.timer(this,"verifier",3);
     }
 
     private CycleFunction<Boolean> cloneVerifiers() {

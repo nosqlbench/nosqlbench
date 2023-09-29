@@ -113,4 +113,10 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
     public synchronized Histogram getOrCreateTriesHistogram() {
         return ActivityMetrics.histogram(this.activity,"tries", this.activity.getHdrDigits());
     }
+
+    @Override
+    public Timer getOrCreateVerifierTimer() {
+        return ActivityMetrics.timer(this.activity,"verifier", this.activity.getHdrDigits());
+
+    }
 }

@@ -26,7 +26,7 @@
 
     <properties>
 
-        <revision>5.21.1-SNAPSHOT</revision>
+        <revision>5.17.4-SNAPSHOT</revision>
         <!-- Set this level to override the logging level for tests during build -->
         <project.testlevel>INFO</project.testlevel>
         <!-- Set this level to override the logging level for tests logging configuration during build -->
@@ -34,6 +34,7 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
 
         <javadoc.name>nosqlbench</javadoc.name>
         <maven.compiler.source>21</maven.compiler.source>

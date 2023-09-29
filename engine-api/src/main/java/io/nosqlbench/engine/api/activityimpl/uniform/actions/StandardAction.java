@@ -59,6 +59,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     private final NBErrorHandler errorHandler;
     private final OpSequence<OpDispenser<? extends Op>> opsequence;
     private final int maxTries;
+    private final Timer verifierTimer;
 
     public StandardAction(A activity, int slot) {
         this.activity = activity;
@@ -71,6 +72,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
         resultTimer = activity.getInstrumentation().getOrCreateResultTimer();
         resultSuccessTimer = activity.getInstrumentation().getOrCreateResultSuccessTimer();
         errorHandler = activity.getErrorHandler();
+        verifierTimer = activity.getInstrumentation().getOrCreateVerifierTimer();
     }
 
     @Override
@@ -109,16 +111,18 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                             "one of [RunnableOp, CycleOp, or ChainingOp]");
                     }
 
-                    CycleFunction<Boolean> verifier = dispenser.getVerifier();
-                    try {
-                        verifier.setVariable("result", result);
-                        verifier.setVariable("cycle",cycle);
-                        Boolean isGood = verifier.apply(cycle);
-                        if (!isGood) {
-                            throw new ResultVerificationError("result verification failed", maxTries - tries, verifier.getExpressionDetails());
+                    try (Timer.Context ignored = verifierTimer.time()) {
+                        CycleFunction<Boolean> verifier = dispenser.getVerifier();
+                        try {
+                            verifier.setVariable("result", result);
+                            verifier.setVariable("cycle",cycle);
+                            Boolean isGood = verifier.apply(cycle);
+                            if (!isGood) {
+                                throw new ResultVerificationError("result verification failed", maxTries - tries, verifier.getExpressionDetails());
+                            }
+                        } catch (Exception e) {
+                            throw new ResultVerificationError(e, maxTries - tries, verifier.getExpressionDetails());
                         }
-                    } catch (Exception e) {
-                        throw new ResultVerificationError(e, maxTries - tries, verifier.getExpressionDetails());
                     }
                 } catch (Exception e) {
                     error = e;

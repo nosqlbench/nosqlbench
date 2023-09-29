@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.venice;
+package io.nosqlbench.api.engine.metrics.instruments;
 
-public enum VeniceOpType {
-    // read a single key
-    ReadSingleKey,
-    Write
+import com.codahale.metrics.Metric;
+import io.nosqlbench.api.labels.NBLabeledElement;
+
+public interface NBLabeledMetric extends Metric, NBLabeledElement {
 }
-
-

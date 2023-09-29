@@ -17,10 +17,9 @@
 package io.nosqlbench.api.engine.metrics.instruments;
 
 import com.codahale.metrics.Meter;
-import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 
-public class NBMetricMeter extends Meter implements NBLabeledElement {
+public class NBMetricMeter extends Meter implements NBLabeledMetric {
 
     private final NBLabels labels;
 
