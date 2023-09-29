@@ -31,6 +31,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
@@ -98,15 +99,18 @@ public class PromPushReporter extends ScheduledReporter implements NBConfigurabl
         bearerToken = null;
         if (optionalApikeyfile.isPresent()) {
             keyfilePath = optionalApikeyfile.map(Path::of).orElseThrow();
-            logger.info("Reading Bearer Token from %s", keyfilePath);
-            PromPushKeyFileReader keyfile = new PromPushKeyFileReader(keyfilePath);
-            bearerToken = "Bearer " + keyfile.get();
+            if (Files.isRegularFile(keyfilePath)) {
+                logger.info("Reading Bearer Token from %s", keyfilePath);
+                PromPushKeyFileReader keyfile = new PromPushKeyFileReader(keyfilePath);
+                bearerToken = keyfile.get();
+            }
         } else if (optionalApikey.isPresent()) {
-            bearerToken = "Bearer " + optionalApikey.get();
+            bearerToken = optionalApikey.get();
         }
         needsAuth = (null != bearerToken);
+        bearerToken = "Bearer " + bearerToken;
     }
-    
+
     @Override
     public synchronized void report(
         SortedMap<String, Gauge> gauges,
