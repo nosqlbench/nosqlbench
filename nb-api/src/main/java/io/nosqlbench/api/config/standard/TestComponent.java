@@ -41,13 +41,15 @@ public class TestComponent extends NBBaseComponent {
 
     @Override
     public NBComponent attach(NBComponent... children) {
-        System.out.println("attaching children:" + Arrays.toString(children));
+        System.out.println("attaching children:" +
+                Arrays.stream(children).map(c -> c.getLabels().linearizeAsMetrics()).toList());
         return super.attach(children);
     }
 
     @Override
     public NBComponent detach(NBComponent... children) {
-        System.out.println("detaching children:" + Arrays.toString(children));
+        System.out.println("detaching children:" +
+                Arrays.stream(children).map(c -> c.getLabels().linearizeAsMetrics()).toList());
         return super.detach(children);
     }
 }

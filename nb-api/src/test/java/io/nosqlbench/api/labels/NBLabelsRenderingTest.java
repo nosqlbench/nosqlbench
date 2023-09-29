@@ -19,7 +19,6 @@ package io.nosqlbench.api.labels;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class NBLabelsRenderingTest {
 
@@ -38,7 +37,7 @@ class NBLabelsRenderingTest {
     public void testLinearizeOpenMetricsFormat() {
         var l1 = NBLabels.forKV("a","b","c","d","e","f");
         String oml1 = l1.linearizeAsMetrics();
-        assertThat(oml1).isEqualTo("{a:\"b\",c:\"d\",e:\"f\"}");
+        assertThat(oml1).isEqualTo("{a=\"b\",c=\"d\",e=\"f\"}");
     }
 
 }
