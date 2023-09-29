@@ -31,7 +31,7 @@ class NBComponentViewsTest {
             .attach(new TestComponent("e", "f"));
         System.out.println(NBComponentViews.treeView(root));
 
-        System.out.println(NBComponentViews.treeView(root, c -> c.getLabels().asMap().keySet().stream().findFirst().orElseThrow()));
+        System.out.println(NBComponentViews.treeView(root, c -> String.valueOf(c.hashCode())));
     }
 
 }
