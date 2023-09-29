@@ -17,18 +17,18 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.NBComponent;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
+import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
+import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.engine.activityimpl.ParameterMap;
-import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -38,7 +38,7 @@ import java.util.function.Supplier;
  * Provides the components needed to build and run an activity a runtime.
  * The easiest way to build a useful Activity is to extend {@link SimpleActivity}.
  */
-public interface Activity extends Comparable<Activity>, ActivityDefObserver, ProgressCapable, StateCapable, NBLabeledElement {
+public interface Activity extends Comparable<Activity>, ActivityDefObserver, ProgressCapable, StateCapable, NBComponent {
 
     /**
      * Provide the activity with the controls needed to stop itself.

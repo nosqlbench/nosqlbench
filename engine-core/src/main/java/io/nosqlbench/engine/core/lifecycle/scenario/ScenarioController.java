@@ -74,7 +74,7 @@ public class ScenarioController implements NBLabeledElement {
 
     private synchronized ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
         if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
-            Activity activity = this.activityLoader.loadActivity(activityDef, this);
+            Activity activity = this.activityLoader.loadActivity(activityDef, scenario);
             ActivityExecutor executor = new ActivityExecutor(activity, this.scenario.getScenarioName());
             Future<ExecutionResult> startedActivity = activitiesExecutor.submit(executor);
             ActivityRuntimeInfo activityRuntimeInfo = new ActivityRuntimeInfo(activity, startedActivity, executor);

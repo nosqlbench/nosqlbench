@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.activity;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.config.NBComponent;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
@@ -41,9 +41,9 @@ public class ActivityLoader {
         this.scenario = scenario;
     }
 
-    public synchronized Activity loadActivity(ActivityDef activityDef, final NBLabeledElement labels) {
+    public synchronized Activity loadActivity(ActivityDef activityDef, final NBComponent parent) {
         activityDef= activityDef.deprecate("yaml","workload").deprecate("type","driver");
-        final Activity activity = new StandardActivityType(activityDef, labels).getAssembledActivity(activityDef, this.activityMap, labels);
+        final Activity activity = new StandardActivityType(activityDef, parent).getAssembledActivity(activityDef, this.activityMap, parent);
         this.activityMap.put(activity.getAlias(),activity);
         ActivityLoader.logger.debug("Resolved activity for alias '{}'", activityDef.getAlias());
         return activity;

@@ -18,16 +18,16 @@ package io.nosqlbench.engine.core;
 
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.activityapi.core.MotorDispenser;
-import io.nosqlbench.engine.api.activityapi.core.SyncAction;
+import io.nosqlbench.engine.api.activityapi.core.*;
+import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
+import io.nosqlbench.engine.api.activityimpl.input.AtomicInput;
 import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
+import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityExecutor;
@@ -36,9 +36,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.Future;
+import io.nosqlbench.api.config.standard.TestComponent;
+import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityapi.core.MotorDispenser;
+import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.fail;
 
@@ -83,49 +96,49 @@ class ActivityExecutorTest {
 //
 //    }
 
-//    @Test
-//    synchronized void testDelayedStartSanity() {
-//
-//        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-delayed-start;cycles=1000;initdelay=2000;");
-//        new ActivityTypeLoader().load(activityDef, NBLabeledElement.EMPTY);
-//
-//        Activity activity = new DelayedInitActivity(activityDef);
-//        final InputDispenser inputDispenser = new CoreInputDispenser(activity);
-//        final ActionDispenser actionDispenser = new CoreActionDispenser(activity);
-//        final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(activity).orElse(null);
-//
-//        MotorDispenser<?> motorDispenser = new CoreMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser);
-//        activity.setActionDispenserDelegate(actionDispenser);
-//        activity.setOutputDispenserDelegate(outputDispenser);
-//        activity.setInputDispenserDelegate(inputDispenser);
-//        activity.setMotorDispenserDelegate(motorDispenser);
-//
-//        ActivityExecutor activityExecutor = new ActivityExecutor(activity, "test-delayed-start");
-//
-//        ExecutorService testExecutor = Executors.newCachedThreadPool();
-//        Future<ExecutionResult> future = testExecutor.submit(activityExecutor);
-//
-//
-//        try {
-//            activityDef.setThreads(1);
-//            activityExecutor.startActivity();
-//            future.get();
-//            testExecutor.shutdownNow();
-//
-//        } catch (final Exception e) {
-//            fail("Unexpected exception", e);
-//        }
-//
-//        assertThat(inputDispenser.getInput(10).getInputSegment(3)).isNull();
-//    }
+    @Test
+    synchronized void testDelayedStartSanity() {
+
+        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-delayed-start;cycles=1000;initdelay=2000;");
+        new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
+
+        Activity activity = new DelayedInitActivity(activityDef);
+        final InputDispenser inputDispenser = new CoreInputDispenser(activity);
+        final ActionDispenser actionDispenser = new CoreActionDispenser(activity);
+        final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(activity).orElse(null);
+
+        MotorDispenser<?> motorDispenser = new CoreMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser);
+        activity.setActionDispenserDelegate(actionDispenser);
+        activity.setOutputDispenserDelegate(outputDispenser);
+        activity.setInputDispenserDelegate(inputDispenser);
+        activity.setMotorDispenserDelegate(motorDispenser);
+
+        ActivityExecutor activityExecutor = new ActivityExecutor(activity, "test-delayed-start");
+
+        ExecutorService testExecutor = Executors.newCachedThreadPool();
+        Future<ExecutionResult> future = testExecutor.submit(activityExecutor);
+
+
+        try {
+            activityDef.setThreads(1);
+            activityExecutor.startActivity();
+            future.get();
+            testExecutor.shutdownNow();
+
+        } catch (final Exception e) {
+            fail("Unexpected exception", e);
+        }
+
+        assertThat(inputDispenser.getInput(10).getInputSegment(3)).isNull();
+    }
 
     @Test
     synchronized void testNewActivityExecutor() {
 
         final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-dynamic-params;cycles=1000;initdelay=5000;");
-        new ActivityTypeLoader().load(activityDef,NBLabeledElement.EMPTY);
+        new ActivityTypeLoader().load(activityDef,TestComponent.INSTANCE);
 
-        Activity simpleActivity = new SimpleActivity(activityDef, NBLabeledElement.forMap(Map.of()));
+        Activity simpleActivity = new SimpleActivity(TestComponent.INSTANCE,activityDef);
 
 //        this.getActivityMotorFactory(this.motorActionDelay(999), new AtomicInput(simpleActivity,activityDef));
 
@@ -171,6 +184,18 @@ class ActivityExecutorTest {
         }
     }
 
+    private MotorDispenser<?> getActivityMotorFactory(final Action lc, Input ls) {
+        return new MotorDispenser<>() {
+            @Override
+            public Motor getMotor(final ActivityDef activityDef, final int slotId) {
+                final Activity activity = new SimpleActivity(TestComponent.INSTANCE,activityDef);
+                final Motor<?> cm = new CoreMotor<>(activity, slotId, ls);
+                cm.setAction(lc);
+                return cm;
+            }
+        };
+    }
+
     private SyncAction motorActionDelay(long delay) {
         return new SyncAction() {
             @Override
@@ -190,7 +215,7 @@ class ActivityExecutorTest {
         private static final Logger logger = LogManager.getLogger(DelayedInitActivity.class);
 
         public DelayedInitActivity(final ActivityDef activityDef) {
-            super(activityDef, NBLabeledElement.EMPTY);
+            super(TestComponent.INSTANCE,activityDef);
         }
 
         @Override
