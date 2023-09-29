@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.config;
+package io.nosqlbench.components;
 
 import io.nosqlbench.api.labels.NBLabeledElement;
+
+import java.util.List;
 
 /**
  * A Component is a functional element of the NoSQLBench runtime which is:
@@ -34,4 +36,11 @@ import io.nosqlbench.api.labels.NBLabeledElement;
 public interface NBComponent extends NBLabeledElement {
 
     NBComponent getParent();
+
+    NBComponent attach(NBComponent... children);
+
+    NBComponent detach(NBComponent... children);
+
+    List<NBComponent> getChildren();
+
 }
