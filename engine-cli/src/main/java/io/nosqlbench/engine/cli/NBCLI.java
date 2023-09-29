@@ -22,6 +22,7 @@ import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
 import io.nosqlbench.api.apps.BundledApp;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;

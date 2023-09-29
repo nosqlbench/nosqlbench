@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.core;
 
-import io.nosqlbench.api.config.NBComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
