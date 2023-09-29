@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
@@ -27,7 +27,6 @@ import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.core.fortesting.BlockingSegmentInput;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.Predicate;
@@ -39,9 +38,9 @@ public class CoreMotorTest {
     @Test
     public void testBasicActivityMotor() {
         final Activity activity = new SimpleActivity(
-            ActivityDef.parseActivityDef("alias=foo"),
-            NBLabeledElement.forMap(Map.of("testing","coremotor"))
-            );
+            new TestComponent("testing", "coremotor"),
+            ActivityDef.parseActivityDef("alias=foo")
+        );
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
         final Motor cm = new CoreMotor(activity, 5L, lockstepper);
         final AtomicLong observableAction = new AtomicLong(-3L);
@@ -51,18 +50,19 @@ public class CoreMotorTest {
         t.start();
         try {
             Thread.sleep(1000);  // allow action time to be waiting in monitor for test fixture
-        } catch (final InterruptedException ignored) {}
+        } catch (final InterruptedException ignored) {
+        }
 
         lockstepper.publishSegment(5L);
-        final boolean result = this.awaitCondition(atomicInteger -> 5L == atomicInteger.get(),observableAction,5000,100);
+        final boolean result = this.awaitCondition(atomicInteger -> 5L == atomicInteger.get(), observableAction, 5000, 100);
         assertThat(observableAction.get()).isEqualTo(5L);
     }
 
     @Test
     public void testIteratorStride() {
-        SimpleActivity activity = new SimpleActivity("stride=3", NBLabeledElement.EMPTY);
+        SimpleActivity activity = new SimpleActivity(TestComponent.INSTANCE, "stride=3");
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
-        final Motor cm1 = new CoreMotor(activity,1L, lockstepper);
+        final Motor cm1 = new CoreMotor(activity, 1L, lockstepper);
         final AtomicLongArray ary = new AtomicLongArray(10);
         final Action a1 = this.getTestArrayConsumer(ary);
         cm1.setAction(a1);
@@ -72,11 +72,12 @@ public class CoreMotorTest {
         t1.start();
         try {
             Thread.sleep(500); // allow action time to be waiting in monitor for test fixture
-        } catch (final InterruptedException ignored) {}
+        } catch (final InterruptedException ignored) {
+        }
 
-        lockstepper.publishSegment(11L,12L,13L);
+        lockstepper.publishSegment(11L, 12L, 13L);
 
-        final boolean result = this.awaitAryCondition(ala -> 13L == ala.get(2),ary,5000,100);
+        final boolean result = this.awaitAryCondition(ala -> 13L == ala.get(2), ary, 5000, 100);
         assertThat(ary.get(0)).isEqualTo(11L);
         assertThat(ary.get(1)).isEqualTo(12L);
         assertThat(ary.get(2)).isEqualTo(13L);
@@ -87,6 +88,7 @@ public class CoreMotorTest {
     private SyncAction getTestArrayConsumer(AtomicLongArray ary) {
         return new SyncAction() {
             private int offset;
+
             @Override
             public int runCycle(final long cycle) {
                 ary.set(this.offset, cycle);
@@ -95,6 +97,7 @@ public class CoreMotorTest {
             }
         };
     }
+
     private SyncAction getTestConsumer(AtomicLong atomicLong) {
         return new SyncAction() {
             @Override
@@ -108,7 +111,7 @@ public class CoreMotorTest {
 
     private boolean awaitAryCondition(final Predicate<AtomicLongArray> atomicLongAryPredicate, final AtomicLongArray ary, final long millis, final long retry) {
         final long start = System.currentTimeMillis();
-        long now=start;
+        long now = start;
         while (now < (start + millis)) {
             final boolean result = atomicLongAryPredicate.test(ary);
             if (result) return true;
@@ -123,7 +126,7 @@ public class CoreMotorTest {
 
     private boolean awaitCondition(final Predicate<AtomicLong> atomicPredicate, final AtomicLong atomicInteger, final long millis, final long retry) {
         final long start = System.currentTimeMillis();
-        long now=start;
+        long now = start;
         while (now < (start + millis)) {
             final boolean result = atomicPredicate.test(atomicInteger);
             if (result) return true;

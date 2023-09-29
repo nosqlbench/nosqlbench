@@ -18,6 +18,8 @@ package io.nosqlbench.api.engine.activityimpl;
 
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.api.labels.NBLabelSpec;
+import io.nosqlbench.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -220,4 +222,12 @@ public class ActivityDef implements NBNamedElement {
         return this;
     }
 
+    public NBLabels auxLabels() {
+        Optional<String> auxLabelSpec = getParams().getOptionalString("labels");
+        if (auxLabelSpec.isPresent()) {
+            return NBLabelSpec.parseLabels(auxLabelSpec.get());
+        }
+        return NBLabels.forKV();
+
+    }
 }

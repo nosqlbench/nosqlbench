@@ -27,14 +27,14 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTem
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.api.Shutdownable;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.api.config.NBComponent;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.errors.OpConfigError;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.nb.annotations.ServiceSelector;
@@ -64,8 +64,8 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
     private final Gauge<Double> activeOpsGauge;
     private final Gauge<Double> completeOpsGauge;
 
-    public StandardActivity(ActivityDef activityDef, NBLabeledElement parentLabels) {
-        super(activityDef, parentLabels);
+    public StandardActivity(NBComponent parent, ActivityDef activityDef) {
+        super(parent,activityDef);
         OpsDocList workload;
 
         Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");

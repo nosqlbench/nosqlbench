@@ -16,14 +16,14 @@
 
 package io.nosqlbench.engine.core.metadata;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.engine.api.activityapi.core.ActivityType;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
-import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.engine.api.activityapi.core.ActivityType;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
+import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -64,7 +64,7 @@ public class MarkdownFinder {
     }
 
     public String forActivityInstance(final String s) {
-        final ActivityType activityType = new ActivityTypeLoader().load(ActivityDef.parseActivityDef("driver="+s), NBLabeledElement.EMPTY).orElseThrow(
+        final ActivityType activityType = new ActivityTypeLoader().load(ActivityDef.parseActivityDef("driver="+s), TestComponent.INSTANCE).orElseThrow(
             () -> new BasicError("Unable to find driver for '" + s + '\'')
         );
         return this.forResourceMarkdown(activityType.getClass().getAnnotation(Service.class)

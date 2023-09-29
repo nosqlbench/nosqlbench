@@ -16,17 +16,17 @@
 
 package io.nosqlbench.engine.core.lifecycle.activity;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.engine.api.activityapi.core.ActivityType;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
-import io.nosqlbench.nb.annotations.Maturity;
-import io.nosqlbench.api.system.NBEnvironment;
+import io.nosqlbench.api.config.NBComponent;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.spi.SimpleServiceLoader;
+import io.nosqlbench.api.system.NBEnvironment;
+import io.nosqlbench.engine.api.activityapi.core.ActivityType;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
+import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -118,7 +118,7 @@ public class ActivityTypeLoader {
         return urlsToAdd;
     }
 
-    public Optional<ActivityType> load(final ActivityDef activityDef, final NBLabeledElement labels) {
+    public Optional<ActivityType> load(final ActivityDef activityDef, final NBComponent parent) {
 
         String driverName = activityDef.getParams()
             .getOptionalString("driver", "type")
@@ -135,18 +135,18 @@ public class ActivityTypeLoader {
             })
             .ifPresent(this::extendClassLoader);
 
-        return getDriverAdapter(driverName,activityDef,labels)
+        return getDriverAdapter(driverName,activityDef,parent)
             .or(() -> this.ACTIVITYTYPE_SPI_FINDER.getOptionally(driverName));
 
     }
 
-    private Optional<ActivityType> getDriverAdapter(final String activityTypeName, final ActivityDef activityDef, final NBLabeledElement labels) {
+    private Optional<ActivityType> getDriverAdapter(final String activityTypeName, final ActivityDef activityDef, final NBComponent parent) {
         final Optional<DriverAdapter> oda = this.DRIVERADAPTER_SPI_FINDER.getOptionally(activityTypeName);
 
         if (oda.isPresent()) {
             final DriverAdapter<?, ?> driverAdapter = oda.get();
 
-            final ActivityType activityType = new StandardActivityType<>(driverAdapter, activityDef, labels);
+            final ActivityType activityType = new StandardActivityType<>(driverAdapter, activityDef, parent);
             return Optional.of(activityType);
         }
         return Optional.empty();
