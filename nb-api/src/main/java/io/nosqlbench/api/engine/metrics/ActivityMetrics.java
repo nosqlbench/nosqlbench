@@ -19,7 +19,7 @@ package io.nosqlbench.api.engine.metrics;
 import com.codahale.metrics.*;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.config.NBNamedElement;
+import io.nosqlbench.components.NBNamedElement;
 import io.nosqlbench.api.labels.NBLabelsFilter;
 import io.nosqlbench.api.engine.activityapi.core.MetricRegistryService;
 import io.nosqlbench.api.engine.metrics.instruments.*;
