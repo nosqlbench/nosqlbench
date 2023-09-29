@@ -16,16 +16,16 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
+import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
+import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.config.NBComponent;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.NBReconfigurable;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
-import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
-import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,26 +40,25 @@ public class StandardActivityType<A extends StandardActivity<?,?>> extends Simpl
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final Map<String, DriverAdapter> adapters = new HashMap<>();
 
-    public StandardActivityType(final DriverAdapter<?,?> adapter, final ActivityDef activityDef, final NBLabeledElement parentLabels) {
-        super(activityDef
+    public StandardActivityType(final DriverAdapter<?,?> adapter, final ActivityDef activityDef, final NBComponent parent) {
+        super(parent,activityDef
             .deprecate("type","driver")
-            .deprecate("yaml", "workload"),
-            parentLabels
+            .deprecate("yaml", "workload")
         );
         adapters.put(adapter.getAdapterName(),adapter);
         if (adapter instanceof ActivityDefAware) ((ActivityDefAware) adapter).setActivityDef(activityDef);
     }
 
-    public StandardActivityType(final ActivityDef activityDef, final NBLabeledElement parentLabels) {
-        super(activityDef, parentLabels);
+    public StandardActivityType(final ActivityDef activityDef, final NBComponent parent) {
+        super(parent,activityDef);
     }
 
     @Override
-    public A getActivity(final ActivityDef activityDef, final NBLabeledElement parentLabels) {
+    public A getActivity(final ActivityDef activityDef, final NBComponent parent) {
         if (activityDef.getParams().getOptionalString("async").isPresent())
             throw new RuntimeException("This driver does not support async mode yet.");
 
-        return (A) new StandardActivity(activityDef, parentLabels);
+        return (A) new StandardActivity(parent, activityDef);
     }
 
     @Override

@@ -16,14 +16,14 @@
 
 package io.nosqlbench.engine.api.activityapi.core;
 
+import io.nosqlbench.api.config.NBComponent;
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +36,7 @@ import java.util.Optional;
  * an action dispenser. Default implementations of input and motor dispensers are provided,
  * and by extension, default inputs and motors.</p>
  */
-@Deprecated(forRemoval = true,since = "5.0")
+//@Deprecated(forRemoval = true,since = "5.0")
 public interface ActivityType<A extends Activity> {
 
 
@@ -47,8 +47,8 @@ public interface ActivityType<A extends Activity> {
      * @return a distinct Activity instance for each call
      */
     @SuppressWarnings("unchecked")
-    default A getActivity(final ActivityDef activityDef, final NBLabeledElement parentLabels) {
-        final SimpleActivity activity = new SimpleActivity(activityDef, parentLabels);
+    default A getActivity(final ActivityDef activityDef, final NBComponent parent) {
+        final SimpleActivity activity = new SimpleActivity(parent,activityDef);
         return (A) activity;
     }
 
@@ -60,8 +60,8 @@ public interface ActivityType<A extends Activity> {
      * @param activities  a map of existing activities
      * @return a distinct activity instance for each call
      */
-    default Activity getAssembledActivity(final ActivityDef activityDef, final Map<String, Activity> activities, final NBLabeledElement labels) {
-        final A activity = this.getActivity(activityDef, labels);
+    default Activity getAssembledActivity(final ActivityDef activityDef, final Map<String, Activity> activities, final NBComponent parent) {
+        final A activity = this.getActivity(activityDef, parent);
 
         final InputDispenser inputDispenser = this.getInputDispenser(activity);
         if (inputDispenser instanceof ActivitiesAware) ((ActivitiesAware) inputDispenser).setActivitiesMap(activities);

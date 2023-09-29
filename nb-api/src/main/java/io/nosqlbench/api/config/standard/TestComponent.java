@@ -21,6 +21,7 @@ import io.nosqlbench.api.labels.NBLabels;
 
 public class TestComponent implements NBComponent {
 
+    public static final NBComponent INSTANCE = new TestComponent();
     private final NBLabels labels;
 
     public TestComponent(String... labels) {

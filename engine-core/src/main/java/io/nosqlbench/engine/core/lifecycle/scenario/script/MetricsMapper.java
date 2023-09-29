@@ -16,20 +16,20 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
 import com.codahale.metrics.*;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.activityapi.core.ActivityType;
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.PolyglotMetricRegistryBindings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Method;
-import java.util.Map.Entry;
-import java.util.Timer;
 import java.util.*;
+import java.util.Timer;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -68,11 +68,11 @@ public enum MetricsMapper {
         final ActivityDef activityDef = ActivityDef.parseActivityDef(activitySpec);
         MetricsMapper.logger.info(() -> "introspecting metric names for " + activitySpec);
 
-        final Optional<ActivityType> activityType = new ActivityTypeLoader().load(activityDef, NBLabeledElement.EMPTY);
+        final Optional<ActivityType> activityType = new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
 
         if (!activityType.isPresent())
             throw new RuntimeException("Activity type '" + activityDef.getActivityType() + "' does not exist in this runtime.");
-        final Activity activity = activityType.get().getAssembledActivity(activityDef, new HashMap<>(), NBLabeledElement.EMPTY);
+        final Activity activity = activityType.get().getAssembledActivity(activityDef, new HashMap<>(), TestComponent.INSTANCE);
         final PolyglotMetricRegistryBindings nashornMetricRegistryBindings = new PolyglotMetricRegistryBindings(ActivityMetrics.getMetricRegistry());
         activity.initActivity();
         activity.getInputDispenserDelegate().getInput(0);

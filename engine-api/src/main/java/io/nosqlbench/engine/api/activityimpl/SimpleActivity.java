@@ -17,7 +17,8 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.labels.NBLabelSpec;
+import io.nosqlbench.api.config.NBComponent;
+import io.nosqlbench.api.config.standard.NBBaseComponent;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
@@ -29,7 +30,6 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
@@ -67,9 +67,8 @@ import java.util.stream.Collectors;
 /**
  * A default implementation of an Activity, suitable for building upon.
  */
-public class SimpleActivity implements Activity {
+public class SimpleActivity extends NBBaseComponent implements Activity {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
-    private final NBLabeledElement parentLabels;
 
     protected ActivityDef activityDef;
     private final List<AutoCloseable> closeables = new ArrayList<>();
@@ -91,18 +90,10 @@ public class SimpleActivity implements Activity {
     private ActivityMetricProgressMeter progressMeter;
     private String workloadSource = "unspecified";
     private final RunStateTally tally = new RunStateTally();
-    private final NBLabels labels;
 
-    public SimpleActivity(ActivityDef activityDef, NBLabeledElement parentLabels) {
-        NBLabels activityLabels = parentLabels.getLabels()
-                .and("activity", activityDef.getAlias());
-        Optional<String> auxLabelSpec = activityDef.getParams().getOptionalString("labels");
-        if (auxLabelSpec.isPresent()) {
-            activityLabels = activityLabels.and(NBLabelSpec.parseLabels(auxLabelSpec.get()));
-        }
-        this.labels = activityLabels;
+    public SimpleActivity(NBComponent parent, ActivityDef activityDef) {
+        super(parent,NBLabels.forKV("activity",activityDef.getAlias()).and(activityDef.auxLabels()));
         this.activityDef = activityDef;
-        this.parentLabels = parentLabels;
         if (activityDef.getAlias().equals(ActivityDef.DEFAULT_ALIAS)) {
             Optional<String> workloadOpt = activityDef.getParams().getOptionalString(
                     "workload",
@@ -119,8 +110,8 @@ public class SimpleActivity implements Activity {
         }
     }
 
-    public SimpleActivity(String activityDefString, NBLabeledElement parentLabels) {
-        this(ActivityDef.parseActivityDef(activityDefString), parentLabels);
+    public SimpleActivity(NBComponent parent, String activityDefString) {
+        this(parent,ActivityDef.parseActivityDef(activityDefString));
     }
 
     @Override
@@ -706,8 +697,4 @@ public class SimpleActivity implements Activity {
         return tally;
     }
 
-    @Override
-    public NBLabels getLabels() {
-        return this.labels;
-    }
 }
