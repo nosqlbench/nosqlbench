@@ -31,8 +31,12 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
 
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
         this.labels = componentSpecificLabelsOnly;
-        this.parent = parentComponent;
-        if (this.parent!=null) { parentComponent.attach(this);}
+        if (parentComponent!=null) {
+            parent = parentComponent;
+            parent.attach(this);
+        } else {
+            parent=null;
+        }
     }
     @Override
     public NBComponent getParent() {
