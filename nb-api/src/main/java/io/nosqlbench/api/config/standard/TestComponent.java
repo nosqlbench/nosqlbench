@@ -16,24 +16,38 @@
 
 package io.nosqlbench.api.config.standard;
 
-import io.nosqlbench.api.config.NBComponent;
 import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 
-public class TestComponent implements NBComponent {
+import java.util.Arrays;
+
+public class TestComponent extends NBBaseComponent {
 
     public static final NBComponent INSTANCE = new TestComponent();
-    private final NBLabels labels;
 
     public TestComponent(String... labels) {
-        this.labels = NBLabels.forKV((Object[]) labels);
+        super(null,NBLabels.forKV((Object[]) labels));
     }
-    @Override
-    public NBComponent getParent() {
-        return this;
+
+    public TestComponent(NBComponent parent, String... labels) {
+        super(parent, NBLabels.forKV((Object[]) labels));
     }
 
     @Override
-    public NBLabels getLabels() {
-        return labels;
+    public String toString() {
+        return getLabels().linearizeAsMetrics() + " ("+this.getClass().getSimpleName()+")";
+    }
+
+    @Override
+    public NBComponent attach(NBComponent... children) {
+        System.out.println("attaching children:" + Arrays.toString(children));
+        return super.attach(children);
+    }
+
+    @Override
+    public NBComponent detach(NBComponent... children) {
+        System.out.println("detaching children:" + Arrays.toString(children));
+        return super.detach(children);
     }
 }

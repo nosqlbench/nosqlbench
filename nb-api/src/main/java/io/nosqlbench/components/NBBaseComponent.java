@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.config.standard;
+package io.nosqlbench.components;
 
-import io.nosqlbench.api.config.NBComponent;
 import io.nosqlbench.api.labels.NBLabels;
+
+import java.util.*;
 
 public class NBBaseComponent implements NBComponent {
     private final NBComponent parent;
+    private final List<NBComponent> children = new ArrayList<>();
     private final NBLabels labels;
 
-    public NBBaseComponent(NBComponent parentComponent, NBLabels compomentSpecificLabelsOnly) {
+    public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
+        this.labels = componentSpecificLabelsOnly;
         this.parent = parentComponent;
-        this.labels = compomentSpecificLabelsOnly;
+        if (this.parent!=null) { parentComponent.attach(this);}
     }
     @Override
     public NBComponent getParent() {
@@ -33,7 +36,25 @@ public class NBBaseComponent implements NBComponent {
     }
 
     @Override
-    public NBLabels getLabels() {
-        return this.parent.getLabels().and(labels);
+    public NBComponent attach(NBComponent... children) {
+        this.children.addAll(Arrays.asList(children));
+        return this;
     }
+
+    @Override
+    public NBComponent detach(NBComponent... children) {
+        this.children.removeAll(Arrays.asList(children));
+        return this;
+    }
+
+    @Override
+    public List<NBComponent> getChildren() {
+        return children;
+    }
+
+    @Override
+    public NBLabels getLabels() {
+        return (this.parent==null) ? labels : this.parent.getLabels().and(labels);
+    }
+
 }
