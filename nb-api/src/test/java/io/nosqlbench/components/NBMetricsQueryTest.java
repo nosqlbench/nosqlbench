@@ -31,11 +31,11 @@ class NBMetricsQueryTest {
     private final static TestComponent root_c2 = new TestComponent(root,"c2","c2");
     private final static TestComponent root_c3 = new TestComponent(root,"c3","c3");
     private final static NBMetric m1 = new NBBaseMetric("m1","m1");
-    private final String m1Handle = root.addMetric(m1);
+    private final static String m1Handle = root.addMetric(m1);
     private final static NBMetric m2 = new NBBaseMetric("m2","m2");
-    private final String m2Handle = root_c2.addMetric(m2);
+    private final static String m2Handle = root_c2.addMetric(m2);
     private final static NBMetric m3 = new NBBaseMetric("m3","m3");
-    private final String m3Handle = root_c3.addMetric(m3);
+    private final static String m3Handle = root_c3.addMetric(m3);
 
     @Test
     public void testFindInTree() {
