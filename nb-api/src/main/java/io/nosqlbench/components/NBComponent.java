@@ -33,7 +33,7 @@ import java.util.List;
  *
  * This interface will start as a tagging interface, but will eventually include aspects of above by extension.
  */
-public interface NBComponent extends NBLabeledElement {
+public interface NBComponent extends NBLabeledElement, NBComponentMetrics, NBMetricsQuery {
 
     NBComponent getParent();
 

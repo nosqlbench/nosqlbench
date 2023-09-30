@@ -123,9 +123,11 @@ public class MapLabels implements NBLabels {
     @Override
     public String linearizeAsMetrics() {
         StringBuilder sb = new StringBuilder("{");
-        this.labels.forEach((k,v) -> {
-            sb.append(k).append(":\"").append(v).append("\",");
-        });
+        ArrayList<String> keys = new ArrayList<>(this.labels.keySet());
+        Collections.sort(keys);
+        for (String key : keys) {
+            sb.append(key).append("=\"").append(labels.get(key)).append("\",");
+        }
         sb.setLength(sb.length()-",".length());
         sb.append("}");
         return sb.toString();

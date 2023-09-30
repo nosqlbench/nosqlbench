@@ -17,11 +17,9 @@
 package io.nosqlbench.adapters.api.util;
 
 import io.nosqlbench.api.engine.util.Tagged;
+import io.nosqlbench.api.labels.NBLabeledElement;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -107,6 +105,12 @@ public class TagFilter {
             .collect(Collectors.toList());
     }
 
+    public <T extends NBLabeledElement> List<T> filterLabeled(Collection<T> labeled) {
+        return labeled.stream()
+            .filter(l -> this.matches(l.getLabels().asMap()).matched())
+            .collect(Collectors.toList());
+    }
+
     public <T extends Tagged> List<String> filterLog(List<T> tagged) {
         return tagged.stream()
             .map(this::matchesTaggedResult)
@@ -155,6 +159,11 @@ public class TagFilter {
             }
         }
     }
+
+//    TODO: Implement Me!
+//     public TagFilter(Map<String,String> filterSpec) {
+//
+//    }
 
     private static String unquote(String filterSpec) {
         for (String s : new String[]{"'", "\""}) {

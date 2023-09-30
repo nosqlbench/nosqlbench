@@ -170,10 +170,10 @@ public interface NBLabels {
      */
     Map<String, String> asMap();
 
-    String linearizeAsMetrics();
-
     /**
-     * @return a new set of labels which includes only those which are not using per-instance semantics.
+     * Return a String representation of the metric's labels as you would see it in an openmetrics filter,
+     * like <PRE>{@code {__name__="metric_family_name",k="20"}}</PRE>
+     * @return a String
      */
-
+    String linearizeAsMetrics();
 }

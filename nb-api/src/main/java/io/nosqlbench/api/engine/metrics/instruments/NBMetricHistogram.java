@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class NBMetricHistogram extends Histogram implements DeltaSnapshotter, HdrDeltaHistogramAttachment, HistogramAttachment, NBLabeledMetric {
+public class NBMetricHistogram extends Histogram implements DeltaSnapshotter, HdrDeltaHistogramAttachment, HistogramAttachment, NBMetric {
 
     private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
     private final NBLabels labels;

@@ -168,4 +168,18 @@ public class TagFilterTest {
         TagFilter tf2 = new TagFilter("any(car:truck,block:moon)");
         assertThat(tf2.matches(itemtags).matched()).isFalse();
     }
+
+    @Test
+    public void testNoneCondition() {
+        Map<String, String> itemtags = Map.of("block", "main", "truck", "car");
+        TagFilter tf = new TagFilter("");
+        assertThat(tf.matches(itemtags).matched()).isTrue();
+        TagFilter tf4 = new TagFilter("none(unseen)");
+        assertThat(tf4.matches(itemtags).matched()).isTrue();
+        TagFilter tf2 = new TagFilter("none(truck)");
+        assertThat(tf2.matches(itemtags).matched()).isFalse();
+        TagFilter tf3 = new TagFilter("none(truck:car)");
+        assertThat(tf3.matches(itemtags).matched()).isFalse();
+    }
+
 }
