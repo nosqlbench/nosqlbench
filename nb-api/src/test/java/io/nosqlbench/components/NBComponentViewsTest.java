@@ -19,19 +19,27 @@ package io.nosqlbench.components;
 import io.nosqlbench.api.config.standard.TestComponent;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class NBComponentViewsTest {
     @Test
     public void testBasicTreeView() {
-        var root = new TestComponent("a", "b")
-            .attach(new TestComponent("c", "d")
-                .attach(new TestComponent("U", "V"))
-                .attach(new TestComponent("Y","Z")))
-            .attach(new TestComponent("e", "f"));
-        System.out.println(NBComponentViews.treeView(root));
+        var root1 = new TestComponent("a", "b");
+        var cd = new TestComponent(root1, "c", "d");
+        var UV = new TestComponent(cd, "U", "V");
+        var YZ = new TestComponent(cd, "Y", "Z");
+        var ef = new TestComponent(root1, "e", "f");
 
-        System.out.println(NBComponentViews.treeView(root, c -> String.valueOf(c.hashCode())));
+        var root2 = new TestComponent("a", "b");
+
+        root2.attach(new TestComponent(root2, "c", "d")
+                .attach(new TestComponent("U", "V"))
+                .attach(new TestComponent("Y", "Z")))
+            .attach(new TestComponent("e", "f"));
+
+        System.out.println("root1:\n" + NBComponentViews.treeView(root1));
+        System.out.println("root1:\n" + NBComponentViews.treeView(root1, c -> String.valueOf(c.hashCode())));
+
+        System.out.println("root2:\n" + NBComponentViews.treeView(root2));
+        System.out.println("root2:\n" + NBComponentViews.treeView(root2, c -> String.valueOf(c.hashCode())));
     }
 
 }

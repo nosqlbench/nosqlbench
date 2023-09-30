@@ -16,7 +16,6 @@
 
 package io.nosqlbench.api.labels;
 
-import io.nosqlbench.api.labels.MapLabels;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -38,6 +37,4 @@ public class MapLabelsTest {
     public void testInvalidCharacters() {
         assertThatThrownBy(() -> new MapLabels(Map.of("a-b","c-d"))).isOfAnyClassIn(RuntimeException.class);
     }
-
-
 }
