@@ -29,6 +29,9 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     private final List<NBComponent> children = new ArrayList<>();
     private final NBLabels labels;
 
+    public NBBaseComponent(NBComponent parentComponent) {
+        this(parentComponent,NBLabels.forKV());
+    }
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
         this.labels = componentSpecificLabelsOnly;
         if (parentComponent!=null) {
