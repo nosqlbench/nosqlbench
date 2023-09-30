@@ -20,6 +20,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provide a result type back to a caller, including the start and end times,
@@ -53,8 +55,15 @@ public class ExecutionResult {
     public ExecutionResult(long startedAt, long endedAt, String iolog, Exception error) {
         this.startedAt = startedAt;
         this.endedAt = endedAt;
+        List<String> elements = new ArrayList<>();
+        if (iolog!=null && iolog.isEmpty()) {
+            elements.add(iolog);
+        }
+        if (error!=null) {
+            elements.add("ERROR:" + error);
+        }
         this.exception = error;
-        this.iolog = ((iolog != null) ? iolog + "\n\n" : "") + exception;
+        this.iolog = String.join("\n",elements);
         this.status = (error==null) ? Status.OK : Status.ERROR;
         logger.debug("populating "+status+" scenario result");
 
@@ -73,7 +82,7 @@ public class ExecutionResult {
     }
 
     public String getIOLog() {
-        return this.iolog;
+        return this.iolog==null? "" : iolog;
     }
 
     public long getElapsedMillis() {
@@ -88,5 +97,14 @@ public class ExecutionResult {
         return this.status;
     }
 
-
+    @Override
+    public String toString() {
+        return "ExecutionResult{" +
+            "status=" + status +
+            ", startedAt=" + startedAt +
+            ", endedAt=" + endedAt +
+            ", exception=" + exception +
+            ", iolog='" + iolog + '\'' +
+            '}';
+    }
 }

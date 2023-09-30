@@ -21,6 +21,7 @@ import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.labels.NBLabelSpec;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.logging.NBLogLevel;
+import io.nosqlbench.api.metadata.SystemId;
 import io.nosqlbench.api.system.NBStatePath;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.cli.Cmd.CmdType;
@@ -133,7 +134,8 @@ public class NBCLIOptions {
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
 
-    private NBLabels labels = NBLabels.forKV();
+    private NBLabels labels = NBLabels.forKV("appname", "nosqlbench")
+        .and("node",SystemId.getNodeId());
     private final List<Cmd> cmdList = new ArrayList<>();
     private int logsMax;
     private boolean wantsVersionShort;

@@ -31,11 +31,10 @@ public interface NBLabeledElement {
     }
 
     NBLabels getLabels();
-
     class BasicLabeledElement implements NBLabeledElement {
         private final NBLabels labels;
         public BasicLabeledElement(final String... kvs) {
-            labels=NBLabels.forKV(kvs);
+            labels=NBLabels.forKV((Object[]) kvs);
         }
 
         public BasicLabeledElement(final Map<String, String> labels) {
@@ -47,5 +46,10 @@ public interface NBLabeledElement {
             return this.labels;
         }
     }
+
+    default String description() {
+        return this.getClass().getSimpleName() + " " + this.getLabels().linearizeAsMetrics();
+    }
+
 
 }

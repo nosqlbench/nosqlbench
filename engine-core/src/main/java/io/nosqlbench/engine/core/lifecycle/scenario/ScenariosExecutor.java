@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class ScenariosExecutor {
         this.name = name;
     }
 
-    public synchronized void execute(Scenario scenario) {
+    public synchronized void execute(NBScenario scenario) {
         if (submitted.get(scenario.getScenarioName()) != null) {
             throw new BasicError("Scenario " + scenario.getScenarioName() + " is already defined. Remove it first to reuse the name.");
         }
@@ -110,7 +110,7 @@ public class ScenariosExecutor {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
                 + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
-        Map<Scenario, ExecutionMetricsResult> scenarioResultMap = new LinkedHashMap<>();
+        Map<NBScenario, ExecutionMetricsResult> scenarioResultMap = new LinkedHashMap<>();
         getAsyncResultStatus()
             .entrySet()
             .forEach(
@@ -142,9 +142,9 @@ public class ScenariosExecutor {
      *
      * @return map of async results, with incomplete results as Optional.empty()
      */
-    public Map<Scenario, Optional<ExecutionMetricsResult>> getAsyncResultStatus() {
+    public Map<NBScenario, Optional<ExecutionMetricsResult>> getAsyncResultStatus() {
 
-        Map<Scenario, Optional<ExecutionMetricsResult>> optResults = new LinkedHashMap<>();
+        Map<NBScenario, Optional<ExecutionMetricsResult>> optResults = new LinkedHashMap<>();
 
         for (SubmittedScenario submittedScenario : submitted.values()) {
             Future<ExecutionMetricsResult> resultFuture = submittedScenario.getResultFuture();
@@ -167,7 +167,7 @@ public class ScenariosExecutor {
         return optResults;
     }
 
-    public Optional<Scenario> getPendingScenario(String scenarioName) {
+    public Optional<NBScenario> getPendingScenario(String scenarioName) {
         return Optional.ofNullable(submitted.get(scenarioName)).map(SubmittedScenario::getScenario);
     }
 
@@ -193,7 +193,7 @@ public class ScenariosExecutor {
 
     public synchronized void stopScenario(String scenarioName, boolean rethrow) {
         logger.debug("#stopScenario(name=" + scenarioName + ", rethrow="+ rethrow+")");
-        Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
+        Optional<NBScenario> pendingScenario = getPendingScenario(scenarioName);
         if (pendingScenario.isPresent()) {
             pendingScenario.get().getScenarioController().forceStopScenario(10000, true);
         } else {
@@ -204,7 +204,7 @@ public class ScenariosExecutor {
     public synchronized void deleteScenario(String scenarioName) {
         stopScenario(scenarioName, false);
 
-        Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
+        Optional<NBScenario> pendingScenario = getPendingScenario(scenarioName);
         if (pendingScenario.isPresent()) {
             submitted.remove(scenarioName);
             logger.info(() -> "cancelled scenario " + scenarioName);
@@ -224,15 +224,15 @@ public class ScenariosExecutor {
     }
 
     private static class SubmittedScenario {
-        private final Scenario scenario;
+        private final NBScenario scenario;
         private final Future<ExecutionMetricsResult> resultFuture;
 
-        SubmittedScenario(Scenario scenario, Future<ExecutionMetricsResult> resultFuture) {
+        SubmittedScenario(NBScenario scenario, Future<ExecutionMetricsResult> resultFuture) {
             this.scenario = scenario;
             this.resultFuture = resultFuture;
         }
 
-        public Scenario getScenario() {
+        public NBScenario getScenario() {
             return scenario;
         }
 

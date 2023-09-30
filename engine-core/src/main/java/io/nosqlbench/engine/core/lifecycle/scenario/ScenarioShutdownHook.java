@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import org.apache.logging.log4j.Logger;
 
 public class ScenarioShutdownHook extends Thread {
 
-    private final Scenario scenario;
+    private final NBScenario scenario;
     private final Logger logger;
 
-    public ScenarioShutdownHook(Scenario scenario) {
+    public ScenarioShutdownHook(NBScenario scenario) {
         this.scenario = scenario;
         logger = scenario.getLogger();
     }

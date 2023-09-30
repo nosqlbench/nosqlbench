@@ -18,13 +18,15 @@ package io.nosqlbench.components;
 
 import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.api.labels.NBLabels;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent {
+    private final static Logger logger = LogManager.getLogger("RUNTIME");
     private final NBComponent parent;
     private final List<NBComponent> children = new ArrayList<>();
     private final NBLabels labels;
@@ -36,7 +38,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         this.labels = componentSpecificLabelsOnly;
         if (parentComponent!=null) {
             parent = parentComponent;
-            parent.attach(this);
+            parent.attachChild(this);
         } else {
             parent=null;
         }
@@ -47,14 +49,21 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     }
 
     @Override
-    public NBComponent attach(NBComponent... children) {
-        this.children.addAll(Arrays.asList(children));
+    public NBComponent attachChild(NBComponent... children) {
+        for (NBComponent child : children) {
+            logger.debug(() -> "attaching " + child.description() + " to parent " + this.description());
+            this.children.add(child);
+        }
         return this;
     }
 
     @Override
-    public NBComponent detach(NBComponent... children) {
-        this.children.removeAll(Arrays.asList(children));
+    public NBComponent detachChild(NBComponent... children) {
+        for (NBComponent child : children) {
+            logger.debug(() -> "detaching " + child.description() + " from " + this.description());
+            this.children.remove(child);
+        }
+
         return this;
     }
 
@@ -88,5 +97,10 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
             found.addAll(c.findMetrics(pattern));
         }
         return found;
+    }
+
+    @Override
+    public void beforeDetach() {
+        logger.debug("before detach " + description());
     }
 }
