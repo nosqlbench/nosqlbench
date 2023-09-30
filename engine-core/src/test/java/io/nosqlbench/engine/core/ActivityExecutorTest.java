@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.core;
 
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
@@ -25,7 +25,6 @@ import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
-import io.nosqlbench.engine.api.activityimpl.input.AtomicInput;
 import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
@@ -36,23 +35,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.Future;
-import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.activityapi.core.MotorDispenser;
-import io.nosqlbench.engine.api.activityapi.core.SyncAction;
-import java.util.Map;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 class ActivityExecutorTest {
@@ -118,10 +103,8 @@ class ActivityExecutorTest {
         ExecutorService testExecutor = Executors.newCachedThreadPool();
         Future<ExecutionResult> future = testExecutor.submit(activityExecutor);
 
-
         try {
             activityDef.setThreads(1);
-            activityExecutor.startActivity();
             future.get();
             testExecutor.shutdownNow();
 
