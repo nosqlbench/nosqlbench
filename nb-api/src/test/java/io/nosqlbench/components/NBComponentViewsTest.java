@@ -30,10 +30,10 @@ class NBComponentViewsTest {
 
         var root2 = new TestComponent("a", "b");
 
-        root2.attach(new TestComponent(root2, "c", "d")
-                .attach(new TestComponent("U", "V"))
-                .attach(new TestComponent("Y", "Z")))
-            .attach(new TestComponent("e", "f"));
+        root2.attachChild(new TestComponent(root2, "c", "d")
+                .attachChild(new TestComponent("U", "V"))
+                .attachChild(new TestComponent("Y", "Z")))
+            .attachChild(new TestComponent("e", "f"));
 
         System.out.println("root1:\n" + NBComponentViews.treeView(root1));
         System.out.println("root1:\n" + NBComponentViews.treeView(root1, c -> String.valueOf(c.hashCode())));

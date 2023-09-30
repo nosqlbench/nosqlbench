@@ -74,7 +74,7 @@ import java.util.ServiceLoader.Provider;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class NBCLI extends NBBaseComponent implements Function<String[], Integer> {
+public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
     private static Logger logger;
     private static final LoggerConfig loggerConfig;
@@ -88,17 +88,14 @@ public class NBCLI extends NBBaseComponent implements Function<String[], Integer
     }
 
     private final String commandName;
-
-    private NBLabels labels;
     private String sessionName;
     private String sessionCode;
     private long sessionTime;
-    private NBLabels extraLabels = NBLabels.forKV();
+    private NBLabels labels = NBLabels.forKV("appname","nosqlbench");
 
     private ClientSystemMetricChecker clientMetricChecker;
 
     public NBCLI(final String commandName) {
-        super(null, NBLabels.forKV("appname","nosqlbench"));
         this.commandName = commandName;
     }
 
@@ -166,14 +163,9 @@ public class NBCLI extends NBBaseComponent implements Function<String[], Integer
         NBCLI.loggerConfig.setConsoleLevel(NBLogLevel.ERROR);
         this.sessionTime = System.currentTimeMillis();
         final NBCLIOptions globalOptions = new NBCLIOptions(args, Mode.ParseGlobalsOnly);
-        this.extraLabels=globalOptions.getLabelMap();
-
+        this.labels=globalOptions.getLabelMap();
         this.sessionCode = SystemId.genSessionCode(sessionTime);
         this.sessionName = SessionNamer.format(globalOptions.getSessionName(), sessionTime).replaceAll("SESSIONCODE", sessionCode);
-        this.labels = NBLabels.forKV()
-            .and("appname", "nosqlbench")
-            .and("node", SystemId.getNodeId())
-            .and(globalOptions.getLabelMap());
 
         NBCLI.loggerConfig
             .setSessionName(sessionName)
@@ -439,7 +431,7 @@ public class NBCLI extends NBBaseComponent implements Function<String[], Integer
          * marshal and transform it for any scenario invocations directly.
          */
         NBSession session = new NBSession(
-            this,
+            new NBBaseComponent(null),
             sessionName,
             options.getProgressSpec(),
             options.getReportSummaryTo(),
@@ -595,7 +587,7 @@ public class NBCLI extends NBBaseComponent implements Function<String[], Integer
 
     @Override
     public NBLabels getLabels() {
-        return (extraLabels==null) ? super.getLabels() : super.getLabels().and(extraLabels);
+        return labels;
     }
 
 }

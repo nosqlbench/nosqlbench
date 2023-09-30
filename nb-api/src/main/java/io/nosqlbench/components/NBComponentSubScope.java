@@ -25,6 +25,7 @@ public class NBComponentSubScope implements AutoCloseable {
     }
     @Override
     public void close() throws RuntimeException {
-        component.getParent().detach(component);
+        component.beforeDetach();
+        component.getParent().detachChild(component);
     }
 }

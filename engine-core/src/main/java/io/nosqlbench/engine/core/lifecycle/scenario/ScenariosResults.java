@@ -30,14 +30,14 @@ public class ScenariosResults {
 
     private static final Logger logger = LogManager.getLogger(ScenariosResults.class);
     private final String scenariosExecutorName;
-    private final Map<Scenario, ExecutionMetricsResult> scenarioResultMap = new LinkedHashMap<>();
+    private final Map<NBScenario, ExecutionMetricsResult> scenarioResultMap = new LinkedHashMap<>();
 
 
     public ScenariosResults(ScenariosExecutor scenariosExecutor) {
         this.scenariosExecutorName = scenariosExecutor.getName();
     }
 
-    public ScenariosResults(ScenariosExecutor scenariosExecutor, Map<Scenario, ExecutionMetricsResult> map) {
+    public ScenariosResults(ScenariosExecutor scenariosExecutor, Map<NBScenario, ExecutionMetricsResult> map) {
         this.scenariosExecutorName = scenariosExecutor.getName();
         scenarioResultMap.putAll(map);
     }
@@ -58,8 +58,8 @@ public class ScenariosResults {
     }
 
     public void reportToLog() {
-        for (Map.Entry<Scenario, ExecutionMetricsResult> entry : this.scenarioResultMap.entrySet()) {
-            Scenario scenario = entry.getKey();
+        for (Map.Entry<NBScenario, ExecutionMetricsResult> entry : this.scenarioResultMap.entrySet()) {
+            NBScenario scenario = entry.getKey();
             ExecutionMetricsResult oresult = entry.getValue();
 
             logger.info(() -> "results for scenario: " + scenario);

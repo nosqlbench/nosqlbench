@@ -39,10 +39,11 @@ public interface NBComponent extends NBLabeledElement, NBComponentMetrics, NBMet
 
     NBComponent getParent();
 
-    NBComponent attach(NBComponent... children);
+    NBComponent attachChild(NBComponent... children);
 
-    NBComponent detach(NBComponent... children);
+    NBComponent detachChild(NBComponent... children);
 
     List<NBComponent> getChildren();
 
+    default void beforeDetach() {}
 }

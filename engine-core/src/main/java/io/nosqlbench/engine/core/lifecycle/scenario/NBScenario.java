@@ -60,7 +60,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-public class Scenario extends NBBaseComponent implements Callable<ExecutionMetricsResult> {
+public class NBScenario extends NBBaseComponent implements Callable<ExecutionMetricsResult> {
 
     private final String reportSummaryTo;
     private final Path logsPath;
@@ -83,11 +83,6 @@ public class Scenario extends NBBaseComponent implements Callable<ExecutionMetri
     public enum Invocation {
         RENDER_SCRIPT,
         EXECUTE_SCRIPT
-    }
-
-    @Override
-    public NBLabels getLabels() {
-        return this.parentComponent.getLabels().and("scenario", this.scenarioName);
     }
 
     public enum State {
@@ -114,7 +109,7 @@ public class Scenario extends NBBaseComponent implements Callable<ExecutionMetri
         Graalvm
     }
 
-    public Scenario(
+    public NBScenario(
         final String scenarioName,
         final String progressInterval,
         final String reportSummaryTo,
@@ -133,9 +128,9 @@ public class Scenario extends NBBaseComponent implements Callable<ExecutionMetri
         this.invocation = invocation;
     }
 
-    public static Scenario forTesting(final String name, final String reportSummaryTo, NBComponent parent) {
+    public static NBScenario forTesting(final String name, final String reportSummaryTo, NBComponent parent) {
 
-        return new Scenario(
+        return new NBScenario(
             name,
             "console:10s",
             reportSummaryTo,
@@ -146,7 +141,7 @@ public class Scenario extends NBBaseComponent implements Callable<ExecutionMetri
         );
     }
 
-    public Scenario setLogger(final Logger logger) {
+    public NBScenario setLogger(final Logger logger) {
         this.logger = logger;
         return this;
     }
@@ -155,13 +150,13 @@ public class Scenario extends NBBaseComponent implements Callable<ExecutionMetri
         return this.logger;
     }
 
-    public Scenario addScriptText(final String scriptText) {
+    public NBScenario addScriptText(final String scriptText) {
         this.scripts.add(scriptText);
         return this;
     }
 
 
-    public Scenario addScriptFiles(final String... args) {
+    public NBScenario addScriptFiles(final String... args) {
         for (final String scriptFile : args) {
             final Path scriptPath = Paths.get(scriptFile);
             byte[] bytes = new byte[0];
@@ -462,7 +457,7 @@ public class Scenario extends NBBaseComponent implements Callable<ExecutionMetri
         if ((null == o) || (this.getClass() != o.getClass())) {
             return false;
         }
-        final Scenario scenario = (Scenario) o;
+        final NBScenario scenario = (NBScenario) o;
         return Objects.equals(this.scenarioName, scenario.scenarioName);
     }
 

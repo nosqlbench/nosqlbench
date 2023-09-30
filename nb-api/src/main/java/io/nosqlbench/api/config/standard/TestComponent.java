@@ -19,37 +19,49 @@ package io.nosqlbench.api.config.standard;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
-
-import java.util.Arrays;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TestComponent extends NBBaseComponent {
+    private final static Logger logger = LogManager.getLogger("RUNTIME");
 
     public static final NBComponent INSTANCE = new TestComponent();
 
     public TestComponent(String... labels) {
         super(null,NBLabels.forKV((Object[]) labels));
+//        logger.trace("new component " + description());
     }
 
     public TestComponent(NBComponent parent, String... labels) {
         super(parent, NBLabels.forKV((Object[]) labels));
+//        logger.trace("new component " + description());
     }
 
     @Override
     public String toString() {
-        return getLabels().linearizeAsMetrics() + " ("+this.getClass().getSimpleName()+")";
+        return description();
     }
 
     @Override
-    public NBComponent attach(NBComponent... children) {
-        System.out.println("attaching children:" +
-                Arrays.stream(children).map(c -> c.getLabels().linearizeAsMetrics()).toList());
-        return super.attach(children);
+    public NBComponent attachChild(NBComponent... children) {
+        for (NBComponent child : children) {
+//            logger.debug("attaching " + child.description());
+            super.attachChild(child);
+        }
+        return this;
     }
 
     @Override
-    public NBComponent detach(NBComponent... children) {
-        System.out.println("detaching children:" +
-                Arrays.stream(children).map(c -> c.getLabels().linearizeAsMetrics()).toList());
-        return super.detach(children);
+    public NBComponent detachChild(NBComponent... children) {
+        for (NBComponent child : children) {
+//            logger.debug("detaching " + child.description());
+            super.detachChild(child);
+        }
+        return this;
+    }
+
+    @Override
+    public void beforeDetach() {
+//        logger.debug("before detach " + description());
     }
 }

@@ -57,7 +57,7 @@
  * <P>Components are structured hierarchically. All components exist within the scope of their parent, with the only
  * exception being the root component, which has no parent. Components always know their parent from construction time.
  * After a component is constructed, it is informed of children components being added and removed via
- * {@link io.nosqlbench.components.NBComponent#attach} and {@link io.nosqlbench.components.NBComponent#detach}
+ * {@link io.nosqlbench.components.NBComponent#attachChild} and {@link io.nosqlbench.components.NBComponent#detachChild}
  * methods.</P>
  *
  * <P>Component logic should interact with other components using the component interfaces and types. No contextual

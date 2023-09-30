@@ -18,20 +18,20 @@ package io.nosqlbench.engine.core;
 
 import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
-import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.NBScenario;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ScenarioTest {
-    private final Logger logger = LogManager.getLogger(ScenarioTest.class);
+public class NBScenarioTest {
+    private final Logger logger = LogManager.getLogger(NBScenarioTest.class);
 
     @Test
     public void shouldLoadScriptText() {
         ScriptEnvBuffer buffer = new ScriptEnvBuffer();
-        Scenario scenario = Scenario.forTesting("testing", "stdout:300", new TestComponent());
+        NBScenario scenario = NBScenario.forTesting("testing", "stdout:300", new TestComponent());
         scenario.addScriptText("print('loaded script environment...');\n");
         try {
             var result=scenario.call();
