@@ -20,13 +20,14 @@ import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBComponentSubScope;
 import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.cli.ScriptBuffer;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
 import io.nosqlbench.engine.core.lifecycle.process.ShutdownManager;
-import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.NBScenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosExecutor;
 import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosResults;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.ScriptParams;
@@ -82,9 +83,9 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
 
         try (ResultContext results = new ResultContext(collector)) {
             final ScenariosExecutor scenariosExecutor = new ScenariosExecutor("executor-" + sessionName, 1);
-            Scenario.Invocation invocation = wantsShowScript ? Scenario.Invocation.RENDER_SCRIPT : Scenario.Invocation.EXECUTE_SCRIPT;
+            NBScenario.Invocation invocation = wantsShowScript ? NBScenario.Invocation.RENDER_SCRIPT : NBScenario.Invocation.EXECUTE_SCRIPT;
 
-            final Scenario scenario = new Scenario(
+            final NBScenario scenario = new NBScenario(
                 sessionName,
                 progressSpec,
                 reportSummaryTo,
@@ -93,39 +94,43 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
                 this,
                 invocation
             );
+            try (NBComponentSubScope s = new NBComponentSubScope(scenario)) {
 
-            final ScriptBuffer buffer = new BasicScriptBuffer().add(cmds.toArray(new Cmd[0]));
-            final String scriptData = buffer.getParsedScript();
+                final ScriptBuffer buffer = new BasicScriptBuffer().add(cmds.toArray(new Cmd[0]));
+                final String scriptData = buffer.getParsedScript();
 
-            // Execute Scenario!
-            if (cmds.isEmpty()) {
-                logger.info("No commands provided.");
+                // Execute Scenario!
+                if (cmds.isEmpty()) {
+                    logger.info("No commands provided.");
+                }
+
+                scenario.addScriptText(scriptData);
+                final ScriptParams scriptParams = new ScriptParams();
+                scriptParams.putAll(buffer.getCombinedParams());
+                scenario.addScenarioScriptParams(scriptParams);
+                scenariosExecutor.execute(scenario);
+                final ScenariosResults scenariosResults = scenariosExecutor.awaitAllResults();
+                logger.debug(() -> "Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
+
+                ActivityMetrics.closeMetrics();
+                scenariosResults.reportToLog();
+                ShutdownManager.shutdown();
+
+                logger.info(scenariosResults.getExecutionSummary());
+
+
+                if (scenariosResults.hasError()) {
+                    results.error(scenariosResults.getAnyError().orElseThrow());
+                    final Exception exception = scenariosResults.getOne().getException();
+                    logger.warn(scenariosResults.getExecutionSummary());
+                    NBCLIErrorHandler.handle(exception, true);
+                    System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
+                }
+
+                results.output(scenariosResults.getExecutionSummary());
+
             }
 
-            scenario.addScriptText(scriptData);
-            final ScriptParams scriptParams = new ScriptParams();
-            scriptParams.putAll(buffer.getCombinedParams());
-            scenario.addScenarioScriptParams(scriptParams);
-            scenariosExecutor.execute(scenario);
-            final ScenariosResults scenariosResults = scenariosExecutor.awaitAllResults();
-            logger.debug(() -> "Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
-
-            ActivityMetrics.closeMetrics();
-            scenariosResults.reportToLog();
-            ShutdownManager.shutdown();
-
-            logger.info(scenariosResults.getExecutionSummary());
-
-
-            if (scenariosResults.hasError()) {
-                results.error(scenariosResults.getAnyError().orElseThrow());
-                final Exception exception = scenariosResults.getOne().getException();
-                logger.warn(scenariosResults.getExecutionSummary());
-                NBCLIErrorHandler.handle(exception, true);
-                System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
-            }
-
-            results.output(scenariosResults.getExecutionSummary());
         }
         return collector.toExecutionResult();
     }

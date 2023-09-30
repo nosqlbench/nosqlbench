@@ -48,11 +48,11 @@ public class ScenarioController implements NBLabeledElement {
     private final ActivityLoader activityLoader;
 
     private final Map<String, ActivityRuntimeInfo> activityInfoMap = new ConcurrentHashMap<>();
-    private final Scenario scenario;
+    private final NBScenario scenario;
 
     private final ExecutorService activitiesExecutor;
 
-    public ScenarioController(Scenario scenario) {
+    public ScenarioController(NBScenario scenario) {
         this.scenario = scenario;
         this.activityLoader = new ActivityLoader(scenario);
 

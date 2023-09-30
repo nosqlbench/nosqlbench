@@ -21,6 +21,7 @@ import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBComponentSubScope;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityimpl.MotorState;
 import io.nosqlbench.api.annotations.Annotation;
@@ -397,39 +398,43 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
 
     @Override
     public ExecutionResult call() throws Exception {
-        shutdownHook=new ActivityExecutorShutdownHook(this);
-        Runtime.getRuntime().addShutdownHook(shutdownHook);
-        long startAt = System.currentTimeMillis();
+        try (NBComponentSubScope scope = new NBComponentSubScope(activity)) {
 
-        Annotators.recordAnnotation(Annotation.newBuilder()
-            .element(this)
-            .now()
-            .layer(Layer.Activity)
-            .addDetail("event", "start-activity")
-            .addDetail("params", activityDef.toString())
-            .build());
+            shutdownHook = new ActivityExecutorShutdownHook(this);
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
+            long startAt = System.currentTimeMillis();
 
-        try {
-            // instantiate and configure fixtures that need to be present
-            // before threads start running such as metrics instruments
-            activity.initActivity();
-            startMotorExecutorService();
-            registerMetrics();
-            startRunningActivityThreads();
-            awaitMotorsAtLeastRunning();
-            logger.debug("STARTED " + activityDef.getAlias());
-            awaitActivityCompletion();
-        } catch (Exception e) {
-            this.exception = e;
-        } finally {
-            stoppedAt=System.currentTimeMillis();
-            unregisterMetrics();
-            activity.shutdownActivity();
-            activity.closeAutoCloseables();
-            ExecutionResult result = new ExecutionResult(startedAt, stoppedAt, "", exception);
-            finish(true);
-            return result;
+            Annotators.recordAnnotation(Annotation.newBuilder()
+                .element(this)
+                .now()
+                .layer(Layer.Activity)
+                .addDetail("event", "start-activity")
+                .addDetail("params", activityDef.toString())
+                .build());
+
+            try {
+                // instantiate and configure fixtures that need to be present
+                // before threads start running such as metrics instruments
+                activity.initActivity();
+                startMotorExecutorService();
+                registerMetrics();
+                startRunningActivityThreads();
+                awaitMotorsAtLeastRunning();
+                logger.debug("STARTED " + activityDef.getAlias());
+                awaitActivityCompletion();
+            } catch (Exception e) {
+                this.exception = e;
+            } finally {
+                stoppedAt = System.currentTimeMillis();
+                unregisterMetrics();
+                activity.shutdownActivity();
+                activity.closeAutoCloseables();
+                ExecutionResult result = new ExecutionResult(startedAt, stoppedAt, "", exception);
+                finish(true);
+                return result;
+            }
         }
+
     }
 
     /**
@@ -463,9 +468,10 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         NBMetricGauge gauge = new NBFunctionGauge(activity, () -> (double) this.motors.size(), "threads");
         this.threadsGauge = ActivityMetrics.gauge(gauge);
     }
+
     private void unregisterMetrics() {
         ActivityMetrics.unregister(this.threadsGauge);
-        this.threadsGauge=null;
+        this.threadsGauge = null;
     }
 
     private boolean shutdownExecutorService(int secondsToWait) {
@@ -569,8 +575,8 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         } else {
             logger.warn("Activity was interrupted by process exit, shutting down ungracefully. Annotations are still submitted.");
         }
-        if (shutdownHook==null) return; // In case of a race condition, only prevented by object monitor
-        else shutdownHook=null;
+        if (shutdownHook == null) return; // In case of a race condition, only prevented by object monitor
+        else shutdownHook = null;
 
         stoppedAt = System.currentTimeMillis(); //TODO: Make only one endedAtMillis assignment
 

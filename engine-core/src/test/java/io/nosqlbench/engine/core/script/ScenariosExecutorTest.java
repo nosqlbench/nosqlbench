@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.Scenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.NBScenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosExecutor;
 import io.nosqlbench.engine.core.lifecycle.scenario.ScenariosResults;
 import org.junit.jupiter.api.Disabled;
@@ -29,7 +29,7 @@ public class ScenariosExecutorTest {
     @Disabled
     public void testAwaitOnTime() {
         ScenariosExecutor e = new ScenariosExecutor(ScenariosExecutorTest.class.getSimpleName(), 1);
-        Scenario s = Scenario.forTesting("testing", "stdout:3000", new TestComponent());
+        NBScenario s = NBScenario.forTesting("testing", "stdout:3000", new TestComponent());
         s.addScriptText("load('classpath:scripts/asyncs.js');\nsetTimeout(\"print('waited')\",5000);\n");
         e.execute(s);
         ScenariosResults scenariosResults = e.awaitAllResults();

@@ -17,9 +17,12 @@
 package io.nosqlbench.components;
 
 import io.nosqlbench.api.config.standard.TestComponent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 class NBComponentLifecycleTest {
+    private final static Logger logger = LogManager.getLogger(NBComponentLifecycleTest.class);
 
     @Test
     public void testBasicLifecycleHooks() {
@@ -28,13 +31,13 @@ class NBComponentLifecycleTest {
         TestComponent node2 = new TestComponent(root, "node2", "node2");
 
         try (NBComponentSubScope scope = new NBComponentSubScope(node1)) {
-            System.out.println("node1 active");
-        }
+            logger.info(node1.description() + " active");
+       }
         try (NBComponentSubScope scope = new NBComponentSubScope(node2)) {
-            System.out.println("node2 active");
+            logger.info(node2.description() + " active");
         }
 
-        System.out.print("all inactive");
+        logger.info("all inactive");
 
     }
 

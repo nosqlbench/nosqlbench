@@ -122,6 +122,9 @@ public class MapLabels implements NBLabels {
 
     @Override
     public String linearizeAsMetrics() {
+        if (labels.isEmpty()) {
+            return "{}";
+        }
         StringBuilder sb = new StringBuilder("{");
         ArrayList<String> keys = new ArrayList<>(this.labels.keySet());
         Collections.sort(keys);
