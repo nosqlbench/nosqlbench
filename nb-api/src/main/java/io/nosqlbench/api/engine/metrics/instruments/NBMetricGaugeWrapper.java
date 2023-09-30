@@ -19,7 +19,7 @@ package io.nosqlbench.api.engine.metrics.instruments;
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.labels.NBLabels;
 
-public class NBMetricGaugeWrapper<T> implements NBMetricGauge<T> {
+public class NBMetricGaugeWrapper<T> implements NBMetricGauge<T>, NBMetric {
 
     private final Gauge<? extends T> gauge;
     private final NBLabels labels;

@@ -18,6 +18,6 @@ package io.nosqlbench.api.engine.metrics.instruments;
 
 import com.codahale.metrics.Gauge;
 
-public interface NBMetricGauge<T> extends Gauge<T>, NBLabeledMetric {
+public interface NBMetricGauge<T> extends Gauge<T>, NBMetric {
 
 }

@@ -16,11 +16,15 @@
 
 package io.nosqlbench.components;
 
+import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.api.labels.NBLabels;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
-public class NBBaseComponent implements NBComponent {
+public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent {
     private final NBComponent parent;
     private final List<NBComponent> children = new ArrayList<>();
     private final NBLabels labels;
@@ -57,4 +61,25 @@ public class NBBaseComponent implements NBComponent {
         return (this.parent==null) ? labels : this.parent.getLabels().and(labels);
     }
 
+    @Override
+    public NBMetric lookupMetricInTree(String name) {
+        Iterator<NBComponent> tree = NBComponentTraversal.traverseBreadth(this);
+        while (tree.hasNext()) {
+            NBComponent c = tree.next();
+            NBMetric metric = c.lookupMetric(name);
+            if (metric!=null) return metric;
+        }
+        return null;
+    }
+
+    @Override
+    public List<NBMetric> findMetricsInTree(String pattern) {
+        Iterator<NBComponent> tree = NBComponentTraversal.traverseBreadth(this);
+        List<NBMetric> found = new ArrayList<>();
+        while (tree.hasNext()) {
+            NBComponent c = tree.next();
+            found.addAll(c.findMetrics(pattern));
+        }
+        return found;
+    }
 }

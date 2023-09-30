@@ -19,8 +19,6 @@ package io.nosqlbench.components;
 import io.nosqlbench.api.config.standard.TestComponent;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class NBComponentLifecycleTest {
 
     @Test
@@ -36,7 +34,7 @@ class NBComponentLifecycleTest {
             System.out.println("node2 active");
         }
 
-        System.out.print("node1 inactive");
+        System.out.print("all inactive");
 
     }
 
