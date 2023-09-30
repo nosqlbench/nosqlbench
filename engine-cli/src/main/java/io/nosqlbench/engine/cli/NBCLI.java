@@ -22,6 +22,7 @@ import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
 import io.nosqlbench.api.apps.BundledApp;
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
@@ -65,7 +66,7 @@ import java.util.ServiceLoader.Provider;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class NBCLI implements Function<String[], Integer>, NBComponent {
+public class NBCLI extends NBBaseComponent implements Function<String[], Integer> {
 
     private static Logger logger;
     private static final LoggerConfig loggerConfig;
@@ -84,8 +85,10 @@ public class NBCLI implements Function<String[], Integer>, NBComponent {
     private String sessionName;
     private String sessionCode;
     private long sessionTime;
+    private NBLabels extraLabels = NBLabels.forKV();
 
     public NBCLI(final String commandName) {
+        super(null, NBLabels.forKV("appname","nosqlbench"));
         this.commandName = commandName;
     }
 
@@ -153,6 +156,7 @@ public class NBCLI implements Function<String[], Integer>, NBComponent {
         NBCLI.loggerConfig.setConsoleLevel(NBLogLevel.ERROR);
         this.sessionTime = System.currentTimeMillis();
         final NBCLIOptions globalOptions = new NBCLIOptions(args, Mode.ParseGlobalsOnly);
+        this.extraLabels=globalOptions.getLabelMap();
 
         this.sessionCode = SystemId.genSessionCode(sessionTime);
         this.sessionName = SessionNamer.format(globalOptions.getSessionName(), sessionTime).replaceAll("SESSIONCODE", sessionCode);
@@ -352,14 +356,6 @@ public class NBCLI implements Function<String[], Integer>, NBComponent {
             return NBCLI.EXIT_OK;
         }
 
-//        disabled for now
-//        if (null != options.wantsMetricsForActivity()) {
-//            final String metricsHelp = this.getMetricsHelpFor(options.wantsMetricsForActivity());
-//            System.out.println("Available metric names for activity:" + options.wantsMetricsForActivity() + ':');
-//            System.out.println(metricsHelp);
-//            return NBCLI.EXIT_OK;
-//        }
-
         NBCLI.logger.debug("initializing annotators with config:'{}'", annotatorsConfig);
         Annotators.init(annotatorsConfig, options.getAnnotateLabelSpec());
         Annotators.recordAnnotation(
@@ -457,11 +453,7 @@ public class NBCLI implements Function<String[], Integer>, NBComponent {
 
     @Override
     public NBLabels getLabels() {
-        return labels;
+        return (extraLabels==null) ? super.getLabels() : super.getLabels().and(extraLabels);
     }
 
-    @Override
-    public NBComponent getParent() {
-        return this;
-    }
 }

@@ -35,6 +35,8 @@ import java.util.List;
  */
 public interface NBComponent extends NBLabeledElement, NBComponentMetrics, NBMetricsQuery {
 
+    NBComponent EMPTY_COMPONENT = new NBBaseComponent(null);
+
     NBComponent getParent();
 
     NBComponent attach(NBComponent... children);

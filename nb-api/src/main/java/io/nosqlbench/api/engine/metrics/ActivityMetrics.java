@@ -19,6 +19,7 @@ package io.nosqlbench.api.engine.metrics;
 import com.codahale.metrics.*;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBNamedElement;
 import io.nosqlbench.api.labels.NBLabelsFilter;
 import io.nosqlbench.api.engine.activityapi.core.MetricRegistryService;
@@ -264,6 +265,12 @@ public class ActivityMetrics {
         return anyGauge;
     }
 
+
+    public static NBMetricGauge gauge(NBMetricGauge gauge) {
+        final NBLabels labels = gauge.getLabels();
+        return (NBMetricGauge) register(labels, () -> new NBMetricGaugeWrapper<>(labels, gauge));
+
+    }
 
     @SuppressWarnings("unchecked")
     public static <T> Gauge<T> gauge(NBLabeledElement parent, String metricFamilyName, Gauge<T> gauge) {

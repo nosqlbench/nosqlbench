@@ -16,12 +16,12 @@
 package io.nosqlbench.engine.api.activityimpl.input;
 
 import com.codahale.metrics.Gauge;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.CyclesSpec;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.input.Input;
@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * after the max value. They simply expose it to callers. It is up to the
  * caller to check the value to determine when the input is deemed "used up."</p>
  */
-public class AtomicInput implements Input, ActivityDefObserver, Gauge<Long>, NBLabeledElement {
+public class AtomicInput extends NBBaseComponent implements Input, ActivityDefObserver, Gauge<Long> {
     private final static Logger logger = LogManager.getLogger(AtomicInput.class);
 
     private final AtomicLong cycle_value = new AtomicLong(0L);
@@ -57,20 +57,19 @@ public class AtomicInput implements Input, ActivityDefObserver, Gauge<Long>, NBL
     private final long startedAt = System.currentTimeMillis();
 
     private final ActivityDef activityDef;
-    private final NBLabeledElement parent;
 
-    public AtomicInput(NBLabeledElement parent, ActivityDef activityDef) {
-        this.parent = parent;
+    public AtomicInput(NBComponent parent, ActivityDef activityDef) {
+        super(parent);
         this.activityDef = activityDef;
         onActivityDefUpdate(activityDef);
-        ActivityMetrics.gauge(this, "input_cycles_first", new NBFunctionGauge(this, () -> (double)this.cycles_min.get()));
-        ActivityMetrics.gauge(this, "input_cycles_last", new NBFunctionGauge(this, () -> (double)this.cycles_max.get()));
-        ActivityMetrics.gauge(this, "input_cycle", new NBFunctionGauge(this, () -> (double)this.cycle_value.get()));
-        ActivityMetrics.gauge(this, "input_cycles_total", new NBFunctionGauge(this, this::getTotalCycles));
-        ActivityMetrics.gauge(this, "input_recycles_first", new NBFunctionGauge(this, () -> (double)this.recycles_min.get()));
-        ActivityMetrics.gauge(this, "input_recycles_last", new NBFunctionGauge(this, () -> (double)this.recycles_max.get()));
-        ActivityMetrics.gauge(this, "input_recycle", new NBFunctionGauge(this, () -> (double) this.recycle_value.get()));
-        ActivityMetrics.gauge(this, "input_recycles_total", new NBFunctionGauge(this, this::getTotalRecycles));
+        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.cycles_min.get(), "input_cycles_first"));
+        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.cycles_max.get(), "input_cycles_last"));
+        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.cycle_value.get(), "input_cycle"));
+        ActivityMetrics.gauge(new NBFunctionGauge(this, this::getTotalCycles, "input_cycles_total"));
+        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.recycles_min.get(), "input_recycles_first"));
+        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.recycles_max.get(), "input_recycles_last"));
+        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.recycle_value.get(), "input_recycle"));
+        ActivityMetrics.gauge(new NBFunctionGauge(this, this::getTotalRecycles, "input_recycles_total"));
     }
 
     private double getTotalRecycles() {
@@ -90,7 +89,7 @@ public class AtomicInput implements Input, ActivityDefObserver, Gauge<Long>, NBL
                 recycle_value.getAndIncrement();
                 if (recycle_value.get() >= recycles_max.get()) {
                     logger.trace(() -> "Exhausted input for " + activityDef.getAlias() + " at " + currentStrideStart + ", recycle " +
-                            "count " + recycle_value.get());
+                        "count " + recycle_value.get());
                     return null;
                 } else {
                     cycle_value.set(cycles_min.get());
@@ -107,11 +106,11 @@ public class AtomicInput implements Input, ActivityDefObserver, Gauge<Long>, NBL
     @Override
     public String toString() {
         return "AtomicInput{" +
-                "cycleValue=" + cycle_value +
-                ", min=" + cycles_min +
-                ", max=" + cycles_max +
-                ", activity=" + activityDef.getAlias() +
-                '}';
+            "cycleValue=" + cycle_value +
+            ", min=" + cycles_min +
+            ", max=" + cycles_max +
+            ", activity=" + activityDef.getAlias() +
+            '}';
     }
 
     @Override
@@ -121,16 +120,16 @@ public class AtomicInput implements Input, ActivityDefObserver, Gauge<Long>, NBL
 
         cycles_max.set(cyclesSpec.last_exclusive());
         if (cycles_min.get() != cyclesSpec.first_inclusive()) {
-            logger.info(() -> "resetting cycle value to new start: cycle[" + cycles_min.get() + "->" + cyclesSpec.first_inclusive()+"] " +
-                    " start["+cycle_value.get()+"->"+ cycles_min.get()+"]");
+            logger.info(() -> "resetting cycle value to new start: cycle[" + cycles_min.get() + "->" + cyclesSpec.first_inclusive() + "] " +
+                " start[" + cycle_value.get() + "->" + cycles_min.get() + "]");
             cycles_min.set(cyclesSpec.first_inclusive());
             cycle_value.set(cycles_min.get());
         }
 
         recycles_max.set(recyclesSpec.last_exclusive());
         if (recycles_min.get() != recyclesSpec.first_inclusive()) {
-            logger.info(() -> "resetting recycle value to new start: recycle[" + recycles_min.get() + "->" + recyclesSpec.first_inclusive()+"] " +
-                    " start["+recycle_value.get()+"->"+ recycles_min.get()+"]");
+            logger.info(() -> "resetting recycle value to new start: recycle[" + recycles_min.get() + "->" + recyclesSpec.first_inclusive() + "] " +
+                " start[" + recycle_value.get() + "->" + recycles_min.get() + "]");
             recycles_min.set(recyclesSpec.first_inclusive());
             recycle_value.set(recyclesSpec.first_inclusive());
         }
@@ -143,11 +142,6 @@ public class AtomicInput implements Input, ActivityDefObserver, Gauge<Long>, NBL
     @Override
     public boolean isContiguous() {
         return true;
-    }
-
-    @Override
-    public NBLabels getLabels() {
-        return parent.getLabels();
     }
 
     @Override
