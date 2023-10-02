@@ -283,7 +283,8 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
     @Override
     public synchronized ActivityInstrumentation getInstrumentation() {
         if (null == this.activityInstrumentation) {
-            activityInstrumentation = new CoreActivityInstrumentation(this);
+            activityInstrumentation = new ComponentActivityInstrumentation(this);
+//            activityInstrumentation = new CoreActivityInstrumentation(this);
         }
         return activityInstrumentation;
     }

@@ -69,7 +69,30 @@
  * component type should be solely informational about the structure and properties of the component hierarchy when
  * possible. This will help organize usage patterns around themed utilities and keep the surface area of the core types
  * to a minimum.</p>
+ * <HR/>
+ * <H2>Types of Components</H2>
+ * The purpose of a component can determine its style of implementation.
  *
+ * <H3>Life-cycle Oriented Components</H3>
+ * <P>Life-cycle components represent executions of some user-managed scope, like session, scenarios, or activities.
+ * These components model the nesting structure of threads of execution, or for activities, groups of threads. As such,
+ * any sub-components they have are generally there to augment or contextualize the execution of the life-cycle component.
+ * In this case, the life-cycle component controls the life-line of its sub-components. When the life-cycle component is
+ * ready to finish its own execution, it will directly inform all components attached to it that it is time for them
+ * to do final housekeeping, including any final buffering and sending, connection tear-down, etc. As components, the parent
+ * component may not know what the details of these housekeeping steps are directly. But components are always something else too,
+ * and in the type-specific implementations which are triggered by component methods, appropriate integrations can take place.</P>
+ *
+ * <H3>Service Oriented Components</H3>
+ * <p>Service components are those which are created as an attachment to other components. They may or may not have additional asynchronous
+ * behavior with respect to their parent component, but they are always in service of the parent component. For example, metrics instruments
+ * like counters are passive, but reporters which send these metrics outside of the system are active and on a schedule.
+ * Service-oriented components generally do not control the duration of their lifetimes. When they are working properly, they exist
+ * along-side and attached to their parent component for the full lifetime of that parent, and then are reaped on demand by the parent
+ * component.</p>
+ *
+ * <HR/>
+ * <H2>Labeling Consistency and interlocks</H2>
  * TODO: labeling consistency
  */
 package io.nosqlbench.components;

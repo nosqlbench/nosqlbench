@@ -46,5 +46,4 @@ public interface NBComponentMetrics {
         return found.get(0);
     }
 
-
 }

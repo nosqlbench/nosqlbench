@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics.reporters;
+package io.nosqlbench.components;
 
-import io.nosqlbench.api.config.params.ParamsParser;
 import io.nosqlbench.api.config.standard.*;
-
-import com.codahale.metrics.*;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
+import io.nosqlbench.api.engine.metrics.reporters.PromExpositionFormat;
+import io.nosqlbench.api.engine.metrics.reporters.PromPushKeyFileReader;
+import io.nosqlbench.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,33 +38,36 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.SortedMap;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class PromPushReporter extends ScheduledReporter implements NBConfigurable {
-    private static final Logger logger = LogManager.getLogger(PromPushReporter.class);
+public class AttachedMetricsPushReporter extends NBBaseComponent implements NBConfigurable, Runnable {
+
+    private static final Logger logger = LogManager.getLogger(AttachedMetricsPushReporter.class);
+    private final int intervalSeconds;
     private HttpClient client;
     private final URI uri;
     private String bearerToken;
     private boolean needsAuth;
 
-    public PromPushReporter(
+    private Lock lock = new ReentrantLock(false);
+    private Condition shutdownSignal = lock.newCondition();
+
+    public AttachedMetricsPushReporter(
         final String targetUriSpec,
-        MetricRegistry registry,
-        String name,
-        MetricFilter filter,
-        TimeUnit rateUnit,
-        TimeUnit durationUnit,
-        final String config
+        NBComponent node,
+        int seconds,
+        NBLabels extraLabels
     ) {
-        super(registry, name, filter, rateUnit, durationUnit);
+        super(node, extraLabels);
+        this.intervalSeconds = seconds;
         uri = URI.create(targetUriSpec);
         needsAuth = false;
+
+        String config = "";
         ConfigLoader loader = new ConfigLoader();
         List<Map> configs = loader.load(config, Map.class);
         NBConfigModel cm = this.getConfigModel();
@@ -76,10 +79,12 @@ public class PromPushReporter extends ScheduledReporter implements NBConfigurabl
             }
         } else {
             logger.info("PromPushReporter default configuration");
-            HashMap<String,String> junk = new HashMap<>(Map.of());
+            HashMap<String, String> junk = new HashMap<>(Map.of());
             NBConfiguration cfg = cm.apply(junk);
             this.applyConfig(cfg);
         }
+
+        Thread.ofVirtual().start(this);
     }
 
     @Override
@@ -112,43 +117,38 @@ public class PromPushReporter extends ScheduledReporter implements NBConfigurabl
         bearerToken = "Bearer " + bearerToken;
     }
 
-    @Override
-    public synchronized void report(
-        SortedMap<String, Gauge> gauges,
-        SortedMap<String, Counter> counters,
-        SortedMap<String, Histogram> histograms,
-        SortedMap<String, Meter> meters,
-        SortedMap<String, Timer> timers
-    ) {
-        final java.time.Clock nowclock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
+    public synchronized void report() {
+        final Clock nowclock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
 
-        StringBuilder sb = new StringBuilder(1024*1024); // 1M pre-allocated to reduce heap churn
+        StringBuilder sb = new StringBuilder(1024 * 1024); // 1M pre-allocated to reduce heap churn
+        List<NBMetric> metrics = new ArrayList<>();
+        Iterator<NBComponent> allMetrics = NBComponentTraversal.traverseBreadth(getParent());
+        allMetrics.forEachRemaining(m -> metrics.addAll(m.findMetrics("")));
 
-        int total=0;
-        for(final SortedMap smap : new SortedMap[]{gauges,counters,histograms,meters,timers})
-            for (final Object metric : smap.values()) {
-                sb = PromExpositionFormat.format(nowclock, sb, metric);
-                total++;
-            }
-        PromPushReporter.logger.debug("formatted {} metrics in prom expo format", total);
+        int total = 0;
+        for (NBMetric metric : metrics) {
+            sb = PromExpositionFormat.format(nowclock, sb, metric);
+            total++;
+        }
+        AttachedMetricsPushReporter.logger.debug("formatted {} metrics in prom expo format", total);
         final String exposition = sb.toString();
         logger.trace(() -> "prom exposition format:\n" + exposition);
 
-        final double backoffRatio=1.5;
-        final double maxBackoffSeconds=10;
+        final double backoffRatio = 1.5;
+        final double maxBackoffSeconds = 10;
         double backOff = 1.0;
 
         final int maxRetries = 5;
         int remainingRetries = maxRetries;
         final List<Exception> errors = new ArrayList<>();
-        boolean succeeded=false;
+        boolean succeeded = false;
 
         while (0 < remainingRetries) {
             remainingRetries--;
             final HttpClient client = getCachedClient();
             final HttpRequest.Builder rb = HttpRequest.newBuilder().uri(uri);
-            if ( needsAuth ) {
-                rb.setHeader("Authorization", bearerToken );
+            if (needsAuth) {
+                rb.setHeader("Authorization", bearerToken);
             }
             final HttpRequest request = rb.POST(BodyPublishers.ofString(exposition)).build();
             final BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
@@ -160,21 +160,21 @@ public class PromPushReporter extends ScheduledReporter implements NBConfigurabl
                     final String errmsg = "status " + response.statusCode() + " while posting metrics to '" + this.uri + '\'';
                     throw new RuntimeException(errmsg);
                 }
-                PromPushReporter.logger.debug("posted {} metrics to prom push endpoint '{}'", total, this.uri);
-                succeeded=true;
+                AttachedMetricsPushReporter.logger.debug("posted {} metrics to prom push endpoint '{}'", total, this.uri);
+                succeeded = true;
                 break;
             } catch (final Exception e) {
                 errors.add(e);
                 try {
-                    Thread.sleep((int)backOff * 1000L);
+                    Thread.sleep((int) backOff * 1000L);
                 } catch (final InterruptedException ignored) {
                 }
-                backOff = Math.min(maxBackoffSeconds,backOff*backoffRatio);
+                backOff = Math.min(maxBackoffSeconds, backOff * backoffRatio);
             }
         }
         if (!succeeded) {
-            PromPushReporter.logger.error("Failed to send push prom metrics after {} tries. Errors follow:", maxRetries);
-            for (final Exception error : errors) PromPushReporter.logger.error(error);
+            AttachedMetricsPushReporter.logger.error("Failed to send push prom metrics after {} tries. Errors follow:", maxRetries);
+            for (final Exception error : errors) AttachedMetricsPushReporter.logger.error(error);
         }
     }
 
@@ -190,5 +190,52 @@ public class PromPushReporter extends ScheduledReporter implements NBConfigurabl
             .version(Version.HTTP_2)
             .build();
         return this.client;
+    }
+
+    @Override
+    public void run() {
+        long now = System.currentTimeMillis();
+        long reportAt = now + intervalSeconds * 1000L;
+        long waitfor = reportAt - now;
+
+        loop:
+        while (true) {
+
+            while (waitfor > 0) {
+                try {
+                    if (shutdownSignal.await(waitfor, TimeUnit.MILLISECONDS)) {
+                        logger.debug("shutting down " + this);
+                        break loop;
+                    }
+                    now = System.currentTimeMillis();
+                    waitfor = now - reportAt;
+                } catch (InterruptedException ignored) {
+                }
+                logger.info("reporting metrics via push");
+                try {
+                    report();
+                } catch (Exception e) {
+                    logger.error(e);
+                } finally {
+                    reportAt = now;
+                    now = System.currentTimeMillis();
+                    waitfor = now - reportAt;
+                }
+            }
+        }
+        logger.info("reporter thread shutting down");
+    }
+
+    @Override
+    public void beforeDetach() {
+        this.shutdown();
+    }
+
+    private void shutdown() {
+        logger.debug("shutting down " + this);
+
+        lock.lock();
+        shutdownSignal.signal();
+        lock.unlock();
     }
 }
