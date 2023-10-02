@@ -103,4 +103,41 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     public void beforeDetach() {
         logger.debug("before detach " + description());
     }
+
+    @Override
+    public final void close() throws RuntimeException {
+        try {
+            logger.debug("cleaning up");
+            ArrayList<NBComponent> children = new ArrayList<>(getChildren());
+            for (NBComponent child : children) {
+                child.close();
+            }
+            teardown();
+        } catch (Exception e) {
+            logger.error(e);
+        } finally {
+            logger.debug("detaching " + description());
+            if (parent!=null) {
+                parent.detachChild(this);
+            }
+        }
+    }
+
+    /**
+     * Override this method in your component implementations when you need to do something
+     * to close out your component.
+     */
+    protected void teardown() {
+        logger.debug("tearing down " + description());
+    }
+
+    @Override
+    public NBBuilders create() {
+        return new NBBuilders(this);
+    }
+
+    @Override
+    public NBFinders find() {
+        return new NBFinders(this);
+    }
 }

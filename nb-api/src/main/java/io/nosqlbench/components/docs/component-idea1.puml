@@ -1,0 +1,48 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+'autonumber
+
+boundary Scope as scope
+control Parent as p
+entity Child as c
+entity External as e
+
+== attachment ==
+create p
+scope -> p : new
+create c
+alt child constructor
+p -> c : new(p,...)
+c -> c : pre-init in super(...)
+p <- c : attachChild(self)
+activate p
+p -> c:
+deactivate p
+c -> c : post-attach init
+activate c
+c --> e: connect
+c <-- e: <connected>
+deactivate c
+p <- c:
+end
+
+== detachment always mediated by child ==
+
+alt child finalize
+
+c -> c: shutdown()
+activate c
+c -> c: flush data and cleanup
+p <- c: detachChild(self)
+activate p
+p -> c
+deactivate p
+
+deactivate c
+
+
+
+end
+
+@enduml
+

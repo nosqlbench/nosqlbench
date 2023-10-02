@@ -70,7 +70,6 @@ public class NBMetricTimer extends Timer implements DeltaSnapshotter, HdrDeltaHi
         return timer;
     }
 
-
     @Override
     public Histogram getNextHdrDeltaHistogram() {
         return deltaHdrHistogramReservoir.getNextHdrHistogram();
@@ -89,6 +88,6 @@ public class NBMetricTimer extends Timer implements DeltaSnapshotter, HdrDeltaHi
 
     @Override
     public String toString() {
-        return "NBTIMER:"+this.getLabels().toString();
+        return description();
     }
 }

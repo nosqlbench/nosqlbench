@@ -1,0 +1,38 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+'autonumber
+
+boundary Scope as scope
+control Parent as p
+entity Child as c
+
+== attachment ==
+create p
+scope -> p : new
+create c
+p -> c : new(p,...)
+p <- c : attach
+activate p
+p -> c :
+deactivate p
+
+
+== detachment, parent initiated ==
+
+p -> c: beforeDetach()
+activate c
+c -> c : internal logic,\nflushing, closing
+p <- c :
+deactivate c
+p -> p : detachChild(c)
+deactivate p
+
+
+== detachment, child initiated ==
+p <- c: detachChild(self)
+activate p
+p -> c:
+deactivate p
+
+
+@enduml

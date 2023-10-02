@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics.instruments;
+package io.nosqlbench.components;
 
-import com.codahale.metrics.Metric;
-import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 
-public interface NBMetric extends Metric, NBLabeledElement {
-    default String getHandle() {
-        return this.getLabels().linearizeAsMetrics();
+public class NBFinders {
+    private final NBBaseComponent base;
+
+    public NBFinders(NBBaseComponent base) {
+        this.base = base;
     }
+
+    public NBMetric metric(String pattern) {
+        NBMetric metric = base.lookupMetricInTree(pattern);
+        if (metric!=null) { return metric; };
+        metric = base.findOneMetricInTree(pattern);
+        return metric;
+    }
+
+
 }

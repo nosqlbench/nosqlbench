@@ -46,4 +46,11 @@ public class NBFunctionGauge implements NBMetricGauge<Double> {
     public NBLabels getLabels() {
         return parent.getLabels().and(this.labels);
     }
+
+    @Override
+    public String toString() {
+        return description();
+    }
 }
+
+

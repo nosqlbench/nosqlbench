@@ -31,9 +31,9 @@ import java.util.List;
  *     <LI>Addressable - Each component has a set of metadata which allows it to be identified clearly under its parent.</LI>
  * </UL>
  *
- * This interface will start as a tagging interface, but will eventually include aspects of above by extension.
+ * This interface includes more aspects of above by extension going forward.
  */
-public interface NBComponent extends NBLabeledElement, NBComponentMetrics, NBMetricsQuery {
+public interface NBComponent extends AutoCloseable, NBLabeledElement, NBComponentMetrics, NBMetricsQuery, NBComponentServices {
 
     NBComponent EMPTY_COMPONENT = new NBBaseComponent(null);
 
@@ -46,4 +46,7 @@ public interface NBComponent extends NBLabeledElement, NBComponentMetrics, NBMet
     List<NBComponent> getChildren();
 
     default void beforeDetach() {}
+
+    @Override
+    void close() throws RuntimeException;
 }

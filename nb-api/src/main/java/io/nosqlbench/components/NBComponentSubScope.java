@@ -16,16 +16,30 @@
 
 package io.nosqlbench.components;
 
+import io.nosqlbench.api.config.standard.TestComponent;
+
 public class NBComponentSubScope implements AutoCloseable {
 
-    private final NBComponent component;
+    private NBComponent[] components;
 
-    public NBComponentSubScope(NBComponent component) {
-        this.component = component;
+    public NBComponentSubScope(NBComponent... components) {
+        this.components = components;
     }
     @Override
     public void close() throws RuntimeException {
-        component.beforeDetach();
-        component.getParent().detachChild(component);
+        for (NBComponent component : components) {
+            component.beforeDetach();
+            NBComponent parent = component.getParent();
+            if (parent!=null) {
+                parent.detachChild(component);
+            }
+        }
+    }
+
+    public void add(TestComponent... adding) {
+        NBComponent[] newAry = new NBComponent[components.length+adding.length];
+        System.arraycopy(components,0,newAry,0,components.length);
+        System.arraycopy(adding,0,newAry,components.length,adding.length);
+        this.components = newAry;
     }
 }
