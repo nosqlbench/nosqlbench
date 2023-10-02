@@ -42,6 +42,9 @@
   </Appenders>
 
   <Loggers>
+    <Logger name="StatusConsoleListener" level="trace">
+      <AppenderRef ref="STDOUT"/>
+    </Logger>
 
     <Logger name="io.nosqlbench.docsys" level="info" additivity="false">
       <AppenderRef ref="APPSLOG"/>

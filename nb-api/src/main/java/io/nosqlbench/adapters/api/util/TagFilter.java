@@ -18,6 +18,7 @@ package io.nosqlbench.adapters.api.util;
 
 import io.nosqlbench.api.engine.util.Tagged;
 import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.components.NBComponent;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -110,6 +111,10 @@ public class TagFilter {
             .filter(l -> this.matches(l.getLabels().asMap()).matched())
             .collect(Collectors.toList());
     }
+    public boolean matchesLabeled(NBComponent c) {
+        return this.matches(c.getLabels().asMap()).matched();
+    }
+
 
     public <T extends Tagged> List<String> filterLog(List<T> tagged) {
         return tagged.stream()
@@ -117,6 +122,7 @@ public class TagFilter {
             .map(Result::getLog)
             .collect(Collectors.toList());
     }
+
 
     private enum Conjugate {
         any((i,j) -> (j>0)),
