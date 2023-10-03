@@ -17,14 +17,19 @@
 package io.nosqlbench.components;
 
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
+import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
+import io.nosqlbench.api.engine.metrics.reporters.PromPushReporterComponent;
 import io.nosqlbench.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
+import java.util.DoubleSummaryStatistics;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class NBBuilders {
@@ -49,10 +54,23 @@ public class NBBuilders {
         return counter;
     }
 
+
     public NBFunctionGauge gauge(String metricFamilyName, Supplier<Double> valueSource) {
         NBFunctionGauge gauge = new NBFunctionGauge(base, valueSource, metricFamilyName);
         base.addMetric(gauge);
         return gauge;
+    }
+
+
+    public DoubleSummaryGauge summaryGauge(String name, String... statspecs) {
+        List<DoubleSummaryGauge.Stat> stats = Arrays.stream(statspecs).map(DoubleSummaryGauge.Stat::valueOf).toList();
+        DoubleSummaryStatistics reservoir = new DoubleSummaryStatistics();
+        DoubleSummaryGauge anyGauge = null;
+        for (DoubleSummaryGauge.Stat stat : stats) {
+            anyGauge = new DoubleSummaryGauge(base.getLabels().and(NBLabels.forKV("name",name,"stat", stat)), stat, reservoir);
+            base.addMetric(anyGauge);
+        }
+        return anyGauge;
     }
 
     public NBMetricHistogram histogram(String metricFamilyName, int hdrdigits) {
@@ -68,12 +86,16 @@ public class NBBuilders {
         AttachedMetricsSummaryReporter reporter = new AttachedMetricsSummaryReporter(base, extraLabels, seconds);
         return reporter;
     }
-    public AttachedMetricsPushReporter pushReporter(String targetUri, int seconds,String... labelspecs) {
+//    public AttachedMetricCsvReporter csvReporter(int seconds, String dirpath, String... labelspecs) {
+//        logger.debug("attaching summary reporter to " + base.description());
+//        NBLabels extraLabels = NBLabels.forKV((Object[]) labelspecs);
+//        AttachedMetricCsvReporter reporter = new AttachedMetricCsvReporter(base, extraLabels, Path.of(dirpath), seconds);
+//        return reporter;
+//    }
+    public PromPushReporterComponent pushReporter(String targetUri, int seconds, String config, String... labelspecs) {
         NBLabels extraLabels = NBLabels.forKV((Object[]) labelspecs);
-        AttachedMetricsPushReporter reporter = new AttachedMetricsPushReporter(targetUri, base, seconds, extraLabels);
+        PromPushReporterComponent reporter = new PromPushReporterComponent(targetUri, config, seconds, base,extraLabels);
         return reporter;
     }
-
-
 
 }
