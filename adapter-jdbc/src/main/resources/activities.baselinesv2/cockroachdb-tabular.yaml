@@ -1,4 +1,4 @@
-min_version: "5.17.1"
+min_version: "5.17.2"
 
 description: |
   A tabular workload with partitions, clusters, and data fields
