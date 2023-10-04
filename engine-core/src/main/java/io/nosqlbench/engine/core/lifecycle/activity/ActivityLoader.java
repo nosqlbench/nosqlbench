@@ -16,11 +16,10 @@
 
 package io.nosqlbench.engine.core.lifecycle.activity;
 
-import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
-import io.nosqlbench.engine.core.lifecycle.scenario.NBScenario;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,10 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ActivityLoader {
     private static final Logger logger = LogManager.getLogger("ACTIVITIES");
     private final Map<String, Activity> activityMap = new ConcurrentHashMap<>();
-    private final NBScenario scenario;
 
-    public ActivityLoader(final NBScenario scenario) {
-        this.scenario = scenario;
+    public ActivityLoader() {
     }
 
     public synchronized Activity loadActivity(ActivityDef activityDef, final NBComponent parent) {

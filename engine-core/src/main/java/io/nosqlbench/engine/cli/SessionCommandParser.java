@@ -19,6 +19,8 @@ package io.nosqlbench.engine.cli;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -28,6 +30,7 @@ import java.util.*;
  * was not recognized.
  */
 public class SessionCommandParser {
+    private final static Logger logger = LogManager.getLogger(SessionCommandParser.class);
 
     private static final String FRAGMENT = "fragment";
     private static final String SCRIPT = "script";
@@ -40,24 +43,33 @@ public class SessionCommandParser {
     private static final String SCENARIO = "scenario";
     private static final String WAIT_MILLIS = "waitmillis";
 
+    private static final String JAVA_MAIN = "java";
+
     public static final Set<String> RESERVED_WORDS = new HashSet<>() {{
         addAll(
-                Arrays.asList(
-                        FRAGMENT, SCRIPT, START, RUN, AWAIT, STOP, FORCE_STOP, ACTIVITY, SCENARIO, WAIT_MILLIS
-                )
+            Arrays.asList(
+                FRAGMENT, SCRIPT, START, RUN, AWAIT, STOP, FORCE_STOP, ACTIVITY, SCENARIO, WAIT_MILLIS
+            )
         );
     }};
 
     public static Optional<List<Cmd>> parse(
-            LinkedList<String> arglist,
-            String... includes
+        LinkedList<String> arglist,
+        String... includes
     ) {
+        boolean scriptCommands = false;
+        boolean javaCommands = false;
         List<Cmd> cmdList = new LinkedList<>();
         PathCanonicalizer canonicalizer = new PathCanonicalizer(includes);
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
             Cmd cmd;
             switch (word) {
+                case JAVA_MAIN:
+                    cmd = Cmd.parseArg(arglist, canonicalizer);
+                    cmdList.add(cmd);
+                    javaCommands = true;
+                    break;
                 case FRAGMENT:
                 case SCRIPT:
                 case START:
@@ -68,13 +80,14 @@ public class SessionCommandParser {
                 case WAIT_MILLIS:
                     cmd = Cmd.parseArg(arglist, canonicalizer);
                     cmdList.add(cmd);
+                    scriptCommands = true;
                     break;
                 default:
                     Optional<Content<?>> scriptfile = NBIO.local()
-                            .searchPrefixes("scripts/auto")
-                            .pathname(word)
-                            .extensionSet("js")
-                            .first();
+                        .searchPrefixes("scripts/auto")
+                        .pathname(word)
+                        .extensionSet("js")
+                        .first();
 
                     //Script
                     if (scriptfile.isPresent()) {
@@ -86,9 +99,13 @@ public class SessionCommandParser {
                     } else if (NBCLIScenarioParser.isFoundWorkload(word, includes)) {
                         NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS, includes);
                     } else {
+                        logger.warn("unrecognized Cmd: " + word);
                         return Optional.empty();
                     }
                     break;
+            }
+            if (javaCommands && scriptCommands) {
+                throw new RuntimeException("combining java and javascript commands into one session is not yet supported.");
             }
         }
         return Optional.of(cmdList);

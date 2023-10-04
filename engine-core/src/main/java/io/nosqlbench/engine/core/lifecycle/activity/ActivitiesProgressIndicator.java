@@ -22,7 +22,7 @@ import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.api.engine.metrics.PeriodicRunnable;
 import io.nosqlbench.api.engine.util.Unit;
-import io.nosqlbench.engine.core.lifecycle.scenario.ScenarioController;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ActivitiesController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,18 +31,18 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-public class ActivityProgressIndicator implements Runnable {
+public class ActivitiesProgressIndicator implements Runnable {
 
     private final static Logger logger = LogManager.getLogger("PROGRESS");
     private final String indicatorSpec;
-    private final ScenarioController sc;
-    private PeriodicRunnable<ActivityProgressIndicator> runnable;
+    private final ActivitiesController sc;
+    private PeriodicRunnable<ActivitiesProgressIndicator> runnable;
     private IndicatorMode indicatorMode = IndicatorMode.console;
     private final Set<String> seen = new HashSet<>();
 
     private long intervalMillis = 1L;
 
-    public ActivityProgressIndicator(ScenarioController sc, String indicatorSpec) {
+    public ActivitiesProgressIndicator(ActivitiesController sc, String indicatorSpec) {
         this.sc = sc;
         this.indicatorSpec = indicatorSpec;
         start();

@@ -18,16 +18,13 @@ package io.nosqlbench.engine.core.lifecycle.scenario.script;
 import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
-import io.nosqlbench.engine.core.lifecycle.scenario.ScenarioController;
 
-public class ScenarioContext extends ScriptEnvBuffer implements LabeledScenarioContext {
+public class ScenarioScriptShell extends ScriptEnvBuffer implements LabeledScenarioContext {
 
-    private final ScenarioController sc;
     private final String contextName;
 
-    public ScenarioContext(String contextName, ScenarioController sc) {
+    public ScenarioScriptShell(String contextName) {
         this.contextName = contextName;
-        this.sc = sc;
     }
 
     public String getContextName() {
@@ -36,14 +33,12 @@ public class ScenarioContext extends ScriptEnvBuffer implements LabeledScenarioC
 
     @Override
     public Object getAttribute(String name) {
-        Object o = super.getAttribute(name);
-        return o;
+        return super.getAttribute(name);
     }
 
     @Override
     public Object getAttribute(String name, int scope) {
-        Object o = super.getAttribute(name, scope);
-        return o;
+        return super.getAttribute(name, scope);
     }
 
     @Override

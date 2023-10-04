@@ -38,6 +38,7 @@ public class Cmd {
         stop(Arg.of("alias_name")),
         forceStop(Arg.of("alias_name")),
         script(Arg.of("script_path", s -> s)),
+        java(Arg.of("main_class",s->s)),
         await(Arg.of("alias_name")),
         waitMillis(Arg.of("millis_to_wait", Long::parseLong)),
         fragment(Arg.ofFreeform("script_fragment")),;
@@ -218,6 +219,16 @@ public class Cmd {
 
     public static String toJSONParams(String varname, Map<String, String> map, boolean oneline) {
         return "// params.size==" + map.size() + "\n" + varname + "=" + toJSONBlock(map, oneline);
+    }
+
+    public static List<Cmd> parseCmds (String...arglist){
+        LinkedList<String> ll = new LinkedList<>(Arrays.asList(arglist));
+        List<Cmd> cmds = new ArrayList<>();
+        while (!ll.isEmpty()) {
+            Cmd cmd = parseArg(ll, null);
+            cmds.add(cmd);
+        }
+        return cmds;
     }
 
 }
