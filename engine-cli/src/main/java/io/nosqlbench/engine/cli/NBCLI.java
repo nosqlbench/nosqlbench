@@ -43,7 +43,6 @@ import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
-import io.nosqlbench.engine.core.lifecycle.scenario.script.MetricsMapper;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 import io.nosqlbench.engine.core.logging.LoggerConfig;
 import io.nosqlbench.engine.core.metadata.MarkdownFinder;
@@ -411,9 +410,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             new NBBaseComponent(null),
             sessionName,
             options.getProgressSpec(),
-            options.getReportSummaryTo(),
-            options.getLogsDirectory(),
-            options.getScriptFile(),
             options.wantsShowScript()
         );
         ExecutionResult sessionResult = session.apply(options.getCommands());
@@ -438,10 +434,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
     }
 
-    private String getMetricsHelpFor(final String activityType) {
-        final String metrics = MetricsMapper.metricsDetail(activityType);
-        return metrics;
-    }
 
     @Override
     public NBLabels getLabels() {

@@ -14,20 +14,29 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario;
+package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBDefaultSceneFixtures;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScriptParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.ScenarioExceptionHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-public class ScenariosExecutor {
+public class ScenariosExecutor extends NBBaseComponent {
 
     private final Logger logger = LogManager.getLogger("SCENARIOS");
     private final LinkedHashMap<String, SubmittedScenario> submitted = new LinkedHashMap<>();
@@ -36,11 +45,8 @@ public class ScenariosExecutor {
     private final String name;
     private RuntimeException stoppingException;
 
-    public ScenariosExecutor(String name) {
-        this(name, 1);
-    }
-
-    public ScenariosExecutor(String name, int threads) {
+    public ScenariosExecutor(NBComponent parent, String name, int threads) {
+        super(parent, NBLabels.forKV("executor","name"));
         executor = new ThreadPoolExecutor(1, threads,
             0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(),
@@ -52,9 +58,24 @@ public class ScenariosExecutor {
         if (submitted.get(scenario.getScenarioName()) != null) {
             throw new BasicError("Scenario " + scenario.getScenarioName() + " is already defined. Remove it first to reuse the name.");
         }
-        Future<ExecutionMetricsResult> future = executor.submit(scenario);
+
+        NBSceneFixtures basecontext = new NBDefaultSceneFixtures(
+            ScriptParams.of(scenario.getParams()),
+            this.getParent(),
+            scenario.getActivitiesController(),
+            loadExtensions(),
+            new OutputStreamWriter(System.out),
+            new OutputStreamWriter(System.err),
+            new InputStreamReader(System.in)
+        );
+        NBSceneBuffer bufferedContext = new NBSceneBuffer(basecontext);
+
+        Future<ScenarioResult> future = executor.submit(
+            () -> new ScenarioResult(scenario.apply(bufferedContext),bufferedContext) // combine basic execution data with trace
+        );
         SubmittedScenario s = new SubmittedScenario(scenario, future);
         submitted.put(s.getName(), s);
+        // TODO at this point, bufferedContext holds all the trace, make it visible in results
     }
 
     @Override
@@ -110,7 +131,7 @@ public class ScenariosExecutor {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
                 + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
-        Map<NBScenario, ExecutionMetricsResult> scenarioResultMap = new LinkedHashMap<>();
+        Map<NBScenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
         getAsyncResultStatus()
             .entrySet()
             .forEach(
@@ -142,21 +163,21 @@ public class ScenariosExecutor {
      *
      * @return map of async results, with incomplete results as Optional.empty()
      */
-    public Map<NBScenario, Optional<ExecutionMetricsResult>> getAsyncResultStatus() {
+    public Map<NBScenario, Optional<ScenarioResult>> getAsyncResultStatus() {
 
-        Map<NBScenario, Optional<ExecutionMetricsResult>> optResults = new LinkedHashMap<>();
+        Map<NBScenario, Optional<ScenarioResult>> optResults = new LinkedHashMap<>();
 
         for (SubmittedScenario submittedScenario : submitted.values()) {
-            Future<ExecutionMetricsResult> resultFuture = submittedScenario.getResultFuture();
+            Future<ScenarioResult> resultFuture = submittedScenario.getResultFuture();
 
-            Optional<ExecutionMetricsResult> oResult = Optional.empty();
+            Optional<ScenarioResult> oResult = Optional.empty();
             if (resultFuture.isDone()) {
                 try {
                     oResult = Optional.of(resultFuture.get());
                 } catch (Exception e) {
                     long now = System.currentTimeMillis();
                     logger.debug("creating exceptional scenario result from getAsyncResultStatus");
-                    oResult = Optional.of(new ExecutionMetricsResult(now, now, "errored output", e));
+                    oResult = Optional.of(new ScenarioResult(now, now, "errored output", e));
                 }
             }
 
@@ -183,7 +204,7 @@ public class ScenariosExecutor {
      * @param scenarioName the scenario name of interest
      * @return an optional result
      */
-    public Optional<Future<ExecutionMetricsResult>> getPendingResult(String scenarioName) {
+    public Optional<Future<ScenarioResult>> getPendingResult(String scenarioName) {
         return Optional.ofNullable(submitted.get(scenarioName)).map(s -> s.resultFuture);
     }
 
@@ -195,7 +216,7 @@ public class ScenariosExecutor {
         logger.debug("#stopScenario(name=" + scenarioName + ", rethrow="+ rethrow+")");
         Optional<NBScenario> pendingScenario = getPendingScenario(scenarioName);
         if (pendingScenario.isPresent()) {
-            pendingScenario.get().getScenarioController().forceStopScenario(10000, true);
+            pendingScenario.get().forceStopScenario(10000, true);
         } else {
             throw new RuntimeException("Unable to cancel scenario: " + scenarioName + ": not found");
         }
@@ -225,9 +246,9 @@ public class ScenariosExecutor {
 
     private static class SubmittedScenario {
         private final NBScenario scenario;
-        private final Future<ExecutionMetricsResult> resultFuture;
+        private final Future<ScenarioResult> resultFuture;
 
-        SubmittedScenario(NBScenario scenario, Future<ExecutionMetricsResult> resultFuture) {
+        SubmittedScenario(NBScenario scenario, Future<ScenarioResult> resultFuture) {
             this.scenario = scenario;
             this.resultFuture = resultFuture;
         }
@@ -236,7 +257,7 @@ public class ScenariosExecutor {
             return scenario;
         }
 
-        Future<ExecutionMetricsResult> getResultFuture() {
+        Future<ScenarioResult> getResultFuture() {
             return resultFuture;
         }
 
@@ -248,6 +269,30 @@ public class ScenariosExecutor {
     public synchronized void notifyException(Thread t, Throwable e) {
         logger.debug(() -> "Scenario executor uncaught exception: " + e.getMessage());
         this.stoppingException = new RuntimeException("Error in scenario thread " + t.getName(), e);
+    }
+
+    private Extensions loadExtensions() {
+        Extensions extensions = new Extensions();// TODO: Load component oriented extensions into here
+
+//        for (final ScriptingExtensionPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
+//            if (!extensionDescriptor.isAutoLoading()) {
+//                this.logger.info(() -> "Not loading " + extensionDescriptor + ", autoloading is false");
+//                continue;
+//            }
+//
+//            final Logger extensionLogger =
+//                LogManager.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
+//            final Object extensionObject = extensionDescriptor.getExtensionObject(
+//                extensionLogger,
+//                metricRegistry,
+//                this.scriptEnv
+//            );
+//            ScenarioMetadataAware.apply(extensionObject, this.getScenarioMetadata());
+//            this.logger.trace(() -> "Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
+//                " class=" + extensionObject.getClass().getSimpleName());
+//            this.scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
+//        }
+        return extensions;
     }
 
 

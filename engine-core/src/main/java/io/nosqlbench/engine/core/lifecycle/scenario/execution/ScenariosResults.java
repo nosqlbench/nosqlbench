@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario;
+package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
-import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
-import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,14 +28,14 @@ public class ScenariosResults {
 
     private static final Logger logger = LogManager.getLogger(ScenariosResults.class);
     private final String scenariosExecutorName;
-    private final Map<NBScenario, ExecutionMetricsResult> scenarioResultMap = new LinkedHashMap<>();
+    private final Map<NBScenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
 
 
     public ScenariosResults(ScenariosExecutor scenariosExecutor) {
         this.scenariosExecutorName = scenariosExecutor.getName();
     }
 
-    public ScenariosResults(ScenariosExecutor scenariosExecutor, Map<NBScenario, ExecutionMetricsResult> map) {
+    public ScenariosResults(ScenariosExecutor scenariosExecutor, Map<NBScenario, ScenarioResult> map) {
         this.scenariosExecutorName = scenariosExecutor.getName();
         scenarioResultMap.putAll(map);
     }
@@ -49,7 +47,7 @@ public class ScenariosResults {
         return sb;
     }
 
-    public ExecutionMetricsResult getOne() {
+    public ScenarioResult getOne() {
         if (this.scenarioResultMap.size() != 1) {
             throw new RuntimeException("getOne found " + this.scenarioResultMap.size() + " results instead of 1.");
         }
@@ -58,17 +56,17 @@ public class ScenariosResults {
     }
 
     public void reportToLog() {
-        for (Map.Entry<NBScenario, ExecutionMetricsResult> entry : this.scenarioResultMap.entrySet()) {
+        for (Map.Entry<NBScenario, ScenarioResult> entry : this.scenarioResultMap.entrySet()) {
             NBScenario scenario = entry.getKey();
-            ExecutionMetricsResult oresult = entry.getValue();
+            ScenarioResult oresult = entry.getValue();
 
             logger.info(() -> "results for scenario: " + scenario);
 
-            if (oresult != null) {
-                oresult.reportElapsedMillisToLog();
-            } else {
-                logger.error(scenario.getScenarioName() + ": incomplete (missing result)");
-            }
+//            if (oresult != null) {
+//                oresult.reportElapsedMillisToLog();
+//            } else {
+//                logger.error(scenario.getScenarioName() + ": incomplete (missing result)");
+//            }
 
         }
     }
@@ -80,7 +78,7 @@ public class ScenariosResults {
 
     public Optional<Exception> getAnyError() {
         return this.scenarioResultMap.values().stream()
-            .map(ExecutionResult::getException).filter(Objects::nonNull).findFirst();
+            .map(ScenarioResult::getException).filter(Objects::nonNull).findFirst();
     }
 
     public int getSize() {

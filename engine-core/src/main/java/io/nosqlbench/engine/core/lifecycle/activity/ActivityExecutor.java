@@ -79,12 +79,11 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
     private ActivityExecutorShutdownHook shutdownHook = null;
     private NBMetricGauge threadsGauge;
 
-    public ActivityExecutor(Activity activity, String sessionId) {
+    public ActivityExecutor(Activity activity) {
         this.activity = activity;
         this.activityDef = activity.getActivityDef();
         activity.getActivityDef().getParams().addListener(this);
         activity.setActivityController(this);
-        this.sessionId = sessionId;
         this.tally = activity.getRunStateTally();
     }
 

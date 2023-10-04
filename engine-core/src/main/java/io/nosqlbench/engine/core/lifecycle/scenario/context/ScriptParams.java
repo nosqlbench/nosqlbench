@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario.script;
+package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -39,6 +39,11 @@ public class ScriptParams extends HashMap<String, String> implements ProxyObject
     private static final Logger logger = LogManager.getLogger(ScriptParams.class);
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+    public static ScriptParams of(Map<String,String> params) {
+        return new ScriptParams() {{
+            putAll(params);
+        }};
+    }
     public ScriptParams withOverrides(Object overrides) {
         Map<String, String> map;
         if (overrides instanceof Map) {
