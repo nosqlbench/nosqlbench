@@ -98,7 +98,7 @@ class ActivityExecutorTest {
         activity.setInputDispenserDelegate(inputDispenser);
         activity.setMotorDispenserDelegate(motorDispenser);
 
-        ActivityExecutor activityExecutor = new ActivityExecutor(activity, "test-delayed-start");
+        ActivityExecutor activityExecutor = new ActivityExecutor(activity);
 
         ExecutorService testExecutor = Executors.newCachedThreadPool();
         Future<ExecutionResult> future = testExecutor.submit(activityExecutor);
@@ -136,7 +136,7 @@ class ActivityExecutorTest {
         simpleActivity.setInputDispenserDelegate(inputDispenser);
         simpleActivity.setMotorDispenserDelegate(motorDispenser);
 
-        ActivityExecutor activityExecutor = new ActivityExecutor(simpleActivity, "test-new-executor");
+        ActivityExecutor activityExecutor = new ActivityExecutor(simpleActivity);
         activityDef.setThreads(5);
         ForkJoinTask<ExecutionResult> executionResultForkJoinTask = ForkJoinPool.commonPool().submit(activityExecutor);
 

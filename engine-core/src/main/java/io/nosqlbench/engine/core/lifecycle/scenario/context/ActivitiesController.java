@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.core.lifecycle.scenario;
+package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.components.NBComponentErrorHandler;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
@@ -40,22 +42,28 @@ import java.util.stream.Collectors;
  * A ScenarioController provides a way to start Activities,
  * modify them while running, and forceStopMotors, pause or restart them.
  */
-public class ScenarioController implements NBLabeledElement {
+public class ActivitiesController extends NBBaseComponent {
 
-    private static final Logger logger = LogManager.getLogger(ScenarioController.class);
+    private static final Logger logger = LogManager.getLogger(ActivitiesController.class);
     private static final Logger scenariologger = LogManager.getLogger("SCENARIO");
 
     private final ActivityLoader activityLoader;
 
     private final Map<String, ActivityRuntimeInfo> activityInfoMap = new ConcurrentHashMap<>();
-    private final NBScenario scenario;
 
     private final ExecutorService activitiesExecutor;
 
-    public ScenarioController(NBScenario scenario) {
-        this.scenario = scenario;
-        this.activityLoader = new ActivityLoader(scenario);
+    public ActivitiesController() {
+        super(new TestComponent("test","test"));
+        this.activityLoader = new ActivityLoader();
+        ActivitiesExceptionHandler exceptionHandler = new ActivitiesExceptionHandler(this);
+        IndexedThreadFactory indexedThreadFactory = new IndexedThreadFactory("ACTIVITY", exceptionHandler);
+        this.activitiesExecutor = Executors.newVirtualThreadPerTaskExecutor();
+    }
 
+    public ActivitiesController(NBComponent parent) {
+        super(parent);
+        this.activityLoader = new ActivityLoader();
         ActivitiesExceptionHandler exceptionHandler = new ActivitiesExceptionHandler(this);
         IndexedThreadFactory indexedThreadFactory = new IndexedThreadFactory("ACTIVITY", exceptionHandler);
         this.activitiesExecutor = Executors.newCachedThreadPool(indexedThreadFactory);
@@ -74,8 +82,8 @@ public class ScenarioController implements NBLabeledElement {
 
     private synchronized ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
         if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
-            Activity activity = this.activityLoader.loadActivity(activityDef, scenario);
-            ActivityExecutor executor = new ActivityExecutor(activity, this.scenario.getScenarioName());
+            Activity activity = this.activityLoader.loadActivity(activityDef, this);
+            ActivityExecutor executor = new ActivityExecutor(activity);
             Future<ExecutionResult> startedActivity = activitiesExecutor.submit(executor);
             ActivityRuntimeInfo activityRuntimeInfo = new ActivityRuntimeInfo(activity, startedActivity, executor);
             this.activityInfoMap.put(activity.getAlias(), activityRuntimeInfo);
@@ -316,7 +324,7 @@ public class ScenarioController implements NBLabeledElement {
      * @param waitTimeMillis grace period during which an activity may cooperatively shut down
      */
     public synchronized void forceStopScenario(int waitTimeMillis, boolean rethrow) {
-        logger.debug("force stopping scenario {}", this.scenario.getScenarioName());
+        logger.debug("force stopping scenario {}", description());
         activityInfoMap.values().forEach(a -> a.getActivityExecutor().forceStopActivity(10000));
         logger.debug("Scenario force stopped.");
     }
@@ -431,7 +439,9 @@ public class ScenarioController implements NBLabeledElement {
 
     public void notifyException(Thread t, Throwable e) {
         logger.error("Uncaught exception in activity lifecycle thread:{}", e, e);
-        scenario.notifyException(t,e);
+        if (getParent() instanceof NBComponentErrorHandler handler) {
+            handler.notifyException(t,e);
+        }
         throw new RuntimeException(e);
     }
 
@@ -456,8 +466,4 @@ public class ScenarioController implements NBLabeledElement {
         }
     }
 
-    @Override
-    public NBLabels getLabels() {
-        return this.scenario.getLabels();
-    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario.script;
+package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosExecutor;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class ScenarioExceptionHandler implements Thread.UncaughtExceptionHandler {
-    private final ScenariosExecutor scenariosExecutor;
-
-    public ScenarioExceptionHandler(ScenariosExecutor scenariosExecutor) {
-        this.scenariosExecutor = scenariosExecutor;
-    }
-
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        scenariosExecutor.notifyException(t, e);
+public class Extensions extends ConcurrentHashMap<String,String> {
+    public static Extensions ofNone() {
+        return new Extensions();
     }
 }

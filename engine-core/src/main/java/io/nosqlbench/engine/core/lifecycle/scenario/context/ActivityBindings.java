@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.core.lifecycle.scenario.script.bindings;
+package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.engine.core.lifecycle.scenario.ScenarioController;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
@@ -29,11 +28,11 @@ import java.util.stream.Collectors;
  */
 public class ActivityBindings implements Bindings, ProxyObject {
 
-    private final ScenarioController scenario;
+    private final ActivitiesController scenario;
     private final Map<String, Bindings> elementMap = new HashMap<String, Bindings>();
 
-    public ActivityBindings(ScenarioController scenarioController) {
-        this.scenario = scenarioController;
+    public ActivityBindings(ActivitiesController activitiesController) {
+        this.scenario = activitiesController;
     }
 
     @Override
