@@ -33,7 +33,7 @@ class AttachedMetricsSummaryReporterTest {
         try (TestComponent root = new TestComponent("root", "root")) {
 
             try {
-                Thread.sleep(10000L);
+                Thread.sleep(100L);
             } catch (InterruptedException ignored) {
             }
             logger.debug("scope ending");

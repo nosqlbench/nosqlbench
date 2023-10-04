@@ -34,8 +34,6 @@ public class NBSceneBuffer implements NBSceneFixtures {
     private DiagWriter stderrBuffer;
     private DiagReader stdinBuffer;
 
-
-    private DiagWriter stdoutWriter;
     public NBSceneBuffer(NBSceneFixtures fixtures) {
         this.fixtures = fixtures;
         stdoutBuffer = new DiagWriter(fixtures.out(), " stdout ");
@@ -66,17 +64,17 @@ public class NBSceneBuffer implements NBSceneFixtures {
 
     @Override
     public Writer out() {
-        return stdoutWriter;
+        return stdoutBuffer;
     }
 
     @Override
     public Writer err() {
-        return null;
+        return stderrBuffer;
     }
 
     @Override
     public Reader in() {
-        return null;
+        return stdinBuffer;
     }
 
     public List<String> getTimedLogLines() {
@@ -91,4 +89,6 @@ public class NBSceneBuffer implements NBSceneFixtures {
     public String getIoLog() {
         return String.join("",getTimedLogLines());
     }
+
+
 }
