@@ -26,7 +26,7 @@ import io.nosqlbench.components.NBComponentErrorHandler;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenario;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +44,7 @@ import java.util.function.Function;
  * </OL>
  */
 public abstract class NBScenario extends NBBaseComponent
-    implements Function<NBSceneBuffer, ScenarioResult>, NBComponentErrorHandler {
+    implements Function<NBSceneFixtures, ScenarioResult>, NBComponentErrorHandler {
 
     private final String scenarioName;
     private final Map<String, String> params;
@@ -120,7 +120,7 @@ public abstract class NBScenario extends NBBaseComponent
      * @return
      */
     @Override
-    public final ScenarioResult apply(NBSceneBuffer sctx) {
+    public final ScenarioResult apply(NBSceneFixtures sctx) {
 
         this.scenarioShutdownHook = new ScenarioShutdownHook(this);
         Runtime.getRuntime().addShutdownHook(this.scenarioShutdownHook);
@@ -177,7 +177,7 @@ public abstract class NBScenario extends NBBaseComponent
         error = new RuntimeException("in thread " + t.getName() + ", " + e, e);
     }
 
-    protected abstract void runScenario(NBSceneBuffer sctx);
+    protected abstract void runScenario(NBSceneFixtures sctx);
 
     public void finish() {
         this.logger.debug("finishing scenario");

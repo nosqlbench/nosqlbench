@@ -21,10 +21,7 @@ import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 
 /**
  * <P>An NBSceneFixtures instance represents the runtime fixtures needed to run a specific
@@ -66,12 +63,12 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
      */
     private Extensions extensions;
 
-    private Writer out;
-    private Writer err;
+    private PrintWriter out;
+    private PrintWriter err;
 
     private Reader in;
 
-    public NBDefaultSceneFixtures(ScriptParams params, NBComponent parent, ActivitiesController controller, Extensions extensions, Writer out, Writer err, Reader in) {
+    public NBDefaultSceneFixtures(ScriptParams params, NBComponent parent, ActivitiesController controller, Extensions extensions, PrintWriter out, PrintWriter err, Reader in) {
         this.params = params;
         this.session = parent;
         this.controller = controller;
@@ -89,8 +86,8 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
             ),
             new ActivitiesController(),
             Extensions.ofNone(),
-            new OutputStreamWriter(System.out),
-            new OutputStreamWriter(System.err),
+            new PrintWriter(System.out),
+            new PrintWriter(System.err),
             new InputStreamReader(System.in)
         );
     }
@@ -116,12 +113,12 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
     }
 
     @Override
-    public Writer out() {
+    public PrintWriter out() {
         return out;
     }
 
     @Override
-    public Writer err() {
+    public PrintWriter err() {
         return err;
     }
 

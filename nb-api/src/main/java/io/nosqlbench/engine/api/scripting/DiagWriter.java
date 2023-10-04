@@ -17,14 +17,14 @@
 package io.nosqlbench.engine.api.scripting;
 
 import java.io.CharArrayWriter;
-import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiagWriter extends Writer {
+public class DiagWriter extends PrintWriter {
 
     Writer wrapped;
     private final String prefix;
@@ -35,12 +35,13 @@ public class DiagWriter extends Writer {
     private final DateTimeFormatter tsformat = DateTimeFormatter.ISO_DATE_TIME;
 
     public DiagWriter(Writer wrapped, String prefix) {
+        super(wrapped);
         this.wrapped = wrapped;
         this.prefix = prefix;
     }
 
     @Override
-    public void write(char[] cbuf, int off, int len) throws IOException {
+    public void write(char[] cbuf, int off, int len) {
         String tsprefix = LocalDateTime.now().format(tsformat);
 
         buffer.write(cbuf, off, len);
@@ -63,19 +64,19 @@ public class DiagWriter extends Writer {
 
         }
 
-        wrapped.write(cbuf, off, len);
+        super.write(cbuf, off, len);
     }
 
     @Override
-    public void flush() throws IOException {
+    public void flush() {
         buffer.flush();
-        wrapped.flush();
+        super.flush();
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         buffer.close();
-        wrapped.close();
+        super.close();
     }
 
     public List<String> getTimedLog() {
