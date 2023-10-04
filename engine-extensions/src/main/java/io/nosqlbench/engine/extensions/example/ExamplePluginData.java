@@ -19,6 +19,7 @@ package io.nosqlbench.engine.extensions.example;
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
@@ -32,7 +33,7 @@ public class ExamplePluginData implements ScriptingExtensionPluginInfo<ExamplePl
     }
 
     @Override
-    public ExamplePlugin getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+    public ExamplePlugin getExtensionObject(final Logger logger, final NBBaseComponent baseComponent, final LabeledScenarioContext scriptContext) {
         return new ExamplePlugin();
     }
 

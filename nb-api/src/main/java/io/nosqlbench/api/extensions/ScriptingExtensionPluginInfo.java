@@ -16,8 +16,9 @@
 
 package io.nosqlbench.api.extensions;
 
-import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
@@ -41,11 +42,11 @@ public interface ScriptingExtensionPluginInfo<T> {
 
     /**
      * @param logger A logger named for the extension, in case the extension wants to log internally
-     * @param metricRegistry The main metric registry, in case the extension wants to track metrics internally
+     * @param component The main metrics component, in case the extension wants to track metrics internally
      * @param scriptContext The scripting context object, useful for interacting with the sandbox directly
      * @return a new instance of an extension. The extension is given a logger if it desires.
      */
-     T getExtensionObject(Logger logger, MetricRegistry metricRegistry, LabeledScenarioContext scriptContext);
+     T getExtensionObject(Logger logger, NBBaseComponent component, LabeledScenarioContext scriptContext);
 
     /**
      * @return a simple name at the root of the variable namespace to anchor this extension.

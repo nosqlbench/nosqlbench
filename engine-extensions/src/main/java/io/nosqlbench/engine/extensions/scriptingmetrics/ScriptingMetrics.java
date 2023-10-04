@@ -21,18 +21,19 @@ import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
 import io.nosqlbench.api.engine.metrics.wrappers.RelevancyMeasures;
+import io.nosqlbench.components.NBBaseComponent;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 
 public class ScriptingMetrics {
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final NBBaseComponent baseComponent;
     private final LabeledScenarioContext scriptContext;
 
-    public ScriptingMetrics(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+    public ScriptingMetrics(final Logger logger, final NBBaseComponent baseComponent, final LabeledScenarioContext scriptContext) {
         this.logger = logger;
-        this.metricRegistry = metricRegistry;
+        this.baseComponent = baseComponent;
         this.scriptContext = scriptContext;
     }
 

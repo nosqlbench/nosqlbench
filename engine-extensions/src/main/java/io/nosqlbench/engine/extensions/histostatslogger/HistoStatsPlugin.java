@@ -17,6 +17,8 @@
 package io.nosqlbench.engine.extensions.histostatslogger;
 
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.components.NBBaseComponent;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
@@ -24,12 +26,12 @@ import javax.script.ScriptContext;
 public class HistoStatsPlugin {
 
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final NBBaseComponent baseComponent;
     private final ScriptContext scriptContext;
 
-    public HistoStatsPlugin(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public HistoStatsPlugin(Logger logger, NBBaseComponent baseComponent, ScriptContext scriptContext) {
         this.logger = logger;
-        this.metricRegistry = metricRegistry;
+        this.baseComponent = baseComponent;
         this.scriptContext = scriptContext;
     }
 

@@ -16,28 +16,36 @@
 
 package io.nosqlbench.engine.extensions.csvmetrics;
 
-import com.codahale.metrics.CsvReporter;
 import com.codahale.metrics.Metric;
-import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.api.engine.metrics.reporters.CsvReporter;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBBuilders;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-public class CSVMetrics {
+public class CSVMetrics extends NBBaseComponent {
 
-    private final MetricRegistry registry;
+    private NBBaseComponent baseComponent;
+    private final NBBuilders builders;
     private final File reportTo;
-    CsvReporter reporter;
+    private CsvReporter reporter;
+    private int interval = 1;
+    private final Logger extensionLogger;
 
     /**
      * Create a CSV reporter that is not automatically logging.
+     * @param baseComponent a NBBaseComponent instance to report
      * @param directory a CSV logging filename
      * @param logger an extension logger, to be used for logging extension-specific events
-     * @param registry a MetricRegistry to report
      */
-    public CSVMetrics(String directory, Logger logger, MetricRegistry registry) {
+    public CSVMetrics(NBBaseComponent baseComponent, String directory, Logger logger) {
+        super(baseComponent);
+        this.baseComponent = baseComponent;
+        extensionLogger = logger;
+        builders = new NBBuilders(baseComponent);
         File reportTo = new File(directory);
         if (!reportTo.exists()) {
             if (!reportTo.mkdirs()) {
@@ -45,38 +53,35 @@ public class CSVMetrics {
             }
         }
         this.reportTo = reportTo;
-        this.registry = registry;
+    }
+
+    public void setInterval(int interval) {
+        this.interval = interval;
     }
 
     private void initReporter() {
         if (reporter!=null) {
             return;
         }
-        reporter = CsvReporter.forRegistry(registry)
-                .convertDurationsTo(TimeUnit.MILLISECONDS)
-                .convertRatesTo(TimeUnit.SECONDS)
-                .filter(filter)
-                .build(reportTo);
-
+        reporter = builders.csvReporter(reportTo, interval);
     }
 
     /**
-     * Create an autologging CSV Reporter with the specified period and time unit.
+     * Create an autologging CSV Reporter with the specified period
      * @param csvFile a CSV logging filename
      * @param logger an extension logger, to be used for logging extension-specific events
-     * @param registry a MetricRegistry to report
+     * @param baseComponent a NBBaseComponent instance to report
      * @param period a period between reporting intervals
-     * @param timeUnit the actual timeunit for the period
      */
-    public CSVMetrics(String csvFile, Logger logger, MetricRegistry registry, long period, TimeUnit timeUnit) {
-        this(csvFile, logger, registry);
-        reporter.start(period, timeUnit);
+    public CSVMetrics(String csvFile, Logger logger, NBBaseComponent baseComponent, int period) {
+        this(baseComponent, csvFile, logger);
+        this.start(period);
     }
 
-    public CSVMetrics start(long period, String timeUnitName) {
+    public CSVMetrics start(int period) {
+        setInterval(period);
         initReporter();
-        TimeUnit timeUnit = TimeUnit.valueOf(timeUnitName);
-        reporter.start(period, timeUnit);
+        reporter.task();
         return this;
     }
 
@@ -94,7 +99,7 @@ public class CSVMetrics {
     private final MetricInstanceFilter filter = new MetricInstanceFilter();
 
     public CSVMetrics stop() {
-        reporter.stop();
+        reporter.teardown();
         return this;
     }
 

@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.extensions.csvmetrics;
 
-import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
@@ -30,9 +30,12 @@ public class CSVMetricsPluginData implements ScriptingExtensionPluginInfo<CSVMet
         return "Allows a script to log some or all metrics to CSV files";
     }
 
+    /*
+     * metricComponent should be the Scenario as this is loaded out of NBScenario
+     */
     @Override
-    public CSVMetricsPlugin getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
-        return new CSVMetricsPlugin(logger, metricRegistry, scriptContext);
+    public CSVMetricsPlugin getExtensionObject(final Logger logger, final NBBaseComponent scenario, final LabeledScenarioContext scriptContext) {
+        return new CSVMetricsPlugin(logger, scenario, scriptContext);
     }
 
 }

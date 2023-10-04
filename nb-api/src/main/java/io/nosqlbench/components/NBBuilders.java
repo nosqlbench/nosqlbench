@@ -19,12 +19,18 @@ package io.nosqlbench.components;
 import com.codahale.metrics.Meter;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
+import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
+import io.nosqlbench.api.engine.metrics.reporters.CsvReporter;
 import io.nosqlbench.api.engine.metrics.instruments.*;
 import io.nosqlbench.api.engine.metrics.reporters.PromPushReporterComponent;
 import io.nosqlbench.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
@@ -109,6 +115,11 @@ public class NBBuilders {
     public PromPushReporterComponent pushReporter(String targetUri, int seconds, String config, String... labelspecs) {
         NBLabels extraLabels = NBLabels.forKV((Object[]) labelspecs);
         PromPushReporterComponent reporter = new PromPushReporterComponent(targetUri, config, seconds, base,extraLabels);
+        return reporter;
+    }
+
+    public CsvReporter csvReporter(File reportTo, int interval) {
+        CsvReporter reporter = new CsvReporter(base, reportTo, interval);
         return reporter;
     }
 

@@ -26,6 +26,7 @@ import io.nosqlbench.addins.s3.s3urlhandler.S3UrlFields;
 import io.nosqlbench.api.system.NBEnvironment;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
 import io.nosqlbench.api.metadata.ScenarioMetadataAware;
+import io.nosqlbench.components.NBBaseComponent;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
@@ -39,13 +40,13 @@ import java.util.Map;
 
 public class S3Uploader implements ScenarioMetadataAware {
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final NBBaseComponent baseComponent;
     private final ScriptContext scriptContext;
     private ScenarioMetadata scenarioMetadata;
 
-    public S3Uploader(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public S3Uploader(Logger logger, NBBaseComponent baseComponent, ScriptContext scriptContext) {
         this.logger = logger;
-        this.metricRegistry = metricRegistry;
+        this.baseComponent = baseComponent;
         this.scriptContext = scriptContext;
     }
 
