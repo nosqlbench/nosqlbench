@@ -17,19 +17,23 @@
 package io.nosqlbench.engine.extensions.csvmetrics;
 
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.components.NBComponentMetrics;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 import java.io.IOException;
 
-public class CSVMetricsPlugin {
+public class CSVMetricsPlugin extends NBBaseComponent {
     private final ScriptContext context;
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final NBBaseComponent parent;
 
-    public CSVMetricsPlugin(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public CSVMetricsPlugin(Logger logger, NBBaseComponent parent, ScriptContext scriptContext) {
+        super(parent);
         this.logger = logger;
-        this.metricRegistry = metricRegistry;
+        this.parent = parent;
         this.context = scriptContext;
     }
 
@@ -39,7 +43,7 @@ public class CSVMetricsPlugin {
      * @return the CSVMetrics instance, for method chaining
      */
     public CSVMetrics log(String filename) {
-        CSVMetrics csvMetrics = new CSVMetrics(filename, logger, metricRegistry);
+        CSVMetrics csvMetrics = new CSVMetrics(parent, filename, logger);
         writeStdout("started new csvmetrics: " + filename + "\n");
         return csvMetrics;
     }
@@ -57,7 +61,7 @@ public class CSVMetricsPlugin {
         for(String p:pattern) {
             log.addPattern(p);
         }
-        return log.start(period, timeUnit);
+        return log.start((int)period);
     }
 
     private void writeStdout(String msg) {

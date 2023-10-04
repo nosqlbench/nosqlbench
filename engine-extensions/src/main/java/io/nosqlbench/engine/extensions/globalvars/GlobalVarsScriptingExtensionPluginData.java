@@ -19,6 +19,7 @@ package io.nosqlbench.engine.extensions.globalvars;
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +35,7 @@ public class GlobalVarsScriptingExtensionPluginData implements ScriptingExtensio
     }
 
     @Override
-    public ConcurrentHashMap<String, Object> getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+    public ConcurrentHashMap<String, Object> getExtensionObject(final Logger logger, final NBBaseComponent baseComponent, final LabeledScenarioContext scriptContext) {
         final ConcurrentHashMap<String, Object> map = SharedState.gl_ObjectMap;
         return map;
     }

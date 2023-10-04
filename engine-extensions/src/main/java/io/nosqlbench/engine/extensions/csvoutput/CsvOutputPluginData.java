@@ -19,6 +19,7 @@ package io.nosqlbench.engine.extensions.csvoutput;
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
@@ -31,7 +32,7 @@ public class CsvOutputPluginData implements ScriptingExtensionPluginInfo<CsvOutp
     }
 
     @Override
-    public CsvOutputPluginInstance getExtensionObject(final Logger logger, final MetricRegistry metricRegistry, final LabeledScenarioContext scriptContext) {
+    public CsvOutputPluginInstance getExtensionObject(final Logger logger, final NBBaseComponent baseComponent, final LabeledScenarioContext scriptContext) {
         return new CsvOutputPluginInstance();
     }
 }

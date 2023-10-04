@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.extensions.histologger;
 
+import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.components.NBBaseComponent;
 import com.codahale.metrics.MetricRegistry;
 import org.apache.logging.log4j.Logger;
 
@@ -23,12 +25,12 @@ import javax.script.ScriptContext;
 
 public class HdrHistoLogPlugin {
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final NBBaseComponent baseComponent;
     private final ScriptContext scriptContext;
 
-    public HdrHistoLogPlugin(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public HdrHistoLogPlugin(Logger logger, NBBaseComponent baseComponent, ScriptContext scriptContext) {
         this.logger = logger;
-        this.metricRegistry = metricRegistry;
+        this.baseComponent = baseComponent;
         this.scriptContext = scriptContext;
     }
 

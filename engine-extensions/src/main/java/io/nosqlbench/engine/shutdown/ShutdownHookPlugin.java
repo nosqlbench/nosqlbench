@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.shutdown;
 
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.components.NBBaseComponent;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
@@ -24,13 +25,13 @@ import java.util.function.Function;
 
 public class ShutdownHookPlugin {
     private final Logger logger;
-    private final MetricRegistry metricRegistry;
+    private final NBBaseComponent baseComponent;
     private final ScriptContext scriptContext;
 
-    public ShutdownHookPlugin(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public ShutdownHookPlugin(Logger logger, NBBaseComponent baseComponent, ScriptContext scriptContext) {
 
         this.logger = logger;
-        this.metricRegistry = metricRegistry;
+        this.baseComponent = baseComponent;
         this.scriptContext = scriptContext;
     }
 
