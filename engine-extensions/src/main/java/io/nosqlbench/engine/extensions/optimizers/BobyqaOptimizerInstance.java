@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.extensions.optimizers;
 
-import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -33,8 +33,7 @@ import java.util.function.Function;
 public class BobyqaOptimizerInstance {
 
     private final Logger logger;
-    private final NBBaseComponent baseComponent;
-    private final ScriptContext scriptContext;
+    private final NBComponent baseComponent;
 
     private int interpolations = 0;
     private double initialTrustRegionRadius = Double.MAX_VALUE;
@@ -50,10 +49,9 @@ public class BobyqaOptimizerInstance {
     private MVLogger mvLogger;
     private double guessSlew = 0.25d;
 
-    public BobyqaOptimizerInstance(Logger logger, NBBaseComponent baseComponent, ScriptContext scriptContext) {
+    public BobyqaOptimizerInstance(Logger logger, NBComponent baseComponent) {
         this.logger = logger;
         this.baseComponent = baseComponent;
-        this.scriptContext = scriptContext;
     }
 
     public BobyqaOptimizerInstance setPoints(int numberOfInterpolationPoints) {

@@ -16,10 +16,9 @@
 
 package io.nosqlbench.engine.extensions.vectormath;
 
-import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
-import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
@@ -31,7 +30,7 @@ public class CqlUtilsPluginInfo implements ScriptingExtensionPluginInfo<CqlUtils
     }
 
     @Override
-    public CqlUtils getExtensionObject(Logger logger, NBBaseComponent baseComponent, LabeledScenarioContext scriptContext) {
+    public CqlUtils getExtensionObject(Logger logger, NBComponent baseComponent) {
         return new CqlUtils();
     }
 }

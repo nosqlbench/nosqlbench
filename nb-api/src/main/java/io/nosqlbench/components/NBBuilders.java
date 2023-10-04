@@ -25,12 +25,14 @@ import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.api.engine.metrics.reporters.CsvReporter;
 import io.nosqlbench.api.engine.metrics.instruments.*;
+import io.nosqlbench.api.engine.metrics.reporters.MetricInstanceFilter;
 import io.nosqlbench.api.engine.metrics.reporters.PromPushReporterComponent;
 import io.nosqlbench.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
@@ -118,9 +120,39 @@ public class NBBuilders {
         return reporter;
     }
 
-    public CsvReporter csvReporter(File reportTo, int interval) {
-        CsvReporter reporter = new CsvReporter(base, reportTo, interval);
-        return reporter;
+    public static class csvReporterBuilder {
+        private final NBComponent component;
+        private Path reportTo = Path.of("metrics.csv");
+        private int interval = 1;
+        private MetricInstanceFilter filter = new MetricInstanceFilter();
+        private NBLabels labels = null;
+
+        public csvReporterBuilder(NBComponent component) {
+            this.component = component;
+        }
+        public csvReporterBuilder labels(NBLabels labels) {
+            this.labels = labels;
+            return this;
+        }
+        public csvReporterBuilder path(Path reportTo) {
+            this.reportTo = reportTo;
+            return this;
+        }
+        public csvReporterBuilder path(String reportTo) {
+            this.reportTo = Path.of(reportTo);
+            return this;
+        }
+        public csvReporterBuilder interval(int interval) {
+            this.interval = interval;
+            return this;
+        }
+        public csvReporterBuilder filter(MetricInstanceFilter filter) {
+            this.filter = filter;
+            return this;
+        }
+        public CsvReporter build() {
+            return new CsvReporter(component, reportTo, interval, filter);
+        }
     }
 
 }

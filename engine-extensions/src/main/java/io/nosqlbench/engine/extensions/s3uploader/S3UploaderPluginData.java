@@ -16,13 +16,13 @@
 
 package io.nosqlbench.engine.extensions.s3uploader;
 
-import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
-import io.nosqlbench.components.NBBaseComponent;
-import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
 import io.nosqlbench.api.metadata.ScenarioMetadataAware;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
 @Service(value = ScriptingExtensionPluginInfo.class, selector = "s3")
@@ -35,8 +35,8 @@ public class S3UploaderPluginData implements ScriptingExtensionPluginInfo<S3Uplo
     }
 
     @Override
-    public S3Uploader getExtensionObject(final Logger logger, final NBBaseComponent baseComponent, final LabeledScenarioContext scriptContext) {
-        final S3Uploader uploader = new S3Uploader(logger, baseComponent, scriptContext);
+    public S3Uploader getExtensionObject(final Logger logger, final NBComponent baseComponent) {
+        final S3Uploader uploader = new S3Uploader(logger, baseComponent);
         ScenarioMetadataAware.apply(uploader, this.scenarioMetadata);
         return uploader;
     }

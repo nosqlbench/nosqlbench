@@ -221,8 +221,7 @@ public class NBScenario extends NBBaseComponent implements Callable<ExecutionMet
                 LogManager.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
             final Object extensionObject = extensionDescriptor.getExtensionObject(
                 extensionLogger,
-                this,
-                this.scriptEnv
+                this
             );
             ScenarioMetadataAware.apply(extensionObject, this.getScenarioMetadata());
             this.logger.trace(() -> "Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +

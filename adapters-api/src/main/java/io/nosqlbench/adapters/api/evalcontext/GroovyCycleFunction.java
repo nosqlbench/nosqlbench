@@ -89,7 +89,6 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
                 LogManager.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
             final Object extensionObject = extensionDescriptor.getExtensionObject(
                 extensionLogger,
-                null,
                 null
             );
             logger.trace(() -> "Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +

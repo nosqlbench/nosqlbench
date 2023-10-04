@@ -20,13 +20,13 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.addins.s3.s3urlhandler.S3ClientCache;
 import io.nosqlbench.addins.s3.s3urlhandler.S3UrlFields;
-import io.nosqlbench.api.system.NBEnvironment;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
 import io.nosqlbench.api.metadata.ScenarioMetadataAware;
+import io.nosqlbench.api.system.NBEnvironment;
 import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
@@ -40,14 +40,12 @@ import java.util.Map;
 
 public class S3Uploader implements ScenarioMetadataAware {
     private final Logger logger;
-    private final NBBaseComponent baseComponent;
-    private final ScriptContext scriptContext;
+    private final NBComponent baseComponent;
     private ScenarioMetadata scenarioMetadata;
 
-    public S3Uploader(Logger logger, NBBaseComponent baseComponent, ScriptContext scriptContext) {
+    public S3Uploader(Logger logger, NBComponent baseComponent) {
         this.logger = logger;
         this.baseComponent = baseComponent;
-        this.scriptContext = scriptContext;
     }
 
     /**
