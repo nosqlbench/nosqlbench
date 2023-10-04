@@ -22,7 +22,7 @@ import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ScriptParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
 import org.graalvm.polyglot.Context;
@@ -119,7 +119,7 @@ public class NBScriptedScenario extends NBScenario {
         return this;
     }
 
-    private void initializeScriptContext(NBSceneBuffer fixtures) {
+    private void initializeScriptContext(NBSceneFixtures fixtures) {
         BufferedScriptContext ctx = new BufferedScriptContext(fixtures);
         this.scriptEngine.setContext(ctx);
     }
@@ -164,7 +164,7 @@ public class NBScriptedScenario extends NBScenario {
 //
     }
 
-    protected synchronized void runScenario(NBSceneBuffer context) {
+    protected synchronized void runScenario(NBSceneFixtures context) {
         if (null == result) {
             try {
                 this.logger.debug("Initializing scripting engine for {}.", scenarioName);

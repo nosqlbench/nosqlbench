@@ -16,16 +16,16 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
 
 import javax.script.SimpleScriptContext;
 import java.io.Reader;
 import java.io.Writer;
 
 public class BufferedScriptContext extends SimpleScriptContext {
-    private final NBSceneBuffer fixtures;
+    private final NBSceneFixtures fixtures;
 
-    public BufferedScriptContext(NBSceneBuffer fixtures) {
+    public BufferedScriptContext(NBSceneFixtures fixtures) {
         this.fixtures = fixtures;
     }
 

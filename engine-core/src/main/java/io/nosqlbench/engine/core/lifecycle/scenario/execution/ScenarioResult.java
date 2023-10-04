@@ -50,4 +50,10 @@ public class ScenarioResult {
     public String getIOLog() {
         return iolog;
     }
+
+    @Override
+    public String toString() {
+        return ((error!=null)? "ERROR:" + error.toString() : "") +
+        getIOLog();
+    }
 }

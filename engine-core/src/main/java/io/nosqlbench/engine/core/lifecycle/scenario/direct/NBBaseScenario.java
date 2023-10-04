@@ -14,28 +14,21 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario.context;
+package io.nosqlbench.engine.core.lifecycle.scenario.direct;
 
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
 
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.util.Map;
 
-public interface NBSceneFixtures {
-    ScriptParams params();
+public abstract class NBBaseScenario extends NBScenario {
 
-    NBComponent session();
+    public NBBaseScenario(NBComponent parentComponent, String scenarioName, Map<String, String> params, String progressInterval) {
+        super(parentComponent, scenarioName, params, progressInterval);
+    }
 
-    ActivitiesController controller();
-
-    Extensions extensions();
-
-    PrintWriter out();
-
-    Writer err();
-
-    Reader in();
-
+    @Override
+    protected void runScenario(NBSceneFixtures sctx) {
+    }
 }

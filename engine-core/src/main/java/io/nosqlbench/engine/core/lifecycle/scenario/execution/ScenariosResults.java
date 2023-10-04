@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ScenariosResults {
 
@@ -83,5 +84,10 @@ public class ScenariosResults {
 
     public int getSize() {
         return this.scenarioResultMap.size();
+    }
+
+    @Override
+    public String toString() {
+        return scenarioResultMap.values().stream().map(Object::toString).collect(Collectors.joining("\n"));
     }
 }

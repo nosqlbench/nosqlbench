@@ -31,7 +31,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -64,8 +64,8 @@ public class ScenariosExecutor extends NBBaseComponent {
             this.getParent(),
             scenario.getActivitiesController(),
             loadExtensions(),
-            new OutputStreamWriter(System.out),
-            new OutputStreamWriter(System.err),
+            new PrintWriter(System.out),
+            new PrintWriter(System.err),
             new InputStreamReader(System.in)
         );
         NBSceneBuffer bufferedContext = new NBSceneBuffer(basecontext);
@@ -177,7 +177,7 @@ public class ScenariosExecutor extends NBBaseComponent {
                 } catch (Exception e) {
                     long now = System.currentTimeMillis();
                     logger.debug("creating exceptional scenario result from getAsyncResultStatus");
-                    oResult = Optional.of(new ScenarioResult(now, now, "errored output", e));
+                    oResult = Optional.of(new ScenarioResult(now, now, "errored output" + e.getMessage(), e));
                 }
             }
 
