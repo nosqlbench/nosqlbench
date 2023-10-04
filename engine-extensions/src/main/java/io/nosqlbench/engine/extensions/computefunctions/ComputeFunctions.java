@@ -61,6 +61,7 @@ public class ComputeFunctions {
         if (actual.length < k) {
             throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + actual.length + ", limit=" + k);
         }
+        relevant = Arrays.copyOfRange(relevant,0,k);
         actual = Arrays.copyOfRange(actual, 0, k);
         Arrays.sort(relevant);
         Arrays.sort(actual);
@@ -106,6 +107,7 @@ public class ComputeFunctions {
         if (actual.length < k) {
             throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + actual.length + ", limit=" + k);
         }
+        relevant = Arrays.copyOfRange(relevant,0,k);
         actual = Arrays.copyOfRange(actual, 0, k);
         Arrays.sort(relevant);
         Arrays.sort(actual);
