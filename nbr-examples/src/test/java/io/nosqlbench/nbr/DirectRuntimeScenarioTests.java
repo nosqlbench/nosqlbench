@@ -16,19 +16,23 @@
 
 package io.nosqlbench.nbr;
 
+import io.nosqlbench.api.config.standard.TestComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosExecutor;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosResults;
+import io.nosqlbench.nbr.examples.SCDryRunScenarioTest;
+import org.junit.jupiter.api.Test;
+
+import java.util.Map;
+
 public class DirectRuntimeScenarioTests {
 
-//    @Test
-//    public void testDirect() {
-//        TestComponent testC = new TestComponent("testroot", "testroot");
-//        new NBScriptedScenario(
-//            "testname",
-//            "console:1m",
-//            null,
-//            Path.of("native-logs"),
-//            null,
-//            testC,
-//            NBScriptedScenario.Invocation.EXECUTE_SCRIPT
-//        );
-//    }
+    @Test
+    public void testDirect() {
+        TestComponent testC = new TestComponent("testroot", "testroot");
+        SCDryRunScenarioTest sc1 = new SCDryRunScenarioTest(TestComponent.EMPTY_COMPONENT, "test", Map.of(), "console:1s");
+        ScenariosExecutor executor = new ScenariosExecutor(TestComponent.EMPTY_COMPONENT, "test", 1);
+        executor.execute(sc1);
+        ScenariosResults results = executor.awaitAllResults();
+        System.out.println(results);
+    }
 }

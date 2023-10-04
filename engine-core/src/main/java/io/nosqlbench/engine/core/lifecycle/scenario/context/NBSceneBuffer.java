@@ -21,6 +21,7 @@ import io.nosqlbench.engine.api.scripting.DiagReader;
 import io.nosqlbench.engine.api.scripting.DiagWriter;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
 
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public class NBSceneBuffer implements NBSceneFixtures {
     }
 
     @Override
-    public Writer out() {
+    public PrintWriter out() {
         return stdoutBuffer;
     }
 
