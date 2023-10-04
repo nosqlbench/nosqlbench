@@ -36,4 +36,5 @@ public interface NBSceneFixtures {
     Writer err();
 
     Reader in();
+
 }

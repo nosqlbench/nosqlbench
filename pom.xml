@@ -85,7 +85,7 @@
         <module>nb5-proof</module>
         <module>nb5</module>
         <module>nbr</module>
-        <module>nbr-examples</module>
+<!--        <module>nbr-examples</module>-->
         <module>nb-api</module>
         <module>nb-annotations</module>
         <module>nb-spectest</module>

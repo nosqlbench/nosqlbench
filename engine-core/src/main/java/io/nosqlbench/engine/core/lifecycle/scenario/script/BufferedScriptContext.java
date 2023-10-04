@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
-import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
 
-public class ScenarioScriptShell extends ScriptEnvBuffer {
+import javax.script.SimpleScriptContext;
+import java.io.Reader;
+import java.io.Writer;
 
-    public ScenarioScriptShell(NBSceneFixtures fixtures) {
+public class BufferedScriptContext extends SimpleScriptContext {
+    private final NBSceneBuffer fixtures;
+
+    public BufferedScriptContext(NBSceneBuffer fixtures) {
+        this.fixtures = fixtures;
     }
 
     @Override
-    public Object getAttribute(String name) {
-        return super.getAttribute(name);
+    public Reader getReader() { // stdin
+        return fixtures.in();
     }
 
     @Override
-    public Object getAttribute(String name, int scope) {
-        return super.getAttribute(name, scope);
+    public Writer getWriter() { // stdout
+        return fixtures.out();
     }
 
     @Override
-    public void setAttribute(String name, Object value, int scope) {
-        super.setAttribute(name, value, scope);
+    public Writer getErrorWriter() { // stderr
+        return fixtures.err();
     }
 
 }
