@@ -43,10 +43,9 @@ public interface ScriptingExtensionPluginInfo<T> {
     /**
      * @param logger A logger named for the extension, in case the extension wants to log internally
      * @param component The main metrics component, in case the extension wants to track metrics internally
-     * @param scriptContext The scripting context object, useful for interacting with the sandbox directly
      * @return a new instance of an extension. The extension is given a logger if it desires.
      */
-     T getExtensionObject(Logger logger, NBBaseComponent component, LabeledScenarioContext scriptContext);
+     T getExtensionObject(Logger logger, NBComponent component);
 
     /**
      * @return a simple name at the root of the variable namespace to anchor this extension.

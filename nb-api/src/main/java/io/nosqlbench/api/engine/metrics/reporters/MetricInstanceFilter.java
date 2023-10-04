@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
-package io.nosqlbench.engine.extensions.csvmetrics;
+package io.nosqlbench.api.engine.metrics.reporters;
 
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;

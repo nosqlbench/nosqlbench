@@ -19,19 +19,18 @@ package io.nosqlbench.engine.extensions.histologger;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.components.NBBaseComponent;
 import com.codahale.metrics.MetricRegistry;
+import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
 
 public class HdrHistoLogPlugin {
     private final Logger logger;
-    private final NBBaseComponent baseComponent;
-    private final ScriptContext scriptContext;
+    private final NBComponent baseComponent;
 
-    public HdrHistoLogPlugin(Logger logger, NBBaseComponent baseComponent, ScriptContext scriptContext) {
+    public HdrHistoLogPlugin(Logger logger, NBComponent baseComponent) {
         this.logger = logger;
         this.baseComponent = baseComponent;
-        this.scriptContext = scriptContext;
     }
 
     public void logHistoIntervals(String session, String pattern, String filename, String interval) {

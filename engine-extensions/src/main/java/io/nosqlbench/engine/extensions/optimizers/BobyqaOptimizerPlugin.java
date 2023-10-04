@@ -16,9 +16,8 @@
 
 package io.nosqlbench.engine.extensions.optimizers;
 
-import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.components.NBBaseComponent;
-import io.nosqlbench.components.NBBuilders;
+import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
@@ -26,17 +25,15 @@ import javax.script.ScriptContext;
 public class BobyqaOptimizerPlugin {
 
     private final Logger logger;
-    private final NBBaseComponent baseComponent;
-    private final ScriptContext scriptContext;
+    private final NBComponent baseComponent;
 
-    public BobyqaOptimizerPlugin(Logger logger, NBBaseComponent baseComponent, ScriptContext scriptContext) {
+    public BobyqaOptimizerPlugin(Logger logger, NBComponent baseComponent) {
         this.logger = logger;
         this.baseComponent = baseComponent;
-        this.scriptContext = scriptContext;
     }
 
     public BobyqaOptimizerInstance init() {
-        return new BobyqaOptimizerInstance(logger,baseComponent,scriptContext);
+        return new BobyqaOptimizerInstance(logger,baseComponent);
     }
 
 
