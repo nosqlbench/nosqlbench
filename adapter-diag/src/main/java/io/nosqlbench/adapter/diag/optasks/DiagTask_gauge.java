@@ -136,7 +136,7 @@ public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double> {
         }
 
         logger.info("Registering gauge for diag task with labels:" + getParentLabels().getLabels() + " label:" + label);
-        this.gauge=ActivityMetrics.gauge(this, label, this);
+        this.gauge=parent.create().gauge(label,() -> this.sampleValue);
     }
 
     @Override

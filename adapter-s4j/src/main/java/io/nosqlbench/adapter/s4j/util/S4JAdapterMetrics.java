@@ -40,7 +40,7 @@ public class S4JAdapterMetrics  {
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
         this.messageSizeHistogram =
-            ActivityMetrics.histogram(this.s4jBaseOpDispenser,
+            s4jBaseOpDispenser.create().histogram(
                 "message_size", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // Timer metrics

@@ -57,7 +57,7 @@ public class AmqpAdapterMetrics {
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
         messageSizeHistogram =
-            ActivityMetrics.histogram(this.amqpBaseOpDispenser,
+            amqpBaseOpDispenser.create().histogram(
                 "message_size", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // Timer metrics
@@ -70,14 +70,14 @@ public class AmqpAdapterMetrics {
         // End-to-end metrics
         // Latency
         e2eMsgProcLatencyHistogram =
-            ActivityMetrics.histogram(this.amqpBaseOpDispenser, "e2e_msg_latency", ActivityMetrics.DEFAULT_HDRDIGITS);
+            amqpBaseOpDispenser.create().histogram("e2e_msg_latency", ActivityMetrics.DEFAULT_HDRDIGITS);
         // Error metrics
         msgErrOutOfSeqCounter =
-            ActivityMetrics.counter(this.amqpBaseOpDispenser, "err_msg_oos");
+            amqpBaseOpDispenser.create().counter("err_msg_oos");
         msgErrLossCounter =
-            ActivityMetrics.counter(this.amqpBaseOpDispenser, "err_msg_loss");
+            amqpBaseOpDispenser.create().counter("err_msg_loss");
         msgErrDuplicateCounter =
-            ActivityMetrics.counter(this.amqpBaseOpDispenser, "err_msg_dup");
+            amqpBaseOpDispenser.create().counter("err_msg_dup");
     }
 
     public Timer getBindTimer() { return bindTimer; }

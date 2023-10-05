@@ -57,9 +57,9 @@ public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, C
         this.maxpages = op.getStaticConfigOr("maxpages", 1);
         this.isRetryReplace = op.getStaticConfigOr("retryreplace", false);
         this.maxLwtRetries = op.getStaticConfigOr("maxlwtretries", 1);
-        this.rowsHistogram = ActivityMetrics.histogram(op, "rows", op.getStaticConfigOr("hdr_digits", 3));
-        this.pagesHistogram = ActivityMetrics.histogram(op, "pages", op.getStaticConfigOr("hdr_digits", 3));
-        this.payloadBytesHistogram = ActivityMetrics.histogram(op, "payload_bytes", op.getStaticConfigOr("hdr_digits", 3));
+        this.rowsHistogram = create().histogram("rows", op.getStaticConfigOr("hdr_digits", 3));
+        this.pagesHistogram = create().histogram("pages", op.getStaticConfigOr("hdr_digits", 3));
+        this.payloadBytesHistogram = create().histogram("payload_bytes", op.getStaticConfigOr("hdr_digits", 3));
     }
 
     public int getMaxPages() {

@@ -22,6 +22,7 @@ import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
+import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,6 +39,7 @@ import java.util.Locale;
 public class HttpSpace implements NBLabeledElement {
     private final static Logger logger = LogManager.getLogger(HttpSpace.class);
 
+    private final NBComponent parent;
     private final String name;
     private final NBConfiguration cfg;
     private HttpConsoleFormats console;
@@ -50,7 +52,8 @@ public class HttpSpace implements NBLabeledElement {
     private boolean diagnosticsEnabled;
 
 
-    public HttpSpace(String spaceName, NBConfiguration cfg) {
+    public HttpSpace(NBComponent parent, String spaceName, NBConfiguration cfg) {
+        this.parent = parent;
         this.name = spaceName;
         this.cfg = cfg;
         applyConfig(cfg);
@@ -76,7 +79,7 @@ public class HttpSpace implements NBLabeledElement {
             );
         this.timeout = Duration.ofMillis(cfg.get("timeout", long.class));
         this.timeoutMillis = cfg.get("timeout", long.class);
-        this.httpMetrics = new HttpMetrics(this);
+        this.httpMetrics = new HttpMetrics(parent, this);
 
         this.console = cfg.getOptional("diag").map(s -> HttpConsoleFormats.apply(s, this.console))
             .orElseGet(() -> HttpConsoleFormats.apply(null,null));

@@ -463,8 +463,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
 //    }
 
     private void registerMetrics() {
-        NBMetricGauge gauge = new NBFunctionGauge(activity, () -> (double) this.motors.size(), "threads");
-        this.threadsGauge = ActivityMetrics.gauge(gauge);
+        this.activity.create().gauge("threads",() -> (double) this.motors.size());
     }
 
     private void unregisterMetrics() {

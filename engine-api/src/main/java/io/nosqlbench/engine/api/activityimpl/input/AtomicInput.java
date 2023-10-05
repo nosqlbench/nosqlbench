@@ -62,14 +62,14 @@ public class AtomicInput extends NBBaseComponent implements Input, ActivityDefOb
         super(parent);
         this.activityDef = activityDef;
         onActivityDefUpdate(activityDef);
-        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.cycles_min.get(), "input_cycles_first"));
-        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.cycles_max.get(), "input_cycles_last"));
-        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.cycle_value.get(), "input_cycle"));
-        ActivityMetrics.gauge(new NBFunctionGauge(this, this::getTotalCycles, "input_cycles_total"));
-        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.recycles_min.get(), "input_recycles_first"));
-        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.recycles_max.get(), "input_recycles_last"));
-        ActivityMetrics.gauge(new NBFunctionGauge(this, () -> (double) this.recycle_value.get(), "input_recycle"));
-        ActivityMetrics.gauge(new NBFunctionGauge(this, this::getTotalRecycles, "input_recycles_total"));
+        create().gauge("input_cycles_first",() -> (double) this.cycles_min.get());
+        create().gauge("input_cycles_last",() -> (double) this.cycles_max.get());
+        create().gauge("input_cycle",() -> (double) this.cycle_value.get());
+        create().gauge("input_cycles_total",this::getTotalCycles);
+        create().gauge("input_recycles_first",() -> (double) this.recycles_min.get());
+        create().gauge("input_recycles_last",() -> (double) this.recycles_max.get());
+        create().gauge("input_recycle",() -> (double) this.recycle_value.get());
+        create().gauge("input_recycles_total",this::getTotalRecycles);
     }
 
     private double getTotalRecycles() {
