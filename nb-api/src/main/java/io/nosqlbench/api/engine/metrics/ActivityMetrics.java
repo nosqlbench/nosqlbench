@@ -141,34 +141,6 @@ public class ActivityMetrics {
         get().remove(graphiteName);
     }
 
-    /**
-     * <p>Create a timer associated with an activity.</p>
-     *
-     * <p>If the provide ActivityDef contains a parameter "hdr_digits", then it will be used to set the number of
-     * significant digits on the histogram's precision.</p>
-     *
-     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
-     * that only one of them succeeds.</p>
-     *
-     * @param named
-     *     an associated activity def
-     * @param metricFamilyName
-     *     a simple, descriptive name for the timer
-     * @return the timer, perhaps a different one if it has already been registered
-     */
-    public static Timer timer(NBLabeledElement parent, String metricFamilyName, int hdrdigits) {
-        final NBLabels labels = parent.getLabels().and("name", sanitize(metricFamilyName));
-
-
-        Timer registeredTimer = (Timer) register(labels, () ->
-            new NBMetricTimer(labels,
-                new DeltaHdrHistogramReservoir(
-                    labels,
-                    hdrdigits
-                )
-            ));
-        return registeredTimer;
-    }
 
     /**
      * <p>Create an HDR histogram associated with an activity.</p>

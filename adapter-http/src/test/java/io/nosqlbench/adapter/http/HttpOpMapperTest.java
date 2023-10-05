@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.http;
 
 import io.nosqlbench.adapter.http.core.HttpOpMapper;
 import io.nosqlbench.adapter.http.core.HttpSpace;
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
@@ -26,6 +27,7 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -43,10 +45,12 @@ public class HttpOpMapperTest {
     static HttpDriverAdapter adapter;
     static HttpOpMapper mapper;
 
+    static NBComponent parent = new TestComponent("parent","parent");
+
     @BeforeAll
     public static void initializeTestMapper() {
         HttpOpMapperTest.cfg = HttpSpace.getConfigModel().apply(Map.of());
-        HttpOpMapperTest.adapter = new HttpDriverAdapter();
+        HttpOpMapperTest.adapter = new HttpDriverAdapter(parent);
         HttpOpMapperTest.adapter.applyConfig(HttpOpMapperTest.cfg);
         final DriverSpaceCache<? extends HttpSpace> cache = HttpOpMapperTest.adapter.getSpaceCache();
         HttpOpMapperTest.mapper = new HttpOpMapper(HttpOpMapperTest.adapter, HttpOpMapperTest.cfg, cache);
@@ -55,7 +59,7 @@ public class HttpOpMapperTest {
     private static ParsedOp parsedOpFor(final String yaml) {
         final OpsDocList docs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
         final OpTemplate opTemplate = docs.getOps().get(0);
-        final ParsedOp parsedOp = new ParsedOp(opTemplate, HttpOpMapperTest.cfg, List.of(HttpOpMapperTest.adapter.getPreprocessor()), NBLabeledElement.forMap(Map.of()));
+        final ParsedOp parsedOp = new ParsedOp(opTemplate, HttpOpMapperTest.cfg, List.of(HttpOpMapperTest.adapter.getPreprocessor()), parent);
         return parsedOp;
     }
 

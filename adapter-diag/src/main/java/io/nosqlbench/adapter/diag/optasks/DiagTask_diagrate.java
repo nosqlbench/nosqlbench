@@ -33,7 +33,7 @@ public class DiagTask_diagrate extends BaseDiagTask implements NBReconfigurable 
     private void updateRateLimiter(String spec) {
         this.rateSpec = new RateSpec(spec);
         rateLimiter = RateLimiters.createOrUpdate(
-            this,
+            this.parent,
             "diag",
             rateLimiter,
             rateSpec

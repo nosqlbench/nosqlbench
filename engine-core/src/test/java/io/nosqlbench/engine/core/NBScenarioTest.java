@@ -34,7 +34,6 @@ public class NBScenarioTest {
 
     @Test
     public void shouldLoadScriptText() {
-        ScriptEnvBuffer buffer = new ScriptEnvBuffer();
         NBScriptedScenario scenario = NBScriptedScenario.ofScripted("testing", Map.of(),new TestComponent(), NBScriptedScenario.Invocation.EXECUTE_SCRIPT);
         scenario.addScriptText("print('loaded script environment...');\n");
         try {

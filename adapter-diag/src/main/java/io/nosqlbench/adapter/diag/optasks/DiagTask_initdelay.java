@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;

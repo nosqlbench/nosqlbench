@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,6 +50,7 @@ public class ThreadDrivenTokenPool implements TokenPool {
     private static final Logger logger = LogManager.getLogger(ThreadDrivenTokenPool.class);
 
     public static final double MIN_CONCURRENT_OPS = 2;
+    private final NBComponent parent;
 
     private long maxActivePool;
     private long burstPoolSize;
@@ -70,7 +72,8 @@ public class ThreadDrivenTokenPool implements TokenPool {
      *
      * @param rateSpec a {@link RateSpec}
      */
-    public ThreadDrivenTokenPool(final RateSpec rateSpec, final NBLabeledElement named) {
+    public ThreadDrivenTokenPool(NBComponent parent, final RateSpec rateSpec, final NBLabeledElement named) {
+        this.parent = parent;
         this.apply(named,rateSpec);
         ThreadDrivenTokenPool.logger.debug(() -> "initialized token pool: " + this + " for rate:" + rateSpec);
 //        filler.start();
@@ -91,7 +94,7 @@ public class ThreadDrivenTokenPool implements TokenPool {
 
         burstPoolSize = this.maxOverActivePool - this.maxActivePool;
         nanosPerOp = rateSpec.getNanosPerOp();
-        filler = null == this.filler ? new TokenFiller(rateSpec, this, labeled, 3) : this.filler.apply(rateSpec);
+        filler = null == this.filler ? new TokenFiller(parent, rateSpec, this, labeled, 3) : this.filler.apply(rateSpec);
         this.notifyAll();
         return this;
     }

@@ -26,6 +26,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
@@ -38,6 +39,10 @@ import java.util.function.Function;
 
 @Service(value = DriverAdapter.class, selector = "http")
 public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
+
+    public HttpDriverAdapter(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     @Override
     public OpMapper<HttpOp> getOpMapper() {

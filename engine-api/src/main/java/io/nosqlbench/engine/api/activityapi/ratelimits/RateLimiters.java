@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,10 +26,10 @@ public enum RateLimiters {
     ;
     private static final Logger logger = LogManager.getLogger(RateLimiters.class);
 
-    public static synchronized RateLimiter createOrUpdate(final NBLabeledElement def, final String label, final RateLimiter extant, final RateSpec spec) {
+    public static synchronized RateLimiter createOrUpdate(final NBComponent parent, final String label, final RateLimiter extant, final RateSpec spec) {
 
         if (null == extant) {
-            final RateLimiter rateLimiter= new HybridRateLimiter(def, label, spec);
+            final RateLimiter rateLimiter= new HybridRateLimiter(parent, label, spec);
 
             RateLimiters.logger.info(() -> "Using rate limiter: " + rateLimiter);
             return rateLimiter;
@@ -38,7 +39,7 @@ public enum RateLimiters {
         return extant;
     }
 
-    public static synchronized RateLimiter create(final NBLabeledElement def, final String label, final String specString) {
+    public static synchronized RateLimiter create(final NBComponent def, final String label, final String specString) {
         return RateLimiters.createOrUpdate(def, label, null, new RateSpec(specString));
     }
 

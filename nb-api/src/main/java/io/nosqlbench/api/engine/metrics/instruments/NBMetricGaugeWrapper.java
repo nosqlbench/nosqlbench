@@ -26,6 +26,10 @@ public class NBMetricGaugeWrapper implements NBMetricGauge, NBMetric {
 
     public NBMetricGaugeWrapper(NBLabels labels, Gauge<Double> gauge) {
         this.gauge = gauge;
+        if (gauge.getValue() instanceof Double d) {
+        } else {
+            throw new RuntimeException("NBMetricGauges only support Double values");
+        }
         this.labels = labels;
     }
 

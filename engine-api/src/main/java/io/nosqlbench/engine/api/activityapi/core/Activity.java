@@ -158,8 +158,6 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
      */
     RateLimiter getStrideRateLimiter(Supplier<? extends RateLimiter> supplier);
 
-    Timer getResultTimer();
-
     /**
      * Get or create the instrumentation needed for this activity. This provides
      * a single place to find and manage, and document instrumentation that is

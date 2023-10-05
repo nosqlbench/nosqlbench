@@ -84,16 +84,15 @@ public class PulsarAdapterMetrics {
 
         // Timer metrics
         bindTimer =
-            ActivityMetrics.timer(this.pulsarBaseOpDispenser,
-                "bind", ActivityMetrics.DEFAULT_HDRDIGITS);
+            pulsarBaseOpDispenser.create().timer("bind", ActivityMetrics.DEFAULT_HDRDIGITS);
         executeTimer =
-            ActivityMetrics.timer(this.pulsarBaseOpDispenser,
+            pulsarBaseOpDispenser.create().timer(
                 "execute", ActivityMetrics.DEFAULT_HDRDIGITS);
         createTransactionTimer =
-            ActivityMetrics.timer(this.pulsarBaseOpDispenser,
+            pulsarBaseOpDispenser.create().timer(
                 "create_transaction", ActivityMetrics.DEFAULT_HDRDIGITS);
         commitTransactionTimer =
-            ActivityMetrics.timer(this.pulsarBaseOpDispenser,
+            pulsarBaseOpDispenser.create().timer(
                 "commit_transaction", ActivityMetrics.DEFAULT_HDRDIGITS);
     }
 
@@ -113,7 +112,7 @@ public class PulsarAdapterMetrics {
     // Pulsar client producer API metrics
     //////////////////////////////////////
     //
-    private static class ProducerGaugeImpl implements Gauge<Object> {
+    private static class ProducerGaugeImpl implements Gauge<Double> {
         private final Producer<?> producer;
         private final Function<ProducerStats, Double> valueExtractor;
 
@@ -123,7 +122,7 @@ public class PulsarAdapterMetrics {
         }
 
         @Override
-        public Object getValue() {
+        public Double getValue() {
             // see Pulsar bug https://github.com/apache/pulsar/issues/10100
             // we need to synchronize on producer otherwise we could receive corrupted data
             synchronized(this.producer) {
@@ -156,7 +155,7 @@ public class PulsarAdapterMetrics {
     // Pulsar client consumer API metrics
     //////////////////////////////////////
     //
-    private static class ConsumerGaugeImpl implements Gauge<Object> {
+    private static class ConsumerGaugeImpl implements Gauge<Double> {
         private final Consumer<?> consumer;
         private final Function<ConsumerStats, Double> valueExtractor;
 
@@ -166,7 +165,7 @@ public class PulsarAdapterMetrics {
         }
 
         @Override
-        public Object getValue() {
+        public Double getValue() {
             // see Pulsar bug https://github.com/apache/pulsar/issues/10100
             // - this is a bug report for producer stats.
             // - assume this also applies to consumer stats.

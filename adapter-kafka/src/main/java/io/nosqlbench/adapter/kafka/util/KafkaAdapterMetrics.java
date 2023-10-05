@@ -62,10 +62,10 @@ public class KafkaAdapterMetrics {
 
         // Timer metrics
         bindTimer =
-            ActivityMetrics.timer(this.kafkaBaseOpDispenser,
+            this.kafkaBaseOpDispenser.create().timer(
                     "bind", ActivityMetrics.DEFAULT_HDRDIGITS);
         executeTimer =
-            ActivityMetrics.timer(this.kafkaBaseOpDispenser,
+            this.kafkaBaseOpDispenser.create().timer(
                      "execute", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // End-to-end metrics

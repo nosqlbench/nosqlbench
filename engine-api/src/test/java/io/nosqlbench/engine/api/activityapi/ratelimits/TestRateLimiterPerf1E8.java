@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.testutils.Perf;
 import org.junit.jupiter.api.Disabled;
@@ -36,7 +37,7 @@ public class TestRateLimiterPerf1E8 {
 
     private final Function<RateSpec, RateLimiter> rlFunction =
         rs -> new HybridRateLimiter(
-            this.def,
+            new TestComponent("test","rltest"),
             "hybrid",
             rs.withVerb(RateSpec.Verb.configure)
         );
