@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,10 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package io.nosqlbench.engine.extensions.csvoutput;
+package io.nosqlbench.api.csvoutput;
 
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.graalvm.polyglot.Value;
@@ -27,14 +30,15 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 
-public class CsvOutputPluginWriter {
+public class CsvOutputPluginWriter extends NBBaseComponent {
 
     private final CSVPrinter printer;
     private final FileWriter filewriter;
     private final LinkedHashSet<String> headerKeys;
     private final String filename;
 
-    public CsvOutputPluginWriter(String filename, String... headers) {
+    public CsvOutputPluginWriter(NBComponent component, String filename, String... headers) {
+        super(component);
         try {
             this.filename = filename;
             Path filepath = Path.of(filename);

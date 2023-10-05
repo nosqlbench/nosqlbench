@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.extensions.csvoutput;
 
+import io.nosqlbench.api.csvoutput.CsvOutputPluginWriter;
+import io.nosqlbench.components.NBBaseComponent;
 import org.assertj.core.util.Files;
 import org.graalvm.polyglot.Value;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,7 @@ public class CsvOutputPluginWriterTest {
         File tmpfile = Files.newTemporaryFile();
         tmpfile.deleteOnExit();
         System.out.println("tmpfile="+ tmpfile.getPath());
-        CsvOutputPluginWriter out = new CsvOutputPluginWriter(tmpfile.getPath(), "one", "two");
+        CsvOutputPluginWriter out = new CsvOutputPluginWriter(new NBBaseComponent(null), tmpfile.getPath(), "one", "two");
         out.write(Value.asValue(Map.of("one","one_","two","two_")));
     }
 
