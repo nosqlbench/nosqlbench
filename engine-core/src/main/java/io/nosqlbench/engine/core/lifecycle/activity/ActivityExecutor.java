@@ -462,8 +462,10 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         this.threadsGauge = ActivityMetrics.register(new NBFunctionGauge(activity, () -> (double) this.motors.size(), "threads"));
     }
     private void unregisterMetrics() {
-        ActivityMetrics.unregister(this.threadsGauge);
-        this.threadsGauge=null;
+        if (this.threadsGauge != null) {
+            ActivityMetrics.unregister(this.threadsGauge);
+            this.threadsGauge = null;
+        }
     }
 
     private boolean shutdownExecutorService(int secondsToWait) {

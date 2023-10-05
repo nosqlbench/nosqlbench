@@ -17,9 +17,14 @@ scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main: run driver=cql tags==block:'main.*' cycles===TEMPLATE(main-cycles,10000000) threads=auto
-  drop-tables:
-    schema: run driver=cql tags==block:drop-tables threads==1 cycles==UNDEF
+    main-write: run driver=cql tags==block:main-write cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main-read-ann: run driver=cql tags==block:main-read-ann cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main-read-pk-ann: run driver=cql tags==block:main-read-pk-ann cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main-read: run driver=cql tags==block:"main-read.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+  astra:
+    schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
+  drop-tables: run driver=cql tags==block:drop-tables threads==1 cycles==UNDEF
   truncate: run driver=cql tags==block:truncate-tables cycles===1 threads=1
   reads: run driver=cql tags==block:main-read cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
@@ -28,13 +33,30 @@ bindings:
   seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
   rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
   rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
-  vector_value: CqlVector(ListSized(5,HashRange(0.0f,100.0f))); NormalizeCqlVector();
+  vector_value: CqlVector(ListSizedHashed(<<dimensions:5>>,HashRange(0.0f,100.0f))); NormalizeCqlVector();
+
 blocks:
   drop-tables:
     ops:
       drop-table-vectors:
         raw: |
           DROP TABLE IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors);
+
+  schema-astra:
+    params:
+      prepared: false
+    ops:
+      create-table:
+        raw: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (
+            key TEXT,
+            value vector<float,<<dimensions:5>>>,
+            PRIMARY KEY (key)
+          );
+      create-sai-index:
+        raw: |
+          CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (value) USING 'StorageAttachedIndex';
+
   schema:
     params:
       prepared: false
@@ -61,6 +83,7 @@ blocks:
       truncate-vectors:
         raw: |
           TRUNCATE TABLE TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors);
+
   rampup:
     params:
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
@@ -69,7 +92,8 @@ blocks:
         prepared: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
           (key, value) VALUES ({seq_key},{vector_value});
-  main-read:
+
+  main-read-ann:
     params:
       ratio: TEMPLATE(read_ratio,90)
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
@@ -78,6 +102,13 @@ blocks:
       main-select-ann-limit:
         prepared: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) ORDER BY value ANN OF {vector_value} LIMIT TEMPLATE(select_limit,2);
+
+  main-read-pk-ann:
+    params:
+      ratio: TEMPLATE(read_ratio,90)
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+      instrument: true
+    ops:
       main-select-pk-ann-limit:
         prepared: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) WHERE KEY={rw_key} ORDER BY value ANN OF {vector_value} LIMIT TEMPLATE(select_limit,2);
