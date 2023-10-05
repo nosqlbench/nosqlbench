@@ -74,7 +74,6 @@ public class StatReader {
                     Double irq = Double.parseDouble(parts[6]);
                     Double softirq = Double.parseDouble(parts[7]);
                     Double steal = Double.parseDouble(parts[8]);
-
                     Double total = user + nice + system + idle + iowait + irq + softirq + steal;
                     metricsMap.put("user", user);
                     metricsMap.put("system", system);

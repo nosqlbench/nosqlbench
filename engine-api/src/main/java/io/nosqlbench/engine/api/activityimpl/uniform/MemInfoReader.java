@@ -76,12 +76,10 @@ public class MemInfoReader {
                     metricsMap.put(key, value);
                 }
             }
-            if (metricsMap.get("MemTotal") != null && metricsMap.get("MemFree") != null) {
+            if (metricsMap.get("MemTotal") != null && metricsMap.get("MemFree") != null)
                 metricsMap.put("MemUsed", metricsMap.get("MemTotal") - metricsMap.get("MemFree"));
-            }
-            if (metricsMap.get("SwapTotal") != null && metricsMap.get("SwapFree") != null) {
+            if (metricsMap.get("SwapTotal") != null && metricsMap.get("SwapFree") != null)
                 metricsMap.put("SwapUsed", metricsMap.get("SwapTotal") - metricsMap.get("SwapFree"));
-            }
         } catch (FileNotFoundException e) {
             return;
         }

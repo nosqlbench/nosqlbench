@@ -66,20 +66,18 @@ public class DiskStatsReader {
             int sectorSizeBytes = 512;
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] fields = line.trim().split("\\s+");
-                if (fields.length < 14)
+                String[] parts = line.trim().split("\\s+");
+                if (parts.length < 14)
                     continue;
                 Map<String,Double> innerMap = new HashMap<>();
-                String device = fields[2];
-                Double readsCompleted = Double.parseDouble(fields[3]);
-                Double sectorsRead = Double.parseDouble(fields[5]);
-                Double writesCompleted = Double.parseDouble(fields[7]);
-                Double sectorsWritten = Double.parseDouble(fields[9]);
-
+                String device = parts[2];
+                Double readsCompleted = Double.parseDouble(parts[3]);
+                Double sectorsRead = Double.parseDouble(parts[5]);
+                Double writesCompleted = Double.parseDouble(parts[7]);
+                Double sectorsWritten = Double.parseDouble(parts[9]);
                 Double transactions = readsCompleted + writesCompleted;
                 Double kbRead = (sectorsRead * sectorSizeBytes) / 1024;
                 Double kbWritten = (sectorsWritten * sectorSizeBytes) / 1024;
-
                 innerMap.put("transactions", transactions);
                 innerMap.put("kB_read", kbRead);
                 innerMap.put("kB_written", kbWritten);
