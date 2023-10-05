@@ -17,6 +17,8 @@
 package io.nosqlbench.components;
 
 import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 
 public class NBFinders {
     private final NBBaseComponent base;
@@ -30,6 +32,32 @@ public class NBFinders {
         if (metric!=null) { return metric; };
         metric = base.findOneMetricInTree(pattern);
         return metric;
+    }
+    private <T extends NBMetric> T findOneMetricWithType(String pattern, Class<T> clazz) {
+        NBMetric found = metric(pattern);
+        if (found==null) {
+            System.out.println(NBComponentFormats.formatAsTree(base));
+            throw new RuntimeException("unable to find metric with pattern '" + pattern + "'");
+        }
+        if (clazz.isAssignableFrom(found.getClass())) {
+            return clazz.cast(found);
+        } else {
+            throw new RuntimeException(
+                "found metric with pattern '" + pattern + "'" +
+                    ", but it was type "
+                    + found.getClass().getSimpleName() + " (not a "
+                    + clazz.getSimpleName() +")"
+            );
+        }
+    }
+
+
+    public NBMetricGauge metricGauge(String pattern) {
+        return findOneMetricWithType(pattern, NBMetricGauge.class);
+    }
+
+    public NBMetricCounter metricCounter(String pattern) {
+        return findOneMetricWithType(pattern, NBMetricCounter.class);
     }
 
 

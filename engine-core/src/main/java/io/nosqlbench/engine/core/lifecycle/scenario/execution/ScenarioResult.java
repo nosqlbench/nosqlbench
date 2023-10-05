@@ -18,42 +18,39 @@ package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
 
-public class ScenarioResult {
+public class ScenarioResult extends NBSceneBuffer {
     private final long startedAt;
     private final long endedAt;
-    private final String iolog;
-    private final Exception error;
+    private final Exception exception;
 
-    public ScenarioResult(long startedAt, long endedAt, String iolog, Exception error) {
-        this.startedAt = startedAt;
-        this.endedAt = endedAt;
-        this.iolog = iolog;
-        this.error = error;
-    }
-
-    public ScenarioResult(ScenarioResult baseResult, NBSceneBuffer bufferedContext) {
-        this.startedAt = baseResult.startedAt;
-        this.endedAt = baseResult.endedAt;
-        String log = bufferedContext.getIoLog();
-        this.error = baseResult.error;
-        if (this.error!=null) {
-            log+=error.getMessage();
-        }
-        this.iolog = log;
-
+    public ScenarioResult(NBSceneBuffer fixtures, long start, long end, Exception exception) {
+        super(fixtures);
+        this.startedAt=start;
+        this.endedAt=end;
+        this.exception =exception;
     }
 
     public Exception getException() {
-        return error;
+        return this.exception;
     }
 
-    public String getIOLog() {
-        return iolog;
+    public static ScenarioResult ofError(Exception e, long now) {
+        return new ScenarioResult(NBSceneBuffer.init("error"),now,now,e);
     }
 
-    @Override
-    public String toString() {
-        return ((error!=null)? "ERROR:" + error.toString() : "") +
-        getIOLog();
+    public void report() {
+        System.out.println(getIOLog());
+        if (exception!=null) {
+            if (exception instanceof RuntimeException rte) {
+                throw rte;
+            } else {
+                throw new RuntimeException(exception);
+            }
+        }
+    }
+    public void exitWithCode() {
+        if (exception!=null) {
+            System.exit(2);
+        }
     }
 }

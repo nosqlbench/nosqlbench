@@ -50,7 +50,7 @@
         <module.nbr>nbr</module.nbr>
 
         <module.nb-spectest>nb-spectest</module.nb-spectest>
-        <module.nbr-examples>nbr-examples</module.nbr-examples>
+<!--        <module.nbr-examples>nbr-examples</module.nbr-examples>-->
 
         <!-- driver modules -->
         <module.adapter-diag>adapter-diag</module.adapter-diag>
@@ -85,7 +85,7 @@
         <module>nb5-proof</module>
         <module>nb5</module>
         <module>nbr</module>
-        <module>nbr-examples</module>
+<!--        <module>nbr-examples</module>-->
         <module>nb-api</module>
         <module>nb-annotations</module>
         <module>nb-spectest</module>
@@ -164,16 +164,6 @@
         </plugins>
 
     </build>
-
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.4.5</version>
-            </plugin>
-        </plugins>
-    </reporting>
 
     <developers>
         <developer>

@@ -91,7 +91,7 @@ public class HybridRateLimiter implements RateLimiter {
     private String label;
     private State state = State.Idle;
     // metrics
-    private Gauge<Long> delayGauge;
+    private Gauge<Double> delayGauge;
     private Gauge<Double> avgRateGauge;
     private Gauge<Double> burstRateGauge;
     private TokenPool tokens;

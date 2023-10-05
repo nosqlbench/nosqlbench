@@ -325,7 +325,7 @@ public class ActivitiesController extends NBBaseComponent {
      */
     public synchronized void forceStopScenario(int waitTimeMillis, boolean rethrow) {
         logger.debug("force stopping scenario {}", description());
-        activityInfoMap.values().forEach(a -> a.getActivityExecutor().forceStopActivity(10000));
+        activityInfoMap.values().forEach(a -> a.getActivityExecutor().forceStopActivity(2000));
         logger.debug("Scenario force stopped.");
     }
 
@@ -451,19 +451,19 @@ public class ActivitiesController extends NBBaseComponent {
 
     public void shutdown() {
         logger.debug(() -> "Requesting ScenarioController shutdown.");
-        this.activitiesExecutor.shutdown();
-        try {
-            if (!this.activitiesExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                logger.info(() -> "Scenario is being forced to shutdown after waiting 5 seconds for graceful shutdown.");
-                this.activitiesExecutor.shutdownNow();
-                if (!this.activitiesExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                    throw new RuntimeException("Unable to shutdown activities executor");
-                }
-            }
-        } catch (Exception e) {
-            logger.warn("There was an exception while trying to shutdown the ScenarioController:{}", e, e);
-            throw new RuntimeException(e);
-        }
+        this.activitiesExecutor.shutdownNow();
+//        try {
+//            if (!this.activitiesExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+//                logger.info(() -> "Scenario is being forced to shutdown after waiting 5 seconds for graceful shutdown.");
+//                this.activitiesExecutor.shutdownNow();
+//                if (!this.activitiesExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+//                    logger.warn("Unable to shutdown activities executor gracefully");
+//                }
+//            }
+//        } catch (Exception e) {
+//            logger.warn("There was an exception while trying to shutdown the ScenarioController:{}", e, e);
+//            throw new RuntimeException(e);
+//        }
     }
 
 }

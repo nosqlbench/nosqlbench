@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.scripting.DiagReader;
 import io.nosqlbench.engine.api.scripting.DiagWriter;
@@ -23,7 +24,6 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
 
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,15 +42,14 @@ public class NBSceneBuffer implements NBSceneFixtures {
         stdinBuffer = new DiagReader(fixtures.in(), "  stdin ");
     }
 
-
     @Override
     public ScriptParams params() {
         return fixtures.params();
     }
 
     @Override
-    public NBComponent session() {
-        return fixtures.session();
+    public NBComponent component() {
+        return fixtures.component();
     }
 
     @Override
@@ -69,7 +68,7 @@ public class NBSceneBuffer implements NBSceneFixtures {
     }
 
     @Override
-    public Writer err() {
+    public PrintWriter err() {
         return stderrBuffer;
     }
 
@@ -87,9 +86,16 @@ public class NBSceneBuffer implements NBSceneFixtures {
         return log;
     }
 
-    public String getIoLog() {
+    public String getIOLog() {
         return String.join("",getTimedLogLines());
     }
 
+    public NBSceneFixtures asFixtures() {
+        return (NBSceneFixtures) this;
+    }
 
+    public static NBSceneBuffer init(String name) {
+        TestComponent root = new TestComponent("scene", "self");
+        return new NBSceneBuffer(NBDefaultSceneFixtures.ofDefault(name));
+    }
 }

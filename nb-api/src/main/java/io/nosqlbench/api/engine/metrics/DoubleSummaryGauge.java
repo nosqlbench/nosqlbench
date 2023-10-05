@@ -26,7 +26,7 @@ import java.util.function.DoubleConsumer;
 /**
  * Create a discrete stat reservoir as a gauge.
  */
-public class DoubleSummaryGauge implements NBMetricGauge<Double>, DoubleConsumer {
+public class DoubleSummaryGauge implements NBMetricGauge, DoubleConsumer {
     private final NBLabels labels;
     private final Stat stat;
     private final DoubleSummaryStatistics stats;

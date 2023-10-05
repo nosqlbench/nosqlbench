@@ -32,17 +32,19 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     private final NBLabels labels;
 
     public NBBaseComponent(NBComponent parentComponent) {
-        this(parentComponent,NBLabels.forKV());
+        this(parentComponent, NBLabels.forKV());
     }
+
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
         this.labels = componentSpecificLabelsOnly;
-        if (parentComponent!=null) {
+        if (parentComponent != null) {
             parent = parentComponent;
             parent.attachChild(this);
         } else {
-            parent=null;
+            parent = null;
         }
     }
+
     @Override
     public NBComponent getParent() {
         return parent;
@@ -74,7 +76,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
 
     @Override
     public NBLabels getLabels() {
-        return (this.parent==null) ? labels : this.parent.getLabels().and(labels);
+        return (this.parent == null) ? labels : this.parent.getLabels().and(labels);
     }
 
     @Override
@@ -83,7 +85,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         while (tree.hasNext()) {
             NBComponent c = tree.next();
             NBMetric metric = c.lookupMetric(name);
-            if (metric!=null) return metric;
+            if (metric != null) return metric;
         }
         return null;
     }
@@ -97,6 +99,17 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
             found.addAll(c.findMetrics(pattern));
         }
         return found;
+    }
+
+    @Override
+    public NBMetric findOneMetricInTree(String pattern) {
+        List<NBMetric> found = findMetricsInTree(pattern);
+        if (found.size() != 1) {
+            System.out.println("Runtime Components and Metrics at this time:\n"+NBComponentFormats.formatAsTree(this));
+            throw new RuntimeException("Found " + found.size() + " metrics with pattern '" + pattern + "', expected exactly 1");
+        }
+        return found.get(0);
+
     }
 
     @Override
@@ -117,7 +130,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
             logger.error(e);
         } finally {
             logger.debug("detaching " + description());
-            if (parent!=null) {
+            if (parent != null) {
                 parent.detachChild(this);
             }
         }

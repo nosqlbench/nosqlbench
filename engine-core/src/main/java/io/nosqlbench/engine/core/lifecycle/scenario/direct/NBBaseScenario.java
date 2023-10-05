@@ -25,7 +25,7 @@ import java.util.Map;
 public abstract class NBBaseScenario extends NBScenario {
 
     public NBBaseScenario(NBComponent parentComponent, String scenarioName, Map<String, String> params, String progressInterval) {
-        super(parentComponent, scenarioName, params, progressInterval);
+        super(parentComponent, scenarioName);
     }
 
     @Override

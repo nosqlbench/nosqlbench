@@ -404,6 +404,11 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             final LoggerConfigData classicConfigs : options.getClassicHistoConfigs())
             ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
 
+        if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
+            options.setWantsStackTraces(true);
+            NBCLI.logger.debug(() -> "enabling stack traces since log level is " + options.getConsoleLogLevel());
+        }
+
         // client machine metrics; TODO: modify pollInterval
         this.clientMetricChecker = new ClientSystemMetricChecker(10);
         registerLoadAvgMetrics();
@@ -416,24 +421,13 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         // intentionally not shown for warn-only
         NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
 
-        final ScenariosExecutor scenariosExecutor = new ScenariosExecutor("executor-" + sessionName, 1);
-        if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
-            options.setWantsStackTraces(true);
-            NBCLI.logger.debug(() -> "enabling stack traces since log level is " + options.getConsoleLogLevel());
-        }
-
-        // intentionally not shown for warn-only
-        NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
-
         /**
          * At this point, the command stream from the CLI should be handed into the session, and the session should
          * marshal and transform it for any scenario invocations directly.
          */
         NBSession session = new NBSession(
             new NBBaseComponent(null),
-            sessionName,
-            options.getProgressSpec(),
-            options.wantsShowScript()
+            sessionName
         );
         ExecutionResult sessionResult = session.apply(options.getCommands());
         sessionResult.printSummary(System.out);
