@@ -120,6 +120,10 @@ public class NBBuilders {
         return reporter;
     }
 
+//    public ExamplePlugin getExamplePlugin(final NBComponent component) {
+//        return new ExamplePlugin(component);
+//    }
+
     public static class csvReporterBuilder {
         private final NBComponent component;
         private Path reportTo = Path.of("metrics.csv");

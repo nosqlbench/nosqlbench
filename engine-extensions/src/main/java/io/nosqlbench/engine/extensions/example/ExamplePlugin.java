@@ -17,8 +17,14 @@
 package io.nosqlbench.engine.extensions.example;
 
 import io.nosqlbench.api.extensions.SandboxPlugin;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 
-public class ExamplePlugin implements SandboxPlugin {
+public class ExamplePlugin extends NBBaseComponent implements SandboxPlugin {
+
+    public ExamplePlugin(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     public long getSum(int addend1, int addend2) {
         return addend1 + addend2;

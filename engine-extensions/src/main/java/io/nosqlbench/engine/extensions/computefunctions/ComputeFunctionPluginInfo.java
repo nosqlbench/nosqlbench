@@ -33,7 +33,7 @@ public class ComputeFunctionPluginInfo implements ScriptingExtensionPluginInfo<C
 
     @Override
     public ComputeFunctions getExtensionObject(Logger logger, NBComponent baseComponent) {
-        return new ComputeFunctions();
+        return new ComputeFunctions(baseComponent);
     }
 
     @Override

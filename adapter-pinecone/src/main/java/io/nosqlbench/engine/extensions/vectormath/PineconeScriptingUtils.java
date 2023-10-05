@@ -17,10 +17,16 @@
 package io.nosqlbench.engine.extensions.vectormath;
 
 import com.google.protobuf.Descriptors;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import io.pinecone.proto.QueryResponse;
 import io.pinecone.proto.ScoredVector;
 
-public class PineconeScriptingUtils {
+public class PineconeScriptingUtils extends NBBaseComponent {
+
+    public PineconeScriptingUtils(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     public String[] responseIdsToStringArray(QueryResponse response) {
         return response.getMatchesList().stream().map(ScoredVector::getId).toArray(String[]::new);
