@@ -42,7 +42,7 @@ public enum RateLimiters {
         return RateLimiters.createOrUpdate(def, label, null, new RateSpec(specString));
     }
 
-    public static class WaitTimeGauge implements Gauge<Long> {
+    public static class WaitTimeGauge implements Gauge<Double> {
 
         private final RateLimiter rateLimiter;
 
@@ -51,8 +51,8 @@ public enum RateLimiters {
         }
 
         @Override
-        public Long getValue() {
-            return this.rateLimiter.getTotalWaitTime();
+        public Double getValue() {
+            return (double)this.rateLimiter.getTotalWaitTime();
         }
     }
 

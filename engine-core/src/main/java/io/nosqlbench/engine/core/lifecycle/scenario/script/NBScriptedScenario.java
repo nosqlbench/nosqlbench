@@ -25,6 +25,7 @@ import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ScriptParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.PolyglotScenarioController;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine.Builder;
 import org.graalvm.polyglot.EnvironmentAccess;
@@ -33,6 +34,7 @@ import org.graalvm.polyglot.PolyglotAccess;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -44,7 +46,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class NBScriptedScenario extends NBScenario {
-    private final Invocation invocation;
+    private final Invocation invocation = Invocation.EXECUTE_SCRIPT;
 
     private Exception error;
 
@@ -79,20 +81,16 @@ public class NBScriptedScenario extends NBScenario {
 
     public NBScriptedScenario(
         final String scenarioName,
-        final String progressInterval,
-        Map<String, String> params,
-        NBComponent parentComponent,
-        Invocation invocation
+        NBComponent parentComponent
     ) {
-        super(parentComponent, scenarioName, params, progressInterval);
+        super(parentComponent, scenarioName);
         this.scenarioName = scenarioName;
         this.progressInterval = progressInterval;
         this.parentComponent = parentComponent;
-        this.invocation = invocation;
     }
 
     public static NBScriptedScenario ofScripted(String name, Map<String, String> params, NBComponent parent, Invocation invocation) {
-        return new NBScriptedScenario(name, "console:10s",params,parent,invocation);
+        return new NBScriptedScenario(name, parent);
     };
 
 
@@ -122,6 +120,7 @@ public class NBScriptedScenario extends NBScenario {
     private void initializeScriptContext(NBSceneFixtures fixtures) {
         BufferedScriptContext ctx = new BufferedScriptContext(fixtures);
         this.scriptEngine.setContext(ctx);
+        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("scenario",new PolyglotScenarioController(fixtures.controller()));
     }
 
     private void initializeScriptingEngine() {
@@ -248,15 +247,15 @@ public class NBScriptedScenario extends NBScenario {
         return "name:'" + scenarioName + '\'';
     }
 
-    public void addScenarioScriptParams(final ScriptParams scenarioScriptParams) {
-        this.scenarioScriptParams = scenarioScriptParams;
-    }
+//    public void addScenarioScriptParams(final ScriptParams scenarioScriptParams) {
+//        this.scenarioScriptParams = scenarioScriptParams;
+//    }
 
-    public void addScenarioScriptParams(final Map<String, String> scriptParams) {
-        this.addScenarioScriptParams(new ScriptParams() {{
-            this.putAll(scriptParams);
-        }});
-    }
+//    public void addScenarioScriptParams(final Map<String, String> scriptParams) {
+//        this.addScenarioScriptParams(new ScriptParams() {{
+//            this.putAll(scriptParams);
+//        }});
+//    }
 
 
 }

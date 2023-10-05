@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface NBMetricsQuery {
+
     /**
      * If you have the serialized open metrics name of a metric, you can ask for it
      * this way and get a direct result.
@@ -36,12 +37,6 @@ public interface NBMetricsQuery {
 
     List<NBMetric> findMetricsInTree(String pattern);
 
-    default NBMetric findOneMetricInTree(String pattern) {
-        List<NBMetric> found = findMetricsInTree(pattern);
-        if (found.size()!=1) {
-            throw new RuntimeException("Found " + found.size() + " metrics with pattern '" + pattern + "', expected exactly 1");
-        }
-        return found.get(0);
-    }
+    NBMetric findOneMetricInTree(String pattern);
 
 }

@@ -23,7 +23,7 @@ import io.nosqlbench.components.NBComponent;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class NBFunctionGauge implements NBMetricGauge<Double> {
+public class NBFunctionGauge implements NBMetricGauge {
 
     private final Supplier<Double> source;
     private final NBLabeledElement parent;

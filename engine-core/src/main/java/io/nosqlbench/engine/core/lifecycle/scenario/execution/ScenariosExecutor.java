@@ -55,12 +55,15 @@ public class ScenariosExecutor extends NBBaseComponent {
     }
 
     public synchronized void execute(NBScenario scenario) {
+        execute(scenario,new ScriptParams());
+    }
+    public synchronized void execute(NBScenario scenario, Map<String,String> params) {
         if (submitted.get(scenario.getScenarioName()) != null) {
             throw new BasicError("Scenario " + scenario.getScenarioName() + " is already defined. Remove it first to reuse the name.");
         }
 
         NBSceneFixtures basecontext = new NBDefaultSceneFixtures(
-            ScriptParams.of(scenario.getParams()),
+            ScriptParams.of(params),
             this.getParent(),
             scenario.getActivitiesController(),
             loadExtensions(),
@@ -71,7 +74,7 @@ public class ScenariosExecutor extends NBBaseComponent {
         NBSceneBuffer bufferedContext = new NBSceneBuffer(basecontext);
 
         Future<ScenarioResult> future = executor.submit(
-            () -> new ScenarioResult(scenario.apply(bufferedContext),bufferedContext) // combine basic execution data with trace
+            () -> scenario.apply(bufferedContext) // combine basic execution data with trace
         );
         SubmittedScenario s = new SubmittedScenario(scenario, future);
         submitted.put(s.getName(), s);
@@ -177,7 +180,7 @@ public class ScenariosExecutor extends NBBaseComponent {
                 } catch (Exception e) {
                     long now = System.currentTimeMillis();
                     logger.debug("creating exceptional scenario result from getAsyncResultStatus");
-                    oResult = Optional.of(new ScenarioResult(now, now, "errored output" + e.getMessage(), e));
+                    oResult = Optional.of(ScenarioResult.ofError(e, now));
                 }
             }
 

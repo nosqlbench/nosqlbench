@@ -58,4 +58,13 @@ class NBComponentTraversalTest {
         assertThat(wider).containsExactly(a,sub1,sub2,dotX,dotY);
     }
 
+    @Test
+    public void testDepthFirstVisitor() {
+        NBComponentTraversal.visitDepthFirst(a, new NBComponentTraversal.Visitor() {
+            @Override
+            public void visit(NBComponent component, int depth) {
+                System.out.println(">".repeat(depth)+":"+component.description());
+            }
+        });
+    }
 }

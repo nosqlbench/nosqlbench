@@ -68,6 +68,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
                     sb.append("\n");
                 }
                 break;
+            case java:
             case start: // start activity
             case run: // run activity
             case await: // await activity

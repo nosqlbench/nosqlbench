@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,22 @@
  * limitations under the License.
  */
 
-var sum= adder.getSum(12,34);
-print('sum is ' + sum);
+package io.nosqlbench.nbr.examples.injava;
+
+import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nbr.examples.SCBaseScenario;
+
+public class SC_template extends SCBaseScenario {
+    public SC_template(NBComponent parentComponent, String scenarioName) {
+        super(parentComponent, scenarioName);
+    }
+
+    /** <pre>{@code
+     *
+     * }</pre>
+     */
+    @Override
+    public void invoke() {
+
+    }
+}

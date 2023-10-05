@@ -27,8 +27,6 @@ import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
 
 public class ComponentActivityInstrumentation implements ActivityInstrumentation {
 
-    private static final String STRICTMETRICNAMES = "strictmetricnames";
-
     private static final String WAIT_TIME = "_waittime";
     private static final String SERVICE_TIME = "_servicetime";
     private static final String RESPONSE_TIME = "_responsetime";

@@ -1,0 +1,76 @@
+fixtures {
+# grid-columns:3
+ tooltip: Fixtures are the standard set of interfaces that a scenario invocation \
+  needs to communicate with any other element or do anything at all. Fixtures are \
+  stateful and disposable, i.e. do not reuse them more than once.
+ io {
+  label: IO Trace Buffers
+   tooltip: in the NBSceneBuffer variant of fixtures, IO streams are wrapped in a \
+   tracing fixture which intercepts and records all IO in and out. This is done \
+   opaquely to the scenario logic.
+#   grid-columns:1
+   in <- tbuf.in
+   out -> tbuf.out
+   err -> tbuf.err
+    tbuf {
+    label: "Assigned IO Streams"
+    tooltip: Normal stdin stdout and stderr IO streams are provided for use by scripted \
+     and compiled scenario logic.
+   # grid-columns:1
+     in
+     out
+     err
+    }
+ }
+ APIs {
+  grid-columns:2
+#  style.stroke-width: 0
+   controller {
+    tooltip: The controller is an Activity Controller which enables \
+    full control of activities, including defining, starting, stopping, \
+    dynamic modification of parameters, blocking, etc. It is the controller \
+    that is responsible for activity lifecycles.
+   }
+   params {
+    tooltip: Scenario parameters are given to the scenario log as part of the \
+     fixtures. These can come from the command line or scripting environment.
+   }
+   component {
+    label: <component>
+    tooltip: The component represents a node in a runtime hierarchy \
+     to which all metrics and other fixtures are attached. Each scenario \
+     runs within a component context, and all component APIs are exposed \
+     directly within the execution context as services.
+   }
+   extensions {
+    tooltip: Extensions are bundled capabilities which can be pulled into \
+     a scenario if and when needed. Contributors can build extensions \
+     which provide additional services, and these can be loaded into either \
+     scripted environments with duck-typing, or into compiled code with type \
+     safety. They are also available to result verifier logic when appropriate.
+   }
+ }
+}
+
+
+logic {
+}
+
+logic <- fixtures.io.in : reads
+logic -> fixtures.io.out : writes
+logic -> fixtures.io.err : writes
+
+system {
+}
+
+fixtures.io.tbuf.in <- system : reads
+fixtures.io.tbuf.out -> system : writes
+fixtures.io.tbuf.err -> system : writes
+
+
+#IO\nbuffers -. "embed" .-> fixtures
+#    params --> fixtures
+#    fixtures --> Scenario\ninstance
+#    Scenario\ninstance --> used\nfixtures
+#    used\nfixtures -. extract .-> IO\ntraces
+

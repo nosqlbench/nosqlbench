@@ -78,11 +78,11 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
         this.in = in;
     }
 
-    public static NBSceneFixtures ofDefault() {
+    public static NBSceneFixtures ofDefault(String name) {
         return new NBDefaultSceneFixtures(
             new ScriptParams(),
             new NBSession(
-                new TestComponent("test", "test"), "test", "console:10s", false
+                new TestComponent("scene", name), "scene~"+name
             ),
             new ActivitiesController(),
             Extensions.ofNone(),
@@ -98,7 +98,7 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
     }
 
     @Override
-    public NBComponent session() {
+    public NBComponent component() {
         return session;
     }
 
