@@ -15,7 +15,7 @@
  *
  */
 
-package io.nosqlbench.api.histologger;
+package io.nosqlbench.api.histo;
 
 import io.nosqlbench.api.engine.metrics.HistoIntervalLogger;
 import io.nosqlbench.api.engine.util.Unit;
@@ -41,6 +41,7 @@ public class HdrHistoLog extends NBBaseComponent {
             new RuntimeException("Unable to parse interval spec:'" + interval + '\''));
 
         HistoIntervalLogger histoIntervalLogger =
-            new HistoIntervalLogger(session, logfile, compiledPattern, intervalMillis);
+            new HistoIntervalLogger(this, session, logfile, compiledPattern, intervalMillis);
+        this.attachChild(histoIntervalLogger);
     }
 }

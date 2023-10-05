@@ -19,6 +19,7 @@ package io.nosqlbench.api.engine.metrics;
 import com.codahale.metrics.ExponentiallyDecayingReservoir;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -38,7 +39,9 @@ public class ClassicTimerListener extends CapabilityHook<TimerAttachment> {
     private final TimeUnit nanoseconds;
     private final Map<String, Attachment> histos = new HashMap<>();
 
-    public ClassicTimerListener(MetricRegistry metricRegistry, String sessionName, String prefix, Pattern pattern, String interval, TimeUnit nanoseconds) {
+    public ClassicTimerListener(NBComponent parent, MetricRegistry metricRegistry, String sessionName, String prefix,
+                                Pattern pattern, String interval, TimeUnit nanoseconds) {
+        super(parent);
         this.metricsRegistry = metricRegistry;
         this.sessionName = sessionName;
         this.prefix = prefix;

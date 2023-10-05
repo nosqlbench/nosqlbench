@@ -17,6 +17,7 @@
 package io.nosqlbench.api.engine.metrics;
 
 import com.codahale.metrics.*;
+import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -36,7 +37,8 @@ public class ClassicHistoListener extends CapabilityHook<HistogramAttachment> {
     private final TimeUnit nanoseconds;
     private final Map<String, Attachment> histos = new HashMap<>();
 
-    public ClassicHistoListener(MetricRegistry metricRegistry, String sessionName, String prefix, Pattern pattern, String interval, TimeUnit nanoseconds) {
+    public ClassicHistoListener(NBComponent parent, MetricRegistry metricRegistry, String sessionName, String prefix, Pattern pattern, String interval, TimeUnit nanoseconds) {
+        super(parent);
         this.metricsRegistry = metricRegistry;
         this.sessionName = sessionName;
         this.prefix = prefix;
