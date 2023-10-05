@@ -17,7 +17,9 @@
 package io.nosqlbench.engine.core.lifecycle.session;
 
 import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.spi.SimpleServiceLoader;
 import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBComponentSubScope;
 import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;
@@ -29,10 +31,14 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosExecutor;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosResults;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenario;
+import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -44,8 +50,6 @@ import java.util.function.Function;
 public class NBSession extends NBBaseComponent implements Function<List<Cmd>, ExecutionResult> {
     private final static Logger logger = LogManager.getLogger(NBSession.class);
     private final String sessionName;
-    private final String progressSpec;
-    private final boolean wantsDryRun;
 
     public enum STATUS {
         OK,
@@ -55,14 +59,10 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
 
     public NBSession(
         NBLabeledElement labelContext,
-        String sessionName,
-        String progressSpec,
-        boolean wantsDryRun
+        String sessionName
     ) {
         super(null, labelContext.getLabels().and("session", sessionName));
         this.sessionName = sessionName;
-        this.progressSpec = progressSpec;
-        this.wantsDryRun = wantsDryRun;
     }
 
     public ExecutionResult apply(List<Cmd> cmds) {
@@ -71,6 +71,8 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
             logger.info("No commands provided.");
         }
 
+        Map<String, String> params = new CmdParamsBuffer(cmds).getGlobalParams();
+
         ResultCollector collector = new ResultCollector();
 
         try (ResultContext results = new ResultContext(collector)) {
@@ -78,13 +80,13 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
 
             NBScenario scenario;
             if (cmds.get(0).getCmdType().equals(Cmd.CmdType.java)) {
-                scenario = buildJavaScenario(cmds, wantsDryRun);
+                scenario = buildJavaScenario(cmds);
             } else {
-                scenario = buildJavacriptScenario(cmds, wantsDryRun);
+                scenario = buildJavacriptScenario(cmds);
             }
             try (NBComponentSubScope scope = new NBComponentSubScope(scenario)) {
                 assert scenario != null;
-                scenariosExecutor.execute(scenario);
+                scenariosExecutor.execute(scenario,params);
 
                 //             this.doReportSummaries(this.reportSummaryTo, this.result);
             }
@@ -106,16 +108,18 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
             }
 
             results.output(scenariosResults.getExecutionSummary());
+            results.ok();
 
         }
         return collector.toExecutionResult();
     }
 
 
-    private NBScenario buildJavacriptScenario(List<Cmd> cmds, boolean dryrun) {
-        NBScriptedScenario.Invocation invocation = dryrun ?
-            NBScriptedScenario.Invocation.RENDER_SCRIPT :
-            NBScriptedScenario.Invocation.EXECUTE_SCRIPT;
+    private NBScenario buildJavacriptScenario(List<Cmd> cmds) {
+//        boolean dryrun;
+//        NBScriptedScenario.Invocation invocation = dryrun ?
+//            NBScriptedScenario.Invocation.RENDER_SCRIPT :
+//            NBScriptedScenario.Invocation.EXECUTE_SCRIPT;
 
         final ScriptBuffer buffer = new BasicScriptBuffer().add(cmds.toArray(new Cmd[0]));
         final String scriptData = buffer.getParsedScript();
@@ -123,21 +127,35 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         final ScriptParams scriptParams = new ScriptParams();
         scriptParams.putAll(buffer.getCombinedParams());
 
-        final NBScriptedScenario scenario = new NBScriptedScenario(
-            sessionName,
-            progressSpec,
-            scriptParams,
-            this,
-            invocation
-        );
+        final NBScriptedScenario scenario = new NBScriptedScenario(sessionName, this);
 
         scenario.addScriptText(scriptData);
-        scenario.addScenarioScriptParams(scriptParams);
         return scenario;
     }
 
-    private NBScenario buildJavaScenario(List<Cmd> cmds, boolean dryrun) {
-        return null;
+    private NBScenario buildJavaScenario(List<Cmd> cmds) {
+        if (cmds.size()!=1) {
+            throw new RuntimeException("java scenarios require exactly 1 java command");
+        }
+        Cmd javacmd = cmds.get(0);
+        String mainClass = javacmd.getArg("main_class");
+        SimpleServiceLoader<NBScenario> loader = new SimpleServiceLoader<>(NBScenario.class, Maturity.Any);
+        List<SimpleServiceLoader.Component<? extends NBScenario>> namedProviders = loader.getNamedProviders(mainClass);
+        SimpleServiceLoader.Component<? extends NBScenario> provider = namedProviders.get(0);
+        Class<? extends NBScenario> type = provider.provider.type();
+        try {
+            Constructor<? extends NBScenario> constructor = type.getConstructor(NBComponent.class, String.class);
+            NBScenario scenario = constructor.newInstance(this, sessionName);
+            return scenario;
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

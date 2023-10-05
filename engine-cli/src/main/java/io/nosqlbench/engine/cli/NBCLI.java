@@ -408,9 +408,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
          */
         NBSession session = new NBSession(
             new NBBaseComponent(null),
-            sessionName,
-            options.getProgressSpec(),
-            options.wantsShowScript()
+            sessionName
         );
         ExecutionResult sessionResult = session.apply(options.getCommands());
         sessionResult.printSummary(System.out);
@@ -433,7 +431,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         return basicHelp;
 
     }
-
 
     @Override
     public NBLabels getLabels() {

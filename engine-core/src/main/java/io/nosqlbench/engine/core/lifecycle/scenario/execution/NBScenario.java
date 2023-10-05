@@ -18,6 +18,7 @@ package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
 import io.nosqlbench.api.annotations.Annotation;
 import io.nosqlbench.api.annotations.Layer;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
 import io.nosqlbench.api.metadata.SystemId;
 import io.nosqlbench.components.NBBaseComponent;
@@ -26,12 +27,12 @@ import io.nosqlbench.components.NBComponentErrorHandler;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenario;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -44,10 +45,9 @@ import java.util.function.Function;
  * </OL>
  */
 public abstract class NBScenario extends NBBaseComponent
-    implements Function<NBSceneFixtures, ScenarioResult>, NBComponentErrorHandler {
-
-    private final String scenarioName;
-    private final Map<String, String> params;
+    implements
+    Function<NBSceneBuffer, ScenarioResult>,
+    NBComponentErrorHandler {
 
     protected Logger logger = LogManager.getLogger("SCENARIO");
     private long startedAtMillis, endedAtMillis;
@@ -56,34 +56,24 @@ public abstract class NBScenario extends NBBaseComponent
 
     private ActivitiesController activitiesController;
     private Exception error;
-    private String progressInterval;
+    private String progressInterval = "console:10s";
     private ActivitiesProgressIndicator activitiesProgressIndicator;
 
-    public NBScenario(
-        NBComponent parentComponent,
-        String scenarioName,
-        Map<String, String> params,
-        String progressInterval
-    ) {
-        super(parentComponent);
-        this.scenarioName = scenarioName;
-        this.params = params;
-        this.progressInterval = progressInterval;
-        this.activitiesController = new ActivitiesController();
-
+    public NBScenario(NBComponent parentComponent, String scenarioName) {
+        super(parentComponent, NBLabels.forKV("scenario",scenarioName));
     }
 
     public String getScenarioName() {
-        return scenarioName;
+        return getLabels().asMap().get("scenario");
     }
 
     public void forceStopScenario(int i, boolean b) {
         activitiesController.forceStopScenario(i,b);
     }
 
-    public Map<String, String> getParams() {
-        return this.params;
-    }
+//    public Map<String, String> getParams() {
+//        return this.params;
+//    }
 
     public ActivitiesController getActivitiesController() {
         return this.activitiesController;
@@ -120,7 +110,8 @@ public abstract class NBScenario extends NBBaseComponent
      * @return
      */
     @Override
-    public final ScenarioResult apply(NBSceneFixtures sctx) {
+    public final ScenarioResult apply(NBSceneBuffer sctx) {
+        this.activitiesController=sctx.controller();
 
         this.scenarioShutdownHook = new ScenarioShutdownHook(this);
         Runtime.getRuntime().addShutdownHook(this.scenarioShutdownHook);
@@ -135,18 +126,18 @@ public abstract class NBScenario extends NBBaseComponent
                 .build()
         );
 
-        if (!"disabled".equals(progressInterval))
+        if (!"disabled".equals(progressInterval) && progressInterval!=null && !progressInterval.isEmpty())
             this.activitiesProgressIndicator = new ActivitiesProgressIndicator(activitiesController, this.progressInterval);
 
         ScenarioResult result = null;
         try {
-            runScenario(sctx);
+            runScenario(sctx.asFixtures());
             final long awaitCompletionTime = 86400 * 365 * 1000L;
             this.logger.debug("Awaiting completion of scenario and activities for {} millis.", awaitCompletionTime);
             this.activitiesController.awaitCompletion(awaitCompletionTime);
         } catch (Exception e) {
             try {
-                activitiesController.forceStopScenario(5000, false);
+                activitiesController.forceStopScenario(3000, false);
             } catch (final Exception eInner) {
                 this.logger.debug("Found inner exception while forcing stop with rethrow=false: {}", eInner);
                 throw new RuntimeException(e);
@@ -156,9 +147,9 @@ public abstract class NBScenario extends NBBaseComponent
             this.activitiesController.shutdown();
             this.endedAtMillis = System.currentTimeMillis();
             result = new ScenarioResult(
+                sctx,
                 startedAtMillis,
                 endedAtMillis,
-                (error != null) ? error.toString() : "",
                 error
             );
         }
@@ -212,11 +203,15 @@ public abstract class NBScenario extends NBBaseComponent
     private synchronized ScenarioMetadata getScenarioMetadata() {
         if (null == this.scenarioMetadata) scenarioMetadata = new ScenarioMetadata(
             startedAtMillis,
-            scenarioName,
+            getScenarioName(),
             SystemId.getNodeId(),
             SystemId.getNodeFingerprint()
         );
         return this.scenarioMetadata;
     }
 
+    @Override
+    public String toString() {
+        return "SCENARIO (" + this.getClass().getSuperclass().getSimpleName()+") { scenarioName: "+getScenarioName()+" }";
+    }
 }

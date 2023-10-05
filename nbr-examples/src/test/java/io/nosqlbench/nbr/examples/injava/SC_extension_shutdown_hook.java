@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.script;
+package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
-import org.junit.jupiter.api.Test;
+import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nbr.examples.SCBaseScenario;
 
-import java.io.IOException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class NBScenarioContextBufferTest {
-
-    @Test
-    public void shouldCaptureLoggedOutput() throws IOException {
-        ScriptEnvBuffer seb = new ScriptEnvBuffer();
-        seb.getWriter().write("out\n");
-        assertThat(seb.getStdoutText()).isEqualTo("out\n");
+public class SC_extension_shutdown_hook extends SCBaseScenario {
+    public SC_extension_shutdown_hook(NBComponent parentComponent, String scenarioName) {
+        super(parentComponent, scenarioName);
     }
 
+    /** <pre>{@code
+     * shutdown.addShutdownHook('testfunc', function f() {
+     *     print("shutdown hook running");
+     * });
+     * }</pre>
+     */
+    @Override
+    public void invoke() {
+
+    }
 }

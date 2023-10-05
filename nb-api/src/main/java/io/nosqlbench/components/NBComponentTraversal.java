@@ -18,11 +18,23 @@ package io.nosqlbench.components;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 public class NBComponentTraversal {
 
     public static Iterator<NBComponent> traverseDepth(NBComponent component) {
         return new iterDepthFirst(component);
+    }
+
+    public static void visitDepthFirst(NBComponent component, Visitor visitor) {
+        visitDepthFirst(component,visitor,0);
+    }
+    private static void visitDepthFirst(NBComponent component, Visitor visitor, int depth) {
+        visitor.visit(component,depth);
+        List<NBComponent> children = component.getChildren();
+        for (NBComponent child : children) {
+            visitDepthFirst(child,visitor,depth+1);
+        }
     }
 
     public static Iterator<NBComponent> traverseBreadth(NBComponent component) {
@@ -71,4 +83,7 @@ public class NBComponentTraversal {
         }
     }
 
+    public interface Visitor {
+        void visit(NBComponent component, int depth);
+    }
 }

@@ -61,7 +61,7 @@ public class ScriptExampleTests {
         ScenariosExecutor executor = new ScenariosExecutor(new TestComponent("test","test"),ScriptExampleTests.class.getSimpleName() + ":" + scriptname, 1);
         NBScriptedScenario s = NBScriptedScenario.ofScripted(scenarioName,Map.of(),new TestComponent("test","test"), NBScriptedScenario.Invocation.EXECUTE_SCRIPT);
 
-        s.addScenarioScriptParams(paramsMap);
+//        s.addScenarioScriptParams(paramsMap);
 
         ClassLoader cl = ScriptExampleTests.class.getClassLoader();
         String script;
@@ -78,7 +78,7 @@ public class ScriptExampleTests {
         }
         s.addScriptText(script);
 //        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
-        executor.execute(s);
+        executor.execute(s,paramsMap);
         ScenariosResults scenariosResults = executor.awaitAllResults();
         ScenarioResult scenarioResult = scenariosResults.getOne();
         executor.shutdownNow();

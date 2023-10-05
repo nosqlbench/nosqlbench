@@ -146,7 +146,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         activitylogger.debug("FORCE STOP/before alias=(" + activity.getAlias() + ")");
         activity.setRunState(RunState.Stopped);
 
-        executorService.shutdown();
+        executorService.shutdownNow();
         requestStopMotors();
 
         int divisor = 100;
@@ -401,7 +401,6 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
 
             shutdownHook = new ActivityExecutorShutdownHook(this);
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            long startAt = System.currentTimeMillis();
 
             Annotators.recordAnnotation(Annotation.newBuilder()
                 .element(this)

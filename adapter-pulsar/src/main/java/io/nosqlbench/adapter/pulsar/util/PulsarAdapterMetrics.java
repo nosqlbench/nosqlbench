@@ -115,9 +115,9 @@ public class PulsarAdapterMetrics {
     //
     private static class ProducerGaugeImpl implements Gauge<Object> {
         private final Producer<?> producer;
-        private final Function<ProducerStats, Object> valueExtractor;
+        private final Function<ProducerStats, Double> valueExtractor;
 
-        ProducerGaugeImpl(final Producer<?> producer, final Function<ProducerStats, Object> valueExtractor) {
+        ProducerGaugeImpl(final Producer<?> producer, final Function<ProducerStats, Double> valueExtractor) {
             this.producer = producer;
             this.valueExtractor = valueExtractor;
         }
@@ -131,20 +131,20 @@ public class PulsarAdapterMetrics {
             }
         }
     }
-    private static Gauge<Object> producerSafeExtractMetric(final Producer<?> producer, final Function<ProducerStats, Object> valueExtractor) {
+    private static Gauge<Double> producerSafeExtractMetric(final Producer<?> producer, final Function<ProducerStats, Double> valueExtractor) {
         return new ProducerGaugeImpl(producer, valueExtractor);
     }
 
     public void registerProducerApiMetrics(final Producer<?> producer) {
 
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "total_bytes_sent",
-            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> s.getTotalBytesSent() + s.getNumBytesSent()));
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalBytesSent() + s.getNumBytesSent()));
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser,  "total_msg_sent",
-            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> s.getTotalMsgsSent() + s.getNumMsgsSent()));
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalMsgsSent() + s.getNumMsgsSent()));
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser,  "total_send_failed",
-            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> s.getTotalSendFailed() + s.getNumSendFailed()));
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalSendFailed() + s.getNumSendFailed()));
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser,  "total_ack_received",
-            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> s.getTotalAcksReceived() + s.getNumAcksReceived()));
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalAcksReceived() + s.getNumAcksReceived()));
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser,  "send_bytes_rate",
             PulsarAdapterMetrics.producerSafeExtractMetric(producer, ProducerStats::getSendBytesRate));
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser,  "send_msg_rate",
@@ -158,9 +158,9 @@ public class PulsarAdapterMetrics {
     //
     private static class ConsumerGaugeImpl implements Gauge<Object> {
         private final Consumer<?> consumer;
-        private final Function<ConsumerStats, Object> valueExtractor;
+        private final Function<ConsumerStats, Double> valueExtractor;
 
-        ConsumerGaugeImpl(final Consumer<?> consumer, final Function<ConsumerStats, Object> valueExtractor) {
+        ConsumerGaugeImpl(final Consumer<?> consumer, final Function<ConsumerStats, Double> valueExtractor) {
             this.consumer = consumer;
             this.valueExtractor = valueExtractor;
         }
@@ -175,23 +175,23 @@ public class PulsarAdapterMetrics {
             }
         }
     }
-    static Gauge<Object> consumerSafeExtractMetric(final Consumer<?> consumer, final Function<ConsumerStats, Object> valueExtractor) {
+    static Gauge<Double> consumerSafeExtractMetric(final Consumer<?> consumer, final Function<ConsumerStats, Double> valueExtractor) {
         return new ConsumerGaugeImpl(consumer, valueExtractor);
     }
 
     public void registerConsumerApiMetrics(final Consumer<?> consumer, final String pulsarApiMetricsPrefix) {
 
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "total_bytes_recv",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> s.getTotalBytesReceived() + s.getNumBytesReceived()));
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getTotalBytesReceived() + s.getNumBytesReceived()));
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "total_msg_recv",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> s.getTotalMsgsReceived() + s.getNumMsgsReceived()));
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double)s.getTotalMsgsReceived() + s.getNumMsgsReceived()));
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "total_recv_failed",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> s.getTotalReceivedFailed() + s.getNumReceiveFailed()));
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getTotalReceivedFailed() + s.getNumReceiveFailed()));
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "total_acks_sent",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> s.getTotalAcksSent() + s.getNumAcksSent()));
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getTotalAcksSent() + s.getNumAcksSent()));
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "recv_bytes_rate",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, ConsumerStats::getRateBytesReceived));
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getRateBytesReceived()));
         ActivityMetrics.gauge(this.pulsarBaseOpDispenser, "recv_msg_rate",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, ConsumerStats::getRateMsgsReceived));
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getRateMsgsReceived()));
     }
 }

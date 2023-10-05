@@ -19,18 +19,18 @@ package io.nosqlbench.api.engine.metrics.instruments;
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.labels.NBLabels;
 
-public class NBMetricGaugeWrapper<T> implements NBMetricGauge<T>, NBMetric {
+public class NBMetricGaugeWrapper implements NBMetricGauge, NBMetric {
 
-    private final Gauge<? extends T> gauge;
+    private final Gauge<Double> gauge;
     private final NBLabels labels;
 
-    public NBMetricGaugeWrapper(NBLabels labels, Gauge<? extends T> gauge) {
+    public NBMetricGaugeWrapper(NBLabels labels, Gauge<Double> gauge) {
         this.gauge = gauge;
         this.labels = labels;
     }
 
     @Override
-    public T getValue() {
+    public Double getValue() {
         return gauge.getValue();
     }
 

@@ -268,14 +268,14 @@ public class ActivityMetrics {
 
     public static NBMetricGauge gauge(NBMetricGauge gauge) {
         final NBLabels labels = gauge.getLabels();
-        return (NBMetricGauge) register(labels, () -> new NBMetricGaugeWrapper<>(labels, gauge));
+        return (NBMetricGauge) register(labels, () -> new NBMetricGaugeWrapper(labels, gauge));
 
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Gauge<T> gauge(NBLabeledElement parent, String metricFamilyName, Gauge<T> gauge) {
+    public static Gauge<Double> gauge(NBLabeledElement parent, String metricFamilyName, Gauge<Double> gauge) {
         final NBLabels labels = parent.getLabels().and("name", sanitize(metricFamilyName));
-        return (Gauge<T>) register(labels, () -> new NBMetricGaugeWrapper<>(labels, gauge));
+        return (Gauge<Double>) register(labels, () -> new NBMetricGaugeWrapper(labels, gauge));
     }
 
     private static MetricRegistry lookupRegistry() {

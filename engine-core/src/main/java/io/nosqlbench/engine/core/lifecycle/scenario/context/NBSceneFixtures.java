@@ -21,12 +21,11 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
 
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.Writer;
 
 public interface NBSceneFixtures {
     ScriptParams params();
 
-    NBComponent session();
+    NBComponent component();
 
     ActivitiesController controller();
 
@@ -34,8 +33,12 @@ public interface NBSceneFixtures {
 
     PrintWriter out();
 
-    Writer err();
+    PrintWriter err();
 
     Reader in();
+
+    public static NBSceneFixtures NEW(String sceneName) {
+        return NBDefaultSceneFixtures.ofDefault(sceneName);
+    }
 
 }
