@@ -15,7 +15,7 @@
  *
  */
 
-package io.nosqlbench.api.engine.optimizers;
+package io.nosqlbench.api.optimizers;
 
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;

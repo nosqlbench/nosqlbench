@@ -15,7 +15,7 @@
  *
  */
 
-package io.nosqlbench.api.engine.optimizers;
+package io.nosqlbench.api.optimizers;
 
 import java.util.ArrayList;
 import java.util.Iterator;

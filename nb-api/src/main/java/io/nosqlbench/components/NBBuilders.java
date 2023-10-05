@@ -28,12 +28,13 @@ import io.nosqlbench.api.engine.metrics.reporters.CsvReporter;
 import io.nosqlbench.api.engine.metrics.instruments.*;
 import io.nosqlbench.api.engine.metrics.reporters.MetricInstanceFilter;
 import io.nosqlbench.api.engine.metrics.reporters.PromPushReporterComponent;
-import io.nosqlbench.api.engine.optimizers.BobyqaOptimizerInstance;
+import io.nosqlbench.api.histologger.HdrHistoLog;
+import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
+import io.nosqlbench.api.files.FileAccess;
 import io.nosqlbench.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
@@ -128,6 +129,14 @@ public class NBBuilders {
 
     public BobyqaOptimizerInstance bobyqaOptimizer(final NBComponent component) {
         return new BobyqaOptimizerInstance(component);
+    }
+
+    public FileAccess fileAccess(String filename) {
+        return new FileAccess();
+    }
+
+    public HdrHistoLog hdrHistoLog(NBComponent component) {
+        return new HdrHistoLog(component);
     }
 
     public static class CsvOutputWriterBuilder {

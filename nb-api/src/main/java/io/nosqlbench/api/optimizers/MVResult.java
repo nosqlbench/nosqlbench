@@ -15,7 +15,7 @@
  *
  */
 
-package io.nosqlbench.api.engine.optimizers;
+package io.nosqlbench.api.optimizers;
 
 import java.util.HashMap;
 import java.util.Map;

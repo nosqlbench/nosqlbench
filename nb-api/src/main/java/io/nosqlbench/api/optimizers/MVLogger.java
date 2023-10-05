@@ -15,7 +15,7 @@
  *
  */
 
-package io.nosqlbench.api.engine.optimizers;
+package io.nosqlbench.api.optimizers;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 
