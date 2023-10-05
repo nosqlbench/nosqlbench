@@ -43,5 +43,7 @@ public class HdrHistoLog extends NBBaseComponent {
         HistoIntervalLogger histoIntervalLogger =
             new HistoIntervalLogger(this, session, logfile, compiledPattern, intervalMillis);
         this.attachChild(histoIntervalLogger);
+
+        //TODO: Use create().histogram() instead?
     }
 }
