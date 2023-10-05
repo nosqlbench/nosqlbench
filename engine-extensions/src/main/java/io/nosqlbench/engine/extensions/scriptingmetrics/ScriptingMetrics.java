@@ -56,12 +56,15 @@ public class ScriptingMetrics {
         return summaryGauge;
     }
 
-    public RelevancyMeasures newRelevancyMeasures(NBLabeledElement parent, Map<String,String> labels) {
-        return new RelevancyMeasures(parent,labels);
+//    public RelevancyMeasures newRelevancyMeasures(NBLabeledElement parent, Map<String,String> labels) {
+//        return new RelevancyMeasures(parent,labels);
+//    }
+    public RelevancyMeasures newRelevancyMeasures(NBLabeledElement parent) {
+        return new RelevancyMeasures(parent);
     }
-    public RelevancyMeasures newRelevancyMeasures(NBLabeledElement parent, Object... labels) {
-        return new RelevancyMeasures(parent,labels);
-    }
+//    public RelevancyMeasures newRelevancyMeasures(NBLabeledElement parent, Object... labels) {
+//        return new RelevancyMeasures(parent,labels);
+//    }
 
 
 
