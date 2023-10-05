@@ -30,6 +30,7 @@ import io.nosqlbench.api.engine.metrics.reporters.MetricInstanceFilter;
 import io.nosqlbench.api.engine.metrics.reporters.PromPushReporterComponent;
 import io.nosqlbench.api.histo.HdrHistoLog;
 import io.nosqlbench.api.histo.HistoStats;
+import io.nosqlbench.api.http.HttpPlugin;
 import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
 import io.nosqlbench.api.files.FileAccess;
 import io.nosqlbench.api.labels.NBLabels;
@@ -142,6 +143,10 @@ public class NBBuilders {
 
     public HistoStats histoStats(NBComponent component) {
         return new HistoStats(component);
+    }
+
+    public HttpPlugin httpPlugin(NBComponent component) {
+        return new HttpPlugin(component);
     }
 
     public static class CsvOutputWriterBuilder {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package io.nosqlbench.engine.extensions.s3uploader;
+package io.nosqlbench.api.s3uploader;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
@@ -27,9 +28,9 @@ import io.nosqlbench.api.metadata.ScenarioMetadataAware;
 import io.nosqlbench.api.system.NBEnvironment;
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.script.ScriptContext;
 import java.io.File;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -38,14 +39,12 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class S3Uploader implements ScenarioMetadataAware {
-    private final Logger logger;
-    private final NBComponent baseComponent;
+public class S3Uploader extends NBBaseComponent implements ScenarioMetadataAware {
     private ScenarioMetadata scenarioMetadata;
+    private final static Logger logger = LogManager.getLogger(S3Uploader.class);
 
-    public S3Uploader(Logger logger, NBComponent baseComponent) {
-        this.logger = logger;
-        this.baseComponent = baseComponent;
+    public S3Uploader(NBComponent baseComponent) {
+        super(baseComponent);
     }
 
     /**
