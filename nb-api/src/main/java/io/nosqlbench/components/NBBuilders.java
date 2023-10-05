@@ -16,6 +16,7 @@
 
 package io.nosqlbench.components;
 
+import io.nosqlbench.api.csvoutput.CsvOutputPluginWriter;
 import com.codahale.metrics.Meter;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
@@ -27,6 +28,7 @@ import io.nosqlbench.api.engine.metrics.reporters.CsvReporter;
 import io.nosqlbench.api.engine.metrics.instruments.*;
 import io.nosqlbench.api.engine.metrics.reporters.MetricInstanceFilter;
 import io.nosqlbench.api.engine.metrics.reporters.PromPushReporterComponent;
+import io.nosqlbench.api.engine.optimizers.BobyqaOptimizerInstance;
 import io.nosqlbench.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -124,33 +126,56 @@ public class NBBuilders {
 //        return new ExamplePlugin(component);
 //    }
 
-    public static class csvReporterBuilder {
+    public BobyqaOptimizerInstance bobyqaOptimizer(final NBComponent component) {
+        return new BobyqaOptimizerInstance(component);
+    }
+
+    public static class CsvOutputWriterBuilder {
+        //CsvOutputPluginWriter(NBComponent component, String filename, String... headers) {
+        private final NBComponent component;
+        private final String filename;
+        private String[] headers;
+
+        public CsvOutputWriterBuilder(NBComponent component, String filename) {
+            this.component = component;
+            this.filename = filename;
+        }
+        public CsvOutputWriterBuilder headers(String... headers) {
+            this.headers = headers;
+            return this;
+        }
+        public CsvOutputPluginWriter build() {
+            return new CsvOutputPluginWriter(component, filename, headers);
+        }
+    }
+
+    public static class CsvReporterBuilder {
         private final NBComponent component;
         private Path reportTo = Path.of("metrics.csv");
         private int interval = 1;
         private MetricInstanceFilter filter = new MetricInstanceFilter();
         private NBLabels labels = null;
 
-        public csvReporterBuilder(NBComponent component) {
+        public CsvReporterBuilder(NBComponent component) {
             this.component = component;
         }
-        public csvReporterBuilder labels(NBLabels labels) {
+        public CsvReporterBuilder labels(NBLabels labels) {
             this.labels = labels;
             return this;
         }
-        public csvReporterBuilder path(Path reportTo) {
+        public CsvReporterBuilder path(Path reportTo) {
             this.reportTo = reportTo;
             return this;
         }
-        public csvReporterBuilder path(String reportTo) {
+        public CsvReporterBuilder path(String reportTo) {
             this.reportTo = Path.of(reportTo);
             return this;
         }
-        public csvReporterBuilder interval(int interval) {
+        public CsvReporterBuilder interval(int interval) {
             this.interval = interval;
             return this;
         }
-        public csvReporterBuilder filter(MetricInstanceFilter filter) {
+        public CsvReporterBuilder filter(MetricInstanceFilter filter) {
             this.filter = filter;
             return this;
         }

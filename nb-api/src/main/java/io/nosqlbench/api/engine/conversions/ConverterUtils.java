@@ -12,9 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package io.nosqlbench.engine.extensions.conversions;
+package io.nosqlbench.api.engine.conversions;
 
 public class ConverterUtils {
     public static int[] toIntArray(String[] strings) {

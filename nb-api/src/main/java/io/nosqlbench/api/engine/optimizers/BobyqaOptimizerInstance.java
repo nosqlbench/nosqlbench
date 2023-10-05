@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package io.nosqlbench.engine.extensions.optimizers;
+package io.nosqlbench.api.engine.optimizers;
 
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
@@ -23,16 +24,16 @@ import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.script.ScriptContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-public class BobyqaOptimizerInstance {
+public class BobyqaOptimizerInstance extends NBBaseComponent {
 
-    private final Logger logger;
+    private static final Logger logger = LogManager.getLogger(BobyqaOptimizerInstance.class);
     private final NBComponent baseComponent;
 
     private int interpolations = 0;
@@ -49,8 +50,8 @@ public class BobyqaOptimizerInstance {
     private MVLogger mvLogger;
     private double guessSlew = 0.25d;
 
-    public BobyqaOptimizerInstance(Logger logger, NBComponent baseComponent) {
-        this.logger = logger;
+    public BobyqaOptimizerInstance(NBComponent baseComponent) {
+        super(baseComponent);
         this.baseComponent = baseComponent;
     }
 
