@@ -33,7 +33,7 @@ bindings:
   seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
   rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
   rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
-  vector_value: CqlVector(ListSized(<<dimensions:5>>,HashRange(0.0f,100.0f))); NormalizeCqlVector();
+  vector_value: CqlVector(ListSizedHashed(<<dimensions:5>>,HashRange(0.0f,100.0f))); NormalizeCqlVector();
 
 blocks:
   drop-tables:
