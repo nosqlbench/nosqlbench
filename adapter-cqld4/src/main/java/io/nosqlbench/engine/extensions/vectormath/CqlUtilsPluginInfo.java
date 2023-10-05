@@ -31,6 +31,6 @@ public class CqlUtilsPluginInfo implements ScriptingExtensionPluginInfo<CqlUtils
 
     @Override
     public CqlUtils getExtensionObject(Logger logger, NBComponent baseComponent) {
-        return new CqlUtils();
+        return new CqlUtils(baseComponent);
     }
 }

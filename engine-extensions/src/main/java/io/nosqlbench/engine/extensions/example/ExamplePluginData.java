@@ -16,7 +16,6 @@
 
 package io.nosqlbench.engine.extensions.example;
 
-import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
@@ -33,7 +32,7 @@ public class ExamplePluginData implements ScriptingExtensionPluginInfo<ExamplePl
 
     @Override
     public ExamplePlugin getExtensionObject(final Logger logger, final NBComponent baseComponent) {
-        return new ExamplePlugin();
+        return new ExamplePlugin(baseComponent);
     }
 
 }

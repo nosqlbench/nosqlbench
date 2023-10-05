@@ -16,6 +16,9 @@
 
 package io.nosqlbench.engine.extensions.computefunctions;
 
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
+
 import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 import java.util.HashSet;
@@ -39,7 +42,11 @@ import java.util.HashSet;
  * these methods will yield incorrect results as they rely on the <EM>two-pointer</EM> method and do not
  * elide duplicates internally.
  */
-public class ComputeFunctions {
+public class ComputeFunctions extends NBBaseComponent {
+
+    public ComputeFunctions(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     /**
      * Compute the recall as the proportion of matching indices divided by the expected indices

@@ -30,6 +30,6 @@ public class PineconeScriptingUtilsPluginInfo implements ScriptingExtensionPlugi
 
     @Override
     public PineconeScriptingUtils getExtensionObject(Logger logger, NBComponent baseComponent) {
-        return new PineconeScriptingUtils();
+        return new PineconeScriptingUtils(baseComponent);
     }
 }

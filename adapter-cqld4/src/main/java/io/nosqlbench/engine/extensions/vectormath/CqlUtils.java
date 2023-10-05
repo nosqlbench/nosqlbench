@@ -17,11 +17,17 @@
 package io.nosqlbench.engine.extensions.vectormath;
 
 import com.datastax.oss.driver.api.core.cql.Row;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 
 import java.util.List;
 import java.util.Objects;
 
-public class CqlUtils {
+public class CqlUtils extends NBBaseComponent {
+
+    public CqlUtils(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     public static long[] cqlRowFieldsToLongArray(String fieldName, List<Row> rows) {
         return rows.stream().mapToLong(r -> r.getLong(fieldName)).toArray();

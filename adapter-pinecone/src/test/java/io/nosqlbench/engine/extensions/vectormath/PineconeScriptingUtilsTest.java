@@ -19,6 +19,7 @@ package io.nosqlbench.engine.extensions.vectormath;
 
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
+import io.nosqlbench.components.NBBaseComponent;
 import io.pinecone.proto.QueryResponse;
 import io.pinecone.proto.ScoredVector;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,7 @@ public class PineconeScriptingUtilsTest {
     @Test
     void responseIdsToStringArrayTest() {
         QueryResponse response = generateQueryResponse();
-        PineconeScriptingUtils utils = new PineconeScriptingUtils();
+        PineconeScriptingUtils utils = new PineconeScriptingUtils(new NBBaseComponent(null));
         String[] ids = utils.responseIdsToStringArray(response);
         assert(ids.length == 3);
         assert(ids[0].equals("1"));
@@ -61,7 +62,7 @@ public class PineconeScriptingUtilsTest {
     @Test
     void responseIdsToIntArrayTest() {
         QueryResponse response = generateQueryResponse();
-        PineconeScriptingUtils utils = new PineconeScriptingUtils();
+        PineconeScriptingUtils utils = new PineconeScriptingUtils(new NBBaseComponent(null));
         int[] ids = utils.responseIdsToIntArray(response);
         assert(ids.length == 3);
         assert(ids[0] == 1);
@@ -72,7 +73,7 @@ public class PineconeScriptingUtilsTest {
     @Test
     void responseIdsToLongArrayTest() {
         QueryResponse response = generateQueryResponse();
-        PineconeScriptingUtils utils = new PineconeScriptingUtils();
+        PineconeScriptingUtils utils = new PineconeScriptingUtils(new NBBaseComponent(null));
         long[] ids = utils.responseIdsToLongArray(response);
         assert(ids.length == 3);
         assert(ids[0] == 1L);
@@ -83,7 +84,7 @@ public class PineconeScriptingUtilsTest {
     @Test
     void responseFieldToStringArrayTest() {
         QueryResponse response = generateQueryResponse();
-        PineconeScriptingUtils utils = new PineconeScriptingUtils();
+        PineconeScriptingUtils utils = new PineconeScriptingUtils(new NBBaseComponent(null));
         String[] ids = utils.responseFieldToStringArray("a", response);
         assert(ids.length == 3);
         assert(ids[0].equals("4"));
@@ -94,7 +95,7 @@ public class PineconeScriptingUtilsTest {
     @Test
     void responseFieldToIntArrayTest() {
         QueryResponse response = generateQueryResponse();
-        PineconeScriptingUtils utils = new PineconeScriptingUtils();
+        PineconeScriptingUtils utils = new PineconeScriptingUtils(new NBBaseComponent(null));
         int[] ids = utils.responseFieldToIntArray("b", response);
         assert(ids.length == 3);
         assert(ids[0] == 5);
@@ -105,7 +106,7 @@ public class PineconeScriptingUtilsTest {
     @Test
     void responseFieldToLongArrayTest() {
         QueryResponse response = generateQueryResponse();
-        PineconeScriptingUtils utils = new PineconeScriptingUtils();
+        PineconeScriptingUtils utils = new PineconeScriptingUtils(new NBBaseComponent(null));
         long[] ids = utils.responseFieldToLongArray("c", response);
         assert(ids.length == 3);
         assert(ids[0] == 6L);
