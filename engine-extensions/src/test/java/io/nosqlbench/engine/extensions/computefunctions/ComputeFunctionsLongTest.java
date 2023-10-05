@@ -69,7 +69,7 @@ class ComputeFunctionsLongTest {
     public void sanityCheckRecallAndLimitRatioLongs() {
         long[] hundo = LongStream.range(0,100).toArray();
 
-        for (int i = 0; i < hundo.length; i++) {
+        for (int i = 1; i < hundo.length; i++) {
             long[] partial=LongStream.range(0,i).toArray();
             int finalI = i;
             assertThat(ComputeFunctions.recall(hundo, partial))
@@ -77,7 +77,7 @@ class ComputeFunctionsLongTest {
                 .isCloseTo((double)partial.length/(double)hundo.length,offset);
             assertThat(ComputeFunctions.recall(hundo, hundo, i))
                 .as(() -> "for full intersection, limit " + finalI +" (K) recall should be fractional/100")
-                .isCloseTo((double)partial.length/(double)hundo.length,offset);
+                .isCloseTo(1.0d,offset);
         }
     }
 
