@@ -39,21 +39,20 @@ public class ScriptingMetrics {
 
     public ScriptingGauge newStaticGauge(final String name, final double initialValue) {
         final ScriptingGauge scriptingGauge = new ScriptingGauge(name, initialValue);
-        ActivityMetrics.gauge(this.scriptContext,name, scriptingGauge);
-        this.logger.info(() -> "registered scripting gauge:" + name);
-        return scriptingGauge;
+        throw new RuntimeException("replace me when merging");
     }
 
     public DoubleSummaryGauge newSummaryGauge(final String name) {
-        final DoubleSummaryGauge summaryGauge = ActivityMetrics.summaryGauge(scriptContext,name);
-        this.logger.info(() -> "registered summmary gauge:" + name);
-        return summaryGauge;
+        throw new RuntimeException("replace me after merge");
+//        this.logger.info(() -> "registered summmary gauge:" + name);
+//        return summaryGauge;
     }
 
     public DoubleSummaryGauge newSummaryGauge(NBLabeledElement context, final String name) {
-        final DoubleSummaryGauge summaryGauge = ActivityMetrics.summaryGauge(context,name);
-        this.logger.info(() -> "registered summmary gauge:" + name);
-        return summaryGauge;
+        throw new RuntimeException("replace me after merge");
+//        final DoubleSummaryGauge summaryGauge = ActivityMetrics.summaryGauge(context,name);
+//        this.logger.info(() -> "registered summmary gauge:" + name);
+//        return summaryGauge;
     }
 
 //    public RelevancyMeasures newRelevancyMeasures(NBLabeledElement parent, Map<String,String> labels) {

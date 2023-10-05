@@ -40,8 +40,8 @@ import java.util.function.Function;
 @Service(value = DriverAdapter.class, selector = "http")
 public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
 
-    public HttpDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public HttpDriverAdapter(NBComponent parent) {
+        super(parent);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
 
     @Override
     public Function<String, ? extends HttpSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return spaceName -> new HttpSpace(spaceName, cfg);
+        return spaceName -> new HttpSpace(getParent(), spaceName, cfg);
     }
 
     @Override

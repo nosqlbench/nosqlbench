@@ -20,6 +20,7 @@ import com.codahale.metrics.Histogram;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.components.NBComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,13 +34,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ExceptionHistoMetrics {
     private final ConcurrentHashMap<String, Histogram> histos = new ConcurrentHashMap<>();
     private final Histogram allerrors;
-    private final NBLabeledElement parentLabels;
+    private final NBComponent parent;
     private final ActivityDef activityDef;
 
-    public ExceptionHistoMetrics(final NBLabeledElement parentLabels, final ActivityDef activityDef) {
-        this.parentLabels = parentLabels;
+    public ExceptionHistoMetrics(final NBComponent parent, final ActivityDef activityDef) {
+        this.parent = parent;
         this.activityDef = activityDef;
-        this.allerrors = ActivityMetrics.histogram(parentLabels, "errorhistos_ALL", activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4));
+        this.allerrors = parent.create().histogram( "errorhistos_ALL", activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4));
     }
 
     public void update(final String name, final long magnitude) {
@@ -47,7 +48,7 @@ public class ExceptionHistoMetrics {
         if (null == h) synchronized (this.histos) {
             h = this.histos.computeIfAbsent(
                 name,
-                errName -> ActivityMetrics.histogram(this.parentLabels, "errorhistos_"+errName, this.activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
+                errName -> parent.create().histogram( "errorhistos_"+errName, this.activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
             );
         }
         h.update(magnitude);

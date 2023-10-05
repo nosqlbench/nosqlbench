@@ -16,12 +16,10 @@
 
 package io.nosqlbench.components;
 
+import com.codahale.metrics.Meter;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
-import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
+import io.nosqlbench.api.engine.metrics.instruments.*;
 import io.nosqlbench.api.engine.metrics.reporters.PromPushReporterComponent;
 import io.nosqlbench.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
@@ -48,6 +46,14 @@ public class NBBuilders {
         base.addMetric(timer);
         return timer;
     }
+
+    public Meter meter(String metricFamilyName) {
+        NBLabels labels = base.getLabels().and("name", metricFamilyName);
+        NBMetricMeter meter = new NBMetricMeter(labels);
+        base.addMetric(meter);
+        return meter;
+    }
+
 
     public NBMetricCounter counter(String metricFamilyName) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);

@@ -142,65 +142,6 @@ public class ActivityMetrics {
     }
 
 
-    /**
-     * <p>Create an HDR histogram associated with an activity.</p>
-     *
-     * <p>If the provide ActivityDef contains a parameter "hdr_digits", then it will be used to set the number of
-     * significant digits on the histogram's precision.</p>
-     *
-     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
-     * that only one of them succeeds.</p>
-     *
-     * @param named
-     *     an associated activity def
-     * @param metricFamilyName
-     *     a simple, descriptive name for the histogram
-     * @return the histogram, perhaps a different one if it has already been registered
-     */
-    public static Histogram histogram(NBLabeledElement labeled, String metricFamilyName, int hdrdigits) {
-        final NBLabels labels = labeled.getLabels().and("name", sanitize(metricFamilyName));
-        return (Histogram) register(labels, () ->
-            new NBMetricHistogram(
-                labels,
-                new DeltaHdrHistogramReservoir(
-                    labels,
-                    hdrdigits
-                )
-            ));
-    }
-
-    /**
-     * <p>Create a counter associated with an activity.</p>
-     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
-     * that only one of them succeeds.</p>
-     *
-     * @param named
-     *     an associated activity def
-     * @param name
-     *     a simple, descriptive name for the counter
-     * @return the counter, perhaps a different one if it has already been registered
-     */
-    public static Counter counter(NBLabeledElement parent, String metricFamilyName) {
-        final NBLabels labels = parent.getLabels().and("name", metricFamilyName);
-        return (Counter) register(labels, () -> new NBMetricCounter(labels));
-    }
-
-    /**
-     * <p>Create a meter associated with an activity.</p>
-     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
-     * that only one of them succeeds.</p>
-     *
-     * @param named
-     *     an associated activity def
-     * @param metricFamilyName
-     *     a simple, descriptive name for the meter
-     * @return the meter, perhaps a different one if it has already been registered
-     */
-    public static Meter meter(NBLabeledElement parent, String metricFamilyName) {
-        final NBLabels labels = parent.getLabels().and("name", sanitize(metricFamilyName));
-        return (Meter) register(labels, () -> new NBMetricMeter(labels));
-    }
-
     private static MetricRegistry get() {
         if (null != ActivityMetrics.registry) {
             return registry;
@@ -213,42 +154,6 @@ public class ActivityMetrics {
         return registry;
     }
 
-    /**
-     * This variant creates a named metric for all of the stats which may be needed, name with metricname_average,
-     * and so on. It uses the same data reservoir for all views, but only returns one of them as a handle to the metric.
-     * This has the effect of leaving some of the metric objects unreferencable from the caller side. This may need
-     * to be changed in a future update in the even that full inventory management is required on metric objects here.
-     *
-     * @param parent
-     *     The labeled element the metric pertains to
-     * @param metricFamilyName
-     *     The name of the measurement
-     * @return One of the created metrics, suitable for calling {@link DoubleSummaryGauge#accept(double)} on.
-     */
-    public static DoubleSummaryGauge summaryGauge(NBLabeledElement parent, String metricFamilyName) {
-        DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
-        DoubleSummaryGauge anyGauge = null;
-        for (DoubleSummaryGauge.Stat statName : DoubleSummaryGauge.Stat.values()) {
-            final NBLabels labels = parent.getLabels()
-                .and("name", sanitize(metricFamilyName))
-                .modifyValue("name", n -> n + "_" + statName.name().toLowerCase());
-            anyGauge = (DoubleSummaryGauge) register(labels, () -> new DoubleSummaryGauge(labels, statName, stats));
-        }
-        return anyGauge;
-    }
-
-
-    public static NBMetricGauge gauge(NBMetricGauge gauge) {
-        final NBLabels labels = gauge.getLabels();
-        return (NBMetricGauge) register(labels, () -> new NBMetricGaugeWrapper(labels, gauge));
-
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Gauge<Double> gauge(NBLabeledElement parent, String metricFamilyName, Gauge<Double> gauge) {
-        final NBLabels labels = parent.getLabels().and("name", sanitize(metricFamilyName));
-        return (Gauge<Double>) register(labels, () -> new NBMetricGaugeWrapper(labels, gauge));
-    }
 
     private static MetricRegistry lookupRegistry() {
         ServiceLoader<MetricRegistryService> metricRegistryServices =

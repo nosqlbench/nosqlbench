@@ -152,14 +152,12 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
         }
 
-        this.pendingOpsGauge = ActivityMetrics.gauge(
-            new NBFunctionGauge(this,() -> this.getProgressMeter().getSummary().pending(), "ops_pending")
-        );
-        this.activeOpsGauge = ActivityMetrics.gauge(
-            new NBFunctionGauge(this, () -> this.getProgressMeter().getSummary().current(),"ops_active")
-        );
-        this.completeOpsGauge = ActivityMetrics.gauge(
-            new NBFunctionGauge(this, () -> this.getProgressMeter().getSummary().complete(),"ops_complete"));
+        this.pendingOpsGauge = create().gauge(
+            "ops_pending",() -> this.getProgressMeter().getSummary().pending());
+        this.activeOpsGauge = create().gauge(
+            "ops_active",() -> this.getProgressMeter().getSummary().current());
+        this.completeOpsGauge = create().gauge(
+            "ops_complete",() -> this.getProgressMeter().getSummary().complete());
     }
 
     @Override

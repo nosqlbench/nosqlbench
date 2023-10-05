@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Counter;
-import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.components.NBComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +30,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ExceptionCountMetrics {
     private final ConcurrentHashMap<String, Counter> counters = new ConcurrentHashMap<>();
     private final Counter allerrors;
-    private final NBLabeledElement parentLabels;
+    private final NBComponent parent;
 
-    public ExceptionCountMetrics(final NBLabeledElement parentLabels) {
-        this.parentLabels = parentLabels;
-        this.allerrors =ActivityMetrics.counter(parentLabels, "errors_ALL");
+    public ExceptionCountMetrics(final NBComponent parent) {
+        this.parent = parent;
+        this.allerrors=parent.create().counter( "errors_ALL");
     }
 
     public void count(final String name) {
@@ -42,7 +42,7 @@ public class ExceptionCountMetrics {
         if (null == c) synchronized (this.counters) {
             c = this.counters.computeIfAbsent(
                 name,
-                k -> ActivityMetrics.counter(this.parentLabels, "errors_" + name)
+                k -> parent.create().counter("errors_" + name)
             );
         }
         c.inc();

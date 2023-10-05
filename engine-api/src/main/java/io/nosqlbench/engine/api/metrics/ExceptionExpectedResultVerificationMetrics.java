@@ -17,22 +17,21 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Counter;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.components.NBComponent;
 
 
 /**
  * Use this to provide exception metering during expected result verification.
  */
 public class ExceptionExpectedResultVerificationMetrics {
-    private final NBLabeledElement parentLabels;
+    private final NBComponent parent;
     private final Counter verificationErrors;
     private final Counter verificationRetries;
 
-    public ExceptionExpectedResultVerificationMetrics(final NBLabeledElement parentLabels) {
-        this.parentLabels = parentLabels;
-        verificationRetries = ActivityMetrics.counter(parentLabels, "verificationcounts_RETRIES");
-        verificationErrors = ActivityMetrics.counter(parentLabels, "verificationcounts_ERRORS");
+    public ExceptionExpectedResultVerificationMetrics(final NBComponent parent) {
+        this.parent = parent;
+        this.verificationRetries=parent.create().counter("verificationcounts_RETRIES");
+        this.verificationErrors=parent.create().counter( "verificationcounts_ERRORS");
     }
 
     public void countVerificationRetries() {

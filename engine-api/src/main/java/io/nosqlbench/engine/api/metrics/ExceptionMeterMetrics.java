@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.metrics;
 import com.codahale.metrics.Meter;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.components.NBComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +31,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ExceptionMeterMetrics {
     private final ConcurrentHashMap<String, Meter> meters = new ConcurrentHashMap<>();
     private final Meter allerrors;
-    private final NBLabeledElement parentLabels;
+    private final NBComponent parent;
 
-    public ExceptionMeterMetrics(final NBLabeledElement parentLabels) {
-        this.parentLabels = parentLabels;
-        this.allerrors = ActivityMetrics.meter(parentLabels, "errormeters_ALL");
+    public ExceptionMeterMetrics(final NBComponent parent) {
+        this.parent = parent;
+        this.allerrors = parent.create().meter("errormeters_ALL");
     }
 
     public void mark(final String name) {
@@ -42,7 +43,7 @@ public class ExceptionMeterMetrics {
         if (null == c) synchronized (this.meters) {
             c = this.meters.computeIfAbsent(
                 name,
-                k -> ActivityMetrics.meter(this.parentLabels, "errormeters_" + name)
+                k -> parent.create().meter("errormeters_" + name)
             );
         }
         c.mark();
