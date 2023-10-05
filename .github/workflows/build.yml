@@ -53,17 +53,17 @@ jobs:
 #          name: codecov-report
 #          path: codecov-report.tgz
 
-      - name: Collecting logfiles
-        if: success() || failure()
-        run: tar -zcvf logfiles.tgz [a-zA-Z]**/logs/*
+#      - name: Collecting logfiles
+#        if: success() || failure()
+#        run: tar -zcvf logfiles.tgz [a-zA-Z]**/logs/*
 
-      - name: Uploading log files
-        if: success() || failure()
-        uses: actions/upload-artifact@v3
-        with:
-          node-version: '16'
-          name: nb-logs
-          path: logfiles.tgz
+#      - name: Uploading log files
+#        if: success() || failure()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          node-version: '16'
+#          name: nb-logs
+#          path: logfiles.tgz
 
       - name: export docs
         if: success()

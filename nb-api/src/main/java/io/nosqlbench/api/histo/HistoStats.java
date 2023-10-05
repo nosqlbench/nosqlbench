@@ -45,5 +45,6 @@ public class HistoStats extends NBBaseComponent {
         HistoStatsLogger histoStatsLogger =
             new HistoStatsLogger(this, sessionComment, logfile, compiledPattern, intervalMillis, TimeUnit.NANOSECONDS);
         this.attachChild(histoStatsLogger);
+        //TODO: Use create().histogram() instead?
     }
 }

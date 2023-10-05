@@ -191,13 +191,13 @@ jobs:
 #          asset_name: nb5
 #          asset_content_type: application/octet-stream
 
-      - name: Archive Test Results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: |
-            [a-zA-Z]**/logs/*
+#      - name: Archive Test Results
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: test-results
+#          path: |
+#            [a-zA-Z]**/logs/*
 
 # This triggers a preview build by cascading the tag to the builddocs repo.
 # The builddocs repo then pushes to preview or release depending on the tag.
