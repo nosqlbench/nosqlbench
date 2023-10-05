@@ -34,6 +34,7 @@ import io.nosqlbench.api.http.HttpPlugin;
 import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
 import io.nosqlbench.api.files.FileAccess;
 import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.api.shutdown.NBShutdownHook;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -149,8 +150,12 @@ public class NBBuilders {
         return new HttpPlugin(component);
     }
 
+    public NBShutdownHook shutdownHook(NBComponent component) {
+        return new NBShutdownHook(component);
+    }
+
     public static class CsvOutputWriterBuilder {
-        //CsvOutputPluginWriter(NBComponent component, String filename, String... headers) {
+
         private final NBComponent component;
         private final String filename;
         private String[] headers;

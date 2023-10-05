@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,24 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package io.nosqlbench.engine.shutdown;
+package io.nosqlbench.api.shutdown;
 
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.script.ScriptContext;
 import java.util.function.Function;
 
-public class ShutdownHookPlugin {
-    private final Logger logger;
-    private final NBComponent baseComponent;
+public class NBShutdownHook extends NBBaseComponent {
+    private final Logger logger = LogManager.getLogger(NBShutdownHook.class);
 
-    public ShutdownHookPlugin(Logger logger, NBComponent baseComponent) {
-
-        this.logger = logger;
-        this.baseComponent = baseComponent;
+    public NBShutdownHook(NBComponent baseComponent) {
+        super(baseComponent);
     }
 
     public void addShutdownHook(String name, Object f) {
@@ -41,6 +40,5 @@ public class ShutdownHookPlugin {
         runnable.setName(shutdownName);
         Runtime.getRuntime().addShutdownHook(runnable);
         logger.info(() -> "Registered shutdown hook to run under name '" + shutdownName + "'");
-
     }
 }
