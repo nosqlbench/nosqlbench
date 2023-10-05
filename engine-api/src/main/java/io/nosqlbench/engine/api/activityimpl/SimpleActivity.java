@@ -362,7 +362,7 @@ public class SimpleActivity implements Activity {
             String cycles = getParams().getOptionalString("stride").orElseThrow();
             logger.info(() -> "defaulting cycles to " + cycles + " (the stride length)");
 //            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
-            getParams().setSilently("cycles", getParams().getOptionalString("stride").orElseThrow());
+            activityDef.setCycles(cycles);
         } else {
             if (0 == activityDef.getCycleCount()) {
                 throw new RuntimeException(
