@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Timer;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.util.Colors;
-import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
@@ -58,7 +58,7 @@ public class InlineTokenPool {
     private static final Logger logger = LogManager.getLogger(InlineTokenPool.class);
 
     public static final double MIN_CONCURRENT_OPS = 5;
-    private final NBLabeledElement parentLabels;
+    private final NBComponent parent;
 
     // Size limit of active pool
     private long maxActivePoolSize;
@@ -104,22 +104,22 @@ public class InlineTokenPool {
      *
      * @param rateSpec a {@link RateSpec}
      */
-    public InlineTokenPool(final RateSpec rateSpec, final ActivityDef def, final NBLabeledElement parentLabels) {
-        this.parentLabels = parentLabels;
+    public InlineTokenPool(final RateSpec rateSpec, final ActivityDef def, final NBComponent parent) {
+        this.parent = parent;
         final ByteBuffer logbuf = this.getBuffer();
         this.apply(rateSpec);
         InlineTokenPool.logger.debug("initialized token pool: {} for rate:{}", this, rateSpec);
-        refillTimer = ActivityMetrics.timer(parentLabels, "tokenfiller",4);
+        refillTimer = parent.create().timer("tokenfiller",4);
     }
 
-    public InlineTokenPool(final long poolsize, final double burstRatio, final ActivityDef def, final NBLabeledElement parentLabels) {
-        this.parentLabels = parentLabels;
+    public InlineTokenPool(final long poolsize, final double burstRatio, final ActivityDef def, final NBComponent parent) {
+        this.parent = parent;
         final ByteBuffer logbuf = this.getBuffer();
         maxActivePoolSize = poolsize;
         this.burstRatio = burstRatio;
         maxActiveAndBurstSize = (long) (this.maxActivePoolSize * burstRatio);
         maxBurstPoolSize = this.maxActiveAndBurstSize - this.maxActivePoolSize;
-        refillTimer = ActivityMetrics.timer(parentLabels, "tokenfiller",4);
+        refillTimer = parent.create().timer( "tokenfiller",4);
     }
 
     /**

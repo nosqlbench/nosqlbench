@@ -25,6 +25,8 @@ import io.nosqlbench.api.config.fieldreaders.StaticFieldReader;
 import io.nosqlbench.api.config.standard.NBConfigError;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.errors.OpConfigError;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.templating.ObjectCache;
 import io.nosqlbench.engine.api.templating.ParsedTemplateMap;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
@@ -298,7 +300,7 @@ import java.util.function.LongFunction;
  * in the activity parameters if needed to find a missing configuration parameter, but this will only work if
  * the specific named parameter is allowed at the activity level.</P>
  */
-public class ParsedOp implements LongFunction<Map<String, ?>>, NBLabeledElement, StaticFieldReader, DynamicFieldReader {
+public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String, ?>>, NBLabeledElement, StaticFieldReader, DynamicFieldReader {
 
     private static final Logger logger = LogManager.getLogger(ParsedOp.class);
 
@@ -334,8 +336,9 @@ public class ParsedOp implements LongFunction<Map<String, ?>>, NBLabeledElement,
         OpTemplate opTemplate,
         NBConfiguration activityCfg,
         List<Function<Map<String, Object>, Map<String, Object>>> preprocessors,
-        NBLabeledElement parent
+        NBComponent parent
     ) {
+        super(parent,NBLabels.forKV("op",opTemplate.getName()));
         this._opTemplate = opTemplate;
         this.activityCfg = activityCfg;
 

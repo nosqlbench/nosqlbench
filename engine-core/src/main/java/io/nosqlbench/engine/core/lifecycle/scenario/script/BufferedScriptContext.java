@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
 
 import javax.script.SimpleScriptContext;

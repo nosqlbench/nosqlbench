@@ -22,6 +22,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 
 import java.util.function.Function;
@@ -31,6 +32,10 @@ import java.util.function.Function;
  */
 @Service(value = DriverAdapter.class, selector = "mongodb")
 public class MongodbDriverAdapter extends BaseDriverAdapter<Op, MongoSpace> {
+
+    public MongodbDriverAdapter(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     @Override
     public OpMapper<Op> getOpMapper() {

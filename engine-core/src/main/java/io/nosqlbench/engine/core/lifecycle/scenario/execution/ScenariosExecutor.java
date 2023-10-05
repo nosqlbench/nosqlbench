@@ -22,10 +22,7 @@ import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBDefaultSceneFixtures;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScriptParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.*;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.ScenarioExceptionHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,7 +62,7 @@ public class ScenariosExecutor extends NBBaseComponent {
         NBSceneFixtures basecontext = new NBDefaultSceneFixtures(
             ScriptParams.of(params),
             this.getParent(),
-            scenario.getActivitiesController(),
+            new ActivitiesController(this),
             loadExtensions(),
             new PrintWriter(System.out),
             new PrintWriter(System.err),
@@ -180,7 +177,7 @@ public class ScenariosExecutor extends NBBaseComponent {
                 } catch (Exception e) {
                     long now = System.currentTimeMillis();
                     logger.debug("creating exceptional scenario result from getAsyncResultStatus");
-                    oResult = Optional.of(ScenarioResult.ofError(e, now));
+                    throw new RuntimeException("replace with a proper error type");
                 }
             }
 

@@ -20,6 +20,7 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.components.NBComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,25 +34,20 @@ public class ExceptionTimerMetrics {
     private final ConcurrentHashMap<String, Timer> timers = new ConcurrentHashMap<>();
     private final Timer allerrors;
     private final ActivityDef activityDef;
-    private final NBLabeledElement parentLabels;
+    private final NBComponent parentLabels;
 
-    public ExceptionTimerMetrics(final NBLabeledElement parentLabels, final ActivityDef activityDef) {
+    public ExceptionTimerMetrics(final NBComponent parent, final ActivityDef activityDef) {
         this.activityDef = activityDef;
-        this.parentLabels = parentLabels;
+        this.parentLabels = parent;
 
-        this.allerrors = ActivityMetrics.timer(
-            parentLabels,
-            "errortimers_ALL",
-            activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4)
-        );
+        this.allerrors=parent.create().timer("errortimers_ALL",4);
     }
 
     public void update(final String name, final long nanosDuration) {
         Timer timer = this.timers.get(name);
         if (null == timer) synchronized (this.timers) {
             timer = this.timers.computeIfAbsent(
-                name,
-                k -> ActivityMetrics.timer(this.parentLabels, "errortimers_" + name, this.activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
+                name, k -> parentLabels.create().timer("errortimers_" + name, 3)
             );
         }
         timer.update(nanosDuration, TimeUnit.NANOSECONDS);

@@ -23,6 +23,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +33,10 @@ import java.util.function.Function;
 @Service(value = DriverAdapter.class, selector = "kafka")
 public class KafkaDriverAdapter extends BaseDriverAdapter<KafkaOp, KafkaSpace> {
     private final static Logger logger = LogManager.getLogger(KafkaDriverAdapter.class);
+
+    public KafkaDriverAdapter(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     @Override
     public OpMapper<KafkaOp> getOpMapper() {

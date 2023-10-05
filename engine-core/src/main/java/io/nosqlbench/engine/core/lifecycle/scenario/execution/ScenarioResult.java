@@ -18,13 +18,14 @@ package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
 
-public class ScenarioResult extends NBSceneBuffer {
+public class ScenarioResult {
     private final long startedAt;
     private final long endedAt;
     private final Exception exception;
+    private final NBSceneBuffer fixtures;
 
     public ScenarioResult(NBSceneBuffer fixtures, long start, long end, Exception exception) {
-        super(fixtures);
+        this.fixtures = fixtures;
         this.startedAt=start;
         this.endedAt=end;
         this.exception =exception;
@@ -32,10 +33,6 @@ public class ScenarioResult extends NBSceneBuffer {
 
     public Exception getException() {
         return this.exception;
-    }
-
-    public static ScenarioResult ofError(Exception e, long now) {
-        return new ScenarioResult(NBSceneBuffer.init("error"),now,now,e);
     }
 
     public void report() {
@@ -52,5 +49,9 @@ public class ScenarioResult extends NBSceneBuffer {
         if (exception!=null) {
             System.exit(2);
         }
+    }
+
+    public String getIOLog() {
+        return fixtures.getIOLog();
     }
 }

@@ -15,9 +15,7 @@
  */
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
-import com.codahale.metrics.MetricRegistry;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
@@ -51,7 +49,7 @@ public class NBScriptedScenario extends NBScenario {
     private Exception error;
 
     private ExecutionMetricsResult result;
-    private final NBLabeledElement parentComponent;
+    private BufferedScriptContext context;
 
     public Optional<ExecutionMetricsResult> getResultIfComplete() {
         return Optional.ofNullable(result);
@@ -68,7 +66,7 @@ public class NBScriptedScenario extends NBScenario {
 
     private ActivitiesProgressIndicator activitiesProgressIndicator;
     private String progressInterval = "console:1m";
-    private ScenarioScriptShell scriptEnv;
+//    private ScenarioScriptShell scriptEnv;
     private final String scenarioName;
     private ScriptParams scenarioScriptParams;
     private final Engine engine = Engine.Graalvm;
@@ -86,7 +84,6 @@ public class NBScriptedScenario extends NBScenario {
         super(parentComponent, scenarioName);
         this.scenarioName = scenarioName;
         this.progressInterval = progressInterval;
-        this.parentComponent = parentComponent;
     }
 
     public static NBScriptedScenario ofScripted(String name, Map<String, String> params, NBComponent parent, Invocation invocation) {
@@ -117,17 +114,14 @@ public class NBScriptedScenario extends NBScenario {
         return this;
     }
 
-    private void initializeScriptContext(NBSceneFixtures fixtures) {
+    private BufferedScriptContext initializeScriptContext(NBSceneFixtures fixtures) {
         BufferedScriptContext ctx = new BufferedScriptContext(fixtures);
-        this.scriptEngine.setContext(ctx);
+//        this.scriptEngine.setContext(ctx);
         ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("scenario",new PolyglotScenarioController(fixtures.controller()));
+        return ctx;
     }
 
     private void initializeScriptingEngine() {
-
-        this.logger.debug("Using engine {}", this.engine.toString());
-        final MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
-
         final Context.Builder contextSettings = Context.newBuilder("js")
             .allowHostAccess(HostAccess.ALL)
             .allowNativeAccess(true)
@@ -145,30 +139,15 @@ public class NBScriptedScenario extends NBScenario {
         final Builder engineBuilder = org.graalvm.polyglot.Engine.newBuilder();
         engineBuilder.option("engine.WarnInterpreterOnly", "false");
         final org.graalvm.polyglot.Engine polyglotEngine = engineBuilder.build();
-
-        // TODO: add in, out, err for this scenario
         scriptEngine = GraalJSScriptEngine.create(polyglotEngine, contextSettings);
-
-//        NBScenarioPojoContext sctx = new NBScenarioPojoContext(
-//            this.scenarioScriptParams,
-//            (NBSession) this.getParent(),
-//            scenarioController,
-//            new ActivityBindings(scenarioController)
-//        );
-//
-//        this.scriptEngine.put("params", sctx.params());
-//        this.scriptEngine.put("session", sctx.session());
-//        this.scriptEngine.put("activities", sctx.activities());
-//        this.scriptEngine.put("scenario", new PolyglotScenarioController(sctx.controller()));
-//
     }
 
-    protected synchronized void runScenario(NBSceneFixtures context) {
+    protected synchronized void runScenario(NBSceneFixtures shell) {
         if (null == result) {
             try {
                 this.logger.debug("Initializing scripting engine for {}.", scenarioName);
                 this.initializeScriptingEngine();
-                this.initializeScriptContext(context);
+                this.context = this.initializeScriptContext(shell);
                 this.logger.debug("Running control script for {}.", scenarioName);
                 this.executeScenarioScripts();
             } catch (final Exception e) {
@@ -190,7 +169,7 @@ public class NBScriptedScenario extends NBScenario {
                     this.logger.debug("Using direct script compilation");
                     final CompiledScript compiled = compilableEngine.compile(script);
                     this.logger.debug("-> invoking main scenario script (compiled)");
-                    result = compiled.eval();
+                    result = compiled.eval(this.context);
                     this.logger.debug("<- scenario script completed (compiled)");
                 }
 //                 else if ((null != scriptfile) && !this.scriptfile.isEmpty()) {

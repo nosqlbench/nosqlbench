@@ -27,6 +27,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +39,13 @@ import java.util.function.Function;
 public class TcpClientDriverAdapter extends BaseDriverAdapter<TcpClientOp, TcpClientAdapterSpace> implements SyntheticOpTemplateProvider {
     private final static Logger logger = LogManager.getLogger(TcpClientDriverAdapter.class);
 
-    private final static StdoutDriverAdapter adap = new StdoutDriverAdapter();
+    private final StdoutDriverAdapter adap;
+
+    public TcpClientDriverAdapter(NBComponent parentComponent) {
+        super(parentComponent);
+        adap=new StdoutDriverAdapter(parentComponent);
+    }
+
     @Override
     public OpMapper<TcpClientOp> getOpMapper() {
         DriverSpaceCache<? extends TcpClientAdapterSpace> ctxCache = getSpaceCache();

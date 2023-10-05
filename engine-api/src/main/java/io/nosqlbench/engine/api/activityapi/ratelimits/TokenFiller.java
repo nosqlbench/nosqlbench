@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityapi.ratelimits;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,10 +48,10 @@ public class TokenFiller implements Runnable {
      * in the JVM.
      *
      */
-    public TokenFiller(final RateSpec rateSpec, final ThreadDrivenTokenPool tokenPool, final NBLabeledElement labeled, final int hdrdigits) {
+    public TokenFiller(NBComponent parent, final RateSpec rateSpec, final ThreadDrivenTokenPool tokenPool, final NBLabeledElement labeled, final int hdrdigits) {
         this.rateSpec = rateSpec;
         this.tokenPool = tokenPool;
-        timer = ActivityMetrics.timer(labeled, "tokenfiller", hdrdigits);
+        timer = parent.create().timer("tokenfiller",3);
     }
 
     public TokenFiller apply(final RateSpec rateSpec) {

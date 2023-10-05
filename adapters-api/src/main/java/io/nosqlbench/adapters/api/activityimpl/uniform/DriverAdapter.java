@@ -22,6 +22,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.api.docsapi.Docs;
 import io.nosqlbench.api.docsapi.DocsBinder;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.config.standard.NBConfiguration;
@@ -54,7 +55,7 @@ import java.util.function.LongFunction;
  *            during construction of R type operations, or even for individual
  *            operations.
  */
-public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> {
+public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent {
 
     /**
      * <p>

@@ -23,12 +23,17 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 
 import java.util.function.Function;
 
 @Service(value = DriverAdapter.class, selector = "pinecone")
 public class PineconeDriverAdapter extends BaseDriverAdapter<PineconeOp, PineconeSpace> {
+
+    public PineconeDriverAdapter(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     @Override
     public OpMapper<PineconeOp> getOpMapper() {

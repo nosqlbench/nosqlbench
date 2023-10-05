@@ -25,6 +25,8 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
+import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.components.NBParentComponentInjection;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.config.params.NBParams;
 import io.nosqlbench.api.config.standard.NBConfigModel;
@@ -45,7 +47,9 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
     private final static Logger logger = LogManager.getLogger(DiagDriverAdapter.class);
     private DiagOpMapper mapper;
 
-    public DiagDriverAdapter() {
+
+    public DiagDriverAdapter(NBComponent parentComponent) {
+        super(parentComponent);
         logger.debug("starting up");
     }
 

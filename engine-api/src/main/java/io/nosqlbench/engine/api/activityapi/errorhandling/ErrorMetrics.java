@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityapi.errorhandling;
 
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionExpectedResultVerificationMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;
@@ -28,42 +29,42 @@ import java.util.function.Supplier;
 
 public class ErrorMetrics {
 
-    private final NBLabeledElement parentLabels;
+    private final NBComponent parent;
     private ExceptionCountMetrics exceptionCountMetrics;
     private ExceptionHistoMetrics exceptionHistoMetrics;
     private ExceptionMeterMetrics exceptionMeterMetrics;
     private ExceptionTimerMetrics exceptionTimerMetrics;
     private ExceptionExpectedResultVerificationMetrics exceptionExpectedResultVerificationMetrics;
 
-    public ErrorMetrics(final NBLabeledElement parentLabels) {
-        this.parentLabels = parentLabels;
+    public ErrorMetrics(final NBComponent parent) {
+        this.parent = parent;
     }
 
     public synchronized ExceptionCountMetrics getExceptionCountMetrics() {
-        if (null == exceptionCountMetrics) this.exceptionCountMetrics = new ExceptionCountMetrics(this.parentLabels);
+        if (null == exceptionCountMetrics) this.exceptionCountMetrics = new ExceptionCountMetrics(this.parent);
         return this.exceptionCountMetrics;
     }
 
     public synchronized ExceptionHistoMetrics getExceptionHistoMetrics() {
         if (null == exceptionHistoMetrics)
-            this.exceptionHistoMetrics = new ExceptionHistoMetrics(this.parentLabels, ActivityDef.parseActivityDef(""));
+            this.exceptionHistoMetrics = new ExceptionHistoMetrics(this.parent, ActivityDef.parseActivityDef(""));
         return this.exceptionHistoMetrics;
     }
 
     public synchronized ExceptionMeterMetrics getExceptionMeterMetrics() {
-        if (null == exceptionMeterMetrics) this.exceptionMeterMetrics = new ExceptionMeterMetrics(this.parentLabels);
+        if (null == exceptionMeterMetrics) this.exceptionMeterMetrics = new ExceptionMeterMetrics(this.parent);
         return this.exceptionMeterMetrics;
     }
 
     public synchronized ExceptionTimerMetrics getExceptionTimerMetrics() {
         if (null == exceptionTimerMetrics)
-            this.exceptionTimerMetrics = new ExceptionTimerMetrics(this.parentLabels, ActivityDef.parseActivityDef(""));
+            this.exceptionTimerMetrics = new ExceptionTimerMetrics(this.parent, ActivityDef.parseActivityDef(""));
         return this.exceptionTimerMetrics;
     }
 
     public synchronized ExceptionExpectedResultVerificationMetrics getExceptionExpectedResultVerificationMetrics() {
         if (null == exceptionExpectedResultVerificationMetrics)
-            this.exceptionExpectedResultVerificationMetrics = new ExceptionExpectedResultVerificationMetrics(this.parentLabels);
+            this.exceptionExpectedResultVerificationMetrics = new ExceptionExpectedResultVerificationMetrics(this.parent);
         return this.exceptionExpectedResultVerificationMetrics;
     }
 

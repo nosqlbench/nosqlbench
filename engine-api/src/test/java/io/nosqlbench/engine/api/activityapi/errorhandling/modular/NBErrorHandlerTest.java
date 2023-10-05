@@ -20,7 +20,9 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.api.errors.ResultMismatchError;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.CountErrorHandler;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers.CounterErrorHandler;
@@ -47,10 +49,9 @@ class NBErrorHandlerTest {
     private static final String ERROR_HANDLER_APPENDER_NAME = "ErrorHandler";
     private final RuntimeException runtimeException = new RuntimeException("test exception");
 
-
     @Test
     void testNullConfig() {
-        final ErrorMetrics errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_stop"));
+        final ErrorMetrics errorMetrics = new ErrorMetrics(new TestComponent("activity","testalias_stop"));
         final NBErrorHandler errhandler = new NBErrorHandler(() -> "stop", () -> errorMetrics);
         assertThatExceptionOfType(RuntimeException.class)
             .isThrownBy(() -> errhandler.handleError(this.runtimeException, 1, 2));
@@ -58,7 +59,7 @@ class NBErrorHandlerTest {
 
     @Test
     void testMultipleWithRetry() {
-        final ErrorMetrics errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_wr"));
+        final ErrorMetrics errorMetrics = new ErrorMetrics(new TestComponent("activity","testalias_wr"));
         final NBErrorHandler eh = new NBErrorHandler(() -> "warn,retry", () -> errorMetrics);
         final ErrorDetail detail = eh.handleError(this.runtimeException, 1, 2);
         assertThat(detail.isRetryable()).isTrue();
@@ -69,7 +70,7 @@ class NBErrorHandlerTest {
         final Logger logger = (Logger) LogManager.getLogger("ERRORS");
         final LogAppender appender = NBMock.registerTestLogger(NBErrorHandlerTest.ERROR_HANDLER_APPENDER_NAME, logger, Level.WARN);
 
-        final ErrorMetrics errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_warn"));
+        final ErrorMetrics errorMetrics = new ErrorMetrics(new TestComponent("activity","testalias_warn"));
         final NBErrorHandler eh = new NBErrorHandler(() -> "warn", () -> errorMetrics);
         final ErrorDetail detail = eh.handleError(this.runtimeException, 1, 2);
 
@@ -84,7 +85,7 @@ class NBErrorHandlerTest {
 
     @Test
     void testHistogramErrorHandler() {
-        final ErrorMetrics errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_histos"));
+        final ErrorMetrics errorMetrics = new ErrorMetrics(new TestComponent("activity","testalias_histos"));
         final NBErrorHandler eh = new NBErrorHandler(() -> "histogram", () -> errorMetrics);
         final ErrorDetail detail = eh.handleError(this.runtimeException, 1, 2);
         assertThat(detail.isRetryable()).isFalse();
@@ -94,7 +95,7 @@ class NBErrorHandlerTest {
 
     @Test
     void testTimerErrorHandler() {
-        final ErrorMetrics errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_timers"));
+        final ErrorMetrics errorMetrics = new ErrorMetrics(new TestComponent("activity","testalias_timers"));
         final NBErrorHandler eh = new NBErrorHandler(() -> "timer", () -> errorMetrics);
         final ErrorDetail detail = eh.handleError(this.runtimeException, 1, 2);
         assertThat(detail.isRetryable()).isFalse();
@@ -107,7 +108,7 @@ class NBErrorHandlerTest {
         final Logger logger = (Logger) LogManager.getLogger(CounterErrorHandler.class);
         final LogAppender appender = NBMock.registerTestLogger(NBErrorHandlerTest.ERROR_HANDLER_APPENDER_NAME, logger, Level.INFO);
 
-        final ErrorMetrics errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_counters"));
+        final ErrorMetrics errorMetrics = new ErrorMetrics(new TestComponent("activity","testalias_counters"));
         final NBErrorHandler eh = new NBErrorHandler(() -> "counter", () -> errorMetrics);
         final ErrorDetail detail = eh.handleError(this.runtimeException, 1, 2);
         assertThat(detail.isRetryable()).isFalse();
@@ -126,7 +127,7 @@ class NBErrorHandlerTest {
         final Logger logger = (Logger) LogManager.getLogger(CountErrorHandler.class);
         final LogAppender appender = NBMock.registerTestLogger(NBErrorHandlerTest.ERROR_HANDLER_APPENDER_NAME, logger, Level.WARN);
 
-        final ErrorMetrics errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_count"));
+        final ErrorMetrics errorMetrics = new ErrorMetrics(new TestComponent("activity","testalias_count"));
         final NBErrorHandler eh = new NBErrorHandler(() -> "count", () -> errorMetrics);
         final ErrorDetail detail = eh.handleError(this.runtimeException, 1, 2);
         assertThat(detail.isRetryable()).isFalse();
@@ -143,7 +144,7 @@ class NBErrorHandlerTest {
 
     @Test
     void testMeterErrorHandler() {
-        final ErrorMetrics errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_meters"));
+        final ErrorMetrics errorMetrics = new ErrorMetrics(new TestComponent("activity","testalias_meters"));
         final NBErrorHandler eh = new NBErrorHandler(() -> "meter", () -> errorMetrics);
         final ErrorDetail detail = eh.handleError(this.runtimeException, 1, 2);
         assertThat(detail.isRetryable()).isFalse();
@@ -153,7 +154,7 @@ class NBErrorHandlerTest {
 
     @Test
     void testCodeShorthand() {
-        final ErrorMetrics errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_meters"));
+        final ErrorMetrics errorMetrics = new ErrorMetrics(new TestComponent("activity","testalias_meters"));
         final NBErrorHandler eh = new NBErrorHandler(() -> "handler=code code=42", () -> errorMetrics);
         final ErrorDetail detail = eh.handleError(this.runtimeException, 1, 2);
         assertThat(detail.isRetryable()).isFalse();
@@ -184,7 +185,7 @@ class NBErrorHandlerTest {
     void testExpectedResultVerificationErrorHandler(String name, Exception error, String log, long retriesCount, long errorsCount, Logger logger) {
         // given
         NBMock.LogAppender appender = NBMock.registerTestLogger(ERROR_HANDLER_APPENDER_NAME, logger, Level.INFO);
-        var errorMetrics = new ErrorMetrics(NBLabeledElement.forKV("activity","testalias_result_verification_" + name));
+        var errorMetrics = new ErrorMetrics(new TestComponent("activity","testalias_result_verification_" + name));
         var eh = new NBErrorHandler(() -> "verifyexpected", () -> errorMetrics);
         var retries = errorMetrics.getExceptionExpectedResultVerificationMetrics().getVerificationRetries();
         var errors = errorMetrics.getExceptionExpectedResultVerificationMetrics().getVerificationErrors();
