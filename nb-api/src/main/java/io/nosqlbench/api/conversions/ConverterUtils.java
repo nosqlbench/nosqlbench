@@ -15,7 +15,7 @@
  *
  */
 
-package io.nosqlbench.api.engine.conversions;
+package io.nosqlbench.api.conversions;
 
 public class ConverterUtils {
     public static int[] toIntArray(String[] strings) {
