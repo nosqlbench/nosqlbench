@@ -275,10 +275,6 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
         return strideLimiter;
     }
 
-    @Override
-    public Timer getResultTimer() {
-        return ActivityMetrics.timer(this, "result", getParams().getOptionalInteger("hdr_digits").orElse(4));
-    }
 
     @Override
     public synchronized ActivityInstrumentation getInstrumentation() {

@@ -24,6 +24,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +38,10 @@ import java.util.function.Function;
 @Service(value = DriverAdapter.class, selector = "cqld4")
 public class Cqld4DriverAdapter extends BaseDriverAdapter<Op, Cqld4Space> {
     private final static Logger logger = LogManager.getLogger(Cqld4DriverAdapter.class);
+
+    public Cqld4DriverAdapter(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     @Override
     public OpMapper<Op> getOpMapper() {

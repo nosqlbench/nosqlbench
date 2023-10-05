@@ -20,6 +20,8 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.adapters.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,12 +33,16 @@ import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
-public abstract class BaseDriverAdapter<R extends Op, S> implements DriverAdapter<R, S>, NBConfigurable, NBReconfigurable {
+public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent implements DriverAdapter<R, S>, NBConfigurable, NBReconfigurable {
     private final static Logger logger = LogManager.getLogger("ADAPTER");
 
     private DriverSpaceCache<? extends S> spaceCache;
     private NBConfiguration cfg;
     private LongFunction<S> spaceF;
+
+    public BaseDriverAdapter(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     /**
      * BaseDriverAdapter will take any provided functions from {@link #getOpStmtRemappers()}

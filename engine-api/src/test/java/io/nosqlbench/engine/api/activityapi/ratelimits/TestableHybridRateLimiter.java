@@ -16,16 +16,19 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.components.NBComponent;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 public class TestableHybridRateLimiter extends HybridRateLimiter {
 
     private final AtomicLong clock;
+    private final static NBComponent parent = new TestComponent("rlparent","rlparent");
 
     public TestableHybridRateLimiter(final AtomicLong clock, final RateSpec rateSpec, final NBLabeledElement def) {
-        super(def, "test", rateSpec);
+        super(parent, "test", rateSpec);
         this.applyRateSpec(rateSpec);
         this.setLabel("test");
         this.clock = clock;

@@ -18,12 +18,16 @@ package io.nosqlbench.adapter.diag.optasks;
 
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 
 import java.util.Map;
 
 public abstract class BaseDiagTask implements DiagTask {
     private NBLabeledElement parentLabels;
     private String name;
+    protected NBComponent parent;
+
 
     @Override
     public abstract Map<String, Object> apply(Long cycle, Map<String, Object> opstate);
@@ -51,4 +55,8 @@ public abstract class BaseDiagTask implements DiagTask {
         return this.name;
     }
 
+    @Override
+    public void applyParentComponent(NBComponent parent) {
+        this.parent=parent;
+    }
 }

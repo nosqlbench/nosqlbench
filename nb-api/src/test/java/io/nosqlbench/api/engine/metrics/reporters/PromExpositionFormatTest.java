@@ -153,7 +153,7 @@ public class PromExpositionFormatTest {
 
     @Test
     public void testGaugeFormat() {
-        Gauge cosetteGauge = () -> 1500;
+        Gauge cosetteGauge = () -> 1500d;
         NBMetricGauge nbMetricGauge = new NBMetricGaugeWrapper(NBLabels.forKV("name","cosette","label6", "value6"), cosetteGauge);
         String formatted = PromExpositionFormat.format(nowclock, nbMetricGauge);
 
@@ -162,7 +162,7 @@ public class PromExpositionFormatTest {
             cosette\\{label6="value6"} 1500.0
             """));
 
-        Gauge cosetteGauge2 = () -> "2000.0";
+        Gauge cosetteGauge2 = () -> 2000.0d;
         NBMetricGauge nbMetricGauge2 = new NBMetricGaugeWrapper(NBLabels.forKV("name","cosette2","label7", "value7"), cosetteGauge2);
         String formatted2 = PromExpositionFormat.format(nowclock, nbMetricGauge2);
 
@@ -171,15 +171,5 @@ public class PromExpositionFormatTest {
             cosette2\\{label7="value7"} 2000.0
             """));
 
-        final int number = 3000;
-        final CharSequence charSequence = Integer.toString(number);
-        Gauge cosetteGauge3 = () -> charSequence;
-        NBMetricGauge nbMetricGauge3 = new NBMetricGaugeWrapper(NBLabels.forKV("name","cosette3","label8", "value8"), cosetteGauge3);
-        String formatted3 = PromExpositionFormat.format(nowclock, nbMetricGauge3);
-
-        assertThat(formatted3).matches(Pattern.compile("""
-            # TYPE cosette3 gauge
-            cosette3\\{label8="value8"} 3000
-            """));
     }
 }

@@ -45,10 +45,10 @@ public class S4JAdapterMetrics  {
 
         // Timer metrics
         this.bindTimer =
-            ActivityMetrics.timer(this.s4jBaseOpDispenser,
+            s4jBaseOpDispenser.create().timer(
                 "bind", ActivityMetrics.DEFAULT_HDRDIGITS);
         this.executeTimer =
-            ActivityMetrics.timer(this.s4jBaseOpDispenser,
+            s4jBaseOpDispenser.create().timer(
                 "execute", ActivityMetrics.DEFAULT_HDRDIGITS);
     }
 

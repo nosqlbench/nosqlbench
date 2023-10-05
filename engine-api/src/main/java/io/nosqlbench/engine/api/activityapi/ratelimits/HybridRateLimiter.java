@@ -19,6 +19,8 @@ package io.nosqlbench.engine.api.activityapi.ratelimits;
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,7 +78,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * </p>
  */
 @Service(value = RateLimiter.class, selector = "hybrid")
-public class HybridRateLimiter implements RateLimiter {
+public class HybridRateLimiter extends NBBaseComponent implements RateLimiter {
 
     private static final Logger logger = LogManager.getLogger(HybridRateLimiter.class);
     private NBLabeledElement named;
@@ -100,13 +102,14 @@ public class HybridRateLimiter implements RateLimiter {
     // TODO Doc rate limiter scenarios, including when you want to reset the waittime, and when you don't
     private final AtomicLong cumulativeWaitTimeNanos = new AtomicLong(0L);
 
-    protected HybridRateLimiter() {
+    protected HybridRateLimiter(NBComponent parent) {
+        super(parent);
     }
 
-    public HybridRateLimiter(final NBLabeledElement named, final String label, final RateSpec rateSpec) {
+    public HybridRateLimiter(final NBComponent parent, final String label, final RateSpec rateSpec) {
+        super(parent);
         this.label = label;
         this.init(named);
-        this.named = named;
         applyRateSpec(rateSpec);
     }
 
@@ -142,7 +145,7 @@ public class HybridRateLimiter implements RateLimiter {
         if (updatingRateSpec.equals(rateSpec) && !updatingRateSpec.isRestart()) return;
 
         rateSpec = updatingRateSpec;
-        tokens = null == this.tokens ? new ThreadDrivenTokenPool(this.rateSpec, this.named) : tokens.apply(this.named, this.rateSpec);
+        tokens = null == this.tokens ? new ThreadDrivenTokenPool(this,this.rateSpec, this.named) : tokens.apply(this.named, this.rateSpec);
 //        this.filler = (this.filler == null) ? new TokenFiller(rateSpec, activityDef) : filler.apply(rateSpec);
 //        this.tokens = this.filler.getTokenPool();
 

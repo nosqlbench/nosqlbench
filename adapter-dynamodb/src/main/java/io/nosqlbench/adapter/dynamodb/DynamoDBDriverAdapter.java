@@ -21,6 +21,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.config.standard.NBConfigModel;
@@ -30,6 +31,10 @@ import java.util.function.Function;
 
 @Service(value = DriverAdapter.class, selector = "dynamodb", maturity = Maturity.Experimental)
 public class DynamoDBDriverAdapter extends BaseDriverAdapter<DynamoDBOp, DynamoDBSpace> {
+
+    public DynamoDBDriverAdapter(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     @Override
     public OpMapper<DynamoDBOp> getOpMapper() {

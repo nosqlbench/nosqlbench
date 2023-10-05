@@ -23,6 +23,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +33,10 @@ import java.util.function.Function;
 @Service(value = DriverAdapter.class, selector = "amqp")
 public class AmqpDriverAdapter extends BaseDriverAdapter<AmqpTimeTrackOp, AmqpSpace> {
     private final static Logger logger = LogManager.getLogger(AmqpDriverAdapter.class);
+
+    public AmqpDriverAdapter(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     @Override
     public OpMapper<AmqpTimeTrackOp> getOpMapper() {

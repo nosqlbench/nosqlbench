@@ -27,6 +27,8 @@ import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.errors.OpConfigError;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  * @param <T>
  *     The type of operation
  */
-public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>, NBLabeledElement {
+public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent implements OpDispenser<T>{
     private final static Logger logger = LogManager.getLogger(BaseOpDispenser.class);
     public static final String VERIFIER = "verifier";
     public static final String VERIFIER_INIT = "verifier-init";
@@ -78,6 +80,7 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
     private final ThreadLocal<CycleFunction<Boolean>> tlVerifier;
 
     protected BaseOpDispenser(final DriverAdapter<T, S> adapter, final ParsedOp op) {
+        super(adapter);
         opName = op.getName();
         this.adapter = adapter;
         labels = op.getLabels();
@@ -99,7 +102,7 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
         verifiers = configureVerifiers(op);
         this._verifier = CycleFunctions.of((a, b) -> a && b, verifiers, true);
         this.tlVerifier = ThreadLocal.withInitial(_verifier::newInstance);
-        this.verifierTimer = ActivityMetrics.timer(this,"verifier",3);
+        this.verifierTimer = create().timer("verifier",3);
     }
 
     private CycleFunction<Boolean> cloneVerifiers() {
@@ -178,10 +181,10 @@ public abstract class BaseOpDispenser<T extends Op, S> implements OpDispenser<T>
     private void configureInstrumentation(final ParsedOp pop) {
         instrument = pop.takeStaticConfigOr("instrument", false);
         if (this.instrument) {
-            final int hdrDigits = pop.getStaticConfigOr("hdr_digits", 4).intValue();
+            final int hdrDigits = pop.getStaticConfigOr("hdr_digits", 4);
 
-            successTimer = ActivityMetrics.timer(pop, ActivityMetrics.sanitize("successfor_"+getOpName()), hdrDigits);
-            errorTimer = ActivityMetrics.timer(pop, ActivityMetrics.sanitize("errorsfor_"+getOpName()), hdrDigits);
+            successTimer = create().timer(ActivityMetrics.sanitize("successfor_"+getOpName()),hdrDigits);
+            errorTimer = create().timer(ActivityMetrics.sanitize("errorsfor_"+getOpName()),hdrDigits);
         }
     }
 

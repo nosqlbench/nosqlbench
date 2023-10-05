@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class NBBuilders {
+
+    // TODO: add mandatory sanitize() around all label names and label "name" values
     private final Logger logger = LogManager.getLogger(NBBuilders.class);
     private final NBBaseComponent base;
 

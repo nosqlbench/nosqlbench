@@ -61,11 +61,10 @@ public class AmqpAdapterMetrics {
                 "message_size", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // Timer metrics
-        bindTimer =
-            ActivityMetrics.timer(this.amqpBaseOpDispenser,
+        bindTimer = amqpBaseOpDispenser.create().timer(
                     "bind", ActivityMetrics.DEFAULT_HDRDIGITS);
         executeTimer =
-            ActivityMetrics.timer(this.amqpBaseOpDispenser,
+            amqpBaseOpDispenser.create().timer(
                      "execute", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // End-to-end metrics

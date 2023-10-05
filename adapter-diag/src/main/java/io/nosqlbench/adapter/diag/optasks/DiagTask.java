@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.diag.optasks;
 import io.nosqlbench.api.config.standard.NBConfigurable;
 import io.nosqlbench.api.config.standard.NBReconfigurable;
 import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.components.NBParentComponentInjection;
 
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -44,7 +45,8 @@ import java.util.function.BiFunction;
 public interface DiagTask extends
     BiFunction<Long,Map<String,Object>, Map<String,Object>>,
     NBConfigurable,
-    NBLabeledElement
+    NBLabeledElement,
+    NBParentComponentInjection
 {
     Map<String, Object> apply(Long cycle, Map<String, Object> opstate);
 
