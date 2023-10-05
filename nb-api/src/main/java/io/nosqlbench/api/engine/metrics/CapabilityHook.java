@@ -17,6 +17,8 @@
 package io.nosqlbench.api.engine.metrics;
 
 import com.codahale.metrics.*;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,9 +27,13 @@ import java.util.Map;
  * A silly class that does nothing but allow cleaner code elsewhere,
  * because MetricRegistryListener, that's why.
  */
-public abstract class CapabilityHook<T> implements MetricRegistryListener {
+public abstract class CapabilityHook<T> extends NBBaseComponent implements MetricRegistryListener {
 
     private final Map<String,T> capables = new HashMap<>();
+
+    public CapabilityHook(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     public abstract void onCapableAdded(String name, T capable);
     public abstract void onCapableRemoved(String name, T capable);

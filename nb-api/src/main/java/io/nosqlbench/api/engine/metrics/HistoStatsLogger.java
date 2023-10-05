@@ -16,6 +16,7 @@
 
 package io.nosqlbench.api.engine.metrics;
 
+import io.nosqlbench.components.NBComponent;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +50,8 @@ public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment
     private PeriodicRunnable<HistoStatsLogger> executor;
     private long lastRunTime=0L;
 
-    public HistoStatsLogger(String sessionName, File file, Pattern pattern, long intervalLength, TimeUnit timeUnit) {
+    public HistoStatsLogger(NBComponent parent, String sessionName, File file, Pattern pattern, long intervalLength, TimeUnit timeUnit) {
+        super(parent);
         this.sessionName = sessionName;
         this.logfile = file;
         this.pattern = pattern;

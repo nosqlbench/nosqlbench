@@ -20,6 +20,7 @@ import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.api.engine.metrics.HistoIntervalLogger;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
+import io.nosqlbench.components.NBBaseComponent;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogReader;
@@ -41,7 +42,7 @@ public class HistoIntervalLoggerTest {
         File tempFile = File.createTempFile("testhistointlog", "hdr", new File("/tmp"));
         tempFile.deleteOnExit();
 
-        HistoIntervalLogger hil = new HistoIntervalLogger("loggertest", tempFile, Pattern.compile(".*"), 1000);
+        HistoIntervalLogger hil = new HistoIntervalLogger(new NBBaseComponent(null), "loggertest", tempFile, Pattern.compile(".*"), 1000);
 
         final int significantDigits = 4;
 

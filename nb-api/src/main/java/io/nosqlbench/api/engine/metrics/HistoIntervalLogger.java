@@ -16,6 +16,7 @@
 
 package io.nosqlbench.api.engine.metrics;
 
+import io.nosqlbench.components.NBComponent;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.HistogramLogWriter;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +35,7 @@ import java.util.regex.Pattern;
  * which both match the pattern and which are {@link EncodableHistogram}s are written the configured
  * logfile at the configured interval.
  */
-public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttachment> implements Runnable, MetricsCloseable  {
+public class HistoIntervalLogger extends CapabilityHook<HdrDeltaHistogramAttachment> implements Runnable, MetricsCloseable {
     private final static Logger logger = LogManager.getLogger(HistoIntervalLogger.class);
 
     private final String sessionName;
@@ -54,7 +55,8 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
     private PeriodicRunnable<HistoIntervalLogger> executor;
     private long lastRunTime;
 
-    public HistoIntervalLogger(String sessionName, File file, Pattern pattern, long intervalLength) {
+    public HistoIntervalLogger(NBComponent parent, String sessionName, File file, Pattern pattern, long intervalLength) {
+        super(parent);
         this.sessionName = sessionName;
         this.logfile = file;
         this.pattern = pattern;
