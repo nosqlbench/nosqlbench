@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package io.nosqlbench.engine.extensions.http;
+package io.nosqlbench.api.http;
+
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 
 import java.io.IOException;
 import java.net.URI;
@@ -22,8 +26,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-public class HttpPlugin {
+public class HttpPlugin extends NBBaseComponent {
     private final HttpClient client = HttpClient.newHttpClient();
+
+    public HttpPlugin(NBComponent parentComponent) {
+        super(parentComponent);
+    }
 
     public HttpResponse<String> get(String url) throws IOException, InterruptedException {
         HttpRequest.Builder builder = HttpRequest.newBuilder();
