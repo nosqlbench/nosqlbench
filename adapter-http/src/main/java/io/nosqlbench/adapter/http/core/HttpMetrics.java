@@ -20,14 +20,17 @@ import com.codahale.metrics.Histogram;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.ActivityMetrics;
+import io.nosqlbench.components.NBComponent;
 
 public class HttpMetrics implements NBLabeledElement {
+    private final NBComponent parent;
     private final HttpSpace space;
     final Histogram statusCodeHistogram;
 
-    public HttpMetrics(HttpSpace space) {
+    public HttpMetrics(NBComponent parent, HttpSpace space) {
+        this.parent = parent;
         this.space = space;
-        statusCodeHistogram = ActivityMetrics.histogram(this, "statuscode",space.getHdrDigits());
+        statusCodeHistogram = parent.create().histogram("statuscode",space.getHdrDigits());
     }
 
     public String getName() {

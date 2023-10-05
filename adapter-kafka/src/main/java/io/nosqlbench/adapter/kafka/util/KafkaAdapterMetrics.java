@@ -56,8 +56,7 @@ public class KafkaAdapterMetrics {
 
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
-        messageSizeHistogram =
-            ActivityMetrics.histogram(this.kafkaBaseOpDispenser,
+        messageSizeHistogram = kafkaBaseOpDispenser.create().histogram(
                 "message_size", ActivityMetrics.DEFAULT_HDRDIGITS);
 
         // Timer metrics
@@ -71,14 +70,14 @@ public class KafkaAdapterMetrics {
         // End-to-end metrics
         // Latency
         e2eMsgProcLatencyHistogram =
-            ActivityMetrics.histogram(this.kafkaBaseOpDispenser, "e2e_msg_latency", ActivityMetrics.DEFAULT_HDRDIGITS);
+            kafkaBaseOpDispenser.create().histogram("e2e_msg_latency", ActivityMetrics.DEFAULT_HDRDIGITS);
         // Error metrics
         msgErrOutOfSeqCounter =
-            ActivityMetrics.counter(this.kafkaBaseOpDispenser, "err_msg_oos");
+            kafkaBaseOpDispenser.create().counter("err_msg_oos");
         msgErrLossCounter =
-            ActivityMetrics.counter(this.kafkaBaseOpDispenser, "err_msg_loss");
+            kafkaBaseOpDispenser.create().counter("err_msg_loss");
         msgErrDuplicateCounter =
-            ActivityMetrics.counter(this.kafkaBaseOpDispenser, "err_msg_dup");
+            kafkaBaseOpDispenser.create().counter( "err_msg_dup");
     }
 
     public Timer getBindTimer() { return bindTimer; }
