@@ -37,16 +37,16 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDu
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
-import io.nosqlbench.engine.api.activityimpl.uniform.ClientSystemMetricChecker;
-import io.nosqlbench.engine.api.activityimpl.uniform.DiskStatsReader;
-import io.nosqlbench.engine.api.activityimpl.uniform.LoadAvgReader;
-import io.nosqlbench.engine.api.activityimpl.uniform.MemInfoReader;
-import io.nosqlbench.engine.api.activityimpl.uniform.NetDevReader;
-import io.nosqlbench.engine.api.activityimpl.uniform.StatReader;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.engine.cli.NBCLIOptions.LoggerConfigData;
 import io.nosqlbench.engine.cli.NBCLIOptions.Mode;
 import io.nosqlbench.engine.core.annotation.Annotators;
+import io.nosqlbench.engine.core.clientload.ClientSystemMetricChecker;
+import io.nosqlbench.engine.core.clientload.DiskStatsReader;
+import io.nosqlbench.engine.core.clientload.LoadAvgReader;
+import io.nosqlbench.engine.core.clientload.MemInfoReader;
+import io.nosqlbench.engine.core.clientload.NetDevReader;
+import io.nosqlbench.engine.core.clientload.StatReader;
 import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import io.nosqlbench.engine.core.lifecycle.process.ShutdownManager;
@@ -519,14 +519,17 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
     }
 
     private void registerLoadAvgMetrics() {
+        LoadAvgReader reader = new LoadAvgReader();
+        if (!reader.fileExists())
+            return;
         Gauge<Double> loadAvgOneMinGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> LoadAvgReader.getOneMinLoadAverage(), "loadavg_1min")
+            new NBFunctionGauge(this, () -> reader.getOneMinLoadAverage(), "loadavg_1min")
         );
         Gauge<Double> loadAvgFiveMinGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> LoadAvgReader.getFiveMinLoadAverage(), "loadavg_5min")
+            new NBFunctionGauge(this, () -> reader.getFiveMinLoadAverage(), "loadavg_5min")
         );
         Gauge<Double> loadAvgFifteenMinuteGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> LoadAvgReader.getFifteenMinLoadAverage(), "loadavg_15min")
+            new NBFunctionGauge(this, () -> reader.getFifteenMinLoadAverage(), "loadavg_15min")
         );
         // add checking for CPU load averages; TODO: Modify thresholds
         clientMetricChecker.addMetricToCheck("loadavg_5min", loadAvgFiveMinGauge, 50.0);
@@ -535,23 +538,26 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
     }
 
     private void registerMemInfoMetrics() {
+        MemInfoReader reader = new MemInfoReader();
+        if (!reader.fileExists())
+            return;
         Gauge<Double> memTotalGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> MemInfoReader.getMemTotalkB(), "mem_total")
+            new NBFunctionGauge(this, () -> reader.getMemTotalkB(), "mem_total")
         );
         Gauge<Double> memUsedGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> MemInfoReader.getMemUsedkB(), "mem_used")
+            new NBFunctionGauge(this, () -> reader.getMemUsedkB(), "mem_used")
         );
         ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> MemInfoReader.getMemFreekB(), "mem_free")
+            new NBFunctionGauge(this, () -> reader.getMemFreekB(), "mem_free")
         );
         ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> MemInfoReader.getMemAvailablekB(), "mem_available")
+            new NBFunctionGauge(this, () -> reader.getMemAvailablekB(), "mem_available")
         );
         ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> MemInfoReader.getMemCachedkB(), "mem_cached")
+            new NBFunctionGauge(this, () -> reader.getMemCachedkB(), "mem_cached")
         );
         ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> MemInfoReader.getMemBufferskB(), "mem_buffered")
+            new NBFunctionGauge(this, () -> reader.getMemBufferskB(), "mem_buffered")
         );
         // add checking for percent memory used at some given time; TODO: Modify percent threshold
         clientMetricChecker.addRatioMetricToCheck(
@@ -559,62 +565,71 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         );
 
         ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> MemInfoReader.getSwapTotalkB(), "swap_total")
+            new NBFunctionGauge(this, () -> reader.getSwapTotalkB(), "swap_total")
         );
         ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> MemInfoReader.getSwapFreekB(), "swap_free")
+            new NBFunctionGauge(this, () -> reader.getSwapFreekB(), "swap_free")
         );
         ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> MemInfoReader.getSwapUsedkB(), "swap_used")
+            new NBFunctionGauge(this, () -> reader.getSwapUsedkB(), "swap_used")
         );
     }
 
     private void registerDiskStatsMetrics() {
-        for (String device: DiskStatsReader.getDevices()) {
+        DiskStatsReader reader = new DiskStatsReader();
+        if (!reader.fileExists())
+            return;
+        for (String device: reader.getDevices()) {
             ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> DiskStatsReader.getTransactionsForDevice(device), device + "_transactions")
+                new NBFunctionGauge(this, () -> reader.getTransactionsForDevice(device), device + "_transactions")
             );
             ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> DiskStatsReader.getKbReadForDevice(device), device + "_kB_read")
+                new NBFunctionGauge(this, () -> reader.getKbReadForDevice(device), device + "_kB_read")
             );
             ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> DiskStatsReader.getKbWrittenForDevice(device), device + "_kB_written")
+                new NBFunctionGauge(this, () -> reader.getKbWrittenForDevice(device), device + "_kB_written")
             );
         }
     }
 
     private void registerNetworkInterfaceMetrics() {
-        for (String interfaceName: NetDevReader.getInterfaces()) {
+        NetDevReader reader = new NetDevReader();
+        if (!reader.fileExists())
+            return;
+        for (String interfaceName: reader.getInterfaces()) {
             ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> NetDevReader.getBytesReceived(interfaceName), interfaceName + "_rx_bytes")
+                new NBFunctionGauge(this, () -> reader.getBytesReceived(interfaceName), interfaceName + "_rx_bytes")
             );
             ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> NetDevReader.getPacketsReceived(interfaceName), interfaceName + "_rx_packets")
+                new NBFunctionGauge(this, () -> reader.getPacketsReceived(interfaceName), interfaceName + "_rx_packets")
             );
             ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> NetDevReader.getBytesTransmitted(interfaceName), interfaceName + "_tx_bytes")
+                new NBFunctionGauge(this, () -> reader.getBytesTransmitted(interfaceName), interfaceName + "_tx_bytes")
             );
             ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> NetDevReader.getPacketsTransmitted(interfaceName), interfaceName + "_tx_packets")
+                new NBFunctionGauge(this, () -> reader.getPacketsTransmitted(interfaceName), interfaceName + "_tx_packets")
             );
         }
     }
 
     private void registerStatMetrics() {
+        StatReader reader = new StatReader();
+        if (!reader.fileExists())
+            return;
         Gauge<Double> cpuUserGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> StatReader.getUserTime(), "cpu_user")
+            new NBFunctionGauge(this, () -> reader.getUserTime(), "cpu_user")
         );
         ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> StatReader.getSystemTime(), "cpu_system")
+            new NBFunctionGauge(this, () -> reader.getSystemTime(), "cpu_system")
         );
         ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> StatReader.getIdleTime(), "cpu_idle")
+            new NBFunctionGauge(this, () -> reader.getIdleTime(), "cpu_idle")
         );
         ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> StatReader.getIoWaitTime(), "cpu_iowait")
+            new NBFunctionGauge(this, () -> reader.getIoWaitTime(), "cpu_iowait")
         );
         Gauge<Double> cpuTotalGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> StatReader.getTotalTime(), "cpu_total")
+            new NBFunctionGauge(this, () -> reader.getTotalTime(), "cpu_total")
         );
         // add checking for percent of time spent in user space; TODO: Modify percent threshold
         clientMetricChecker.addRatioMetricToCheck(
