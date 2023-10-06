@@ -508,7 +508,6 @@ public class SimpleActivity implements Activity {
                 logger.warn("initialized {} op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.", dryrunCount);
             }
 
-
             return planner.resolve();
 
         } catch (Exception e) {
@@ -547,19 +546,19 @@ public class SimpleActivity implements Activity {
         List<OpTemplate> unfilteredOps = opsDocList.getOps();
         List<OpTemplate> filteredOps = opsDocList.getOps(tagfilter);
 
-        if (0 == filteredOps.size()) {
+        if (filteredOps.isEmpty()) {
             // There were no ops, and it *wasn't* because they were all filtered out.
             // In this case, let's try to synthesize the ops as long as at least a default driver was provided
             // But if there were no ops, and there was no default driver provided, we can't continue
             // There were no ops, and it was because they were all filtered out
-            if (0 < unfilteredOps.size()) {
+            if (!unfilteredOps.isEmpty()) {
                 throw new BasicError("There were no active op templates with tag filter '"
                         + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
             }
             if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
                 filteredOps = sotp.getSyntheticOpTemplates(opsDocList, this.activityDef.getParams());
                 Objects.requireNonNull(filteredOps);
-                if (0 == filteredOps.size()) {
+                if (filteredOps.isEmpty()) {
                     throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + '\'' +
                             " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
                 }

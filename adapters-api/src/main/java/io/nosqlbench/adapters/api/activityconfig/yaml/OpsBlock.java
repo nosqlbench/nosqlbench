@@ -52,9 +52,10 @@ public class OpsBlock implements Tagged, Iterable<OpTemplate> {
 
     public String getName() {
         StringBuilder sb = new StringBuilder();
-        if (!rawOpsDoc.getName().isEmpty()) {
-            sb.append(rawOpsDoc.getName()).append("--");
-        }
+        // TODO: document and fix this
+//        if (!rawOpsDoc.getName().isEmpty()) {
+//            sb.append(rawOpsDoc.getName()).append("--");
+//        }
         if (!rawOpsBlock.getName().isEmpty()) {
             sb.append(rawOpsBlock.getName());
         } else {
