@@ -57,12 +57,4 @@ public class PGVectorDriverAdapter extends BaseDriverAdapter<PGVectorOp, PGVecto
         return super.getConfigModel().add(PGVectorSpace.getConfigModel());
     }
 
-    @Service(value = DriverAdapterLoader.class,selector = "jdbc")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public PGVectorDriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new PGVectorDriverAdapter(parent,childLabels);
-        }
-    }
-
 }

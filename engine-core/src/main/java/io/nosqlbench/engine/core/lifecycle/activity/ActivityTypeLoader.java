@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.activity;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.api.content.Content;
@@ -43,6 +44,7 @@ public class ActivityTypeLoader {
     private static final Logger logger = LogManager.getLogger(ActivityTypeLoader.class);
     private final SimpleServiceLoader<ActivityType> ACTIVITYTYPE_SPI_FINDER = new SimpleServiceLoader<ActivityType>(ActivityType.class, Maturity.Any);
     private final SimpleServiceLoader<DriverAdapter> DRIVERADAPTER_SPI_FINDER = new SimpleServiceLoader<>(DriverAdapter.class, Maturity.Any);
+    private final SimpleServiceLoader<DriverAdapterLoader> DRIVERADAPTERLOADER_SPI_FINDER = new SimpleServiceLoader<>(DriverAdapterLoader.class, Maturity.Any);
     private final Set<URL> jarUrls = new HashSet<>();
 
     public ActivityTypeLoader setMaturity(final Maturity maturity) {
@@ -153,11 +155,12 @@ public class ActivityTypeLoader {
     }
 
     public Set<String> getAllSelectors() {
-        final Map<String, Maturity> allSelectors = this.ACTIVITYTYPE_SPI_FINDER.getAllSelectors();
-        final Map<String, Maturity> addAdapters = this.DRIVERADAPTER_SPI_FINDER.getAllSelectors();
+//        final Map<String, Maturity> allSelectors = this.ACTIVITYTYPE_SPI_FINDER.getAllSelectors();
+//        final Map<String, Maturity> allAdapters = this.DRIVERADAPTER_SPI_FINDER.getAllSelectors();
+        final Map<String, Maturity> allAdapterLoaders = this.DRIVERADAPTERLOADER_SPI_FINDER.getAllSelectors();
         final Set<String> all = new LinkedHashSet<>();
-        all.addAll(allSelectors.keySet());
-        all.addAll(addAdapters.keySet());
+//        all.addAll(allSelectors.keySet());
+        all.addAll(allAdapterLoaders.keySet());
         return all;
     }
 }

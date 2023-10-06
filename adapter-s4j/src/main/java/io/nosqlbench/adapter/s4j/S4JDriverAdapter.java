@@ -57,12 +57,4 @@ public class S4JDriverAdapter extends BaseDriverAdapter<S4JOp, S4JSpace> {
         return super.getConfigModel().add(S4JSpace.getConfigModel());
     }
 
-    @Service(value = DriverAdapterLoader.class,selector = "s4j")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public S4JDriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new S4JDriverAdapter(parent,childLabels);
-        }
-    }
-
 }

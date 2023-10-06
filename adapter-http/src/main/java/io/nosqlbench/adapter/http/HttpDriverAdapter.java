@@ -85,12 +85,4 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
         return super.getConfigModel().add(HttpSpace.getConfigModel()).add(thisCfgModel);
     }
 
-    @Service(value = DriverAdapterLoader.class,selector = "http")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public HttpDriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new HttpDriverAdapter(parent,childLabels);
-        }
-    }
-
 }
