@@ -66,8 +66,6 @@
         <module.adapter-kafka>adapter-amqp</module.adapter-kafka>
         <module.adapter-jdbc>adapter-jdbc</module.adapter-jdbc>
 
-        <!--        <module.hdf-loader>hdf-loader</module.hdf-loader>-->
-
         <!-- VIRTDATA MODULES -->
         <module.virtdata-api>virtdata-api</module.virtdata-api>
         <module.virtdata-lang>virtdata-lang</module.virtdata-lang>
@@ -114,7 +112,6 @@
         <module>adapter-jdbc</module>
         <module>adapter-pgvector</module>
         <module>adapter-pinecone</module>
-<!--        <module>hdf-loader</module>-->
 
         <!-- VIRTDATA MODULES -->
         <module>virtdata-api</module>
