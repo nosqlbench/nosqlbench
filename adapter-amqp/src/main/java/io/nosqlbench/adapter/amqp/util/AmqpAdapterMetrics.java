@@ -22,7 +22,6 @@ import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.amqp.dispensers.AmqpBaseOpDispenser;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,28 +55,17 @@ public class AmqpAdapterMetrics {
 
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
-        messageSizeHistogram =
-            amqpBaseOpDispenser.create().histogram(
-                "message_size", ActivityMetrics.DEFAULT_HDRDIGITS);
-
+        messageSizeHistogram = amqpBaseOpDispenser.create().histogram("message_size");
         // Timer metrics
-        bindTimer = amqpBaseOpDispenser.create().timer(
-                    "bind", ActivityMetrics.DEFAULT_HDRDIGITS);
-        executeTimer =
-            amqpBaseOpDispenser.create().timer(
-                     "execute", ActivityMetrics.DEFAULT_HDRDIGITS);
-
+        bindTimer = amqpBaseOpDispenser.create().timer("bind");
+        executeTimer = amqpBaseOpDispenser.create().timer("execute");
         // End-to-end metrics
         // Latency
-        e2eMsgProcLatencyHistogram =
-            amqpBaseOpDispenser.create().histogram("e2e_msg_latency", ActivityMetrics.DEFAULT_HDRDIGITS);
+        e2eMsgProcLatencyHistogram = amqpBaseOpDispenser.create().histogram("e2e_msg_latency");
         // Error metrics
-        msgErrOutOfSeqCounter =
-            amqpBaseOpDispenser.create().counter("err_msg_oos");
-        msgErrLossCounter =
-            amqpBaseOpDispenser.create().counter("err_msg_loss");
-        msgErrDuplicateCounter =
-            amqpBaseOpDispenser.create().counter("err_msg_dup");
+        msgErrOutOfSeqCounter = amqpBaseOpDispenser.create().counter("err_msg_oos");
+        msgErrLossCounter = amqpBaseOpDispenser.create().counter("err_msg_loss");
+        msgErrDuplicateCounter = amqpBaseOpDispenser.create().counter("err_msg_dup");
     }
 
     public Timer getBindTimer() { return bindTimer; }

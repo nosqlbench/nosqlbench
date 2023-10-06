@@ -25,7 +25,6 @@ import io.nosqlbench.adapters.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
@@ -183,8 +182,8 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
         if (this.instrument) {
             final int hdrDigits = pop.getStaticConfigOr("hdr_digits", 4);
 
-            successTimer = create().timer(ActivityMetrics.sanitize("successfor_"+getOpName()),hdrDigits);
-            errorTimer = create().timer(ActivityMetrics.sanitize("errorsfor_"+getOpName()),hdrDigits);
+            successTimer = create().timer("successfor_"+getOpName(),hdrDigits);
+            errorTimer = create().timer("errorsfor_"+getOpName(),hdrDigits);
         }
     }
 

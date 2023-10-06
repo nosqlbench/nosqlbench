@@ -20,9 +20,9 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.kafka.dispensers.KafkaBaseOpDispenser;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,21 +56,20 @@ public class KafkaAdapterMetrics {
 
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
-        messageSizeHistogram = kafkaBaseOpDispenser.create().histogram(
-                "message_size", ActivityMetrics.DEFAULT_HDRDIGITS);
+        messageSizeHistogram = kafkaBaseOpDispenser.create().histogram("message_size");
 
         // Timer metrics
         bindTimer =
             this.kafkaBaseOpDispenser.create().timer(
-                    "bind", ActivityMetrics.DEFAULT_HDRDIGITS);
+                    "bind");
         executeTimer =
             this.kafkaBaseOpDispenser.create().timer(
-                     "execute", ActivityMetrics.DEFAULT_HDRDIGITS);
+                     "execute");
 
         // End-to-end metrics
         // Latency
         e2eMsgProcLatencyHistogram =
-            kafkaBaseOpDispenser.create().histogram("e2e_msg_latency", ActivityMetrics.DEFAULT_HDRDIGITS);
+            kafkaBaseOpDispenser.create().histogram("e2e_msg_latency");
         // Error metrics
         msgErrOutOfSeqCounter =
             kafkaBaseOpDispenser.create().counter("err_msg_oos");

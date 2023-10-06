@@ -19,7 +19,6 @@ package io.nosqlbench.engine.extensions.scriptingmetrics;
 import com.codahale.metrics.MetricRegistry;
 import io.nosqlbench.api.config.LabeledScenarioContext;
 import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
 import io.nosqlbench.api.engine.metrics.wrappers.RelevancyMeasures;
 import org.apache.logging.log4j.Logger;

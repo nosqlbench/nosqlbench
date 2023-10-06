@@ -176,4 +176,5 @@ public interface NBLabels {
      * @return a String
      */
     String linearizeAsMetrics();
+
 }

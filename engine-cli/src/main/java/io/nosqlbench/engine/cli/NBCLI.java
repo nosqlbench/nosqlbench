@@ -26,7 +26,6 @@ import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
@@ -46,7 +45,6 @@ import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 import io.nosqlbench.engine.core.logging.LoggerConfig;
 import io.nosqlbench.engine.core.metadata.MarkdownFinder;
-import io.nosqlbench.engine.core.metrics.MetricReporters;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.annotations.ServiceSelector;
 import org.apache.logging.log4j.LogManager;
@@ -235,8 +233,9 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
         NBIO.addGlobalIncludes(options.wantsIncludes());
 
-        ActivityMetrics.setHdrDigits(options.getHdrDigits());
-        ActivityMetrics.setLabelValidator(options.getAnnotateLabelSpec());
+        // TODO: metrics
+//        ActivityMetrics.setHdrDigits(options.getHdrDigits());
+//        ActivityMetrics.setLabelValidator(options.getAnnotateLabelSpec());
 
         if (options.wantsBasicHelp()) {
             System.out.println(this.loadHelpFile("basic.md"));
@@ -358,46 +357,36 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 .build()
         );
 
-        if ((null != reportPromPushTo) || (null != reportGraphiteTo) || (null != options.wantsReportCsvTo())) {
-            final MetricReporters reporters = MetricReporters.getInstance();
-            reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
-
-            if (null != reportPromPushTo)
-                reporters.addPromPush(reportPromPushTo, options.wantsMetricsPrefix(), promPushConfig);
-            if (null != reportGraphiteTo) reporters.addGraphite(reportGraphiteTo, options.wantsMetricsPrefix());
-            if (null != options.wantsReportCsvTo())
-                reporters.addCSVReporter(options.wantsReportCsvTo(), options.wantsMetricsPrefix());
-            if (options.wantsLoggedMetrics()) {
-                reporters.addLogger();
-            }
-            reporters.start(10, options.getReportInterval());
-        }
-
-        if (options.wantsEnableChart()) {
-            NBCLI.logger.info("Charting enabled");
-            if (0 == options.getHistoLoggerConfigs().size()) {
-                NBCLI.logger.info("Adding default histologger configs");
-                final String pattern = ".*";
-                final String file = options.getChartHdrFileName();
-                final String interval = "1s";
-                options.setHistoLoggerConfigs(pattern, file, interval);
-            }
-        }
-
-        for (
-            final LoggerConfigData histoLogger : options.getHistoLoggerConfigs())
-            ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
-        for (
-            final LoggerConfigData statsLogger : options.getStatsLoggerConfigs())
-            ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
-        for (
-            final LoggerConfigData classicConfigs : options.getClassicHistoConfigs())
-            ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
-
-        if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
-            options.setWantsStackTraces(true);
-            NBCLI.logger.debug(() -> "enabling stack traces since log level is " + options.getConsoleLogLevel());
-        }
+        // TODO: metrics
+//        if ((null != reportPromPushTo) || (null != reportGraphiteTo) || (null != options.wantsReportCsvTo())) {
+//            final MetricReporters reporters = MetricReporters.getInstance();
+//            reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
+//
+//            if (null != reportPromPushTo)
+//                reporters.addPromPush(reportPromPushTo, options.wantsMetricsPrefix(), promPushConfig);
+//            if (null != reportGraphiteTo) reporters.addGraphite(reportGraphiteTo, options.wantsMetricsPrefix());
+//            if (null != options.wantsReportCsvTo())
+//                reporters.addCSVReporter(options.wantsReportCsvTo(), options.wantsMetricsPrefix());
+//            if (options.wantsLoggedMetrics()) {
+//                reporters.addLogger();
+//            }
+//            reporters.start(10, options.getReportInterval());
+//        }
+//
+//        for (
+//            final LoggerConfigData histoLogger : options.getHistoLoggerConfigs())
+//            ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
+//        for (
+//            final LoggerConfigData statsLogger : options.getStatsLoggerConfigs())
+//            ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
+//        for (
+//            final LoggerConfigData classicConfigs : options.getClassicHistoConfigs())
+//            ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
+//
+//        if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
+//            options.setWantsStackTraces(true);
+//            NBCLI.logger.debug(() -> "enabling stack traces since log level is " + options.getConsoleLogLevel());
+//        }
 
         // intentionally not shown for warn-only
         NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());

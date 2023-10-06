@@ -17,7 +17,6 @@
 package io.nosqlbench.engine.extensions.histologger;
 
 import com.codahale.metrics.MetricRegistry;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptContext;
@@ -34,6 +33,7 @@ public class HdrHistoLogPlugin {
     }
 
     public void logHistoIntervals(String session, String pattern, String filename, String interval) {
-        ActivityMetrics.addHistoLogger(session, pattern, filename, interval);
+        // TODO: metrics
+//        ActivityMetrics.addHistoLogger(session, pattern, filename, interval);
     }
 }
