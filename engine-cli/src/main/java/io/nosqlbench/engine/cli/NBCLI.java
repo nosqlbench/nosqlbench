@@ -242,10 +242,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
         NBIO.addGlobalIncludes(options.wantsIncludes());
 
-        // TODO: metrics
-//        ActivityMetrics.setHdrDigits(options.getHdrDigits());
-//        ActivityMetrics.setLabelValidator(options.getAnnotateLabelSpec());
-
         if (options.wantsBasicHelp()) {
             System.out.println(this.loadHelpFile("basic.md"));
             return NBCLI.EXIT_OK;
@@ -366,7 +362,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 .build()
         );
 
-        // TODO: metrics
 //        if ((null != reportPromPushTo) || (null != reportGraphiteTo) || (null != options.wantsReportCsvTo())) {
 //            final MetricReporters reporters = MetricReporters.getInstance();
 //            reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());

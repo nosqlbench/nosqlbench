@@ -85,6 +85,7 @@ public class ScriptExampleTests {
         return scenarioResult;
     }
 
+    @Disabled
     @BeforeAll
     public static void logit() {
         System.out.println("Running ASYNC version of Script Integration Tests.");
