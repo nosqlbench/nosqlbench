@@ -58,12 +58,4 @@ public class PulsarDriverAdapter extends BaseDriverAdapter<PulsarOp, PulsarSpace
         return super.getConfigModel().add(PulsarSpace.getConfigModel());
     }
 
-    @Service(value = DriverAdapterLoader.class,selector = "pulsar")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public PulsarDriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new PulsarDriverAdapter(parent,childLabels);
-        }
-    }
-
 }

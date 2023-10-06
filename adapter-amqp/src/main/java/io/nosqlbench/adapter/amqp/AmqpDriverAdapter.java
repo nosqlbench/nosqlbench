@@ -57,12 +57,4 @@ public class AmqpDriverAdapter extends BaseDriverAdapter<AmqpTimeTrackOp, AmqpSp
         return super.getConfigModel().add(AmqpSpace.getConfigModel());
     }
 
-    @Service(value = DriverAdapterLoader.class,selector = "amqp")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public AmqpDriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new AmqpDriverAdapter(parent,childLabels);
-        }
-    }
-
 }

@@ -109,12 +109,4 @@ public class Cqld4DriverAdapter extends BaseDriverAdapter<Op, Cqld4Space> {
         return remappers;
     }
 
-    @Service(value = DriverAdapterLoader.class,selector = "cqld4")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public Cqld4DriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new Cqld4DriverAdapter(parent,childLabels);
-        }
-    }
-
 }

@@ -55,12 +55,4 @@ public class DynamoDBDriverAdapter extends BaseDriverAdapter<DynamoDBOp, DynamoD
         return super.getConfigModel().add(DynamoDBSpace.getConfigModel());
     }
 
-    @Service(value = DriverAdapterLoader.class,selector = "dynamodb")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public DynamoDBDriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new DynamoDBDriverAdapter(parent,childLabels);
-        }
-    }
-
 }

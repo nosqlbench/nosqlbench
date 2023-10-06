@@ -54,12 +54,4 @@ public class MongodbDriverAdapter extends BaseDriverAdapter<Op, MongoSpace> {
         return super.getConfigModel().add(MongoSpace.getConfigModel());
     }
 
-    @Service(value = DriverAdapterLoader.class,selector = "mongodb")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public MongodbDriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new MongodbDriverAdapter(parent,childLabels);
-        }
-    }
-
 }

@@ -56,12 +56,5 @@ public class KafkaDriverAdapter extends BaseDriverAdapter<KafkaOp, KafkaSpace> {
     public NBConfigModel getConfigModel() {
         return super.getConfigModel().add(KafkaSpace.getConfigModel());
     }
-    @Service(value = DriverAdapterLoader.class,selector = "kafka")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public KafkaDriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new KafkaDriverAdapter(parent,childLabels);
-        }
-    }
 
 }
