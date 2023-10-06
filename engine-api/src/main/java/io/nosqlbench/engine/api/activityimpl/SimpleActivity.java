@@ -343,12 +343,15 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
             getParams().setSilently("stride", stride);
         }
 
+        // CYCLES
         Optional<String> cyclesOpt = getParams().getOptionalString("cycles");
         if (cyclesOpt.isEmpty()) {
             String cycles = getParams().getOptionalString("stride").orElseThrow();
             logger.info(() -> "defaulting cycles to " + cycles + " (the stride length)");
 //            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
-            getParams().setSilently("cycles", getParams().getOptionalString("stride").orElseThrow());
+//            getParams().setSilently("cycles", getParams().getOptionalString("stride").orElseThrow());
+            this.getActivityDef().setCycles(getParams().getOptionalString("stride").orElseThrow());
+//            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
         } else {
             if (0 == activityDef.getCycleCount()) {
                 throw new RuntimeException(

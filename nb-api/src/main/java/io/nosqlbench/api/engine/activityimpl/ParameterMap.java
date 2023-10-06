@@ -181,6 +181,9 @@ public class ParameterMap extends ConcurrentHashMap<String, Object> implements B
 
 
     public void set(String paramName, Object newValue) {
+        if (paramName.equals("cycles")) {
+            logger.warn("Setting 'cycles' on the parameter map is likely causing a bug in your activity. Call setCycles on the def instead.");
+        }
         super.put(paramName, String.valueOf(newValue));
         logger.info(() -> "setting param " + paramName + "=" + newValue);
         markMutation();
