@@ -40,6 +40,9 @@ public class NBBuilders {
         this.base = base;
     }
 
+    public NBMetricTimer timer(String metricFamilyName) {
+        return timer(metricFamilyName,4);
+    }
     public NBMetricTimer timer(String metricFamilyName, int hdrdigits) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
         NBMetricTimer timer = new NBMetricTimer(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits));
@@ -81,6 +84,9 @@ public class NBBuilders {
         return anyGauge;
     }
 
+    public NBMetricHistogram histogram(String metricFamilyName) {
+        return histogram(metricFamilyName,4);
+    }
     public NBMetricHistogram histogram(String metricFamilyName, int hdrdigits) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
         NBMetricHistogram histogram = new NBMetricHistogram(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits));

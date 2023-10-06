@@ -21,7 +21,6 @@ import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;

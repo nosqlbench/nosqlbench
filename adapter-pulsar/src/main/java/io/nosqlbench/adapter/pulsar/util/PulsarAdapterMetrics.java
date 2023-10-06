@@ -17,11 +17,9 @@
 package io.nosqlbench.adapter.pulsar.util;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.pulsar.dispensers.PulsarBaseOpDispenser;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Consumer;
@@ -75,28 +73,15 @@ public class PulsarAdapterMetrics {
             pulsarBaseOpDispenser.create().counter("err_msg_dup");
 
         // Histogram metrics
-        messageSizeHistogram =
-            pulsarBaseOpDispenser.create().histogram(
-                "message_size", ActivityMetrics.DEFAULT_HDRDIGITS);
-        e2eMsgProcLatencyHistogram =
-            pulsarBaseOpDispenser.create().histogram(
-                "e2e_msg_latency", ActivityMetrics.DEFAULT_HDRDIGITS);
-        payloadRttHistogram =
-            pulsarBaseOpDispenser.create().histogram(
-                "payload_rtt", ActivityMetrics.DEFAULT_HDRDIGITS);
+        messageSizeHistogram = pulsarBaseOpDispenser.create().histogram("message_size");
+        e2eMsgProcLatencyHistogram = pulsarBaseOpDispenser.create().histogram("e2e_msg_latency");
+        payloadRttHistogram = pulsarBaseOpDispenser.create().histogram("payload_rtt");
 
         // Timer metrics
-        bindTimer =
-            pulsarBaseOpDispenser.create().timer("bind", ActivityMetrics.DEFAULT_HDRDIGITS);
-        executeTimer =
-            pulsarBaseOpDispenser.create().timer(
-                "execute", ActivityMetrics.DEFAULT_HDRDIGITS);
-        createTransactionTimer =
-            pulsarBaseOpDispenser.create().timer(
-                "create_transaction", ActivityMetrics.DEFAULT_HDRDIGITS);
-        commitTransactionTimer =
-            pulsarBaseOpDispenser.create().timer(
-                "commit_transaction", ActivityMetrics.DEFAULT_HDRDIGITS);
+        bindTimer = pulsarBaseOpDispenser.create().timer("bind");
+        executeTimer = pulsarBaseOpDispenser.create().timer("execute");
+        createTransactionTimer = pulsarBaseOpDispenser.create().timer("create_transaction");
+        commitTransactionTimer = pulsarBaseOpDispenser.create().timer("commit_transaction");
     }
 
     public Counter getMsgErrOutOfSeqCounter() {

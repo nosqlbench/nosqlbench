@@ -30,8 +30,6 @@ import io.nosqlbench.api.Shutdownable;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.api.labels.NBLabels;

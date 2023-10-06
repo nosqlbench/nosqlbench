@@ -18,7 +18,6 @@ package io.nosqlbench.engine.core.lifecycle.scenario.context;
 import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.ParameterMap;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBComponentErrorHandler;
@@ -425,7 +424,8 @@ public class ActivitiesController extends NBBaseComponent {
     }
 
     public void reportMetrics() {
-        ActivityMetrics.reportTo(System.out);
+        // TODO: metrics
+//        ActivityMetrics.reportTo(System.out);
     }
 
     public List<ProgressMeterDisplay> getProgressMeters() {

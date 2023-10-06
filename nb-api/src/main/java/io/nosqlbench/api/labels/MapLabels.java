@@ -16,6 +16,8 @@
 
 package io.nosqlbench.api.labels;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -23,9 +25,11 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 public class MapLabels implements NBLabels {
+
+    private final static Logger logger = LogManager.getLogger(MapLabels.class);
     private final Map<String,String> labels;
 
-    public MapLabels(final Map<String, String> labels, String... instanceFields) {
+    public MapLabels(final Map<String, String> labels) {
         verifyValidNamesAndValues(labels);
 //        verifyValidValues(labels);
         this.labels = Collections.unmodifiableMap(labels);
@@ -136,6 +140,19 @@ public class MapLabels implements NBLabels {
         return sb.toString();
 
     }
+
+    public static String sanitize(String word) {
+        String sanitized = word;
+        sanitized = sanitized.replaceAll("\\.", "__");
+        sanitized = sanitized.replaceAll("-", "_");
+        sanitized = sanitized.replaceAll("[^a-zA-Z0-9_]+", "");
+
+        if (!word.equals(sanitized)) {
+            logger.warn("The identifier or value '" + word + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
+        }
+        return sanitized;
+    }
+
 
     @Override
     public MapLabels and(final Object... labelsAndValues) {
