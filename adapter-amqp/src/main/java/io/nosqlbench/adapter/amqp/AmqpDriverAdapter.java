@@ -17,12 +17,14 @@
 package io.nosqlbench.adapter.amqp;
 
 import io.nosqlbench.adapter.amqp.ops.AmqpTimeTrackOp;
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
@@ -34,8 +36,8 @@ import java.util.function.Function;
 public class AmqpDriverAdapter extends BaseDriverAdapter<AmqpTimeTrackOp, AmqpSpace> {
     private final static Logger logger = LogManager.getLogger(AmqpDriverAdapter.class);
 
-    public AmqpDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public AmqpDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
     }
 
     @Override
@@ -54,4 +56,13 @@ public class AmqpDriverAdapter extends BaseDriverAdapter<AmqpTimeTrackOp, AmqpSp
     public NBConfigModel getConfigModel() {
         return super.getConfigModel().add(AmqpSpace.getConfigModel());
     }
+
+    @Service(value = DriverAdapterLoader.class,selector = "amqp")
+    public static class Loader implements DriverAdapterLoader {
+        @Override
+        public AmqpDriverAdapter load(NBComponent parent, NBLabels childLabels) {
+            return new AmqpDriverAdapter(parent,childLabels);
+        }
+    }
+
 }

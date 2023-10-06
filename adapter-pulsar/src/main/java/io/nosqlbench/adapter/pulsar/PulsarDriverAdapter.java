@@ -16,11 +16,13 @@
 
 package io.nosqlbench.adapter.pulsar;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.config.standard.NBConfigModel;
@@ -35,8 +37,8 @@ public class PulsarDriverAdapter extends BaseDriverAdapter<PulsarOp, PulsarSpace
 
     private final static Logger logger = LogManager.getLogger(PulsarDriverAdapter.class);
 
-    public PulsarDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public PulsarDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent,labels);
     }
 
     @Override
@@ -55,4 +57,13 @@ public class PulsarDriverAdapter extends BaseDriverAdapter<PulsarOp, PulsarSpace
     public NBConfigModel getConfigModel() {
         return super.getConfigModel().add(PulsarSpace.getConfigModel());
     }
+
+    @Service(value = DriverAdapterLoader.class,selector = "pulsar")
+    public static class Loader implements DriverAdapterLoader {
+        @Override
+        public PulsarDriverAdapter load(NBComponent parent, NBLabels childLabels) {
+            return new PulsarDriverAdapter(parent,childLabels);
+        }
+    }
+
 }

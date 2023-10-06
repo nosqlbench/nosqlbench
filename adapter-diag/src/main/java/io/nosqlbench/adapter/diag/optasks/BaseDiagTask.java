@@ -18,7 +18,6 @@ package io.nosqlbench.adapter.diag.optasks;
 
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
 
 import java.util.Map;

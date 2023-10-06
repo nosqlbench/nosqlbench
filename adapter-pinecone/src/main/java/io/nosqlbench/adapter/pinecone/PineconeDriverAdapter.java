@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.pinecone;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapter.pinecone.ops.PineconeOp;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
@@ -23,6 +24,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 
@@ -31,8 +33,8 @@ import java.util.function.Function;
 @Service(value = DriverAdapter.class, selector = "pinecone")
 public class PineconeDriverAdapter extends BaseDriverAdapter<PineconeOp, PineconeSpace> {
 
-    public PineconeDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public PineconeDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
     }
 
     @Override
@@ -50,6 +52,14 @@ public class PineconeDriverAdapter extends BaseDriverAdapter<PineconeOp, Pinecon
     @Override
     public NBConfigModel getConfigModel() {
         return super.getConfigModel().add(PineconeSpace.getConfigModel());
+    }
+
+    @Service(value = DriverAdapterLoader.class,selector = "pinecone")
+    public static class Loader implements DriverAdapterLoader {
+        @Override
+        public PineconeDriverAdapter load(NBComponent parent, NBLabels childLabels) {
+            return new PineconeDriverAdapter(parent,childLabels);
+        }
     }
 
 }

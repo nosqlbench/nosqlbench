@@ -25,8 +25,8 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.components.NBParentComponentInjection;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.config.params.NBParams;
 import io.nosqlbench.api.config.standard.NBConfigModel;
@@ -48,8 +48,8 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
     private DiagOpMapper mapper;
 
 
-    public DiagDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public DiagDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
         logger.debug("starting up");
     }
 
@@ -109,4 +109,5 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
     public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> params) {
         return OpsLoader.loadString("log:level=INFO", OpTemplateFormat.inline, params,null).getOps();
     }
+
 }

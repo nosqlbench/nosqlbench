@@ -23,6 +23,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
@@ -34,8 +35,8 @@ import java.util.function.Function;
 public class JDBCDriverAdapter extends BaseDriverAdapter<JDBCOp, JDBCSpace> {
     private final static Logger logger = LogManager.getLogger(JDBCDriverAdapter.class);
 
-    public JDBCDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public JDBCDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent,labels);
     }
 
     @Override

@@ -22,6 +22,7 @@ import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
 import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBParentComponentInjection;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
@@ -78,7 +79,7 @@ import java.util.function.LongToDoubleFunction;
  *
  */
 @Service(value= DiagTask.class,selector="gauge")
-public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double> {
+public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double>, NBParentComponentInjection {
     private final static Logger logger = LogManager.getLogger("DIAG");
 
     // TODO: allow for temporal filtering

@@ -16,11 +16,13 @@
 
 package io.nosqlbench.adapter.dynamodb;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
@@ -32,8 +34,8 @@ import java.util.function.Function;
 @Service(value = DriverAdapter.class, selector = "dynamodb", maturity = Maturity.Experimental)
 public class DynamoDBDriverAdapter extends BaseDriverAdapter<DynamoDBOp, DynamoDBSpace> {
 
-    public DynamoDBDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public DynamoDBDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
     }
 
     @Override
@@ -52,4 +54,13 @@ public class DynamoDBDriverAdapter extends BaseDriverAdapter<DynamoDBOp, DynamoD
     public NBConfigModel getConfigModel() {
         return super.getConfigModel().add(DynamoDBSpace.getConfigModel());
     }
+
+    @Service(value = DriverAdapterLoader.class,selector = "dynamodb")
+    public static class Loader implements DriverAdapterLoader {
+        @Override
+        public DynamoDBDriverAdapter load(NBComponent parent, NBLabels childLabels) {
+            return new DynamoDBDriverAdapter(parent,childLabels);
+        }
+    }
+
 }

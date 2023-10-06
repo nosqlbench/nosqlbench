@@ -20,8 +20,9 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.adapters.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.components.NBBaseComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,8 +41,8 @@ public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent
     private NBConfiguration cfg;
     private LongFunction<S> spaceF;
 
-    public BaseDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public BaseDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
     }
 
     /**
