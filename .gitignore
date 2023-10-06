@@ -7,6 +7,8 @@ local/**
 metrics/**
 bin/**
 **/.idea
+!.idea/scopes
+!.idea/scopes/**
 **/*.iml
 **/target
 **/.classpath
