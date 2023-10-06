@@ -27,21 +27,6 @@ public class SC_activity_error extends SCBaseScenario {
         super(parentComponent, scenarioName);
     }
 
-    @Override
-    protected void runScenario(NBSceneFixtures shell) {
-
-//        HdrHistoLogPluginData hdrHistoLogPluginData = new HdrHistoLogPluginData();
-//        HdrHistoLogPlugin histologplugin = hdrHistoLogPluginData.getExtensionObject(...);
-//        histologplugin.logHistoIntervals(...);
-
-//        HdrHistoLogPlugin logplugin = shell.extensions().get("histologger",HdrHistoLogPlugin.class);
-
-//        var serviceojbect = extensions.get("histologger");
-
-//        AttachedMetricsSummaryReporter reporter = shell.runtime().create().summaryReporter(5, "labelname", "labelvalue");
-
-    }
-
     /**
      * Equivalent to javascript form:
      * <pre>{@code
@@ -73,7 +58,7 @@ public class SC_activity_error extends SCBaseScenario {
         );
         stdout.write("starting activity activity_error");
         controller.start(activitydef1);
-        controller.waitMillis(2000);
+        controller.waitMillis(500);
         controller.getActivityDef("activity_error").getParams().set("threads","unparsable"); // forced error
         controller.awaitActivity("activity_error", Long.MAX_VALUE);
     }
