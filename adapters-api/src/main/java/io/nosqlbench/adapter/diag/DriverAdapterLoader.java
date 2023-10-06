@@ -1,4 +1,4 @@
-package io.nosqlbench.components;
+package io.nosqlbench.adapter.diag;
 
 /*
  * Copyright (c) 2022 nosqlbench
@@ -18,6 +18,11 @@ package io.nosqlbench.components;
  */
 
 
-public interface NBParentComponentInjection {
-    void applyParentComponent(NBComponent component);
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBComponent;
+
+public interface DriverAdapterLoader {
+    public <A extends Op,B> DriverAdapter<A,B> load(NBComponent parent, NBLabels childLabels);
 }

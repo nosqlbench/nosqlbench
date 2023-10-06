@@ -17,7 +17,9 @@
 package io.nosqlbench.adapter.diag.optasks;
 
 import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.components.NBComponent;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
@@ -27,9 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DiagTask_gaugeTest {
 
+    private NBComponent parent = new TestComponent("DiagTask_gaugeTest","DiagTask_gauge");
     @Test
     public void testAvg() {
         DiagTask_gauge gaugeTask = new DiagTask_gauge();
+        gaugeTask.applyParentComponent(parent);
         gaugeTask.setName("test");
         gaugeTask.setLabelsFrom(NBLabeledElement.EMPTY);
         NBConfiguration taskConfig = gaugeTask.getConfigModel().apply(Map.of(
@@ -48,6 +52,7 @@ public class DiagTask_gaugeTest {
     @Test
     public void testMin() {
         DiagTask_gauge gaugeTask = new DiagTask_gauge();
+        gaugeTask.applyParentComponent(parent);
         gaugeTask.setName("test");
         gaugeTask.setLabelsFrom(NBLabeledElement.EMPTY);
         NBConfiguration taskConfig = gaugeTask.getConfigModel().apply(Map.of(
@@ -67,6 +72,7 @@ public class DiagTask_gaugeTest {
     @Test
     public void testMax() {
         DiagTask_gauge gaugeTask = new DiagTask_gauge();
+        gaugeTask.applyParentComponent(parent);
         gaugeTask.setName("test");
         gaugeTask.setLabelsFrom(NBLabeledElement.EMPTY);
         NBConfiguration taskConfig = gaugeTask.getConfigModel().apply(Map.of(

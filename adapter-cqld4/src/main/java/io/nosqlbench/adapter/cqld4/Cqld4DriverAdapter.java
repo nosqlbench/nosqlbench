@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.cqld4;
 
 import io.nosqlbench.adapter.cqld4.opmappers.Cqld4CoreOpMapper;
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
@@ -24,6 +25,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
@@ -39,8 +41,8 @@ import java.util.function.Function;
 public class Cqld4DriverAdapter extends BaseDriverAdapter<Op, Cqld4Space> {
     private final static Logger logger = LogManager.getLogger(Cqld4DriverAdapter.class);
 
-    public Cqld4DriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public Cqld4DriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
     }
 
     @Override
@@ -106,4 +108,13 @@ public class Cqld4DriverAdapter extends BaseDriverAdapter<Op, Cqld4Space> {
 
         return remappers;
     }
+
+    @Service(value = DriverAdapterLoader.class,selector = "cqld4")
+    public static class Loader implements DriverAdapterLoader {
+        @Override
+        public Cqld4DriverAdapter load(NBComponent parent, NBLabels childLabels) {
+            return new Cqld4DriverAdapter(parent,childLabels);
+        }
+    }
+
 }

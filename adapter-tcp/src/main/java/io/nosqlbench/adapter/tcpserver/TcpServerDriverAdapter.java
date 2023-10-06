@@ -15,6 +15,7 @@
  */
 
 package io.nosqlbench.adapter.tcpserver;
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapter.stdout.StdoutDriverAdapter;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
@@ -26,6 +27,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
@@ -40,9 +42,9 @@ public class TcpServerDriverAdapter extends BaseDriverAdapter<TcpServerOp, TcpSe
 
     private final StdoutDriverAdapter adap;
 
-    public TcpServerDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
-        adap = new StdoutDriverAdapter(parentComponent);
+    public TcpServerDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
+        adap = new StdoutDriverAdapter(parentComponent, labels);
     }
 
     @Override
@@ -67,4 +69,5 @@ public class TcpServerDriverAdapter extends BaseDriverAdapter<TcpServerOp, TcpSe
     public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String,Object> cfg) {
         return adap.getSyntheticOpTemplates(opsDocList, cfg);
     }
+
 }

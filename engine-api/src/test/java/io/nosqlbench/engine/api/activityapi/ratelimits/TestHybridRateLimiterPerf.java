@@ -16,7 +16,6 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.testutils.Perf;
 import io.nosqlbench.api.testutils.Result;
 import io.nosqlbench.components.NBBaseComponent;
