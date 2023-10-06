@@ -67,6 +67,13 @@ public class AtomicInputTest {
     }
 
     @Test
+    public void testThatOneCycleAndOneRecycleYieldsOneTotal() {
+        AtomicInput input = new AtomicInput(root, ActivityDef.parseActivityDef("alias=foo;cycles=1;recycles=1"));
+        CycleSegment segment = input.getInputSegment(1);
+        assertThat(segment).isNotNull();
+        assertThat(segment.nextCycle()).isEqualTo(0L);
+    }
+    @Test
     public void testThatCycleAndRecycleOffsetsWork() {
         AtomicInput input = new AtomicInput(root, ActivityDef.parseActivityDef("alias=foo;cycles=310..330;recycles=37..39"));
         CycleSegment segment = null;

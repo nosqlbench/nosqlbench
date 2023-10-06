@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 
 public class MapLabels implements NBLabels {
 
-    private final static Logger logger = LogManager.getLogger(MapLabels.class);
+//    private final static Logger logger = LogManager.getLogger(MapLabels.class);
     private final Map<String,String> labels;
 
     public MapLabels(final Map<String, String> labels) {
@@ -147,9 +147,9 @@ public class MapLabels implements NBLabels {
         sanitized = sanitized.replaceAll("-", "_");
         sanitized = sanitized.replaceAll("[^a-zA-Z0-9_]+", "");
 
-        if (!word.equals(sanitized)) {
-            logger.warn("The identifier or value '" + word + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
-        }
+//        if (!word.equals(sanitized)) {
+//            logger.warn("The identifier or value '" + word + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
+//        }
         return sanitized;
     }
 

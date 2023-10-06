@@ -118,10 +118,14 @@ public class AtomicInput extends NBBaseComponent implements Input, ActivityDefOb
 
         cycles_max.set(cyclesSpec.last_exclusive());
         if (cycles_min.get() != cyclesSpec.first_inclusive()) {
-            logger.info(() -> "resetting cycle value to new start: cycle[" + cycles_min.get() + "->" + cyclesSpec.first_inclusive() + "] " +
+            logger.info(() -> "resetting first cycle (inclusive) value to: cycle[" + cycles_min.get() + "->" + cyclesSpec.first_inclusive() + "] " +
                 " start[" + cycle_value.get() + "->" + cycles_min.get() + "]");
             cycles_min.set(cyclesSpec.first_inclusive());
             cycle_value.set(cycles_min.get());
+        }
+        if (cycles_max.get() != cyclesSpec.last_exclusive()) {
+            logger.info(() -> "resetting last cycle (exclusive) value to: cycle[" + cycles_max.get() + "->" + cyclesSpec.last_exclusive() + "]");
+            cycles_max.set(cyclesSpec.last_exclusive());
         }
 
         recycles_max.set(recyclesSpec.last_exclusive());
@@ -131,6 +135,11 @@ public class AtomicInput extends NBBaseComponent implements Input, ActivityDefOb
             recycles_min.set(recyclesSpec.first_inclusive());
             recycle_value.set(recyclesSpec.first_inclusive());
         }
+        if (recycles_max.get() != recyclesSpec.last_exclusive()) {
+            logger.info(() -> "resetting last recycle (exclusive) value to: recycle[" + recycles_max.get() + "->" + recyclesSpec.last_exclusive() + "]");
+            recycles_max.set(recyclesSpec.last_exclusive());
+        }
+
     }
 
     public long getStartedAtMillis() {
