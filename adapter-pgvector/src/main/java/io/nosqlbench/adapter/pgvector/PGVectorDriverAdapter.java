@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.pgvector;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapter.pgvector.optypes.PGVectorOp;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
@@ -23,6 +24,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
@@ -34,8 +36,8 @@ import java.util.function.Function;
 public class PGVectorDriverAdapter extends BaseDriverAdapter<PGVectorOp, PGVectorSpace> {
     private final static Logger logger = LogManager.getLogger(PGVectorDriverAdapter.class);
 
-    public PGVectorDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public PGVectorDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
     }
 
     @Override
@@ -54,4 +56,13 @@ public class PGVectorDriverAdapter extends BaseDriverAdapter<PGVectorOp, PGVecto
     public NBConfigModel getConfigModel() {
         return super.getConfigModel().add(PGVectorSpace.getConfigModel());
     }
+
+    @Service(value = DriverAdapterLoader.class,selector = "jdbc")
+    public static class Loader implements DriverAdapterLoader {
+        @Override
+        public PGVectorDriverAdapter load(NBComponent parent, NBLabels childLabels) {
+            return new PGVectorDriverAdapter(parent,childLabels);
+        }
+    }
+
 }

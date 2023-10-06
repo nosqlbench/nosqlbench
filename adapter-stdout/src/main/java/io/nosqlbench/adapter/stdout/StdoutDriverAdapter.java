@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.stdout;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpData;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
@@ -24,6 +25,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.config.standard.ConfigModel;
@@ -41,8 +43,8 @@ import java.util.stream.Collectors;
 public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace> implements SyntheticOpTemplateProvider {
     private final static Logger logger = LogManager.getLogger(StdoutDriverAdapter.class);
 
-    public StdoutDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public StdoutDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
     }
 
     @Override
@@ -113,5 +115,14 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
         String stmtTemplate = format.format(ensureNewline, new ArrayList<>(keySet));
         return stmtTemplate;
     }
+
+    @Service(value = DriverAdapterLoader.class,selector = "stdout")
+    public static class Loader implements DriverAdapterLoader {
+        @Override
+        public StdoutDriverAdapter load(NBComponent parent, NBLabels childLabels) {
+            return new StdoutDriverAdapter(parent,childLabels);
+        }
+    }
+
 
 }

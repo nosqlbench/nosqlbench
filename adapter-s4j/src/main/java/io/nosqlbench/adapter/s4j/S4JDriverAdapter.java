@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.s4j;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapter.s4j.ops.S4JOp;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
@@ -23,6 +24,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
@@ -34,8 +36,8 @@ import java.util.function.Function;
 public class S4JDriverAdapter extends BaseDriverAdapter<S4JOp, S4JSpace> {
     private final static Logger logger = LogManager.getLogger(S4JDriverAdapter.class);
 
-    public S4JDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public S4JDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
     }
 
     @Override
@@ -54,4 +56,13 @@ public class S4JDriverAdapter extends BaseDriverAdapter<S4JOp, S4JSpace> {
     public NBConfigModel getConfigModel() {
         return super.getConfigModel().add(S4JSpace.getConfigModel());
     }
+
+    @Service(value = DriverAdapterLoader.class,selector = "s4j")
+    public static class Loader implements DriverAdapterLoader {
+        @Override
+        public S4JDriverAdapter load(NBComponent parent, NBLabels childLabels) {
+            return new S4JDriverAdapter(parent,childLabels);
+        }
+    }
+
 }

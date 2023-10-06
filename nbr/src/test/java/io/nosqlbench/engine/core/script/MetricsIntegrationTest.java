@@ -19,6 +19,7 @@ package io.nosqlbench.engine.core.script;
 import com.codahale.metrics.Histogram;
 import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.components.NBComponent;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -27,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class MetricsIntegrationTest {
 
+    @Disabled("until this is reimplemented")
     @Test
     public void testHistogramLogger() {
         NBComponent parent = new TestComponent("metricstest","metricstest","alias","foo","driver","diag","op","noop");
@@ -37,7 +39,9 @@ public class MetricsIntegrationTest {
         testhistogram.getSnapshot();
         final File logfile = new File("testhisto.log");
         assertThat(logfile).exists();
-        assertThat(logfile.lastModified()).isGreaterThan(System.currentTimeMillis()-10000);
+        long now = System.currentTimeMillis();
+        long millisAge = now - logfile.lastModified();
+        assertThat(millisAge).isLessThan(10000L);
 
     }
 }

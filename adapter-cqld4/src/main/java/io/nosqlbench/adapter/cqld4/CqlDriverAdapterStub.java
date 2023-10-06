@@ -17,12 +17,13 @@
 package io.nosqlbench.adapter.cqld4;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 
 @Service(value = DriverAdapter.class, selector = "cql")
 public class CqlDriverAdapterStub extends Cqld4DriverAdapter {
-    public CqlDriverAdapterStub(NBComponent parentComponent) {
-        super(parentComponent);
+    public CqlDriverAdapterStub(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
     }
 }

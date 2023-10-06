@@ -18,8 +18,8 @@ package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.*;

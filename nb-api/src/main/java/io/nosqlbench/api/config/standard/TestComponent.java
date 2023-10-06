@@ -17,8 +17,8 @@
 package io.nosqlbench.api.config.standard;
 
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.components.NBBaseComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

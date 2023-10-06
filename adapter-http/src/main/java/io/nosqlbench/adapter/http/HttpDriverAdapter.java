@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.http;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapter.http.core.HttpFormatParser;
 import io.nosqlbench.adapter.http.core.HttpOp;
 import io.nosqlbench.adapter.http.core.HttpOpMapper;
@@ -26,6 +27,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.api.config.standard.NBConfigModel;
@@ -40,8 +42,8 @@ import java.util.function.Function;
 @Service(value = DriverAdapter.class, selector = "http")
 public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
 
-    public HttpDriverAdapter(NBComponent parent) {
-        super(parent);
+    public HttpDriverAdapter(NBComponent parent, NBLabels labels) {
+        super(parent, labels);
     }
 
     @Override
@@ -82,4 +84,13 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
 
         return super.getConfigModel().add(HttpSpace.getConfigModel()).add(thisCfgModel);
     }
+
+    @Service(value = DriverAdapterLoader.class,selector = "http")
+    public static class Loader implements DriverAdapterLoader {
+        @Override
+        public HttpDriverAdapter load(NBComponent parent, NBLabels childLabels) {
+            return new HttpDriverAdapter(parent,childLabels);
+        }
+    }
+
 }

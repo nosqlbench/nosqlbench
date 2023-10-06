@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.kafka;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapter.kafka.ops.KafkaOp;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
@@ -23,6 +24,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
@@ -34,8 +36,8 @@ import java.util.function.Function;
 public class KafkaDriverAdapter extends BaseDriverAdapter<KafkaOp, KafkaSpace> {
     private final static Logger logger = LogManager.getLogger(KafkaDriverAdapter.class);
 
-    public KafkaDriverAdapter(NBComponent parentComponent) {
-        super(parentComponent);
+    public KafkaDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
     }
 
     @Override
@@ -54,4 +56,12 @@ public class KafkaDriverAdapter extends BaseDriverAdapter<KafkaOp, KafkaSpace> {
     public NBConfigModel getConfigModel() {
         return super.getConfigModel().add(KafkaSpace.getConfigModel());
     }
+    @Service(value = DriverAdapterLoader.class,selector = "kafka")
+    public static class Loader implements DriverAdapterLoader {
+        @Override
+        public KafkaDriverAdapter load(NBComponent parent, NBLabels childLabels) {
+            return new KafkaDriverAdapter(parent,childLabels);
+        }
+    }
+
 }

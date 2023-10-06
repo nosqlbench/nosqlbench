@@ -18,8 +18,8 @@ package io.nosqlbench.engine.core.lifecycle.session;
 
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.spi.SimpleServiceLoader;
-import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponentSubScope;
 import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;

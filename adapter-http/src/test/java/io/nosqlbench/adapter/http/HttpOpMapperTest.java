@@ -27,6 +27,7 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,7 +51,7 @@ public class HttpOpMapperTest {
     @BeforeAll
     public static void initializeTestMapper() {
         HttpOpMapperTest.cfg = HttpSpace.getConfigModel().apply(Map.of());
-        HttpOpMapperTest.adapter = new HttpDriverAdapter(parent);
+        HttpOpMapperTest.adapter = new HttpDriverAdapter(parent, NBLabels.forKV());
         HttpOpMapperTest.adapter.applyConfig(HttpOpMapperTest.cfg);
         final DriverSpaceCache<? extends HttpSpace> cache = HttpOpMapperTest.adapter.getSpaceCache();
         HttpOpMapperTest.mapper = new HttpOpMapper(HttpOpMapperTest.adapter, HttpOpMapperTest.cfg, cache);

@@ -22,6 +22,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.NBReconfigurable;
+import io.nosqlbench.components.NBParentComponentInjection;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.nb.annotations.ServiceSelector;
 import org.apache.logging.log4j.LogManager;
@@ -67,6 +68,9 @@ public class DiagOpDispenser extends BaseOpDispenser<DiagOp,DiagSpace> implement
             // Dynamically load the named task instance, based on the op field key AKA the taskname
             // and ensure that exactly one is found or throw an error
             DiagTask task = ServiceSelector.of(optype, ServiceLoader.load(DiagTask.class)).getOne();
+            if (task instanceof NBParentComponentInjection parentAware) {
+                parentAware.applyParentComponent(op);
+            }
             task.setLabelsFrom(op);
             task.setName(opname);
 
