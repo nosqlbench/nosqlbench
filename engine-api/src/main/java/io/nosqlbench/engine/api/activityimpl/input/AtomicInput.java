@@ -18,8 +18,6 @@ package io.nosqlbench.engine.api.activityimpl.input;
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.CyclesSpec;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;

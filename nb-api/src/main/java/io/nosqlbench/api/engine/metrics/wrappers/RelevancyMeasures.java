@@ -18,7 +18,6 @@ package io.nosqlbench.api.engine.metrics.wrappers;
 
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
 
 import java.util.ArrayList;

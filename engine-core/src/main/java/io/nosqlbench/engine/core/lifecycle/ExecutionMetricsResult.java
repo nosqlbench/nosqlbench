@@ -18,7 +18,6 @@ package io.nosqlbench.engine.core.lifecycle;
 
 import com.codahale.metrics.*;
 import com.codahale.metrics.ConsoleReporter.Builder;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.metrics.reporters.Log4JMetricsReporter;
 import io.nosqlbench.api.engine.metrics.reporters.Log4JMetricsReporter.LoggingLevel;
 import io.nosqlbench.engine.core.metrics.NBMetricsSummary;
@@ -57,17 +56,18 @@ public class ExecutionMetricsResult extends ExecutionResult {
     public String getMetricsSummary() {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try (final PrintStream ps = new PrintStream(os)) {
-            final Builder builder = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
-                .convertDurationsTo(TimeUnit.MICROSECONDS)
-                .convertRatesTo(TimeUnit.SECONDS)
-                .filter(MetricFilter.ALL)
-                .outputTo(ps);
-            final Set<MetricAttribute> disabled = new HashSet<>(ExecutionMetricsResult.INTERVAL_ONLY_METRICS);
-            if (60000 > this.getElapsedMillis()) disabled.addAll(ExecutionMetricsResult.OVER_ONE_MINUTE_METRICS);
-            builder.disabledMetricAttributes(disabled);
-            final ConsoleReporter consoleReporter = builder.build();
-            consoleReporter.report();
-            consoleReporter.close();
+            // TODO: metrics
+//            final Builder builder = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+//                .convertDurationsTo(TimeUnit.MICROSECONDS)
+//                .convertRatesTo(TimeUnit.SECONDS)
+//                .filter(MetricFilter.ALL)
+//                .outputTo(ps);
+//            final Set<MetricAttribute> disabled = new HashSet<>(ExecutionMetricsResult.INTERVAL_ONLY_METRICS);
+//            if (60000 > this.getElapsedMillis()) disabled.addAll(ExecutionMetricsResult.OVER_ONE_MINUTE_METRICS);
+//            builder.disabledMetricAttributes(disabled);
+//            final ConsoleReporter consoleReporter = builder.build();
+//            consoleReporter.report();
+//            consoleReporter.close();
         }
         final String result = os.toString(StandardCharsets.UTF_8);
         return result;
@@ -88,31 +88,33 @@ public class ExecutionMetricsResult extends ExecutionResult {
         ExecutionResult.logger.debug("-- active data on this last report. (The workload has already stopped.) Record   --");
         ExecutionResult.logger.debug("-- metrics to an external format to see values for each reporting interval.      --");
         ExecutionResult.logger.debug("-- BEGIN METRICS DETAIL --");
-        final Log4JMetricsReporter reporter = Log4JMetricsReporter.forRegistry(ActivityMetrics.getMetricRegistry())
-            .withLoggingLevel(LoggingLevel.DEBUG)
-            .convertDurationsTo(TimeUnit.MICROSECONDS)
-            .convertRatesTo(TimeUnit.SECONDS)
-            .filter(MetricFilter.ALL)
-            .outputTo(ExecutionResult.logger)
-            .build();
-        reporter.report();
-        reporter.close();
+        // TODO: metrics
+//        final Log4JMetricsReporter reporter = Log4JMetricsReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+//            .withLoggingLevel(LoggingLevel.DEBUG)
+//            .convertDurationsTo(TimeUnit.MICROSECONDS)
+//            .convertRatesTo(TimeUnit.SECONDS)
+//            .filter(MetricFilter.ALL)
+//            .outputTo(ExecutionResult.logger)
+//            .build();
+//        reporter.report();
+//        reporter.close();
         ExecutionResult.logger.debug("-- END METRICS DETAIL --");
     }
 
     public void reportMetricsCountsTo(final PrintStream printStream) {
         final StringBuilder sb = new StringBuilder();
 
-        ActivityMetrics.getMetricRegistry().getMetrics().forEach((k, v) -> {
-            if (v instanceof Counting counting) {
-                final long count = counting.getCount();
-                if (0 < count) NBMetricsSummary.summarize(sb, k, v);
-            } else if (v instanceof Gauge<?> gauge) {
-                final Object value = gauge.getValue();
-                if (value instanceof Number n) if (0 != n.doubleValue()) NBMetricsSummary.summarize(sb, k, v);
-            }
-        });
-
+        // TODO: metrics
+//        ActivityMetrics.getMetricRegistry().getMetrics().forEach((k, v) -> {
+//            if (v instanceof Counting counting) {
+//                final long count = counting.getCount();
+//                if (0 < count) NBMetricsSummary.summarize(sb, k, v);
+//            } else if (v instanceof Gauge<?> gauge) {
+//                final Object value = gauge.getValue();
+//                if (value instanceof Number n) if (0 != n.doubleValue()) NBMetricsSummary.summarize(sb, k, v);
+//            }
+//        });
+//
         printStream.println("-- BEGIN NON-ZERO metric counts (run longer for full report):");
         printStream.print(sb);
         printStream.println("-- END NON-ZERO metric counts:");

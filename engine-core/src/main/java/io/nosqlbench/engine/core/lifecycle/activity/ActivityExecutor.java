@@ -16,8 +16,6 @@
 package io.nosqlbench.engine.core.lifecycle.activity;
 
 import com.codahale.metrics.Gauge;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
-import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
@@ -467,11 +465,14 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
     }
 
     private void unregisterMetrics() {
+        // TODO: metrics
+//        ActivityMetrics.unregister(this.threadsGauge);
         if (this.threadsGauge != null) {
-        ActivityMetrics.unregister(this.threadsGauge);
-        this.threadsGauge = null;
+            ActivityMetrics.unregister(this.threadsGauge);
+
+            this.threadsGauge = null;
     }
-    }
+
 
     private boolean shutdownExecutorService(int secondsToWait) {
 

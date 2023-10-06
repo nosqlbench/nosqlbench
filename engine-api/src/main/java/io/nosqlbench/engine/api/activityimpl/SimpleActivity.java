@@ -33,7 +33,6 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
