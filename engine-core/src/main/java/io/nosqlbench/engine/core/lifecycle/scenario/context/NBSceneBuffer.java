@@ -94,8 +94,8 @@ public class NBSceneBuffer implements NBSceneFixtures {
         return (NBSceneFixtures) this;
     }
 
-//    public static NBSceneBuffer init(String name) {
-//        TestComponent root = new TestComponent("scene", "self");
-//        return new NBSceneBuffer(NBDefaultSceneFixtures.ofDefault(name));
-//    }
+    public static NBSceneBuffer init(String name) {
+        TestComponent root = new TestComponent("scene", "self");
+        return new NBSceneBuffer(NBDefaultSceneFixtures.ofDefault(name));
+    }
 }

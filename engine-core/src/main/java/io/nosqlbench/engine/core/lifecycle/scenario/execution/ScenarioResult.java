@@ -54,4 +54,21 @@ public class ScenarioResult {
     public String getIOLog() {
         return fixtures.getIOLog();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("ScenarioResult [")
+            .append(this.endedAt - this.startedAt)
+            .append("ms]");
+        if (exception==null) {
+             sb.append(" OK ");
+        } else {
+            sb.append(" ERROR ").append(exception);
+        }
+        String iolog = getIOLog();
+        if (!iolog.isEmpty()) {
+            sb.append(" IO{\n").append("}\n").append(iolog);
+        }
+        return sb.toString();
+    }
 }
