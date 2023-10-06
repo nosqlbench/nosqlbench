@@ -71,12 +71,4 @@ public class TcpClientDriverAdapter extends BaseDriverAdapter<TcpClientOp, TcpCl
         return adap.getSyntheticOpTemplates(opsDocList, cfg);
     }
 
-    @Service(value = DriverAdapterLoader.class,selector = "tcpclient")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public TcpClientDriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new TcpClientDriverAdapter(parent,childLabels);
-        }
-    }
-
 }

@@ -54,12 +54,4 @@ public class PineconeDriverAdapter extends BaseDriverAdapter<PineconeOp, Pinecon
         return super.getConfigModel().add(PineconeSpace.getConfigModel());
     }
 
-    @Service(value = DriverAdapterLoader.class,selector = "pinecone")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public PineconeDriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new PineconeDriverAdapter(parent,childLabels);
-        }
-    }
-
 }

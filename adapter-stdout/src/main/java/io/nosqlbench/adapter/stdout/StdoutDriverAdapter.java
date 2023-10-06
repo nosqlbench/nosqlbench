@@ -116,13 +116,5 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
         return stmtTemplate;
     }
 
-    @Service(value = DriverAdapterLoader.class,selector = "stdout")
-    public static class Loader implements DriverAdapterLoader {
-        @Override
-        public StdoutDriverAdapter load(NBComponent parent, NBLabels childLabels) {
-            return new StdoutDriverAdapter(parent,childLabels);
-        }
-    }
-
 
 }
