@@ -60,6 +60,6 @@ public class Sequence<T> implements OpSequence<T> {
 
     @Override
     public String toString() {
-        return Arrays.toString(this.seq);
+        return "seq len="+seq.length + ", LUT=" + Arrays.toString(this.seq);
     }
 }

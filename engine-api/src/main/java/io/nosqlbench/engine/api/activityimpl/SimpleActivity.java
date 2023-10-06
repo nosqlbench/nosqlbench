@@ -343,12 +343,15 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
             getParams().setSilently("stride", stride);
         }
 
+        // CYCLES
         Optional<String> cyclesOpt = getParams().getOptionalString("cycles");
         if (cyclesOpt.isEmpty()) {
             String cycles = getParams().getOptionalString("stride").orElseThrow();
             logger.info(() -> "defaulting cycles to " + cycles + " (the stride length)");
 //            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
-            activityDef.setCycles(cycles);
+//            getParams().setSilently("cycles", getParams().getOptionalString("stride").orElseThrow());
+            this.getActivityDef().setCycles(getParams().getOptionalString("stride").orElseThrow());
+//            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
         } else {
             if (0 == activityDef.getCycleCount()) {
                 throw new RuntimeException(
@@ -532,19 +535,19 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
         List<OpTemplate> unfilteredOps = opsDocList.getOps();
         List<OpTemplate> filteredOps = opsDocList.getOps(tagfilter);
 
-        if (filteredOps.isEmpty()) {
+        if (0 == filteredOps.size()) {
             // There were no ops, and it *wasn't* because they were all filtered out.
             // In this case, let's try to synthesize the ops as long as at least a default driver was provided
             // But if there were no ops, and there was no default driver provided, we can't continue
             // There were no ops, and it was because they were all filtered out
-            if (!unfilteredOps.isEmpty()) {
+            if (0 < unfilteredOps.size()) {
                 throw new BasicError("There were no active op templates with tag filter '"
                         + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
             }
             if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
                 filteredOps = sotp.getSyntheticOpTemplates(opsDocList, this.activityDef.getParams());
                 Objects.requireNonNull(filteredOps);
-                if (filteredOps.isEmpty()) {
+                if (0 == filteredOps.size()) {
                     throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + '\'' +
                             " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
                 }
