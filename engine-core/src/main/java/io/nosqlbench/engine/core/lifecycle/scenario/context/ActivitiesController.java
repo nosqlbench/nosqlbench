@@ -424,7 +424,6 @@ public class ActivitiesController extends NBBaseComponent {
     }
 
     public void reportMetrics() {
-        // TODO: metrics
 //        ActivityMetrics.reportTo(System.out);
     }
 

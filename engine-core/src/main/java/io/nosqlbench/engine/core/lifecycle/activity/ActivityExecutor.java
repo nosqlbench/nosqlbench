@@ -422,7 +422,7 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
                 this.exception = e;
             } finally {
                 stoppedAt = System.currentTimeMillis();
-                unregisterMetrics();
+                // TODO: close out metrics outputs on component tree if needed
                 activity.shutdownActivity();
                 activity.closeAutoCloseables();
                 ExecutionResult result = new ExecutionResult(startedAt, stoppedAt, "", exception);
