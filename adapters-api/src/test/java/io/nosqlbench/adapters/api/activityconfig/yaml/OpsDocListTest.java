@@ -22,6 +22,7 @@ import org.assertj.core.data.MapEntry;
 import org.junit.jupiter.api.BeforeAll;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -54,6 +55,7 @@ public class OpsDocListTest {
         doclist = OpsLoader.loadPath("testdocs/docs_blocks_ops.yaml", Map.of());
     }
 
+    @Disabled("superseded by UniformWorkloadSpecification")
     @Test
     public void testBlocksInheritDocData() {
         assertThat(doclist).isNotNull();
@@ -74,6 +76,7 @@ public class OpsDocListTest {
 
     }
 
+    @Disabled("superseded by UniformWorkloadSpecification")
     @Test
     public void testStmtInheritsBlockData() {
         OpsDoc doc0 = doclist.getStmtDocs().get(0);

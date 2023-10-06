@@ -58,7 +58,7 @@ public class ScenarioController implements NBLabeledElement {
 
         ActivitiesExceptionHandler exceptionHandler = new ActivitiesExceptionHandler(this);
         IndexedThreadFactory indexedThreadFactory = new IndexedThreadFactory("ACTIVITY", exceptionHandler);
-        this.activitiesExecutor = Executors.newVirtualThreadPerTaskExecutor();
+        this.activitiesExecutor = Executors.newCachedThreadPool(indexedThreadFactory);
     }
 
     /**
