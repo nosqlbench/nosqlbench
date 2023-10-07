@@ -20,8 +20,10 @@ import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.scripting.DiagReader;
 import io.nosqlbench.engine.api.scripting.DiagWriter;
+import io.nosqlbench.engine.api.scripting.InterjectingCharArrayWriter;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
 
+import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -37,8 +39,8 @@ public class NBSceneBuffer implements NBSceneFixtures {
 
     public NBSceneBuffer(NBSceneFixtures fixtures) {
         this.fixtures = fixtures;
-        stdoutBuffer = new DiagWriter(fixtures.out(), " stdout ");
-        stderrBuffer = new DiagWriter(fixtures.err(), " stderr ");
+        stdoutBuffer = new DiagWriter(fixtures.out(), new InterjectingCharArrayWriter(" stdout "));
+        stderrBuffer = new DiagWriter(fixtures.err(), new InterjectingCharArrayWriter(" stderr "));
         stdinBuffer = new DiagReader(fixtures.in(), "  stdin ");
     }
 
@@ -77,17 +79,17 @@ public class NBSceneBuffer implements NBSceneFixtures {
         return stdinBuffer;
     }
 
-    public List<String> getTimedLogLines() {
-        List<String> log = new ArrayList<String>();
-        Optional.ofNullable(this.stdinBuffer).map(DiagReader::getTimedLog).ifPresent(log::addAll);
-        Optional.ofNullable(this.stderrBuffer).map(DiagWriter::getTimedLog).ifPresent(log::addAll);
-        Optional.ofNullable(this.stdoutBuffer).map(DiagWriter::getTimedLog).ifPresent(log::addAll);
-        log = log.stream().map(l -> l.endsWith("\n") ? l : l+"\n").collect(Collectors.toList());
-        return log;
-    }
+//    public List<String> getTimedLogLines() {
+//        List<String> log = new ArrayList<String>();
+//        Optional.ofNullable(this.stdinBuffer).map(DiagReader::getTimedLog).ifPresent(log::addAll);
+//        Optional.ofNullable(this.stderrBuffer).map(DiagWriter::getTimedLog).ifPresent(log::addAll);
+//        Optional.ofNullable(this.stdoutBuffer).map(DiagWriter::getTimedLog).ifPresent(log::addAll);
+//        log = log.stream().map(l -> l.endsWith("\n") ? l : l+"\n").collect(Collectors.toList());
+//        return log;
+//    }
 
     public String getIOLog() {
-        return String.join("",getTimedLogLines());
+        return this.stdoutBuffer.getTimedLog()+this.stderrBuffer.getTimedLog();
     }
 
     public NBSceneFixtures asFixtures() {

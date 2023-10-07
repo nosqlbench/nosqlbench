@@ -26,10 +26,11 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.graalvm.polyglot.Value;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 public class BobyqaOptimizerInstance extends NBBaseComponent {
 
@@ -42,7 +43,7 @@ public class BobyqaOptimizerInstance extends NBBaseComponent {
 
     private final MVParams params = new MVParams();
 
-    private MultivariateFunction objectiveFunctionFromScript;
+    private MultivariateFunction objectiveFunction;
     private SimpleBounds bounds;
     private InitialGuess initialGuess;
     private PointValuePair result;
@@ -93,16 +94,30 @@ public class BobyqaOptimizerInstance extends NBBaseComponent {
         return this;
     }
 
-    public BobyqaOptimizerInstance setObjectiveFunction(Object f) {
-        if (f instanceof Function) {
-//            Function<Object[],Object> function = (Function<Object[],Object>)f;
-            this.objectiveFunctionFromScript =
-                    new PolyglotMultivariateObjectScript(logger, params, f);
-        } else {
-            throw new RuntimeException("The objective function must be recognizable as a polyglot Function");
-        }
-
+    public BobyqaOptimizerInstance setObjectiveFunction(ToDoubleFunction<double[]> f) {
+        this.objectiveFunction = new MultivariateFunction() {
+            @Override
+            public double value(double[] point) {
+                return f.applyAsDouble(point);
+            }
+        };
         return this;
+    }
+    public BobyqaOptimizerInstance setObjectiveFunction(MultivariateFunction f) {
+        this.objectiveFunction = f;
+        return this;
+    }
+    public BobyqaOptimizerInstance setObjectiveFunction(Value f) {
+        throw new RuntimeException("replace me");
+//        if (f instanceof Function) {
+////            Function<Object[],Object> function = (Function<Object[],Object>)f;
+//            this.objectiveFunctionFromScript =
+//                    new PolyglotMultivariateObjectScript(logger, params, f);
+//        } else {
+//            throw new RuntimeException("The objective function must be recognizable as a polyglot Function");
+//        }
+//
+//        return this;
     }
 
     public BobyqaOptimizerInstance setMaxEval(int maxEval) {
@@ -121,7 +136,7 @@ public class BobyqaOptimizerInstance extends NBBaseComponent {
                 this.stoppingTrustRegionRadius
         );
 
-        this.mvLogger = new MVLogger(this.objectiveFunctionFromScript);
+        this.mvLogger = new MVLogger(this.objectiveFunction);
         ObjectiveFunction objective = new ObjectiveFunction(this.mvLogger);
 
         List<OptimizationData> od = List.of(

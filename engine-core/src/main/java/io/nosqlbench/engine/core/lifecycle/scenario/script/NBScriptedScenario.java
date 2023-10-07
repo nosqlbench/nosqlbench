@@ -30,10 +30,7 @@ import org.graalvm.polyglot.EnvironmentAccess;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotAccess;
 
-import javax.script.Compilable;
-import javax.script.CompiledScript;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
+import javax.script.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -66,7 +63,7 @@ public class NBScriptedScenario extends NBScenario {
 
     private ActivitiesProgressIndicator activitiesProgressIndicator;
     private String progressInterval = "console:1m";
-//    private ScenarioScriptShell scriptEnv;
+    //    private ScenarioScriptShell scriptEnv;
     private final String scenarioName;
     private ScriptParams scenarioScriptParams;
     private final Engine engine = Engine.Graalvm;
@@ -88,7 +85,9 @@ public class NBScriptedScenario extends NBScenario {
 
     public static NBScriptedScenario ofScripted(String name, Map<String, String> params, NBComponent parent, Invocation invocation) {
         return new NBScriptedScenario(name, parent);
-    };
+    }
+
+    ;
 
 
     public NBScriptedScenario addScriptText(final String scriptText) {
@@ -117,7 +116,7 @@ public class NBScriptedScenario extends NBScenario {
     private BufferedScriptContext initializeScriptContext(NBSceneFixtures fixtures) {
         BufferedScriptContext ctx = new BufferedScriptContext(fixtures);
 //        this.scriptEngine.setContext(ctx);
-        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("scenario",new PolyglotScenarioController(fixtures.controller()));
+        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("scenario", new PolyglotScenarioController(fixtures.controller()));
         return ctx;
     }
 
@@ -142,67 +141,39 @@ public class NBScriptedScenario extends NBScenario {
         scriptEngine = GraalJSScriptEngine.create(polyglotEngine, contextSettings);
     }
 
-    protected synchronized void runScenario(NBSceneFixtures shell) {
-        if (null == result) {
-            try {
-                this.logger.debug("Initializing scripting engine for {}.", scenarioName);
-                this.initializeScriptingEngine();
-                this.context = this.initializeScriptContext(shell);
-                this.logger.debug("Running control script for {}.", scenarioName);
-                this.executeScenarioScripts();
-            } catch (final Exception e) {
-                error = e;
-            } finally {
-                this.logger.debug("{} scenario run", null == this.error ? "NORMAL" : "ERRORED");
-            }
+    protected final void runScenario(NBSceneFixtures shell) {
+        try {
+            this.logger.debug("Initializing scripting engine for {}.", scenarioName);
+            this.initializeScriptingEngine();
+            this.context = this.initializeScriptContext(shell);
+            this.logger.debug("Running control script for {}.", scenarioName);
+            this.executeScenarioScripts();
+        } catch (ScriptException e) {
+            throw new RuntimeException(e);
+        } finally {
+            this.endedAtMillis = System.currentTimeMillis();
+//            this.logger.debug("{} scenario run", null == this.error ? "NORMAL" : "ERRORED");
+        }
 //            String iolog = error != null ? error.toString() : this.scriptEnv.getTimedLog();
 //            result = new ExecutionMetricsResult(startedAtMillis, endedAtMillis, iolog, this.error);
 //            this.result.reportMetricsSummaryToLog();
+    }
+
+    private void executeScenarioScripts() throws ScriptException {
+        for (final String script : this.scripts) {
+            if ((scriptEngine instanceof Compilable compilableEngine)) {
+                this.logger.debug("Using direct script compilation");
+                final CompiledScript compiled = compilableEngine.compile(script);
+                this.logger.debug("-> invoking main scenario script (compiled)");
+                compiled.eval(this.context);
+                this.logger.debug("<- scenario script completed (compiled)");
+            } else {
+                this.logger.debug("-> invoking main scenario script (interpreted)");
+                this.scriptEngine.eval(script);
+                this.logger.debug("<- scenario control script completed (interpreted)");
+            }
         }
     }
-
-    private void executeScenarioScripts() {
-        for (final String script : this.scripts)
-            try {
-                Object result = null;
-                if ((scriptEngine instanceof Compilable compilableEngine)) {
-                    this.logger.debug("Using direct script compilation");
-                    final CompiledScript compiled = compilableEngine.compile(script);
-                    this.logger.debug("-> invoking main scenario script (compiled)");
-                    result = compiled.eval(this.context);
-                    this.logger.debug("<- scenario script completed (compiled)");
-                }
-//                 else if ((null != scriptfile) && !this.scriptfile.isEmpty()) {
-//                    final String filename = this.scriptfile.replace("_SESSION_", this.scenarioName);
-//                    this.logger.debug("-> invoking main scenario script (interpreted from {})", filename);
-//                    final Path written = Files.writeString(
-//                        Path.of(filename),
-//                        script,
-//                        StandardOpenOption.TRUNCATE_EXISTING,
-//                        StandardOpenOption.CREATE
-//                    );
-//                    final BufferedReader reader = Files.newBufferedReader(written);
-//                    this.scriptEngine.eval(reader);
-//                    this.logger.debug("<- scenario control script completed (interpreted) from {})", filename);
-//                }
-                else {
-                    this.logger.debug("-> invoking main scenario script (interpreted)");
-                    result = this.scriptEngine.eval(script);
-                    this.logger.debug("<- scenario control script completed (interpreted)");
-                }
-                if (null != result)
-                    this.logger.debug("scenario result: type({}): value:{}", result.getClass().getCanonicalName(), result);
-            } catch (final Exception e) {
-                error = e;
-                this.logger.error("Error in scenario, shutting down. ({})", e);
-            } finally {
-                this.endedAtMillis = System.currentTimeMillis();
-                System.out.flush();
-                System.err.flush();
-            }
-    }
-
-
 
 
     @Override

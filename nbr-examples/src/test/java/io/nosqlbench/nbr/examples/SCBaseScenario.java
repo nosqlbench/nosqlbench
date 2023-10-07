@@ -39,7 +39,7 @@ public abstract class SCBaseScenario extends NBScenario {
     }
 
     @Override
-    protected void runScenario(NBSceneFixtures shell) {
+    protected final void runScenario(NBSceneFixtures shell) {
         this.component = shell.component();
         this.stdin = shell.in();
         this.stdout = shell.out();

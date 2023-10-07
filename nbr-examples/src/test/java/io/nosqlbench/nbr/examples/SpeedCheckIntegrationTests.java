@@ -16,6 +16,7 @@
 package io.nosqlbench.nbr.examples;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenarioResult;
+import io.nosqlbench.nbr.examples.injavascript.ScriptExampleTests;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
