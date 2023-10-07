@@ -92,6 +92,7 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
         );
     }
 
+
     @Override
     public ScriptParams params() {
         return params;

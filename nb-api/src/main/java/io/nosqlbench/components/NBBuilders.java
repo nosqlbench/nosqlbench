@@ -130,8 +130,8 @@ public class NBBuilders {
 //        return new ExamplePlugin(component);
 //    }
 
-    public BobyqaOptimizerInstance bobyqaOptimizer(final NBComponent component) {
-        return new BobyqaOptimizerInstance(component);
+    public BobyqaOptimizerInstance bobyqaOptimizer() {
+        return new BobyqaOptimizerInstance(base);
     }
 
     public FileAccess fileAccess(String filename) {

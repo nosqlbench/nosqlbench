@@ -16,6 +16,7 @@
 package io.nosqlbench.engine.api.scripting;
 
 import javax.script.SimpleScriptContext;
+import java.io.CharArrayWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.time.format.DateTimeFormatter;
@@ -42,7 +43,7 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
             synchronized(this) {
                 if (stdoutBuffer==null) {
                     Writer superWriter = super.getWriter();
-                    stdoutBuffer = new DiagWriter(superWriter, " stdout ");
+                    stdoutBuffer = new DiagWriter(superWriter, new InterjectingCharArrayWriter(" stdout  "));
                 }
             }
         }
@@ -55,7 +56,7 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
             synchronized(this) {
                 if (stderrBuffer==null) {
                     Writer superErrorWriter = super.getErrorWriter();
-                    stderrBuffer = new DiagWriter(superErrorWriter, " error ");
+                    stderrBuffer = new DiagWriter(superErrorWriter, new InterjectingCharArrayWriter(" stderr "));
                 }
             }
         }
@@ -79,24 +80,17 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
         return stdinBuffer.buffer.toString();
     }
 
-    public String getStderrText() {
-        return stderrBuffer.buffer.toString();
-    }
-
-    public String getStdoutText() {
-        return stdoutBuffer.buffer.toString();
-    }
-
-    public List<String> getTimeLogLines() {
-        List<String> log = new ArrayList<String>();
-        Optional.ofNullable(this.stdinBuffer).map(DiagReader::getTimedLog).ifPresent(log::addAll);
-        Optional.ofNullable(this.stderrBuffer).map(DiagWriter::getTimedLog).ifPresent(log::addAll);
-        Optional.ofNullable(this.stdoutBuffer).map(DiagWriter::getTimedLog).ifPresent(log::addAll);
-        log = log.stream().map(l -> l.endsWith("\n") ? l : l+"\n").collect(Collectors.toList());
-        return log;
-    }
+//    public List<String> getTimeLogLines() {
+//        List<String> log = new ArrayList<String>();
+//        Optional.ofNullable(this.stdinBuffer).map(DiagReader::getTimedLog).ifPresent(log::addAll);
+//        Optional.ofNullable(this.stderrBuffer).map(DiagWriter::getTimedLog).ifPresent(log::addAll);
+//        Optional.ofNullable(this.stdoutBuffer).map(DiagWriter::getTimedLog).ifPresent(log::addAll);
+//        log = log.stream().map(l -> l.endsWith("\n") ? l : l+"\n").collect(Collectors.toList());
+//        return log;
+//    }
     public String getTimedLog() {
-        return getTimeLogLines().stream().collect(Collectors.joining());
+        return this.stdoutBuffer.getTimedLog()+this.stderrBuffer.getTimedLog();
+//        return getTimeLogLines().stream().collect(Collectors.joining());
     }
 
 }

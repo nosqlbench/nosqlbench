@@ -16,8 +16,12 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
+import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
+import io.nosqlbench.api.optimizers.MVResult;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nbr.examples.SCBaseScenario;
+
+import java.util.function.ToDoubleFunction;
 
 public class SC_optimo extends SCBaseScenario {
     public SC_optimo(NBComponent parentComponent, String scenarioName) {
@@ -54,6 +58,21 @@ public class SC_optimo extends SCBaseScenario {
      */
     @Override
     public void invoke() {
+        BobyqaOptimizerInstance bobby = create().bobyqaOptimizer();
+        bobby.param("pa", 0.0d, 200000.0d);
+        bobby.param("pb", 0.0d, 2000000d);
 
+        bobby.setInitialRadius(10000.0).setStoppingRadius(0.001).setMaxEval(1000);
+
+        ToDoubleFunction<double[]> f = new ToDoubleFunction<double[]>() {
+            @Override
+            public double applyAsDouble(double[] value) {
+                return 10000000 - ((Math.abs(100-value[0])) + (Math.abs(100-value[1])));
+            }
+        };
+        bobby.setObjectiveFunction(f);
+        MVResult result = bobby.optimize();
+        stdout.println("optimized result was " + result);
+        stdout.println("map of result was " + result.getMap());
     }
 }

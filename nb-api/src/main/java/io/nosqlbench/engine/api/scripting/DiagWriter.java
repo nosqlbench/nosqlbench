@@ -22,256 +22,44 @@ import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DiagWriter extends PrintWriter {
 
-    Writer wrapped;
-    private final String prefix;
-    CharArrayWriter buffer = new CharArrayWriter();
-    private final List<String> timedLog = new ArrayList<String>();
-    private final StringBuilder sb = new StringBuilder();
-    private int checkpoint = 0;
-
     private final DateTimeFormatter tsformat = DateTimeFormatter.ISO_DATE_TIME;
+    Writer wrapped;
+    InterjectingCharArrayWriter buffer;
 
-    public DiagWriter(Writer wrapped, String prefix) {
-        super(wrapped);
+    public DiagWriter(Writer wrapped, InterjectingCharArrayWriter buffer) {
+        super(new FanWriter(buffer,wrapped));
         this.wrapped = wrapped;
-        this.prefix = prefix;
+        this.buffer = buffer;
     }
 
-    @Override
-    public void write(char[] cbuf, int off, int len) {
-        buffer.write(cbuf, off, len);
-        String text = new String(cbuf, off, len);
-
-        sb.append(text);
-        checkpointIf();
-
-        super.write(cbuf, off, len);
+    public String getBuf() {
+        return this.buffer.toString();
     }
 
-    private void check() {
-        if (sb.substring(checkpoint,sb.length()).contains("\n")) {
-            checkpoint();
+    private final static Pattern nl = Pattern.compile("([^\n]*\n?)");
+    public String getTimedLog() {
+        StringBuilder sb = new StringBuilder();
+        long[] times = buffer.getTimes();
+        int idx=0;
+        Matcher finder = nl.matcher(buffer.toString());
+        while (finder.find()) {
+            String tsprefix = LocalDateTime.ofInstant(Instant.ofEpochMilli(times[idx++]), ZoneId.systemDefault()).format(tsformat);
+            sb.append(tsprefix).append(" ").append(finder.group(0));
         }
-    }
-
-    private void checkpointIf() {
-        if (checkpoint==sb.length()) {
-            return;
-        }
-        if (sb.substring(checkpoint,sb.length()).contains("\n")) {
-            checkpoint();
-            checkpointIf();
-        }
-    }
-    private void checkpoint() {
-        String tsprefix = LocalDateTime.now().format(tsformat);
-        String msgs = sb.toString();
-        String extra = msgs.substring(msgs.lastIndexOf("\n") + 1);
-        sb.setLength(0);
-        sb.append(extra);
-        String[] parts = msgs.substring(0, msgs.length() - extra.length()).split("\n");
-        for (String part : parts) {
-            if (!part.isBlank()) {
-                String tslogEntry = tsprefix + prefix + part + "\n";
-                timedLog.add(tslogEntry);
-            }
-        }
-        checkpoint = 0;
-    }
-
-    @Override
-    public void write(int c) {
-        this.buffer.write(c);
-        sb.append((char)c);
-        checkpointIf();
-        super.write(c);
-    }
-
-    @Override
-    public void write(@NotNull char[] buf) {
-        try {
-            this.buffer.write(buf);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        sb.append(buf);
-        checkpointIf();
-        super.write(buf);
-    }
-
-    @Override
-    public void write(@NotNull String s, int off, int len) {
-        this.buffer.write(s,off,len);
-        sb.append(s);
-        checkpointIf();
-        super.write(s, off, len);
-    }
-
-    @Override
-    public void write(@NotNull String s) {
-        try {
-            sb.append(s);
-            this.buffer.write(s);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        checkpointIf();
-        super.write(s);
-    }
-
-    @Override
-    public void print(boolean b) {
-        super.print(b);
-    }
-
-    @Override
-    public void print(char c) {
-        super.print(c);
-    }
-
-    @Override
-    public void print(int i) {
-        super.print(i);
-    }
-
-    @Override
-    public void print(long l) {
-        super.print(l);
-    }
-
-    @Override
-    public void print(float f) {
-        super.print(f);
-    }
-
-    @Override
-    public void print(double d) {
-        super.print(d);
-    }
-
-    @Override
-    public void print(@NotNull char[] s) {
-        super.print(s);
-    }
-
-    @Override
-    public void print(String s) {
-        super.print(s);
-    }
-
-    @Override
-    public void print(Object obj) {
-        super.print(obj);
-    }
-
-    @Override
-    public void println() {
-        super.println();
-    }
-
-    @Override
-    public void println(boolean x) {
-        super.println(x);
-    }
-
-    @Override
-    public void println(char x) {
-        super.println(x);
-    }
-
-    @Override
-    public void println(int x) {
-        super.println(x);
-    }
-
-    @Override
-    public void println(long x) {
-        super.println(x);
-    }
-
-    @Override
-    public void println(float x) {
-        super.println(x);
-    }
-
-    @Override
-    public void println(double x) {
-        super.println(x);
-    }
-
-    @Override
-    public void println(@NotNull char[] x) {
-        super.println(x);
-    }
-
-    @Override
-    public void println(String x) {
-        super.println(x);
-    }
-
-    @Override
-    public void println(Object x) {
-        super.println(x);
-    }
-
-    @Override
-    public PrintWriter printf(@NotNull String format, Object... args) {
-        return super.printf(format, args);
-    }
-
-    @Override
-    public PrintWriter printf(Locale l, @NotNull String format, Object... args) {
-        return super.printf(l, format, args);
-    }
-
-    @Override
-    public PrintWriter format(@NotNull String format, Object... args) {
-        return super.format(format, args);
-    }
-
-    @Override
-    public PrintWriter format(Locale l, @NotNull String format, Object... args) {
-        return super.format(l, format, args);
-    }
-
-    @Override
-    public PrintWriter append(CharSequence csq) {
-        return super.append(csq);
-    }
-
-    @Override
-    public PrintWriter append(CharSequence csq, int start, int end) {
-        return super.append(csq, start, end);
-    }
-
-    @Override
-    public PrintWriter append(char c) {
-        return super.append(c);
-    }
-
-    @Override
-    public void flush() {
-        buffer.flush();
-        checkpoint();
-        super.flush();
-    }
-
-    @Override
-    public void close() {
-        buffer.close();
-        checkpoint();
-        super.close();
-    }
-
-    public List<String> getTimedLog() {
-        return timedLog;
+        finder.appendTail(sb);
+        return sb.toString();
     }
 }

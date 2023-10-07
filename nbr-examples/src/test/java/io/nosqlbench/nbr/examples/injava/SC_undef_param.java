@@ -19,6 +19,8 @@ package io.nosqlbench.nbr.examples.injava;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nbr.examples.SCBaseScenario;
 
+import java.util.Map;
+
 public class SC_undef_param extends SCBaseScenario {
     public SC_undef_param(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
@@ -43,6 +45,15 @@ public class SC_undef_param extends SCBaseScenario {
      */
     @Override
     public void invoke() {
-
+        stdout.println("params from command line:");
+        stdout.println(params.toString());
+        stdout.println("before: params.get(\"three\"):" + params.get("three"));
+        var overrides = Map.of(
+            "three", "undef"
+        );
+        params=params.withOverrides(Map.of(
+            "three","UNDEF"
+        ));
+        stdout.println("after overriding with three:UNDEF: params.get(\"three\"):" + params.get("three"));
     }
 }
