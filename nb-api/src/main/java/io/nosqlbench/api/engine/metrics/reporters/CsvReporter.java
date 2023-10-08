@@ -75,7 +75,7 @@ public class CsvReporter extends PeriodicTaskComponent {
     }
 
     public void start() {
-        List<NBMetric> metrics = component.findMetricsInTree("");
+        List<NBMetric> metrics = component.find().metrics();
         final long timestamp = TimeUnit.MILLISECONDS.toSeconds(clock.getTime());
         for (NBMetric metric : metrics) {
             if (metric instanceof Gauge<?>) {

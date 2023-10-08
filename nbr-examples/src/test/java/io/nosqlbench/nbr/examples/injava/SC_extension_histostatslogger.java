@@ -17,7 +17,7 @@
 package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.nbr.examples.SCBaseScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
 
 public class SC_extension_histostatslogger extends SCBaseScenario {
     public SC_extension_histostatslogger(NBComponent parentComponent, String scenarioName) {

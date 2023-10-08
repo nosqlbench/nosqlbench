@@ -47,7 +47,6 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
      */
     void setActivityController(ActivityController activityController);
 
-    ActivityController getActivityController();
 
     /**
      * Register an object which should be closed after this activity is shutdown.

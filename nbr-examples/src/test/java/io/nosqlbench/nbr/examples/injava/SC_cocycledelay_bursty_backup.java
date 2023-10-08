@@ -19,7 +19,7 @@ package io.nosqlbench.nbr.examples.injava;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.nbr.examples.SCBaseScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
 
 import java.util.Map;
 
@@ -94,8 +94,8 @@ public class SC_cocycledelay_bursty_backup extends SCBaseScenario {
         stdout.println("starting activity co_cycle_delay_bursty");
         controller.start(co_cycle_delay_bursty);
 
-        NBMetricCounter service_time_counter = find().metricCounter("activity=co_cycle_delay_bursty,name=cycles_servicetime");
-        NBMetricGauge wait_time_gauge = find().metricGauge("activity=co_cycle_delay_bursty,name=cycles_waittime");
+        NBMetricCounter service_time_counter = find().counter("activity=co_cycle_delay_bursty,name=cycles_servicetime");
+        NBMetricGauge wait_time_gauge = find().gauge("activity=co_cycle_delay_bursty,name=cycles_waittime");
         String diagrate = controller.getActivityDef("co_cycle_delay_bursty").getParams().get("diagrate").toString();
         String cyclerate = controller.getActivityDef("co_cycle_delay_bursty").getParams().get("cyclerate").toString();
 

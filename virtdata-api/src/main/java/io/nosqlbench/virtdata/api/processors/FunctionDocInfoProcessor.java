@@ -40,7 +40,7 @@ import static io.nosqlbench.virtdata.api.processors.ProcessorClassNames.ThreadSa
  * manifests. It simply calls listener interfaces to do the rest of the work.
  */
 @SupportedOptions({"title"})
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
+@SupportedSourceVersion(SourceVersion.RELEASE_21)
 @SupportedAnnotationTypes({
         ThreadSafeMapper,
         PerThreadMapper

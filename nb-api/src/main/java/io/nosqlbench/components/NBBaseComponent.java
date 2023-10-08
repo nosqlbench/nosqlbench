@@ -82,38 +82,6 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         return effectiveLabels;
     }
 
-    @Override
-    public NBMetric lookupMetricInTree(String name) {
-        Iterator<NBComponent> tree = NBComponentTraversal.traverseBreadth(this);
-        while (tree.hasNext()) {
-            NBComponent c = tree.next();
-            NBMetric metric = c.lookupMetric(name);
-            if (metric != null) return metric;
-        }
-        return null;
-    }
-
-    @Override
-    public List<NBMetric> findMetricsInTree(String pattern) {
-        Iterator<NBComponent> tree = NBComponentTraversal.traverseBreadth(this);
-        List<NBMetric> found = new ArrayList<>();
-        while (tree.hasNext()) {
-            NBComponent c = tree.next();
-            found.addAll(c.findMetrics(pattern));
-        }
-        return found;
-    }
-
-    @Override
-    public NBMetric findOneMetricInTree(String pattern) {
-        List<NBMetric> found = findMetricsInTree(pattern);
-        if (found.size() != 1) {
-            System.out.println("Runtime Components and Metrics at this time:\n" + NBComponentFormats.formatAsTree(this));
-            throw new RuntimeException("Found " + found.size() + " metrics with pattern '" + pattern + "', expected exactly 1");
-        }
-        return found.get(0);
-
-    }
 
     @Override
     public void beforeDetach() {
@@ -155,5 +123,18 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     @Override
     public NBFinders find() {
         return new NBFinders(this);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        if (getComponentMetrics().size()>0) {
+            sb.append(System.lineSeparator()).append("metrics:");
+            for (NBMetric componentMetric : getComponentMetrics()) {
+                sb.append(System.lineSeparator()).append("m ").append(componentMetric.toString());
+            }
+        }
+        return sb.toString();
     }
 }

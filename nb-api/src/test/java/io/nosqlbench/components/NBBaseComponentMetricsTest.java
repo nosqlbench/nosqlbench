@@ -30,22 +30,22 @@ class NBBaseComponentMetricsTest {
     void testBasicAddAndLookup() {
         NBBaseComponentMetrics cm = new NBBaseComponentMetrics();
         NBMetric m1 = new NBBaseMetric("k","20");
-        String m1Handle = cm.addMetric(m1);
+        String m1Handle = cm.addComponentMetric(m1);
         NBMetric m2 = new NBBaseMetric("k","27","l","62");
-        String m2Handle = cm.addMetric(m2);
+        String m2Handle = cm.addComponentMetric(m2);
 
-        assertThat(cm.lookupMetric(m1Handle)).isEqualTo(m1);
-        assertThat(cm.lookupMetric(m2Handle)).isEqualTo(m2);
+        assertThat(cm.getComponentMetric(m1Handle)).isEqualTo(m1);
+        assertThat(cm.getComponentMetric(m2Handle)).isEqualTo(m2);
     }
     @Test
     void find() {
         NBBaseComponentMetrics cm = new NBBaseComponentMetrics();
         NBMetric m1 = new NBBaseMetric("k","20");
-        String m1Handle = cm.addMetric(m1);
+        String m1Handle = cm.addComponentMetric(m1);
         NBMetric m2 = new NBBaseMetric("k","27","l","62");
-        String m2Handle = cm.addMetric(m2);
+        String m2Handle = cm.addComponentMetric(m2);
 
-        assertThat(cm.findMetrics("k=27")).isEqualTo(List.of(m2));
-        assertThat(cm.findMetrics("k=20")).isNotEqualTo(List.of(m2));
+        assertThat(cm.findComponentMetrics("k=27")).isEqualTo(List.of(m2));
+        assertThat(cm.findComponentMetrics("k=20")).isNotEqualTo(List.of(m2));
     }
 }

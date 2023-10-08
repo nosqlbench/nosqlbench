@@ -110,7 +110,7 @@ public class PromPushReporterComponent extends PeriodicTaskComponent implements 
         StringBuilder sb = new StringBuilder(1024 * 1024); // 1M pre-allocated to reduce heap churn
 
         int total = 0;
-        for (final Object metric : getParent().findMetricsInTree("")) {
+        for (final Object metric : getParent().find().metrics()) {
             sb = PromExpositionFormat.format(nowclock, sb, metric);
             total++;
         }

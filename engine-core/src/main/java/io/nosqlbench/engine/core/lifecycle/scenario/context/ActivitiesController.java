@@ -74,18 +74,20 @@ public class ActivitiesController extends NBBaseComponent {
      *
      * @param activityDef string in alias=value1;driver=value2;... format
      */
-    public synchronized void start(ActivityDef activityDef) {
-        doStartActivity(activityDef);
+    public Activity start(ActivityDef activityDef) {
+        ActivityRuntimeInfo ari = doStartActivity(activityDef);
+        return ari.getActivity();
     }
 
 
-    private synchronized ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
+    private ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
         if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
             Activity activity = this.activityLoader.loadActivity(activityDef, this);
             ActivityExecutor executor = new ActivityExecutor(activity);
             Future<ExecutionResult> startedActivity = activitiesExecutor.submit(executor);
             ActivityRuntimeInfo activityRuntimeInfo = new ActivityRuntimeInfo(activity, startedActivity, executor);
             this.activityInfoMap.put(activity.getAlias(), activityRuntimeInfo);
+
         }
         return this.activityInfoMap.get(activityDef.getAlias());
     }
@@ -96,9 +98,9 @@ public class ActivitiesController extends NBBaseComponent {
      *
      * @param activityDefMap A map containing the activity definition
      */
-    public synchronized void start(Map<String, String> activityDefMap) {
+    public Activity start(Map<String, String> activityDefMap) {
         ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
-        start(ad);
+        return start(ad);
     }
 
     /**

@@ -17,7 +17,7 @@
 package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.nbr.examples.SCBaseScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
 
 import java.util.Map;
 

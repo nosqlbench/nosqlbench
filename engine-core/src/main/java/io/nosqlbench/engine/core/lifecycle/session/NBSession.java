@@ -26,7 +26,7 @@ import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.cli.ScriptBuffer;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScriptParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosExecutor;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosResults;
@@ -124,8 +124,8 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         final ScriptBuffer buffer = new BasicScriptBuffer().add(cmds.toArray(new Cmd[0]));
         final String scriptData = buffer.getParsedScript();
 
-        final ScriptParams scriptParams = new ScriptParams();
-        scriptParams.putAll(buffer.getCombinedParams());
+        final ScenarioParams scenarioParams = new ScenarioParams();
+        scenarioParams.putAll(buffer.getCombinedParams());
 
         final NBScriptedScenario scenario = new NBScriptedScenario(sessionName, this);
 
@@ -139,10 +139,21 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         }
         Cmd javacmd = cmds.get(0);
         String mainClass = javacmd.getArg("main_class");
-        SimpleServiceLoader<NBScenario> loader = new SimpleServiceLoader<>(NBScenario.class, Maturity.Any);
-        List<SimpleServiceLoader.Component<? extends NBScenario>> namedProviders = loader.getNamedProviders(mainClass);
-        SimpleServiceLoader.Component<? extends NBScenario> provider = namedProviders.get(0);
-        Class<? extends NBScenario> type = provider.provider.type();
+
+//        This doesn't work as expected; The newest service loader docs are vague about Provider and no-args ctor requirements
+//        and the code suggests that you still have to have one unless you are in a named module
+//        SimpleServiceLoader<NBScenario> loader = new SimpleServiceLoader<>(NBScenario.class, Maturity.Any);
+//        List<SimpleServiceLoader.Component<? extends NBScenario>> namedProviders = loader.getNamedProviders(mainClass);
+//        SimpleServiceLoader.Component<? extends NBScenario> provider = namedProviders.get(0);
+//        Class<? extends NBScenario> type = provider.provider.type();
+
+        Class<NBScenario> type;
+        try {
+            type = (Class<NBScenario>) Class.forName(mainClass);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
         try {
             Constructor<? extends NBScenario> constructor = type.getConstructor(NBComponent.class, String.class);
             NBScenario scenario = constructor.newInstance(this, sessionName);

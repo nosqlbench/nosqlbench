@@ -941,7 +941,7 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
 
     @Override
     public String toString() {
-        return this.tmap.toString();
+        return "ParsedOp: map: " + this.tmap.toString();
     }
 
     public List<CapturePoint> getCaptures() {
