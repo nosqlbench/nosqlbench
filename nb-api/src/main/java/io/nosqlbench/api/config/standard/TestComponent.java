@@ -39,7 +39,7 @@ public class TestComponent extends NBBaseComponent {
 
     @Override
     public String toString() {
-        return description();
+        return "TestComponent #"+hashCode();
     }
 
     @Override
@@ -64,4 +64,5 @@ public class TestComponent extends NBBaseComponent {
     public void beforeDetach() {
 //        logger.debug("before detach " + description());
     }
+
 }

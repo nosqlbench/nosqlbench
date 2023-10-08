@@ -18,11 +18,19 @@ package io.nosqlbench.components;
 
 import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * This is the stateful store of metrics on a specific component in the hierarchy.
+ * Mostly, these methods provide the internal logic needed to support easier
+ * access to metrics via {@link NBComponentServices}.
+ *
+ *
+ */
 public interface NBComponentMetrics {
-    String addMetric(NBMetric metric);
+    String addComponentMetric(NBMetric metric);
 
     /**
      * If you have the serialized open metrics name of a metric, you can ask for it
@@ -30,20 +38,17 @@ public interface NBComponentMetrics {
      * @param name The name of a metric in {@code {a:"b",...}} form
      * @return the metric or null if it dosen't exist
      */
-    NBMetric lookupMetric(String name);
+    NBMetric getComponentMetric(String name);
 
-    default Optional<NBMetric> lookupMetricOptionally(String name) {
-        return Optional.ofNullable(lookupMetric(name));
-    }
+    List<NBMetric> findComponentMetrics(String pattern);
 
-    List<NBMetric> findMetrics(String pattern);
-
-    default NBMetric findOneMetric(String pattern) {
-        List<NBMetric> found = findMetrics(pattern);
+    default NBMetric findOneComponentMetric(String pattern) {
+        List<NBMetric> found = findComponentMetrics(pattern);
         if (found.size()!=1) {
             throw new RuntimeException("Found " + found.size() + " metrics with pattern '" + pattern + "', expected exactly 1");
         }
         return found.get(0);
     }
 
+    Collection<? extends NBMetric> getComponentMetrics();
 }

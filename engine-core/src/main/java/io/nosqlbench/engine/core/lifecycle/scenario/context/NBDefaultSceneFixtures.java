@@ -44,7 +44,7 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
     /*
       These are parameters which are passed into the script, named scenario, etc.
      */
-    private ScriptParams params;
+    private ScenarioParams params;
     /*
      * NBSession is the root component type in a NB process, and all CLI options which
      * affect global settings are expected to be properties on the session.
@@ -68,7 +68,7 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
 
     private Reader in;
 
-    public NBDefaultSceneFixtures(ScriptParams params, NBComponent parent, ActivitiesController controller, Extensions extensions, PrintWriter out, PrintWriter err, Reader in) {
+    public NBDefaultSceneFixtures(ScenarioParams params, NBComponent parent, ActivitiesController controller, Extensions extensions, PrintWriter out, PrintWriter err, Reader in) {
         this.params = params;
         this.session = parent;
         this.controller = controller;
@@ -80,7 +80,7 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
 
     public static NBSceneFixtures ofDefault(String name) {
         return new NBDefaultSceneFixtures(
-            new ScriptParams(),
+            new ScenarioParams(),
             new NBSession(
                 new TestComponent("scene", name), "scene~"+name
             ),
@@ -94,7 +94,7 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
 
 
     @Override
-    public ScriptParams params() {
+    public ScenarioParams params() {
         return params;
     }
 

@@ -26,7 +26,7 @@ public class NBComponentFormats {
         return sb.toString();
     }
 
-    private final static class PrintVisitor implements NBComponentTraversal.Visitor {
+    protected final static class PrintVisitor implements NBComponentTraversal.Visitor {
 
         private final StringBuilder builder;
 
@@ -36,7 +36,14 @@ public class NBComponentFormats {
 
         @Override
         public void visit(NBComponent component, int depth) {
-            builder.append(String.format("%03d %s\n",depth,component));
+            String indent = "  ".repeat(depth);
+            builder.append(indent).append(String.format("%03d %s",depth,component.description()));
+            String string = component.toString();
+            String[] split = string.split(System.lineSeparator());
+            for (String s : split) {
+                builder.append(System.lineSeparator()).append(indent).append(" >").append(s);
+            }
+            builder.append(System.lineSeparator());
         }
     }
 

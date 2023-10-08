@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.api.errors.BasicError;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScriptParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -25,11 +25,11 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class ScriptParamsTest {
+public class ScenarioParamsTest {
 
     @Test
     public void testThatNullOverridesKeyThrowsBasicError() {
-        ScriptParams p = new ScriptParams();
+        ScenarioParams p = new ScenarioParams();
         p.put("a","b");
         p.withDefaults(Map.of("c","d"));
         HashMap<String, String> overrides = new HashMap<>();

@@ -60,14 +60,14 @@ public class NBBuilders {
     public NBMetricTimer timer(String metricFamilyName, int hdrdigits) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
         NBMetricTimer timer = new NBMetricTimer(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits));
-        base.addMetric(timer);
+        base.addComponentMetric(timer);
         return timer;
     }
 
     public Meter meter(String metricFamilyName) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
         NBMetricMeter meter = new NBMetricMeter(labels);
-        base.addMetric(meter);
+        base.addComponentMetric(meter);
         return meter;
     }
 
@@ -75,14 +75,14 @@ public class NBBuilders {
     public NBMetricCounter counter(String metricFamilyName) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
         NBMetricCounter counter = new NBMetricCounter(labels);
-        base.addMetric(counter);
+        base.addComponentMetric(counter);
         return counter;
     }
 
 
     public NBFunctionGauge gauge(String metricFamilyName, Supplier<Double> valueSource) {
         NBFunctionGauge gauge = new NBFunctionGauge(base, valueSource, metricFamilyName);
-        base.addMetric(gauge);
+        base.addComponentMetric(gauge);
         return gauge;
     }
 
@@ -93,7 +93,7 @@ public class NBBuilders {
         DoubleSummaryGauge anyGauge = null;
         for (DoubleSummaryGauge.Stat stat : stats) {
             anyGauge = new DoubleSummaryGauge(base.getLabels().and(NBLabels.forKV("name",name,"stat", stat)), stat, reservoir);
-            base.addMetric(anyGauge);
+            base.addComponentMetric(anyGauge);
         }
         return anyGauge;
     }
@@ -104,7 +104,7 @@ public class NBBuilders {
     public NBMetricHistogram histogram(String metricFamilyName, int hdrdigits) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
         NBMetricHistogram histogram = new NBMetricHistogram(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits));
-        base.addMetric(histogram);
+        base.addComponentMetric(histogram);
         return histogram;
     }
 

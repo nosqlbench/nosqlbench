@@ -26,6 +26,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.context.*;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.ScenarioExceptionHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -56,23 +57,23 @@ public class ScenariosExecutor extends NBBaseComponent {
             throw new BasicError("Scenario " + scenario.getScenarioName() + " is already defined. Remove it first to reuse the name.");
         }
 
-        NBSceneFixtures basecontext = new NBDefaultSceneFixtures(
-            ScriptParams.of(params),
-            this.getParent(),
-            new ActivitiesController(this),
-            loadExtensions(),
-            new PrintWriter(System.out),
-            new PrintWriter(System.err),
-            new InputStreamReader(System.in)
-        );
-        NBSceneBuffer bufferedContext = new NBSceneBuffer(basecontext);
-
+        NBSceneBuffer bufferedContext = getNbSceneBuffer(params);
         Future<ScenarioResult> future = executor.submit(
             () -> scenario.apply(bufferedContext) // combine basic execution data with trace
         );
         SubmittedScenario s = new SubmittedScenario(scenario, future);
         submitted.put(s.getName(), s);
         // TODO at this point, bufferedContext holds all the trace, make it visible in results
+    }
+
+    @NotNull
+    private NBSceneBuffer getNbSceneBuffer(Map<String, String> params) {
+        return NBSceneBuffer.builder()
+            .component(this.getParent())
+            .tracedIO()
+            .extensions(loadExtensions())
+            .params(params)
+            .build();
     }
 
     @Override
@@ -174,7 +175,7 @@ public class ScenariosExecutor extends NBBaseComponent {
                 } catch (Exception e) {
                     long now = System.currentTimeMillis();
                     logger.debug("creating exceptional scenario result from getAsyncResultStatus");
-                    throw new RuntimeException("replace with a proper error type");
+                    throw new RuntimeException("replace with a proper error type: " + e.toString(),e);
                 }
             }
 
@@ -292,5 +293,8 @@ public class ScenariosExecutor extends NBBaseComponent {
         return extensions;
     }
 
+    public ScenarioResult run(NBScenario scenario, Map<String,String> params) {
+        return scenario.apply(getNbSceneBuffer(params));
+    }
 
 }

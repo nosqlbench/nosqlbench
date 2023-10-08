@@ -42,7 +42,7 @@ public class AttachedMetricsSummaryReporter extends PeriodicTaskComponent {
         StringBuilder sb = new StringBuilder(1024 * 1024); // 1M pre-allocated to reduce heap churn
         List<NBMetric> metrics = new ArrayList<>();
         Iterator<NBComponent> allMetrics = NBComponentTraversal.traverseBreadth(getParent());
-        allMetrics.forEachRemaining(m -> metrics.addAll(m.findMetrics("")));
+        allMetrics.forEachRemaining(m -> metrics.addAll(m.findComponentMetrics("")));
 
         int total = 0;
         for (NBMetric metric : metrics) {

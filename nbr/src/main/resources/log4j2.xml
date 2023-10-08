@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<Configuration status="debug" strict="true" name="XMLConfigTest">
+<Configuration status="warn" strict="true" name="XMLConfigTest">
 
   <Filter type="ThresholdFilter" level="trace"/>
 

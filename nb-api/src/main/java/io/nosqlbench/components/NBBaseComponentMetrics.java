@@ -19,17 +19,19 @@ package io.nosqlbench.components;
 import io.nosqlbench.adapters.api.util.TagFilter;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class NBBaseComponentMetrics implements NBComponentMetrics {
     private final Lock lock = new ReentrantLock(false);
-    private final Map<String, NBMetric> metrics = new HashMap<>();
+    private final Map<String, NBMetric> metrics = new ConcurrentHashMap<>();
     @Override
-    public String addMetric(NBMetric metric) {
+    public String addComponentMetric(NBMetric metric) {
         try {
             lock.lock();
             String openMetricsName = metric.getLabels().linearizeAsMetrics();
@@ -43,13 +45,18 @@ public class NBBaseComponentMetrics implements NBComponentMetrics {
         }
     }
     @Override
-    public NBMetric lookupMetric(String name) {
+    public NBMetric getComponentMetric(String name) {
         return metrics.get(name);
     }
 
     @Override
-    public List<NBMetric> findMetrics(String pattern) {
+    public List<NBMetric> findComponentMetrics(String pattern) {
         TagFilter filter = new TagFilter(pattern);
         return filter.filterLabeled(metrics.values());
+    }
+
+    @Override
+    public Collection<? extends NBMetric> getComponentMetrics() {
+        return metrics.values();
     }
 }

@@ -16,9 +16,11 @@
 
 package io.nosqlbench.components;
 
-import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.api.engine.metrics.instruments.*;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class NBFinders {
     private final NBBaseComponent base;
@@ -28,12 +30,16 @@ public class NBFinders {
     }
 
     public NBMetric metric(String pattern) {
-        NBMetric metric = base.lookupMetricInTree(pattern);
-        if (metric!=null) { return metric; };
-        metric = base.findOneMetricInTree(pattern);
-        return metric;
+        return oneMetricInTree(pattern);
     }
-    private <T extends NBMetric> T findOneMetricWithType(String pattern, Class<T> clazz) {
+    public List<NBMetric> metrics(String pattern) {
+        return this.metricsInTree(pattern);
+    }
+    public List<NBMetric> metrics() {
+        return this.metricsInTree();
+    }
+
+    private <T extends NBMetric> T oneMetricWithType(String pattern, Class<T> clazz) {
         NBMetric found = metric(pattern);
         if (found==null) {
             System.out.println(NBComponentFormats.formatAsTree(base));
@@ -52,13 +58,65 @@ public class NBFinders {
     }
 
 
-    public NBMetricGauge metricGauge(String pattern) {
-        return findOneMetricWithType(pattern, NBMetricGauge.class);
+    public NBMetricGauge gauge(String pattern) {
+        return oneMetricWithType(pattern, NBMetricGauge.class);
     }
 
-    public NBMetricCounter metricCounter(String pattern) {
-        return findOneMetricWithType(pattern, NBMetricCounter.class);
+    public NBMetricCounter counter(String pattern) {
+        return oneMetricWithType(pattern, NBMetricCounter.class);
     }
 
+    public NBMetricTimer timer(String pattern) {
+        return oneMetricWithType(pattern, NBMetricTimer.class);
+    }
+
+    public NBMetricHistogram histogram(String pattern) {
+        return oneMetricWithType(pattern, NBMetricHistogram.class);
+    }
+
+    public NBMetricMeter meter(String pattern) {
+        return oneMetricWithType(pattern,NBMetricMeter.class);
+    }
+
+//    public NBMetric firstMetricInTree(String name) {
+//        Iterator<NBComponent> tree = NBComponentTraversal.traverseBreadth(base);
+//        while (tree.hasNext()) {
+//            NBComponent c = tree.next();
+//            NBMetric metric = base.getComponentMetric(name);
+//            if (metric != null) return metric;
+//        }
+//        return null;
+//    }
+
+    private List<NBMetric> metricsInTree() {
+        Iterator<NBComponent> tree = NBComponentTraversal.traverseBreadth(base);
+        List<NBMetric> found = new ArrayList<>();
+        while (tree.hasNext()) {
+            NBComponent c = tree.next();
+            found.addAll(c.getComponentMetrics());
+        }
+        return found;
+    }
+    private List<NBMetric> metricsInTree(String pattern) {
+        if (pattern.isEmpty()) {
+            throw new RuntimeException("non-empty predicate is required for this form. Perhaps you wanted metricsInTree()");
+        }
+        Iterator<NBComponent> tree = NBComponentTraversal.traverseBreadth(base);
+        List<NBMetric> found = new ArrayList<>();
+        while (tree.hasNext()) {
+            NBComponent c = tree.next();
+            found.addAll(c.findComponentMetrics(pattern));
+        }
+        return found;
+    }
+
+    private NBMetric oneMetricInTree(String pattern) {
+        List<NBMetric> found = metricsInTree(pattern);
+        if (found.size() != 1) {
+            System.out.println("Runtime Components and Metrics at this time:\n" + NBComponentFormats.formatAsTree(base));
+            throw new RuntimeException("Found " + found.size() + " metrics with pattern '" + pattern + "', expected exactly 1");
+        }
+        return found.get(0);
+    }
 
 }

@@ -19,12 +19,12 @@ package io.nosqlbench.nbr.examples.injava;
 import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
 import io.nosqlbench.api.optimizers.MVResult;
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.nbr.examples.SCBaseScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
 
 import java.util.function.ToDoubleFunction;
 
-public class SC_optimo extends SCBaseScenario {
-    public SC_optimo(NBComponent parentComponent, String scenarioName) {
+public class SC_optimo_test extends SCBaseScenario {
+    public SC_optimo_test(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 

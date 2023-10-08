@@ -16,12 +16,11 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
-import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScriptParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.PolyglotScenarioController;
 import org.graalvm.polyglot.Context;
@@ -65,7 +64,7 @@ public class NBScriptedScenario extends NBScenario {
     private String progressInterval = "console:1m";
     //    private ScenarioScriptShell scriptEnv;
     private final String scenarioName;
-    private ScriptParams scenarioScriptParams;
+    private ScenarioParams scenarioScenarioParams;
     private final Engine engine = Engine.Graalvm;
     private long startedAtMillis = -1L;
     private long endedAtMillis = -1L;

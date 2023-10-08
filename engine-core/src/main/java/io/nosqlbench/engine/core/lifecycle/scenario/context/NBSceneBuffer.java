@@ -23,29 +23,54 @@ import io.nosqlbench.engine.api.scripting.DiagWriter;
 import io.nosqlbench.engine.api.scripting.InterjectingCharArrayWriter;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
 
-import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.io.StringReader;
 
 public class NBSceneBuffer implements NBSceneFixtures {
     private final NBSceneFixtures fixtures;
+
+    public enum IOType {
+        connected,
+        virtual,
+        traced
+    }
+    private final IOType iotype;
     private DiagWriter stdoutBuffer;
     private DiagWriter stderrBuffer;
     private DiagReader stdinBuffer;
 
-    public NBSceneBuffer(NBSceneFixtures fixtures) {
+    public NBSceneBuffer(NBSceneFixtures fixtures, IOType ioTypes) {
+        this.iotype = ioTypes;
         this.fixtures = fixtures;
-        stdoutBuffer = new DiagWriter(fixtures.out(), new InterjectingCharArrayWriter(" stdout "));
-        stderrBuffer = new DiagWriter(fixtures.err(), new InterjectingCharArrayWriter(" stderr "));
-        stdinBuffer = new DiagReader(fixtures.in(), "  stdin ");
+
+        switch (iotype) {
+            case traced:
+                stdoutBuffer = new DiagWriter(fixtures.out(), new InterjectingCharArrayWriter(" stdout "));
+                stderrBuffer = new DiagWriter(fixtures.err(), new InterjectingCharArrayWriter(" stderr "));
+                stdinBuffer = new DiagReader(fixtures.in(), "  stdin ");
+                break;
+            case virtual:
+                stdoutBuffer = new DiagWriter(new InterjectingCharArrayWriter(" stdout "));
+                stderrBuffer = new DiagWriter(new InterjectingCharArrayWriter(" stderr "));
+                stdinBuffer = new DiagReader(new StringReader(""), "  stdin ");
+                break;
+            case connected:
+                stdoutBuffer = new DiagWriter(fixtures.out());
+                stderrBuffer = new DiagWriter(fixtures.err());
+                stdinBuffer = new DiagReader(fixtures.in(), "  stdin ");
+                break;
+
+        }
+    }
+
+
+    public NBSceneBuffer(NBSceneFixtures fixtures) {
+        this(fixtures, IOType.traced);
     }
 
     @Override
-    public ScriptParams params() {
+    public ScenarioParams params() {
         return fixtures.params();
     }
 
@@ -79,15 +104,6 @@ public class NBSceneBuffer implements NBSceneFixtures {
         return stdinBuffer;
     }
 
-//    public List<String> getTimedLogLines() {
-//        List<String> log = new ArrayList<String>();
-//        Optional.ofNullable(this.stdinBuffer).map(DiagReader::getTimedLog).ifPresent(log::addAll);
-//        Optional.ofNullable(this.stderrBuffer).map(DiagWriter::getTimedLog).ifPresent(log::addAll);
-//        Optional.ofNullable(this.stdoutBuffer).map(DiagWriter::getTimedLog).ifPresent(log::addAll);
-//        log = log.stream().map(l -> l.endsWith("\n") ? l : l+"\n").collect(Collectors.toList());
-//        return log;
-//    }
-
     public String getIOLog() {
         return this.stdoutBuffer.getTimedLog()+this.stderrBuffer.getTimedLog();
     }
@@ -99,5 +115,9 @@ public class NBSceneBuffer implements NBSceneFixtures {
     public static NBSceneBuffer init(String name) {
         TestComponent root = new TestComponent("scene", "self");
         return new NBSceneBuffer(NBDefaultSceneFixtures.ofDefault(name));
+    }
+
+    public static SceneBuilderFacets.WantsContext builder() {
+        return new SceneBuilder();
     }
 }

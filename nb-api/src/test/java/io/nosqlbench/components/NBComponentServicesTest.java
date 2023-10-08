@@ -48,7 +48,7 @@ class NBComponentServicesTest {
         NBFunctionGauge gauge = b1.create().gauge("test_gauge", () -> 5.2d);
         String gaugeHandle = gauge.getHandle();
 
-        List<NBMetric> metricsInTree = root.findMetricsInTree("");
+        List<NBMetric> metricsInTree = root.find().metrics();
         assertThat(metricsInTree).containsAll(List.of(timer1, gauge));
         metricsInTree.forEach(m -> {
             System.out.println("metric: " + m.toString());

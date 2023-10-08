@@ -39,8 +39,8 @@ public class DiagWriter extends PrintWriter {
     Writer wrapped;
     InterjectingCharArrayWriter buffer;
 
-    public DiagWriter(Writer wrapped, InterjectingCharArrayWriter buffer) {
-        super(new FanWriter(buffer,wrapped));
+    public DiagWriter(Writer... writers) {
+        super(new FanWriter(writers));
         this.wrapped = wrapped;
         this.buffer = buffer;
     }

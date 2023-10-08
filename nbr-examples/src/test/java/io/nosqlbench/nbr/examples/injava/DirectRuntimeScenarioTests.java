@@ -22,7 +22,6 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenarioResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosExecutor;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosResults;
-import io.nosqlbench.nbr.examples.injava.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -145,7 +144,7 @@ public class DirectRuntimeScenarioTests {
     @Disabled("enable before merge")
     @Test
     public void test_SC_optimo() {
-        NBScenario scenario = new SC_optimo(testC,"test_SC_optimo");
+        NBScenario scenario = new SC_optimo_test(testC,"test_SC_optimo");
         ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_optimo"));
         System.out.println(result);
     }

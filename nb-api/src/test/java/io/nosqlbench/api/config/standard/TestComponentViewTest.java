@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nbr.examples.injava;
+package io.nosqlbench.api.config.standard;
 
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
+import org.junit.jupiter.api.Test;
 
-public class SC_extension_shutdown_hook extends SCBaseScenario {
-    public SC_extension_shutdown_hook(NBComponent parentComponent, String scenarioName) {
-        super(parentComponent, scenarioName);
+import static org.assertj.core.api.Assertions.assertThat;
+
+class TestComponentViewTest {
+
+
+    @Test
+    public void testDiagnosticView() {
+        NBComponent root = new TestComponent("rootk","rootv");
+        TestComponent tc = new TestComponent(root, "atest", "view");
+        String string = tc.toString();
+        assertThat(string).isEqualTo("TestComponent #1305486145");
     }
 
-    /** <pre>{@code
-     * shutdown.addShutdownHook('testfunc', function f() {
-     *     print("shutdown hook running");
-     * });
-     * }</pre>
-     */
-    @Override
-    public void invoke() {
-
-    }
 }
