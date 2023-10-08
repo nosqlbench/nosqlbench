@@ -38,7 +38,7 @@ public class NBScenarioTest {
         scenario.addScriptText("print('loaded script environment...');\n");
         try {
             ScenariosExecutor executor = new ScenariosExecutor(TestComponent.INSTANCE, "test", 1);
-            executor.execute(scenario);
+            executor.execute(scenario,Map.of());
             ScenarioResult result = executor.awaitAllResults().getOne();
             assertThat(result.getIOLog()).contains("loaded script environment...");
         } catch (Exception e) {
