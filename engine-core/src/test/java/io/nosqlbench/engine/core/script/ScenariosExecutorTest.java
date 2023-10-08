@@ -33,7 +33,7 @@ public class ScenariosExecutorTest {
         ScenariosExecutor e = new ScenariosExecutor(new TestComponent("id","test-await-on-time"),ScenariosExecutorTest.class.getSimpleName(), 1);
         NBScriptedScenario scenario = NBScriptedScenario.ofScripted("testing", Map.of(),new TestComponent("scripted-scenario","scripted-scenario"), NBScriptedScenario.Invocation.EXECUTE_SCRIPT);
         scenario.addScriptText("load('classpath:scripts/asyncs.js');\nsetTimeout(\"print('waited')\",5000);\n");
-        e.execute(scenario);
+        e.execute(scenario,Map.of());
         ScenariosResults scenariosResults = e.awaitAllResults();
     }
 

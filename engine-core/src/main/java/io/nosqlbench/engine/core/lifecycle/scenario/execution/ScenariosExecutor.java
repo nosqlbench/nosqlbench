@@ -51,9 +51,6 @@ public class ScenariosExecutor extends NBBaseComponent {
         this.name = name;
     }
 
-    public synchronized void execute(NBScenario scenario) {
-        execute(scenario,new ScriptParams());
-    }
     public synchronized void execute(NBScenario scenario, Map<String,String> params) {
         if (submitted.get(scenario.getScenarioName()) != null) {
             throw new BasicError("Scenario " + scenario.getScenarioName() + " is already defined. Remove it first to reuse the name.");

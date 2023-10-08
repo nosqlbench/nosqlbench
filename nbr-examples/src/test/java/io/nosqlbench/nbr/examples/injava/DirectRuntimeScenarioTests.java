@@ -26,6 +26,8 @@ import io.nosqlbench.nbr.examples.injava.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DirectRuntimeScenarioTests {
@@ -37,7 +39,7 @@ public class DirectRuntimeScenarioTests {
         TestComponent testC = new TestComponent("testroot", "testroot");
         SC_activity_error sc1 = new SC_activity_error(TestComponent.EMPTY_COMPONENT, "test");
         ScenariosExecutor executor = new ScenariosExecutor(TestComponent.EMPTY_COMPONENT, "test", 1);
-        executor.execute(sc1);
+        executor.execute(sc1, Map.of());
         ScenariosResults results = executor.awaitAllResults();
         System.out.println(results);
     }
