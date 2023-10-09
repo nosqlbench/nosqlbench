@@ -82,7 +82,7 @@ public class SC_optimo extends SCBaseScenario {
          */
 
         PerfWindowSampler sampler = new PerfWindowSampler();
-        NBMetricTimer result_success_timer = flywheel.find().timer("name:ressult_success");
+        NBMetricTimer result_success_timer = flywheel.find().timer("name:result_success");
         sampler.addDeltaTime("achieved_rate", result_success_timer::getCount, 1.0);
         final DeltaSnapshotReader snapshotter = result_success_timer.getDeltaReader();
         AtomicReference<ConvenientSnapshot> snapshot = new AtomicReference<>(snapshotter.getDeltaSnapshot());
