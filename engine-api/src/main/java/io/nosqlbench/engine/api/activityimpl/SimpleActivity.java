@@ -78,7 +78,6 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
     private RunState runState = RunState.Uninitialized;
     private RateLimiter strideLimiter;
     private RateLimiter cycleLimiter;
-    private ActivityController activityController;
     private ActivityInstrumentation activityInstrumentation;
     private PrintWriter console;
     private long startedAtMillis;
@@ -206,17 +205,6 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
     @Override
     public int compareTo(Activity o) {
         return getAlias().compareTo(o.getAlias());
-    }
-
-    @Override
-    public ActivityController getActivityController() {
-        return activityController;
-    }
-
-    @Override
-    public void setActivityController(ActivityController activityController) {
-        this.activityController = activityController;
-
     }
 
     @Override
@@ -694,5 +682,6 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
     public RunStateTally getRunStateTally() {
         return tally;
     }
+
 
 }

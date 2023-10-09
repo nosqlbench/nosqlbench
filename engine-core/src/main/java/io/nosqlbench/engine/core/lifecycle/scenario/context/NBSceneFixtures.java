@@ -27,7 +27,7 @@ public interface NBSceneFixtures {
 
     NBComponent component();
 
-    ActivitiesController controller();
+    ScenarioActivitiesController controller();
 
     Extensions extensions();
 

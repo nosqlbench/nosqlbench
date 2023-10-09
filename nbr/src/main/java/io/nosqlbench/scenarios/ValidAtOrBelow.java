@@ -14,32 +14,30 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics.instruments;
+package io.nosqlbench.scenarios;
 
-import com.codahale.metrics.Counter;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
+import java.util.function.DoubleUnaryOperator;
 
-public class NBMetricCounter extends Counter implements NBMetric {
+public class ValidAtOrBelow implements DoubleUnaryOperator {
 
-    private final NBLabels labels;
-
-    public NBMetricCounter(final NBLabels labels) {
-        this.labels = labels;
+    public ValidAtOrBelow(double threshold, double defaultValue) {
+        this.threshold = threshold;
+        this.defaultValue = defaultValue;
     }
 
-    @Override
-    public NBLabels getLabels() {
-        return labels;
-    }
+    private double threshold;
+    private double defaultValue;
 
     @Override
-    public String typeName() {
-        return "counter";
+    public double applyAsDouble(double operand) {
+        if (operand<=threshold) {
+            return operand;
+        } else {
+            return defaultValue;
+        }
     }
 
-    @Override
-    public String toString() {
-        return description();
+    public static ValidAtOrBelow max(double max) {
+        return new ValidAtOrBelow(max,0.0d);
     }
 }

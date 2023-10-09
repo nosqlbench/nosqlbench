@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
  * This allows the state tracking to work consistently for all observers.</p>
  */
 
-public class ActivityExecutor implements NBLabeledElement, ActivityController, ParameterMap.Listener, ProgressCapable, Callable<ExecutionResult> {
+public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener, ProgressCapable, Callable<ExecutionResult> {
 
     // TODO Encapsulate valid state transitions to be only modifiable within the appropriate type view.
 
@@ -81,7 +81,6 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         this.activity = activity;
         this.activityDef = activity.getActivityDef();
         activity.getActivityDef().getParams().addListener(this);
-        activity.setActivityController(this);
         this.tally = activity.getRunStateTally();
     }
 
@@ -257,16 +256,24 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
 
     private void increaseActiveMotorCountUpToThreadParam(ActivityDef activityDef) {
         // Create motor slots
-        while (motors.size() < activityDef.getThreads()) {
-
-            Motor motor = activity.getMotorDispenserDelegate().getMotor(activityDef, motors.size());
-            logger.trace(() -> "Starting cycle motor thread:" + motor);
-            motors.add(motor);
+        try {
+            while (motors.size() < activityDef.getThreads()) {
+                Motor motor = activity.getMotorDispenserDelegate().getMotor(activityDef, motors.size());
+                logger.trace(() -> "Starting cycle motor thread:" + motor);
+                motors.add(motor);
+            }
+        } catch (Exception e) {
+            System.out.print("critical error while starting motors: " + e);
+            logger.error("critical error while starting motors:" + e,e);
+            throw new RuntimeException(e);
         }
     }
 
     private void reduceActiveMotorCountDownToThreadParam(ActivityDef activityDef) {
         // Stop and remove extra motor slots
+        if (activityDef.getThreads()==0) {
+            logger.warn("setting threads to zero is not advised. At least one thread has to be active to keep the activity alive.");
+        }
         while (motors.size() > activityDef.getThreads()) {
             Motor motor = motors.get(motors.size() - 1);
             logger.trace(() -> "Stopping cycle motor thread:" + motor);
@@ -362,29 +369,6 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
         logger.debug(() -> "Uncaught exception in activity thread forwarded to activity executor: " + e.getMessage());
         this.exception = new RuntimeException("Error in activity thread " + t.getName(), e);
         this.requestStopMotors();
-    }
-
-    @Override
-    public synchronized void stopActivityWithReasonAsync(String reason) {
-        logger.info(() -> "Stopping activity " + this.activityDef.getAlias() + ": " + reason);
-        this.exception = new RuntimeException("Stopping activity " + this.activityDef.getAlias() + ": " + reason);
-        logger.error("stopping with reason: " + exception);
-        requestStopMotors();
-    }
-
-    @Override
-    public synchronized void stopActivityWithErrorAsync(Throwable throwable) {
-        if (exception == null) {
-            this.exception = new RuntimeException(throwable);
-            logger.error("stopping on error: " + throwable.toString(), throwable);
-        } else {
-            if (activityDef.getParams().getOptionalBoolean("fullerrors").orElse(false)) {
-                logger.error("additional error: " + throwable.toString(), throwable);
-            } else {
-                logger.warn("summarized error (fullerrors=false): " + throwable.toString());
-            }
-        }
-        requestStopMotors();
     }
 
     @Override
@@ -587,6 +571,10 @@ public class ActivityExecutor implements NBLabeledElement, ActivityController, P
             .addDetail("event", "stop-activity")
             .addDetail("params", activityDef.toString())
             .build());
+    }
+
+    public void awaitMotorsRunningOrTerminalState() {
+        awaitMotorsAtLeastRunning();
     }
 
     private class ThreadsGauge implements Gauge<Double> {

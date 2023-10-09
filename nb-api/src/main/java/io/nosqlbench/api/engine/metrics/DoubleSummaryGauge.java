@@ -31,6 +31,11 @@ public class DoubleSummaryGauge implements NBMetricGauge, DoubleConsumer {
     private final Stat stat;
     private final DoubleSummaryStatistics stats;
 
+    @Override
+    public String typeName() {
+        return "gauge";
+    }
+
     public enum Stat {
         Min,
         Max,

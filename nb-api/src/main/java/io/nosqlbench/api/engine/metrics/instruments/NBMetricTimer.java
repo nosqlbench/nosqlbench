@@ -90,4 +90,9 @@ public class NBMetricTimer extends Timer implements DeltaSnapshotter, HdrDeltaHi
     public String toString() {
         return description();
     }
+
+    @Override
+    public String typeName() {
+        return "timer";
+    }
 }

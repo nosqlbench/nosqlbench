@@ -86,4 +86,8 @@ public class StandardActivityType<A extends StandardActivity<?,?>> extends Simpl
     }
 
 
+    @Override
+    public void shutdownActivity() {
+
+    }
 }

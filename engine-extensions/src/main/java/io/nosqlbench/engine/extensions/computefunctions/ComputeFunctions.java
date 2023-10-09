@@ -203,6 +203,7 @@ public class ComputeFunctions extends NBBaseComponent {
     public static double average_precision(int[] relevant, int[] actual, int k) {
         relevant = Arrays.copyOfRange(relevant,0,k);
         int maxK = Math.min(k,actual.length);
+        relevant = Arrays.copyOfRange(relevant,0,k);
         HashSet<Integer> relevantSet = new HashSet<>(relevant.length);
         for (Integer i : relevant) {
             relevantSet.add(i);
@@ -225,6 +226,7 @@ public class ComputeFunctions extends NBBaseComponent {
     public static double average_precision(long[] relevant, long[] actual, int k) {
         relevant = Arrays.copyOfRange(relevant,0,k);
         int maxK = Math.min(k,actual.length);
+        relevant = Arrays.copyOfRange(relevant,0,k);
         HashSet<Long> refset = new HashSet<>(relevant.length);
         for (Long i : relevant) {
             refset.add(i);

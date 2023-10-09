@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.direct;
 
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
@@ -32,7 +32,7 @@ public abstract class SCBaseScenario extends NBScenario {
     protected Reader stdin;
     protected PrintWriter stdout;
     protected Writer stderr;
-    protected ActivitiesController controller;
+    protected ScenarioActivitiesController controller;
     protected ScenarioParams params;
     protected Extensions extensions;
 
@@ -60,7 +60,7 @@ public abstract class SCBaseScenario extends NBScenario {
      *     <LI>component, an {@link NBComponent} - The NB component upon which all metrics or other services are attached.</LI>
      *     <LI>stdin - a {@link Reader} representing the input buffer which would normally be {@link System#in}
      *     <LI>stdout, stderr</LI>- a {@link PrintWriter}; This can be buffered virtually, attached to {@link System#out} and {@link System#err} or both for IO tracing.</LI>
-     *     <LI>controller - A dedicated {@link ActivitiesController} which can be used to define, start, top, and interact with activities.</LI>
+     *     <LI>controller - A dedicated {@link ScenarioActivitiesController} which can be used to define, start, top, and interact with activities.</LI>
      *     <LI>params - The {@link ScenarioParams} which have been passed to this scenario.</LI>
      *     <LI>extensions - A dedicated ahndle to the {@link Extensions} service.</LI>
      *     <LI><EM>all component services</EM> as this scenario IS a component. This includes all implemented methods in any of the {@link NBComponent} sub-interfaces.</EM>

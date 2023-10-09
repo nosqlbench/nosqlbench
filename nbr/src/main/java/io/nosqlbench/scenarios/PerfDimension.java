@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics.instruments;
+package io.nosqlbench.scenarios;
 
-import io.nosqlbench.api.labels.NBLabels;
+import java.util.function.DoubleSupplier;
 
-public class NBBaseMetric implements NBMetric {
-    private final NBLabels labels;
+public interface PerfDimension {
 
-    public NBBaseMetric(String... labels) {
-        this.labels = NBLabels.forKV((Object[]) labels);
-    }
-    @Override
-    public NBLabels getLabels() {
-        return this.labels;
-    }
+    public double getWeight();
 
-    @Override
-    public String typeName() {
-        return "basetype";
-    }
+    public Weighting getWeighting();
+    public DoubleSupplier getSupplier();
+    public String getName();
+    public String getValue();
+
 }

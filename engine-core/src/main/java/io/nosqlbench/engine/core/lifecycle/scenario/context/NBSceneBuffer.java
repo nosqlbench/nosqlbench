@@ -80,7 +80,7 @@ public class NBSceneBuffer implements NBSceneFixtures {
     }
 
     @Override
-    public ActivitiesController controller() {
+    public ScenarioActivitiesController controller() {
         return fixtures.controller();
     }
 

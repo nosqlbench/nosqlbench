@@ -18,6 +18,8 @@ package io.nosqlbench.components;
  */
 
 
+import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
+
 public class NBComponentFormats {
     public static String formatAsTree(NBBaseComponent base) {
         StringBuilder sb = new StringBuilder();
@@ -38,11 +40,18 @@ public class NBComponentFormats {
         public void visit(NBComponent component, int depth) {
             String indent = "  ".repeat(depth);
             builder.append(indent).append(String.format("%03d %s",depth,component.description()));
-            String string = component.toString();
-            String[] split = string.split(System.lineSeparator());
-            for (String s : split) {
+            String componentNativeTypeToString = component.toString();
+            String[] toStringLines = componentNativeTypeToString.split(System.lineSeparator());
+            for (String s : toStringLines) {
                 builder.append(System.lineSeparator()).append(indent).append(" >").append(s);
             }
+            if (component.getComponentMetrics().size()>0) {
+                builder.append(System.lineSeparator()).append("metrics:");
+                for (NBMetric componentMetric : component.getComponentMetrics()) {
+                    builder.append(indent).append(System.lineSeparator()).append("  ").append(componentMetric.toString());
+                }
+            }
+
             builder.append(System.lineSeparator());
         }
     }
