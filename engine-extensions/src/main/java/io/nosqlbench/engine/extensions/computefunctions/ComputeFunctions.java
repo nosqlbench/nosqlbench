@@ -80,6 +80,7 @@ public class ComputeFunctions {
         if (actual.length < k) {
             throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + actual.length + ", limit=" + k);
         }
+        relevant = Arrays.copyOfRange(relevant,0,k);
         actual = Arrays.copyOfRange(actual, 0, k);
         Arrays.sort(relevant);
         Arrays.sort(actual);
@@ -126,6 +127,7 @@ public class ComputeFunctions {
         if (actual.length < k) {
             throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + actual.length + ", limit=" + k);
         }
+        relevant = Arrays.copyOfRange(relevant,0,k);
         actual = Arrays.copyOfRange(actual, 0, k);
         Arrays.sort(relevant);
         Arrays.sort(actual);
@@ -158,6 +160,7 @@ public class ComputeFunctions {
      * Reciprocal Rank - The multiplicative inverse of the first rank which is relevant.
      */
     public static double reciprocal_rank(long[] relevant, long[] actual, int k) {
+        relevant = Arrays.copyOfRange(relevant,0,k);
         int firstRank = Intersections.firstMatchingIndex(relevant, actual, k);
         if (firstRank >= 0) {
             return 1.0d / (firstRank+1);
@@ -174,6 +177,7 @@ public class ComputeFunctions {
      * RR as in M(RR)
      */
     public static double reciprocal_rank(int[] relevant, int[] actual, int k) {
+        relevant = Arrays.copyOfRange(relevant,0,k);
         int firstRank = Intersections.firstMatchingIndex(relevant, actual, k);
         if (firstRank<0) {
             return 0;
@@ -190,6 +194,7 @@ public class ComputeFunctions {
     }
 
     public static double average_precision(int[] relevant, int[] actual, int k) {
+        relevant = Arrays.copyOfRange(relevant,0,k);
         int maxK = Math.min(k,actual.length);
         HashSet<Integer> relevantSet = new HashSet<>(relevant.length);
         for (Integer i : relevant) {
@@ -211,6 +216,7 @@ public class ComputeFunctions {
       return average_precision(relevant, actual, actual.length);
     }
     public static double average_precision(long[] relevant, long[] actual, int k) {
+        relevant = Arrays.copyOfRange(relevant,0,k);
         int maxK = Math.min(k,actual.length);
         HashSet<Long> refset = new HashSet<>(relevant.length);
         for (Long i : relevant) {
