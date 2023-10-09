@@ -41,31 +41,31 @@ import java.util.stream.Collectors;
  * A ScenarioController provides a way to start Activities,
  * modify them while running, and forceStopMotors, pause or restart them.
  */
-public class ActivitiesController extends NBBaseComponent {
+public class ScenarioActivitiesController extends NBBaseComponent {
 
-    private static final Logger logger = LogManager.getLogger(ActivitiesController.class);
+    private static final Logger logger = LogManager.getLogger(ScenarioActivitiesController.class);
     private static final Logger scenariologger = LogManager.getLogger("SCENARIO");
 
     private final ActivityLoader activityLoader;
 
     private final Map<String, ActivityRuntimeInfo> activityInfoMap = new ConcurrentHashMap<>();
 
-    private final ExecutorService activitiesExecutor;
+    private final ExecutorService executorService;
 
-    public ActivitiesController() {
+    public ScenarioActivitiesController() {
         super(new TestComponent("test","test"));
         this.activityLoader = new ActivityLoader();
         ActivitiesExceptionHandler exceptionHandler = new ActivitiesExceptionHandler(this);
         IndexedThreadFactory indexedThreadFactory = new IndexedThreadFactory("ACTIVITY", exceptionHandler);
-        this.activitiesExecutor = Executors.newVirtualThreadPerTaskExecutor();
+        this.executorService = Executors.newVirtualThreadPerTaskExecutor();
     }
 
-    public ActivitiesController(NBComponent parent) {
+    public ScenarioActivitiesController(NBComponent parent) {
         super(parent);
         this.activityLoader = new ActivityLoader();
         ActivitiesExceptionHandler exceptionHandler = new ActivitiesExceptionHandler(this);
         IndexedThreadFactory indexedThreadFactory = new IndexedThreadFactory("ACTIVITY", exceptionHandler);
-        this.activitiesExecutor = Executors.newCachedThreadPool(indexedThreadFactory);
+        this.executorService = Executors.newVirtualThreadPerTaskExecutor();
     }
 
     /**
@@ -84,8 +84,9 @@ public class ActivitiesController extends NBBaseComponent {
         if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
             Activity activity = this.activityLoader.loadActivity(activityDef, this);
             ActivityExecutor executor = new ActivityExecutor(activity);
-            Future<ExecutionResult> startedActivity = activitiesExecutor.submit(executor);
+            Future<ExecutionResult> startedActivity = executorService.submit(executor);
             ActivityRuntimeInfo activityRuntimeInfo = new ActivityRuntimeInfo(activity, startedActivity, executor);
+            activityRuntimeInfo.getActivityExecutor().awaitMotorsRunningOrTerminalState();
             this.activityInfoMap.put(activity.getAlias(), activityRuntimeInfo);
 
         }
@@ -179,6 +180,10 @@ public class ActivitiesController extends NBBaseComponent {
 
         scenariologger.debug("STOP {}", activityDef.getAlias());
         runtimeInfo.stopActivity();
+    }
+
+    public synchronized void stop(Activity activity) {
+        stop(activity.getActivityDef());
     }
 
     /**
@@ -452,7 +457,7 @@ public class ActivitiesController extends NBBaseComponent {
 
     public void shutdown() {
         logger.debug(() -> "Requesting ScenarioController shutdown.");
-        this.activitiesExecutor.shutdownNow();
+        this.executorService.shutdownNow();
 //        try {
 //            if (!this.activitiesExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
 //                logger.info(() -> "Scenario is being forced to shutdown after waiting 5 seconds for graceful shutdown.");

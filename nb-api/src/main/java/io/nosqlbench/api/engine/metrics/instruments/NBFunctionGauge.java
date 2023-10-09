@@ -51,6 +51,11 @@ public class NBFunctionGauge implements NBMetricGauge {
     public String toString() {
         return description();
     }
+
+    @Override
+    public String typeName() {
+        return "gauge";
+    }
 }
 
 

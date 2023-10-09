@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityapi.core;
+package io.nosqlbench.scenarios;
 
-public interface ActivityController {
-    void stopActivityWithReasonAsync(String reason);
-    void stopActivityWithErrorAsync(Throwable throwable);
+public enum Weighting {
+    uniform;
+    public double applyWeight(double input) {
+        return switch (this) {
+            case uniform -> input;
+        };
+    }
 }

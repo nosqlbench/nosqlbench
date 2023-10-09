@@ -190,4 +190,8 @@ public class BobyqaOptimizerInstance extends NBBaseComponent {
     public double[] getResult() {
         return result.getPoint();
     }
+
+    public MVParams getParams() {
+        return params;
+    }
 }

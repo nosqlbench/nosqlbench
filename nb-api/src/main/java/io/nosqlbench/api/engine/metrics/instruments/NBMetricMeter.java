@@ -31,4 +31,9 @@ public class NBMetricMeter extends Meter implements NBMetric {
     public NBLabels getLabels() {
         return labels;
     }
+
+    @Override
+    public String typeName() {
+        return "meter";
+    }
 }

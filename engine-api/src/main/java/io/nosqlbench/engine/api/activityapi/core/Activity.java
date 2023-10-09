@@ -16,7 +16,6 @@
 
 package io.nosqlbench.engine.api.activityapi.core;
 
-import com.codahale.metrics.Timer;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.activityimpl.ParameterMap;
@@ -39,14 +38,6 @@ import java.util.function.Supplier;
  * The easiest way to build a useful Activity is to extend {@link SimpleActivity}.
  */
 public interface Activity extends Comparable<Activity>, ActivityDefObserver, ProgressCapable, StateCapable, NBComponent {
-
-    /**
-     * Provide the activity with the controls needed to stop itself.
-     *
-     * @param activityController The dedicated control interface for this activity
-     */
-    void setActivityController(ActivityController activityController);
-
 
     /**
      * Register an object which should be closed after this activity is shutdown.

@@ -30,6 +30,15 @@ public class MVParams implements Iterable<MVParams.MVParam> {
         return this;
     }
 
+    public double getValue(String name, double[] values) {
+        for (int i = 0; i < paramList.size(); i++) {
+            if (paramList.get(i).name.toLowerCase().equals(name.toLowerCase())) {
+                return values[i];
+            }
+        }
+        throw new RuntimeException("no index found for param named '" + name + "', out of " + paramList);
+    }
+
     public int size() {
         return paramList.size();
     }

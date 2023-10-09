@@ -42,4 +42,9 @@ public class NBMetricGaugeWrapper implements NBMetricGauge, NBMetric {
     public NBLabels getLabels() {
         return labels;
     }
+
+    @Override
+    public String typeName() {
+        return "gauge";
+    }
 }

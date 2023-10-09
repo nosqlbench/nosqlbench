@@ -132,7 +132,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         if (getComponentMetrics().size()>0) {
             sb.append(System.lineSeparator()).append("metrics:");
             for (NBMetric componentMetric : getComponentMetrics()) {
-                sb.append(System.lineSeparator()).append("m ").append(componentMetric.toString());
+                sb.append(System.lineSeparator()).append("  ").append(componentMetric.toString());
             }
         }
         return sb.toString();

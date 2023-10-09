@@ -109,4 +109,14 @@ public class NBMetricHistogram extends Histogram implements DeltaSnapshotter, Hd
     public NBLabels getLabels() {
         return this.labels;
     }
+
+    @Override
+    public String typeName() {
+        return "histogram";
+    }
+
+    @Override
+    public String toString() {
+        return description();
+    }
 }

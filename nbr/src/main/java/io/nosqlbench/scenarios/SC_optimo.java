@@ -18,7 +18,9 @@ package io.nosqlbench.scenarios;
  */
 
 
-import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
+import io.nosqlbench.api.engine.metrics.ConvenientSnapshot;
+import io.nosqlbench.api.engine.metrics.DeltaSnapshotReader;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
 import io.nosqlbench.api.optimizers.MVResult;
 import io.nosqlbench.components.NBComponent;
@@ -27,12 +29,15 @@ import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.ToDoubleFunction;
 
 public class SC_optimo extends SCBaseScenario {
     private final static Logger logger = LogManager.getLogger(SC_optimo.class);
+
     public SC_optimo(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
@@ -42,28 +47,32 @@ public class SC_optimo extends SCBaseScenario {
         // TODO: having "scenario" here as well as in "named scenario" in workload templates is confusing. Make this clearer.
         String workload = params.getOrDefault("workload", "default_workload");
 
-        Map<String,String> activityParams = new HashMap<>(Map.of(
+        Map<String, String> activityParams = new HashMap<>(Map.of(
             "cycles", String.valueOf(Long.MAX_VALUE),
             "threads", "1",
             "driver", "diag",
             "rate", "1"
         ));
         if (params.containsKey("workload")) {
-            activityParams.put("workload",params.get("workload"));
+            activityParams.put("workload", params.get("workload"));
         } else if (params.containsKey("op")) {
-            activityParams.put("op",params.get("op"));
+            activityParams.put("op", params.get("op"));
         } else {
-            activityParams.put("op","log: level=info");
+            activityParams.put("op", "log: level=info");
             logger.warn("You provided neither a workload nor an op, so assuming diagnostic mode.");
         }
 
-        Activity flywheel = controller.start(activityParams);
+        int seconds = params.containsKey("window") ? Integer.parseInt(params.get("window")) : 5;
 
         BobyqaOptimizerInstance bobby = create().bobyqaOptimizer();
-
-        bobby.param("threads", 0.0d, 200000.0d);
-        bobby.param("rate", 0.0d, 1_000_000.d);
+        bobby.param("rate", 1.0d, 10000.d);
+        bobby.param("threads", 1.0d, 1000.0d);
         bobby.setInitialRadius(10000.0).setStoppingRadius(0.001).setMaxEval(1000);
+
+        Activity flywheel = controller.start(activityParams);
+        stdout.println("warming up for " + seconds + " seconds");
+        controller.waitMillis(5000);
+
 
         /**
          * <P>This function is the objective function, and is responsible for applying
@@ -71,24 +80,49 @@ public class SC_optimo extends SCBaseScenario {
          * better the parameters are.</P>
          * <P>The parameter values will be passed in as an array, pair-wise with the param calls above.</P>
          */
+
+        PerfWindowSampler sampler = new PerfWindowSampler();
+        NBMetricTimer result_success_timer = flywheel.find().timer("name:ressult_success");
+        sampler.addDeltaTime("achieved_rate", result_success_timer::getCount, 1.0);
+        final DeltaSnapshotReader snapshotter = result_success_timer.getDeltaReader();
+        AtomicReference<ConvenientSnapshot> snapshot = new AtomicReference<>(snapshotter.getDeltaSnapshot());
+        ValidAtOrBelow below15000 = ValidAtOrBelow.max(15000);
+        sampler.addDirect(
+            "p99latency",
+            () -> below15000.applyAsDouble(snapshot.get().getP99ns()),
+            -1.0,
+            () -> snapshot.set(snapshotter.getDeltaSnapshot())
+        );
+        sampler.startWindow();
+
         ToDoubleFunction<double[]> f = new ToDoubleFunction<double[]>() {
             @Override
-            public double applyAsDouble(double[] value) {
-                int threads=(int)value[0];
+            public double applyAsDouble(double[] values) {
+                stdout.println("params=" + Arrays.toString(values));
+                int threads = (int) bobby.getParams().getValue("threads", values);
+                double rate = bobby.getParams().getValue("rate", values);
 
-                NBMetric counter = flywheel.find().counter("counterstuff");
-
+                stdout.println("setting threads to " + threads);
                 flywheel.getActivityDef().setThreads(threads);
 
-                double rate=value[1];
-                flywheel.getActivityDef().setCycles(String.valueOf(rate));
+                String ratespec = rate + ":1.1:restart";
+                stdout.println("setting rate to " + ratespec);
+                flywheel.getActivityDef().getParams().put("rate", ratespec);
 
+                sampler.startWindow();
+                stdout.println("waiting " + seconds + " seconds...");
+                controller.waitMillis(seconds * 1000L);
+                sampler.stopWindow();
+                double value = sampler.getCurrentWindowValue();
+                stdout.println(sampler.toString());
+                return value;
 
-                return 10000000 - ((Math.abs(100-value[0])) + (Math.abs(100-value[1])));
             }
         };
         bobby.setObjectiveFunction(f);
         MVResult result = bobby.optimize();
+
+        controller.stop(flywheel);
         stdout.println("optimized result was " + result);
         stdout.println("map of result was " + result.getMap());
 

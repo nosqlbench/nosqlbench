@@ -14,32 +14,18 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.api.engine.metrics.instruments;
+package io.nosqlbench.scenarios;
 
-import com.codahale.metrics.Counter;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
+import java.util.function.DoubleSupplier;
 
-public class NBMetricCounter extends Counter implements NBMetric {
+public class Uniform extends BasePerfDimension {
 
-    private final NBLabels labels;
-
-    public NBMetricCounter(final NBLabels labels) {
-        this.labels = labels;
+    public Uniform(double weight, DoubleSupplier supplier, String name) {
+        super(name, weight, Weighting.uniform, supplier);
     }
 
     @Override
-    public NBLabels getLabels() {
-        return labels;
-    }
-
-    @Override
-    public String typeName() {
-        return "counter";
-    }
-
-    @Override
-    public String toString() {
-        return description();
+    public String getValue() {
+        return null;
     }
 }

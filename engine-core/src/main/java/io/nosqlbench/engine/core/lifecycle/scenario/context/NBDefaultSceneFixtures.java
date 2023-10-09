@@ -56,7 +56,7 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
      * a given scenario. A scenario doesn't complete unless until all activities
      * are complete or errored.
      */
-    private ActivitiesController controller;
+    private ScenarioActivitiesController controller;
     /*
      * Extensions provide additional scripting capabilities which are not provided by the
      * scripting or other runtimes, or new ways of tapping into extant features.
@@ -68,7 +68,7 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
 
     private Reader in;
 
-    public NBDefaultSceneFixtures(ScenarioParams params, NBComponent parent, ActivitiesController controller, Extensions extensions, PrintWriter out, PrintWriter err, Reader in) {
+    public NBDefaultSceneFixtures(ScenarioParams params, NBComponent parent, ScenarioActivitiesController controller, Extensions extensions, PrintWriter out, PrintWriter err, Reader in) {
         this.params = params;
         this.session = parent;
         this.controller = controller;
@@ -84,7 +84,7 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
             new NBSession(
                 new TestComponent("scene", name), "scene~"+name
             ),
-            new ActivitiesController(),
+            new ScenarioActivitiesController(),
             Extensions.ofNone(),
             new PrintWriter(System.out),
             new PrintWriter(System.err),
@@ -104,7 +104,7 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
     }
 
     @Override
-    public ActivitiesController controller() {
+    public ScenarioActivitiesController controller() {
         return controller;
     }
 

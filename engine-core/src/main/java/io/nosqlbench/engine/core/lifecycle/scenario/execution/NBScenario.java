@@ -26,7 +26,7 @@ import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponentErrorHandler;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenario;
@@ -54,7 +54,7 @@ public abstract class NBScenario extends NBBaseComponent
 
     private ScenarioMetadata scenarioMetadata;
 
-    private ActivitiesController activitiesController;
+    private ScenarioActivitiesController scenarioActivitiesController;
     private Exception error;
     private String progressInterval = "console:10s";
     private ActivitiesProgressIndicator activitiesProgressIndicator;
@@ -68,15 +68,15 @@ public abstract class NBScenario extends NBBaseComponent
     }
 
     public void forceStopScenario(int i, boolean b) {
-        activitiesController.forceStopScenario(i,b);
+        scenarioActivitiesController.forceStopScenario(i,b);
     }
 
 //    public Map<String, String> getParams() {
 //        return this.params;
 //    }
 
-    public ActivitiesController getActivitiesController() {
-        return this.activitiesController;
+    public ScenarioActivitiesController getActivitiesController() {
+        return this.scenarioActivitiesController;
     }
 
     public enum State {
@@ -111,7 +111,7 @@ public abstract class NBScenario extends NBBaseComponent
      */
     @Override
     public final ScenarioResult apply(NBSceneBuffer sctx) {
-        this.activitiesController=sctx.controller();
+        this.scenarioActivitiesController =sctx.controller();
 
         this.scenarioShutdownHook = new ScenarioShutdownHook(this);
         Runtime.getRuntime().addShutdownHook(this.scenarioShutdownHook);
@@ -127,24 +127,24 @@ public abstract class NBScenario extends NBBaseComponent
         );
 
         if (!"disabled".equals(progressInterval) && progressInterval!=null && !progressInterval.isEmpty())
-            this.activitiesProgressIndicator = new ActivitiesProgressIndicator(activitiesController, this.progressInterval);
+            this.activitiesProgressIndicator = new ActivitiesProgressIndicator(scenarioActivitiesController, this.progressInterval);
 
         ScenarioResult result = null;
         try {
             runScenario(sctx.asFixtures());
             final long awaitCompletionTime = 86400 * 365 * 1000L;
             this.logger.debug("Awaiting completion of scenario and activities for {} millis.", awaitCompletionTime);
-            this.activitiesController.awaitCompletion(awaitCompletionTime);
+            this.scenarioActivitiesController.awaitCompletion(awaitCompletionTime);
         } catch (Exception e) {
             try {
-                activitiesController.forceStopScenario(3000, false);
+                scenarioActivitiesController.forceStopScenario(3000, false);
             } catch (final Exception eInner) {
                 this.logger.debug("Found inner exception while forcing stop with rethrow=false: {}", eInner);
                 throw new RuntimeException(e);
             }
             this.error = e;
         } finally {
-            this.activitiesController.shutdown();
+            this.scenarioActivitiesController.shutdown();
             this.endedAtMillis = System.currentTimeMillis();
             result = new ScenarioResult(
                 sctx,
@@ -183,7 +183,7 @@ public abstract class NBScenario extends NBBaseComponent
         } else
             this.logger.info(
                 "Scenario completed successfully, with {} logical activities.",
-                activitiesController.getActivityExecutorMap().size()
+                scenarioActivitiesController.getActivityExecutorMap().size()
             );
 
         this.logger.info(() -> "scenario state: " + state);

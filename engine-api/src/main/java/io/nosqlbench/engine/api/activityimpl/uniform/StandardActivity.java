@@ -34,7 +34,6 @@ import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBComponentLoader;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.nb.annotations.ServiceSelector;

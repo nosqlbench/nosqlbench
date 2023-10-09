@@ -28,11 +28,11 @@ import java.util.stream.Collectors;
  */
 public class ActivityBindings implements Bindings, ProxyObject {
 
-    private final ActivitiesController scenario;
+    private final ScenarioActivitiesController scenario;
     private final Map<String, Bindings> elementMap = new HashMap<String, Bindings>();
 
-    public ActivityBindings(ActivitiesController activitiesController) {
-        this.scenario = activitiesController;
+    public ActivityBindings(ScenarioActivitiesController scenarioActivitiesController) {
+        this.scenario = scenarioActivitiesController;
     }
 
     @Override
