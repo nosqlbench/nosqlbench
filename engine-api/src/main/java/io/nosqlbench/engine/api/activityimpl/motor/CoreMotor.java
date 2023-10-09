@@ -212,7 +212,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
             if (strideRateLimiter != null) {
                 // block for strides rate limiter
-                strideRateLimiter.start();
+                strideRateLimiter.block();
             }
 
             long strideDelay = 0L;
@@ -251,7 +251,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
                     if (strideRateLimiter != null) {
                         // block for strides rate limiter
-                        strideDelay = strideRateLimiter.maybeWaitForOp();
+                        strideDelay = strideRateLimiter.block();
                     }
 
                     StrideTracker<D> strideTracker = new StrideTracker<>(
@@ -283,7 +283,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
                         if (cycleRateLimiter != null) {
                             // Block for cycle rate limiter
-                            cycleDelay = cycleRateLimiter.maybeWaitForOp();
+                            cycleDelay = cycleRateLimiter.block();
                         }
 
                         try {
@@ -354,7 +354,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
                     if (strideRateLimiter != null) {
                         // block for strides rate limiter
-                        strideDelay = strideRateLimiter.maybeWaitForOp();
+                        strideDelay = strideRateLimiter.block();
                     }
 
                     long strideStart = System.nanoTime();
@@ -378,7 +378,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
                             if (cycleRateLimiter != null) {
                                 // Block for cycle rate limiter
-                                cycleDelay = cycleRateLimiter.maybeWaitForOp();
+                                cycleDelay = cycleRateLimiter.block();
                             }
 
                             long cycleStart = System.nanoTime();

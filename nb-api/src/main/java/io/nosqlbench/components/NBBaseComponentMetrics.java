@@ -51,6 +51,9 @@ public class NBBaseComponentMetrics implements NBComponentMetrics {
 
     @Override
     public List<NBMetric> findComponentMetrics(String pattern) {
+        if (this.metrics.containsKey(pattern)) {
+            return List.of(metrics.get(pattern));
+        }
         TagFilter filter = new TagFilter(pattern);
         return filter.filterLabeled(metrics.values());
     }

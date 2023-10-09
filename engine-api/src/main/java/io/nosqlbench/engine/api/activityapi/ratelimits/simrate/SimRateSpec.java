@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityapi.ratelimits;
+package io.nosqlbench.engine.api.activityapi.ratelimits.simrate;
 
 import io.nosqlbench.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.api.engine.util.Unit;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+
+import java.time.temporal.ChronoUnit;
 
 /**
  * <H2>Rate Limiter Specifications</H2>
@@ -32,7 +34,7 @@ import org.apache.logging.log4j.LogManager;
  * </P>
  *
  * <H2>Controlling Rate Limiters</H2>
- *
+ * <p>
  * Rate limiters specifiers can be easily constructed programmatically. However, in scripting,
  * these will often be controlled by assigning a configuration string.
  *
@@ -45,14 +47,14 @@ import org.apache.logging.log4j.LogManager;
  * <LI>&lt;rate&gt;,&lt;burst ratio&gt;</LI>
  * <LI>&lt;rate&gt;,&lt;burst ratio&gt;,&lt;verb&gt;</LI>
  * </UL>
- *
+ * <p>
  * Where:
  *
  * <EM>rate</EM> is the ops per second, expressed as any positive floating point value.
  * <EM>burst ratio</EM> is a floating point value greater than 1.0 which determines how much faster
  * the rate limiter may go to catch up to the overall.
  * <EM>verb</EM> is one of configure, start, or restart, as explained below.
- *
+ * <p>
  * For example:
  * <UL>
  * <LI>200 - allow up to 200 ops to start per second, with the default burst ratio of 1.1.
@@ -95,16 +97,39 @@ import org.apache.logging.log4j.LogManager;
  * <DT>restart</DT>
  * <DD>Restarting a rate limiter is the same as starting it initially. The only difference is that
  * restarting forces a re-initialization as part of the configuration.</DD>
+ * <p>
+ * <HR/>
+ * <P>ChronoUnit Examples</P>
+ * <PRE>{@code
+ * <p>
+ * example ticks   op/s          seconds/op   ticks/op
+ * -----------------------------------------------------------
+ * 1       ns      50   ops/s    0.02, 1/20      20_000_000  (1s of ns / 50)
+ * 2       ns       5   ops/s    0.2,  1/2      200_000_000  (1s of ns / 5)
+ * 3       ns       0.5 ops/s    2.0   2/1    2_000_000_000  (1s of ns / 0.5)
+ * 4       us       0.5 ops/s    2.0   2/1        2_000_000  (1s of us / 0.5)
+ * 5       ms       0.5 ops/s    2.0   2/1            2_000  (1s of ms / 0.5)
+ * }</PRE>
  *
- * </DL>
+ * <UL>
+ * <LI>In examples 1 and 2, the ticks/op are comfortably within the 2147483648 (2^31)
+ * range afforded by a 32-bit semaphore count.</LI>
+ * <LI>Example 3 shows where the value
+ * technically fits, but leaves no more than around 8% margin for the burst pool.
+ * This is insufficient as burst pool should be allowed to be up to 100% the size
+ * of the base rate pool.</LI>
+ * <LI>This is remedied in examples 4 and 5 by adjusting the unit of allocation
+ * to bigger chunks of time.</LI>
+ * </UL>
  */
-public class RateSpec {
+public class SimRateSpec {
 
-    private final static Logger logger = LogManager.getLogger(RateSpec.class);
-
+    private final static Logger logger = LogManager.getLogger(SimRateSpec.class);
     public static final double DEFAULT_RATE_OPS_S = 1.0D;
     public static final double DEFAULT_BURST_RATIO = 1.1D;
     public static Verb DEFAULT_VERB = Verb.start;
+
+    public ChronoUnit unit;
 
     /**
      * Target rate in Operations Per Second
@@ -113,9 +138,36 @@ public class RateSpec {
     public double burstRatio = DEFAULT_BURST_RATIO;
     public Verb verb = Verb.start;
 
+    public double burstRatio() {
+        return this.burstRatio;
+    }
+
+    public int ticksPerOp() {
+        return switch (unit) {
+            case NANOS -> (int) (1_000_000_000d / opsPerSec);
+            case MICROS -> (int) (1_000_000d / opsPerSec);
+            case MILLIS -> (int) (1_000d / opsPerSec);
+            case SECONDS -> (int) (1d / opsPerSec);
+            default -> throw new RuntimeException("invalid ChronoUnit for rate spec:" + unit);
+        };
+    }
+
+    public int nanosToTicks(long newNanoTokens) {
+        if (newNanoTokens>Integer.MAX_VALUE) {
+            throw new RuntimeException("time base error with nanoseconds to ticks, value (" + newNanoTokens + ") is too large (>2^31!)");
+        }
+        return switch (unit) {
+            case NANOS -> (int) newNanoTokens;
+            case MICROS -> (int) (newNanoTokens/1_000L);
+            case MILLIS -> (int) (newNanoTokens/1_000_000L);
+            case SECONDS -> (int) (newNanoTokens/1_000_000_000L);
+            default -> throw new RuntimeException("invalid ChronoUnit for rate spec:" + unit);
+        };
+    }
+
     /**
      * Rate limiters can be put into motion in different modes to suit different scenarios. This is
-     * mostly to support advanced scripting capability. When the verb is not specified in a {@link RateSpec},
+     * mostly to support advanced scripting capability. When the verb is not specified in a {@link SimRateSpec},
      * then it is started immediately as a user would expect.
      */
     public enum Verb {
@@ -143,28 +195,49 @@ public class RateSpec {
          * target rates, where each iteration is independent of the others. In order to restart, a rate
          * limiter will be configured if necessary.
          */
-        restart
+        restart,
+        stop
     }
 
-    public RateSpec(double opsPerSec, double burstRatio) {
+    public SimRateSpec(double opsPerSec, double burstRatio) {
         this(opsPerSec, burstRatio, DEFAULT_VERB);
     }
 
-    public RateSpec(double opsPerSec, double burstRatio, Verb type) {
+    public SimRateSpec(double opsPerSec, double burstRatio, Verb type) {
+        apply(opsPerSec, burstRatio, verb);
+    }
+
+    private void apply(double opsPerSec, double burstRatio, Verb verb) {
         this.opsPerSec = opsPerSec;
         this.burstRatio = burstRatio;
-        this.verb = type;
+        this.verb = verb;
+        this.unit = chronoUnitFor(opsPerSec);
+
+        // TODO: include burst into ticks calculation
     }
 
-    public RateSpec(ParameterMap.NamedParameter tuple) {
-        this(tuple.value);
-        if (tuple.name.startsWith("co_")) {
-            logger.warn("The co_ prefix on " + tuple.name + " is no longer needed. All rate limiters now provide standard coordinated omission metrics.");
+    private ChronoUnit chronoUnitFor(double opsPerSec) {
+        if (opsPerSec > 1.0d) {
+            return ChronoUnit.NANOS;
         }
+        if (opsPerSec > 0.001d) {
+            return ChronoUnit.MICROS;
+        }
+        if (opsPerSec > 0.000001d) {
+            return ChronoUnit.MILLIS;
+        }
+        return ChronoUnit.SECONDS;
     }
 
-    public RateSpec(String spec) {
+    public SimRateSpec(ParameterMap.NamedParameter tuple) {
+        this(tuple.value);
+    }
+
+    public SimRateSpec(String spec) {
         String[] specs = spec.split("[,:;]");
+        Verb verb = Verb.start;
+        double burstRatio = DEFAULT_BURST_RATIO;
+        double opsPerSec;
         switch (specs.length) {
             case 3:
                 verb = Verb.valueOf(specs[2].toLowerCase());
@@ -180,6 +253,7 @@ public class RateSpec {
             default:
                 throw new RuntimeException("Rate specs must be either '<rate>' or '<rate>:<burstRatio>' as in 5000.0 or 5000.0:1.0");
         }
+        apply(opsPerSec, burstRatio, verb);
     }
 
     public String toString() {
@@ -193,22 +267,18 @@ public class RateSpec {
         return String.format("{ rate:'%s', burstRatio:'%.3f', SOPSS:'%s', BOPSS:'%s', verb:'%s' }", ratefmt, burstRatio, ratefmt, burstfmt, verb);
     }
 
-    public RateSpec withOpsPerSecond(double rate) {
-        return new RateSpec(rate, this.burstRatio);
+    public SimRateSpec withOpsPerSecond(double rate) {
+        return new SimRateSpec(rate, this.burstRatio);
     }
 
-    public RateSpec withBurstRatio(double burstRatio) {
-        return new RateSpec(this.opsPerSec, burstRatio);
+    public SimRateSpec withBurstRatio(double burstRatio) {
+        return new SimRateSpec(this.opsPerSec, burstRatio);
     }
 
-    public RateSpec withVerb(Verb verb) {
-        return new RateSpec(this.opsPerSec, this.burstRatio, verb);
+    public SimRateSpec withVerb(Verb verb) {
+        return new SimRateSpec(this.opsPerSec, this.burstRatio, verb);
     }
 
-
-    public long getNanosPerOp() {
-        return (long) (1E9 / opsPerSec);
-    }
 
     public double getRate() {
         return this.opsPerSec;
@@ -223,10 +293,10 @@ public class RateSpec {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        RateSpec rateSpec = (RateSpec) o;
+        SimRateSpec simRateSpec = (SimRateSpec) o;
 
-        if (Double.compare(rateSpec.opsPerSec, opsPerSec) != 0) return false;
-        return Double.compare(rateSpec.burstRatio, burstRatio) == 0;
+        if (Double.compare(simRateSpec.opsPerSec, opsPerSec) != 0) return false;
+        return Double.compare(simRateSpec.burstRatio, burstRatio) == 0;
     }
 
     @Override

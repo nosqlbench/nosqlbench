@@ -19,7 +19,7 @@ package io.nosqlbench.adapter.diag.optasks;
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.nb.annotations.Service;
 
 import java.util.Map;
@@ -28,15 +28,14 @@ import java.util.Map;
 public class DiagTask_diagrate extends BaseDiagTask implements NBReconfigurable {
     private String name;
     private RateLimiter rateLimiter;
-    private RateSpec rateSpec;
+    private SimRateSpec simRateSpec;
 
     private void updateRateLimiter(String spec) {
-        this.rateSpec = new RateSpec(spec);
+        this.simRateSpec = new SimRateSpec(spec);
         rateLimiter = RateLimiters.createOrUpdate(
             this.parent,
-            "diag",
             rateLimiter,
-            rateSpec
+            simRateSpec
         );
     }
 
@@ -68,7 +67,7 @@ public class DiagTask_diagrate extends BaseDiagTask implements NBReconfigurable 
 
     @Override
     public Map<String, Object> apply(Long aLong, Map<String, Object> stringObjectMap) {
-        rateLimiter.maybeWaitForOp();
+        rateLimiter.block();
         return stringObjectMap;
     }
 }

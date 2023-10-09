@@ -17,8 +17,9 @@
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
 import com.codahale.metrics.Gauge;
-import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRate;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,10 +27,10 @@ public enum RateLimiters {
     ;
     private static final Logger logger = LogManager.getLogger(RateLimiters.class);
 
-    public static synchronized RateLimiter createOrUpdate(final NBComponent parent, final String label, final RateLimiter extant, final RateSpec spec) {
+    public static synchronized RateLimiter createOrUpdate(final NBComponent parent, final RateLimiter extant, final SimRateSpec spec) {
 
         if (null == extant) {
-            final RateLimiter rateLimiter= new HybridRateLimiter(parent, label, spec);
+            final RateLimiter rateLimiter= new SimRate(parent, spec);
 
             RateLimiters.logger.info(() -> "Using rate limiter: " + rateLimiter);
             return rateLimiter;
@@ -40,47 +41,8 @@ public enum RateLimiters {
     }
 
     public static synchronized RateLimiter create(final NBComponent def, final String label, final String specString) {
-        return RateLimiters.createOrUpdate(def, label, null, new RateSpec(specString));
+        return RateLimiters.createOrUpdate(def, null, new SimRateSpec(specString));
     }
 
-    public static class WaitTimeGauge implements Gauge<Double> {
-
-        private final RateLimiter rateLimiter;
-
-        public WaitTimeGauge(final RateLimiter rateLimiter) {
-            this.rateLimiter = rateLimiter;
-        }
-
-        @Override
-        public Double getValue() {
-            return (double)this.rateLimiter.getTotalWaitTime();
-        }
-    }
-
-    public static class RateGauge implements Gauge<Double> {
-        private final RateLimiter rateLimiter;
-
-        public RateGauge(final RateLimiter rateLimiter) {
-            this.rateLimiter = rateLimiter;
-        }
-
-        @Override
-        public Double getValue() {
-            return this.rateLimiter.getRateSpec().opsPerSec;
-        }
-    }
-
-    public static class BurstRateGauge implements Gauge<Double> {
-        private final RateLimiter rateLimiter;
-
-        public BurstRateGauge(final RateLimiter rateLimiter) {
-            this.rateLimiter = rateLimiter;
-        }
-
-        @Override
-        public Double getValue() {
-            return this.rateLimiter.getRateSpec().getBurstRatio() * this.rateLimiter.getRateSpec().getRate();
-        }
-    }
 
 }

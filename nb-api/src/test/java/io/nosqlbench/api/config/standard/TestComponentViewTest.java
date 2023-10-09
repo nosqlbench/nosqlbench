@@ -23,13 +23,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class TestComponentViewTest {
 
-
     @Test
     public void testDiagnosticView() {
         NBComponent root = new TestComponent("rootk","rootv");
         TestComponent tc = new TestComponent(root, "atest", "view");
         String string = tc.toString();
-        assertThat(string).isEqualTo("TestComponent #1305486145");
+        string = string.replaceAll("#[0-9]+","#ID");
+        assertThat(string).isEqualTo("TestComponent #ID");
     }
 
 }
