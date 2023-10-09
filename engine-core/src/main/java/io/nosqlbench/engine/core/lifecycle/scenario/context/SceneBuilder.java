@@ -28,7 +28,7 @@ import java.io.Reader;
 import java.util.Map;
 
 public class SceneBuilder implements SceneBuilderFacets.ALL {
-    private Map<String,String> params;
+    private Map<String,String> params = Map.of();
     private ScenarioActivitiesController controller;
     private Extensions extensions;
     private PrintWriter out = new PrintWriter(System.out);

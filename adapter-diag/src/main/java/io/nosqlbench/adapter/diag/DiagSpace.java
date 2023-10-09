@@ -56,7 +56,7 @@ public class DiagSpace implements ActivityDefObserver, AutoCloseable {
 
     public void maybeWaitForOp(double diagrate) {
         if (diagRateLimiter != null) {
-            long waittime = diagRateLimiter.maybeWaitForOp();
+            long waittime = diagRateLimiter.block();
         }
     }
 

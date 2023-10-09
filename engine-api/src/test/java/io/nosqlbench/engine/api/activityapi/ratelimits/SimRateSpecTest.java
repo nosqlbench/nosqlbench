@@ -16,33 +16,34 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RateSpecTest {
+public class SimRateSpecTest {
 
     @Test
     public void testDefaultRateSpecPattern() {
-        RateSpec r = new RateSpec("523");
+        SimRateSpec r = new SimRateSpec("523");
         assertThat(r.getRate()).isEqualTo(523.0d);
         assertThat(r.getBurstRatio()).isEqualTo(1.1d);
     }
 
     @Test
     public void testBurstRatioPattern() {
-        RateSpec r = new RateSpec("12345,1.3");
+        SimRateSpec r = new SimRateSpec("12345,1.3");
         assertThat(r.getRate()).isEqualTo(12345.0d);
         assertThat(r.getBurstRatio()).isEqualTo(1.3d);
     }
 
     @Test
     public void testTypeSelection() {
-        RateSpec a = new RateSpec("12345,1.4,configure");
-        assertThat(a.getVerb()).isEqualTo(RateSpec.Verb.configure);
-        RateSpec d = new RateSpec("12345,1.4,restart");
-        assertThat(d.verb).isEqualTo(RateSpec.Verb.restart);
-        RateSpec c = new RateSpec("12345,1.1");
-        assertThat(c.verb).isEqualTo(RateSpec.Verb.start);
+        SimRateSpec a = new SimRateSpec("12345,1.4,configure");
+        assertThat(a.getVerb()).isEqualTo(SimRateSpec.Verb.configure);
+        SimRateSpec d = new SimRateSpec("12345,1.4,restart");
+        assertThat(d.verb).isEqualTo(SimRateSpec.Verb.restart);
+        SimRateSpec c = new SimRateSpec("12345,1.1");
+        assertThat(c.verb).isEqualTo(SimRateSpec.Verb.start);
     }
 }

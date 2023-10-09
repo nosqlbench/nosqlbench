@@ -26,7 +26,7 @@ import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateSpec;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.api.labels.NBLabels;
@@ -305,12 +305,12 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
     public synchronized void initOrUpdateRateLimiters(ActivityDef activityDef) {
 
         activityDef.getParams().getOptionalNamedParameter("striderate")
-                .map(RateSpec::new)
-                .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this, "strides", strideLimiter, spec));
+                .map(SimRateSpec::new)
+                .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this, strideLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate")
-                .map(RateSpec::new).ifPresent(
-                        spec -> cycleLimiter = RateLimiters.createOrUpdate(this, "cycles", cycleLimiter, spec));
+                .map(SimRateSpec::new).ifPresent(
+                        spec -> cycleLimiter = RateLimiters.createOrUpdate(this, cycleLimiter, spec));
 
     }
 

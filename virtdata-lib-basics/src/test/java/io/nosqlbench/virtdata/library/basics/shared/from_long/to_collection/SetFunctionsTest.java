@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -24,12 +26,13 @@ import java.util.function.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SetFunctionsTest {
+    private final static Logger logger = LogManager.getLogger(SetFunctionsTest.class);
 
     @Test
     public void testSetFunctions() {
         SetFunctions f1 = new SetFunctions((LongUnaryOperator) i -> i, (LongFunction<Double>) j -> (double) j);
         Set<Object> set = f1.apply(3);
-        System.out.println(set);
+        logger.info(set);
     }
 
     @Test

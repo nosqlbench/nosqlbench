@@ -16,23 +16,25 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.engine.api.activityapi.core.Startable;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 
-public interface RateLimiter extends Startable {
+import java.time.Duration;
+
+public interface RateLimiter {
 
     /**
-     * Block until it is time for the next operation, according to the
-     * nanoseconds per op as set by {@link #applyRateSpec(RateSpec)}
+     * <P>Block until it is time for the next operation, according to the
+     * nanoseconds per op as set by {@link #applyRateSpec(SimRateSpec)}
      * @return the waittime as nanos behind schedule when this op returns.
-     * The returned value is required to be greater than or equal to zero.
+     * The returned value is required to be greater than or equal to zero.</P>
      *
-     * Note that accuracy of the returned value is limited by timing
+     * <P>Note that accuracy of the returned value is limited by timing
      * precision and calling overhead of the real time clock. It will not
      * generally be better than microseconds. Also, some rate limiting
      * algorithms are unable to efficiently track per-op waittime at speed
-     * due to bulk allocation mechanisms necessary to support higher rates.
+     * due to bulk allocation mechanisms necessary to support higher rates.</P>
      */
-    long maybeWaitForOp();
+    long block();
 
     /**
      * Return the total number of nanoseconds behind schedule
@@ -41,7 +43,7 @@ public interface RateLimiter extends Startable {
      * an accumulator and also included in any subsequent measurement.
      * @return nanoseconds behind schedule since the rate limiter was started
      */
-    long getTotalWaitTime();
+    Duration getTotalWaitTimeDuration();
 
     /**
      * Return the total number of nanoseconds behind schedule
@@ -50,13 +52,16 @@ public interface RateLimiter extends Startable {
      * an accumulator and also included in any subsequent measurement.
      * @return nanoseconds behind schedule since the rate limiter was started
      */
-    long getWaitTime();
+
+    Duration getWaitTimeDuration();
+
+    double getWaitTimeSeconds();
 
     /**
      * Modify the rate of a running rate limiter.
      * @param spec The rate and burstRatio specification
      */
-    void applyRateSpec(RateSpec spec);
+    void applyRateSpec(SimRateSpec spec);
 
 
     /**
@@ -70,6 +75,6 @@ public interface RateLimiter extends Startable {
      * Get the rate spec that this rate limiter was created from.
      * @return a RateSpec that describes this rate limiter
      */
-    RateSpec getRateSpec();
+    SimRateSpec getSpec();
 
 }
