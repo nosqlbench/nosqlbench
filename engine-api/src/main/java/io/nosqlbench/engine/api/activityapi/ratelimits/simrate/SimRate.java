@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
@@ -69,7 +70,8 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
     private long refillIntervalNanos = 1_000_000_0;
     private int maxActivePool, burstPoolSize, maxOverActivePool, ticksPerOp;
     private SimRateSpec spec;
-    private long blocks;
+
+    private LongAdder blocks = new LongAdder();
 
     private final ReentrantLock fillerLock = new ReentrantLock(false);
 
@@ -246,7 +248,7 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
     }
 
     public long block() {
-        this.blocks++;
+        this.blocks.increment();
         try {
             this.activePool.acquire(ticksPerOp);
         } catch (InterruptedException e) {
@@ -325,7 +327,7 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
             (double) this.activePool.availablePermits() / this.maxActivePool * 100.0,
             (double) this.activePool.availablePermits() / this.maxOverActivePool * 100.0,
             this.waitingPool.get(),
-            this.blocks,
+            this.blocks.sum(),
             this.fillerLock.isLocked() ? "LOCKED" : "UNLOCKED", spec.ticksPerOp()
         );
 

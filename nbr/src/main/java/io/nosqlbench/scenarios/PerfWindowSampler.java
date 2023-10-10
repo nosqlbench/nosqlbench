@@ -24,7 +24,7 @@ import java.util.function.DoubleSupplier;
  * This is a helper class that makes it easy to bundle up a combination of measurable
  * factors and get a windowed sample from them. To use it, add your named data sources
  * with their coefficients, and optionally a callback which resets the measurement
- * buffers for the next time. When you call {@link #getCurrentWindowValue()}, all callbacks
+ * buffers for the next time. When you call {@link #getValue()}, all callbacks
  * are used after the value computation is complete.
  *
  * <P>This is NOT thread safe!</P>
@@ -32,19 +32,8 @@ import java.util.function.DoubleSupplier;
 public class PerfWindowSampler {
 
     private final List<Criterion> criteria = new ArrayList<>();
-    private boolean openWindow = false;
-
-    private final static int STARTS = 0;
-    private final static int ENDS = 1;
-    private final static int WEIGHTED = 2;
-    private final static int START_TIME = 3;
-    private final static int END_TIME = 4;
-    private final static int ARYSIZE = END_TIME+1;
-    /**
-     * window, measure, START,STOP,WEIGHTED
-     */
-    private double[][][] data;
-    private int window = -1;
+    private final WindowSamples windows = new WindowSamples();
+    private WindowSample window;
 
 
     void addDirect(String name, DoubleSupplier supplier, double weight, Runnable callback) {
@@ -65,90 +54,40 @@ public class PerfWindowSampler {
         });
     }
 
-    double getCurrentWindowValue() {
-        if (openWindow) {
-            throw new RuntimeException("invalid access to checkpoint value on open window.");
-        }
-        double product = 1.0d;
-        if (data==null) {
+    double getValue() {
+        if (windows.size()==0) {
             return Double.NaN;
         }
-        double[][] values = data[window];
-
-        for (int i = 0; i < criteria.size(); i++) {
-            product *= values[i][WEIGHTED];
-        }
-        return product;
+        return windows.getLast().value();
     }
-    private double valueOf(int measuredItem) {
-        double[] vals = data[window][measuredItem];
-
-        if (criteria.get(measuredItem).delta) {
-            double duration = (vals[END_TIME] - vals[START_TIME])/1000D;
-            double increment = vals[ENDS] - vals[STARTS];
-
-            return increment / duration;
-        } else {
-            return vals[ENDS];
-        }
-    }
-
 
     @Override
     public String toString() {
-
-        StringBuilder sb = new StringBuilder("PERF " + (openWindow ? "OPENWINDOW! " : "" ) + "sampler value =").append(getCurrentWindowValue()).append("\n");
-        for (int i = 0; i < criteria.size(); i++) {
-            Criterion criterion = criteria.get(i);
-            sb.append("->").append(criterion.name).append(" last=").append(valueOf(i)).append("\n");
-        }
+        StringBuilder sb = new StringBuilder("PERF VALUE=").append(getValue()).append("\n");
+        sb.append("windows:\n"+windows.getLast().toString());
         return sb.toString();
     }
 
     public void startWindow() {
         startWindow(System.currentTimeMillis());
-
     }
     public void startWindow(long now) {
-        openWindow=true;
-        window++;
-        if (this.data == null) {
-            this.data = new double[1][criteria.size()][ARYSIZE];
+        if (window!=null) {
+            throw new RuntimeException("cant start window twice in a row. Must close window first");
         }
-        if (this.window >=data.length) {
-            double[][][] newary = new double[data.length<<1][criteria.size()][ARYSIZE];
-            System.arraycopy(data,0,newary,0,data.length);
-            this.data = newary;
-        }
-        for (int i = 0; i < criteria.size(); i++) {
-            data[window][i][START_TIME] = now;
-            Criterion criterion = criteria.get(i);
-            if (criterion.delta) {
-                data[window][i][STARTS] = criterion.supplier.getAsDouble();
-            } else {
-                data[window][i][STARTS] = Double.NaN;
-            }
-            criterion.callback.run();
-        }
-        for (Criterion criterion : criteria) {
-            criterion.callback.run();
-        }
+        List<ParamSample> samples = criteria.stream().map(c -> ParamSample.init(c).start(now)).toList();
+        this.window = new WindowSample(samples);
     }
 
     public void stopWindow() {
         stopWindow(System.currentTimeMillis());
     }
     public void stopWindow(long now) {
-        for (int i = 0; i < criteria.size(); i++) {
-            data[window][i][END_TIME] = now;
-            Criterion criterion = criteria.get(i);
-            double endmark = criterion.supplier.getAsDouble();
-            data[window][i][ENDS] = endmark;
-
-            double sample = valueOf(i);
-            data[window][i][WEIGHTED] = sample* criterion.weight;
+        for (int i = 0; i < window.size(); i++) {
+            window.set(i,window.get(i).stop(now));
         }
-        openWindow=false;
+        windows.add(window);
+        window=null;
     }
 
     public static record Criterion(
@@ -158,4 +97,55 @@ public class PerfWindowSampler {
         Runnable callback,
         boolean delta
     ) { }
+
+    public static class WindowSamples extends ArrayList<WindowSample> {}
+    public static class WindowSample extends ArrayList<ParamSample> {
+        public WindowSample(List<ParamSample> samples) {
+            super(samples);
+        }
+
+        public double value() {
+            return stream().mapToDouble(ParamSample::weightedValue).sum();
+        }
+    }
+    public static record ParamSample(Criterion criterion, long startAt, long endAt, double startval, double endval) {
+        public double weightedValue() {
+            return rawValue() * criterion().weight;
+        }
+
+        private double rawValue() {
+            if (criterion.delta()) {
+                return endval - startval;
+            }
+            return endval;
+        }
+
+        private double rate() {
+            return rawValue()/seconds();
+        }
+        private double seconds() {
+            return ((double)(endAt-startAt)) / 1000d;
+        }
+
+        public static ParamSample init(Criterion criterion) {
+            return new ParamSample(criterion, 0,0,Double.NaN, Double.NaN);
+        }
+
+        public ParamSample start(long startTime) {
+            criterion.callback.run();
+            double v1 = criterion.supplier.getAsDouble();
+            return new ParamSample(criterion,startTime,0L, v1, Double.NaN);
+        }
+        public ParamSample stop(long stopTime) {
+            double v2 = criterion.supplier.getAsDouble();
+            return new ParamSample(criterion,startAt,stopTime,startval, v2);
+        }
+
+        @Override
+        public String toString() {
+            return "sample[" + criterion.name() + "] "
+                + ((Double.isNaN(endval)) ? " incomplete" : "dT:" + seconds() + " dV:" + rawValue() + " rate:" + rate() + " v1:" + startval + " v2:" + endval);
+        }
+
+    }
 }
