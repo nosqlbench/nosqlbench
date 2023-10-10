@@ -25,7 +25,7 @@ package io.nosqlbench.adapter.pgvector;
  */
 public enum PGVectorOpType {
     //See https://jdbc.postgresql.org/documentation/query/
-    execute, // Used for CREATE|DROP DATABASE|TABLE operation. Returns nothing.
+    execute, // Used for CREATE|DROP DATABASE|TABLE operation. Returns nothing in theory however the API call can return ResultSet(s) in practice.
     query, // Used for SELECT operation. Returns a ResultSet object.
     update // Used for updating records such as INSERT|UPDATE|DELETE. Returns the number of rows affected.
 }

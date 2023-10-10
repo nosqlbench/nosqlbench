@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.pgvector;
 
 import io.nosqlbench.adapter.pgvector.opdispensers.PGVectorExecuteOpDispenser;
 import io.nosqlbench.adapter.pgvector.opdispensers.PGVectorExecuteQueryOpDispenser;
+import io.nosqlbench.adapter.pgvector.opdispensers.PGVectorExecuteUpdateOpDispenser;
 import io.nosqlbench.adapter.pgvector.optypes.PGVectorOp;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
@@ -75,10 +76,12 @@ public class PGVectorOpMapper implements OpMapper<PGVectorOp> {
 
                 // INSERT|UPDATE|DELETE uses 'executeUpdate' and returns an 'int'
                 // https://jdbc.postgresql.org/documentation/query/#performing-updates
+                case update ->
+                    new PGVectorExecuteUpdateOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
 
                 // CREATE|DROP TABLE|VIEW uses 'execute' (as opposed to 'executeQuery' which returns a 'ResultSet')
                 // https://jdbc.postgresql.org/documentation/query/#example54dropping-a-table-in-jdbc
-                case execute, update ->
+                case execute ->
                     new PGVectorExecuteOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
             };
         }
