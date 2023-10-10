@@ -24,34 +24,38 @@ import java.util.List;
 
 public class MVLogger implements MultivariateFunction {
     private final MultivariateFunction function;
-    List<List<Double>> log = new ArrayList<>();
+    List<Entry> entries = new ArrayList<>();
 
     public MVLogger(MultivariateFunction function) {
         this.function = function;
     }
 
     @Override
-    public double value(double[] doubles) {
-        ArrayList<Double> params = new ArrayList<>(doubles.length);
-        log.add(params);
-
-        return function.value(doubles);
+    public double value(double[] params) {
+        double value = function.value(params);
+        entries.add(new Entry(params,value));
+        return value;
     }
 
-    public List<List<Double>> getLogList() {
-        return log;
+    public List<Entry> getLogList() {
+        return entries;
     }
 
+    public List<Entry> getLog() {
+        return entries;
+    }
     public double[][] getLogArray() {
-        double[][] ary = new double[log.size()][];
-        for (int row = 0; row < log.size(); row++) {
-            List<Double> columns = log.get(row);
-            double[] rowary = new double[columns.size()];
-            ary[row]=rowary;
-            for (int col = 0; col < log.get(row).size(); col++) {
-                rowary[col]=columns.get(col);
-            }
+        double[][] ary = new double[entries.size()][];
+        for (int row = 0; row < entries.size(); row++) {
+            Entry entry = entries.get(row);
+            ary[row]=entry.params();
         }
         return ary;
     }
+
+    public Entry getLastEntry() {
+        return entries.getLast();
+    }
+
+    public static record Entry(double[] params, double value) {};
 }

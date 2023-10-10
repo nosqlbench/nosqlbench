@@ -204,7 +204,7 @@ public class GrafanaClient {
             HttpRequest request = rqb.build();
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
-            if (e.getMessage().contains("WWW-Authenticate header missing")) {
+            if (e.getMessage()!=null && e.getMessage().contains("WWW-Authenticate header missing")) {
                 throw new RuntimeException("Java HttpClient was not authorized, and it saw no WWW-Authenticate header" +
                     " in the response, so this is probably Grafana telling you that the auth scheme failed. Normally " +
                     "this error would be thrown by Java HttpClient:" + e.getMessage());

@@ -34,7 +34,7 @@ class PerfWindowSamplerTest {
 
         pws.startWindow();
         pws.stopWindow();
-        double value = pws.getCurrentWindowValue();
+        double value = pws.getValue();
         assertThat(value).isCloseTo(9.0, Offset.offset(0.002));
     }
 
@@ -56,7 +56,7 @@ class PerfWindowSamplerTest {
         a2.set(10L);
 
         pws.stopWindow(1000L);
-        double value = pws.getCurrentWindowValue();
+        double value = pws.getValue();
         assertThat(value).isCloseTo(30.0,Offset.offset(0.001));
 
         pws.startWindow(10000L);
@@ -64,7 +64,7 @@ class PerfWindowSamplerTest {
         a2.set(42); // 42-1=41; 41+32=73
 
         pws.stopWindow(11000L);
-        double value2 = pws.getCurrentWindowValue();
+        double value2 = pws.getValue();
         assertThat(value2).isCloseTo(1248.0,Offset.offset(0.001));
 
     }

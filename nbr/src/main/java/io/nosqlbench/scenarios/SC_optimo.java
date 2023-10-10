@@ -27,7 +27,6 @@ import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.events.ParamChange;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
-import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRate;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
 import org.apache.logging.log4j.LogManager;
@@ -72,7 +71,7 @@ public class SC_optimo extends SCBaseScenario {
         BobyqaOptimizerInstance bobby = create().bobyqaOptimizer();
         bobby.param("rate", 1.0d, 10000.d);
         bobby.param("threads", 1.0d, 1000.0d);
-        bobby.param("noise", 100d, 200.0d);
+//        bobby.param("noise", 100d, 200.0d);
         bobby.setInitialRadius(1000000.0).setStoppingRadius(0.001).setMaxEval(1000);
 
         Activity flywheel = controller.start(activityParams);
@@ -86,9 +85,14 @@ public class SC_optimo extends SCBaseScenario {
          * <P>The parameter values will be passed in as an array, pair-wise with the param calls above.</P>
          */
 
+        flywheel.onEvent(new ParamChange<>(new CycleRateSpec(5.0, 1.1d, SimRateSpec.Verb.restart)));
+
         PerfWindowSampler sampler = new PerfWindowSampler();
         NBMetricTimer result_success_timer = flywheel.find().timer("name:result_success");
+        System.out.println("c1:" + result_success_timer.getCount());
         sampler.addDeltaTime("achieved_rate", result_success_timer::getCount, 1000.0);
+        System.out.println("c2:" + result_success_timer.getCount());
+        stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
         final DeltaSnapshotReader snapshotter = result_success_timer.getDeltaReader();
         AtomicReference<ConvenientSnapshot> snapshot = new AtomicReference<>(snapshotter.getDeltaSnapshot());
 //        ValidAtOrBelow below15000 = ValidAtOrBelow.max(15000);
@@ -98,28 +102,43 @@ public class SC_optimo extends SCBaseScenario {
 //            -1.0,
 //            () -> snapshot.set(snapshotter.getDeltaSnapshot())
 //        );
-        sampler.startWindow();
 
         ToDoubleFunction<double[]> f = new ToDoubleFunction<double[]>() {
             @Override
             public double applyAsDouble(double[] values) {
                 stdout.println("params=" + Arrays.toString(values));
 
+                System.out.println("c3:" + result_success_timer.getCount());
+                stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
+
                 int threads = (int) bobby.getParams().getValue("threads", values);
-                stdout.println("SETTING threads to " + threads);
                 flywheel.getActivityDef().setThreads(threads);
+                stdout.println("PARAM threads set to " + threads + " confirm: " + flywheel.getActivityDef().getThreads());
 
                 double rate = bobby.getParams().getValue("rate", values);
-                stdout.println("SETTING rate to "+ rate);
                 CycleRateSpec ratespec = new CycleRateSpec(rate, 1.1d, SimRateSpec.Verb.restart);
                 flywheel.onEvent(new ParamChange<>(ratespec));
+                stdout.println("PARAM cyclerate set to " +rate);
+                stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
+
+                System.out.println("c3b:" + result_success_timer.getCount());
+                stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
+                stdout.println("waiting 2 seconds for stabilization");
+                controller.waitMillis(2000);
+
+                System.out.println("c4:" + result_success_timer.getCount());
+                stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
 
                 sampler.startWindow();
                 stdout.println("waiting " + seconds + " seconds...");
                 controller.waitMillis(seconds * 1000L);
                 sampler.stopWindow();
-                double value = sampler.getCurrentWindowValue();
-                stdout.println("RESULT: " + sampler);
+                System.out.println("c5:" + result_success_timer.getCount());
+                stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
+
+                double value = sampler.getValue();
+                stdout.println("RESULT:\n" + sampler);
+                stdout.println("-".repeat(40));
                 return value;
 
             }
@@ -131,7 +150,7 @@ public class SC_optimo extends SCBaseScenario {
         stdout.println("optimized result was " + result);
         stdout.println("map of result was " + result.getMap());
 
-        // TODO: controller start should not return the activity itself, but a control point, like activityDef
+        // TODO: controller startAt should not return the activity itself, but a control point, like activityDef
 
         // TODO: warn user if one of the result params is near or at the range allowed, as there
         // could be a better result if the range is arbitrarily limiting the parameter space.
