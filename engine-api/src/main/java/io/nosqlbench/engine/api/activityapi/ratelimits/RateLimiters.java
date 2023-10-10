@@ -40,9 +40,5 @@ public enum RateLimiters {
         return extant;
     }
 
-    public static synchronized RateLimiter create(final NBComponent def, final String label, final String specString) {
-        return RateLimiters.createOrUpdate(def, null, new SimRateSpec(specString));
-    }
-
 
 }

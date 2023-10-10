@@ -20,11 +20,11 @@ package io.nosqlbench.components;
 
 import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.events.NBEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent {
@@ -136,5 +136,20 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
             }
         }
         return sb.toString();
+    }
+
+
+    @Override
+    public void onEvent(NBEvent event) {
+        logger.debug(() -> description() + " handling event " + event.toString());
+        switch (event) {
+            case UpEvent ue -> { if (parent!=null) parent.onEvent(ue); }
+            case DownEvent de -> {
+                for (NBComponent child : children) {
+                    child.onEvent(de);
+                }
+            }
+            default -> logger.info("dropping event " + event);
+        }
     }
 }

@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.events.ParamChange;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
@@ -26,6 +27,7 @@ import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiters;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
@@ -43,6 +45,7 @@ import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.StrideRateSpec;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DryRunOpDispenserWrapper;
@@ -113,7 +116,7 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
 
     @Override
     public synchronized void initActivity() {
-        initOrUpdateRateLimiters(this.activityDef);
+//        initOrUpdateRateLimiters(this.activityDef);
     }
 
     public synchronized NBErrorHandler getErrorHandler() {
@@ -299,19 +302,25 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
 
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
-        initOrUpdateRateLimiters(activityDef);
+//        initOrUpdateRateLimiters(activityDef);
     }
 
     public synchronized void initOrUpdateRateLimiters(ActivityDef activityDef) {
 
+
         activityDef.getParams().getOptionalNamedParameter("striderate")
-                .map(SimRateSpec::new)
-                .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this, strideLimiter, spec));
+                .map(StrideRateSpec::new).ifPresent(sr -> this.onEvent(new ParamChange<>(sr)));
 
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate")
-                .map(SimRateSpec::new).ifPresent(
-                        spec -> cycleLimiter = RateLimiters.createOrUpdate(this, cycleLimiter, spec));
+                .map(CycleRateSpec::new).ifPresent(sr -> this.onEvent(new ParamChange<>(sr)));
 
+    }
+
+    public void createOrUpdateStrideLimiter(SimRateSpec spec) {
+        strideLimiter = RateLimiters.createOrUpdate(this, strideLimiter, spec);
+    }
+    public void createOrUpdateCycleLimiter(SimRateSpec spec) {
+        cycleLimiter = RateLimiters.createOrUpdate(this, cycleLimiter, spec);
     }
 
     /**

@@ -33,7 +33,7 @@ import java.util.List;
  *
  * This interface includes more aspects of above by extension going forward.
  */
-public interface NBComponent extends AutoCloseable, NBLabeledElement, NBComponentMetrics, NBComponentServices {
+public interface NBComponent extends AutoCloseable, NBLabeledElement, NBComponentMetrics, NBComponentServices, NBComponentEvents {
 
     NBComponent EMPTY_COMPONENT = new NBBaseComponent(null);
 

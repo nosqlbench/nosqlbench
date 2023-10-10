@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
@@ -71,6 +72,7 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
     private long blocks;
 
     private final ReentrantLock fillerLock = new ReentrantLock(false);
+
     private AtomicLong cumulativeWaitTimeTicks = new AtomicLong(0L);
     private long startTime;
 
@@ -78,43 +80,6 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
         super(parent, NBLabels.forKV());
         this.spec = spec;
         startFiller();
-    }
-
-    private void startFiller() {
-        try {
-            applySpec(spec);
-            fillerLock.lock();
-            if (this.filler != null) {
-                logger.debug("filler already started, no changes");
-                return;
-            }
-            this.filler = new Thread(new FillerRunnable());
-            filler.setName("FILLER");
-            filler.setUncaughtExceptionHandler(this);
-            filler.start();
-        } finally {
-            fillerLock.unlock();
-        }
-    }
-
-    private void stopFiller() {
-        try {
-            fillerLock.lock();
-            if (filler == null) {
-                logger.debug("filler already stopped, no changes");
-                return;
-            }
-            running = false;
-            logger.trace("STARTED  awaiting filler thread join");
-            filler.join();
-            logger.trace("FINISHED awaiting filler thread join");
-            filler = null;
-            accumulateStats();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            fillerLock.unlock();
-        }
     }
 
     public long refill() {
@@ -131,7 +96,7 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
             if (intOverFlowNanoTokens > 0) {
                 waitingPool.addAndGet(spec.nanosToTicks(intOverFlowNanoTokens));
                 newNanoTokens -= intOverFlowNanoTokens;
-                logger.warn(() -> "timer overflow with extra tokens=" + intOverFlowNanoTokens);
+//                logger.warn(() -> "timer overflow with extra tokens=" + intOverFlowNanoTokens);
             }
             int newTokens = spec.nanosToTicks(newNanoTokens);
 
@@ -163,7 +128,6 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
 
             int burstFillAllowed = (int) (refillFactor * this.burstPoolSize);
 
-
             burstFillAllowed = Math.min(this.maxOverActivePool - this.activePool.availablePermits(), burstFillAllowed);
 
             // we can only burst up to our burst limit, but only as much time as we have in the waiting pool already
@@ -182,27 +146,39 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
 //        }
 //        System.out.println();
 
-            long waiting = this.activePool.availablePermits() + this.waitingPool.get();
-            return waiting;
+//            long waiting = this.activePool.availablePermits() + this.waitingPool.get();
+//            return waiting;
+        } catch (Exception e) {
+            logger.error(e);
         } finally {
             fillerLock.unlock();
-
+            long waiting = this.activePool.availablePermits() + this.waitingPool.get();
+            return waiting;
         }
     }
 
 
     @Override
     public void applyRateSpec(SimRateSpec updatingSimRateSpec) {
+        logger.info("rate spec:\n" + updatingSimRateSpec);
         try {
             fillerLock.lock();
+
             if (null == updatingSimRateSpec) throw new RuntimeException("RateSpec must be defined");
 
-            if (updatingSimRateSpec.verb == SimRateSpec.Verb.stop || updatingSimRateSpec.verb == SimRateSpec.Verb.restart) {
-                if (filler != null) {
-                    stopFiller();
-                }
+            if (filler != null) {
+                stopFiller();
             }
-            applySpec(updatingSimRateSpec);
+            this.spec = updatingSimRateSpec;
+//            if (updatingSimRateSpec.verb == SimRateSpec.Verb.stop || updatingSimRateSpec.verb == SimRateSpec.Verb.restart) {
+//                if (filler != null) {
+//                    stopFiller();
+//                }
+//            }
+
+//            convertTimeBase(spec, updatingSimRateSpec);
+            initPools(spec);
+
             if (updatingSimRateSpec.verb == SimRateSpec.Verb.start || updatingSimRateSpec.verb == SimRateSpec.Verb.restart) {
                 if (filler == null) {
                     startFiller();
@@ -215,28 +191,58 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
 
     }
 
+    /**
+     * When a rate limiter is stopped in the midst of a reconfiguration, carry over the accumulated time
+     * in the active pool after converting the time base. Extra time that won't fit because of any time-base
+     * scaling is sent into the waiting pool automatically.
+     */
+    private void convertTimeBase(SimRateSpec from, SimRateSpec to) {
+        ChronoUnit fromUnit = from.unit;
+        ChronoUnit toUnit = to.unit;
+
+        if (fromUnit == toUnit) {
+            return;
+        }
+
+        int drained = activePool.drainPermits();
+        Duration drainedTime = Duration.of(drained, fromUnit);
+        long totalNanos = (drainedTime.getSeconds() * 1_000_000_000) + drainedTime.getNano();
+
+        int newTicks = to.nanosToTicks(totalNanos);
+        int ticksForActive = Math.min(newTicks, 1_000_000_000);
+        long nanosForActive = totalNanos - to.ticksToNanos(ticksForActive);
+        long nanosForWaiting = totalNanos - nanosForActive;
+
+        this.waitingPool.addAndGet(nanosForActive);
+        this.activePool.release((int) nanosForWaiting);
+    }
+
     private void accumulateStats() {
         this.cumulativeWaitTimeTicks.addAndGet(this.waitingPool.get());
     }
 
     @Override
-    public Duration getWaitTimeDuration(){
+    public Duration getWaitTimeDuration() {
         return Duration.of(waitingPool.get(), this.spec.unit);
     }
 
     @Override
     public double getWaitTimeSeconds() {
-        Duration wait =  getWaitTimeDuration();
-        return (double) wait.getSeconds() + (wait.getNano()/1_000_000_000d);
+        Duration wait = getWaitTimeDuration();
+        return (double) wait.getSeconds() + (wait.getNano() / 1_000_000_000d);
     }
 
-    public void applySpec(SimRateSpec simRateSpec) {
-        ticksPerOp = simRateSpec.ticksPerOp();
+    public void initPools(SimRateSpec simRateSpec) {
         maxActivePool = 1_000_000_000;
         maxOverActivePool = (int) (this.maxActivePool * simRateSpec.burstRatio());
         burstPoolSize = this.maxOverActivePool - this.maxActivePool;
-        this.startTime = System.nanoTime();
 
+        this.activePool.drainPermits();
+        ticksPerOp = simRateSpec.ticksPerOp();
+        this.activePool.release(ticksPerOp); // Allow the first op to start immediately, but only the first
+        this.waitingPool.set(0);
+
+        this.startTime = System.nanoTime();
     }
 
     public long block() {
@@ -259,38 +265,68 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
         return spec;
     }
 
+    private void startFiller() {
+        try {
+            fillerLock.lock();
+            initPools(spec);
+            running = true;
+            if (this.filler != null) {
+                logger.debug("filler already started, no changes");
+                return;
+            }
+            this.filler = new Thread(new FillerRunnable());
+            filler.setName("FILLER");
+            filler.setUncaughtExceptionHandler(this);
+            filler.start();
+        } finally {
+            fillerLock.unlock();
+        }
+    }
+
+    private void stopFiller() {
+        try {
+            fillerLock.lock();
+            if (filler == null) {
+                logger.debug("filler already stopped, no changes");
+                return;
+            }
+            running = false;
+            filler.join();
+            filler = null;
+            accumulateStats();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            fillerLock.unlock();
+        }
+    }
+
+
     private final class FillerRunnable implements Runnable {
         private long fills = 0L;
         private int charat = 0;
 
         @Override
         public void run() {
-            System.out.print("_");
-            while (SimRate.this.running) {
-                fills++;
-//                if ((fills%100)==0) {
-//                    System.out.print(chars[charat++%chars.length]);
-//                    System.out.print(ANSI_CURSOR_LEFT);
-//                    System.out.flush();
-//                }
-//                logger.debug(() -> "refilling");
+            while (running) {
                 SimRate.this.refill();
+                fills++;
                 LockSupport.parkNanos(refillIntervalNanos);
             }
-            System.out.println("stopping filler");
+            logger.debug("shutting down refill thread");
         }
     }
 
     @Override
     public String toString() {
         return String.format(
-            "{ active:%d, max:%d, fill:'(%,3.1f%%)A (%,3.1f%%)B', wait_ns:%,d, blocks:%,d lock:%s}",
-            this.activePool.availablePermits(), this.maxActivePool,
+            "{ rate:%f active:%d, max:%d, fill:'(%,3.1f%%)A (%,3.1f%%)B', wait_ns:%,d, blocks:%,d lock:%s ticks:%d}",
+            this.spec.getRate(), this.activePool.availablePermits(), this.maxActivePool,
             (double) this.activePool.availablePermits() / this.maxActivePool * 100.0,
             (double) this.activePool.availablePermits() / this.maxOverActivePool * 100.0,
             this.waitingPool.get(),
             this.blocks,
-            this.fillerLock.isLocked() ? "LOCKED" : "UNLOCKED"
+            this.fillerLock.isLocked() ? "LOCKED" : "UNLOCKED", spec.ticksPerOp()
         );
 
     }
@@ -318,7 +354,7 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
     @Override
     public Duration getTotalWaitTimeDuration() {
         Duration d1 = Duration.of(waitingPool.get(), this.spec.unit);
-        Duration d2 = Duration.of(cumulativeWaitTimeTicks.get(),this.spec.unit);
+        Duration d2 = Duration.of(cumulativeWaitTimeTicks.get(), this.spec.unit);
         return d1.plus(d2);
     }
 

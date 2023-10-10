@@ -30,7 +30,7 @@ import java.util.*;
  * was not recognized.
  */
 public class SessionCommandParser {
-    private final static Logger logger = LogManager.getLogger(SessionCommandParser.class);
+//    private final static Logger logger = LogManager.getLogger(SessionCommandParser.class);
 
     private static final String FRAGMENT = "fragment";
     private static final String SCRIPT = "script";
@@ -99,7 +99,7 @@ public class SessionCommandParser {
                     } else if (NBCLIScenarioParser.isFoundWorkload(word, includes)) {
                         NBCLIScenarioParser.parseScenarioCommand(arglist, RESERVED_WORDS, includes);
                     } else {
-                        logger.warn("unrecognized Cmd: " + word);
+                        System.out.println("unrecognized Cmd: " + word); // instead of using logger due to init precedence
                         return Optional.empty();
                     }
                     break;
