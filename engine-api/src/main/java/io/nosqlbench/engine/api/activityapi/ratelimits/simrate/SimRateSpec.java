@@ -153,15 +153,25 @@ public class SimRateSpec {
     }
 
     public int nanosToTicks(long newNanoTokens) {
-        if (newNanoTokens>Integer.MAX_VALUE) {
-            throw new RuntimeException("time base error with nanoseconds to ticks, value (" + newNanoTokens + ") is too large (>2^31!)");
-        }
+//        if (newNanoTokens>Integer.MAX_VALUE) {
+//            throw new RuntimeException("time base error with nanoseconds to ticks, value (" + newNanoTokens + ") is too large (>2^31!)");
+//        }
         return switch (unit) {
             case NANOS -> (int) newNanoTokens;
             case MICROS -> (int) (newNanoTokens/1_000L);
             case MILLIS -> (int) (newNanoTokens/1_000_000L);
             case SECONDS -> (int) (newNanoTokens/1_000_000_000L);
-            default -> throw new RuntimeException("invalid ChronoUnit for rate spec:" + unit);
+            default -> throw new RuntimeException("invalid ChronoUnit for nanosToTicks:" + unit);
+        };
+    }
+
+    public long ticksToNanos(int newTicks) {
+        return switch (unit) {
+            case NANOS -> newTicks;
+            case MICROS -> newTicks*1_000L;
+            case MILLIS -> newTicks*1_000_000L;
+            case SECONDS -> newTicks*1_000_000_000L;
+            default -> throw new RuntimeException("invalid ChronoUnit for ticksToNanos:" + unit);
         };
     }
 
@@ -266,19 +276,6 @@ public class SimRateSpec {
 
         return String.format("{ rate:'%s', burstRatio:'%.3f', SOPSS:'%s', BOPSS:'%s', verb:'%s' }", ratefmt, burstRatio, ratefmt, burstfmt, verb);
     }
-
-    public SimRateSpec withOpsPerSecond(double rate) {
-        return new SimRateSpec(rate, this.burstRatio);
-    }
-
-    public SimRateSpec withBurstRatio(double burstRatio) {
-        return new SimRateSpec(this.opsPerSec, burstRatio);
-    }
-
-    public SimRateSpec withVerb(Verb verb) {
-        return new SimRateSpec(this.opsPerSec, this.burstRatio, verb);
-    }
-
 
     public double getRate() {
         return this.opsPerSec;

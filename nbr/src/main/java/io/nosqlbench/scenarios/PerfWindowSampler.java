@@ -84,7 +84,10 @@ public class PerfWindowSampler {
         double[] vals = data[window][measuredItem];
 
         if (criteria.get(measuredItem).delta) {
-            return (vals[ENDS] - vals[STARTS]) / (vals[END_TIME] - vals[START_TIME])*1000.0d;
+            double duration = (vals[END_TIME] - vals[START_TIME])/1000D;
+            double increment = vals[ENDS] - vals[STARTS];
+
+            return increment / duration;
         } else {
             return vals[ENDS];
         }

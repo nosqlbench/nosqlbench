@@ -34,7 +34,11 @@ import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.events.NBEvent;
+import io.nosqlbench.components.events.ParamChange;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.StrideRateSpec;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.nb.annotations.ServiceSelector;
 import org.apache.logging.log4j.LogManager;
@@ -237,5 +241,20 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
     @Override
     public NBLabels getLabels() {
         return super.getLabels();
+    }
+
+
+    @Override
+    public void onEvent(NBEvent event) {
+        switch(event) {
+            case ParamChange<?> pc -> {
+                switch (pc.value()) {
+                    case CycleRateSpec crs -> createOrUpdateCycleLimiter(crs);
+                    case StrideRateSpec srs -> createOrUpdateStrideLimiter(srs);
+                    default -> super.onEvent(event);
+                }
+            }
+            default -> super.onEvent(event);
+        }
     }
 }
