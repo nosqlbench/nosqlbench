@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +30,7 @@ import java.util.Map;
 
 public class ScenarioSummary {
     private final static Logger logger = LogManager.getLogger(ScenarioSummary.class);
-    private static void doReportSummaries(final String reportSummaryTo, final ExecutionMetricsResult result, Map<String,String> subs) {
+    private static void doReportSummaries(NBComponent scenario, final String reportSummaryTo, final ExecutionMetricsResult result, Map<String,String> subs) {
         final List<PrintStream> fullChannels = new ArrayList<>();
         final List<PrintStream> briefChannels = new ArrayList<>();
         final String[] destinationSpecs = reportSummaryTo.split(", *");
@@ -69,8 +70,9 @@ public class ScenarioSummary {
                     briefChannels.add(out);
                 }
             }
-        fullChannels.forEach(result::reportMetricsSummaryTo);
-//        briefChannels.forEach(result::reportCountsTo);
+        for (PrintStream fullChannel : fullChannels) {
+            result.reportMetricsSummaryTo(scenario, fullChannel);
+        }
     }
 
 }
