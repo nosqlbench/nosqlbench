@@ -26,42 +26,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class PGVectorExecuteOp extends PGVectorOp {
-    private static final Logger LOGGER = LogManager.getLogger(PGVectorExecuteOp.class);
+public class PGVectorExecuteUpdateOp extends PGVectorOp {
+    private static final Logger LOGGER = LogManager.getLogger(PGVectorExecuteUpdateOp.class);
     private static final String LOG_UPDATE_COUNT_ERROR = "Exception occurred while attempting to fetch the update count of the query operation";
     private static final String LOG_UPDATE_COUNT = "Executed a normal DDL/DML (non-SELECT) operation. DML query updated [%d] records";
 
-    public PGVectorExecuteOp(Connection connection, Statement statement, String queryString) {
+    public PGVectorExecuteUpdateOp(Connection connection, Statement statement, String queryString) {
         super(connection, statement, queryString);
     }
 
     @Override
     public Object apply(long value) {
-        List<ResultSet> queryResults = new ArrayList<>();
         try {
-            boolean isResultSet = statement.execute(queryString);
-
-            ResultSet rs;
-            if (isResultSet) {
-                int countResults = 0;
-                rs = statement.getResultSet();
-                Objects.requireNonNull(rs);
-                countResults += rs.getRow();
-                queryResults.add(rs);
-                while (null != rs) {
-                    while (statement.getMoreResults() && -1 > statement.getUpdateCount()) {
-                        countResults += rs.getRow();
-                    }
-                    rs = statement.getResultSet();
-                    queryResults.add(rs);
-                }
-
-                finalResultCount = countResults;
-                LOGGER.debug(() -> LOG_ROWS_PROCESSED);
-            }
+            finalResultCount = statement.executeUpdate(queryString);
+            LOGGER.debug(() -> LOG_ROWS_PROCESSED);
             connection.commit();
             LOGGER.debug(() -> LOG_COMMIT_SUCCESS);
-            return queryResults;
+            return finalResultCount;
         } catch (SQLException sqlException) {
             String exMsg = String.format("ERROR: [ state => %s, cause => %s, message => %s ]",
                 sqlException.getSQLState(), sqlException.getCause(), sqlException.getMessage());

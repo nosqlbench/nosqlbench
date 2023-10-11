@@ -22,6 +22,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class PGVectorExecuteQueryOp extends PGVectorOp {
@@ -32,29 +34,13 @@ public class PGVectorExecuteQueryOp extends PGVectorOp {
     }
 
     @Override
-    public void run() {
+    public Object apply(long value) {
+        List<ResultSet> queryResults = new ArrayList<>();
         try {
-            boolean isResultSet = statement.execute(queryString);
-
-            ResultSet rs;
-            if (isResultSet) {
-                int countResults = 0;
-                rs = statement.getResultSet();
-                Objects.requireNonNull(rs);
-                countResults += rs.getRow();
-
-                while (null != rs) {
-                    while (statement.getMoreResults() && -1 > statement.getUpdateCount()) {
-                        countResults += rs.getRow();
-                    }
-                    rs = statement.getResultSet();
-                }
-
-                finalResultCount = countResults;
-                LOGGER.debug(() -> LOG_ROWS_PROCESSED);
-            }
+            ResultSet rs = statement.executeQuery(queryString);
             connection.commit();
             LOGGER.debug(() -> LOG_COMMIT_SUCCESS);
+            return queryResults;
         } catch (SQLException sqlException) {
             String exMsg = String.format("ERROR: [ state => %s, cause => %s, message => %s ]",
                 sqlException.getSQLState(), sqlException.getCause(), sqlException.getMessage());

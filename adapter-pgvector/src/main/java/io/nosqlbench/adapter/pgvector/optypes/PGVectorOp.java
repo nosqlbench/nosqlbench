@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.pgvector.optypes;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +37,7 @@ import java.sql.Statement;
  *
  * @see <a href="https://github.com/brettwooldridge/HikariCP">HikariCP connection pooling</a> for details.
  */
-public abstract class PGVectorOp implements RunnableOp {
+public abstract class PGVectorOp implements CycleOp {
     private static final Logger LOGGER = LogManager.getLogger(PGVectorOp.class);
     protected static final String LOG_COMMIT_SUCCESS = "Executed the PGVector statement & committed the connection successfully";
 
