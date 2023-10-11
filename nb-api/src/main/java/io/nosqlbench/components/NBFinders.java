@@ -57,6 +57,19 @@ public class NBFinders {
         }
     }
 
+    public static <T extends NBMetric> List<T> allMetricsWithType(Class<T> clazz, NBComponent component) {
+        Iterator<NBComponent> tree = NBComponentTraversal.traverseBreadth(component);
+        List<NBMetric> found = new ArrayList<>();
+        while (tree.hasNext()) {
+            NBComponent c = tree.next();
+            for (NBMetric metric : c.getComponentMetrics()) {
+                if (clazz.isAssignableFrom(metric.getClass())) {
+                    found.add(metric);
+                }
+            }
+        }
+        return (List<T>) found;
+    }
 
     public NBMetricGauge gauge(String pattern) {
         return oneMetricWithType(pattern, NBMetricGauge.class);

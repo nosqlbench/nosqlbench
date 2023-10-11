@@ -37,6 +37,16 @@ import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.shutdown.NBShutdownHook;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import com.codahale.metrics.MetricAttribute;
+import com.codahale.metrics.MetricFilter;
+import io.nosqlbench.api.csvoutput.CsvOutputPluginWriter;
+import io.nosqlbench.api.engine.metrics.reporters.*;
+import io.nosqlbench.api.files.FileAccess;
+import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
+import org.apache.logging.log4j.Marker;
+
+import java.io.PrintStream;
+import java.util.Set;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -126,15 +136,11 @@ public class NBBuilders {
         return reporter;
     }
 
-//    public ExamplePlugin getExamplePlugin(final NBComponent component) {
-//        return new ExamplePlugin(component);
-//    }
-
     public BobyqaOptimizerInstance bobyqaOptimizer() {
         return new BobyqaOptimizerInstance(base);
     }
 
-    public FileAccess fileAccess(String filename) {
+    public FileAccess fileAccess() {
         return new FileAccess();
     }
 
@@ -152,6 +158,190 @@ public class NBBuilders {
 
     public NBShutdownHook shutdownHook(NBComponent component) {
         return new NBShutdownHook(component);
+    }
+
+    public static class Log4jReporterBuilder {
+        private final NBComponent component;
+        private Logger logger = LogManager.getLogger(Log4JMetricsReporter.class);
+        private Log4JMetricsReporter.LoggingLevel loggingLevel = Log4JMetricsReporter.LoggingLevel.INFO;
+        private Marker marker;
+        private MetricFilter filter= new MetricInstanceFilter();
+        private boolean oneLastTime = false;
+        private NBLabels labels;
+        private int interval = 1;
+
+        public Log4jReporterBuilder(NBComponent component) {
+            this.component = component;
+        }
+        public Log4jReporterBuilder oneLastTime(final boolean oneLastTime) {
+            this.oneLastTime = oneLastTime;
+            return this;
+        }
+        public Log4jReporterBuilder interval(final int interval) {
+            this.interval = interval;
+            return this;
+        }
+        public Log4jReporterBuilder outputTo(final Logger logger) {
+            this.logger = logger;
+            return this;
+        }
+        public Log4jReporterBuilder markWith(final Marker marker) {
+            this.marker = marker;
+            return this;
+        }
+        public Log4jReporterBuilder labels(final NBLabels labels) {
+            this.labels = labels;
+            return this;
+        }
+        public Log4jReporterBuilder filter(final MetricFilter filter) {
+            this.filter = filter;
+            return this;
+        }
+        public Log4jReporterBuilder withLoggingLevel(final Log4JMetricsReporter.LoggingLevel loggingLevel) {
+            this.loggingLevel = loggingLevel;
+            return this;
+        }
+        public Log4JMetricsReporter build() {
+            final LoggerProxy loggerProxy = switch (this.loggingLevel) {
+                case TRACE -> new TraceLoggerProxy(this.logger);
+                case INFO -> new InfoLoggerProxy(this.logger);
+                case WARN -> new WarnLoggerProxy(this.logger);
+                case ERROR -> new ErrorLoggerProxy(this.logger);
+                default -> new DebugLoggerProxy(this.logger);
+            };
+            return new Log4JMetricsReporter(this.component, loggerProxy, this.marker, this.filter, this.labels, this.interval, this.oneLastTime);
+        }
+    }
+    /* private class to allow logger configuration */
+    public abstract static class LoggerProxy {
+        protected final Logger logger;
+
+        protected LoggerProxy(final Logger logger) {
+            this.logger = logger;
+        }
+
+        public abstract void log(Marker marker, String format, Object... arguments);
+
+        public abstract boolean isEnabled(Marker marker);
+    }
+
+    /* private class to allow logger configuration */
+    private static class DebugLoggerProxy extends LoggerProxy {
+        public DebugLoggerProxy(final Logger logger) {
+            super(logger);
+        }
+
+        @Override
+        public void log(final Marker marker, final String format, final Object... arguments) {
+            this.logger.debug(marker, format, arguments);
+        }
+
+        @Override
+        public boolean isEnabled(final Marker marker) {
+            return this.logger.isDebugEnabled(marker);
+        }
+    }
+
+    /* private class to allow logger configuration */
+    private static class TraceLoggerProxy extends LoggerProxy {
+        public TraceLoggerProxy(final Logger logger) {
+            super(logger);
+        }
+
+        @Override
+        public void log(final Marker marker, final String format, final Object... arguments) {
+            this.logger.trace(marker, format, arguments);
+        }
+
+        @Override
+        public boolean isEnabled(final Marker marker) {
+            return this.logger.isTraceEnabled(marker);
+        }
+    }
+
+    /* private class to allow logger configuration */
+    private static class InfoLoggerProxy extends LoggerProxy {
+        public InfoLoggerProxy(final Logger logger) {
+            super(logger);
+        }
+
+        @Override
+        public void log(final Marker marker, final String format, final Object... arguments) {
+            this.logger.info(marker, format, arguments);
+        }
+
+        @Override
+        public boolean isEnabled(final Marker marker) {
+            return this.logger.isInfoEnabled(marker);
+        }
+    }
+
+    /* private class to allow logger configuration */
+    private static class WarnLoggerProxy extends LoggerProxy {
+        public WarnLoggerProxy(final Logger logger) {
+            super(logger);
+        }
+
+        @Override
+        public void log(final Marker marker, final String format, final Object... arguments) {
+            this.logger.warn(marker, format, arguments);
+        }
+
+        @Override
+        public boolean isEnabled(final Marker marker) {
+            return this.logger.isWarnEnabled(marker);
+        }
+    }
+
+    /* private class to allow logger configuration */
+    private static class ErrorLoggerProxy extends LoggerProxy {
+        public ErrorLoggerProxy(final Logger logger) {
+            super(logger);
+        }
+
+        @Override
+        public void log(final Marker marker, final String format, final Object... arguments) {
+            this.logger.error(marker, format, arguments);
+        }
+
+        @Override
+        public boolean isEnabled(final Marker marker) {
+            return this.logger.isErrorEnabled(marker);
+        }
+
+    }
+
+    public static class ConsoleReporterBuilder {
+        private final NBComponent component;
+        private final PrintStream output;
+        private NBLabels labels = null;
+        private int interval = 1;
+        private boolean oneLastTime = false;
+        private Set<MetricAttribute> disabledMetricAttributes = Set.of();
+
+        public ConsoleReporterBuilder(NBComponent component, PrintStream output) {
+            this.component = component;
+            this.output = output;
+        }
+        public ConsoleReporterBuilder labels(NBLabels labels) {
+            this.labels = labels;
+            return this;
+        }
+        public ConsoleReporterBuilder interval(int interval) {
+            this.interval = interval;
+            return this;
+        }
+        public ConsoleReporterBuilder oneLastTime(boolean oneLastTime) {
+            this.oneLastTime = oneLastTime;
+            return this;
+        }
+        public ConsoleReporterBuilder disabledMetricAttributes(Set<MetricAttribute> disabledMetricAttributes) {
+            this.disabledMetricAttributes = disabledMetricAttributes;
+            return this;
+        }
+        public ConsoleReporter build() {
+            return new ConsoleReporter(component, labels, interval, oneLastTime, output, disabledMetricAttributes);
+        }
     }
 
     public static class CsvOutputWriterBuilder {
@@ -204,7 +394,7 @@ public class NBBuilders {
             return this;
         }
         public CsvReporter build() {
-            return new CsvReporter(component, reportTo, interval, filter);
+            return new CsvReporter(component, reportTo, interval, filter, labels);
         }
     }
 
