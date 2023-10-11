@@ -149,7 +149,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
                     child.onEvent(de);
                 }
             }
-            default -> logger.info("dropping event " + event);
+            default -> logger.warn("dropping event " + event);
         }
     }
 }
