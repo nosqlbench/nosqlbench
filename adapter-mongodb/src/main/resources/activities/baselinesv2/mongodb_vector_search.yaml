@@ -1,0 +1,163 @@
+# Connection Guide: https://www.mongodb.com/docs/drivers/java/sync/current/fundamentals/connection/
+# Troubleshoot connection: https://www.mongodb.com/docs/atlas/troubleshoot-connection/#special-characters-in-connection-string-password
+# nb5 run driver=mongodb workload=/path/to/mongodb_verctor_search.yaml tags=block:"schema.*" connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+# nb5 run driver=mongodb workload=/path/to/mongodb_verctor_search.yaml tags=block:rampup cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+# nb5 run driver=mongodb workload=/path/to/mongodb_verctor_search.yaml tags='block:main-.*' cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+min_version: "5.17.5"
+
+description: |
+  This workload is analogous to the cql-keyvalue2 workload, just implemented for MongoDB Atlas Vector Search.
+
+scenarios:
+  default:
+    schema: run driver=mongodb tags==block:"schema.*" threads==1 cycles==UNDEF database=baselines
+    rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,100000) threads=auto database=baselines
+    main: run driver=mongodb tags==block:'main-.*' cycles===TEMPLATE(main-cycles,100000) threads=auto database=baselines
+    drop: run driver=mongodb tags==block:drop-collection threads==1 cycles==UNDEF database=baselines
+
+params:
+  instrument: true
+bindings:
+  #seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString();
+  #seq_value: >-
+  #  Hash();
+  #  Mod(TEMPLATE(valuecount,1000000000));
+  #  CharBufImage('A-Za-z0-9 _|/',16000000,HashRange(TEMPLATE(mintext,50000)TEMPLATE(addzeroes,),TEMPLATE(maxtext,150000)TEMPLATE(addzeroes,)));
+  #  ToString();
+  rw_key: TEMPLATE(keydist,Uniform(0,1000000000)); ToString() -> String
+  #rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)); CharBufImage('A-Za-z0-9 _|/',16000000,HashRange(TEMPLATE(mintext,50000)TEMPLATE(addzeros,),TEMPLATE(maxtext,150000)TEMPLATE(addzeros,))); ToString();
+  #WRITE
+  train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train"); ToCqlVector();
+  #READ
+  test_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/test"); ToCqlVector();
+
+blocks:
+  schema:
+    params:
+      prepared: false
+    ops:
+      # https://www.mongodb.com/docs/manual/reference/method/db.createCollection/
+      # https://www.mongodb.com/docs/manual/core/schema-validation/specify-json-schema/
+      # `clusteredIndex` only support creation of an index on `_id` field (as shown below) so its optional
+      create_collection: |
+        {
+          create: "TEMPLATE(collection,keyvalue)",
+          clusteredIndex: {
+            key: { "_id": 1 },
+            unique: true,
+            name: "_id_idx"
+          },
+          writeConcern: { w: "majority" },
+          validator: {
+            $jsonSchema: {
+              bsonType: "object",
+              title: "Key/Value collection schema validation",
+              required: [ "key" ],
+              properties: {
+                key: {
+                  bsonType: "string",
+                  description: "'key' must be a string and is required"
+                },
+                value: {
+                  bsonType: "array",
+                  description: "'value' must be an array of numbers of BSON double type and is optional but, recommended"
+                }
+              }
+            }
+          },
+          validationLevel: "off",
+          validationAction: "warn",
+          comment: "keyvalue collection creation with strict types and a required 'key' field."
+        }
+      create_key_index: |
+        {
+          createIndexes: "TEMPLATE(collection,keyvalue)",
+          indexes: [
+            {
+              key: {
+                key: 1,
+              },
+              name: "kv_key_idx",
+              unique: true
+            }
+          ],
+          writeConcern: { w: "majority" },
+          comment: "'key' index creation for keyvalue collection. Values should be unique.",
+          commitQuorum: "majority"
+        }
+      create_vector_search_index: |
+        {
+          createSearchIndexes: "TEMPLATE(collection,keyvalue)",
+          indexes: [
+            {
+              name: "kv_value_vector_search_idx",
+              definition: {
+                mappings: {
+                  dynamic: true,
+                  fields: {
+                    value: {
+                      type: "knnVector",
+                      dimensions: TEMPLATE(dimensions,1536),
+                      similarity: "TEMPLATE(similarity_function,cosine)"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+  rampup:
+    ops:
+      rampup-insert: |
+        {
+          insert: "TEMPLATE(collection,keyvalue)",
+          documents: [
+            {
+              key: "{rw_key}",
+              value: {train_floatlist}
+            }
+          ],
+          comment: "Insert documents into keyvalue collection."
+        }
+  main-read:
+    params:
+      ratio: 5
+    ops:
+      main-select: |
+        {
+          aggregate: "TEMPLATE(collection,keyvalue)",
+          pipeline: [
+            $vectorSearch: {
+              index: "kv_value_vector_search_idx",
+              path: "value",
+              queryVector: {test_floatlist},
+              numCandidates: TEMPLATE(num_candidates,1000)
+              limit: TEMPLATE(top_k,100)
+            }
+          ],
+          readConcern: { level: "majority" },
+          comment: "Find the results for the given 'value' vector search embedding."
+        }
+  main-write:
+    params:
+      ratio: 5
+    ops:
+      main-insert: |
+        {
+          insert: "TEMPLATE(collection,keyvalue)",
+          documents: [
+            {
+              key: "{rw_key}",
+              value: {train_floatlist}
+            }
+          ],
+          writeConcern: { w: "majority" },
+          comment: "Insert documents into keyvalue collection."
+        }
+  drop-collection:
+    ops:
+      drop-collection: |
+        {
+          drop: "TEMPLATE(collection,keyvalue)",
+          comment: "Drop keyvalue collection to start afresh."
+        }
