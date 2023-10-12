@@ -28,6 +28,10 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.BiFunction;
 
+/**
+ * Since we like to use SPI/ServiceLoader, and we can't use the Provider-only interface as
+ * suggested in {@link ServiceLoader}, we have to indirect to the safe ctor from a parent context.
+ */
 public class NBComponentLoader {
     public static <C extends NBComponent> C load(NBComponent parent, String selector, Class<C> clazz) {
         ServiceLoader<C> loader = ServiceLoader.load(clazz);

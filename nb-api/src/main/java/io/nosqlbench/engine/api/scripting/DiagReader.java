@@ -27,7 +27,7 @@ import java.util.List;
 public class DiagReader extends Reader {
     Reader wrapped;
     private final String prefix;
-    CharArrayWriter buffer = new CharArrayWriter(0);
+    final CharArrayWriter buffer;
     private final List<String> timedLog = new ArrayList<String>();
 
     private final DateTimeFormatter tsformat = DateTimeFormatter.ISO_DATE_TIME;
@@ -37,17 +37,23 @@ public class DiagReader extends Reader {
     public DiagReader(Reader wrapped, String prefix) {
         this.wrapped = wrapped;
         this.prefix = prefix;
+        this.buffer = new CharArrayWriter(0);
+    }
+
+    public DiagReader(Reader wrapped) {
+        this.wrapped = wrapped;
+        this.prefix = null;
+        this.buffer = null;
     }
 
     @Override
     public int read(char[] cbuf, int off, int len) throws IOException {
-        String tsprefix = LocalDateTime.now().format(tsformat);
-
         int read = wrapped.read(cbuf, off, len);
-        buffer.write(cbuf, off, len);
-
-        timedLog.add(tsprefix + prefix + new String(cbuf, off, len));
-
+        if (buffer!=null) {
+            String tsprefix = LocalDateTime.now().format(tsformat);
+            buffer.write(cbuf, off, len);
+            timedLog.add(tsprefix + prefix + new String(cbuf, off, len));
+        }
         return read;
     }
 

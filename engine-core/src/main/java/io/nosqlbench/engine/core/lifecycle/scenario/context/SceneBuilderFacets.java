@@ -19,7 +19,6 @@ package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
 
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
 
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -27,9 +26,7 @@ import java.util.Map;
 
 public interface SceneBuilderFacets {
     public interface ALL extends
-        WantsContext,
         WantsController,
-        WantsExtensions,
         WantsStderr,
         WantsStdout,
         WantsStdin,
@@ -38,10 +35,6 @@ public interface SceneBuilderFacets {
         WantsIoType {
     }
 
-
-    public interface WantsContext {
-        public WantsController component(NBComponent component);
-    }
 
     public interface WantsController extends WantsStdin, WantsIoType {
         public WantsStdin controller(ScenarioActivitiesController controller);
@@ -57,7 +50,7 @@ public interface SceneBuilderFacets {
     }
 
     public interface WantsStderr extends CanBuild {
-        public WantsExtensions err(PrintWriter err);
+        public WantsParams err(PrintWriter err);
     }
 
     public interface WantsIoType extends CanBuild {
@@ -65,23 +58,19 @@ public interface SceneBuilderFacets {
          * If you want the stdin, stdout, stderr streams to be contained only within the scenario's
          * execution environment, not connected to the outside world, do this.
          */
-        public WantsExtensions virtualIO();
+        public WantsParams virtualIO();
 
         /**
          * If you want to connect stdin, stdout, stderr streams to the system in, out and error streams,
          * do this.
          */
-        public WantsExtensions connectedIO();
+        public WantsParams connectedIO();
 
         /**
          * If you want to connect the console IO streams to the outside world, but also capture them for
          * diagnostics or other purposes, do this.
          */
-        public WantsExtensions tracedIO();
-    }
-
-    public interface WantsExtensions extends CanBuild {
-        public WantsParams extensions(Extensions extensions);
+        public WantsParams tracedIO();
     }
 
     public interface WantsParams extends CanBuild {
@@ -89,7 +78,7 @@ public interface SceneBuilderFacets {
     }
 
     public interface CanBuild {
-        NBSceneBuffer build();
+        NBSceneBuffer build(NBComponent forComponent);
     }
 
 }

@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario.execution;
+package io.nosqlbench.components.decorators;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 
-public class Extensions extends ConcurrentHashMap<String,String> {
-    public static Extensions ofNone() {
-        return new Extensions();
-    }
+public interface NBProviderSearch {
+    public <T> Optional<T> findParentService(Class<T> type);
 }

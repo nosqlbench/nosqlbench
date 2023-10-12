@@ -18,7 +18,6 @@ package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
 import io.nosqlbench.api.config.standard.TestComponent;
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 
 import java.io.*;
@@ -61,37 +60,33 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
      * Extensions provide additional scripting capabilities which are not provided by the
      * scripting or other runtimes, or new ways of tapping into extant features.
      */
-    private Extensions extensions;
 
     private PrintWriter out;
     private PrintWriter err;
 
     private Reader in;
 
-    public NBDefaultSceneFixtures(ScenarioParams params, NBComponent parent, ScenarioActivitiesController controller, Extensions extensions, PrintWriter out, PrintWriter err, Reader in) {
+    public NBDefaultSceneFixtures(ScenarioParams params, ScenarioActivitiesController controller, PrintWriter out, PrintWriter err, Reader in) {
         this.params = params;
-        this.session = parent;
         this.controller = controller;
-        this.extensions = extensions;
         this.out = out;
         this.err = err;
         this.in = in;
     }
 
-    public static NBSceneFixtures ofDefault(String name) {
-        return new NBDefaultSceneFixtures(
-            new ScenarioParams(),
-            new NBSession(
-                new TestComponent("scene", name), "scene~"+name
-            ),
-            new ScenarioActivitiesController(),
-            Extensions.ofNone(),
-            new PrintWriter(System.out),
-            new PrintWriter(System.err),
-            new InputStreamReader(System.in)
-        );
-    }
-
+//    public static NBSceneFixtures ofDefault(String name) {
+//        return new NBDefaultSceneFixtures(
+//            new ScenarioParams(),
+//            new NBSession(
+//                new TestComponent("scene", name), "scene~"+name
+//            ),
+//            new ScenarioActivitiesController(),
+//            new PrintWriter(System.out),
+//            new PrintWriter(System.err),
+//            new InputStreamReader(System.in)
+//        );
+//    }
+//
 
     @Override
     public ScenarioParams params() {
@@ -99,18 +94,8 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
     }
 
     @Override
-    public NBComponent component() {
-        return session;
-    }
-
-    @Override
     public ScenarioActivitiesController controller() {
         return controller;
-    }
-
-    @Override
-    public Extensions extensions() {
-        return extensions;
     }
 
     @Override

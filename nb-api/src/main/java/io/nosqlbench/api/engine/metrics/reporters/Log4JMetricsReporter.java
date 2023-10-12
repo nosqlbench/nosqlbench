@@ -19,7 +19,7 @@ package io.nosqlbench.api.engine.metrics.reporters;
 import com.codahale.metrics.*;
 import io.nosqlbench.api.engine.metrics.instruments.*;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBBuilders;
+import io.nosqlbench.components.NBCreators;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBFinders;
 import io.nosqlbench.components.PeriodicTaskComponent;
@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 public class Log4JMetricsReporter extends PeriodicTaskComponent {
 
     public enum LoggingLevel { TRACE, DEBUG, INFO, WARN, ERROR }
-    private final NBBuilders.LoggerProxy loggerProxy;
+    private final NBCreators.LoggerProxy loggerProxy;
     private final Marker marker;
     private final TimeUnit rateUnit = TimeUnit.NANOSECONDS;
     private final TimeUnit durationUnit = TimeUnit.NANOSECONDS;
@@ -45,7 +45,7 @@ public class Log4JMetricsReporter extends PeriodicTaskComponent {
     private final long rateFactor = TimeUnit.NANOSECONDS.toSeconds(1);
 
     public Log4JMetricsReporter(final NBComponent component,
-                                final NBBuilders.LoggerProxy loggerProxy,
+                                final NBCreators.LoggerProxy loggerProxy,
                                 final Marker marker,
                                 final MetricFilter filter,
                                 final NBLabels extraLabels,

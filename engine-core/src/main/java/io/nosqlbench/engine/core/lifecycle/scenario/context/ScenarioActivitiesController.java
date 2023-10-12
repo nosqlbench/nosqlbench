@@ -52,14 +52,6 @@ public class ScenarioActivitiesController extends NBBaseComponent {
 
     private final ExecutorService executorService;
 
-    public ScenarioActivitiesController() {
-        super(new TestComponent("test","test"));
-        this.activityLoader = new ActivityLoader();
-        ActivitiesExceptionHandler exceptionHandler = new ActivitiesExceptionHandler(this);
-        IndexedThreadFactory indexedThreadFactory = new IndexedThreadFactory("ACTIVITY", exceptionHandler);
-        this.executorService = Executors.newVirtualThreadPerTaskExecutor();
-    }
-
     public ScenarioActivitiesController(NBComponent parent) {
         super(parent);
         this.activityLoader = new ActivityLoader();

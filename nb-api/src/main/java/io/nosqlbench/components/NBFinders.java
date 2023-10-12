@@ -17,8 +17,10 @@
 package io.nosqlbench.components;
 
 import io.nosqlbench.api.engine.metrics.instruments.*;
+import org.apache.commons.text.diff.StringsComparator;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,14 +47,16 @@ public class NBFinders {
             System.out.println(NBComponentFormats.formatAsTree(base));
             throw new RuntimeException("unable to find metric with pattern '" + pattern + "'");
         }
-        if (clazz.isAssignableFrom(found.getClass())) {
+        if (clazz.isInstance(found.getClass())) {
+            return clazz.cast(found);
+        } else if (clazz.isAssignableFrom(found.getClass())) {
             return clazz.cast(found);
         } else {
             throw new RuntimeException(
                 "found metric with pattern '" + pattern + "'" +
                     ", but it was type "
                     + found.getClass().getSimpleName() + " (not a "
-                    + clazz.getSimpleName() +")"
+                    + clazz.getSimpleName() + ")"
             );
         }
     }
@@ -123,6 +127,20 @@ public class NBFinders {
         return found;
     }
 
+    private <T> List<T> metricsInTree(String pattern, Class<T> type) {
+        if (pattern.isEmpty()) {
+            throw new RuntimeException("non-empty predicate is required for this form. Perhaps you wanted metricsInTree()");
+        }
+        Iterator<NBComponent> tree = NBComponentTraversal.traverseBreadth(base);
+        List<T> found = new ArrayList<>();
+        while (tree.hasNext()) {
+            NBComponent c = tree.next();
+            found.addAll(c.findComponentMetrics(pattern,type));
+        }
+        return found;
+    }
+
+
     private NBMetric oneMetricInTree(String pattern) {
         List<NBMetric> found = metricsInTree(pattern);
         if (found.size() != 1) {
@@ -130,6 +148,15 @@ public class NBFinders {
             throw new RuntimeException("Found " + found.size() + " metrics with pattern '" + pattern + "', expected exactly 1");
         }
         return found.get(0);
+    }
+
+    public <T extends NBMetric> T topMetric(String pattern, Class<T> type) {
+        List<T> metrics = this.metricsInTree(pattern, type);
+        if (!metrics.isEmpty()) {
+            return metrics.get(0);
+        } else {
+            throw new RuntimeException("top metric not found: pattern='" +pattern +"', type='" + type.getSimpleName() + "'");
+        }
     }
 
 }

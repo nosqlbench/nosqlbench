@@ -21,6 +21,7 @@ import io.nosqlbench.api.spi.SimpleServiceLoader;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponentSubScope;
+import io.nosqlbench.components.decorators.NBTokenWords;
 import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.cli.ScriptBuffer;
@@ -47,7 +48,7 @@ import java.util.function.Function;
  * on.
  * All NBScenarios are run within an NBSession.
  */
-public class NBSession extends NBBaseComponent implements Function<List<Cmd>, ExecutionResult> {
+public class NBSession extends NBBaseComponent implements Function<List<Cmd>, ExecutionResult>, NBTokenWords {
     private final static Logger logger = LogManager.getLogger(NBSession.class);
     private final String sessionName;
 

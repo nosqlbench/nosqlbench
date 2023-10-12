@@ -35,32 +35,27 @@ import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
 import io.nosqlbench.api.files.FileAccess;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.shutdown.NBShutdownHook;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.BundledExtensions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import com.codahale.metrics.MetricAttribute;
 import com.codahale.metrics.MetricFilter;
-import io.nosqlbench.api.csvoutput.CsvOutputPluginWriter;
 import io.nosqlbench.api.engine.metrics.reporters.*;
-import io.nosqlbench.api.files.FileAccess;
-import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
 import org.apache.logging.log4j.Marker;
 
 import java.io.PrintStream;
-import java.util.Set;
+import java.util.*;
 
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.DoubleSummaryStatistics;
-import java.util.List;
 import java.util.function.Supplier;
 
-public class NBBuilders {
+public class NBCreators {
 
     // TODO: add mandatory sanitize() around all label names and label "name" values
-    private final Logger logger = LogManager.getLogger(NBBuilders.class);
+    private final Logger logger = LogManager.getLogger(NBCreators.class);
     private final NBBaseComponent base;
 
-    public NBBuilders(NBBaseComponent base) {
+    public NBCreators(NBBaseComponent base) {
         this.base = base;
     }
 
@@ -398,4 +393,11 @@ public class NBBuilders {
         }
     }
 
+    public <T> T requiredExtension(String name, Class<T> type) {
+        return new BundledExtensions(base)
+            .load(name, type)
+            .orElseThrow(
+                () -> new RuntimeException("unable to load extension with name '" + name + "' and type '" + type.getSimpleName() + "'")
+            );
+    }
 }

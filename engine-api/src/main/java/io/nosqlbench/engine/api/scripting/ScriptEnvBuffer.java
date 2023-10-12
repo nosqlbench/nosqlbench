@@ -43,7 +43,7 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
             synchronized(this) {
                 if (stdoutBuffer==null) {
                     Writer superWriter = super.getWriter();
-                    stdoutBuffer = new DiagWriter(superWriter, new InterjectingCharArrayWriter(" stdout  "));
+                    stdoutBuffer = new DiagWriter(new InterjectingCharArrayWriter(" stdout  "),superWriter);
                 }
             }
         }
@@ -56,7 +56,7 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
             synchronized(this) {
                 if (stderrBuffer==null) {
                     Writer superErrorWriter = super.getErrorWriter();
-                    stderrBuffer = new DiagWriter(superErrorWriter, new InterjectingCharArrayWriter(" stderr "));
+                    stderrBuffer = new DiagWriter(new InterjectingCharArrayWriter(" stderr "),superErrorWriter);
                 }
             }
         }

@@ -36,13 +36,20 @@ import java.util.regex.Pattern;
 public class DiagWriter extends PrintWriter {
 
     private final DateTimeFormatter tsformat = DateTimeFormatter.ISO_DATE_TIME;
-    Writer wrapped;
     InterjectingCharArrayWriter buffer;
 
-    public DiagWriter(Writer... writers) {
-        super(new FanWriter(writers));
-        this.wrapped = wrapped;
-        this.buffer = buffer;
+    public DiagWriter(InterjectingCharArrayWriter charbuffer, Writer writer) {
+        super(new FanWriter(charbuffer, writer));
+        this.buffer = charbuffer;
+    }
+
+    public DiagWriter(InterjectingCharArrayWriter charbuffer) {
+        super(charbuffer);
+        this.buffer = charbuffer;
+    }
+
+    public DiagWriter(PrintWriter out) {
+        super(out);
     }
 
     public String getBuf() {

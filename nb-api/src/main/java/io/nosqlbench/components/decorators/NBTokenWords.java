@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario.context;
+package io.nosqlbench.components.decorators;
 
-import io.nosqlbench.components.NBComponent;
+import java.util.Map;
 
-import java.io.PrintWriter;
-import java.io.Reader;
-
-public interface NBSceneFixtures {
-    ScenarioParams params();
-
-    ScenarioActivitiesController controller();
-
-    PrintWriter out();
-
-    PrintWriter err();
-
-    Reader in();
-
-
+public interface NBTokenWords {
+    Map<String,String> getTokens();
 }

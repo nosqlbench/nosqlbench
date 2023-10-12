@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,153 +43,164 @@ public class DirectRuntimeScenarioTests {
         ScenariosResults results = executor.awaitAllResults();
         System.out.println(results);
     }
-
-    @Disabled("enable before merge")
     @Test
-    public void testSC_activit_init_error() {
-        SC_start_stop_diag scenario = new SC_start_stop_diag(testC, "SC_start_stop_diag");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("SC_start_stop_diag"));
+    public void test_SC_linkedinput() {
+        NBScenario scenario = new SC_linkedinput(testC,"test_SC_linkedinput");
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        Pattern p = Pattern.compile(".*started leader.*started follower.*stopped leader.*stopped follower.*", Pattern.DOTALL);
+        assertThat(p.matcher(result.getIOLog()).matches()).isTrue();
+
+    }
+    @Test
+    public void testSC_activity_init_error() {
+        SC_activity_init_error scenario = new SC_activity_init_error(testC, "SC_activity_init_error");
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        assertThat(result.getException()).isNotNull();
+        assertThat(result.getException().getMessage()).contains("Unknown config parameter 'unknown_config'");
+        assertThat(result.getException()).isNotNull();
     }
 
+
     @Test
-    @Disabled("enable before merge")
     public void test_SC_activity_error() {
         NBScenario scenario = new SC_activity_error(testC,"test_SC_activity_error");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_activity_error"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        assertThat(result.getException()).isNotNull();
+        assertThat(result.getException().getMessage()).contains("For input string: \"unparsable\"");
+
     }
-    @Disabled("enable before merge")
-    @Test
-    public void test_SC_activity_init_error() {
-        NBScenario scenario = new SC_activity_init_error(testC,"test_SC_activity_init_error");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_activity_init_error"));
-    }
-    @Disabled("enable before merge")
     @Test
     public void test_SC_await_finished() {
         NBScenario scenario = new SC_await_finished(testC,"test_SC_await_finished");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_await_finished"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        assertThat(result.getIOLog()).contains("awaited activity");
     }
-    @Disabled("enable before merge")
     @Test
     public void test_SC_basicdiag() {
         NBScenario scenario = new SC_basicdiag(testC,"test_SC_basicdiag");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_basicdiag"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        assertThat(result.getIOLog().indexOf("starting activity basic_diag")).isGreaterThanOrEqualTo(0);
+        assertThat(result.getIOLog().indexOf("stopping activity basic_diag")).isGreaterThanOrEqualTo(1);
+        assertThat(result.getIOLog().indexOf("stopped activity basic_diag")).isGreaterThanOrEqualTo(2);
     }
-    @Disabled("enable before merge")
     @Test
     public void test_SC_blockingrun() {
         NBScenario scenario = new SC_blockingrun(testC,"test_SC_blockingrun");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_blockingrun"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        assertThat(result.getIOLog()).matches(Pattern.compile(".*running.*finished.*running.*finished.*",Pattern.DOTALL));
     }
-    @Disabled("enable before merge")
+
+
+
     @Test
     public void test_SC_cocycledelay_bursty() {
         NBScenario scenario = new SC_cocycledelay_bursty(testC,"test_SC_cocycledelay_bursty");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_cocycledelay_bursty"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
         result.report();
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_cocycledelay_strict() {
         NBScenario scenario = new SC_cocycledelay_strict(testC,"test_SC_cocycledelay_strict");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_cocycledelay_strict"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_cycle_rate() {
         NBScenario scenario = new SC_cycle_rate(testC,"test_SC_cycle_rate");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_cycle_rate"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_cycle_rate_change() {
         NBScenario scenario = new SC_cycle_rate_change(testC,"test_SC_cycle_rate_change");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_cycle_rate_change"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_extension_csvmetrics() {
         NBScenario scenario = new SC_extension_csvmetrics(testC,"test_SC_extension_csvmetrics");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_extension_csvmetrics"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_extension_csvoutput() {
         NBScenario scenario = new SC_extension_csvoutput(testC,"test_SC_extension_csvoutput");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_extension_csvoutput"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_extension_histostatslogger() {
         NBScenario scenario = new SC_extension_histostatslogger(testC,"test_SC_extension_histostatslogger");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_extension_histostatslogger"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_extension_shutdown_hook() {
         NBScenario scenario = new SC_extension_shutdown_hook(testC,"test_SC_extension_shutdown_hook");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_extension_shutdown_hook"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+    }
+    @Test
+    public void test_SC_extension_example() {
+        NBScenario scenario = new SC_extension_example(testC,"test_SC_extension_example");
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+//        result.exitWithCode();
+        assertThat(result.getIOLog()).contains("3+5=8");
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_histologger() {
         NBScenario scenario = new SC_histologger(testC,"test_SC_histologger");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_histologger"));
-    }
-    @Disabled("enable before merge")
-    @Test
-    public void test_SC_linkedinput() {
-        NBScenario scenario = new SC_linkedinput(testC,"test_SC_linkedinput");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_linkedinput"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_optimo() {
         NBScenario scenario = new SC_optimo_test(testC,"test_SC_optimo");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_optimo"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
         System.out.println(result);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_params_variable() {
         NBScenario scenario = new SC_params_variable(testC,"test_SC_params_variable");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_params_variable"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_readmetrics() {
         NBScenario scenario = new SC_readmetrics(testC,"test_SC_readmetrics");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_readmetrics"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_speedcheck() {
         NBScenario scenario = new SC_speedcheck(testC,"test_SC_speedcheck");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_speedcheck"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_start_stop_diag() {
         NBScenario scenario = new SC_start_stop_diag(testC,"test_SC_start_stop_diag");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_start_stop_diag"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_threadchange() {
         NBScenario scenario = new SC_threadchange(testC,"test_SC_threadchange");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_threadchange"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_threadspeeds() {
         NBScenario scenario = new SC_threadspeeds(testC,"test_SC_threadspeeds");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_threadspeeds"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_undef_param() {
         NBScenario scenario = new SC_undef_param(testC, "test_SC_undef_param");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.init("test_SC_undef_param"));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
         String out = result.getIOLog();
         assertThat(out).contains("foobar");
     }

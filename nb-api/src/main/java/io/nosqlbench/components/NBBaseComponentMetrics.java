@@ -19,10 +19,7 @@ package io.nosqlbench.components;
 import io.nosqlbench.adapters.api.util.TagFilter;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -57,6 +54,26 @@ public class NBBaseComponentMetrics implements NBComponentMetrics {
         TagFilter filter = new TagFilter(pattern);
         return filter.filterLabeled(metrics.values());
     }
+
+    @Override
+    public <T> Collection<? extends T> findComponentMetrics(String pattern, Class<T> type) {
+        if (this.metrics.containsKey(pattern)) {
+            NBMetric metric = metrics.get(pattern);
+            if (type.isAssignableFrom(metric.getClass())) {
+                return List.of(type.cast(metric));
+            }
+        }
+        TagFilter filter = new TagFilter(pattern);
+        List<NBMetric> found = filter.filterLabeled(metrics.values());
+        List<T> foundAndMatching = new ArrayList<>();
+        for (NBMetric metric : found) {
+            if (type.isAssignableFrom(metric.getClass())) {
+                foundAndMatching.add(type.cast(metric));
+            }
+        }
+        return foundAndMatching;
+    }
+
 
     @Override
     public Collection<? extends NBMetric> getComponentMetrics() {

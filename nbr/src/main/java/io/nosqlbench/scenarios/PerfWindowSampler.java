@@ -55,7 +55,7 @@ public class PerfWindowSampler {
     }
 
     double getValue() {
-        if (windows.size()==0) {
+        if (windows.size() == 0) {
             return Double.NaN;
         }
         return windows.getLast().value();
@@ -64,15 +64,16 @@ public class PerfWindowSampler {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("PERF VALUE=").append(getValue()).append("\n");
-        sb.append("windows:\n"+windows.getLast().toString());
+        sb.append("windows:\n" + windows.getLast().toString());
         return sb.toString();
     }
 
     public void startWindow() {
         startWindow(System.currentTimeMillis());
     }
+
     public void startWindow(long now) {
-        if (window!=null) {
+        if (window != null) {
             throw new RuntimeException("cant start window twice in a row. Must close window first");
         }
         List<ParamSample> samples = criteria.stream().map(c -> ParamSample.init(c).start(now)).toList();
@@ -82,12 +83,13 @@ public class PerfWindowSampler {
     public void stopWindow() {
         stopWindow(System.currentTimeMillis());
     }
+
     public void stopWindow(long now) {
         for (int i = 0; i < window.size(); i++) {
-            window.set(i,window.get(i).stop(now));
+            window.set(i, window.get(i).stop(now));
         }
         windows.add(window);
-        window=null;
+        window = null;
     }
 
     public static record Criterion(
@@ -96,18 +98,27 @@ public class PerfWindowSampler {
         double weight,
         Runnable callback,
         boolean delta
-    ) { }
+    ) {
+    }
 
-    public static class WindowSamples extends ArrayList<WindowSample> {}
+    public static class WindowSamples extends ArrayList<WindowSample> {
+    }
+
     public static class WindowSample extends ArrayList<ParamSample> {
         public WindowSample(List<ParamSample> samples) {
             super(samples);
         }
 
         public double value() {
-            return stream().mapToDouble(ParamSample::weightedValue).sum();
+            double product = 1.0;
+            for (ParamSample sample : this) {
+                product *= sample.weightedValue();
+            }
+
+            return product;
         }
     }
+
     public static record ParamSample(Criterion criterion, long startAt, long endAt, double startval, double endval) {
         public double weightedValue() {
             return rawValue() * criterion().weight;
@@ -121,24 +132,26 @@ public class PerfWindowSampler {
         }
 
         private double rate() {
-            return rawValue()/seconds();
+            return rawValue() / seconds();
         }
+
         private double seconds() {
-            return ((double)(endAt-startAt)) / 1000d;
+            return ((double) (endAt - startAt)) / 1000d;
         }
 
         public static ParamSample init(Criterion criterion) {
-            return new ParamSample(criterion, 0,0,Double.NaN, Double.NaN);
+            return new ParamSample(criterion, 0, 0, Double.NaN, Double.NaN);
         }
 
         public ParamSample start(long startTime) {
             criterion.callback.run();
             double v1 = criterion.supplier.getAsDouble();
-            return new ParamSample(criterion,startTime,0L, v1, Double.NaN);
+            return new ParamSample(criterion, startTime, 0L, v1, Double.NaN);
         }
+
         public ParamSample stop(long stopTime) {
             double v2 = criterion.supplier.getAsDouble();
-            return new ParamSample(criterion,startAt,stopTime,startval, v2);
+            return new ParamSample(criterion, startAt, stopTime, startval, v2);
         }
 
         @Override
