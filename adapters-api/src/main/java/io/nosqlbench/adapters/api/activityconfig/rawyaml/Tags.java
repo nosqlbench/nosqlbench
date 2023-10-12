@@ -17,6 +17,7 @@
 package io.nosqlbench.adapters.api.activityconfig.rawyaml;
 
 import io.nosqlbench.api.engine.util.Tagged;
+import io.nosqlbench.api.errors.OpConfigError;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -33,6 +34,14 @@ public class Tags implements Tagged {
 
     public void setTags(Map<String, String> tags) {
         this.tags.clear();
+        tags.forEach((k,v) -> {
+            if (k.contains("\n") || k.contains(" ")) {
+                throw new OpConfigError("tags name may not contain newlines or spaces: '" + k +"'");
+            }
+            if (v.contains("\n") || v.contains(" ")) {
+                throw new OpConfigError("tag values may not contain newlines or spaces (for name '" + k + "':'" + v +"'");
+            }
+        });
         this.tags.putAll(tags);
     }
 
