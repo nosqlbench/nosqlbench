@@ -24,7 +24,6 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import io.nosqlbench.addins.s3.s3urlhandler.S3ClientCache;
 import io.nosqlbench.addins.s3.s3urlhandler.S3UrlFields;
 import io.nosqlbench.api.metadata.ScenarioMetadata;
-import io.nosqlbench.api.metadata.ScenarioMetadataAware;
 import io.nosqlbench.api.system.NBEnvironment;
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
@@ -39,7 +38,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class S3Uploader extends NBBaseComponent implements ScenarioMetadataAware {
+public class S3Uploader extends NBBaseComponent {
     private ScenarioMetadata scenarioMetadata;
     private final static Logger logger = LogManager.getLogger(S3Uploader.class);
 
@@ -81,11 +80,7 @@ public class S3Uploader extends NBBaseComponent implements ScenarioMetadataAware
 
         Map<String,String> combined = new LinkedHashMap<>(params);
         combined.putAll(scenarioMetadata.asMap());
-        String url = NBEnvironment.INSTANCE.interpolateWithTimestamp(
-            urlTemplate,
-                scenarioMetadata.getStartedAt(),
-                combined
-            )
+        String url = NBEnvironment.INSTANCE.interpolateWithTimestamp(urlTemplate, scenarioMetadata.getStartedAt(), combined)
             .orElseThrow();
         logger.debug(() -> "S3 composite URL is '" + url + "'");
 
@@ -103,8 +98,4 @@ public class S3Uploader extends NBBaseComponent implements ScenarioMetadataAware
         return url;
     }
 
-    @Override
-    public void setScenarioMetadata(ScenarioMetadata metadata) {
-        this.scenarioMetadata = metadata;
-    }
 }

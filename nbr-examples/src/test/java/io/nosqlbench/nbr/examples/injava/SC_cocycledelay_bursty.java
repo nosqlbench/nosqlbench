@@ -18,7 +18,11 @@ package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.components.events.ParamChange;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
 
 import java.util.Map;
@@ -81,68 +85,60 @@ public class SC_cocycledelay_bursty extends SCBaseScenario {
      */
     @Override
     public void invoke() {
+        int diagrate = 500;
         var co_cycle_delay_bursty = Map.of(
             "alias", "co_cycle_delay_bursty",
             "driver", "diag",
             "cycles", "0..1000000",
             "threads", "1",
-            "cyclerate", "10,1.5",
-            "op", "log: level=info"
+            "cyclerate", "1000,1.5",
+            "op", "diagrate: diagrate=" + diagrate
+//            "dryrun", "op" // silent
         );
 
-        controller.waitMillis(1000);
+        controller.waitMillis(500);
         stdout.println("starting activity co_cycle_delay_bursty");
-        controller.start(co_cycle_delay_bursty);
+        Activity activity = controller.start(co_cycle_delay_bursty);
+        controller.waitMillis(1000);
 
-        NBMetricCounter service_time_counter = find().counter("activity=co_cycle_delay_bursty,name=cycles_servicetime");
-        NBMetricGauge wait_time_gauge = find().gauge("activity=co_cycle_delay_bursty,name=cycles_waittime");
-        String diagrate = controller.getActivityDef("co_cycle_delay_bursty").getParams().get("diagrate").toString();
-        String cyclerate = controller.getActivityDef("co_cycle_delay_bursty").getParams().get("cyclerate").toString();
-//
-//        for (int i = 0; i < 5; i++) {
-//            controller.waitMillis(1000);
-//            if (!controller.isRunningActivity(co_cycle_delay_bursty)) {
-//                stdout.println("scenario exited prematurely, aborting.");
-//                break;
-//            }
-//            diagrate = controller.getActivityDef("co_cycle_delay_bursty").getParams().get("diagrate").toString();
-//            cyclerate = controller.getActivityDef("co_cycle_delay_bursty").getParams().get("cyclerate").toString();
-//            stdout.println(
-//                "backlogging, cycles=" + service_time_counter.getCount() +
-//                " waittime=" + wait_time_gauge.getValue() +
-//                " diagrate=" + diagrate +
-//                " cyclerate=" + cyclerate
-//            );
-//        }
-//
-//        stdout.println("step1 metrics.waittime=" + wait_time_gauge.getValue());
-//        controller.getActivityDef("co_cycle_delay_bursty").getParams().put("diagrate", "10000");
-//
-//        for (int i = 0; i < 10; i++) {
-//            if (!controller.isRunningActivity("co_cycle_delay_bursty")) {
-//                stdout.println("scenario exited prematurely, aborting.");
-//                break;
-//            }
-//            diagrate = controller.getActivityDef("co_cycle_delay_bursty").getParams().get("diagrate").toString();
-//            cyclerate = controller.getActivityDef("co_cycle_delay_bursty").getParams().get("cyclerate").toString();
-//
-//            stdout.println(
-//                "recovering, cycles=" + service_time_counter.getCount() +
-//                " waittime=" + wait_time_gauge.getValue() +
-//                    " diagrate=" + diagrate +
-//                    " cyclerate=" + cyclerate
-//            );
-//
-//            controller.waitMillis(1000);
-//            if (wait_time_gauge.getValue() < 50000000) {
-//                stdout.println("waittime trended back down as expected, exiting on iteration " + i);
-//                break;
-//            }
-//        }
-//
-//        stdout.println("step2 metrics.waittime=" + wait_time_gauge.getValue());
-//        controller.stop(co_cycle_delay_bursty);
-//
-//        stdout.println("stopped activity co_cycle_delay_bursty");
+        NBMetricTimer service_time_counter = find().topMetric("activity=co_cycle_delay_bursty,name=cycles_servicetime", NBMetricTimer.class);
+        NBMetricGauge wait_time_gauge = find().topMetric("activity=co_cycle_delay_bursty,name=cycles_waittime",NBMetricGauge.class);
+
+        for (int i = 0; i < 5; i++) {
+            controller.waitMillis(1000);
+            if (!controller.isRunningActivity("co_cycle_delay_bursty")) {
+                throw new RuntimeException("Scenario exited prematurely.");
+            }
+
+            stdout.println("backlogging, cycles=" + service_time_counter.getCount() +
+                " waittime=" + wait_time_gauge.getValue() +
+                " diagrate=" + diagrate +
+                " cyclerate=" + activity.getCycleLimiter().getSpec()
+            );
+        }
+
+        stdout.println("step1 waittime=" + wait_time_gauge.getValue());
+        onEvent(new ParamChange<>(new CycleRateSpec(10000, 1.1)));
+
+        for (int i = 0; i < 10; i++) {
+            if (!controller.isRunningActivity("co_cycle_delay_bursty")) {
+                throw new RuntimeException("scenario exited prematurely.");
+            }
+            stdout.println("backlogging, cycles=" + service_time_counter.getCount() +
+                " waittime=" + wait_time_gauge.getValue() +
+                " diagrate=" + diagrate +
+                " cyclerate=" + activity.getCycleLimiter().getSpec()
+            );
+            if (wait_time_gauge.getValue() < 50000000) {
+                stdout.println("waittime trended back down as expected, exiting on iteration " + i);
+                break;
+            }
+        }
+
+        stdout.println("step2 metrics.waittime=" + wait_time_gauge.getValue());
+        controller.stop(co_cycle_delay_bursty);
+
+        stdout.println("stopped activity co_cycle_delay_bursty");
+
     }
 }

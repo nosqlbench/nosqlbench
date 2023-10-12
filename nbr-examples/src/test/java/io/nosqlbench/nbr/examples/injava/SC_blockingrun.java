@@ -57,13 +57,13 @@ public class SC_blockingrun extends SCBaseScenario {
     public void invoke() {
         var activitydef1 = Map.of(
             "alias","blockactivity1","driver","diag",
-            "cycles","0..100000","threads","1",
+            "cycles","0..10000","threads","1",
             "interval","2000","op","noop"
         );
 
         var activitydef2 = Map.of(
             "alias", "blockingactivity2","driver","diag",
-            "cycles","0..100000","threads","1",
+            "cycles","0..10000","threads","1",
             "interval","2000", "op","noop"
         );
 

@@ -19,12 +19,15 @@ package io.nosqlbench.nbr.examples.injava;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
 
+import java.util.Map;
+
 public class SC_linkedinput extends SCBaseScenario {
     public SC_linkedinput(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
-    /** <pre>{@code
+    /**
+     * <pre>{@code
      * var leader = {
      *     driver: 'diag',
      *     alias: 'leader',
@@ -54,6 +57,31 @@ public class SC_linkedinput extends SCBaseScenario {
      */
     @Override
     public void invoke() {
+
+        var leader = Map.of(
+            "driver", "diag",
+            "alias", "leader",
+            "targetrate", "10000",
+            "op", "log:level=info"
+        );
+
+        var follower = Map.of(
+            "driver", "diag",
+            "alias", "follower",
+            "op", "log:level=INFO"
+
+        );
+
+        controller.start(leader);
+        stdout.println("started leader");
+        controller.start(follower);
+        stdout.println("started follower");
+
+        controller.waitMillis(500);
+        controller.stop(leader);
+        stdout.println("stopped leader");
+        controller.stop(follower);
+        stdout.println("stopped follower");
 
     }
 }

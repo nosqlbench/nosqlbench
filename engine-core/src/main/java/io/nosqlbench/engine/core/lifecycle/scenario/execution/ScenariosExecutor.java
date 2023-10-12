@@ -69,11 +69,9 @@ public class ScenariosExecutor extends NBBaseComponent {
     @NotNull
     private NBSceneBuffer getNbSceneBuffer(Map<String, String> params) {
         return NBSceneBuffer.builder()
-            .component(this.getParent())
             .tracedIO()
-            .extensions(loadExtensions())
             .params(params)
-            .build();
+            .build(parent);
     }
 
     @Override
@@ -267,30 +265,6 @@ public class ScenariosExecutor extends NBBaseComponent {
     public synchronized void notifyException(Thread t, Throwable e) {
         logger.debug(() -> "Scenario executor uncaught exception: " + e.getMessage());
         this.stoppingException = new RuntimeException("Error in scenario thread " + t.getName(), e);
-    }
-
-    private Extensions loadExtensions() {
-        Extensions extensions = new Extensions();// TODO: Load component oriented extensions into here
-
-//        for (final ScriptingExtensionPluginInfo<?> extensionDescriptor : SandboxExtensionFinder.findAll()) {
-//            if (!extensionDescriptor.isAutoLoading()) {
-//                this.logger.info(() -> "Not loading " + extensionDescriptor + ", autoloading is false");
-//                continue;
-//            }
-//
-//            final Logger extensionLogger =
-//                LogManager.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
-//            final Object extensionObject = extensionDescriptor.getExtensionObject(
-//                extensionLogger,
-//                metricRegistry,
-//                this.scriptEnv
-//            );
-//            ScenarioMetadataAware.apply(extensionObject, this.getScenarioMetadata());
-//            this.logger.trace(() -> "Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
-//                " class=" + extensionObject.getClass().getSimpleName());
-//            this.scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
-//        }
-        return extensions;
     }
 
     public ScenarioResult run(NBScenario scenario, Map<String,String> params) {

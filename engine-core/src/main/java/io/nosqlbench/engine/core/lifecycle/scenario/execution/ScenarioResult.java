@@ -46,6 +46,7 @@ public class ScenarioResult {
         }
     }
     public void exitWithCode() {
+        System.out.print(getIOLog());
         if (exception!=null) {
             System.exit(2);
         }

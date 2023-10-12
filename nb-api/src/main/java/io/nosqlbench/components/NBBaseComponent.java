@@ -20,22 +20,23 @@ package io.nosqlbench.components;
 
 import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.decorators.NBTokenWords;
 import io.nosqlbench.components.events.NBEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent {
+public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent, NBTokenWords {
     private final static Logger logger = LogManager.getLogger("RUNTIME");
     protected final NBComponent parent;
     protected final NBLabels labels;
     private final List<NBComponent> children = new ArrayList<>();
 
     public NBBaseComponent(NBComponent parentComponent) {
-        this(parentComponent,NBLabels.forKV());
+        this(parentComponent, NBLabels.forKV());
     }
+
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
         this.labels = componentSpecificLabelsOnly;
         if (parentComponent != null) {
@@ -78,7 +79,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     @Override
     public NBLabels getLabels() {
         NBLabels effectiveLabels = (this.parent == null ? NBLabels.forKV() : parent.getLabels());
-        effectiveLabels = (this.labels == null ) ? effectiveLabels : effectiveLabels.and(this.labels);
+        effectiveLabels = (this.labels == null) ? effectiveLabels : effectiveLabels.and(this.labels);
         return effectiveLabels;
     }
 
@@ -116,8 +117,8 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     }
 
     @Override
-    public NBBuilders create() {
-        return new NBBuilders(this);
+    public NBCreators create() {
+        return new NBCreators(this);
     }
 
     @Override
@@ -129,7 +130,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName());
-        if (getComponentMetrics().size()>0) {
+        if (!getComponentMetrics().isEmpty()) {
             sb.append(System.lineSeparator()).append("metrics:");
             for (NBMetric componentMetric : getComponentMetrics()) {
                 sb.append(System.lineSeparator()).append("  ").append(componentMetric.toString());
@@ -143,7 +144,9 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     public void onEvent(NBEvent event) {
         logger.debug(() -> description() + " handling event " + event.toString());
         switch (event) {
-            case UpEvent ue -> { if (parent!=null) parent.onEvent(ue); }
+            case UpEvent ue -> {
+                if (parent != null) parent.onEvent(ue);
+            }
             case DownEvent de -> {
                 for (NBComponent child : children) {
                     child.onEvent(de);
@@ -152,4 +155,25 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
             default -> logger.warn("dropping event " + event);
         }
     }
+
+    @Override
+    public <T> Optional<T> findParentService(Class<T> type) {
+        return findServiceOn(type, this);
+    }
+
+    private <T> Optional<T> findServiceOn(Class<T> type, NBComponent target) {
+        if (type.isAssignableFrom(target.getClass())) {
+            return Optional.of(type.cast(target));
+        } else if (getParent() != null) {
+            return findServiceOn(type, getParent());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Map<String, String> getTokens() {
+        return getLabels().asMap();
+    }
+
 }

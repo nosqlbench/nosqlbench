@@ -23,7 +23,7 @@ import com.codahale.metrics.MetricFilter;
 import io.nosqlbench.api.engine.metrics.instruments.*;
 import io.nosqlbench.api.engine.metrics.reporters.ConsoleReporter;
 import io.nosqlbench.api.engine.metrics.reporters.Log4JMetricsReporter;
-import io.nosqlbench.components.NBBuilders;
+import io.nosqlbench.components.NBCreators;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBComponentTraversal;
 import io.nosqlbench.components.NBFinders;
@@ -63,7 +63,7 @@ public class ExecutionMetricsResult extends ExecutionResult {
     public String getMetricsSummary(NBComponent component) {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try (final PrintStream ps = new PrintStream(os)) {
-            final NBBuilders.ConsoleReporterBuilder builder = new NBBuilders.ConsoleReporterBuilder(component, ps);
+            final NBCreators.ConsoleReporterBuilder builder = new NBCreators.ConsoleReporterBuilder(component, ps);
             final Set<MetricAttribute> disabled = new HashSet<>(ExecutionMetricsResult.INTERVAL_ONLY_METRICS);
             if (60000 > this.getElapsedMillis()) disabled.addAll(ExecutionMetricsResult.OVER_ONE_MINUTE_METRICS);
             builder.disabledMetricAttributes(disabled);
@@ -90,7 +90,7 @@ public class ExecutionMetricsResult extends ExecutionResult {
         ExecutionResult.logger.debug("-- active data on this last report. (The workload has already stopped.) Record   --");
         ExecutionResult.logger.debug("-- metrics to an external format to see values for each reporting interval.      --");
         ExecutionResult.logger.debug("-- BEGIN METRICS DETAIL --");
-        final Log4JMetricsReporter reporter = new NBBuilders.Log4jReporterBuilder(component)
+        final Log4JMetricsReporter reporter = new NBCreators.Log4jReporterBuilder(component)
             .withLoggingLevel(Log4JMetricsReporter.LoggingLevel.DEBUG)
             .filter(MetricFilter.ALL)
             .outputTo(ExecutionResult.logger)

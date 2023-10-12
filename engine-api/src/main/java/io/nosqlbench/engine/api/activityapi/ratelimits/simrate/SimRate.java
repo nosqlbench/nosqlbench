@@ -81,7 +81,14 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
     public SimRate(NBComponent parent, SimRateSpec spec) {
         super(parent, NBLabels.forKV());
         this.spec = spec;
+        initMetrics();
         startFiller();
+    }
+
+    private void initMetrics() {
+        create().gauge("cycles_waittime",() -> (double)getWaitTimeDuration().get(ChronoUnit.NANOS));
+        create().gauge("_config_cyclerate", () -> spec.opsPerSec);
+        create().gauge("_config_burstrate", () -> spec.burstRatio);
     }
 
     public long refill() {

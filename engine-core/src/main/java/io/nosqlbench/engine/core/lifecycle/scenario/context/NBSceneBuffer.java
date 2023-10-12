@@ -21,7 +21,6 @@ import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.scripting.DiagReader;
 import io.nosqlbench.engine.api.scripting.DiagWriter;
 import io.nosqlbench.engine.api.scripting.InterjectingCharArrayWriter;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
 
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -35,6 +34,7 @@ public class NBSceneBuffer implements NBSceneFixtures {
         virtual,
         traced
     }
+
     private final IOType iotype;
     private DiagWriter stdoutBuffer;
     private DiagWriter stderrBuffer;
@@ -46,8 +46,8 @@ public class NBSceneBuffer implements NBSceneFixtures {
 
         switch (iotype) {
             case traced:
-                stdoutBuffer = new DiagWriter(fixtures.out(), new InterjectingCharArrayWriter(" stdout "));
-                stderrBuffer = new DiagWriter(fixtures.err(), new InterjectingCharArrayWriter(" stderr "));
+                stdoutBuffer = new DiagWriter(new InterjectingCharArrayWriter(" stdout "), fixtures.out());
+                stderrBuffer = new DiagWriter(new InterjectingCharArrayWriter(" stderr "), fixtures.err());
                 stdinBuffer = new DiagReader(fixtures.in(), "  stdin ");
                 break;
             case virtual:
@@ -58,7 +58,7 @@ public class NBSceneBuffer implements NBSceneFixtures {
             case connected:
                 stdoutBuffer = new DiagWriter(fixtures.out());
                 stderrBuffer = new DiagWriter(fixtures.err());
-                stdinBuffer = new DiagReader(fixtures.in(), "  stdin ");
+                stdinBuffer = new DiagReader(fixtures.in());
                 break;
 
         }
@@ -75,18 +75,8 @@ public class NBSceneBuffer implements NBSceneFixtures {
     }
 
     @Override
-    public NBComponent component() {
-        return fixtures.component();
-    }
-
-    @Override
     public ScenarioActivitiesController controller() {
         return fixtures.controller();
-    }
-
-    @Override
-    public Extensions extensions() {
-        return fixtures.extensions();
     }
 
     @Override
@@ -105,19 +95,19 @@ public class NBSceneBuffer implements NBSceneFixtures {
     }
 
     public String getIOLog() {
-        return this.stdoutBuffer.getTimedLog()+this.stderrBuffer.getTimedLog();
+        return this.stdoutBuffer.getTimedLog() + this.stderrBuffer.getTimedLog();
     }
 
     public NBSceneFixtures asFixtures() {
         return (NBSceneFixtures) this;
     }
 
-    public static NBSceneBuffer init(String name) {
-        TestComponent root = new TestComponent("scene", "self");
-        return new NBSceneBuffer(NBDefaultSceneFixtures.ofDefault(name));
+
+    public static SceneBuilderFacets.WantsController builder() {
+        return new SceneBuilder();
     }
 
-    public static SceneBuilderFacets.WantsContext builder() {
-        return new SceneBuilder();
+    public static NBSceneBuffer traced(NBComponent component) {
+        return builder().tracedIO().build(component);
     }
 }

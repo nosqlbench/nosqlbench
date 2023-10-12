@@ -19,7 +19,6 @@ package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
 
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.Extensions;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -30,27 +29,17 @@ import java.util.Map;
 public class SceneBuilder implements SceneBuilderFacets.ALL {
     private Map<String,String> params = Map.of();
     private ScenarioActivitiesController controller;
-    private Extensions extensions;
     private PrintWriter out = new PrintWriter(System.out);
     private PrintWriter err = new PrintWriter(System.err);
     private Reader in = new InputStreamReader(System.in);
-    private NBComponent component;
-    private NBSceneBuffer.IOType iotype;
+    private NBSceneBuffer.IOType iotype = NBSceneBuffer.IOType.traced;
 
 
-    @Override
-    public SceneBuilder component(NBComponent component) {
-        this.component = component;
-        return this;
-    }
-
-    public NBSceneBuffer build() {
+    public NBSceneBuffer build(NBComponent forScenario) {
         NBDefaultSceneFixtures fixtures =
             new NBDefaultSceneFixtures(
                 ScenarioParams.of(this.params),
-                this.component,
-                ((this.controller!=null) ? this.controller : new ScenarioActivitiesController(component)),
-                this.extensions,
+                ((this.controller!=null) ? this.controller : new ScenarioActivitiesController(forScenario)),
                 this.out,
                 this.err,
                 this.in);
@@ -71,7 +60,7 @@ public class SceneBuilder implements SceneBuilderFacets.ALL {
     }
 
     @Override
-    public SceneBuilder err(PrintWriter err) {
+    public SceneBuilderFacets.WantsParams err(PrintWriter err) {
         this.err = err;
         return this;
     }
@@ -84,31 +73,25 @@ public class SceneBuilder implements SceneBuilderFacets.ALL {
     }
 
     @Override
-    public SceneBuilder extensions(Extensions extensions) {
-        this.extensions = extensions;
-        return this;
-    }
-
-    @Override
     public SceneBuilder params(Map<String, String> params) {
         this.params=params;
         return this;
     }
 
     @Override
-    public SceneBuilderFacets.WantsExtensions virtualIO() {
+    public SceneBuilderFacets.WantsParams virtualIO() {
         this.iotype= NBSceneBuffer.IOType.virtual;
         return this;
     }
 
     @Override
-    public SceneBuilderFacets.WantsExtensions connectedIO() {
+    public SceneBuilderFacets.WantsParams connectedIO() {
         this.iotype = NBSceneBuffer.IOType.connected;
         return this;
     }
 
     @Override
-    public SceneBuilderFacets.WantsExtensions tracedIO() {
+    public SceneBuilderFacets.WantsParams tracedIO() {
         this.iotype=NBSceneBuffer.IOType.traced;
         return this;
     }

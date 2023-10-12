@@ -60,8 +60,8 @@ class PerfWindowSamplerTest {
         assertThat(value).isCloseTo(30.0,Offset.offset(0.001));
 
         pws.startWindow(10000L);
-        a1.set(42); // 42-10=32
-        a2.set(42); // 42-1=41; 41+32=73
+        a1.set(42); // 42-3=39
+        a2.set(42); // 42-10=32
 
         pws.stopWindow(11000L);
         double value2 = pws.getValue();

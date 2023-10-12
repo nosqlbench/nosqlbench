@@ -116,7 +116,7 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
 
     @Override
     public synchronized void initActivity() {
-//        initOrUpdateRateLimiters(this.activityDef);
+        initOrUpdateRateLimiters(this.activityDef);
     }
 
     public synchronized NBErrorHandler getErrorHandler() {
@@ -306,7 +306,6 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
     }
 
     public synchronized void initOrUpdateRateLimiters(ActivityDef activityDef) {
-
 
         activityDef.getParams().getOptionalNamedParameter("striderate")
                 .map(StrideRateSpec::new).ifPresent(sr -> this.onEvent(new ParamChange<>(sr)));

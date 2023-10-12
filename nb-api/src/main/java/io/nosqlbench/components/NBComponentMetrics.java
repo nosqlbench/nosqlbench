@@ -50,5 +50,15 @@ public interface NBComponentMetrics {
         return found.get(0);
     }
 
+    default <T> T findOneComponentMetric(String pattern, Class<T> type) {
+        NBMetric found = findOneComponentMetric(pattern);
+        if (type.isAssignableFrom(found.getClass())) {
+            return type.cast(found);
+        }
+        return null;
+    }
+
     Collection<? extends NBMetric> getComponentMetrics();
+
+    <T> Collection<? extends T> findComponentMetrics(String pattern, Class<T> type);
 }

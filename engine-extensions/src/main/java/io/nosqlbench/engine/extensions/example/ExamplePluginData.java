@@ -21,7 +21,7 @@ import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 
-@Service(value = ScriptingExtensionPluginInfo.class, selector = "adder")
+@Service(value = ScriptingExtensionPluginInfo.class, selector = "example")
 public class ExamplePluginData implements ScriptingExtensionPluginInfo<ExamplePlugin> {
 
     @Override

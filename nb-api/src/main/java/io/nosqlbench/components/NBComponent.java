@@ -17,6 +17,7 @@
 package io.nosqlbench.components;
 
 import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.components.decorators.NBProviderSearch;
 
 import java.util.List;
 
@@ -33,7 +34,13 @@ import java.util.List;
  *
  * This interface includes more aspects of above by extension going forward.
  */
-public interface NBComponent extends AutoCloseable, NBLabeledElement, NBComponentMetrics, NBComponentServices, NBComponentEvents {
+public interface NBComponent extends
+    AutoCloseable,
+    NBLabeledElement,
+    NBComponentMetrics,
+    NBComponentServices,
+    NBComponentEvents,
+    NBProviderSearch {
 
     NBComponent EMPTY_COMPONENT = new NBBaseComponent(null);
 

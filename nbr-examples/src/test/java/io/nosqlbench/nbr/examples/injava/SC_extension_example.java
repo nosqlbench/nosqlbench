@@ -18,34 +18,23 @@ package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
+import io.nosqlbench.engine.extensions.example.ExamplePlugin;
 
-import java.util.Map;
-
-public class SC_basicdiag extends SCBaseScenario {
-    public SC_basicdiag(NBComponent parentComponent, String scenarioName) {
+public class SC_extension_example extends SCBaseScenario {
+    public SC_extension_example(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
     /** <pre>{@code
-     * basic_diag = params.withOverrides({
-     *     "alias" : "basic_diag",
-     *     "driver" : "diag"
-     * });
+     * var csvlogger = csvoutput.open("logs/csvoutputtestfile.csv","header1","header2");
      *
-     *
-     * print('starting activity basic_diag');
-     * scenario.start(basic_diag);
+     * csvlogger.write({"header1": "value1","header2":"value2"});
      * }</pre>
      */
     @Override
     public void invoke() {
-        var basic_diag = params.withOverrides(
-            Map.of("alias","basic_diag","driver","diag")
-        );
-        stdout.println("starting activity basic_diag");
-        controller.start(basic_diag);
-        stdout.println("stopping activity basic_diag");
-        controller.stop(basic_diag);
-        stdout.println("stopped activity basic_diag");
+        ExamplePlugin examplePlugin = create().requiredExtension("example", ExamplePlugin.class);
+        long sum = examplePlugin.getSum(3, 5);
+        stdout.println("3+5=" + sum);
     }
 }
