@@ -102,8 +102,8 @@ public class ScenarioActivitiesController extends NBBaseComponent {
      *
      * @param alias the alias of an activity that is already known to the scenario
      */
-    public synchronized void start(String alias) {
-        start(ActivityDef.parseActivityDef(alias));
+    public Activity start(String alias) {
+        return start(ActivityDef.parseActivityDef(alias));
     }
 
     public synchronized void run(int timeout, Map<String, String> activityDefMap) {

@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
 import io.nosqlbench.api.config.standard.TestComponent;
+import io.nosqlbench.api.filtering.TristateFilter;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.scripting.DiagReader;
 import io.nosqlbench.engine.api.scripting.DiagWriter;
@@ -25,9 +26,22 @@ import io.nosqlbench.engine.api.scripting.InterjectingCharArrayWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Map;
 
 public class NBSceneBuffer implements NBSceneFixtures {
     private final NBSceneFixtures fixtures;
+
+    public NBSceneBuffer params(Map<String,String> params) {
+        return new NBSceneBuffer(
+            new NBDefaultSceneFixtures(
+                ScenarioParams.of(params),
+                fixtures.controller(),
+                fixtures.out(),
+                fixtures.err(),
+                fixtures.in())
+            ,iotype
+        );
+    }
 
     public enum IOType {
         connected,

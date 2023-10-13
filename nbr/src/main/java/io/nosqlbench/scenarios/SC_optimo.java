@@ -29,6 +29,7 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
+import io.nosqlbench.scenarios.findmax.SimFrameCapture;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -87,7 +88,7 @@ public class SC_optimo extends SCBaseScenario {
 
         flywheel.onEvent(new ParamChange<>(new CycleRateSpec(5.0, 1.1d, SimRateSpec.Verb.restart)));
 
-        PerfWindowSampler sampler = new PerfWindowSampler();
+        SimFrameCapture sampler = new SimFrameCapture();
         NBMetricTimer result_success_timer = flywheel.find().timer("name:result_success");
         System.out.println("c1:" + result_success_timer.getCount());
         sampler.addDeltaTime("achieved_rate", result_success_timer::getCount, 1000.0);

@@ -98,12 +98,15 @@ public class DirectRuntimeScenarioTests {
         ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
         result.report();
     }
+
+
     @Disabled("enable before merge")
     @Test
     public void test_SC_cocycledelay_strict() {
         NBScenario scenario = new SC_cocycledelay_strict(testC,"test_SC_cocycledelay_strict");
         ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
+
     @Disabled("enable before merge")
     @Test
     public void test_SC_cycle_rate() {
@@ -184,7 +187,6 @@ public class DirectRuntimeScenarioTests {
         NBScenario scenario = new SC_start_stop_diag(testC,"test_SC_start_stop_diag");
         ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
-    @Disabled("enable before merge")
     @Test
     public void test_SC_threadchange() {
         NBScenario scenario = new SC_threadchange(testC,"test_SC_threadchange");
@@ -196,12 +198,12 @@ public class DirectRuntimeScenarioTests {
         NBScenario scenario = new SC_threadspeeds(testC,"test_SC_threadspeeds");
         ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
     }
-    @Disabled("enable before merge")
+
     @Test
     public void test_SC_undef_param() {
         NBScenario scenario = new SC_undef_param(testC, "test_SC_undef_param");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario).params(Map.of("one", "two", "three", "four")));
         String out = result.getIOLog();
-        assertThat(out).contains("foobar");
+        assertThat(out).matches(Pattern.compile(".*after overriding .*:null.*",Pattern.DOTALL));
     }
 }

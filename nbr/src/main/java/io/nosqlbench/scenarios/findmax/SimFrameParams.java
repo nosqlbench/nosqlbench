@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios;
+package io.nosqlbench.scenarios.findmax;
 
-import java.util.function.DoubleSupplier;
-
-public class Uniform extends BasePerfDimension {
-
-    public Uniform(double weight, DoubleSupplier supplier, String name) {
-        super(name, weight, Weighting.uniform, supplier);
-    }
-
-    @Override
-    public String getValue() {
-        return null;
+public record SimFrameParams(
+    double rate_shelf,
+    double rate_delta,
+    long sample_time_ms
+) {
+    public double computed_rate() {
+        return rate_shelf+rate_delta;
     }
 }

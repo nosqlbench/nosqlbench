@@ -16,6 +16,7 @@
 
 package io.nosqlbench.scenarios;
 
+import io.nosqlbench.scenarios.findmax.SimFrameCapture;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
@@ -24,11 +25,11 @@ import java.util.function.DoubleSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PerfWindowSamplerTest {
+class PerfFrameSamplerTest {
 
     @Test
     public void testBasicValues() {
-        PerfWindowSampler pws = new PerfWindowSampler();
+        SimFrameCapture pws = new SimFrameCapture();
         pws.addDirect("a",() -> 1.0d, 1.0d);
         pws.addDirect("b",()-> 3.0d, 3.0d);
 
@@ -46,7 +47,7 @@ class PerfWindowSamplerTest {
         AtomicLong a2 = new AtomicLong(0);
         DoubleSupplier ds2 = () -> (double) a2.get();
 
-        PerfWindowSampler pws = new PerfWindowSampler();
+        SimFrameCapture pws = new SimFrameCapture();
         pws.addDeltaTime("a",ds1, 1.0d);
         pws.addDeltaTime("b",ds2, 1.0d);
 

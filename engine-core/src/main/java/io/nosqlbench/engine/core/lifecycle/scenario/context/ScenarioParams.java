@@ -24,10 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -179,6 +176,10 @@ public class ScenarioParams extends HashMap<String, String> implements ProxyObje
     @Override
     public void putMember(String key, Value value) {
         super.put(key, value.asString());
+    }
+
+    public Optional<String> maybeGet(String name) {
+        return Optional.ofNullable(get(name));
     }
     //endregion
 

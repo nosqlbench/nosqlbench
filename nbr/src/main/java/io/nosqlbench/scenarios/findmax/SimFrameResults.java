@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios;
+package io.nosqlbench.scenarios.findmax;
 
-import java.util.function.DoubleSupplier;
+import java.util.List;
 
-public interface PerfDimension {
+public interface SimFrameResults {
+    List<SimFrameCapture.FrameSampleSet> history();
 
-    public double getWeight();
+    double getValue();
 
-    public Weighting getWeighting();
-    public DoubleSupplier getSupplier();
-    public String getName();
-    public String getValue();
-
+    int size();
 }

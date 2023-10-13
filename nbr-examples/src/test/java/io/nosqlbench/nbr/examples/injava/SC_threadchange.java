@@ -39,5 +39,16 @@ public class SC_threadchange extends SCBaseScenario {
     @Override
     public void invoke() {
 
+          var activity = controller.start("driver=diag;alias=threadchange;cycles=0..60000;threads=1;interval=2000;op='noop';rate=1000");
+          activity.getActivityDef().setThreads(1);
+          stdout.println("threads now " + activity.getActivityDef().getThreads());
+          stdout.println("waiting 500 ms");
+        controller.waitMillis(500);
+
+        activity.getActivityDef().setThreads(5);
+          stdout.println("threads now " + activity.getActivityDef().getThreads());
+          controller.stop("threadchange");
+
+
     }
 }
