@@ -99,7 +99,6 @@ public class SC_findmax extends SCBaseScenario {
             capture.stopWindow();
             journal.record(frameParams,capture.last());
             stdout.println(capture.last());
-//            stdout.println("SUMMARY:" + journal.last());
             stdout.println("-".repeat(40));
             frameParams = planner.nextStep(journal);
         }
