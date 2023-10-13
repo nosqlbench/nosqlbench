@@ -87,8 +87,8 @@ public class MongoSpace implements NBNamedElement, AutoCloseable {
         // https://www.mongodb.com/docs/v7.0/reference/stable-api
         ServerApi serverApi = ServerApi.builder()
             .version(ServerApiVersion.V1)
-            .deprecationErrors(true)
-            .strict(true)
+            .deprecationErrors(false)
+            .strict(false)//Needed because createSearchIndexes is not in stable API
             .build();
 
         MongoClientSettings settings = MongoClientSettings.builder()

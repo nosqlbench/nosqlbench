@@ -11,9 +11,13 @@ description: |
 scenarios:
   default:
     schema: run driver=mongodb tags==block:"schema.*" threads==1 cycles==UNDEF database=baselines
-    rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,100000) threads=auto database=baselines
+    rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(trainsize) threads=auto database=baselines errors=counter,retry
     main: run driver=mongodb tags==block:'main-.*' cycles===TEMPLATE(main-cycles,100000) threads=auto database=baselines
-    drop: run driver=mongodb tags==block:drop-collection threads==1 cycles==UNDEF database=baselines
+    drop: run driver=mongodb tags==block:drop-entire-collection threads==1 cycles==UNDEF database=baselines
+    search_and_index: >-
+      run driver=mongodb alias=search_and_index tags='block:main-read' labels='target:mongodbatlas'
+      cycles=TEMPLATE(testsize) errors=counter,retry stride=100 striderate=7.50
+      read_ratio=1 threads=500 database=baselines
 
 params:
   instrument: true
@@ -30,6 +34,7 @@ bindings:
   train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train"); ToCqlVector();
   #READ
   test_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/test"); ToCqlVector();
+  relevant_indices: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
 
 blocks:
   schema:
@@ -65,8 +70,8 @@ blocks:
               }
             }
           },
-          validationLevel: "off",
-          validationAction: "warn",
+          validationLevel: "strict",
+          validationAction: "error",
           comment: "keyvalue collection creation with strict types and a required 'key' field."
         }
       create_key_index: |
@@ -121,26 +126,46 @@ blocks:
         }
   main-read:
     params:
-      ratio: 5
+      ratio: TEMPLATE(read_ratio,5)
     ops:
       main-select: |
         {
           aggregate: "TEMPLATE(collection,keyvalue)",
           pipeline: [
-            $vectorSearch: {
-              index: "kv_value_vector_search_idx",
-              path: "value",
-              queryVector: {test_floatlist},
-              numCandidates: TEMPLATE(num_candidates,1000)
-              limit: TEMPLATE(top_k,100)
+            "$vectorSearch": {
+              "index": "kv_value_vector_search_idx",
+              "path": "value",
+              "queryVector": {test_floatlist},
+              "numCandidates": TEMPLATE(num_candidates,1000)
+              "limit": TEMPLATE(top_k,100)
+            },
+            {
+              "$project": {
+                "_id": 0,
+                "key": 1,
+                "value": 1,
+                "score": { "$meta": "vectorSearchScore" }
+              }
             }
           ],
-          readConcern: { level: "majority" },
+          readConcern: { "level": "majority" },
           comment: "Find the results for the given 'value' vector search embedding."
         }
+      verifier-init: |
+        k=TEMPLATE(top_k,100)
+        relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op);
+        relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+        relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+        relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+        relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+        relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+      verifier: |
+        actual_indices=cql_utils.cqlStringColumnToIntArray("key",result);
+        relevancy.accept({relevant_indices},actual_indices);
+        return true;
   main-write:
     params:
-      ratio: 5
+      ratio: TEMPLATE(write_ratio,5)
     ops:
       main-insert: |
         {
@@ -154,8 +179,13 @@ blocks:
           writeConcern: { w: "majority" },
           comment: "Insert documents into keyvalue collection."
         }
-  drop-collection:
+  drop-entire-collection:
     ops:
+      drop-vsearch-index: |
+        {
+          dropSearchIndex: "TEMPLATE(collection,keyvalue)",
+          name: "kv_value_vector_search_idx"
+        }
       drop-collection: |
         {
           drop: "TEMPLATE(collection,keyvalue)",
