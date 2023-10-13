@@ -31,6 +31,7 @@ bindings:
   rw_key: TEMPLATE(keydist,Uniform(0,1000000000)); ToString() -> String
   #rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)); CharBufImage('A-Za-z0-9 _|/',16000000,HashRange(TEMPLATE(mintext,50000)TEMPLATE(addzeros,),TEMPLATE(maxtext,150000)TEMPLATE(addzeros,))); ToString();
   #WRITE
+  seq_key: ToString();
   train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train"); ToCqlVector();
   #READ
   test_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/test"); ToCqlVector();
@@ -118,7 +119,7 @@ blocks:
           insert: "TEMPLATE(collection,keyvalue)",
           documents: [
             {
-              key: "{rw_key}",
+              key: "{seq_key}",
               value: {train_floatlist}
             }
           ],
@@ -160,7 +161,8 @@ blocks:
         relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
         relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
       verifier: |
-        actual_indices=cql_utils.cqlStringColumnToIntArray("key",result);
+        actual_indices=io.nosqlbench.adapter.mongodb.MongoDbUtils.getFieldFromResults("key",result);
+#        actual_indices=cql_utils.cqlStringColumnToIntArray("key",result);
         relevancy.accept({relevant_indices},actual_indices);
         return true;
   main-write:
