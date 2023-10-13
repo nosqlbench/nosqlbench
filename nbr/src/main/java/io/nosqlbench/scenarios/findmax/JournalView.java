@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.components.events;
+package io.nosqlbench.scenarios.findmax;
 
-import io.nosqlbench.components.UpEvent;
+import java.util.List;
 
-public record ParamChange<T>(T value) implements UpEvent {
-    public static <T> ParamChange<T> of(T value) {
-        return new ParamChange<>(value);
-    }
+public interface JournalView {
+    List<SimFrame> frames();
+    SimFrame last();
+    SimFrame beforeLast();
 }

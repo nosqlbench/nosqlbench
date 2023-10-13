@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
+import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.spi.SimpleServiceLoader;
 import io.nosqlbench.components.NBComponent;
@@ -168,6 +169,8 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+
+
     }
 
 }

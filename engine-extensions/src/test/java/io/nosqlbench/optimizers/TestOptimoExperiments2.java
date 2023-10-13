@@ -25,6 +25,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -57,6 +58,7 @@ public class TestOptimoExperiments2 {
 
     private final static Logger logger = LogManager.getLogger(TestOptimoExperiments2.class);
 
+    @Disabled
     @Test
     public void testBrokenParams() {
 

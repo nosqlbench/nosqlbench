@@ -19,6 +19,5 @@ package io.nosqlbench.components;
 public interface NBComponentServices {
 
     public NBCreators create();
-
     public NBFinders find();
 }

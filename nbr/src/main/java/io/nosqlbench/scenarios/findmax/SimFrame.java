@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.components.events;
+package io.nosqlbench.scenarios.findmax;
 
-import io.nosqlbench.components.UpEvent;
-
-public record ParamChange<T>(T value) implements UpEvent {
-    public static <T> ParamChange<T> of(T value) {
-        return new ParamChange<>(value);
+/**
+ * Capture the control inputs as well as the result of a sample period of a simulated workload.
+ * @param params The parameters which control the simulated workload during the sample window
+ * @param result The measured result, including key metrics and criteria for the sample window
+ */
+public record SimFrame(SimFrameParams params, SimFrameCapture.FrameSampleSet result) {
+    public double value() {
+        return result().value();
     }
+    public int index() {
+        return result.index();
+    }
+
 }

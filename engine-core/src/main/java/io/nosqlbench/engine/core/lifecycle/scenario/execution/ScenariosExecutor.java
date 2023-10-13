@@ -173,7 +173,7 @@ public class ScenariosExecutor extends NBBaseComponent {
                 } catch (Exception e) {
                     long now = System.currentTimeMillis();
                     logger.debug("creating exceptional scenario result from getAsyncResultStatus");
-                    throw new RuntimeException("replace with a proper error type: " + e.toString(),e);
+                    throw new RuntimeException(e);
                 }
             }
 
