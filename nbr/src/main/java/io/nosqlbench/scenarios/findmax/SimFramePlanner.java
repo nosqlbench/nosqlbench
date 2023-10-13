@@ -73,11 +73,6 @@ public class SimFramePlanner {
                 journal.last().params().sample_time_ms()
             );
         }
-        // if last result was better than the one before it
-        // increment from settings
-        // else if the new base would be higher than the initial rate_step
-        // rebase
-        // else return null;
         SimFrame last = journal.last();
         SimFrame before = journal.beforeLast();
         if (before.value() < last.value()) { // got a better result, keep on keepin' on
