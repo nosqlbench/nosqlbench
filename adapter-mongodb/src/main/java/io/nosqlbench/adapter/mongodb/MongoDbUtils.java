@@ -1,6 +1,5 @@
 package io.nosqlbench.adapter.mongodb;
 
-import com.mongodb.client.FindIterable;
 import org.bson.Document;
 
 import java.util.ArrayList;
