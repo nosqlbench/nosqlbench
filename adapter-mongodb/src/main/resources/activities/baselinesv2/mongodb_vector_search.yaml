@@ -131,42 +131,49 @@ blocks:
     params:
       ratio: TEMPLATE(read_ratio,5)
     ops:
-      main-select: |
-        {
-          aggregate: "TEMPLATE(collection,keyvalue)",
-          pipeline: [
-            "$vectorSearch": {
-              "index": "kv_value_vector_search_idx",
-              "path": "value",
-              "queryVector": {test_floatlist},
-              "numCandidates": TEMPLATE(num_candidates,1000)
-              "limit": TEMPLATE(top_k,100)
+      main_select:
+        op: |
+          {
+            "aggregate": "TEMPLATE(collection,keyvalue)",
+            "cursor" : {
+              "batchSize": 100
             },
-            {
-              "$project": {
-                "_id": 0,
-                "key": 1,
-                "value": 1,
-                "score": { "$meta": "vectorSearchScore" }
+            "pipeline": [
+              {
+                "$vectorSearch": {
+                  "index": "kv_value_vector_search_idx",
+                  "path": "value",
+                  "queryVector": {test_floatlist},
+                  "numCandidates": TEMPLATE(num_candidates,1000),
+                  "limit": TEMPLATE(top_k,100)
+                }
+              },
+              {
+                "$project": {
+                  "_id": 0,
+                  "key": 1,
+                  "value": 1,
+                  "score": { "$meta": "vectorSearchScore" }
+                }
               }
-            }
-          ],
-          readConcern: { "level": "majority" },
-          comment: "Find the results for the given 'value' vector search embedding."
-        }
-      verifier-init: |
-        k=TEMPLATE(top_k,100)
-        relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op);
-        relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
-        relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
-        relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
-        relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
-        relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
-      verifier: |
-        actual_indices=io.nosqlbench.adapter.mongodb.MongoDbUtils.getFieldFromResults("key",result);
-#        actual_indices=cql_utils.cqlStringColumnToIntArray("key",result);
-        relevancy.accept({relevant_indices},actual_indices);
-        return true;
+            ],
+            "readConcern": { "level": "local" },
+            "comment": "Find the results for the given 'value' vector search embedding."
+          }
+        verifier-imports:
+          - io.nosqlbench.adapter.mongodb.MongoDbUtils
+        verifier-init: |
+          k=TEMPLATE(top_k,100)
+          relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op);
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+        verifier: |
+          actual_indices=MongoDbUtils.getFieldFromResults("key",result);
+          relevancy.accept({relevant_indices},actual_indices);
+          return true;
   main-write:
     params:
       ratio: TEMPLATE(write_ratio,5)
