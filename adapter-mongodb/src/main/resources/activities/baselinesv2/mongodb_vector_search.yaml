@@ -5,6 +5,8 @@
 # nb5 run driver=mongodb workload=/path/to/mongodb_verctor_search.yaml tags='block:main-.*' cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
 min_version: "5.17.5"
 
+# https://www.mongodb.com/docs/atlas/app-services/data-api/
+
 description: |
   This workload is analogous to the cql-keyvalue2 workload, just implemented for MongoDB Atlas Vector Search.
 
