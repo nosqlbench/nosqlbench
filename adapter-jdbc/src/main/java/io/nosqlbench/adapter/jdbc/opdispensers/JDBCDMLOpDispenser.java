@@ -39,9 +39,6 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
     private final LongFunction<String> pStmtSqlStrFunc;
     private final LongFunction<List<Object>> pStmtValListFunc;
 
-    // Only for Vector relevancy score testing (Vector read statement)
-    private final String verifierKeyName;
-
     public JDBCDMLOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter,
                               JDBCSpace jdbcSpace,
                               ParsedOp op,
@@ -68,8 +65,6 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
             }
             return pStmtValListObj;
         };
-
-        this.verifierKeyName = op.getStaticConfigOr("verifier-key", "");
     }
 
     @Override

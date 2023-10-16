@@ -29,6 +29,7 @@ public abstract class JDBCBaseOpDispenser extends BaseOpDispenser<JDBCOp, JDBCSp
     protected final JDBCSpace jdbcSpace;
     protected  boolean isDdlStatement;
     protected final boolean isPreparedStatement;
+    protected final String verifierKeyName;
 
     public JDBCBaseOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter,
                                JDBCSpace jdbcSpace,
@@ -36,8 +37,8 @@ public abstract class JDBCBaseOpDispenser extends BaseOpDispenser<JDBCOp, JDBCSp
         super(adapter, op);
         this.jdbcSpace = jdbcSpace;
         this.isPreparedStatement = op.getStaticConfigOr("prepared", false);
+        this.verifierKeyName = op.getStaticConfigOr("verifier-key", "");
     }
-
     public void checkShutdownEntry(long cycle) {
         if (cycle == (jdbcSpace.getTotalCycleNum()-1)) {
             jdbcSpace.enterShutdownStage();
