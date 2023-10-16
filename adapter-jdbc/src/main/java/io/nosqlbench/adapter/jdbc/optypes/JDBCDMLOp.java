@@ -44,6 +44,7 @@ public abstract class JDBCDMLOp extends JDBCOp {
                      String pStmtSqlStr,
                      List<Object> pStmtValList) {
         super(jdbcSpace);
+        assert(StringUtils.isNotBlank(pStmtSqlStr));
 
         this.isReadStmt = isReadStmt;
         this.pStmtSqlStr = pStmtSqlStr;
@@ -77,24 +78,29 @@ public abstract class JDBCDMLOp extends JDBCOp {
 
         for (int i=0; i<valList.size(); i++) {
             int fieldIdx = i + 1;
-            String inputFieldVal = ((String)valList.get(i)).trim();
+            Object fieldValObj = valList.get(i);
+            assert (fieldValObj != null);
 
             try {
-                Object fieldValObj = inputFieldVal;
-
-                // If the 'fieldVal' is a string like "[<float_num_1>, <float_num_2>, ... <float_num_n>]" format,
-                // convert it to the Vector object
-                if ( inputFieldVal.startsWith("[") && inputFieldVal.endsWith("]") ) {
-                    JDBCPgVector vector = new JDBCPgVector();
-                    vector.setValue(inputFieldVal);
-                    fieldValObj = vector;
+                // Special processing for Vector
+                if (fieldValObj instanceof String) {
+                    String strObj = (String)fieldValObj;
+                    if (StringUtils.isNotBlank(strObj)) {
+                        strObj = strObj.trim();
+                        // If the 'fieldVal' is a string like "[<float_num_1>, <float_num_2>, ... <float_num_n>]" format,
+                        // convert it to the Vector object
+                        if (strObj.startsWith("[") && strObj.endsWith("]")) {
+                            JDBCPgVector vector = new JDBCPgVector();
+                            vector.setValue(strObj);
+                            fieldValObj = vector;
+                        }
+                    }
                 }
-
                 stmt.setObject(fieldIdx, fieldValObj);
             }
             catch (JDBCPgVectorException | SQLException e) {
                 throw new RuntimeException(
-                    "Failed to parse the prepared statement value for field[" + fieldIdx + "] " + inputFieldVal);
+                    "Failed to parse the prepared statement value for field[" + fieldIdx + "] " + fieldValObj);
             }
         }
 

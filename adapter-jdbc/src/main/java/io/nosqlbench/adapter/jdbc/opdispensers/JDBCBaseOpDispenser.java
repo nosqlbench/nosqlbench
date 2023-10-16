@@ -17,13 +17,10 @@
 package io.nosqlbench.adapter.jdbc.opdispensers;
 
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
-import io.nosqlbench.adapter.jdbc.optypes.JDBCDMLOp;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public abstract class JDBCBaseOpDispenser extends BaseOpDispenser<JDBCOp, JDBCSpace> {
     protected static final String ERROR_STATEMENT_CREATION =
