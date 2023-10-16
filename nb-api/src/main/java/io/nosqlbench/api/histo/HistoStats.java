@@ -17,7 +17,6 @@
 
 package io.nosqlbench.api.histo;
 
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.metrics.HistoStatsLogger;
 import io.nosqlbench.api.engine.util.Unit;
 import io.nosqlbench.components.NBBaseComponent;

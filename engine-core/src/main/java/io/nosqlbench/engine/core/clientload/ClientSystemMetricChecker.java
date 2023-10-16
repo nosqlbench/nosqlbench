@@ -17,6 +17,10 @@
 package io.nosqlbench.engine.core.clientload;
 
 import com.codahale.metrics.Gauge;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.util.concurrent.Executors;
@@ -25,22 +29,23 @@ import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientSystemMetricChecker {
+public class ClientSystemMetricChecker extends NBBaseComponent {
     private final int pollIntervalSeconds;
     private final ScheduledExecutorService scheduler;
     private List<ClientMetric> clientMetrics;
 
-    public ClientSystemMetricChecker(int pollIntervalSeconds) {
+    public ClientSystemMetricChecker(NBComponent parent, NBLabels additionalLabels, int pollIntervalSeconds) {
+        super(parent,additionalLabels);
         this.pollIntervalSeconds = pollIntervalSeconds;
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.clientMetrics = new ArrayList<>();
     }
 
-    public void addMetricToCheck(String name, Gauge<Double> metric, Double threshold) {
-        addRatioMetricToCheck(name, metric, null, threshold, false);
+    public void addMetricToCheck(NBMetricGauge gauge, Double threshold) {
+        addRatioMetricToCheck(gauge, null, threshold, false);
     }
 
-    public void addRatioMetricToCheck(String name, Gauge<Double> numerator, Gauge<Double> denominator, Double threshold, boolean retainPrev) {
+    public void addRatioMetricToCheck(NBMetricGauge numerator, NBMetricGauge denominator, Double threshold, boolean retainPrev) {
         /**
          * Some "meaningful" system metrics are derived via:
          * - taking a ratio of instantaneous values (e.g. MemUsed / MemTotal from /proc/meminfo)
@@ -48,13 +53,11 @@ public class ClientSystemMetricChecker {
          *
          * This method serves to be able to allow checking those which can be derived as a ratio of two existing metrics.
          */
-        clientMetrics.add(new ClientMetric(name, numerator, denominator, threshold, retainPrev));
+        clientMetrics.add(new ClientMetric(numerator, denominator, threshold, retainPrev));
     }
 
     public void start() {
-        scheduler.scheduleAtFixedRate(() -> {
-            checkMetrics();
-        }, pollIntervalSeconds, pollIntervalSeconds, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::checkMetrics, pollIntervalSeconds, pollIntervalSeconds, TimeUnit.SECONDS);
     }
 
     private void checkMetrics() {
@@ -68,20 +71,18 @@ public class ClientSystemMetricChecker {
 
     private class ClientMetric {
         private static final Logger logger = LogManager.getLogger(ClientMetric.class);
-        private final String name;
-        private final Gauge<Double> numerator;
-        private final Gauge<Double> denominator;
+        private final NBMetricGauge numerator;
+        private final NBMetricGauge denominator;
         private final Double threshold;
         private final Boolean retainPrevValue;
         private Double prevNumeratorValue;
         private Double prevDenominatorValue;
 
-        private ClientMetric(String name, Gauge<Double> gauge, Double threshold) {
-            this(name, gauge, null, threshold, false);
+        private ClientMetric(NBMetricGauge gauge, Double threshold) {
+            this(gauge, null, threshold, false);
         }
 
-        private ClientMetric(String name, Gauge<Double> numerator, Gauge<Double> denominator, Double threshold, Boolean retainPrevValue) {
-            this.name = name;
+        private ClientMetric(NBMetricGauge numerator, NBMetricGauge denominator, Double threshold, Boolean retainPrevValue) {
             this.numerator = numerator;
             this.denominator = denominator;
             this.threshold = threshold;
@@ -123,7 +124,7 @@ public class ClientSystemMetricChecker {
         private void check() {
             Double extractedVal = extract();
             if (extractedVal != null && extractedVal > threshold)
-                logger.warn(name + " value = " + extractedVal + " > threshold " + threshold);
+                logger.warn(getLabels().asMap().get("name") + " value = " + extractedVal + " > threshold " + threshold);
         }
     }
 }

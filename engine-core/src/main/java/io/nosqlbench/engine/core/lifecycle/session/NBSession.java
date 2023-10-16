@@ -17,8 +17,9 @@
 package io.nosqlbench.engine.core.lifecycle.session;
 
 import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.spi.SimpleServiceLoader;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponentSubScope;
@@ -26,6 +27,7 @@ import io.nosqlbench.components.decorators.NBTokenWords;
 import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.cli.ScriptBuffer;
+import io.nosqlbench.engine.core.clientload.*;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
@@ -33,7 +35,6 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosExecutor;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosResults;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenario;
-import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,6 +53,7 @@ import java.util.function.Function;
 public class NBSession extends NBBaseComponent implements Function<List<Cmd>, ExecutionResult>, NBTokenWords {
     private final static Logger logger = LogManager.getLogger(NBSession.class);
     private final String sessionName;
+    private final ClientSystemMetricChecker clientMetricChecker;
 
     public enum STATUS {
         OK,
@@ -65,6 +67,15 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
     ) {
         super(null, labelContext.getLabels().and("session", sessionName));
         this.sessionName = sessionName;
+
+        this.clientMetricChecker = new ClientSystemMetricChecker(this, NBLabels.forKV(),10);
+        registerLoadAvgMetrics();
+        registerMemInfoMetrics();
+        registerDiskStatsMetrics();
+        registerNetworkInterfaceMetrics();
+        registerStatMetrics();
+        clientMetricChecker.start();
+
     }
 
     public ExecutionResult apply(List<Cmd> cmds) {
@@ -87,19 +98,13 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
                 scenario = buildJavacriptScenario(cmds);
             }
             try (NBComponentSubScope scope = new NBComponentSubScope(scenario)) {
-                assert scenario != null;
-                scenariosExecutor.execute(scenario,params);
-
+                scenariosExecutor.execute(scenario, params);
                 //             this.doReportSummaries(this.reportSummaryTo, this.result);
             }
             final ScenariosResults scenariosResults = scenariosExecutor.awaitAllResults();
             logger.debug(() -> "Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
 
-//            ActivityMetrics.closeMetrics();
-//            scenariosResults.reportToLog();
-//            ShutdownManager.shutdown();
-//
-//            logger.info(scenariosResults.getExecutionSummary());
+            //            logger.info(scenariosResults.getExecutionSummary());
 
             if (scenariosResults.hasError()) {
                 results.error(scenariosResults.getAnyError().orElseThrow());
@@ -136,7 +141,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
     }
 
     private NBScenario buildJavaScenario(List<Cmd> cmds) {
-        if (cmds.size()!=1) {
+        if (cmds.size() != 1) {
             throw new RuntimeException("java scenarios require exactly 1 java command");
         }
         Cmd javacmd = cmds.get(0);
@@ -171,6 +176,80 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         }
 
 
+    }
+
+
+    private void registerLoadAvgMetrics() {
+        LoadAvgReader reader = new LoadAvgReader();
+        if (!reader.fileExists())
+            return;
+
+        NBFunctionGauge load1m = create().gauge("loadavg_1min", reader::getOneMinLoadAverage);
+        clientMetricChecker.addMetricToCheck(load1m, 50.0);
+
+        NBFunctionGauge load5m = create().gauge("loadavg_5min", reader::getFiveMinLoadAverage);
+        clientMetricChecker.addMetricToCheck(load5m, 50.0);
+
+        NBFunctionGauge load15m = create().gauge("loadavg_15min", reader::getFifteenMinLoadAverage);
+        clientMetricChecker.addMetricToCheck(load15m, 50.0);
+        // add checking for CPU load averages; TODO: Modify thresholds
+
+    }
+
+    private void registerMemInfoMetrics() {
+        MemInfoReader reader = new MemInfoReader();
+        if (!reader.fileExists())
+            return;
+
+        NBMetricGauge memTotalGauge = create().gauge("mem_total",reader::getMemTotalkB);
+        NBMetricGauge memUsedGauge = create().gauge("mem_used",reader::getMemUsedkB);
+        NBMetricGauge memFreeGauge = create().gauge("mem_free",reader::getMemFreekB);
+        NBMetricGauge memAvailableGauge = create().gauge("mem_avaialble",reader::getMemAvailablekB);
+        NBMetricGauge memCachedGauge = create().gauge("mem_cache",reader::getMemCachedkB);
+        NBMetricGauge memBufferedGauge = create().gauge("mem_buffered", reader::getMemBufferskB);
+        // add checking for percent memory used at some given time; TODO: Modify percent threshold
+        clientMetricChecker.addRatioMetricToCheck(memUsedGauge, memTotalGauge, 90.0, false);
+
+        NBMetricGauge swapTotalGauge = create().gauge("swap_total", reader::getSwapTotalkB);
+        NBMetricGauge swapFreeGauge = create().gauge("swap_free",reader::getSwapFreekB);
+        NBMetricGauge swapUsedGauge = create().gauge("swap_used",reader::getSwapUsedkB);
+    }
+
+    private void registerDiskStatsMetrics() {
+        DiskStatsReader reader = new DiskStatsReader();
+        if (!reader.fileExists())
+            return;
+
+        for (String device : reader.getDevices()) {
+            create().gauge(device +"_transactions", () ->reader.getTransactionsForDevice(device));
+            create().gauge(device +"_kB_read", () -> reader.getKbReadForDevice(device));
+            create().gauge(device+"_kB_written", () -> reader.getKbWrittenForDevice(device));
+        }
+    }
+
+    private void registerNetworkInterfaceMetrics() {
+        NetDevReader reader = new NetDevReader();
+        if (!reader.fileExists())
+            return;
+        for (String iface : reader.getInterfaces()) {
+            create().gauge(iface+"_rx_bytes",() -> reader.getBytesReceived(iface));
+            create().gauge(iface+"_rx_packets",() -> reader.getPacketsReceived(iface));
+            create().gauge(iface+"_tx_bytes",() -> reader.getBytesTransmitted(iface));
+            create().gauge(iface+"_tx_packets",() -> reader.getPacketsTransmitted(iface));
+        }
+    }
+
+    private void registerStatMetrics() {
+        StatReader reader = new StatReader();
+        if (!reader.fileExists())
+            return;
+        NBMetricGauge cpuUserGauge = create().gauge("cpu_user", reader::getUserTime);
+        NBMetricGauge cpuSystemGauge = create().gauge("cpu_system",reader::getSystemTime);
+        NBMetricGauge cpuIdleGauge = create().gauge("cpu_idle", reader::getIdleTime);
+        NBMetricGauge cpuIoWaitGauge = create().gauge("cpu_iowait", reader::getIoWaitTime);
+        NBMetricGauge cpuTotalGauge = create().gauge("cpu_total", reader::getTotalTime);
+        // add checking for percent of time spent in user space; TODO: Modify percent threshold
+        clientMetricChecker.addRatioMetricToCheck(cpuUserGauge, cpuTotalGauge, 50.0, true);
     }
 
 }
