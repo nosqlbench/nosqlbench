@@ -24,7 +24,6 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import io.nosqlbench.components.NBNamedElement;
 import com.mongodb.client.MongoDatabase;
-import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;

@@ -24,7 +24,6 @@ import io.nosqlbench.api.annotations.Layer;
 import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
-import io.nosqlbench.api.engine.metrics.ActivityMetrics;
 import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.labels.NBLabeledElement;
@@ -393,13 +392,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 //        }
 
         // client machine metrics; TODO: modify pollInterval
-        this.clientMetricChecker = new ClientSystemMetricChecker(10);
-        registerLoadAvgMetrics();
-        registerMemInfoMetrics();
-        registerDiskStatsMetrics();
-        registerNetworkInterfaceMetrics();
-        registerStatMetrics();
-        clientMetricChecker.start();
 
         // intentionally not shown for warn-only
         NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
@@ -435,124 +427,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
     }
 
 
-    private void registerLoadAvgMetrics() {
-        LoadAvgReader reader = new LoadAvgReader();
-        if (!reader.fileExists())
-            return;
-        Gauge<Double> loadAvgOneMinGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getOneMinLoadAverage(), "loadavg_1min")
-        );
-        Gauge<Double> loadAvgFiveMinGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getFiveMinLoadAverage(), "loadavg_5min")
-        );
-        Gauge<Double> loadAvgFifteenMinuteGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getFifteenMinLoadAverage(), "loadavg_15min")
-        );
-        // add checking for CPU load averages; TODO: Modify thresholds
-        clientMetricChecker.addMetricToCheck("loadavg_5min", loadAvgFiveMinGauge, 50.0);
-        clientMetricChecker.addMetricToCheck("loadavg_1min", loadAvgOneMinGauge, 50.0);
-        clientMetricChecker.addMetricToCheck("loadavg_15min", loadAvgFifteenMinuteGauge, 50.0);
-    }
-
-    private void registerMemInfoMetrics() {
-        MemInfoReader reader = new MemInfoReader();
-        if (!reader.fileExists())
-            return;
-        Gauge<Double> memTotalGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getMemTotalkB(), "mem_total")
-        );
-        Gauge<Double> memUsedGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getMemUsedkB(), "mem_used")
-        );
-        ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getMemFreekB(), "mem_free")
-        );
-        ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getMemAvailablekB(), "mem_available")
-        );
-        ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getMemCachedkB(), "mem_cached")
-        );
-        ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getMemBufferskB(), "mem_buffered")
-        );
-        // add checking for percent memory used at some given time; TODO: Modify percent threshold
-        clientMetricChecker.addRatioMetricToCheck(
-            "mem_used_percent", memUsedGauge, memTotalGauge, 90.0, false
-        );
-
-        ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getSwapTotalkB(), "swap_total")
-        );
-        ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getSwapFreekB(), "swap_free")
-        );
-        ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getSwapUsedkB(), "swap_used")
-        );
-    }
-
-    private void registerDiskStatsMetrics() {
-        DiskStatsReader reader = new DiskStatsReader();
-        if (!reader.fileExists())
-            return;
-        for (String device: reader.getDevices()) {
-            ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> reader.getTransactionsForDevice(device), device + "_transactions")
-            );
-            ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> reader.getKbReadForDevice(device), device + "_kB_read")
-            );
-            ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> reader.getKbWrittenForDevice(device), device + "_kB_written")
-            );
-        }
-    }
-
-    private void registerNetworkInterfaceMetrics() {
-        NetDevReader reader = new NetDevReader();
-        if (!reader.fileExists())
-            return;
-        for (String interfaceName: reader.getInterfaces()) {
-            ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> reader.getBytesReceived(interfaceName), interfaceName + "_rx_bytes")
-            );
-            ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> reader.getPacketsReceived(interfaceName), interfaceName + "_rx_packets")
-            );
-            ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> reader.getBytesTransmitted(interfaceName), interfaceName + "_tx_bytes")
-            );
-            ActivityMetrics.register(
-                new NBFunctionGauge(this, () -> reader.getPacketsTransmitted(interfaceName), interfaceName + "_tx_packets")
-            );
-        }
-    }
-
-    private void registerStatMetrics() {
-        StatReader reader = new StatReader();
-        if (!reader.fileExists())
-            return;
-        Gauge<Double> cpuUserGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getUserTime(), "cpu_user")
-        );
-        ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getSystemTime(), "cpu_system")
-        );
-        ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getIdleTime(), "cpu_idle")
-        );
-        ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getIoWaitTime(), "cpu_iowait")
-        );
-        Gauge<Double> cpuTotalGauge = ActivityMetrics.register(
-            new NBFunctionGauge(this, () -> reader.getTotalTime(), "cpu_total")
-        );
-        // add checking for percent of time spent in user space; TODO: Modify percent threshold
-        clientMetricChecker.addRatioMetricToCheck(
-            "cpu_user_percent", cpuUserGauge, cpuTotalGauge, 50.0, true
-        );
-    }
 
     @Override
     public NBLabels getLabels() {
