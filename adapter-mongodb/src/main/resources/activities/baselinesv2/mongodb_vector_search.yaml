@@ -18,7 +18,7 @@ scenarios:
     drop: run driver=mongodb tags==block:drop-entire-collection threads==1 cycles==UNDEF database=baselines
     search_and_index: >-
       run driver=mongodb alias=search_and_index tags='block:main-read' labels='target:mongodbatlas'
-      cycles=TEMPLATE(testsize) errors=counter,retry stride=100 striderate=7.50
+      cycles=TEMPLATE(testsize) errors=counter,retry,warn stride=100 striderate=7.50
       read_ratio=1 threads=500 database=baselines
 
 params:
@@ -136,7 +136,7 @@ blocks:
           {
             "aggregate": "TEMPLATE(collection,keyvalue)",
             "cursor" : {
-              "batchSize": 100
+              "batchSize": TEMPLATE(top_k,100)
             },
             "pipeline": [
               {
@@ -144,7 +144,7 @@ blocks:
                   "index": "kv_value_vector_search_idx",
                   "path": "value",
                   "queryVector": {test_floatlist},
-                  "numCandidates": TEMPLATE(num_candidates,1000),
+                  "numCandidates": TEMPLATE(num_candidates,100),
                   "limit": TEMPLATE(top_k,100)
                 }
               },
