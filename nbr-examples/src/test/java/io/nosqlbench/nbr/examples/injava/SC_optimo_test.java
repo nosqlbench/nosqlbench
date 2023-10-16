@@ -44,16 +44,16 @@ public class SC_optimo_test extends SCBaseScenario {
      *         var a = 0.0 + values.pa;
      *         var b = 0.0 + values.pb;
      *
-     *         var result = 1000000 - ((Math.abs(100 - a) + Math.abs(100 - b)));
-     *         print("a=" + a + ",b=" + b + ", r=" + result);
-     *         return result;
+     *         var samples = 1000000 - ((Math.abs(100 - a) + Math.abs(100 - b)));
+     *         print("a=" + a + ",b=" + b + ", r=" + samples);
+     *         return samples;
      *     }
      * );
      *
-     * var result = optimo.optimize();
+     * var samples = optimo.optimize();
      *
-     * print("optimized result was " + result);
-     * print("map of result was " + result.getMap());
+     * print("optimized samples was " + samples);
+     * print("map of samples was " + samples.getMap());
      * }</pre>
      */
     @Override
@@ -72,7 +72,7 @@ public class SC_optimo_test extends SCBaseScenario {
         };
         bobby.setObjectiveFunction(f);
         MVResult result = bobby.optimize();
-        stdout.println("optimized result was " + result);
-        stdout.println("map of result was " + result.getMap());
+        stdout.println("optimized samples was " + result);
+        stdout.println("map of samples was " + result.getMap());
     }
 }

@@ -62,7 +62,7 @@ bindings:
   # same as long -> NumberNameToString() -> String; String -> ToByteBuffer()
   string_bb: NumberNameToString(); ToByteBuffer(); ToHexString();
 
-  # char buffer to byte buffer, another way to get the same result as above
+  # char buffer to byte buffer, another way to get the same samples as above
   # same as
   # long -> NumberNameToString() -> String; String -> ToCharBuffer() -> CharBuffer; CharBuffer -> ToByteBuffer() -> ByteBuffer
   cb_bb: NumberNameToString(); ToCharBuffer(); ToByteBuffer(); ToHexString();

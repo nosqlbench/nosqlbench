@@ -49,7 +49,7 @@ public class SimFrameCapture implements SimFrameResults {
      *     coefficient of weight for this measure
      * @param callback
      */
-    private void add(String name, EvalType type, ToDoubleFunction<DoubleMap> remix, DoubleSupplier supplier, double weight, Runnable callback) {
+    private void add(String name, EvalType type, ToDoubleFunction<BasisValues> remix, DoubleSupplier supplier, double weight, Runnable callback) {
         this.criteria.add(new Criterion(name, type, remix, supplier, weight, callback==null? () -> {} : callback));
     }
 
@@ -98,15 +98,15 @@ public class SimFrameCapture implements SimFrameResults {
      * @param remix
      *     A function which relies on previously computed raw values.
      * @param weight
-     *     The weight to apply to the result of this value for the final frame sample value.
+     *     The weight to apply to the samples of this value for the final frame sample value.
      * @param callback
      *     An optional callback to invoke when the frame starts
      */
-    public void addRemix(String name, ToDoubleFunction<DoubleMap> remix, double weight, Runnable callback) {
+    public void addRemix(String name, ToDoubleFunction<BasisValues> remix, double weight, Runnable callback) {
         add(name, EvalType.remix, remix, null, weight, callback);
     }
 
-    public void addRemix(String name, ToDoubleFunction<DoubleMap> remix, double weight) {
+    public void addRemix(String name, ToDoubleFunction<BasisValues> remix, double weight) {
         add(name, EvalType.remix, remix, null, weight, null);
     }
 
@@ -145,7 +145,7 @@ public class SimFrameCapture implements SimFrameResults {
             throw new RuntimeException("cant start window twice in a row. Must close window first");
         }
         int nextidx = this.allFrames.size();
-        DoubleMap vars = new DoubleMap();
+        BasisValues vars = new BasisValues();
         List<FrameSample> samples = criteria.stream().map(c -> FrameSample.init(c, nextidx, vars).start(now)).toList();
         this.currentFrame = new FrameSampleSet(samples);
 //        System.out.println("after start:\n"+ frameCaptureSummary(currentFrame));
@@ -177,7 +177,7 @@ public class SimFrameCapture implements SimFrameResults {
         return allFrames.getLast();
     }
 
-    public void addRemix(String name, ToDoubleFunction<DoubleMap> remix) {
+    public void addRemix(String name, ToDoubleFunction<BasisValues> remix) {
         addRemix(name, remix, 1.0, null);
     }
 

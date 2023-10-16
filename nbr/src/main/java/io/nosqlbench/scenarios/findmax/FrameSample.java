@@ -16,6 +16,9 @@
 
 package io.nosqlbench.scenarios.findmax;
 
+/**
+ * A frame sample is responsible for capturing the data associated with a criterion.
+ */
 public record FrameSample(
     Criterion criterion,
     int index,
@@ -23,22 +26,22 @@ public record FrameSample(
     long endAt,
     double startval,
     double endval,
-    double calculated,
-    DoubleMap vars
+    double basis,
+    BasisValues vars
 ) {
     public FrameSample {
-        vars.put(criterion.name(), calculated);
+        vars.put(criterion.name(), basis);
     }
 
     public double weightedValue() {
         if (Double.isNaN(criterion.weight())) {
             return 1.0d;
         } else {
-            return calculated * criterion().weight();
+            return basis * criterion().weight();
         }
     }
 
-    private double calculatedValue() {
+    private double calculateBasis() {
         return switch (criterion.evaltype()) {
             case direct -> endval;
             case deltaT -> (endval - startval) / seconds();
@@ -50,7 +53,7 @@ public record FrameSample(
         return ((double) (endAt - startAt)) / 1000d;
     }
 
-    public static FrameSample init(Criterion criterion, int index, DoubleMap vars) {
+    public static FrameSample init(Criterion criterion, int index, BasisValues vars) {
         return new FrameSample(criterion, index, 0, 0, Double.NaN, Double.NaN, Double.NaN, vars);
     }
 
@@ -67,8 +70,11 @@ public record FrameSample(
         return complete;
     }
 
+    /**
+     * Take a frame sample which is fully populated with measured values and convert it into one with a computed basis value.
+     */
     private FrameSample tally() {
-        return new FrameSample(criterion, index, startAt, endAt, startval, endval, calculatedValue(), vars);
+        return new FrameSample(criterion, index, startAt, endAt, startval, endval, calculateBasis(), vars);
     }
 
     @Override
@@ -80,13 +86,13 @@ public record FrameSample(
             index,
 //            seconds(),
 //            deltaV(),
-            calculated,
+            basis,
             weightedValue(),
             (Double.isNaN(criterion.weight()) ? " [NEUTRAL WEIGHT]" : "")
         );
     }
 
-    private double deltaV() {
-        return endval - startval;
-    }
+//    private double deltaV() {
+//        return endval - startval;
+//    }
 }

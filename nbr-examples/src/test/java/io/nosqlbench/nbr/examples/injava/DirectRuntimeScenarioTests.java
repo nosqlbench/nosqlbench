@@ -147,7 +147,7 @@ public class DirectRuntimeScenarioTests {
     public void test_SC_extension_example() {
         NBScenario scenario = new SC_extension_example(testC,"test_SC_extension_example");
         ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
-//        result.exitWithCode();
+//        samples.exitWithCode();
         assertThat(result.getIOLog()).contains("3+5=8");
     }
     @Disabled("enable before merge")

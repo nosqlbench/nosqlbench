@@ -131,8 +131,8 @@ public class WorkloadContainerVerifications {
 //            try (CqlSession session = CqlSession.builder().addContactPoint(new InetSocketAddress(hostIP, mappedPort9042)).withLocalDatacenter(datacenter).build()) {
 //                //->Check for the creation of the keyspace baselines
 //                logger.info("Checking for the creation of the keyspace \"baselines\"...");
-//                ResultSet result = session.execute("SELECT keyspace_name FROM system_schema.keyspaces");
-//                List<Row> rows = result.all();
+//                ResultSet samples = session.execute("SELECT keyspace_name FROM system_schema.keyspaces");
+//                List<Row> rows = samples.all();
 //                boolean keyspaceFound = false;
 //                for (Row row : rows) {
 //                    if (row.getString("keyspace_name").equals("baselines")) {
@@ -145,8 +145,8 @@ public class WorkloadContainerVerifications {
 //
 //                //->Check for the creation of the baselines keyvalue table
 //                logger.info("Checking for the creation of the table \"baselines.keyvalue\"...");
-//                result = session.execute("SELECT table_name FROM system_schema.tables WHERE keyspace_name='baselines'");
-//                rows = result.all();
+//                samples = session.execute("SELECT table_name FROM system_schema.tables WHERE keyspace_name='baselines'");
+//                rows = samples.all();
 //                boolean tableFound = false;
 //                for (Row row : rows) {
 //                    if (row.getString("table_name").equals("keyvalue")) {

@@ -18,10 +18,11 @@ package io.nosqlbench.scenarios.findmax;
 
 import java.util.List;
 
+/**
+ * An observer-only view of results.
+ */
 public interface SimFrameResults {
     List<FrameSampleSet> history();
-
     double getValue();
-
     int size();
 }

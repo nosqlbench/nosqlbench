@@ -22,7 +22,7 @@ bindings:
 # the entry above
 
 # You can offset the start of your millis to some formatted date.
-# Notice, that in this case, the result is still in millis since the epoch
+# Notice, that in this case, the samples is still in millis since the epoch
 
  randomMillisStartingFeb2018: StartingEpochMillis('2018-02-01 05:00:00');
 

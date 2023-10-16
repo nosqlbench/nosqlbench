@@ -81,7 +81,7 @@ public class SC_optimo extends SCBaseScenario {
 
         /**
          * <P>This function is the objective function, and is responsible for applying
-         * the parameters and yielding a result. The higher the returned result, the
+         * the parameters and yielding a samples. The higher the returned samples, the
          * better the parameters are.</P>
          * <P>The parameter values will be passed in as an array, pair-wise with the param calls above.</P>
          */
@@ -148,12 +148,12 @@ public class SC_optimo extends SCBaseScenario {
         MVResult result = bobby.optimize();
 
         controller.stop(flywheel);
-        stdout.println("optimized result was " + result);
-        stdout.println("map of result was " + result.getMap());
+        stdout.println("optimized samples was " + result);
+        stdout.println("map of samples was " + result.getMap());
 
         // TODO: controller startAt should not return the activity itself, but a control point, like activityDef
 
-        // TODO: warn user if one of the result params is near or at the range allowed, as there
-        // could be a better result if the range is arbitrarily limiting the parameter space.
+        // TODO: warn user if one of the samples params is near or at the range allowed, as there
+        // could be a better samples if the range is arbitrarily limiting the parameter space.
     }
 }

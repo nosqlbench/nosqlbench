@@ -18,7 +18,10 @@ package io.nosqlbench.scenarios.findmax;
 
 import java.util.Arrays;
 
-public class DoubleMap {
+/**
+ * Provide named doubles without resorting to Map and boxing shenanigans.
+ */
+public class BasisValues {
     private double[] values = new double[0];
     private String[] names = new String[0];
 

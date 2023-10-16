@@ -17,7 +17,18 @@
 package io.nosqlbench.scenarios.findmax;
 
 public enum EvalType {
+    /**
+     * A basis value is read from a supplier directly at the end of a simulation frame with no additional computation.
+     */
     direct,
+    /**
+     * At the beginning of a simulation frame, starting basis values and starting frame times are recorded. At the end
+     * of that simulation frame, ending basis values and ending time are record. The basis value is computed as
+     * ΔV/ΔT.
+     */
     deltaT,
+    /**
+     * At the end of a simulation frame, any remix values are computed as a function over any previous defined basis values.
+     */
     remix
 }

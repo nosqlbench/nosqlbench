@@ -39,7 +39,7 @@ public class ProcessResult {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("--- process result\nstatus:%d", exitStatus));
+        sb.append(String.format("--- process samples\nstatus:%d", exitStatus));
         sb.append(String.format(" time:%.3fs", (durationNanos/1000000000.0)));
         sb.append(String.format(" dir:%s",cmdDir));
         sb.append("\n--- stdout:\n");

@@ -35,7 +35,7 @@ public class ProcessInvoker {
     /**
      * Run the process with a specified timeout and alias.
      *
-     * @param alias          the name of the process for logging and result gathering
+     * @param alias          the name of the process for logging and samples gathering
      * @param timeoutSeconds the number of seconds to wait for the process to return
      * @param cmdline        the command line
      * @return a ProcessResult
