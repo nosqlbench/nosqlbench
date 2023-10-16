@@ -1,0 +1,197 @@
+# Connection Guide: https://www.mongodb.com/docs/drivers/java/sync/current/fundamentals/connection/
+# Troubleshoot connection: https://www.mongodb.com/docs/atlas/troubleshoot-connection/#special-characters-in-connection-string-password
+# nb5 run driver=mongodb workload=/path/to/mongodb_verctor_search.yaml tags=block:"schema.*" connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+# nb5 run driver=mongodb workload=/path/to/mongodb_verctor_search.yaml tags=block:rampup cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+# nb5 run driver=mongodb workload=/path/to/mongodb_verctor_search.yaml tags='block:main-.*' cycles=25 connection='mongodb+srv://user:pass@sample-db.host.mongodb.net/?retryWrites=true&w=majority' database=baselines -vv --show-stacktraces
+min_version: "5.17.5"
+
+# https://www.mongodb.com/docs/atlas/app-services/data-api/
+
+description: |
+  This workload is analogous to the cql-keyvalue2 workload, just implemented for MongoDB Atlas Vector Search.
+
+scenarios:
+  default:
+    schema: run driver=mongodb tags==block:"schema.*" threads==1 cycles==UNDEF database=baselines
+    rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(trainsize) threads=auto database=baselines errors=counter,retry
+    main: run driver=mongodb tags==block:'main-.*' cycles===TEMPLATE(main-cycles,100000) threads=auto database=baselines
+    drop: run driver=mongodb tags==block:drop-entire-collection threads==1 cycles==UNDEF database=baselines
+    search_and_index: >-
+      run driver=mongodb alias=search_and_index tags='block:main-read' labels='target:mongodbatlas'
+      cycles=TEMPLATE(testsize) errors=counter,retry,warn stride=100 striderate=7.50
+      read_ratio=1 threads=500 database=baselines
+
+params:
+  instrument: true
+bindings:
+  rw_key: TEMPLATE(keydist,Uniform(0,1000000000)); ToString() -> String
+  #WRITE
+  seq_key: ToString();
+  train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train"); ToCqlVector();
+  #READ
+  test_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/test"); ToCqlVector();
+  relevant_indices: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
+
+blocks:
+  schema:
+    params:
+      prepared: false
+    ops:
+      # https://www.mongodb.com/docs/manual/reference/method/db.createCollection/
+      # https://www.mongodb.com/docs/manual/core/schema-validation/specify-json-schema/
+      # `clusteredIndex` only support creation of an index on `_id` field (as shown below) so its optional
+      create_collection: |
+        {
+          create: "TEMPLATE(collection,keyvalue)",
+          clusteredIndex: {
+            key: { "_id": 1 },
+            unique: true,
+            name: "_id_idx"
+          },
+          writeConcern: { w: "majority" },
+          validator: {
+            $jsonSchema: {
+              bsonType: "object",
+              title: "Key/Value collection schema validation",
+              required: [ "key" ],
+              properties: {
+                key: {
+                  bsonType: "string",
+                  description: "'key' must be a string and is required"
+                },
+                value: {
+                  bsonType: "array",
+                  description: "'value' must be an array of numbers of BSON double type and is optional but, recommended"
+                }
+              }
+            }
+          },
+          validationLevel: "strict",
+          validationAction: "error",
+          comment: "keyvalue collection creation with strict types and a required 'key' field."
+        }
+      create_key_index: |
+        {
+          createIndexes: "TEMPLATE(collection,keyvalue)",
+          indexes: [
+            {
+              key: {
+                key: 1,
+              },
+              name: "kv_key_idx",
+              unique: true
+            }
+          ],
+          writeConcern: { w: "majority" },
+          comment: "'key' index creation for keyvalue collection. Values should be unique.",
+          commitQuorum: "majority"
+        }
+      create_vector_search_index: |
+        {
+          createSearchIndexes: "TEMPLATE(collection,keyvalue)",
+          indexes: [
+            {
+              name: "kv_value_vector_search_idx",
+              definition: {
+                mappings: {
+                  dynamic: true,
+                  fields: {
+                    value: {
+                      type: "knnVector",
+                      dimensions: TEMPLATE(dimensions,1536),
+                      similarity: "TEMPLATE(similarity_function,cosine)"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+  rampup:
+    ops:
+      rampup-insert: |
+        {
+          insert: "TEMPLATE(collection,keyvalue)",
+          documents: [
+            {
+              key: "{seq_key}",
+              value: {train_floatlist}
+            }
+          ],
+          comment: "Insert documents into keyvalue collection."
+        }
+  main-read:
+    params:
+      ratio: TEMPLATE(read_ratio,5)
+    ops:
+      main_select:
+        op: |
+          {
+            "aggregate": "TEMPLATE(collection,keyvalue)",
+            "cursor" : {
+              "batchSize": TEMPLATE(top_k,100)
+            },
+            "pipeline": [
+              {
+                "$vectorSearch": {
+                  "index": "kv_value_vector_search_idx",
+                  "path": "value",
+                  "queryVector": {test_floatlist},
+                  "numCandidates": TEMPLATE(num_candidates,100),
+                  "limit": TEMPLATE(top_k,100)
+                }
+              },
+              {
+                "$project": {
+                  "_id": 0,
+                  "key": 1,
+                  "value": 1,
+                  "score": { "$meta": "vectorSearchScore" }
+                }
+              }
+            ],
+            "readConcern": { "level": "local" },
+            "comment": "Find the results for the given 'value' vector search embedding."
+          }
+        verifier-imports:
+          - io.nosqlbench.adapter.mongodb.MongoDbUtils
+        verifier-init: |
+          k=TEMPLATE(top_k,100)
+          relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op);
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+        verifier: |
+          actual_indices=MongoDbUtils.getFieldFromResults("key",result);
+          relevancy.accept({relevant_indices},actual_indices);
+          return true;
+  main-write:
+    params:
+      ratio: TEMPLATE(write_ratio,5)
+    ops:
+      main-insert: |
+        {
+          insert: "TEMPLATE(collection,keyvalue)",
+          documents: [
+            {
+              key: "{rw_key}",
+              value: {train_floatlist}
+            }
+          ],
+          writeConcern: { w: "majority" },
+          comment: "Insert documents into keyvalue collection."
+        }
+  drop-entire-collection:
+    ops:
+      drop-vsearch-index: |
+        {
+          dropSearchIndex: "TEMPLATE(collection,keyvalue)",
+          name: "kv_value_vector_search_idx"
+        }
+      drop-collection: |
+        {
+          drop: "TEMPLATE(collection,keyvalue)",
+          comment: "Drop keyvalue collection to start afresh."
+        }
