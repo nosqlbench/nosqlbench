@@ -31,19 +31,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <PRE>{@code
- * Performing FindMax analysis with the following parameters:
- * Scale sample window between %d and %d\n",sample_time_ms,sample_max
- * increasing by %.3fX on each rejected iteration.\n", sample_incr
- * Set target rate to %d + %d  * ( %d ^iter) \n", rate_base, rate_step, rate_incr
- * for each iteration accepted in a row.\n"
- * Schedule %s operations at a time per thread.\n", min_stride
- * Report the average result of running the findmax search algorithm %d times.\n",averageof
- * Reject iterations which fail to achieve %2.0f%% of the target rate.\n", testrate_cutoff * 100
- * Reject iterations which fail to achieve %2.0f%% of the best rate.\n", bestrate_cutoff * 100
- * Reject iterations which fail to achieve better than %dms response\n", latency_cutoff
- * at percentile p%f\n", latency_pctile * 100
- * }</PRE>
+ * <P>This is the Java-native version of findmax on the NB5.21 architecture. It has been modified from the
+ * previous form in significant ways.</P>
+ * <UL>
+ * <LI>Instead of pass/fail criteria all performance factors are expressed as a value function.
+ * This will make it easy to adapt different search algorithms (in the form of non-derivative multivariate optimizers)
+ * to the same approach.</LI>
+ * <LI>A set of simulation frame utilities bundles the derivation of black-box values. These will be used to refine
+ * findmax, but will
+ * be general-purposed for any other analysis and optimization method as needed.
+ * </LI>
+ * <LI>The search strategy which determines the parameters for the next simulation frame has been factored out into a
+ * planner.</LI>
+ * </UL>
+ *
+ * <P>There is an accompanying visual narrative "findmax.png" bundled with this source code to help explain
+ * the search pattern of findmax. Additional docs and a usage guide will follow.</P>
+ *
+ * <P>This can be tested as <PRE>{@code nb5 --show-stacktraces java io.nosqlbench.scenarios.findmax.SC_findmax threads=36}</PRE></P>
  */
 public class SC_findmax extends SCBaseScenario {
     private final static Logger logger = LogManager.getLogger(SC_findmax.class);
@@ -60,7 +65,7 @@ public class SC_findmax extends SCBaseScenario {
 
         Map<String, String> activityParams = new HashMap<>(Map.of(
             "cycles", String.valueOf(Long.MAX_VALUE),
-            "threads", params.getOrDefault("threads","1"),
+            "threads", params.getOrDefault("threads", "1"),
             "driver", "diag",
             "rate", String.valueOf(ratespec.opsPerSec),
             "dryrun", "op"
@@ -80,7 +85,7 @@ public class SC_findmax extends SCBaseScenario {
 
         Activity flywheel = controller.start(activityParams);
 
-        SimFrameCapture capture = this.perfValueMeasures(flywheel, 0.99, 50);
+        SimFrameCapture capture = this.perfValueMeasures(flywheel);
         SimFramePlanner planner = new SimFramePlanner(findmaxSettings);
         SimFrameJournal journal = new SimFrameJournal();
 
@@ -102,7 +107,7 @@ public class SC_findmax extends SCBaseScenario {
         // could be a better result if the range is arbitrarily limiting the parameter space.
     }
 
-    private SimFrameCapture perfValueMeasures(Activity activity, double fractional_quantile, double cutoff_ms) {
+    private SimFrameCapture perfValueMeasures(Activity activity) {
         SimFrameCapture sampler = new SimFrameCapture();
 
         NBMetricTimer result_timer = activity.find().timer("name:result");
@@ -116,12 +121,12 @@ public class SC_findmax extends SCBaseScenario {
         sampler.addRemix("achieved_success_ratio", vars -> {
             // exponentially penalize results which do not attain 100% successful op rate
             double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("achieved_oprate"));
-            return Math.pow(basis,3);
+            return Math.pow(basis, 3);
         });
         sampler.addRemix("achieved_target_ratio", (vars) -> {
             // exponentially penalize results which do not attain 100% target rate
             double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("target_rate"));
-            return Math.pow(basis,3);
+            return Math.pow(basis, 3);
         });
 
         // TODO: add response time with a sigmoid style threshold at fractional_quantile and cutoff_ms
@@ -152,11 +157,4 @@ public class SC_findmax extends SCBaseScenario {
 
         return sampler;
     }
-
-    private final static record RunParams(
-        int sample_seconds,
-        double target_rate
-    ) {
-    }
-
 }

@@ -18,6 +18,10 @@ package io.nosqlbench.scenarios.findmax;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
 
+/**
+ * These search parameters are based on the original findmax algorithm, and
+ * should be reduced down to the minimum set needed.
+ */
 public record FindmaxSearchParams(
     int sample_time_ms,
     int sample_max,

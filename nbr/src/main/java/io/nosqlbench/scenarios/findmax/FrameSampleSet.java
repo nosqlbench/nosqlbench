@@ -19,6 +19,9 @@ package io.nosqlbench.scenarios.findmax;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A bundle of frame samples
+ */
 public class FrameSampleSet extends ArrayList<FrameSample> {
     public FrameSampleSet(List<FrameSample> samples) {
         super(samples);

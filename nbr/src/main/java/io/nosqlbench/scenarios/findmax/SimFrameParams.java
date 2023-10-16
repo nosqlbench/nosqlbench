@@ -16,8 +16,14 @@
 
 package io.nosqlbench.scenarios.findmax;
 
+/**
+ * These parameters are calculated by the planner based on previous simulation frame history.
+ */
 public record SimFrameParams(
-    double rate_shelf, double rate_delta, long sample_time_ms, String description
+    double rate_shelf,
+    double rate_delta,
+    long sample_time_ms,
+    String description
 ) {
     public double computed_rate() {
         return rate_shelf+rate_delta;

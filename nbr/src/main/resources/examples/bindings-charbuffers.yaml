@@ -27,7 +27,7 @@ bindings:
   # with a source function which provides the initial data. Any
   # object type is allowed, as the toString() method is used to iteratively
   # fill the initial buffer until it is full according to the imgsize
-  # This mode still only provides a single possible result.
+  # This mode still only provides a single possible samples.
   #
   # Create a CharBuffer of 100 characters from the names of numbers
   cb_composed_fixed: CharBufImage(NumberNameToString(),100) # srcfunc, imgsize
@@ -35,7 +35,7 @@ bindings:
   # Alternately, you can simply provide a set of printable characters and
   # ranges from US-ASCII instead of providing a full function. In this mode,
   # characters are selected from the provided set for the initial fill.
-  # This mode still only provides a single possible result.
+  # This mode still only provides a single possible samples.
   #
   # Create a CharBuffer of 100 characters consisting of hexadecimal digits.
   cb_charsets_fixed: CharBufImage('0-9A-F',100) # srcchars, imgsize

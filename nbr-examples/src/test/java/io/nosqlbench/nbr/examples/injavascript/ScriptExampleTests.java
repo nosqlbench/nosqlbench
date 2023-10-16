@@ -129,7 +129,7 @@ public class ScriptExampleTests {
         ScenarioResult scenarioResult = runScenario("optimo");
         String iolog = scenarioResult.getIOLog();
         System.out.println("iolog\n" + iolog);
-        assertThat(iolog).contains("map of result was");
+        assertThat(iolog).contains("map of samples was");
     }
 
     @Disabled
