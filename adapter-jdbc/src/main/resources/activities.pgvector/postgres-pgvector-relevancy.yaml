@@ -117,11 +117,12 @@ blocks:
     ops:
       main-select:
         dmlread: |
-          SELECT key, value FROM TEMPLATE(schema,public).TEMPLATE(table,pgvec)
+          SELECT key, (value <-> ?) as relevancy, value
+          FROM TEMPLATE(schema,public).TEMPLATE(table,pgvec)
           ORDER BY value <-> ?
           LIMIT TEMPLATE(queryLimit,10);
         prep_stmt_val_arr: |
-          {test_vector}
+          {test_vector},{test_vector}
         verifier-init: |
           relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op);
           for (int k in List.of(100)) {
