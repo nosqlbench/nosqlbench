@@ -16,14 +16,21 @@
 
 package io.nosqlbench.scenarios.findmax;
 
-import java.util.List;
+import java.util.function.DoubleSupplier;
+import java.util.function.ToDoubleFunction;
 
-public interface JournalView {
-    List<SimFrame> frames();
-    SimFrame last();
-    SimFrame beforeLast();
-    SimFrame bestRun();
-
-    SimFrame before(SimFrame frame);
-    SimFrame after(SimFrame frame);
+public record Criterion(
+    String name,
+    EvalType evaltype,
+    ToDoubleFunction<DoubleMap> remix,
+    DoubleSupplier supplier,
+    double weight,
+    /**
+     * This frameStartCallback is run at the start of a window
+     */
+    Runnable frameStartCallback
+) {
+    public Criterion {
+        frameStartCallback = frameStartCallback!=null ? frameStartCallback : () -> {};
+    }
 }

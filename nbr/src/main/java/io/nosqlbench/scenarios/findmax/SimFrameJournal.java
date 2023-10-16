@@ -18,10 +18,11 @@ package io.nosqlbench.scenarios.findmax;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class SimFrameJournal extends ArrayList<SimFrame> implements JournalView {
-    public void record(SimFrameParams params, SimFrameCapture.FrameSampleSet samples) {
+    public void record(SimFrameParams params, FrameSampleSet samples) {
         add(new SimFrame(params, samples));
     }
 
@@ -41,5 +42,26 @@ public class SimFrameJournal extends ArrayList<SimFrame> implements JournalView 
             throw new RuntimeException("can't get beforeLast for only " + size() + " elements");
         }
         return get(size()-2);
+    }
+
+    @Override
+    public SimFrame bestRun() {
+        return this.stream().sorted(Comparator.comparingDouble(SimFrame::value)).toList().getLast();
+    }
+
+    @Override
+    public SimFrame before(SimFrame frame) {
+        int beforeIdx=frame.index()-1;
+        if (beforeIdx>=0 && beforeIdx<=size()-1) {
+            return frames().get(beforeIdx);
+        } else throw new RuntimeException("Invalid index for before: " + beforeIdx + " with " + size() + " frames");
+    }
+
+    @Override
+    public SimFrame after(SimFrame frame) {
+        int afterIdx=frame.index()+1;
+        if (afterIdx>=0 && afterIdx<=size()-1) {
+            return frames().get(afterIdx);
+        } else throw new RuntimeException("Invalid index for after: " + afterIdx + " with " + size() + " frames");
     }
 }

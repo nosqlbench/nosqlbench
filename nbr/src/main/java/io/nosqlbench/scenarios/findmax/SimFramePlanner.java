@@ -19,7 +19,9 @@ package io.nosqlbench.scenarios.findmax;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 public class SimFramePlanner {
     private final Logger logger = LogManager.getLogger(SimFramePlanner.class);
@@ -49,8 +51,7 @@ public class SimFramePlanner {
 
     public SimFrameParams initialStep() {
         return new SimFrameParams(
-            this.findmax.rate_base(), this.findmax.rate_step(),
-            this.findmax.sample_time_ms()
+            this.findmax.rate_base(), this.findmax.rate_step(), this.findmax.sample_time_ms(), "INITIAL"
         );
     }
 
@@ -64,43 +65,49 @@ public class SimFramePlanner {
      * @return Optionally, a set of params which indicates another simulation frame should be sampled, else null
      */
     public SimFrameParams nextStep(JournalView journal) {
-        List<SimFrame> frames = journal.frames();
-        if (frames.size() < 2) {
-            System.out.println("FIRSTTWO");
-            return new SimFrameParams(
-                journal.last().params().rate_shelf(),
-                journal.last().params().rate_shelf() + (journal.last().params().rate_delta() * findmax.rate_incr()),
-                journal.last().params().sample_time_ms()
-            );
-        }
         SimFrame last = journal.last();
-        SimFrame before = journal.beforeLast();
-        if (before.value() < last.value()) { // got a better result, keep on keepin' on
-            System.out.println("CONTINUE");
+        SimFrame best = journal.bestRun();
+        if (best.index() == last.index()) { // got better consecutively
             return new SimFrameParams(
                 last.params().rate_shelf(),
                 last.params().rate_delta() * findmax.rate_incr(),
-                last.params().sample_time_ms()
+                last.params().sample_time_ms(),
+                "CONTINUE after improvement from frame " + last.index()
             );
-        } else { // reset to last better result as base and start again
-            if (last.params().rate_delta() > findmax.rate_step()) { // but only if there is still searchable space
-                System.out.println("REBASE");
-                return new SimFrameParams(
-                    before.params().computed_rate(),
-                    findmax.rate_step(),
-                    (long) (before.params().sample_time_ms() * findmax.sample_incr()));
-            } else {
-                // but only if there is still unsearched resolution within rate_step
+        } else  if (best.index() == last.index() - 1) { // got worse consecutively
+            if ((last.params().computed_rate() - best.params().computed_rate()) <= findmax.rate_step()) {
                 logger.info("could not divide search space further, stop condition met");
-                System.out.println("STOP CONDITION");
                 return null;
-
+            } else {
+                return new SimFrameParams(
+                    best.params().computed_rate(),
+                    findmax.rate_step(),
+                    (long) (last.params().sample_time_ms() * findmax.sample_incr()),
+                    "REBASE search range to new base after frame " + best.index()
+                );
+            }
+        } else {
+            // find next frame with higher rate but lower value, the closest one by rate
+            SimFrame nextWorseFrameWithHigherRate = journal.frames().stream()
+                    .filter(f -> f.value() < best.value())
+                    .filter(f -> f.params().computed_rate() > best.params().computed_rate())
+                .min(Comparator.comparingDouble(f -> f.params().computed_rate()))
+                .orElseThrow(() -> new RuntimeException("inconsistent result"));
+            if ((nextWorseFrameWithHigherRate.params().computed_rate() - best.params().computed_rate()) > findmax.rate_step()) {
+                return new SimFrameParams(
+                    best.params().computed_rate(),
+                    findmax.rate_step(),
+                    (long) (last.params().sample_time_ms() * findmax.sample_incr()),
+                    "REBASE search range from frames " + best.index() + " ➞ " +nextWorseFrameWithHigherRate.index()
+                );
+            } else {
+                return null;
             }
         }
     }
 
-    private SimFrameParams nextStepParams(SimFrame previous) {
-        return null;
+    private boolean improvedScore(SimFrame before, SimFrame last) {
+        return before.value() < last.value();
     }
 
 }

@@ -32,24 +32,14 @@ import java.util.Random;
 /**
  *
  * Consider JSAT
- *
- * https://en.wikipedia.org/wiki/Coordinate_descent
- *
- * http://firsttimeprogrammer.blogspot.com/2014/09/multivariable-gradient-descent.html
- *
- * https://towardsdatascience.com/machine-learning-bit-by-bit-multivariate-gradient-descent-e198fdd0df85
- *
- * https://pdfs.semanticscholar.org/d142/3994d7b4462994925663959721130755b275.pdf
- *
- * file:///tmp/bfgs-example.pdf
- *
- * https://github.com/vinhkhuc/lbfgs4j
- *
- * https://github.com/EdwardRaff/JSAT/wiki/Algorithms
- *
- * http://www.optimization-online.org/DB_FILE/2010/05/2616.pdf
- *
- * https://github.com/dpressel/sgdtk
+ * <a href="https://en.wikipedia.org/wiki/Coordinate_descent">...</a>
+ * <a href="http://firsttimeprogrammer.blogspot.com/2014/09/multivariable-gradient-descent.html>...</a>
+ * <a href="https://towardsdatascience.com/machine-learning-bit-by-bit-multivariate-gradient-descent-e198fdd0df85>...</a>
+ * <a href="https://pdfs.semanticscholar.org/d142/3994d7b4462994925663959721130755b275.pdf>...</a>
+ * <a href="https://github.com/vinhkhuc/lbfgs4j">...</a>
+ * <a href="https://github.com/EdwardRaff/JSAT/wiki/Algorithms">...</a>
+ * <a href="http://www.optimization-online.org/DB_FILE/2010/05/2616.pdf">...</a>
+ * <a href="https://github.com/dpressel/sgdtk">...</a>
  *
  */
 public class TestOptimoExperiments {

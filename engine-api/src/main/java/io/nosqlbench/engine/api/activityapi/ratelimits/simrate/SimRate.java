@@ -87,8 +87,8 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
 
     private void initMetrics() {
         create().gauge("cycles_waittime",() -> (double)getWaitTimeDuration().get(ChronoUnit.NANOS));
-        create().gauge("_config_cyclerate", () -> spec.opsPerSec);
-        create().gauge("_config_burstrate", () -> spec.burstRatio);
+        create().gauge("config_cyclerate", () -> spec.opsPerSec);
+        create().gauge("config_burstrate", () -> spec.burstRatio);
     }
 
     public long refill() {
@@ -140,10 +140,10 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
             burstFillAllowed = Math.min(this.maxOverActivePool - this.activePool.availablePermits(), burstFillAllowed);
 
             // we can only burst up to our burst limit, but only as much time as we have in the waiting pool already
-            final int burstFill = (int) Math.min(burstFillAllowed, this.waitingPool.get());
+            final int burstRecoveryToActivePool = (int) Math.max(0L,Math.min(burstFillAllowed, this.waitingPool.get()));
 
-            this.waitingPool.addAndGet(-burstFill);
-            this.activePool.release(burstFill);
+            this.waitingPool.addAndGet(-burstRecoveryToActivePool);
+            this.activePool.release(burstRecoveryToActivePool);
 
 //        System.out.print(this);
 //        System.out.print(ANSI_BrightBlue + " adding=" + allocatedToActivePool);
@@ -159,6 +159,7 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
 //            return waiting;
         } catch (Exception e) {
             logger.error(e);
+            throw new RuntimeException(e);
         } finally {
             fillerLock.unlock();
             long waiting = this.activePool.availablePermits() + this.waitingPool.get();

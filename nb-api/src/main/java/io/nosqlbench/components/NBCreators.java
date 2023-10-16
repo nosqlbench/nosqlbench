@@ -60,7 +60,7 @@ public class NBCreators {
     }
 
     public NBMetricTimer timer(String metricFamilyName) {
-        return timer(metricFamilyName,4);
+        return timer(metricFamilyName,3);
     }
     public NBMetricTimer timer(String metricFamilyName, int hdrdigits) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
@@ -87,6 +87,12 @@ public class NBCreators {
 
     public NBFunctionGauge gauge(String metricFamilyName, Supplier<Double> valueSource) {
         NBFunctionGauge gauge = new NBFunctionGauge(base, valueSource, metricFamilyName);
+        base.addComponentMetric(gauge);
+        return gauge;
+    }
+
+    public NBVariableGauge variableGauge(String metricFamilyName, double initialValue, String... additionalLabels) {
+        NBVariableGauge gauge = new NBVariableGauge(base, metricFamilyName, initialValue, additionalLabels);
         base.addComponentMetric(gauge);
         return gauge;
     }

@@ -17,9 +17,7 @@
 package io.nosqlbench.scenarios.findmax;
 
 public record SimFrameParams(
-    double rate_shelf,
-    double rate_delta,
-    long sample_time_ms
+    double rate_shelf, double rate_delta, long sample_time_ms, String description
 ) {
     public double computed_rate() {
         return rate_shelf+rate_delta;
