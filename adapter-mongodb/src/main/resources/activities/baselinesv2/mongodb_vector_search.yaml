@@ -24,14 +24,7 @@ scenarios:
 params:
   instrument: true
 bindings:
-  #seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString();
-  #seq_value: >-
-  #  Hash();
-  #  Mod(TEMPLATE(valuecount,1000000000));
-  #  CharBufImage('A-Za-z0-9 _|/',16000000,HashRange(TEMPLATE(mintext,50000)TEMPLATE(addzeroes,),TEMPLATE(maxtext,150000)TEMPLATE(addzeroes,)));
-  #  ToString();
   rw_key: TEMPLATE(keydist,Uniform(0,1000000000)); ToString() -> String
-  #rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)); CharBufImage('A-Za-z0-9 _|/',16000000,HashRange(TEMPLATE(mintext,50000)TEMPLATE(addzeros,),TEMPLATE(maxtext,150000)TEMPLATE(addzeros,))); ToString();
   #WRITE
   seq_key: ToString();
   train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train"); ToCqlVector();
