@@ -18,8 +18,11 @@ package io.nosqlbench.adapter.mongodb.core;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
+import com.mongodb.ServerApi;
+import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
 import io.nosqlbench.api.config.NBNamedElement;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
@@ -27,6 +30,7 @@ import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.Document;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.UuidCodec;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -80,12 +84,26 @@ public class MongoSpace implements NBNamedElement, AutoCloseable {
                 MongoClientSettings.getDefaultCodecRegistry()
         );
 
+        // https://www.mongodb.com/docs/v7.0/reference/stable-api
+        ServerApi serverApi = ServerApi.builder()
+            .version(ServerApiVersion.V1)
+            .deprecationErrors(false)
+            .strict(false)//Needed because createSearchIndexes is not in stable API
+            .build();
+
         MongoClientSettings settings = MongoClientSettings.builder()
                 .applyConnectionString(new ConnectionString(connectionURL))
                 .codecRegistry(codecRegistry)
+                .serverApi(serverApi)
                 .uuidRepresentation(UuidRepresentation.STANDARD)
+                .applicationName("NoSQLBench")
                 .build();
         this.mongoClient = MongoClients.create(settings);
+
+        // Send a ping to confirm a successful connection
+        MongoDatabase mdb = this.mongoClient.getDatabase("admin");
+        mdb.runCommand(new Document("ping", 1));
+        logger.info(() -> "Connection ping test to the cluster successful.");
     }
 
     public MongoClient getClient() {
