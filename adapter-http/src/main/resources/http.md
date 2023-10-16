@@ -163,6 +163,11 @@ defaults:
 - **ok-body** - An optional regex pattern which will be applied to the
   body to verify that it is a valid response. If this is not provided,
   then content bodies are read, but any content is considered valid.
+- **result-type** - If provided, you can specify `none`, `string`, or `json_element`.
+  By default, this is set to `none` and the http op will not produce a result type.
+  If you use string, then the raw body is returned, and if you use json_element,
+  then the body is presumed to be valid JSON, and it is parsed and returned as
+  a JsonElement.
 
 Any other statement parameter which is capitalized is taken as a request
 header. If additional fields are provided which are not included in the

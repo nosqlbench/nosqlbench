@@ -46,14 +46,24 @@ public class HttpOp implements CycleOp {
     private final HttpClient client;
     private final HttpSpace space;
     private final long cycle;
+    private final HttpResultType resultType;
 
-    public HttpOp(HttpClient client, HttpRequest request, Pattern ok_status, Pattern ok_body, HttpSpace space, long cycle) {
+    public HttpOp(
+        HttpClient client,
+        HttpRequest request,
+        Pattern ok_status,
+        Pattern ok_body,
+        HttpSpace space,
+        long cycle,
+        HttpResultType resultType
+    ) {
         this.client = client;
         this.request = request;
         this.ok_status = ok_status;
         this.ok_body = ok_body;
         this.space = space;
         this.cycle = cycle;
+        this.resultType = resultType;
     }
 
     @Override
@@ -91,31 +101,14 @@ public class HttpOp implements CycleOp {
                 System.out.println();
             }
             // propogate exception so main error handling logic can take over
-            if (error!=null) {
+            if (error != null) {
                 throw new RuntimeException(error);
             }
         }
-        try {
-            JsonParser parser = new JsonParser();
-            JsonObject json = parser.parse(response.body()).getAsJsonObject();
-
-            if (!json.has("hits") || !json.getAsJsonObject("hits").has("hits")) {
-                return null;
-            }
-            JsonArray hits = json.getAsJsonObject("hits").getAsJsonArray("hits");
-
-            int count = hits.size();
-            int[] keys = new int[count];
-            int i = 0;
-            for (JsonElement element : hits) {
-                JsonObject hit = element.getAsJsonObject();
-                keys[i] = hit.getAsJsonObject("_source").get("key").getAsInt();
-                i++;
-            }
-            return keys;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
+        return switch (resultType) {
+            case string -> response.body();
+            case json_element -> JsonParser.parseString(response.body()).getAsJsonObject();
+            case none -> null;
+        };
     }
 }
