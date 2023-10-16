@@ -36,9 +36,11 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
     private static final Logger logger = LogManager.getLogger(JDBCDMLOpDispenser.class);
 
     private final boolean isReadStatement;
-
     private final LongFunction<String> pStmtSqlStrFunc;
     private final LongFunction<List<Object>> pStmtValListFunc;
+
+    // Only for Vector relevancy score testing (Vector read statement)
+    private final String verifierKeyName;
 
     public JDBCDMLOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter,
                               JDBCSpace jdbcSpace,
@@ -66,6 +68,8 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
             }
             return pStmtValListObj;
         };
+
+        this.verifierKeyName = op.getStaticConfigOr("verifier-key", "");
     }
 
     @Override
@@ -77,7 +81,8 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
                 jdbcSpace,
                 true,
                 pStmtSqlStrFunc.apply(cycle),
-                pStmtValListFunc.apply(cycle));
+                pStmtValListFunc.apply(cycle),
+                this.verifierKeyName);
         }
         else {
             int ddlStmtBatchNum = jdbcSpace.getDmlBatchNum();

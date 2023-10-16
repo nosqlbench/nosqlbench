@@ -42,13 +42,10 @@ public abstract class JDBCOp implements CycleOp {
     }
 
     protected void closeStatement(Statement stmt) throws SQLException {
-        /*
-         * NO-op for now
-         * ------------------
         if (! (stmt instanceof  PreparedStatement)) {
             stmt.close();
         } else if (jdbcSpace.isShuttingDown()) {
             stmt.close();
-        }*/
+        }
     }
 }

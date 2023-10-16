@@ -15,23 +15,23 @@ scenarios:
     ###
     ## For DDL workload, turn on 'AutoCommit'. Turning it off will cause errors.
     ###
-    drop-tbl:       run driver=jdbc tags==block:drop-tbl        threads==1   cycles==UNDEF               url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
+    drop-tbl:       run driver=jdbc tags==block:drop-tbl        threads==1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
     # The following CLI parameters is needed for 'create-tbl' named scenario:
     # - dimensions: vector dimension size (MUST match the actual ANN benchmark data)
-    create-tbl:     run driver=jdbc tags==block:create-tbl      threads==1   cycles==UNDEF               url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
+    create-tbl:     run driver=jdbc tags==block:create-tbl      threads==1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
     #
     # Vectors with up to 2,000 dimensions can be indexed.
     #
     # The following extra CLI parameter is needed for both 'create-vec-idx' and 'drop-vec-idx' named scenarios:
     # - indexName: index name
-    drop-vec-idx: run driver=jdbc tags==block:drop-vec-idx  threads==1   cycles==UNDEF                   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
+    drop-vec-idx: run driver=jdbc tags==block:drop-vec-idx      threads==1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
     # The following extra CLI parameters are needed for 'create-vec-idx' named scenario:
     # - indexType: index type; valid values: 'ivfflat' or 'hnsw' (see: https://github.com/pgvector/pgvector#indexing)
     # - indexOpt: index options
     #     * for 'ivfflat' index type, the option is like: "lists=<number>"
     #     * for 'hnsw' index type, the option is like: "m=<number>,ef_construction =<number>"
     # - relFunc: relevancy function; valid values: 'l2' (L2 distance), 'ip' (Inner product), or 'cosine' (Cosine distance)
-    create-vec-idx: run driver=jdbc tags==block:create-vec-idx  threads==1   cycles==UNDEF               url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
+    create-vec-idx: run driver=jdbc tags==block:create-vec-idx  threads==1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
 
     ###
     ## For DML workload, 'AutoCommit' can be off or on
@@ -103,7 +103,7 @@ blocks:
   # Using PostgreSQl upsert (INSERT ON CONFLICT statement)
   vec-write:
     params:
-      # DML statement MUST be prepared
+      # DML write statement MUST be prepared
       prepared: true
     ops:
       main-insert:
@@ -115,14 +115,25 @@ blocks:
 
   vec-read:
     ops:
+      params:
+        # DML READ statement can be prepared or not
+        prepared: true
       main-select:
         dmlread: |
           SELECT key, (value <-> ?) as relevancy, value
           FROM TEMPLATE(schema,public).TEMPLATE(table,pgvec)
           ORDER BY value <-> ?
-          LIMIT TEMPLATE(queryLimit,10);
+          LIMIT TEMPLATE(queryLimit,100);
         prep_stmt_val_arr: |
           {test_vector},{test_vector}
+        #################################
+        ## NOTE:
+        #  1). The script blocks below are ONLY relevant with Vector relevancy score verification
+        #  2). The "verifier-key" must match the Vector data identifier column name (e.g. primary key name)
+        #      right now the identifier must be a type that can be converted to int.
+        verifier-key: "key"
+        verifier-imports:
+          - io.nosqlbench.adapter.mongodb.MongoDbUtils
         verifier-init: |
           relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op);
           for (int k in List.of(100)) {
@@ -134,7 +145,7 @@ blocks:
           }
         verifier: |
           // driver-specific function
-          actual_indices=pgvec_utils.sqlStringColumnToIntArray("key",result);
+          actual_indices=pgvec_utils.getValueListForVerifierKey(result);
           // driver-agnostic function
           relevancy.accept({validation_set},actual_indices);
           // because we are "verifying" although this needs to be reorganized

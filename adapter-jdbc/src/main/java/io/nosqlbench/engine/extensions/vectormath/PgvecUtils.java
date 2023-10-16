@@ -16,75 +16,15 @@
 
 package io.nosqlbench.engine.extensions.vectormath;
 
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 public class PgvecUtils {
-
-    public static long[] sqlResultSetFieldsToLongArray(String fieldName, List<ResultSet> resultSets) {
-        return resultSets.stream().filter(r -> {
-            try {
-                return ((r!=null) && !r.isClosed());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }).mapToLong(r -> {
-            try {
-                return r.getLong(fieldName);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+    public static int[] getValueListForVerifierKey(List<String> values) {
+        int[] intArr = values.stream().mapToInt(v -> {
+            return Integer.parseInt(Objects.requireNonNull(v));
         }).toArray();
-    }
-
-    public static String[] sqlResultSetFieldsToStringArray(String fieldName, List<ResultSet> resultSets) {
-        return resultSets.stream().filter(r -> {
-            try {
-                return ((r!=null) && !r.isClosed());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }).map(r -> {
-            try {
-                return r.getString(fieldName);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }).toArray(String[]::new);
-    }
-
-    public static int[] sqlResultSetListToIntArray(String fieldName, List<ResultSet> resultSets) {
-        return resultSets.stream().filter(r -> {
-            try {
-                return ((r!=null) && !r.isClosed());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }).mapToInt(r -> {
-            try {
-                return r.getInt(fieldName);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }).toArray();
-    }
-
-    public static int[] sqlStringColumnToIntArray(String fieldName, List<ResultSet> resultSets) {
-        return resultSets.stream().filter(r -> {
-            try {
-                return ((r!=null) && !r.isClosed());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }).mapToInt(r -> {
-            try {
-                return Integer.parseInt(Objects.requireNonNull(r.getString(fieldName)));
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }).toArray();
+        return intArr;
     }
 }

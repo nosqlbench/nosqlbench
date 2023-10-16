@@ -17,8 +17,7 @@ package io.nosqlbench.adapter.jdbc.optypes;
 
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
-import io.nosqlbench.adapter.jdbc.utils.JDBCPgVector;
-import io.nosqlbench.engine.extensions.vectormath.PgvecUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,11 +28,15 @@ import java.util.List;
 public class JDBCDMLReadOp extends JDBCDMLOp {
     private static final Logger LOGGER = LogManager.getLogger(JDBCDMLReadOp.class);
 
+    private String verifierKeyName;
+
     public JDBCDMLReadOp(JDBCSpace jdbcSpace,
                          boolean isReadStmt,
                          String pStmtSqlStr,
-                         List<Object> pStmtValList) {
+                         List<Object> pStmtValList,
+                         String verifierKeyName) {
         super(jdbcSpace, isReadStmt, pStmtSqlStr, pStmtValList);
+        this.verifierKeyName = verifierKeyName;
     }
 
     @Override
@@ -44,14 +47,17 @@ public class JDBCDMLReadOp extends JDBCDMLOp {
         }
 
         try {
-            int resultFetched = 0;
-            List<ResultSet> resultSetList = new ArrayList<>();
+            // key string list to be used in the "Vector" relevancy score verification
+            List<String> verifierValueList = new ArrayList<>();
 
             ResultSet rs;
             if (!isPreparedStmt) {
                 rs = stmt.executeQuery(pStmtSqlStr);
                 do {
-                    resultSetList.add(rs);
+                    String keyVal = rs.getString(this.verifierKeyName);
+                    if (StringUtils.isNotBlank(keyVal)) {
+                        verifierValueList.add(keyVal);
+                    }
                 } while (rs.next());
                 closeStatement(stmt);
             }
@@ -63,8 +69,10 @@ public class JDBCDMLReadOp extends JDBCDMLOp {
                     if(isResultSet) {
                         rs = stmt.getResultSet();
                         while(rs.next()) {
-                            resultSetList.add(rs);
-                            resultFetched++;
+                            String keyVal = rs.getString(this.verifierKeyName);
+                            if (StringUtils.isNotBlank(keyVal)) {
+                                verifierValueList.add(keyVal);
+                            }
                         }
                         rs.close();
                     } else {
@@ -78,11 +86,7 @@ public class JDBCDMLReadOp extends JDBCDMLOp {
                 closeStatement(stmt);
             }
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Total {} of results have been returned.", resultFetched);
-            }
-
-            return resultSetList;
+            return verifierValueList;
         }
         catch (SQLException sqlException) {
             throw new JDBCAdapterUnexpectedException(

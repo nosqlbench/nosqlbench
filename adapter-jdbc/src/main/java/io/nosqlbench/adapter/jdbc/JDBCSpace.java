@@ -66,8 +66,7 @@ public class JDBCSpace implements AutoCloseable {
 
     public JDBCSpace(String spaceName, NBConfiguration cfg) {
         this.spaceName = spaceName;
-        this.totalCycleNum = NumberUtils.toLong(cfg.get("cycles"));
-
+        this.totalCycleNum = NumberUtils.toLong(cfg.getOptional("cycles").orElse("1"));
         int totalThreads = NumberUtils.toInt(cfg.getOptional("threads").orElse("1"));
         int numConnInput = NumberUtils.toInt(cfg.getOptional("num_conn").orElse("10"));
         this.maxNumConn = Math.min(totalThreads, numConnInput);
