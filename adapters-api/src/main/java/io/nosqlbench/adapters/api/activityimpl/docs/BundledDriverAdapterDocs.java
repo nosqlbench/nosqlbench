@@ -16,11 +16,15 @@
 
 package io.nosqlbench.adapters.api.activityimpl.docs;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.api.docsapi.BundledMarkdownManifest;
 import io.nosqlbench.api.docsapi.Docs;
 import io.nosqlbench.api.docsapi.DocsBinder;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.spi.SimpleServiceLoader;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
 
@@ -30,11 +34,13 @@ import java.util.List;
 public class BundledDriverAdapterDocs implements BundledMarkdownManifest {
     @Override
     public DocsBinder getDocs() {
+        NBComponent root = NBComponent.EMPTY_COMPONENT;
         DocsBinder docs = new Docs();
-        SimpleServiceLoader<DriverAdapter> loader = new SimpleServiceLoader<>(DriverAdapter.class, Maturity.Any);
-        List<SimpleServiceLoader.Component<? extends DriverAdapter>> namedProviders = loader.getNamedProviders();
-        for (SimpleServiceLoader.Component<? extends DriverAdapter> namedProvider : namedProviders) {
-            DriverAdapter driverAdapter = namedProvider.provider.get();
+        SimpleServiceLoader<DriverAdapterLoader> loader = new SimpleServiceLoader<>(DriverAdapterLoader.class, Maturity.Any);
+        List<SimpleServiceLoader.Component<? extends DriverAdapterLoader>> namedProviders = loader.getNamedProviders();
+        for (SimpleServiceLoader.Component<? extends DriverAdapterLoader> namedProvider : namedProviders) {
+            DriverAdapterLoader driverAdapterLoader = namedProvider.provider.get();
+            DriverAdapter<Op, Object> driverAdapter = driverAdapterLoader.load(NBComponent.EMPTY_COMPONENT, NBLabels.forKV());
             DocsBinder bundledDocs = driverAdapter.getBundledDocs();
             docs = docs.merge(bundledDocs);
         }
