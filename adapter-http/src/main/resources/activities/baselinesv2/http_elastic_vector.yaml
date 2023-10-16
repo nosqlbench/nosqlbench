@@ -1,0 +1,234 @@
+min_version: "5.17.3"
+description: |
+  A workload which reads ann-benchmarks vector data from HDF5 file format.
+scenarios:
+  #main: run driver=http tags=='block:main.*' cycles===1 stride=1 threads=1
+  schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
+  load:
+    schema: run driver=http tags==block:schema threads==1 cycles==UNDEF diag=all
+    rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,100) threads=100
+    #rampup: run driver=http tags==block:rampup cycles===47341 threads=1
+    #rampup: run driver=http tags==block:rampup cycles===1183514 threads=10
+
+  drop-tables:
+    schema: run driver=http tags==block:drop-tables threads==1 cycles==UNDEF
+  truncate: run driver=http tags==block:truncate-tables cycles===1 threads=1
+    #reads: run driver=http tags==block:main-read cycles===TEMPLATE(read-cycles,100) threads=100
+  reads: run driver=http tags==block:main-read cycles===TEMPLATE(read-cycles,100) threads=10
+bindings:
+  rw_key1: Mul(25); ToString()
+  train_vector1: Mul(25); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key2: Mul(25); Add(1); ToString()
+  train_vector2: Mul(25); Add(1); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key3: Mul(25); Add(2); ToString()
+  train_vector3: Mul(25); Add(2); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key4: Mul(25); Add(3); ToString()
+  train_vector4: Mul(25); Add(3); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key5: Mul(25); Add(4); ToString()
+  train_vector5: Mul(25); Add(4); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key6: Mul(25); Add(5); ToString()
+  train_vector6: Mul(25); Add(5); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key7: Mul(25); Add(6); ToString()
+  train_vector7: Mul(25); Add(6); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key8: Mul(25); Add(7); ToString()
+  train_vector8: Mul(25); Add(7); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key9: Mul(25); Add(8); ToString()
+  train_vector9: Mul(25); Add(8); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key10: Mul(25); Add(9); ToString()
+  train_vector10: Mul(25); Add(9); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key11: Mul(25); Add(10); ToString()
+  train_vector11: Mul(25); Add(10); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key12: Mul(25); Add(11); ToString()
+  train_vector12: Mul(25); Add(11); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key13: Mul(25); Add(12); ToString()
+  train_vector13: Mul(25); Add(12); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key14: Mul(25); Add(13); ToString()
+  train_vector14: Mul(25); Add(13); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key15: Mul(25); Add(14); ToString()
+  train_vector15: Mul(25); Add(14); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key16: Mul(25); Add(15); ToString()
+  train_vector16: Mul(25); Add(15); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key17: Mul(25); Add(16); ToString()
+  train_vector17: Mul(25); Add(16); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key18: Mul(25); Add(17); ToString()
+  train_vector18: Mul(25); Add(17); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key19: Mul(25); Add(18); ToString()
+  train_vector19: Mul(25); Add(18); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key20: Mul(25); Add(19); ToString()
+  train_vector20: Mul(25); Add(19); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key21: Mul(25); Add(20); ToString()
+  train_vector21: Mul(25); Add(20); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key22: Mul(25); Add(21); ToString()
+  train_vector22: Mul(25); Add(21); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key23: Mul(25); Add(22); ToString()
+  train_vector23: Mul(25); Add(22); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key24: Mul(25); Add(23); ToString()
+  train_vector24: Mul(25); Add(23); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  rw_key25: Mul(25); Add(24); ToString()
+  train_vector25: Mul(25); Add(24); HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+
+  rw_key: ToString()
+  train_vector: HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/train") ; ToCqlVector()
+  test_vector: HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/test") ; ToCqlVector()
+  validation_set: HdfFileToIntArray("TEMPLATE(hdf5_path)", "/neighbors")
+ops:
+  vop1:
+    stmt: "number:{number} name:{number_name}\n"
+    verifier-imports:
+      - "io.nosqlbench.api.engine.metrics.ActivityMetrics"
+    verifier-init: |
+      recallHisto = ActivityMetrics.histogram(_parsed_op,"recall-histo",4);
+    verifier: |
+      // double recall = vectormath.computeRecall(result,result)
+      recallHisto.update(cycle);
+      return true;
+blocks:
+  reset-schema:
+    ops:
+      - delete-index: |
+          DELETE TEMPLATE(url, https://TODO.com)/TEMPLATE(index,vector)
+          Authorization: ApiKey TEMPLATE(apikey, required)
+          Content-Type: application/json
+  schema:
+    ops:
+      - create-index: |
+          PUT TEMPLATE(url, https://TODO.com)/TEMPLATE(index, vector)
+          Authorization: ApiKey TEMPLATE(apikey, required)
+          Content-Type: application/json
+
+          {
+            "mappings": {
+              "properties": {
+                "value": {
+                  "type": "dense_vector",
+                  "dims": TEMPLATE(dimensions, 25),
+                  "index": true,
+                  "similarity": "TEMPLATE(similarity_function, cosine)"
+                },
+                "key": {
+                  "type": "text"
+                }
+              }
+            }
+          }
+
+
+  rampup:
+    ops:
+      - rampup-bulk-insert: |
+          POST TEMPLATE(url, https://TODO.com)/TEMPLATE(index,vector)/_bulk?refresh=true
+          Authorization: ApiKey TEMPLATE(apikey, required)
+          Content-Type: application/json
+
+          {"index": {} }
+          {"value": {train_vector1},"key": {rw_key1}}
+          {"index": {} }
+          {"value": {train_vector2},"key": {rw_key2}}
+          {"index": {} }
+          {"value": {train_vector3},"key": {rw_key3}}
+          {"index": {} }
+          {"value": {train_vector4},"key": {rw_key4}}
+          {"index": {} }
+          {"value": {train_vector5},"key": {rw_key5}}
+          {"index": {} }
+          {"value": {train_vector6},"key": {rw_key6}}
+          {"index": {} }
+          {"value": {train_vector7},"key": {rw_key7}}
+          {"index": {} }
+          {"value": {train_vector8},"key": {rw_key8}}
+          {"index": {} }
+          {"value": {train_vector9},"key": {rw_key9}}
+          {"index": {} }
+          {"value": {train_vector10},"key": {rw_key10}}
+          {"index": {} }
+          {"value": {train_vector11},"key": {rw_key11}}
+          {"index": {} }
+          {"value": {train_vector12},"key": {rw_key12}}
+          {"index": {} }
+          {"value": {train_vector13},"key": {rw_key13}}
+          {"index": {} }
+          {"value": {train_vector14},"key": {rw_key14}}
+          {"index": {} }
+          {"value": {train_vector15},"key": {rw_key15}}
+          {"index": {} }
+          {"value": {train_vector16},"key": {rw_key16}}
+          {"index": {} }
+          {"value": {train_vector17},"key": {rw_key17}}
+          {"index": {} }
+          {"value": {train_vector18},"key": {rw_key18}}
+          {"index": {} }
+          {"value": {train_vector19},"key": {rw_key19}}
+          {"index": {} }
+          {"value": {train_vector20},"key": {rw_key20}}
+          {"index": {} }
+          {"value": {train_vector21},"key": {rw_key21}}
+          {"index": {} }
+          {"value": {train_vector22},"key": {rw_key22}}
+          {"index": {} }
+          {"value": {train_vector23},"key": {rw_key23}}
+          {"index": {} }
+          {"value": {train_vector24},"key": {rw_key24}}
+          {"index": {} }
+          {"value": {train_vector25},"key": {rw_key25}}
+
+      #- rampup-insert: |
+      #   POST TEMPLATE(url, https://TODO.com)/TEMPLATE(index,vector)//_doc?refresh=true
+      #    Authorization: ApiKey TEMPLATE(apikey, required)
+      #    Content-Type: application/json
+
+      #    {
+      #      "value": {train_vector},
+      #      "key": {rw_key}
+      #    }
+  main-read:
+    params:
+      ratio: TEMPLATE(read_ratio,90)
+      instrument: true
+    ops:
+      - main-select-ann-limit:
+          op: |
+            POST TEMPLATE(url, https://TODO.com)/TEMPLATE(index,vector)/_search
+            Authorization: ApiKey TEMPLATE(apikey, required)
+            Content-Type: application/json
+
+            {
+              "from" : 0,
+              "size" : TEMPLATE(k,100),
+              "knn": {
+                "field": "value",
+                "query_vector": {test_vector},
+                "k": TEMPLATE(k, 100),
+                "num_candidates": TEMPLATE(k,100)
+              }
+            }
+          verifier-imports:
+            - io.nosqlbench.adapter.http.JsonElementUtils
+          verifier-init: |
+            k=TEMPLATE(top_k,100)
+            relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op);
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+          verifier: |
+            actual_indices=JsonElementUtils.getIntArrayFromHits(result);
+            relevancy.accept({relevant_indices},actual_indices);
+            return true;
+
+  main-write:
+    params:
+      ratio: TEMPLATE(write_ratio,10)
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+      instrument: true
+      prepared: true
+    ops:
+      - main-insert: |
+          POST TEMPLATE(url, https://TODO.com)/TEMPLATE(index,vector)/_doc?refresh=true
+          Authorization: ApiKey TEMPLATE(apikey, required)
+          Content-Type: application/json
+
+          {
+            "value": {train_data},
+            "key": {rw_key}
+          }
