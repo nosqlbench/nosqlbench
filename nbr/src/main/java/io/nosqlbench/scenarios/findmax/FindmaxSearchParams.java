@@ -33,7 +33,7 @@ public record FindmaxSearchParams(
 ) {
     public FindmaxSearchParams(ScenarioParams params) {
         this(
-            params.maybeGet("sample_time_ms").map(Integer::parseInt).orElse(1000),
+            params.maybeGet("sample_time_ms").map(Integer::parseInt).orElse(3000),
             params.maybeGet("sample_max").map(Integer::parseInt).orElse(10000),
             params.maybeGet("sample_incr").map(Double::parseDouble).orElse(1.01d),
             params.maybeGet("rate_base").map(Double::parseDouble).orElse(0d),

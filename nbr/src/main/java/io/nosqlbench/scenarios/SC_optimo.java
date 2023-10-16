@@ -53,7 +53,7 @@ public class SC_optimo extends SCBaseScenario {
 
         Map<String, String> activityParams = new HashMap<>(Map.of(
             "cycles", String.valueOf(Long.MAX_VALUE),
-            "threads", "1",
+            "threads", params.getOrDefault("threads","1"),
             "driver", "diag",
             "rate", "1",
             "dryrun","op"

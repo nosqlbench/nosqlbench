@@ -16,7 +16,6 @@
 
 package io.nosqlbench.scenarios.findmax;
 
-import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.components.NBComponent;
@@ -57,12 +56,13 @@ public class SC_findmax extends SCBaseScenario {
     public void invoke() {
         // TODO: having "scenario" here as well as in "named scenario" in workload templates is confusing. Make this clearer.
         String workload = params.getOrDefault("workload", "default_workload");
+        CycleRateSpec ratespec = new CycleRateSpec(100.0, 1.05);
 
         Map<String, String> activityParams = new HashMap<>(Map.of(
             "cycles", String.valueOf(Long.MAX_VALUE),
-            "threads", "1",
+            "threads", params.getOrDefault("threads","1"),
             "driver", "diag",
-            "rate", "1",
+            "rate", String.valueOf(ratespec.opsPerSec),
             "dryrun", "op"
         ));
         if (params.containsKey("workload")) {
@@ -76,33 +76,28 @@ public class SC_findmax extends SCBaseScenario {
 
         FindmaxSearchParams findmaxSettings = new FindmaxSearchParams(params);
 
-        int seconds = findmaxSettings.sample_time_ms();
-//        double target_rate = findmaxSettings.rate_base() + findmaxSettings.rate_step();
+        int sampletime_ms = findmaxSettings.sample_time_ms();
 
         Activity flywheel = controller.start(activityParams);
-        final double[] target_rate = new double[] {findmaxSettings.rate_step()};
-        NBFunctionGauge targetRateGauge = flywheel.create().gauge("target_rate", () -> target_rate[0]);
-//        stdout.println("warming up for " + seconds + " seconds");
-//        controller.waitMillis(seconds * 1000);
 
         SimFrameCapture capture = this.perfValueMeasures(flywheel, 0.99, 50);
         SimFramePlanner planner = new SimFramePlanner(findmaxSettings);
         SimFrameJournal journal = new SimFrameJournal();
 
         SimFrameParams frameParams = planner.initialStep();
-        while (frameParams!=null) {
-            stdout.println("params:" + frameParams);
-            target_rate[0] = frameParams.computed_rate();
-            flywheel.onEvent(ParamChange.of(new CycleRateSpec(target_rate[0], 1.05d, SimRateSpec.Verb.restart)));
+        while (frameParams != null) {
+            stdout.println(frameParams);
+            flywheel.onEvent(ParamChange.of(new CycleRateSpec(frameParams.computed_rate(), 1.05d, SimRateSpec.Verb.restart)));
             capture.startWindow();
             controller.waitMillis(frameParams.sample_time_ms());
             capture.stopWindow();
-            journal.record(frameParams,capture.last());
+            journal.record(frameParams, capture.last());
             stdout.println(capture.last());
             stdout.println("-".repeat(40));
             frameParams = planner.nextStep(journal);
         }
         controller.stop(flywheel);
+        stdout.println("bestrun:\n" + journal.bestRun());
 
         // could be a better result if the range is arbitrarily limiting the parameter space.
     }
@@ -110,22 +105,28 @@ public class SC_findmax extends SCBaseScenario {
     private SimFrameCapture perfValueMeasures(Activity activity, double fractional_quantile, double cutoff_ms) {
         SimFrameCapture sampler = new SimFrameCapture();
 
-        NBMetricTimer result_success_timer = activity.find().timer("name:result_success");
         NBMetricTimer result_timer = activity.find().timer("name:result");
+        NBMetricTimer result_success_timer = activity.find().timer("name:result_success");
+        NBMetricGauge cyclerate_gauge = activity.find().gauge("name=config_cyclerate");
 
-        // achieved rate
-        sampler.addDeltaTime(
-            "achieved_rate",
-            result_success_timer::getCount,
-            1.0
-        );
+        sampler.addDirect("target_rate", cyclerate_gauge::getValue, Double.NaN);
+        sampler.addDeltaTime("achieved_oprate", result_timer::getCount, Double.NaN);
+        sampler.addDeltaTime("achieved_ok_oprate", result_success_timer::getCount, 1.0);
 
-//        NBMetricGauge target_rate_gauge = activity.find().gauge("name=target_rate");
-//        sampler.addDirect(
-//            "achieved_ratio",
-//            () -> Math.max(1.0d,(result_success_timer.getCount() / target_rate_gauge.getValue()))*Math.max(1.0d,(result_success_timer.getCount() / target_rate_gauge.getValue())),
-//            1.0
-//        );
+        sampler.addRemix("achieved_success_ratio", vars -> {
+            // exponentially penalize results which do not attain 100% successful op rate
+            double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("achieved_oprate"));
+            return Math.pow(basis,3);
+        });
+        sampler.addRemix("achieved_target_ratio", (vars) -> {
+            // exponentially penalize results which do not attain 100% target rate
+            double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("target_rate"));
+            return Math.pow(basis,3);
+        });
+
+        // TODO: add response time with a sigmoid style threshold at fractional_quantile and cutoff_ms
+
+        // TODO: add tries based saturation detection, where p99 tries start increasing above 1
 
 //        // response time
 //        sampler.addDirect(

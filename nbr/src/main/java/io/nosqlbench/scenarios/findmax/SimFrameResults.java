@@ -19,7 +19,7 @@ package io.nosqlbench.scenarios.findmax;
 import java.util.List;
 
 public interface SimFrameResults {
-    List<SimFrameCapture.FrameSampleSet> history();
+    List<FrameSampleSet> history();
 
     double getValue();
 

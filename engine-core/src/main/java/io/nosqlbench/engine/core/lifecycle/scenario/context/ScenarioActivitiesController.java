@@ -93,7 +93,9 @@ public class ScenarioActivitiesController extends NBBaseComponent {
      */
     public Activity start(Map<String, String> activityDefMap) {
         ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
-        return start(ad);
+        Activity started = start(ad);
+        awaitAllThreadsOnline(started,30000L);
+        return started;
     }
 
     /**
@@ -174,9 +176,26 @@ public class ScenarioActivitiesController extends NBBaseComponent {
         runtimeInfo.stopActivity();
     }
 
+    public boolean awaitAllThreadsOnline(ActivityDef activityDef, long timeoutMs) {
+        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
+        if (null == runtimeInfo) {
+            throw new RuntimeException("could not stop missing activity:" + activityDef);
+        }
+
+        scenariologger.debug("STOP {}", activityDef.getAlias());
+        return runtimeInfo.awaitAllThreadsOnline(timeoutMs);
+    }
+
     public synchronized void stop(Activity activity) {
         stop(activity.getActivityDef());
     }
+
+
+    public boolean awaitAllThreadsOnline(Activity activity, long timeoutMs) {
+        return awaitAllThreadsOnline(activity.getActivityDef(), timeoutMs);
+    }
+
+
 
     /**
      * <p>Stop an activity, given an activity def map. The only part of the map that is important is the
@@ -385,6 +404,7 @@ public class ScenarioActivitiesController extends NBBaseComponent {
     public void await(ActivityDef activityDef, long timeoutMs) {
         this.awaitActivity(activityDef, timeoutMs);
     }
+
 
     public boolean awaitActivity(ActivityDef activityDef, long timeoutMs) {
         ActivityRuntimeInfo ari = this.activityInfoMap.get(activityDef.getAlias());

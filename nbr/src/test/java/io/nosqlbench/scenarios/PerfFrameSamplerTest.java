@@ -70,4 +70,19 @@ class PerfFrameSamplerTest {
 
     }
 
+    @Test
+    public void testRemixValues() {
+        SimFrameCapture pws = new SimFrameCapture();
+        pws.addDirect("a",() -> 3.0d, 1.0d);
+        pws.addDirect("b",()-> 7.0d, 1.0d);
+        pws.addRemix("d", (vars) -> { return vars.get("a")*vars.get("b");},1.0);
+
+        pws.startWindow();
+        pws.stopWindow();
+        double value = pws.getValue();
+        // because the value of d is the product of a and b as above
+        // and the value of the sample is the product of a*b*d
+        assertThat(value).isCloseTo(21d*21d, Offset.offset(0.002));
+    }
+
 }

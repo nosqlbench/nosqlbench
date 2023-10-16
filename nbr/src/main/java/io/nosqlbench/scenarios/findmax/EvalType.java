@@ -16,14 +16,8 @@
 
 package io.nosqlbench.scenarios.findmax;
 
-import java.util.List;
-
-public interface JournalView {
-    List<SimFrame> frames();
-    SimFrame last();
-    SimFrame beforeLast();
-    SimFrame bestRun();
-
-    SimFrame before(SimFrame frame);
-    SimFrame after(SimFrame frame);
+public enum EvalType {
+    direct,
+    deltaT,
+    remix
 }

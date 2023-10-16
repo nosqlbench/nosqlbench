@@ -434,6 +434,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         }
     }
 
+
 //    public synchronized void startActivity() {
 //        RunStateImage startable = tally.awaitNoneOther(1000L, RunState.Uninitialized, RunState.Stopped);
 //        if (startable.isTimeout()) {
@@ -575,6 +576,11 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
 
     public void awaitMotorsRunningOrTerminalState() {
         awaitMotorsAtLeastRunning();
+    }
+
+    public boolean awaitAllThreadsOnline(long timeoutMs) {
+        RunStateImage image = tally.awaitNoneOther(timeoutMs, RunState.Running);
+        return image.isNoneOther(RunState.Running);
     }
 
     private class ThreadsGauge implements Gauge<Double> {

@@ -91,4 +91,8 @@ public class ActivityRuntimeInfo implements ProgressCapable {
     public ActivityExecutor getActivityExecutor() {
         return executor;
     }
+
+    public boolean awaitAllThreadsOnline(long timeoutMs) {
+        return this.executor.awaitAllThreadsOnline(timeoutMs);
+    }
 }

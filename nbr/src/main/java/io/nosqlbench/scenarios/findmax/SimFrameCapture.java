@@ -21,11 +21,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.LongSupplier;
+import java.util.function.ToDoubleFunction;
 
 /**
  * This is a helper class that makes it easy to bundle up a combination of measurable
  * factors and get a windowed sample from them. To use it, add your named data sources
- * with their coefficients, and optionally a callback which resets the measurement
+ * with their coefficients, and optionally a frameStartCallback which resets the measurement
  * buffers for the next time. When you call {@link #getValue()}, all callbacks
  * are used after the value computation is complete.
  *
@@ -37,32 +38,84 @@ public class SimFrameCapture implements SimFrameResults {
     private FrameSampleSet currentFrame;
 
 
-    public void addDirect(String name, DoubleSupplier supplier, double weight, Runnable callback) {
-        this.criteria.add(new Criterion(name, supplier, weight, callback, false));
+    /**
+     * Direct values are simply measured at the end of a frame.
+     *
+     * @param name
+     *     measure name
+     * @param supplier
+     *     source of measurement
+     * @param weight
+     *     coefficient of weight for this measure
+     * @param callback
+     */
+    private void add(String name, EvalType type, ToDoubleFunction<DoubleMap> remix, DoubleSupplier supplier, double weight, Runnable callback) {
+        this.criteria.add(new Criterion(name, type, remix, supplier, weight, callback==null? () -> {} : callback));
     }
 
+    /**
+     * Direct values are simply measured at the end of a frame.
+     *
+     * @param name
+     *     measure name
+     * @param supplier
+     *     source of measurement
+     * @param weight
+     *     coefficient of weight for this measure
+     */
     public void addDirect(String name, DoubleSupplier supplier, double weight) {
-        addDirect(name, supplier, weight, () -> {
-        });
+        add(name, EvalType.direct, null, supplier, weight, null);
     }
 
     public void addDeltaTime(String name, DoubleSupplier supplier, double weight, Runnable callback) {
-        this.criteria.add(new Criterion(name, supplier, weight, callback, true));
+        this.criteria.add(new Criterion(name, EvalType.deltaT, null, supplier, weight, callback));
     }
 
     public void addDeltaTime(String name, DoubleSupplier supplier, double weight) {
-        addDeltaTime(name, supplier, weight, () -> {
-        });
+        criteria.add(new Criterion(name, EvalType.deltaT, null, supplier, weight, null));
     }
 
+    /**
+     * Delta Time values are taken as the differential of the first and last values with respect
+     * to time passing.
+     *
+     * @param name
+     * @param supplier
+     * @param weight
+     */
     public void addDeltaTime(String name, LongSupplier supplier, double weight) {
-        addDeltaTime(name, () -> (double)supplier.getAsLong(), weight);
+        addDeltaTime(name, () -> (double) supplier.getAsLong(), weight);
     }
+
+    /**
+     * A remix function takes as its input the computed raw values of the other functions, irrespective
+     * of their weights or weighting functions. At the end of a frame, each defined value is computed
+     * in the order it was added for capture and then added to the results view, where it can be referenced
+     * by subsequent functions. Thus, any remix values must be added after those value on which it depends.
+     *
+     * @param name
+     *     The name of the remix value
+     * @param remix
+     *     A function which relies on previously computed raw values.
+     * @param weight
+     *     The weight to apply to the result of this value for the final frame sample value.
+     * @param callback
+     *     An optional callback to invoke when the frame starts
+     */
+    public void addRemix(String name, ToDoubleFunction<DoubleMap> remix, double weight, Runnable callback) {
+        add(name, EvalType.remix, remix, null, weight, callback);
+    }
+
+    public void addRemix(String name, ToDoubleFunction<DoubleMap> remix, double weight) {
+        add(name, EvalType.remix, remix, null, weight, null);
+    }
+
 
     @Override
     public List<FrameSampleSet> history() {
         return Collections.unmodifiableList(this.allFrames);
     }
+
     @Override
     public double getValue() {
         if (allFrames.isEmpty()) {
@@ -79,7 +132,7 @@ public class SimFrameCapture implements SimFrameResults {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("PERF VALUE=").append(getValue()).append("\n");
-        sb.append("windows:\n" + allFrames.getLast().toString());
+        sb.append("windows:\n").append(allFrames.getLast().toString());
         return sb.toString();
     }
 
@@ -92,8 +145,19 @@ public class SimFrameCapture implements SimFrameResults {
             throw new RuntimeException("cant start window twice in a row. Must close window first");
         }
         int nextidx = this.allFrames.size();
-        List<FrameSample> samples = criteria.stream().map(c -> FrameSample.init(c,nextidx).start(now)).toList();
+        DoubleMap vars = new DoubleMap();
+        List<FrameSample> samples = criteria.stream().map(c -> FrameSample.init(c, nextidx, vars).start(now)).toList();
         this.currentFrame = new FrameSampleSet(samples);
+//        System.out.println("after start:\n"+ frameCaptureSummary(currentFrame));
+    }
+
+    private String frameCaptureSummary(FrameSampleSet currentFrame) {
+        StringBuilder sb = new StringBuilder();
+        for (FrameSample fs : this.currentFrame) {
+            sb.append(fs.index()).append(" T:").append(fs.startAt()).append("-").append(fs.endAt()).append(" V:")
+                .append(fs.startval()).append(",").append(fs.endval()).append("\n");
+        }
+        return sb.toString();
     }
 
     public void stopWindow() {
@@ -105,99 +169,20 @@ public class SimFrameCapture implements SimFrameResults {
             currentFrame.set(i, currentFrame.get(i).stop(now));
         }
         allFrames.add(currentFrame);
+//        System.out.println("after stop:\n"+ frameCaptureSummary(currentFrame));
         currentFrame = null;
-    }
-
-    public static record Criterion(
-        String name,
-        DoubleSupplier supplier,
-        double weight,
-        Runnable callback,
-        boolean delta
-    ) {
     }
 
     public FrameSampleSet last() {
         return allFrames.getLast();
     }
 
+    public void addRemix(String name, ToDoubleFunction<DoubleMap> remix) {
+        addRemix(name, remix, 1.0, null);
+    }
+
+
     public static class FrameSamples extends ArrayList<FrameSampleSet> {
-    }
-
-    public static class FrameSampleSet extends ArrayList<FrameSample> {
-        public FrameSampleSet(List<FrameSample> samples) {
-            super(samples);
-        }
-
-        public int index() {
-            return getLast().index();
-        }
-        public double value() {
-            double product = 1.0;
-            for (FrameSample sample : this) {
-                product *= sample.weightedValue();
-            }
-            return product;
-        }
-
-
-        @Override
-        public String toString() {
-            StringBuilder sb= new StringBuilder();
-            sb.append(String.format("FRAME %05d  VALUE %010.5f\n", index(), value())).append("\n");
-            for (FrameSample frameSample : this) {
-                sb.append(" > ").append(frameSample.toString()).append("\n");
-            }
-            return sb.toString();
-        }
-    }
-
-    public static record FrameSample(Criterion criterion, int index, long startAt, long endAt, double startval, double endval) {
-        public double weightedValue() {
-            return rawValue() * criterion().weight;
-        }
-
-        private double rawValue() {
-            if (criterion.delta()) {
-                return endval - startval;
-            }
-            return endval;
-        }
-
-        private double rate() {
-            return rawValue() / seconds();
-        }
-
-        private double seconds() {
-            return ((double) (endAt - startAt)) / 1000d;
-        }
-
-        public static FrameSample init(Criterion criterion, int index) {
-            return new FrameSample(criterion, index, 0, 0, Double.NaN, Double.NaN);
-        }
-
-        public FrameSample start(long startTime) {
-            criterion.callback.run();
-            double v1 = criterion.supplier.getAsDouble();
-            return new FrameSample(criterion, index, startTime, 0L, v1, Double.NaN);
-        }
-
-        public FrameSample stop(long stopTime) {
-            double v2 = criterion.supplier.getAsDouble();
-            return new FrameSample(criterion, index, startAt, stopTime, startval, v2);
-        }
-
-        @Override
-        public String toString() {
-            return String.format(
-                "%20s %03d dt[%04.2f] dV[%010.5f] wV=%010.5f",
-                criterion.name,
-                index,
-                seconds(),
-                rawValue(),
-                weightedValue()
-            );
-        }
     }
 
 }

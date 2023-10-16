@@ -21,12 +21,13 @@ package io.nosqlbench.scenarios.findmax;
  * @param params The parameters which control the simulated workload during the sample window
  * @param result The measured result, including key metrics and criteria for the sample window
  */
-public record SimFrame(SimFrameParams params, SimFrameCapture.FrameSampleSet result) {
+public record SimFrame(SimFrameParams params, FrameSampleSet result) {
     public double value() {
         return result().value();
     }
     public int index() {
         return result.index();
     }
+
 
 }
