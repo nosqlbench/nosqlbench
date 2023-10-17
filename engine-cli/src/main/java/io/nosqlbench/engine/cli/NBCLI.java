@@ -25,6 +25,8 @@ import io.nosqlbench.api.apps.BundledApp;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
+import io.nosqlbench.api.engine.metrics.reporters.CsvReporter;
+import io.nosqlbench.api.engine.metrics.reporters.MetricInstanceFilter;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
@@ -404,6 +406,15 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             new NBBaseComponent(null),
             sessionName
         );
+
+        options.wantsReportCsvTo().ifPresent(cfg -> {
+            MetricInstanceFilter filter = new MetricInstanceFilter();
+            filter.addPattern(cfg.pattern);
+            new CsvReporter(session,Path.of(cfg.file), cfg.millis, filter);
+        });
+
+
+
         ExecutionResult sessionResult = session.apply(options.getCommands());
         sessionResult.printSummary(System.out);
         return sessionResult.getStatus().code;

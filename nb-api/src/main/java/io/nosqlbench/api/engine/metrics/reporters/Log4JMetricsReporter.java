@@ -49,9 +49,9 @@ public class Log4JMetricsReporter extends PeriodicTaskComponent {
                                 final Marker marker,
                                 final MetricFilter filter,
                                 final NBLabels extraLabels,
-                                final int seconds,
+                                final long millis,
                                 final boolean oneLastTime) {
-        super(component, extraLabels, seconds, oneLastTime);
+        super(component, extraLabels, millis, oneLastTime);
         this.loggerProxy = loggerProxy;
         this.marker = marker;
     }

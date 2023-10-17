@@ -135,7 +135,7 @@ public class NBCLIOptions {
 
 
     private NBLabels labels = NBLabels.forKV("appname", "nosqlbench")
-        .and("node",SystemId.getNodeId());
+        .and("node", SystemId.getNodeId());
     private final List<Cmd> cmdList = new ArrayList<>();
     private int logsMax;
     private boolean wantsVersionShort;
@@ -645,21 +645,21 @@ public class NBCLIOptions {
             final String arg = arglist.peekFirst();
             Objects.requireNonNull(arg);
             final String helpmsg = """
-                    Could not recognize command 'ARG'.
-                    This means that all of the following searches for a compatible command failed:
-                    1. commands: no scenario command named 'ARG' is known. (start, run, await, ...)
-                    2. scripts: no auto script named './scripts/auto/ARG.js' in the local filesystem.
-                    3. scripts: no auto script named 'scripts/auto/ARG.js' was found in the PROG binary.
-                    4. workloads: no workload file named ARG[.yaml] was found in the local filesystem, even in include paths INCLUDES.
-                    5. workloads: no workload file named ARG[.yaml] was bundled in PROG binary, even in include paths INCLUDES.
-                    6. apps: no application named ARG was bundled in PROG.
+                Could not recognize command 'ARG'.
+                This means that all of the following searches for a compatible command failed:
+                1. commands: no scenario command named 'ARG' is known. (start, run, await, ...)
+                2. scripts: no auto script named './scripts/auto/ARG.js' in the local filesystem.
+                3. scripts: no auto script named 'scripts/auto/ARG.js' was found in the PROG binary.
+                4. workloads: no workload file named ARG[.yaml] was found in the local filesystem, even in include paths INCLUDES.
+                5. workloads: no workload file named ARG[.yaml] was bundled in PROG binary, even in include paths INCLUDES.
+                6. apps: no application named ARG was bundled in PROG.
 
-                    You can discover available ways to invoke PROG by using the various --list-* commands:
-                    [ --list-commands, --list-scripts, --list-workloads (and --list-scenarios), --list-apps ]
-                    """
-                    .replaceAll("ARG", arg)
-                    .replaceAll("PROG", "nb5")
-                    .replaceAll("INCLUDES", String.join(",", wantsIncludes()));
+                You can discover available ways to invoke PROG by using the various --list-* commands:
+                [ --list-commands, --list-scripts, --list-workloads (and --list-scenarios), --list-apps ]
+                """
+                .replaceAll("ARG", arg)
+                .replaceAll("PROG", "nb5")
+                .replaceAll("INCLUDES", String.join(",", wantsIncludes()));
             throw new BasicError(helpmsg);
 
         }
@@ -682,21 +682,21 @@ public class NBCLIOptions {
 
     public List<LoggerConfigData> getHistoLoggerConfigs() {
         final List<LoggerConfigData> configs =
-                this.histoLoggerConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
+            this.histoLoggerConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
         this.checkLoggerConfigs(configs, NBCLIOptions.LOG_HISTOGRAMS);
         return configs;
     }
 
     public List<LoggerConfigData> getStatsLoggerConfigs() {
         final List<LoggerConfigData> configs =
-                this.statsLoggerConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
+            this.statsLoggerConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
         this.checkLoggerConfigs(configs, NBCLIOptions.LOG_HISTOSTATS);
         return configs;
     }
 
     public List<LoggerConfigData> getClassicHistoConfigs() {
         final List<LoggerConfigData> configs =
-                this.classicHistoConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
+            this.classicHistoConfigs.stream().map(LoggerConfigData::new).collect(Collectors.toList());
         this.checkLoggerConfigs(configs, NBCLIOptions.CLASSIC_HISTOGRAMS);
         return configs;
     }
@@ -807,14 +807,14 @@ public class NBCLIOptions {
         configs.stream().map(LoggerConfigData::getFilename).forEach(s -> {
             if (files.contains(s))
                 System.err.println(s + " is included in " + configName + " more than once. It will only be " +
-                        "included " +
-                        "in the first matching config. Reorder your options if you need to control this.");
+                    "included " +
+                    "in the first matching config. Reorder your options if you need to control this.");
             files.add(s);
         });
     }
 
-    public String wantsReportCsvTo() {
-        return this.reportCsvTo;
+    public Optional<LoggerConfigData> wantsReportCsvTo() {
+        return Optional.ofNullable(this.reportCsvTo).map(LoggerConfigData::new);
     }
 
     public Path getLogsDirectory() {
@@ -897,13 +897,16 @@ public class NBCLIOptions {
     public static class LoggerConfigData {
         public String file;
         public String pattern = ".*";
-        public String interval = "30 seconds";
+        public long millis = 30000L;
 
         public LoggerConfigData(final String histoLoggerSpec) {
             final String[] words = histoLoggerSpec.split(":");
             switch (words.length) {
                 case 3:
-                    this.interval = words[2].isEmpty() ? this.interval : words[2];
+                    if (words[2] != null && !words[2].isEmpty()) {
+                        this.millis = Unit.msFor(words[2]).orElseThrow(() ->
+                            new RuntimeException("Unable to parse interval spec:" + words[2] + '\''));
+                    }
                 case 2:
                     this.pattern = words[1].isEmpty() ? this.pattern : words[1];
                 case 1:
@@ -913,8 +916,8 @@ public class NBCLIOptions {
                     break;
                 default:
                     throw new RuntimeException(
-                            NBCLIOptions.LOG_HISTOGRAMS +
-                                    " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
+                        NBCLIOptions.LOG_HISTOGRAMS +
+                            " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
                     );
             }
         }
@@ -939,7 +942,7 @@ public class NBCLIOptions {
         switch (parts.length) {
             case 2:
                 Unit.msFor(parts[1]).orElseThrow(
-                        () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + '\'')
+                    () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + '\'')
                 );
                 progressSpec.intervalSpec = parts[1];
             case 1:

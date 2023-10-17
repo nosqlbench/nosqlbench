@@ -67,6 +67,8 @@ public interface NBLabels {
         return this.linearizeValues('.', included);
     }
 
+    String linearize_bare(String... barewords);
+
     /**
      * Render a string representation of the label set according to the prometheus exposition naming format.
      * This means that a label set which includes the JSON data:
@@ -135,6 +137,10 @@ public interface NBLabels {
      */
     NBLabels modifyValue(String labelName, Function<String,String> transform);
 
+    String linearizeAsMetrics();
+
+    String linearizeAsKvString();
+
     /**
      * Create a new NBLabels value with the additional keys and values appended.
      *
@@ -175,6 +181,9 @@ public interface NBLabels {
      * like <PRE>{@code {__name__="metric_family_name",k="20"}}</PRE>
      * @return a String
      */
-    String linearizeAsMetrics();
+
+    NBLabels intersection(NBLabels labelset);
+
+    NBLabels difference(NBLabels otherLabels);
 
 }

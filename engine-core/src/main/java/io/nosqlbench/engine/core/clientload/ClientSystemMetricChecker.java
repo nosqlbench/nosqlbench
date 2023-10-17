@@ -124,7 +124,7 @@ public class ClientSystemMetricChecker extends NBBaseComponent {
         private void check() {
             Double extractedVal = extract();
             if (extractedVal != null && extractedVal > threshold)
-                logger.warn(getLabels().asMap().get("name") + " value = " + extractedVal + " > threshold " + threshold);
+                logger.warn(numerator.getLabels().linearizeAsMetrics() + " value = " + extractedVal + " > threshold " + threshold);
         }
     }
 }

@@ -18,7 +18,8 @@
 package io.nosqlbench.api.engine.metrics.reporters;
 
 import com.codahale.metrics.*;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
+import io.nosqlbench.api.engine.metrics.instruments.*;
+import io.nosqlbench.api.labels.NBLabelUtils;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.PeriodicTaskComponent;
@@ -26,9 +27,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -52,10 +58,11 @@ public class CsvReporter extends PeriodicTaskComponent {
     private final long durationFactor;
     private final long rateFactor;
     private final NBComponent component;
+    private Map<Path, PrintWriter> outstreams = new HashMap<>();
 
-    public CsvReporter(NBComponent node, Path reportTo, int interval, MetricInstanceFilter filter,
+    public CsvReporter(NBComponent node, Path reportTo, long intervalMs, MetricInstanceFilter filter,
                        NBLabels extraLabels) {
-        super(node, extraLabels, interval, false);
+        super(node, extraLabels, intervalMs, false);
         this.component = node;
         this.reportTo = reportTo;
         this.filter = filter;
@@ -68,29 +75,56 @@ public class CsvReporter extends PeriodicTaskComponent {
         this.timerHeader = String.join(separator, "count", "max", "mean", "min", "stddev", "p50", "p75", "p95", "p98", "p99", "p999", "mean_rate", "m1_rate", "m5_rate", "m15_rate", "rate_unit", "duration_unit");
         this.meterHeader = String.join(separator, "count", "mean_rate", "m1_rate", "m5_rate", "m15_rate", "rate_unit");
         this.histogramHeader = String.join(separator, "count", "max", "mean", "min", "stddev", "p50", "p75", "p95", "p98", "p99", "p999");
+
+        if (Files.exists(reportTo) && !Files.isDirectory(reportTo)) {
+            throw new RuntimeException(reportTo.toString() + " already exists and is not a directory.");
+        }
+        if (!Files.exists(reportTo)) {
+            try {
+                Files.createDirectories(reportTo, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwx---")));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 
-    public CsvReporter(NBComponent node, Path reportTo, int interval, MetricInstanceFilter filter) {
-        this(node, reportTo, interval, filter, null);
+    public CsvReporter(NBComponent node, Path reportTo, long intervalMs, MetricInstanceFilter filter) {
+        this(node, reportTo, intervalMs, filter, null);
     }
 
-    public void start() {
+    @Override
+    public void task() {
         List<NBMetric> metrics = component.find().metrics();
         final long timestamp = TimeUnit.MILLISECONDS.toSeconds(clock.getTime());
+        NBLabels commonLabels = NBLabelUtils.commonLabels(metrics);
+        logger.info("Factoring out common labels for CSV metrics logging: " + commonLabels.linearizeAsMetrics());
+
         for (NBMetric metric : metrics) {
-            if (metric instanceof Gauge<?>) {
-                reportGauge(timestamp, metric.getLabels().linearizeAsMetrics(), (Gauge<?>) metric);
-            } else if (metric instanceof Counter) {
-                reportCounter(timestamp, metric.getLabels().linearizeAsMetrics(), (Counter) metric);
-            } else if (metric instanceof Histogram) {
-                reportHistogram(timestamp, metric.getLabels().linearizeAsMetrics(), (Histogram) metric);
-            } else if (metric instanceof Meter) {
-                reportMeter(timestamp, metric.getLabels().linearizeAsMetrics(), (Meter) metric);
-            } else if (metric instanceof Timer) {
-                reportTimer(timestamp, metric.getLabels().linearizeAsMetrics(), (Timer) metric);
+            String name = metric.getLabels().difference(commonLabels).linearize_bare("scenario","activity","name");
+//            metric.getLabels().difference(commonLabels);
+            switch (metric) {
+                case NBMetricGauge gauge:
+                    reportGauge(timestamp, name, gauge);
+                    break;
+                case NBMetricCounter counter:
+                    reportCounter(timestamp, name, counter);
+                    break;
+                case NBMetricHistogram histogram:
+                    reportHistogram(timestamp, name, histogram);
+                    break;
+                case NBMetricTimer timer:
+                    reportTimer(timestamp, name, timer);
+                    break;
+                case NBMetricMeter meter:
+                    reportMeter(timestamp, name, meter);
+                    break;
+                default:
+                    throw new RuntimeException("Unrecognized metric type to report '" + metric.getClass().getSimpleName() + "'");
             }
         }
     }
+
 
     protected double convertDuration(double duration) {
         return duration / durationFactor;
@@ -168,35 +202,35 @@ public class CsvReporter extends PeriodicTaskComponent {
     }
 
     private void report(long timestamp, String name, String header, String line, Object... values) {
-        try {
-            final File file = new File(reportTo + ".csv");
-            final boolean fileAlreadyExists = file.exists();
-            if (fileAlreadyExists || file.createNewFile()) {
-                try (PrintWriter out = new PrintWriter(new OutputStreamWriter(
-                    new FileOutputStream(file, true), UTF_8))) {
-                    if (!fileAlreadyExists) {
-                        out.println("t" + separator + header);
-                    }
-                    out.printf(locale, String.format(locale, "%d" + separator + "%s%n", timestamp, line), values);
-                }
-            }
-        } catch (IOException e) {
-            logger.warn("Error writing to {}", name, e);
-        }
+        Path pathname = reportTo.resolve(Path.of(name + ".csv")).normalize();
+        PrintWriter out = outstreams.computeIfAbsent(pathname, p -> createWriter(p, "t" + separator + header));
+        out.printf(locale, String.format(locale, "%d" + separator + "%s%n", timestamp, line), values);
+        out.flush();
     }
 
-    protected String sanitize(String fileName) {
-        //TODO: sanitize file name
-        return fileName;
+    private PrintWriter createWriter(Path path, String firstline) {
+        try {
+            boolean addHeader = !Files.exists(path);
+            if (!Files.exists(path)) {
+                addHeader = true;
+                Files.createFile(path, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwxr--")));
+                Files.writeString(path, firstline);
+            }
+            BufferedWriter buf = Files.newBufferedWriter(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            PrintWriter out = new PrintWriter(buf);
+            if (addHeader) {
+                out.println(firstline);
+            }
+            return out;
+        } catch (IOException e) {
+            logger.warn("Error writing to {}", path, e);
+            throw new RuntimeException(e);
+        }
     }
 
     public void teardown() {
         super.teardown();
     }
 
-    @Override
-    public void task() {
-        this.start();
-    }
 
 }
