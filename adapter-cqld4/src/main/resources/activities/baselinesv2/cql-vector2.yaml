@@ -20,10 +20,9 @@ scenarios:
     # nb5 cql-vector2 cassandra.rampup host=localhost localdc=datacenter1 dimensions=100 trainsize=1000000 dataset=glove-100-angular rate=10000
     rampup: run tags='block:rampup' threads=auto cycles=TEMPLATE(trainsize,set-the-trainsize) errors=counter,warn
     # nb5 cql-vector2 cassandra.search_and_index testsize=10000 host=localhost localdc=datacenter1 dimensions=100 dataset=glove-100-angular --report-csv-to rmetrics:.*:5s
-    search_and_index: >-
+    read_recall: >-
       run alias=search_and_index tags='block:search_and_index,optype=select' labels='target:cassandra'
-      cycles=TEMPLATE(testsize) stride=100 striderate=7.50
-      errors=counter,warn threads=1
+      cycles=TEMPLATE(testsize) errors=counter,warn threads=1
   astra_vectors:
     drop: run tags='block:drop' labels='target:astra' threads===1 cycles===2 driverconfig=app.conf
     schema: run tags='block:schema' labels='target:astra' threads===1 cycles===2
