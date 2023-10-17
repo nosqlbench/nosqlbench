@@ -192,14 +192,6 @@ public class NBCLIScenarioParser {
 
                 // TODO: simplify this
                 String alias = buildingCmd.get("alias");
-                for (String token : new String[]{"STEP"}) {
-                    if (!alias.contains(token)) {
-                        logger.warn("Your alias template '" + alias + "' does not contain " + token + ", which will " +
-                            "cause your metrics to be combined under the same name. It is strongly advised that you " +
-                            "include them in a template like " + WORKLOAD_SCENARIO_STEP + ".");
-                    }
-                }
-
                 String workloadToken = workloadContent.asPath().getFileName().toString();
 
                 alias = alias.replaceAll("WORKLOAD", sanitize(workloadToken));

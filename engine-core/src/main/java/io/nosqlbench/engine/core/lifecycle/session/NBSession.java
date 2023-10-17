@@ -71,9 +71,9 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         this.clientMetricChecker = new ClientSystemMetricChecker(this, NBLabels.forKV(),10);
         registerLoadAvgMetrics();
         registerMemInfoMetrics();
-        registerDiskStatsMetrics();
+//        registerDiskStatsMetrics();
         registerNetworkInterfaceMetrics();
-        registerStatMetrics();
+        registerCpuStatMetrics();
         clientMetricChecker.start();
 
     }
@@ -239,7 +239,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         }
     }
 
-    private void registerStatMetrics() {
+    private void registerCpuStatMetrics() {
         StatReader reader = new StatReader();
         if (!reader.fileExists())
             return;
