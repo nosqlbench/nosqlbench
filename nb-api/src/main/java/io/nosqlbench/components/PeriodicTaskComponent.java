@@ -28,7 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class PeriodicTaskComponent extends NBBaseComponent implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(PeriodicTaskComponent.class);
-    private final int intervalSeconds;
+    private final long intervalmillis;
     private final Lock lock = new ReentrantLock();
     private final Condition shutdownSignal = lock.newCondition();
     private final boolean oneLastTime;
@@ -39,23 +39,24 @@ public abstract class PeriodicTaskComponent extends NBBaseComponent implements R
     public PeriodicTaskComponent(
         NBComponent node,
         NBLabels extraLabels,
-        int seconds,
+        long millis,
         boolean oneLastTime
     ) {
         super(node, extraLabels);
-        this.intervalSeconds = seconds;
+        this.intervalmillis = millis;
         thread = Thread.ofVirtual().start(this);
-        this.oneLastTime=oneLastTime;
+        this.oneLastTime = oneLastTime;
     }
 
     protected abstract void task();
+
     @Override
     public void run() {
         long now = System.currentTimeMillis();
-        long reportAt = now + intervalSeconds * 1000L;
+        long reportAt = now + intervalmillis;
         long waitfor = reportAt - now;
 
-        while (true) {
+        while (running) {
             while (running && waitfor > 0) {
                 boolean signalReceived = false;
                 try {
@@ -77,12 +78,14 @@ public abstract class PeriodicTaskComponent extends NBBaseComponent implements R
                 task();
             } catch (Exception e) {
                 logger.error(e);
+                throw new RuntimeException(e);
             } finally {
-                reportAt = reportAt + (intervalSeconds * 1000L);
+                reportAt = reportAt + (intervalmillis);
                 now = System.currentTimeMillis();
                 waitfor = reportAt - now;
             }
         }
+        logger.info("shutting down periodic runnable component: " + description());
     }
 
     public void teardown() {

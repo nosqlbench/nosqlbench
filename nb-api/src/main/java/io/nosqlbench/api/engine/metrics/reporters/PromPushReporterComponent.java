@@ -49,11 +49,11 @@ public class PromPushReporterComponent extends PeriodicTaskComponent implements 
     public PromPushReporterComponent(
         final String targetUriSpec,
         final String config,
-        int seconds,
+        long millis,
         NBComponent component,
         NBLabels labels
     ) {
-        super(component, labels, seconds, true);
+        super(component, labels, millis, true);
 
         uri = URI.create(targetUriSpec);
         needsAuth = false;

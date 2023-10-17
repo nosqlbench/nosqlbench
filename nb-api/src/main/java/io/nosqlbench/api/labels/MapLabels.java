@@ -16,8 +16,6 @@
 
 package io.nosqlbench.api.labels;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -93,6 +91,31 @@ public class MapLabels implements NBLabels {
     }
 
     @Override
+    public String linearize_bare(String... barewords) {
+        StringBuilder sb = new StringBuilder();
+        Set<String> keyset = new HashSet<>(labels.keySet());
+        for (String bareword : barewords) {
+            if (keyset.contains(bareword)) {
+                keyset.remove(bareword);
+                sb.append(labels.get(bareword)).append("__");
+            }
+        }
+        if (!sb.isEmpty()) {
+            sb.setLength(sb.length()-"__".length());
+        }
+
+        List<String> keys = new ArrayList<>(keyset);
+        if (!keys.isEmpty()) {
+            Collections.sort(keys);
+            for (String key : keys) {
+                sb.append("_").append(key).append("_").append(labels.get(key)).append("__");
+            }
+            sb.setLength(sb.length()-"__".length());
+        }
+        return sb.toString();
+    }
+
+    @Override
     public String linearize(String bareName, String... included) {
         final StringBuilder sb = new StringBuilder();
 
@@ -105,7 +128,7 @@ public class MapLabels implements NBLabels {
             if (null == rawName) throw new RuntimeException("Unable to get value for key '" + bareName + '\'');
             sb.append(rawName);
         }
-        if (0 < includedNames.size()) {
+        if (1 < includedNames.size()) {
             sb.append('{');
             for (final String includedName : includedNames) {
                 if (includedName.equals(bareName)) continue;
@@ -116,9 +139,9 @@ public class MapLabels implements NBLabels {
                     .append(includedValue)
                     .append('"')
                     .append(',');
+                sb.setLength(sb.length()-",".length());
+                sb.append('}');
             }
-            sb.setLength(sb.length()-",".length());
-            sb.append('}');
         }
 
         return sb.toString();
@@ -137,6 +160,23 @@ public class MapLabels implements NBLabels {
         }
         sb.setLength(sb.length()-",".length());
         sb.append("}");
+        return sb.toString();
+
+    }
+
+
+    @Override
+    public String linearizeAsKvString() {
+        if (labels.isEmpty()) {
+            return "EMPTY";
+        }
+        StringBuilder sb = new StringBuilder("");
+        ArrayList<String> keys = new ArrayList<>(this.labels.keySet());
+        Collections.sort(keys);
+        for (String key : keys) {
+            sb.append(key).append("=").append(labels.get(key)).append(",");
+        }
+        sb.setLength(sb.length()-",".length());
         return sb.toString();
 
     }
@@ -256,4 +296,45 @@ public class MapLabels implements NBLabels {
     public int hashCode() {
         return labels != null ? labels.hashCode() : 0;
     }
+
+
+    /**
+     * Take the intersection of the two label sets, considering both key
+     * and value for each label entry. If both have the same label name
+     * but different values for it, then that label is not considered
+     * common and it is not retained in the intersection.
+     * @param otherLabels The label set to intersect
+     */
+    @Override
+    public NBLabels intersection(NBLabels otherLabels) {
+        Map<String, String> other = otherLabels.asMap();
+        Map<String,String> common = new LinkedHashMap<>();
+        asMap().forEach((k,v) -> {
+            if (other.containsKey(k) && other.get(k).equals(v)) {
+                common.put(k,v);
+            }
+        });
+        return NBLabels.forMap(common);
+    }
+
+    /**
+     * Subtract all matching labels from the other label set from this one,
+     * considering label names and values. If the other label set contains
+     * the same name but a different value, then it is not considered a
+     * match and thus not removed from the labels of this element.
+     * @param otherLabels Labels to remove, where key and value matches
+     * @return The same, or a smaller set of labels for this element
+     */
+    @Override
+    public NBLabels difference(NBLabels otherLabels) {
+        Map<String, String> other = otherLabels.asMap();
+        NBLabels difference = NBLabels.forKV();
+        for (String key : labels.keySet()) {
+            if (!other.containsKey(key) || !other.get(key).equals(labels.get(key))) {
+                difference = difference.and(key,labels.get(key));
+            }
+        }
+        return difference;
+    }
+
 }

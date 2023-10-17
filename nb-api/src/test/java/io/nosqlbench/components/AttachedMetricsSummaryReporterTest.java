@@ -52,7 +52,7 @@ class AttachedMetricsSummaryReporterTest {
             scope.add(root);
             TestComponent l1 = new TestComponent(root, "l1", "l1");
             NBMetricCounter counter = l1.create().counter("mycounter");
-            AttachedMetricsSummaryReporter reporter = l1.create().summaryReporter(1);
+            AttachedMetricsSummaryReporter reporter = l1.create().summaryReporter(1000);
             NBFunctionGauge g1 = root.create().gauge("rootgauge", () -> 42d);
             NBFunctionGauge g2 = l1.create().gauge("leafgauge", () -> 48d);
 
@@ -79,7 +79,7 @@ class AttachedMetricsSummaryReporterTest {
         TestComponent root = new TestComponent("root", "root");
         TestComponent l1 = new TestComponent(root, "l1", "l1");
         NBMetricCounter counter = l1.create().counter("mycounter");
-        AttachedMetricsSummaryReporter reporter = l1.create().summaryReporter(5);
+        AttachedMetricsSummaryReporter reporter = l1.create().summaryReporter(5000);
         NBFunctionGauge g1 = root.create().gauge("rootgauge", () -> 42d);
         NBFunctionGauge g2 = l1.create().gauge("leafgauge", () -> 48d);
 

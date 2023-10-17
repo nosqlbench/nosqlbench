@@ -24,7 +24,6 @@ import org.apache.logging.log4j.LogManager;
  */
 public class PeriodicRunnable<T extends Runnable> implements Runnable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(PeriodicRunnable.class);
-
     private final long intervalMillis;
     private final T action;
     private Thread thread;

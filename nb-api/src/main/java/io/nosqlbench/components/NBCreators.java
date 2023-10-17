@@ -119,10 +119,10 @@ public class NBCreators {
         return histogram;
     }
 
-    public AttachedMetricsSummaryReporter summaryReporter(int seconds, String... labelspecs) {
+    public AttachedMetricsSummaryReporter summaryReporter(long millis, String... labelspecs) {
         logger.debug("attaching summary reporter to " + base.description());
         NBLabels extraLabels = NBLabels.forKV((Object[]) labelspecs);
-        AttachedMetricsSummaryReporter reporter = new AttachedMetricsSummaryReporter(base, extraLabels, seconds);
+        AttachedMetricsSummaryReporter reporter = new AttachedMetricsSummaryReporter(base, extraLabels, millis);
         return reporter;
     }
 //    public AttachedMetricCsvReporter csvReporter(int seconds, String dirpath, String... labelspecs) {
@@ -131,9 +131,9 @@ public class NBCreators {
 //        AttachedMetricCsvReporter reporter = new AttachedMetricCsvReporter(base, extraLabels, Path.of(dirpath), seconds);
 //        return reporter;
 //    }
-    public PromPushReporterComponent pushReporter(String targetUri, int seconds, String config, String... labelspecs) {
+    public PromPushReporterComponent pushReporter(String targetUri, long millis, String config, String... labelspecs) {
         NBLabels extraLabels = NBLabels.forKV((Object[]) labelspecs);
-        PromPushReporterComponent reporter = new PromPushReporterComponent(targetUri, config, seconds, base,extraLabels);
+        PromPushReporterComponent reporter = new PromPushReporterComponent(targetUri, config, millis, base,extraLabels);
         return reporter;
     }
 
@@ -169,7 +169,7 @@ public class NBCreators {
         private MetricFilter filter= new MetricInstanceFilter();
         private boolean oneLastTime = false;
         private NBLabels labels;
-        private int interval = 1;
+        private long millis = 1000;
 
         public Log4jReporterBuilder(NBComponent component) {
             this.component = component;
@@ -179,7 +179,7 @@ public class NBCreators {
             return this;
         }
         public Log4jReporterBuilder interval(final int interval) {
-            this.interval = interval;
+            this.millis = interval;
             return this;
         }
         public Log4jReporterBuilder outputTo(final Logger logger) {
@@ -210,7 +210,7 @@ public class NBCreators {
                 case ERROR -> new ErrorLoggerProxy(this.logger);
                 default -> new DebugLoggerProxy(this.logger);
             };
-            return new Log4JMetricsReporter(this.component, loggerProxy, this.marker, this.filter, this.labels, this.interval, this.oneLastTime);
+            return new Log4JMetricsReporter(this.component, loggerProxy, this.marker, this.filter, this.labels, this.millis, this.oneLastTime);
         }
     }
     /* private class to allow logger configuration */
@@ -316,7 +316,7 @@ public class NBCreators {
         private final NBComponent component;
         private final PrintStream output;
         private NBLabels labels = null;
-        private int interval = 1;
+        private long interval = 1000;
         private boolean oneLastTime = false;
         private Set<MetricAttribute> disabledMetricAttributes = Set.of();
 

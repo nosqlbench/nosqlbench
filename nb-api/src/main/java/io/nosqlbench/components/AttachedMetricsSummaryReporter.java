@@ -32,8 +32,8 @@ import java.util.List;
 public class AttachedMetricsSummaryReporter extends PeriodicTaskComponent {
     private final static Logger logger = LogManager.getLogger(AttachedMetricsPushReporter.class);
 
-    public AttachedMetricsSummaryReporter(NBComponent node, NBLabels extraLabels, int seconds) {
-        super(node, extraLabels, seconds, true);
+    public AttachedMetricsSummaryReporter(NBComponent node, NBLabels extraLabels, long millis) {
+        super(node, extraLabels, millis, true);
     }
 
     public void task() {
