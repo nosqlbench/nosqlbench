@@ -15,11 +15,11 @@ description: |
 
 scenarios:
   cassandra:
-    # nb5 cql-vector cassandra.schema host=localhost localdc=datacenter1 dimensions=100
+    # nb5 cql-vector2 cassandra.schema host=localhost localdc=datacenter1 dimensions=100
     schema: run tags='block:schema' threads==undef cycles==undef
-    # nb5 cql-vector cassandra.rampup host=localhost localdc=datacenter1 dimensions=100 trainsize=1000000 dataset=glove-100-angular rate=10000
+    # nb5 cql-vector2 cassandra.rampup host=localhost localdc=datacenter1 dimensions=100 trainsize=1000000 dataset=glove-100-angular rate=10000
     rampup: run tags='block:rampup' threads=auto cycles=TEMPLATE(trainsize,set-the-trainsize) errors=counter,warn
-    # nb5 cql-vector cassandra.search_and_index testsize=10000 host=localhost localdc=datacenter1 dimensions=100 dataset=glove-100-angular --report-csv-to rmetrics:.*:5s
+    # nb5 cql-vector2 cassandra.search_and_index testsize=10000 host=localhost localdc=datacenter1 dimensions=100 dataset=glove-100-angular --report-csv-to rmetrics:.*:5s
     search_and_index: >-
       run alias=search_and_index tags='block:search_and_index,optype=select' labels='target:cassandra'
       cycles=TEMPLATE(testsize) stride=100 striderate=7.50
