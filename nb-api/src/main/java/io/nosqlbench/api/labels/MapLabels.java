@@ -125,13 +125,13 @@ public class MapLabels implements NBLabels {
         String rawName = null;
         if (null != bareName) {
             rawName = this.labels.get(bareName);
+            includedNames.remove(bareName);
             if (null == rawName) throw new RuntimeException("Unable to get value for key '" + bareName + '\'');
             sb.append(rawName);
         }
-        if (1 < includedNames.size()) {
+        if (!includedNames.isEmpty()) {
             sb.append('{');
             for (final String includedName : includedNames) {
-                if (includedName.equals(bareName)) continue;
                 final String includedValue = this.labels.get(includedName);
                 Objects.requireNonNull(includedValue);
                 sb.append(includedName)
@@ -139,9 +139,9 @@ public class MapLabels implements NBLabels {
                     .append(includedValue)
                     .append('"')
                     .append(',');
-                sb.setLength(sb.length()-",".length());
-                sb.append('}');
             }
+            sb.setLength(sb.length()-",".length());
+            sb.append('}');
         }
 
         return sb.toString();
