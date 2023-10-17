@@ -102,7 +102,7 @@ public class HttpOp implements CycleOp {
             }
             // propogate exception so main error handling logic can take over
             if (error != null) {
-                throw new RuntimeException(error);
+                throw new RuntimeException(error).getClass().getna;
             }
         }
         return switch (resultType) {
