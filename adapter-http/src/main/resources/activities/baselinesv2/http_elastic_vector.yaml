@@ -201,6 +201,7 @@ blocks:
                 "num_candidates": TEMPLATE(k,100)
               }
             }
+          result-type: json_element
           verifier-imports:
             - io.nosqlbench.adapter.http.JsonElementUtils
           verifier-init: |
