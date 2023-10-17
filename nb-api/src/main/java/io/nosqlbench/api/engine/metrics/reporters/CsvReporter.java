@@ -214,7 +214,6 @@ public class CsvReporter extends PeriodicTaskComponent {
             if (!Files.exists(path)) {
                 addHeader = true;
                 Files.createFile(path, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwxr--")));
-                Files.writeString(path, firstline);
             }
             BufferedWriter buf = Files.newBufferedWriter(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             PrintWriter out = new PrintWriter(buf);
