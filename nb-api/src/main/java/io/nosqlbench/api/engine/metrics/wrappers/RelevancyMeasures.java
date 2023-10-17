@@ -19,6 +19,7 @@ package io.nosqlbench.api.engine.metrics.wrappers;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.api.engine.metrics.DoubleSummaryGauge;
+import io.nosqlbench.components.NBComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,25 +27,25 @@ import java.util.Map;
 
 public class RelevancyMeasures implements NBLabeledElement {
 
-    private final NBLabeledElement parent;
+    private final NBComponent parent;
     private final NBLabels labels;
     private final List<RelevancyFunction> functions = new ArrayList<>();
     private final List<DoubleSummaryGauge> gauges = new ArrayList<>();
 
-    public RelevancyMeasures(NBLabeledElement parent) {
+    public RelevancyMeasures(NBComponent parent) {
         this(parent,NBLabels.forKV());
     }
 
-    public RelevancyMeasures(NBLabeledElement parent, NBLabels labels) {
+    public RelevancyMeasures(NBComponent parent, NBLabels labels) {
         this.parent = parent;
         this.labels = labels;
     }
 
-    public RelevancyMeasures(NBLabeledElement parent, Object... labels) {
+    public RelevancyMeasures(NBComponent parent, Object... labels) {
         this.parent = parent;
         this.labels = NBLabels.forKV(labels);
     }
-    public RelevancyMeasures(NBLabeledElement parent, Map<String,String> labels) {
+    public RelevancyMeasures(NBComponent parent, Map<String,String> labels) {
         this(parent,NBLabels.forMap(labels));
     }
 
@@ -57,8 +58,8 @@ public class RelevancyMeasures implements NBLabeledElement {
         for (RelevancyFunction function : f) {
             this.functions.add(function);
             function.prependLabels(this);
-            // DoubleSummaryGauge gauge = ActivityMetrics.summaryGauge(function, function.getUniqueName());
-            // this.gauges.add(gauge);
+            DoubleSummaryGauge gauge = parent.create().summaryGauge(function.getUniqueName(),DoubleSummaryGauge.Stat.Average.toString());
+            this.gauges.add(gauge);
         }
         return this;
     }
