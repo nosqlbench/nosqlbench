@@ -15,6 +15,7 @@ description: |
 
 scenarios:
   cassandra:
+    drop: run tags='block:drop' labels='target:astra' threads===1 cycles===2
     # nb5 cql-vector2 cassandra.schema host=localhost localdc=datacenter1 dimensions=100
     schema: run tags='block:schema' threads==undef cycles==undef
     # nb5 cql-vector2 cassandra.rampup host=localhost localdc=datacenter1 dimensions=100 trainsize=1000000 dataset=glove-100-angular rate=10000
