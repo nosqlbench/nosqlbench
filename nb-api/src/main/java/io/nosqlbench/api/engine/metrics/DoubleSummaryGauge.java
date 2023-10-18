@@ -70,4 +70,8 @@ public class DoubleSummaryGauge implements NBMetricGauge<Double>, DoubleConsumer
         return labels;
     }
 
+    @Override
+    public String toString() {
+        return this.labels.toString()+":"+this.stats.toString();
+    }
 }

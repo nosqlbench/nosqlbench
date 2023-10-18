@@ -71,4 +71,12 @@ public class RelevancyMeasures implements NBLabeledElement {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (DoubleSummaryGauge gauge : gauges) {
+            sb.append(gauge.toString()).append("\n");
+        }
+        return sb.toString();
+    }
 }

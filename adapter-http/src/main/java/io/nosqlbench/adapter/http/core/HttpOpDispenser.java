@@ -93,7 +93,7 @@ public class HttpOpDispenser extends BaseOpDispenser<HttpOp, HttpSpace> {
             .filter(n -> n.charAt(0) >= 'A')
             .filter(n -> n.charAt(0) <= 'Z')
             .toList();
-        if (headerNames.size() > 0) {
+        if (!headerNames.isEmpty()) {
             for (String headerName : headerNames) {
                 initBuilderF = op.enhanceFunc(initBuilderF, headerName, String.class, (b, h) -> b.header(headerName, h));
             }
@@ -113,12 +113,16 @@ public class HttpOpDispenser extends BaseOpDispenser<HttpOp, HttpSpace> {
             .map(Pattern::compile)
             .orElse(null);
 
+        HttpResultType resultType = op.getOptionalEnumFromField(HttpResultType.class,"result-type").orElse(HttpResultType.none);
+
         LongFunction<HttpOp> opFunc = cycle -> new HttpOp(
             ctxF.apply(cycle).getClient(),
             reqF.apply(cycle),
             ok_status,
             ok_body,
-            ctxF.apply(cycle), cycle
+            ctxF.apply(cycle),
+            cycle,
+            resultType
         );
         return opFunc;
     }
