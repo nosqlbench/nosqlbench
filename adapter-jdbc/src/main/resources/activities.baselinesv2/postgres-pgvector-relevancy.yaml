@@ -1,0 +1,152 @@
+# run driver=jdbc workload="/path/to/postgresql-keyvalue.yaml" tags="block:schema" threads=AUTO cycles=4 url="jdbc:postgresql://host:port/database" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName=insectdb sslrootcert="/path/to/postgresql_certs/root.crt" -vv --show-stacktraces
+min_version: "5.17.2"
+
+description: |
+  A workload which reads ann-benchmarks vector data from HDF5 file format for PostgreSql with pgvector.
+
+scenarios:
+  default:
+    ####
+    # The following CLI parameters are required for all named scenarios:
+    # - schema: schema name
+    # - table: table name
+    ####
+
+    ###
+    ## For DDL workload, turn on 'AutoCommit'. Turning it off will cause errors.
+    ###
+    drop-tbl:       run driver=jdbc tags==block:drop-tbl        threads==1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
+    # The following CLI parameters is needed for 'create-tbl' named scenario:
+    # - dimensions: vector dimension size (MUST match the actual ANN benchmark data)
+    create-tbl:     run driver=jdbc tags==block:create-tbl      threads==1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
+    #
+    # Vectors with up to 2,000 dimensions can be indexed.
+    #
+    # The following extra CLI parameter is needed for both 'create-vec-idx' and 'drop-vec-idx' named scenarios:
+    # - indexName: index name
+    drop-vec-idx: run driver=jdbc tags==block:drop-vec-idx      threads==1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
+    # The following extra CLI parameters are needed for 'create-vec-idx' named scenario:
+    # - indexType: index type; valid values: 'ivfflat' or 'hnsw' (see: https://github.com/pgvector/pgvector#indexing)
+    # - indexOpt: index options
+    #     * for 'ivfflat' index type, the option is like: "lists=<number>"
+    #     * for 'hnsw' index type, the option is like: "m=<number>,ef_construction =<number>"
+    # - relFunc: relevancy function; valid values: 'l2' (L2 distance), 'ip' (Inner product), or 'cosine' (Cosine distance)
+    create-vec-idx: run driver=jdbc tags==block:create-vec-idx  threads==1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
+
+    ###
+    ## For DML workload, 'AutoCommit' can be off or on
+    ## - MUST be off when batching is used !!
+    ###
+    # The following extra CLI parameters is needed for both 'vec-read' and 'vec-write' named scenarios:
+    # - dataset: ANN benchmark testing dataset name
+    #
+    # The following extra CLI parameters is needed for 'vec-read' named scenario:
+    # - queryLimit: the number of the records to be returned as in 'LIMIT <number>' clause
+    vec-read: run driver=jdbc tags==block:vec-read     cycles===TEMPLATE(main-cycles,100)  threads=AUTO  url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt" autoCommit="true"
+    # The following extra CLI parameters is needed for 'vec-write' named scenario:
+    # - trainsize: the number of records to load from the dataset and insert into the table
+    vec-write:  run driver=jdbc tags==block:vec-write  cycles===TEMPLATE(trainsize)        threads=AUTO  url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+
+bindings:
+  rw_key: ToString()
+  train_vector: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train");
+  test_vector: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/test");
+  validation_set: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors");
+
+blocks:
+  drop-tbl:
+    params:
+      # DDL statement must NOT be prepared
+      prepared: false
+    ops:
+      drop-table:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schema,public).TEMPLATE(table,pgvec);
+      drop-schema:
+        ddl: |
+          DROP SCHEMA IF EXISTS TEMPLATE(schema,public);
+
+  create-tbl:
+    params:
+      # DDL statement must NOT be prepared
+      prepared: false
+    ops:
+      create-schema:
+        ddl: |
+          CREATE SCHEMA IF NOT EXISTS TEMPLATE(schema,public);
+      create-table:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schema,public).TEMPLATE(table,pgvec)
+          (key TEXT PRIMARY KEY, value vector(<<dimensions:5>>));
+
+  drop-vec-idx:
+    params:
+      # DDL statement must NOT be prepared
+      prepared: false
+    ops:
+      drop-vector-index:
+        ddl: |
+          DROP INDEX IF EXISTS TEMPLATE(schema,public).TEMPLATE(indexName,TEMPLATE(dataset)-idx);
+
+  create-vec-idx:
+    params:
+      # DDL statement must NOT be prepared
+      prepared: false
+    ops:
+      create-vector-index:
+        ddl: |
+          CREATE INDEX IF NOT EXISTS TEMPLATE(indexName,TEMPLATE(dataset)-idx-TEMPLATE(indexType))
+          ON TEMPLATE(schema,public).TEMPLATE(table,pgvec)
+          USING TEMPLATE(indexType) (value vector_TEMPLATE(relFunc)_ops)
+          WITH (TEMPLATE(indexOpt));
+
+  # Using PostgreSQl upsert (INSERT ON CONFLICT statement)
+  vec-write:
+    params:
+      # DML write statement MUST be prepared
+      prepared: true
+    ops:
+      main-insert:
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schema,public).TEMPLATE(table,pgvec) VALUES (?,?)
+          ON CONFLICT DO NOTHING;
+        prep_stmt_val_arr: |
+          {rw_key},{test_vector}
+
+  vec-read:
+    ops:
+      params:
+        # DML READ statement can be prepared or not
+        prepared: true
+      main-select:
+        dmlread: |
+          SELECT key, (value <-> ?) as relevancy, value
+          FROM TEMPLATE(schema,public).TEMPLATE(table,pgvec)
+          ORDER BY value <-> ?
+          LIMIT TEMPLATE(queryLimit,100);
+        prep_stmt_val_arr: |
+          {test_vector},{test_vector}
+        #################################
+        ## NOTE:
+        #  1). The script blocks below are ONLY relevant with Vector relevancy score verification
+        #  2). The "verifier-key" must match the Vector data identifier column name (e.g. primary key name)
+        #      right now the identifier must be a type that can be converted to int.
+        verifier-key: "key"
+        verifier-imports:
+          - io.nosqlbench.adapter.mongodb.MongoDbUtils
+        verifier-init: |
+          relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op);
+          for (int k in List.of(100)) {
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+          }
+        verifier: |
+          // driver-specific function
+          actual_indices=pgvec_utils.getValueListForVerifierKey(result);
+          // driver-agnostic function
+          relevancy.accept({validation_set},actual_indices);
+          // because we are "verifying" although this needs to be reorganized
+          return true;

@@ -110,7 +110,6 @@
         <module>adapter-kafka</module>
         <module>adapter-amqp</module>
         <module>adapter-jdbc</module>
-        <module>adapter-pgvector</module>
         <module>adapter-pinecone</module>
 
         <!-- VIRTDATA MODULES -->
