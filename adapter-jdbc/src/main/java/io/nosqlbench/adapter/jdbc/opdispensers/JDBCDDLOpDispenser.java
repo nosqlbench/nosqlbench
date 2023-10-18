@@ -17,25 +17,38 @@
 package io.nosqlbench.adapter.jdbc.opdispensers;
 
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
-import io.nosqlbench.adapter.jdbc.optypes.JDBCExecuteQueryOp;
+import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterInvalidParamException;
+import io.nosqlbench.adapter.jdbc.optypes.JDBCDDLOp;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
 import java.util.function.LongFunction;
 
-public class JDBCExecuteQueryOpDispenser extends JDBCBaseOpDispenser {
-    private static final Logger logger = LogManager.getLogger(JDBCExecuteQueryOpDispenser.class);
+public class JDBCDDLOpDispenser extends JDBCBaseOpDispenser {
 
-    public JDBCExecuteQueryOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter, LongFunction<Connection> connectionLongFunc, ParsedOp op, LongFunction<String> targetFunction) {
-        super(adapter, connectionLongFunc, op, targetFunction);
+    private static final Logger logger = LogManager.getLogger(JDBCDDLOpDispenser.class);
+
+    private final LongFunction<String> ddlSqlStrFunc;
+
+    public JDBCDDLOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter,
+                              JDBCSpace jdbcSpace,
+                              ParsedOp op,
+                              LongFunction<String> sqlStrFunc) {
+        super(adapter, jdbcSpace, op);
+        this.isDdlStatement = true;
+        this.ddlSqlStrFunc = sqlStrFunc;
+
+        if (isPreparedStatement) {
+            throw new JDBCAdapterInvalidParamException("DDL statements can NOT be prepared!");
+        }
     }
-
     @Override
-    public JDBCExecuteQueryOp apply(long cycle) {
-        return new JDBCExecuteQueryOp(this.connectionLongFunction.apply(cycle), this.statementLongFunction.apply(cycle), targetFunction.apply(cycle));
+    public JDBCDDLOp apply(long cycle) {
+        checkShutdownEntry(cycle);
+        String ddlSqlStr = ddlSqlStrFunc.apply(cycle);
+        return new JDBCDDLOp(jdbcSpace, ddlSqlStr);
     }
 }

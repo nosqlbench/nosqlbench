@@ -60,6 +60,14 @@
             <artifactId>HikariCP</artifactId>
             <version>5.0.1</version>
         </dependency>
+
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.commons</groupId>-->
+<!--            <artifactId>commons-collections4</artifactId>-->
+<!--            <version>4.4</version>-->
+<!--        </dependency>-->
+
     </dependencies>
 
     <build>

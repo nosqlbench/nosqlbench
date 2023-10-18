@@ -24,8 +24,7 @@ package io.nosqlbench.adapter.jdbc;
  * @see <a href="https://www.cockroachlabs.com/docs/v22.2/sql-statements.html#data-definition-statements">CockroachDB API Reference</a>
  */
 public enum JDBCOpType {
-    //See https://jdbc.postgresql.org/documentation/query/
-    execute, // Used for CREATE|DROP DATABASE|TABLE operation. Returns nothing.
-    query, // Used for SELECT operation. Returns a ResultSet object.
-    update // Used for updating records such as INSERT|UPDATE|DELETE. Returns the number of rows affected.
+    ddl,        // Used for DDL statements (Statement). Returns boolean (success or not).
+    dmlwrite,   // Used for DML write statements (INSERT|UPDATE|DELETE) (PreparedStatement). Returns the number of rows affected.
+    dmlread     // Used for DML read statements (SELECT) (PreparedStatement). Returns a list of the ResultSet objects.
 }

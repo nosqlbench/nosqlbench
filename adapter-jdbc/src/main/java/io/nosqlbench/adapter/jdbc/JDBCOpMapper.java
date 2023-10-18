@@ -16,8 +16,9 @@
 
 package io.nosqlbench.adapter.jdbc;
 
-import io.nosqlbench.adapter.jdbc.opdispensers.JDBCExecuteOpDispenser;
-import io.nosqlbench.adapter.jdbc.opdispensers.JDBCExecuteQueryOpDispenser;
+import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterInvalidParamException;
+import io.nosqlbench.adapter.jdbc.opdispensers.JDBCDMLOpDispenser;
+import io.nosqlbench.adapter.jdbc.opdispensers.JDBCDDLOpDispenser;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
 import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
@@ -26,6 +27,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,12 +49,17 @@ public class JDBCOpMapper implements OpMapper<JDBCOp> {
 
     @Override
     public OpDispenser<? extends JDBCOp> apply(ParsedOp op) {
-        LongFunction<String> spaceNameF = op.getAsFunctionOr("space", "default");
-        LongFunction<JDBCSpace> spaceFunc = l -> spaceCache.get(spaceNameF.apply(l));
+        String spaceName = op.getStaticConfigOr("space", "default");
+        JDBCSpace jdbcSpace = spaceCache.get(spaceName);
 
-        // Since the only needed thing in the JDBCSpace is the Connection, we can short-circuit
-        // to it here instead of stepping down from the cycle to the space to the connection.
-        LongFunction<Connection> connectionLongFunc = l -> spaceCache.get(spaceNameF.apply(l)).getConnection();
+        int nbThreadNum = NumberUtils.toInt(op.getStaticConfig("threads", String.class));
+        int maxConnNum =  jdbcSpace.getMaxNumConn();
+        if (nbThreadNum > maxConnNum) {
+            throw new JDBCAdapterInvalidParamException(
+                "JDBC connection is NOT thread safe. The total NB thread number (" + nbThreadNum +
+                    ") can NOT be greater than the maximum connection number 'num_conn' (" + maxConnNum + ")"
+            );
+        }
 
         /*
          * If the user provides a body element, then they want to provide the JSON or
@@ -62,24 +69,22 @@ public class JDBCOpMapper implements OpMapper<JDBCOp> {
         if (op.isDefined("body")) {
             throw new RuntimeException("This mode is reserved for later. Do not use the 'body' op field.");
         } else {
-            TypeAndTarget<JDBCOpType, String> opType = op.getTypeAndTarget(JDBCOpType.class, String.class, "type", "stmt");
+            TypeAndTarget<JDBCOpType, String> opType = op.getTypeAndTarget(JDBCOpType.class, String.class);
 
             logger.info(() -> "Using " + opType.enumId + " statement form for '" + op.getName());
 
             return switch (opType.enumId) {
-
-                // SELECT uses 'executeQuery' and returns a 'ResultSet'
-                // https://jdbc.postgresql.org/documentation/query/#example51processing-a-simple-query-in-jdbc
-                case query ->
-                    new JDBCExecuteQueryOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
-
-                // INSERT|UPDATE|DELETE uses 'executeUpdate' and returns an 'int'
-                // https://jdbc.postgresql.org/documentation/query/#performing-updates
-
-                // CREATE|DROP TABLE|VIEW uses 'execute' (as opposed to 'executeQuery' which returns a 'ResultSet')
                 // https://jdbc.postgresql.org/documentation/query/#example54dropping-a-table-in-jdbc
-                case execute, update ->
-                    new JDBCExecuteOpDispenser(adapter, connectionLongFunc, op, opType.targetFunction);
+                case ddl->
+                    new JDBCDDLOpDispenser(adapter, jdbcSpace, op, opType.targetFunction);
+
+                // https://jdbc.postgresql.org/documentation/query/#performing-updates
+                case dmlwrite ->
+                    new JDBCDMLOpDispenser(adapter, jdbcSpace, op, false, opType.targetFunction);
+
+                // https://jdbc.postgresql.org/documentation/query/#example51processing-a-simple-query-in-jdbc
+                case dmlread ->
+                    new JDBCDMLOpDispenser(adapter, jdbcSpace, op, true, opType.targetFunction);
             };
         }
     }

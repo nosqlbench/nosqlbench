@@ -21,44 +21,27 @@ import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.function.LongFunction;
 
 public abstract class JDBCBaseOpDispenser extends BaseOpDispenser<JDBCOp, JDBCSpace> {
-    private static final Logger logger = LogManager.getLogger(JDBCBaseOpDispenser.class);
+    protected static final String ERROR_STATEMENT_CREATION =
+        "Error while attempting to create the jdbc statement from the connection";
 
-    protected static final String ERROR_STATEMENT_CREATION = "Error while attempting to create the jdbc statement from the connection";
+    protected final JDBCSpace jdbcSpace;
+    protected  boolean isDdlStatement;
+    protected final boolean isPreparedStatement;
+    protected final String verifierKeyName;
 
-    protected final LongFunction<String> targetFunction;
-    protected final LongFunction<Connection> connectionLongFunction;
-    protected final LongFunction<Statement> statementLongFunction;
-
-    public JDBCBaseOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter, LongFunction<Connection> connectionLongFunc, ParsedOp op, LongFunction<String> targetFunction) {
+    public JDBCBaseOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter,
+                               JDBCSpace jdbcSpace,
+                               ParsedOp op) {
         super(adapter, op);
-
-        this.connectionLongFunction = connectionLongFunc;
-        this.targetFunction = targetFunction;
-        this.statementLongFunction = createStmtFunc(op);
+        this.jdbcSpace = jdbcSpace;
+        this.isPreparedStatement = op.getStaticConfigOr("prepared", false);
+        this.verifierKeyName = op.getStaticConfigOr("verifier-key", "");
     }
-
-    protected LongFunction<Statement> createStmtFunc(ParsedOp cmd) {
-        try {
-            LongFunction<Statement> basefunc = l -> {
-                try {
-                    return this.connectionLongFunction.apply(l).createStatement();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            };
-            return basefunc;
-        } catch (Exception ex) {
-            logger.error(ERROR_STATEMENT_CREATION, ex);
-            throw new RuntimeException(ERROR_STATEMENT_CREATION, ex);
+    public void checkShutdownEntry(long cycle) {
+        if (cycle == (jdbcSpace.getTotalCycleNum()-1)) {
+            jdbcSpace.enterShutdownStage();
         }
     }
 }
