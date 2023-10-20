@@ -123,12 +123,12 @@
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-graphite</artifactId>
-                <version>4.2.19</version>
+                <version>4.2.20</version>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-core</artifactId>
-                <version>4.2.19</version>
+                <version>4.2.20</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -281,7 +281,7 @@
             <dependency>
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core-java11</artifactId>
-                <version>6.4.5</version>
+                <version>6.4.6</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -291,7 +291,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.555</version>
+                <version>1.12.558</version>
             </dependency>
             <dependency>
                 <groupId>com.elega9t</groupId>
