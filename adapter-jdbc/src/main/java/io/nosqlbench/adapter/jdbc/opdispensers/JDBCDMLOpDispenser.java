@@ -77,7 +77,7 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
         logger.info("Total {} JDBC connections will be created [isReadStmt:{}, threads/{}, num_conn/{}]; " +
                 "dml_batch: {}, autoCommit: {}",
             maxNumConnFinal, isReadStmt, threadNum, numConnInput,
-            jdbcSpace.getDmlBatchNum(), jdbcSpace.getHikariDataSource().isAutoCommit());
+            jdbcSpace.getDmlBatchNum(), jdbcSpace.isAutoCommit());
 
         // TODO: this is a current limitation applied by this adapter
         //       improve this behavior by allowing the user to choose

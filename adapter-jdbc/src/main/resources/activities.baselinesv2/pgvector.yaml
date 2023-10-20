@@ -1,0 +1,100 @@
+# run driver=jdbc workload="/path/to/postgresql-keyvalue.yaml" tags="block:schema" threads=AUTO cycles=4 url="jdbc:postgresql://host:port/database" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName=insectdb sslrootcert="/path/to/postgresql_certs/root.crt" -vv --show-stacktraces
+min_version: "5.17.2"
+
+description: |
+  A workload which reads ann-benchmarks vector data from HDF5 file format for PostgreSql with baselinetor.
+
+scenarios:
+  default:
+    # supabase environment
+    drop:    run driver=jdbc tags==block:drop     threads===1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    schema:  run driver=jdbc tags==block:schema   threads===1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    testann: run driver=jdbc tags==block:testann  threads=AUTO cycles===TEMPLATE(main-cycles,1000)  url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    train:   run driver=jdbc tags==block:train    threads=AUTO cycles===TEMPLATE(trainsize) dml_batch=120 autoCommit=false url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+
+bindings:
+  rw_key: ToString();
+  train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(datasetfile).hdf5", "/train"); ToCqlVector();
+  test_floatlist: HdfFileToFloatList("testdata/TEMPLATE(datasetfile).hdf5", "/test"); ToCqlVector();
+  relevant_indices: HdfFileToIntArray("testdata/TEMPLATE(datasetfile).hdf5", "/neighbors")
+
+blocks:
+  drop:
+    ops:
+      drop_vector_index:
+        ddl: |
+          DROP INDEX IF EXISTS idx_TEMPLATE(tablename,baseline)_TEMPLATE(indextype)_TEMPLATE(similarity_function);
+      drop_table:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname,public).TEMPLATE(tablename,baseline);
+      ##
+      # NOTE: Do NOT enable this block for 'runall.sh' script
+      # --------------------------------------------------
+      # drop_schema:
+      #   ddl: |
+      #     DROP SCHEMA IF EXISTS TEMPLATE(schemaname,public);
+
+  schema:
+    ops:
+      create_schema:
+        ddl: |
+          CREATE SCHEMA IF NOT EXISTS TEMPLATE(schemaname,public);
+      create_table:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname,public).TEMPLATE(tablename,baseline)
+          (key TEXT PRIMARY KEY, value vector(TEMPLATE(dimensions,5)));
+      create_vector_index:
+        ddl: |
+          CREATE INDEX IF NOT EXISTS idx_TEMPLATE(tablename,baseline)_TEMPLATE(indextype)_TEMPLATE(similarity_function)
+          ON TEMPLATE(schemaname,public).TEMPLATE(tablename,baseline)
+          USING TEMPLATE(indextype) (value vector_TEMPLATE(similarity_function)_ops)
+          WITH (TEMPLATE(indexopt));
+
+  train:
+    params:
+      prepared: true
+    ops:
+      main_insert:
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname,public).TEMPLATE(tablename,baseline) VALUES (?,?)
+          ON CONFLICT DO NOTHING;
+        prep_stmt_val_arr: |
+          {rw_key},{train_floatlist}
+
+  testann:
+    params:
+      prepared: true
+    ops:
+      # NOTE: right now this is only for cosine similarity.
+      #       in baselinetor, '<=>' is for cosine similarity
+      #                    '<->' is for euclidean distance
+      #                    '<#>' is for inner product
+      main_select:
+        dmlread: |
+          SELECT *
+          FROM TEMPLATE(schemaname,public).TEMPLATE(tablename,baseline)
+          ORDER BY value <=> ?
+          LIMIT TEMPLATE(top_k,100);
+        prep_stmt_val_arr: |
+          {test_floatlist}
+        #################################
+        ## NOTE:
+        #  1). The script blocks below are ONLY relevant with Vector relevancy score verification
+        #  2). The "verifier-key" must match the Vector data identifier column name (e.g. primary key name)
+        #      right now the identifier must be a type that can be converted to int.
+        verifier-key: "key"
+        verifier-init: |
+          relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op);
+          k=TEMPLATE(top_k,100)
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+        verifier: |
+          // driver-specific function
+          actual_indices=pgvec_utils.getValueListForVerifierKey(result);
+          // driver-agnostic function
+          relevancy.accept({relevant_indices},actual_indices);
+          // because we are "verifying" although this needs to be reorganized
+          return true;

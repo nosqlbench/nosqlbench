@@ -23,10 +23,8 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.Properties;
 import java.util.Random;
 
 public abstract class JDBCOp implements CycleOp {
@@ -50,13 +48,27 @@ public abstract class JDBCOp implements CycleOp {
         return jdbcSpace.getConnection(
             new JDBCSpace.ConnectionCacheKey(connectionName), () -> {
             try {
-                Connection connection = jdbcSpace.getHikariDataSource().getConnection();
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("JDBC connection ({}) is successfully created: {}",
-                        connectionName, connection);
+                Connection connection;
+
+                if (jdbcSpace.useHikariCP()) {
+                    connection = jdbcSpace.getHikariDataSource().getConnection();
                 }
+                // Use DriverManager directly
+                else {
+                    String url = jdbcSpace.getConnConfig().getJdbcUrl();
+                    Properties props = jdbcSpace.getConnConfig().getDataSourceProperties();
+                    props.put("user", jdbcSpace.getConnConfig().getUsername());
+                    props.put("password", jdbcSpace.getConnConfig().getPassword());
+                    connection = DriverManager.getConnection(url, props);
+                }
+
                 // Register 'vector' type
                 JDBCPgVector.addVectorType(connection);
+
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("A new JDBC connection ({}) is successfully created: {}",
+                        connectionName, connection);
+                }
 
                 return  connection;
             }
