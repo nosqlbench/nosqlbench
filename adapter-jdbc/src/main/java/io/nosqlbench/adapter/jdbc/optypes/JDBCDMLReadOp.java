@@ -42,8 +42,7 @@ public class JDBCDMLReadOp extends JDBCDMLOp {
     @Override
     public Object apply(long value) {
         try  {
-            Connection connection = super.jdbcSpace.getConnection();
-            Statement stmt = super.createDMLStatement(connection);
+            Statement stmt = super.createDMLStatement();
             if (isPreparedStmt) {
                 stmt = setPrepStmtValues((PreparedStatement) stmt);
             }
@@ -63,7 +62,7 @@ public class JDBCDMLReadOp extends JDBCDMLOp {
             }
             else {
                 boolean isResultSet = ((PreparedStatement)stmt).execute();
-                super.processCommit(connection);
+                super.processCommit();
 
                 while(true) {
                     if(isResultSet) {

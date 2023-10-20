@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.jdbc.optypes;
 
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
+import io.nosqlbench.adapter.jdbc.utils.JDBCPgVector;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +27,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Random;
 
 public abstract class JDBCOp implements CycleOp {
     private static final Logger LOGGER = LogManager.getLogger(JDBCOp.class);
@@ -33,8 +35,36 @@ public abstract class JDBCOp implements CycleOp {
         "Executed the JDBC statement & committed the connection successfully";
 
     protected final JDBCSpace jdbcSpace;
+    protected final Connection jdbcConnection;
+    private final Random random = new Random();
 
     public JDBCOp(JDBCSpace jdbcSpace) {
         this.jdbcSpace = jdbcSpace;
+        this.jdbcConnection = getConnection();
+    }
+
+    private Connection getConnection() {
+        int rnd = random.nextInt(0, jdbcSpace.getMaxNumConn());
+        final String connectionName = "jdbc-conn-" + rnd;
+
+        return jdbcSpace.getConnection(
+            new JDBCSpace.ConnectionCacheKey(connectionName), () -> {
+            try {
+                Connection connection = jdbcSpace.getHikariDataSource().getConnection();
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("JDBC connection ({}) is successfully created: {}",
+                        connectionName, connection);
+                }
+                // Register 'vector' type
+                JDBCPgVector.addVectorType(connection);
+
+                return  connection;
+            }
+            catch (Exception ex) {
+                String exp = "Exception occurred while attempting to create a connection using the HikariDataSource";
+                LOGGER.error(exp, ex);
+                throw new JDBCAdapterUnexpectedException(exp);
+            }
+        });
     }
 }

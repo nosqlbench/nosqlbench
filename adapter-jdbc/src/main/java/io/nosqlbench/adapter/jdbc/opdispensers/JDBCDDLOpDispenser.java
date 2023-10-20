@@ -41,6 +41,8 @@ public class JDBCDDLOpDispenser extends JDBCBaseOpDispenser {
         this.isDdlStatement = true;
         this.ddlSqlStrFunc = sqlStrFunc;
 
+        // For DDL statements, must use autoCommit
+        assert(jdbcSpace.getHikariDataSource().isAutoCommit());
         if (isPreparedStatement) {
             throw new JDBCAdapterInvalidParamException("DDL statements can NOT be prepared!");
         }

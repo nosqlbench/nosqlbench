@@ -18,13 +18,11 @@ package io.nosqlbench.adapter.jdbc.optypes;
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterInvalidParamException;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
-import io.nosqlbench.adapter.jdbc.exceptions.JDBCPgVectorException;
 import io.nosqlbench.adapter.jdbc.utils.JDBCPgVector;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -74,7 +72,7 @@ public abstract class JDBCDMLOp extends JDBCOp {
     }
 
     // Only applicable to a prepared statement
-    protected PreparedStatement setPrepStmtValues(PreparedStatement stmt) {
+    protected PreparedStatement setPrepStmtValues(PreparedStatement stmt) throws SQLException {
         assert (stmt != null);
 
         for (int i=0; i<pStmtValList.size(); i++) {
@@ -99,8 +97,8 @@ public abstract class JDBCDMLOp extends JDBCOp {
                 }
                 stmt.setObject(fieldIdx, fieldValObj);
             }
-            catch (JDBCPgVectorException | SQLException e) {
-                throw new RuntimeException(
+            catch ( SQLException e) {
+                throw new SQLException(
                     "Failed to parse the prepared statement value for field[" + fieldIdx + "] " + fieldValObj);
             }
         }
@@ -108,36 +106,31 @@ public abstract class JDBCDMLOp extends JDBCOp {
         return stmt;
     }
 
-    protected void processCommit(Connection connection) throws SQLException {
-        if ( (connection!=null) && !(connection.isClosed()) ) {
-            if (!connection.getAutoCommit()) {
-                connection.commit();
-                LOGGER.debug(() -> LOG_COMMIT_SUCCESS);
-            }
+
+    protected void processCommit() throws SQLException {
+        if (!jdbcConnection.getAutoCommit()) {
+            jdbcConnection.commit();
+            LOGGER.debug(() -> LOG_COMMIT_SUCCESS);
         }
     }
 
-    protected Statement createDMLStatement(Connection connection) throws SQLException {
+    protected Statement createDMLStatement() throws SQLException {
         Statement stmt = jdbcStmtTL.get();
-
         if (stmt == null) {
-            if ( (connection!=null) && !(connection.isClosed()) ) {
-                if (isPreparedStmt)
-                    stmt = connection.prepareStatement(pStmtSqlStr);
-                else
-                    stmt = connection.createStatement();
+            if (isPreparedStmt)
+                stmt = jdbcConnection.prepareStatement(pStmtSqlStr);
+            else
+                stmt = jdbcConnection.createStatement();
 
-                jdbcStmtTL.set(stmt);
+            jdbcStmtTL.set(stmt);
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("A statement is created -- prepared: {}, read/write: {}, stmt: {}",
-                        isPreparedStmt,
-                        isReadStmt ? "read" : "write",
-                        stmt);
-                }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("A statement is created -- prepared: {}, read/write: {}, stmt: {}",
+                    isPreparedStmt,
+                    isReadStmt ? "read" : "write",
+                    stmt);
             }
         }
-
         return stmt;
     }
 }

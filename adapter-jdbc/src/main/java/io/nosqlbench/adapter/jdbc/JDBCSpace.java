@@ -38,6 +38,7 @@ import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 public class JDBCSpace implements AutoCloseable {
     private final static Logger logger = LogManager.getLogger(JDBCSpace.class);
@@ -59,15 +60,17 @@ public class JDBCSpace implements AutoCloseable {
     private final int totalThreadNum;
     private HikariConfig hikariConfig;
     private HikariDataSource hikariDataSource;
-    private final Random random;
 
-    ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
+    // Maintain a client-side pooling just to make sure the allocated connections can
+    // be reclaimed quickly, instead of waiting for Hikari pooling to reclaim it eventually
+    public record ConnectionCacheKey(String connName) {
+    }
+    private final ConcurrentHashMap<ConnectionCacheKey, Connection> connections = new ConcurrentHashMap<>();
 
     public JDBCSpace(String spaceName, NBConfiguration cfg) {
         this.spaceName = spaceName;
         this.totalCycleNum = NumberUtils.toLong(cfg.getOptional("cycles").orElse("1"));
         this.totalThreadNum = NumberUtils.toInt(cfg.getOptional("threads").orElse("1"));
-        this.random = new Random();
 
         // Must be after the 'maxNumConn' statements and before the rest of the remaining statements!
         this.initializeSpace(cfg);
@@ -107,28 +110,8 @@ public class JDBCSpace implements AutoCloseable {
         return this.hikariDataSource;
     }
 
-    public Connection getConnection() {
-        int rnd = random.nextInt(0, getMaxNumConn());
-        final String connectionName = "jdbc-conn-" + rnd;
-
-        return connections.computeIfAbsent(connectionName, key -> {
-            try {
-                Connection connection = hikariDataSource.getConnection();
-                if (logger.isDebugEnabled()) {
-                    logger.debug("JDBC connection ({}) is successfully created: {}",
-                        connectionName, connection);
-                }
-                // Register 'vector' type
-                JDBCPgVector.addVectorType(connection);
-
-                return  connection;
-            }
-            catch (Exception ex) {
-                String exp = "Exception occurred while attempting to create a connection using the HikariDataSource";
-                logger.error(exp, ex);
-                throw new JDBCAdapterUnexpectedException(exp);
-            }
-        });
+    public Connection getConnection(ConnectionCacheKey key, Supplier<Connection> connectionSupplier) {
+        return connections.computeIfAbsent(key, __ -> connectionSupplier.get());
     }
 
     private void initializeSpace(NBConfiguration cfg) {
@@ -187,11 +170,11 @@ public class JDBCSpace implements AutoCloseable {
         hikariConfig.addDataSourceProperty("applicationName", cfg.get("applicationName"));
         hikariConfig.addDataSourceProperty("rewriteBatchedInserts", cfg.getOrDefault("rewriteBatchedInserts", true));
 
-        // We're managing the auto-commit behavior of connections ourselves and hence disabling the auto-commit.
         Optional<String> autoCommitOpt = cfg.getOptional("autoCommit");
-        boolean autoCommit = false;
-        if (autoCommitOpt.isPresent()) autoCommit = BooleanUtils.toBoolean(autoCommitOpt.get());
-        hikariConfig.setAutoCommit(autoCommit);
+        if (autoCommitOpt.isPresent()) {
+            boolean autoCommit = autoCommit = BooleanUtils.toBoolean(autoCommitOpt.get());
+            hikariConfig.setAutoCommit(autoCommit);
+        }
 
         hikariConfig.setKeepaliveTime(Integer.parseInt(cfg.get("keepaliveTime")));
         // Use the NB "num_conn" parameter instead, wth 20% extra capacity
@@ -204,7 +187,7 @@ public class JDBCSpace implements AutoCloseable {
 
     private void shutdownSpace() {
         try {
-            logger.info("Total {} of connections is being closed ...", connections.size());
+            logger.info("Shutting down JDBCSpace -- total {} of connections is being closed ...", connections.size());
             for (Connection connection : connections.values()) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Close connection : {}", connection);

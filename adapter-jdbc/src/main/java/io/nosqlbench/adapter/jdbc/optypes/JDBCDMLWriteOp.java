@@ -50,14 +50,13 @@ public class JDBCDMLWriteOp extends JDBCDMLOp {
 
         try {
             assert (isPreparedStmt);
-            Connection connection = super.jdbcSpace.getConnection();
-            PreparedStatement stmt = (PreparedStatement) super.createDMLStatement(connection);
+            PreparedStatement stmt = (PreparedStatement) super.createDMLStatement();
             stmt = super.setPrepStmtValues(stmt);
 
             // No batch
             if (ddlStmtBatchNum == 1) {
                 int result_cnt = stmt.executeUpdate();
-                super.processCommit(connection);
+                super.processCommit();
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("[single ddl - execution] cycle:{}, result_cnt: {}, stmt: {}",
                         value, result_cnt, stmt);
@@ -76,7 +75,7 @@ public class JDBCDMLWriteOp extends JDBCDMLOp {
                 //       To avoid this, make sure the total cycle number is the multiple of the batch number
                 if (trackingCnt % ddlStmtBatchNum == 0) {
                     int[] counts = stmt.executeBatch();
-                    processCommit(connection);
+                    processCommit();
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("[batch ddl - execution] cycle:{}, total_batch_res_cnt:{}, stmt: {}",
                             value, counts, stmt);
@@ -88,10 +87,6 @@ public class JDBCDMLWriteOp extends JDBCDMLOp {
             }
         }
         catch (SQLException sqlException) {
-            LOGGER.info("pStmtSqlStr={}", pStmtSqlStr);
-            LOGGER.info("pStmtValList={}", pStmtValList);
-            LOGGER.info("value:{},trackingCnt:{}",value,trackingCnt);
-
             throw new JDBCAdapterUnexpectedException(
                 "Failed to execute the prepared DDL statement: \"" + pStmtSqlStr + "\", " +
                     "with values: \"" + pStmtValList + "\"");
