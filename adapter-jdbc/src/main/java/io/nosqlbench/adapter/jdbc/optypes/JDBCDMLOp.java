@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -73,12 +74,12 @@ public abstract class JDBCDMLOp extends JDBCOp {
     }
 
     // Only applicable to a prepared statement
-    protected PreparedStatement setPrepStmtValues(PreparedStatement stmt, List<Object> valList) {
+    protected PreparedStatement setPrepStmtValues(PreparedStatement stmt) {
         assert (stmt != null);
 
-        for (int i=0; i<valList.size(); i++) {
+        for (int i=0; i<pStmtValList.size(); i++) {
             int fieldIdx = i + 1;
-            Object fieldValObj = valList.get(i);
+            Object fieldValObj = pStmtValList.get(i);
             assert (fieldValObj != null);
 
             try {
@@ -107,26 +108,24 @@ public abstract class JDBCDMLOp extends JDBCOp {
         return stmt;
     }
 
-    protected void processCommit() {
-        try {
-            if (!jdbcConnection.getAutoCommit()) {
-                jdbcConnection.commit();
+    protected void processCommit(Connection connection) throws SQLException {
+        if ( (connection!=null) && !(connection.isClosed()) ) {
+            if (!connection.getAutoCommit()) {
+                connection.commit();
                 LOGGER.debug(() -> LOG_COMMIT_SUCCESS);
             }
-        } catch (SQLException e) {
-            throw new JDBCAdapterUnexpectedException("Failed to process JDBC statement commit!");
         }
     }
 
-    protected Statement createDMLStatement() {
+    protected Statement createDMLStatement(Connection connection) throws SQLException {
         Statement stmt = jdbcStmtTL.get();
 
-        try {
-            if (stmt == null) {
+        if (stmt == null) {
+            if ( (connection!=null) && !(connection.isClosed()) ) {
                 if (isPreparedStmt)
-                    stmt = jdbcConnection.prepareStatement(pStmtSqlStr);
+                    stmt = connection.prepareStatement(pStmtSqlStr);
                 else
-                    stmt = jdbcConnection.createStatement();
+                    stmt = connection.createStatement();
 
                 jdbcStmtTL.set(stmt);
 
@@ -137,11 +136,8 @@ public abstract class JDBCDMLOp extends JDBCOp {
                         stmt);
                 }
             }
-
-            return stmt;
-        } catch (SQLException e) {
-            throw new JDBCAdapterUnexpectedException(
-                "Unable to create a prepared JDBC statement");
         }
+
+        return stmt;
     }
 }

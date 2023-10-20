@@ -47,7 +47,6 @@ public class JDBCDDLOpDispenser extends JDBCBaseOpDispenser {
     }
     @Override
     public JDBCDDLOp apply(long cycle) {
-        checkShutdownEntry(cycle);
         String ddlSqlStr = ddlSqlStrFunc.apply(cycle);
         return new JDBCDDLOp(jdbcSpace, ddlSqlStr);
     }

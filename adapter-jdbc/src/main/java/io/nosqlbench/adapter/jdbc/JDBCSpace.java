@@ -28,15 +28,14 @@ import io.nosqlbench.api.config.standard.NBConfiguration;
 import io.nosqlbench.api.config.standard.Param;
 import io.nosqlbench.api.errors.OpConfigError;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,33 +47,27 @@ public class JDBCSpace implements AutoCloseable {
     // NOTE: Since JDBC connection is NOT thread-safe, the total NB threads MUST be less
     //       than or equal to this number. This is to make sure one thread per connection.
     private final static int DEFAULT_CONN_NUM = 5;
-    private final int maxNumConn;
+    private int maxNumConn = DEFAULT_CONN_NUM;
 
-    // For DML statements, how many statements to put together in one batch
+    // For DML write statements, how many statements to put together in one batch
     // - 1 : no batch (default)
     // - positive number: using batch
     private final static int DEFAULT_DML_BATCH_NUM = 1;
-    private final int dmlBatchNum;
+    private int dmlBatchNum = DEFAULT_DML_BATCH_NUM;
 
     private final long totalCycleNum;
-    private static boolean isShuttingDown = false;
-
+    private final int totalThreadNum;
     private HikariConfig hikariConfig;
     private HikariDataSource hikariDataSource;
+    private final Random random;
 
     ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
     public JDBCSpace(String spaceName, NBConfiguration cfg) {
         this.spaceName = spaceName;
         this.totalCycleNum = NumberUtils.toLong(cfg.getOptional("cycles").orElse("1"));
-        int totalThreads = NumberUtils.toInt(cfg.getOptional("threads").orElse("1"));
-        int numConnInput = NumberUtils.toInt(cfg.getOptional("num_conn").orElse("10"));
-        this.maxNumConn = Math.min(totalThreads, numConnInput);
-        if (this.maxNumConn < 1) {
-            throw new JDBCAdapterInvalidParamException(
-                "'num_conn' NB CLI parameter must be a positive number!"
-            );
-        }
+        this.totalThreadNum = NumberUtils.toInt(cfg.getOptional("threads").orElse("1"));
+        this.random = new Random();
 
         // Must be after the 'maxNumConn' statements and before the rest of the remaining statements!
         this.initializeSpace(cfg);
@@ -95,12 +88,6 @@ public class JDBCSpace implements AutoCloseable {
                 "Using batch, 'dml_batch'(" + this.dmlBatchNum + ") > 1, along with 'autoCommit' ON is not supported!"
             );
         }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("{} JDBC connections will be created [max(threads/{}, num_conn/{}]; " +
-                    "dml_batch: {}, autoCommit: {}",
-                maxNumConn, totalThreads, numConnInput, dmlBatchNum, hikariConfig.isAutoCommit());
-        }
     }
 
     @Override
@@ -109,42 +96,39 @@ public class JDBCSpace implements AutoCloseable {
     }
 
     public int getMaxNumConn() { return this.maxNumConn; }
+    public void setMaxNumConn(int i) { this.maxNumConn = i; }
 
     public int getDmlBatchNum() { return this.dmlBatchNum; }
 
     public long getTotalCycleNum() { return this.totalCycleNum; }
-
-    public boolean isShuttingDown() { return isShuttingDown; }
-    public void enterShutdownStage() { isShuttingDown = true; }
-
+    public int getTotalThreadNum() { return this.totalThreadNum; }
 
     public HikariDataSource getHikariDataSource() {
         return this.hikariDataSource;
     }
 
-    public Connection getConnection(String connectionName) {
-        Connection connection = connections.get(connectionName);
-        if (connection == null) {
+    public Connection getConnection() {
+        int rnd = random.nextInt(0, getMaxNumConn());
+        final String connectionName = "jdbc-conn-" + rnd;
+
+        return connections.computeIfAbsent(connectionName, key -> {
             try {
-                connection = hikariDataSource.getConnection();
+                Connection connection = hikariDataSource.getConnection();
                 if (logger.isDebugEnabled()) {
                     logger.debug("JDBC connection ({}) is successfully created: {}",
                         connectionName, connection);
                 }
-
                 // Register 'vector' type
                 JDBCPgVector.addVectorType(connection);
 
-                connections.put(connectionName, connection);
+                return  connection;
             }
             catch (Exception ex) {
                 String exp = "Exception occurred while attempting to create a connection using the HikariDataSource";
                 logger.error(exp, ex);
                 throw new JDBCAdapterUnexpectedException(exp);
             }
-        }
-
-        return connection;
+        });
     }
 
     private void initializeSpace(NBConfiguration cfg) {
@@ -210,46 +194,28 @@ public class JDBCSpace implements AutoCloseable {
         hikariConfig.setAutoCommit(autoCommit);
 
         hikariConfig.setKeepaliveTime(Integer.parseInt(cfg.get("keepaliveTime")));
-
-        // HikariCP "maximumPoolSize" parameter is ignored.
         // Use the NB "num_conn" parameter instead, wth 20% extra capacity
         hikariConfig.setMaximumPoolSize((int)Math.ceil(1.2*maxNumConn));
 
         this.hikariDataSource = new HikariDataSource(hikariConfig);
+
+        logger.info("hikariDataSource is created : {}", hikariDataSource);
     }
 
     private void shutdownSpace() {
-        isShuttingDown = true;
-
         try {
-            waitUntilAllOpFinished(System.currentTimeMillis());
-
+            logger.info("Total {} of connections is being closed ...", connections.size());
             for (Connection connection : connections.values()) {
-                connection.close();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Close connection : {}", connection);
+                    connection.close();
+                }
             }
         } catch (Exception e) {
             throw new JDBCAdapterUnexpectedException("Unexpected error when trying to close the JDBC connection!");
         }
 
         hikariDataSource.close();
-    }
-
-    private void waitUntilAllOpFinished(long shutdownStartTimeMills) {
-        final int timeToWaitInSec = 5;
-        long timeElapsedMills;
-        boolean continueChk;
-
-        do {
-            JDBCAdapterUtil.pauseCurThreadExec(1);
-
-            long curTimeMills = System.currentTimeMillis();
-            timeElapsedMills = curTimeMills - shutdownStartTimeMills;
-            continueChk = (timeElapsedMills <= (timeToWaitInSec*1000));
-        } while (continueChk);
-
-        logger.info(
-            "shutdownSpace::waitUntilAllOpFinished -- " +
-            "shutdown time elapsed: " + timeElapsedMills + "ms.");
     }
 
     public static NBConfigModel getConfigModel() {

@@ -33,20 +33,16 @@ public class JDBCDDLOp extends JDBCOp {
         this.ddlStmtStr = ddlStmtStr;
     }
 
-    private Statement createDDLStatement() {
-        try {
-            return jdbcConnection.createStatement();
-        } catch (SQLException e) {
-            throw new JDBCAdapterUnexpectedException(
-                "Unable to create a regular (non-prepared) JDBC statement");
-        }
+    private Statement createDDLStatement(Connection connection) throws SQLException {
+        return connection.createStatement();
     }
     @Override
     public Object apply(long value) {
         try {
-            Statement stmt = createDDLStatement();
-            stmt.execute(ddlStmtStr);
-            closeStatement(stmt);
+            Connection connection = jdbcSpace.getConnection();
+            try (Statement stmt = createDDLStatement(connection)) {
+                stmt.execute(ddlStmtStr);
+            }
             return true;
         } catch (SQLException sqlException) {
             throw new JDBCAdapterUnexpectedException(

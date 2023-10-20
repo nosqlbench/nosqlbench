@@ -41,12 +41,13 @@ public class JDBCDMLReadOp extends JDBCDMLOp {
 
     @Override
     public Object apply(long value) {
-        Statement stmt = super.createDMLStatement();
-        if (isPreparedStmt) {
-            stmt = super.setPrepStmtValues((PreparedStatement) stmt, this.pStmtValList);
-        }
+        try  {
+            Connection connection = super.jdbcSpace.getConnection();
+            Statement stmt = super.createDMLStatement(connection);
+            if (isPreparedStmt) {
+                stmt = setPrepStmtValues((PreparedStatement) stmt);
+            }
 
-        try {
             // key string list to be used in the "Vector" relevancy score verification
             List<String> verifierValueList = new ArrayList<>();
 
@@ -59,11 +60,10 @@ public class JDBCDMLReadOp extends JDBCDMLOp {
                         verifierValueList.add(keyVal);
                     }
                 } while (rs.next());
-                closeStatement(stmt);
             }
             else {
                 boolean isResultSet = ((PreparedStatement)stmt).execute();
-                super.processCommit();
+                super.processCommit(connection);
 
                 while(true) {
                     if(isResultSet) {
@@ -82,8 +82,6 @@ public class JDBCDMLReadOp extends JDBCDMLOp {
                     }
                     isResultSet = stmt.getMoreResults();
                 }
-
-                closeStatement(stmt);
             }
 
             return verifierValueList;

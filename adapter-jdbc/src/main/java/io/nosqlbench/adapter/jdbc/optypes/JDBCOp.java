@@ -33,19 +33,8 @@ public abstract class JDBCOp implements CycleOp {
         "Executed the JDBC statement & committed the connection successfully";
 
     protected final JDBCSpace jdbcSpace;
-    protected final Connection jdbcConnection;
 
     public JDBCOp(JDBCSpace jdbcSpace) {
         this.jdbcSpace = jdbcSpace;
-        String curThreadName = Thread.currentThread().getName();
-        this.jdbcConnection = this.jdbcSpace.getConnection(curThreadName);
-    }
-
-    protected void closeStatement(Statement stmt) throws SQLException {
-        if (! (stmt instanceof  PreparedStatement)) {
-            stmt.close();
-        } else if (jdbcSpace.isShuttingDown()) {
-            stmt.close();
-        }
     }
 }
