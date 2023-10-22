@@ -73,7 +73,8 @@ public abstract class JDBCOp implements CycleOp {
                 return  connection;
             }
             catch (Exception ex) {
-                String exp = "Exception occurred while attempting to create a connection using the HikariDataSource";
+                String exp = "Exception occurred while attempting to create a connection (useHikariCP=" +
+                    jdbcSpace.useHikariCP() + ")";
                 LOGGER.error(exp, ex);
                 throw new JDBCAdapterUnexpectedException(exp);
             }

@@ -109,24 +109,25 @@ public class JDBCSpace implements AutoCloseable {
     private void initializeSpace(NBConfiguration cfg) {
         //
         // NOTE: Although it looks like a good idea to use Hikari Connection Pooling
-        //       But in my testing, it shows weird behaviors such as
-        //       1) sometimes failed to allocate connection while the target server is completely working fine
+        //       But in my testing, it shows some strange behaviors such as
+        //       1) failed to allocate connection while the target server is completely working fine
         //          e.g. it failed consistently on a m5d.4xlarge testing bed but not on my mac.
         //       2) doesn't really respect the 'max_connections' setting
         //       3) it also appears to me that Hikari connection is slow
         //
         // Therefore, use `use_hikaricp` option to control whether to use Hikari connection pooling. When
-        // setting to 'false', it uses JDBC adapter's own (simple) connection management, with JDBC driver's
-        // `DriverManager` to create connection directly.
+        // setting to 'false' (as default), it uses JDBC adapter's own (simple) connection management, with
+        // JDBC driver's `DriverManager` to create connection directly.
         //
         this.useHikariCP = BooleanUtils.toBoolean(cfg.getOptional("use_hikaricp").orElse("true"));
-
-        this.autoCommitCLI = BooleanUtils.toBoolean(cfg.getOptional("use_hikaricp").orElse("true"));
-        this.totalCycleNum = NumberUtils.toLong(cfg.getOptional("cycles").orElse("1"));
-        this.totalThreadNum = NumberUtils.toInt(cfg.getOptional("threads").orElse("1"));
-
+        this.autoCommitCLI = BooleanUtils.toBoolean(cfg.getOptional("autoCommit").orElse("true"));
         this.dmlBatchNum = NumberUtils.toInt(cfg.getOptional("dml_batch").orElse("1"));
         if (this.dmlBatchNum < 0) dmlBatchNum = 1;
+        logger.info("CLI input parameters -- useHikariCP:{}, autoCommitCLI:{}, dmlBatchNum:{}",
+            useHikariCP, autoCommitCLI, dmlBatchNum);
+
+        this.totalCycleNum = NumberUtils.toLong(cfg.getOptional("cycles").orElse("1"));
+        this.totalThreadNum = NumberUtils.toInt(cfg.getOptional("threads").orElse("1"));
 
         connConfig.setJdbcUrl(cfg.get("url"));
         connConfig.addDataSourceProperty("serverName", cfg.get("serverName"));
