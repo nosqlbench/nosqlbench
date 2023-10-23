@@ -54,8 +54,17 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
 
     @Override
     public NBComponent attachChild(NBComponent... children) {
+
         for (NBComponent child : children) {
             logger.debug(() -> "attaching " + child.description() + " to parent " + this.description());
+            for (NBComponent extant : this.children) {
+                if (!child.getComponentOnlyLabels().isEmpty() && child.getComponentOnlyLabels().equals(extant.getComponentOnlyLabels())) {
+                    throw new RuntimeException("Adding second child under already-defined labels is not allowed:\n" +
+                        " extant: " + extant + "\n" +
+                        " adding: " + child);
+                }
+            }
+
             this.children.add(child);
         }
         return this;
@@ -81,6 +90,11 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         NBLabels effectiveLabels = (this.parent == null ? NBLabels.forKV() : parent.getLabels());
         effectiveLabels = (this.labels == null) ? effectiveLabels : effectiveLabels.and(this.labels);
         return effectiveLabels;
+    }
+
+    @Override
+    public NBLabels getComponentOnlyLabels() {
+        return this.labels;
     }
 
 

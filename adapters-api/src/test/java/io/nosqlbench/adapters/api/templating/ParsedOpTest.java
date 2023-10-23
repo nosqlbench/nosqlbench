@@ -37,28 +37,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParsedOpTest {
 
-    final NBComponent parent = new TestComponent("opparent","opparent");
-    ParsedOp pc = new ParsedOp(
-        new OpData().applyFields(
-            Map.of(
-                "op", Map.of(
-                    "stmt", "test",
-                    "dyna1", "{dyna1}",
-                    "dyna2", "{{NumberNameToString()}}",
-                    "identity", "{{Identity()}}"
-                ),
-                "bindings", Map.of(
-                    "dyna1", "NumberNameToString()"
+    private NBComponent getParent() {
+        return new TestComponent("opparent","opparent");
+    }
+    private ParsedOp getOp() {
+
+        ParsedOp pc = new ParsedOp(
+            new OpData().applyFields(
+                Map.of(
+                    "op", Map.of(
+                        "stmt", "test",
+                        "dyna1", "{dyna1}",
+                        "dyna2", "{{NumberNameToString()}}",
+                        "identity", "{{Identity()}}"
+                    ),
+                    "bindings", Map.of(
+                        "dyna1", "NumberNameToString()"
+                    )
                 )
-            )
-        ),
-        ConfigModel.of(ParsedOpTest.class)
-            .add(Param.defaultTo("testcfg", "testval"))
-            .asReadOnly()
-            .apply(Map.of()),
-        List.of(),
-        parent
-    );
+            ),
+            ConfigModel.of(ParsedOpTest.class)
+                .add(Param.defaultTo("testcfg", "testval"))
+                .asReadOnly()
+                .apply(Map.of()),
+            List.of(),
+            getParent()
+        );
+        return pc;
+    }
 
     @Test
     public void testFieldDelegationFromDynamicToStaticToConfig() {
@@ -78,7 +84,7 @@ public class ParsedOpTest {
         final OpsDocList stmtsDocs = OpsLoader.loadString(opt, OpTemplateFormat.yaml, cfg.getMap(), null);
         assertThat(stmtsDocs.getOps().size()).isEqualTo(1);
         final OpTemplate opTemplate = stmtsDocs.getOps().get(0);
-        final ParsedOp parsedOp = new ParsedOp(opTemplate, cfg, List.of(), parent);
+        final ParsedOp parsedOp = new ParsedOp(opTemplate, cfg, List.of(), getParent());
 
         assertThat(parsedOp.getAsFunctionOr("d1", "invalid").apply(1L)).isEqualTo("one");
         assertThat(parsedOp.getAsFunctionOr("s1", "invalid").apply(1L)).isEqualTo("static-one");
@@ -117,7 +123,7 @@ public class ParsedOpTest {
                 .asReadOnly()
                 .apply(Map.of()),
             List.of(),
-            parent
+            getParent()
         );
         final LongFunction<? extends String> f1 = parsedOp.getAsRequiredFunction("field1-literal");
         final LongFunction<? extends String> f2 = parsedOp.getAsRequiredFunction("field2-object");
@@ -134,7 +140,7 @@ public class ParsedOpTest {
 
     @Test
     public void testParsedOp() {
-        final Map<String, Object> m1 = this.pc.apply(0);
+        final Map<String, Object> m1 = getOp().apply(0);
         assertThat(m1).containsEntry("stmt", "test");
         assertThat(m1).containsEntry("dyna1", "zero");
         assertThat(m1).containsEntry("dyna2", "zero");
@@ -143,21 +149,21 @@ public class ParsedOpTest {
 
     @Test
     public void testNewListBinder() {
-        final LongFunction<List<Object>> lb = this.pc.newListBinder("dyna1", "identity", "dyna2", "identity");
+        final LongFunction<List<Object>> lb = getOp().newListBinder("dyna1", "identity", "dyna2", "identity");
         final List<Object> objects = lb.apply(1);
         assertThat(objects).isEqualTo(List.of("one", 1L, "one", 1L));
     }
 
     @Test
     public void testNewMapBinder() {
-        final LongFunction<Map<String, Object>> mb = this.pc.newOrderedMapBinder("dyna1", "identity", "dyna2");
+        final LongFunction<Map<String, Object>> mb = getOp().newOrderedMapBinder("dyna1", "identity", "dyna2");
         final Map<String, Object> objects = mb.apply(2);
         assertThat(objects).isEqualTo(Map.<String, Object>of("dyna1", "two", "identity", 2L, "dyna2", "two"));
     }
 
     @Test
     public void testNewAryBinder() {
-        final LongFunction<Object[]> ab = this.pc.newArrayBinder("dyna1", "dyna1", "identity", "identity");
+        final LongFunction<Object[]> ab = getOp().newArrayBinder("dyna1", "dyna1", "identity", "identity");
         final Object[] objects = ab.apply(3);
         assertThat(objects).isEqualTo(new Object[]{"three", "three", 3L, 3L});
     }
@@ -189,7 +195,7 @@ public class ParsedOpTest {
                 .asReadOnly()
                 .apply(Map.of()),
             List.of(),
-            parent
+            getParent()
         );
 
         Map<String, Object> result = pc.getTemplateMap().apply(1);

@@ -50,6 +50,4 @@ public interface NBLabeledElement {
     default String description() {
         return this.getClass().getSimpleName() + ((this.getLabels()!=null) ? " " + this.getLabels().linearizeAsMetrics() : " {NOLABELS}");
     }
-
-
 }

@@ -3,9 +3,16 @@
 [![Star on Github](https://img.shields.io/github/stars/nosqlbench/nosqlbench.svg?style=social)](https://github.com/nosqlbench/nosqlbench/stargazers)
 [![Chat on Discord](https://img.shields.io/discord/819995781406130176?logo=discord)](https://discord.gg/dBHRakusMN)
 
-# NoSQLBench v5
+# NoSQLBench 5
 
 **The Open Source, Pluggable, NoSQL Benchmarking Suite**
+
+👉 The current version of NoSQLBench in development is _5.21_, which is based on Java 21 LTS.
+All new language features in Java 21, and some preview features may be used. There are
+significant improvements in this branch which will be documented before a main release is
+published. If you are presently using NoSQLBench for testing, and are not actively developing
+against the code base, it is recommended that you stay on the latest 5.17 release until an
+official 5.21 release is available. [What's in store for 5.21.](nb_521.md)
 
 [Get it Here](DOWNLOADS.md)
 
@@ -15,71 +22,80 @@
 
 ## What is NoSQLBench?
 
-NoSQLBench is a serious performance testing tool for the NoSQL ecosystem. It brings together features and capabilities
+NoSQLBench is a serious performance testing tool for the NoSQL ecosystem. It brings together
+features and capabilities
 that are not found in any other tool.
 
-- You can run common testing workloads directly from the command line. You can start doing this within 5 minutes of
-   reading this.
-- You can generate virtual data sets of arbitrary size, with deterministic data and statistically shaped values.
-- You can design custom workloads that emulate your application, contained in a single file, based on statement
-   templates - no IDE or coding required.
-- When needed, you can open the access panels and rewire the runtime behavior of NoSQLBench to do advanced testing,
-   including a full scripting environment with Javascript.
+- You can run common testing workloads directly from the command line. You can start doing this
+  within 5 minutes of
+  reading this.
+- You can generate virtual data sets of arbitrary size, with deterministic data and statistically
+  shaped values.
+- You can design custom workloads that emulate your application, contained in a single file, based
+  on statement
+  templates - no IDE or coding required.
+- When needed, you can open the access panels and rewire the runtime behavior of NoSQLBench to do
+  advanced testing,
+  including a full scripting environment with Javascript.
 
-The core machinery of NoSQLBench has been built with attention to detail. It has been battle tested within DataStax as a
-way to help users validate their data models, baseline system performance, and qualify system designs for scale.
+The core machinery of NoSQLBench has been built with attention to detail. It has been battle
+tested within DataStax and in the NoSQL ecosystem as a way to help users validate their data
+models, baseline system performance, and qualify system designs for scale.
 
-In short, NoSQLBench wishes to be a programmable power tool for performance testing. However, it is somewhat generic. It
-doesn't know directly about a particular type of system, or protocol. It simply provides a suitable machine harness in
-which to put your drivers and testing logic. If you know how to build a client for a particular kind of system, it will
-let you load it like a plugin and control it dynamically.
-
-Initially, NoSQLBench comes with support for CQL, but we would like to see this expanded with contributions from others.
+In short, NoSQLBench wishes to be a programmable power tool for performance testing. However, it
+is somewhat generic. The core runtime of NoSQLBench doesn't know directly about a particular
+type of system, or protocol. It simply provides a suitable machine harness in which to put your
+drivers and testing logic. If you know how to build a client for a particular kind of system, it
+will let you load it like a plugin and control it dynamically. However, several protocols are
+supported out of the box as bundled drivers.
 
 ## Origins
 
-The code in this project comes from multiple sources. The procedural data generation capability was known before as
-'Virtual Data Set'. The core runtime and scripting harness was from the 'EngineBlock' project. The CQL support was
-previously used within DataStax. In March of 2020, DataStax and the project maintainers for these projects decided to
-put everything into one OSS project in order to make contributions and sharing easier for everyone. Thus, the new
-project name and structure was launched as nosqlbench.io. NoSQLBench is an independent project that is sponsored by
-DataStax.
+The code in this project comes from multiple sources. The procedural data generation capability was
+known before as 'Virtual Data Set' OSS project. The core runtime and scripting harness was from
+the 'EngineBlock' OSS project. The CQL driver module was previously used within DataStax. In
+March of 2020, DataStax and the project maintainers for these projects decided to put
+everything into one OSS project in order to make contributions and sharing easier for everyone.
+Thus, the new project name and structure was launched as nosqlbench.io. NoSQLBench is an
+independent project that is sponsored by DataStax.
 
-We offer NoSQLBench as a new way of thinking about testing systems. It is not limited to testing only one type of
-system. It is our wish to build a community of users and practice around this project so that everyone in the NoSQL
-ecosystem can benefit from common concepts and understanding and reliable patterns of use.
+We offer NoSQLBench as a new way of thinking about testing systems. It is not limited to
+testing only one type of system. It is our wish to build a community of users and practice
+around this project so that everyone in the NoSQL ecosystem can benefit from common concepts
+and understanding and reliable patterns of use.
 
 ## Getting Support
 
-In general, our goals with NoSQLBench are to make the help systems and examples wrap around the users like a suit of
-armor, so that they feel capable of doing most things autonomously. Please keep this in mind when looking for personal
-support form our community, and help us find those places where the docs are lacking. Maybe you can help us by adding
-some missing docs!
+In general, our goals with NoSQLBench are to make the help systems and examples wrap around the
+users like a suit of armor, so that they feel capable of doing most things autonomously. Please keep
+this in mind when looking for personal support form our community, and help us find those places
+where the docs are lacking. Maybe you can help us by adding some missing docs!
 
 ### NoSQLBench Discord Server
 
-We have a discord server. This is where users and developers can discuss
-anything about NoSQLBench and support each other.
-Please [join us](https://discord.gg/dBHRakusMN) there if you are a new
-user of NoSQLBench!
+We have a discord server. This is where users and developers can discuss anything about NoSQLBench
+and support each other. Please [join us](https://discord.gg/dBHRakusMN) there if you are a new user
+of NoSQLBench!
 
 ## Contributing
 
-We are actively looking for contributors to help make NoSQLBench better. This is an ambitious project that is just
-finding its stride. If you want to be part of the next chapter in NoSQLBench development please look at
-[CONTRIBUTING](CONTRIBUTING.md) for ideas, and jump in where you feel comfortable.
+We are actively looking for contributors to help make NoSQLBench better. This is an ambitious
+project that is just finding its stride. If you want to be part of the next chapter in NoSQLBench
+development please look at [CONTRIBUTING](CONTRIBUTING.md) for ideas, and jump in where you feel
+comfortable.
 
 All contributors are expected to abide by the [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md).
 
 ## License
 
-All of the code in this repository is licensed under the APL version 2. If you contribute to this project, then you must
-agree to license all of your constributions under this license.
+All of the code in this repository is licensed under the APL version 2. If you contribute to this
+project, then you must agree to license all of your contributions under this license.
 
 ## System Compatibility
 
-This is a Linux targeted tool, as most cloud/nosql testing is done on Linux instances. Some support for other systems is
-available, but more work is needed to support them fully. Here is what is supported for each:
+This is a Linux targeted tool, as most cloud/nosql testing is done on Linux instances. Some support
+for other systems is available, but more work is needed to support them fully. Here is what is
+supported for each:
 
 1. on Linux, all features are supported, for both `nb5.jar` as well as the appimage binary `nb`
 2. on Mac, all features are supported, with `nb5.jar`.
@@ -106,8 +122,8 @@ available, but more work is needed to support them fully. Here is what is suppor
   </tr>
 </table>
 
-
 ## Contributors
+
 Checkout all our wonderful contributors [here](./CONTRIBUTING.md#contributors).
 
 ---

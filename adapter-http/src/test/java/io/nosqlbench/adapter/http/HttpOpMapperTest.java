@@ -46,12 +46,10 @@ public class HttpOpMapperTest {
     static HttpDriverAdapter adapter;
     static HttpOpMapper mapper;
 
-    static NBComponent parent = new TestComponent("parent","parent");
-
     @BeforeAll
     public static void initializeTestMapper() {
         HttpOpMapperTest.cfg = HttpSpace.getConfigModel().apply(Map.of());
-        HttpOpMapperTest.adapter = new HttpDriverAdapter(parent, NBLabels.forKV());
+        HttpOpMapperTest.adapter = new HttpDriverAdapter(new TestComponent("parent","parent"), NBLabels.forKV());
         HttpOpMapperTest.adapter.applyConfig(HttpOpMapperTest.cfg);
         final DriverSpaceCache<? extends HttpSpace> cache = HttpOpMapperTest.adapter.getSpaceCache();
         HttpOpMapperTest.mapper = new HttpOpMapper(HttpOpMapperTest.adapter, HttpOpMapperTest.cfg, cache);
@@ -60,7 +58,7 @@ public class HttpOpMapperTest {
     private static ParsedOp parsedOpFor(final String yaml) {
         final OpsDocList docs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
         final OpTemplate opTemplate = docs.getOps().get(0);
-        final ParsedOp parsedOp = new ParsedOp(opTemplate, HttpOpMapperTest.cfg, List.of(HttpOpMapperTest.adapter.getPreprocessor()), parent);
+        final ParsedOp parsedOp = new ParsedOp(opTemplate, HttpOpMapperTest.cfg, List.of(HttpOpMapperTest.adapter.getPreprocessor()), new TestComponent("parent","parent"));
         return parsedOp;
     }
 

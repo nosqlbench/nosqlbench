@@ -99,9 +99,9 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
         Optional<String> defaultDriverOption = activityDef.getParams().getOptionalString("driver");
         for (OpTemplate ot : opTemplates) {
-            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
-            String driverName = incompleteOpDef.takeOptionalStaticValue("driver", String.class)
-                .or(() -> incompleteOpDef.takeOptionalStaticValue("type", String.class))
+//            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
+            String driverName = ot.getOptionalStringParam("driver", String.class)
+                .or(() -> ot.getOptionalStringParam("type", String.class))
                 .or(() -> defaultDriverOption)
                 .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
 

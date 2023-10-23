@@ -17,6 +17,7 @@
 package io.nosqlbench.components;
 
 import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.decorators.NBProviderSearch;
 
 import java.util.List;
@@ -51,6 +52,8 @@ public interface NBComponent extends
     NBComponent detachChild(NBComponent... children);
 
     List<NBComponent> getChildren();
+
+    NBLabels getComponentOnlyLabels();
 
     default void beforeDetach() {}
 

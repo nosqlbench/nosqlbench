@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 public class MapLabels implements NBLabels {
 
 //    private final static Logger logger = LogManager.getLogger(MapLabels.class);
-    private final Map<String,String> labels;
+    protected final Map<String,String> labels;
 
     public MapLabels(final Map<String, String> labels) {
         verifyValidNamesAndValues(labels);
@@ -337,4 +337,8 @@ public class MapLabels implements NBLabels {
         return difference;
     }
 
+    @Override
+    public boolean isEmpty() {
+        return labels.isEmpty();
+    }
 }

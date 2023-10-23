@@ -26,8 +26,6 @@ know!
 
 [I am a user and I want to contribute built-in scenarios.](devdocs/devguide/adding_scenarios.md)
 
-[I am a UI developer and I want to improve the NoSQLBench UI (NBUI)](devdocs/devguide/nbui/README.md)
-
 ## Contribution Ideas
 
 There are lots of ways to contribute to the project. Some ideas on how to

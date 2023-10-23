@@ -186,4 +186,5 @@ public interface NBLabels {
 
     NBLabels difference(NBLabels otherLabels);
 
+    boolean isEmpty();
 }
