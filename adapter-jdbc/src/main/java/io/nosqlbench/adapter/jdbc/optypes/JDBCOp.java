@@ -18,14 +18,14 @@ package io.nosqlbench.adapter.jdbc.optypes;
 
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
+import io.nosqlbench.adapter.jdbc.utils.JDBCPgVector;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.Properties;
+import java.util.Random;
 
 public abstract class JDBCOp implements CycleOp {
     private static final Logger LOGGER = LogManager.getLogger(JDBCOp.class);
@@ -34,18 +34,50 @@ public abstract class JDBCOp implements CycleOp {
 
     protected final JDBCSpace jdbcSpace;
     protected final Connection jdbcConnection;
+    private final Random random = new Random();
 
     public JDBCOp(JDBCSpace jdbcSpace) {
         this.jdbcSpace = jdbcSpace;
-        String curThreadName = Thread.currentThread().getName();
-        this.jdbcConnection = this.jdbcSpace.getConnection(curThreadName);
+        this.jdbcConnection = getConnection();
     }
 
-    protected void closeStatement(Statement stmt) throws SQLException {
-        if (! (stmt instanceof  PreparedStatement)) {
-            stmt.close();
-        } else if (jdbcSpace.isShuttingDown()) {
-            stmt.close();
-        }
+    private Connection getConnection() {
+        int rnd = random.nextInt(0, jdbcSpace.getMaxNumConn());
+        final String connectionName = "jdbc-conn-" + rnd;
+
+        return jdbcSpace.getConnection(
+            new JDBCSpace.ConnectionCacheKey(connectionName), () -> {
+            try {
+                Connection connection;
+
+                if (jdbcSpace.useHikariCP()) {
+                    connection = jdbcSpace.getHikariDataSource().getConnection();
+                }
+                // Use DriverManager directly
+                else {
+                    String url = jdbcSpace.getConnConfig().getJdbcUrl();
+                    Properties props = jdbcSpace.getConnConfig().getDataSourceProperties();
+                    props.put("user", jdbcSpace.getConnConfig().getUsername());
+                    props.put("password", jdbcSpace.getConnConfig().getPassword());
+                    connection = DriverManager.getConnection(url, props);
+                }
+
+                // Register 'vector' type
+                JDBCPgVector.addVectorType(connection);
+
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("A new JDBC connection ({}) is successfully created: {}",
+                        connectionName, connection);
+                }
+
+                return connection;
+            }
+            catch (Exception ex) {
+                String exp = "Exception occurred while attempting to create a connection (useHikariCP=" +
+                    jdbcSpace.useHikariCP() + ")";
+                LOGGER.error(exp, ex);
+                throw new JDBCAdapterUnexpectedException(exp);
+            }
+        });
     }
 }

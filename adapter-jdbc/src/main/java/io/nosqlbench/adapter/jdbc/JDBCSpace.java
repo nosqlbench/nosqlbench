@@ -20,8 +20,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterInvalidParamException;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
-import io.nosqlbench.adapter.jdbc.utils.JDBCAdapterUtil;
-import io.nosqlbench.adapter.jdbc.utils.JDBCPgVector;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.config.standard.NBConfigModel;
 import io.nosqlbench.api.config.standard.NBConfiguration;
@@ -33,12 +31,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 public class JDBCSpace implements AutoCloseable {
     private final static Logger logger = LogManager.getLogger(JDBCSpace.class);
@@ -48,58 +43,37 @@ public class JDBCSpace implements AutoCloseable {
     // NOTE: Since JDBC connection is NOT thread-safe, the total NB threads MUST be less
     //       than or equal to this number. This is to make sure one thread per connection.
     private final static int DEFAULT_CONN_NUM = 5;
-    private final int maxNumConn;
+    private int maxNumConn = DEFAULT_CONN_NUM;
 
-    // For DML statements, how many statements to put together in one batch
+    // For DML write statements, how many statements to put together in one batch
     // - 1 : no batch (default)
     // - positive number: using batch
     private final static int DEFAULT_DML_BATCH_NUM = 1;
-    private final int dmlBatchNum;
+    private int dmlBatchNum = DEFAULT_DML_BATCH_NUM;
 
-    private final long totalCycleNum;
-    private static boolean isShuttingDown = false;
+    private long totalCycleNum;
+    private int totalThreadNum;
+    private boolean autoCommitCLI;
 
-    private HikariConfig hikariConfig;
+    private boolean useHikariCP;
+    private final HikariConfig connConfig = new HikariConfig();
     private HikariDataSource hikariDataSource;
 
-    ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
+    // Maintain a client-side pooling just to make sure the allocated connections can
+    // be reclaimed quickly, instead of waiting for Hikari pooling to reclaim it eventually
+    public record ConnectionCacheKey(String connName) {
+    }
+    private final ConcurrentHashMap<ConnectionCacheKey, Connection> connections = new ConcurrentHashMap<>();
 
     public JDBCSpace(String spaceName, NBConfiguration cfg) {
         this.spaceName = spaceName;
-        this.totalCycleNum = NumberUtils.toLong(cfg.getOptional("cycles").orElse("1"));
-        int totalThreads = NumberUtils.toInt(cfg.getOptional("threads").orElse("1"));
-        int numConnInput = NumberUtils.toInt(cfg.getOptional("num_conn").orElse("10"));
-        this.maxNumConn = Math.min(totalThreads, numConnInput);
-        if (this.maxNumConn < 1) {
-            throw new JDBCAdapterInvalidParamException(
-                "'num_conn' NB CLI parameter must be a positive number!"
-            );
-        }
-
-        // Must be after the 'maxNumConn' statements and before the rest of the remaining statements!
         this.initializeSpace(cfg);
 
-        this.dmlBatchNum = NumberUtils.toInt(cfg.getOptional("dml_batch").orElse("1"));
-        if (this.dmlBatchNum < 1) {
-            throw new JDBCAdapterInvalidParamException(
-                "'dml_batch' NB CLI parameter must be a positive number!"
-            );
-        }
-        // According to JDBC spec,
-        // - The commit behavior of executeBatch is always implementation-defined
-        //   when an error occurs and auto-commit is true.
-        //
         // In this adapter, we treat it as an error if 'autoCommit' is ON and using batch at the same time.
-        if ( (this.dmlBatchNum > 1) && (hikariConfig.isAutoCommit()) ) {
+        if ( (this.dmlBatchNum > 1) && isAutoCommit() ) {
             throw new JDBCAdapterInvalidParamException(
                 "Using batch, 'dml_batch'(" + this.dmlBatchNum + ") > 1, along with 'autoCommit' ON is not supported!"
             );
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("{} JDBC connections will be created [max(threads/{}, num_conn/{}]; " +
-                    "dml_batch: {}, autoCommit: {}",
-                maxNumConn, totalThreads, numConnInput, dmlBatchNum, hikariConfig.isAutoCommit());
         }
     }
 
@@ -108,62 +82,67 @@ public class JDBCSpace implements AutoCloseable {
         shutdownSpace();
     }
 
-    public int getMaxNumConn() { return this.maxNumConn; }
+    public int getMaxNumConn() { return maxNumConn; }
+    public void setMaxNumConn(int i) { maxNumConn = i; }
 
-    public int getDmlBatchNum() { return this.dmlBatchNum; }
+    public int getDmlBatchNum() { return dmlBatchNum; }
 
-    public long getTotalCycleNum() { return this.totalCycleNum; }
+    public long getTotalCycleNum() { return totalCycleNum; }
+    public int getTotalThreadNum() { return totalThreadNum; }
 
-    public boolean isShuttingDown() { return isShuttingDown; }
-    public void enterShutdownStage() { isShuttingDown = true; }
-
-
-    public HikariDataSource getHikariDataSource() {
-        return this.hikariDataSource;
+    public boolean isAutoCommit() {
+        if (useHikariCP)
+            return connConfig.isAutoCommit();
+        else
+            return this.autoCommitCLI;
     }
+    public boolean useHikariCP() { return useHikariCP; }
+    public HikariConfig getConnConfig() { return connConfig; }
 
-    public Connection getConnection(String connectionName) {
-        Connection connection = connections.get(connectionName);
-        if (connection == null) {
-            try {
-                connection = hikariDataSource.getConnection();
-                if (logger.isDebugEnabled()) {
-                    logger.debug("JDBC connection ({}) is successfully created: {}",
-                        connectionName, connection);
-                }
 
-                // Register 'vector' type
-                JDBCPgVector.addVectorType(connection);
+    public HikariDataSource getHikariDataSource() { return hikariDataSource; }
 
-                connections.put(connectionName, connection);
-            }
-            catch (Exception ex) {
-                String exp = "Exception occurred while attempting to create a connection using the HikariDataSource";
-                logger.error(exp, ex);
-                throw new JDBCAdapterUnexpectedException(exp);
-            }
-        }
-
-        return connection;
+    public Connection getConnection(ConnectionCacheKey key, Supplier<Connection> connectionSupplier) {
+        return connections.computeIfAbsent(key, __ -> connectionSupplier.get());
     }
 
     private void initializeSpace(NBConfiguration cfg) {
-        hikariConfig = new HikariConfig();
+        //
+        // NOTE: Although it looks like a good idea to use Hikari Connection Pooling
+        //       But in my testing, it shows some strange behaviors such as
+        //       1) failed to allocate connection while the target server is completely working fine
+        //          e.g. it failed consistently on a m5d.4xlarge testing bed but not on my mac.
+        //       2) doesn't really respect the 'max_connections' setting
+        //       3) it also appears to me that Hikari connection is slow
+        //
+        // Therefore, use `use_hikaricp` option to control whether to use Hikari connection pooling. When
+        // setting to 'false' (as default), it uses JDBC adapter's own (simple) connection management, with
+        // JDBC driver's `DriverManager` to create connection directly.
+        //
+        this.useHikariCP = BooleanUtils.toBoolean(cfg.getOptional("use_hikaricp").orElse("true"));
+        this.autoCommitCLI = BooleanUtils.toBoolean(cfg.getOptional("autoCommit").orElse("true"));
+        this.dmlBatchNum = NumberUtils.toInt(cfg.getOptional("dml_batch").orElse("1"));
+        if (this.dmlBatchNum < 0) dmlBatchNum = 1;
+        logger.info("CLI input parameters -- useHikariCP:{}, autoCommitCLI:{}, dmlBatchNum:{}",
+            useHikariCP, autoCommitCLI, dmlBatchNum);
 
-        hikariConfig.setJdbcUrl(cfg.get("url"));
-        hikariConfig.addDataSourceProperty("serverName", cfg.get("serverName"));
+        this.totalCycleNum = NumberUtils.toLong(cfg.getOptional("cycles").orElse("1"));
+        this.totalThreadNum = NumberUtils.toInt(cfg.getOptional("threads").orElse("1"));
+
+        connConfig.setJdbcUrl(cfg.get("url"));
+        connConfig.addDataSourceProperty("serverName", cfg.get("serverName"));
 
         Optional<String> databaseName = cfg.getOptional("databaseName");
         if (databaseName.isPresent()) {
-            hikariConfig.addDataSourceProperty("databaseName", databaseName.get());
+            connConfig.addDataSourceProperty("databaseName", databaseName.get());
         }
 
         int portNumber = Integer.parseInt(cfg.get("portNumber"));
-        hikariConfig.addDataSourceProperty("portNumber", portNumber);
+        connConfig.addDataSourceProperty("portNumber", portNumber);
 
         Optional<String> user = cfg.getOptional("user");
         if (user.isPresent()) {
-            hikariConfig.setUsername(user.get());
+            connConfig.setUsername(user.get());
         }
 
         Optional<String> password = cfg.getOptional("password");
@@ -171,7 +150,7 @@ public class JDBCSpace implements AutoCloseable {
             if (user.isEmpty()) {
                 throw new OpConfigError("Both user and password options are required. Only password is supplied in this case.");
             }
-            hikariConfig.setPassword(password.get());
+            connConfig.setPassword(password.get());
         } else {
             if (user.isPresent()) {
                 throw new OpConfigError("Both user and password options are required. Only user is supplied in this case.");
@@ -179,77 +158,56 @@ public class JDBCSpace implements AutoCloseable {
         }
 
         Optional<Boolean> ssl = cfg.getOptional(Boolean.class, "ssl");
-        hikariConfig.addDataSourceProperty("ssl", ssl.orElse(false));
+        connConfig.addDataSourceProperty("ssl", ssl.orElse(false));
 
         Optional<String> sslMode = cfg.getOptional("sslmode");
         if (sslMode.isPresent()) {
-            hikariConfig.addDataSourceProperty("sslmode", sslMode.get());
+            connConfig.addDataSourceProperty("sslmode", sslMode.get());
         } else {
-            hikariConfig.addDataSourceProperty("sslmode", "prefer");
+            connConfig.addDataSourceProperty("sslmode", "prefer");
         }
 
         Optional<String> sslCert = cfg.getOptional("sslcert");
         if (sslCert.isPresent()) {
-            hikariConfig.addDataSourceProperty("sslcert", sslCert.get());
+            connConfig.addDataSourceProperty("sslcert", sslCert.get());
         } /*else if(sslMode.isPresent() && (!"disable".equalsIgnoreCase(sslMode.get()) || !"allow".equalsIgnoreCase(sslMode.get())) || !"prefer".equalsIgnoreCase(sslMode.get())) {
             throw new OpConfigError("When sslmode is true, sslcert should be provided.");
         }*/
 
         Optional<String> sslRootCert = cfg.getOptional("sslrootcert");
         if (sslRootCert.isPresent()) {
-            hikariConfig.addDataSourceProperty("sslrootcert", sslRootCert.get());
+            connConfig.addDataSourceProperty("sslrootcert", sslRootCert.get());
         }
 
-        hikariConfig.addDataSourceProperty("applicationName", cfg.get("applicationName"));
-        hikariConfig.addDataSourceProperty("rewriteBatchedInserts", cfg.getOrDefault("rewriteBatchedInserts", true));
+        connConfig.addDataSourceProperty("applicationName", cfg.get("applicationName"));
+        connConfig.addDataSourceProperty("rewriteBatchedInserts", cfg.getOrDefault("rewriteBatchedInserts", true));
 
-        // We're managing the auto-commit behavior of connections ourselves and hence disabling the auto-commit.
-        Optional<String> autoCommitOpt = cfg.getOptional("autoCommit");
-        boolean autoCommit = false;
-        if (autoCommitOpt.isPresent()) autoCommit = BooleanUtils.toBoolean(autoCommitOpt.get());
-        hikariConfig.setAutoCommit(autoCommit);
-
-        hikariConfig.setKeepaliveTime(Integer.parseInt(cfg.get("keepaliveTime")));
-
-        // HikariCP "maximumPoolSize" parameter is ignored.
+        connConfig.setKeepaliveTime(Integer.parseInt(cfg.get("keepaliveTime")));
         // Use the NB "num_conn" parameter instead, wth 20% extra capacity
-        hikariConfig.setMaximumPoolSize((int)Math.ceil(1.2*maxNumConn));
+        connConfig.setMaximumPoolSize((int) Math.ceil(1.2 * maxNumConn));
 
-        this.hikariDataSource = new HikariDataSource(hikariConfig);
+        if (useHikariCP) {
+            this.hikariDataSource = new HikariDataSource(connConfig);
+            logger.info("hikariDataSource is created : {}", hikariDataSource);
+        }
     }
 
     private void shutdownSpace() {
-        isShuttingDown = true;
-
         try {
-            waitUntilAllOpFinished(System.currentTimeMillis());
-
+            logger.info("Shutting down JDBCSpace -- total {} of connections is being closed ...", connections.size());
             for (Connection connection : connections.values()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Close connection : {}", connection);
+                }
                 connection.close();
             }
         } catch (Exception e) {
             throw new JDBCAdapterUnexpectedException("Unexpected error when trying to close the JDBC connection!");
         }
 
-        hikariDataSource.close();
-    }
-
-    private void waitUntilAllOpFinished(long shutdownStartTimeMills) {
-        final int timeToWaitInSec = 5;
-        long timeElapsedMills;
-        boolean continueChk;
-
-        do {
-            JDBCAdapterUtil.pauseCurThreadExec(1);
-
-            long curTimeMills = System.currentTimeMillis();
-            timeElapsedMills = curTimeMills - shutdownStartTimeMills;
-            continueChk = (timeElapsedMills <= (timeToWaitInSec*1000));
-        } while (continueChk);
-
-        logger.info(
-            "shutdownSpace::waitUntilAllOpFinished -- " +
-            "shutdown time elapsed: " + timeElapsedMills + "ms.");
+        if (hikariDataSource != null) {
+            hikariDataSource.close();
+        }
     }
 
     public static NBConfigModel getConfigModel() {
@@ -259,8 +217,8 @@ public class JDBCSpace implements AutoCloseable {
             .add(Param.defaultTo("dml_batch", DEFAULT_DML_BATCH_NUM)
                 .setDescription("The number of DML write statements in a batch. Defaults to 1. Ignored by DML read statements!" +
                     DEFAULT_DML_BATCH_NUM + "' (no batch)"))
-            .add(Param.defaultTo("url", "jdbc:postgresql:/")
-                .setDescription("The connection URL used to connect to the DBMS. Defaults to 'jdbc:postgresql:/'"))
+            .add(Param.defaultTo("use_hikaricp", "true")
+                .setDescription("Whether to use Hikari connection pooling (default: true)!"))
             .add(Param.defaultTo("url", "jdbc:postgresql:/")
                 .setDescription("The connection URL used to connect to the DBMS. Defaults to 'jdbc:postgresql:/'"))
             .add(Param.defaultTo("serverName", "localhost")

@@ -17,10 +17,12 @@
 package io.nosqlbench.adapter.jdbc.opdispensers;
 
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
+import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterInvalidParamException;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import org.apache.commons.lang3.math.NumberUtils;
 
 public abstract class JDBCBaseOpDispenser extends BaseOpDispenser<JDBCOp, JDBCSpace> {
     protected static final String ERROR_STATEMENT_CREATION =
@@ -38,10 +40,5 @@ public abstract class JDBCBaseOpDispenser extends BaseOpDispenser<JDBCOp, JDBCSp
         this.jdbcSpace = jdbcSpace;
         this.isPreparedStatement = op.getStaticConfigOr("prepared", false);
         this.verifierKeyName = op.getStaticConfigOr("verifier-key", "");
-    }
-    public void checkShutdownEntry(long cycle) {
-        if (cycle == (jdbcSpace.getTotalCycleNum()-1)) {
-            jdbcSpace.enterShutdownStage();
-        }
     }
 }

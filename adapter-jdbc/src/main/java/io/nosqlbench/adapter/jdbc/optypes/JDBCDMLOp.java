@@ -18,7 +18,6 @@ package io.nosqlbench.adapter.jdbc.optypes;
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterInvalidParamException;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
-import io.nosqlbench.adapter.jdbc.exceptions.JDBCPgVectorException;
 import io.nosqlbench.adapter.jdbc.utils.JDBCPgVector;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -73,12 +72,12 @@ public abstract class JDBCDMLOp extends JDBCOp {
     }
 
     // Only applicable to a prepared statement
-    protected PreparedStatement setPrepStmtValues(PreparedStatement stmt, List<Object> valList) {
+    protected PreparedStatement setPrepStmtValues(PreparedStatement stmt) throws SQLException {
         assert (stmt != null);
 
-        for (int i=0; i<valList.size(); i++) {
+        for (int i=0; i<pStmtValList.size(); i++) {
             int fieldIdx = i + 1;
-            Object fieldValObj = valList.get(i);
+            Object fieldValObj = pStmtValList.get(i);
             assert (fieldValObj != null);
 
             try {
@@ -98,8 +97,8 @@ public abstract class JDBCDMLOp extends JDBCOp {
                 }
                 stmt.setObject(fieldIdx, fieldValObj);
             }
-            catch (JDBCPgVectorException | SQLException e) {
-                throw new RuntimeException(
+            catch ( SQLException e) {
+                throw new SQLException(
                     "Failed to parse the prepared statement value for field[" + fieldIdx + "] " + fieldValObj);
             }
         }
@@ -107,41 +106,31 @@ public abstract class JDBCDMLOp extends JDBCOp {
         return stmt;
     }
 
-    protected void processCommit() {
-        try {
-            if (!jdbcConnection.getAutoCommit()) {
-                jdbcConnection.commit();
-                LOGGER.debug(() -> LOG_COMMIT_SUCCESS);
-            }
-        } catch (SQLException e) {
-            throw new JDBCAdapterUnexpectedException("Failed to process JDBC statement commit!");
+
+    protected void processCommit() throws SQLException {
+        if (!jdbcConnection.getAutoCommit()) {
+            jdbcConnection.commit();
+            LOGGER.debug(() -> LOG_COMMIT_SUCCESS);
         }
     }
 
-    protected Statement createDMLStatement() {
+    protected Statement createDMLStatement() throws SQLException {
         Statement stmt = jdbcStmtTL.get();
+        if (stmt == null) {
+            if (isPreparedStmt)
+                stmt = jdbcConnection.prepareStatement(pStmtSqlStr);
+            else
+                stmt = jdbcConnection.createStatement();
 
-        try {
-            if (stmt == null) {
-                if (isPreparedStmt)
-                    stmt = jdbcConnection.prepareStatement(pStmtSqlStr);
-                else
-                    stmt = jdbcConnection.createStatement();
+            jdbcStmtTL.set(stmt);
 
-                jdbcStmtTL.set(stmt);
-
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("A statement is created -- prepared: {}, read/write: {}, stmt: {}",
-                        isPreparedStmt,
-                        isReadStmt ? "read" : "write",
-                        stmt);
-                }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("A statement is created -- prepared: {}, read/write: {}, stmt: {}",
+                    isPreparedStmt,
+                    isReadStmt ? "read" : "write",
+                    stmt);
             }
-
-            return stmt;
-        } catch (SQLException e) {
-            throw new JDBCAdapterUnexpectedException(
-                "Unable to create a prepared JDBC statement");
         }
+        return stmt;
     }
 }
