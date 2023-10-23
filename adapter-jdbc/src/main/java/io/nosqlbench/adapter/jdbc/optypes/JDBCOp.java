@@ -70,7 +70,7 @@ public abstract class JDBCOp implements CycleOp {
                         connectionName, connection);
                 }
 
-                return  connection;
+                return connection;
             }
             catch (Exception ex) {
                 String exp = "Exception occurred while attempting to create a connection (useHikariCP=" +

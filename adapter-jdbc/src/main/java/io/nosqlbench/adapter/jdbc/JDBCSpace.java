@@ -198,8 +198,8 @@ public class JDBCSpace implements AutoCloseable {
             for (Connection connection : connections.values()) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Close connection : {}", connection);
-                    connection.close();
                 }
+                connection.close();
             }
         } catch (Exception e) {
             throw new JDBCAdapterUnexpectedException("Unexpected error when trying to close the JDBC connection!");
