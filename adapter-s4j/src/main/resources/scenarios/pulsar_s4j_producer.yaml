@@ -13,7 +13,7 @@ params:
   async_api: "true"
 
 blocks:
-  msg-produce-block:
+  msg_produce_block:
     ops:
       op1:
         ## The value represents the destination (queue or topic) name

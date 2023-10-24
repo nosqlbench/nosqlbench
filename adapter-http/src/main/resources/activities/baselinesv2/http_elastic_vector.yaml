@@ -10,7 +10,7 @@ scenarios:
     #rampup: run driver=http tags==block:rampup cycles===47341 threads=1
     #rampup: run driver=http tags==block:rampup cycles===1183514 threads=10
 
-  drop-tables:
+  drop_tables:
     schema: run driver=http tags==block:drop-tables threads==1 cycles==UNDEF
   truncate: run driver=http tags==block:truncate-tables cycles===1 threads=1
     #reads: run driver=http tags==block:main-read cycles===TEMPLATE(read-cycles,100) threads=100
@@ -171,7 +171,7 @@ blocks:
           {"index": {} }
           {"value": {train_vector25},"key": {rw_key25}}
 
-      #- rampup-insert: |
+      #- rampup_insert: |
       #   POST TEMPLATE(url, https://TODO.com)/TEMPLATE(index,vector)//_doc?refresh=true
       #    Authorization: ApiKey TEMPLATE(apikey, required)
       #    Content-Type: application/json
@@ -180,12 +180,12 @@ blocks:
       #      "value": {train_vector},
       #      "key": {rw_key}
       #    }
-  main-read:
+  main_read:
     params:
       ratio: TEMPLATE(read_ratio,90)
       instrument: true
     ops:
-      - main-select-ann-limit:
+      - main_select_ann_limit:
           op: |
             POST TEMPLATE(url, https://TODO.com)/TEMPLATE(index,vector)/_search
             Authorization: ApiKey TEMPLATE(apikey, required)
@@ -217,14 +217,14 @@ blocks:
             relevancy.accept({relevant_indices},actual_indices);
             return true;
 
-  main-write:
+  main_write:
     params:
       ratio: TEMPLATE(write_ratio,10)
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
       instrument: true
       prepared: true
     ops:
-      - main-insert: |
+      - main_insert: |
           POST TEMPLATE(url, https://TODO.com)/TEMPLATE(index,vector)/_doc?refresh=true
           Authorization: ApiKey TEMPLATE(apikey, required)
           Content-Type: application/json

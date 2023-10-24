@@ -24,7 +24,7 @@ bindings:
 blocks:
   schema:
     ops:
-      create-table:
+      create_table:
         CreateTable: TEMPLATE(table,keyvalue)
         Keys:
           partkey: HASH
@@ -42,7 +42,7 @@ blocks:
            "partkey": "{seq_key}",
            "value": "{seq_value}"
           }
-  main-write:
+  main_write:
     ops:
       main-putitem:
         PutItem: TEMPLATE(table,keyvalue)
@@ -51,7 +51,7 @@ blocks:
            "partkey": "{rw_key}",
            "value": "{rw_value}"
           }
-  main-read:
+  main_read:
     ops:
       main-getitem:
         GetItem: TEMPLATE(table,keyvalue)

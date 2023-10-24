@@ -39,7 +39,7 @@ bindings:
 blocks:
   schema:
     ops:
-      create-keyspace:
+      create_keyspace:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
@@ -65,7 +65,7 @@ blocks:
 
   rampup:
     ops:
-      rampup-insert:
+      rampup_insert:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"
@@ -77,11 +77,11 @@ blocks:
             "query":"mutation {\n  insertTabular(tabular: {part: \"{part_layout}\", clust: \"{clust_layout}\", data: \"{data}\"}) {\n    part\n    clust\n    data\n  }\n}\n"
           }
 
-  main-read:
+  main_read:
     params:
       ratio: <<read_ratio:1>>
     ops:
-      main-select:
+      main_select:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"
@@ -93,11 +93,11 @@ blocks:
             "query":"{\n  getTabulars(part: \"{part_read}\", clust: \"{clust_read}\") {\n    data {\n      part\n      clust\n      data\n    }\n    pagingState\n  }\n}\n"
           }
 
-  main-write:
+  main_write:
     params:
       ratio: <<write_ratio:9>>
     ops:
-      main-write:
+      main_write:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
         Accept: "application/json"

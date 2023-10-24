@@ -1,11 +1,11 @@
 blocks:
   schema:
     ops:
-      create-keyspace: |
+      create_keyspace: |
         create keyspace if not exists <<keyspace:baselines>>
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
         AND durable_writes = true;
-      create-table: |
+      create_table: |
         CREATE TABLE baselines.alltypes (
           id text PRIMARY KEY,
           f_bigint bigint,

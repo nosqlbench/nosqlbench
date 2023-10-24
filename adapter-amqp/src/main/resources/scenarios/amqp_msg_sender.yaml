@@ -25,7 +25,7 @@ params:
 
 
 blocks:
-  msg-send-block:
+  msg_send_block:
     ops:
       op1:
         AmqpMsgSender: ""

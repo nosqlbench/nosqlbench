@@ -34,22 +34,22 @@ blocks:
     params:
       prepared: false
     ops:
-      create-keyspace: |
+      create_keyspace: |
         create keyspace if not exists <<keyspace:baselines>>
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
         AND durable_writes = true;
-      create-table: |
+      create_table: |
         create table if not exists <<keyspace:baselines>>.<<table:tabular>> (
          part text,
          clust text,
          data text,
          PRIMARY KEY (part,clust)
         );
-  schema-astra:
+  schema_astra:
     params:
       prepared: false
     ops:
-      create-table: |
+      create_table: |
         create table if not exists <<keyspace:baselines>>.<<table:tabular>> (
          part text,
          clust text,
@@ -60,7 +60,7 @@ blocks:
     params:
       cl: <<write_cl:LOCAL_QUORUM>>
     ops:
-      rampup-insert: |
+      rampup_insert: |
          insert into <<keyspace:baselines>>.<<table:tabular>>
          (part,clust,data)
          values ({part_layout},{clust_layout},{data})
@@ -68,22 +68,22 @@ blocks:
     params:
       cl: <<read_cl:LOCAL_QUORUM>>
     ops:
-      verify-select: |
+      verify_select: |
           select * from <<keyspace:baselines>>.<<table:tabular>> where part={part_layout} and clust={clust_layout};
 
-  main-read:
+  main_read:
     params:
       ratio: 5
       cl: <<read_cl:LOCAL_QUORUM>>
     ops:
-      main-select: |
+      main_select: |
         select * from <<keyspace:baselines>>.<<table:tabular>> where part={part_read} limit {limit};
 
-  main-write:
+  main_write:
     params:
       ratio: 5
       cl: <<write_cl:LOCAL_QUORUM>>
     ops:
-      main-write: |
+      main_write: |
         insert into <<keyspace:baselines>>.<<table:tabular>>
         (part, clust, data) values ({part_write},{clust_write},{data_write});

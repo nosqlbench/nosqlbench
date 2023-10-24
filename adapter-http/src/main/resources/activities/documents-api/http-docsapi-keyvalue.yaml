@@ -62,7 +62,7 @@ blocks:
 
   rampup:
     ops:
-      rampup-insert:
+      rampup_insert:
         method: PUT
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections/<<collection:docs_collection>>/{seq_key}
         Accept: "application/json"
@@ -78,7 +78,7 @@ blocks:
     params:
       ratio: <<read_ratio:5>>
     ops:
-      main-select:
+      main_select:
         method: GET
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections/<<collection:docs_collection>>/{rw_key}
         Accept: "application/json"
@@ -86,7 +86,7 @@ blocks:
         X-Cassandra-Token: "{token}"
         ok-status: "[2-4][0-9][0-9]"
 
-      main-write:
+      main_write:
         method: PUT
         uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_keyvalue>>/collections/<<collection:docs_collection>>/{rw_key}
         Accept: "application/json"

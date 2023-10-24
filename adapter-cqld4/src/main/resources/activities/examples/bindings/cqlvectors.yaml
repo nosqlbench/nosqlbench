@@ -3,9 +3,9 @@ description: |
 scenarios:
   default: run driver=stdout cycles=10 format=readout
   simple: run driver=stdout bindings='simple.*' cycles=10 format=readout
-  hof-four: run driver=stdout bindings=hof_vector cycles=10 format=readout
-  hof-vary: run driver=stdout bindings='hof_vary.*' cycles=10 format=readout
-  hof-tenunit: run driver=stdout bindings='"'hof_ten.*' cycles=10 format=readout
+  hof_four: run driver=stdout bindings=hof_vector cycles=10 format=readout
+  hof_vary: run driver=stdout bindings='hof_vary.*' cycles=10 format=readout
+  hof_tenunit: run driver=stdout bindings='"'hof_ten.*' cycles=10 format=readout
 
 bindings:
   # default provides a 5-component vector, with unit-interval values. (Not normalized)

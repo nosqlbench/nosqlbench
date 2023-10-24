@@ -184,7 +184,7 @@ blocks:
   rampup:
     ops:
       # time: BinData(4, "{time}"),
-      rampup-insert: |
+      rampup_insert: |
         {
           insert: "TEMPLATE(collection,timeseries)",
           documents: [
@@ -208,11 +208,11 @@ blocks:
           writeConcern: { w: "majority" },
           comment: "Insert documents into a timeseries collection."
         }
-  main-read:
+  main_read:
     params:
       ratio: TEMPLATE(read_ratio,1)
     ops:
-      select-read:
+      select_read:
         statement: |
           {
             find: "TEMPLATE(collection,timeseries)",
@@ -222,11 +222,11 @@ blocks:
             comment: "Find the value for the given 'machine_id' and 'sensor_name'."
           }
         ratio: TEMPLATE(read_ratio,1)
-  main-write:
+  main_write:
     params:
       ratio: TEMPLATE(write_ratio,9)
     ops:
-      main-insert: 
+      main_insert:
         statement: |
           {
             insert: "TEMPLATE(collection,timeseries)",
@@ -252,7 +252,7 @@ blocks:
             comment: "Insert documents into a timeseries collection."
           }
         ratio: TEMPLATE(write_ratio,9)
-  
+
   # The below drop-collection blocks expects the collection to exist or else this will fail
   drop-collection:
     ops:

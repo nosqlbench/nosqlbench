@@ -17,14 +17,14 @@ scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main-write: run driver=cql tags==block:main-write cycles===TEMPLATE(main-cycles,10000000) threads=auto
-    main-read-ann: run driver=cql tags==block:main-read-ann cycles===TEMPLATE(main-cycles,10000000) threads=auto
-    main-read-pk-ann: run driver=cql tags==block:main-read-pk-ann cycles===TEMPLATE(main-cycles,10000000) threads=auto
-    main-read: run driver=cql tags==block:"main-read.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main_write: run driver=cql tags==block:main-write cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main_read_ann: run driver=cql tags==block:main_read_ann cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main_read_pk_ann: run driver=cql tags==block:main_read_pk_ann cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main_read: run driver=cql tags==block:"main-read.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
     main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
   astra:
     schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
-  drop-tables: run driver=cql tags==block:drop-tables threads==1 cycles==UNDEF
+  drop_tables: run driver=cql tags==block:drop-tables threads==1 cycles==UNDEF
   truncate: run driver=cql tags==block:truncate-tables cycles===1 threads=1
   reads: run driver=cql tags==block:main-read cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
@@ -36,24 +36,24 @@ bindings:
   vector_value: CqlVector(ListSizedHashed(<<dimensions:5>>,HashRange(0.0f,100.0f))); NormalizeCqlVector();
 
 blocks:
-  drop-tables:
+  drop_tables:
     ops:
-      drop-table-vectors:
+      drop_tables_vectors:
         raw: |
           DROP TABLE IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors);
 
-  schema-astra:
+  schema_astra:
     params:
       prepared: false
     ops:
-      create-table:
+      create_table:
         raw: |
           CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (
             key TEXT,
             value vector<float,<<dimensions:5>>>,
             PRIMARY KEY (key)
           );
-      create-sai-index:
+      create_sai_index:
         raw: |
           CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (value) USING 'StorageAttachedIndex';
 
@@ -61,26 +61,26 @@ blocks:
     params:
       prepared: false
     ops:
-      create-keyspace:
+      create_keyspace:
         raw: |
           CREATE KEYSPACE IF NOT EXISTS TEMPLATE(keyspace,baselines)
           WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'};
-      create-table:
+      create_table:
         raw: |
           CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (
             key TEXT,
             value vector<float,<<dimensions:5>>>,
             PRIMARY KEY (key)
           );
-      create-sai-index:
+      create_sai_index:
         raw: |
           CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (value) USING 'StorageAttachedIndex';
 
-  truncate-tables:
+  truncate_tables:
     params:
       prepared: false
     ops:
-      truncate-vectors:
+      truncate_vectors:
         raw: |
           TRUNCATE TABLE TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors);
 
@@ -88,38 +88,38 @@ blocks:
     params:
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     ops:
-      rampup-insert:
+      rampup_insert:
         prepared: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
           (key, value) VALUES ({seq_key},{vector_value});
 
-  main-read-ann:
+  main_read_ann:
     params:
       ratio: TEMPLATE(read_ratio,90)
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
       instrument: true
     ops:
-      main-select-ann-limit:
+      main_select_ann_limit:
         prepared: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) ORDER BY value ANN OF {vector_value} LIMIT TEMPLATE(select_limit,2);
 
-  main-read-pk-ann:
+  main_read_pk_ann:
     params:
       ratio: TEMPLATE(read_ratio,90)
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
       instrument: true
     ops:
-      main-select-pk-ann-limit:
+      main_select_pk_ann_limit:
         prepared: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) WHERE KEY={rw_key} ORDER BY value ANN OF {vector_value} LIMIT TEMPLATE(select_limit,2);
 
-  main-write:
+  main_write:
     params:
       ratio: TEMPLATE(write_ratio,10)
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
       instrument: true
     ops:
-      main-insert:
+      main_insert:
         prepared: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
           (key, value) VALUES ({rw_key}, {vector_value});

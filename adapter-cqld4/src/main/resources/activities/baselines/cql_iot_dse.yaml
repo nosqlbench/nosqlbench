@@ -24,12 +24,12 @@ blocks:
     params:
       prepared: false
     ops:
-      create-keyspace: |
+      create_keyspace: |
         create keyspace if not exists <<keyspace:baselines>>
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
         AND durable_writes = true;
 
-      create-table: |
+      create_table: |
         create table if not exists <<keyspace:baselines>>.<<table:iot>> (
         machine_id UUID,     // source machine
         sensor_name text,    // sensor name
@@ -51,14 +51,14 @@ blocks:
     params:
       prepared: false
     ops:
-      truncate-table: |
+      truncate_table: |
         truncate table TEMPLATE(keyspace, baselines).TEMPLATE(table:iot);
   rampup:
     params:
       cl: <<write_cl:LOCAL_QUORUM>>
       idempotent: true
     ops:
-      rampup-insert: |
+      rampup_insert: |
         insert into  <<keyspace:baselines>>.<<table:iot>> (machine_id, sensor_name, time, sensor_value, station_id, data)
         values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
         using timestamp {cell_timestamp};
@@ -69,26 +69,26 @@ blocks:
       type: read
       verify-fields: "*, -cell_timestamp"
     ops:
-      select-verify: |
+      select_verify: |
         select * from <<keyspace:baselines>>.<<table:iot>> where machine_id={machine_id}
         and sensor_name={sensor_name} and time={time};
 
-  main-read:
+  main_read:
     params:
       ratio: <<read_ratio:1>>
       cl: <<read_cl:LOCAL_QUORUM>>
     ops:
-      select-read: |
+      select_read: |
         select * from <<keyspace:baselines>>.<<table:iot>>
         where machine_id={machine_id} and sensor_name={sensor_name}
         limit <<limit:10>>;
-  main-write:
+  main_write:
     params:
       ratio: <<write_ratio:9>>
       cl: <<write_cl:LOCAL_QUORUM>>
       idempotent: true
     ops:
-      insert-main: |
+      insert_main: |
         insert into <<keyspace:baselines>>.<<table:iot>>
         (machine_id, sensor_name, time, sensor_value, station_id, data)
         values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})

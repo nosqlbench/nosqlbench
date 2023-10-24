@@ -133,7 +133,7 @@ blocks:
         }
   rampup:
     ops:
-      rampup-insert: |
+      rampup_insert: |
         {
           insert: "TEMPLATE(collection,tabular)",
           documents: [
@@ -153,7 +153,7 @@ blocks:
           writeConcern: { w: "majority" },
           comment: "Insert documents into tabular collection."
         }
-  main-read:
+  main_read:
     params:
       ratio: TEMPLATE(read_ratio,1)
     ops:
@@ -233,7 +233,7 @@ blocks:
             comment: "Find the data67 value for the given 'part'."
           }
         ratio: TEMPLATE(read_ratio,1)
-      main-select:
+      main_select:
         statement: |
           {
             find: "TEMPLATE(collection,tabular)",
@@ -244,11 +244,11 @@ blocks:
             comment: "Find the data01234567 value for the given 'part'."
           }
         ratio: TEMPLATE(read_ratio,1)
-  main-write:
+  main_write:
     params:
       ratio: TEMPLATE(write_ratio,8)
     ops:
-      main-insert: 
+      main_insert:
         statement: |
           {
             insert: "TEMPLATE(collection,tabular)",
@@ -269,7 +269,7 @@ blocks:
             comment: "Insert documents into tabular collection."
           }
         ratio: TEMPLATE(write_ratio,8)
-  
+
   # The below drop-collection blocks expects the collection to exist or else this will fail
   drop-collection:
     ops:

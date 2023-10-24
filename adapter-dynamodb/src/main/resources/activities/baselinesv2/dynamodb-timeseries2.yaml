@@ -32,7 +32,7 @@ bindings:
 blocks:
   schema:
     ops:
-      create-table:
+      create_table:
         CreateTable: TEMPLATE(table,timeseries)
         Keys:
           machine_id_sensor_name: HASH

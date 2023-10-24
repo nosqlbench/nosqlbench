@@ -5,7 +5,7 @@ bindings:
 params:
 
 blocks:
-  msg-recv-block:
+  msg_recv_block:
     ops:
       op1:
         AmqpMsgReceiver: ""

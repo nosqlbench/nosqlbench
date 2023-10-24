@@ -36,11 +36,11 @@ blocks:
     params:
       prepared: false
     ops:
-      create-keyspace: |
+      create_keyspace: |
         create keyspace if not exists TEMPLATE(keyspace,baselines)
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
         AND durable_writes = true;
-      create-table: |
+      create_table: |
         create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,iot) (
         machine_id UUID,     // source machine
         sensor_name text,    // sensor name
@@ -61,13 +61,13 @@ blocks:
     params:
       prepared: false
     ops:
-      truncate-table: |
+      truncate_table: |
         truncate table TEMPLATE(keyspace,baselines).TEMPLATE(table,iot);
-  schema-astra:
+  schema_astra:
     params:
       prepared: false
     ops:
-      create-table-astra: |
+      create_table_astra: |
         create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,iot) (
         machine_id UUID,     // source machine
         sensor_name text,    // sensor name
@@ -83,7 +83,7 @@ blocks:
       idempotent: true
       instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
     ops:
-      insert-rampup: |
+      insert_rampup: |
         insert into  TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         (machine_id, sensor_name, time, sensor_value, station_id, data)
         values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
@@ -95,28 +95,28 @@ blocks:
       instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
       verify-fields: "*, -cell_timestamp"
     ops:
-      select-verify: |
+      select_verify: |
         select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         where machine_id={machine_id} and sensor_name={sensor_name} and time={time};
 
-  main-read:
+  main_read:
     params:
       ratio: TEMPLATE(read_ratio,1)
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
       instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
     ops:
-      select-read: |
+      select_read: |
         select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         where machine_id={machine_id} and sensor_name={sensor_name}
         limit TEMPLATE(limit,10);
-  main-write:
+  main_write:
     params:
       ratio: TEMPLATE(write_ratio,9)
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
       instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
       idempotent: true
     ops:
-      insert-main: |
+      insert_main: |
         insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         (machine_id, sensor_name, time, sensor_value, station_id, data)
         values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})

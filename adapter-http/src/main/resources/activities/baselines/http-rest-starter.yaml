@@ -27,7 +27,7 @@ bindings:
 blocks:
   schema:
     ops:
-      create-keyspace:
+      create_keyspace:
         method: POST
         uri: http://<<stargate_host>>:8082/v2/schemas/keyspaces
         Accept: "application/json"
@@ -49,7 +49,7 @@ blocks:
         Content-Type: "application/json"
         ok-status: "[2-4][0-9][0-9]"
 
-      create-table:
+      create_table:
         method: POST
         uri: http://<<stargate_host>>:8082/v2/schemas/keyspaces/starter/tables
         Accept: "application/json"
@@ -79,7 +79,7 @@ blocks:
 
   rampup:
     ops:
-      rampup-insert:
+      rampup_insert:
         method: POST
         uri: http://<<stargate_host>>:8082/v2/keyspaces/starter/http_rest_starter
         Accept: "application/json"
@@ -92,11 +92,11 @@ blocks:
             "value": "{seq_value}"
           }
 
-  main-read:
+  main_read:
     params:
       ratio: 5
     ops:
-      main-select:
+      main_select:
         method: GET
         uri: http://<<stargate_host>>:8082/v2/keyspaces/starter/http_rest_starter/{rw_key}
         Accept: "application/json"
@@ -105,11 +105,11 @@ blocks:
         Content-Type: "application/json"
         ok-status: "[2-4][0-9][0-9]"
 
-  main-write:
+  main_write:
     params:
       ratio: 5
     ops:
-      main-write:
+      main_write:
         method: POST
         uri: http://<<stargate_host>>:8082/v2/keyspaces/starter/http_rest_starter
         Accept: "application/json"

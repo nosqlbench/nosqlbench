@@ -29,8 +29,8 @@ scenarios:
   default:
     schema: run tags=block:schema.* threads==1
     main: run tags=block:main-.*.* cycles===TEMPLATE(main-cycles,0) threads=auto
-    default-schema: run tags=block:"schema.*" threads==1
-    default-main: run tags=block:"main.*" cycles===TEMPLATE(main-cycles,0) threads=auto
+    default_schema: run tags=block:"schema.*" threads==1
+    default_main: run tags=block:"main.*" cycles===TEMPLATE(main-cycles,0) threads=auto
   astra:
     schema: run tags=block:astra-schema threads==1
     main: run tags=block:"main.*" cycles===TEMPLATE(main-cycles,0) threads=auto
@@ -50,21 +50,21 @@ bindings:
 blocks:
   schema:
     ops:
-      create-keyspace: |
+      create_keyspace: |
           create keyspace if not exists TEMPLATE(keyspace,baselines)
           WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
           AND durable_writes = true;
-      create-table: |
+      create_table: |
           create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) (
           key text,
            value text,
            PRIMARY KEY (key)
           );
-  schema-astra:
+  schema_astra:
     params:
       prepared: false
     ops:
-      create-table: |
+      create_table: |
           create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) (
           key text,
            value text,
@@ -74,23 +74,23 @@ blocks:
     params:
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     ops:
-      rampup-insert: |
+      rampup_insert: |
           insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental)
           (key, value)
           values ({rampup_key},{rampup_value});
-  main-read:
+  main_read:
     params:
       ratio: 1
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
     ops:
-      main-select: |
+      main_select: |
           select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental) where key={read_key};
-  main-write:
+  main_write:
     params:
       ratio: 1
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     ops:
-      main-insert: |
+      main_insert: |
           insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,incremental)
           (key, value) values ({write_key}, {write_value});
 

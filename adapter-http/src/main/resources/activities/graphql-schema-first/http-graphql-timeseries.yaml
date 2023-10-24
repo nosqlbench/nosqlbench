@@ -39,7 +39,7 @@ bindings:
 blocks:
   schema:
     ops:
-      create-keyspace:
+      create_keyspace:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
@@ -65,7 +65,7 @@ blocks:
 
   rampup:
     ops:
-      rampup-insert:
+      rampup_insert:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
         Accept: "application/json"
@@ -77,11 +77,11 @@ blocks:
             "query":"mutation {\n  insertIot(iot: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", sensor_value: {sensor_value}, station_id: \"{station_id}\", data: \"{data}\"}) {\n    machine_id\n    sensor_name\n    time\n    sensor_value\n    station_id\n    data\n  }\n}\n"
           }
 
-  main-read:
+  main_read:
     params:
       ratio: <<read_ratio:1>>
     ops:
-      main-select:
+      main_select:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
         Accept: "application/json"
@@ -93,11 +93,11 @@ blocks:
             "query":"{\n  getIots(machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\") {\n    data {\n      machine_id\n      sensor_name\n      time\n      sensor_value\n      station_id\n      data\n    }\n  }\n}\n"
           }
 
-  main-write:
+  main_write:
     params:
       ratio: <<write_ratio:9>>
     ops:
-      main-write:
+      main_write:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_timeseries>>
         Accept: "application/json"

@@ -15,8 +15,8 @@ scenarios:
   default:
     schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
-    main-read: run driver=http tags==block:"main-read.*" cycles===TEMPLATE(main-cycles,10) threads=auto
-    main-write: run driver=http tags==block:"main-write.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+    main_read: run driver=http tags==block:"main-read.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+    main_write: run driver=http tags==block:"main-write.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 
 bindings:
@@ -36,7 +36,7 @@ blocks:
     params:
       prepared: false
     ops:
-      create-keyspace:
+      create_keyspace:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
@@ -46,7 +46,7 @@ blocks:
         body: >2
           {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_iot>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
 
-      create-table:
+      create_table:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
@@ -58,7 +58,7 @@ blocks:
 
   rampup:
     ops:
-      rampup-insert:
+      rampup_insert:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_iot>>
         Accept: "application/json"
@@ -68,11 +68,11 @@ blocks:
         body: >2
           {"query":"mutation insertReading {\n  reading: insert<<table:iot>>( value: {machine_id: \"{machine_id}\", sensor_name: \"{sensor_name}\", time: \"{time}\", data: \"{data}\", sensor_value: {sensor_value}, station_id: \"{station_id}\"}) {value {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
 
-  main-read:
+  main_read:
     params:
       ratio: <<read_ratio:1>>
     ops:
-      main-select:
+      main_select:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_iot>>
         Accept: "application/json"
@@ -82,11 +82,11 @@ blocks:
         body: >2
           {"query":"query readings {<<table:iot>>(value: {machine_id: \"{machine_id}\",sensor_name: \"{sensor_name}\"}, options: { pageSize: <<limit:10>> }) {values {machine_id, sensor_name, time, data, sensor_value, station_id}}}"}
 
-  main-write:
+  main_write:
     params:
       ratio: <<write_ratio:9>>
     ops:
-      main-write:
+      main_write:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_iot>>
         Accept: "application/json"

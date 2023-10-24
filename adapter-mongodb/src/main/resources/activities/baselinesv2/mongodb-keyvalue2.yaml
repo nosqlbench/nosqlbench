@@ -82,7 +82,7 @@ blocks:
         }
   rampup:
     ops:
-      rampup-insert: |
+      rampup_insert: |
         {
           insert: "TEMPLATE(collection,keyvalue)",
           documents: [
@@ -93,22 +93,22 @@ blocks:
           ],
           comment: "Insert documents into keyvalue collection."
         }
-  main-read:
+  main_read:
     params:
       ratio: 5
     ops:
-      main-select: |
+      main_select: |
         {
           find: "TEMPLATE(collection,keyvalue)",
           filter: { key: { $eq: "{rw_key}" } },
           readConcern: { level: "majority" },
           comment: "Find the value for the given 'key'."
         }
-  main-write:
+  main_write:
     params:
       ratio: 5
     ops:
-      main-insert: |
+      main_insert: |
         {
           insert: "TEMPLATE(collection,keyvalue)",
           documents: [

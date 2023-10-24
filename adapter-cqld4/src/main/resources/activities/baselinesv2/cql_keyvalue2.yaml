@@ -34,21 +34,21 @@ blocks:
     params:
       prepared: false
     ops:
-      create-keyspace: |
+      create_keyspace: |
         create keyspace if not exists TEMPLATE(keyspace,baselines)
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf:1)'}
         AND durable_writes = true;
-      create-table: |
+      create_table: |
         create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
         key text,
          value text,
          PRIMARY KEY (key)
         );
-  schema-astra:
+  schema_astra:
     params:
       prepared: false
     statements:
-      create-table: |
+      create_table: |
         create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
         key text,
          value text,
@@ -58,7 +58,7 @@ blocks:
     params:
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     ops:
-      rampup-insert: |
+      rampup_insert: |
         insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
         (key, value)
         values ({seq_key},{seq_value});
@@ -66,21 +66,21 @@ blocks:
     params:
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
     ops:
-      verify-select: |
+      verify_select: |
         select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) where key={seq_key};
       verify-fields: key->seq_key, value->seq_value
-  main-read:
+  main_read:
     params:
       ratio: 5
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
     statements:
-      main-select: |
+      main_select: |
         select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) where key={rw_key};
-  main-write:
+  main_write:
     params:
       ratio: 5
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     statements:
-      main-insert: |
+      main_insert: |
         insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
         (key, value) values ({rw_key}, {rw_value});

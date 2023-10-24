@@ -109,7 +109,7 @@ blocks:
         }
   rampup:
     ops:
-      rampup-insert: |
+      rampup_insert: |
         {
           insert: "TEMPLATE(collection,keyvalue)",
           documents: [
@@ -120,7 +120,7 @@ blocks:
           ],
           comment: "Insert documents into keyvalue collection."
         }
-  main-read:
+  main_read:
     params:
       ratio: TEMPLATE(read_ratio,5)
     ops:
@@ -167,11 +167,11 @@ blocks:
           actual_indices=MongoDbUtils.getFieldFromResults("key",result);
           relevancy.accept({relevant_indices},actual_indices);
           return true;
-  main-write:
+  main_write:
     params:
       ratio: TEMPLATE(write_ratio,5)
     ops:
-      main-insert: |
+      main_insert: |
         {
           insert: "TEMPLATE(collection,keyvalue)",
           documents: [

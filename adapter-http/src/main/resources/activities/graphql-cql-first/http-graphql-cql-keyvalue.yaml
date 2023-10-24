@@ -26,7 +26,7 @@ bindings:
 blocks:
   schema:
     ops:
-      create-keyspace:
+      create_keyspace:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
@@ -36,7 +36,7 @@ blocks:
         body: >2
           {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_keyvalue>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
 
-      create-table:
+      create_table:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
@@ -48,7 +48,7 @@ blocks:
 
   rampup:
     ops:
-      rampup-insert:
+      rampup_insert:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
         Accept: "application/json"
@@ -58,11 +58,11 @@ blocks:
         body: |
           {"query":"mutation {\n  insert<<table:keyvalue>>( value: {key: \"{seq_key}\", value: \"{seq_value}\",}) {value {key, value}}}"}
 
-  main-read:
+  main_read:
     params:
       ratio: <<read_ratio:5>>
     ops:
-      main-select:
+      main_select:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
         Accept: "application/json"
@@ -72,11 +72,11 @@ blocks:
         body: |
           {"query":"{<<table:keyvalue>>(value: {key: \"{rw_key}\"}) {values {key, value}}}"}
 
-  main-write:
+  main_write:
     params:
       ratio: <<write_ratio:5>>
     ops:
-      main-write:
+      main_write:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
         Accept: "application/json"

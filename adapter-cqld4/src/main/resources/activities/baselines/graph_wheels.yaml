@@ -8,8 +8,8 @@ scenarios:
     creategraph: run driver=cqld4 graphname=graph_wheels tags=block:create-graph cycles===UNDEF
     schema: run driver=cqld4 graphname=graph_wheels tags=block:graph-schema cycles===UNDEF
     rampup: run driver==cqld4 graphname=graph_wheels tags=block:rampup cycles=1
-  drop-graph: run driver=cqld4 graphname=graph_wheels tags=block:drop-graph cycles===UNDEF
-  creategraph-classic: run driver=cqld4 graphname=graph_wheels tags=block:create-graph-classic cycles===UNDEF
+  drop_graph: run driver=cqld4 graphname=graph_wheels tags=block:drop-graph cycles===UNDEF
+  creategraph_classic: run driver=cqld4 graphname=graph_wheels tags=block:create_graph_classic cycles===UNDEF
   fluent: run driver=cqld4 graphname=graph_wheels tags=block:fluent cycles=10
   devmode: run driver=cqld4 graphname=graph_wheels tags=name:dev-mode
   prodmode: run driver=cqld4 graphname=graph_wheels tags=name:prod-mode
@@ -26,12 +26,12 @@ bindings:
   diag_one_pct: WeightedLongs('1:1;0:99')
 
 blocks:
-  drop-graph:
+  drop_graph:
     statements:
-      drop-graph:
+      drop_graph:
         type: gremlin
         script: "system.graph('<<graphname:graph_wheels>>').ifExists().drop();"
-  create-graph-classic:
+  create_graph_classic:
     statements:
       creategraph:
         type: gremlin
@@ -39,15 +39,15 @@ blocks:
           system.graph('<<graphname:graph_wheels>>')
            .classicEngine()
            .create()
-  create-graph:
+  create_graph:
     statements:
       creategraph:
        type: gremlin
        script: >-
          system.graph('<<graphname:graph_wheels>>').ifNotExists().create()
-  create-schema:
+  create_schema:
     statements:
-      graph-schema:
+      graph_schema:
         type: gremlin
         graphname: <<graphname:graph_wheels>>
         script: >-
@@ -72,20 +72,20 @@ blocks:
            .from('session')
            .to('device')
            .create()
-  dev-mode:
+  dev_mode:
     tags:
       block: dev-mode
     statements:
-      dev-mode:
+      dev_mode:
        type: gremlin
        graphname: <<graphname:graph_wheels>>
        script: >-
         schema.config().option('graph.schema_mode').set('Development');
-  prod-mode:
+  prod_mode:
     tags:
       block: prod-mode
     statements:
-      prod-mode:
+      prod_mode:
         type: gremlin
         graphname: <<graphname:graph_wheels>>
         script: >-
@@ -94,7 +94,7 @@ blocks:
     tags:
       block: rampup
     statements:
-      main-add:
+      main_add:
         type: gremlin
         diag: "{diag_one_pct}"
         graphname: <<graphname:graph_wheels>>

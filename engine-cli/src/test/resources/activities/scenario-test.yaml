@@ -5,16 +5,16 @@ scenarios:
     schema: run  driver==stdout workload===scenario-test  tags=block:"schema.*"
     rampup: run  driver=stdout  workload===scenario-test  tags=block:rampup cycles=TEMPLATE(cycles1,10)
     main: run    driver=stdout  workload===scenario-test  tags=block:"main.*" cycles=TEMPLATE(cycles2,10)
-  schema-only:
+  schema_only:
     schema: run driver=stdout workload==scenario-test tags=block:"schema.*" doundef==undef
 
-  template-test:
-    with-template: run driver=stdout cycles=TEMPLATE(cycles-test,10)
+  template_test:
+    with_template: run driver=stdout cycles=TEMPLATE(cycles-test,10)
 
 blocks:
   schema:
     ops:
-      create-keyspace: |
+      create_keyspace: |
           create keyspace if not exists puppies
   rampup:
     ops:

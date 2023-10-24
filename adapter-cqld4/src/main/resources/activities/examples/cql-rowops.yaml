@@ -13,15 +13,15 @@ bindings:
 blocks:
   schema:
     ops:
-      create-keyspace: |
+      create_keyspace: |
         create KEYSPACE if not exists TEMPLATE(keyspace,examples)
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}
         AND durable_writes = 'true';
-      create-users-table: |
+      create_users_table: |
         create table if not exists TEMPLATE(keyspace,examples).users (
           userid text PRIMARY KEY
         );
-      create-interests-table: |
+      create_interests_table: |
         create table if not exists TEMPLATE(keyspace,examples).interests (
           userid text,
           interest text,
@@ -29,9 +29,9 @@ blocks:
         );
   rampup:
     ops:
-      insert-users: |
+      insert_users: |
         insert into TEMPLATE(keyspace,examples).users (userid) VALUES ({userid});
-      insert-interests: |
+      insert_interests: |
         insert into TEMPLATE(keyspace,examples).interests(
          interest,    userid
         ) VALUES (
@@ -39,9 +39,9 @@ blocks:
         );
   main:
     ops:
-      read-user: |
+      read_user: |
         select * from TEMPLATE(keyspace,examples).users
          where userid={userid};
-      read interests: |
+      read_interests: |
         select * from TEMPLATE(keyspace,examples).interests
          where interest={interest};

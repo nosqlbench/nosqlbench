@@ -4,8 +4,8 @@ scenarios:
     schema: run driver=cql tags=block:"schema.*" threads===UNDEF cycles===UNDEF
     rampup: run driver=cql tags=block:"rampup.*" threads=auto cycles===TEMPLATE(rampup-cycles,10000)
     main: run driver=cql tags=block:"main.*" threads=auto cycles===TEMPLATE(main-cycles,10000)
-  main-insert: run driver=cql tags=block:main-insert threads=auto cycles===TEMPLATE(main-cycles,10000)
-  main-select: run driver=cql tags=block:main-select threads=auto cycles===TEMPLATE(main-cycles,10000)
+  main_insert: run driver=cql tags=block:main-insert threads=auto cycles===TEMPLATE(main-cycles,10000)
+  main_select: run driver=cql tags=block:main-select threads=auto cycles===TEMPLATE(main-cycles,10000)
   main-scan: run driver=cql tags=block:main-scan threads=auto cycles===TEMPLATE(main-cycles,10000)
   main-update: run driver=cql tags=block:main-update threads=auto cycles===TEMPLATE(main-cycles,10000)
   truncate: run driver=cql tags=block:'truncate.*' threads===UNDEF cycles===UNDEF
@@ -13,7 +13,7 @@ scenarios:
   schema-types: run driver=cql tags=block:schema-types threads===UNDEF cycles===UNDEF
   schema-tables: run driver=cql tags=block:schema-tables threads===UNDEF cycles===UNDEF
   drop: run driver=cql tags=block:'drop.*' threads===UNDEF cycles===UNDEF
-  drop-tables: run driver=cql tags=block:drop-tables threads===UNDEF cycles===UNDEF
+  drop_tables: run driver=cql tags=block:drop-tables threads===UNDEF cycles===UNDEF
   drop-types: run driver=cql tags=block:drop-types threads===UNDEF cycles===UNDEF
   drop-keyspaces: run driver=cql tags=block:drop-keyspaces threads===UNDEF cycles===UNDEF
 bindings:
@@ -91,7 +91,7 @@ blocks:
       }
     ops: {
       }
-  truncate-tables:
+  truncate_tables:
     params:
       timeout: 900.0
     ops:
@@ -102,7 +102,7 @@ blocks:
       }
     ops: {
       }
-  drop-tables:
+  drop_tables:
     params:
       timeout: 900.0
     ops:
@@ -124,7 +124,7 @@ blocks:
           VALUES
           ( {text}, {bigint}, {blob}, {boolean}, {date}, {decimal}, {double}, {duration}, {float}, {frozen<list<int>>}, {list<text>}, {map<text,text>}, {set<text>}, {smallint}, {text}, {time}, {timestamp}, {timeuuid}, {tinyint}, {uuid}, {text}, {varint}, {ascii}, {inet}, {int} );
         ratio: 1
-  main-insert:
+  main_insert:
     params:
       timeout: 10.0
     ops:
@@ -135,7 +135,7 @@ blocks:
           VALUES
           ( {text}, {bigint}, {blob}, {boolean}, {date}, {decimal}, {double}, {duration}, {float}, {frozen<list<int>>}, {list<text>}, {map<text,text>}, {set<text>}, {smallint}, {text}, {time}, {timestamp}, {timeuuid}, {tinyint}, {uuid}, {text}, {varint}, {ascii}, {inet}, {int} );
         ratio: 1
-  main-select:
+  main_select:
     params:
       timeout: 10.0
     ops:

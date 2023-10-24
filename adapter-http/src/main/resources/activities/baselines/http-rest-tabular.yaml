@@ -37,7 +37,7 @@ bindings:
 blocks:
   schema:
     ops:
-      create-keyspace:
+      create_keyspace:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
         Accept: "application/json"
@@ -59,7 +59,7 @@ blocks:
         Content-Type: "application/json"
         ok-status: "[2-4][0-9][0-9]"
 
-      create-table:
+      create_table:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
         Accept: "application/json"
@@ -96,7 +96,7 @@ blocks:
 
   rampup:
     ops:
-      rampup-insert:
+      rampup_insert:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"
@@ -110,11 +110,11 @@ blocks:
             "data": "{data}"
           }
 
-  main-read:
+  main_read:
     params:
       ratio: 5
     ops:
-      main-select:
+      main_select:
         method: GET
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
         Accept: "application/json"
@@ -122,11 +122,11 @@ blocks:
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
 
-  main-write:
+  main_write:
     params:
       ratio: 5
     ops:
-      main-write:
+      main_write:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
         Accept: "application/json"

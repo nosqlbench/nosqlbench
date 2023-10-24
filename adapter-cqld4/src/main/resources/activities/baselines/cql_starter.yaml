@@ -35,11 +35,11 @@ blocks:
     params:
       prepared: false
     ops:
-      create-keyspace: |
+      create_keyspace: |
         create keyspace if not exists <<keyspace:starter>>
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
         AND durable_writes = true;
-      create-table: |
+      create_table: |
         create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
         machine_id UUID,
         message text,
@@ -47,11 +47,11 @@ blocks:
         PRIMARY KEY ((machine_id), time)
         ) WITH CLUSTERING ORDER BY (time DESC);
 
-  schema-astra:
+  schema_astra:
     params:
       prepared: false
     ops:
-      create-table-astra: |
+      create_table_astra: |
         create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
         machine_id UUID,
         message text,
@@ -64,29 +64,29 @@ blocks:
       cl: <<write_cl:LOCAL_QUORUM>>
       idempotent: true
     ops:
-      insert-rampup: |
+      insert_rampup: |
         insert into  <<keyspace:starter>>.<<table:cqlstarter>> (machine_id, message, time)
         values ({machine_id}, {rampup_message}, {time}) using timestamp {ts};
 
   rampdown:
     ops:
-      truncate-table: |
+      truncate_table: |
         truncate table <<keyspace:starter>>.<<table:cqlstarter>>;
 
-  main-read:
+  main_read:
     params:
       ratio: <<read_ratio:1>>
       cl: <<read_cl:LOCAL_QUORUM>>
     ops:
-      select-read: |
+      select_read: |
         select * from <<keyspace:starter>>.<<table:cqlstarter>>
         where machine_id={machine_id};
-  main-write:
+  main_write:
     params:
       ratio: <<write_ratio:9>>
       cl: <<write_cl:LOCAL_QUORUM>>
       idempotent: true
     ops:
-      insert-main: |
+      insert_main: |
         insert into <<keyspace:starter>>.<<table:cqlstarter>>
         (machine_id, message, time) values ({machine_id}, {message}, {time}) using timestamp {ts};

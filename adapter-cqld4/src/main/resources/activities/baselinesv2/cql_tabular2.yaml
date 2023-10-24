@@ -73,11 +73,11 @@ blocks:
     params:
       prepared: false
     ops:
-      create-keyspace: |
+      create_keyspace: |
         create keyspace if not exists TEMPLATE(keyspace,baselines)
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
         AND durable_writes = true;
-      create-table: |
+      create_table: |
         create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) (
          part text,
          clust text,
@@ -85,11 +85,11 @@ blocks:
          data4 text, data5 text, data6 text, data7 text,
          PRIMARY KEY (part,clust)
         );
-  schema-astra:
+  schema_astra:
     params:
       prepared: false
     ops:
-      create-table: |
+      create_table: |
         create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) (
          part text,
          clust text,
@@ -101,7 +101,7 @@ blocks:
     params:
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     ops:
-      rampup-insert: |
+      rampup_insert: |
         insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
         (part,clust,data0,data1,data2,data3,data4,data5,data6,data7)
         values ({part_layout},{clust_layout},{data0},{data1},{data2},{data3},{data4},{data5},{data6},{data7});
@@ -109,35 +109,35 @@ blocks:
     params:
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
     ops:
-      verify-select: |
+      verify_select: |
         select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_layout} and clust={clust_layout};
-  main-read:
+  main_read:
     params:
       ratio: 1
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
     ops:
-      main-select-all: |
+      main_select_all: |
         select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
-      main-select-01: |
+      main_select_01: |
         select data0,data1 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
-      main-select-0246: |
+      main_select_0246: |
         select data0,data2,data4,data6 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
-      main-select-1357: |
+      main_select_1357: |
         select data1,data3,data5,data7 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
-      main-select-0123: |
+      main_select_0123: |
         select data0,data1,data2,data3 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
-      main-select-4567: |
+      main_select_4567: |
         select data4,data5,data6,data7 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
-      main-select-67: |
+      main_select_67: |
         select data6,data7 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
-      main-select: |
+      main_select: |
         select data0,data1,data2,data3,data4,data5,data6,data7 from TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular) where part={part_read} limit {limit};
-  main-write:
+  main_write:
     params:
       ratio: 8
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
     ops:
-      main-write: |
+      main_write: |
         insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,tabular)
         (part, clust, data0,data1,data2,data3,data4,data5,data6,data7)
         values ({part_write},{clust_write},{data0},{data1},{data2},{data3},{data4},{data5},{data6},{data7})

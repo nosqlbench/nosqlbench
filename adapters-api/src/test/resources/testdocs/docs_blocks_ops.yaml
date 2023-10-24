@@ -6,7 +6,7 @@ scenarios:
   default:
     - run driver=stdout alias=step1
     - run driver=stdout alias=step2
-  schema-only:
+  schema_only:
     - run driver=blah tags=block:"schema.*"
 
 tags:

@@ -28,7 +28,7 @@ bindings:
 blocks:
   schema:
     ops:
-      create-keyspace:
+      create_keyspace:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
         Accept: "application/json"
@@ -49,7 +49,7 @@ blocks:
         Content-Type: "application/json"
         ok-status: "[2-4][0-9][0-9]"
 
-      create-table:
+      create_table:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
         Accept: "application/json"
@@ -77,9 +77,9 @@ blocks:
             "ifNotExists": true
           }
 
-  schema-astra:
+  schema_astra:
     ops:
-      create-table-astra:
+      create_table_astra:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
         Accept: "application/json"
@@ -108,7 +108,7 @@ blocks:
           }
   rampup:
     ops:
-      rampup-insert:
+      rampup_insert:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:keyvalue>>
         Accept: "application/json"
@@ -121,11 +121,11 @@ blocks:
             "value": "{seq_value}"
           }
 
-  main-read:
+  main_read:
     params:
       ratio: <<read_ratio:5>>
     ops:
-      main-select:
+      main_select:
         method: GET
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:keyvalue>>/{rw_key}
         Accept: "application/json"
@@ -134,11 +134,11 @@ blocks:
         Content-Type: "application/json"
         ok-status: "[2-4][0-9][0-9]"
 
-  main-write:
+  main_write:
     params:
       ratio: <<write_ratio:5>>
     ops:
-      main-write:
+      main_write:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:keyvalue>>
         Accept: "application/json"

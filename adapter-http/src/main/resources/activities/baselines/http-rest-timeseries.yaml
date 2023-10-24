@@ -3,7 +3,7 @@ min_version: "5.17.3"
 description: >2
   NOTE: THIS VERSION IS NOT FUNCTIONING FULLY AND HAS AN OPEN TICKET TO INVESTIGATE:
   See here: https://github.com/nosqlbench/nosqlbench/issues/1148
-  
+
   This workload emulates a time-series data model and access patterns.
   This should be identical to the cql variant except for:
   - We can't specify the write timestamp to make the write idempotent like we can with cql.
@@ -34,7 +34,7 @@ bindings:
 blocks:
   rampup:
     ops:
-      rampup-insert:
+      rampup_insert:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>
         Accept: "application/json"
@@ -53,7 +53,7 @@ blocks:
 
   schema:
     ops:
-      create-keyspace:
+      create_keyspace:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
         Accept: "application/json"
@@ -75,7 +75,7 @@ blocks:
         Content-Type: "application/json"
         ok-status: "[2-4][0-9][0-9]"
 
-      create-table:
+      create_table:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
         Accept: "application/json"
@@ -137,11 +137,11 @@ blocks:
             "ifNotExists": true
           }
 
-  main-read:
+  main_read:
     params:
       ratio: <<read_ratio:1>>
     ops:
-      main-select:
+      main_select:
         method: GET
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>?where=URLENCODE[[{"machine_id":{"$eq":"{machine_id}"},"sensor_name":{"$eq":"{sensor_name}"}}]]&page-size=<<limit:10>>
         Accept: "application/json"
@@ -149,11 +149,11 @@ blocks:
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
 
-  main-write:
+  main_write:
     params:
       ratio: <<write_ratio:9>>
     ops:
-      main-write:
+      main_write:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:iot>>
         Accept: "application/json"

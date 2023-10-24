@@ -11,9 +11,9 @@ description: |
 scenarios:
   default:
     schema: run driver=http tags==block:"schema.*" threads==1 cycles==UNDEF
-    rampup-insert: run driver=http tags==block:"rampup-insert.*" cycles===TEMPLATE(rampup-cycles,12) threads=auto
-    main-read: run driver=http tags==block:"main-read.*" cycles===TEMPLATE(main-cycles,12) threads=auto
-    main-write: run driver=http tags==block:"main-write.*" cycles===TEMPLATE(main-cycles,12) threads=auto
+    rampup_insert: run driver=http tags==block:"rampup-insert.*" cycles===TEMPLATE(rampup-cycles,12) threads=auto
+    main_read: run driver=http tags==block:"main-read.*" cycles===TEMPLATE(main-cycles,12) threads=auto
+    main_write: run driver=http tags==block:"main-write.*" cycles===TEMPLATE(main-cycles,12) threads=auto
 
 bindings:
   weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
@@ -35,7 +35,7 @@ bindings:
 blocks:
   schema:
     ops:
-      create-keyspace:
+      create_keyspace:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
@@ -45,7 +45,7 @@ blocks:
         body: >2
           {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_tabular>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
 
-      create-table:
+      create_table:
         method: POST
         uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
         Accept: "application/json"
@@ -55,7 +55,7 @@ blocks:
         body: >2
           {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_tabular>>\"\n    tableName: \"<<table:tabular>>\"\n    partitionKeys: [{ name: \"part\", type: { basic: TEXT } }]\n    clusteringKeys: [{ name: \"clust\", type: { basic: TEXT } }]\n    values: [{ name: \"data\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}\n"}
 
-  rampup-insert:
+  rampup_insert:
     ops:
       action:
         method: POST
@@ -67,7 +67,7 @@ blocks:
         body: >2
           {"query":"mutation {\n  insert<<table:tabular>>( value: {part: \"{part_layout}\", clust: \"{clust_layout}\", data: \"{data}\"}) {value {part, clust, data}}}"}
 
-  main-read:
+  main_read:
     params:
       ratio: 5
     ops:
@@ -80,9 +80,9 @@ blocks:
         Content-Type: "application/json"
         body: >2
           {"query":"{<<table:tabular>>(value: {part: \"{part_read}\"}, options: { pageSize: <<limit:10>> }) {values {part, clust, data}}}"}
-  
 
-  main-write:
+
+  main_write:
     params:
       ratio: 5
     ops:

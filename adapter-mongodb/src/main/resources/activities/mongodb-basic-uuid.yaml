@@ -16,7 +16,7 @@ blocks:
     readPreference: primary
   rampup:
     ops:
-      rampup-insert: |
+      rampup_insert: |
         {
           insert: "<<collection:keyvalueuuid>>",
           documents: [ { _id: UUID("{seq_uuid}"),
@@ -34,7 +34,7 @@ blocks:
           find: "<<collection:keyvalueuuid>>",
           filter: { _id: UUID("{seq_uuid}") }
         }
-  main-read:
+  main_read:
     params:
       ratio: <<read_ratio:1>>
       type: read
@@ -45,13 +45,13 @@ blocks:
           find: "<<collection:keyvalueuuid>>",
           filter: { _id: UUID("{rw_uuid}") }
         }
-  main-write:
+  main_write:
     params:
       ratio: <<write_ratio:1>>
       type: write
       readPreference: primary
     ops:
-      main-insert: |
+      main_insert: |
         {
           insert: "<<collection:keyvalueuuid>>",
           documents: [ { _id: UUID("{rw_uuid}")
