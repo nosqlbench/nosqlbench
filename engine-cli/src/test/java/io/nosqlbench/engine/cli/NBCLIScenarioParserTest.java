@@ -178,10 +178,10 @@ public class NBCLIScenarioParserTest {
                 "tags", "block:\"schema.*\"",
                 "workload", "scenario_test"
         ));
-        NBCLIOptions opts1 = new NBCLIOptions(new String[]{"local/example-scenarios", "namedsteps.one", "testparam1=testvalue2"});
+        NBCLIOptions opts1 = new NBCLIOptions(new String[]{"local/example_scenarios", "namedsteps.one", "testparam1=testvalue2"});
         List<Cmd> cmds1 = opts1.getCommands();
         assertThat(cmds1.size()).isEqualTo(1);
-        assertThat(cmds1.get(0).getArg("cycles-test")).isNull();
+        assertThat(cmds1.get(0).getArg("cycles_test")).isNull();
 
     }
 }
