@@ -34,7 +34,7 @@
     </description>
 
     <properties>
-        <amqp.version>5.17.0</amqp.version>
+        <amqp.version>5.18.0</amqp.version>
     </properties>
 
     <dependencies>
