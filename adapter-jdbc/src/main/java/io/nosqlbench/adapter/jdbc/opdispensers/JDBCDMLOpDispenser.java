@@ -48,6 +48,39 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
         this.isDdlStatement = false;
         this.isReadStatement = isReadStmt;
 
+        int numConnInput = Integer.parseInt(op.getStaticConfig("num_conn", String.class));
+
+        // Only apply 'one-thread-per-connection' limit to the WRITE workload
+        //    due to the fact that the PostgreSQL connection is not thread safe
+        // For the READ workload, Do NOT apply this limitation.
+        int threadNum = jdbcSpace.getTotalThreadNum();
+        int maxNumConnFinal = numConnInput;
+
+        // For write workload, avoid thread-safety issue by using a constrained connection number
+        // For read workload, it is ok to use more threads than available connections
+        if (!isReadStmt)  {
+            if (threadNum > numConnInput) {
+                throw new JDBCAdapterInvalidParamException(
+                    "JDBC connection is NOT thread safe. For write workload, the total NB thread number (" + threadNum +
+                        ") can NOT be greater than the maximum connection number 'num_conn' (" + numConnInput + ")"
+                );
+            }
+        }
+        maxNumConnFinal = Math.min(threadNum, maxNumConnFinal);
+        if (maxNumConnFinal < 1) {
+            throw new JDBCAdapterInvalidParamException(
+                "'num_conn' NB CLI parameter must be a positive number!"
+            );
+        }
+        jdbcSpace.setMaxNumConn(maxNumConnFinal);
+
+        logger.info("Total {} JDBC connections will be created [isReadStmt:{}, threads/{}, num_conn/{}]; " +
+                "dml_batch: {}, autoCommit: {}",
+            maxNumConnFinal, isReadStmt, threadNum, numConnInput,
+            jdbcSpace.getDmlBatchNum(), jdbcSpace.isAutoCommit());
+
+        // TODO: this is a current limitation applied by this adapter
+        //       improve this behavior by allowing the user to choose
         if (!isPreparedStatement && !isReadStatement) {
             throw new JDBCAdapterInvalidParamException("DML write statements MUST be prepared!");
         }
@@ -69,8 +102,6 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
 
     @Override
     public JDBCDMLOp apply(long cycle) {
-        checkShutdownEntry(cycle);
-
         if (isReadStatement) {
             return new JDBCDMLReadOp(
                 jdbcSpace,

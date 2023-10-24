@@ -20,6 +20,7 @@ import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -44,24 +45,22 @@ public class JDBCDMLWriteOp extends JDBCDMLOp {
     @Override
     public Object apply(long value) {
         int trackingCnt = threadBatchTrackingCntTL.get();
-        trackingCnt = trackingCnt + 1;
+        trackingCnt++;
         threadBatchTrackingCntTL.set(trackingCnt);
 
-        PreparedStatement stmt = (PreparedStatement) super.createDMLStatement();
-        stmt = super.setPrepStmtValues(stmt, this.pStmtValList);
-
         try {
+            assert (isPreparedStmt);
+            PreparedStatement stmt = (PreparedStatement) super.createDMLStatement();
+            stmt = super.setPrepStmtValues(stmt);
+
             // No batch
             if (ddlStmtBatchNum == 1) {
                 int result_cnt = stmt.executeUpdate();
                 super.processCommit();
-                closeStatement(stmt);
-
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("[single ddl - execution] cycle:{}, result_cnt: {}, stmt: {}",
                         value, result_cnt, stmt);
                 }
-
                 return result_cnt;
             }
             // Use batch
@@ -71,12 +70,12 @@ public class JDBCDMLWriteOp extends JDBCDMLOp {
                     LOGGER.debug("[batch ddl - adding to batch] cycle:{},  stmt: {}",
                         value, stmt);
                 }
-
-                if ( (trackingCnt % ddlStmtBatchNum == 0) || jdbcSpace.isShuttingDown() ) {
+                // NOTE: if the total number of cycles is not the multiple of the batch number,
+                //       some records in a batch may not be written to the database
+                //       To avoid this, make sure the total cycle number is the multiple of the batch number
+                if (trackingCnt % ddlStmtBatchNum == 0) {
                     int[] counts = stmt.executeBatch();
                     processCommit();
-                    closeStatement(stmt);
-
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("[batch ddl - execution] cycle:{}, total_batch_res_cnt:{}, stmt: {}",
                             value, counts, stmt);

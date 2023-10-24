@@ -52,15 +52,6 @@ public class JDBCOpMapper implements OpMapper<JDBCOp> {
         String spaceName = op.getStaticConfigOr("space", "default");
         JDBCSpace jdbcSpace = spaceCache.get(spaceName);
 
-        int nbThreadNum = NumberUtils.toInt(op.getStaticConfig("threads", String.class));
-        int maxConnNum =  jdbcSpace.getMaxNumConn();
-        if (nbThreadNum > maxConnNum) {
-            throw new JDBCAdapterInvalidParamException(
-                "JDBC connection is NOT thread safe. The total NB thread number (" + nbThreadNum +
-                    ") can NOT be greater than the maximum connection number 'num_conn' (" + maxConnNum + ")"
-            );
-        }
-
         /*
          * If the user provides a body element, then they want to provide the JSON or
          * a data structure that can be converted into JSON, bypassing any further
