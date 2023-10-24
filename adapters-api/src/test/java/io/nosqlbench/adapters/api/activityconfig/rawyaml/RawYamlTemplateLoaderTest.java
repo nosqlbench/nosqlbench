@@ -68,13 +68,13 @@ public class RawYamlTemplateLoaderTest {
             "a quintessential description - this is superseded by dedicated specification tests and will be removed");
 
         RawScenarios rawScenarios = rawOpsDoc.getRawScenarios();
-        assertThat(rawScenarios.getScenarioNames()).containsExactly("default", "schema-only");
+        assertThat(rawScenarios.getScenarioNames()).containsExactly("default", "schema_only");
         Map<String, String> defaultScenario = rawScenarios.getNamedScenario("default");
         assertThat(defaultScenario.keySet())
             .containsExactly("000","001");
         assertThat(defaultScenario.values())
             .containsExactly("run driver=stdout alias=step1","run driver=stdout alias=step2");
-        Map<String, String> schemaOnlyScenario = rawScenarios.getNamedScenario("schema-only");
+        Map<String, String> schemaOnlyScenario = rawScenarios.getNamedScenario("schema_only");
         assertThat(schemaOnlyScenario.keySet())
             .containsExactly("000");
         assertThat(schemaOnlyScenario.values())
