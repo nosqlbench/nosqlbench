@@ -413,6 +413,8 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
                 finish(true);
                 return result;
             }
+        } catch (Exception e2) {
+            throw new RuntimeException(e2);
         }
 
     }
@@ -426,6 +428,9 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
      * has been completed at least.
      */
     private void awaitMotorsAtLeastRunning() {
+        if (this.exception!=null) {
+            return;
+        }
         RunStateImage states = tally.awaitAny(RunState.Running, RunState.Stopped, RunState.Finished, RunState.Errored);
         RunState maxState = states.getMaxState();
         if (maxState == RunState.Errored) {
@@ -489,7 +494,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         RunState maxState = state.getMaxState();
         activity.setRunState(maxState);
         if (maxState == RunState.Errored) {
-            throw new RuntimeException("Error while waiting for activity completion:" + this.exception);
+            throw new RuntimeException("Error while waiting for activity completion" + (this.exception!=null ? this.exception.toString() : ""));
         }
     }
 

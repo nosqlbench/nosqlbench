@@ -235,6 +235,13 @@ public class PromExpositionFormat {
 
         if (!word.equals(sanitized)) {
             logger.warn("The identifier or value '" + word + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
+            StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+            StringBuilder stb = new StringBuilder();
+            for (StackTraceElement element : elements) {
+                stb.append("\tat ").append(element).append("\n");
+            }
+            logger.warn("stacktrace: " + stb.toString());
+
         }
         return sanitized;
     }

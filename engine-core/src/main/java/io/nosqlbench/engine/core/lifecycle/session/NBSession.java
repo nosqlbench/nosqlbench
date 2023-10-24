@@ -100,6 +100,8 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
             try (NBComponentSubScope scope = new NBComponentSubScope(scenario)) {
                 scenariosExecutor.execute(scenario, params);
                 //             this.doReportSummaries(this.reportSummaryTo, this.result);
+            } catch (Exception e) {
+                results.error(e);
             }
             final ScenariosResults scenariosResults = scenariosExecutor.awaitAllResults();
             logger.debug(() -> "Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");

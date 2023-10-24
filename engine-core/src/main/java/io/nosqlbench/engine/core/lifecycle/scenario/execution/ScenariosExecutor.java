@@ -85,7 +85,7 @@ public class ScenariosExecutor extends NBBaseComponent {
      * @return the final scenario-result map.
      */
     public ScenariosResults awaitAllResults() {
-        return awaitAllResults(Long.MAX_VALUE / 2, 60000); // half max value, to avoid overflow
+        return awaitAllResults(Long.MAX_VALUE / 2, 10000); // half max value, to avoid overflow
     }
 
     /**
@@ -103,30 +103,40 @@ public class ScenariosExecutor extends NBBaseComponent {
         long timeoutAt = System.currentTimeMillis() + timeout;
 
         executor.shutdown();
-        boolean isShutdown = false;
-
-        while (!isShutdown && System.currentTimeMillis() < timeoutAt) {
-            long waitedAt = System.currentTimeMillis();
-            long updateAt = Math.min(timeoutAt, waitedAt + updateInterval);
-            while (!isShutdown && System.currentTimeMillis() < timeoutAt) {
-                while (!isShutdown && System.currentTimeMillis() < updateAt) {
-                    try {
-                        long timeRemaining = updateAt - System.currentTimeMillis();
-                        isShutdown = executor.awaitTermination(timeRemaining, TimeUnit.MILLISECONDS);
-                    } catch (InterruptedException ignored) {
-                    }
+        try {
+            while (!executor.awaitTermination(timeout, TimeUnit.MILLISECONDS)) {
+                if (System.currentTimeMillis()>=timeoutAt) {
+                    throw new RuntimeException("executor still running scenarios after awaiting all results for " + timeout
+                        + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
                 }
-                logger.trace(() -> "waited " + (System.currentTimeMillis()-waitFrom) + " millis for scenarios");
-                updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
             }
-
-            logger.debug("scenarios executor shutdown after " + (System.currentTimeMillis() - waitedAt) + "ms.");
+        } catch (InterruptedException ignored) {
         }
 
-        if (!isShutdown) {
-            throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
-                + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
-        }
+//        while (!executor.isShutdown() && System.currentTimeMillis() < timeoutAt) {
+//            long waitedAt = System.currentTimeMillis();
+//            long updateAt = Math.min(timeoutAt, waitedAt + updateInterval);
+//            while (!executor.isShutdown() && System.currentTimeMillis() < timeoutAt) {
+//                while (!executor.isShutdown() && System.currentTimeMillis() < updateAt) {
+//                    try {
+//                        long timeRemaining = updateAt - System.currentTimeMillis();
+//                        if  (executor.awaitTermination(timeRemaining, TimeUnit.MILLISECONDS)) {
+//                            logger.info("executor shutdown during await");
+//                        }
+//                    } catch (InterruptedException ignored) {
+//                    }
+//                }
+//                logger.trace(() -> "waited " + (System.currentTimeMillis()-waitFrom) + " millis for scenarios");
+//                updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
+//            }
+//
+//            logger.debug("scenarios executor shutdown after " + (System.currentTimeMillis() - waitedAt) + "ms.");
+//        }
+//
+//        if (!executor.isShutdown()) {
+//            throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
+//                + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
+//        }
         Map<NBScenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
         getAsyncResultStatus()
             .entrySet()

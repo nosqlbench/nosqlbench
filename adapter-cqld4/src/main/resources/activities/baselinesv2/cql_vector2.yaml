@@ -15,7 +15,7 @@ description: |
 
 scenarios:
   cassandra:
-    drop: run tags='block:drop' labels='target:astra' threads===1 cycles===2
+    drop: run tags='block:drop' threads==undef cycles==undef
     # nb5 cql-vector2 cassandra.schema host=localhost localdc=datacenter1 dimensions=100
     schema: run tags='block:schema' threads==undef cycles==undef
     # nb5 cql-vector2 cassandra.rampup host=localhost localdc=datacenter1 dimensions=100 trainsize=1000000 dataset=glove-100-angular rate=10000
@@ -25,8 +25,8 @@ scenarios:
       run alias=search_and_index tags='block:search_and_index,optype=select' labels='target:cassandra'
       cycles=TEMPLATE(testsize) errors=counter,warn threads=1
   astra_vectors:
-    drop: run tags='block:drop' labels='target:astra' threads===1 cycles===2 driverconfig=app.conf
-    schema: run tags='block:schema' labels='target:astra' threads===1 cycles===2
+    drop: run tags='block:drop' labels='target:astra' threads==undef cycles==undef driverconfig=app.conf
+    schema: run tags='block:schema' labels='target:astra' threads==undef cycles==undef
     rampup: run tags='block:rampup' labels='target:astra' threads=100 cycles=TEMPLATE(trainsize) errors=counter
 #    search_and_index_unthrottled: >-
 #      run tags='block:search_and_index,optype=select' labels='target:astra'

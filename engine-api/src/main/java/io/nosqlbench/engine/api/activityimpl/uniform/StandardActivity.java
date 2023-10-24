@@ -36,6 +36,7 @@ import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.events.NBEvent;
 import io.nosqlbench.components.events.ParamChange;
+import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.StrideRateSpec;
@@ -55,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <R> A type of runnable which wraps the operations for this type of driver.
  * @param <S> The context type for the activity, AKA the 'space' for a named driver instance and its associated object graph
  */
-public class StandardActivity<R extends Op, S> extends SimpleActivity implements SyntheticOpTemplateProvider {
+public class StandardActivity<R extends Op, S> extends SimpleActivity implements SyntheticOpTemplateProvider, ActivityDefObserver {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
 
     private final OpSequence<OpDispenser<? extends Op>> sequence;
@@ -203,6 +204,25 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         }
     }
 
+//    @Override
+//    public synchronized void onActivityDefUpdate(final ActivityDef activityDef) {
+//        super.onActivityDefUpdate(activityDef);
+//
+//        for (final DriverAdapter adapter : this.adapters.values())
+//            if (adapter instanceof NBReconfigurable reconfigurable) {
+//                NBConfigModel cfgModel = reconfigurable.getReconfigModel();
+//                final Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+//                if (op_yaml_loc.isPresent()) {
+//                    final Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
+//                    final OpsDocList workload = OpsLoader.loadPath(op_yaml_loc.get(), disposable, "activities");
+//                    cfgModel = cfgModel.add(workload.getConfigModel());
+//                }
+//                final NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
+//                reconfigurable.applyReconfig(cfg);
+//            }
+//
+//    }
+
     @Override
     public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> cfg) {
         List<OpTemplate> opTemplates = new ArrayList<>();
@@ -257,4 +277,6 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             default -> super.onEvent(event);
         }
     }
+
+
 }

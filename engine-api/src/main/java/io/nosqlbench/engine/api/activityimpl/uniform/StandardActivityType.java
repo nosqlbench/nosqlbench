@@ -35,22 +35,31 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class StandardActivityType<A extends StandardActivity<?,?>> extends SimpleActivity implements ActivityType<A> {
+public class StandardActivityType<A extends StandardActivity<?,?>> implements ActivityType<A> {
 
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final Map<String, DriverAdapter> adapters = new HashMap<>();
+    private final NBComponent parent;
+//    private final DriverAdapter<?, ?> adapter;
+    private final ActivityDef activityDef;
 
     public StandardActivityType(final DriverAdapter<?,?> adapter, final ActivityDef activityDef, final NBComponent parent) {
-        super(parent,activityDef
-            .deprecate("type","driver")
-            .deprecate("yaml", "workload")
-        );
+        this.parent = parent;
+//        this.adapter = adapter;
+        this.activityDef = activityDef;
+//        super(parent,activityDef
+//            .deprecate("type","driver")
+//            .deprecate("yaml", "workload")
+//        );
         adapters.put(adapter.getAdapterName(),adapter);
         if (adapter instanceof ActivityDefAware) ((ActivityDefAware) adapter).setActivityDef(activityDef);
     }
 
     public StandardActivityType(final ActivityDef activityDef, final NBComponent parent) {
-        super(parent,activityDef);
+        this.parent = parent;
+        this.activityDef = activityDef;
+
+//        super(parent,activityDef);
     }
 
     @Override
@@ -61,33 +70,10 @@ public class StandardActivityType<A extends StandardActivity<?,?>> extends Simpl
         return (A) new StandardActivity(parent, activityDef);
     }
 
-    @Override
-    public synchronized void onActivityDefUpdate(final ActivityDef activityDef) {
-        super.onActivityDefUpdate(activityDef);
-
-        for (final DriverAdapter adapter : this.adapters.values())
-            if (adapter instanceof NBReconfigurable reconfigurable) {
-                NBConfigModel cfgModel = reconfigurable.getReconfigModel();
-                final Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
-                if (op_yaml_loc.isPresent()) {
-                    final Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
-                    final OpsDocList workload = OpsLoader.loadPath(op_yaml_loc.get(), disposable, "activities");
-                    cfgModel = cfgModel.add(workload.getConfigModel());
-                }
-                final NBConfiguration cfg = cfgModel.apply(activityDef.getParams());
-                reconfigurable.applyReconfig(cfg);
-            }
-
-    }
 
     @Override
     public ActionDispenser getActionDispenser(final A activity) {
         return new StandardActionDispenser(activity);
     }
 
-
-    @Override
-    public void shutdownActivity() {
-
-    }
 }

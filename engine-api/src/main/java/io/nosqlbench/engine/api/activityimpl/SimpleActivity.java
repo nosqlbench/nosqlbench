@@ -202,7 +202,7 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
     }
 
     public String toString() {
-        return activityDef.getAlias() + ':' + this.runState + ':' + this.tally;
+        return (activityDef!=null ? activityDef.getAlias() : "unset_alias" )  + ':' + this.runState + ':' + this.tally ;
     }
 
     @Override

@@ -75,6 +75,7 @@ public class ScenarioActivitiesController extends NBBaseComponent {
     private ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
         if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
             Activity activity = this.activityLoader.loadActivity(activityDef, this);
+            activity.initActivity();
             ActivityExecutor executor = new ActivityExecutor(activity);
             Future<ExecutionResult> startedActivity = executorService.submit(executor);
             ActivityRuntimeInfo activityRuntimeInfo = new ActivityRuntimeInfo(activity, startedActivity, executor);
