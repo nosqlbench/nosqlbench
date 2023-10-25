@@ -18,11 +18,14 @@ package io.nosqlbench.api.engine.metrics.reporters;
 
 import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.api.system.NBEnvironment;
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.PeriodicTaskComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
@@ -39,69 +42,28 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
 
-public class PromPushReporterComponent extends PeriodicTaskComponent implements NBConfigurable {
+public class PromPushReporterComponent extends PeriodicTaskComponent {
     private static final Logger logger = LogManager.getLogger(PromPushReporterComponent.class);
+    private final Path keyfilePath;
     private HttpClient client;
     private final URI uri;
     private String bearerToken;
-    private boolean needsAuth;
 
-    public PromPushReporterComponent(
-        final String targetUriSpec,
-        final String config,
-        long millis,
-        NBComponent component,
-        NBLabels labels
-    ) {
-        super(component, labels, millis, true);
-
-        uri = URI.create(targetUriSpec);
-        needsAuth = false;
-        ConfigLoader loader = new ConfigLoader();
-        List<Map> configs = loader.load(config, Map.class);
-        NBConfigModel cm = this.getConfigModel();
-        if (configs != null) {
-            logger.info("PromPushReporter process configuration: %s", config);
-            for (Map cmap : configs) {
-                NBConfiguration cfg = cm.apply(cmap);
-                this.applyConfig(cfg);
+    public PromPushReporterComponent(NBComponent parent, URI endpoint, long intervalMs, NBLabels nbLabels) {
+        super(parent,nbLabels,intervalMs,true);
+        this.uri = endpoint;
+        this.keyfilePath = NBEnvironment.INSTANCE
+            .interpolateWithTimestamp("$NBSTATEDIR/prompush/prompush_apikey", System.currentTimeMillis())
+            .map(Path::of)
+            .orElseThrow(() -> new RuntimeException("Unable to create path for apikey file: $NBSTATEDIR/prompush/prompush_apikey"));
+        if (Files.isRegularFile(keyfilePath)) {
+            try {
+                logger.info("Reading Bearer Token from {}", keyfilePath);
+                this.bearerToken = Files.readString(keyfilePath).trim();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-        } else {
-            logger.info("PromPushReporter default configuration");
-            HashMap<String, String> junk = new HashMap<>(Map.of());
-            NBConfiguration cfg = cm.apply(junk);
-            this.applyConfig(cfg);
         }
-    }
-
-    @Override
-    public NBConfigModel getConfigModel() {
-        return ConfigModel.of(this.getClass())
-            .add(Param.defaultTo("apikeyfile", "$NBSTATEDIR/prompush/prompush_apikey")
-                .setDescription("The file that contains the api key, supersedes apikey"))
-            .add(Param.optional("apikey", String.class)
-                .setDescription("The api key to use"))
-            .asReadOnly();
-    }
-
-    @Override
-    public void applyConfig(NBConfiguration cfg) {
-        Path keyfilePath = null;
-        Optional<String> optionalApikeyfile = cfg.getEnvOptional("apikeyfile");
-        Optional<String> optionalApikey = cfg.getOptional("apikey");
-        bearerToken = null;
-        if (optionalApikeyfile.isPresent()) {
-            keyfilePath = optionalApikeyfile.map(Path::of).orElseThrow();
-            if (Files.isRegularFile(keyfilePath)) {
-                logger.info("Reading Bearer Token from %s", keyfilePath);
-                PromPushKeyFileReader keyfile = new PromPushKeyFileReader(keyfilePath);
-                bearerToken = keyfile.get();
-            }
-        } else if (optionalApikey.isPresent()) {
-            bearerToken = optionalApikey.get();
-        }
-        needsAuth = (null != bearerToken);
-        bearerToken = "Bearer " + bearerToken;
     }
 
     public void task() {
@@ -131,8 +93,8 @@ public class PromPushReporterComponent extends PeriodicTaskComponent implements 
             remainingRetries--;
             final HttpClient client = getCachedClient();
             final HttpRequest.Builder rb = HttpRequest.newBuilder().uri(uri);
-            if (needsAuth) {
-                rb.setHeader("Authorization", bearerToken);
+            if (bearerToken!=null) {
+                rb.setHeader("Authorization", "Bearer " + bearerToken);
             }
             final HttpRequest request = rb.POST(BodyPublishers.ofString(exposition)).build();
             final BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();

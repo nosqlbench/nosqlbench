@@ -107,7 +107,7 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
 
     @Override
     public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> params) {
-        return OpsLoader.loadString("noop: noop", OpTemplateFormat.inline, params,null).getOps();
+        return OpsLoader.loadString("noop: noop", OpTemplateFormat.inline, params,null).getOps(true);
 //        return OpsLoader.loadString("log:level=INFO", OpTemplateFormat.inline, params,null).getOps();
     }
 

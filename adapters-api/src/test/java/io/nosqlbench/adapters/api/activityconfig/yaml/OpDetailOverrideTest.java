@@ -47,7 +47,7 @@ public class OpDetailOverrideTest {
         assertThat(s.getStmt()).contains("globalstatement1");
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
-        assertThat(s.getTags()).isEqualTo(Map.of("block","block0","global_tag1","tag value","name","block0__stmt1"));
+        assertThat(s.getTags()).isEqualTo(Map.of("block","block0","global_tag1","tag value","name","block0__stmt1", "op","stmt1"));
 
         OpsBlock doc1block1 = doc1.getBlocks().get(1);
         List<OpTemplate> ops = doc1block1.getOps();
@@ -56,14 +56,14 @@ public class OpDetailOverrideTest {
         s = ops.get(0);
         assertThat(s.getName()).isEqualTo("testblock1__stmt1");
         assertThat(s.getStmt()).contains("astatement1");
-        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1__stmt1"));
+        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1__stmt1","op","stmt1"));
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 
         s = ops.get(1);
         assertThat(s.getName()).isEqualTo("testblock1__s2name");
         assertThat(s.getStmt()).contains("s2statement data");
-        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1__s2name"));
+        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1__s2name","op","s2name"));
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 
@@ -78,7 +78,7 @@ public class OpDetailOverrideTest {
         s = ops.get(3);
         assertThat(s.getName()).isEqualTo("testblock1__s4");
         assertThat(s.getStmt()).contains("statement 4");
-        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1__s4"));
+        assertThat(s.getTags()).isEqualTo(Map.of("block","testblock1","global_tag1","tag value","name","testblock1__s4","op","s4"));
         assertThat(s.getBindings()).hasSize(1);
         assertThat(s.getParams()).hasSize(1);
 

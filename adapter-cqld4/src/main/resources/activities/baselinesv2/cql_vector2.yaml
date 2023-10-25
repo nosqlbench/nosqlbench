@@ -1,3 +1,4 @@
+min_version: 5.21
 description: |
   This is a template for live vector search testing.
 
@@ -17,7 +18,7 @@ scenarios:
   cassandra:
     drop: run tags='block:drop' threads==undef cycles==undef
     # nb5 cql-vector2 cassandra.schema host=localhost localdc=datacenter1 dimensions=100
-    schema: run tags='block:schema' threads==undef cycles==undef
+    schema: run tags='op=create_.*' threads==undef cycles==undef
     # nb5 cql-vector2 cassandra.rampup host=localhost localdc=datacenter1 dimensions=100 trainsize=1000000 dataset=glove-100-angular rate=10000
     rampup: run tags='block:rampup' threads=auto cycles=TEMPLATE(trainsize,set-the-trainsize) errors=counter,warn
     # nb5 cql-vector2 cassandra.search_and_index testsize=10000 host=localhost localdc=datacenter1 dimensions=100 dataset=glove-100-angular --report-csv-to rmetrics:.*:5s
@@ -25,16 +26,14 @@ scenarios:
       run alias=search_and_index tags='block:search_and_index,optype=select' labels='target:cassandra'
       cycles=TEMPLATE(testsize) errors=counter,warn threads=1
   astra_vectors:
-    drop: run tags='block:drop' labels='target:astra' threads==undef cycles==undef driverconfig=app.conf
-    schema: run tags='block:schema' labels='target:astra' threads==undef cycles==undef
-    rampup: run tags='block:rampup' labels='target:astra' threads=100 cycles=TEMPLATE(trainsize) errors=counter
+    drop: run tags='block:drop' tags='block:drop' threads==undef cycles==undef
+    schema: run tags='block:schema' tags='op=create_.*(table|index)' threads==undef cycles==undef dimensions==TEMPLATE(dimensions,25)
+    train: run tags='block:rampup' threads=auto cycles=TEMPLATE(trainsize) errors=counter,warn maxtries=2 dimensions==TEMPLATE(dimensions,25)
 #    search_and_index_unthrottled: >-
 #      run tags='block:search_and_index,optype=select' labels='target:astra'
 #      cycles=TEMPLATE(testsize) threads=10 errors=count,retry stride=500 errors=counter
-    search_and_index: >-
-      run alias=search_and_index tags='block:search_and_index,optype=select' labels='target:astra'
-      cycles=TEMPLATE(testsize) errors=count,retry stride=100 striderate=7.50
-      errors=counter threads=500
+    testann: >-
+      run tags='block:testann' cycles=TEMPLATE(testsize) errors=count,retry maxtries=2 threads=auto
     # one activity or two? data leap-frog? or concurrency separate for both?
   #  await_index: run tags='block:await_index' # This would need to exit when a condition is met
   #  stop_search_and_index: stop search_and_index
@@ -50,10 +49,10 @@ params:
 bindings:
   id: ToString()
   # This
-  test_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/test"); ToCqlVector();
-  relevant_indices: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
-  distance_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/distance")
-  train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train"); ToCqlVector();
+  test_floatlist: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/test"); ToCqlVector();
+  relevant_indices: HdfFileToIntArray("testdata/TEMPLATE(datafile).hdf5", "/neighbors")
+  distance_floatlist: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/distance")
+  train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/train"); ToCqlVector();
   synthetic_vectors: HashedFloatVectors(TEMPLATE(dimensions));
 
 blocks:
@@ -75,23 +74,18 @@ blocks:
         raw: |
           CREATE KEYSPACE IF NOT EXISTS TEMPLATE(keyspace,baselines)
           WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};
-        target: cassandra
       create_table:
         raw: |
           CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (
             key TEXT,
-            value vector<float,TEMPLATE(dimensions)>,
+            value vector<float,TEMPLATE(dimensions,set-the-dimensions-template-var)>,
             PRIMARY KEY (key)
           );
-        tags:
-          target: astra
       create_sai_index:
         raw: |
           CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (value) USING 'StorageAttachedIndex'
           WITH OPTIONS = {'similarity_function' : 'TEMPLATE(similarity_function,cosine)'};
 #         WITH OPTIONS = {'maximum_node_connections' : TEMPLATE(M,16), 'construction_beam_width' : TEMPLATE(ef,100), 'similarity_function' : 'TEMPLATE(similarity_function,dot_product)'};
-        tags:
-          target: astra
   rampup:
     params:
       cl: TEMPLATE(write_cl,LOCAL_QUORUM)
@@ -102,7 +96,7 @@ blocks:
         (key, value) VALUES ({id},{train_floatlist});
 #  await_index:
 #    ops:
-  search_and_index:
+  testann:
     ops:
       select_ann_limit_TEMPLATE(k,100):
         prepared: |

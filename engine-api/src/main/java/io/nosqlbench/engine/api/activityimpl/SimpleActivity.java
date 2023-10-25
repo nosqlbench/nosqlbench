@@ -528,8 +528,8 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
 
         OpsDocList opsDocList = loadStmtsDocList();
 
-        List<OpTemplate> unfilteredOps = opsDocList.getOps();
-        List<OpTemplate> filteredOps = opsDocList.getOps(tagfilter);
+        List<OpTemplate> unfilteredOps = opsDocList.getOps(false);
+        List<OpTemplate> filteredOps = opsDocList.getOps(tagfilter, true);
 
         if (0 == filteredOps.size()) {
             // There were no ops, and it *wasn't* because they were all filtered out.
@@ -555,6 +555,7 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
                         3) driver=stdout (or any other drive that can synthesize ops)""");
             }
             if (0 == filteredOps.size()) {
+
                 throw new BasicError("There were no active op templates with tag filter '" + tagfilter + '\'');
             }
         }

@@ -57,7 +57,7 @@ public class HttpOpMapperTest {
 
     private static ParsedOp parsedOpFor(final String yaml) {
         final OpsDocList docs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, Map.of(), null);
-        final OpTemplate opTemplate = docs.getOps().get(0);
+        final OpTemplate opTemplate = docs.getOps(true).get(0);
         final ParsedOp parsedOp = new ParsedOp(opTemplate, HttpOpMapperTest.cfg, List.of(HttpOpMapperTest.adapter.getPreprocessor()), new TestComponent("parent","parent"));
         return parsedOp;
     }

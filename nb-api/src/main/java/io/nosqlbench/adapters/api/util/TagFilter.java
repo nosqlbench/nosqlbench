@@ -189,7 +189,7 @@ public class TagFilter {
      *
      * @return a Result telling whether the tags matched and why or why not
      */
-    protected Result matches(Map<String, String> tags) {
+    protected Result<Map<String,String>> matches(Map<String, String> tags) {
 
         List<String> log = new ArrayList<>();
 
@@ -229,11 +229,15 @@ public class TagFilter {
             totalKeyMatches += matchedKey ? 1 : 0;
         }
         boolean matched = conjugate.matchfunc.apply(filter.size(),totalKeyMatches);
-        return new Result(matched, log);
+        if (filter.keySet().isEmpty()) {
+            log.add("(<☑>) " + tags.toString() + " : matched empty pattern");
+        }
+        return new Result<>(tags, matched, log);
     }
 
-    public Result matchesTaggedResult(Tagged item) {
-        return matches(item.getTags());
+    public <T extends Tagged> Result<T> matchesTaggedResult(T item) {
+        Result<Map<String, String>> matches = matches(item.getTags());
+        return new Result<>(item,matches.matched(),matches.matchLog);
     }
 
     public boolean matchesTagged(Tagged item) {
@@ -244,33 +248,26 @@ public class TagFilter {
         return filter;
     }
 
-    public static class Result {
+    public static class Result<T> {
         private final boolean matched;
         private final List<String> matchLog;
+        private final T element;
 
-        public Result(boolean matched, List<String> log) {
+        public Result(T element, boolean matched, List<String> log) {
+            this.element = element;
             this.matched = matched;
             this.matchLog = log;
         }
 
-        public static Result Matched(String reason) {
-            return new Result(true, new ArrayList<String>() {{
-                add(reason);
-            }});
+        public T getElement() {
+            return element;
         }
-
-        public static Result Unmatched(String reason) {
-            return new Result(false, new ArrayList<String>() {{
-                add(reason);
-            }});
-        }
-
         public boolean matched() {
             return this.matched;
         }
 
         public String getLog() {
-            return this.matchLog.stream().collect(Collectors.joining("\n"));
+            return String.join("\n", this.matchLog);
         }
     }
 }

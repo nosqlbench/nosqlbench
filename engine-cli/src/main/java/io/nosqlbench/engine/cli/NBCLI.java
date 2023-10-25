@@ -27,6 +27,8 @@ import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.engine.metrics.reporters.CsvReporter;
 import io.nosqlbench.api.engine.metrics.reporters.MetricInstanceFilter;
+import io.nosqlbench.api.engine.metrics.reporters.PromPushReporterComponent;
+import io.nosqlbench.api.engine.util.Unit;
 import io.nosqlbench.api.errors.BasicError;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
@@ -42,14 +44,8 @@ import io.nosqlbench.engine.cli.NBCLIOptions.Mode;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.clientload.ClientSystemMetricChecker;
-import io.nosqlbench.engine.core.clientload.DiskStatsReader;
-import io.nosqlbench.engine.core.clientload.LoadAvgReader;
-import io.nosqlbench.engine.core.clientload.MemInfoReader;
-import io.nosqlbench.engine.core.clientload.NetDevReader;
-import io.nosqlbench.engine.core.clientload.StatReader;
 import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
-import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 import io.nosqlbench.engine.core.logging.LoggerConfig;
 import io.nosqlbench.engine.core.metadata.MarkdownFinder;
@@ -58,11 +54,13 @@ import io.nosqlbench.nb.annotations.ServiceSelector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
+import picocli.CommandLine;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -210,12 +208,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             }
         }
 
-        String reportGraphiteTo = globalOptions.wantsReportGraphiteTo();
         String annotatorsConfig = globalOptions.getAnnotatorsConfig();
-        String promPushConfig = globalOptions.getPromPushConfig();
-        final String reportPromPushTo = globalOptions.wantsReportPromPushTo();
-
-        String graphiteMetricsAddress = null;
 
         if (annotatorsConfig == null || annotatorsConfig.isBlank()) {
             List<Map<String, String>> annotatorsConfigs = new ArrayList<>();
@@ -224,16 +217,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                     "level", "info"
             ));
 
-            if (null != graphiteMetricsAddress) {
-                reportGraphiteTo = graphiteMetricsAddress + ":9109";
-                annotatorsConfigs.add(Map.of(
-                        "type", "grafana",
-                        "baseurl", "http://" + graphiteMetricsAddress + ":3000",
-                        "tags", "appname:nosqlbench",
-                        "timeoutms", "5000",
-                        "onerror", "warn"
-                ));
-            }
             Gson gson = new GsonBuilder().create();
             annotatorsConfig = gson.toJson(annotatorsConfigs);
         }
@@ -411,6 +394,20 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             MetricInstanceFilter filter = new MetricInstanceFilter();
             filter.addPattern(cfg.pattern);
             new CsvReporter(session,Path.of(cfg.file), cfg.millis, filter);
+        });
+
+        options.wantsReportPromPushTo().ifPresent(cfg -> {
+            String[] words = cfg.split(",");
+            String uri;
+            long intervalMs=10_000L;
+
+            switch (words.length) {
+                case 2: intervalMs= Unit.msFor(words[1]).orElseThrow(() -> new RuntimeException("can't parse '" + words[1] + "!"));
+                case 1: uri = words[0];
+                break;
+                default: throw new RuntimeException("Unable to parse '" + cfg + "', must be in <URI> or <URI>,ms form");
+            }
+            session.create().pushReporter(uri,intervalMs,NBLabels.forKV());
         });
 
 

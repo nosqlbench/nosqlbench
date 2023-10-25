@@ -110,7 +110,7 @@ public class YamlSpecValidator implements STAssemblyValidator {
                 List<Map<String, Object>> expectedList = gson.fromJson(json, type);
 
                 OpsDocList stmtsDocs = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, new HashMap<>(), null);
-                List<OpTemplate> stmts = stmtsDocs.getOps();
+                List<OpTemplate> stmts = stmtsDocs.getOps(false);
                 List<Map<String, Object>> stmt_objs = stmts.stream().map(OpTemplate::asData).collect(Collectors.toList());
 
                 try {

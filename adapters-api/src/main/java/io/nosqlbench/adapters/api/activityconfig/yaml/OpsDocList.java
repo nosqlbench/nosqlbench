@@ -58,8 +58,8 @@ public class OpsDocList implements Iterable<OpsDoc> {
             .collect(Collectors.toList());
     }
 
-    public List<OpTemplate> getOps() {
-        return getOps("");
+    public List<OpTemplate> getOps(boolean logit) {
+        return getOps("", logit);
     }
 
     /**
@@ -67,17 +67,30 @@ public class OpsDocList implements Iterable<OpsDoc> {
      * @return The list of all included op templates for all included blocks of  in this document,
      * including the inherited and overridden values from this doc and the parent block.
      */
-    public List<OpTemplate> getOps(String tagFilterSpec) {
+    public List<OpTemplate> getOps(String tagFilterSpec, boolean logit) {
         TagFilter ts = new TagFilter(tagFilterSpec);
         List<OpTemplate> opTemplates = new ArrayList<>();
 
-        getStmtDocs().stream()
-            .flatMap(d -> d.getOpTemplates().stream())
-            .filter(ts::matchesTagged)
+        List<OpTemplate> rawtemplates = getStmtDocs().stream()
+            .flatMap(d -> d.getOpTemplates().stream()).toList();
+
+        List<String> matchlog = new ArrayList<>();
+        rawtemplates.stream()
+            .map(ts::matchesTaggedResult)
+            .peek(r -> matchlog.add(r.getLog()))
+            .filter(TagFilter.Result::matched)
+            .map(TagFilter.Result::getElement)
             .forEach(opTemplates::add);
+
+        if (logit) {
+            for (String s : matchlog) {
+                logger.info(s);
+            }
+        }
 
         return opTemplates;
     }
+
 
 
     @Override

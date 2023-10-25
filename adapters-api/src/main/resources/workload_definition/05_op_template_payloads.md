@@ -40,7 +40,8 @@ ops: "cycle number '{{NumberNameToString}}'"
   {
     "tags": {
       "name": "block0__stmt1",
-      "block": "block0"
+      "block": "block0",
+      "op": "stmt1"
     },
     "op": {
       "stmt": "cycle number '{{NumberNameToString}}'"
@@ -83,7 +84,8 @@ ops:
   {
     "tags": {
       "name": "block0__stmt1",
-      "block": "block0"
+      "block": "block0",
+      "op": "stmt1"
     },
     "op": {
       "stmt": "even cycle '{{NumberNameToString}}'"
@@ -93,7 +95,8 @@ ops:
   {
     "tags": {
       "name": "block0__stmt2",
-      "block": "block0"
+      "block": "block0",
+      "op": "stmt2"
     },
     "op": {
       "stmt": "odd  cycle '{{NumberNameToString}}'"
@@ -136,7 +139,8 @@ ops:
   {
     "tags": {
       "name": "block0__myop1",
-      "block": "block0"
+      "block": "block0",
+      "op": "myop1"
     },
     "op": {
       "stmt": "even cycle '{{NumberNameToString}}'"
@@ -146,7 +150,8 @@ ops:
   {
     "tags": {
       "name": "block0__myop2",
-      "block": "block0"
+      "block": "block0",
+      "op": "myop2"
     },
     "op": {
       "stmt": "odd  cycle '{{NumberNameToString}}'"
@@ -194,7 +199,8 @@ ops:
   {
     "tags": {
       "name": "block0__op1",
-      "block": "block0"
+      "block": "block0",
+      "op": "op1"
     },
     "op": {
       "opfield1": "opvalue1",
@@ -245,7 +251,8 @@ ops:
   {
     "tags": {
       "name": "block0__op1",
-      "block": "block0"
+      "block": "block0",
+      "op": "op1"
     },
     "op": {
       "stmt": [
@@ -304,7 +311,8 @@ ops:
   {
     "tags": {
       "name": "block0__op1",
-      "block": "block0"
+      "block": "block0",
+      "op": "op1"
     },
     "op": {
       "index_map": {
@@ -377,7 +385,8 @@ ops:
     },
     "tags": {
       "name": "block0__op1",
-      "block": "block0"
+      "block": "block0",
+      "op": "op1"
     },
     "op": {
       "index_map": {

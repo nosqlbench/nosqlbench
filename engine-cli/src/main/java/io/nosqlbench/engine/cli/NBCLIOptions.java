@@ -57,7 +57,6 @@ public class NBCLIOptions {
     private static final String METRICS_LABELSPEC = "--metrics-labelspec";
     private static final String LABELSPEC = "--labelspec";
     private static final String ANNOTATORS_CONFIG = "--annotators";
-    private static final String PROMPUSH_CONFIG = "--prompush";
 
     // Enabled if the TERM env var is provided
     private static final String ANSI = "--ansi";
@@ -180,7 +179,6 @@ public class NBCLIOptions {
     private String scriptFile;
     private String[] annotateEvents = {"ALL"};
     private String annotatorsConfig = "";
-    private String promPushConfig = "";
     private String statedirs = NBStatePath.NB_STATEDIR_PATHS;
     private Path statepath;
     private final String hdrForChartFileName = NBCLIOptions.DEFAULT_CHART_HDR_LOG_NAME;
@@ -209,10 +207,6 @@ public class NBCLIOptions {
 
     public String getAnnotatorsConfig() {
         return this.annotatorsConfig;
-    }
-
-    public String getPromPushConfig() {
-        return this.promPushConfig;
     }
 
     public NBLabels getLabelMap() {
@@ -386,10 +380,6 @@ public class NBCLIOptions {
                 case NBCLIOptions.REPORT_PROMPUSH_TO:
                     arglist.removeFirst();
                     this.reportPromPushTo = arglist.removeFirst();
-                    break;
-                case NBCLIOptions.PROMPUSH_CONFIG:
-                    arglist.removeFirst();
-                    promPushConfig = this.readWordOrThrow(arglist, "prompush config");
                     break;
                 case NBCLIOptions.GRAPHITE_LOG_LEVEL:
                     arglist.removeFirst();
@@ -757,8 +747,8 @@ public class NBCLIOptions {
         return this.reportGraphiteTo;
     }
 
-    public String wantsReportPromPushTo() {
-        return this.reportPromPushTo;
+    public Optional<String> wantsReportPromPushTo() {
+        return Optional.ofNullable(this.reportPromPushTo);
     }
 
     public String wantsMetricsPrefix() {

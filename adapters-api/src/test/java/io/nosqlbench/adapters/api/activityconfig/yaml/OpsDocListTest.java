@@ -130,9 +130,9 @@ public class OpsDocListTest {
 
     @Test
     public void testFilteredStmts() {
-        List<OpTemplate> stmts = doclist.getOps("");
+        List<OpTemplate> stmts = doclist.getOps("",true);
         Assertions.assertThat(stmts).hasSize(6);
-        stmts = doclist.getOps("root1:value23");
+        stmts = doclist.getOps("root1:value23",true);
         Assertions.assertThat(stmts).hasSize(2);
     }
 

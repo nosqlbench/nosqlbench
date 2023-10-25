@@ -44,6 +44,7 @@ import io.nosqlbench.api.engine.metrics.reporters.*;
 import org.apache.logging.log4j.Marker;
 
 import java.io.PrintStream;
+import java.net.URI;
 import java.util.*;
 
 import java.nio.file.Path;
@@ -119,21 +120,20 @@ public class NBCreators {
         return histogram;
     }
 
-    public AttachedMetricsSummaryReporter summaryReporter(long millis, String... labelspecs) {
-        logger.debug("attaching summary reporter to " + base.description());
-        NBLabels extraLabels = NBLabels.forKV((Object[]) labelspecs);
-        AttachedMetricsSummaryReporter reporter = new AttachedMetricsSummaryReporter(base, extraLabels, millis);
-        return reporter;
-    }
+//    public AttachedMetricsSummaryReporter summaryReporter(long millis, String... labelspecs) {
+//        logger.debug("attaching summary reporter to " + base.description());
+//        NBLabels extraLabels = NBLabels.forKV((Object[]) labelspecs);
+//        AttachedMetricsSummaryReporter reporter = new AttachedMetricsSummaryReporter(base, extraLabels, millis);
+//        return reporter;
+//    }
 //    public AttachedMetricCsvReporter csvReporter(int seconds, String dirpath, String... labelspecs) {
 //        logger.debug("attaching summary reporter to " + base.description());
 //        NBLabels extraLabels = NBLabels.forKV((Object[]) labelspecs);
 //        AttachedMetricCsvReporter reporter = new AttachedMetricCsvReporter(base, extraLabels, Path.of(dirpath), seconds);
 //        return reporter;
 //    }
-    public PromPushReporterComponent pushReporter(String targetUri, long millis, String config, String... labelspecs) {
-        NBLabels extraLabels = NBLabels.forKV((Object[]) labelspecs);
-        PromPushReporterComponent reporter = new PromPushReporterComponent(targetUri, config, millis, base,extraLabels);
+    public PromPushReporterComponent pushReporter(String endpoint, long millis, NBLabels extraLabels) {
+        PromPushReporterComponent reporter = new PromPushReporterComponent(this.base, URI.create(endpoint), millis, extraLabels);
         return reporter;
     }
 

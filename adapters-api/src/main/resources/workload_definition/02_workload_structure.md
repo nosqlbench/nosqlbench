@@ -381,7 +381,8 @@ blocks:
     },
     "tags": {
       "name": "namedblock1__op1",
-      "block": "namedblock1"
+      "block": "namedblock1",
+      "op": "op1"
     }
   },
   {
@@ -392,7 +393,8 @@ blocks:
     },
     "tags": {
       "name": "namedblock1__op2",
-      "block": "namedblock1"
+      "block": "namedblock1",
+      "op": "op2"
     }
   }
 ]
@@ -454,7 +456,8 @@ blocks:
     },
     "tags": {
       "name": "block1__op1",
-      "block": "block1"
+      "block": "block1",
+      "op": "op1"
     }
   },
   {
@@ -465,7 +468,8 @@ blocks:
     },
     "tags": {
       "name": "block1__op2",
-      "block": "block1"
+      "block": "block1",
+      "op": "op2"
     }
   },
   {
@@ -475,7 +479,8 @@ blocks:
     },
     "tags": {
       "name": "this_is_block_2__op3",
-      "block": "this_is_block_2"
+      "block": "this_is_block_2",
+      "op": "op3"
     }
   }
 ]
@@ -524,7 +529,8 @@ blocks:
     },
     "tags": {
       "name": "myblock__stmt1",
-      "block": "myblock"
+      "block": "myblock",
+      "op": "stmt1"
     }
   }
 ]
