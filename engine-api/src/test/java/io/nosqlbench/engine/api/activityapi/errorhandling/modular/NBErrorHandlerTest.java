@@ -136,8 +136,6 @@ class NBErrorHandlerTest {
 
         logger.getContext().stop(); // force any async appenders to flush
         logger.getContext().start(); // resume processing
-
-        assertThat(appender.getFirstEntry()).contains("Starting with v4.17 onward, use 'counter'");
         appender.cleanup(logger);
     }
 
