@@ -7,10 +7,10 @@ description: |
 scenarios:
   default:
     # supabase environment
-    drop:    run driver=jdbc tags==block:drop     threads===1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
-    schema:  run driver=jdbc tags==block:schema   threads===1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
-    testann: run driver=jdbc tags==block:testann  threads=AUTO cycles===TEMPLATE(main-cycles,1000)  url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
-    train:   run driver=jdbc tags==block:train    threads=AUTO cycles===TEMPLATE(trainsize) dml_batch=120 autoCommit=false url="jdbc:postgresql://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    drop:    run driver=jdbc tags==block:drop     threads===1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="postgres" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    schema:  run driver=jdbc tags==block:schema   threads===1   cycles==UNDEF   url="jdbc:postgresql://host:port/" databaseName="postgres" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    testann: run driver=jdbc tags==block:testann  threads=AUTO cycles===TEMPLATE(main-cycles,1000)  url="jdbc:postgresql://host:port/" databaseName="postgres" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    train:   run driver=jdbc tags==block:train    threads=AUTO cycles===TEMPLATE(trainsize) dml_batch=120 autoCommit=false url="jdbc:postgresql://host:port/" databaseName="postgres" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
 
 bindings:
   rw_key: ToString();
@@ -36,6 +36,9 @@ blocks:
 
   schema:
     ops:
+      create_pgvec_extn:
+        ddl: |
+          CREATE EXTENSION IF NOT EXISTS vector;
       create_schema:
         ddl: |
           CREATE SCHEMA IF NOT EXISTS TEMPLATE(schemaname,public);

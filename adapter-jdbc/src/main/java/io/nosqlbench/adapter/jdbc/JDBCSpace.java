@@ -156,9 +156,7 @@ public class JDBCSpace implements AutoCloseable {
                 throw new OpConfigError("Both user and password options are required. Only user is supplied in this case.");
             }
         }
-
-        Optional<Boolean> ssl = cfg.getOptional(Boolean.class, "ssl");
-        connConfig.addDataSourceProperty("ssl", ssl.orElse(false));
+        connConfig.addDataSourceProperty("ssl", BooleanUtils.toBoolean(cfg.getOptional("ssl").orElse("false")));
 
         Optional<String> sslMode = cfg.getOptional("sslmode");
         if (sslMode.isPresent()) {
@@ -177,6 +175,11 @@ public class JDBCSpace implements AutoCloseable {
         Optional<String> sslRootCert = cfg.getOptional("sslrootcert");
         if (sslRootCert.isPresent()) {
             connConfig.addDataSourceProperty("sslrootcert", sslRootCert.get());
+        }
+
+        Optional<String> sslKey = cfg.getOptional("sslkey");
+        if (sslKey.isPresent()) {
+            connConfig.addDataSourceProperty("sslkey", sslKey.get());
         }
 
         connConfig.addDataSourceProperty("applicationName", cfg.get("applicationName"));
@@ -240,6 +243,8 @@ public class JDBCSpace implements AutoCloseable {
                     " verify-ca validates the certificate, but does not verify the hostname." +
                     " verify-full will validate that the certificate is correct and verify the host connected to has the same hostname as the certificate." +
                     " Default is prefer."))
+            .add(Param.optional("sslkey")
+                .setDescription("Provide the full path for the key file. Defaults to defaultdir/postgresql.pk8, where defaultdir is ${user.home}/.postgresql/ in *nix systems and %appdata%/postgresql/ on windows."))
             .add(Param.optional("sslcert")
                 .setDescription("Provide the full path for the certificate file. Defaults to defaultdir/postgresql.crt, where defaultdir is ${user.home}/.postgresql/ in *nix systems and %appdata%/postgresql/ on windows."))
             .add(Param.optional("sslrootcert")
