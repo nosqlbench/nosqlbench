@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.Function;
 
+@Service(value = DriverAdapter.class,selector = "jdbc")
 public class JDBCDriverAdapter extends BaseDriverAdapter<JDBCOp, JDBCSpace> {
     private final static Logger logger = LogManager.getLogger(JDBCDriverAdapter.class);
 
