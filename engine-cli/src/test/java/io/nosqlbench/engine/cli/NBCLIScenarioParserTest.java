@@ -150,9 +150,9 @@ public class NBCLIScenarioParserTest {
     @Test
     public void testThatScenarioUrlsAreSupported() {
         //TODO: This might change?
-        String urlScenario = "https://raw.githubusercontent.com/nosqlbench/nosqlbench/main/engine-cli/src/test/resources/activities/scenario-test.yaml";
+        String urlScenario = "https://raw.githubusercontent.com/nosqlbench/nosqlbench/main/engine-cli/src/test/resources/activities/scenario_test.yaml";
 
-        NBCLIOptions opts = new NBCLIOptions(new String[]{urlScenario, "schema-only", "cycles-test=20"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{urlScenario, "schema_only", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isGreaterThan(0);
     }
