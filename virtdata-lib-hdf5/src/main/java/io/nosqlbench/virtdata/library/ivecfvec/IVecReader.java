@@ -99,7 +99,7 @@ public class IVecReader implements LongFunction<int[]> {
         }
         int[] data = new int[recdim];
         for (int i = 0; i < dimensions; i++) {
-            data[i]=Integer.reverseBytes(bb.getInt());
+            data[i]=Integer.reverseBytes(record.getInt());
         }
         return data;
     }

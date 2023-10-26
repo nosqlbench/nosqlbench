@@ -83,11 +83,11 @@ public class FVecReader implements LongFunction<float[]> {
         ByteBuffer record = this.bb.get(recpos,buf).order(ByteOrder.LITTLE_ENDIAN);
         int recdim = record.getInt();
         if(recdim!=dimensions) {
-            throw new RuntimeException("dimensions are not uniform for ivec file '" + this.path.toString() + "', found dim " + recdim + " at record " + value);
+            throw new RuntimeException("dimensions are not uniform for fvec file '" + this.path.toString() + "', found dim " + recdim + " at record " + value);
         }
         float[] data = new float[recdim];
         for (int i = 0; i < dimensions; i++) {
-            data[i]=bb.getFloat();
+            data[i]=record.getFloat();
         }
         return data;
     }
