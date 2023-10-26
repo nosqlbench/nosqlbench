@@ -28,7 +28,7 @@ scenarios:
   astra_vectors:
     drop: run tags='block:drop' tags='block:drop' threads==undef cycles==undef
     schema: run tags='block:schema' tags='op=create_.*(table|index)' threads==undef cycles==undef dimensions==TEMPLATE(dimensions,25)
-    train: run tags='block:rampup' threads=auto cycles=TEMPLATE(trainsize) errors=counter,warn maxtries=2 dimensions==TEMPLATE(dimensions,25)
+    train: run tags='block:rampup' threads=20x cycles=TEMPLATE(trainsize) errors=counter,warn maxtries=2 dimensions==TEMPLATE(dimensions,25)
 #    search_and_index_unthrottled: >-
 #      run tags='block:search_and_index,optype=select' labels='target:astra'
 #      cycles=TEMPLATE(testsize) threads=10 errors=count,retry stride=500 errors=counter
@@ -114,6 +114,9 @@ blocks:
         verifier: |
           actual_indices=io.nosqlbench.engine.extensions.vectormath.CqlUtils.cqlStringColumnToIntArray("key",result);
           relevancy.accept({relevant_indices},actual_indices);
+          System.out.println();
+          System.out.println("actual ",actual_indices);
+          System.out.println("known  ",{relevant_indices});
           return true;
       insert_rewrite:
         prepared: |
