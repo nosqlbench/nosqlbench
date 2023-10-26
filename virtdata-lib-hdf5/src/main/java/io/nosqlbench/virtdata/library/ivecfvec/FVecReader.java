@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.library.ivecfvec;
 
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -31,6 +32,7 @@ import java.util.function.LongFunction;
 /**
  * Reads ivec files with random access, using the input to specify the record number.
  */
+@ThreadSafeMapper
 public class FVecReader implements LongFunction<float[]> {
 
     private final MappedByteBuffer bb;

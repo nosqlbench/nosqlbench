@@ -20,6 +20,7 @@ import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Example;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -37,6 +38,7 @@ import java.util.function.LongToIntFunction;
  * While it is possible to specify different dimensioned vectors per record, this is not supported, since this
  * function honors the pure-function behavior of other NB binding functions. This requires uniform record structure for random access.
  */
+@ThreadSafeMapper
 public class IVecReader implements LongFunction<int[]> {
 
     private final MappedByteBuffer bb;
