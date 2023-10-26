@@ -114,9 +114,6 @@ blocks:
         verifier: |
           actual_indices=io.nosqlbench.engine.extensions.vectormath.CqlUtils.cqlStringColumnToIntArray("key",result);
           relevancy.accept({relevant_indices},actual_indices);
-          System.out.println();
-          System.out.println("actual ",actual_indices);
-          System.out.println("known  ",{relevant_indices});
           return true;
       insert_rewrite:
         prepared: |
