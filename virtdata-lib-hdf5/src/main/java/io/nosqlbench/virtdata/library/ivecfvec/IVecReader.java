@@ -19,6 +19,8 @@ package io.nosqlbench.virtdata.library.ivecfvec;
 import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
@@ -39,6 +41,7 @@ import java.util.function.LongToIntFunction;
  * function honors the pure-function behavior of other NB binding functions. This requires uniform record structure for random access.
  */
 @ThreadSafeMapper
+@Categories(Category.readers)
 public class IVecReader implements LongFunction<int[]> {
 
     private final MappedByteBuffer bb;

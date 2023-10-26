@@ -33,5 +33,6 @@ public enum Category {
     experimental,
     combinitoric,
     vectors,
-    HOF
+    HOF,
+    readers
 }
