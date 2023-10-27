@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="cql_vector2__testann__E5-SMALL-MULI" type="JarApplication" folderName="E5-SMALL-MULI">
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <option name="JAR_PATH" value="$PROJECT_DIR$/nb5/target/nb5.jar" />
+    <option name="PROGRAM_PARAMETERS" value="cql_vector2_fvec astra_vectors.testann userfile=auth/userfile passfile=auth/passfile scb=auth/scb.zip --show-stacktraces dimensions=384 testsize=10000 trainsize=100000 datafile=intfloat_multilingual-e5-small filetype=fvec table=e5_small_muli similarity_function=cosine --add-labels &quot;dimensions:384,dataset=e5_small_muli&quot;" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/local/jvector" />
+    <option name="ALTERNATIVE_JRE_PATH" value="jdk21" />
+    <method v="2" />
+  </configuration>
+</component>
