@@ -537,7 +537,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>-ea ${argLine}</argLine>
+                    <argLine>-ea @{argLine}</argLine>
                     <systemPropertyVariables>
                         <Log4jContextSelector>
                             org.apache.logging.log4j.core.async.AsyncLoggerContextSelector

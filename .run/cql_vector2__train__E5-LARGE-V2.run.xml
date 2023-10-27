@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="cql_vector2__train__E5-LARGE-V2" type="JarApplication" folderName="E5-LARGE-V2">
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <option name="JAR_PATH" value="$PROJECT_DIR$/nb5/target/nb5.jar" />
+    <option name="PROGRAM_PARAMETERS" value="cql_vector2_fvec astra_vectors.train userfile=auth/userfile passfile=auth/passfile scb=auth/scb.zip --show-stacktraces dimensions=1024 testsize=10000 trainsize=100000 datafile=intfloat_e5-large-v2 filetype=fvec table=e5_large_v2 similarity_function=cosine --add-labels &quot;dimensions:1024,dataset=e5_large_v2&quot;" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/local/jvector" />
+    <option name="ALTERNATIVE_JRE_PATH" value="jdk21" />
+    <method v="2" />
+  </configuration>
+</component>

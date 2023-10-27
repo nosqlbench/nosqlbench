@@ -48,10 +48,17 @@ params:
 
 bindings:
   id: ToString()
-  test_floatlist: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/test"); ToCqlVector();
-  relevant_indices: HdfFileToIntArray("testdata/TEMPLATE(datafile).hdf5", "/neighbors")
-  distance_floatlist: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/distance")
-  train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/train"); ToCqlVector();
+  # filetype=hdf5 for TEMPLATE(filetype,hdf5)
+  test_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/test"); ToCqlVector();
+  relevant_indices_hdf5: HdfFileToIntArray("testdata/TEMPLATE(datafile).hdf5", "/neighbors")
+  distance_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/distance")
+  train_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/train"); ToCqlVector();
+  # filetype=fvec for TEMPLATE(filetype,fvec)
+  test_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_query_vectors.fvec"); ToCqlVector();
+  relevant_indices_fvec: IVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_indices_query.ivec");
+  distance_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(testsize)_distances_count.fvec",TEMPLATE(dimensions),0);
+  train_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0); ToCqlVector();
+  # synthetic
   synthetic_vectors: HashedFloatVectors(TEMPLATE(dimensions));
 
 blocks:
@@ -92,7 +99,7 @@ blocks:
     ops:
       insert: |
         INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
-        (key, value) VALUES ({id},{train_floatlist});
+        (key, value) VALUES ({id},{train_floatlist_TEMPLATE(filetype,hdf5)});
 #  await_index:
 #    ops:
   testann:
@@ -100,7 +107,7 @@ blocks:
       select_ann_limit_TEMPLATE(k,100):
         prepared: |
           SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
-          ORDER BY value ANN OF {test_floatlist} LIMIT TEMPLATE(select_limit,100);
+          ORDER BY value ANN OF {test_floatlist_TEMPLATE(filetype,hdf5)} LIMIT TEMPLATE(select_limit,100);
         tags:
           optype: select
         verifier-init: |
@@ -113,12 +120,12 @@ blocks:
           relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
         verifier: |
           actual_indices=io.nosqlbench.engine.extensions.vectormath.CqlUtils.cqlStringColumnToIntArray("key",result);
-          relevancy.accept({relevant_indices},actual_indices);
+          relevancy.accept({relevant_indices_TEMPLATE(filetype,hdf5)},actual_indices);
           return true;
       insert_rewrite:
         prepared: |
           INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
-          (key, value) VALUES ({id},{train_floatlist});
+          (key, value) VALUES ({id},{train_floatlist_TEMPLATE(filetype,hdf5)});
         tags:
           optype: insert
 
