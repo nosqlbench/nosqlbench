@@ -16,7 +16,6 @@
 
 package io.nosqlbench.virtdata.library.ivecfvec;
 
-import io.nosqlbench.api.config.standard.ConfigModel;
 import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Categories;
@@ -25,14 +24,12 @@ import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.function.LongFunction;
-import java.util.function.LongToIntFunction;
 
 /**
  * Reads ivec files with random access, using the input to specify the record number.
@@ -89,17 +86,17 @@ public class IVecReader implements LongFunction<int[]> {
     @Override
     public int[] apply(long value) {
         int recordIdx = (int) (value % reclim);
-        long offset = value * recordIdx;
-        int recpos = (int) (offset %filesize) ;
+        int recpos = recordIdx*reclen;
         byte[] buf = new byte[reclen];
-        ByteBuffer record = this.bb.get(recpos,buf);
+        this.bb.get(recpos,buf);
+        ByteBuffer record = ByteBuffer.wrap(buf);
         int recdim = Integer.reverseBytes(record.getInt());
         if(recdim!=dimensions) {
             throw new RuntimeException("dimensions are not uniform for ivec file '" + this.path.toString() + "', found dim " + recdim + " at record " + value);
         }
         int[] data = new int[recdim];
         for (int i = 0; i < dimensions; i++) {
-            data[i]=Integer.reverseBytes(bb.getInt());
+            data[i]=Integer.reverseBytes(record.getInt());
         }
         return data;
     }

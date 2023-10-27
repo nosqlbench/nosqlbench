@@ -25,6 +25,7 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
@@ -77,18 +78,17 @@ public class FVecReader implements LongFunction<float[]> {
     @Override
     public float[] apply(long value) {
         int recordIdx = (int) (value % reclim);
-        long offset = value * recordIdx;
-        int recpos = (int) (offset %filesize) ;
-        byte[] buf = new byte[reclen];
-        ByteBuffer record = this.bb.get(recpos,buf).order(ByteOrder.LITTLE_ENDIAN);
-        int recdim = record.getInt();
+        int recpos = recordIdx*reclen;
+        int recdim = Integer.reverseBytes(bb.getInt(recpos));
         if(recdim!=dimensions) {
-            throw new RuntimeException("dimensions are not uniform for ivec file '" + this.path.toString() + "', found dim " + recdim + " at record " + value);
+            throw new RuntimeException("dimensions are not uniform for fvec file '" + this.path.toString() + "', found dim " + recdim + " at record " + value);
         }
-        float[] data = new float[recdim];
-        for (int i = 0; i < dimensions; i++) {
-            data[i]=bb.getFloat();
-        }
-        return data;
+        var vbuf = new byte[dimensions*Float.BYTES];
+        bb.get(recpos + Integer.BYTES, vbuf);
+
+        FloatBuffer fbuf=ByteBuffer.wrap(vbuf).order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer();
+        var vectors = new float[dimensions];
+        fbuf.get(vectors);
+        return vectors;
     }
 }
