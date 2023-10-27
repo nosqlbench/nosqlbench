@@ -53,11 +53,12 @@ bindings:
   relevant_indices_hdf5: HdfFileToIntArray("testdata/TEMPLATE(datafile).hdf5", "/neighbors")
   distance_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/distance")
   train_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/train"); ToCqlVector();
-  # filetype=vecs for TEMPLATE(filetype,vecs)
-  test_floatlist_vecs: FVecReader("testdata/TEMPLATE(datafile).fvec"); ToCqlVector();
-  relevant_indices_vecs: IVecReader("testdata/TEMPLATE(datafile).ivec");
-  distance_floatlist_vecs: FVecReader("testdata/TEMPLATE(datafile).fvec");
-  train_floatlist_vecs: FVecReader("testdata/TEMPLATE(datafile).fvec"); ToCqlVector();
+  # filetype=fvec for TEMPLATE(filetype,fvec)
+  test_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_query_vectors.fvec"); ToCqlVector();
+  relevant_indices_fvec: IVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_indices_query.ivec");
+  distance_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(testsize)_distances_count.fvec",TEMPLATE(dimensions),0);
+  train_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0); ToCqlVector();
+  # synthetic
   synthetic_vectors: HashedFloatVectors(TEMPLATE(dimensions));
 
 blocks:

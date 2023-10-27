@@ -18,6 +18,9 @@ package io.nosqlbench.virtdata.library.ivecfvec;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,9 +28,13 @@ class IVecReaderTest {
 
     @Test
     public void testReadIvec() {
+
+        ArrayList<HashSet<Integer>> idx_ref = IvecFvecMethods.readIvecs("src/test/resources/ivecfvec/test_ada_002_10000_indices_query_10000.ivec");
+
         IVecReader ir = new IVecReader("src/test/resources/ivecfvec/test_ada_002_10000_indices_query_10000.ivec");
         for (int i = 0; i < 10; i++) {
             int[] indices = ir.apply(0);
+            HashSet<Integer> ref = idx_ref.get(0);
             for (int j = 0; j < indices.length; j++) {
                 assertThat(indices[j]).isGreaterThanOrEqualTo(0);
                 assertThat(indices[j]).isLessThanOrEqualTo(10000);
@@ -41,7 +48,7 @@ class IVecReaderTest {
         for (int i = 0; i < 10; i++) {
             float[] dist = ir.apply(i);
             for (int j = 1; j < dist.length; j++) {
-                assertThat(dist[j]).isGreaterThanOrEqualTo(dist[j-1]);
+                assertThat(dist[j]).isGreaterThanOrEqualTo(dist[j-1]).describedAs("dist[" + j +"]=(" +dist[j]+") dist[j-1]=(" + dist[j-1] + ")");
             }
         }
     }
