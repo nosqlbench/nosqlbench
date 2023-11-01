@@ -17,24 +17,24 @@
 package io.nosqlbench.scenarios.simframe.optimo;
 
 import io.nosqlbench.scenarios.simframe.capture.JournalView;
+import io.nosqlbench.scenarios.simframe.findmax.FindMaxFrameParams;
+import io.nosqlbench.scenarios.simframe.findmax.FindmaxSearchParams;
+import io.nosqlbench.scenarios.simframe.planning.SimFramePlanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * A frame planner is what decides what next set of parameters to try based on a history
- * of simulation frames, and whether to proceed with another sim frame.
- * @param <C> The configuration type for the planner
- * @param <P> The parameter set type for the planner, emitted for each time another sim frame should be run
- */
-public abstract class OptimoPlanner<C,P> {
+public class OptimoPlanner extends SimFramePlanner<OptimoSearchParams, OptimoFrameParams> {
     private final Logger logger = LogManager.getLogger(OptimoPlanner.class);
-    protected final C config;
 
-    public OptimoPlanner(C plannerConfig) {
-        this.config = plannerConfig;
+    public OptimoPlanner(OptimoSearchParams plannerConfig) {
+        super(plannerConfig);
     }
 
-    public abstract P initialStep();
+    @Override
+    public OptimoFrameParams initialStep() {
+        return new OptimoFrameParams(100.0,5000);
+
+    }
 
     /**
      * Using a stateful history of all control parameters and all results, decide if there
@@ -45,6 +45,8 @@ public abstract class OptimoPlanner<C,P> {
      *     All parameters and results, organized in enumerated simulation frames
      * @return Optionally, a set of params which indicates another simulation frame should be sampled, else null
      */
-    public abstract P nextStep(JournalView journal);
+    public OptimoFrameParams nextStep(JournalView journal) {
+        return null;
+    }
 
 }

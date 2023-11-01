@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.stats;
+package io.nosqlbench.scenarios.simframe.stabilization;
 
 public record TimedSample(long msTime, double value) {
 }

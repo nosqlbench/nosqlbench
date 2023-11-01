@@ -93,23 +93,12 @@ public class SC_findmax extends SCBaseScenario {
         FindMaxFrameParams frameParams = planner.initialStep();
         while (frameParams != null) {
             stdout.println(frameParams);
-//            flywheel.onEvent(ParamChange.of(new CycleRateSpec(frameParams.computed_rate(), 1.05d, SimRateSpec.Verb.restart)));
-//            long settling_time = frameParams.settling_time_ms();
-//            if (settling_time>0) {
-//                stdout.println("settling for " + settling_time + " ms");
-//                controller.waitMillis(settling_time);
-//            }
             flywheel.onEvent(ParamChange.of(new CycleRateSpec(frameParams.computed_rate(), 1.05d, SimRateSpec.Verb.restart)));
             capture.startWindow();
             for (int i = 0; i < 10; i++) {
                 controller.waitMillis(frameParams.sample_time_ms()/10);
                 stdout.println(capture.activeSample());
             }
-//            controller.waitMillis(frameParams.sample_time_ms());
-//            capture.awaitSteadyState();
-//            capture.restartWindow();
-//            flywheel.onEvent(ParamChange.of(new CycleRateSpec(frameParams.computed_rate(), 1.05d, SimRateSpec.Verb.restart)));
-//            controller.waitMillis(frameParams.sample_time_ms());
             capture.stopWindow();
             journal.record(frameParams, capture.last());
             stdout.println(capture.last());

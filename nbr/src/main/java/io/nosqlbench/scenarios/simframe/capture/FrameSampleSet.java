@@ -46,9 +46,9 @@ public class FrameSampleSet extends ArrayList<FrameSample> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("FRAME % 5d  VALUE %10.5f\n", index(), value()));
+        sb.append(String.format("FRAME% 5d VALUE %10.5f\n", index(), value()));
         for (int i = 0; i < this.size(); i++) {
-            sb.append(i==this.size()-1 ? "┗━▶ ": "┣━▶ ");
+            sb.append(i==this.size()-1 ? "┗━▶  ": "┣━▶  ");
             sb.append(get(i).toString()).append("\n");
         }
         return sb.toString();

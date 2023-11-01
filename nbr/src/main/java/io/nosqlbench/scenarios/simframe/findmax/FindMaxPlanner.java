@@ -46,9 +46,10 @@ public class FindMaxPlanner extends SimFramePlanner<FindmaxSearchParams, FindMax
      *     All parameters and results, organized in enumerated simulation frames
      * @return Optionally, a set of params which indicates another simulation frame should be sampled, else null
      */
-    public FindMaxFrameParams nextStep(JournalView journal) {
-        SimFrame last = journal.last();
-        SimFrame best = journal.bestRun();
+    @Override
+    public FindMaxFrameParams nextStep(JournalView<FindMaxFrameParams> journal) {
+        SimFrame<FindMaxFrameParams> last = journal.last();
+        SimFrame<FindMaxFrameParams> best = journal.bestRun();
         if (best.index() == last.index()) { // got better consecutively
             return new FindMaxFrameParams(
                 last.params().rate_shelf(),
@@ -73,7 +74,7 @@ public class FindMaxPlanner extends SimFramePlanner<FindmaxSearchParams, FindMax
             }
         } else { // any other case
             // find next frame with higher rate but lower value, the closest one by rate
-            SimFrame nextWorseFrameWithHigherRate = journal.frames().stream()
+            SimFrame<FindMaxFrameParams> nextWorseFrameWithHigherRate = journal.frames().stream()
                     .filter(f -> f.value() < best.value())
                     .filter(f -> f.params().computed_rate() > best.params().computed_rate())
                 .min(Comparator.comparingDouble(f -> f.params().computed_rate()))
@@ -92,5 +93,7 @@ public class FindMaxPlanner extends SimFramePlanner<FindmaxSearchParams, FindMax
             }
         }
     }
+
+
 
 }
