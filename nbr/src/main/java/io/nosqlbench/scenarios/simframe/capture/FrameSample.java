@@ -58,7 +58,7 @@ public final class FrameSample {
         if (active) {
             this.endAt = endTime;
             this.endval = (criterion().evaltype() != EvalType.remix) ? criterion().supplier().getAsDouble() : Double.NaN;
-            calculateBasis();
+            calculateBasis(endTime);
             this.active = false;
         } else {
             throw new RuntimeException("Can't stop an inactive frame.");
@@ -67,10 +67,14 @@ public final class FrameSample {
     }
 
     private void calculateBasis() {
+        calculateBasis(System.currentTimeMillis());
+    }
+
+    private void calculateBasis(long now) {
         if (!active) {
             throw new RuntimeException("Calculations on inactive windows should not be done.");
         }
-        this.endAt = System.currentTimeMillis();
+        this.endAt = now;
         this.endval = (criterion().evaltype() != EvalType.remix) ? criterion().supplier().getAsDouble() : Double.NaN;
         double seconds = deltaT();
         double basis = switch (criterion.evaltype()) {
