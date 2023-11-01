@@ -56,21 +56,21 @@ public class TestOptimoExperiments {
 
 
         SimpleBounds bounds = new SimpleBounds(
-                new double[]{0.0d, 0.0d, 0.0d},
-                new double[]{1E9,1E9,1E9});
+                new double[]{0.0d, 0.0d, 0.0d, 0.0d},
+                new double[]{1E9,1E9,1E9,1E9});
 
         List<OptimizationData> od = List.of(
                 new ObjectiveFunction(m),
                 GoalType.MAXIMIZE,
-                new InitialGuess(new double[]{1.0,1.0,1.0}),
+                new InitialGuess(new double[]{1.0,1.0,1.0,1.0}),
                 new MaxEval(1000)
                 ,bounds
         );
 
         BOBYQAOptimizer mo = new BOBYQAOptimizer(
-                9,
+                12,
                 1000.0,
-                1.0
+                0.25
         );
         PointValuePair result = mo.optimize(od.toArray(new OptimizationData[0]));
 

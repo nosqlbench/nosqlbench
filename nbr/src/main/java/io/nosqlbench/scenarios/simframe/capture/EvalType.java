@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.findmax;
+package io.nosqlbench.scenarios.simframe.capture;
 
 public enum EvalType {
     /**

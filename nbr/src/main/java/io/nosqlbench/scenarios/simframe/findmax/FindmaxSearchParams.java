@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.findmax;
+package io.nosqlbench.scenarios.simframe.findmax;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
 
@@ -32,23 +32,22 @@ public record FindmaxSearchParams(
     double average_of,
     double latency_cutoff,
     double latency_pctile,
-    double testrate_cutoff,
-    double bestrate_cutoff
+    long min_settling_ms
 ) {
     public FindmaxSearchParams(ScenarioParams params) {
         this(
-            params.maybeGet("sample_time_ms").map(Integer::parseInt).orElse(3000),
+            params.maybeGet("sample_time_ms").map(Integer::parseInt).orElse(4000),
             params.maybeGet("sample_max").map(Integer::parseInt).orElse(10000),
-            params.maybeGet("sample_incr").map(Double::parseDouble).orElse(1.01d),
+            params.maybeGet("sample_incr").map(Double::parseDouble).orElse(1.2d),
             params.maybeGet("rate_base").map(Double::parseDouble).orElse(0d),
             params.maybeGet("rate_step").map(Double::parseDouble).orElse(100d),
-            params.maybeGet("rate_incr").map(Double::parseDouble).orElse(2.0d),
+            params.maybeGet("rate_incr").map(Double::parseDouble).orElse(2d),
             params.maybeGet("average_of").map(Integer::parseInt).orElse(2),
             params.maybeGet("latency_cutoff").map(Double::parseDouble).orElse(50.0d),
-            params.maybeGet("testrate_cutoff").map(Double::parseDouble).orElse(0.8),
-            params.maybeGet("bestrate_cutoff").map(Double::parseDouble).orElse(0.90),
-            params.maybeGet("latency_pctile").map(Double::parseDouble).orElse(0.99)
+            params.maybeGet("latency_pctile").map(Double::parseDouble).orElse(0.99),
+            params.maybeGet("min_settling_ms").map(Long::parseLong).orElse(4000L)
         );
 
     }
+
 }

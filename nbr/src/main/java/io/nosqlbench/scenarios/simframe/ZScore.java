@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.findmax.conditioning;
+package io.nosqlbench.scenarios.simframe;
 
 public class ZScore {
 

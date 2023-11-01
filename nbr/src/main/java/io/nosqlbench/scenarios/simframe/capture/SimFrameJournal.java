@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.findmax;
+package io.nosqlbench.scenarios.simframe.capture;
+
+import io.nosqlbench.scenarios.simframe.planning.SimFrame;
+import io.nosqlbench.scenarios.simframe.findmax.FindMaxFrameParams;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +28,7 @@ import java.util.List;
  * Aggregate usage patterns around capturing and using simulation frame data.
  */
 public class SimFrameJournal extends ArrayList<SimFrame> implements JournalView {
-    public void record(SimFrameParams params, FrameSampleSet samples) {
+    public void record(FindMaxFrameParams params, FrameSampleSet samples) {
         add(new SimFrame(params, samples));
     }
 

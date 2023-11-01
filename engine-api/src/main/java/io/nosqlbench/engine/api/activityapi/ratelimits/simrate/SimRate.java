@@ -259,8 +259,7 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
         this.blocks.increment();
         try {
             this.activePool.acquire(ticksPerOp);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        } catch (InterruptedException ignored) {
         }
         return this.waitingPool.get() + this.activePool.availablePermits();
     }

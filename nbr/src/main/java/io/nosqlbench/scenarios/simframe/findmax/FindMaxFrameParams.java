@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios;
+package io.nosqlbench.scenarios.simframe.findmax;
 
-public enum Weighting {
-    uniform;
-    public double applyWeight(double input) {
-        return switch (this) {
-            case uniform -> input;
-        };
+/**
+ * These parameters are calculated by the planner based on previous simulation frame history.
+ */
+public record FindMaxFrameParams(
+    double rate_shelf,
+    double rate_delta,
+    long sample_time_ms,
+    long settling_time_ms,
+    String description
+) {
+    public double computed_rate() {
+        return rate_shelf+rate_delta;
     }
 }

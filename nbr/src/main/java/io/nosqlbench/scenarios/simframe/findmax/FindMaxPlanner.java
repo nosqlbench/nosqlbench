@@ -14,32 +14,26 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.findmax;
+package io.nosqlbench.scenarios.simframe.findmax;
 
+import io.nosqlbench.scenarios.simframe.capture.JournalView;
+import io.nosqlbench.scenarios.simframe.planning.SimFrame;
+import io.nosqlbench.scenarios.simframe.planning.SimFramePlanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
 
-public class SimFramePlanner {
-    private final Logger logger = LogManager.getLogger(SimFramePlanner.class);
+public class FindMaxPlanner extends SimFramePlanner<FindmaxSearchParams, FindMaxFrameParams> {
+    private final Logger logger = LogManager.getLogger(FindMaxPlanner.class);
 
-
-    /**
-     * Search params which control findmax
-     */
-    private final FindmaxSearchParams findmax;
-
-    public SimFramePlanner(FindmaxSearchParams findMaxSettings) {
-        this.findmax = findMaxSettings;
-
+    public FindMaxPlanner(FindmaxSearchParams findMaxSettings) {
+        super(findMaxSettings);
     }
 
-    public SimFrameParams initialStep() {
-        return new SimFrameParams(
-            this.findmax.rate_base(), this.findmax.rate_step(), this.findmax.sample_time_ms(), "INITIAL"
+    public FindMaxFrameParams initialStep() {
+        return new FindMaxFrameParams(
+            config.rate_base(), config.rate_step(), config.sample_time_ms(), config.min_settling_ms(), "INITIAL"
         );
     }
 
@@ -52,26 +46,28 @@ public class SimFramePlanner {
      *     All parameters and results, organized in enumerated simulation frames
      * @return Optionally, a set of params which indicates another simulation frame should be sampled, else null
      */
-    public SimFrameParams nextStep(JournalView journal) {
+    public FindMaxFrameParams nextStep(JournalView journal) {
         SimFrame last = journal.last();
         SimFrame best = journal.bestRun();
         if (best.index() == last.index()) { // got better consecutively
-            return new SimFrameParams(
+            return new FindMaxFrameParams(
                 last.params().rate_shelf(),
-                last.params().rate_delta() * findmax.rate_incr(),
+                last.params().rate_delta() * config.rate_incr(),
                 last.params().sample_time_ms(),
+                config.min_settling_ms(),
                 "CONTINUE after improvement from frame " + last.index()
             );
         } else if (best.index() == last.index() - 1) {
             // got worse consecutively, this may be collapsed out since the general case below covers it (test first)
-            if ((last.params().computed_rate() - best.params().computed_rate()) <= findmax.rate_step()) {
+            if ((last.params().computed_rate() - best.params().computed_rate()) <= config.rate_step()) {
                 logger.info("could not divide search space further, stop condition met");
                 return null;
             } else {
-                return new SimFrameParams(
+                return new FindMaxFrameParams(
                     best.params().computed_rate(),
-                    findmax.rate_step(),
-                    (long) (last.params().sample_time_ms() * findmax.sample_incr()),
+                    config.rate_step(),
+                    (long) (last.params().sample_time_ms() * config.sample_incr()),
+                    config.min_settling_ms()*4,
                     "REBASE search range to new base after frame " + best.index()
                 );
             }
@@ -82,11 +78,12 @@ public class SimFramePlanner {
                     .filter(f -> f.params().computed_rate() > best.params().computed_rate())
                 .min(Comparator.comparingDouble(f -> f.params().computed_rate()))
                 .orElseThrow(() -> new RuntimeException("inconsistent samples"));
-            if ((nextWorseFrameWithHigherRate.params().computed_rate() - best.params().computed_rate()) > findmax.rate_step()) {
-                return new SimFrameParams(
+            if ((nextWorseFrameWithHigherRate.params().computed_rate() - best.params().computed_rate()) > config.rate_step()) {
+                return new FindMaxFrameParams(
                     best.params().computed_rate(),
-                    findmax.rate_step(),
-                    (long) (last.params().sample_time_ms() * findmax.sample_incr()),
+                    config.rate_step(),
+                    (long) (last.params().sample_time_ms() * config.sample_incr()),
+                    config.min_settling_ms()* 2,
                     "REBASE search range from frames " + best.index() + " ➞ " +nextWorseFrameWithHigherRate.index()
                 );
             } else {

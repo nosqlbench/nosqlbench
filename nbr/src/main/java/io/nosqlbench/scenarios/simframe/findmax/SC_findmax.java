@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.findmax;
+package io.nosqlbench.scenarios.simframe.findmax;
 
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.events.ParamChange;
@@ -24,6 +25,8 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
+import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
+import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -81,20 +84,32 @@ public class SC_findmax extends SCBaseScenario {
 
         FindmaxSearchParams findmaxSettings = new FindmaxSearchParams(params);
 
-        int sampletime_ms = findmaxSettings.sample_time_ms();
-
         Activity flywheel = controller.start(activityParams);
 
         SimFrameCapture capture = this.perfValueMeasures(flywheel);
-        SimFramePlanner planner = new SimFramePlanner(findmaxSettings);
+        FindMaxPlanner planner = new FindMaxPlanner(findmaxSettings);
         SimFrameJournal journal = new SimFrameJournal();
 
-        SimFrameParams frameParams = planner.initialStep();
+        FindMaxFrameParams frameParams = planner.initialStep();
         while (frameParams != null) {
             stdout.println(frameParams);
+//            flywheel.onEvent(ParamChange.of(new CycleRateSpec(frameParams.computed_rate(), 1.05d, SimRateSpec.Verb.restart)));
+//            long settling_time = frameParams.settling_time_ms();
+//            if (settling_time>0) {
+//                stdout.println("settling for " + settling_time + " ms");
+//                controller.waitMillis(settling_time);
+//            }
             flywheel.onEvent(ParamChange.of(new CycleRateSpec(frameParams.computed_rate(), 1.05d, SimRateSpec.Verb.restart)));
             capture.startWindow();
-            controller.waitMillis(frameParams.sample_time_ms());
+            for (int i = 0; i < 10; i++) {
+                controller.waitMillis(frameParams.sample_time_ms()/10);
+                stdout.println(capture.activeSample());
+            }
+//            controller.waitMillis(frameParams.sample_time_ms());
+//            capture.awaitSteadyState();
+//            capture.restartWindow();
+//            flywheel.onEvent(ParamChange.of(new CycleRateSpec(frameParams.computed_rate(), 1.05d, SimRateSpec.Verb.restart)));
+//            controller.waitMillis(frameParams.sample_time_ms());
             capture.stopWindow();
             journal.record(frameParams, capture.last());
             stdout.println(capture.last());
@@ -113,6 +128,8 @@ public class SC_findmax extends SCBaseScenario {
         NBMetricTimer result_timer = activity.find().timer("name:result");
         NBMetricTimer result_success_timer = activity.find().timer("name:result_success");
         NBMetricGauge cyclerate_gauge = activity.find().gauge("name=config_cyclerate");
+        NBMetricHistogram tries_histo_src = activity.find().histogram("name=tries");
+        NBMetricHistogram tries_histo = tries_histo_src.attachHdrDeltaHistogram();
 
         sampler.addDirect("target_rate", cyclerate_gauge::getValue, Double.NaN);
         sampler.addDeltaTime("achieved_oprate", result_timer::getCount, Double.NaN);
@@ -128,32 +145,11 @@ public class SC_findmax extends SCBaseScenario {
             double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("target_rate"));
             return Math.pow(basis, 3);
         });
+//        sampler.addRemix("retries_p99", (vars) -> {
+//            double retriesP99 = tries_histo.getDeltaSnapshot(90).get99thPercentile();
+//            return 1/retriesP99;
+//        });
 
-        // TODO: add response time with a sigmoid style threshold at fractional_quantile and cutoff_ms
-
-        // TODO: add tries based saturation detection, where p99 tries start increasing above 1
-
-//        // response time
-//        sampler.addDirect(
-//            "latency",
-//            () -> {
-//                double quantile_response_ns = result_success_timer.getDeltaSnapshot(1000).getValue(fractional_quantile);
-//                if (quantile_response_ns * 1000000 > cutoff_ms) {
-//                    return 0.0d;
-//                } else {
-//                    return quantile_response_ns;
-//                }
-//            },
-//            -1
-//        );
-//
-//        // error count
-//        sampler.addDeltaTime(
-//            "error_rate",
-//            () -> result_timer.getCount() - result_success_timer.getCount(),
-//            -1
-//        );
-//
 
         return sampler;
     }

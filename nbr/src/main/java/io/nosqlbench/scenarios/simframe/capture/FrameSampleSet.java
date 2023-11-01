@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.findmax;
+package io.nosqlbench.scenarios.simframe.capture;
+
+import io.nosqlbench.scenarios.simframe.capture.FrameSample;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +42,6 @@ public class FrameSampleSet extends ArrayList<FrameSample> {
         return product;
     }
 
-
     // https://www.w3.org/TR/xml-entity-names/025.html
     @Override
     public String toString() {
@@ -52,4 +53,5 @@ public class FrameSampleSet extends ArrayList<FrameSample> {
         }
         return sb.toString();
     }
+
 }

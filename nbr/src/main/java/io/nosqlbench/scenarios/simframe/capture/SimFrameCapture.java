@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.findmax;
+package io.nosqlbench.scenarios.simframe.capture;
+
+import io.nosqlbench.scenarios.simframe.stats.StabilityDetector;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.DoubleSupplier;
-import java.util.function.LongSupplier;
-import java.util.function.ToDoubleFunction;
+import java.util.function.*;
 
 /**
  * This is a helper class that makes it easy to bundle up a combination of measurable
@@ -35,7 +35,29 @@ import java.util.function.ToDoubleFunction;
 public class SimFrameCapture implements SimFrameResults {
     private final List<Criterion> criteria = new ArrayList<>();
     private final FrameSamples allFrames = new FrameSamples();
-    private FrameSampleSet currentFrame;
+    private FrameSampleSet activeFrame;
+
+    private volatile boolean running = true;
+
+    private final StabilityDetector stabilizer;
+
+
+    public SimFrameCapture() {
+        stabilizer = new StabilityDetector(1.0,100,this::getPartialValue, 1000,100,10);
+    }
+
+    private double getPartialValue() {
+        if (activeFrame ==null)  {
+            return 0.0d;
+        } else {
+            return activeFrame.value();
+        }
+    }
+
+    public void awaitSteadyState() {
+        stabilizer.run();
+    }
+
 
 
     /**
@@ -139,21 +161,27 @@ public class SimFrameCapture implements SimFrameResults {
     public void startWindow() {
         startWindow(System.currentTimeMillis());
     }
+    public void restartWindow() {
+        restartWindow(System.currentTimeMillis());
+    }
 
-    public void startWindow(long now) {
-        if (currentFrame != null) {
-            throw new RuntimeException("cant start window twice in a row. Must close window first");
-        }
+    public void restartWindow(long now) {
         int nextidx = this.allFrames.size();
         BasisValues vars = new BasisValues();
-        List<FrameSample> samples = criteria.stream().map(c -> FrameSample.init(c, nextidx, vars).start(now)).toList();
-        this.currentFrame = new FrameSampleSet(samples);
-//        System.out.println("after start:\n"+ frameCaptureSummary(currentFrame));
+        List<FrameSample> samples = criteria.stream().map(c -> new FrameSample(c, nextidx, vars).start(now)).toList();
+        this.activeFrame = new FrameSampleSet(samples);
+    }
+
+    public void startWindow(long now) {
+        if (activeFrame != null) {
+            throw new RuntimeException("cant start window twice in a row. Must close window first");
+        }
+        restartWindow(now);
     }
 
     private String frameCaptureSummary(FrameSampleSet currentFrame) {
         StringBuilder sb = new StringBuilder();
-        for (FrameSample fs : this.currentFrame) {
+        for (FrameSample fs : this.activeFrame) {
             sb.append(fs.index()).append(" T:").append(fs.startAt()).append("-").append(fs.endAt()).append(" V:")
                 .append(fs.startval()).append(",").append(fs.endval()).append("\n");
         }
@@ -165,12 +193,12 @@ public class SimFrameCapture implements SimFrameResults {
     }
 
     public void stopWindow(long now) {
-        for (int i = 0; i < currentFrame.size(); i++) {
-            currentFrame.set(i, currentFrame.get(i).stop(now));
+        for (int i = 0; i < activeFrame.size(); i++) {
+            activeFrame.set(i, activeFrame.get(i).stop(now));
         }
-        allFrames.add(currentFrame);
+        allFrames.add(activeFrame);
 //        System.out.println("after stop:\n"+ frameCaptureSummary(currentFrame));
-        currentFrame = null;
+        activeFrame = null;
     }
 
     public FrameSampleSet last() {
@@ -179,6 +207,10 @@ public class SimFrameCapture implements SimFrameResults {
 
     public void addRemix(String name, ToDoubleFunction<BasisValues> remix) {
         addRemix(name, remix, 1.0, null);
+    }
+
+    public FrameSampleSet activeSample() {
+        return activeFrame;
     }
 
 

@@ -14,18 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.findmax;
+package io.nosqlbench.scenarios.simframe.stats;
 
-/**
- * These parameters are calculated by the planner based on previous simulation frame history.
- */
-public record SimFrameParams(
-    double rate_shelf,
-    double rate_delta,
-    long sample_time_ms,
-    String description
-) {
-    public double computed_rate() {
-        return rate_shelf+rate_delta;
-    }
+public record TimedSample(long msTime, double value) {
 }

@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.findmax;
+package io.nosqlbench.scenarios.simframe.capture;
 
 import java.util.List;
 
 /**
- * Provide an observer-only view of a simulation journal
+ * An observer-only view of results.
  */
-public interface JournalView {
-    List<SimFrame> frames();
-    SimFrame last();
-    SimFrame beforeLast();
-    SimFrame bestRun();
-    SimFrame before(SimFrame frame);
-    SimFrame after(SimFrame frame);
+public interface SimFrameResults {
+    List<FrameSampleSet> history();
+    double getValue();
+    int size();
 }

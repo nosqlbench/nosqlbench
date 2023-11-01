@@ -16,7 +16,7 @@
 
 package io.nosqlbench.scenarios;
 
-import io.nosqlbench.scenarios.findmax.SimFrameCapture;
+import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 

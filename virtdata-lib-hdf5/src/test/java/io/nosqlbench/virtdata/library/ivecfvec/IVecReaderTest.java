@@ -37,7 +37,7 @@ class IVecReaderTest {
             HashSet<Integer> ref = idx_ref.get(0);
             for (int j = 0; j < indices.length; j++) {
                 assertThat(indices[j]).isGreaterThanOrEqualTo(0);
-                assertThat(indices[j]).isLessThanOrEqualTo(10000);
+                assertThat(indices[j]).isLessThan(10000);
             }
         }
     }

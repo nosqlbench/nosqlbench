@@ -5,7 +5,7 @@
       <option name="region" />
       <option name="useCurrentConnection" value="false" />
     </extension>
-    <option name="JAR_PATH" value="$PROJECT_DIR$/nb5/target/nb5.jar" />
+    <option name="JAR_PATH" value="nb5/target/nb5.jar" />
     <option name="PROGRAM_PARAMETERS" value="cql_vector2_fvec astra_vectors.testann userfile=auth/userfile passfile=auth/passfile scb=auth/scb.zip --show-stacktraces dimensions=1024 testsize=10000 trainsize=100000 datafile=intfloat_e5-large-v2 filetype=fvec table=e5_large_v2 similarity_function=cosine --add-labels &quot;dimensions:1024,dataset=e5_large_v2&quot;" />
     <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/local/jvector" />
     <option name="ALTERNATIVE_JRE_PATH" value="jdk21" />
