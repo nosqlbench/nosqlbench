@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.capture;
+package io.nosqlbench.scenarios.simframe.optimo;
 
-import io.nosqlbench.scenarios.simframe.planning.SimFrame;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
 
-import java.util.List;
+public record OptimoSearchParams(
 
-/**
- * Provide an observer-only view of a simulation journal
- */
-public interface JournalView<P> {
-    List<SimFrame<P>> frames();
-    SimFrame<P> last();
-    SimFrame<P> beforeLast();
-    SimFrame<P> bestRun();
-    SimFrame<P> before(SimFrame<P> frame);
-    SimFrame<P> after(SimFrame<P> frame);
+) {
+    public OptimoSearchParams(ScenarioParams params) {
+        this();
+    }
 }

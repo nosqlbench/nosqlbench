@@ -18,6 +18,8 @@ package io.nosqlbench.scenarios.simframe.optimo;
 
 import io.nosqlbench.api.engine.metrics.ConvenientSnapshot;
 import io.nosqlbench.api.engine.metrics.DeltaSnapshotReader;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
 import io.nosqlbench.api.optimizers.MVResult;
@@ -28,6 +30,11 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
+import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
+import io.nosqlbench.scenarios.simframe.findmax.FindMaxFrameParams;
+import io.nosqlbench.scenarios.simframe.findmax.FindMaxPlanner;
+import io.nosqlbench.scenarios.simframe.findmax.FindmaxSearchParams;
+import io.nosqlbench.scenarios.simframe.findmax.SC_findmax;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,7 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.ToDoubleFunction;
 
 public class SC_optimo extends SCBaseScenario {
-    private final static Logger logger = LogManager.getLogger(SC_optimo.class);
+    private final static Logger logger = LogManager.getLogger(SC_findmax.class);
 
     public SC_optimo(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
@@ -48,13 +55,14 @@ public class SC_optimo extends SCBaseScenario {
     public void invoke() {
         // TODO: having "scenario" here as well as in "named scenario" in workload templates is confusing. Make this clearer.
         String workload = params.getOrDefault("workload", "default_workload");
+        CycleRateSpec ratespec = new CycleRateSpec(100.0, 1.05);
 
         Map<String, String> activityParams = new HashMap<>(Map.of(
             "cycles", String.valueOf(Long.MAX_VALUE),
-            "threads", params.getOrDefault("threads","1"),
+            "threads", params.getOrDefault("threads", "1"),
             "driver", "diag",
-            "rate", "1",
-            "dryrun","op"
+            "rate", String.valueOf(ratespec.opsPerSec),
+            "dryrun", "op"
         ));
         if (params.containsKey("workload")) {
             activityParams.put("workload", params.get("workload"));
@@ -65,93 +73,64 @@ public class SC_optimo extends SCBaseScenario {
             logger.warn("You provided neither a workload nor an op, so assuming diagnostic mode.");
         }
 
-        int seconds = params.containsKey("window") ? Integer.parseInt(params.get("window")) : 5;
-
-        BobyqaOptimizerInstance bobby = create().bobyqaOptimizer();
-        bobby.param("rate", 1.0d, 10000.d);
-        bobby.param("threads", 1.0d, 1000.0d);
-//        bobby.param("noise", 100d, 200.0d);
-        bobby.setInitialRadius(1000000.0).setStoppingRadius(0.001).setMaxEval(1000);
+        OptimoSearchParams optimoSearchParams = new OptimoSearchParams(params);
 
         Activity flywheel = controller.start(activityParams);
-        stdout.println("warming up for " + seconds + " seconds");
-        controller.waitMillis(5000);
 
-        /**
-         * <P>This function is the objective function, and is responsible for applying
-         * the parameters and yielding a samples. The higher the returned samples, the
-         * better the parameters are.</P>
-         * <P>The parameter values will be passed in as an array, pair-wise with the param calls above.</P>
-         */
+        SimFrameCapture capture = this.perfValueMeasures(flywheel);
+        OptimoPlanner planner = new OptimoPlanner(optimoSearchParams);
+        SimFrameJournal journal = new SimFrameJournal();
 
-        flywheel.onEvent(new ParamChange<>(new CycleRateSpec(5.0, 1.1d, SimRateSpec.Verb.restart)));
-
-        SimFrameCapture sampler = new SimFrameCapture();
-        NBMetricTimer result_success_timer = flywheel.find().timer("name:result_success");
-        System.out.println("c1:" + result_success_timer.getCount());
-        sampler.addDeltaTime("achieved_rate", result_success_timer::getCount, 1000.0);
-        System.out.println("c2:" + result_success_timer.getCount());
-        stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
-        final DeltaSnapshotReader snapshotter = result_success_timer.getDeltaReader();
-        AtomicReference<ConvenientSnapshot> snapshot = new AtomicReference<>(snapshotter.getDeltaSnapshot());
-//        ValidAtOrBelow below15000 = ValidAtOrBelow.max(15000);
-//        sampler.addDirect(
-//            "p99latency",
-//            () -> below15000.applyAsDouble(snapshot.get().getP99ns()),
-//            -1.0,
-//            () -> snapshot.set(snapshotter.getDeltaSnapshot())
-//        );
-
-        ToDoubleFunction<double[]> f = new ToDoubleFunction<double[]>() {
-            @Override
-            public double applyAsDouble(double[] values) {
-                stdout.println("params=" + Arrays.toString(values));
-
-                System.out.println("c3:" + result_success_timer.getCount());
-                stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
-
-                int threads = (int) bobby.getParams().getValue("threads", values);
-                flywheel.getActivityDef().setThreads(threads);
-                stdout.println("PARAM threads set to " + threads + " confirm: " + flywheel.getActivityDef().getThreads());
-
-                double rate = bobby.getParams().getValue("rate", values);
-                CycleRateSpec ratespec = new CycleRateSpec(rate, 1.1d, SimRateSpec.Verb.restart);
-                flywheel.onEvent(new ParamChange<>(ratespec));
-                stdout.println("PARAM cyclerate set to " +rate);
-                stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
-
-                System.out.println("c3b:" + result_success_timer.getCount());
-                stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
-                stdout.println("waiting 2 seconds for stabilization");
-                controller.waitMillis(2000);
-
-                System.out.println("c4:" + result_success_timer.getCount());
-                stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
-
-                sampler.startWindow();
-                stdout.println("waiting " + seconds + " seconds...");
-                controller.waitMillis(seconds * 1000L);
-                sampler.stopWindow();
-                System.out.println("c5:" + result_success_timer.getCount());
-                stdout.println(" RATE>>> " + flywheel.getCycleLimiter().toString());
-
-                double value = sampler.getValue();
-                stdout.println("RESULT:\n" + sampler);
-                stdout.println("-".repeat(40));
-                return value;
-
+        OptimoFrameParams frameParams = planner.initialStep();
+        while (frameParams != null) {
+            stdout.println(frameParams);
+            flywheel.onEvent(ParamChange.of(new CycleRateSpec(frameParams.target_rate(), 1.05d, SimRateSpec.Verb.restart)));
+            capture.startWindow();
+            for (int i = 0; i < 10; i++) {
+                controller.waitMillis(frameParams.sample_time_ms()/10);
+                stdout.println(capture.activeSample());
             }
-        };
-        bobby.setObjectiveFunction(f);
-        MVResult result = bobby.optimize();
-
+            capture.stopWindow();
+            journal.record(frameParams, capture.last());
+            stdout.println(capture.last());
+            stdout.println("-".repeat(40));
+            frameParams = planner.nextStep(journal);
+        }
         controller.stop(flywheel);
-        stdout.println("optimized samples was " + result);
-        stdout.println("map of samples was " + result.getMap());
+        stdout.println("bestrun:\n" + journal.bestRun());
 
-        // TODO: controller startAt should not return the activity itself, but a control point, like activityDef
+        // could be a better result if the range is arbitrarily limiting the parameter space.
+    }
 
-        // TODO: warn user if one of the samples params is near or at the range allowed, as there
-        // could be a better samples if the range is arbitrarily limiting the parameter space.
+    private SimFrameCapture perfValueMeasures(Activity activity) {
+        SimFrameCapture sampler = new SimFrameCapture();
+
+        NBMetricTimer result_timer = activity.find().timer("name:result");
+        NBMetricTimer result_success_timer = activity.find().timer("name:result_success");
+        NBMetricGauge cyclerate_gauge = activity.find().gauge("name=config_cyclerate");
+        NBMetricHistogram tries_histo_src = activity.find().histogram("name=tries");
+        NBMetricHistogram tries_histo = tries_histo_src.attachHdrDeltaHistogram();
+
+        sampler.addDirect("target_rate", cyclerate_gauge::getValue, Double.NaN);
+        sampler.addDeltaTime("achieved_oprate", result_timer::getCount, Double.NaN);
+        sampler.addDeltaTime("achieved_ok_oprate", result_success_timer::getCount, 1.0);
+
+        sampler.addRemix("achieved_success_ratio", vars -> {
+            // exponentially penalize results which do not attain 100% successful op rate
+            double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("achieved_oprate"));
+            return Math.pow(basis, 3);
+        });
+        sampler.addRemix("achieved_target_ratio", (vars) -> {
+            // exponentially penalize results which do not attain 100% target rate
+            double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("target_rate"));
+            return Math.pow(basis, 3);
+        });
+//        sampler.addRemix("retries_p99", (vars) -> {
+//            double retriesP99 = tries_histo.getDeltaSnapshot(90).get99thPercentile();
+//            return 1/retriesP99;
+//        });
+
+
+        return sampler;
     }
 }

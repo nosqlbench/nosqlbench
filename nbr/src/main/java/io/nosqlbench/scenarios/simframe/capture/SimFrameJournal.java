@@ -27,8 +27,8 @@ import java.util.List;
 /**
  * Aggregate usage patterns around capturing and using simulation frame data.
  */
-public class SimFrameJournal extends ArrayList<SimFrame> implements JournalView {
-    public void record(FindMaxFrameParams params, FrameSampleSet samples) {
+public class SimFrameJournal<P> extends ArrayList<SimFrame<P>> implements JournalView {
+    public void record(P params, FrameSampleSet samples) {
         add(new SimFrame(params, samples));
     }
 
