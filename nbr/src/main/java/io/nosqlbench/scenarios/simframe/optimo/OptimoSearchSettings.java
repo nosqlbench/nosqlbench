@@ -25,7 +25,7 @@ public record OptimoSearchSettings(
 ) {
     public OptimoSearchSettings(ScenarioParams params, OptimoParamModel model) {
         this(
-            params.maybeGet("sample_time_ms").map(Long::parseLong).orElse(1000L),
+            params.maybeGet("sample_time_ms").map(Long::parseLong).orElse(5000L),
             model
         );
     }

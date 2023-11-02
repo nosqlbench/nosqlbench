@@ -58,7 +58,10 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         for (NBComponent child : children) {
             logger.debug(() -> "attaching " + child.description() + " to parent " + this.description());
             for (NBComponent extant : this.children) {
-                if (!child.getComponentOnlyLabels().isEmpty() && child.getComponentOnlyLabels().equals(extant.getComponentOnlyLabels())) {
+                NBLabels eachLabels = extant.getComponentOnlyLabels();
+                NBLabels newLabels = child.getComponentOnlyLabels();
+
+                if (eachLabels!=null && newLabels!=null && !eachLabels.isEmpty() && !newLabels.isEmpty() && child.getComponentOnlyLabels().equals(extant.getComponentOnlyLabels())) {
                     throw new RuntimeException("Adding second child under already-defined labels is not allowed:\n" +
                         " extant: (" + extant.getClass().getSimpleName() + ") " + extant.description() + "\n" +
                         " adding: (" + child.getClass().getSimpleName() + ") " + child.description());
