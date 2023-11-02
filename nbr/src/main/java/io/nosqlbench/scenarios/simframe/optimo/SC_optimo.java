@@ -26,6 +26,8 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.findmax.SC_findmax;
@@ -42,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Service(value = NBScenario.class, selector = "optimo")
 public class SC_optimo extends SCBaseScenario {
     private final static Logger logger = LogManager.getLogger(SC_findmax.class);
 
@@ -75,13 +78,12 @@ public class SC_optimo extends SCBaseScenario {
         SimFrameCapture capture = this.perfValueMeasures(flywheel);
         SimFrameJournal<OptimoFrameParams> journal = new SimFrameJournal<>();
 
-
         OptimoParamModel model = new OptimoParamModel();
 
-        model.add("rate",100,1000,10000000,
+        model.add("rate",100,1000,10_000_000,
             rate -> flywheel.onEvent(ParamChange.of(new CycleRateSpec(rate, 1.1d, SimRateSpec.Verb.restart)))
         );
-        model.add("threads",1,10,10000,
+        model.add("threads",1,10,10_000,
             threads -> flywheel.onEvent(ParamChange.of(new SetThreads((int) threads)))
         );
         OptimoSearchSettings optimoSearchParams = new OptimoSearchSettings(params,model);
@@ -92,30 +94,42 @@ public class SC_optimo extends SCBaseScenario {
             new ObjectiveFunction(frameFunction),
             GoalType.MAXIMIZE,
             new InitialGuess(model.getInitialGuess()),
-            new MaxEval(2500),
+            new MaxEval(100),
             model.getBounds()
         );
 
         /**
          * optimizer settings
          * <PRE>{@code
+         * // BEFORE stability detection
          * ΔT  IP  ITR  STR    ITER WINNER P
+         * 4S  6   5    1E-4   87   86     rate=1603980.57 threads=38.12
+         * 4S  6   5    1E-5   32   0      rate=1000 threads=10 (stuck, and again)
          * 4S  6   10   1E-3   101  70     rate=1807028.66 threads=5479.26
          * 4S  6   10   1E-3   25   12     rate=1010.55    threads=1.78
          * 4S  6   10   1E-3   37   32     rate=656537.93  threads=1.0
+         * 4S  6   10   1E-4   95   64     rate=1796326.69 threads=1.0
+         * 4S  6   15   1E-5   33   27     rate=1340405.42 threads=1.11 // these runs seem to be suffering from over-saturation hang-over
+         * 4S  6   25   1E-4   32   32     rate=1674547.43 threads=1.0
+         * 4S  6   25   1E-4   74   59     rate=2327131.37 threads=10000
+         * 4S  6   25   1E-4   93   78     rate=2422970.28 threads=2435.21
          * 4S  6   25   1E-5   67   41     rate=2278757.14 threads=4767
          * 4S  6   25   1E-5   91   62     rate=2477244.22 threads=8905.10
          * 4S  6   25   1E-5   86   74     rate=2339949.66 threads=4796.69
-         * 4S  6   100  1E-4   77   39     rate=1048884.14 threads=1.0
-         * 4S  6   25   1E-4   32   32     rate=1674547.43 threads=1.0
-         * 4S  6   10   1E-4   95   64     rate=1796326.69 threads=1.0
-         * 4S  6   25   1E-4   74   59     rate=2327131.37 threads=10000
-         * 4S  6   25   1E-4   93   78     rate=2422970.28 threads=2435.21
          * 4S  6   25   1E-3   33   27     rate=1738588.36 threads=1.0
-         * 4S  6   5    1E-4   87   86     rate=1603980.57 threads=38.12
-         * 4S  6   5    1E-5   32   0      rate=1000 threads=10 (stuck, and again)
-         * 4S  6   15   1E-5   33   27     rate=1340405.42 threads=1.11 // these runs seem to be suffering from over-saturation hang-over
          * 4S  6   50   1E-5   72   71     rate=952825.94  threads=434  // same as above, stabilization checks must be implemented
+         * 4S  6   100  1E-4   77   39     rate=1048884.14 threads=1.0
+         *
+         * AFTER stability detection at 10,5,0.98 --> multiple runs reliably landing in the same zone
+         * ΔT  IP  ITR  STR    ITER WINNER P
+         * 1S  6   50   1E-5   75   74     rate=2367740, threads=10000
+         * 1S  6   50   1E-4   75   57     rate=2412151, threads=1
+         *                     83   66     rate=2379849, threads=9949
+         *              1E-3   74   39          2376196
+         *              1E-2                    2179369 (stuck in well, RESCUE failed)
+         *         10   1E-3                    1607107
+         *         25   1E-3                    2469518
+         *
          * </PRE>
          *
          * If the initial trust radius is not large enough with respect to the stopping trust radius, then the search will stop
@@ -130,13 +144,15 @@ public class SC_optimo extends SCBaseScenario {
             6,
             /**
              * Initial trust region radius, affects how well aggressively BOBYQA explores the parameter space.
-             * Too small and it may not explore enough to find a gradient. Too large, and the feedback loop seems to run dry quickly.
+             * Too small and it may not explore enough to find a gradient if it starts in a flatter part of the manifold.
+             * Too large, and the feedback loop seems to run dry quickly due to lack of detail.
              */
-            50,
+            25,
             /**
-             * Stopping trust region radius. Differences in result which are below this value are likely to stop the search
+             * Stopping trust region radius. This is the space which contains interpolation points, and can be trusted
+             * to contain a reasonably representative character of the overall manifold
              */
-            1E-5
+            1E-4
         );
         PointValuePair result = null;
         try {
@@ -180,10 +196,10 @@ public class SC_optimo extends SCBaseScenario {
             double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("target_rate"));
             return Math.pow(basis, 2);
         });
-//        sampler.addRemix("retries_p99", (vars) -> {
-//            double retriesP99 = tries_histo.getDeltaSnapshot(90).get99thPercentile();
-//            return 1/retriesP99;
-//        });
+        sampler.addRemix("retries_p99", (vars) -> {
+            double triesP99 = tries_histo.getDeltaSnapshot(90).get99thPercentile();
+            return 1/triesP99;
+        });
 
 
         return sampler;
