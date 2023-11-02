@@ -32,6 +32,7 @@ import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.findmax.SC_findmax;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
+import io.nosqlbench.scenarios.simframe.stabilization.StatFunctions;
 import org.apache.commons.math4.legacy.exception.MathIllegalStateException;
 import org.apache.commons.math4.legacy.optim.*;
 import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
@@ -177,6 +178,8 @@ public class SC_optimo extends SCBaseScenario {
         SimFrameCapture sampler = new SimFrameCapture();
 
         NBMetricTimer result_timer = activity.find().timer("name:result");
+        NBMetricTimer latency_histo = result_timer.attachHdrDeltaHistogram();
+
         NBMetricTimer result_success_timer = activity.find().timer("name:result_success");
         NBMetricGauge cyclerate_gauge = activity.find().gauge("name=config_cyclerate");
         NBMetricHistogram tries_histo_src = activity.find().histogram("name=tries");
@@ -200,8 +203,12 @@ public class SC_optimo extends SCBaseScenario {
             double triesP99 = tries_histo.getDeltaSnapshot(90).get99thPercentile();
             return 1/triesP99;
         });
-
-
+        sampler.addDirect("latency_cutoff_50", () -> {
+            double latencyP99 = latency_histo.getDeltaSnapshot(90).getP99ms();
+            double v = StatFunctions.sigmoidE4LowPass(latencyP99, 50);
+//            System.out.println("v:"+v+"  p99ms:" + latencyP99);
+            return v;
+        },1.0d);
         return sampler;
     }
 }

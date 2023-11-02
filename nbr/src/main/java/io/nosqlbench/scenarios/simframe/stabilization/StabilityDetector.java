@@ -108,12 +108,12 @@ public class StabilityDetector implements Runnable {
             basis *= reductionFactor;
         }
 
-        double time = ((double)(nextCheckAt - startedAt))/1000d;
-        System.out.printf("% 4.1fS STABILITY %g :", time, basis);
-        for (int i = 0; i < stddev.length; i++) {
-            System.out.printf("[%d]: %g ", windows[i], stddev[i]);
-        }
-        System.out.println();
+//        double time = ((double)(nextCheckAt - startedAt))/1000d;
+//        System.out.printf("% 4.1fS STABILITY %g :", time, basis);
+//        for (int i = 0; i < stddev.length; i++) {
+//            System.out.printf("[%d]: %g ", windows[i], stddev[i]);
+//        }
+//        System.out.println();
         return basis;
 
     }
