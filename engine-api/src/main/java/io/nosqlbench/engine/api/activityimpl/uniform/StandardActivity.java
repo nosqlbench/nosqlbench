@@ -36,6 +36,7 @@ import io.nosqlbench.api.errors.OpConfigError;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.events.NBEvent;
 import io.nosqlbench.components.events.ParamChange;
+import io.nosqlbench.components.events.SetThreads;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
@@ -269,6 +270,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         switch(event) {
             case ParamChange<?> pc -> {
                 switch (pc.value()) {
+                    case SetThreads st -> activityDef.setThreads(st.threads);
                     case CycleRateSpec crs -> createOrUpdateCycleLimiter(crs);
                     case StrideRateSpec srs -> createOrUpdateStrideLimiter(srs);
                     default -> super.onEvent(event);

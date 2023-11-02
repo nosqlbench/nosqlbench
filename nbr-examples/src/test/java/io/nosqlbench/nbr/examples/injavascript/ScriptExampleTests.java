@@ -48,7 +48,7 @@ public class ScriptExampleTests {
 
     public static ScenarioResult runScenario(String scriptname, String... params) {
         if ((params.length % 2) != 0) {
-            throw new RuntimeException("params must be pairwise key, value, ...");
+            throw new RuntimeException("paramValues must be pairwise key, value, ...");
         }
         Map<String, String> paramsMap = new HashMap<>();
 
@@ -143,8 +143,8 @@ public class ScriptExampleTests {
     @Test
     public void testScriptParamsVariable() {
         ScenarioResult scenarioResult = runScenario("params_variable", "one", "two", "three", "four");
-        assertThat(scenarioResult.getIOLog()).contains("params[\"one\"]='two'");
-        assertThat(scenarioResult.getIOLog()).contains("params[\"three\"]='four'");
+        assertThat(scenarioResult.getIOLog()).contains("paramValues[\"one\"]='two'");
+        assertThat(scenarioResult.getIOLog()).contains("paramValues[\"three\"]='four'");
         assertThat(scenarioResult.getIOLog()).contains("overridden[\"three\"] [overridden-three-five]='five'");
         assertThat(scenarioResult.getIOLog()).contains("defaulted.get[\"four\"] [defaulted-four-niner]='niner'");
     }
@@ -153,10 +153,10 @@ public class ScriptExampleTests {
     @Test
     public void testScriptParamsUndefVariableWithOverride() {
         ScenarioResult scenarioResult = runScenario("undef_param", "one", "two", "three", "four");
-        assertThat(scenarioResult.getIOLog()).contains("before: params[\"three\"]:four");
-        assertThat(scenarioResult.getIOLog()).contains("before: params.three:four");
-        assertThat(scenarioResult.getIOLog()).contains("after: params[\"three\"]:undefined");
-        assertThat(scenarioResult.getIOLog()).contains("after: params.three:undefined");
+        assertThat(scenarioResult.getIOLog()).contains("before: paramValues[\"three\"]:four");
+        assertThat(scenarioResult.getIOLog()).contains("before: paramValues.three:four");
+        assertThat(scenarioResult.getIOLog()).contains("after: paramValues[\"three\"]:undefined");
+        assertThat(scenarioResult.getIOLog()).contains("after: paramValues.three:undefined");
     }
 
     // TODO - length >= 2 expected, not passing with changes for metrics

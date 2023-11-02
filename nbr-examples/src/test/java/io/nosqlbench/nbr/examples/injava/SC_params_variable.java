@@ -25,14 +25,14 @@ public class SC_params_variable extends SCBaseScenario {
     }
 
     /** <pre>{@code
-     * print('params["one"]=\'' + params["one"] + "'");
-     * print('params["three"]=\'' + params["three"] + "'");
+     * print('paramValues["one"]=\'' + paramValues["one"] + "'");
+     * print('paramValues["three"]=\'' + paramValues["three"] + "'");
      *
      * var overrides = {
      *   'three': "five"
      * };
      *
-     * var overridden = params.withOverrides(overrides);
+     * var overridden = paramValues.withOverrides(overrides);
      *
      * print('overridden["three"] [overridden-three-five]=\'' + overridden["three"] + "'");
      *
@@ -40,7 +40,7 @@ public class SC_params_variable extends SCBaseScenario {
      *     'four': "niner"
      * };
      *
-     * var defaulted = params.withDefaults(defaults);
+     * var defaulted = paramValues.withDefaults(defaults);
      *
      * print('defaulted.get["four"] [defaulted-four-niner]=\'' + defaulted["four"] + "'");
      * }</pre>

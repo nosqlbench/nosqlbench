@@ -44,7 +44,7 @@ public class FindMaxPlanner extends SimFramePlanner<FindmaxSearchParams, FindMax
      *
      * @param journal
      *     All parameters and results, organized in enumerated simulation frames
-     * @return Optionally, a set of params which indicates another simulation frame should be sampled, else null
+     * @return Optionally, a set of paramValues which indicates another simulation frame should be sampled, else null
      */
     @Override
     public FindMaxFrameParams nextStep(JournalView<FindMaxFrameParams> journal) {

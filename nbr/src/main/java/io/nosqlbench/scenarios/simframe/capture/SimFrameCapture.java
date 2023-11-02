@@ -43,7 +43,7 @@ public class SimFrameCapture implements SimFrameResults {
 
 
     public SimFrameCapture() {
-        stabilizer = new StabilityDetector(1.0,100,this::getPartialValue, 200,100,10);
+        stabilizer = new StabilityDetector(0.1,0.98,this::getPartialValue, 10,5);
     }
 
     private double getPartialValue() {

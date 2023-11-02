@@ -16,12 +16,7 @@
 
 package io.nosqlbench.scenarios.simframe.optimo;
 
-public record OptimoFrameParams(
-    OptimoParamModel model,
-    double[] paramValues
-) {
-    @Override
-    public String toString() {
-        return model.summarizeParams(paramValues);
+public class ThreadSpec {
+    public ThreadSpec(double threads) {
     }
 }

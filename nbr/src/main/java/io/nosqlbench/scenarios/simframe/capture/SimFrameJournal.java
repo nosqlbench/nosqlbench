@@ -33,17 +33,17 @@ public class SimFrameJournal<P> extends ArrayList<SimFrame<P>> implements Journa
     }
 
     @Override
-    public List<SimFrame> frames() {
+    public List<SimFrame<P>> frames() {
         return Collections.unmodifiableList(this);
     }
 
     @Override
-    public SimFrame last() {
+    public SimFrame<P> last() {
         return super.getLast();
     }
 
     @Override
-    public SimFrame beforeLast() {
+    public SimFrame<P> beforeLast() {
         if (size()<2) {
             throw new RuntimeException("can't get beforeLast for only " + size() + " elements");
         }
@@ -51,12 +51,12 @@ public class SimFrameJournal<P> extends ArrayList<SimFrame<P>> implements Journa
     }
 
     @Override
-    public SimFrame bestRun() {
+    public SimFrame<P> bestRun() {
         return this.stream().sorted(Comparator.comparingDouble(SimFrame::value)).toList().getLast();
     }
 
     @Override
-    public SimFrame before(SimFrame frame) {
+    public SimFrame<P> before(SimFrame frame) {
         int beforeIdx=frame.index()-1;
         if (beforeIdx>=0 && beforeIdx<=size()-1) {
             return frames().get(beforeIdx);
@@ -64,7 +64,7 @@ public class SimFrameJournal<P> extends ArrayList<SimFrame<P>> implements Journa
     }
 
     @Override
-    public SimFrame after(SimFrame frame) {
+    public SimFrame<P> after(SimFrame frame) {
         int afterIdx=frame.index()+1;
         if (afterIdx>=0 && afterIdx<=size()-1) {
             return frames().get(afterIdx);

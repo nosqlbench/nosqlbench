@@ -30,6 +30,8 @@ public class StabilityDetector implements Runnable {
     private StatBucket[] buckets;
     private int[] windows;
     private volatile boolean running = true;
+    private long startedAt;
+    private long nextCheckAt;
 
     /**
      * Configure a stability checker that reads values from a source on some timed loop,
@@ -88,6 +90,7 @@ public class StabilityDetector implements Runnable {
     }
 
     private double computeStability() {
+//        System.out.println("priming " + this.buckets[0].count() + "/" + this.buckets[0].ringbuf.size());
         if (!primed()) {
             return -1.0d;
         }
@@ -98,17 +101,16 @@ public class StabilityDetector implements Runnable {
         double basis = 1.0d;
 
         for (int i = 0; i < buckets.length - 1; i++) {
-            double reductionFactor = stddev[i] / stddev[i + 1];
+            // if previous bigger window had a higher stddev than the one after, then it is converging
+            double reductionFactor = (stddev[i + 1] / stddev[i]);
             basis *= reductionFactor;
         }
-        System.out.printf("STABILITY %g :", basis);
+        double time = ((double)(nextCheckAt - startedAt))/1000d;
+        System.out.printf("% 4.1fS STABILITY %g :", time, basis);
         for (int i = 0; i < stddev.length; i++) {
             System.out.printf("[%d]: %g ", windows[i], stddev[i]);
         }
         System.out.println();
-//        logger.info("STABILITY " + basis);
-
-
         return basis;
 
     }
@@ -118,14 +120,13 @@ public class StabilityDetector implements Runnable {
      */
     @Override
     public void run() {
-        int interval = (int) this.timeSliceSeconds / 1000;
+        int interval = (int) (this.timeSliceSeconds * 1000);
+        startedAt = System.currentTimeMillis();
         reset();
 
-        boolean steadyEnough = false;
-        long lastCheck = System.currentTimeMillis();
-        long nextCheckAt = lastCheck + interval;
+        nextCheckAt = startedAt + interval;
 
-        while (running && !steadyEnough) {
+        while (running) {
             long delay = nextCheckAt - System.currentTimeMillis();
             while (delay > 0) {
                 try {
@@ -134,12 +135,15 @@ public class StabilityDetector implements Runnable {
                 }
                 delay = nextCheckAt - System.currentTimeMillis();
             }
+
             double value = source.getAsDouble();
             apply(value);
             double stabilityFactor = computeStability();
+
             if (stabilityFactor > threshold) {
                 return;
             }
+            nextCheckAt+=interval;
         }
     }
 

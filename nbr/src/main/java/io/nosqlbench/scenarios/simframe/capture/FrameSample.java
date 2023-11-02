@@ -149,13 +149,13 @@ public final class FrameSample {
         return switch (criterion().evaltype()) {
             case deltaT ->
                 String.format(
-                    "% 5d %30s derived=% 12.3f ⋅ W[% 3.3f] =% 17.5f   ΔV:%12.5f ΔT=%5.3f",
+                    "% 5d %30s  basis=% 12.3f ⋅ W=%1.1f C=% 17.5f   ΔV %12.5f  ΔT %5.3fS",
                     index, criterion.name(),
                     basis, criterion().weight(), weightedValue(),
                     deltaV(), deltaT());
             case direct,remix ->
                 String.format(
-                    "% 5d %30s derived=% 12.3f ⋅ W[% 3.3f] =% 17.5f",
+                    "% 5d %30s  basis=% 12.3f ⋅ W=%1.1f C=% 17.5f",
                     index, criterion.name(),
                     basis, criterion().weight(), weightedValue());
         };

@@ -16,12 +16,17 @@
 
 package io.nosqlbench.scenarios.simframe.optimo;
 
-public record OptimoFrameParams(
-    OptimoParamModel model,
-    double[] paramValues
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
+
+public record OptimoSearchSettings(
+    long sample_time_ms,
+    OptimoParamModel model
 ) {
-    @Override
-    public String toString() {
-        return model.summarizeParams(paramValues);
+    public OptimoSearchSettings(ScenarioParams params, OptimoParamModel model) {
+        this(
+            params.maybeGet("sample_time_ms").map(Long::parseLong).orElse(1000L),
+            model
+        );
     }
 }

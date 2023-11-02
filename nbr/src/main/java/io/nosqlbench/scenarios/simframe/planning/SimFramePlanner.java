@@ -43,7 +43,7 @@ public abstract class SimFramePlanner<C,P> {
      *
      * @param journal
      *     All parameters and results, organized in enumerated simulation frames
-     * @return Optionally, a set of params which indicates another simulation frame should be sampled, else null
+     * @return Optionally, a set of paramValues which indicates another simulation frame should be sampled, else null
      */
     public abstract P nextStep(JournalView<P> journal);
 

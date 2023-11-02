@@ -27,33 +27,33 @@ public class SC_undef_param extends SCBaseScenario {
     }
 
     /** <pre>{@code
-     * print("params from command line:");
-     * print(params);
-     * print('before: params["three"]:' + params["three"]);
-     * print('before: params.three:' + params.three);
+     * print("paramValues from command line:");
+     * print(paramValues);
+     * print('before: paramValues["three"]:' + paramValues["three"]);
+     * print('before: paramValues.three:' + paramValues.three);
      *
      * var overrides = {
      *   'three': "undef",
      * };
      *
-     * print("params.three after overriding with three:UNDEF");
-     * params = params.withOverrides({'three':'UNDEF'});
-     * print(params);
-     * print('after: params["three"]:' + params["three"]);
-     * print('after: params.three:' + params.three);
+     * print("paramValues.three after overriding with three:UNDEF");
+     * paramValues = paramValues.withOverrides({'three':'UNDEF'});
+     * print(paramValues);
+     * print('after: paramValues["three"]:' + paramValues["three"]);
+     * print('after: paramValues.three:' + paramValues.three);
      * }</pre>
      */
     @Override
     public void invoke() {
-        stdout.println("params from command line:");
+        stdout.println("paramValues from command line:");
         stdout.println(params.toString());
-        stdout.println("before: params.get(\"three\"):" + params.get("three"));
+        stdout.println("before: paramValues.get(\"three\"):" + params.get("three"));
         var overrides = Map.of(
             "three", "undef"
         );
         params=params.withOverrides(Map.of(
             "three","UNDEF"
         ));
-        stdout.println("after overriding with three:UNDEF: params.get(\"three\"):" + params.get("three"));
+        stdout.println("after overriding with three:UNDEF: paramValues.get(\"three\"):" + params.get("three"));
     }
 }

@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.optimo;
+package io.nosqlbench.scenarios.simframe.planning;
 
-public record OptimoFrameParams(
-    OptimoParamModel model,
-    double[] paramValues
-) {
+import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
+
+public interface SimFrameFunction extends MultivariateFunction {
     @Override
-    public String toString() {
-        return model.summarizeParams(paramValues);
-    }
+    double value(double[] point);
+
 }
