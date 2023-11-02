@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.optimo;
+package io.nosqlbench.components.events;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
+import io.nosqlbench.components.events.NBEvent;
 
-public record OptimoSearchParams(
+public class SetThreads implements NBEvent {
+    public final int threads;
 
-) {
-    public OptimoSearchParams(ScenarioParams params) {
-        this();
+    public SetThreads(int threads) {
+        this.threads = threads;
     }
 }

@@ -27,7 +27,7 @@ public class SC_basicdiag extends SCBaseScenario {
     }
 
     /** <pre>{@code
-     * basic_diag = params.withOverrides({
+     * basic_diag = paramValues.withOverrides({
      *     "alias" : "basic_diag",
      *     "driver" : "diag"
      * });

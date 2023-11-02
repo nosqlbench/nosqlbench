@@ -34,4 +34,9 @@ public record SimFrame<P>(
     public int index() {
         return samples.index();
     }
+
+    @Override
+    public String toString() {
+        return params.toString()+samples.toString();
+    }
 }

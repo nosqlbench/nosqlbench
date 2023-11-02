@@ -17,8 +17,7 @@
 
 package io.nosqlbench.api.optimizers;
 
-import org.apache.commons.math3.analysis.MultivariateFunction;
-
+import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
 import java.util.ArrayList;
 import java.util.List;
 

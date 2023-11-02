@@ -17,12 +17,16 @@
 package io.nosqlbench.optimizers;
 
 import io.nosqlbench.api.optimizers.MVLogger;
-import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.exception.MathIllegalStateException;
-import org.apache.commons.math3.optim.*;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
+import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
+//import org.apache.commons.math3.optim.*;
+//import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+//import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+//import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
+import org.apache.commons.math4.legacy.exception.MathIllegalStateException;
+import org.apache.commons.math4.legacy.optim.*;
+import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math4.legacy.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math4.legacy.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;
