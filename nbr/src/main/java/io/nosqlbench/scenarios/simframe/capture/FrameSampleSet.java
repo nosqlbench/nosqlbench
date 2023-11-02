@@ -37,6 +37,9 @@ public class FrameSampleSet extends ArrayList<FrameSample> {
         double product = 1.0;
         for (FrameSample sample : this) {
             double weighted = sample.weightedValue();
+            if (Double.isNaN(weighted)||Double.isInfinite(weighted)) {
+                throw new RuntimeException("Not a real value for '" + sample.criterion().name() + "': " + weighted);
+            }
             product *= weighted;
         }
         return product;
