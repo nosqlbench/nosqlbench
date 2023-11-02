@@ -35,7 +35,7 @@ public class ClientSystemMetricChecker extends NBBaseComponent {
     private List<ClientMetric> clientMetrics;
 
     public ClientSystemMetricChecker(NBComponent parent, NBLabels additionalLabels, int pollIntervalSeconds) {
-        super(parent,additionalLabels);
+        super(parent,additionalLabels.and("_type","client-metrics"));
         this.pollIntervalSeconds = pollIntervalSeconds;
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.clientMetrics = new ArrayList<>();

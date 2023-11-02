@@ -242,7 +242,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
      * @param activityDef
      *     the activityDef for this activity instance
      */
-    private void adjustMotorCountToThreadParam(ActivityDef activityDef) {
+    private void adjustMotorCountToThreadParam(ActivityDef activityDef) { // TODO: Ensure that threads area allowed to complete their current op gracefully
         logger.trace(() -> ">-pre-adjust->" + getSlotStatus());
 
         reduceActiveMotorCountDownToThreadParam(activityDef);

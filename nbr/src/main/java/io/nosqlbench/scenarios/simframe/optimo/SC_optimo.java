@@ -25,6 +25,7 @@ import io.nosqlbench.components.events.SetThreads;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
 import io.nosqlbench.nb.annotations.Service;
@@ -44,7 +45,13 @@ import org.apache.logging.log4j.Logger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.LockSupport;
 
+
+/**
+ * // TODO: Add sanity checks for a valid run, which inform the users with too-high error rates, or similar, and
+ * // refuse to run without overrides.
+ */
 @Service(value = NBScenario.class, selector = "optimo")
 public class SC_optimo extends SCBaseScenario {
     private final static Logger logger = LogManager.getLogger(SC_findmax.class);
@@ -59,36 +66,64 @@ public class SC_optimo extends SCBaseScenario {
         String workload = params.getOrDefault("workload", "default_workload");
         CycleRateSpec ratespec = new CycleRateSpec(100.0, 1.05);
 
-        Map<String, String> activityParams = new HashMap<>(Map.of(
-            "cycles", String.valueOf(Long.MAX_VALUE),
-            "threads", params.getOrDefault("threads", "1"),
-            "driver", "diag",
-            "rate", String.valueOf(ratespec.opsPerSec),
-            "dryrun", "op"
-        ));
-        if (params.containsKey("workload")) {
-            activityParams.put("workload", params.get("workload"));
-        } else if (params.containsKey("op")) {
-            activityParams.put("op", params.get("op"));
-        } else {
-            activityParams.put("op", "log: level=info");
-            logger.warn("You provided neither a workload nor an op, so assuming diagnostic mode.");
-        }
+//        Map<String, String> defaultActivityParams = new HashMap<>(Map.of(
+//            "cycles", String.valueOf(Long.MAX_VALUE),
+//            "threads", params.getOrDefault("threads", "1"),
+//            "driver", "diag",
+//            "rate", String.valueOf(ratespec.opsPerSec),
+//            "dryrun", "op"
+//        ));
+//        ScenarioParams customParams = params.withDefaults(defaultActivityParams);
+//
+//        if (params.containsKey("workload")) {
+//            activityParams.put("workload", params.get("workload"));
+//        } else if (params.containsKey("op")) {
+//            activityParams.put("op", params.get("op"));
+//        } else {
+//            activityParams.put("op", "log: level=info");
+//            logger.warn("You provided neither a workload nor an op, so assuming diagnostic mode.");
+//        }
+
+        var activityParams = params.withOverrides(
+            new HashMap<String, String>() {{
+                put("cycles", String.valueOf(Long.MAX_VALUE));
+                put("rate", "10");
+                put("threads", "1");
+                put("tags", "block:testann");
+                put("errors", "count,retry,warn");
+                put("maxtries", "2");
+            }}
+        );
+        activityParams.remove("main_class");
 
         Activity flywheel = controller.start(activityParams);
+
+        NBMetricTimer result_success_timer = flywheel.find().timer("name:result_success");
+        for (int i = 0; i < 1000; i++) {
+            if (result_success_timer.getCount()>0) {
+                System.out.println("saw traffic at loop " + i);
+                break;
+            }
+            LockSupport.parkNanos(10_000_000);
+        }
+        if (result_success_timer.getCount()==0) {
+            throw new RuntimeException("Activity was not processing cycles after waiting 10seconds");
+        }
+
+        // await flywheel actually spinning, or timeout with error
         SimFrameCapture capture = this.perfValueMeasures(flywheel);
         SimFrameJournal<OptimoFrameParams> journal = new SimFrameJournal<>();
 
         OptimoParamModel model = new OptimoParamModel();
 
-        model.add("rate",100,1000,10_000_000,
+        model.add("rate", 1, 10, 1000,
             rate -> flywheel.onEvent(ParamChange.of(new CycleRateSpec(rate, 1.1d, SimRateSpec.Verb.restart)))
         );
-        model.add("threads",1,10,10_000,
+        model.add("threads", 10, 20, 100,
             threads -> flywheel.onEvent(ParamChange.of(new SetThreads((int) threads)))
         );
-        OptimoSearchSettings optimoSearchParams = new OptimoSearchSettings(params,model);
-        SimFrameFunction frameFunction = new OptimoFrameFunction(controller,optimoSearchParams,flywheel,capture,journal);
+        OptimoSearchSettings optimoSearchParams = new OptimoSearchSettings(params, model);
+        SimFrameFunction frameFunction = new OptimoFrameFunction(controller, optimoSearchParams, flywheel, capture, journal);
 
 
         List<OptimizationData> od = List.of(
@@ -160,7 +195,7 @@ public class SC_optimo extends SCBaseScenario {
             result = mo.optimize(od.toArray(new OptimizationData[od.size()]));
         } catch (MathIllegalStateException missed) {
             if (missed.getMessage().contains("trust region step has failed to reduce Q")) {
-                logger.warn(missed.getMessage()+", so returning current result.");
+                logger.warn(missed.getMessage() + ", so returning current result.");
                 result = new PointValuePair(journal.last().params().paramValues(), journal.last().value());
             } else {
                 throw missed;
@@ -191,24 +226,34 @@ public class SC_optimo extends SCBaseScenario {
 
         sampler.addRemix("achieved_success_ratio", vars -> {
             // exponentially penalize results which do not attain 100% successful op rate
+            if (vars.get("achieved_oprate")==0.0d) {
+                return 0d;
+            }
             double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("achieved_oprate"));
-            return Math.pow(basis, 2);
+            return basis;
+//            return Math.pow(basis, 2);
         });
         sampler.addRemix("achieved_target_ratio", (vars) -> {
             // exponentially penalize results which do not attain 100% target rate
             double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("target_rate"));
-            return Math.pow(basis, 2);
+            return basis;
+//            return Math.pow(basis, 2);
         });
         sampler.addRemix("retries_p99", (vars) -> {
             double triesP99 = tries_histo.getDeltaSnapshot(90).get99thPercentile();
-            return 1/triesP99;
+            if (Double.isNaN(triesP99)||Double.isInfinite(triesP99)||triesP99==0.0d) {
+                logger.warn("invalid value for retries_p99, skipping as identity for now");
+                return 1.0d;
+            }
+            return 1 / triesP99;
         });
         sampler.addDirect("latency_cutoff_50", () -> {
             double latencyP99 = latency_histo.getDeltaSnapshot(90).getP99ms();
             double v = StatFunctions.sigmoidE4LowPass(latencyP99, 50);
 //            System.out.println("v:"+v+"  p99ms:" + latencyP99);
-            return v;
-        },1.0d);
+            return 1.0d;
+//            return v;
+        }, 1.0d);
         return sampler;
     }
 }

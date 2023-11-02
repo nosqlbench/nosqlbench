@@ -68,7 +68,7 @@ public class StabilityDetector implements Runnable {
     }
 
     private void reset() {
-        detectionTime=-1L;
+        detectionTime = -1L;
         this.buckets = new StatBucket[windows.length];
         for (int i = 0; i < windows.length; i++) {
             buckets[i] = new StatBucket(windows[i]);
@@ -108,6 +108,8 @@ public class StabilityDetector implements Runnable {
             basis *= reductionFactor;
         }
 
+        // TODO: investigate why we get NaN sometimes and what it means for stability checks
+        // TODO: turn this into a one line summary with some cool unicode characters
 //        double time = ((double)(nextCheckAt - startedAt))/1000d;
 //        System.out.printf("% 4.1fS STABILITY %g :", time, basis);
 //        for (int i = 0; i < stddev.length; i++) {
@@ -144,19 +146,19 @@ public class StabilityDetector implements Runnable {
             double stabilityFactor = computeStability();
 
             if (stabilityFactor > threshold) {
-                detectionTime = ((double)(nextCheckAt - startedAt))/1000d;
+                detectionTime = ((double) (nextCheckAt - startedAt)) / 1000d;
                 return;
             }
-            nextCheckAt+=interval;
+            nextCheckAt += interval;
         }
     }
 
     @Override
     public String toString() {
-        if (detectionTime>0L) {
-            return String.format("stability converged in % 4.2fS",detectionTime);
+        if (detectionTime > 0L) {
+            return String.format("stability converged in % 4.2fS", detectionTime);
         } else {
-            return String.format("awaiting stability for % 4.2fS",(((double)(nextCheckAt - startedAt))/1000d));
+            return String.format("awaiting stability for % 4.2fS", (((double) (nextCheckAt - startedAt)) / 1000d));
         }
     }
 }
