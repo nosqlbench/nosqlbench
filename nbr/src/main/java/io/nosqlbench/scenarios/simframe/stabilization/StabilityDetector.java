@@ -32,6 +32,7 @@ public class StabilityDetector implements Runnable {
     private volatile boolean running = true;
     private long startedAt;
     private long nextCheckAt;
+    private double detectionTime;
 
     /**
      * Configure a stability checker that reads values from a source on some timed loop,
@@ -67,17 +68,18 @@ public class StabilityDetector implements Runnable {
     }
 
     private void reset() {
+        detectionTime=-1L;
         this.buckets = new StatBucket[windows.length];
         for (int i = 0; i < windows.length; i++) {
             buckets[i] = new StatBucket(windows[i]);
         }
     }
 
-    public double apply(double value) {
+    public void apply(double value) {
         for (StatBucket bucket : buckets) {
             bucket.apply(value);
         }
-        return computeStability();
+//        return computeStability();
     }
 
     private boolean primed() {
@@ -105,12 +107,13 @@ public class StabilityDetector implements Runnable {
             double reductionFactor = (stddev[i + 1] / stddev[i]);
             basis *= reductionFactor;
         }
-        double time = ((double)(nextCheckAt - startedAt))/1000d;
-        System.out.printf("% 4.1fS STABILITY %g :", time, basis);
-        for (int i = 0; i < stddev.length; i++) {
-            System.out.printf("[%d]: %g ", windows[i], stddev[i]);
-        }
-        System.out.println();
+
+//        double time = ((double)(nextCheckAt - startedAt))/1000d;
+//        System.out.printf("% 4.1fS STABILITY %g :", time, basis);
+//        for (int i = 0; i < stddev.length; i++) {
+//            System.out.printf("[%d]: %g ", windows[i], stddev[i]);
+//        }
+//        System.out.println();
         return basis;
 
     }
@@ -141,11 +144,19 @@ public class StabilityDetector implements Runnable {
             double stabilityFactor = computeStability();
 
             if (stabilityFactor > threshold) {
+                detectionTime = ((double)(nextCheckAt - startedAt))/1000d;
                 return;
             }
             nextCheckAt+=interval;
         }
     }
 
-
+    @Override
+    public String toString() {
+        if (detectionTime>0L) {
+            return String.format("stability converged in % 4.2fS",detectionTime);
+        } else {
+            return String.format("awaiting stability for % 4.2fS",(((double)(nextCheckAt - startedAt))/1000d));
+        }
+    }
 }
