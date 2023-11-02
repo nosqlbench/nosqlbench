@@ -56,6 +56,7 @@ public class SimFrameCapture implements SimFrameResults {
 
     public void awaitSteadyState() {
         stabilizer.run();
+        System.out.println(stabilizer);
     }
 
 
