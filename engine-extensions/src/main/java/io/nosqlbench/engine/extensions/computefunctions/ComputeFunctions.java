@@ -59,7 +59,7 @@ public class ComputeFunctions {
 
     public static double recall(long[] relevant, long[] actual, int k) {
         if (actual.length < k) {
-            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + actual.length + ", limit=" + k);
+            throw new RuntimeException("indices fewer than limit, invalid recall computation: index count=" + actual.length + ", limit=" + k);
         }
         relevant = Arrays.copyOfRange(relevant,0,k);
         actual = Arrays.copyOfRange(actual, 0, k);
@@ -106,7 +106,7 @@ public class ComputeFunctions {
 
     public static double recall(int[] relevant, int[] actual, int k) {
         if (actual.length < k) {
-            throw new RuntimeException("indices fewer than limit, invalid precision computation: index count=" + actual.length + ", limit=" + k);
+            throw new RuntimeException("indices fewer than limit, invalid recall computation: index count=" + actual.length + ", limit=" + k);
         }
         relevant = Arrays.copyOfRange(relevant,0,k);
         actual = Arrays.copyOfRange(actual, 0, k);
