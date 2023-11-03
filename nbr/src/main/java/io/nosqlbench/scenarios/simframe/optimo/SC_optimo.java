@@ -95,34 +95,37 @@ public class SC_optimo extends SCBaseScenario {
             }}
         );
         activityParams.remove("main_class");
+        activityParams.remove("cutoff_quantile");
+        activityParams.remove("cutoff_ms");
 
         Activity flywheel = controller.start(activityParams);
 
         NBMetricTimer result_success_timer = flywheel.find().timer("name:result_success");
         for (int i = 0; i < 1000; i++) {
-            if (result_success_timer.getCount()>0) {
+            if (result_success_timer.getCount() > 0) {
                 System.out.println("saw traffic at loop " + i);
                 break;
             }
             LockSupport.parkNanos(10_000_000);
         }
-        if (result_success_timer.getCount()==0) {
+        if (result_success_timer.getCount() == 0) {
             throw new RuntimeException("Activity was not processing cycles after waiting 10seconds");
         }
 
         // await flywheel actually spinning, or timeout with error
-        SimFrameCapture capture = this.perfValueMeasures(flywheel);
+
         SimFrameJournal<OptimoFrameParams> journal = new SimFrameJournal<>();
 
         OptimoParamModel model = new OptimoParamModel();
 
-        model.add("rate", 1, 10, 1000,
+        model.add("rate", 20, 50, 1000000,
             rate -> flywheel.onEvent(ParamChange.of(new CycleRateSpec(rate, 1.1d, SimRateSpec.Verb.restart)))
         );
-        model.add("threads", 10, 20, 100,
-            threads -> flywheel.onEvent(ParamChange.of(new SetThreads((int) threads)))
+        model.add("threads", 10, 50, 2000,
+            threads -> flywheel.onEvent(ParamChange.of(new SetThreads((int) (threads))))
         );
         OptimoSearchSettings optimoSearchParams = new OptimoSearchSettings(params, model);
+        SimFrameCapture capture = this.perfValueMeasures(flywheel, optimoSearchParams);
         SimFrameFunction frameFunction = new OptimoFrameFunction(controller, optimoSearchParams, flywheel, capture, journal);
 
 
@@ -192,7 +195,7 @@ public class SC_optimo extends SCBaseScenario {
         );
         PointValuePair result = null;
         try {
-            result = mo.optimize(od.toArray(new OptimizationData[od.size()]));
+            result = mo.optimize(od.toArray(new OptimizationData[0]));
         } catch (MathIllegalStateException missed) {
             if (missed.getMessage().contains("trust region step has failed to reduce Q")) {
                 logger.warn(missed.getMessage() + ", so returning current result.");
@@ -209,7 +212,7 @@ public class SC_optimo extends SCBaseScenario {
         // could be a better result if the range is arbitrarily limiting the parameter space.
     }
 
-    private SimFrameCapture perfValueMeasures(Activity activity) {
+    private SimFrameCapture perfValueMeasures(Activity activity, OptimoSearchSettings settings) {
         SimFrameCapture sampler = new SimFrameCapture();
 
         NBMetricTimer result_timer = activity.find().timer("name:result");
@@ -226,7 +229,7 @@ public class SC_optimo extends SCBaseScenario {
 
         sampler.addRemix("achieved_success_ratio", vars -> {
             // exponentially penalize results which do not attain 100% successful op rate
-            if (vars.get("achieved_oprate")==0.0d) {
+            if (vars.get("achieved_oprate") == 0.0d) {
                 return 0d;
             }
             double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("achieved_oprate"));
@@ -241,18 +244,20 @@ public class SC_optimo extends SCBaseScenario {
         });
         sampler.addRemix("retries_p99", (vars) -> {
             double triesP99 = tries_histo.getDeltaSnapshot(90).get99thPercentile();
-            if (Double.isNaN(triesP99)||Double.isInfinite(triesP99)||triesP99==0.0d) {
-                logger.warn("invalid value for retries_p99, skipping as identity for now");
+            if (Double.isNaN(triesP99) || Double.isInfinite(triesP99) || triesP99 == 0.0d) {
+                // There wasn't enough data in the histogram to make a call one way or another,
+                // so this won't really be a factor
+//                logger.warn("invalid value for retries_p99, skipping as identity for now");
                 return 1.0d;
             }
             return 1 / triesP99;
         });
         sampler.addDirect("latency_cutoff_50", () -> {
-            double latencyP99 = latency_histo.getDeltaSnapshot(90).getP99ms();
-            double v = StatFunctions.sigmoidE4LowPass(latencyP99, 50);
-//            System.out.println("v:"+v+"  p99ms:" + latencyP99);
-            return 1.0d;
-//            return v;
+            double latencyP99 = (latency_histo.getDeltaSnapshot(90).getValue(settings.cutoff_quantile()))/1_000_000d;
+            double v = (StatFunctions.sigmoidE4LowPass(latencyP99, settings.cutoff_ms()));
+//            System.out.println("v:"+v+"  p99ms:" + latencyP99 + " cutoff_quantile=" + settings.cutoff_quantile() + " cutoff_ms=" + settings.cutoff_ms());
+            return v;
+//            return 1.0d;
         }, 1.0d);
         return sampler;
     }

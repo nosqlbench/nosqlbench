@@ -46,12 +46,14 @@ public class OptimoFrameFunction implements SimFrameFunction {
 
     @Override
     public double value(double[] point) {
+        System.out.println("━".repeat(40));
         OptimoFrameParams params = settings.model().apply(point);
         System.out.println(params);
         capture.startWindow();
         capture.awaitSteadyState();
         settings.model().apply(point);
         capture.restartWindow();
+        System.out.println("sampling for " + settings.sample_time_ms()+"ms");
         controller.waitMillis(settings.sample_time_ms());
         capture.stopWindow();
         journal.record(params,capture.last());

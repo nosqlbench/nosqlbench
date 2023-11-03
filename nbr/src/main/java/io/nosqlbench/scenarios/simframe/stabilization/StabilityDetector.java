@@ -19,7 +19,9 @@ package io.nosqlbench.scenarios.simframe.stabilization;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalDouble;
 import java.util.function.DoubleSupplier;
 
 public class StabilityDetector implements Runnable {
@@ -91,6 +93,7 @@ public class StabilityDetector implements Runnable {
         return true;
     }
 
+
     private double computeStability() {
 //        System.out.println("priming " + this.buckets[0].count() + "/" + this.buckets[0].ringbuf.size());
         if (!primed()) {
@@ -110,12 +113,17 @@ public class StabilityDetector implements Runnable {
 
         // TODO: investigate why we get NaN sometimes and what it means for stability checks
         // TODO: turn this into a one line summary with some cool unicode characters
-//        double time = ((double)(nextCheckAt - startedAt))/1000d;
-//        System.out.printf("% 4.1fS STABILITY %g :", time, basis);
-//        for (int i = 0; i < stddev.length; i++) {
-//            System.out.printf("[%d]: %g ", windows[i], stddev[i]);
-//        }
-//        System.out.println();
+        double time = ((double)(nextCheckAt - startedAt))/1000d;
+
+
+        if (time>10.0) {
+            System.out.print(stabilitySummary(stddev));
+            System.out.printf("% 4.1fS STABILITY %g :", time, basis);
+            for (int i = 0; i < stddev.length; i++) {
+                System.out.printf("[%d]: %g ", windows[i], stddev[i]);
+            }
+            System.out.println();
+        }
         return basis;
 
     }
@@ -153,12 +161,29 @@ public class StabilityDetector implements Runnable {
         }
     }
 
+    private static String levels8 = " ▁▂▃▄▅▆▇";
+    public String stabilitySummary(double[] stddev) {
+        StringBuilder sb = new StringBuilder("[");
+        double bias=(1.0d/16.0);
+        double max=0.0d;
+        for (int i = 0; i < stddev.length; i++) {
+            max=Math.max(max,stddev[i]);
+        }
+        for (int i = 0; i < stddev.length; i++) {
+            int idx = Math.min(7,((int)(stddev[i]/max)*levels8.length()));
+            char c = levels8.charAt(idx);
+            sb.append(c);
+        }
+        sb.append("] ");
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         if (detectionTime > 0L) {
-            return String.format("stability converged in % 4.2fS", detectionTime);
+            return String.format("results converged in % 4.2fS", detectionTime);
         } else {
-            return String.format("awaiting stability for % 4.2fS", (((double) (nextCheckAt - startedAt)) / 1000d));
+            return String.format("awaiting convergence for % 4.2fS", (((double) (nextCheckAt - startedAt)) / 1000d));
         }
     }
 }
