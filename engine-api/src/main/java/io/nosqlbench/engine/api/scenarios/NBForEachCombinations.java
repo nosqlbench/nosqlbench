@@ -30,7 +30,7 @@ public class NBForEachCombinations implements Iterable<NBForEachCombinations.NBF
     }
 
     public void add(String key, String cases) {
-	String[] array = cases.split(",");
+        String[] array = cases.split(",");
         add(key, array);
     }
 
@@ -64,6 +64,7 @@ public class NBForEachCombinations implements Iterable<NBForEachCombinations.NBF
 
     public List<NBForEachCombination> getCombinations(boolean includeNames) {
         List<NBForEachCombination> combinations = new ArrayList<>();
+        if ( keyArrays.size() < 1 ) return combinations;
         generateCombinationsHelper(new ArrayList<>(keyArrays.keySet()), 0, new ArrayList<>(), combinations, includeNames);
         return combinations;
     }
@@ -74,8 +75,8 @@ public class NBForEachCombinations implements Iterable<NBForEachCombinations.NBF
 
     // Inner class for the Iterator implementation
     public class NBForEachCombinationIterator implements Iterator<NBForEachCombination> {
-        private List<NBForEachCombination> combinations;
-        private int index;
+        private List<NBForEachCombination> combinations = null;
+        private int index = 0;
 
         public NBForEachCombinationIterator(boolean includeNames) {
             combinations = getCombinations(includeNames);
@@ -84,6 +85,7 @@ public class NBForEachCombinations implements Iterable<NBForEachCombinations.NBF
 
         @Override
         public boolean hasNext() {
+            if (combinations == null) return false;
             return index < combinations.size();
         }
 
