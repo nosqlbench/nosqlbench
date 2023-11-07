@@ -47,6 +47,7 @@ public class IVecReader implements LongFunction<int[]> {
     private final long filesize;
     private final Path path;
     private final int reclim;
+    private final int totalRecords;
 
     /**
      * Read the ivec file, determining the record size from the first record.
@@ -73,7 +74,7 @@ public class IVecReader implements LongFunction<int[]> {
         }
         int datalen = (dimensions * Integer.BYTES);
         this.reclen = Integer.BYTES + datalen;
-        int totalRecords = (int) (filesize/reclen);
+        totalRecords = (int) (filesize/reclen);
         if (recordLimit > totalRecords) {
             throw new RuntimeException("Specified record range of " + recordLimit + ", but file only contained " + totalRecords + " total");
         }
@@ -100,4 +101,16 @@ public class IVecReader implements LongFunction<int[]> {
         }
         return data;
     }
+
+    public int getDimensions(){
+        return this.dimensions;
+    }
+    public int getTotalRecords() {
+        return this.totalRecords;
+    }
+
+    public int getRecordLimit() {
+        return this.reclim;
+    }
+
 }

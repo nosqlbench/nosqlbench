@@ -103,13 +103,45 @@ public class ValuesCheckerRunnable implements Runnable {
 
             synchronizeFor("verification " + rangeInfo);
             logger.debug(() -> "checker " + this.threadNum + " verifying range [" + start + ".." + (start + end) + ")");
-            for (int bufidx = 0; bufidx < expected.size(); bufidx++) {
-                if (!expected.get(bufidx).equals(output[bufidx])) {
-                    String errmsg = "Value differs: " +
+            if (expected.get(0) instanceof double[] && output[0] instanceof double[]) {
+                for (int bufidx = 0; bufidx < expected.size(); bufidx++) {
+                    if (!Arrays.equals((double[]) expected.get(bufidx),(double[])output[bufidx])) {
+                        String errmsg = "Value differs: " +
                             "iteration: " + (bufidx + rangeStart) +
                             " expected:'" + expected.get(bufidx) + "' actual:'" + output[bufidx] + "'";
 
-                    throw new RuntimeException(errmsg);
+                        throw new RuntimeException(errmsg);
+                    }
+                }
+            } else if (expected.get(0) instanceof float[] && output[0] instanceof float[]) {
+                for (int bufidx = 0; bufidx < expected.size(); bufidx++) {
+                    if (!Arrays.equals((float[]) expected.get(bufidx),(float[])output[bufidx])) {
+                        String errmsg = "Value differs: " +
+                            "iteration: " + (bufidx + rangeStart) +
+                            " expected:'" + expected.get(bufidx) + "' actual:'" + output[bufidx] + "'";
+
+                        throw new RuntimeException(errmsg);
+                    }
+                }
+            } else if (expected.get(0) instanceof int[] && output[0] instanceof int[]) {
+                for (int bufidx = 0; bufidx < expected.size(); bufidx++) {
+                    if (!Arrays.equals((int[]) expected.get(bufidx),(int[])output[bufidx])) {
+                        String errmsg = "Value differs: " +
+                            "iteration: " + (bufidx + rangeStart) +
+                            " expected:'" + expected.get(bufidx) + "' actual:'" + output[bufidx] + "'";
+
+                        throw new RuntimeException(errmsg);
+                    }
+                }
+            } else {
+                for (int bufidx = 0; bufidx < expected.size(); bufidx++) {
+                    if (!expected.get(bufidx).equals(output[bufidx])) {
+                        String errmsg = "Value differs: " +
+                            "iteration: " + (bufidx + rangeStart) +
+                            " expected:'" + expected.get(bufidx) + "' actual:'" + output[bufidx] + "'";
+
+                        throw new RuntimeException(errmsg);
+                    }
                 }
             }
             synchronizeFor("verification complete" + rangeInfo);
