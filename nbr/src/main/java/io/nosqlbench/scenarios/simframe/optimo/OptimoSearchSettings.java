@@ -16,7 +16,7 @@
 
 package io.nosqlbench.scenarios.simframe.optimo;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 
 public record OptimoSearchSettings(
     long sample_time_ms,
@@ -24,7 +24,7 @@ public record OptimoSearchSettings(
     double cutoff_ms,
     OptimoParamModel model
 ) {
-    public OptimoSearchSettings(ScenarioParams params, OptimoParamModel model) {
+    public OptimoSearchSettings(ScenarioPhaseParams params, OptimoParamModel model) {
         this(
             params.maybeGet("sample_time_ms").map(Long::parseLong).orElse(5000L),
             params.maybeGet("cutoff_quantile").map(Double::parseDouble).orElse(0.99),

@@ -26,29 +26,27 @@ import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponentErrorHandler;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedScenarioContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
-import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBScenarioContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenarioPhase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * This is the core logic of every NB scenario.
- * <OL>
- * <LI>NBScenario creates a generic execution context.</LI>
- * <LI>This context is functionally applied to (executed by) a specific implementation.</LI>
- * <LI>Activities associated with the scenario are completed or errored.</LI>
- * <LI>A result is composited from the data in the component tree.</LI>
- * </OL>
+ * This is a fragment of scenario logic, and can be applied to any scenario.
+ * Each NBScenarioPhase comes fully parametrized. It is not meant to be invoked with different parameters.
+ * Consider this single-shot for now.
  */
-public abstract class NBScenario extends NBBaseComponent
-    implements
-    Function<NBSceneBuffer, ScenarioResult>,
+public abstract class NBScenarioPhase extends NBBaseComponent
+    implements BiFunction<NBBufferedScenarioContext, ScenarioPhaseParams, ScenarioPhaseResult>,
     NBComponentErrorHandler {
 
+    private final String targetScenario;
     protected Logger logger = LogManager.getLogger("SCENARIO");
     private long startedAtMillis, endedAtMillis;
 
@@ -59,8 +57,9 @@ public abstract class NBScenario extends NBBaseComponent
     private String progressInterval = "console:10s";
     private ActivitiesProgressIndicator activitiesProgressIndicator;
 
-    public NBScenario(NBComponent parentComponent, String scenarioName) {
-        super(parentComponent, NBLabels.forKV("scenario",scenarioName));
+    public NBScenarioPhase(NBComponent parentComponent, String phaseName, String targetScenario) {
+        super(parentComponent, NBLabels.forKV("phase",phaseName));
+        this.targetScenario = targetScenario;
     }
 
     public String getScenarioName() {
@@ -71,12 +70,12 @@ public abstract class NBScenario extends NBBaseComponent
         scenarioActivitiesController.forceStopScenario(i,b);
     }
 
-//    public Map<String, String> getParams() {
-//        return this.params;
-//    }
-
     public ScenarioActivitiesController getActivitiesController() {
         return this.scenarioActivitiesController;
+    }
+
+    public String getTargetScenario() {
+        return this.targetScenario;
     }
 
     public enum State {
@@ -110,13 +109,13 @@ public abstract class NBScenario extends NBBaseComponent
      * @return
      */
     @Override
-    public final ScenarioResult apply(NBSceneBuffer sctx) {
+    public final ScenarioPhaseResult apply(NBBufferedScenarioContext sctx, ScenarioPhaseParams params) {
         this.scenarioActivitiesController =sctx.controller();
 
         this.scenarioShutdownHook = new ScenarioShutdownHook(this);
         Runtime.getRuntime().addShutdownHook(this.scenarioShutdownHook);
 
-        this.state = NBScriptedScenario.State.Running;
+        this.state = NBScriptedScenarioPhase.State.Running;
         this.startedAtMillis = System.currentTimeMillis();
         Annotators.recordAnnotation(
             Annotation.newBuilder()
@@ -129,9 +128,9 @@ public abstract class NBScenario extends NBBaseComponent
         if (!"disabled".equals(progressInterval) && progressInterval!=null && !progressInterval.isEmpty())
             this.activitiesProgressIndicator = new ActivitiesProgressIndicator(scenarioActivitiesController, this.progressInterval);
 
-        ScenarioResult result = null;
+        ScenarioPhaseResult result = null;
         try {
-            runScenario(sctx.asFixtures());
+            runScenarioPhase(sctx, params);
             final long awaitCompletionTime = 86400 * 365 * 1000L;
             this.logger.debug("Awaiting completion of scenario and activities for {} millis.", awaitCompletionTime);
             this.scenarioActivitiesController.awaitCompletion(awaitCompletionTime);
@@ -146,7 +145,7 @@ public abstract class NBScenario extends NBBaseComponent
         } finally {
             this.scenarioActivitiesController.shutdown();
             this.endedAtMillis = System.currentTimeMillis();
-            result = new ScenarioResult(
+            result = new ScenarioPhaseResult(
                 sctx,
                 startedAtMillis,
                 endedAtMillis,
@@ -168,7 +167,7 @@ public abstract class NBScenario extends NBBaseComponent
         error = new RuntimeException("in thread " + t.getName() + ", " + e, e);
     }
 
-    protected abstract void runScenario(NBSceneFixtures sctx);
+    protected abstract void runScenarioPhase(NBScenarioContext sctx, ScenarioPhaseParams params);
 
     public void finish() {
         this.logger.debug("finishing scenario");

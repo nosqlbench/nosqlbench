@@ -16,15 +16,15 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedScenarioContext;
 
-public class ScenarioResult {
+public class ScenarioPhaseResult {
     private final long startedAt;
     private final long endedAt;
     private final Exception exception;
-    private final NBSceneBuffer fixtures;
+    private final NBBufferedScenarioContext fixtures;
 
-    public ScenarioResult(NBSceneBuffer fixtures, long start, long end, Exception exception) {
+    public ScenarioPhaseResult(NBBufferedScenarioContext fixtures, long start, long end, Exception exception) {
         this.fixtures = fixtures;
         this.startedAt=start;
         this.endedAt=end;

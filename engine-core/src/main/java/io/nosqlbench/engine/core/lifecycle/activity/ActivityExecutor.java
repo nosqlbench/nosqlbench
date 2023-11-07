@@ -19,7 +19,7 @@ import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBComponentSubScope;
+import io.nosqlbench.components.NBComponentExecutionScope;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityimpl.MotorState;
 import io.nosqlbench.api.annotations.Annotation;
@@ -379,7 +379,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
 
     @Override
     public ExecutionResult call() throws Exception {
-        try (NBComponentSubScope scope = new NBComponentSubScope(activity)) {
+        try (NBComponentExecutionScope scope = new NBComponentExecutionScope(activity)) {
 
             shutdownHook = new ActivityExecutorShutdownHook(this);
             Runtime.getRuntime().addShutdownHook(shutdownHook);

@@ -17,10 +17,14 @@
 package io.nosqlbench.nbr.examples.injavascript;
 
 import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenarioResult;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosExecutor;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosResults;
-import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenario;
+import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedScenarioContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBScenarioContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenarioPhaseResult;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenarioPhase;
+import io.nosqlbench.engine.core.lifecycle.session.NBScenario;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeAll;
@@ -46,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Execution(ExecutionMode.SAME_THREAD)
 public class ScriptExampleTests {
 
-    public static ScenarioResult runScenario(String scriptname, String... params) {
+    public static ScenarioPhaseResult runScenario(String scriptname, String... params) {
         if ((params.length % 2) != 0) {
             throw new RuntimeException("paramValues must be pairwise key, value, ...");
         }
@@ -58,8 +62,14 @@ public class ScriptExampleTests {
         String scenarioName = "scenario " + scriptname;
         System.out.println("=".repeat(29) + " Running integration test for example scenario: " + scenarioName);
 
-        ScenariosExecutor executor = new ScenariosExecutor(new TestComponent("test","test"),ScriptExampleTests.class.getSimpleName() + ":" + scriptname, 1);
-        NBScriptedScenario s = NBScriptedScenario.ofScripted(scenarioName,Map.of(),new TestComponent("test","test"), NBScriptedScenario.Invocation.EXECUTE_SCRIPT);
+        NBComponent root = new TestComponent("exampletest",scriptname);
+        NBBufferedScenarioContext ctx = NBScenarioContext.builder().name(scriptname).build(root);
+        NBScenario scenario = new NBScenario(
+            root,
+            NBLabels.forKV(),
+            ctx
+        );
+        NBScriptedScenarioPhase s = NBScriptedScenarioPhase.ofScripted(scenarioName,Map.of(),new TestComponent("test","test"), NBScriptedScenarioPhase.Invocation.EXECUTE_SCRIPT);
 
 //        s.addScenarioScriptParams(paramsMap);
 
@@ -78,11 +88,8 @@ public class ScriptExampleTests {
         }
         s.addScriptText(script);
 //        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
-        executor.execute(s,paramsMap);
-        ScenariosResults scenariosResults = executor.awaitAllResults();
-        ScenarioResult scenarioResult = scenariosResults.getOne();
-        executor.shutdownNow();
-        return scenarioResult;
+        ScenarioPhaseResult result = scenario.apply(s);
+        return result;
     }
 
     @Disabled
@@ -94,17 +101,17 @@ public class ScriptExampleTests {
     @Disabled
     @Test
     public void testLinkedInput() {
-        ScenarioResult scenarioResult = runScenario("linkedinput");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("linkedinput");
         Pattern p = Pattern.compile(".*started leader.*started follower.*stopped leader.*stopped follower.*",
             Pattern.DOTALL);
-        assertThat(p.matcher(scenarioResult.getIOLog()).matches()).isTrue();
+        assertThat(p.matcher(scenarioPhaseResult.getIOLog()).matches()).isTrue();
     }
 
     @Disabled
     @Test
     public void testCycleRate() {
-        ScenarioResult scenarioResult = runScenario("cycle_rate");
-        String iolog = scenarioResult.getIOLog();
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("cycle_rate");
+        String iolog = scenarioPhaseResult.getIOLog();
         System.out.println("iolog\n" + iolog);
         Pattern p = Pattern.compile(".*mean cycle rate = (\\d[.\\d]+).*", Pattern.DOTALL);
         Matcher m = p.matcher(iolog);
@@ -119,15 +126,15 @@ public class ScriptExampleTests {
     @Disabled
     @Test
     public void testExtensionPoint() {
-        ScenarioResult scenarioResult = runScenario("extensions");
-        assertThat(scenarioResult.getIOLog()).contains("sum is 46");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("extensions");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("sum is 46");
     }
 
     @Disabled
     @Test
     public void testOptimo() {
-        ScenarioResult scenarioResult = runScenario("optimo");
-        String iolog = scenarioResult.getIOLog();
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("optimo");
+        String iolog = scenarioPhaseResult.getIOLog();
         System.out.println("iolog\n" + iolog);
         assertThat(iolog).contains("map of samples was");
     }
@@ -135,36 +142,36 @@ public class ScriptExampleTests {
     @Disabled
     @Test
     public void testExtensionCsvMetrics() {
-        ScenarioResult scenarioResult = runScenario("extension_csvmetrics");
-        assertThat(scenarioResult.getIOLog()).contains("started new csvmetrics: logs/csvmetricstestdir");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("extension_csvmetrics");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("started new csvmetrics: logs/csvmetricstestdir");
     }
 
     @Disabled
     @Test
     public void testScriptParamsVariable() {
-        ScenarioResult scenarioResult = runScenario("params_variable", "one", "two", "three", "four");
-        assertThat(scenarioResult.getIOLog()).contains("paramValues[\"one\"]='two'");
-        assertThat(scenarioResult.getIOLog()).contains("paramValues[\"three\"]='four'");
-        assertThat(scenarioResult.getIOLog()).contains("overridden[\"three\"] [overridden-three-five]='five'");
-        assertThat(scenarioResult.getIOLog()).contains("defaulted.get[\"four\"] [defaulted-four-niner]='niner'");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("params_variable", "one", "two", "three", "four");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("paramValues[\"one\"]='two'");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("paramValues[\"three\"]='four'");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("overridden[\"three\"] [overridden-three-five]='five'");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("defaulted.get[\"four\"] [defaulted-four-niner]='niner'");
     }
 
     @Disabled
     @Test
     public void testScriptParamsUndefVariableWithOverride() {
-        ScenarioResult scenarioResult = runScenario("undef_param", "one", "two", "three", "four");
-        assertThat(scenarioResult.getIOLog()).contains("before: paramValues[\"three\"]:four");
-        assertThat(scenarioResult.getIOLog()).contains("before: paramValues.three:four");
-        assertThat(scenarioResult.getIOLog()).contains("after: paramValues[\"three\"]:undefined");
-        assertThat(scenarioResult.getIOLog()).contains("after: paramValues.three:undefined");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("undef_param", "one", "two", "three", "four");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("before: paramValues[\"three\"]:four");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("before: paramValues.three:four");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("after: paramValues[\"three\"]:undefined");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("after: paramValues.three:undefined");
     }
 
     // TODO - length >= 2 expected, not passing with changes for metrics
     @Disabled
     @Test
     public void testExtensionHistoStatsLogger() throws IOException {
-        ScenarioResult scenarioResult = runScenario("extension_histostatslogger");
-        assertThat(scenarioResult.getIOLog()).contains("stdout started " +
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("extension_histostatslogger");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("stdout started " +
             "logging to logs/histostats.csv");
         List<String> strings = Files.readAllLines(Paths.get(
             "logs/histostats.csv"));
@@ -176,7 +183,7 @@ public class ScriptExampleTests {
     @Disabled
     @Test
     public void testExtensionCsvOutput() throws IOException {
-        ScenarioResult scenarioResult = runScenario("extension_csvoutput");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("extension_csvoutput");
         List<String> strings = Files.readAllLines(Paths.get(
             "logs/csvoutputtestfile.csv"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
@@ -188,8 +195,8 @@ public class ScriptExampleTests {
     @Disabled
     @Test
     public void testExtensionHistogramLogger() throws IOException {
-        ScenarioResult scenarioResult = runScenario("extension_histologger");
-        assertThat(scenarioResult.getIOLog()).contains("stdout started logging to hdrhistodata.log");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("extension_histologger");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("stdout started logging to hdrhistodata.log");
         List<String> strings = Files.readAllLines(Paths.get("hdrhistodata.log"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains(",HIST");
@@ -199,24 +206,24 @@ public class ScriptExampleTests {
     @Disabled
     @Test
     public void testBlockingRun() {
-        ScenarioResult scenarioResult = runScenario("blockingrun");
-        int a1end = scenarioResult.getIOLog().indexOf("blockingactivity1 finished");
-        int a2start = scenarioResult.getIOLog().indexOf("running blockingactivity2");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("blockingrun");
+        int a1end = scenarioPhaseResult.getIOLog().indexOf("blockingactivity1 finished");
+        int a2start = scenarioPhaseResult.getIOLog().indexOf("running blockingactivity2");
         assertThat(a1end).isLessThan(a2start);
     }
 
     @Disabled
     @Test
     public void testAwaitFinished() {
-        ScenarioResult scenarioResult = runScenario("awaitfinished");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("awaitfinished");
     }
 
     @Disabled
     @Test
     public void testStartStop() {
-        ScenarioResult scenarioResult = runScenario("startstopdiag");
-        int startedAt = scenarioResult.getIOLog().indexOf("starting activity teststartstopdiag");
-        int stoppedAt = scenarioResult.getIOLog().indexOf("stopped activity teststartstopdiag");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("startstopdiag");
+        int startedAt = scenarioPhaseResult.getIOLog().indexOf("starting activity teststartstopdiag");
+        int stoppedAt = scenarioPhaseResult.getIOLog().indexOf("stopped activity teststartstopdiag");
         assertThat(startedAt).isGreaterThan(0);
         assertThat(stoppedAt).isGreaterThan(startedAt);
     }
@@ -225,10 +232,10 @@ public class ScriptExampleTests {
     @Disabled
     @Test
     public void testThreadChange() {
-        ScenarioResult scenarioResult = runScenario("threadchange");
-        int changedTo1At = scenarioResult.getIOLog().indexOf("threads now 1");
-        int changedTo5At = scenarioResult.getIOLog().indexOf("threads now 5");
-        System.out.println("IOLOG:\n"+scenarioResult.getIOLog());
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("threadchange");
+        int changedTo1At = scenarioPhaseResult.getIOLog().indexOf("threads now 1");
+        int changedTo5At = scenarioPhaseResult.getIOLog().indexOf("threads now 5");
+        System.out.println("IOLOG:\n"+ scenarioPhaseResult.getIOLog());
         assertThat(changedTo1At).isGreaterThan(0);
         assertThat(changedTo5At).isGreaterThan(changedTo1At);
     }
@@ -236,25 +243,25 @@ public class ScriptExampleTests {
     @Disabled
     @Test
     public void testReadMetric() {
-        ScenarioResult scenarioResult = runScenario("readmetrics");
-        assertThat(scenarioResult.getIOLog()).contains("count: ");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("readmetrics");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("count: ");
     }
 
     @Disabled
     @Test
     public void testShutdownHook() {
-        ScenarioResult scenarioResult = runScenario("extension_shutdown_hook");
-        assertThat(scenarioResult.getIOLog()).doesNotContain("shutdown hook running").describedAs(
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("extension_shutdown_hook");
+        assertThat(scenarioPhaseResult.getIOLog()).doesNotContain("shutdown hook running").describedAs(
             "shutdown hooks should not run in the same IO context as the main scenario"
         );
     }
     @Disabled
     @Test
     public void testReportedCoDelayBursty() {
-        ScenarioResult scenarioResult = runScenario("cocycledelay_bursty");
-        assertThat(scenarioResult.getIOLog()).contains("step1 metrics.waittime=");
-        assertThat(scenarioResult.getIOLog()).contains("step2 metrics.waittime=");
-        String iolog = scenarioResult.getIOLog();
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("cocycledelay_bursty");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("step1 metrics.waittime=");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("step2 metrics.waittime=");
+        String iolog = scenarioPhaseResult.getIOLog();
         System.out.println(iolog);
         assertThat(iolog).contains("waittime trended back down as expected");
     }
@@ -262,10 +269,10 @@ public class ScriptExampleTests {
     @Disabled
     @Test
     public void testReportedCoDelayStrict() {
-        ScenarioResult scenarioResult = runScenario("cocycledelay_strict");
-        assertThat(scenarioResult.getIOLog()).contains("step1 cycles_waittime=");
-        assertThat(scenarioResult.getIOLog()).contains("step2 cycles_waittime=");
-        String iolog = scenarioResult.getIOLog();
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("cocycledelay_strict");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("step1 cycles_waittime=");
+        assertThat(scenarioPhaseResult.getIOLog()).contains("step2 cycles_waittime=");
+        String iolog = scenarioPhaseResult.getIOLog();
         System.out.println(iolog);
         // TODO: ensure that waittime is staying the same or increasing
         // after investigating minor decreasing effect
@@ -274,15 +281,15 @@ public class ScriptExampleTests {
     @Disabled
     @Test
     public void testCycleRateChangeNewMetrics() {
-        ScenarioResult scenarioResult = runScenario("cycle_rate_change");
-        String ioLog = scenarioResult.getIOLog();
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("cycle_rate_change");
+        String ioLog = scenarioPhaseResult.getIOLog();
         assertThat(ioLog).contains("cycles adjusted, exiting on iteration");
     }
 
     @Disabled
     @Test
     public void testErrorPropagationFromAdapterOperation() {
-        ScenarioResult scenarioResult = runScenario(
+        ScenarioPhaseResult scenarioPhaseResult = runScenario(
             "basicdiag",
             "driver", "diag", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
         );
@@ -292,18 +299,18 @@ public class ScriptExampleTests {
     @Disabled
     @Test
     public void testErrorPropagationFromMotorThread() {
-        ScenarioResult scenarioResult = runScenario("activity_error");
-        assertThat(scenarioResult.getException()).isNotNull();
-        assertThat(scenarioResult.getException().getMessage()).contains("For input string: \"unparsable\"");
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("activity_error");
+        assertThat(scenarioPhaseResult.getException()).isNotNull();
+        assertThat(scenarioPhaseResult.getException().getMessage()).contains("For input string: \"unparsable\"");
     }
 
     @Disabled
     @Test
     public void testErrorPropagationFromActivityInitialization() {
-        ScenarioResult scenarioResult = runScenario("activity_init_error");
-        assertThat(scenarioResult.getException()).isNotNull();
-        assertThat(scenarioResult.getException().getMessage()).contains("Unknown config parameter 'unknown_config'");
-        assertThat(scenarioResult.getException()).isNotNull();
+        ScenarioPhaseResult scenarioPhaseResult = runScenario("activity_init_error");
+        assertThat(scenarioPhaseResult.getException()).isNotNull();
+        assertThat(scenarioPhaseResult.getException().getMessage()).contains("Unknown config parameter 'unknown_config'");
+        assertThat(scenarioPhaseResult.getException()).isNotNull();
     }
 
 

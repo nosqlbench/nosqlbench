@@ -50,7 +50,7 @@ class AttachedMetricsSummaryReporterTest {
     @Disabled
     @Test
     public void testAttachedReporterScope() {
-        try (NBComponentSubScope scope = new NBComponentSubScope()) {
+        try (NBComponentExecutionScope scope = new NBComponentExecutionScope()) {
             TestComponent root = new TestComponent("root", "root");
             scope.add(root);
             TestComponent l1 = new TestComponent(root, "l1", "l1");

@@ -16,14 +16,11 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenario;
-import org.apache.logging.log4j.Logger;
-
 public class ScenarioShutdownHook extends Thread {
 
-    private final NBScenario scenario;
+    private final NBScenarioPhase scenario;
 
-    public ScenarioShutdownHook(NBScenario scenario) {
+    public ScenarioShutdownHook(NBScenarioPhase scenario) {
         this.scenario = scenario;
     }
 

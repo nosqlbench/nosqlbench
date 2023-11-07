@@ -16,8 +16,6 @@
 
 package io.nosqlbench.components.events;
 
-import io.nosqlbench.components.UpEvent;
-
 public record ParamChange<T>(T value) implements UpEvent {
     public static <T> ParamChange<T> of(T value) {
         return new ParamChange<>(value);

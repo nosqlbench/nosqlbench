@@ -17,14 +17,14 @@
 package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
 import java.util.Map;
 
-@Service(value=NBScenario.class,selector="activity_init_error")
-public class SC_activity_init_error extends SCBaseScenario {
+@Service(value= NBScenarioPhase.class,selector="activity_init_error")
+public class SC_activity_init_error extends SCBaseScenarioPhase {
     public SC_activity_init_error(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.scenarios.simframe.findmax;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 
 /**
  * These search parameters are based on the original findmax algorithm, and
@@ -34,7 +34,7 @@ public record FindmaxSearchParams(
     double latency_pctile,
     long min_settling_ms
 ) {
-    public FindmaxSearchParams(ScenarioParams params) {
+    public FindmaxSearchParams(ScenarioPhaseParams params) {
         this(
             params.maybeGet("sample_time_ms").map(Integer::parseInt).orElse(4000),
             params.maybeGet("sample_max").map(Integer::parseInt).orElse(10000),

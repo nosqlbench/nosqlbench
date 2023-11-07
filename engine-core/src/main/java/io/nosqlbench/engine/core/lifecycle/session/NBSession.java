@@ -22,26 +22,25 @@ import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBBaseComponent;
-import io.nosqlbench.components.NBComponentSubScope;
 import io.nosqlbench.components.decorators.NBTokenWords;
 import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.cli.ScriptBuffer;
 import io.nosqlbench.engine.core.clientload.*;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
-import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosExecutor;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosResults;
-import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedScenarioContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBScenarioContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenarioPhaseResult;
+import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenarioPhase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -55,10 +54,19 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
     private final String sessionName;
     private final ClientSystemMetricChecker clientMetricChecker;
 
+    private final Map<String, NBBufferedScenarioContext> contexts = new ConcurrentHashMap<>();
+
     public enum STATUS {
         OK,
         WARNING,
         ERROR
+    }
+
+    private NBBufferedScenarioContext getContext(String name) {
+        return contexts.computeIfAbsent(
+            name,
+            n -> NBScenarioContext.builder().name(n).build(this)
+        );
     }
 
     public NBSession(
@@ -68,7 +76,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         super(null, labelContext.getLabels().and("session", sessionName));
         this.sessionName = sessionName;
 
-        this.clientMetricChecker = new ClientSystemMetricChecker(this, NBLabels.forKV(),10);
+        this.clientMetricChecker = new ClientSystemMetricChecker(this, NBLabels.forKV(), 10);
         registerLoadAvgMetrics();
         registerMemInfoMetrics();
 //        registerDiskStatsMetrics();
@@ -78,107 +86,43 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
 
     }
 
+
+    /**
+     * Notes on scenario names:
+     * <UL>
+     * <LI>If none are provided, then all cmds are implicitly allocated to the "default" scenario.</LI>
+     * <LI>If the name "default" is provided directly, then this is considered an error.</LI>
+     * <LI>Otherwise, the most recently set scenario name is the one in which all following commands are run.</LI>
+     * <LI></LI>
+     * </UL>
+     *
+     * @param cmds
+     *     the function argument
+     * @return
+     */
     public ExecutionResult apply(List<Cmd> cmds) {
-
-        if (cmds.isEmpty()) {
-            logger.info("No commands provided.");
-        }
-
-        Map<String, String> params = new CmdParamsBuffer(cmds).getGlobalParams();
-
+        List<NBPhaseAssembly.PhaseAndParams> phases = NBPhaseAssembly.preparePhases(cmds, this);
         ResultCollector collector = new ResultCollector();
-
         try (ResultContext results = new ResultContext(collector)) {
-            final ScenariosExecutor scenariosExecutor = new ScenariosExecutor(this, "executor-" + sessionName, 1);
-
-            NBScenario scenario;
-            if (cmds.get(0).getCmdType().equals(Cmd.CmdType.java)) {
-                scenario = buildJavaScenario(cmds);
-            } else {
-                scenario = buildJavacriptScenario(cmds);
+            for (NBScenarioPhase phase : phases) {
+                String targetScenario = phase.getTargetScenario();
+                NBBufferedScenarioContext context = getContext(targetScenario);
+                ScenarioPhaseResult result = null;
+                try {
+                    result = phase.apply(context);
+                    results.ok();
+                } catch (Exception e) {
+                    results.error(e);
+                } finally {
+                    if (result!=null && result.getIOLog()!=null) {
+                        results.output(result.getIOLog());
+                    }
+                }
             }
-            try (NBComponentSubScope scope = new NBComponentSubScope(scenario)) {
-                scenariosExecutor.execute(scenario, params);
-                //             this.doReportSummaries(this.reportSummaryTo, this.result);
-            } catch (Exception e) {
-                results.error(e);
-            }
-            final ScenariosResults scenariosResults = scenariosExecutor.awaitAllResults();
-            logger.debug(() -> "Total of " + scenariosResults.getSize() + " result object returned from ScenariosExecutor");
-
-            //            logger.info(scenariosResults.getExecutionSummary());
-
-            if (scenariosResults.hasError()) {
-                results.error(scenariosResults.getAnyError().orElseThrow());
-                final Exception exception = scenariosResults.getOne().getException();
-                logger.warn(scenariosResults.getExecutionSummary());
-                NBCLIErrorHandler.handle(exception, true);
-                System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
-            }
-
-            results.output(scenariosResults.getExecutionSummary());
-            results.ok();
-
         }
         return collector.toExecutionResult();
     }
 
-
-    private NBScenario buildJavacriptScenario(List<Cmd> cmds) {
-//        boolean dryrun;
-//        NBScriptedScenario.Invocation invocation = dryrun ?
-//            NBScriptedScenario.Invocation.RENDER_SCRIPT :
-//            NBScriptedScenario.Invocation.EXECUTE_SCRIPT;
-
-        final ScriptBuffer buffer = new BasicScriptBuffer().add(cmds.toArray(new Cmd[0]));
-        final String scriptData = buffer.getParsedScript();
-
-        final ScenarioParams scenarioParams = new ScenarioParams();
-        scenarioParams.putAll(buffer.getCombinedParams());
-
-        final NBScriptedScenario scenario = new NBScriptedScenario(sessionName, this);
-
-        scenario.addScriptText(scriptData);
-        return scenario;
-    }
-
-    private NBScenario buildJavaScenario(List<Cmd> cmds) {
-        if (cmds.size() != 1) {
-            throw new RuntimeException("java scenarios require exactly 1 java command");
-        }
-        Cmd javacmd = cmds.get(0);
-        String mainClass = javacmd.getArg("main_class");
-
-//        This doesn't work as expected; The newest service loader docs are vague about Provider and no-args ctor requirements
-//        and the code suggests that you still have to have one unless you are in a named module
-//        SimpleServiceLoader<NBScenario> loader = new SimpleServiceLoader<>(NBScenario.class, Maturity.Any);
-//        List<SimpleServiceLoader.Component<? extends NBScenario>> namedProviders = loader.getNamedProviders(mainClass);
-//        SimpleServiceLoader.Component<? extends NBScenario> provider = namedProviders.get(0);
-//        Class<? extends NBScenario> type = provider.provider.type();
-
-        Class<NBScenario> type;
-        try {
-            type = (Class<NBScenario>) Class.forName(mainClass);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-        try {
-            Constructor<? extends NBScenario> constructor = type.getConstructor(NBComponent.class, String.class);
-            NBScenario scenario = constructor.newInstance(this, sessionName);
-            return scenario;
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-
-
-    }
 
 
     private void registerLoadAvgMetrics() {
@@ -203,18 +147,18 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         if (!reader.fileExists())
             return;
 
-        NBMetricGauge memTotalGauge = create().gauge("mem_total",reader::getMemTotalkB);
-        NBMetricGauge memUsedGauge = create().gauge("mem_used",reader::getMemUsedkB);
-        NBMetricGauge memFreeGauge = create().gauge("mem_free",reader::getMemFreekB);
-        NBMetricGauge memAvailableGauge = create().gauge("mem_avaialble",reader::getMemAvailablekB);
-        NBMetricGauge memCachedGauge = create().gauge("mem_cache",reader::getMemCachedkB);
+        NBMetricGauge memTotalGauge = create().gauge("mem_total", reader::getMemTotalkB);
+        NBMetricGauge memUsedGauge = create().gauge("mem_used", reader::getMemUsedkB);
+        NBMetricGauge memFreeGauge = create().gauge("mem_free", reader::getMemFreekB);
+        NBMetricGauge memAvailableGauge = create().gauge("mem_avaialble", reader::getMemAvailablekB);
+        NBMetricGauge memCachedGauge = create().gauge("mem_cache", reader::getMemCachedkB);
         NBMetricGauge memBufferedGauge = create().gauge("mem_buffered", reader::getMemBufferskB);
         // add checking for percent memory used at some given time; TODO: Modify percent threshold
         clientMetricChecker.addRatioMetricToCheck(memUsedGauge, memTotalGauge, 90.0, false);
 
         NBMetricGauge swapTotalGauge = create().gauge("swap_total", reader::getSwapTotalkB);
-        NBMetricGauge swapFreeGauge = create().gauge("swap_free",reader::getSwapFreekB);
-        NBMetricGauge swapUsedGauge = create().gauge("swap_used",reader::getSwapUsedkB);
+        NBMetricGauge swapFreeGauge = create().gauge("swap_free", reader::getSwapFreekB);
+        NBMetricGauge swapUsedGauge = create().gauge("swap_used", reader::getSwapUsedkB);
     }
 
     private void registerDiskStatsMetrics() {
@@ -223,9 +167,9 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
             return;
 
         for (String device : reader.getDevices()) {
-            create().gauge(device +"_transactions", () ->reader.getTransactionsForDevice(device));
-            create().gauge(device +"_kB_read", () -> reader.getKbReadForDevice(device));
-            create().gauge(device+"_kB_written", () -> reader.getKbWrittenForDevice(device));
+            create().gauge(device + "_transactions", () -> reader.getTransactionsForDevice(device));
+            create().gauge(device + "_kB_read", () -> reader.getKbReadForDevice(device));
+            create().gauge(device + "_kB_written", () -> reader.getKbWrittenForDevice(device));
         }
     }
 
@@ -234,10 +178,10 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         if (!reader.fileExists())
             return;
         for (String iface : reader.getInterfaces()) {
-            create().gauge(iface+"_rx_bytes",() -> reader.getBytesReceived(iface));
-            create().gauge(iface+"_rx_packets",() -> reader.getPacketsReceived(iface));
-            create().gauge(iface+"_tx_bytes",() -> reader.getBytesTransmitted(iface));
-            create().gauge(iface+"_tx_packets",() -> reader.getPacketsTransmitted(iface));
+            create().gauge(iface + "_rx_bytes", () -> reader.getBytesReceived(iface));
+            create().gauge(iface + "_rx_packets", () -> reader.getPacketsReceived(iface));
+            create().gauge(iface + "_tx_bytes", () -> reader.getBytesTransmitted(iface));
+            create().gauge(iface + "_tx_packets", () -> reader.getPacketsTransmitted(iface));
         }
     }
 
@@ -246,7 +190,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         if (!reader.fileExists())
             return;
         NBMetricGauge cpuUserGauge = create().gauge("cpu_user", reader::getUserTime);
-        NBMetricGauge cpuSystemGauge = create().gauge("cpu_system",reader::getSystemTime);
+        NBMetricGauge cpuSystemGauge = create().gauge("cpu_system", reader::getSystemTime);
         NBMetricGauge cpuIdleGauge = create().gauge("cpu_idle", reader::getIdleTime);
         NBMetricGauge cpuIoWaitGauge = create().gauge("cpu_iowait", reader::getIoWaitTime);
         NBMetricGauge cpuTotalGauge = create().gauge("cpu_total", reader::getTotalTime);

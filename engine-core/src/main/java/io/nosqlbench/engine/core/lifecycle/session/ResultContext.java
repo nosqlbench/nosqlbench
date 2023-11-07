@@ -24,7 +24,7 @@ public class ResultContext implements AutoCloseable {
     private final Consumer<ResultContext> receiver;
     private ExecutionResult.Status status;
 
-    ResultContext(Consumer<ResultContext> receiver) {
+    public ResultContext(Consumer<ResultContext> receiver) {
         this.receiver = receiver;
     }
 

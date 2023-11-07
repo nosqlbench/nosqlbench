@@ -16,32 +16,20 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
-import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.api.filtering.TristateFilter;
+import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.api.scripting.DiagReader;
 import io.nosqlbench.engine.api.scripting.DiagWriter;
 import io.nosqlbench.engine.api.scripting.InterjectingCharArrayWriter;
+import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.Map;
 
-public class NBSceneBuffer implements NBSceneFixtures {
-    private final NBSceneFixtures fixtures;
-
-    public NBSceneBuffer params(Map<String,String> params) {
-        return new NBSceneBuffer(
-            new NBDefaultSceneFixtures(
-                ScenarioParams.of(params),
-                fixtures.controller(),
-                fixtures.out(),
-                fixtures.err(),
-                fixtures.in())
-            ,iotype
-        );
-    }
+public class NBBufferedScenarioContext extends NBBaseComponent implements NBScenarioContext {
+    private final NBScenarioContext fixtures;
 
     public enum IOType {
         connected,
@@ -54,7 +42,8 @@ public class NBSceneBuffer implements NBSceneFixtures {
     private DiagWriter stderrBuffer;
     private DiagReader stdinBuffer;
 
-    public NBSceneBuffer(NBSceneFixtures fixtures, IOType ioTypes) {
+    public NBBufferedScenarioContext(NBComponent parent, String name, NBScenarioContext fixtures, IOType ioTypes) {
+        super(parent, NBLabels.forKV("context",name));
         this.iotype = ioTypes;
         this.fixtures = fixtures;
 
@@ -79,14 +68,14 @@ public class NBSceneBuffer implements NBSceneFixtures {
     }
 
 
-    public NBSceneBuffer(NBSceneFixtures fixtures) {
-        this(fixtures, IOType.traced);
+    public NBBufferedScenarioContext(NBSession parent, String name, NBScenarioContext fixtures) {
+        this(parent, name, fixtures, IOType.traced);
     }
 
-    @Override
-    public ScenarioParams params() {
-        return fixtures.params();
-    }
+//    @Override
+//    public ScenarioPhaseParams params() {
+//        return fixtures.params();
+//    }
 
     @Override
     public ScenarioActivitiesController controller() {
@@ -112,16 +101,16 @@ public class NBSceneBuffer implements NBSceneFixtures {
         return this.stdoutBuffer.getTimedLog() + this.stderrBuffer.getTimedLog();
     }
 
-    public NBSceneFixtures asFixtures() {
-        return (NBSceneFixtures) this;
+    public NBScenarioContext asFixtures() {
+        return (NBScenarioContext) this;
     }
 
 
-    public static SceneBuilderFacets.WantsController builder() {
-        return new SceneBuilder();
+    public static ContextBuilderFacets.WantsName builder() {
+        return new NBScenarioContextBuilder();
     }
 
-    public static NBSceneBuffer traced(NBComponent component) {
-        return builder().tracedIO().build(component);
+    public static NBBufferedScenarioContext traced(NBComponent component) {
+        return builder().name(String.valueOf(System.currentTimeMillis())).tracedIO().build(component);
     }
 }

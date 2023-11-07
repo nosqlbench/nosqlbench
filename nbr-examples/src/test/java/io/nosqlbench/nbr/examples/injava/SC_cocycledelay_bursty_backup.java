@@ -19,11 +19,11 @@ package io.nosqlbench.nbr.examples.injava;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
 import java.util.Map;
 
-public class SC_cocycledelay_bursty_backup extends SCBaseScenario {
+public class SC_cocycledelay_bursty_backup extends SCBaseScenarioPhase {
     public SC_cocycledelay_bursty_backup(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }

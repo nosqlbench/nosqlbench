@@ -24,7 +24,9 @@ import io.nosqlbench.components.events.ParamChange;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
-import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import org.apache.logging.log4j.LogManager;
@@ -53,7 +55,8 @@ import java.util.Map;
  *
  * <P>This can be tested as <PRE>{@code nb5 --show-stacktraces java io.nosqlbench.scenarios.findmax.SC_findmax threads=36}</PRE></P>
  */
-public class SC_findmax extends SCBaseScenario {
+@Service(value = NBScenarioPhase.class,selector = "findmax")
+public class SC_findmax extends SCBaseScenarioPhase {
     private final static Logger logger = LogManager.getLogger(SC_findmax.class);
 
     public SC_findmax(NBComponent parentComponent, String scenarioName) {

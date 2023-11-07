@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nbr.examples.injava;
+package io.nosqlbench.scenarios.diag;
 
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
+import io.nosqlbench.nb.annotations.Service;
 
-public class SC_extension_shutdown_hook extends SCBaseScenarioPhase {
-    public SC_extension_shutdown_hook(NBComponent parentComponent, String scenarioName) {
+@Service(value = NBScenarioPhase.class,selector = "diag")
+public class SC_diag extends SCBaseScenarioPhase {
+    public SC_diag(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
-    /** <pre>{@code
-     * shutdown.addShutdownHook('testfunc', function f() {
-     *     print("shutdown hook running");
-     * });
-     * }</pre>
-     */
     @Override
     public void invoke() {
-
+        stdout.println("diagnostic scenario writing to stdout");
+        stderr.println("diagnostic scenario writing to stderr");
     }
 }

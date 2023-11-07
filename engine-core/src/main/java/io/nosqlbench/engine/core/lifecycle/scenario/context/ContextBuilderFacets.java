@@ -24,8 +24,9 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 
-public interface SceneBuilderFacets {
+public interface ContextBuilderFacets {
     public interface ALL extends
+        WantsName,
         WantsController,
         WantsStderr,
         WantsStdout,
@@ -35,6 +36,9 @@ public interface SceneBuilderFacets {
         WantsIoType {
     }
 
+    public interface WantsName {
+        public WantsController name(String name);
+    }
 
     public interface WantsController extends WantsStdin, WantsIoType {
         public WantsStdin controller(ScenarioActivitiesController controller);
@@ -78,7 +82,7 @@ public interface SceneBuilderFacets {
     }
 
     public interface CanBuild {
-        NBSceneBuffer build(NBComponent forComponent);
+        NBBufferedScenarioContext build(NBComponent forComponent);
     }
 
 }

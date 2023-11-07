@@ -30,10 +30,10 @@ class NBComponentLifecycleTest {
         TestComponent node1 = new TestComponent(root, "node1", "node1");
         TestComponent node2 = new TestComponent(root, "node2", "node2");
 
-        try (NBComponentSubScope scope = new NBComponentSubScope(node1)) {
+        try (NBComponentExecutionScope scope = new NBComponentExecutionScope(node1)) {
             logger.info(node1.description() + " active");
        }
-        try (NBComponentSubScope scope = new NBComponentSubScope(node2)) {
+        try (NBComponentExecutionScope scope = new NBComponentExecutionScope(node2)) {
             logger.info(node2.description() + " active");
         }
 

@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
-import io.nosqlbench.api.config.standard.TestComponent;
+import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 
 import java.io.*;
 
@@ -39,11 +39,11 @@ import java.io.*;
  * <P>Within an execution context, scenario logic is expected to adhere to usage of
  * <i>scene.in</i>, <i>scene.out</i>, and <i>scene.error</i> instead of System.out, ...</P>
  */
-public class NBDefaultSceneFixtures implements NBSceneFixtures {
+public class NBDefaultScenarioContext extends NBBaseComponent implements NBScenarioContext  {
     /*
       These are parameters which are passed into the script, named scenario, etc.
      */
-    private ScenarioParams params;
+    private ScenarioPhaseParams params;
     /*
      * NBSession is the root component type in a NB process, and all CLI options which
      * affect global settings are expected to be properties on the session.
@@ -66,8 +66,8 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
 
     private Reader in;
 
-    public NBDefaultSceneFixtures(ScenarioParams params, ScenarioActivitiesController controller, PrintWriter out, PrintWriter err, Reader in) {
-        this.params = params;
+    public NBDefaultScenarioContext(NBComponent parent, String name, ScenarioActivitiesController controller, PrintWriter out, PrintWriter err, Reader in) {
+        super(parent, NBLabels.forKV("context",name));
         this.controller = controller;
         this.out = out;
         this.err = err;
@@ -89,7 +89,7 @@ public class NBDefaultSceneFixtures implements NBSceneFixtures {
 //
 
     @Override
-    public ScenarioParams params() {
+    public ScenarioPhaseParams params() {
         return params;
     }
 

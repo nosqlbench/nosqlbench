@@ -16,18 +16,17 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.events.ParamChange;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
-import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
 import java.util.Map;
 
-public class SC_cocycledelay_bursty extends SCBaseScenario {
+public class SC_cocycledelay_bursty extends SCBaseScenarioPhase {
     public SC_cocycledelay_bursty(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }

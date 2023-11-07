@@ -17,11 +17,11 @@
 package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
 import java.util.Map;
 
-public class SC_linkedinput extends SCBaseScenario {
+public class SC_linkedinput extends SCBaseScenarioPhase {
     public SC_linkedinput(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }

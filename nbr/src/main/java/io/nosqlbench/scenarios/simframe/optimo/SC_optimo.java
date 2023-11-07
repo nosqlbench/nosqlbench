@@ -25,9 +25,8 @@ import io.nosqlbench.components.events.SetThreads;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
@@ -44,7 +43,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.LockSupport;
 
 
@@ -52,12 +50,12 @@ import java.util.concurrent.locks.LockSupport;
  * // TODO: Add sanity checks for a valid run, which inform the users with too-high error rates, or similar, and
  * // refuse to run without overrides.
  */
-@Service(value = NBScenario.class, selector = "optimo")
-public class SC_optimo extends SCBaseScenario {
+@Service(value = NBScenarioPhase.class, selector = "optimo")
+public class SC_optimo extends SCBaseScenarioPhase {
     private final static Logger logger = LogManager.getLogger(SC_findmax.class);
 
-    public SC_optimo(NBComponent parentComponent, String scenarioName) {
-        super(parentComponent, scenarioName);
+    public SC_optimo(NBComponent parentComponent, String phaseName, String targetScenario) {
+        super(parentComponent, phaseName, targetScenario);
     }
 
     @Override

@@ -19,9 +19,9 @@ import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBScenarioContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.PolyglotScenarioController;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine.Builder;
@@ -39,7 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class NBScriptedScenario extends NBScenario {
+public class NBScriptedScenarioPhase extends NBScenarioPhase {
     private final Invocation invocation = Invocation.EXECUTE_SCRIPT;
 
     private Exception error;
@@ -63,8 +63,8 @@ public class NBScriptedScenario extends NBScenario {
     private ActivitiesProgressIndicator activitiesProgressIndicator;
     private String progressInterval = "console:1m";
     //    private ScenarioScriptShell scriptEnv;
-    private final String scenarioName;
-    private ScenarioParams scenarioScenarioParams;
+    private final String phaseName;
+    private ScenarioPhaseParams scenarioScenarioParams;
     private final Engine engine = Engine.Graalvm;
     private long startedAtMillis = -1L;
     private long endedAtMillis = -1L;
@@ -73,29 +73,30 @@ public class NBScriptedScenario extends NBScenario {
         Graalvm
     }
 
-    public NBScriptedScenario(
-        final String scenarioName,
-        NBComponent parentComponent
+    public NBScriptedScenarioPhase(
+        NBComponent parentComponent,
+        String phaseName,
+        String targetScenario
     ) {
-        super(parentComponent, scenarioName);
-        this.scenarioName = scenarioName;
+        super(parentComponent, phaseName, targetScenario);
+        this.phaseName = phaseName;
         this.progressInterval = progressInterval;
     }
 
-    public static NBScriptedScenario ofScripted(String name, Map<String, String> params, NBComponent parent, Invocation invocation) {
-        return new NBScriptedScenario(name, parent);
+    public static NBScriptedScenarioPhase ofScripted(String name, Map<String, String> params, NBComponent parent, Invocation invocation) {
+        return new NBScriptedScenarioPhase(parent, name, "default");
     }
 
     ;
 
 
-    public NBScriptedScenario addScriptText(final String scriptText) {
+    public NBScriptedScenarioPhase addScriptText(final String scriptText) {
         this.scripts.add(scriptText);
         return this;
     }
 
 
-    public NBScriptedScenario addScriptFiles(final String... args) {
+    public NBScriptedScenarioPhase addScriptFiles(final String... args) {
         for (final String scriptFile : args) {
             final Path scriptPath = Paths.get(scriptFile);
             byte[] bytes = new byte[0];
@@ -112,7 +113,7 @@ public class NBScriptedScenario extends NBScenario {
         return this;
     }
 
-    private BufferedScriptContext initializeScriptContext(NBSceneFixtures fixtures) {
+    private BufferedScriptContext initializeScriptContext(NBScenarioContext fixtures) {
         BufferedScriptContext ctx = new BufferedScriptContext(fixtures);
 //        this.scriptEngine.setContext(ctx);
         ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("scenario", new PolyglotScenarioController(fixtures.controller()));
@@ -140,12 +141,12 @@ public class NBScriptedScenario extends NBScenario {
         scriptEngine = GraalJSScriptEngine.create(polyglotEngine, contextSettings);
     }
 
-    protected final void runScenario(NBSceneFixtures shell) {
+    protected final void runScenarioPhase(NBScenarioContext shell) {
         try {
-            this.logger.debug("Initializing scripting engine for {}.", scenarioName);
+            this.logger.debug("Initializing scripting engine for {}.", phaseName);
             this.initializeScriptingEngine();
             this.context = this.initializeScriptContext(shell);
-            this.logger.debug("Running control script for {}.", scenarioName);
+            this.logger.debug("Running control script for {}.", phaseName);
             this.executeScenarioScripts();
         } catch (ScriptException e) {
             throw new RuntimeException(e);
@@ -183,17 +184,17 @@ public class NBScriptedScenario extends NBScenario {
         if ((null == o) || (this.getClass() != o.getClass())) {
             return false;
         }
-        final NBScriptedScenario scenario = (NBScriptedScenario) o;
-        return Objects.equals(this.scenarioName, scenario.scenarioName);
+        final NBScriptedScenarioPhase scenario = (NBScriptedScenarioPhase) o;
+        return Objects.equals(this.phaseName, scenario.phaseName);
     }
 
     @Override
     public int hashCode() {
-        return (null != this.scenarioName) ? scenarioName.hashCode() : 0;
+        return (null != this.phaseName) ? phaseName.hashCode() : 0;
     }
 
     public String toString() {
-        return "name:'" + scenarioName + '\'';
+        return "name:'" + phaseName + '\'';
     }
 
 //    public void addScenarioScriptParams(final ScriptParams scenarioScriptParams) {

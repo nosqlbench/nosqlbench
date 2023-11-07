@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.components;
+package io.nosqlbench.components.events;
 
 import io.nosqlbench.components.events.NBEvent;
 
-public interface DownEvent extends NBEvent {
+public interface UpEvent extends NBEvent {
 }

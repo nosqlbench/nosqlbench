@@ -14,9 +14,28 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.components;
+package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
-import io.nosqlbench.components.events.NBEvent;
+import io.nosqlbench.components.NBComponent;
 
-public interface UpEvent extends NBEvent {
+import java.io.PrintWriter;
+import java.io.Reader;
+
+public interface NBScenarioContext extends NBComponent {
+//    ScenarioPhaseParams params();
+
+    ScenarioActivitiesController controller();
+
+    PrintWriter out();
+
+    PrintWriter err();
+
+    Reader in();
+
+    public static ContextBuilderFacets.WantsName builder() {
+        return new NBScenarioContextBuilder();
+    }
+
+
+
 }

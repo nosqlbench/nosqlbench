@@ -18,34 +18,35 @@ package io.nosqlbench.engine.core.lifecycle.scenario.direct;
 
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneFixtures;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBScenarioContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
 
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.Writer;
 
-public abstract class SCBaseScenario extends NBScenario {
+public abstract class SCBaseScenarioPhase extends NBScenarioPhase {
     protected Reader stdin;
     protected PrintWriter stdout;
-    protected Writer stderr;
+    protected PrintWriter stderr;
     protected ScenarioActivitiesController controller;
-    protected ScenarioParams params;
 
-    public SCBaseScenario(NBComponent parentComponent, String scenarioName) {
-        super(parentComponent, scenarioName);
+    public SCBaseScenarioPhase(NBComponent parentComponent, String phaseName, String targetScenario) {
+        super(parentComponent, phaseName, targetScenario);
+    }
+    public SCBaseScenarioPhase(NBComponent parentComponent, String phaseName) {
+        super(parentComponent, phaseName, "default");
     }
 
+
     @Override
-    protected final void runScenario(NBSceneFixtures shell) {
+    protected final void runScenarioPhase(NBScenarioContext shell, ScenarioPhaseParams params) {
         this.stdin = shell.in();
         this.stdout = shell.out();
         this.stderr = shell.err();
         this.controller = shell.controller();
-        this.params = shell.params();
         try {
-            invoke();
+            invoke(params);
         } catch (Exception e) {
             stdout.println(e.toString());
             throw e;
@@ -61,11 +62,11 @@ public abstract class SCBaseScenario extends NBScenario {
      *     <LI>stdin - a {@link Reader} representing the input buffer which would normally be {@link System#in}
      *     <LI>stdout, stderr</LI>- a {@link PrintWriter}; This can be buffered virtually, attached to {@link System#out} and {@link System#err} or both for IO tracing.</LI>
      *     <LI>controller - A dedicated {@link ScenarioActivitiesController} which can be used to define, start, top, and interact with activities.</LI>
-     *     <LI>params - The {@link ScenarioParams} which have been passed to this scenario.</LI>
+     *     <LI>params - The {@link ScenarioPhaseParams} which have been passed to this scenario.</LI>
      *     <LI><EM>all component services</EM> as this scenario IS a component. This includes all implemented methods in any of the {@link NBComponent} sub-interfaces.</EM>
      *     </LI>
      * </UL>
      */
-    public abstract void invoke();
+    public abstract void invoke(ScenarioPhaseParams params);
 
 }

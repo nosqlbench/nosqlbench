@@ -17,9 +17,9 @@
 package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenario;
+import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
-public class SC_template extends SCBaseScenario {
+public class SC_template extends SCBaseScenarioPhase {
     public SC_template(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }

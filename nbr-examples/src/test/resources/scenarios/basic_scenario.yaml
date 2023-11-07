@@ -1,0 +1,3 @@
+scenarios:
+  default:
+    diag1: "run driver=diag op='log: level=info'"

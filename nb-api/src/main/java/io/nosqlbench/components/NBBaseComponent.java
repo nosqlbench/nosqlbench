@@ -21,7 +21,9 @@ package io.nosqlbench.components;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.decorators.NBTokenWords;
+import io.nosqlbench.components.events.DownEvent;
 import io.nosqlbench.components.events.NBEvent;
+import io.nosqlbench.components.events.UpEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.cli;
 
+import jakarta.validation.constraints.NotNull;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -41,7 +42,8 @@ public class Cmd {
         java(Arg.of("main_class",s->s)),
         await(Arg.of("alias_name")),
         waitMillis(Arg.of("millis_to_wait", Long::parseLong)),
-        fragment(Arg.ofFreeform("script_fragment")),;
+        fragment(Arg.ofFreeform("script_fragment")),
+        scenario(Arg.ofFreeform("scenario_name"));
 
         private final Arg<?>[] positional;
 
@@ -104,7 +106,7 @@ public class Cmd {
 
     private final CmdType cmdType;
 
-    public Cmd(CmdType cmdType, Map<String, String> cmdArgs) {
+    public Cmd(@NotNull CmdType cmdType, Map<String, String> cmdArgs) {
         this.cmdArgs = cmdArgs;
         this.cmdType = cmdType;
     }

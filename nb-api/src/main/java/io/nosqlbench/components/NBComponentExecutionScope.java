@@ -18,11 +18,11 @@ package io.nosqlbench.components;
 
 import io.nosqlbench.api.config.standard.TestComponent;
 
-public class NBComponentSubScope implements AutoCloseable {
+public class NBComponentExecutionScope implements AutoCloseable {
 
     private NBComponent[] components;
 
-    public NBComponentSubScope(NBComponent... components) {
+    public NBComponentExecutionScope(NBComponent... components) {
         this.components = components;
     }
     @Override

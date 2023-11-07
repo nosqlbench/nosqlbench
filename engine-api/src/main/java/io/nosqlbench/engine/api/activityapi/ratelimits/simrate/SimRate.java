@@ -266,7 +266,8 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        logger.error(e);
+        logger.error("SimRate filler thread threw an error, and will be stopped:" + e, e);
+        stopFiller();
     }
 
     @Override

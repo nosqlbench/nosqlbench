@@ -31,17 +31,17 @@ import java.util.stream.Collectors;
 /**
  * Wrap the scenario parameters in a type which allows for easy manipulation
  */
-public class ScenarioParams extends HashMap<String, String> implements ProxyObject {
+public class ScenarioPhaseParams extends HashMap<String, String> implements ProxyObject {
 
-    private static final Logger logger = LogManager.getLogger(ScenarioParams.class);
+    private static final Logger logger = LogManager.getLogger(ScenarioPhaseParams.class);
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public static ScenarioParams of(Map<String,String> params) {
-        return new ScenarioParams() {{
+    public static ScenarioPhaseParams of(Map<String,String> params) {
+        return new ScenarioPhaseParams() {{
             putAll(params);
         }};
     }
-    public ScenarioParams withOverrides(Object overrides) {
+    public ScenarioPhaseParams withOverrides(Object overrides) {
         Map<String, String> map;
         if (overrides instanceof Map) {
             map = (Map) overrides;
@@ -57,7 +57,7 @@ public class ScenarioParams extends HashMap<String, String> implements ProxyObje
         }
         checkForNulls("params", "calling withOverrides", this);
         checkForNulls("overrides", "calling withOverrides", map);
-        ScenarioParams result = new ScenarioParams();
+        ScenarioPhaseParams result = new ScenarioPhaseParams();
         result.putAll(this);
 
         for (Entry<String, String> overrideEntry : map.entrySet()) {
@@ -73,12 +73,12 @@ public class ScenarioParams extends HashMap<String, String> implements ProxyObje
                 logger.trace("Overrode key '" + oKey + "': from '" + was + " to " + oVal);
             }
         }
-        ScenarioParams p = new ScenarioParams();
+        ScenarioPhaseParams p = new ScenarioPhaseParams();
         p.putAll(result);
         return p;
     }
 
-    public ScenarioParams withDefaults(Object defaults) {
+    public ScenarioPhaseParams withDefaults(Object defaults) {
         Map<String, String> map;
         if (defaults instanceof Map) {
             map = (Map) defaults;
@@ -91,12 +91,12 @@ public class ScenarioParams extends HashMap<String, String> implements ProxyObje
             logger.warn("A null map was provided to withDefaults. This could be a bug in your script.");
             map = Map.of();
         }
-        ScenarioParams result = new ScenarioParams();
+        ScenarioPhaseParams result = new ScenarioPhaseParams();
         checkForNulls("params", "calling withDefaults", this);
         checkForNulls("defaults", "calling withDefaults", map);
         result.putAll(map);
         result.putAll(this);
-        ScenarioParams p = new ScenarioParams();
+        ScenarioPhaseParams p = new ScenarioPhaseParams();
         p.putAll(result);
         return p;
     }
