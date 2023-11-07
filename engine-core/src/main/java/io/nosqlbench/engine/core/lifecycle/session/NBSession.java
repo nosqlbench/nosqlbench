@@ -16,7 +16,10 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
+import com.codahale.metrics.Counting;
+import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
+import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
@@ -35,9 +38,12 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosExecutor;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosResults;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenario;
+import io.nosqlbench.engine.core.metrics.NBMetricsSummary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -54,6 +60,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
     private final static Logger logger = LogManager.getLogger(NBSession.class);
     private final String sessionName;
     private final ClientSystemMetricChecker clientMetricChecker;
+    private final StringBuilder metricsSummary = new StringBuilder();
 
     public enum STATUS {
         OK,
@@ -118,9 +125,19 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
 
             results.output(scenariosResults.getExecutionSummary());
             results.ok();
-
+            printMetricsSummary();
         }
         return collector.toExecutionResult();
+    }
+
+    private void printMetricsSummary() {
+        this.getComponentMetrics().forEach(this::reportExecutionMetric);
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try (final PrintStream printStream = new PrintStream(os)) {
+            printStream.println("-- BEGIN NON-ZERO metric counts (run longer for full report):");
+            printStream.print(metricsSummary.toString());
+            printStream.println("-- END NON-ZERO metric counts:");
+        }
     }
 
 
@@ -252,6 +269,21 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         NBMetricGauge cpuTotalGauge = create().gauge("cpu_total", reader::getTotalTime);
         // add checking for percent of time spent in user space; TODO: Modify percent threshold
         clientMetricChecker.addRatioMetricToCheck(cpuUserGauge, cpuTotalGauge, 50.0, true);
+    }
+
+    @Override
+    public void reportExecutionMetric(NBMetric metric) {
+        if (metric instanceof Counting counting) {
+            final long count = counting.getCount();
+            if (0 < count) {
+                NBMetricsSummary.summarize(metricsSummary, metric.getLabels().linearizeAsMetrics(), metric);
+            }
+        } else if (metric instanceof Gauge<?> gauge) {
+            final Object value = gauge.getValue();
+            if (value instanceof Number n) if (0 != n.doubleValue()) {
+                NBMetricsSummary.summarize(metricsSummary, metric.getLabels().linearizeAsMetrics(), metric);
+            }
+        }
     }
 
 }

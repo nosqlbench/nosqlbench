@@ -111,6 +111,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
             for (NBComponent child : children) {
                 child.close();
             }
+            reportMetrics();
             teardown();
         } catch (Exception e) {
             logger.error(e);
@@ -119,6 +120,21 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
             if (parent != null) {
                 parent.detachChild(this);
             }
+        }
+    }
+
+    private void reportMetrics() {
+        this.getComponentMetrics().forEach(m -> {
+            logger.debug("reporting metric " + m.toString());
+            reportExecutionMetric(m);
+        });
+    }
+
+    public void reportExecutionMetric(NBMetric m) {
+        if (parent != null) {
+            parent.reportExecutionMetric(m);
+        } else {
+            logger.debug("buffering metric " + m.toString() + " for final report");
         }
     }
 
