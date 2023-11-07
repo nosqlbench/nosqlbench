@@ -124,36 +124,36 @@ public class NBForEachCombinations implements Iterable<NBForEachCombinations.NBF
         }
     }
 
-    public static void main(String[] args) {
+    //public static void main(String[] args) {
 
 	// For each combinations
-        NBForEachCombinations foreach = new NBForEachCombinations();
+    //    NBForEachCombinations foreach = new NBForEachCombinations();
 
-	    // datasets
-        foreach.add("dataset", "glove25,glove50");
+    // datasets
+    //    foreach.add("dataset", "glove25,glove50");
 
-	    // k
-        foreach.add("k", "100,75,50,25,10,5,3,1");
+    // k
+    //    foreach.add("k", "100,75,50,25,10,5,3,1");
 
-        // index
-        foreach.add("index", "false,true");
+    // index
+    //    foreach.add("index", "false,true");
 
-        // Get combinations with names included - this is one way to replace setting fields on commands
-        Iterator<NBForEachCombination> iteratorWithNames = foreach.iterator(true);
-        while (iteratorWithNames.hasNext()) {
-	    String fields = (iteratorWithNames.next()).getFields();
-	    System.out.println(fields);
-        }
+    // Get combinations with names included - this is one way to replace setting fields on commands
+    //    Iterator<NBForEachCombination> iteratorWithNames = foreach.iterator(true);
+    //    while (iteratorWithNames.hasNext()) {
+	//    String fields = (iteratorWithNames.next()).getFields();
+	//    System.out.println(fields);
+    //    }
 
-        // Get key names
-        List<String> keyNames = foreach.getKeys();
-        System.out.println("NBForEachCombinations without names:");
-        System.out.println("Keys: " + keyNames);
-        System.out.println("Values:");
-        // Get combinations without names
-        for (NBForEachCombination combination : foreach) {
-            System.out.println(combination.getCombination());
-        }
+    // Get key names
+    //    List<String> keyNames = foreach.getKeys();
+    //    System.out.println("NBForEachCombinations without names:");
+    //    System.out.println("Keys: " + keyNames);
+    //    System.out.println("Values:");
+    // Get combinations without names
+    //    for (NBForEachCombination combination : foreach) {
+    //        System.out.println(combination.getCombination());
+    //    }
 
-    }
+    //}
 }
