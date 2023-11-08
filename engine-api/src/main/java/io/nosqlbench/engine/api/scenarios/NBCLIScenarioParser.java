@@ -150,12 +150,28 @@ public class NBCLIScenarioParser {
                     String.join(", ", scenarios.getScenarioNames()));
             }
 
+            // See if this a foreach scenario
+            boolean forEachScenario = scenarioName.startsWith("~foreach");
+            NBForEachCombinations forEachComb = new NBForEachCombinations();
+
             // each named command line step of the named scenario
             for (Map.Entry<String, String> cmdEntry : namedSteps.entrySet()) {
 
                 String stepName = cmdEntry.getKey();
                 String cmd = cmdEntry.getValue();
                 cmd = userParamsInterp.apply(cmd);
+                // if this is a foreach scenario then look for special steps
+                if (forEachScenario && stepName.startsWith("~")) {
+                    // see what type of special step this
+                    if (stepName.equals("~tablename")) {
+                        // scenario name template
+                        scenarioName = cmd;
+                    } else {
+                        // foreach values
+                        forEachComb.add(stepName.substring(1), cmd);
+                    }
+                    continue;
+                }
                 LinkedHashMap<String, CmdArg> parsedStep = parseStep(cmd);
                 LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userProvidedParams);
                 LinkedHashMap<String, String> buildingCmd = new LinkedHashMap<>();
@@ -189,6 +205,8 @@ public class NBCLIScenarioParser {
                 if (!buildingCmd.containsKey("alias")) {
                     buildingCmd.put("alias", "alias=" + WORKLOAD_SCENARIO_STEP);
                 }
+
+                // Somewhere here we handle the iterator on NBForEachCombinations to create/instance iterations
 
                 // TODO: simplify this
                 String alias = buildingCmd.get("alias");
