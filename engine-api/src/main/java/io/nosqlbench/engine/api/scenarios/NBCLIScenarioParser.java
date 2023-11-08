@@ -152,7 +152,7 @@ public class NBCLIScenarioParser {
 
             // See if this a foreach scenario
             boolean forEachScenario = scenarioName.startsWith("~foreach");
-            NBForEachCombinations forEachComb = new NBForEachCombinations();
+            NBForEachCombination forEachComb = new NBForEachCombination();
 
             // each named command line step of the named scenario
             for (Map.Entry<String, String> cmdEntry : namedSteps.entrySet()) {

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.templating;
 
-import io.nosqlbench.engine.api.scenarios.NBForEachCombinations;
+import io.nosqlbench.engine.api.scenarios.NBForEachCombination;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,7 +28,7 @@ public class NBForEachCombinationsTest {
 
     @Test
     public void testAddAndGetKeys() {
-        NBForEachCombinations combinations = new NBForEachCombinations();
+        NBForEachCombination combinations = new NBForEachCombination();
         combinations.add("key1", "value1,value2");
         combinations.add("key2", "value3,value4");
 
@@ -41,14 +41,14 @@ public class NBForEachCombinationsTest {
 
     @Test
     public void testIteratorWithoutNames() {
-        NBForEachCombinations combinations = new NBForEachCombinations();
+        NBForEachCombination combinations = new NBForEachCombination();
         combinations.add("key1", "value1,value2");
         combinations.add("key2", "value3,value4");
 
-        Iterator<NBForEachCombinations.NBForEachCombination> iterator = combinations.iterator(false);
+        Iterator<NBForEachCombination.NBForEach> iterator = combinations.iterator(false);
         int count = 0;
         while (iterator.hasNext()) {
-            NBForEachCombinations.NBForEachCombination combination = iterator.next();
+            NBForEachCombination.NBForEach combination = iterator.next();
             count++;
         }
 
@@ -57,14 +57,14 @@ public class NBForEachCombinationsTest {
 
     @Test
     public void testIteratorWithNames() {
-        NBForEachCombinations combinations = new NBForEachCombinations();
+        NBForEachCombination combinations = new NBForEachCombination();
         combinations.add("key1", "value1,value2");
         combinations.add("key2", "value3,value4");
 
-        Iterator<NBForEachCombinations.NBForEachCombination> iterator = combinations.iterator(true);
+        Iterator<NBForEachCombination.NBForEach> iterator = combinations.iterator(true);
         int count = 0;
         while (iterator.hasNext()) {
-            NBForEachCombinations.NBForEachCombination combination = iterator.next();
+            NBForEachCombination.NBForEach combination = iterator.next();
             String fields = combination.getFields();
             assertNotNull(fields);
             assertTrue(fields.contains("key1") || fields.contains("key2"));
@@ -78,9 +78,9 @@ public class NBForEachCombinationsTest {
 
     @Test
     public void testEmptyCombinations() {
-        NBForEachCombinations combinations = new NBForEachCombinations();
+        NBForEachCombination combinations = new NBForEachCombination();
 
-        Iterator<NBForEachCombinations.NBForEachCombination> iterator = combinations.iterator(false);
+        Iterator<NBForEachCombination.NBForEach> iterator = combinations.iterator(false);
         assertFalse(iterator.hasNext());
     }
 }
