@@ -60,7 +60,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
     private final static Logger logger = LogManager.getLogger(NBSession.class);
     private final String sessionName;
     private final ClientSystemMetricChecker clientMetricChecker;
-    private final StringBuilder metricsSummary = new StringBuilder();
+    private final StringBuffer metricsSummary = new StringBuffer();
 
     public enum STATUS {
         OK,
@@ -124,22 +124,11 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
             }
 
             results.output(scenariosResults.getExecutionSummary());
+            results.output(metricsSummary.toString());
             results.ok();
-            printMetricsSummary();
         }
         return collector.toExecutionResult();
     }
-
-    private void printMetricsSummary() {
-        this.getComponentMetrics().forEach(this::reportExecutionMetric);
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        try (final PrintStream printStream = new PrintStream(os)) {
-            printStream.println("-- BEGIN NON-ZERO metric counts (run longer for full report):");
-            printStream.print(metricsSummary.toString());
-            printStream.println("-- END NON-ZERO metric counts:");
-        }
-    }
-
 
     private NBScenario buildJavacriptScenario(List<Cmd> cmds) {
 //        boolean dryrun;
@@ -273,17 +262,19 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
 
     @Override
     public void reportExecutionMetric(NBMetric metric) {
+        StringBuilder metricSummary = new StringBuilder();
         if (metric instanceof Counting counting) {
             final long count = counting.getCount();
             if (0 < count) {
-                NBMetricsSummary.summarize(metricsSummary, metric.getLabels().linearizeAsMetrics(), metric);
+                NBMetricsSummary.summarize(metricSummary, metric.getLabels().linearizeAsMetrics(), metric);
             }
         } else if (metric instanceof Gauge<?> gauge) {
             final Object value = gauge.getValue();
             if (value instanceof Number n) if (0 != n.doubleValue()) {
-                NBMetricsSummary.summarize(metricsSummary, metric.getLabels().linearizeAsMetrics(), metric);
+                NBMetricsSummary.summarize(metricSummary, metric.getLabels().linearizeAsMetrics(), metric);
             }
         }
+        metricsSummary.append(metricSummary).append("\n");
     }
 
 }
