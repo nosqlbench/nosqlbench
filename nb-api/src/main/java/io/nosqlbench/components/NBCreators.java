@@ -31,6 +31,7 @@ import io.nosqlbench.api.engine.metrics.reporters.PromPushReporterComponent;
 import io.nosqlbench.api.histo.HdrHistoLog;
 import io.nosqlbench.api.histo.HistoStats;
 import io.nosqlbench.api.http.HttpPlugin;
+import io.nosqlbench.api.labels.MapLabels;
 import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
 import io.nosqlbench.api.files.FileAccess;
 import io.nosqlbench.api.labels.NBLabels;
@@ -315,7 +316,7 @@ public class NBCreators {
     public static class ConsoleReporterBuilder {
         private final NBComponent component;
         private final PrintStream output;
-        private NBLabels labels = null;
+        private NBLabels labels = new MapLabels(Map.of());
         private long interval = 1000;
         private boolean oneLastTime = false;
         private Set<MetricAttribute> disabledMetricAttributes = Set.of();

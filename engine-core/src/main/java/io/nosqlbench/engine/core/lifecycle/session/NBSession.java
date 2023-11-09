@@ -21,11 +21,13 @@ import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.api.engine.metrics.reporters.ConsoleReporter;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.NBComponentSubScope;
+import io.nosqlbench.components.NBCreators;
 import io.nosqlbench.components.decorators.NBTokenWords;
 import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;
@@ -46,6 +48,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -61,6 +64,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
     private final String sessionName;
     private final ClientSystemMetricChecker clientMetricChecker;
     private final StringBuffer metricsSummary = new StringBuffer();
+    private List<NBMetric> summaryMetrics = new ArrayList<>();
 
     public enum STATUS {
         OK,
@@ -122,9 +126,9 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
                 NBCLIErrorHandler.handle(exception, true);
                 System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
             }
-
+            ConsoleReporter summaryReporter = new NBCreators.ConsoleReporterBuilder(this, new PrintStream(System.out)).build();
+            summaryReporter.reportOnce(summaryMetrics);
             results.output(scenariosResults.getExecutionSummary());
-            results.output(metricsSummary.toString());
             results.ok();
         }
         return collector.toExecutionResult();
@@ -262,19 +266,20 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
 
     @Override
     public void reportExecutionMetric(NBMetric metric) {
-        StringBuilder metricSummary = new StringBuilder();
-        if (metric instanceof Counting counting) {
-            final long count = counting.getCount();
-            if (0 < count) {
-                NBMetricsSummary.summarize(metricSummary, metric.getLabels().linearizeAsMetrics(), metric);
-            }
-        } else if (metric instanceof Gauge<?> gauge) {
-            final Object value = gauge.getValue();
-            if (value instanceof Number n) if (0 != n.doubleValue()) {
-                NBMetricsSummary.summarize(metricSummary, metric.getLabels().linearizeAsMetrics(), metric);
-            }
-        }
-        metricsSummary.append(metricSummary).append("\n");
+        summaryMetrics.add(metric);
+//        StringBuilder metricSummary = new StringBuilder();
+//        if (metric instanceof Counting counting) {
+//            final long count = counting.getCount();
+//            if (0 < count) {
+//                NBMetricsSummary.summarize(metricSummary, metric.getLabels().linearizeAsMetrics(), metric);
+//            }
+//        } else if (metric instanceof Gauge<?> gauge) {
+//            final Object value = gauge.getValue();
+//            if (value instanceof Number n) if (0 != n.doubleValue()) {
+//                NBMetricsSummary.summarize(metricSummary, metric.getLabels().linearizeAsMetrics(), metric);
+//            }
+//        }
+//        metricsSummary.append(metricSummary).append("\n");
     }
 
 }

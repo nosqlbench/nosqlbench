@@ -221,4 +221,27 @@ public class ConsoleReporter extends PeriodicTaskComponent {
     protected double convertDuration(double duration) {
         return duration / durationFactor;
     }
+
+    public void reportOnce(List<NBMetric> summaryMetrics) {
+        List<NBMetricGauge> gauges = new ArrayList<>();
+        List<NBMetricCounter> counters = new ArrayList<>();
+        List<NBMetricHistogram> histograms = new ArrayList<>();
+        List<NBMetricMeter> meters = new ArrayList<>();
+        List<NBMetricTimer> timers = new ArrayList<>();
+        for (NBMetric metric : summaryMetrics) {
+            if (metric instanceof NBMetricGauge) {
+                gauges.add((NBMetricGauge) metric);
+            } if (metric instanceof NBMetricCounter) {
+                counters.add((NBMetricCounter) metric);
+            } if (metric instanceof NBMetricHistogram) {
+                histograms.add((NBMetricHistogram) metric);
+            } if (metric instanceof NBMetricMeter) {
+                meters.add((NBMetricMeter) metric);
+            } if (metric instanceof NBMetricTimer) {
+                timers.add((NBMetricTimer) metric);
+            }
+        }
+        report(gauges, counters, histograms, meters, timers);
+    }
+
 }

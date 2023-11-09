@@ -101,6 +101,10 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     @Override
     public void beforeDetach() {
         logger.debug("before detach " + description());
+        this.getComponentMetrics().forEach(m -> {
+            logger.debug("reporting metric " + m.toString());
+            reportExecutionMetric(m);
+        });
     }
 
     @Override
@@ -111,7 +115,6 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
             for (NBComponent child : children) {
                 child.close();
             }
-            reportMetrics();
             teardown();
         } catch (Exception e) {
             logger.error(e);
@@ -121,13 +124,6 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
                 parent.detachChild(this);
             }
         }
-    }
-
-    private void reportMetrics() {
-        this.getComponentMetrics().forEach(m -> {
-            logger.debug("reporting metric " + m.toString());
-            reportExecutionMetric(m);
-        });
     }
 
     public void reportExecutionMetric(NBMetric m) {
