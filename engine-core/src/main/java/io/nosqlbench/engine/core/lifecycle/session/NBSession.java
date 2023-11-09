@@ -267,19 +267,6 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
     @Override
     public void reportExecutionMetric(NBMetric metric) {
         summaryMetrics.add(metric);
-//        StringBuilder metricSummary = new StringBuilder();
-//        if (metric instanceof Counting counting) {
-//            final long count = counting.getCount();
-//            if (0 < count) {
-//                NBMetricsSummary.summarize(metricSummary, metric.getLabels().linearizeAsMetrics(), metric);
-//            }
-//        } else if (metric instanceof Gauge<?> gauge) {
-//            final Object value = gauge.getValue();
-//            if (value instanceof Number n) if (0 != n.doubleValue()) {
-//                NBMetricsSummary.summarize(metricSummary, metric.getLabels().linearizeAsMetrics(), metric);
-//            }
-//        }
-//        metricsSummary.append(metricSummary).append("\n");
     }
 
 }
