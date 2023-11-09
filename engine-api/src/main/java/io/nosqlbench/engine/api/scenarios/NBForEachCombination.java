@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 public class NBForEachCombination implements Iterable<NBForEachCombination.NBForEach> {
     private Map<String, List<String>> keyArrays;
@@ -36,12 +39,6 @@ public class NBForEachCombination implements Iterable<NBForEachCombination.NBFor
      *    foreach.add("k", "100,75,50,25,10,5,3,1");
      *    foreach.add("index", "false,true");
      *
-     *    // Get combinations with keys included - this is one way to replace setting fields on commands
-     *    Iterator<NBForEachCombination> iteratorWithNames = foreach.iterator(true);
-     *    while (iteratorWithNames.hasNext()) {
-     *       String fields = (iteratorWithNames.next()).getFields();
-     *       System.out.println(fields);
-     *    }
      *    // Get key names
      *    List<String> keyNames = foreach.getKeys();
      *    // Get combinations without names
@@ -84,17 +81,30 @@ public class NBForEachCombination implements Iterable<NBForEachCombination.NBFor
      */
     public class NBForEach {
         /**
-         * One single combination of elements.
+         * One single combination of values.
          */
-        private List<String> elements;
+        private List<String> values;
 
         /**
-         * Adds an array of elements associated with the combination instance.
-         *
-         * @param elements The array of values for this combination.
+         * Key value map for consuming this combination
          */
-        public NBForEach(List<String> elements) {
-            this.elements = elements;
+        private LinkedHashMap<String, String> map;
+
+        /**
+         * Adds an array of values associated with the combination instance.
+         *
+         * @param keys   The array of keys for each value
+         * @param values The array of values for this combination.
+         */
+        public NBForEach(List<String> keys, List<String> values) {
+            this.values = this.values;
+            map = new LinkedHashMap<>();
+            // Ensure both lists have the same size
+            if (keys.size() != values.size()) {
+                throw new IllegalArgumentException("Lists must have the same size");
+            }
+            // Combine the lists into the LinkedHashMap
+            for (int i = 0; i < keys.size(); i++) map.put(keys.get(i), values.get(i));
         }
 
         /**
@@ -103,22 +113,48 @@ public class NBForEachCombination implements Iterable<NBForEachCombination.NBFor
          * @return The array of values for this combination.
          */
         public List<String> getCombination() {
-            return elements;
+            return values;
         }
 
         /**
-         * Returns a string of values associated with the given key.
-         * The results of this depend on combinations being created with names.
-         * If so then "key1=value1 key2=value2 key3=value3" type strings are returned.
+         * Retrieve a map of values associated with the keys.
          *
-         * @return The string of values for this combination.
+         * @return The key-value map for this combination.
          */
-        public String getFields() {
-            String fields = " ";
-            for (String element : elements) {
-                    fields += element+" ";
+        public LinkedHashMap<String, String> getMap() {
+            return map;
+        }
+
+        /**
+         * Process an instance from a naming template.
+         *
+         * @param template The naming pattern to process
+         * @param userData A map of extra key-values to replace in the pattern
+         * @return The name for this combination.
+         */
+        public String getTemplateName(String template, LinkedHashMap<String, String> userData) {
+            // Regular expression pattern to match "(key)" where key can be any key from the map
+            Pattern pattern = Pattern.compile("\\((\\w+)\\)");
+            // Matcher to find the pattern in the input string
+            Matcher matcher = pattern.matcher(template);
+            // Replace patterns with corresponding values from the map
+            StringBuffer resultBuffer = new StringBuffer();
+            while (matcher.find()) {
+                String key = matcher.group(1);
+                if (map.containsKey(key)) {
+                    String replacement = map.get(key);
+                    matcher.appendReplacement(resultBuffer, replacement);
+                } else if (userData.containsKey(key)) {
+                    String replacement = userData.get(key);
+                    matcher.appendReplacement(resultBuffer, replacement);
+                } else {
+                    // If the key is not found in the map, keep the original pattern
+                    matcher.appendReplacement(resultBuffer, key);
+                }
             }
-            return fields;
+            matcher.appendTail(resultBuffer);
+            String string = resultBuffer.toString();
+            return string;
         }
     }
 
@@ -134,14 +170,13 @@ public class NBForEachCombination implements Iterable<NBForEachCombination.NBFor
     /**
      * Returns an array of combinations associated with the key array.
      *
-     * @param   includeNames Whether to include the key names as part of each element of each combination.
      * @return  The array of combinations.
      */
-    public List<NBForEach> getCombinations(boolean includeNames) {
+    public List<NBForEach> getCombinations() {
         List<NBForEach> combinations = new ArrayList<>();
         if (keyArrays.isEmpty()) return combinations;
         // Use recursive inner class which creates an array of combinations for each element array added.
-        generateCombinationsHelper(new ArrayList<>(keyArrays.keySet()), 0, new ArrayList<>(), combinations, includeNames);
+        generateCombinationsHelper(new ArrayList<>(keyArrays.keySet()), 0, new ArrayList<>(), combinations);
         return combinations;
     }
 
@@ -152,17 +187,15 @@ public class NBForEachCombination implements Iterable<NBForEachCombination.NBFor
      * @param currentIndex       How deep the recursion is in this call.
      * @param currentCombination The current list of combination values being processed.
      * @param combinations       The list of combinations being built.
-     * @param includeNames       If true then build each element of a combination as "<key>=<value>"
      */
     private void generateCombinationsHelper(List<String> arrayNames,
                                             int currentIndex,
                                             List<String> currentCombination,
-                                            List<NBForEach> combinations,
-                                            boolean includeNames) {
+                                            List<NBForEach> combinations) {
         // have we consumed every key?
         if (currentIndex == arrayNames.size()) {
             // add the combination
-            combinations.add(new NBForEach(new ArrayList<>(currentCombination)));
+            combinations.add(new NBForEach(getKeys(), new ArrayList<>(currentCombination)));
             return;
         }
 
@@ -173,13 +206,9 @@ public class NBForEachCombination implements Iterable<NBForEachCombination.NBFor
             // iterate on the key's value
         for (String value : valueArray) {
             // add the value to the working combination array
-            if (includeNames) {
-                currentCombination.add(keyName + "=" + value);
-            } else {
-                currentCombination.add(value);
-            }
+            currentCombination.add(value);
             // generate cases for the next keyName in arrayNames
-            generateCombinationsHelper(arrayNames, currentIndex + 1, currentCombination, combinations, includeNames);
+            generateCombinationsHelper(arrayNames, currentIndex + 1, currentCombination, combinations);
             // remove the last value so that we add the next back on the next iteration
             currentCombination.remove(currentCombination.size() - 1);
         }
@@ -199,11 +228,11 @@ public class NBForEachCombination implements Iterable<NBForEachCombination.NBFor
         private int index = 0;
 
         /**
-         * Create an Iterator instance with or without keynames.
+         * Create an Iterator instance
          */
-        public NBForEachIterator(boolean includeNames) {
+        public NBForEachIterator() {
             index = 0;
-            combinations = getCombinations(includeNames);
+            combinations = getCombinations();
         }
 
         /**
@@ -238,16 +267,7 @@ public class NBForEachCombination implements Iterable<NBForEachCombination.NBFor
      */
     @Override
     public Iterator<NBForEach> iterator() {
-        return new NBForEachIterator(false);
-    }
-
-    /**
-     * Creates an Iterator over Combination key=values or values
-     *
-     * @return a Combination iterator
-     */
-    public Iterator<NBForEach> iterator(boolean includeNames) {
-        return new NBForEachIterator(includeNames);
+        return new NBForEachIterator();
     }
 
 }

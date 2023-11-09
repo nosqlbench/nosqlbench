@@ -25,6 +25,7 @@ import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.content.NBPathsAPI;
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.engine.api.scenarios.NBForEachCombination.NBForEach;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -103,6 +104,8 @@ public class NBCLIScenarioParser {
         LinkedList<String> buildCmdBuffer = new LinkedList<>();
         StrInterpolator userParamsInterp = new StrInterpolator(userProvidedParams);
 
+        // At this point scenariosNames is a list of all scenarios named in the command line.
+        // If no sceanrios are provided then the default scenario is used.
 
         for (String scenarioName : scenarioNames) {
 
@@ -117,27 +120,27 @@ public class NBCLIScenarioParser {
             OpsDocList scenariosYaml = OpsLoader.loadContent(yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
             Scenarios scenarios = scenariosYaml.getDocScenarios();
 
-            String[] nameparts = scenarioName.split("\\.",2);
-            Map<String,String> namedSteps = new LinkedHashMap<>();
-            if (nameparts.length==1) {
+            String[] nameparts = scenarioName.split("\\.", 2);
+            Map<String, String> namedSteps = new LinkedHashMap<>();
+            if (nameparts.length == 1) {
                 Map<String, String> namedScenario = scenarios.getNamedScenario(scenarioName);
-                if (namedScenario==null) {
+                if (namedScenario == null) {
                     throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
-                    + "', but you can pick from one of: " + String.join(", ", scenarios.getScenarioNames()));
+                        + "', but you can pick from one of: " + String.join(", ", scenarios.getScenarioNames()));
                 }
                 namedSteps.putAll(namedScenario);
             } else {
                 Map<String, String> selectedScenario = scenarios.getNamedScenario(nameparts[0]);
-                if (selectedScenario==null) {
+                if (selectedScenario == null) {
                     throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
                         + "', but you can pick from one of: " + String.join(", ", scenarios.getScenarioNames()));
                 }
                 String stepname = nameparts[1];
                 if (stepname.matches("\\d+")) {
-                    stepname = String.format("%03d",Integer.parseInt(nameparts[1]));
+                    stepname = String.format("%03d", Integer.parseInt(nameparts[1]));
                 }
                 if (selectedScenario.containsKey(stepname)) {
-                    namedSteps.put(stepname,selectedScenario.get(stepname));
+                    namedSteps.put(stepname, selectedScenario.get(stepname));
                 } else {
                     throw new BasicError("Unable to find named scenario.step '" + scenarioName + "' in workload '" + workloadName
                         + "', but you can pick from one of: " + selectedScenario.keySet().stream().map(n -> nameparts[0].concat(".").concat(n)).collect(Collectors.joining(", ")));
@@ -151,81 +154,109 @@ public class NBCLIScenarioParser {
             }
 
             // See if this a foreach scenario
-            boolean forEachScenario = scenarioName.startsWith("~foreach");
-            NBForEachCombination forEachComb = new NBForEachCombination();
-
-            // each named command line step of the named scenario
-            for (Map.Entry<String, String> cmdEntry : namedSteps.entrySet()) {
-
-                String stepName = cmdEntry.getKey();
-                String cmd = cmdEntry.getValue();
-                cmd = userParamsInterp.apply(cmd);
-                // if this is a foreach scenario then look for special steps
-                if (forEachScenario && stepName.startsWith("~")) {
-                    // see what type of special step this
-                    if (stepName.equals("~tablename")) {
-                        // scenario name template
-                        scenarioName = cmd;
-                    } else {
-                        // foreach values
-                        forEachComb.add(stepName.substring(1), cmd);
+            boolean forEachScenario = scenarioName.contains("(");
+            NBForEachCombination forEach = new NBForEachCombination();
+            if (forEachScenario) {
+                // We need to extract all of the cases before processing a scenario.
+                for (Map.Entry<String, String> cmdEntry : namedSteps.entrySet()) {
+                    String stepName = cmdEntry.getKey();
+                    String cmd = cmdEntry.getValue();
+                    cmd = userParamsInterp.apply(cmd);
+                    // if this is a foreach scenario then look for special steps
+                    if (forEachScenario && stepName.startsWith("(") && stepName.endsWith(")")) {
+                        // foreach key values
+                        String key = stepName.substring(1, stepName.length() - 1);
+                        forEach.add(key, cmd);
                     }
-                    continue;
                 }
-                LinkedHashMap<String, CmdArg> parsedStep = parseStep(cmd);
-                LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userProvidedParams);
-                LinkedHashMap<String, String> buildingCmd = new LinkedHashMap<>();
+            } else {
+                // Add identity so that we can use an iterator to process the scenario steps into multiple versions
+                forEach.add("1", "1");
+            }
+            // Get the for each iteration keynames
+            List<String> keyNames = forEach.getKeys();
+            // Iterate at least once on the scenario steps
+            Iterator<NBForEach> scenarioIterator = forEach.iterator();
+            while (scenarioIterator.hasNext()) {
+                NBForEach combination = scenarioIterator.next();
+                LinkedHashMap<String, String> forMap = combination.getMap();
+                // setup this instance of the named scenario.
+                String scenarioNameInstance = combination.getTemplateName(scenarioName, userProvidedParams);
 
-                // consume each of the parameters from the steps to produce a composited command
-                // order is primarily based on the step template, then on user-provided parameters
-                for (CmdArg cmdarg : parsedStep.values()) {
+                // each named command line step of the named scenario
+                for (Map.Entry<String, String> cmdEntry : namedSteps.entrySet()) {
 
-                    // allow user provided parameter values to override those in the template,
-                    // if the assignment operator used in the template allows for it
-                    if (usersCopy.containsKey(cmdarg.getName())) {
-                        cmdarg = cmdarg.override(usersCopy.remove(cmdarg.getName()));
+                    String stepName = cmdEntry.getKey();
+                    // if this is a foreach step then skip further processing
+                    if (forEachScenario && stepName.startsWith("(") && stepName.endsWith(")")) continue;
+
+                    String cmd = cmdEntry.getValue();
+                    cmd = userParamsInterp.apply(cmd);
+
+                    LinkedHashMap<String, CmdArg> parsedStep = parseStep(cmd);
+                    LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userProvidedParams);
+                    if (forEachScenario) {
+                        // Add foreach combination to the list of user modified keys. If there is overlap then use the foreach.
+                        for (int i = 0; i < keyNames.size(); i++) {
+                            String key = keyNames.get(i);
+                            String value = forMap.get(key);
+                            if (usersCopy.containsKey(key)) {
+                                usersCopy.replace(key, value);
+                            } else {
+                                usersCopy.put(key, value);
+                            }
+                        }
+                    }
+                    LinkedHashMap<String, String> buildingCmd = new LinkedHashMap<>();
+
+                    // consume each of the parameters from the steps to produce a composited command
+                    // order is primarily based on the step template, then on user-provided parameters
+                    for (CmdArg cmdarg : parsedStep.values()) {
+
+                        // allow user provided parameter values to override those in the template,
+                        // if the assignment operator used in the template allows for it
+                        if (usersCopy.containsKey(cmdarg.getName())) {
+                            cmdarg = cmdarg.override(usersCopy.remove(cmdarg.getName()));
+                        }
+
+                        buildingCmd.put(cmdarg.getName(), cmdarg.toString());
+                    }
+                    usersCopy.forEach((k, v) -> buildingCmd.put(k, k + "=" + v));
+
+                    // Undefine any keys with a value of 'undef'
+                    List<String> undefKeys = buildingCmd.entrySet()
+                        .stream()
+                        .filter(e -> e.getValue().toLowerCase().endsWith("=undef"))
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
+                    undefKeys.forEach(buildingCmd::remove);
+
+                    if (!buildingCmd.containsKey("workload")) {
+                        buildingCmd.put("workload", "workload=" + workloadName);
                     }
 
-                    buildingCmd.put(cmdarg.getName(), cmdarg.toString());
+                    if (!buildingCmd.containsKey("alias")) {
+                        buildingCmd.put("alias", "alias=" + WORKLOAD_SCENARIO_STEP);
+                    }
+
+                    // TODO: simplify this
+                    String alias = buildingCmd.get("alias");
+                    String workloadToken = workloadContent.asPath().getFileName().toString();
+
+                    alias = alias.replaceAll("WORKLOAD", sanitize(workloadToken));
+                    alias = alias.replaceAll("SCENARIO", sanitize(scenarioNameInstance));
+                    alias = alias.replaceAll("STEP", sanitize(stepName));
+                    alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
+                    buildingCmd.put("alias", alias);
+                    buildingCmd.put("labels", "labels=workload:$" + sanitize(workloadToken));
+
+                    logger.debug(() -> "rebuilt command: " + String.join(" ", buildingCmd.values()));
+                    buildCmdBuffer.addAll(buildingCmd.values());
                 }
-                usersCopy.forEach((k, v) -> buildingCmd.put(k, k + "=" + v));
-
-                // Undefine any keys with a value of 'undef'
-                List<String> undefKeys = buildingCmd.entrySet()
-                    .stream()
-                    .filter(e -> e.getValue().toLowerCase().endsWith("=undef"))
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
-                undefKeys.forEach(buildingCmd::remove);
-
-                if (!buildingCmd.containsKey("workload")) {
-                    buildingCmd.put("workload", "workload=" + workloadName);
-                }
-
-                if (!buildingCmd.containsKey("alias")) {
-                    buildingCmd.put("alias", "alias=" + WORKLOAD_SCENARIO_STEP);
-                }
-
-                // Somewhere here we handle the iterator on NBForEachCombinations to create/instance iterations
-
-                // TODO: simplify this
-                String alias = buildingCmd.get("alias");
-                String workloadToken = workloadContent.asPath().getFileName().toString();
-
-                alias = alias.replaceAll("WORKLOAD", sanitize(workloadToken));
-                alias = alias.replaceAll("SCENARIO", sanitize(scenarioName));
-                alias = alias.replaceAll("STEP", sanitize(stepName));
-                alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
-                buildingCmd.put("alias", alias);
-                buildingCmd.put("labels","labels=workload:$"+sanitize(workloadToken));
-
-                logger.debug(() -> "rebuilt command: " + String.join(" ", buildingCmd.values()));
-                buildCmdBuffer.addAll(buildingCmd.values());
             }
         }
         buildCmdBuffer.descendingIterator().forEachRemaining(arglist::addFirst);
         logger.debug(() -> "composed command line args to fulfill named scenario: " + arglist);
-
     }
 
     public static String sanitize(String word) {
