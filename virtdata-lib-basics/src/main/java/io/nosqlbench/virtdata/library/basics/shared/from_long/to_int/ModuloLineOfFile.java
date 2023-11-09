@@ -28,7 +28,7 @@ import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
 
 /**
- * Return the number of a random line from the specified file, indexed starting from 0.
+ * Return a modulo remainder of a line from the specified file, indexed starting from 0.
  */
 @ThreadSafeMapper
 @Categories({Category.general})
