@@ -130,7 +130,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         if (parent != null) {
             parent.reportExecutionMetric(m);
         } else {
-            logger.debug("buffering metric " + m.toString() + " for final report");
+            logger.warn(() -> "Component " + this.toString() + " has a non-session null parent component");
         }
     }
 

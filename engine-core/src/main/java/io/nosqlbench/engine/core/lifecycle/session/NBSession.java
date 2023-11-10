@@ -16,16 +16,14 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
-import com.codahale.metrics.Counting;
-import com.codahale.metrics.Gauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.api.engine.metrics.reporters.ConsoleReporter;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBComponentSubScope;
 import io.nosqlbench.components.NBCreators;
 import io.nosqlbench.components.decorators.NBTokenWords;
@@ -40,11 +38,9 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosExecutor;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosResults;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenario;
-import io.nosqlbench.engine.core.metrics.NBMetricsSummary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
