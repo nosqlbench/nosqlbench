@@ -25,6 +25,7 @@ import io.nosqlbench.api.content.Content;
 import io.nosqlbench.api.content.NBIO;
 import io.nosqlbench.api.content.NBPathsAPI;
 import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.engine.cli.Cmd;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -58,9 +59,7 @@ public class NBCLIScenarioParser {
         return found.isPresent();
     }
 
-    public static void parseScenarioCommand(LinkedList<String> arglist,
-                                            Set<String> RESERVED_WORDS,
-                                            String... includes) {
+    public static void parseScenarioCommand(LinkedList<String> arglist, String... includes) {
 
         String workloadName = arglist.removeFirst();
         Optional<Content<?>> found = NBIO.all()
@@ -77,19 +76,19 @@ public class NBCLIScenarioParser {
 
         // Buffer in scenario names from CLI, only counting non-options non-parameters and non-reserved words
         List<String> scenarioNames = new ArrayList<>();
-        while (arglist.size() > 0
+        while (!arglist.isEmpty()
             && !arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")
-            && !RESERVED_WORDS.contains(arglist.peekFirst())) {
+            && !Cmd.CmdType.anyMatches(arglist.peekFirst())) {
             scenarioNames.add(arglist.removeFirst());
         }
-        if (scenarioNames.size() == 0) {
+        if (scenarioNames.isEmpty()) {
             scenarioNames.add("default");
         }
 
         // Parse CLI command into keyed parameters, in order
         LinkedHashMap<String, String> userProvidedParams = new LinkedHashMap<>();
-        while (arglist.size() > 0
+        while (!arglist.isEmpty()
             && arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")) {
             String[] arg = arglist.removeFirst().split("=", 2);
@@ -144,7 +143,7 @@ public class NBCLIScenarioParser {
                 }
             }
 
-            if (namedSteps == null) {
+            if (namedSteps.isEmpty()) {
                 throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
                     + "', but you can pick from one of: " +
                     String.join(", ", scenarios.getScenarioNames()));
@@ -179,7 +178,7 @@ public class NBCLIScenarioParser {
                     .stream()
                     .filter(e -> e.getValue().toLowerCase().endsWith("=undef"))
                     .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
+                    .toList();
                 undefKeys.forEach(buildingCmd::remove);
 
                 if (!buildingCmd.containsKey("workload")) {
@@ -307,7 +306,7 @@ public class NBCLIScenarioParser {
 
     public static List<WorkloadDesc> filterForScenarios(List<Content<?>> candidates) {
 
-        List<Path> yamlPathList = candidates.stream().map(Content::asPath).collect(Collectors.toList());
+        List<Path> yamlPathList = candidates.stream().map(Content::asPath).toList();
 
         List<WorkloadDesc> workloadDescriptions = new ArrayList<>();
 
@@ -333,7 +332,7 @@ public class NBCLIScenarioParser {
                 OpsDocList stmts = null;
                 try {
                     stmts = OpsLoader.loadContent(content, new LinkedHashMap<>());
-                    if (stmts.getStmtDocs().size() == 0) {
+                    if (stmts.getStmtDocs().isEmpty()) {
                         logger.warn("Encountered yaml with no docs in '" + referenced + "'");
                         continue;
                     }
@@ -355,7 +354,7 @@ public class NBCLIScenarioParser {
 
                 List<String> scenarioNames = scenarios.getScenarioNames();
 
-                if (scenarioNames != null && scenarioNames.size() > 0) {
+                if (scenarioNames != null && !scenarioNames.isEmpty()) {
 //                String path = yamlPath.toString();
 //                path = path.startsWith(FileSystems.getDefault().getSeparator()) ? path.substring(1) : path;
                     LinkedHashMap<String, String> sortedTemplates = new LinkedHashMap<>();
@@ -410,9 +409,9 @@ public class NBCLIScenarioParser {
             .searchPrefixes("scripts/auto")
             .searchPrefixes(includes)
             .extensionSet("js")
-            .list().stream().map(Content::asPath).collect(Collectors.toList());
+            .list().stream().map(Content::asPath).toList();
 
-        List<String> scriptNames = new ArrayList();
+        List<String> scriptNames = new ArrayList<>();
 
         for (Path scriptPath : scriptPaths) {
             String name = scriptPath.getFileName().toString();

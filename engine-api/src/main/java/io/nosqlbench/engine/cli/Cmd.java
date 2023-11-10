@@ -60,6 +60,11 @@ public class Cmd {
             this.positional = positional;
         }
 
+        public static boolean anyMatches(String s) {
+            CmdType found = valueOfAnyCase(s);
+            return found!=null;
+        }
+
         public String[] getPositionalArgNames() {
             String[] names = new String[positional.length];
             for (int i = 0; i < names.length; i++) {
@@ -74,7 +79,7 @@ public class Cmd {
                     return value;
                 }
             }
-            return valueOf(cmdname); // let the normal exception take over in this case
+            return null;
         }
 
         public Arg<?>[] getPositionalArgs() {
@@ -175,7 +180,7 @@ public class Cmd {
                 throw new InvalidParameterException(
                         "command '" + cmdName + "' requires a value for " + arg.name +
                                 ", but a named parameter was found instead: " + nextarg);
-            } else if (SessionCommandParser.RESERVED_WORDS.contains(nextarg)) {
+            } else if (CmdType.anyMatches(nextarg)) {
                 throw new InvalidParameterException(
                         "command '" + cmdName + "' requires a value for " + arg.name
                                 + ", but a reserved word was found instead: " + nextarg);
@@ -186,7 +191,7 @@ public class Cmd {
         }
 
         while (arglist.size() > 0 &&
-                !SessionCommandParser.RESERVED_WORDS.contains(arglist.peekFirst())
+                !CmdType.anyMatches(arglist.peekFirst())
                 && arglist.peekFirst().contains("=")) {
             String arg = arglist.removeFirst();
             String[] assigned = arg.split("=", 2);

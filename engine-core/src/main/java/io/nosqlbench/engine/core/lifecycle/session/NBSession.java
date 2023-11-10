@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
+import io.nosqlbench.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.api.labels.NBLabeledElement;
@@ -110,9 +111,20 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
                     results.apply(result);
                 } catch (Exception e) {
                     results.error(e);
+                    for (NBBufferedScenarioContext value : contexts.values()) {
+                        value.controller().forceStopScenario(10000);
+                    }
                 }
-                results.ok();
             }
+
+            for (String ctxName : contexts.keySet()) {
+                NBBufferedScenarioContext ctx = contexts.get(ctxName);
+                logger.debug("awaiting end of activities in context '" + ctxName +"':" +
+                    ctx.controller().getActivityDefs().stream().map(ActivityDef::getAlias).toList());
+                ctx.controller().awaitCompletion(Long.MAX_VALUE);
+                logger.debug("completed");
+            }
+
         }
         return collector.toExecutionResult();
     }

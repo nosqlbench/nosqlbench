@@ -67,7 +67,7 @@ public class NBCLIArgsFileTest {
 
     @Test
     public void testLinesToArgs() {
-        NBCLIArgsFile argsfile = new NBCLIArgsFile().reserved("reservedword");
+        NBCLIArgsFile argsfile = new NBCLIArgsFile().reserved(s -> s.equals("reservedword"));
         LinkedList<String> args = argsfile.linesToArgs(
                 List.of("--optionname argument", "--optionname2", "--opt3 reservedword")
         );

@@ -315,7 +315,7 @@ public class NBCLIOptions {
 
         // Now that statdirs is settled, auto load argsfile if it is present
         final NBCLIArgsFile argsfile = new NBCLIArgsFile();
-        argsfile.reserved(SessionCommandParser.RESERVED_WORDS);
+        argsfile.reserved(CmdType::anyMatches);
         argsfile.preload("--argsfile-optional", NBCLIOptions.ARGS_FILE_DEFAULT);
         arglist = argsfile.process(arglist);
 

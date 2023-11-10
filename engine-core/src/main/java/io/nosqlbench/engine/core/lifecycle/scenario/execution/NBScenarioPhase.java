@@ -66,10 +66,6 @@ public abstract class NBScenarioPhase extends NBBaseComponent
         return getLabels().asMap().get("scenario");
     }
 
-    public void forceStopScenario(int i, boolean b) {
-        scenarioActivitiesController.forceStopScenario(i,b);
-    }
-
     public ScenarioActivitiesController getActivitiesController() {
         return this.scenarioActivitiesController;
     }
@@ -136,7 +132,7 @@ public abstract class NBScenarioPhase extends NBBaseComponent
             this.scenarioActivitiesController.awaitCompletion(awaitCompletionTime);
         } catch (Exception e) {
             try {
-                scenarioActivitiesController.forceStopScenario(3000, false);
+                scenarioActivitiesController.forceStopScenario(3000);
             } catch (final Exception eInner) {
                 this.logger.debug("Found inner exception while forcing stop with rethrow=false: {}", eInner);
                 throw new RuntimeException(e);

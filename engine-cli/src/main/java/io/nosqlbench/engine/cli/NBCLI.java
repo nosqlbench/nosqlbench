@@ -252,7 +252,9 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         if (options.getWantsListCommands()) {
-            SessionCommandParser.RESERVED_WORDS.forEach(System.out::println);
+            for (Cmd.CmdType value : Cmd.CmdType.values()) {
+                System.out.println(value.name());
+            }
             return NBCLI.EXIT_OK;
         }
         if (options.wantsActivityTypes()) {

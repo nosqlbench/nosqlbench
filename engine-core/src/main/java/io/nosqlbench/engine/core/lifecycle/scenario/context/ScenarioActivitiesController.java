@@ -341,7 +341,7 @@ public class ScenarioActivitiesController extends NBBaseComponent {
      *
      * @param waitTimeMillis grace period during which an activity may cooperatively shut down
      */
-    public synchronized void forceStopScenario(int waitTimeMillis, boolean rethrow) {
+    public synchronized void forceStopScenario(int waitTimeMillis) {
         logger.debug("force stopping scenario {}", description());
         activityInfoMap.values().forEach(a -> a.getActivityExecutor().forceStopActivity(2000));
         logger.debug("Scenario force stopped.");
