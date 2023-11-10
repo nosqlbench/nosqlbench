@@ -29,6 +29,7 @@ public class ArgsComparator implements Comparator<Constructor<?>> {
         INCOMPATIBLE
 
     }
+
     private final Object[] parameters;
 
     public ArgsComparator(Object[] parameters) {
@@ -65,41 +66,45 @@ public class ArgsComparator implements Comparator<Constructor<?>> {
     /**
      * Establish a priority value (lower is better) based on how well the arguments
      * match to the given constructor's parameters.
-     *
+     * <p>
      * Note: The distinction between primitives and boxed types is lost here,
      * as the primitive version of Class<?> is only accessible via {@link Long#TYPE}
      * and similar, so primitive matching and auto-boxed matching are effectively
      * the same rank.
+     * <p>
+     * rank 0 -> all arguments are the same type or boxed type
+     * rank 1 -> all arguments are assignable, without autoboxing
+     * rank 2 -> all arguments are assignable, with autoboxing
+     * rank 3 -> not all arguments are assignable
      *
-     *  rank 0 -> all arguments are the same type or boxed type
-     *  rank 1 -> all arguments are assignable, without autoboxing
-     *  rank 2 -> all arguments are assignable, with autoboxing
-     *  rank 3 -> not all arguments are assignable
-     * @param ctor - constructor
-     * @param arguments - arguments to match against
+     * @param ctor
+     *     - constructor
+     * @param arguments
+     *     - arguments to match against
      * @return a lower number for when arguments match parameters better
      */
     public MATCHRANK matchRank(Constructor<?> ctor, Object[] arguments) {
         int paramLen = ctor.getParameterCount();
         int argsLen = arguments.length;
 
-        if (paramLen!=argsLen && !ctor.isVarArgs()) {
+        if (paramLen != argsLen && !ctor.isVarArgs()) {
             return MATCHRANK.INCOMPATIBLE;
         }
 
         int len = arguments.length; // only consider varargs if some provided
-        MATCHRANK[] ranks = new MATCHRANK[len];
 
         Class<?>[] ptypes = ctor.getParameterTypes();
         Class<?>[] atypes = Arrays.stream(arguments).map(Object::getClass).toArray(i -> new Class<?>[i]);
+        int maxidx=Math.min(ptypes.length,atypes.length);
+        MATCHRANK[] ranks = new MATCHRANK[maxidx];
 
-        for (int position = 0; position < len; position++) {
-            Class<?> ptype = ptypes[position];
-            Class<?> atype = (position<atypes.length) ? atypes[position] : atypes[atypes.length-1];
+        for (int position = 0; position < maxidx; position++) {
+            Class<?> ptype = (position < ptypes.length) ? ptypes[position] : ptypes[ptypes.length - 1];
+            Class<?> atype = (position < atypes.length) ? atypes[position] : atypes[atypes.length - 1];
             Class<?> across = WRAPPER_TYPE_MAP.get(atype);
             Class<?> pcross = WRAPPER_TYPE_MAP.get(ptype);
 
-            if (atype.isPrimitive()==ptype.isPrimitive() && atype.equals(ptype)) {
+            if (atype.isPrimitive() == ptype.isPrimitive() && atype.equals(ptype)) {
                 ranks[position] = MATCHRANK.DIRECT;
             } else if (across != null && pcross != null && (across.equals(ptype) || pcross.equals(atype))) {
                 ranks[position] = MATCHRANK.DIRECT;
