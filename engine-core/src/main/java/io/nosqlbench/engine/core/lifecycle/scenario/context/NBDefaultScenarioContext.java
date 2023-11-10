@@ -89,11 +89,6 @@ public class NBDefaultScenarioContext extends NBBaseComponent implements NBScena
 //
 
     @Override
-    public ScenarioPhaseParams params() {
-        return params;
-    }
-
-    @Override
     public ScenarioActivitiesController controller() {
         return controller;
     }

@@ -17,6 +17,7 @@
 package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
 public class SC_threadchange extends SCBaseScenarioPhase {
@@ -37,7 +38,7 @@ public class SC_threadchange extends SCBaseScenarioPhase {
      * }</pre>
      */
     @Override
-    public void invoke() {
+    public void invoke(ScenarioPhaseParams params) {
 
           var activity = controller.start("driver=diag;alias=threadchange;cycles=0..60000;threads=1;interval=2000;op='noop';rate=1000");
           activity.getActivityDef().setThreads(1);

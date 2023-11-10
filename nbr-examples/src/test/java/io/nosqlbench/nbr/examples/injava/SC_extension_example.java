@@ -17,6 +17,7 @@
 package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 import io.nosqlbench.engine.extensions.example.ExamplePlugin;
 
@@ -32,7 +33,7 @@ public class SC_extension_example extends SCBaseScenarioPhase {
      * }</pre>
      */
     @Override
-    public void invoke() {
+    public void invoke(ScenarioPhaseParams params) {
         ExamplePlugin examplePlugin = create().requiredExtension("example", ExamplePlugin.class);
         long sum = examplePlugin.getSum(3, 5);
         stdout.println("3+5=" + sum);

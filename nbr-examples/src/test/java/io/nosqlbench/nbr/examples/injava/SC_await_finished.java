@@ -17,6 +17,7 @@
 package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
 import java.util.Map;
@@ -44,7 +45,7 @@ public class SC_await_finished extends SCBaseScenarioPhase {
      * }</pre>
      */
     @Override
-    public void invoke() {
+    public void invoke(ScenarioPhaseParams params) {
         var activitydef1 = Map.of(
             "alias", "activity_to_await",
             "driver", "diag",

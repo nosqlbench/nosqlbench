@@ -17,19 +17,23 @@
 package io.nosqlbench.scenarios.diag;
 
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(value = NBScenarioPhase.class,selector = "diag")
+@Service(value = NBScenarioPhase.class, selector = "diag")
 public class SC_diag extends SCBaseScenarioPhase {
     public SC_diag(NBComponent parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
     @Override
-    public void invoke() {
-        stdout.println("diagnostic scenario writing to stdout");
+    public void invoke(ScenarioPhaseParams params) {
+        stdout.println("diagnostic scenario writing params to stdout:");
+        params.forEach((k, v) -> {
+            stdout.println(k + ":" + v);
+        });
         stderr.println("diagnostic scenario writing to stderr");
     }
 }

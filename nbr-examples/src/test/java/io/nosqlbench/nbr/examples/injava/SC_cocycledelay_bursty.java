@@ -22,6 +22,7 @@ import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.events.ParamChange;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
 import java.util.Map;
@@ -83,7 +84,7 @@ public class SC_cocycledelay_bursty extends SCBaseScenarioPhase {
      * }</pre>
      */
     @Override
-    public void invoke() {
+    public void invoke(ScenarioPhaseParams params) {
         int diagrate = 500;
         var co_cycle_delay_bursty = Map.of(
             "alias", "co_cycle_delay_bursty",

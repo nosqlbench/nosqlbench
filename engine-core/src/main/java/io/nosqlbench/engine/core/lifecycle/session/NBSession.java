@@ -20,12 +20,9 @@ import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.api.labels.NBLabeledElement;
 import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.components.NBBaseComponent;
 import io.nosqlbench.components.decorators.NBTokenWords;
-import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;
-import io.nosqlbench.engine.cli.ScriptBuffer;
 import io.nosqlbench.engine.core.clientload.*;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedScenarioContext;
@@ -33,12 +30,9 @@ import io.nosqlbench.engine.core.lifecycle.scenario.context.NBScenarioContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenarioPhaseResult;
-import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenarioPhase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -101,23 +95,23 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
      * @return
      */
     public ExecutionResult apply(List<Cmd> cmds) {
-        List<NBPhaseAssembly.PhaseAndParams> phases = NBPhaseAssembly.preparePhases(cmds, this);
+        List<NBPhaseAssembly.PhaseInvocation> phases = NBPhaseAssembly.preparePhases(cmds, this, this::getContext);
         ResultCollector collector = new ResultCollector();
         try (ResultContext results = new ResultContext(collector)) {
-            for (NBScenarioPhase phase : phases) {
-                String targetScenario = phase.getTargetScenario();
-                NBBufferedScenarioContext context = getContext(targetScenario);
+            for (NBPhaseAssembly.PhaseInvocation invocation : phases) {
+                NBScenarioPhase phase = invocation.phase();
+                ScenarioPhaseParams params = invocation.params();
+                String targetContext = invocation.targetContext();
+
+                NBBufferedScenarioContext context = getContext(targetContext);
                 ScenarioPhaseResult result = null;
                 try {
-                    result = phase.apply(context);
-                    results.ok();
+                    result = phase.apply(context, params);
+                    results.apply(result);
                 } catch (Exception e) {
                     results.error(e);
-                } finally {
-                    if (result!=null && result.getIOLog()!=null) {
-                        results.output(result.getIOLog());
-                    }
                 }
+                results.ok();
             }
         }
         return collector.toExecutionResult();

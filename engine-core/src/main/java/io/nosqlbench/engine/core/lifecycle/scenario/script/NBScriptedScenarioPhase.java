@@ -28,6 +28,7 @@ import org.graalvm.polyglot.Engine.Builder;
 import org.graalvm.polyglot.EnvironmentAccess;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotAccess;
+import org.graalvm.polyglot.io.IOAccess;
 
 import javax.script.*;
 import java.io.IOException;
@@ -46,6 +47,7 @@ public class NBScriptedScenarioPhase extends NBScenarioPhase {
 
     private ExecutionMetricsResult result;
     private BufferedScriptContext context;
+    private GraalJSScriptEngine _engine;
 
     public Optional<ExecutionMetricsResult> getResultIfComplete() {
         return Optional.ofNullable(result);
@@ -58,7 +60,6 @@ public class NBScriptedScenarioPhase extends NBScenarioPhase {
     }
 
     private final List<String> scripts = new ArrayList<>();
-    private ScriptEngine scriptEngine;
 
     private ActivitiesProgressIndicator activitiesProgressIndicator;
     private String progressInterval = "console:1m";
@@ -120,61 +121,61 @@ public class NBScriptedScenarioPhase extends NBScenarioPhase {
         return ctx;
     }
 
-    private void initializeScriptingEngine() {
-        final Context.Builder contextSettings = Context.newBuilder("js")
-            .allowHostAccess(HostAccess.ALL)
-            .allowNativeAccess(true)
-            .allowCreateThread(true)
-            .allowIO(true)
-            .allowHostClassLookup(s -> true)
-            .allowHostClassLoading(true)
-            .allowCreateProcess(true)
-            .allowAllAccess(true)
-            .allowEnvironmentAccess(EnvironmentAccess.INHERIT)
-            .allowPolyglotAccess(PolyglotAccess.ALL)
-            .option("js.ecmascript-version", "2022")
-            .option("js.nashorn-compat", "true");
+    private GraalJSScriptEngine initializeScriptingEngine() {
+        if (_engine == null) {
+            final Context.Builder contextSettings = Context.newBuilder("js")
+                .allowHostAccess(HostAccess.ALL)
+                .allowNativeAccess(true)
+                .allowCreateThread(true)
+                .allowIO(IOAccess.ALL)
+                .allowHostClassLookup(s -> true)
+                .allowHostClassLoading(true)
+                .allowCreateProcess(true)
+                .allowAllAccess(true)
+                .allowEnvironmentAccess(EnvironmentAccess.INHERIT)
+                .allowPolyglotAccess(PolyglotAccess.ALL)
+                .option("js.ecmascript-version", "2022")
+                .option("js.nashorn-compat", "true");
 
-        final Builder engineBuilder = org.graalvm.polyglot.Engine.newBuilder();
-        engineBuilder.option("engine.WarnInterpreterOnly", "false");
-        final org.graalvm.polyglot.Engine polyglotEngine = engineBuilder.build();
-        scriptEngine = GraalJSScriptEngine.create(polyglotEngine, contextSettings);
+            final Builder engineBuilder = org.graalvm.polyglot.Engine.newBuilder();
+            engineBuilder.option("engine.WarnInterpreterOnly", "false");
+            final org.graalvm.polyglot.Engine polyglotEngine = engineBuilder.build();
+            this._engine= GraalJSScriptEngine.create(polyglotEngine, contextSettings);
+        }
+        return this._engine;
     }
 
-    protected final void runScenarioPhase(NBScenarioContext shell) {
+    protected final void runScenarioPhase(NBScenarioContext shell, ScenarioPhaseParams params) {
         try {
             this.logger.debug("Initializing scripting engine for {}.", phaseName);
-            this.initializeScriptingEngine();
+            GraalJSScriptEngine engine = this.initializeScriptingEngine();
             this.context = this.initializeScriptContext(shell);
             this.logger.debug("Running control script for {}.", phaseName);
-            this.executeScenarioScripts();
+
+            for (final String script : this.scripts) {
+                if ((engine instanceof Compilable compilableEngine)) {
+                    this.logger.debug("Using direct script compilation");
+                    final CompiledScript compiled = compilableEngine.compile(script);
+                    this.logger.debug("-> invoking main scenario script (compiled)");
+                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("params",params);
+                    compiled.eval(this.context);
+                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).remove("params");
+                    this.logger.debug("<- scenario script completed (compiled)");
+                } else {
+                    this.logger.debug("-> invoking main scenario script (interpreted)");
+                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("params",params);
+                    engine.eval(script);
+                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).remove("params");
+                    this.logger.debug("<- scenario control script completed (interpreted)");
+                }
+            }
         } catch (ScriptException e) {
             throw new RuntimeException(e);
         } finally {
             this.endedAtMillis = System.currentTimeMillis();
 //            this.logger.debug("{} scenario run", null == this.error ? "NORMAL" : "ERRORED");
         }
-//            String iolog = error != null ? error.toString() : this.scriptEnv.getTimedLog();
-//            result = new ExecutionMetricsResult(startedAtMillis, endedAtMillis, iolog, this.error);
-//            this.result.reportMetricsSummaryToLog();
     }
-
-    private void executeScenarioScripts() throws ScriptException {
-        for (final String script : this.scripts) {
-            if ((scriptEngine instanceof Compilable compilableEngine)) {
-                this.logger.debug("Using direct script compilation");
-                final CompiledScript compiled = compilableEngine.compile(script);
-                this.logger.debug("-> invoking main scenario script (compiled)");
-                compiled.eval(this.context);
-                this.logger.debug("<- scenario script completed (compiled)");
-            } else {
-                this.logger.debug("-> invoking main scenario script (interpreted)");
-                this.scriptEngine.eval(script);
-                this.logger.debug("<- scenario control script completed (interpreted)");
-            }
-        }
-    }
-
 
     @Override
     public boolean equals(final Object o) {
@@ -196,17 +197,6 @@ public class NBScriptedScenarioPhase extends NBScenarioPhase {
     public String toString() {
         return "name:'" + phaseName + '\'';
     }
-
-//    public void addScenarioScriptParams(final ScriptParams scenarioScriptParams) {
-//        this.scenarioScriptParams = scenarioScriptParams;
-//    }
-
-//    public void addScenarioScriptParams(final Map<String, String> scriptParams) {
-//        this.addScenarioScriptParams(new ScriptParams() {{
-//            this.putAll(scriptParams);
-//        }});
-//    }
-
 
 }
 

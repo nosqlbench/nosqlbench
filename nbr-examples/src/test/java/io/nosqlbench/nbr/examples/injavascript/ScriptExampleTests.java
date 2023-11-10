@@ -24,7 +24,6 @@ import io.nosqlbench.engine.core.lifecycle.scenario.context.NBScenarioContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenarioPhaseResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenarioPhase;
-import io.nosqlbench.engine.core.lifecycle.session.NBScenario;
 import org.apache.commons.compress.utils.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeAll;
@@ -64,11 +63,11 @@ public class ScriptExampleTests {
 
         NBComponent root = new TestComponent("exampletest",scriptname);
         NBBufferedScenarioContext ctx = NBScenarioContext.builder().name(scriptname).build(root);
-        NBScenario scenario = new NBScenario(
-            root,
-            NBLabels.forKV(),
-            ctx
-        );
+//        NBScenario scenario = new NBScenario(
+//            root,
+//            NBLabels.forKV(),
+//            ctx
+//        );
         NBScriptedScenarioPhase s = NBScriptedScenarioPhase.ofScripted(scenarioName,Map.of(),new TestComponent("test","test"), NBScriptedScenarioPhase.Invocation.EXECUTE_SCRIPT);
 
 //        s.addScenarioScriptParams(paramsMap);
@@ -88,7 +87,7 @@ public class ScriptExampleTests {
         }
         s.addScriptText(script);
 //        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
-        ScenarioPhaseResult result = scenario.apply(s);
+        ScenarioPhaseResult result = s.apply(ctx,ScenarioPhaseParams.of(paramsMap));
         return result;
     }
 

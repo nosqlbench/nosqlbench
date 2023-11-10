@@ -17,6 +17,7 @@
 package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
 import java.util.Map;
@@ -38,7 +39,7 @@ public class SC_basicdiag extends SCBaseScenarioPhase {
      * }</pre>
      */
     @Override
-    public void invoke() {
+    public void invoke(ScenarioPhaseParams params) {
         var basic_diag = params.withOverrides(
             Map.of("alias","basic_diag","driver","diag")
         );

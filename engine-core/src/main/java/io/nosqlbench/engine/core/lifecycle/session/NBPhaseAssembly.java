@@ -17,10 +17,10 @@
 package io.nosqlbench.engine.core.lifecycle.session;
 
 import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.components.NBComponentExecutionScope;
 import io.nosqlbench.engine.cli.BasicScriptBuffer;
 import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.cli.ScriptBuffer;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedScenarioContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenarioPhase;
@@ -29,61 +29,65 @@ import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
+import java.util.function.Function;
 
 public class NBPhaseAssembly {
 
     private final static Logger logger = LogManager.getLogger(NBPhaseAssembly.class);
 
-    public final static String DEFAULT_SCENARIO_NAME = "default";
+    public static record PhaseInvocation(NBScenarioPhase phase, ScenarioPhaseParams params, String targetContext){};
 
-    public static record PhaseAndParams(NBScenarioPhase phase, ScenarioPhaseParams params){};
-
-    public static List<PhaseAndParams> preparePhases(List<Cmd> cmds, NBSession parent) {
+    public static List<PhaseInvocation> preparePhases(List<Cmd> cmds, NBSession parent, Function<String, NBBufferedScenarioContext> ctxprovider) {
         List<Cmd> mappedCmds = tagScenarios(cmds);
-        List<PhaseAndParams> phases = preparePhases(mappedCmds, parent);
-        return phases;
+        List<PhaseInvocation> invocations = prepareMappedPhases(mappedCmds, parent, ctxprovider);
+        return invocations;
     }
 
     private static List<Cmd> tagScenarios(List<Cmd> cmds) {
-        LinkedList<Cmd> tagged = new LinkedList<>(cmds);
-        String scenarioName = DEFAULT_SCENARIO_NAME;
-        ListIterator<Cmd> cmdIter = tagged.listIterator();
-        while (cmdIter.hasNext()) {
-            Cmd cmd = cmdIter.next();
-            if (cmd.getCmdType() == Cmd.CmdType.scenario) {
-                scenarioName = cmd.getArg("scenario_name");
-                if (scenarioName.equals(DEFAULT_SCENARIO_NAME)) {
-                    logger.warn("You are explicitly setting the scenario name to 'main'. This is likely an error. This is the default scenario name, and if you are using different scenario names you should pick something that is different and specific.");
+        LinkedList<Cmd> tagged = new LinkedList<>();
+        String contextName=Cmd.DEFAULT_TARGET_CONTEXT;
+        for (Cmd cmd : cmds) {
+            if (cmd.getParams().containsKey("context")) {
+                String ctx = cmd.getParams().remove("context");
+                tagged.add(cmd.forTargetContext(ctx));
+            } else if (cmd.getCmdType() == Cmd.CmdType.context) {
+                contextName = cmd.getArg("context_name");
+                if (contextName.equals(Cmd.DEFAULT_TARGET_CONTEXT)) {
+                    logger.warn("You are explicitly setting the scenario name to "+Cmd.DEFAULT_TARGET_CONTEXT+"'. This is likely an error. " +
+                        "This is the default scenario name, and if you are using different scenario names you should pick something that is different and specific.");
                 }
-                cmdIter.previous();
-                cmdIter.remove();
             } else {
-                cmd.getParams().put("scenario", scenarioName);
+                tagged.add(cmd.forTargetContext(contextName));
             }
         }
         return new ArrayList<>(tagged);
     }
 
-    private static List<NBScenarioPhase> preparePhases(List<Cmd> mappedCmds, NBComponent parent) {
-        List<NBScenarioPhase> phases = new ArrayList<>();
+    private static List<PhaseInvocation> prepareMappedPhases(List<Cmd> mappedCmds, NBComponent parent, Function<String,NBBufferedScenarioContext> ctxProvider) {
+        List<PhaseInvocation> parameterizedInvocations = new ArrayList<>();
         String basename="phase_";
         int count=0;
         for (Cmd cmd : mappedCmds) {
             count++;
             String phaseName=basename+String.valueOf(count);
             String targetScenario = cmd.getParams().remove("scenario");
+
+            ScenarioPhaseParams params = switch (cmd.getCmdType()) {
+                case java, context -> ScenarioPhaseParams.of(cmd.getParams());
+                default -> ScenarioPhaseParams.of(Map.of());
+            };
+
             var phase = switch (cmd.getCmdType()) {
                 case java -> buildJavaPhase(List.of(cmd), targetScenario, parent, phaseName);
-                case scenario -> throw new RuntimeException("scenario commands should have already been parsed out.");
+                case context -> throw new RuntimeException("scenario commands should have already been parsed out.");
                 default -> buildJavascriptPhase(List.of(cmd), targetScenario, parent, phaseName);
             };
-            phases.add(phase);
+
+            String contetName = cmd.getTargetContext();
+            parameterizedInvocations.add(new PhaseInvocation(phase,params,contetName));
         }
-        return phases;
+        return parameterizedInvocations;
     }
 
 
@@ -155,8 +159,4 @@ public class NBPhaseAssembly {
             throw new RuntimeException(e);
         }
     }
-
-
-
-
 }

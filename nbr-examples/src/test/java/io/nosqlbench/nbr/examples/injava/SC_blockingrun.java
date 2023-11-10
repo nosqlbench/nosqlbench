@@ -17,6 +17,7 @@
 package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
 import java.util.Map;
@@ -54,7 +55,7 @@ public class SC_blockingrun extends SCBaseScenarioPhase {
      * }</pre>
      */
     @Override
-    public void invoke() {
+    public void invoke(ScenarioPhaseParams params) {
         var activitydef1 = Map.of(
             "alias","blockactivity1","driver","diag",
             "cycles","0..10000","threads","1",

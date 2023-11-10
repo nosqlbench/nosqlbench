@@ -32,6 +32,16 @@ import java.util.function.Function;
 public class Cmd {
 
     private final static Logger logger = LogManager.getLogger(Cmd.class);
+    public static final String DEFAULT_TARGET_CONTEXT = "default";
+    private final String targetContextName;
+
+    public String getTargetContext() {
+        return targetContextName;
+    }
+
+    public Cmd forTargetContext(String contextName) {
+        return new Cmd(cmdType,cmdArgs,contextName);
+    }
 
     public enum CmdType {
         run(),
@@ -43,10 +53,9 @@ public class Cmd {
         await(Arg.of("alias_name")),
         waitMillis(Arg.of("millis_to_wait", Long::parseLong)),
         fragment(Arg.ofFreeform("script_fragment")),
-        scenario(Arg.ofFreeform("scenario_name"));
+        context(Arg.ofFreeform("context_name"));
 
         private final Arg<?>[] positional;
-
         CmdType(Arg<?>... positional) {
             this.positional = positional;
         }
@@ -106,9 +115,16 @@ public class Cmd {
 
     private final CmdType cmdType;
 
+    public Cmd(@NotNull CmdType cmdType, Map<String, String> cmdArgs, String targetContextName) {
+        this.cmdArgs = cmdArgs;
+        this.cmdType = cmdType;
+        this.targetContextName = targetContextName;
+    }
+
     public Cmd(@NotNull CmdType cmdType, Map<String, String> cmdArgs) {
         this.cmdArgs = cmdArgs;
         this.cmdType = cmdType;
+        this.targetContextName = DEFAULT_TARGET_CONTEXT;
     }
 
     public CmdType getCmdType() {

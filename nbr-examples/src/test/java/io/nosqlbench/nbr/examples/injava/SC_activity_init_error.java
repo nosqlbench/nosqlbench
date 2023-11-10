@@ -17,6 +17,7 @@
 package io.nosqlbench.nbr.examples.injava;
 
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
@@ -48,7 +49,7 @@ public class SC_activity_init_error extends SCBaseScenarioPhase {
      *
      */
     @Override
-    public void invoke() {
+    public void invoke(ScenarioPhaseParams params) {
         var activitydef1 = Map.of(
             "alias","activity_init_error",
             "driver","diag",

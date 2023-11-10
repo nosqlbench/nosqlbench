@@ -19,6 +19,7 @@ package io.nosqlbench.nbr.examples.injava;
 import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
 import io.nosqlbench.api.optimizers.MVResult;
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
 import java.util.function.ToDoubleFunction;
@@ -57,7 +58,7 @@ public class SC_optimo_test extends SCBaseScenarioPhase {
      * }</pre>
      */
     @Override
-    public void invoke() {
+    public void invoke(ScenarioPhaseParams params) {
         BobyqaOptimizerInstance bobby = create().bobyqaOptimizer();
         bobby.param("pa", 0.0d, 200000.0d);
         bobby.param("pb", 0.0d, 2000000d);

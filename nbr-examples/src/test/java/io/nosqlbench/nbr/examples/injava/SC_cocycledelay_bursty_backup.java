@@ -19,6 +19,7 @@ package io.nosqlbench.nbr.examples.injava;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 
 import java.util.Map;
@@ -80,7 +81,7 @@ public class SC_cocycledelay_bursty_backup extends SCBaseScenarioPhase {
      * }</pre>
      */
     @Override
-    public void invoke() {
+    public void invoke(ScenarioPhaseParams params) {
         var co_cycle_delay_bursty = Map.of(
             "alias", "co_cycle_delay_bursty",
             "driver", "diag",

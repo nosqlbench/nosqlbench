@@ -22,15 +22,13 @@ import io.nosqlbench.components.NBComponent;
 import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedScenarioContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBScenarioContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenarioPhaseResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedScenarioPhase;
-import io.nosqlbench.engine.core.lifecycle.session.NBScenario;
-import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,10 +41,9 @@ public class NBScenarioPhaseTest {
         NBScriptedScenarioPhase phase = NBScriptedScenarioPhase.ofScripted("testing", Map.of(),new TestComponent(), NBScriptedScenarioPhase.Invocation.EXECUTE_SCRIPT);
         phase.addScriptText("print('loaded script environment...');\n");
         NBBufferedScenarioContext ctx = NBScenarioContext.builder().name("testing").build(NBComponent.EMPTY_COMPONENT);
-        NBScenario s = new NBScenario(NBComponent.EMPTY_COMPONENT, NBLabels.forKV(),ctx);
 
         try {
-            ScenarioPhaseResult result = s.apply(phase);
+            ScenarioPhaseResult result = phase.apply(ctx, ScenarioPhaseParams.of(Map.of()));
             assertThat(result.getIOLog()).contains("loaded script environment...");
         } catch (Exception e) {
             logger.debug(() -> "Scenario run encountered an exception: " + e.getMessage());

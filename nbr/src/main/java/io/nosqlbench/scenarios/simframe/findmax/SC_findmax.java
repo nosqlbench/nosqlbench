@@ -24,6 +24,7 @@ import io.nosqlbench.components.events.ParamChange;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.direct.SCBaseScenarioPhase;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
 import io.nosqlbench.nb.annotations.Service;
@@ -64,7 +65,7 @@ public class SC_findmax extends SCBaseScenarioPhase {
     }
 
     @Override
-    public void invoke() {
+    public void invoke(ScenarioPhaseParams params) {
         // TODO: having "scenario" here as well as in "named scenario" in workload templates is confusing. Make this clearer.
         String workload = params.getOrDefault("workload", "default_workload");
         CycleRateSpec ratespec = new CycleRateSpec(100.0, 1.05);

@@ -19,6 +19,7 @@ package io.nosqlbench.engine.core.lifecycle.session;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class ResultContext implements AutoCloseable {
     private final Consumer<ResultContext> receiver;
@@ -77,5 +78,15 @@ public class ResultContext implements AutoCloseable {
 
     public Exception getException() {
         return error;
+    }
+
+    public void apply(Supplier<ExecutionResult> resultSource) {
+        ExecutionResult executionResult = resultSource.get();
+        if (executionResult.getException()!=null) {
+            this.error(executionResult.getException());
+            output(executionResult.getIOLog());
+        } else {
+            this.ok();
+        }
     }
 }

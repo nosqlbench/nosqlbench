@@ -16,9 +16,12 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
+import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedScenarioContext;
 
-public class ScenarioPhaseResult {
+import java.util.function.Supplier;
+
+public class ScenarioPhaseResult implements Supplier<ExecutionResult> {
     private final long startedAt;
     private final long endedAt;
     private final Exception exception;
@@ -71,5 +74,10 @@ public class ScenarioPhaseResult {
             sb.append(" IO{\n").append("}\n").append(iolog);
         }
         return sb.toString();
+    }
+
+    @Override
+    public ExecutionResult get() {
+        return new ExecutionResult(this.startedAt,this.endedAt,this.getIOLog(),this.exception);
     }
 }
