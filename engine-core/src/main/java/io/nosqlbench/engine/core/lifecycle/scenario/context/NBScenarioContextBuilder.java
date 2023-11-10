@@ -31,22 +31,22 @@ public class NBScenarioContextBuilder implements ContextBuilderFacets.ALL {
     private PrintWriter out = new PrintWriter(System.out);
     private PrintWriter err = new PrintWriter(System.err);
     private Reader in = new InputStreamReader(System.in);
-    private NBBufferedScenarioContext.IOType iotype = NBBufferedScenarioContext.IOType.traced;
+    private NBBufferedCommandContext.IOType iotype = NBBufferedCommandContext.IOType.traced;
     private NBComponent parentComponent;
     private String contextName;
 
 
     public NBScenarioContextBuilder() {}
-    public NBBufferedScenarioContext build(NBComponent forScenario) {
-        NBDefaultScenarioContext fixtures =
-            new NBDefaultScenarioContext(
+    public NBBufferedCommandContext build(NBComponent forScenario) {
+        NBDefaultCommandContext fixtures =
+            new NBDefaultCommandContext(
                 parentComponent,
                 contextName,
                 ((this.controller!=null) ? this.controller : new ScenarioActivitiesController(forScenario)),
                 this.out,
                 this.err,
                 this.in);
-        return new NBBufferedScenarioContext(parentComponent,contextName,fixtures,iotype);
+        return new NBBufferedCommandContext(parentComponent,contextName,fixtures,iotype);
     }
 
 
@@ -83,19 +83,19 @@ public class NBScenarioContextBuilder implements ContextBuilderFacets.ALL {
 
     @Override
     public ContextBuilderFacets.WantsParams virtualIO() {
-        this.iotype= NBBufferedScenarioContext.IOType.virtual;
+        this.iotype= NBBufferedCommandContext.IOType.virtual;
         return this;
     }
 
     @Override
     public ContextBuilderFacets.WantsParams connectedIO() {
-        this.iotype = NBBufferedScenarioContext.IOType.connected;
+        this.iotype = NBBufferedCommandContext.IOType.connected;
         return this;
     }
 
     @Override
     public ContextBuilderFacets.WantsParams tracedIO() {
-        this.iotype= NBBufferedScenarioContext.IOType.traced;
+        this.iotype= NBBufferedCommandContext.IOType.traced;
         return this;
     }
 

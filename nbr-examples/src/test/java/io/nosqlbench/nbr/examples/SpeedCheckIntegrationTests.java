@@ -15,7 +15,7 @@
  */
 package io.nosqlbench.nbr.examples;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenarioPhaseResult;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.nbr.examples.injavascript.ScriptExampleTests;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -31,14 +31,14 @@ public class SpeedCheckIntegrationTests {
     @Disabled
     // Verified as working
     public void testSpeedSanity() {
-        ScenarioPhaseResult scenarioPhaseResult = ScriptExampleTests.runScenario("speedcheck");
+        NBCommandResult NBCommandResult = ScriptExampleTests.runScriptCommands("speedcheck");
     }
 
     @Test
     @Disabled
     // This seems incomplete
     public void testThreadSpeeds() {
-        ScenarioPhaseResult scenarioPhaseResult = ScriptExampleTests.runScenario("threadspeeds");
+        NBCommandResult NBCommandResult = ScriptExampleTests.runScriptCommands("threadspeeds");
     }
 
 

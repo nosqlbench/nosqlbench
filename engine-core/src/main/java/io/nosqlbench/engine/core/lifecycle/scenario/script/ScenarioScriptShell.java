@@ -16,11 +16,11 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
 import io.nosqlbench.engine.api.scripting.ScriptEnvBuffer;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBScenarioContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
 
 public class ScenarioScriptShell extends ScriptEnvBuffer {
 
-    public ScenarioScriptShell(NBScenarioContext fixtures) {
+    public ScenarioScriptShell(NBCommandContext fixtures) {
     }
 
     @Override

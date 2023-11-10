@@ -31,13 +31,11 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @Disabled
 @Execution(ExecutionMode.SAME_THREAD)
 public class ScenarioExampleTests {
 
-    public static ExecutionResult runScenario(String... params) {
+    public static ExecutionResult runScenarioTest(String... params) {
         List<Content<?>> sources = NBIO.fs().pathname(params[0]).extensionSet(".yaml", ".YAML", ".yml", ".YML").list();
         if (sources.size()!=1) {
             throw new RuntimeException("Found [" + sources.size() +"] sources for '" + params[0] +"'");
@@ -59,7 +57,7 @@ public class ScenarioExampleTests {
 
     @Test
     public void testBasicNamedScenario() {
-        ExecutionResult scenarioResult = runScenario("basic_scenario");
+        ExecutionResult scenarioResult = runScenarioTest("basic_scenario");
 //        Pattern p = Pattern.compile(".*started leader.*started follower.*stopped leader.*stopped follower.*",
 //            Pattern.DOTALL);
 //        assertThat(p.matcher(scenarioResult.getIOLog()).matches()).isTrue();

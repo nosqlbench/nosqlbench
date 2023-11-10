@@ -82,7 +82,7 @@ public interface ContextBuilderFacets {
     }
 
     public interface CanBuild {
-        NBBufferedScenarioContext build(NBComponent forComponent);
+        NBBufferedCommandContext build(NBComponent forComponent);
     }
 
 }

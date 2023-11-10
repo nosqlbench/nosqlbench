@@ -16,11 +16,11 @@ description: |
 
 scenarios:
   cassandra:
-    drop: run tags='block:drop' threads==undef cycles==undef
+    drop: run tags='block:drop' threads==undef cycles==undef context=cassandra
     # nb5 cql-vector2 cassandra.schema host=localhost localdc=datacenter1 dimensions=100
-    schema: run tags='op=create_.*' threads==undef cycles==undef
+    schema: run tags='op=create_.*' threads==undef cycles==undef context=cassandra
     # nb5 cql-vector2 cassandra.rampup host=localhost localdc=datacenter1 dimensions=100 trainsize=1000000 dataset=glove-100-angular rate=10000
-    rampup: run tags='block:rampup' threads=auto cycles=TEMPLATE(trainsize,set-the-trainsize) errors=counter,warn
+    rampup: run tags='block:rampup' threads=auto cycles=TEMPLATE(trainsize,set-the-trainsize) errors=counter,warn context=cassandra
     # nb5 cql-vector2 cassandra.search_and_index testsize=10000 host=localhost localdc=datacenter1 dimensions=100 dataset=glove-100-angular --report-csv-to rmetrics:.*:5s
     read_recall: >-
       run alias=search_and_index tags='block:search_and_index,optype=select' labels='target:cassandra'

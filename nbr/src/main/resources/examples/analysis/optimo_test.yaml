@@ -1,0 +1,13 @@
+# generalize startup of SC_optimo (take out the hard-wired bits)
+# review names of components and align for least confusion
+scenarios:
+  # make NBCLIScenarioParser auto-inject scenario name as context= for each unqualified command
+  # distinctions: commands are stateless outside of their invocations. commands may have ephemeral state while they are running.
+  # Any last state effects from a command are manifested as changes to components, like changes to an activity, threads, etc.
+  # contexts are state. Parameters go with contexts to qualify how a command behaves.
+  analyze:
+    flywheel: 'start driver=diag op="log: level=info" cycles=1M rate=10'
+    # allow the second form
+    optimo: java a.b.c.d.SC_optimo activity=startup
+    optimo2: optimo activity=startup
+

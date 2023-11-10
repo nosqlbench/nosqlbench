@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario.execution;
+package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
-public class ScenarioShutdownHook extends Thread {
+import io.nosqlbench.components.NBComponent;
 
-    private final NBCommand scenario;
+import java.io.PrintWriter;
+import java.io.Reader;
 
-    public ScenarioShutdownHook(NBCommand scenario) {
-        this.scenario = scenario;
+public interface NBCommandContext extends NBComponent {
+//    ScenarioPhaseParams params();
+
+    ScenarioActivitiesController controller();
+
+    PrintWriter out();
+
+    PrintWriter err();
+
+    Reader in();
+
+    public static ContextBuilderFacets.WantsName builder() {
+        return new NBScenarioContextBuilder();
     }
 
-    @Override
-    public void run() {
-        scenario.finish();
-    }
+
 
 }

@@ -16,32 +16,37 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBScenarioContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
 
 import javax.script.SimpleScriptContext;
 import java.io.Reader;
 import java.io.Writer;
 
 public class BufferedScriptContext extends SimpleScriptContext {
-    private final NBScenarioContext fixtures;
 
-    public BufferedScriptContext(NBScenarioContext fixtures) {
-        this.fixtures = fixtures;
+    Reader reader;
+    Writer writer;
+    Writer errorWriter;
+
+    public BufferedScriptContext(Writer writer, Writer errorWriter,Reader reader) {
+        this.writer = writer;
+        this.errorWriter = errorWriter;
+        this.reader = reader;
     }
 
     @Override
     public Reader getReader() { // stdin
-        return fixtures.in();
+        return this.reader;
     }
 
     @Override
     public Writer getWriter() { // stdout
-        return fixtures.out();
+        return this.writer;
     }
 
     @Override
     public Writer getErrorWriter() { // stderr
-        return fixtures.err();
+        return this.errorWriter;
     }
 
 }

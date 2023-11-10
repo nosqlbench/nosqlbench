@@ -26,11 +26,11 @@ import io.nosqlbench.components.decorators.NBTokenWords;
 import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.core.clientload.*;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedScenarioContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBScenarioContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioPhaseParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenarioPhase;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenarioPhaseResult;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,7 +49,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
     private final String sessionName;
     private final ClientSystemMetricChecker clientMetricChecker;
 
-    private final Map<String, NBBufferedScenarioContext> contexts = new ConcurrentHashMap<>();
+    private final Map<String, NBBufferedCommandContext> contexts = new ConcurrentHashMap<>();
 
     public enum STATUS {
         OK,
@@ -57,10 +57,10 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         ERROR
     }
 
-    private NBBufferedScenarioContext getContext(String name) {
+    private NBBufferedCommandContext getContext(String name) {
         return contexts.computeIfAbsent(
             name,
-            n -> NBScenarioContext.builder().name(n).build(this)
+            n -> NBCommandContext.builder().name(n).build(this)
         );
     }
 
@@ -96,29 +96,29 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
      * @return
      */
     public ExecutionResult apply(List<Cmd> cmds) {
-        List<NBPhaseAssembly.PhaseInvocation> phases = NBPhaseAssembly.preparePhases(cmds, this, this::getContext);
+        List<NBCommandAssembly.CommandInvocation> phases = NBCommandAssembly.preparePhases(cmds, this, this::getContext);
         ResultCollector collector = new ResultCollector();
         try (ResultContext results = new ResultContext(collector)) {
-            for (NBPhaseAssembly.PhaseInvocation invocation : phases) {
-                NBScenarioPhase phase = invocation.phase();
-                ScenarioPhaseParams params = invocation.params();
-                String targetContext = invocation.targetContext();
+            for (NBCommandAssembly.CommandInvocation invocation : phases) {
+                NBCommand command = invocation.command();
+                NBCommandParams params = invocation.params();
+                String targetContext = invocation.contextName();
 
-                NBBufferedScenarioContext context = getContext(targetContext);
-                ScenarioPhaseResult result = null;
+                NBBufferedCommandContext context = getContext(targetContext);
+                NBCommandResult result = null;
                 try {
-                    result = phase.apply(context, params);
+                    result = command.apply(context, params);
                     results.apply(result);
                 } catch (Exception e) {
                     results.error(e);
-                    for (NBBufferedScenarioContext value : contexts.values()) {
+                    for (NBBufferedCommandContext value : contexts.values()) {
                         value.controller().forceStopScenario(10000);
                     }
                 }
             }
 
             for (String ctxName : contexts.keySet()) {
-                NBBufferedScenarioContext ctx = contexts.get(ctxName);
+                NBBufferedCommandContext ctx = contexts.get(ctxName);
                 logger.debug("awaiting end of activities in context '" + ctxName +"':" +
                     ctx.controller().getActivityDefs().stream().map(ActivityDef::getAlias).toList());
                 ctx.controller().awaitCompletion(Long.MAX_VALUE);

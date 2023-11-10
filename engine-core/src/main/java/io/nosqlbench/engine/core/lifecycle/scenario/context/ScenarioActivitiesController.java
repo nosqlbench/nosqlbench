@@ -447,6 +447,16 @@ public class ScenarioActivitiesController extends NBBaseComponent {
 //        ActivityMetrics.reportTo(System.out);
     }
 
+    public Optional<Activity> getSoloActivity() {
+        if (this.getActivityExecutorMap().size()==1) {
+            return Optional.of(activityInfoMap.values().iterator().next().getActivity());
+        }
+        return Optional.empty();
+    }
+    public Optional<Activity> getActivity(String activityName) {
+        return Optional.ofNullable(this.activityInfoMap.get(activityName)).map(ActivityRuntimeInfo::getActivity);
+    }
+
     public List<ProgressMeterDisplay> getProgressMeters() {
         List<ProgressMeterDisplay> indicators = new ArrayList<>();
         for (ActivityRuntimeInfo ae : activityInfoMap.values()) {
