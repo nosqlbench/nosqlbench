@@ -19,12 +19,15 @@ package io.nosqlbench.components;
 
 
 import io.nosqlbench.api.engine.metrics.instruments.NBMetric;
+import io.nosqlbench.api.engine.metrics.reporters.ConsoleReporter;
 import io.nosqlbench.api.labels.NBLabels;
 import io.nosqlbench.components.decorators.NBTokenWords;
+import io.nosqlbench.components.events.ComponentOutOfScope;
 import io.nosqlbench.components.events.NBEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.PrintStream;
 import java.util.*;
 
 public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent, NBTokenWords {
@@ -32,6 +35,8 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     protected final NBComponent parent;
     protected final NBLabels labels;
     private final List<NBComponent> children = new ArrayList<>();
+    private NBMetricsBuffer metricsBuffer = new NBMetricsBuffer();
+    protected boolean bufferOrphanedMetrics = false;
 
     public NBBaseComponent(NBComponent parentComponent) {
         this(parentComponent, NBLabels.forKV());
@@ -101,10 +106,6 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     @Override
     public void beforeDetach() {
         logger.debug("before detach " + description());
-        this.getComponentMetrics().forEach(m -> {
-            logger.debug("reporting metric " + m.toString());
-            reportExecutionMetric(m);
-        });
     }
 
     @Override
@@ -126,13 +127,21 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         }
     }
 
+    /**
+     * This method is called by the engine to report a component going out of scope. The metrics for that component
+     * will bubble up through the component layers and can be buffered for reporting at multiple levels.
+     *
+     * @param m The metric to report
+     */
     public void reportExecutionMetric(NBMetric m) {
+        if (bufferOrphanedMetrics) {
+            metricsBuffer.addSummaryMetric(m);
+        }
         if (parent != null) {
             parent.reportExecutionMetric(m);
-        } else {
-            logger.warn(() -> "Component " + this.toString() + " has a non-session null parent component");
         }
     }
+
 
     /**
      * Override this method in your component implementations when you need to do something
@@ -176,6 +185,14 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
             case DownEvent de -> {
                 for (NBComponent child : children) {
                     child.onEvent(de);
+                }
+            }
+            case ComponentOutOfScope coos -> {
+                for (NBMetric m : this.getComponentMetrics()) {
+                    reportExecutionMetric(m);
+                }
+                if (bufferOrphanedMetrics) {
+                    metricsBuffer.printMetricSummary(this);
                 }
             }
             default -> logger.warn("dropping event " + event);
