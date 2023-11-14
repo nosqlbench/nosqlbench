@@ -16,8 +16,8 @@
 
 package io.nosqlbench.nbr.examples.injavascript;
 
-import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
@@ -62,7 +62,7 @@ public class ScriptExampleTests {
 
         NBComponent root = new TestComponent("exampletest",scriptname);
         NBBufferedCommandContext ctx = NBCommandContext.builder().name(scriptname).build(root);
-        NBScriptedCommand s = NBScriptedCommand.ofScripted(scenarioName,Map.of(),new TestComponent("test","test"), NBScriptedCommand.Invocation.EXECUTE_SCRIPT);
+        NBScriptedCommand s = NBScriptedCommand.ofScripted(scenarioName,Map.of(),ctx, NBScriptedCommand.Invocation.EXECUTE_SCRIPT);
 
         ClassLoader cl = ScriptExampleTests.class.getClassLoader();
         String script;
@@ -79,7 +79,7 @@ public class ScriptExampleTests {
         }
         s.addScriptText(script);
 //        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
-        NBCommandResult result = s.apply(ctx, NBCommandParams.of(paramsMap));
+        NBCommandResult result = s.invokeSafe(ctx, NBCommandParams.of(paramsMap));
         return result;
     }
 

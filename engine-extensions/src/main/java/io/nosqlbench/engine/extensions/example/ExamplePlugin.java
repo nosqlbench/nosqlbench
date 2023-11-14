@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.extensions.example;
 
-import io.nosqlbench.api.extensions.SandboxPlugin;
-import io.nosqlbench.components.NBBaseComponent;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.extensions.SandboxPlugin;
+import io.nosqlbench.nb.api.components.NBBaseComponent;
+import io.nosqlbench.nb.api.components.NBComponent;
 
 public class ExamplePlugin extends NBBaseComponent implements SandboxPlugin {
 

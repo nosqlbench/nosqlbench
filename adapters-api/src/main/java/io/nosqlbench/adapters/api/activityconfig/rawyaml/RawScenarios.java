@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapters.api.activityconfig.rawyaml;
 
-import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.nb.api.errors.BasicError;
 
 import java.util.*;
 

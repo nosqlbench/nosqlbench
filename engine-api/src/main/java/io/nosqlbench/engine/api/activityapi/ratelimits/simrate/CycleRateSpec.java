@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits.simrate;
 
-import io.nosqlbench.api.engine.activityimpl.ParameterMap;
+import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 
 public class CycleRateSpec extends SimRateSpec {
     public CycleRateSpec(double opsPerSec, double burstRatio) {

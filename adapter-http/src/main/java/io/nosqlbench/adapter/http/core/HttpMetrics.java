@@ -17,9 +17,9 @@
 package io.nosqlbench.adapter.http.core;
 
 import com.codahale.metrics.Histogram;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.components.NBComponent;
 
 public class HttpMetrics implements NBLabeledElement {
     private final NBComponent parent;

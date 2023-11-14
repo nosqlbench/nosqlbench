@@ -16,21 +16,23 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
 
 import java.io.PrintWriter;
 import java.io.Reader;
 
 
-public class NB_threadchange extends NBCommand {
-    public NB_threadchange(NBComponent parentComponent, String scenarioName) {
+public class NB_threadchange extends NBBaseCommand {
+    public NB_threadchange(NBBufferedCommandContext parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
-    /** <pre>{@code
+    /**
+     * <pre>{@code
      * scenario.start("driver=diag;alias=threadchange;cycles=0..60000;threads=1;interval=2000;op='noop';rate=1000");
      * activities.threadchange.threads=1;
      * print("threads now " + activities.threadchange.threads);
@@ -43,18 +45,17 @@ public class NB_threadchange extends NBCommand {
      * }</pre>
      */
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
 
-          var activity = controller.start("driver=diag;alias=threadchange;cycles=0..60000;threads=1;interval=2000;op='noop';rate=1000");
-          activity.getActivityDef().setThreads(1);
-          stdout.println("threads now " + activity.getActivityDef().getThreads());
-          stdout.println("waiting 500 ms");
+        var activity = controller.start("driver=diag;alias=threadchange;cycles=0..60000;threads=1;interval=2000;op='noop';rate=1000");
+        activity.getActivityDef().setThreads(1);
+        stdout.println("threads now " + activity.getActivityDef().getThreads());
+        stdout.println("waiting 500 ms");
         controller.waitMillis(500);
 
         activity.getActivityDef().setThreads(5);
-          stdout.println("threads now " + activity.getActivityDef().getThreads());
-          controller.stop("threadchange");
-
-
+        stdout.println("threads now " + activity.getActivityDef().getThreads());
+        controller.stop("threadchange");
+        return null;
     }
 }

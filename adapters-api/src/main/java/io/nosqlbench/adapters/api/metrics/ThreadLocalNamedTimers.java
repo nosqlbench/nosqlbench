@@ -19,7 +19,7 @@ package io.nosqlbench.adapters.api.metrics;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.Timer.Context;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

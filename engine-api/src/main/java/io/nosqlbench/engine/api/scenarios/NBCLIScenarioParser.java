@@ -21,10 +21,10 @@ import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.adapters.api.templating.StrInterpolator;
-import io.nosqlbench.api.content.Content;
-import io.nosqlbench.api.content.NBIO;
-import io.nosqlbench.api.content.NBPathsAPI;
-import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.nb.api.nbio.Content;
+import io.nosqlbench.nb.api.nbio.NBIO;
+import io.nosqlbench.nb.api.nbio.NBPathsAPI;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.engine.cli.Cmd;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -189,6 +189,10 @@ public class NBCLIScenarioParser {
                     buildingCmd.put("alias", "alias=" + WORKLOAD_SCENARIO_STEP);
                 }
 
+                if (!buildingCmd.containsKey("context")) {
+                    buildingCmd.put("context","context="+scenarioName);
+                }
+
                 // TODO: simplify this
                 String alias = buildingCmd.get("alias");
                 String workloadToken = workloadContent.asPath().getFileName().toString();
@@ -198,7 +202,7 @@ public class NBCLIScenarioParser {
                 alias = alias.replaceAll("STEP", sanitize(stepName));
                 alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
                 buildingCmd.put("alias", alias);
-                buildingCmd.put("labels","labels=workload:$"+sanitize(workloadToken));
+                buildingCmd.put("labels","labels=workload:"+sanitize(workloadToken)+",scenario:"+scenarioName);
 
                 logger.debug(() -> "rebuilt command: " + String.join(" ", buildingCmd.values()));
                 buildCmdBuffer.addAll(buildingCmd.values());

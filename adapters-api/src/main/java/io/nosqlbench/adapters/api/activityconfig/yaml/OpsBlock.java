@@ -19,7 +19,7 @@ package io.nosqlbench.adapters.api.activityconfig.yaml;
 import io.nosqlbench.adapters.api.activityconfig.MultiMapLookup;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpDef;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsBlock;
-import io.nosqlbench.api.engine.util.Tagged;
+import io.nosqlbench.nb.api.engine.util.Tagged;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

@@ -36,6 +36,35 @@
 
     <dependencies>
 
+        <!-- from core -->
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mpierce.metrics.reservoir</groupId>
+            <artifactId>hdrhistogram-metrics-reservoir</artifactId>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-graphite</artifactId>
+        </dependency>
+
+        <!-- graalvm -->
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.tools</groupId>
+            <artifactId>profiler</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- ^ from core -->
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nb-api</artifactId>
@@ -124,6 +153,14 @@
     </profiles>
 
     <build>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
@@ -136,8 +173,8 @@
                     <include>log4j2-test.xml</include>
                 </includes>
             </testResource>
-
         </testResources>
+
     </build>
 
 

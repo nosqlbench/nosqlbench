@@ -16,20 +16,21 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 
 
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 
-public class NB_cocycledelay_bursty_backup extends NBCommand {
-    public NB_cocycledelay_bursty_backup(NBComponent parentComponent, String scenarioName) {
+public class NB_cocycledelay_bursty_backup extends NBBaseCommand {
+    public NB_cocycledelay_bursty_backup(NBBufferedCommandContext parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -85,7 +86,7 @@ public class NB_cocycledelay_bursty_backup extends NBCommand {
      * }</pre>
      */
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         var co_cycle_delay_bursty = Map.of(
             "alias", "co_cycle_delay_bursty",
             "driver", "diag",
@@ -149,7 +150,6 @@ public class NB_cocycledelay_bursty_backup extends NBCommand {
         controller.stop(co_cycle_delay_bursty);
 
         stdout.println("stopped activity co_cycle_delay_bursty");
-
-
+        return null;
     }
 }

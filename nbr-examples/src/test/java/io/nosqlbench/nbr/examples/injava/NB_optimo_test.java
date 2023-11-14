@@ -16,20 +16,21 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.api.optimizers.BobyqaOptimizerInstance;
-import io.nosqlbench.api.optimizers.MVResult;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.nb.api.optimizers.BobyqaOptimizerInstance;
+import io.nosqlbench.nb.api.optimizers.MVResult;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 
 
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.function.ToDoubleFunction;
 
-public class NB_optimo_test extends NBCommand {
-    public NB_optimo_test(NBComponent parentComponent, String scenarioName) {
+public class NB_optimo_test extends NBBaseCommand {
+    public NB_optimo_test(NBBufferedCommandContext parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -62,7 +63,7 @@ public class NB_optimo_test extends NBCommand {
      * }</pre>
      */
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         BobyqaOptimizerInstance bobby = create().bobyqaOptimizer();
         bobby.param("pa", 0.0d, 200000.0d);
         bobby.param("pb", 0.0d, 2000000d);
@@ -79,5 +80,6 @@ public class NB_optimo_test extends NBCommand {
         MVResult result = bobby.optimize();
         stdout.println("optimized samples was " + result);
         stdout.println("map of samples was " + result.getMap());
+        return null;
     }
 }

@@ -16,23 +16,18 @@
 
 package io.nosqlbench.adapter.jdbc;
 
-import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterInvalidParamException;
 import io.nosqlbench.adapter.jdbc.opdispensers.JDBCDMLOpDispenser;
 import io.nosqlbench.adapter.jdbc.opdispensers.JDBCDDLOpDispenser;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
-import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.sql.Connection;
-import java.util.function.LongFunction;
 
 public class JDBCOpMapper implements OpMapper<JDBCOp> {
     private final static Logger logger = LogManager.getLogger(JDBCOpMapper.class);

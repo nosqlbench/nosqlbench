@@ -16,17 +16,18 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 
 import java.io.PrintWriter;
 import java.io.Reader;
 
 
-public class NB_readmetrics extends NBCommand {
-    public NB_readmetrics(NBComponent parentComponent, String scenarioName) {
+public class NB_readmetrics extends NBBaseCommand {
+    public NB_readmetrics(NBBufferedCommandContext parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -53,7 +54,7 @@ public class NB_readmetrics extends NBCommand {
      * }</pre>
      */
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
-
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
+        return null;
     }
 }

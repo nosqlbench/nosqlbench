@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapters.api.templating;
 
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import org.apache.commons.text.StrLookup;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.LogManager;

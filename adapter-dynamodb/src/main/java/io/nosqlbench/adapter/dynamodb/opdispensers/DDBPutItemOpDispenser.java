@@ -24,7 +24,7 @@ import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import io.nosqlbench.api.errors.OpConfigError;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.util.Map;
 import java.util.function.LongFunction;

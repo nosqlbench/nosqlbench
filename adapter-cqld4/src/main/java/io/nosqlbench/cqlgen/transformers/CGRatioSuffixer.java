@@ -16,11 +16,11 @@
 
 package io.nosqlbench.cqlgen.transformers;
 
-import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
 import io.nosqlbench.cqlgen.core.CGSchemaStats;
 import io.nosqlbench.cqlgen.model.CqlModel;
 import io.nosqlbench.cqlgen.model.CqlTable;
+import io.nosqlbench.nb.api.config.standard.*;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

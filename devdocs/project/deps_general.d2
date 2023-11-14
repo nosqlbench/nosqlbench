@@ -1,0 +1,68 @@
+direction: right
+classes: {
+ api: {
+  style: {
+   fill: lightblue
+  }
+ }
+}
+classes: {
+ auxapi: {
+  style: {
+   fill: lightgreen
+  }
+ }
+}
+
+
+
+adapters: "Adapter\nImplementations"
+nb5: "NB binary 'nb5'"
+nbr: "NB Runtime 'nbr'"
+engine: "NB Core Engine\nImplementation"
+virtdata: "VirtData Runtime"
+
+coreapi.adapters-api: "Adapters\nAPI"
+coreapi.engine-api: "Engine\nAPI"
+baseapi.nb-api: "NB\nBase Layer\nAPI"
+baseapi.nb-annotations: "NB\nAnnotations"
+virtdata.virtdata-api: "VirtData\nAPI"
+virtdata.virtdata-lang: "VirtData\nGrammars"
+*-api.class: api
+*.*-annotations.class: auxapi
+*.*-lang.class: auxapi
+
+virtdata.virtdata-libs: "VirtData\nFunction\nLibraries"
+
+nb5 -> nbr
+nb5 -> adapters
+adapters -> coreapi.adapters-api
+nbr -> engine
+
+engine -> coreapi.engine-api
+coreapi.adapters-api -> virtdata
+
+coreapi.engine-api -> virtdata
+coreapi.engine-api -> baseapi.nb-api
+coreapi.adapters-api -> baseapi.nb-api
+engine -> coreapi.adapters-api
+virtdata.virtdata-libs -> virtdata.virtdata-api
+virtdata.virtdata-api -> baseapi.nb-api
+
+virtdata {
+ virtdata-lang
+ virtdata-api
+ virtdata-libs
+ virtdata-libs -> virtdata-api
+ virtdata-api -> virtdata-lang
+}
+baseapi {
+ nb-annotations
+ nb-api
+ nb-api -> nb-annotations
+}
+
+coreapi {
+ adapters-api
+ engine-api
+}

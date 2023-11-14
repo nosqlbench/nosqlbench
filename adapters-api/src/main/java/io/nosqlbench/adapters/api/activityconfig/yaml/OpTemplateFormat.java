@@ -17,6 +17,7 @@
 package io.nosqlbench.adapters.api.activityconfig.yaml;
 
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDocList;
+import io.nosqlbench.nb.api.config.params.ParamsParser;
 
 import java.net.URI;
 import java.nio.file.Path;
@@ -45,7 +46,7 @@ public enum OpTemplateFormat {
     jsonnet("jsonnet", "jsonnet5"),
 
     /**
-     * The source is inline, meaning {@link io.nosqlbench.api.config.params.ParamsParser} format.
+     * The source is inline, meaning {@link ParamsParser} format.
      * This is similar to the {@link #stmt} format except that it is parsed for internal op structure.
      * This format is not detectable by source path, and thus can only be used when provided directly
      * from the caller.

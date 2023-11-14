@@ -16,10 +16,10 @@
 
 package io.nosqlbench.api.docsapi.docexporter;
 
-import io.nosqlbench.api.docsapi.BundledMarkdownLoader;
-import io.nosqlbench.api.docsapi.DocsBinder;
-import io.nosqlbench.api.docsapi.DocsNameSpace;
-import io.nosqlbench.api.markdown.aggregator.MutableMarkdown;
+import io.nosqlbench.nb.api.docsapi.BundledMarkdownLoader;
+import io.nosqlbench.nb.api.docsapi.DocsBinder;
+import io.nosqlbench.nb.api.docsapi.DocsNameSpace;
+import io.nosqlbench.nb.api.markdown.aggregator.MutableMarkdown;
 import io.nosqlbench.virtdata.userlibs.apps.docsapp.VirtDataGenDocsApp;
 
 import java.io.File;

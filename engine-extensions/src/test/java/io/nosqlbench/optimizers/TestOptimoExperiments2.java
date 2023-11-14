@@ -16,7 +16,7 @@
 
 package io.nosqlbench.optimizers;
 
-import io.nosqlbench.api.optimizers.MVLogger;
+import io.nosqlbench.nb.api.optimizers.MVLogger;
 import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
 import org.apache.commons.math4.legacy.exception.MathIllegalStateException;
 import org.apache.commons.math4.legacy.optim.*;

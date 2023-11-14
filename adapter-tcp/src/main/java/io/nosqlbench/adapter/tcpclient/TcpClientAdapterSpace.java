@@ -16,12 +16,11 @@
 
 package io.nosqlbench.adapter.tcpclient;
 
-import io.nosqlbench.adapter.tcpserver.TcpServerAdapterSpace;
-import io.nosqlbench.api.config.standard.ConfigModel;
-import io.nosqlbench.api.config.standard.NBConfigModel;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.config.standard.Param;
-import io.nosqlbench.api.engine.util.SSLKsFactory;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.Param;
+import io.nosqlbench.nb.api.engine.util.SSLKsFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

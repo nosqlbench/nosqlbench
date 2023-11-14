@@ -16,8 +16,8 @@
 
 package io.nosqlbench.adapter.http.statuscodes;
 
-import io.nosqlbench.api.content.Content;
-import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.nb.api.nbio.Content;
+import io.nosqlbench.nb.api.nbio.NBIO;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;

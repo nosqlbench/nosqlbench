@@ -16,24 +16,16 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
-import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
-import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.api.config.standard.NBConfigModel;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.config.standard.NBReconfigurable;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
-import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class StandardActivityType<A extends StandardActivity<?,?>> implements ActivityType<A> {
 

@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.api.content.Content;
-import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.nb.api.nbio.Content;
+import io.nosqlbench.nb.api.nbio.NBIO;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

@@ -16,18 +16,19 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 
 
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 
-public class NB_await_finished extends NBCommand {
-    public NB_await_finished(NBComponent parentComponent, String scenarioName) {
+public class NB_await_finished extends NBBaseCommand {
+    public NB_await_finished(NBBufferedCommandContext parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -49,7 +50,7 @@ public class NB_await_finished extends NBCommand {
      * }</pre>
      */
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         var activitydef1 = Map.of(
             "alias", "activity_to_await",
             "driver", "diag",
@@ -62,5 +63,6 @@ public class NB_await_finished extends NBCommand {
         controller.start(activitydef1);
         controller.awaitActivity("activity_to_await",1000L);
         stdout.println("awaited activity");
+        return null;
     }
 }

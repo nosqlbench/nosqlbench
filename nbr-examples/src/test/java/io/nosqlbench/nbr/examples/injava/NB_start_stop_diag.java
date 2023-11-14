@@ -16,18 +16,19 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 
 
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 
-public class NB_start_stop_diag extends NBCommand {
-    public NB_start_stop_diag(NBComponent parentComponent, String scenarioName) {
+public class NB_start_stop_diag extends NBBaseCommand {
+    public NB_start_stop_diag(NBBufferedCommandContext parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -57,7 +58,7 @@ public class NB_start_stop_diag extends NBCommand {
      * }</pre>
      */
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
 
         var activitydef = Map.of(
             "alias" , "teststartstopdiag",
@@ -78,6 +79,6 @@ public class NB_start_stop_diag extends NBCommand {
         controller.stop(activitydef);
 
         stdout.println("stopped activity teststartstopdiag");
-
+        return null;
     }
 }

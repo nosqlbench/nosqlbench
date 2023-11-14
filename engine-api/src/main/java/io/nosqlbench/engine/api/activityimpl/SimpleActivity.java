@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
-import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.components.NBBaseComponent;
-import io.nosqlbench.components.events.ParamChange;
+import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.NBBaseComponent;
+import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
@@ -31,11 +31,11 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.errors.BasicError;
-import io.nosqlbench.api.errors.OpConfigError;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;

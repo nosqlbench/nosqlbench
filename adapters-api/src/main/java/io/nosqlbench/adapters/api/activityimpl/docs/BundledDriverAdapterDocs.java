@@ -19,12 +19,12 @@ package io.nosqlbench.adapters.api.activityimpl.docs;
 import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.api.docsapi.BundledMarkdownManifest;
-import io.nosqlbench.api.docsapi.Docs;
-import io.nosqlbench.api.docsapi.DocsBinder;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.spi.SimpleServiceLoader;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.docsapi.BundledMarkdownManifest;
+import io.nosqlbench.nb.api.docsapi.Docs;
+import io.nosqlbench.nb.api.docsapi.DocsBinder;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
 

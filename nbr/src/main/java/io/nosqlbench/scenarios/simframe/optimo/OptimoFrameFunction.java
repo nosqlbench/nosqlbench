@@ -17,7 +17,8 @@
 package io.nosqlbench.scenarios.simframe.optimo;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
+import io.nosqlbench.engine.api.activityapi.core.RunState;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
@@ -28,10 +29,10 @@ public class OptimoFrameFunction implements SimFrameFunction {
     private final SimFrameCapture capture;
     private final SimFrameJournal<OptimoFrameParams> journal;
     private final OptimoSearchSettings settings;
-    private final ScenarioActivitiesController controller;
+    private final ContextActivitiesController controller;
 
     public OptimoFrameFunction(
-        ScenarioActivitiesController controller,
+        ContextActivitiesController controller,
         OptimoSearchSettings settings,
         Activity flywheel,
         SimFrameCapture capture,
@@ -58,6 +59,10 @@ public class OptimoFrameFunction implements SimFrameFunction {
         capture.stopWindow();
         journal.record(params,capture.last());
         System.out.println(journal.last());
+        if (flywheel.getRunStateTally().tallyFor(RunState.Running)==0) {
+            System.out.println("state:" + flywheel.getRunState());
+            throw new RuntimeException("Early exit of flywheel activity '" + flywheel.getAlias() + "'. Can't continue.");
+        }
         return journal.last().value();
     }
 }

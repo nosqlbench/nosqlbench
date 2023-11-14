@@ -16,17 +16,18 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 
-public class NB_linkedinput extends NBCommand {
-    public NB_linkedinput(NBComponent parentComponent, String scenarioName) {
+public class NB_linkedinput extends NBBaseCommand {
+    public NB_linkedinput(NBBufferedCommandContext parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -60,7 +61,7 @@ public class NB_linkedinput extends NBCommand {
      * }</pre>
      */
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
     var leader = Map.of(
             "driver", "diag",
             "alias", "leader",
@@ -85,7 +86,7 @@ public class NB_linkedinput extends NBCommand {
         stdout.println("stopped leader");
         controller.stop(follower);
         stdout.println("stopped follower");
-
+        return null;
     }
 
 }

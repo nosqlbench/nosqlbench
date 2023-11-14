@@ -1,0 +1,167 @@
+direction: right
+
+adapter {
+ grid-rows: 4
+ amqp
+ cqld4
+ diag
+ dynamodb
+ http
+ jdbc
+ kafka
+ mongodb
+ pinecone
+ pulsar
+ s4j
+ stdout
+ tcp
+}
+
+nb5 {
+ nb5 {
+  tooltip: The main executable for the NoSQLBench project
+  shape: circle
+ }
+ proof {
+  tooltip: Integrated tests for the main artifact which exercises the bundled workloads
+ }
+ "nb5.jar" {
+   shape: circle
+ }
+ proof -> nb5
+ nb5 -> "nb5.jar"
+ nb5 -> JDK
+}
+
+nb {
+ spectest
+ annotations
+ api {
+  style.fill: yellow
+ }
+}
+
+nbr {
+ nbr
+ examples
+}
+
+
+engine {
+ docker
+ api {
+      style.fill: yellow
+ }
+ cli
+ core
+ clients
+ extensions
+}
+
+virtdata {
+ api {
+      style.fill: yellow
+     }
+ lang
+ lib-basics
+ lib-curves4
+ lib-hdf5
+ lib-random
+ lib-realer
+ realdata
+ userlibs
+}
+
+adapters {
+ api  {
+       style.fill: yellow
+      }
+}
+adapter -> adapters.api
+docsys -> nb.api
+(docsys -> nb.api)[0].style.stroke: darkblue
+(docsys -> nb.api)[0].style.stroke-width: 5
+engine.api -> nb.api
+engine.api -> adapters.api
+engine.api -> nb.spectest
+engine.api -> nb.annotations
+engine.api -> virtdata.userlibs
+engine.cli -> engine.core
+engine.cli -> nb.annotations
+engine.clients -> nb.api
+engine.core -> engine.api
+engine.extensions -> engine.api
+adapters.api -> nb.annotations
+adapters.api -> nb.spectest
+adapters.api -> nb.api
+adapters.api -> virtdata.userlibs
+
+mvn.defaults
+
+nb {
+ annotations
+ api {
+      grid-rows: 3
+      style.fill: lightblue
+      tags
+      metrics
+      SSL
+      labels
+      errors
+      components
+      events
+      logging
+      service loading
+      shutdown hooks
+      env vars
+      addins conversions
+      annotations docs
+      app bundling
+      config NBIO
+     }
+ spectest
+ api -> annotations
+}
+
+nbr {
+ nbr
+ examples
+}
+
+virtdata {
+ api {
+      style.fill: yellow
+     }
+ lang
+ lib-basics -> api
+ lib-hdf5 -> lib-basics
+ lib-curves4 -> lib-basics
+ lib-realer -> lib-basics
+# lib-curves4 -> api
+ lib-random
+ lib-random -> lib-basics
+ realdata -> api
+ api -> lang
+ userlibs -> realdata
+ userlibs -> lib-realer
+ userlibs -> api
+ userlibs -> lib-random
+ userlibs -> lib-basics
+ userlibs -> lib-curves4
+ userlibs -> lib-hdf5
+
+}
+virtdata.api -> nb.api
+
+nbr.nbr -> engine.core
+nbr.nbr -> engine.cli
+nbr.nbr -> engine.extensions
+# nbr.nbr -> adapter.diag
+nbr.nbr -> engine.clients
+nbr.examples -> nbr.nbr
+
+
+
+nb5.nb5 -> nbr.nbr
+nb5.nb5 -> adapter
+

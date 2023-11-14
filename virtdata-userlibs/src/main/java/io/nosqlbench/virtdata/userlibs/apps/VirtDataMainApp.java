@@ -16,7 +16,7 @@
 
 package io.nosqlbench.virtdata.userlibs.apps;
 
-import io.nosqlbench.api.apps.BundledApp;
+import io.nosqlbench.nb.api.apps.BundledApp;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.userlibs.apps.diagnoseapp.VirtDataDiagnoseApp;
 import io.nosqlbench.virtdata.userlibs.apps.valuechecker.VirtDataCheckPerfApp;

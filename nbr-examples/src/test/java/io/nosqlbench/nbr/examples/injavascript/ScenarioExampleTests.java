@@ -16,9 +16,9 @@
 
 package io.nosqlbench.nbr.examples.injavascript;
 
-import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.api.content.Content;
-import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.nb.api.nbio.Content;
+import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.engine.cli.Cmd;
 import io.nosqlbench.engine.cli.NBCLIOptions;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;

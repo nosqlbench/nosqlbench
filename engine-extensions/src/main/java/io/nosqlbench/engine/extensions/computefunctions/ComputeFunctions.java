@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.extensions.computefunctions;
 
-import io.nosqlbench.components.NBBaseComponent;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.components.NBBaseComponent;
+import io.nosqlbench.nb.api.components.NBComponent;
 
 import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;

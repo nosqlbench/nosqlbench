@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.errorhandling.modular.handlers;
 
-import io.nosqlbench.api.errors.ResultMismatchError;
+import io.nosqlbench.nb.api.errors.ResultMismatchError;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.metrics.ExceptionExpectedResultVerificationMetrics;

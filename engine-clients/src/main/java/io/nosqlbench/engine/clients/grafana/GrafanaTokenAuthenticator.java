@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.clients.grafana;
 
-import io.nosqlbench.api.apps.BundledApp;
-import io.nosqlbench.api.system.NBEnvironment;
+import io.nosqlbench.nb.api.apps.BundledApp;
+import io.nosqlbench.nb.api.system.NBEnvironment;
 import picocli.CommandLine;
 
 //@Service(value = BundledApp.class,selector = "grafana-apikey")

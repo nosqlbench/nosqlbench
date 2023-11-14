@@ -16,17 +16,18 @@
 
 package io.nosqlbench.scenarios.simframe.findmax;
 
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
-import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.components.events.ParamChange;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
+import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
@@ -58,16 +59,16 @@ import java.util.Map;
  *
  * <P>This can be tested as <PRE>{@code nb5 --show-stacktraces java io.nosqlbench.scenarios.findmax.SC_findmax threads=36}</PRE></P>
  */
-@Service(value = NBCommand.class,selector = "findmax")
-public class NB_findmax extends NBCommand {
+@Service(value = NBBaseCommand.class,selector = "findmax")
+public class NB_findmax extends NBBaseCommand {
     private final static Logger logger = LogManager.getLogger(NB_findmax.class);
 
-    public NB_findmax(NBComponent parentComponent, String scenarioName, String context) {
+    public NB_findmax(NBBufferedCommandContext parentComponent, String scenarioName, String context) {
         super(parentComponent, scenarioName, context);
     }
 
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         // TODO: having "scenario" here as well as in "named scenario" in workload templates is confusing. Make this clearer.
         String workload = params.getOrDefault("workload", "default_workload");
         CycleRateSpec ratespec = new CycleRateSpec(100.0, 1.05);
@@ -115,6 +116,7 @@ public class NB_findmax extends NBCommand {
         stdout.println("bestrun:\n" + journal.bestRun());
 
         // could be a better result if the range is arbitrarily limiting the parameter space.
+        return null;
     }
 
     private SimFrameCapture perfValueMeasures(Activity activity) {

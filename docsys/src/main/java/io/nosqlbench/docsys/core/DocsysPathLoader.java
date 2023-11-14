@@ -16,9 +16,9 @@
 
 package io.nosqlbench.docsys.core;
 
-import io.nosqlbench.api.docsapi.Docs;
-import io.nosqlbench.api.docsapi.DocsBinder;
-import io.nosqlbench.api.docsapi.DocsNameSpaceImpl;
+import io.nosqlbench.nb.api.docsapi.Docs;
+import io.nosqlbench.nb.api.docsapi.DocsBinder;
+import io.nosqlbench.nb.api.docsapi.DocsNameSpaceImpl;
 import io.nosqlbench.docsys.api.DocsysDynamicManifest;
 import io.nosqlbench.docsys.api.DocsysStaticManifest;
 

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits.simrate;
 
-import io.nosqlbench.api.engine.activityimpl.ParameterMap;
+import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 
 public class StrideRateSpec extends SimRateSpec {
     public StrideRateSpec(double opsPerSec, double burstRatio) {

@@ -16,9 +16,8 @@
 
 package io.nosqlbench.engine.api.activityimpl.input;
 
-import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import org.junit.jupiter.api.Test;
 

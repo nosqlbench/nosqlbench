@@ -18,7 +18,7 @@ package io.nosqlbench.adapters.api.activityconfig.yaml;
 
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsBlock;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDoc;
-import io.nosqlbench.api.engine.util.Tagged;
+import io.nosqlbench.nb.api.engine.util.Tagged;
 
 import java.util.ArrayList;
 import java.util.Iterator;

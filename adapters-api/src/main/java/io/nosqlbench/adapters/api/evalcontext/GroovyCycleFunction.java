@@ -20,8 +20,8 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.BundledExtensions;
+import io.nosqlbench.nb.api.extensions.ScriptingExtensionPluginInfo;
+import io.nosqlbench.nb.api.loaders.BundledExtensionsLoader;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
@@ -75,7 +75,7 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
     }
 
     private void addServices() {
-        for (final ScriptingExtensionPluginInfo<?> extensionDescriptor : BundledExtensions.findAll()) {
+        for (final ScriptingExtensionPluginInfo<?> extensionDescriptor : BundledExtensionsLoader.findAll()) {
             staticImports.addAll(extensionDescriptor.autoImportStaticMethodClasses());
             if (!extensionDescriptor.isAutoLoading()) {
                 logger.info(() -> "Not loading " + extensionDescriptor + ", autoloading is false");

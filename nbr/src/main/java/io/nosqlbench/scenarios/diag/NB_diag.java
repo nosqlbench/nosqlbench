@@ -16,28 +16,29 @@
 
 package io.nosqlbench.scenarios.diag;
 
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
 import io.nosqlbench.nb.annotations.Service;
 
 import java.io.PrintWriter;
 import java.io.Reader;
 
-@Service(value = NBCommand.class, selector = "diag")
-public class NB_diag extends NBCommand {
-    public NB_diag(NBComponent parentComponent, String scenarioName, String targetScenario) {
+@Service(value = NBBaseCommand.class, selector = "diag")
+public class NB_diag extends NBBaseCommand {
+    public NB_diag(NBBufferedCommandContext parentComponent, String scenarioName, String targetScenario) {
         super(parentComponent, scenarioName, targetScenario);
     }
 
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         stdout.println("diagnostic scenario writing params to stdout:");
         params.forEach((k, v) -> {
             stdout.println(k + ":" + v);
         });
         stderr.println("diagnostic scenario writing to stderr");
-
+        return null;
     }
 }

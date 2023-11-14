@@ -16,18 +16,19 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 
 
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 
-public class NB_activity_error extends NBCommand {
-    public NB_activity_error(NBComponent parentComponent, String scenarioName) {
+public class NB_activity_error extends NBBaseCommand {
+    public NB_activity_error(NBBufferedCommandContext parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -52,7 +53,7 @@ public class NB_activity_error extends NBCommand {
      * </pre>
      */
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         var activitydef1 = Map.of("alias", "activity_error",
             "driver", "diag",
             "cycles", "0..1500000",
@@ -65,5 +66,6 @@ public class NB_activity_error extends NBCommand {
         controller.waitMillis(500);
         controller.getActivityDef("activity_error").getParams().set("threads","unparsable"); // forced error
         controller.awaitActivity("activity_error", Long.MAX_VALUE);
+        return null;
     }
 }

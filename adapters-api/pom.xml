@@ -36,15 +36,21 @@
 
     <dependencies>
 
+<!--        <dependency>-->
+<!--            <groupId>io.nosqlbench</groupId>-->
+<!--            <artifactId>nb-spectest</artifactId>-->
+<!--            <version>${revision}</version>-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>nb-spectest</artifactId>
+            <artifactId>nb-annotations</artifactId>
             <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>nb-annotations</artifactId>
+            <artifactId>nb-spectest</artifactId>
             <version>${revision}</version>
         </dependency>
 

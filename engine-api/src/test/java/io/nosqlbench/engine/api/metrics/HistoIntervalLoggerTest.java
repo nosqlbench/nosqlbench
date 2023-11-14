@@ -16,11 +16,11 @@
 
 package io.nosqlbench.engine.api.metrics;
 
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
-import io.nosqlbench.api.engine.metrics.HistoIntervalLogger;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
-import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
+import io.nosqlbench.nb.api.engine.metrics.HistoIntervalLogger;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
+import io.nosqlbench.nb.api.components.NBBaseComponent;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogReader;

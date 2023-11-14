@@ -16,20 +16,19 @@
 
 package io.nosqlbench.scenarios.simframe.optimo;
 
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
-import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.components.events.ParamChange;
-import io.nosqlbench.components.events.SetThreads;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
+import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.events.ParamChange;
+import io.nosqlbench.nb.api.components.events.SetThreads;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
-import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.findmax.NB_findmax;
@@ -65,16 +64,15 @@ import java.util.concurrent.locks.LockSupport;
  *          to contain a reasonably representative character of the overall manifold</LI>
  * </OL>
  */
-@Service(value = NBCommand.class, selector = "optimo")
-public class NB_optimo extends NBCommand {
+public class NB_optimo extends NBBaseCommand {
     private final static Logger logger = LogManager.getLogger(NB_findmax.class);
 
-    public NB_optimo(NBComponent parentComponent, String phaseName, String targetScenario) {
+    public NB_optimo(NBBufferedCommandContext parentComponent, String phaseName, String targetScenario) {
         super(parentComponent, phaseName, targetScenario);
     }
 
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         // TODO: having "scenario" here as well as in "named scenario" in workload templates is confusing. Make this clearer.
 
         Optional<String> optionalActivityName = params.maybeGet("activity");
@@ -87,6 +85,7 @@ public class NB_optimo extends NBCommand {
 
         // Start the flywheel at an "idle" speed, even if the user hasn't set it
         flywheel.onEvent(new ParamChange<>(new CycleRateSpec(100.0d, 1.1d, SimRateSpec.Verb.restart)));
+        flywheel.getActivityDef().setEndCycle(Long.MAX_VALUE);
 
         // await flywheel actually spinning, or timeout with error
         NBMetricTimer result_success_timer = flywheel.find().timer("name:result_success");
@@ -140,9 +139,9 @@ public class NB_optimo extends NBCommand {
         }
         stdout.println("result:" + result);
 
-        controller.stop(flywheel);
         stdout.println("bestrun:\n" + journal.bestRun());
 
+        return null;
         // could be a better result if the range is arbitrarily limiting the parameter space.
     }
 
@@ -161,21 +160,22 @@ public class NB_optimo extends NBCommand {
         sampler.addDeltaTime("achieved_oprate", result_timer::getCount, Double.NaN);
         sampler.addDeltaTime("achieved_ok_oprate", result_success_timer::getCount, 1.0);
 
-        sampler.addRemix("achieved_success_ratio", vars -> {
-            // exponentially penalize results which do not attain 100% successful op rate
-            if (vars.get("achieved_oprate") == 0.0d) {
-                return 0d;
-            }
-            double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("achieved_oprate"));
-            return basis;
-//            return Math.pow(basis, 2);
-        });
-        sampler.addRemix("achieved_target_ratio", (vars) -> {
-            // exponentially penalize results which do not attain 100% target rate
-            double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("target_rate"));
-            return basis;
-//            return Math.pow(basis, 2);
-        });
+//        sampler.addRemix("achieved_success_ratio", vars -> {
+//            // exponentially penalize results which do not attain 100% successful op rate
+//            if (vars.get("achieved_oprate") == 0.0d) {
+//                return 0d;
+//            }
+//            double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("achieved_oprate"));
+//            return basis;
+////            return Math.pow(basis, 2);
+//        });
+
+//        sampler.addRemix("achieved_target_ratio", (vars) -> {
+//            // exponentially penalize results which do not attain 100% target rate
+//            double basis = Math.min(1.0d, vars.get("achieved_ok_oprate") / vars.get("target_rate"));
+//            return basis;
+////            return Math.pow(basis, 2);
+//        });
         sampler.addRemix("retries_p99", (vars) -> {
             double triesP99 = tries_histo.getDeltaSnapshot(90).get99thPercentile();
             if (Double.isNaN(triesP99) || Double.isInfinite(triesP99) || triesP99 == 0.0d) {

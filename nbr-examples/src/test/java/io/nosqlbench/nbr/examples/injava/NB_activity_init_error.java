@@ -16,20 +16,21 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
 import io.nosqlbench.nb.annotations.Service;
 
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 
-@Service(value= NBCommand.class,selector="activity_init_error")
-public class NB_activity_init_error extends NBCommand {
-    public NB_activity_init_error(NBComponent parentComponent, String scenarioName) {
+@Service(value= NBBaseCommand.class,selector="activity_init_error")
+public class NB_activity_init_error extends NBBaseCommand {
+    public NB_activity_init_error(NBBufferedCommandContext parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -52,7 +53,7 @@ public class NB_activity_init_error extends NBCommand {
      *
      */
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         var activitydef1 = Map.of(
             "alias","activity_init_error",
             "driver","diag",
@@ -68,6 +69,6 @@ public class NB_activity_init_error extends NBCommand {
         controller.waitMillis(2000);
         controller.awaitActivity("activity_init_error",Long.MAX_VALUE);
         stdout.println("awaited activity");
-
+        return null;
     }
 }

@@ -19,11 +19,11 @@ package io.nosqlbench.engine.api.activityapi.core;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.engine.activityimpl.ParameterMap;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricCounter;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricTimer;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 
 public class ComponentActivityInstrumentation implements ActivityInstrumentation {
 

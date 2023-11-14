@@ -16,10 +16,10 @@
 
 package io.nosqlbench.engine.api.metrics;
 
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.engine.metrics.ConvenientSnapshot;
-import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricHistogram;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.engine.metrics.ConvenientSnapshot;
+import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

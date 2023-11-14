@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -105,10 +105,11 @@ public class NBCLIScenarioParserTest {
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
                 "alias", "with_template",
+                "context", "template_test",
                 "cycles", "20",
                 "cycles-test", "20",
                 "driver", "stdout",
-                "labels","workload:$scenario_test",
+                "labels","workload:scenario_test,scenario:template_test",
                 "workload", "scenario_test"
         ));
     }
@@ -120,9 +121,10 @@ public class NBCLIScenarioParserTest {
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
                 "alias", "schema",
+                "context", "schema_only",
                 "cycles-test", "20",
                 "driver", "stdout",
-                "labels","workload:$scenario_test",
+                "labels","workload:scenario_test,scenario:schema_only",
                 "tags", "block:\"schema.*\"",
                 "workload", "scenario_test"
         ));
@@ -172,9 +174,10 @@ public class NBCLIScenarioParserTest {
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getParams()).isEqualTo(Map.of(
                 "alias", "schema",
+                "context","schema_only",
                 "cycles-test", "20",
                 "driver", "stdout",
-                "labels","workload:$scenario_test",
+                "labels","workload:scenario_test,scenario:schema_only",
                 "tags", "block:\"schema.*\"",
                 "workload", "scenario_test"
         ));

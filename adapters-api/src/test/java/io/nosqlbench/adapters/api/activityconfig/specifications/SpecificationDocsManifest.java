@@ -16,9 +16,9 @@
 
 package io.nosqlbench.adapters.api.activityconfig.specifications;
 
-import io.nosqlbench.api.docsapi.BundledMarkdownManifest;
-import io.nosqlbench.api.docsapi.Docs;
-import io.nosqlbench.api.docsapi.DocsBinder;
+import io.nosqlbench.nb.api.docsapi.BundledMarkdownManifest;
+import io.nosqlbench.nb.api.docsapi.Docs;
+import io.nosqlbench.nb.api.docsapi.DocsBinder;
 
 public class SpecificationDocsManifest implements BundledMarkdownManifest {
     @Override

@@ -16,9 +16,8 @@
 
 package io.nosqlbench.engine.extensions.vectormath;
 
-import com.google.protobuf.Descriptors;
-import io.nosqlbench.components.NBBaseComponent;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.components.NBBaseComponent;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.pinecone.proto.QueryResponse;
 import io.pinecone.proto.ScoredVector;
 

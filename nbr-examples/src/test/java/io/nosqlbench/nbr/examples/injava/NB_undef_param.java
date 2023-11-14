@@ -16,18 +16,19 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 
 
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 
-public class NB_undef_param extends NBCommand {
-    public NB_undef_param(NBComponent parentComponent, String scenarioName) {
+public class NB_undef_param extends NBBaseCommand {
+    public NB_undef_param(NBBufferedCommandContext parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -49,7 +50,7 @@ public class NB_undef_param extends NBCommand {
      * }</pre>
      */
     @Override
-    public void invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ScenarioActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         stdout.println("paramValues from command line:");
         stdout.println(params.toString());
         stdout.println("before: paramValues.get(\"three\"):" + params.get("three"));
@@ -60,5 +61,6 @@ public class NB_undef_param extends NBCommand {
             "three","UNDEF"
         ));
         stdout.println("after overriding with three:UNDEF: paramValues.get(\"three\"):" + params.get("three"));
+        return null;
     }
 }

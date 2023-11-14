@@ -16,7 +16,6 @@
 
 package io.nosqlbench.nb.api.config.standard;
 
-import io.nosqlbench.api.config.standard.Param;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

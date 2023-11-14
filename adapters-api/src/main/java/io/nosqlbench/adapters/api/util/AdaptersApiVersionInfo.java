@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapters.api.util;
 
-import io.nosqlbench.api.errors.OpConfigError;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.io.IOException;
 import java.io.InputStream;
