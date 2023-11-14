@@ -164,13 +164,13 @@ public class NBScriptedCommand extends NBBaseCommand {
                     this.logger.debug("-> invoking main scenario script (compiled)");
                     engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("params",params);
                     resultObject = compiled.eval(this.context);
-                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).remove("params");
+//                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).remove("params");
                     this.logger.debug("<- scenario script completed (compiled)");
                 } else {
                     this.logger.debug("-> invoking main scenario script (interpreted)");
                     engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("params",params);
                     resultObject = engine.eval(script);
-                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).remove("params");
+//                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).remove("params");
                     this.logger.debug("<- scenario control script completed (interpreted)");
                 }
                 return resultObject;

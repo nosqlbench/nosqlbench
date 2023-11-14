@@ -192,6 +192,9 @@ public class NBCLIScenarioParser {
                 if (!buildingCmd.containsKey("context")) {
                     buildingCmd.put("context","context="+scenarioName);
                 }
+                if (!buildingCmd.containsKey("step")) {
+                    buildingCmd.put("step","step="+stepName);
+                }
 
                 // TODO: simplify this
                 String alias = buildingCmd.get("alias");

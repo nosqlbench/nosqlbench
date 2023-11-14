@@ -19,7 +19,6 @@ package io.nosqlbench.engine.core.lifecycle.session;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
@@ -31,9 +30,7 @@ import java.util.Objects;
 
 public class NBCommandInvoker {
     private final static Logger logger = LogManager.getLogger(NBCommandInvoker.class);
-//    public static NBCommandResult invoke(NBInvokableCommand command) {
-//        return invoke(command,NBCommandParams.of(Map.of()));
-//    }
+
     public static NBCommandResult invoke(NBInvokableCommand command, NBCommandParams params) {
         return invoke(createContext(),command,params);
     }

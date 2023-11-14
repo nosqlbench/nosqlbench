@@ -34,13 +34,14 @@ public class Cmd {
     private final static Logger logger = LogManager.getLogger(Cmd.class);
     public static final String DEFAULT_TARGET_CONTEXT = "default";
     private final String targetContextName;
+    private final String stepName;
 
     public String getTargetContext() {
         return targetContextName;
     }
 
-    public Cmd forTargetContext(String contextName) {
-        return new Cmd(cmdType,cmdArgs,contextName);
+    public Cmd forTargetContext(String contextName, String stepName) {
+        return new Cmd(cmdType,cmdArgs,contextName, stepName);
     }
 
     public enum CmdType {
@@ -120,9 +121,10 @@ public class Cmd {
 
     private final CmdType cmdType;
 
-    public Cmd(@NotNull CmdType cmdType, Map<String, String> cmdArgs, String targetContextName) {
+    public Cmd(@NotNull CmdType cmdType, Map<String, String> cmdArgs, String targetContextName, String stepName) {
         this.cmdArgs = cmdArgs;
         this.cmdType = cmdType;
+        this.stepName = stepName;
         this.targetContextName = targetContextName;
     }
 
@@ -130,6 +132,7 @@ public class Cmd {
         this.cmdArgs = cmdArgs;
         this.cmdType = cmdType;
         this.targetContextName = DEFAULT_TARGET_CONTEXT;
+        this.stepName = "no-step";
     }
 
     public CmdType getCmdType() {

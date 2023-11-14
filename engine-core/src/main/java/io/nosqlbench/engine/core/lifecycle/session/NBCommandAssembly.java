@@ -49,7 +49,8 @@ public class NBCommandAssembly {
         for (Cmd cmd : cmds) {
             if (cmd.getParams().containsKey("context")) {
                 String ctx = cmd.getParams().remove("context");
-                tagged.add(cmd.forTargetContext(ctx));
+                String step = cmd.getParams().remove("step");
+                tagged.add(cmd.forTargetContext(ctx, step));
             } else if (cmd.getCmdType() == Cmd.CmdType.context) {
                 contextName = cmd.getArg("context_name");
                 if (contextName.equals(Cmd.DEFAULT_TARGET_CONTEXT)) {
@@ -57,7 +58,7 @@ public class NBCommandAssembly {
                         "This is the default scenario name, and if you are using different scenario names you should pick something that is different and specific.");
                 }
             } else {
-                tagged.add(cmd.forTargetContext(contextName));
+                tagged.add(cmd.forTargetContext(contextName,null));
             }
         }
         return new ArrayList<>(tagged);

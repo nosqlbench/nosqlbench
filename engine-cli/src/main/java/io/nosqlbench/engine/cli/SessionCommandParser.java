@@ -48,7 +48,7 @@ public class SessionCommandParser {
                 Class<? extends NBInvokableCommand> cmdClass = NBCommandLoader.oneExists(word);
                 if (cmdClass!=null) {
                     arglist.removeFirst();
-                    arglist.addFirst(cmdClass.getCanonicalName());
+                    arglist.addFirst(word);
                     arglist.addFirst("java");
                     continue;
                 }

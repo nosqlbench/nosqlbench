@@ -18,7 +18,9 @@ package io.nosqlbench.scenarios.simframe.optimo;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
+import io.nosqlbench.nb.annotations.Service;
 
+@Service(value = NBCommandInfo.class,selector = "optimo")
 public class NBOptimoInfo extends NBCommandInfo {
     @Override
     public Class<? extends NBBaseCommand> getType() {

@@ -37,8 +37,8 @@ public abstract class NBBaseCommand extends NBInvokableCommand {
     private final String targetScenario;
     protected Logger logger = LogManager.getLogger("COMMAND");
 
-    public NBBaseCommand(NBBufferedCommandContext parentComponent, String phaseName, String targetScenario) {
-        super(parentComponent, NBLabels.forKV("command", phaseName));
+    public NBBaseCommand(NBBufferedCommandContext parentComponent, String stepName, String targetScenario) {
+        super(parentComponent, NBLabels.forKV("step", stepName));
         this.targetScenario = targetScenario;
     }
 

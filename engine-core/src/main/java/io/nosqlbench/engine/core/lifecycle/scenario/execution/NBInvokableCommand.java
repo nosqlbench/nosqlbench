@@ -45,10 +45,10 @@ public abstract class NBInvokableCommand extends NBBaseComponent implements BiFu
         try {
             logger.debug("invoking command: " + this);
             resultObject=apply(context, params);
-            logger.debug("cmd produced:" + (resultObject==null ? "NULL" : resultObject.toString()));
+            logger.debug("cmd produced: " + (resultObject==null ? "NULL" : resultObject.toString()));
         } catch (Exception e) {
-            logger.error("cmd error:" + (resultObject==null ? "NULL" : Objects.requireNonNull(resultObject).toString()));
             exception = e;
+            logger.error("error in command " + this.description() + ": " + exception);
         } finally {
             long endAt = System.currentTimeMillis();
             result = new NBCommandResult(context, startAt, endAt, exception);
