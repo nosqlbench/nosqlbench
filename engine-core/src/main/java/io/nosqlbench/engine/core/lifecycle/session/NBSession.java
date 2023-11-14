@@ -115,6 +115,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
                 NBCLIErrorHandler.handle(exception, true);
                 System.err.println(exception.getMessage()); // TODO: make this consistent with ConsoleLogging sequencing
             }
+            metricsBuffer.printMetricSummary(this);
             results.output(scenariosResults.getExecutionSummary());
             results.ok();
         }

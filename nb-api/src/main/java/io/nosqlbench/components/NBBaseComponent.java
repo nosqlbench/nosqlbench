@@ -35,7 +35,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     protected final NBComponent parent;
     protected final NBLabels labels;
     private final List<NBComponent> children = new ArrayList<>();
-    private NBMetricsBuffer metricsBuffer = new NBMetricsBuffer();
+    protected NBMetricsBuffer metricsBuffer = new NBMetricsBuffer();
     protected boolean bufferOrphanedMetrics = false;
 
     public NBBaseComponent(NBComponent parentComponent) {
