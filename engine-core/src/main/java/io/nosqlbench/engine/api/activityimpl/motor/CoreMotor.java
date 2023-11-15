@@ -221,113 +221,114 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
             // Reviewer Note: This separate of code paths was used to avoid impacting the
             // previously logic for the SyncAction type. It may be consolidated later once
             // the async action is proven durable
-            if (action instanceof AsyncAction) {
+//            if (action instanceof AsyncAction) {
+//
+//                @SuppressWarnings("unchecked")
+//                AsyncAction<D> async = (AsyncAction) action;
+//
+//                opTracker = new OpTrackerImpl<>(activity, slotId);
+//                opTracker.setCycleOpFunction(async.getOpInitFunction());
+//
+//                StrideOutputConsumer<D> strideconsumer = null;
+//                if (action instanceof StrideOutputConsumer) {
+//                    strideconsumer = (StrideOutputConsumer<D>) async;
+//                }
+//
+//                motorState.enterState(Running);
+//                while (motorState.get() == Running) {
+//
+//                    CycleSegment cycleSegment = null;
+//
+//                    try (Timer.Context inputTime = inputTimer.time()) {
+//                        cycleSegment = input.getInputSegment(stride);
+//                    }
+//
+//                    if (cycleSegment == null) {
+//                        logger.trace(() -> "input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
+//                        motorState.enterState(Finished);
+//                        continue;
+//                    }
+//
+//                    if (strideRateLimiter != null) {
+//                        // block for strides rate limiter
+//                        strideDelay = strideRateLimiter.block();
+//                    }
+//
+//                    StrideTracker<D> strideTracker = new StrideTracker<>(
+//                        strideServiceTimer,
+//                        stridesResponseTimer,
+//                        strideDelay,
+//                        cycleSegment.peekNextCycle(),
+//                        stride,
+//                        output,
+//                        strideconsumer);
+//                    strideTracker.start();
+//
+//                    long strideStart = System.nanoTime();
+//
+//                    while (!cycleSegment.isExhausted() && motorState.get() == Running) {
+//                        long cyclenum = cycleSegment.nextCycle();
+//                        if (cyclenum < 0) {
+//                            if (cycleSegment.isExhausted()) {
+//                                logger.trace(() -> "input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
+//                                motorState.enterState(Finished);
+//                                continue;
+//                            }
+//                        }
+//
+//                        if (motorState.get() != Running) {
+//                            logger.trace(()->"motor stopped in cycle " + cyclenum + ", stopping motor thread " + slotId);
+//                            continue;
+//                        }
+//
+//                        if (cycleRateLimiter != null) {
+//                            // Block for cycle rate limiter
+//                            cycleDelay = cycleRateLimiter.block();
+//                        }
+//
+//                        try {
+//                            TrackedOp<D> op = opTracker.newOp(cyclenum, strideTracker);
+//                            op.setWaitTime(cycleDelay);
+//
+//                            synchronized (opTracker) {
+//                                while (opTracker.isFull()) {
+//                                    try {
+//                                        logger.trace(() -> "Blocking for enqueue with (" + opTracker.getPendingOps() + "/" + opTracker.getMaxPendingOps() + ") queued ops");
+//                                        optrackerBlockCounter.inc();
+//                                        opTracker.wait(10000);
+//                                    } catch (InterruptedException ignored) {
+//                                    }
+//                                }
+//                            }
+//
+//                            async.enqueue(op);
+//
+//                        } catch (Exception t) {
+//                            logger.error(()->"Error while processing async cycle " + cyclenum + ", error:" + t);
+//                            throw t;
+//                        }
+//                    }
+//
+//
+//                }
+//
+//                if (motorState.get() == Finished) {
+//                    boolean finished = opTracker.awaitCompletion(60000);
+//                    if (finished) {
+//                        logger.debug(() -> "slot " + this.slotId + " completed successfully");
+//                    } else {
+//                        logger.warn(() -> "slot " + this.slotId + " was stopped before completing successfully");
+//                    }
+//                }
+//
+//                if (motorState.get() == Stopping) {
+//                    motorState.enterState(Stopped);
+//                }
+//
+//
+//            } else if (action instanceof SyncAction sync) {
 
-                @SuppressWarnings("unchecked")
-                AsyncAction<D> async = (AsyncAction) action;
-
-                opTracker = new OpTrackerImpl<>(activity, slotId);
-                opTracker.setCycleOpFunction(async.getOpInitFunction());
-
-                StrideOutputConsumer<D> strideconsumer = null;
-                if (action instanceof StrideOutputConsumer) {
-                    strideconsumer = (StrideOutputConsumer<D>) async;
-                }
-
-                motorState.enterState(Running);
-                while (motorState.get() == Running) {
-
-                    CycleSegment cycleSegment = null;
-
-                    try (Timer.Context inputTime = inputTimer.time()) {
-                        cycleSegment = input.getInputSegment(stride);
-                    }
-
-                    if (cycleSegment == null) {
-                        logger.trace(() -> "input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
-                        motorState.enterState(Finished);
-                        continue;
-                    }
-
-                    if (strideRateLimiter != null) {
-                        // block for strides rate limiter
-                        strideDelay = strideRateLimiter.block();
-                    }
-
-                    StrideTracker<D> strideTracker = new StrideTracker<>(
-                        strideServiceTimer,
-                        stridesResponseTimer,
-                        strideDelay,
-                        cycleSegment.peekNextCycle(),
-                        stride,
-                        output,
-                        strideconsumer);
-                    strideTracker.start();
-
-                    long strideStart = System.nanoTime();
-
-                    while (!cycleSegment.isExhausted() && motorState.get() == Running) {
-                        long cyclenum = cycleSegment.nextCycle();
-                        if (cyclenum < 0) {
-                            if (cycleSegment.isExhausted()) {
-                                logger.trace(() -> "input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
-                                motorState.enterState(Finished);
-                                continue;
-                            }
-                        }
-
-                        if (motorState.get() != Running) {
-                            logger.trace(()->"motor stopped in cycle " + cyclenum + ", stopping motor thread " + slotId);
-                            continue;
-                        }
-
-                        if (cycleRateLimiter != null) {
-                            // Block for cycle rate limiter
-                            cycleDelay = cycleRateLimiter.block();
-                        }
-
-                        try {
-                            TrackedOp<D> op = opTracker.newOp(cyclenum, strideTracker);
-                            op.setWaitTime(cycleDelay);
-
-                            synchronized (opTracker) {
-                                while (opTracker.isFull()) {
-                                    try {
-                                        logger.trace(() -> "Blocking for enqueue with (" + opTracker.getPendingOps() + "/" + opTracker.getMaxPendingOps() + ") queued ops");
-                                        optrackerBlockCounter.inc();
-                                        opTracker.wait(10000);
-                                    } catch (InterruptedException ignored) {
-                                    }
-                                }
-                            }
-
-                            async.enqueue(op);
-
-                        } catch (Exception t) {
-                            logger.error(()->"Error while processing async cycle " + cyclenum + ", error:" + t);
-                            throw t;
-                        }
-                    }
-
-
-                }
-
-                if (motorState.get() == Finished) {
-                    boolean finished = opTracker.awaitCompletion(60000);
-                    if (finished) {
-                        logger.debug(() -> "slot " + this.slotId + " completed successfully");
-                    } else {
-                        logger.warn(() -> "slot " + this.slotId + " was stopped before completing successfully");
-                    }
-                }
-
-                if (motorState.get() == Stopping) {
-                    motorState.enterState(Stopped);
-                }
-
-
-            } else if (action instanceof SyncAction sync) {
-
+            if (action instanceof SyncAction sync) {
                 cycleServiceTimer = activity.getInstrumentation().getOrCreateCyclesServiceTimer();
                 strideServiceTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
 
