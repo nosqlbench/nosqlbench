@@ -17,6 +17,7 @@
 package io.nosqlbench.adapters.api.activityconfig.rawyaml;
 
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -108,6 +109,9 @@ public class RawOpFields extends Tags {
                     for (Object bkey : bindingsMap.keySet()) {
                         Object bval = bindingsMap.get(bkey);
                         if (bval != null) {
+                            if (bkey==null) {
+                                throw new OpConfigError("can't configure an op field with a null value: " + bkey);
+                            }
                             bindings.put(bkey.toString(), bval.toString());
                         } else {
                             logger.warn("empty bindings entry for " + bkey);
