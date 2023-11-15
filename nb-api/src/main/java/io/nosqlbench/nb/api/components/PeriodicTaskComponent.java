@@ -73,7 +73,7 @@ public abstract class PeriodicTaskComponent extends NBBaseComponent implements R
                 now = System.currentTimeMillis();
                 waitfor = reportAt - now;
             }
-            logger.info("summarizing metrics to console");
+//            logger.info("summarizing metrics to console");
             try {
                 task();
             } catch (Exception e) {
