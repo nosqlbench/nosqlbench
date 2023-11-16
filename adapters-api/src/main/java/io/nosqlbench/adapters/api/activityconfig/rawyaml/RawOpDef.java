@@ -68,9 +68,9 @@ public class RawOpDef extends RawOpFields {
             String keyName = found.iterator().next();
             Object op = map.remove(keyName);
             if (op instanceof CharSequence s) {
-                if (!keyName.equals("stmt")) {
-                    logger.info("Used implied stmt field under name '" + keyName + "'. You can just use 'stmt: ... "+ s +"' or the equivalent to avoid this warning.");
-                }
+//                if (!keyName.equals("stmt")) {
+//                    logger.info("Used implied stmt field under name '" + keyName + "'. You can just use 'stmt: ... "+ s +"' or the equivalent to avoid this warning.");
+//                }
                 map.put("stmt",s.toString());
 //                setOp(new LinkedHashMap<String,Object>(Map.of("stmt",s.toString())));
             } else {
