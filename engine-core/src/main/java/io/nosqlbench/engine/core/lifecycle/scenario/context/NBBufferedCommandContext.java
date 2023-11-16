@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
 import io.nosqlbench.engine.core.annotation.Annotators;
+import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ContextShutdownHook;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
@@ -37,6 +38,7 @@ public class NBBufferedCommandContext extends NBBaseComponent implements NBComma
 
     private final static Logger logger = LogManager.getLogger(NBBufferedCommandContext.class);
     private final ContextActivitiesController controller;
+    private final ActivitiesProgressIndicator activitiesProgressIndicator;
     private ContextShutdownHook contextShutdownHook;
     private long startedAtMillis;
     private Exception error;
@@ -87,6 +89,8 @@ public class NBBufferedCommandContext extends NBBaseComponent implements NBComma
                 .layer(Layer.Scenario)
                 .build()
         );
+
+        this.activitiesProgressIndicator = new ActivitiesProgressIndicator(this.controller, "console:10s");
     }
 
 
