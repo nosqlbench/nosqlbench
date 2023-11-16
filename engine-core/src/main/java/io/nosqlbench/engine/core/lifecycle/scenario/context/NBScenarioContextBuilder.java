@@ -32,13 +32,12 @@ public class NBScenarioContextBuilder implements ContextBuilderFacets.ALL {
     private PrintWriter err = new PrintWriter(System.err);
     private Reader in = new InputStreamReader(System.in);
     private NBBufferedCommandContext.IOType iotype = NBBufferedCommandContext.IOType.traced;
-    private NBComponent parentComponent;
     private String contextName;
 
 
     public NBScenarioContextBuilder() {}
     public NBBufferedCommandContext build(NBComponent contextParentComponent) {
-        return new NBBufferedCommandContext(parentComponent,contextName,iotype);
+        return new NBBufferedCommandContext(contextParentComponent,contextName,iotype);
     }
 
 
