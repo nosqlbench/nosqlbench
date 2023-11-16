@@ -19,7 +19,6 @@ package io.nosqlbench.adapter.http.apps;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.apps.BundledApp;
 import io.nosqlbench.nb.api.nbio.NBIO;
-import io.nosqlbench.virtdata.core.templates.StringBindingsTemplate;
 import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -52,11 +51,10 @@ public class OpenApiExporter implements BundledApp {
     private final Map<String,Map<String,String>> typeMapById = new LinkedHashMap<>();
 
     private static record Argv(
-        Map<String,String> headers,
+        String infile,
+        String outfile, String baseurl, Map<String,String> headers,
         Set<String> enableMethods,
-        int limit,
-        String baseurl,
-        String outfile
+        int limit
     ) {}
 
     private Argv argv;
@@ -64,8 +62,8 @@ public class OpenApiExporter implements BundledApp {
     @Override
     public int applyAsInt(String[] args) {
         argv = parseArgs(args);
-        String source_spec = NBIO.fs().pathname("source_openapi.yaml").first()
-            .orElseThrow(() -> new RuntimeException("unable to read source_openapi.yaml"))
+        String source_spec = NBIO.fs().pathname(argv.infile).first()
+            .orElseThrow(() -> new RuntimeException("unable to read " + argv.infile))
             .asString();
 
         // PARSE
@@ -115,15 +113,6 @@ public class OpenApiExporter implements BundledApp {
             }
         }
         outstream.println(workloadText);
-//
-//        System.err.println("type map\n");
-//        for (String id : typeMapById.keySet()) {
-//            Map<String, String> entries = typeMapById.get(id);
-//            System.err.println("id: "+id);
-//            for (String varname : entries.keySet()) {
-//                System.err.println(" "+varname+" "+entries.get(varname));
-//            }
-//        }
         return 0;
     }
 
@@ -200,6 +189,7 @@ public class OpenApiExporter implements BundledApp {
         Map<String,String> headers = new LinkedHashMap<>();
         ListIterator<String> iter = argv.listIterator();
         String baseurl = "{baseurl}";
+        String infile = "specify-me.yaml";
         int limit = 0;
         String outfile = null;
         while (iter.hasNext()) {
@@ -219,11 +209,42 @@ public class OpenApiExporter implements BundledApp {
                 limit = Integer.parseInt(iter.next());
             } else if (word.equals("-b")) {
                 baseurl = iter.next();
+            } else if (word.equals("-I")) {
+                infile = iter.next();
             } else if (word.equals("-O")) {
                 outfile = iter.next();
+            } else {
+                System.out.println("""
+                    EXAMPLE:           nb5 openapi-exporter -I myspec.yaml -O myworkload.yaml -b "TEMPLATE(baseurl)"
+
+                    -I <inputfile>     Set the input file for the OpenAPI spec, as in:
+                                       -I myspec.yaml
+
+                    [-O <outputfile>]  Set the output file for the workload, as in:
+                                       -O myworkload.yaml
+                                       If unspecified, the result is printed to stdout.
+
+                    [-m [method]]      Include methods in generated workload. This argument can be specified multiple times, as in:
+                                       -m get -m post
+                                       If unspecified, then all methods are included by default.
+
+                    [-h "<header>"]    Add a header to each request. This can be specified multiple times, as in:
+                                       -h "Authorization: Bearer sometoken" -h "X-Special-Header: I love spicy chicken wings."
+                                       If unspecified, then no additional headers are added beyond those in the spec.
+
+                    [-l <limit> ]      Limit the generated op templates to some number, usually used to test a small scale
+                                       version of the rendered workload before doing the full scale test, as in:
+                                       -l 10
+                                       If unspecified, all operations included in the spec are rendered as op templates.
+
+                    [-b <baseurl> ]    Set the base url which will be used with every request. This is often set to
+                                       a template var form and the specified when the workload is run, as in:
+                                       -b "TEMPLATE(baseurl)" ...
+                                       If unspecified "{baseurl}" is used, which will require a binding to be set for it.
+                    """);
             }
         }
-        return new Argv(headers,enabledMethods, limit, baseurl, outfile);
+        return new Argv(infile, outfile, baseurl, headers,enabledMethods, limit);
     }
 
 //    private Map<String,Object> buildOpBodyTemplate(OpenAPI model, String path, PathItem pathitem, PathItem.HttpMethod method, Operation op) {
@@ -239,20 +260,6 @@ public class OpenApiExporter implements BundledApp {
 //        String urlPath = buildUrlPath(model, path, pathinfo, op);
         // Main Line
         body.append(method.name()).append(" ").append(argv.baseurl()+path).append(" ").append("HTTP/2.0").append("\n");
-
-        //
-//        ApiResponses responses = op.getResponses();
-//        if (responses.size()>1) {
-//            throw new RuntimeException("There are " + responses.size() + " responses, but we're only using the first.");
-//        }
-//        Map.Entry<String, ApiResponse> firstResponse = responses.entrySet().iterator().next();
-//        String code = firstResponse.getKey();
-//        ApiResponse value = firstResponse.getValue();
-//        Map.Entry<String, MediaType> firstContentEntry = value.getContent().entrySet().iterator().next();
-//        String firstContentKey = firstContentEntry.getKey();
-//        MediaType firstMediaType = firstContentEntry.getValue();
-//        Schema responseSchema = getRefOr(model, firstMediaType.getSchema());
-//        body.append("content-type: ").append(firstContentKey).append("\n");
 
         Curl curlData= loadCurlData(op);
         headers.putAll(curlData.headers);
@@ -292,15 +299,6 @@ public class OpenApiExporter implements BundledApp {
             MediaType mediaType = content.get(contentType);
 
             body.append("\n\n").append(bodyTemplate);
-//            Schema schema=getRefOr(model, mediaType.getSchema());
-//            if (schema!=null) {
-//                if (schema.getExamples()!=null) {
-//                    List examples = schema.getExamples();
-//                    for (Object example : examples) {
-//                        System.err.println("example:\n"+example);
-//                    }
-//                }
-//            }
         }
         return body.toString();
     }
@@ -382,42 +380,6 @@ public class OpenApiExporter implements BundledApp {
 
     }
 
-//    private StringBindingsTemplate generateTemplateFromSchema(OpenAPI model, Schema schema) {
-//        String stringTemplate = "";
-//        BindingsTemplate bindingsTemplate =null;
-//
-//        if (schema instanceof ArraySchema as) {
-//
-//        } else if (schema instanceof ObjectSchema os) {
-//            Map<String,Object> struct = new LinkedHashMap<>();
-//
-//            Map<String, Schema> props = os.getProperties();
-//            for (String propName : props.keySet()) {
-//                Schema pval = props.get(propName);
-//                if (pval instanceof ComposedSchema composed) {
-//                    System.out.println(composed);
-//                }
-//            }
-//        } else if (schema instanceof StringSchema str) {
-//
-//        } else {
-//            throw new RuntimeException("Unknown schema type for body template construction, add more support:" + schema);
-//        }
-//
-//
-//        return new StringBindingsTemplate(stringTemplate, bindingsTemplate);
-//
-//    }
-
-//    private String buildUrlPath(OpenAPI model, String path, PathItem pathinfo, Operation op) {
-//        String urlPath = path;
-//        List<Parameter> pathParams = pathinfo.getParameters().stream().filter(p -> p.getIn().equals("path")).toList();
-//        for (Parameter pathParam : pathParams) {
-//            pathParam=getRefOr(model,pathParam);
-//            urlPath.replaceAll("{"+pathParam.getName()+"}",)
-//        }
-//        return urlPath;
-//    }
 
     public static <T> T getRefOr(OpenAPI model, T or) {
         if (or==null) {
@@ -449,14 +411,4 @@ public class OpenApiExporter implements BundledApp {
         };
     }
 
-
-
-    //    private static void dumpYaml(List<OpTemplate> templates) {
-//        DumpSettings settings = DumpSettings.builder().build();
-//        Dump dump = new Dump(settings, new NBYamlRepresenters(settings));
-//        for (OpTemplate template : templates) {
-//            System.out.println(template);
-//            System.out.println(dump.dumpToString(template));
-//        }
-//    }
 }
