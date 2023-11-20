@@ -38,7 +38,7 @@ public abstract class AbstractHdfFileToVectorType {
         int[] sliceDimensions = new int[dims.length];
         sliceDimensions[0] = 1;
         // Do we want to give the option of reducing vector dimensions here?
-        sliceDimensions[1] = dims[1];
+        sliceDimensions[1] = dims.length > 1 ? dims[1] : 1;
         return dataset.getData(sliceOffset, sliceDimensions);
     }
 }
