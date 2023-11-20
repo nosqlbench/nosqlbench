@@ -33,7 +33,7 @@ public class HdfDatasetToStringsTest {
         };
 
         HdfDatasetToStrings hdfFileToVector = new HdfDatasetToStrings(
-            "/Users/mark.wolters/dev/vec/hdf5_test_strings.h5",
+            "src/test/resources/hdf5_test_strings.h5",
             "/strings");
 
         String read;
