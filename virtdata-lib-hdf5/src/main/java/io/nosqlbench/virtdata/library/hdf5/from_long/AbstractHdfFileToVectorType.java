@@ -36,9 +36,10 @@ public abstract class AbstractHdfFileToVectorType {
         long[] sliceOffset = new long[dims.length];
         sliceOffset[0] = (l % dims[0]);
         int[] sliceDimensions = new int[dims.length];
+        // We always want to read a single vector
         sliceDimensions[0] = 1;
-        // Do we want to give the option of reducing vector dimensions here?
-        sliceDimensions[1] = dims.length > 1 ? dims[1] : 1;
+        // Number of elements in the vector
+        sliceDimensions[1] = dims[1];
         return dataset.getData(sliceOffset, sliceDimensions);
     }
 }
