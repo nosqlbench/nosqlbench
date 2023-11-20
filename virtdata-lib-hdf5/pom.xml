@@ -53,6 +53,7 @@
                 <directory>src/test/resources</directory>
                 <excludes>
                     <exclude>h5ex_t_float.h5</exclude>
+                    <exclude>hdf5_test_strings.h5</exclude>
                     <exclude>**/*.ivec</exclude>
                     <exclude>**/*.fvec</exclude>
                 </excludes>
