@@ -20,8 +20,6 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.hdf5.from_long.AbstractHdfFileToVectorType;
-import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGenerator;
-import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGeneratorFactory;
 
 import java.util.function.LongFunction;
 
@@ -43,8 +41,12 @@ public class HdfDatasetToStrings extends AbstractHdfFileToVectorType implements 
         sliceOffset[0] = (l % dims[0]);
         int[] sliceDimensions = new int[dims.length];
         sliceDimensions[0] = 1;
-        sliceDimensions[1] = dims.length > 1 ? dims[1] : 1;
-        return (String) dataset.getData(sliceOffset, sliceDimensions);
+        if (dims.length > 1) {
+            for (int i = 1; i < dims.length; i++) {
+                sliceDimensions[i] = dims[i];
+            }
+        }
+        return ((String[])dataset.getData(sliceOffset, sliceDimensions))[0];
     }
 
 }
