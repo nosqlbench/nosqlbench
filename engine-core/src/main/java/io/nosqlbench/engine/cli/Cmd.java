@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.cli;
 
+import io.nosqlbench.engine.core.lifecycle.session.CmdParser;
 import jakarta.validation.constraints.NotNull;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -54,7 +55,8 @@ public class Cmd {
         await(Arg.of("alias_name")),
         waitMillis(Arg.of("millis_to_wait", Long::parseLong)),
         fragment(Arg.ofFreeform("script_fragment")),
-        context(Arg.ofFreeform("context_name"));
+        context(Arg.ofFreeform("context_name")),
+        indirect(Arg.of("name"));
 
         private final Arg<?>[] positional;
         CmdType(Arg<?>... positional) {
@@ -62,7 +64,7 @@ public class Cmd {
         }
 
         public static boolean anyMatches(String s) {
-            CmdType found = valueOfAnyCase(s);
+            CmdType found = valueOfAnyCaseOrIndirect(s);
             return found!=null;
         }
 
@@ -74,13 +76,13 @@ public class Cmd {
             return names;
         }
 
-        public static CmdType valueOfAnyCase(String cmdname) {
+        public static CmdType valueOfAnyCaseOrIndirect(String cmdname) {
             for (CmdType value : values()) {
                 if (cmdname.equals(value.toString()) || cmdname.equalsIgnoreCase(value.toString())) {
                     return value;
                 }
             }
-            return null;
+            return indirect;
         }
 
         public Arg<?>[] getPositionalArgs() {
@@ -128,11 +130,23 @@ public class Cmd {
         this.targetContextName = targetContextName;
     }
 
-    public Cmd(@NotNull CmdType cmdType, Map<String, String> cmdArgs) {
-        this.cmdArgs = cmdArgs;
+    public Cmd(@NotNull String cmdTypeOrName, Map<String,String> argmap) {
+        this.cmdType = CmdType.valueOfAnyCaseOrIndirect(cmdTypeOrName);
+        this.targetContextName = DEFAULT_TARGET_CONTEXT;
+        this.stepName = "no-step";
+        this.cmdArgs = new LinkedHashMap<>(argmap);
+        if (this.cmdType==CmdType.indirect) {
+            this.cmdArgs.put("_name", cmdTypeOrName);
+        }
+    }
+    public Cmd(@NotNull CmdType cmdType, Map<String, String> cmdArgMap) {
+        this.cmdArgs = new LinkedHashMap<>(cmdArgMap);
         this.cmdType = cmdType;
         this.targetContextName = DEFAULT_TARGET_CONTEXT;
         this.stepName = "no-step";
+        if (cmdType==CmdType.indirect && !cmdArgMap.containsKey("_name")) {
+            throw new RuntimeException("indirect cmd type is invalid without a '_name' parameter.");
+        }
     }
 
     public CmdType getCmdType() {
@@ -146,26 +160,24 @@ public class Cmd {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(cmdType.toString());
-        sb.append("(");
-        if (getParams().size() > cmdType.positional.length) {
-            sb.append(toJSONBlock(getParams(), false));
-        } else {
-            for (String value : getParams().values()) {
-                String trimmed = ((value.startsWith("'") && value.endsWith("'"))
-                        || (value.startsWith("\"")) && value.endsWith("\"")) ?
-                        value.substring(1, value.length() - 1) : value;
-                sb.append("'").append(trimmed).append("'").append(",");
+        getParams().forEach((k,v) -> {
+            String sanitizedValue = v;
+
+            for (char c :v.toCharArray()){
+                if (CmdParser.SYMBOLS.indexOf(c)>=0) {
+                    sanitizedValue = "'" + v +"'";
+                    break;
+                }
             }
-            sb.setLength(sb.length() - 1);
-        }
-        sb.append(");");
+            sb.append(" ").append(k).append("=").append(sanitizedValue);
+        });
         return sb.toString();
     }
 
     public static Cmd parseArg(LinkedList<String> arglist, PathCanonicalizer fixer) {
 
         String cmdName = arglist.removeFirst();
-        CmdType cmdType = CmdType.valueOfAnyCase(cmdName);
+        CmdType cmdType = CmdType.valueOfAnyCaseOrIndirect(cmdName);
 
         Map<String, String> params = new LinkedHashMap<>();
 
@@ -222,7 +234,7 @@ public class Cmd {
         List<String> l = new ArrayList<>();
         for (Map.Entry<String, String> entries : map.entrySet()) {
             String key = entries.getKey();
-            String value = sanitizeQuotes(entries.getValue());
+            String value = removeQuotes(entries.getValue());
             if (oneline) {
                 l.add("'" + key + "':'" + value + "'");
             } else {
@@ -232,7 +244,7 @@ public class Cmd {
         return "{" + (oneline ? "" : "\n") + String.join(",\n", l) + (oneline ? "}" : "\n}");
     }
 
-    private static String sanitizeQuotes(String value) {
+    private static String removeQuotes(String value) {
         if (value.startsWith("'") && value.endsWith("'")) {
             return value.substring(1, value.length() - 1);
         }
