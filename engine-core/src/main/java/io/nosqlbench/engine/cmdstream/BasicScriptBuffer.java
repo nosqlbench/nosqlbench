@@ -47,6 +47,11 @@ public class BasicScriptBuffer implements ScriptBuffer {
         return this.commands;
     }
 
+    public ScriptBuffer add(BasicScriptBuffer buf) {
+        sb.append(buf.getParsedScript());
+        return this;
+    }
+
     public ScriptBuffer add(Cmd cmd) {
         commands.add(cmd);
         Map<String, String> params = cmd.getArgMap();
@@ -155,4 +160,8 @@ public class BasicScriptBuffer implements ScriptBuffer {
     }
 
 
+    public BasicScriptBuffer add(String script) {
+        sb.append(script);
+        return this;
+    }
 }

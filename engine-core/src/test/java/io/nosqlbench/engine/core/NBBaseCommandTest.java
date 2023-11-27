@@ -16,6 +16,9 @@
 
 package io.nosqlbench.engine.core;
 
+import io.nosqlbench.engine.cmdstream.Cmd;
+import io.nosqlbench.engine.cmdstream.CmdArg;
+import io.nosqlbench.engine.cmdstream.CmdParam;
 import io.nosqlbench.engine.core.lifecycle.session.NBCommandInvoker;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
@@ -40,7 +43,9 @@ public class NBBaseCommandTest {
     public void shouldLoadScriptText() {
         NBBufferedCommandContext ctx = NBCommandContext.builder().name("testing").build(NBComponent.EMPTY_COMPONENT);
         NBScriptedCommand cmd = NBScriptedCommand.ofScripted("testing", Map.of(),ctx, NBScriptedCommand.Invocation.EXECUTE_SCRIPT);
-        cmd.addScriptText("print('loaded script environment...');\n");
+        cmd.add(new Cmd("fragment",Map.of(
+            "fragment",new CmdArg(new CmdParam("fragment",s->s,false),"=","fragment=\"print('loaded script environment...');\n\"")
+        )));
 
         try {
             NBCommandResult result = NBCommandInvoker.invoke(ctx,cmd);

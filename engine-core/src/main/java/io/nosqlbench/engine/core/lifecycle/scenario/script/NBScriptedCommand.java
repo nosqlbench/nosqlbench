@@ -16,14 +16,14 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
+import io.nosqlbench.engine.cmdstream.BasicScriptBuffer;
+import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
-import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.script.bindings.PolyglotScenarioController;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine.Builder;
 import org.graalvm.polyglot.EnvironmentAccess;
@@ -32,19 +32,13 @@ import org.graalvm.polyglot.PolyglotAccess;
 import org.graalvm.polyglot.io.IOAccess;
 
 import javax.script.*;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class NBScriptedCommand extends NBBaseCommand {
     private final Invocation invocation = Invocation.EXECUTE_SCRIPT;
+    private final BasicScriptBuffer buffer;
 
     private Exception error;
 
@@ -56,13 +50,18 @@ public class NBScriptedCommand extends NBBaseCommand {
         return Optional.ofNullable(result);
     }
 
+    public NBScriptedCommand add(BasicScriptBuffer otherBuf) {
+        this.buffer.add(otherBuf);
+        return this;
+    }
+
 
     public enum Invocation {
         RENDER_SCRIPT,
         EXECUTE_SCRIPT
     }
 
-    private final List<String> scripts = new ArrayList<>();
+//    private final List<String> scripts = new ArrayList<>();
 
     private ActivitiesProgressIndicator activitiesProgressIndicator;
     private String progressInterval = "console:1m";
@@ -85,37 +84,39 @@ public class NBScriptedCommand extends NBBaseCommand {
         super(parentComponent, phaseName, targetScenario);
         this.phaseName = phaseName;
         this.progressInterval = progressInterval;
+        this.buffer = new BasicScriptBuffer();
     }
 
     public static NBScriptedCommand ofScripted(String name, Map<String, String> params, NBBufferedCommandContext parent, Invocation invocation) {
         return new NBScriptedCommand(parent, name, "default");
     }
-
-    ;
-
-
-    public NBScriptedCommand addScriptText(final String scriptText) {
-        this.scripts.add(scriptText);
+    public NBScriptedCommand add(Cmd... cmds) {
+        this.buffer.add(cmds);
         return this;
     }
 
+//    public NBScriptedCommand addScriptText(final String scriptText) {
+//        this.scripts.add(scriptText);
+//        return this;
+//    }
+//
 
-    public NBScriptedCommand addScriptFiles(final String... args) {
-        for (final String scriptFile : args) {
-            final Path scriptPath = Paths.get(scriptFile);
-            byte[] bytes = new byte[0];
-            try {
-                bytes = Files.readAllBytes(scriptPath);
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
-            final ByteBuffer bb = ByteBuffer.wrap(bytes);
-            final Charset utf8 = StandardCharsets.UTF_8;
-            final String scriptData = utf8.decode(bb).toString();
-            this.addScriptText(scriptData);
-        }
-        return this;
-    }
+//    public NBScriptedCommand addScriptFiles(final String... args) {
+//        for (final String scriptFile : args) {
+//            final Path scriptPath = Paths.get(scriptFile);
+//            byte[] bytes = new byte[0];
+//            try {
+//                bytes = Files.readAllBytes(scriptPath);
+//            } catch (final IOException e) {
+//                e.printStackTrace();
+//            }
+//            final ByteBuffer bb = ByteBuffer.wrap(bytes);
+//            final Charset utf8 = StandardCharsets.UTF_8;
+//            final String scriptData = utf8.decode(bb).toString();
+//            this.addScriptText(scriptData);
+//        }
+//        return this;
+//    }
 
     private BufferedScriptContext initializeScriptContext(PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         BufferedScriptContext ctx = new BufferedScriptContext(stdout, stderr, stdin);
@@ -164,7 +165,8 @@ public class NBScriptedCommand extends NBBaseCommand {
             engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("params", params);
 
             Object resultObject = null;
-            for (final String script : this.scripts) {
+
+//            for (final String script : this.scripts) {
 //                if ((engine instanceof Compilable compilableEngine)) {
 //                    this.logger.debug("Using direct script compilation");
 //                    final CompiledScript compiled = compilableEngine.compile(script);
@@ -180,18 +182,18 @@ public class NBScriptedCommand extends NBBaseCommand {
 //                engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("stdout", stdout);
 //                engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("stderr", stderr);
 //                engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("stdin", stdin);
-                resultObject = engine.eval(script);
+                resultObject = engine.eval(buffer.getParsedScript());
                 this.logger.debug("<- scenario control script completed (interpreted)");
 //                }
                 return resultObject;
-            }
+//            }
         } catch (ScriptException e) {
             throw new RuntimeException(e);
         } finally {
             this.endedAtMillis = System.currentTimeMillis();
 //            this.logger.debug("{} scenario run", null == this.error ? "NORMAL" : "ERRORED");
         }
-        return null;
+//        return null;
     }
 
     @Override
@@ -212,7 +214,7 @@ public class NBScriptedCommand extends NBBaseCommand {
     }
 
     public String toString() {
-        return "name:'" + phaseName + '\'';
+        return description();
     }
 
 

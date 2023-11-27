@@ -83,6 +83,7 @@ public class NB_optimo extends NBBaseCommand {
         Activity flywheel = optionalActivity.or(controller::getSoloActivity)
             .orElseThrow(() -> new RuntimeException("You didn't provide the name of an activity to attach to, nor was there a solo activity available in this context"));
 
+        stdout.println("running optimo on activity '" + flywheel.getAlias() + "'");
         // Start the flywheel at an "idle" speed, even if the user hasn't set it
         flywheel.onEvent(new ParamChange<>(new CycleRateSpec(100.0d, 1.1d, SimRateSpec.Verb.restart)));
         flywheel.getActivityDef().setEndCycle(Long.MAX_VALUE);

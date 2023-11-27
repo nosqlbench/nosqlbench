@@ -17,6 +17,9 @@
 package io.nosqlbench.engine.core.lifecycle.session;
 
 import io.nosqlbench.engine.cmdstream.Cmd;
+import io.nosqlbench.engine.cmdstream.CmdArg;
+import io.nosqlbench.engine.cmdstream.CmdParam;
+import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedCommand;
@@ -25,7 +28,9 @@ import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service(value = NBInvokableResolver.class, selector = "autojs")
@@ -41,10 +46,10 @@ public class NBAutoScriptResolver implements NBInvokableResolver {
 
         if (scriptfile.isPresent()) {
             Path pathOf = scriptfile.get().asPath();
-            return new NBScriptedCommand(
-                parent, phaseName, cmd.getTargetContext()).addScriptFiles(
-                "scripts/auto/" + cmd.getArgValue("_impl") + ".js"
-            );
+            Map<String, CmdArg> newArgs = new LinkedHashMap<>(cmd.getArgs());
+            newArgs.put("path",new CmdArg(new CmdParam("name",s->s,false),"=",pathOf.toString()));
+            Cmd reformattedCmd = new Cmd("script", newArgs);
+            return new NBScriptedCommand(parent, phaseName, cmd.getTargetContext()).add(reformattedCmd);
         } else {
             return null;
         }

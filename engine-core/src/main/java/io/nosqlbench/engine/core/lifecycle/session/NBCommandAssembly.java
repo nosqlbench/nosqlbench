@@ -17,12 +17,9 @@
 package io.nosqlbench.engine.core.lifecycle.session;
 
 import io.nosqlbench.engine.cmdstream.*;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
-import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedCommand;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -72,10 +69,10 @@ public class NBCommandAssembly {
         int count = 0;
         for (Cmd cmd : mappedCmds) {
             count++;
-            String phaseName = basename + String.valueOf(count);
+            String phaseName = basename + count;
 
             NBCommandParams params = switch (cmd.getCmdType()) {
-                case java, context -> NBCommandParams.of(cmd.getArgMap());
+                case indirect, java, context -> NBCommandParams.of(cmd.getArgMap());
                 default -> NBCommandParams.of(Map.of());
             };
 

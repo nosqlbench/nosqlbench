@@ -97,10 +97,10 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
 
         // TODO: add context closing command
         // TODO: inject context closing commands after the last command referencing each context
-        List<NBCommandAssembly.CommandInvocation> commandCalls = NBCommandAssembly.assemble(cmds, this::getContext);
+        List<NBCommandAssembly.CommandInvocation> invocationCalls = NBCommandAssembly.assemble(cmds, this::getContext);
         ResultCollector collector = new ResultCollector();
         try (ResultContext results = new ResultContext(collector).ok()) {
-            for (NBCommandAssembly.CommandInvocation invocation : commandCalls) {
+            for (NBCommandAssembly.CommandInvocation invocation : invocationCalls) {
                 try {
                     String targetContext = invocation.contextName();
                     NBBufferedCommandContext context = getContext(targetContext);

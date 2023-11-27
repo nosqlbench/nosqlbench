@@ -16,6 +16,7 @@
 
 package io.nosqlbench.nbr.examples.injavascript;
 
+import io.nosqlbench.engine.cmdstream.BasicScriptBuffer;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
@@ -77,7 +78,7 @@ public class ScriptExampleTests {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-        s.addScriptText(script);
+        s.add(new BasicScriptBuffer().add(script));
 //        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
         NBCommandResult result = s.invokeSafe(ctx, NBCommandParams.of(paramsMap));
         return result;
