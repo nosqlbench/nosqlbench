@@ -28,15 +28,10 @@ import java.util.function.Function;
 
 public interface NBCommandContext extends NBComponent, BiFunction<NBInvokableCommand,NBCommandParams, NBCommandResult> {
 //    ScenarioPhaseParams params();
-
     ContextActivitiesController controller();
-
     PrintWriter out();
-
     PrintWriter err();
-
     Reader in();
-
     public static ContextBuilderFacets.WantsName builder() {
         return new NBScenarioContextBuilder();
     }

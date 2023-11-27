@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.cli;
+package io.nosqlbench.engine.cmdstream;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
@@ -25,7 +24,7 @@ import io.nosqlbench.nb.annotations.ServiceSelector;
 import java.util.List;
 import java.util.ServiceLoader;
 
-public class NBCommandLoader {
+public class NBJavaCommandLoader {
     public static Class<? extends NBInvokableCommand> oneExists(String cmdName) {
         ServiceLoader<NBCommandInfo> loader = ServiceLoader.load(NBCommandInfo.class);
         ServiceSelector<NBCommandInfo> selector = ServiceSelector.of(cmdName, loader);

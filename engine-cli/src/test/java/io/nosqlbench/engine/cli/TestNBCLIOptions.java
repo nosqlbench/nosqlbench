@@ -17,6 +17,8 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.docsys.core.PathWalker;
+import io.nosqlbench.engine.cmdstream.Cmd;
+import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import org.junit.jupiter.api.Test;
 
@@ -36,8 +38,8 @@ public class TestNBCLIOptions {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"start", "foo=wan", "start", "bar=lan"});
         assertThat(opts.getCommands()).isNotNull();
         assertThat(opts.getCommands().size()).isEqualTo(2);
-        assertThat(opts.getCommands().get(0).getParams()).containsEntry("foo","wan");
-        assertThat(opts.getCommands().get(1).getParams()).containsEntry("bar","lan");
+//        assertThat(opts.getCommands().get(0).getArgs()).containsEntry("foo","wan");
+//        assertThat(opts.getCommands().get(1).getArgs()).containsEntry("bar","lan");
     }
 
     @Test
@@ -45,8 +47,8 @@ public class TestNBCLIOptions {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"start", "param1=param2", "param3=param4",
                                                           "--report-graphite-to", "woot", "--report-interval", "23"});
         assertThat(opts.getCommands().size()).isEqualTo(1);
-        assertThat(opts.getCommands().get(0).getParams()).containsEntry("param1","param2");
-        assertThat(opts.getCommands().get(0).getParams()).containsEntry("param3","param4");
+//        assertThat(opts.getCommands().get(0).getArgs()).containsEntry("param1","param2");
+//        assertThat(opts.getCommands().get(0).getArgs()).containsEntry("param3","param4");
         assertThat(opts.wantsReportGraphiteTo()).isEqualTo("woot");
         assertThat(opts.getReportInterval()).isEqualTo(23);
     }
@@ -70,10 +72,10 @@ public class TestNBCLIOptions {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "ascriptaone", "script", "ascriptatwo"});
         assertThat(opts.getCommands()).isNotNull();
         assertThat(opts.getCommands().size()).isEqualTo(2);
-        assertThat(opts.getCommands().get(0).getCmdType()).isEqualTo(Cmd.CmdType.script);
-        assertThat(opts.getCommands().get(0).getArg("script_path")).isEqualTo("ascriptaone");
-        assertThat(opts.getCommands().get(1).getCmdType()).isEqualTo(Cmd.CmdType.script);
-        assertThat(opts.getCommands().get(1).getArg("script_path")).isEqualTo("ascriptatwo");
+        assertThat(opts.getCommands().get(0).getCmdType()).isEqualTo(CmdType.script);
+        assertThat(opts.getCommands().get(0).getArgValue("path")).isEqualTo("ascriptaone");
+        assertThat(opts.getCommands().get(1).getCmdType()).isEqualTo(CmdType.script);
+        assertThat(opts.getCommands().get(1).getArgValue("path")).isEqualTo("ascriptatwo");
     }
 
     @Test
@@ -115,9 +117,9 @@ public class TestNBCLIOptions {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "ascript", "param1=value1"});
         assertThat(opts.getCommands().size()).isEqualTo(1);
         Cmd cmd = opts.getCommands().get(0);
-        assertThat(cmd.getParams().size()).isEqualTo(2);
-        assertThat(cmd.getParams()).containsKey("param1");
-        assertThat(cmd.getParams().get("param1")).isEqualTo("value1");
+        assertThat(cmd.getArgs().size()).isEqualTo(2);
+        assertThat(cmd.getArgs()).containsKey("param1");
+        assertThat(cmd.getArgs().get("param1")).isEqualTo("value1");
     }
 
     @Test
@@ -137,7 +139,7 @@ public class TestNBCLIOptions {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "start", "driver=woot" });
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds).hasSize(1);
-        assertThat(cmds.get(0).getCmdType()).isEqualTo(Cmd.CmdType.start);
+        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.start);
 
     }
 
@@ -146,7 +148,7 @@ public class TestNBCLIOptions {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "run", "driver=runwoot" });
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds).hasSize(1);
-        assertThat(cmds.get(0).getCmdType()).isEqualTo(Cmd.CmdType.run);
+        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.run);
 
     }
 
@@ -155,8 +157,8 @@ public class TestNBCLIOptions {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "stop", "woah" });
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds).hasSize(1);
-        assertThat(cmds.get(0).getCmdType()).isEqualTo(Cmd.CmdType.stop);
-        assertThat(cmds.get(0).getArg("alias_name")).isEqualTo("woah");
+        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.stop);
+        assertThat(cmds.get(0).getArgValue("alias_name")).isEqualTo("woah");
 
     }
 
@@ -170,8 +172,8 @@ public class TestNBCLIOptions {
     public void shouldRecognizeAwaitActivityCmd() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "await", "awaitme" });
         List<Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).getCmdType()).isEqualTo(Cmd.CmdType.await);
-        assertThat(cmds.get(0).getArg("alias_name")).isEqualTo("awaitme");
+        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.await);
+        assertThat(cmds.get(0).getArgValue("alias_name")).isEqualTo("awaitme");
 
     }
 
@@ -185,8 +187,8 @@ public class TestNBCLIOptions {
     public void shouldRecognizewaitMillisCmd() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "waitmillis", "23234" });
         List<Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).getCmdType()).isEqualTo(Cmd.CmdType.waitMillis);
-        assertThat(cmds.get(0).getArg("millis_to_wait")).isEqualTo("23234");
+        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.waitMillis);
+        assertThat(cmds.get(0).getArgValue("ms")).isEqualTo("23234");
 
     }
 

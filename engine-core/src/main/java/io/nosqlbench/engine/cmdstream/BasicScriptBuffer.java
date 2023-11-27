@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.cli;
+package io.nosqlbench.engine.cmdstream;
 
 import io.nosqlbench.adapters.api.templating.StrInterpolator;
 import io.nosqlbench.nb.api.nbio.Content;
@@ -49,7 +49,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
 
     public ScriptBuffer add(Cmd cmd) {
         commands.add(cmd);
-        Map<String, String> params = cmd.getParams();
+        Map<String, String> params = cmd.getArgMap();
 
         switch (cmd.getCmdType()) {
             case script:
@@ -63,8 +63,8 @@ public class BasicScriptBuffer implements ScriptBuffer {
 //                sb.append(Cmd.toJSONParams("params", cmd.getParams(), false));
 //                sb.append(";\n");
                 combineGlobalParams(scriptParams, cmd);
-                sb.append(cmd.getArg("script_fragment"));
-                if (cmd.getArg("script_fragment").endsWith(";")) {
+                sb.append(cmd.getArgValue("script_fragment"));
+                if (cmd.getArgValue("script_fragment").endsWith(";")) {
                     sb.append("\n");
                 }
                 break;
@@ -76,18 +76,18 @@ public class BasicScriptBuffer implements ScriptBuffer {
             case forceStop: // force stopping activity
             case waitMillis:
 
-                sb.append("scenario.").append(cmd).append("\n");
+                sb.append("controller.").append(cmd.asScriptText()).append("\n");
 ////                // Sanity check that this can parse before using it
-////                sb.append("scenario.").append(cmd.toString()).append("(")
+////                sb.append("controller.").append(cmd.toString()).append("(")
 ////                    .append(Cmd.toJSONBlock(cmd.getParams(), false))
 ////                    .append(");\n");
 ////                break;
-//                sb.append("scenario.awaitActivity(\"").append(cmd.getArg("alias_name")).append("\");\n");
+//                sb.append("controller.awaitActivity(\"").append(cmd.getArg("alias_name")).append("\");\n");
 //                break;
-//                sb.append("scenario.stop(\"").append(cmd.getArg("alias_name")).append("\");\n");
+//                sb.append("controller.stop(\"").append(cmd.getArg("alias_name")).append("\");\n");
 //                break;
-//                long millis_to_wait = Long.parseLong(cmd.getArg("millis_to_wait"));
-//                sb.append("scenario.waitMillis(").append(millis_to_wait).append(");\n");
+//                long millis_to_wait = Long.parseLong(cmd.getArg("ms"));
+//                sb.append("controller.waitMillis(").append(millis_to_wait).append(");\n");
                 break;
         }
         return this;
@@ -102,8 +102,8 @@ public class BasicScriptBuffer implements ScriptBuffer {
      * @param cmd          The command containing the new params to merge in
      */
     private void combineGlobalParams(Map<String, String> scriptParams, Cmd cmd) {
-        for (String newkey : cmd.getParams().keySet()) {
-            String newvalue = cmd.getParams().get(newkey);
+        for (String newkey : cmd.getArgs().keySet()) {
+            String newvalue = cmd.getArgMap().get(newkey);
 
             if (scriptParams.containsKey(newkey)) {
                 logger.warn("command '" + cmd.getCmdType() + "' overwrote param '" + newkey + " as " + newvalue);
@@ -142,14 +142,14 @@ public class BasicScriptBuffer implements ScriptBuffer {
 
     public static String loadScript(Cmd cmd) {
         String scriptData;
-        String script_path = cmd.getArg("script_path");
+        String path = cmd.getArgValue("path");
 
-        logger.debug(() -> "Looking for " + script_path);
+        logger.debug(() -> "Looking for " + path);
 
-        Content<?> one = NBIO.all().searchPrefixes("scripts").pathname(script_path).extensionSet("js").one();
+        Content<?> one = NBIO.all().searchPrefixes("scripts").pathname(path).extensionSet("js").one();
         scriptData = one.asString();
 
-        StrInterpolator interpolator = new StrInterpolator(cmd.getParams());
+        StrInterpolator interpolator = new StrInterpolator(cmd.getArgs());
         scriptData = interpolator.apply(scriptData);
         return scriptData;
     }

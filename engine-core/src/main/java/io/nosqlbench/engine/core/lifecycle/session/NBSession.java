@@ -16,7 +16,6 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
@@ -24,12 +23,11 @@ import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.NBBaseComponent;
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
-import io.nosqlbench.engine.cli.Cmd;
+import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.core.clientload.*;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -97,6 +95,8 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
      */
     public ExecutionResult apply(List<Cmd> cmds) {
 
+        // TODO: add context closing command
+        // TODO: inject context closing commands after the last command referencing each context
         List<NBCommandAssembly.CommandInvocation> commandCalls = NBCommandAssembly.assemble(cmds, this::getContext);
         ResultCollector collector = new ResultCollector();
         try (ResultContext results = new ResultContext(collector).ok()) {

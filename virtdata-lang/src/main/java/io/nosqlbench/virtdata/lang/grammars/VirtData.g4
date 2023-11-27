@@ -9,7 +9,7 @@ expression : (lvalue ASSIGN)? virtdataCall ;
 
 virtdataCall :
  ( inputType TYPEARROW )?
- ( funcName '(' (WS? arg ( WS? ',' WS? arg )* WS? )? WS? ')' )
+ ( funcName '(' (WS? cmdParam ( WS? ',' WS? cmdParam )* WS? )? WS? ')' )
  ( TYPEARROW outputType )? WS?
  ;
 
@@ -18,7 +18,7 @@ inputType : ID;
 funcName: ID;
 outputType : ID;
 
-arg : ( value | virtdataCall | ref );
+cmdParam : ( value | virtdataCall | ref );
 ref : ('$' ID );
 value : ( floatValue | doubleValue | integerValue | longValue | stringValue | booleanValue);
 stringValue : SSTRING_LITERAL | DSTRING_LITERAL ;

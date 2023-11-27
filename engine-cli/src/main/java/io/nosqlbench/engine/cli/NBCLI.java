@@ -19,6 +19,7 @@ package io.nosqlbench.engine.cli;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
+import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.apps.BundledApp;
@@ -248,7 +249,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         if (options.getWantsListCommands()) {
-            for (Cmd.CmdType value : Cmd.CmdType.values()) {
+            for (CmdType value : CmdType.values()) {
                 System.out.println(value.name());
             }
             return NBCLI.EXIT_OK;

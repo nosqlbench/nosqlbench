@@ -57,7 +57,6 @@ public class NBScriptedCommand extends NBBaseCommand {
     }
 
 
-
     public enum Invocation {
         RENDER_SCRIPT,
         EXECUTE_SCRIPT
@@ -120,7 +119,13 @@ public class NBScriptedCommand extends NBBaseCommand {
 
     private BufferedScriptContext initializeScriptContext(PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         BufferedScriptContext ctx = new BufferedScriptContext(stdout, stderr, stdin);
-        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("scenario", new PolyglotScenarioController(controller));
+        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("this", this);
+        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("context", context);
+        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("controller", controller);
+        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("stdout", stdout);
+        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("stderr", stderr);
+        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("stdin", stdin);
+
         return ctx;
     }
 
@@ -143,7 +148,7 @@ public class NBScriptedCommand extends NBBaseCommand {
             final Builder engineBuilder = org.graalvm.polyglot.Engine.newBuilder();
             engineBuilder.option("engine.WarnInterpreterOnly", "false");
             final org.graalvm.polyglot.Engine polyglotEngine = engineBuilder.build();
-            this._engine= GraalJSScriptEngine.create(polyglotEngine, contextSettings);
+            this._engine = GraalJSScriptEngine.create(polyglotEngine, contextSettings);
         }
         return this._engine;
     }
@@ -155,24 +160,29 @@ public class NBScriptedCommand extends NBBaseCommand {
             GraalJSScriptEngine engine = this.initializeScriptingEngine();
             this.context = this.initializeScriptContext(stdout, stderr, stdin, controller);
             this.logger.debug("Running control script for {}.", phaseName);
+            engine.setContext(context);
+            engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("params", params);
 
             Object resultObject = null;
             for (final String script : this.scripts) {
-                if ((engine instanceof Compilable compilableEngine)) {
-                    this.logger.debug("Using direct script compilation");
-                    final CompiledScript compiled = compilableEngine.compile(script);
-                    this.logger.debug("-> invoking main scenario script (compiled)");
-                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("params",params);
-                    resultObject = compiled.eval(this.context);
-//                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).remove("params");
-                    this.logger.debug("<- scenario script completed (compiled)");
-                } else {
-                    this.logger.debug("-> invoking main scenario script (interpreted)");
-                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("params",params);
-                    resultObject = engine.eval(script);
-//                    engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).remove("params");
-                    this.logger.debug("<- scenario control script completed (interpreted)");
-                }
+//                if ((engine instanceof Compilable compilableEngine)) {
+//                    this.logger.debug("Using direct script compilation");
+//                    final CompiledScript compiled = compilableEngine.compile(script);
+//                    this.logger.debug("-> invoking main scenario script (compiled)");
+//                    resultObject = compiled.eval(this.context);
+//                    this.logger.debug("<- scenario script completed (compiled)");
+//                } else {
+                this.logger.debug("-> invoking main scenario script (interpreted)");
+//                engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("this", this);
+//                engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("params", params);
+//                engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("context", context);
+//                engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("controller", controller);
+//                engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("stdout", stdout);
+//                engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("stderr", stderr);
+//                engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("stdin", stdin);
+                resultObject = engine.eval(script);
+                this.logger.debug("<- scenario control script completed (interpreted)");
+//                }
                 return resultObject;
             }
         } catch (ScriptException e) {

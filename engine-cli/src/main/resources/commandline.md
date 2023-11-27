@@ -58,16 +58,16 @@ Provide the metrics that are available for scripting
 
 This is how you actually tell ${PROG} what scenario to run. Each of these commands appends script logic
 to the scenario that will be executed. These are considered as commands, can occur in any order and
-quantity. The only rule is that arguments in the arg=value form will apply to the preceding script
+quantity. The only rule is that arguments in the cmdParam=value form will apply to the preceding script
 or activity.
 
 Add the named script file to the scenario, interpolating named parameters:
 
-    script <script file> [arg=value]...
+    script <script file> [cmdParam=value]...
 
 Add the named activity to the scenario, interpolating named parameters
 
-    activity [arg=value]...
+    activity [cmdParam=value]...
 
 ## Logging options
 

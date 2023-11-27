@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.cli;
 
+import io.nosqlbench.engine.cmdstream.BasicScriptBuffer;
+import io.nosqlbench.engine.cmdstream.Cmd;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

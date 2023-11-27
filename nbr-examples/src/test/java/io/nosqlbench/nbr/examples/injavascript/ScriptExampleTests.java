@@ -231,7 +231,6 @@ public class ScriptExampleTests {
         assertThat(changedTo5At).isGreaterThan(changedTo1At);
     }
 
-    @Disabled
     @Test
     public void testReadMetric() {
         NBCommandResult NBCommandResult = runScriptCommands("readmetrics");

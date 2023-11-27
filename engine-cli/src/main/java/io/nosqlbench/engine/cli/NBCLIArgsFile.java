@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.cli;
 
+import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.api.system.NBEnvironment;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.Logger;
@@ -88,7 +89,7 @@ public class NBCLIArgsFile {
     LinkedHashSet<String> argsToPin = new LinkedHashSet<>();
     LinkedHashSet<String> argsToUnpin = new LinkedHashSet<>();
     private final Set<String> readPaths = new HashSet<>();
-    private Predicate<String> reservedPredicate = Cmd.CmdType::anyMatches;
+    private Predicate<String> reservedPredicate = CmdType::anyMatches;
 
     public NBCLIArgsFile() {
     }

@@ -82,7 +82,7 @@ To reverse the effect of pinning an option, you simply use
  `--unpin ...`.
 
 The behavior of --unpin is slightly different than --pin. Specifically,
-an option which is unpinned will be removed from the arg list, and will
+an option which is unpinned will be removed from the cmdParam list, and will
 not be used in the current invocation of nosqlbench after removal.
 
 Further, you can specify `--unpin --grafana-baseurl` to unpin an option

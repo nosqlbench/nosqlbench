@@ -10,11 +10,11 @@ The scripts in this directory are meant to be used for two things:
 
 All of these scripts can be invoked directly by NoSQLBench with one of these patterns:
 
-* `nb script <basename> <arg>...`
+* `nb script <basename> <cmdParam>...`
   * example: `nb script params_variable one=two three=four`
-* `java -jar nb.jar script <filename>.js <arg>...` (ensure you have Java 17 for this)
+* `java -jar nb.jar script <filename>.js <cmdParam>...` (ensure you have Java 17 for this)
   * example: `java -jar nb.jar params_variable five=six`
-* `nb <basename> <arg>...` (if and only if `<script>.js` is located in scripts/auto)
+* `nb <basename> <cmdParam>...` (if and only if `<script>.js` is located in scripts/auto)
   * example: `nb `
 
 ## Diag Adapter

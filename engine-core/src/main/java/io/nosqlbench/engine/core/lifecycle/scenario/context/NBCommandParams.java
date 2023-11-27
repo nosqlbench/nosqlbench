@@ -28,9 +28,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * Wrap the scenario parameters in a type which allows for easy manipulation
- */
 public class NBCommandParams extends HashMap<String, String> implements ProxyObject {
 
     private static final Logger logger = LogManager.getLogger(NBCommandParams.class);

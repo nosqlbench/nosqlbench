@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.cli;
+package io.nosqlbench.engine.core.lifecycle.session;
 
-import io.nosqlbench.engine.api.scenarios.NBCLIScenarioPreprocessor;
+import io.nosqlbench.engine.cmdstream.Cmd;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 
 import java.util.List;
 
-public class NBCLIScripts {
-    public static void printScripts(boolean includeScenarios,
-                                      String... includes) {
-        List<String> scripts =
-            NBCLIScenarioPreprocessor.getScripts(true, includes);
-
-        for (String script: scripts) {
-            System.out.println(script);
-        }
-
-    }
+public interface NBInvokableResolver {
+    NBInvokableCommand resolve(Cmd cmd, NBBufferedCommandContext parent, String phaseName);
 
 }

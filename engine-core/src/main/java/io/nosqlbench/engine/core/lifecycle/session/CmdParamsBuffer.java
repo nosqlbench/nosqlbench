@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
-import io.nosqlbench.engine.cli.Cmd;
+import io.nosqlbench.engine.cmdstream.Cmd;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,8 +59,8 @@ public class CmdParamsBuffer {
      * @param cmd          The command containing the new params to merge in
      */
     private void combineGlobalParams(Map<String, String> scriptParams, Cmd cmd) {
-        for (String newkey : cmd.getParams().keySet()) {
-            String newvalue = cmd.getParams().get(newkey);
+        for (String newkey : cmd.getArgs().keySet()) {
+            String newvalue = cmd.getArgs().get(newkey).getValue();
 
             if (scriptParams.containsKey(newkey)) {
                 logger.warn("command '" + cmd.getCmdType() + "' overwrote param '" + newkey + " as " + newvalue);

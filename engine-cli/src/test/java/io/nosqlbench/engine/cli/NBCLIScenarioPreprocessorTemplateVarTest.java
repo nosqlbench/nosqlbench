@@ -19,13 +19,14 @@ package io.nosqlbench.engine.cli;
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
+import io.nosqlbench.engine.cmdstream.Cmd;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class NBCLIScenarioParserTemplateVarTest {
+public class NBCLIScenarioPreprocessorTemplateVarTest {
 
     @Test
     public void testMultipleOccurencesOfSameTemplateVar() {
@@ -33,12 +34,12 @@ public class NBCLIScenarioParserTemplateVarTest {
         List<Cmd> cmds = opts.getCommands();
         cmds.forEach(System.out::println);
 
-        OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArg("workload"),cmds.get(0).getParams());
+        OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArgValue("workload"),cmds.get(0).getArgs());
         OpTemplate optpl1 = workload1.getOps(true).get(0);
         System.out.println("op from cmd1:"+optpl1);
         assertThat(optpl1.getStmt()).contains("cycle {cycle} replaced replaced\n");
 
-        OpsDocList workload2 = OpsLoader.loadPath(cmds.get(1).getArg("workload"),cmds.get(1).getParams());
+        OpsDocList workload2 = OpsLoader.loadPath(cmds.get(1).getArgValue("workload"),cmds.get(1).getArgs());
         OpTemplate optpl2 = workload2.getOps(true).get(0);
         System.out.println("op from cmd2:"+optpl2);
         assertThat(optpl2.getStmt()).contains("cycle {cycle} def1 def1\n");
@@ -50,7 +51,7 @@ public class NBCLIScenarioParserTemplateVarTest {
         List<Cmd> cmds = opts.getCommands();
         cmds.forEach(System.out::println);
 
-        OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArg("workload"),cmds.get(0).getParams());
+        OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArgValue("workload"),cmds.get(0).getArgs());
         OpTemplate optpl1 = workload1.getOps(true).get(0);
         System.out.println("op from cmd1:"+optpl1);
         assertThat(optpl1.getStmt()).contains("cycle {cycle} overridden overridden\n");
@@ -62,8 +63,8 @@ public class NBCLIScenarioParserTemplateVarTest {
         List<Cmd> cmds = opts.getCommands();
         cmds.forEach(System.out::println);
         assertThat(cmds).hasSize(2);
-        assertThat(cmds.get(0).getParams().get("tvar3")).isEqualTo("tval3");
-        assertThat(cmds.get(1).getParams().get("tvar3")).isEqualTo("tval3");
+        assertThat(cmds.get(0).getArgs().get("tvar3")).isEqualTo("tval3");
+        assertThat(cmds.get(1).getArgs().get("tvar3")).isEqualTo("tval3");
     }
 
 }

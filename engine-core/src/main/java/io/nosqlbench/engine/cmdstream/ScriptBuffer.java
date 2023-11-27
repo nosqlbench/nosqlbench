@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.cli;
+package io.nosqlbench.engine.cmdstream;
 
 import java.util.List;
 import java.util.Map;

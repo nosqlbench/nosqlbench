@@ -21,11 +21,12 @@ import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.adapters.api.templating.StrInterpolator;
+import io.nosqlbench.engine.cmdstream.Cmd;
+import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.nbio.NBPathsAPI;
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.engine.cli.Cmd;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -39,7 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class NBCLIScenarioParser {
+public class NBCLIScenarioPreprocessor {
 
     public final static String SILENT_LOCKED = "==";
     public final static String VERBOSE_LOCKED = "===";
@@ -59,16 +60,19 @@ public class NBCLIScenarioParser {
         return found.isPresent();
     }
 
-    public static void parseScenarioCommand(LinkedList<String> arglist, String... includes) {
+    public static void rewriteScenarioCommands(LinkedList<String> arglist, List<String> includes) {
 
         String workloadName = arglist.removeFirst();
         Optional<Content<?>> found = NBIO.all()
             .searchPrefixes("activities")
-            .searchPrefixes(includes)
+            .searchPrefixes(includes.toArray(new String[0]))
             .pathname(workloadName)
             .extensionSet(RawOpsLoader.YAML_EXTENSIONS)
             .first();
 //
+        if (!found.isPresent()) {
+            return;
+        }
         Content<?> workloadContent = found.orElseThrow();
 
 //        Optional<Path> workloadPathSearch = NBPaths.findOptionalPath(workloadName, "yaml", false, "activities");
@@ -79,7 +83,7 @@ public class NBCLIScenarioParser {
         while (!arglist.isEmpty()
             && !arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")
-            && !Cmd.CmdType.anyMatches(arglist.peekFirst())) {
+            && !CmdType.anyMatches(arglist.peekFirst())) {
             scenarioNames.add(arglist.removeFirst());
         }
         if (scenarioNames.isEmpty()) {
@@ -103,15 +107,18 @@ public class NBCLIScenarioParser {
         StrInterpolator userParamsInterp = new StrInterpolator(userProvidedParams);
 
 
+        // Each Scenario
+
         for (String scenarioName : scenarioNames) {
 
             // Load in named scenario
             Content<?> yamlWithNamedScenarios = NBIO.all()
                 .searchPrefixes(SEARCH_IN)
-                .searchPrefixes(includes)
+                .searchPrefixes(includes.toArray(new String[0]))
                 .pathname(workloadName)
                 .extensionSet(RawOpsLoader.YAML_EXTENSIONS)
                 .first().orElseThrow();
+
             // TODO: The yaml needs to be parsed with arguments from each command independently to support template vars
             OpsDocList scenariosYaml = OpsLoader.loadContent(yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
             Scenarios scenarios = scenariosYaml.getDocScenarios();
@@ -149,19 +156,22 @@ public class NBCLIScenarioParser {
                     String.join(", ", scenarios.getScenarioNames()));
             }
 
-            // each named command line step of the named scenario
+            // each command in Context
             for (Map.Entry<String, String> cmdEntry : namedSteps.entrySet()) {
 
                 String stepName = cmdEntry.getKey();
                 String cmd = cmdEntry.getValue();
+
+                // here, we should actually parse the command using argv rules
+
                 cmd = userParamsInterp.apply(cmd);
-                LinkedHashMap<String, CmdArg> parsedStep = parseStep(cmd);
+                LinkedHashMap<String, SCNamedParam> parsedStep = parseStep(cmd);
                 LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userProvidedParams);
                 LinkedHashMap<String, String> buildingCmd = new LinkedHashMap<>();
 
                 // consume each of the parameters from the steps to produce a composited command
                 // order is primarily based on the step template, then on user-provided parameters
-                for (CmdArg cmdarg : parsedStep.values()) {
+                for (SCNamedParam cmdarg : parsedStep.values()) {
 
                     // allow user provided parameter values to override those in the template,
                     // if the assignment operator used in the template allows for it
@@ -237,8 +247,8 @@ public class NBCLIScenarioParser {
 
     private static final Pattern WordAndMaybeAssignment = Pattern.compile("(?<name>\\w[-_\\d\\w.]+)((?<oper>=+)(?<val>.+))?");
 
-    private static LinkedHashMap<String, CmdArg> parseStep(String cmd) {
-        LinkedHashMap<String, CmdArg> parsedStep = new LinkedHashMap<>();
+    private static LinkedHashMap<String, SCNamedParam> parseStep(String cmd) {
+        LinkedHashMap<String, SCNamedParam> parsedStep = new LinkedHashMap<>();
 
         String[] namedStepPieces = cmd.split(" +");
         for (String commandFragment : namedStepPieces) {
@@ -255,56 +265,9 @@ public class NBCLIScenarioParser {
             String commandName = matcher.group("name");
             String assignmentOp = matcher.group("oper");
             String assignedValue = matcher.group("val");
-            parsedStep.put(commandName, new CmdArg(commandName, assignmentOp, assignedValue));
+            parsedStep.put(commandName, new SCNamedParam(commandName, assignmentOp, assignedValue));
         }
         return parsedStep;
-    }
-
-    private final static class CmdArg {
-        private final String name;
-        private final String operator;
-        private final String value;
-        private String scenarioName;
-
-        public CmdArg(String name, String operator, String value) {
-            this.name = name;
-            this.operator = operator;
-            this.value = value;
-        }
-
-        public boolean isReassignable() {
-            return UNLOCKED.equals(operator);
-        }
-
-        public boolean isFinalSilent() {
-            return SILENT_LOCKED.equals(operator);
-        }
-
-        public boolean isFinalVerbose() {
-            return VERBOSE_LOCKED.equals(operator);
-        }
-
-
-        public CmdArg override(String value) {
-            if (isReassignable()) {
-                return new CmdArg(this.name, this.operator, value);
-            } else if (isFinalSilent()) {
-                return this;
-            } else if (isFinalVerbose()) {
-                throw new BasicError("Unable to reassign value for locked param '" + name + operator + value + "'");
-            } else {
-                throw new RuntimeException("impossible!");
-            }
-        }
-
-        @Override
-        public String toString() {
-            return name + (operator != null ? "=" : "") + (value != null ? value : "");
-        }
-
-        public String getName() {
-            return name;
-        }
     }
 
     private static final Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");

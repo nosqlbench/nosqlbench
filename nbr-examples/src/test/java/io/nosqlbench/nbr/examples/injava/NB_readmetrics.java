@@ -16,14 +16,17 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
+import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
 import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.Map;
 
 
 public class NB_readmetrics extends NBBaseCommand {
@@ -55,6 +58,24 @@ public class NB_readmetrics extends NBBaseCommand {
      */
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
+        Activity activity = controller.start(Map.of(
+            "alias", "testactivity",
+            "driver", "diag",
+            "cycles", "0..1000000000",
+            "threads", "5",
+            "interval", "2000",
+            "op", "noop"
+        ));
+        controller.waitMillis(500);
+        NBMetricTimer service_timer = find().topMetric("activity=testactivity,name=cycles_servicetime", NBMetricTimer.class);
+
+        while (service_timer.getCount()<1000) {
+            stdout.println("waiting 10ms because cycles<1000");
+            controller.waitMillis(10);
+        }
+
+        controller.stop("testactivity");
+        stdout.println("count: " + service_timer.getCount());
         return null;
     }
 }

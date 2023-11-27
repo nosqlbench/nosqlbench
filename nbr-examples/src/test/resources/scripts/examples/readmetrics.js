@@ -23,13 +23,13 @@ activitydef = {
     "op" : "noop"
 };
 
-scenario.start(activitydef);
-
-scenario.waitMillis(500);
-while (metrics.testactivity.cycles_servicetime.count < 1000) {
-    print('waiting 10ms because cycles<10000 : ' + metrics.testactivity.cycles_servicetime.count);
-    scenario.waitMillis(10);
+activity = controller.start(activitydef);
+controller.waitMillis(500);
+var service_timer = activity.find().topMetric("activity=testactivity,name=cycles_servicetime", Packages.io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer.class);
+while (service_timer.getCount() < 1000) {
+    stdout.println('waiting 10ms because cycles<10000 : ' + service_timer.getCount());
+    controller.waitMillis(10);
 
 }
-scenario.stop(activitydef);
-print("count: " + metrics.testactivity.cycles_servicetime.count);
+controller.stop(activitydef);
+stdout.println("count: " + service_timer.getCount());

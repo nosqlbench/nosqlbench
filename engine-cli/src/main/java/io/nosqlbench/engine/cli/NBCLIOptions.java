@@ -16,6 +16,10 @@
 
 package io.nosqlbench.engine.cli;
 
+import io.nosqlbench.engine.api.scenarios.NBCLIScenarioPreprocessor;
+import io.nosqlbench.engine.cmdstream.Cmd;
+import io.nosqlbench.engine.cmdstream.PathCanonicalizer;
+import io.nosqlbench.engine.core.lifecycle.session.CmdParser;
 import io.nosqlbench.nb.api.engine.util.Unit;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.labels.NBLabelSpec;
@@ -24,7 +28,7 @@ import io.nosqlbench.nb.api.logging.NBLogLevel;
 import io.nosqlbench.nb.api.metadata.SystemId;
 import io.nosqlbench.nb.api.system.NBStatePath;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
-import io.nosqlbench.engine.cli.Cmd.CmdType;
+import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.annotations.Maturity;
 
 import java.io.File;
@@ -66,7 +70,6 @@ public class NBCLIOptions {
     // Discovery
     private static final String HELP = "--help";
     private static final String LIST_COMMANDS = "--list-commands";
-    private static final String LIST_METRICS = "--list-metrics";
     private static final String LIST_DRIVERS = "--list-drivers";
     private static final String LIST_ACTIVITY_TYPES = "--list-activity-types";
     private static final String LIST_SCRIPTS = "--list-scripts";
@@ -524,12 +527,6 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     wantsListCommands = true;
                     break;
-                case NBCLIOptions.LIST_METRICS:
-                    arglist.removeFirst();
-                    arglist.addFirst("start");
-                    final Cmd cmd = Cmd.parseArg(arglist, canonicalizer);
-                    this.wantsMetricsForActivity = cmd.getArg("driver");
-                    break;
                 case NBCLIOptions.HDR_DIGITS:
                     arglist.removeFirst();
                     this.hdr_digits = Integer.parseInt(this.readWordOrThrow(arglist, "significant digits"));
@@ -629,11 +626,12 @@ public class NBCLIOptions {
             }
         }
         arglist = nonincludes;
-        final Optional<List<Cmd>> commands = SessionCommandParser.parse(arglist);
-        if (commands.isPresent()) cmdList.addAll(commands.get());
-        else {
-            final String arg = arglist.peekFirst();
-            Objects.requireNonNull(arg);
+        NBCLIScenarioPreprocessor.rewriteScenarioCommands(arglist,wantsToIncludePaths);
+        this.cmdList.addAll(CmdParser.parseArgvCommands(arglist));
+
+        if (!arglist.isEmpty()) {
+            final String cmdParam = arglist.peekFirst();
+            Objects.requireNonNull(cmdParam);
             final String helpmsg = """
                 Could not recognize command 'ARG'.
                 This means that all of the following searches for a compatible command failed:
@@ -647,7 +645,7 @@ public class NBCLIOptions {
                 You can discover available ways to invoke PROG by using the various --list-* commands:
                 [ --list-commands, --list-scripts, --list-workloads (and --list-scenarios), --list-apps ]
                 """
-                .replaceAll("ARG", arg)
+                .replaceAll("ARG", cmdParam)
                 .replaceAll("PROG", "nb5")
                 .replaceAll("INCLUDES", String.join(",", wantsIncludes()));
             throw new BasicError(helpmsg);
