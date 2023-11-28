@@ -58,6 +58,18 @@ public class DefaultDatasetParser implements DatasetParser {
         return buildCql();
     }
 
+    public String parseInline(String raw) {
+        logger.debug(() -> "Parsing: " + raw);
+        JsonObject conditions = JsonParser.parseString(raw).getAsJsonObject().get(CONDITIONS).getAsJsonObject();
+        if (conditions.has(AND)) {
+            return parseAndConditionsInline(conditions);
+        } else if (conditions.has(OR)) {
+            return parseOrConditionsInline(conditions);
+        } else {
+            throw new RuntimeException("Unknown predicate type: " + conditions.keySet());
+        }
+    }
+
     private String buildCql() {
         StringBuilder sb = new StringBuilder();
         if (!operations.isEmpty()) {
@@ -75,7 +87,8 @@ public class DefaultDatasetParser implements DatasetParser {
                                 sb.append(SPACE).append(k).append(SPACE).append(op.operator()).append(SPACE).append(LEFT_PAREN);
                                 currentField = k;
                             } else {
-                                if (!currentField.equals(k)) {
+                                if (currentField != null &&
+                                    !currentField.equals(k)) {
                                     throw new RuntimeException("Cannot have multiple IN clauses with different fields");
                                 }
                             }
@@ -112,7 +125,6 @@ public class DefaultDatasetParser implements DatasetParser {
         conditions.get(OR).getAsJsonArray().forEach(e -> {
             JsonObject condition = e.getAsJsonObject();
             String field = condition.keySet().iterator().next();
-            //TODO: Determine if we need to support more than just match
             JsonElement match = condition.get(field).getAsJsonObject().get(MATCH);
             if (match != null) {
                 boolean isNumeric = match.getAsJsonObject().get(VALUE).isJsonPrimitive() &&
@@ -129,11 +141,40 @@ public class DefaultDatasetParser implements DatasetParser {
         });
     }
 
+    private String parseOrConditionsInline(JsonObject conditions) {
+        StringBuilder builder = new StringBuilder(WHERE);
+        boolean first = true;
+        for (JsonElement e : conditions.get(OR).getAsJsonArray()) {
+            JsonObject condition = e.getAsJsonObject();
+            String field = condition.keySet().iterator().next();
+            JsonElement match = condition.get(field).getAsJsonObject().get(MATCH);
+            if (match != null) {
+                if (first) {
+                    builder.append(SPACE).append(field).append(SPACE).append(IN).append(LEFT_PAREN);
+                    first = false;
+                } else {
+                    builder.append(COMMA);
+                }
+                boolean isNumeric = match.getAsJsonObject().get(VALUE).isJsonPrimitive() &&
+                    match.getAsJsonObject().get(VALUE).getAsJsonPrimitive().isNumber();
+
+                builder.append(
+                    isNumeric ?
+                        match.getAsJsonObject().get(VALUE).getAsString() :
+                        SINGLE_QUOTE + match.getAsJsonObject().get(VALUE).getAsString() + SINGLE_QUOTE
+                );
+            } else {
+                logger.error(() -> "No match found for: " + condition.keySet());
+            }
+        }
+        builder.append(RIGHT_PAREN);
+        return builder.toString();
+    }
+
     private void parseAndConditions(JsonObject conditions) {
         conditions.get(AND).getAsJsonArray().forEach(e -> {
             JsonObject condition = e.getAsJsonObject();
             String field = condition.keySet().iterator().next();
-            //TODO: Determine if we need to support more than just match
             JsonElement match = condition.get(field).getAsJsonObject().get(MATCH);
             if (match != null) {
                 boolean isNumeric = match.getAsJsonObject().get(VALUE).isJsonPrimitive() &&
@@ -150,17 +191,47 @@ public class DefaultDatasetParser implements DatasetParser {
         });
     }
 
+    private String parseAndConditionsInline(JsonObject conditions) {
+        StringBuilder builder = new StringBuilder(WHERE);
+        boolean first = true;
+        for (JsonElement e : conditions.get(AND).getAsJsonArray()) {
+            JsonObject condition = e.getAsJsonObject();
+            String field = condition.keySet().iterator().next();
+            JsonElement match = condition.get(field).getAsJsonObject().get(MATCH);
+            if (match != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    builder.append(SPACE).append(AND);
+                }
+                boolean isNumeric = match.getAsJsonObject().get(VALUE).isJsonPrimitive() &&
+                    match.getAsJsonObject().get(VALUE).getAsJsonPrimitive().isNumber();
+                builder.append(SPACE).append(field).append(EQ);
+                builder.append(
+                    isNumeric ?
+                        match.getAsJsonObject().get(VALUE).getAsString() :
+                        SINGLE_QUOTE + match.getAsJsonObject().get(VALUE).getAsString() + SINGLE_QUOTE
+                );
+            } else {
+                logger.error(() -> "No match found for: " + condition.keySet());
+            }
+        }
+        return builder.toString();
+    }
+
     public static void main(String[] args) {
         DefaultDatasetParser parser = new DefaultDatasetParser();
         String test1 = "{\"conditions\": {\"and\": [{\"a\": {\"match\": {\"value\": 53}}}]}}";
         String test2 = "{\"conditions\": {\"and\": [{\"a\": {\"match\": {\"value\": \"thirteen\"}}}, {\"b\": {\"match\": {\"value\": 54}}}]}}";
-        String test3 = "{\"conditions\": {\"or\": [{\"a\": {\"match\": {\"value\": \"nine\"}}}, {\"a\": {\"match\": {\"value\": 71}}}]}}";
-        String test4 = "{\"conditions\": {\"or\": [{\"a\": {\"match\": {\"value\": \"nine\"}}}, {\"a\": {\"match\": {\"value\": 71}}}, {\"a\": {\"match\": {\"value\": 7}}}]}}";
-        String test5 = "{\"conditions\": {\"or\": [{\"a\": {\"match\": {\"value\": 99}}}, {\"b\": {\"match\": {\"value\": 71}}}]}}";
-        System.out.println(parser.parse(test1));
-        System.out.println(parser.parse(test2));
-        System.out.println(parser.parse(test3));
-        System.out.println(parser.parse(test4));
-        System.out.println(parser.parse(test5));
+        String test3 = "{\"conditions\": {\"and\": [{\"a\": {\"match\": {\"value\": \"thirteen\"}}}, {\"b\": {\"match\": {\"value\": 54}}},  {\"a\": {\"match\": {\"value\": 154}}}]}}";
+        String test4 = "{\"conditions\": {\"or\": [{\"a\": {\"match\": {\"value\": \"nine\"}}}, {\"a\": {\"match\": {\"value\": 71}}}]}}";
+        String test5 = "{\"conditions\": {\"or\": [{\"a\": {\"match\": {\"value\": \"nine\"}}}, {\"a\": {\"match\": {\"value\": 71}}}, {\"a\": {\"match\": {\"value\": 7}}}]}}";
+        String test6 = "{\"conditions\": {\"or\": [{\"a\": {\"match\": {\"value\": 99}}}, {\"b\": {\"match\": {\"value\": 71}}}]}}";
+        System.out.println(parser.parseInline(test1));
+        System.out.println(parser.parseInline(test2));
+        System.out.println(parser.parseInline(test3));
+        System.out.println(parser.parseInline(test4));
+        System.out.println(parser.parseInline(test5));
+        System.out.println(parser.parseInline(test6));
     }
 }
