@@ -40,11 +40,12 @@ public abstract class PeriodicTaskComponent extends NBBaseComponent implements R
         NBComponent node,
         NBLabels extraLabels,
         long millis,
-        boolean oneLastTime
+        boolean oneLastTime,
+        String threadName
     ) {
         super(node, extraLabels);
         this.intervalmillis = millis;
-        thread = Thread.ofVirtual().start(this);
+        thread = Thread.ofVirtual().name(threadName).start(this);
         this.oneLastTime = oneLastTime;
     }
 

@@ -43,7 +43,7 @@ public class ConsoleReporter extends PeriodicTaskComponent {
     private final long durationFactor = TimeUnit.NANOSECONDS.toNanos(1);
     public ConsoleReporter(NBComponent node, NBLabels extraLabels, long millis, boolean oneLastTime,
                            PrintStream output, Set<MetricAttribute> disabledMetricAttributes) {
-        super(node, extraLabels, millis, oneLastTime);
+        super(node, extraLabels, millis, oneLastTime,"REPORT-CONSOLE");
         this.output = output;
         this.dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT,
             DateFormat.MEDIUM,

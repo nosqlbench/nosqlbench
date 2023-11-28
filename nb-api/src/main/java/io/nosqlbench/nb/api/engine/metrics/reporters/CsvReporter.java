@@ -59,7 +59,7 @@ public class CsvReporter extends PeriodicTaskComponent {
 
     public CsvReporter(NBComponent node, Path reportTo, long intervalMs, MetricInstanceFilter filter,
                        NBLabels extraLabels) {
-        super(node, extraLabels, intervalMs, false);
+        super(node, extraLabels, intervalMs, false,"REPORT-CSV");
         this.component = node;
         this.reportTo = reportTo;
         this.filter = filter;

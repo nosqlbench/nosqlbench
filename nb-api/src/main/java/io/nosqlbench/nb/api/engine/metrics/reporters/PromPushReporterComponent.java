@@ -48,7 +48,7 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
     private String bearerToken;
 
     public PromPushReporterComponent(NBComponent parent, URI endpoint, long intervalMs, NBLabels nbLabels) {
-        super(parent,nbLabels.and("_type","prom-push"),intervalMs,true);
+        super(parent,nbLabels.and("_type","prom-push"),intervalMs,true,"REPORT-PROMPUSH");
         this.uri = endpoint;
         this.keyfilePath = NBEnvironment.INSTANCE
             .interpolateWithTimestamp("$NBSTATEDIR/prompush/prompush_apikey", System.currentTimeMillis())
