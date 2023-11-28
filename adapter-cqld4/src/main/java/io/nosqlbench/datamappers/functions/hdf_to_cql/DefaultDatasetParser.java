@@ -23,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DefaultDatasetParser implements DatasetParser {
     private static final String WHERE = "WHERE";
@@ -35,39 +34,19 @@ public class DefaultDatasetParser implements DatasetParser {
     private static final String CONDITIONS = "conditions";
     private static final String VALUE = "value";
     private static final String SPACE = " ";
-    private Map<String, Set<Operation>> operations = new HashMap<>();
+    private static final String SINGLE_QUOTE = "'";
+    private static final String COMMA = ",";
+    private static final String LEFT_PAREN = "(";
+    private static final String RIGHT_PAREN = ")";
+    private final Map<String, List<Operation>> operations = new HashMap<>();
     private static final Logger logger = LogManager.getLogger(DefaultDatasetParser.class);
 
-    private static class Operation {
-        private final String value;
-        private final String operator;
-        private final String conjunction;
-        private final boolean isNumeric;
-
-        public Operation(String value, String operator, String conjunction, boolean isNumeric) {
-            this.value = value;
-            this.operator = operator;
-            this.conjunction = conjunction;
-            this.isNumeric = isNumeric;
-        }
-        public String getValue() {
-            return value;
-        }
-        public String getOperator() {
-            return operator;
-        }
-        public String getConjunction() {
-            return conjunction;
-        }
-        public boolean isNumeric() {
-            return isNumeric;
-        }
+    private record Operation(String value, String operator, String conjunction, boolean isNumeric) {
     }
 
     @Override
     public String parse(String raw) {
         logger.debug(() -> "Parsing: " + raw);
-        System.out.println(raw);
         operations.clear();
         JsonObject conditions = JsonParser.parseString(raw).getAsJsonObject().get(CONDITIONS).getAsJsonObject();
         if (conditions.has(AND)) {
@@ -80,49 +59,50 @@ public class DefaultDatasetParser implements DatasetParser {
     }
 
     private String buildCql() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (!operations.isEmpty()) {
             sb.append(WHERE);
-            AtomicBoolean initial = new AtomicBoolean(true);
-            AtomicBoolean appendIn = new AtomicBoolean(true);
-            operations.forEach((k, v) -> {
-                v.forEach(e -> {
-                    if (initial.get()) {
-                        initial.set(false);
-                    } else if (e.getConjunction().equals(AND)) {
-                        sb.append(SPACE).append(e.getConjunction());
-                    }
-                    switch (e.getOperator()) {
+            String currentField = null;
+            for (int i = 0; i < operations.size(); i++) {
+                Map.Entry<String, List<Operation>> entry = (Map.Entry<String, List<Operation>>) operations.entrySet().toArray()[i];
+                String k = entry.getKey();
+                List<Operation> v = entry.getValue();
+                for (int j = 0; j < v.size(); j++) {
+                    Operation op = v.get(j);
+                    switch (op.operator()) {
                         case IN -> {
-                            if (appendIn.get()) {
-                                sb.append(" ").append(k).append(" ").append(e.getOperator()).append(" (");
-                                if (e.isNumeric()) {
-                                    sb.append(e.getValue());
-                                } else {
-                                    sb.append("'").append(e.getValue()).append("'");
-                                }
-                                appendIn.set(false);
+                            if (i == 0 && j == 0) {
+                                sb.append(SPACE).append(k).append(SPACE).append(op.operator()).append(SPACE).append(LEFT_PAREN);
+                                currentField = k;
                             } else {
-                                if (e.isNumeric()) {
-                                    sb.append(",").append(e.getValue()).append(")");
-                                } else {
-                                    sb.append(",").append("'").append(e.getValue()).append("'").append(")");
+                                if (!currentField.equals(k)) {
+                                    throw new RuntimeException("Cannot have multiple IN clauses with different fields");
                                 }
+                            }
+                            if (op.isNumeric()) {
+                                sb.append(op.value());
+                            } else {
+                                sb.append(SINGLE_QUOTE).append(op.value()).append(SINGLE_QUOTE);
+                            }
+                            if ((i == operations.size() - 1) && (j == v.size() - 1)) {
+                                sb.append(RIGHT_PAREN);
+                            } else {
+                                sb.append(COMMA);
                             }
                         }
                         case EQ -> {
-                            if (!e.isNumeric()) {
-                                sb.append(" ").append(k).append(e.getOperator()).append("'").append(e.getValue()).append("'");
+                            if (i != 0) sb.append(SPACE).append(op.conjunction());
+                            if (!op.isNumeric()) {
+                                sb.append(SPACE).append(k).append(op.operator()).append(SINGLE_QUOTE).append(op.value()).append(SINGLE_QUOTE);
                             } else {
-                                sb.append(" ").append(k).append(e.getOperator()).append(e.getValue());
+                                sb.append(SPACE).append(k).append(op.operator()).append(op.value());
                             }
                         }
-                        default ->
-                            throw new RuntimeException("Unknown operator: " + e.getOperator());
+                        default -> throw new RuntimeException("Unknown operator: " + op.operator());
                     }
 
-                });
-            });
+                }
+            }
         }
 
         return sb.toString();
@@ -140,7 +120,7 @@ public class DefaultDatasetParser implements DatasetParser {
                 if (operations.containsKey(field)) {
                     operations.get(field).add(new Operation(match.getAsJsonObject().get(VALUE).getAsString(), IN, OR, isNumeric));
                 } else {
-                    operations.put(field, new HashSet<>(Collections.singleton(
+                    operations.put(field, new ArrayList<>(Collections.singleton(
                         new Operation(match.getAsJsonObject().get(VALUE).getAsString(), IN, OR, isNumeric))));
                     }
             } else {
@@ -161,7 +141,7 @@ public class DefaultDatasetParser implements DatasetParser {
                 if (operations.containsKey(field)) {
                     operations.get(field).add(new Operation(match.getAsJsonObject().get(VALUE).getAsString(), EQ, AND, isNumeric));
                 } else {
-                    operations.put(field, new HashSet<>(Collections.singleton(
+                    operations.put(field, new ArrayList<>(Collections.singleton(
                         new Operation(match.getAsJsonObject().get(VALUE).getAsString(), EQ, AND, isNumeric))));
                 }
             } else {
@@ -175,10 +155,12 @@ public class DefaultDatasetParser implements DatasetParser {
         String test1 = "{\"conditions\": {\"and\": [{\"a\": {\"match\": {\"value\": 53}}}]}}";
         String test2 = "{\"conditions\": {\"and\": [{\"a\": {\"match\": {\"value\": \"thirteen\"}}}, {\"b\": {\"match\": {\"value\": 54}}}]}}";
         String test3 = "{\"conditions\": {\"or\": [{\"a\": {\"match\": {\"value\": \"nine\"}}}, {\"a\": {\"match\": {\"value\": 71}}}]}}";
-        String test4 = "{\"conditions\": {\"or\": [{\"a\": {\"match\": {\"value\": 99}}}, {\"b\": {\"match\": {\"value\": 71}}}]}}";
+        String test4 = "{\"conditions\": {\"or\": [{\"a\": {\"match\": {\"value\": \"nine\"}}}, {\"a\": {\"match\": {\"value\": 71}}}, {\"a\": {\"match\": {\"value\": 7}}}]}}";
+        String test5 = "{\"conditions\": {\"or\": [{\"a\": {\"match\": {\"value\": 99}}}, {\"b\": {\"match\": {\"value\": 71}}}]}}";
         System.out.println(parser.parse(test1));
         System.out.println(parser.parse(test2));
         System.out.println(parser.parse(test3));
         System.out.println(parser.parse(test4));
+        System.out.println(parser.parse(test5));
     }
 }
