@@ -16,19 +16,9 @@
 
 package io.nosqlbench.datamappers.functions.hdf_to_cql;
 
-public interface DatasetParser {
-    static DatasetParser parserFactory(String parsername) {
-        switch(parsername) {
-            case "default":
-                return new DefaultDatasetParser();
-            case "noop":
-                return new NoopDatasetParser();
-            case "jaw":
-                return new JAWDatasetParser();
-            default:
-                throw new RuntimeException("Unknown parser name: " + parsername);
-        }
+public class NoopDatasetParser implements DatasetParser {
+    @Override
+    public String parse(String raw) {
+        return raw;
     }
-
-    String parse(String raw);
 }
