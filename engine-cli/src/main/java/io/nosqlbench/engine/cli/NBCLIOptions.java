@@ -53,7 +53,7 @@ public class NBCLIOptions {
     private static final String userHome = System.getProperty("user.home");
 
 
-    private static final Map<String, String> DEFAULT_LABELS = Map.of("appname", "nosqlbench");
+    private static final Map<String, String> DEFAULT_LABELS = Map.of("jobname", "nosqlbench");
     private static final String METRICS_PREFIX = "--metrics-prefix";
     private static final String ANNOTATE_EVENTS = "--annotate";
 
@@ -136,8 +136,12 @@ public class NBCLIOptions {
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
 
-    private NBLabels labels = NBLabels.forKV("appname", "nosqlbench")
-        .and("node", SystemId.getNodeId());
+    private NBLabels labels =
+        NBLabels.forKV(
+            "jobname", "nosqlbench",
+            "instance", "default",
+            "node", SystemId.getNodeId()
+        );
     private final List<Cmd> cmdList = new ArrayList<>();
     private int logsMax;
     private boolean wantsVersionShort;
@@ -254,6 +258,10 @@ public class NBCLIOptions {
 
     public String getMetricsLabelSpec() {
         return metricsLabelSpec;
+    }
+
+    public NBLabels getLabels() {
+        return this.labels;
     }
 
     public enum Mode {
@@ -501,7 +509,7 @@ public class NBCLIOptions {
 
     private void addLabels(String labeldata) {
         NBLabels newLabels = NBLabelSpec.parseLabels(labeldata);
-        this.labels = this.labels.and(newLabels);
+        this.labels = newLabels.andDefault(this.labels);
     }
 
     private void parseAllOptions(final String[] args) {
@@ -626,7 +634,7 @@ public class NBCLIOptions {
             }
         }
         arglist = nonincludes;
-        NBCLIScenarioPreprocessor.rewriteScenarioCommands(arglist,wantsToIncludePaths);
+        NBCLIScenarioPreprocessor.rewriteScenarioCommands(arglist, wantsToIncludePaths);
         this.cmdList.addAll(CmdParser.parseArgvCommands(arglist));
 
         if (!arglist.isEmpty()) {

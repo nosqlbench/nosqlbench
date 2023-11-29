@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.labels;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 
@@ -169,6 +170,8 @@ public interface NBLabels {
      */
     String valueOf(String name);
 
+    Optional<String> valueOfOptional(String name);
+
     /**
      * Return a map representation of the label set, regardless of the underlying form.
      *
@@ -187,4 +190,7 @@ public interface NBLabels {
     NBLabels difference(NBLabels otherLabels);
 
     boolean isEmpty();
+
+    NBLabels andDefault(String name, String value);
+    NBLabels andDefault(NBLabels defaults);
 }

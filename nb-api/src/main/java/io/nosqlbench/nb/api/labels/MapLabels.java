@@ -201,6 +201,24 @@ public class MapLabels implements NBLabels {
     }
 
     @Override
+    public NBLabels andDefault(String name, String value) {
+        if (!this.labels.containsKey(name)) {
+            return this.and(name, value);
+        }
+        return this;
+    }
+
+    @Override
+    public NBLabels andDefault(NBLabels defaults) {
+        NBLabels updated = this;
+        Map<String, String> defaultMap = defaults.asMap();
+        for (String name : defaultMap.keySet()) {
+            updated = updated.andDefault(name,defaultMap.get(name));
+        }
+        return updated;
+    }
+
+    @Override
     public MapLabels and(NBLabels labels) {
         return new MapLabels(this.labels,labels.asMap());
     }
@@ -247,6 +265,13 @@ public class MapLabels implements NBLabels {
         final String only = labels.get(name);
         if (null == only) throw new RuntimeException("The specified value is null for key '" + name + '\'');
         return only;
+    }
+
+    public Optional<String> valueOfOptional(String name) {
+        if (!this.labels.containsKey(name)) return Optional.empty();
+        final String only = labels.get(name);
+        if (null == only) return Optional.empty();
+        return Optional.of(only);
     }
 
     @Override

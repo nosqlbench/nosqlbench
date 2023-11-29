@@ -66,7 +66,11 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         NBLabeledElement labelContext,
         String sessionName
     ) {
-        super(null, labelContext.getLabels().and("session", sessionName));
+        super(
+            null,
+            labelContext.getLabels()
+                .and("session", sessionName)
+        );
         this.sessionName = sessionName;
 
         this.clientMetricChecker = new ClientSystemMetricChecker(this, NBLabels.forKV(), 10);
