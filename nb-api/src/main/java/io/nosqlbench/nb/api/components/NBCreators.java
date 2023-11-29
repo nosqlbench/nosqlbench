@@ -126,7 +126,7 @@ public class NBCreators {
 //        return reporter;
 //    }
     public PromPushReporterComponent pushReporter(String endpoint, long millis, NBLabels extraLabels) {
-        PromPushReporterComponent reporter = new PromPushReporterComponent(this.base, URI.create(endpoint), millis, extraLabels);
+        PromPushReporterComponent reporter = new PromPushReporterComponent(this.base, endpoint, millis, extraLabels);
         return reporter;
     }
 
