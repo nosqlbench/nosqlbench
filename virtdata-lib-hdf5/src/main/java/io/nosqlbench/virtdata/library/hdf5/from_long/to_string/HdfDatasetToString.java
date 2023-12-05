@@ -31,15 +31,20 @@ public class HdfDatasetToString implements LongFunction<String> {
     private final HdfFile hdfFile;
     private final Dataset dataset;
     private final String separator;
+    private final String datasetAsString;
 
     public HdfDatasetToString(String filename, String dataset, String separator) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
         this.dataset = hdfFile.getDatasetByPath(dataset);
         this.separator = separator;
+        this.datasetAsString = parseDataset();
     }
 
-    @Override
-    public String apply(long value) {
+    public HdfDatasetToString(String filename, String dataset) {
+        this(filename, dataset, ",");
+    }
+
+    private String parseDataset() {
         String[] columnDataset = (String[])dataset.getData();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < columnDataset.length; i++) {
@@ -49,6 +54,11 @@ public class HdfDatasetToString implements LongFunction<String> {
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public String apply(long value) {
+        return datasetAsString;
     }
 
 }
