@@ -48,7 +48,8 @@ public abstract class NBInvokableCommand extends NBBaseComponent implements BiFu
             logger.debug("cmd produced: " + (resultObject==null ? "NULL" : resultObject.toString()));
         } catch (Exception e) {
             exception = e;
-            logger.error("error in command " + this.description() + ": " + exception);
+            logger.error("error in command (stack trace follows): " + this.description() + ": " + exception);
+            exception.printStackTrace(System.out);
         } finally {
             long endAt = System.currentTimeMillis();
             result = new NBCommandResult(context, startAt, endAt, exception);
