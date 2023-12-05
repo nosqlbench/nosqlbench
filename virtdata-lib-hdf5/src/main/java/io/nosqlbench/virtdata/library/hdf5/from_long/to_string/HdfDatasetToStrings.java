@@ -43,9 +43,7 @@ public class HdfDatasetToStrings extends AbstractHdfFileToVectorType implements 
         int[] sliceDimensions = new int[dims.length];
         sliceDimensions[0] = 1;
         if (dims.length > 1) {
-            for (int i = 1; i < dims.length; i++) {
-                sliceDimensions[i] = dims[i];
-            }
+            System.arraycopy(dims, 1, sliceDimensions, 1, dims.length - 1);
         }
         String payload = null;
         switch(dataset.getJavaType().getSimpleName().toLowerCase()) {
@@ -67,7 +65,7 @@ public class HdfDatasetToStrings extends AbstractHdfFileToVectorType implements 
         if (payload == null) {
             throw new RuntimeException("Unsupported datatype: " + dataset.getJavaType().getSimpleName());
         }
-        payload = payload.replaceAll("\\[", "").replaceAll("\\]", "");
+        payload = payload.replaceAll("\\[", "").replaceAll("]", "");
         return payload;
     }
 
