@@ -635,7 +635,8 @@ public class NBCLIOptions {
         }
         arglist = nonincludes;
         NBCLIScenarioPreprocessor.rewriteScenarioCommands(arglist, wantsToIncludePaths);
-        this.cmdList.addAll(CmdParser.parseArgvCommands(arglist));
+        LinkedList<Cmd> parsedCmds = CmdParser.parseArgvCommands(arglist);
+        this.cmdList.addAll(parsedCmds);
 
         if (!arglist.isEmpty()) {
             final String cmdParam = arglist.peekFirst();

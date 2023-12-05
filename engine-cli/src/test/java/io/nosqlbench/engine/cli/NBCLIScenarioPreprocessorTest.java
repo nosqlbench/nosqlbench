@@ -104,7 +104,7 @@ public class NBCLIScenarioPreprocessorTest {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario_test", "template_test", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
-        assertThat(cmds.get(0).getArgs()).isEqualTo(Map.of(
+        assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
             "alias", "with_template",
             "context", "template_test",
             "cycles", "20",
@@ -121,7 +121,7 @@ public class NBCLIScenarioPreprocessorTest {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario_test", "schema_only", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
-        assertThat(cmds.get(0).getArgs()).isEqualTo(Map.of(
+        assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
             "alias", "schema",
             "context", "schema_only",
             "cycles-test", "20",
@@ -134,7 +134,7 @@ public class NBCLIScenarioPreprocessorTest {
         NBCLIOptions opts1 = new NBCLIOptions(new String[]{"scenario_test", "schema_only", "doundef=20"});
         List<Cmd> cmds1 = opts1.getCommands();
         assertThat(cmds1.size()).isEqualTo(1);
-        assertThat(cmds1.get(0).getArgValue("cycles-test")).isNull();
+        assertThat(cmds1.get(0).getArgValueOrNull("cycles-test")).isNull();
     }
 
     @Test
@@ -175,7 +175,7 @@ public class NBCLIScenarioPreprocessorTest {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario_test", "schema_only", "cycles-test=20"});
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
-        assertThat(cmds.get(0).getArgs()).isEqualTo(Map.of(
+        assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
             "alias", "schema",
             "context", "schema_only",
             "cycles-test", "20",
@@ -188,7 +188,7 @@ public class NBCLIScenarioPreprocessorTest {
         NBCLIOptions opts1 = new NBCLIOptions(new String[]{"local/example_scenarios", "namedsteps.one", "testparam1=testvalue2"});
         List<Cmd> cmds1 = opts1.getCommands();
         assertThat(cmds1.size()).isEqualTo(1);
-        assertThat(cmds1.get(0).getArgValue("cycles_test")).isNull();
+        assertThat(cmds1.get(0).getArgValueOrNull("cycles_test")).isNull();
 
     }
 }

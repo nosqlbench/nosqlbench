@@ -62,7 +62,11 @@ public class NBCLIScenarioPreprocessor {
 
     public static void rewriteScenarioCommands(LinkedList<String> arglist, List<String> includes) {
 
-        String workloadName = arglist.removeFirst();
+        if (arglist.isEmpty()) {
+            return;
+        }
+
+        String workloadName = arglist.peekFirst();
         Optional<Content<?>> found = NBIO.all()
             .searchPrefixes("activities")
             .searchPrefixes(includes.toArray(new String[0]))
@@ -73,6 +77,7 @@ public class NBCLIScenarioPreprocessor {
         if (!found.isPresent()) {
             return;
         }
+        arglist.removeFirst();
         Content<?> workloadContent = found.orElseThrow();
 
 //        Optional<Path> workloadPathSearch = NBPaths.findOptionalPath(workloadName, "yaml", false, "activities");
@@ -83,7 +88,7 @@ public class NBCLIScenarioPreprocessor {
         while (!arglist.isEmpty()
             && !arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")
-            && !CmdType.anyMatches(arglist.peekFirst())) {
+            && CmdType.valueOfAnyCaseOrIndirect(arglist.peekFirst())==CmdType.indirect) {
             scenarioNames.add(arglist.removeFirst());
         }
         if (scenarioNames.isEmpty()) {

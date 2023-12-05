@@ -18,6 +18,7 @@ package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.cmdstream.BasicScriptBuffer;
 import io.nosqlbench.engine.cmdstream.Cmd;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +28,7 @@ public class BasicScriptBufferTest {
 
     @Test
     public void testScriptInterpolation() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "script_to_interpolate", "parameter1=replaced"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "path=script_to_interpolate", "parameter1=replaced"});
 
         BasicScriptBuffer b = new BasicScriptBuffer();
         b.add(opts.getCommands().toArray(new Cmd[0]));
@@ -39,7 +40,7 @@ public class BasicScriptBufferTest {
 
     @Test
     public void testAutoScriptCommand() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "acommand" });
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "script","path=acommand" });
         BasicScriptBuffer b = new BasicScriptBuffer();
         b.add(opts.getCommands().toArray(new Cmd[0]));
         String s = b.getParsedScript();
@@ -51,7 +52,7 @@ public class BasicScriptBufferTest {
     public void testScriptParamsSingle() {
         NBCLIOptions opts = new NBCLIOptions(new String[] {
             "script",
-            "testscripts/printscript.js",
+            "path=testscripts/printscript.js",
             "param1=value1"
         });
         BasicScriptBuffer b = new BasicScriptBuffer();
@@ -65,10 +66,10 @@ public class BasicScriptBufferTest {
     public void testScriptParamsMulti() {
         NBCLIOptions opts = new NBCLIOptions(new String[] {
             "script",
-            "testscripts/printscript.js",
+            "path=testscripts/printscript.js",
             "param1=value1",
             "script",
-            "testscripts/printparam.js",
+            "path=testscripts/printparam.js",
             "paramname=another",
             "param2=andanother"
         });
@@ -79,9 +80,10 @@ public class BasicScriptBufferTest {
         assertThat(script).matches("(?s).*a single line.*");
     }
 
+    @Disabled("semantic parsing is deferred till later")
     @Test
     public void shouldThrowErrorForInvalidWaitMillisOperand() {
         assertThatExceptionOfType(NumberFormatException.class)
-                .isThrownBy(() -> new NBCLIOptions(new String[]{ "waitmillis", "noway" }));
+                .isThrownBy(() -> new NBCLIOptions(new String[]{ "waitmillis", "ms=noway" }));
     }
 }

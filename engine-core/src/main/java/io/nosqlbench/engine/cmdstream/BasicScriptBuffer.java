@@ -68,8 +68,8 @@ public class BasicScriptBuffer implements ScriptBuffer {
 //                sb.append(Cmd.toJSONParams("params", cmd.getParams(), false));
 //                sb.append(";\n");
                 combineGlobalParams(scriptParams, cmd);
-                sb.append(cmd.getArgValue("script_fragment"));
-                if (cmd.getArgValue("script_fragment").endsWith(";")) {
+                sb.append(cmd.getArgValue("fragment"));
+                if (cmd.getArgValue("fragment").endsWith(";")) {
                     sb.append("\n");
                 }
                 break;
@@ -154,7 +154,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
         Content<?> one = NBIO.all().searchPrefixes("scripts").pathname(path).extensionSet("js").one();
         scriptData = one.asString();
 
-        StrInterpolator interpolator = new StrInterpolator(cmd.getArgs());
+        StrInterpolator interpolator = new StrInterpolator(cmd.getArgMap());
         scriptData = interpolator.apply(scriptData);
         return scriptData;
     }

@@ -44,7 +44,7 @@ public class NBBaseCommandTest {
         NBBufferedCommandContext ctx = NBCommandContext.builder().name("testing").build(NBComponent.EMPTY_COMPONENT);
         NBScriptedCommand cmd = NBScriptedCommand.ofScripted("testing", Map.of(),ctx, NBScriptedCommand.Invocation.EXECUTE_SCRIPT);
         cmd.add(new Cmd("fragment",Map.of(
-            "fragment",new CmdArg(new CmdParam("fragment",s->s,false),"=","fragment=\"print('loaded script environment...');\n\"")
+            "fragment",new CmdArg(new CmdParam("fragment",s->s,false),"=","print('loaded script environment...');")
         )));
 
         try {

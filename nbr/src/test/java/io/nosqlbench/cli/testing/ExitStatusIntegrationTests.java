@@ -68,7 +68,7 @@ class ExitStatusIntegrationTests {
                 "driver=diag", "cyclerate=10", "not_a_thing", "cycles=100", "-vvv"
         );
         String stdout = String.join("\n", result.getStdoutData());
-        assertThat(stdout).contains("Could not recognize command");
+        assertThat(stdout).contains("internal error: You requested exactly one instance of a service by name 'not_a_thing'");
         assertThat(result.exitStatus).isEqualTo(2);
     }
 

@@ -49,10 +49,18 @@ public class Cmd {
     }
 
 
+    public String getArgValueOrNull(String paramName) {
+        CmdArg cmdArg = this.cmdArgs.get(paramName);
+        if (cmdArg==null) {
+            return null;
+        }
+        return cmdArg.getValue();
+
+    }
     public String getArgValue(String paramName) {
         CmdArg cmdArg = this.cmdArgs.get(paramName);
         if (cmdArg==null) {
-            throw new BasicError("Could not get param value for undefined arg '" + paramName);
+            throw new BasicError("Could not get param value for undefined arg '" + paramName + "'");
         }
         return cmdArg.getValue();
     }
@@ -114,6 +122,7 @@ public class Cmd {
         return cmdType;
     }
 
+    // TODO: Since this replaced an implicit String, the types need to be disambiguated
     public Map<String, CmdArg> getArgs() {
         return cmdArgs;
     }

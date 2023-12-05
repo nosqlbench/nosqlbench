@@ -46,7 +46,7 @@ public class CmdParser {
     private record parameter(String name, String op, String value) {}
     private record command(String name){}
     private final static Pattern combinedPattern =
-        Pattern.compile("(?<varname>[a-zA-Z_][a-zA-Z0-9_.]+)(?<operator>=+)(?<value>.+)|(?<command>[a-zA-Z_][a-zA-Z0-9_.]+)",Pattern.DOTALL);
+        Pattern.compile("(?<varname>[a-zA-Z_][a-zA-Z0-9_.-]+)(?<operator>=+)(?<value>.+)|(?<command>[a-zA-Z_][a-zA-Z0-9_.]+)",Pattern.DOTALL);
     private final static Pattern commandName =Pattern.compile("^$");
     public static LinkedList<Cmd> parseArgvCommands(LinkedList<String> args) {
         LinkedList<Record> cmdstructs = new LinkedList<>();

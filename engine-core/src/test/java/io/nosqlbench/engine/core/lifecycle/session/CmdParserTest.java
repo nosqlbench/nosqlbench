@@ -35,7 +35,7 @@ class CmdParserTest {
         List<Cmd> cmds = CmdParser.parse("testcmd42");
         assertThat(cmds).hasSize(1);
         assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.indirect);
-        assertThat(cmds.get(0).getArgValue("name")).isEqualTo("testcmd42");
+        assertThat(cmds.get(0).getArgValue("_impl")).isEqualTo("testcmd42");
     }
 
     @Test
@@ -43,7 +43,7 @@ class CmdParserTest {
         List<Cmd> cmds = CmdParser.parse("testcmd43 param1=value1");
         assertThat(cmds).hasSize(1);
         assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.indirect);
-        assertThat(cmds.get(0).getArgValue("name")).isEqualTo("testcmd43");
+        assertThat(cmds.get(0).getArgValue("_impl")).isEqualTo("testcmd43");
         assertThat(cmds.get(0).getArgValue("param1")).isEqualTo("value1");
     }
 
@@ -52,7 +52,7 @@ class CmdParserTest {
         List<Cmd> cmds = CmdParser.parse("testcmd44 param1=\"value1\"");
         assertThat(cmds).hasSize(1);
         assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.indirect);
-        assertThat(cmds.get(0).getArgValue("name")).isEqualTo("testcmd44");
+        assertThat(cmds.get(0).getArgValue("_impl")).isEqualTo("testcmd44");
         assertThat(cmds.get(0).getArgValue("param1")).isEqualTo("value1");
     }
 
@@ -91,7 +91,7 @@ class CmdParserTest {
         LinkedList<Cmd> cmds = CmdParser.parseArgvCommands(new LinkedList<>(List.of("_cmd4", "param1=value1")));
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.indirect);
-        assertThat(cmds.get(0).getArgValue("name")).isEqualTo("_cmd4");
+        assertThat(cmds.get(0).getArgValue("_impl")).isEqualTo("_cmd4");
         assertThat(cmds.get(0).getArgValue("param1")).isEqualTo("value1");
     }
 

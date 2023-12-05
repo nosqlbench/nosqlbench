@@ -89,7 +89,7 @@ public class NBCLIArgsFile {
     LinkedHashSet<String> argsToPin = new LinkedHashSet<>();
     LinkedHashSet<String> argsToUnpin = new LinkedHashSet<>();
     private final Set<String> readPaths = new HashSet<>();
-    private Predicate<String> reservedPredicate = CmdType::anyMatches;
+    private Predicate<String> reservedPredicate = p -> CmdType.valueOfAnyCaseOrIndirect(p)!=CmdType.indirect;
 
     public NBCLIArgsFile() {
     }
