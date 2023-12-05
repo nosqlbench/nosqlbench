@@ -171,6 +171,9 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
     @Override
     public void applyRateSpec(SimRateSpec updatingSimRateSpec) {
         logger.info("rate spec:\n" + updatingSimRateSpec);
+        if (updatingSimRateSpec.getRate()==0d) {
+            logger.warn("setting a rate of 0 will yield undefined results");
+        }
         try {
             fillerLock.lock();
 
