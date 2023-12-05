@@ -23,6 +23,7 @@ import os.CommandResult;
 
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -38,4 +39,6 @@ public interface NBCommandContext extends NBComponent, BiFunction<NBInvokableCom
 
     default void doShutdown() {
     };
+
+    Map<String,Object> getContainerVars();
 }

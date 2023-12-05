@@ -33,6 +33,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class NBBufferedCommandContext extends NBBaseComponent implements NBCommandContext {
 
@@ -43,6 +47,7 @@ public class NBBufferedCommandContext extends NBBaseComponent implements NBComma
     private long startedAtMillis;
     private Exception error;
     private long endedAtMillis;
+    private final Map<String, Object> vars = new LinkedHashMap<>();
 
     public enum IOType {
         connected,
@@ -139,12 +144,48 @@ public class NBBufferedCommandContext extends NBBaseComponent implements NBComma
             }
 //            throw new RuntimeException(safeCmdResult.getException());
         }
+
+        Object object = safeCmdResult.getResultObject();
+        String stepname = getLabels().valueOfOptional("step").orElse("unknownstep");
+        if (object instanceof Map<?,?> map) {
+            map.forEach((k,v) -> {
+                logger.debug("setting command result for '" + stepname + "." + k + "' to '" + v.toString()+"'");
+                getContainerVars().put(stepname+"."+k,v.toString());
+            });
+            getContainerVars().put(stepname+"._map",map);
+        } else if (object instanceof List<?> list) {
+            for (int i = 0; i < list.size(); i++) {
+                getContainerVars().put(stepname+"."+String.valueOf(i),list.get(i));
+            }
+            getContainerVars().put(stepname+"._list",list);
+        } else if (object instanceof Set<?> set) {
+            getContainerVars().put(stepname+"._set",set);
+        } else if (object != null && object.getClass().isArray()) {
+            getContainerVars().put(stepname + "._array", object);
+        } else if (object !=null) {
+            getContainerVars().put(stepname + "._object", object);
+
+            // ignore
+//        } else {
+//
+//            RuntimeException error = new RuntimeException("Unrecognizable type to set context vars with:" + object.getClass().getCanonicalName());
+//            logger.error(error);
+////            throw new RuntimeException("Unrecognizable type to set context vars with:" + object.getClass().getCanonicalName());
+        } else {
+            logger.debug("no object was provided to set the context result");
+        }
+
         return safeCmdResult;
     }
 
     @Override
     public void doShutdown() {
         NBCommandContext.super.doShutdown();
+    }
+
+    @Override
+    public Map<String, Object> getContainerVars() {
+        return this.vars;
     }
 
     @Override
