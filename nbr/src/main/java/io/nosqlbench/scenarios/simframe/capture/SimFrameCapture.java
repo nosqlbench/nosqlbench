@@ -36,11 +36,7 @@ public class SimFrameCapture implements SimFrameResults {
     private final List<Criterion> criteria = new ArrayList<>();
     private final FrameSamples allFrames = new FrameSamples();
     private FrameSampleSet activeFrame;
-
-    private volatile boolean running = true;
-
     private final StabilityDetector stabilizer;
-
 
     public SimFrameCapture() {
         stabilizer = new StabilityDetector(0.1,0.98,this::getPartialValue, 10,5);

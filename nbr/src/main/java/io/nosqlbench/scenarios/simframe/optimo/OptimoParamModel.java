@@ -17,6 +17,7 @@
 package io.nosqlbench.scenarios.simframe.optimo;
 
 
+import io.nosqlbench.scenarios.simframe.planning.GenericParamModel;
 import org.apache.commons.math4.legacy.optim.SimpleBounds;
 
 import java.util.ArrayList;
@@ -24,19 +25,19 @@ import java.util.List;
 import java.util.function.DoubleConsumer;
 
 public class OptimoParamModel {
-    private final List<Param> params = new ArrayList<>();
+    private final List<GenericParamModel> params = new ArrayList<>();
 
     public OptimoParamModel add(String name, double min, double initial, double max, DoubleConsumer effector) {
         if (min>initial || initial > max) {
             throw new RuntimeException("parameters must be in min<initial<max order");
         }
-        this.params.add(new Param(name, min, initial, max, effector));
+        this.params.add(new GenericParamModel(name, min, initial, max, effector));
         return this;
     }
 
     public OptimoFrameParams apply(double[] values) {
         for (int i = 0; i < values.length; i++) {
-            params.get(i).effector.accept(values[i]);
+            params.get(i).effector().accept(values[i]);
         }
         return new OptimoFrameParams(this, values);
     }
@@ -48,7 +49,7 @@ public class OptimoParamModel {
     public double[] getInitialGuess() {
         double[] initialGuess = new double[params.size()];
         for (int i = 0; i < params.size(); i++) {
-            initialGuess[i]=params.get(i).initialGuess;
+            initialGuess[i]=params.get(i).initialGuess();
         }
         return initialGuess;
     }
@@ -56,7 +57,7 @@ public class OptimoParamModel {
     private double[] lowerBounds() {
         double[] lowerBounds = new double[params.size()];
         for (int i = 0; i < params.size(); i++) {
-            lowerBounds[i]=params.get(i).lowerBound;
+            lowerBounds[i]=params.get(i).lowerBound();
         }
         return lowerBounds;
     }
@@ -64,7 +65,7 @@ public class OptimoParamModel {
     private double[] upperBounds() {
         double[] upperBounds = new double[params.size()];
         for (int i = 0; i < params.size(); i++) {
-            upperBounds[i]=params.get(i).upperBound;
+            upperBounds[i]=params.get(i).upperBound();
         }
         return upperBounds;
     }
@@ -72,16 +73,13 @@ public class OptimoParamModel {
     public String summarizeParams(double[] paramValues) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < params.size(); i++) {
-            Param p = params.get(i);
-            sb.append(String.format("%30s % 15.2f [%f-%f]\n", p.name, paramValues[i],p.lowerBound,p.upperBound));
+            GenericParamModel p = params.get(i);
+            sb.append(String.format("%30s % 15.2f [%f-%f]\n", p.name(), paramValues[i],p.lowerBound(),p.upperBound()));
         }
         return sb.toString();
     }
 
-    public static record Param(
-        String name,
-        double lowerBound,
-        double initialGuess,
-        double upperBound,
-        DoubleConsumer effector) {}
+    public List<GenericParamModel> getParams() {
+        return this.params;
+    }
 }

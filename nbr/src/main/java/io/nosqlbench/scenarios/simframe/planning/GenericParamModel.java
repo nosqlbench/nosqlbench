@@ -14,30 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.optimo;
+package io.nosqlbench.scenarios.simframe.planning;
 
+import java.util.function.DoubleConsumer;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-public class OptimoFrameParams{
-
-    OptimoParamModel model;
-    double[] paramValues;
-
-    public OptimoFrameParams(OptimoParamModel model, double[] paramValues) {
-        this.model = model;
-        this.paramValues = paramValues;
-    }
-
-    @Override
-    public String toString() {
-        return model.summarizeParams(paramValues);
-    }
-
-    public double[] paramValues() {
-        return paramValues;
-    }
-
+public record GenericParamModel(
+    String name,
+    double lowerBound,
+    double initialGuess,
+    double upperBound,
+    DoubleConsumer effector) {
 }

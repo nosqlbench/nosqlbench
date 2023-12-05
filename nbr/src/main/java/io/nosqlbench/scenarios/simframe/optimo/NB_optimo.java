@@ -32,6 +32,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.findmax.NB_findmax;
+import io.nosqlbench.scenarios.simframe.planning.SimFrame;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
 import io.nosqlbench.scenarios.simframe.stabilization.StatFunctions;
 import org.apache.commons.math4.legacy.exception.MathIllegalStateException;
@@ -45,6 +46,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.LockSupport;
 
@@ -75,31 +77,9 @@ public class NB_optimo extends NBBaseCommand {
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
         // TODO: having "scenario" here as well as in "named scenario" in workload templates is confusing. Make this clearer.
 
-        Optional<String> optionalActivityName = params.maybeGet("activity");
-        Optional<Activity> optionalActivity = optionalActivityName.flatMap(controller::getActivity);
-        if (optionalActivityName.isPresent() && optionalActivity.isEmpty()) {
-            throw new RuntimeException("you specified activity '" + optionalActivityName.get() + "' but it was not found.");
-        }
-        Activity flywheel = optionalActivity.or(controller::getSoloActivity)
-            .orElseThrow(() -> new RuntimeException("You didn't provide the name of an activity to attach to, nor was there a solo activity available in this context"));
-
-        stdout.println("running optimo on activity '" + flywheel.getAlias() + "'");
-        // Start the flywheel at an "idle" speed, even if the user hasn't set it
-        flywheel.onEvent(new ParamChange<>(new CycleRateSpec(100.0d, 1.1d, SimRateSpec.Verb.restart)));
-        flywheel.getActivityDef().setEndCycle(Long.MAX_VALUE);
-
-        // await flywheel actually spinning, or timeout with error
-        NBMetricTimer result_success_timer = flywheel.find().timer("name:result_success");
-        for (int i = 0; i < 1000; i++) {
-            if (result_success_timer.getCount() > 0) {
-                System.out.printf("saw traffic after %.2f seconds\n", ((double) i / 10));
-                break;
-            }
-            LockSupport.parkNanos(100_000_000);
-        }
-        if (result_success_timer.getCount() == 0) {
-            throw new RuntimeException("Unable to see traffic on activity " + flywheel.getAlias() + " after 10 seconds.");
-        }
+        Activity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));
+        stdout.println("starting analysis on activity '" + flywheel.getAlias() + "'");
+        SimFrameUtils.awaitActivity(flywheel);
 
         SimFrameJournal<OptimoFrameParams> journal = new SimFrameJournal<>();
         OptimoParamModel model = new OptimoParamModel();
@@ -140,9 +120,9 @@ public class NB_optimo extends NBBaseCommand {
         }
         stdout.println("result:" + result);
 
-        stdout.println("bestrun:\n" + journal.bestRun());
-
-        return null;
+        SimFrame<OptimoFrameParams> best = journal.bestRun();
+        stdout.println("bestrun:\n" + best);
+        return best.params();
         // could be a better result if the range is arbitrarily limiting the parameter space.
     }
 

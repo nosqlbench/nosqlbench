@@ -17,7 +17,6 @@
 package io.nosqlbench.scenarios.simframe.capture;
 
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
-import io.nosqlbench.scenarios.simframe.findmax.FindMaxFrameParams;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,9 +26,16 @@ import java.util.List;
 /**
  * Aggregate usage patterns around capturing and using simulation frame data.
  */
-public class SimFrameJournal<P> extends ArrayList<SimFrame<P>> implements JournalView {
+public class SimFrameJournal<P> extends ArrayList<SimFrame<P>> implements JournalView<P> {
+
+    public SimFrameJournal() {
+    }
+    protected SimFrameJournal(SimFrameJournal<P> simFrames) {
+        this.addAll(simFrames);
+    }
+
     public void record(P params, FrameSampleSet samples) {
-        add(new SimFrame(params, samples));
+        add(new SimFrame<P>(params, samples));
     }
 
     @Override
@@ -56,7 +62,7 @@ public class SimFrameJournal<P> extends ArrayList<SimFrame<P>> implements Journa
     }
 
     @Override
-    public SimFrame<P> before(SimFrame frame) {
+    public SimFrame<P> before(SimFrame<P> frame) {
         int beforeIdx=frame.index()-1;
         if (beforeIdx>=0 && beforeIdx<=size()-1) {
             return frames().get(beforeIdx);
@@ -64,10 +70,17 @@ public class SimFrameJournal<P> extends ArrayList<SimFrame<P>> implements Journa
     }
 
     @Override
-    public SimFrame<P> after(SimFrame frame) {
+    public SimFrame<P> after(SimFrame<P> frame) {
         int afterIdx=frame.index()+1;
         if (afterIdx>=0 && afterIdx<=size()-1) {
             return frames().get(afterIdx);
         } else throw new RuntimeException("Invalid index for after: " + afterIdx + " with " + size() + " frames");
+    }
+
+    @Override
+    public JournalView<P> reset() {
+        var prior = new SimFrameJournal<>(this);
+        this.clear();
+        return prior;
     }
 }

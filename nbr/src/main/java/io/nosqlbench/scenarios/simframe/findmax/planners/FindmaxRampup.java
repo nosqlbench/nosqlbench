@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax;
+package io.nosqlbench.scenarios.simframe.findmax.planners;
 
+import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
+import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.scenarios.simframe.capture.JournalView;
+import io.nosqlbench.scenarios.simframe.findmax.FindMaxFrameParams;
+import io.nosqlbench.scenarios.simframe.findmax.FindmaxSearchParams;
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
 import io.nosqlbench.scenarios.simframe.planning.SimFramePlanner;
 import org.apache.logging.log4j.LogManager;
@@ -24,11 +31,16 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Comparator;
 
-public class FindMaxPlanner extends SimFramePlanner<FindmaxSearchParams, FindMaxFrameParams> {
-    private final Logger logger = LogManager.getLogger(FindMaxPlanner.class);
+public class FindmaxRampup extends SimFramePlanner<FindmaxSearchParams, FindMaxFrameParams> {
+    private final Logger logger = LogManager.getLogger(FindmaxRampup.class);
 
-    public FindMaxPlanner(FindmaxSearchParams findMaxSettings) {
-        super(findMaxSettings);
+    public FindmaxRampup(NBCommandParams analyzerParams) {
+        super(analyzerParams);
+    }
+
+    @Override
+    public FindmaxSearchParams getConfig(NBCommandParams params) {
+        return new FindmaxSearchParams(params);
     }
 
     public FindMaxFrameParams initialStep() {
@@ -94,6 +106,10 @@ public class FindMaxPlanner extends SimFramePlanner<FindmaxSearchParams, FindMax
         }
     }
 
+    @Override
+    public void applyParams(FindMaxFrameParams params, Activity flywheel) {
+        flywheel.onEvent(ParamChange.of(new CycleRateSpec(params.rate_shelf()+params.rate_delta(), 1.1d, SimRateSpec.Verb.restart)));
+    }
 
 
 }

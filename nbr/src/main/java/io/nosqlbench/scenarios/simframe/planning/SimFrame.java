@@ -16,8 +16,11 @@
 
 package io.nosqlbench.scenarios.simframe.planning;
 
+import io.nosqlbench.scenarios.simframe.capture.FrameSample;
 import io.nosqlbench.scenarios.simframe.capture.FrameSampleSet;
-import io.nosqlbench.scenarios.simframe.findmax.FindMaxFrameParams;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Capture the control inputs as well as the samples of a sample period of a simulated workload.
@@ -39,4 +42,5 @@ public record SimFrame<P>(
     public String toString() {
         return params.toString()+samples.toString();
     }
+
 }

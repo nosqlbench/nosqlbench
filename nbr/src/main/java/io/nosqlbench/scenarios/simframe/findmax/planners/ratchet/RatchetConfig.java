@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax;
+package io.nosqlbench.scenarios.simframe.findmax.planners.ratchet;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
 
@@ -22,28 +22,27 @@ import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
  * These search parameters are based on the original findmax algorithm, and
  * should be reduced down to the minimum set needed.
  */
-public record FindmaxSearchParams(
+public record RatchetConfig(
     int sample_time_ms,
     int sample_max,
     double sample_incr,
     double rate_base,
     double rate_step,
-    double rate_incr,
-    int average_of,
-    long min_settling_ms
+    double rate_minstep,
+    double rate_scaledown,
+    int max_attempts
 ) {
-    public FindmaxSearchParams(NBCommandParams params) {
+    public RatchetConfig(NBCommandParams params) {
         this(
-            params.maybeGet("sample_time_ms").map(Integer::parseInt).orElse(4000),
+            params.maybeGet("sample_time_ms").map(Integer::parseInt).orElse(1000),
             params.maybeGet("sample_max").map(Integer::parseInt).orElse(10000),
             params.maybeGet("sample_incr").map(Double::parseDouble).orElse(1.2d),
-            params.maybeGet("rate_base").map(Double::parseDouble).orElse(0d),
-            params.maybeGet("rate_step").map(Double::parseDouble).orElse(100d),
-            params.maybeGet("rate_incr").map(Double::parseDouble).orElse(2d),
-            params.maybeGet("average_of").map(Integer::parseInt).orElse(2),
-            params.maybeGet("min_settling_ms").map(Long::parseLong).orElse(4000L)
+            params.maybeGet("rate_base").map(Double::parseDouble).orElse(5d),
+            params.maybeGet("rate_step").map(Double::parseDouble).orElse(1000d),
+            params.maybeGet("rate_minstep").map(Double::parseDouble).orElse(1000d),
+            params.maybeGet("rate_scaledown").map(Double::parseDouble).orElse(0.25),
+            params.maybeGet("max_attempts").map(Integer::parseInt).orElse(3)
         );
 
     }
-
 }

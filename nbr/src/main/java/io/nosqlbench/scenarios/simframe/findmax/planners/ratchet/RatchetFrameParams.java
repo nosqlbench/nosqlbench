@@ -14,30 +14,15 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.optimo;
+package io.nosqlbench.scenarios.simframe.findmax.planners.ratchet;
 
+import io.nosqlbench.scenarios.simframe.planning.GenericParamModel;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+public record RatchetFrameParams(
+    double rate,
+    int attempt,
+    double step_size,
+    String description
 
-public class OptimoFrameParams{
-
-    OptimoParamModel model;
-    double[] paramValues;
-
-    public OptimoFrameParams(OptimoParamModel model, double[] paramValues) {
-        this.model = model;
-        this.paramValues = paramValues;
-    }
-
-    @Override
-    public String toString() {
-        return model.summarizeParams(paramValues);
-    }
-
-    public double[] paramValues() {
-        return paramValues;
-    }
-
+) {
 }

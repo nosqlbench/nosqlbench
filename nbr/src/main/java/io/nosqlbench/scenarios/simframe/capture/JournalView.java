@@ -30,4 +30,5 @@ public interface JournalView<P> {
     SimFrame<P> bestRun();
     SimFrame<P> before(SimFrame<P> frame);
     SimFrame<P> after(SimFrame<P> frame);
+    JournalView<P> reset();
 }
