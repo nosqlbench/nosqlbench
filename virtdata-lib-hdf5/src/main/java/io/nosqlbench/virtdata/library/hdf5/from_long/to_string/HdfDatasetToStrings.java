@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.function.LongFunction;
 
 /**
- * This function reads a dataset from an HDF5 file. The dataset itself is not
+ * This function reads a dataset of any supported type from an HDF5 file. The dataset itself is not
  * read into memory, only the metadata (the "dataset" Java Object). The lambda function
  * reads a single vector from the dataset, based on the long input value.
  */

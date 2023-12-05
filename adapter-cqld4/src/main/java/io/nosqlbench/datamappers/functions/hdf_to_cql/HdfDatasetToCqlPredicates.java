@@ -25,6 +25,10 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
 
+/**
+ * Binding function that accepts a long input value for the cycle and returns a string consisting of the
+ * CQL predicate parsed from a single record in an HDF5 dataset
+ */
 @ThreadSafeMapper
 @Categories(Category.experimental)
 public class HdfDatasetToCqlPredicates implements LongFunction<String> {
@@ -33,7 +37,12 @@ public class HdfDatasetToCqlPredicates implements LongFunction<String> {
     private final int recordCount;
     private final DatasetParser parser;
 
-
+    /**
+     * Create a new binding function that accepts a long input value for the cycle and returns a string
+     * @param filename
+     * @param datasetname
+     * @param parsername
+     */
     public HdfDatasetToCqlPredicates(String filename, String datasetname, String parsername) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
         dataset = hdfFile.getDatasetByPath(datasetname);

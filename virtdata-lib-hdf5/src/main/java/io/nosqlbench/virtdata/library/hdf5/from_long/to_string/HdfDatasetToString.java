@@ -25,6 +25,13 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
 
+/**
+ * This function reads a vector dataset from an HDF5 file. The entire dataset is parsed  into a single
+ * String Object with the discreet values separated by the user supplied separator character. It is
+ * intended for use only with small datasets where the entire dataset can be read into memory and there
+ * is no need to read individual vectors from the dataset.
+ * The lambda function simply returns the String representation of the dataset.
+ */
 @ThreadSafeMapper
 @Categories(Category.experimental)
 public class HdfDatasetToString implements LongFunction<String> {
@@ -33,6 +40,13 @@ public class HdfDatasetToString implements LongFunction<String> {
     private final String separator;
     private final String datasetAsString;
 
+    /**
+     * Create a new binding function that accepts a long input value for the cycle and returns a string representation
+     * of the specified dataset
+     * @param filename
+     * @param dataset
+     * @param separator
+     */
     public HdfDatasetToString(String filename, String dataset, String separator) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
         this.dataset = hdfFile.getDatasetByPath(dataset);

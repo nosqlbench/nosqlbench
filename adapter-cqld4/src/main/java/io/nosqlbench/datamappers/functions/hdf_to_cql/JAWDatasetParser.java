@@ -15,7 +15,12 @@
  */
 
 package io.nosqlbench.datamappers.functions.hdf_to_cql;
-
+/**
+ * This class is used to parse the raw JSON from the HDF dataset into a CQL predicate. This implementation
+ * accepts a string consisting of the desired CQL predicate as translated from the original jsonl files
+ * and simply adds the WHERE keyword to the beginning of the string if it is not already present, hence
+ * the new Just Add Where (JAW) parser.
+ */
 public class JAWDatasetParser implements DatasetParser {
     private static final String WHERE = "WHERE";
     @Override

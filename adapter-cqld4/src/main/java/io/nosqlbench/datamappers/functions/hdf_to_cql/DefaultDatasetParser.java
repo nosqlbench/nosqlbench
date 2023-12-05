@@ -22,6 +22,11 @@ import com.google.gson.JsonParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * This class is used to parse the raw JSON from the HDF dataset into a CQL predicate. This is the default
+ * implementation. It accepts a JSON string of the form found at https://github.com/qdrant/ann-filtering-benchmark-datasets
+ * and converts it into a CQL predicate in String form
+ */
 public class DefaultDatasetParser implements DatasetParser {
     private static final String WHERE = "WHERE";
     private static final String MATCH = "match";

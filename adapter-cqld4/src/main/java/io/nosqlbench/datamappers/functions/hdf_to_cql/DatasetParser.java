@@ -16,7 +16,16 @@
 
 package io.nosqlbench.datamappers.functions.hdf_to_cql;
 
+/**
+ * This interface is used to parse the raw JSON from the HDF dataset into a CQL predicate.
+ */
 public interface DatasetParser {
+
+    /**
+     * Return the specified class to parse the raw JSON from the HDF dataset into a CQL predicate.
+     * @param parsername
+     * @return A new instance of the specified parser class.
+     */
     static DatasetParser parserFactory(String parsername) {
         return switch (parsername) {
             case "default" -> new DefaultDatasetParser();
