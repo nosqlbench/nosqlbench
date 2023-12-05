@@ -21,6 +21,7 @@ import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.hdf5.from_long.AbstractHdfFileToVectorType;
 
+import java.util.Arrays;
 import java.util.function.LongFunction;
 
 /**
@@ -46,7 +47,28 @@ public class HdfDatasetToStrings extends AbstractHdfFileToVectorType implements 
                 sliceDimensions[i] = dims[i];
             }
         }
-        return ((String[])dataset.getData(sliceOffset, sliceDimensions))[0];
+        String payload = null;
+        switch(dataset.getJavaType().getSimpleName().toLowerCase()) {
+            case "string" ->
+                payload = ((String[])dataset.getData(sliceOffset, sliceDimensions))[0];
+            case "int" ->
+                payload = Arrays.toString(((int[][]) dataset.getData(sliceOffset, sliceDimensions))[0]);
+            case "float" ->
+                payload = Arrays.toString(((float[][]) dataset.getData(sliceOffset, sliceDimensions))[0]);
+            case "short" ->
+                payload = Arrays.toString(((short[][]) dataset.getData(sliceOffset, sliceDimensions))[0]);
+            case "long" ->
+                payload = Arrays.toString(((long[][]) dataset.getData(sliceOffset, sliceDimensions))[0]);
+            case "double" ->
+                payload = Arrays.toString(((double[][]) dataset.getData(sliceOffset, sliceDimensions))[0]);
+            case "char" ->
+                payload = String.valueOf(((char[][])dataset.getData(sliceOffset, sliceDimensions))[0]);
+        }
+        if (payload == null) {
+            throw new RuntimeException("Unsupported datatype: " + dataset.getJavaType().getSimpleName());
+        }
+        payload = payload.replaceAll("\\[", "").replaceAll("\\]", "");
+        return payload;
     }
 
 }
