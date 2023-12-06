@@ -152,6 +152,9 @@ public class StabilityDetector implements Runnable {
             double value = source.getAsDouble();
             apply(value);
             double stabilityFactor = computeStability();
+//            if (Double.isNaN(stabilityFactor)) {
+//                System.out.println("NaN stability factor");
+//            }
 
             if (stabilityFactor > threshold) {
                 detectionTime = ((double) (nextCheckAt - startedAt)) / 1000d;

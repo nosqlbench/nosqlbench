@@ -46,7 +46,8 @@ public class SimFrameCapture implements SimFrameResults {
         if (activeFrame ==null)  {
             return 0.0d;
         } else {
-            return activeFrame.value();
+            double value = activeFrame.value();
+            return value;
         }
     }
 
