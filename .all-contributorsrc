@@ -479,6 +479,36 @@
         "code",
         "ideas"
       ]
+    },
+    {
+      "login": "ShaunakDas88",
+      "name": "Shaunak Das",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11130580?v=4",
+      "profile": "https://github.com/ShaunakDas88",
+      "contributions": [
+        "bug",
+        "business",
+        "code",
+        "content",
+        "data",
+        "doc",
+        "design",
+        "example",
+        "ideas",
+        "infra",
+        "maintenance",
+        "mentoring",
+        "platform",
+        "plugin",
+        "projectManagement",
+        "research",
+        "review",
+        "security",
+        "tool",
+        "test",
+        "userTesting"
+      ]
     }
-  ]
+  ],
+  "commitType": "docs"
 }
