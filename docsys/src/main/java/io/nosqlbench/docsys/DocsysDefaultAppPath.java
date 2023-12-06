@@ -16,8 +16,8 @@
 
 package io.nosqlbench.docsys;
 
-import io.nosqlbench.api.docsapi.Docs;
-import io.nosqlbench.api.docsapi.DocsBinder;
+import io.nosqlbench.nb.api.docsapi.Docs;
+import io.nosqlbench.nb.api.docsapi.DocsBinder;
 import io.nosqlbench.docsys.api.DocsysStaticManifest;
 
 //@Service(DocsysStaticManifest.class)

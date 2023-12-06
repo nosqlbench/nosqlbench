@@ -42,7 +42,7 @@ public final class FrameSample {
         if (active) {
             calculateBasis();
         }
-        double result = (Double.isNaN(criterion().weight()) ? 1.0d : criterion().weight()) * basis;
+        double result = (Double.isNaN(criterion().weight()) ? 1.0d : (criterion().weight()) * basis);
         return result;
     }
 
@@ -149,13 +149,13 @@ public final class FrameSample {
         return switch (criterion().evaltype()) {
             case deltaT ->
                 String.format(
-                    "% 3d %30s derived=% 12.3f ⋅ W[% 3.3f] =% 12.5f ΔV:%12.5f ΔT=%5.3f",
+                    "% 5d %30s  basis=% 12.3f ⋅ W=%1.1f C=% 17.5f   ΔV %12.5f  ΔT %5.3fS",
                     index, criterion.name(),
                     basis, criterion().weight(), weightedValue(),
                     deltaV(), deltaT());
             case direct,remix ->
                 String.format(
-                    "% 3d %30s derived=% 12.3f ⋅ W[% 3.3f] =% 12.5f",
+                    "% 5d %30s  basis=% 12.3f ⋅ W=%1.1f C=% 17.5f",
                     index, criterion.name(),
                     basis, criterion().weight(), weightedValue());
         };

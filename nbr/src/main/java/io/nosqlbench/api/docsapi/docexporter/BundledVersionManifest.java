@@ -16,10 +16,10 @@
 
 package io.nosqlbench.api.docsapi.docexporter;
 
-import io.nosqlbench.api.content.NBIO;
-import io.nosqlbench.api.docsapi.BundledMarkdownManifest;
-import io.nosqlbench.api.docsapi.Docs;
-import io.nosqlbench.api.docsapi.DocsBinder;
+import io.nosqlbench.nb.api.nbio.NBIO;
+import io.nosqlbench.nb.api.docsapi.BundledMarkdownManifest;
+import io.nosqlbench.nb.api.docsapi.Docs;
+import io.nosqlbench.nb.api.docsapi.DocsBinder;
 import io.nosqlbench.nb.annotations.Service;
 
 @Service(value=BundledMarkdownManifest.class,selector = "versions")

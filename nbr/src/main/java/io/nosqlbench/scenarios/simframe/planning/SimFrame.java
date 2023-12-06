@@ -16,15 +16,21 @@
 
 package io.nosqlbench.scenarios.simframe.planning;
 
+import io.nosqlbench.scenarios.simframe.capture.FrameSample;
 import io.nosqlbench.scenarios.simframe.capture.FrameSampleSet;
-import io.nosqlbench.scenarios.simframe.findmax.FindMaxFrameParams;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Capture the control inputs as well as the samples of a sample period of a simulated workload.
  * @param params The parameters which control the simulated workload during the sample window
  * @param samples The measured samples, including key metrics and criteria for the sample window
  */
-public record SimFrame(FindMaxFrameParams params, FrameSampleSet samples) {
+public record SimFrame<P>(
+    P params,
+    FrameSampleSet samples
+) {
     public double value() {
         return samples().value();
     }
@@ -32,5 +38,9 @@ public record SimFrame(FindMaxFrameParams params, FrameSampleSet samples) {
         return samples.index();
     }
 
+    @Override
+    public String toString() {
+        return params.toString()+samples.toString();
+    }
 
 }

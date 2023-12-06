@@ -17,14 +17,16 @@
 package io.nosqlbench.engine.core.lifecycle.session;
 
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class ResultContext implements AutoCloseable {
     private final Consumer<ResultContext> receiver;
     private ExecutionResult.Status status;
 
-    ResultContext(Consumer<ResultContext> receiver) {
+    public ResultContext(Consumer<ResultContext> receiver) {
         this.receiver = receiver;
     }
 
@@ -33,12 +35,15 @@ public class ResultContext implements AutoCloseable {
     public final StringBuilder buf = new StringBuilder();
     private long stopMillis;
 
-    public void error(Exception error) {
+    public ResultContext error(Exception error) {
         this.error = error;
+        error();
+        return this;
     }
 
-    public void output(CharSequence cs) {
+    public ResultContext output(CharSequence cs) {
         buf.append(cs);
+        return this;
     }
     public String output() {
         return buf.toString();
@@ -60,11 +65,13 @@ public class ResultContext implements AutoCloseable {
         return new ExecutionResult(this.startMillis,this.stopMillis,buf.toString(), error);
     }
 
-    public void ok() {
+    public ResultContext ok() {
         this.status= ExecutionResult.Status.OK;
+        return this;
     }
-    public void error() {
+    public ResultContext error() {
         this.status= ExecutionResult.Status.ERROR;
+        return this;
     }
 
     public long startMillis() {
@@ -77,5 +84,16 @@ public class ResultContext implements AutoCloseable {
 
     public Exception getException() {
         return error;
+    }
+
+    public ResultContext apply(Supplier<ExecutionResult> resultSource) {
+        ExecutionResult executionResult = resultSource.get();
+        if (executionResult.getException()!=null) {
+            this.error(executionResult.getException());
+            output(executionResult.getIOLog());
+        } else {
+            this.ok();
+        }
+        return this;
     }
 }

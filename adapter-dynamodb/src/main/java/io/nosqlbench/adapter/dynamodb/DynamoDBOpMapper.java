@@ -25,7 +25,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
-import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
 public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
 

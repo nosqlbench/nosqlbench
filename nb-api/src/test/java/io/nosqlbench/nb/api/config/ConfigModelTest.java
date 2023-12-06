@@ -16,7 +16,10 @@
 
 package io.nosqlbench.nb.api.config;
 
-import io.nosqlbench.api.config.standard.*;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.Param;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

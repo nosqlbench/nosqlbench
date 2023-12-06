@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.extensions.csvoutput;
 
-import io.nosqlbench.api.csvoutput.CsvOutputPluginWriter;
-import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.nb.api.csvoutput.CsvOutputPluginWriter;
+import io.nosqlbench.nb.api.components.NBBaseComponent;
 import org.assertj.core.util.Files;
 import org.graalvm.polyglot.Value;
 import org.junit.jupiter.api.Test;

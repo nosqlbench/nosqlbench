@@ -22,11 +22,11 @@
  */
 package io.nosqlbench.cqlgen.transformers;
 
-import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
 import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import io.nosqlbench.cqlgen.model.*;
 import io.nosqlbench.cqlgen.transformers.namecache.*;
+import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.logging.log4j.LogManager;

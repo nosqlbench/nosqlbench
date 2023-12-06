@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.process;
 
-import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.PolyglotException;

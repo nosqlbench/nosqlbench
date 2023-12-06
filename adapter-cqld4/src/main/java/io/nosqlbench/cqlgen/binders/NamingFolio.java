@@ -16,12 +16,12 @@
 
 package io.nosqlbench.cqlgen.binders;
 
-import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.cqlgen.model.CqlColumnBase;
 import io.nosqlbench.cqlgen.model.CqlModel;
 import io.nosqlbench.cqlgen.model.CqlTable;
 import io.nosqlbench.cqlgen.core.CGElementNamer;
-import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.labels.NBLabeledElement;
 
 import java.util.*;
 

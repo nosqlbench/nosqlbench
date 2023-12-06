@@ -16,8 +16,8 @@
 
 package io.nosqlbench.virtdata.library.ivecfvec;
 
-import io.nosqlbench.api.content.Content;
-import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.nb.api.nbio.Content;
+import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;

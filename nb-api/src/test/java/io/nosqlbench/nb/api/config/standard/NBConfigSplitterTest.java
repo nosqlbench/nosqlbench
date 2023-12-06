@@ -16,7 +16,6 @@
 
 package io.nosqlbench.nb.api.config.standard;
 
-import io.nosqlbench.api.config.standard.NBConfigSplitter;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

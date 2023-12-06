@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

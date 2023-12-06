@@ -35,7 +35,7 @@ more RawMarkdownSource services via SPI. This is most easily done with a
 ## RawMarkdownSource endpoints provide Content
 
 Each instance of a RawMarkdownSource service provides all of the individual markdown files it finds
-indirectly as io.nosqlbench.nb.api.content.Content, which allows the internal file content to be
+indirectly as io.nosqlbench.nb.api.nbio.Content, which allows the internal file content to be
 read appropriately regardless of whether it comes from a classpath resource stream, a file on disk,
 or even a dynamic source like function metadata.
 
@@ -213,7 +213,7 @@ making it searchable for users.
 
 ## Topic Mapping Logic
 
-Topics may be transitive. There is no clear rationale for avoiding this, and at least one good  
+Topics may be transitive. There is no clear rationale for avoiding this, and at least one good
 reason to allow it. The method for validating and resolving topic aggregations, where there may be
 layers of dependencies, is explained here:
 

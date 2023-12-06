@@ -15,7 +15,7 @@
  */
 package io.nosqlbench.engine.core.lifecycle.scenario.context;
 
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
@@ -28,11 +28,11 @@ import java.util.stream.Collectors;
  */
 public class ActivityBindings implements Bindings, ProxyObject {
 
-    private final ScenarioActivitiesController scenario;
+    private final ContextActivitiesController scenario;
     private final Map<String, Bindings> elementMap = new HashMap<String, Bindings>();
 
-    public ActivityBindings(ScenarioActivitiesController scenarioActivitiesController) {
-        this.scenario = scenarioActivitiesController;
+    public ActivityBindings(ContextActivitiesController contextActivitiesController) {
+        this.scenario = contextActivitiesController;
     }
 
     @Override

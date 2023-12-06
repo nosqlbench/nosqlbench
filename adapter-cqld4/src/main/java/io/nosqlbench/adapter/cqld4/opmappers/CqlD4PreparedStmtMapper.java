@@ -28,8 +28,8 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
-import io.nosqlbench.api.config.params.ParamsParser;
-import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.nb.api.config.params.ParamsParser;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 
 import java.util.List;

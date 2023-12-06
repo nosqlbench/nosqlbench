@@ -33,11 +33,11 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>virtdata-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.nosqlbench</groupId>-->
+<!--            <artifactId>virtdata-api</artifactId>-->
+<!--            <version>${revision}</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>io.nosqlbench</groupId>

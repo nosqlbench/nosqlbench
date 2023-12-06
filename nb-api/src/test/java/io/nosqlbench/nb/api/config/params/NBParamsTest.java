@@ -17,8 +17,6 @@
 package io.nosqlbench.nb.api.config.params;
 
 
-import io.nosqlbench.api.config.params.Element;
-import io.nosqlbench.api.config.params.NBParams;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;

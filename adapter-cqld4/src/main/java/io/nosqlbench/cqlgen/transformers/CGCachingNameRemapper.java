@@ -16,8 +16,8 @@
 
 package io.nosqlbench.cqlgen.transformers;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
+import io.nosqlbench.nb.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Combinations;
 
 import java.util.HashMap;

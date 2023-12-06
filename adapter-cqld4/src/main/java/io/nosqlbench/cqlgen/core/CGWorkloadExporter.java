@@ -18,9 +18,9 @@ package io.nosqlbench.cqlgen.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.api.apps.BundledApp;
-import io.nosqlbench.api.content.Content;
-import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.nb.api.apps.BundledApp;
+import io.nosqlbench.nb.api.nbio.Content;
+import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.cqlgen.api.BindingsLibrary;
 import io.nosqlbench.cqlgen.binders.Binding;
 import io.nosqlbench.cqlgen.binders.BindingsAccumulator;

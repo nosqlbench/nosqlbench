@@ -16,7 +16,6 @@
 
 package io.nosqlbench.nb.api.config.standard;
 
-import io.nosqlbench.api.config.standard.NBTypeConverter;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

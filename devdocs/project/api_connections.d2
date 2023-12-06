@@ -1,0 +1,32 @@
+direction: right
+classes: {
+ api: {
+  style: {
+   fill: lightblue
+  }
+ }
+}
+classes: {
+ auxapi: {
+  style: {
+   fill: lightgreen
+  }
+ }
+}
+
+
+adapters-api -> nb-api
+engine-api -> nb-api
+virtdata-api -> nb-api
+engine-api -> virtdata-api
+engine-api -> adapters-api
+nb-api -> nb-annotations
+virtdata-api -> virtdata-lang
+nb5 -> runtime
+nb5 -> adapters
+adapters -> adapters-api
+runtime -> engine
+engine -> engine-api
+*-api.class: api
+*-annotations.class: auxapi
+*-lang.class: auxapi

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.core;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.labels.NBLabeledElement;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

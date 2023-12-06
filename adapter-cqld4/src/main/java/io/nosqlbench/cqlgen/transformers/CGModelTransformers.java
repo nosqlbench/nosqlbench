@@ -16,8 +16,8 @@
 
 package io.nosqlbench.cqlgen.transformers;
 
-import io.nosqlbench.api.config.standard.NBConfigurable;
-import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBConfigurable;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.cqlgen.api.CGModelTransformer;
 import io.nosqlbench.cqlgen.api.CGTransformerConfigurable;
 import io.nosqlbench.cqlgen.core.CGWorkloadExporter;

@@ -16,16 +16,13 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBSceneBuffer;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBScenario;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenarioResult;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosExecutor;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.ScenariosResults;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.engine.core.lifecycle.session.NBCommandInvoker;
+import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,28 +30,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DirectRuntimeScenarioTests {
 
     private final TestComponent testC = new TestComponent("testroot", "testroot");
-    @Disabled("enable before merge")
-    @Test
-    public void testDirect() {
-        TestComponent testC = new TestComponent("testroot", "testroot");
-        SC_activity_error sc1 = new SC_activity_error(TestComponent.EMPTY_COMPONENT, "test");
-        ScenariosExecutor executor = new ScenariosExecutor(TestComponent.EMPTY_COMPONENT, "test", 1);
-        executor.execute(sc1, Map.of());
-        ScenariosResults results = executor.awaitAllResults();
-        System.out.println(results);
-    }
     @Test
     public void test_SC_linkedinput() {
-        NBScenario scenario = new SC_linkedinput(testC,"test_SC_linkedinput");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_linkedinput").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_linkedinput(testC,"test_SC_linkedinput");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
         Pattern p = Pattern.compile(".*started leader.*started follower.*stopped leader.*stopped follower.*", Pattern.DOTALL);
         assertThat(p.matcher(result.getIOLog()).matches()).isTrue();
 
     }
     @Test
     public void testSC_activity_init_error() {
-        SC_activity_init_error scenario = new SC_activity_init_error(testC, "SC_activity_init_error");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("testSC_activity_init_error").build(TestComponent.EMPTY_COMPONENT);
+        NB_activity_init_error command = new NB_activity_init_error(testC, "SC_activity_init_error");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
         assertThat(result.getException()).isNotNull();
         assertThat(result.getException().getMessage()).contains("Unknown config parameter 'unknown_config'");
         assertThat(result.getException()).isNotNull();
@@ -63,30 +52,34 @@ public class DirectRuntimeScenarioTests {
 
     @Test
     public void test_SC_activity_error() {
-        NBScenario scenario = new SC_activity_error(testC,"test_SC_activity_error");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_activity_error").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_activity_error(testC,"test_SC_activity_error");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
         assertThat(result.getException()).isNotNull();
         assertThat(result.getException().getMessage()).contains("For input string: \"unparsable\"");
 
     }
     @Test
     public void test_SC_await_finished() {
-        NBScenario scenario = new SC_await_finished(testC,"test_SC_await_finished");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_await_finished").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_await_finished(testC,"test_SC_await_finished");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
         assertThat(result.getIOLog()).contains("awaited activity");
     }
     @Test
     public void test_SC_basicdiag() {
-        NBScenario scenario = new SC_basicdiag(testC,"test_SC_basicdiag");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_basicdiag").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_basicdiag(testC,"test_SC_basicdiag");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
         assertThat(result.getIOLog().indexOf("starting activity basic_diag")).isGreaterThanOrEqualTo(0);
         assertThat(result.getIOLog().indexOf("stopping activity basic_diag")).isGreaterThanOrEqualTo(1);
         assertThat(result.getIOLog().indexOf("stopped activity basic_diag")).isGreaterThanOrEqualTo(2);
     }
     @Test
     public void test_SC_blockingrun() {
-        NBScenario scenario = new SC_blockingrun(testC,"test_SC_blockingrun");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_blockingrun").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_blockingrun(testC,"test_SC_blockingrun");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
         assertThat(result.getIOLog()).matches(Pattern.compile(".*running.*finished.*running.*finished.*",Pattern.DOTALL));
     }
 
@@ -94,8 +87,9 @@ public class DirectRuntimeScenarioTests {
 
     @Test
     public void test_SC_cocycledelay_bursty() {
-        NBScenario scenario = new SC_cocycledelay_bursty(testC,"test_SC_cocycledelay_bursty");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_cocycledelay_bursty").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_cocycledelay_bursty(testC,"test_SC_cocycledelay_bursty");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
         result.report();
     }
 
@@ -103,106 +97,124 @@ public class DirectRuntimeScenarioTests {
     @Disabled("enable before merge")
     @Test
     public void test_SC_cocycledelay_strict() {
-        NBScenario scenario = new SC_cocycledelay_strict(testC,"test_SC_cocycledelay_strict");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("testest_SC_cocycledelay_strictting").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_cocycledelay_strict(testC,"test_SC_cocycledelay_strict");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
 
     @Disabled("enable before merge")
     @Test
     public void test_SC_cycle_rate() {
-        NBScenario scenario = new SC_cycle_rate(testC,"test_SC_cycle_rate");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_cycle_rate").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_cycle_rate(testC,"test_SC_cycle_rate");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_cycle_rate_change() {
-        NBScenario scenario = new SC_cycle_rate_change(testC,"test_SC_cycle_rate_change");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_cycle_rate_change").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_cycle_rate_change(testC,"test_SC_cycle_rate_change");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_extension_csvmetrics() {
-        NBScenario scenario = new SC_extension_csvmetrics(testC,"test_SC_extension_csvmetrics");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_extension_csvmetrics").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_extension_csvmetrics(testC,"test_SC_extension_csvmetrics");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_extension_csvoutput() {
-        NBScenario scenario = new SC_extension_csvoutput(testC,"test_SC_extension_csvoutput");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_extension_csvoutput").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_extension_csvoutput(testC,"test_SC_extension_csvoutput");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_extension_histostatslogger() {
-        NBScenario scenario = new SC_extension_histostatslogger(testC,"test_SC_extension_histostatslogger");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_extension_histostatslogger").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_extension_histostatslogger(testC,"test_SC_extension_histostatslogger");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_extension_shutdown_hook() {
-        NBScenario scenario = new SC_extension_shutdown_hook(testC,"test_SC_extension_shutdown_hook");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_extension_shutdown_hook").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_extension_shutdown_hook(testC,"test_SC_extension_shutdown_hook");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Test
     public void test_SC_extension_example() {
-        NBScenario scenario = new SC_extension_example(testC,"test_SC_extension_example");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
-//        samples.exitWithCode();
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_extension_example").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_extension_example(testC,"test_SC_extension_example");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
+        //        samples.exitWithCode();
         assertThat(result.getIOLog()).contains("3+5=8");
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_histologger() {
-        NBScenario scenario = new SC_histologger(testC,"test_SC_histologger");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("tetest_SC_histologgersting").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_histologger(testC,"test_SC_histologger");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_optimo() {
-        NBScenario scenario = new SC_optimo_test(testC,"test_SC_optimo");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_optimo").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_optimo_test(testC,"test_SC_optimo");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
         System.out.println(result);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_params_variable() {
-        NBScenario scenario = new SC_params_variable(testC,"test_SC_params_variable");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_params_variable").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_params_variable(testC,"test_SC_params_variable");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_readmetrics() {
-        NBScenario scenario = new SC_readmetrics(testC,"test_SC_readmetrics");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_readmetrics").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_readmetrics(testC,"test_SC_readmetrics");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_speedcheck() {
-        NBScenario scenario = new SC_speedcheck(testC,"test_SC_speedcheck");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_speedcheck").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_speedcheck(testC,"test_SC_speedcheck");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_start_stop_diag() {
-        NBScenario scenario = new SC_start_stop_diag(testC,"test_SC_start_stop_diag");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_start_stop_diag").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_start_stop_diag(testC,"test_SC_start_stop_diag");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Test
     public void test_SC_threadchange() {
-        NBScenario scenario = new SC_threadchange(testC,"test_SC_threadchange");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_threadchange").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_threadchange(testC,"test_SC_threadchange");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
     @Disabled("enable before merge")
     @Test
     public void test_SC_threadspeeds() {
-        NBScenario scenario = new SC_threadspeeds(testC,"test_SC_threadspeeds");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario));
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_threadspeeds").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_threadspeeds(testC,"test_SC_threadspeeds");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
     }
 
     @Test
     public void test_SC_undef_param() {
-        NBScenario scenario = new SC_undef_param(testC, "test_SC_undef_param");
-        ScenarioResult result = scenario.apply(NBSceneBuffer.traced(scenario).params(Map.of("one", "two", "three", "four")));
+        //.params(Map.of("one", "two", "three", "four")
+        NBBufferedCommandContext testC = NBBufferedCommandContext.builder().name("test_SC_undef_param").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_undef_param(testC, "test_SC_undef_param");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
         String out = result.getIOLog();
         assertThat(out).matches(Pattern.compile(".*after overriding .*:null.*",Pattern.DOTALL));
     }

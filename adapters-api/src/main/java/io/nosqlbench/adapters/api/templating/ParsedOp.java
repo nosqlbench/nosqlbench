@@ -17,16 +17,15 @@
 package io.nosqlbench.adapters.api.templating;
 
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.api.labels.NBLabelSpec;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.config.fieldreaders.DynamicFieldReader;
-import io.nosqlbench.api.config.fieldreaders.StaticFieldReader;
-import io.nosqlbench.api.config.standard.NBConfigError;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.errors.OpConfigError;
-import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.nb.api.labels.NBLabelSpec;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.config.fieldreaders.DynamicFieldReader;
+import io.nosqlbench.nb.api.config.fieldreaders.StaticFieldReader;
+import io.nosqlbench.nb.api.config.standard.NBConfigError;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.errors.OpConfigError;
+import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.NBBaseComponent;
 import io.nosqlbench.engine.api.templating.ObjectCache;
 import io.nosqlbench.engine.api.templating.ParsedTemplateMap;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;

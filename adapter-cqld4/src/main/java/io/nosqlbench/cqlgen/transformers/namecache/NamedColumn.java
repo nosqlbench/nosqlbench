@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.transformers.namecache;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.labels.NBLabeledElement;
 
 import java.util.Map;
 import java.util.function.Function;

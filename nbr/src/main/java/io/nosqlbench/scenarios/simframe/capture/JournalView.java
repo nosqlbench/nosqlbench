@@ -23,11 +23,12 @@ import java.util.List;
 /**
  * Provide an observer-only view of a simulation journal
  */
-public interface JournalView {
-    List<SimFrame> frames();
-    SimFrame last();
-    SimFrame beforeLast();
-    SimFrame bestRun();
-    SimFrame before(SimFrame frame);
-    SimFrame after(SimFrame frame);
+public interface JournalView<P> {
+    List<SimFrame<P>> frames();
+    SimFrame<P> last();
+    SimFrame<P> beforeLast();
+    SimFrame<P> bestRun();
+    SimFrame<P> before(SimFrame<P> frame);
+    SimFrame<P> after(SimFrame<P> frame);
+    JournalView<P> reset();
 }

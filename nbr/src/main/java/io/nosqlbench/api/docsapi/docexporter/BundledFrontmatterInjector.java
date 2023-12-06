@@ -16,7 +16,7 @@
 
 package io.nosqlbench.api.docsapi.docexporter;
 
-import io.nosqlbench.api.markdown.aggregator.MutableMarkdown;
+import io.nosqlbench.nb.api.markdown.aggregator.MutableMarkdown;
 
 import java.util.Locale;
 

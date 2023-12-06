@@ -19,7 +19,7 @@ package io.nosqlbench.adapter.amqp;
 import io.nosqlbench.adapter.amqp.dispensers.AmqpMsgRecvOpDispenser;
 import io.nosqlbench.adapter.amqp.dispensers.AmqpMsgSendOpDispenser;
 import io.nosqlbench.adapter.amqp.ops.AmqpTimeTrackOp;
-import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;

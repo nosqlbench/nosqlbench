@@ -20,13 +20,57 @@ package io.nosqlbench.scenarios.simframe.findmax;
  * These parameters are calculated by the planner based on previous simulation frame history.
  */
 public record FindMaxFrameParams(
+    /**
+     * The base rate upon which we add higher deltas
+     */
     double rate_shelf,
-    double rate_delta,
-    long sample_time_ms,
-    long settling_time_ms,
-    String description
+
+        /**
+         * The incremental rate which we stack on top of the base rate to find a new limit
+         */
+        double rate_delta,
+        /**
+         * How many millis we sample the current frame for
+         */
+        long sample_time_ms,
+        /**
+         * How many millis we let the workload settle for to achieve stability, such as when it has recently
+         * be in in over-saturation mode with a too-high delta
+         */
+        long settling_time_ms,
+        /**
+         * Narrate the reason for the current parameters being set the way the are
+         */
+        String description
+
 ) {
     public double computed_rate() {
-        return rate_shelf+rate_delta;
+        return rate_delta + rate_shelf;
     }
+
+
+//    public FindMaxFrameParams(double rate_shelf, double rate_delta, long sample_time_ms, long settling_time_ms, String description) {
+//        this.rate_shelf = rate_shelf;
+//        this.rate_delta = rate_delta;
+//        this.sample_time_ms = sample_time_ms;
+//        this.settling_time_ms = settling_time_ms;
+//        this.description = description;
+//    }
+//
+//    public double computed_rate() {
+//        return rate_shelf+rate_delta;
+//    }
+//
+//    public double rate_shelf() {
+//        return rate_shelf;
+//    }
+//
+//    public double rate_delta() {
+//        return rate_delta;
+//    }
+//
+//    public long sample_time_ms() {
+//        return sample_time_ms;
+//    }
+
 }

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.docsys.api;
 
-import io.nosqlbench.api.docsapi.DocsBinder;
+import io.nosqlbench.nb.api.docsapi.DocsBinder;
 
 public interface DocsysDynamicManifest {
     DocsBinder getDocs();

@@ -16,10 +16,10 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.nb.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.components.NBComponent;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 

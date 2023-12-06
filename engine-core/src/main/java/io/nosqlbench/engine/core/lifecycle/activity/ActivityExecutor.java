@@ -16,27 +16,27 @@
 package io.nosqlbench.engine.core.lifecycle.activity;
 
 import com.codahale.metrics.Gauge;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBComponentSubScope;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.nb.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.components.NBComponentExecutionScope;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityimpl.MotorState;
-import io.nosqlbench.api.annotations.Annotation;
-import io.nosqlbench.api.annotations.Layer;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.engine.activityimpl.ParameterMap;
+import io.nosqlbench.nb.api.annotations.Annotation;
+import io.nosqlbench.nb.api.annotations.Layer;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateImage;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
-import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
+import io.nosqlbench.virtdata.userlibs.apps.valuechecker.IndexedThreadFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -64,7 +64,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
     private static final Logger logger = LogManager.getLogger(ActivityExecutor.class);
     private static final Logger activitylogger = LogManager.getLogger("ACTIVITY");
 
-    private final List<Motor<?>> motors = new ArrayList<>();
+    private final LinkedList<Motor<?>> motors = new LinkedList<>();
     private final Activity activity;
     private final ActivityDef activityDef;
     private final RunStateTally tally;
@@ -242,7 +242,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
      * @param activityDef
      *     the activityDef for this activity instance
      */
-    private void adjustMotorCountToThreadParam(ActivityDef activityDef) {
+    private void adjustMotorCountToThreadParam(ActivityDef activityDef) { // TODO: Ensure that threads area allowed to complete their current op gracefully
         logger.trace(() -> ">-pre-adjust->" + getSlotStatus());
 
         reduceActiveMotorCountDownToThreadParam(activityDef);
@@ -274,6 +274,18 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         if (activityDef.getThreads()==0) {
             logger.warn("setting threads to zero is not advised. At least one thread has to be active to keep the activity alive.");
         }
+//        LinkedList<Motor<?>> toremove = new LinkedList<>();
+//        while (activityDef.getThreads()>motors.size()) {
+//            Motor<?> motor = motors.removeLast();
+//            toremove.addFirst(motor);
+//        }
+//        for (Motor<?> motor : toremove) {
+//            motor.requestStop();
+//        }
+//        for (Motor<?> motor : toremove) {
+//            motor.removeState();
+//        }
+//
         while (motors.size() > activityDef.getThreads()) {
             Motor motor = motors.get(motors.size() - 1);
             logger.trace(() -> "Stopping cycle motor thread:" + motor);
@@ -379,7 +391,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
 
     @Override
     public ExecutionResult call() throws Exception {
-        try (NBComponentSubScope scope = new NBComponentSubScope(activity)) {
+        try (NBComponentExecutionScope scope = new NBComponentExecutionScope(activity)) {
 
             shutdownHook = new ActivityExecutorShutdownHook(this);
             Runtime.getRuntime().addShutdownHook(shutdownHook);

@@ -15,7 +15,7 @@
  */
 package io.nosqlbench.engine.core.lifecycle.process;
 
-import io.nosqlbench.api.Shutdownable;
+import io.nosqlbench.nb.api.lifecycle.Shutdownable;
 
 import java.util.LinkedList;
 

@@ -42,11 +42,11 @@
             <version>${revision}</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-diag</artifactId>
-            <version>${revision}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.nosqlbench</groupId>-->
+<!--            <artifactId>adapter-diag</artifactId>-->
+<!--            <version>${revision}</version>-->
+<!--        </dependency>-->
 
     </dependencies>
 

@@ -17,12 +17,12 @@
 package io.nosqlbench.adapters.api.activityimpl.uniform;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.adapters.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBComponent;
-import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.nb.api.config.standard.*;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.NBBaseComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -16,11 +16,11 @@
 
 package io.nosqlbench.engine.core.metadata;
 
-import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.api.content.Content;
-import io.nosqlbench.api.content.NBIO;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.nb.api.nbio.Content;
+import io.nosqlbench.nb.api.nbio.NBIO;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.engine.api.activityapi.core.ActivityType;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import io.nosqlbench.nb.annotations.Service;

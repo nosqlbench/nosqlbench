@@ -9,7 +9,7 @@ expression : (lvalue ASSIGN)? mgCall ;
 
 mgCall :
  ( inputType INPUTTYPE )?
- ( funcName '(' (arg (',' arg )* )? ')' )
+ ( funcName '(' (cmdParam (',' cmdParam )* )? ')' )
  ( OUTPUTTYPE outputType )?
  ;
 
@@ -18,7 +18,7 @@ inputType : ID;
 funcName: ID;
 outputType : ID;
 
-arg : ( ref | mgCall | value );
+cmdParam : ( ref | mgCall | value );
 ref : ('$' ID );
 value : ( floatValue | integerValue | stringValue);
 stringValue : SSTRING_LITERAL | DSTRING_LITERAL ;

@@ -16,9 +16,9 @@
 
 package io.nosqlbench.docapi;
 
-import io.nosqlbench.api.docsapi.BundledMarkdownManifest;
-import io.nosqlbench.api.docsapi.Docs;
-import io.nosqlbench.api.docsapi.DocsBinder;
+import io.nosqlbench.nb.api.docsapi.BundledMarkdownManifest;
+import io.nosqlbench.nb.api.docsapi.Docs;
+import io.nosqlbench.nb.api.docsapi.DocsBinder;
 import io.nosqlbench.nb.annotations.Service;
 
 @Service(value = BundledMarkdownManifest.class, selector = "bundled-markdown-test-docs")

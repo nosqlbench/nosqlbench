@@ -17,15 +17,14 @@
 package io.nosqlbench.adapter.amqp;
 
 import io.nosqlbench.adapter.amqp.ops.AmqpTimeTrackOp;
-import io.nosqlbench.adapter.diag.DriverAdapterLoader;
-import io.nosqlbench.api.config.standard.NBConfigModel;
-import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

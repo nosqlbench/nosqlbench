@@ -18,7 +18,7 @@ package io.nosqlbench.virtdata.library.hdf5.from_long;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
-import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.nb.api.nbio.NBIO;
 
 public abstract class AbstractHdfFileToVectorType {
     protected final HdfFile hdfFile;

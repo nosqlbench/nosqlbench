@@ -16,8 +16,8 @@
 
 package io.nosqlbench.adapters.api.activityconfig.rawyaml;
 
-import io.nosqlbench.api.engine.util.Tagged;
-import io.nosqlbench.api.errors.OpConfigError;
+import io.nosqlbench.nb.api.engine.util.Tagged;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

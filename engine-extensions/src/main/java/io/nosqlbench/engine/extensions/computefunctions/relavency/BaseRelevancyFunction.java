@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.extensions.computefunctions.relavency;
 
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.engine.metrics.wrappers.RelevancyFunction;
+import io.nosqlbench.nb.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyFunction;
 
 public abstract class BaseRelevancyFunction implements RelevancyFunction {
     private final String name;

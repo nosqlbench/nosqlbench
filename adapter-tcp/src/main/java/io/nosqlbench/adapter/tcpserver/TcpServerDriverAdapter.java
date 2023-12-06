@@ -15,11 +15,10 @@
  */
 
 package io.nosqlbench.adapter.tcpserver;
-import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapter.stdout.StdoutDriverAdapter;
-import io.nosqlbench.api.config.standard.ConfigModel;
-import io.nosqlbench.api.config.standard.NBConfigModel;
-import io.nosqlbench.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
@@ -27,8 +26,8 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.cqlgen.api;
 
-import io.nosqlbench.components.NBNamedElement;
+import io.nosqlbench.nb.api.components.NBNamedElement;
 import io.nosqlbench.cqlgen.model.CqlModel;
 
 import java.util.function.Function;

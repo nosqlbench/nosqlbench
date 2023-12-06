@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.script.bindings;
 
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
@@ -29,9 +29,9 @@ public class PolyglotScenarioController {
 
     private static final Logger logger = LogManager.getLogger("SCENARIO/POLYGLOT");
 
-    private final ScenarioActivitiesController controller;
+    private final ContextActivitiesController controller;
 
-    public PolyglotScenarioController(ScenarioActivitiesController inner) {
+    public PolyglotScenarioController(ContextActivitiesController inner) {
         this.controller = inner;
     }
 

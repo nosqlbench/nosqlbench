@@ -17,9 +17,9 @@
 package io.nosqlbench.adapters.api.activityconfig;
 
 import com.amazonaws.util.StringInputStream;
-import io.nosqlbench.api.content.Content;
-import io.nosqlbench.api.content.NBIO;
-import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.nb.api.nbio.Content;
+import io.nosqlbench.nb.api.nbio.NBIO;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;

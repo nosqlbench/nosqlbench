@@ -37,6 +37,9 @@ public class FrameSampleSet extends ArrayList<FrameSample> {
         double product = 1.0;
         for (FrameSample sample : this) {
             double weighted = sample.weightedValue();
+            if (Double.isNaN(weighted)||Double.isInfinite(weighted)) {
+                throw new RuntimeException("Not a real value for '" + sample.criterion().name() + "': " + weighted);
+            }
             product *= weighted;
         }
         return product;
@@ -46,9 +49,9 @@ public class FrameSampleSet extends ArrayList<FrameSample> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("FRAME % 5d  VALUE %10.5f\n", index(), value()));
+        sb.append(String.format("FRAME% 5d VALUE %10.5f\n", index(), value()));
         for (int i = 0; i < this.size(); i++) {
-            sb.append(i==this.size()-1 ? "┗━▶ ": "┣━▶ ");
+            sb.append(i==this.size()-1 ? "┗━▶  ": "┣━▶  ");
             sb.append(get(i).toString()).append("\n");
         }
         return sb.toString();

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.scenarios.simframe.capture;
 
-import io.nosqlbench.scenarios.simframe.stats.StabilityDetector;
+import io.nosqlbench.scenarios.simframe.stabilization.StabilityDetector;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,26 +36,24 @@ public class SimFrameCapture implements SimFrameResults {
     private final List<Criterion> criteria = new ArrayList<>();
     private final FrameSamples allFrames = new FrameSamples();
     private FrameSampleSet activeFrame;
-
-    private volatile boolean running = true;
-
     private final StabilityDetector stabilizer;
 
-
     public SimFrameCapture() {
-        stabilizer = new StabilityDetector(1.0,100,this::getPartialValue, 1000,100,10);
+        stabilizer = new StabilityDetector(0.1,0.98,this::getPartialValue, 10,5);
     }
 
     private double getPartialValue() {
         if (activeFrame ==null)  {
             return 0.0d;
         } else {
-            return activeFrame.value();
+            double value = activeFrame.value();
+            return value;
         }
     }
 
     public void awaitSteadyState() {
         stabilizer.run();
+        System.out.println(stabilizer);
     }
 
 

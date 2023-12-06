@@ -16,8 +16,11 @@
 
 package io.nosqlbench.adapter.diag.optasks;
 
-import io.nosqlbench.api.config.standard.*;
 import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.Param;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

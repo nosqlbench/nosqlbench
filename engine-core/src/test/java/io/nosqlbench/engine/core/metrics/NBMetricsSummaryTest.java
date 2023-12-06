@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.core.metrics;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.engine.metrics.DeltaHdrHistogramReservoir;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;

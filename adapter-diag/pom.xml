@@ -58,7 +58,7 @@
         </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-api</artifactId>
+            <artifactId>engine-core</artifactId>
             <version>${revision}</version>
             <scope>compile</scope>
         </dependency>

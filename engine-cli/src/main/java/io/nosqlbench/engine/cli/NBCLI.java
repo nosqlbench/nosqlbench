@@ -19,23 +19,22 @@ package io.nosqlbench.engine.cli;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
-import io.nosqlbench.api.annotations.Annotation;
-import io.nosqlbench.api.annotations.Layer;
-import io.nosqlbench.api.apps.BundledApp;
-import io.nosqlbench.api.content.Content;
-import io.nosqlbench.api.content.NBIO;
-import io.nosqlbench.api.engine.metrics.instruments.NBFunctionGauge;
-import io.nosqlbench.api.engine.metrics.reporters.CsvReporter;
-import io.nosqlbench.api.engine.metrics.reporters.MetricInstanceFilter;
-import io.nosqlbench.api.engine.metrics.reporters.PromPushReporterComponent;
-import io.nosqlbench.api.engine.util.Unit;
-import io.nosqlbench.api.errors.BasicError;
-import io.nosqlbench.api.labels.NBLabeledElement;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.api.logging.NBLogLevel;
-import io.nosqlbench.api.metadata.SessionNamer;
-import io.nosqlbench.api.metadata.SystemId;
-import io.nosqlbench.components.NBBaseComponent;
+import io.nosqlbench.engine.cmdstream.CmdType;
+import io.nosqlbench.nb.api.annotations.Annotation;
+import io.nosqlbench.nb.api.annotations.Layer;
+import io.nosqlbench.nb.api.apps.BundledApp;
+import io.nosqlbench.nb.api.nbio.Content;
+import io.nosqlbench.nb.api.nbio.NBIO;
+import io.nosqlbench.nb.api.engine.metrics.reporters.CsvReporter;
+import io.nosqlbench.nb.api.engine.metrics.reporters.MetricInstanceFilter;
+import io.nosqlbench.nb.api.engine.util.Unit;
+import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.logging.NBLogLevel;
+import io.nosqlbench.nb.api.metadata.SessionNamer;
+import io.nosqlbench.nb.api.metadata.SystemId;
+import io.nosqlbench.nb.api.components.NBBaseComponent;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
@@ -54,13 +53,11 @@ import io.nosqlbench.nb.annotations.ServiceSelector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
-import picocli.CommandLine;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -86,9 +83,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
     private String sessionName;
     private String sessionCode;
     private long sessionTime;
-    private NBLabels labels = NBLabels.forKV("appname","nosqlbench");
+    private NBLabels labels;
 
-    private ClientSystemMetricChecker clientMetricChecker;
 
     public NBCLI(final String commandName) {
         this.commandName = commandName;
@@ -158,7 +154,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         NBCLI.loggerConfig.setConsoleLevel(NBLogLevel.ERROR);
         this.sessionTime = System.currentTimeMillis();
         final NBCLIOptions globalOptions = new NBCLIOptions(args, Mode.ParseGlobalsOnly);
-        this.labels=globalOptions.getLabelMap();
+        this.labels = globalOptions.getLabels();
         this.sessionCode = SystemId.genSessionCode(sessionTime);
         this.sessionName = SessionNamer.format(globalOptions.getSessionName(), sessionTime).replaceAll("SESSIONCODE", sessionCode);
 
@@ -213,8 +209,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         if (annotatorsConfig == null || annotatorsConfig.isBlank()) {
             List<Map<String, String>> annotatorsConfigs = new ArrayList<>();
             annotatorsConfigs.add(Map.of(
-                    "type", "log",
-                    "level", "info"
+                "type", "log",
+                "level", "info"
             ));
 
             Gson gson = new GsonBuilder().create();
@@ -252,7 +248,9 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         if (options.getWantsListCommands()) {
-            SessionCommandParser.RESERVED_WORDS.forEach(System.out::println);
+            for (CmdType value : CmdType.values()) {
+                System.out.println(value.name());
+            }
             return NBCLI.EXIT_OK;
         }
         if (options.wantsActivityTypes()) {
@@ -386,30 +384,36 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
          * marshal and transform it for any scenario invocations directly.
          */
         NBSession session = new NBSession(
-            new NBBaseComponent(null),
+            new NBBaseComponent(null,
+                options.getLabelMap()
+                    .andDefault("jobname", "nosqlbench")
+                    .andDefault("instance", "default")
+            ),
             sessionName
         );
 
         options.wantsReportCsvTo().ifPresent(cfg -> {
             MetricInstanceFilter filter = new MetricInstanceFilter();
             filter.addPattern(cfg.pattern);
-            new CsvReporter(session,Path.of(cfg.file), cfg.millis, filter);
+            new CsvReporter(session, Path.of(cfg.file), cfg.millis, filter);
         });
 
         options.wantsReportPromPushTo().ifPresent(cfg -> {
             String[] words = cfg.split(",");
             String uri;
-            long intervalMs=10_000L;
+            long intervalMs = 10_000L;
 
             switch (words.length) {
-                case 2: intervalMs= Unit.msFor(words[1]).orElseThrow(() -> new RuntimeException("can't parse '" + words[1] + "!"));
-                case 1: uri = words[0];
-                break;
-                default: throw new RuntimeException("Unable to parse '" + cfg + "', must be in <URI> or <URI>,ms form");
+                case 2:
+                    intervalMs = Unit.msFor(words[1]).orElseThrow(() -> new RuntimeException("can't parse '" + words[1] + "!"));
+                case 1:
+                    uri = words[0];
+                    break;
+                default:
+                    throw new RuntimeException("Unable to parse '" + cfg + "', must be in <URI> or <URI>,ms form");
             }
-            session.create().pushReporter(uri,intervalMs,NBLabels.forKV());
+            session.create().pushReporter(uri, intervalMs, NBLabels.forKV());
         });
-
 
 
         ExecutionResult sessionResult = session.apply(options.getCommands());
@@ -433,7 +437,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         return basicHelp;
 
     }
-
 
 
     @Override

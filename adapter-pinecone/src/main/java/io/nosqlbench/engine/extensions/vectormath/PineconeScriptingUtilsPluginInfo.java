@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.extensions.vectormath;
 
-import io.nosqlbench.api.extensions.ScriptingExtensionPluginInfo;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.extensions.ScriptingExtensionPluginInfo;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.Logger;
 

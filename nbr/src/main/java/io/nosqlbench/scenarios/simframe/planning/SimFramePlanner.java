@@ -16,22 +16,36 @@
 
 package io.nosqlbench.scenarios.simframe.planning;
 
-import io.nosqlbench.scenarios.simframe.capture.JournalView;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.scenarios.simframe.capture.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.PrintWriter;
 
 /**
  * A frame planner is what decides what next set of parameters to try based on a history
  * of simulation frames, and whether to proceed with another sim frame.
- * @param <C> The configuration type for the planner
- * @param <P> The parameter set type for the planner, emitted for each time another sim frame should be run
+ *
+ * @param <C>
+ *     The configuration type for the planner
  */
-public abstract class SimFramePlanner<C,P> {
+public abstract class SimFramePlanner<C,P extends Record> {
     private final Logger logger = LogManager.getLogger(SimFramePlanner.class);
     protected final C config;
+    protected final SimFrameJournal<P> journal;
 
-    public SimFramePlanner(C plannerConfig) {
-        this.config = plannerConfig;
+    public SimFramePlanner(NBCommandParams analyzerParams) {
+        this.config = getConfig(analyzerParams);
+        this.journal = initJournal();
+    }
+
+    public abstract C getConfig(NBCommandParams params);
+
+    public SimFrameJournal<P> initJournal() {
+        return new SimFrameJournal<>();
     }
 
     public abstract P initialStep();
@@ -43,8 +57,33 @@ public abstract class SimFramePlanner<C,P> {
      *
      * @param journal
      *     All parameters and results, organized in enumerated simulation frames
-     * @return Optionally, a set of params which indicates another simulation frame should be sampled, else null
+     * @return Optionally, a set of paramValues which indicates another simulation frame should be sampled, else null
      */
-    public abstract P nextStep(JournalView journal);
+    public abstract P nextStep(JournalView<P> journal);
+
+    public abstract void applyParams(P params, Activity activity);
+    public P analyze(Activity flywheel, SimFrameCapture capture, PrintWriter stdout, PrintWriter stderr, ContextActivitiesController controller) {
+        var frameParams = initialStep();
+
+        while (frameParams != null) {
+            stdout.println(frameParams);
+            applyParams(frameParams,flywheel);
+            capture.startWindow();
+            capture.awaitSteadyState();
+            applyParams(frameParams,flywheel);
+            capture.restartWindow();
+//            controller.waitMillis(500);
+            capture.awaitSteadyState();
+            capture.stopWindow();
+            journal.record(frameParams, capture.last());
+            stdout.println(capture.last());
+            stdout.println("-".repeat(40));
+            frameParams = nextStep(journal);
+        }
+        return journal.bestRun().params();
+
+    }
+
+
 
 }

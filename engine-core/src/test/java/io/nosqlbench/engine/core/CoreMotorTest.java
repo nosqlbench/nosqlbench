@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.core;
 
-import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.Motor;

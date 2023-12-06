@@ -16,8 +16,9 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.api.system.NBEnvironment;
-import io.nosqlbench.api.errors.BasicError;
+import io.nosqlbench.engine.cmdstream.CmdType;
+import io.nosqlbench.nb.api.system.NBEnvironment;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -83,11 +85,11 @@ public class NBCLIArgsFile {
 
     private Path argsPath;
     private LinkedList<String> preload;
-    private final Set<String> stopWords = new HashSet<>();
     private final LinkedHashSet<String> args = new LinkedHashSet<>();
     LinkedHashSet<String> argsToPin = new LinkedHashSet<>();
     LinkedHashSet<String> argsToUnpin = new LinkedHashSet<>();
     private final Set<String> readPaths = new HashSet<>();
+    private Predicate<String> reservedPredicate = p -> CmdType.valueOfAnyCaseOrIndirect(p)!=CmdType.indirect;
 
     public NBCLIArgsFile() {
     }
@@ -102,24 +104,11 @@ public class NBCLIArgsFile {
      * trailing parts of arguments. The provided words will not
      * be considered as valid values to arguments in any case.
      *
-     * @param reservedWords Words to ignore in option values
+     * @param isReserved A test to check whether a word is reserved
      * @return this ArgsFile, for method chaining
      */
-    public NBCLIArgsFile reserved(Collection<String> reservedWords) {
-        this.stopWords.addAll(reservedWords);
-        return this;
-    }
-
-    /**
-     * Indicate which words are invalid for the purposes of matching
-     * trailing parts of arguments. The provided words will not
-     * be considered as valid values to arguments in any case.
-     *
-     * @param reservedWords Words to ignore in option values
-     * @return this ArgsFile, for method chaining
-     */
-    public NBCLIArgsFile reserved(String... reservedWords) {
-        this.stopWords.addAll(Arrays.asList(reservedWords));
+    public NBCLIArgsFile reserved(Predicate<String> isReserved) {
+        this.reservedPredicate = isReserved;
         return this;
     }
 
@@ -507,7 +496,7 @@ public class NBCLIArgsFile {
         }
         String opt = iter.next();
 
-        if (!opt.startsWith("-") || stopWords.contains(opt)) {
+        if (!opt.startsWith("-") || reservedPredicate.test(opt)) {
             throw new RuntimeException("Arguments following the --pin option must not" +
                     " be commands like '" + opt + "'");
         }
@@ -518,7 +507,7 @@ public class NBCLIArgsFile {
 
         if (iter.hasNext()) {
             opt = iter.next();
-            if (!stopWords.contains(opt) && !opt.startsWith("-")) {
+            if (!reservedPredicate.test(opt) && !opt.startsWith("-")) {
                 option.add(opt);
                 if (consume) {
                     iter.remove();

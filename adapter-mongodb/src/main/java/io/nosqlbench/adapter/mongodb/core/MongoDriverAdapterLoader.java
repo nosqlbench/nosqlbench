@@ -19,8 +19,8 @@ package io.nosqlbench.adapter.mongodb.core;
 
 
 import io.nosqlbench.adapter.diag.DriverAdapterLoader;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 
 @Service(value = DriverAdapterLoader.class, selector = "mongodb")

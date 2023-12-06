@@ -886,8 +886,8 @@
 
                                 <configuration>
                                     <gpgArguments>
-                                        <arg>--pinentry-mode</arg>
-                                        <arg>loopback</arg>
+                                        <cmdParam>--pinentry-mode</cmdParam>
+                                        <cmdParam>loopback</cmdParam>
                                     </gpgArguments>
                                 </configuration>
                             </execution>

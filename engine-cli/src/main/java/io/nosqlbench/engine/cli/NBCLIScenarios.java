@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.cli;
 
-import io.nosqlbench.engine.api.scenarios.NBCLIScenarioParser;
+import io.nosqlbench.engine.api.scenarios.NBCLIScenarioPreprocessor;
 import io.nosqlbench.engine.api.scenarios.WorkloadDesc;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class NBCLIScenarios {
     ) {
         List<WorkloadDesc> workloads = List.of();
         try {
-            workloads = NBCLIScenarioParser.getWorkloadsWithScenarioScripts(true, includes);
+            workloads = NBCLIScenarioPreprocessor.getWorkloadsWithScenarioScripts(true, includes);
         } catch (Exception e) {
             throw new RuntimeException("Error while getting workloads:" + e.getMessage(), e);
 

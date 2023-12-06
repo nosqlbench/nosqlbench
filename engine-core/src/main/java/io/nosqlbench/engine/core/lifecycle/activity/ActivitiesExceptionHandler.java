@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.activity;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ScenarioActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,9 +24,9 @@ public class ActivitiesExceptionHandler implements Thread.UncaughtExceptionHandl
 
     private static final Logger logger = LogManager.getLogger(ActivitiesExceptionHandler.class);
 
-    private final ScenarioActivitiesController controller;
+    private final ContextActivitiesController controller;
 
-    public ActivitiesExceptionHandler(ScenarioActivitiesController controller) {
+    public ActivitiesExceptionHandler(ContextActivitiesController controller) {
         this.controller = controller;
         logger.debug(() -> "Activities exception handler starting up for executor '" + this.controller + "'");
     }

@@ -17,7 +17,6 @@
 package io.nosqlbench.scenarios.simframe.capture;
 
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
-import io.nosqlbench.scenarios.simframe.findmax.FindMaxFrameParams;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,23 +26,30 @@ import java.util.List;
 /**
  * Aggregate usage patterns around capturing and using simulation frame data.
  */
-public class SimFrameJournal extends ArrayList<SimFrame> implements JournalView {
-    public void record(FindMaxFrameParams params, FrameSampleSet samples) {
-        add(new SimFrame(params, samples));
+public class SimFrameJournal<P> extends ArrayList<SimFrame<P>> implements JournalView<P> {
+
+    public SimFrameJournal() {
+    }
+    protected SimFrameJournal(SimFrameJournal<P> simFrames) {
+        this.addAll(simFrames);
+    }
+
+    public void record(P params, FrameSampleSet samples) {
+        add(new SimFrame<P>(params, samples));
     }
 
     @Override
-    public List<SimFrame> frames() {
+    public List<SimFrame<P>> frames() {
         return Collections.unmodifiableList(this);
     }
 
     @Override
-    public SimFrame last() {
+    public SimFrame<P> last() {
         return super.getLast();
     }
 
     @Override
-    public SimFrame beforeLast() {
+    public SimFrame<P> beforeLast() {
         if (size()<2) {
             throw new RuntimeException("can't get beforeLast for only " + size() + " elements");
         }
@@ -51,12 +57,12 @@ public class SimFrameJournal extends ArrayList<SimFrame> implements JournalView 
     }
 
     @Override
-    public SimFrame bestRun() {
+    public SimFrame<P> bestRun() {
         return this.stream().sorted(Comparator.comparingDouble(SimFrame::value)).toList().getLast();
     }
 
     @Override
-    public SimFrame before(SimFrame frame) {
+    public SimFrame<P> before(SimFrame<P> frame) {
         int beforeIdx=frame.index()-1;
         if (beforeIdx>=0 && beforeIdx<=size()-1) {
             return frames().get(beforeIdx);
@@ -64,10 +70,17 @@ public class SimFrameJournal extends ArrayList<SimFrame> implements JournalView 
     }
 
     @Override
-    public SimFrame after(SimFrame frame) {
+    public SimFrame<P> after(SimFrame<P> frame) {
         int afterIdx=frame.index()+1;
         if (afterIdx>=0 && afterIdx<=size()-1) {
             return frames().get(afterIdx);
         } else throw new RuntimeException("Invalid index for after: " + afterIdx + " with " + size() + " frames");
+    }
+
+    @Override
+    public JournalView<P> reset() {
+        var prior = new SimFrameJournal<>(this);
+        this.clear();
+        return prior;
     }
 }

@@ -16,11 +16,10 @@
 
 package io.nosqlbench.engine.core.clientload;
 
-import com.codahale.metrics.Gauge;
-import io.nosqlbench.api.engine.metrics.instruments.NBMetricGauge;
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBBaseComponent;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.components.NBBaseComponent;
+import io.nosqlbench.nb.api.components.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.util.concurrent.Executors;
@@ -35,7 +34,7 @@ public class ClientSystemMetricChecker extends NBBaseComponent {
     private List<ClientMetric> clientMetrics;
 
     public ClientSystemMetricChecker(NBComponent parent, NBLabels additionalLabels, int pollIntervalSeconds) {
-        super(parent,additionalLabels);
+        super(parent,additionalLabels.and("_type","client-metrics"));
         this.pollIntervalSeconds = pollIntervalSeconds;
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.clientMetrics = new ArrayList<>();

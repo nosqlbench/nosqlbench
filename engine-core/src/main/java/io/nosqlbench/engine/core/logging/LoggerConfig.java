@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core.logging;
 
-import io.nosqlbench.api.logging.NBLogLevel;
+import io.nosqlbench.nb.api.logging.NBLogLevel;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Filter;
@@ -198,10 +198,10 @@ public class LoggerConfig extends ConfigurationFactory {
             LayoutComponentBuilder logfileLayout = builder.newLayout("PatternLayout")
                     .addAttribute("pattern", logfilePattern);
 
-            String filebase = getSessionName().replaceAll("\\s", "_");
-            String logfilePath = loggerDir.resolve(filebase + ".log").toString();
+
+            String logfilePath = loggerDir.resolve(getFileBase() + ".log").toString();
             this.logfileLocation = logfilePath;
-            String archivePath = loggerDir.resolve(filebase + "-TIMESTAMP.log.gz").toString()
+            String archivePath = loggerDir.resolve(getFileBase() + "-TIMESTAMP.log.gz").toString()
                     .replaceAll("TIMESTAMP", "%d{MM-dd-yy}");
 
             ComponentBuilder triggeringPolicy = builder.newComponent("Policies")
@@ -218,8 +218,12 @@ public class LoggerConfig extends ConfigurationFactory {
             builder.add(logsAppenderBuilder);
 
             if (isDedicatedVerificationLoggerEnabled) {
-                var verificationLogfilePath = loggerDir.resolve(filebase + "_verification.log").toString();
-                addResultVerificationLoggingChannel(builder, verificationLogfilePath);
+                attachAuxLogger(builder, "VERIFY", fileLevel);
+            }
+            // TODO: build stop-words transcoder, add padding to end of alphabet, substitute stopwords
+
+            if (fileLevel.isInRange(Level.INFO,Level.TRACE)) {
+                attachAuxLogger(builder, "RUNTIME", fileLevel);
             }
 
             rootBuilder.add(
@@ -254,6 +258,10 @@ public class LoggerConfig extends ConfigurationFactory {
 
         BuiltConfiguration builtConfig = builder.build();
         return builtConfig;
+    }
+
+    private String getFileBase() {
+        return getSessionName().replaceAll("\\s", "_");
     }
 
     private String getSessionName() {
@@ -381,22 +389,23 @@ public class LoggerConfig extends ConfigurationFactory {
         return this;
     }
 
-    private void addResultVerificationLoggingChannel(ConfigurationBuilder<BuiltConfiguration> builder, String verificationLogfilePath) {
-        var appenderName = "RESULTVERIFYLOG";
+    private void attachAuxLogger(ConfigurationBuilder<BuiltConfiguration> builder, String loggerName, Level fileLevel) {
+        String appenderName = loggerName+(("_APPENDER").toUpperCase());
+        String fileName = loggerDir.resolve(getFileBase() + "_"+loggerName+".log").toString().toLowerCase();
         var appender = builder
             .newAppender(appenderName, FileAppender.PLUGIN_NAME)
             .addAttribute("append", false)
-            .addAttribute("fileName", verificationLogfilePath)
+            .addAttribute("fileName", fileName)
             .add(builder
                 .newLayout("PatternLayout")
                 .addAttribute("pattern", "%d %p %C{1.} [%t] %m%n")
             );
         var logger = builder
-            .newLogger("VERIFY", Level.INFO)
+            .newLogger(loggerName, fileLevel)
             .add(builder.newAppenderRef(appenderName))
             .addAttribute("additivity", false);
-
         builder.add(appender);
         builder.add(logger);
+
     }
 }

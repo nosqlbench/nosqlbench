@@ -16,9 +16,9 @@
 
 package io.nosqlbench.cqlgen.model;
 
-import io.nosqlbench.api.labels.NBLabels;
-import io.nosqlbench.components.NBNamedElement;
-import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.components.NBNamedElement;
+import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.cqlgen.core.CGTableStats;
 import io.nosqlbench.cqlgen.transformers.ComputedTableStats;
 

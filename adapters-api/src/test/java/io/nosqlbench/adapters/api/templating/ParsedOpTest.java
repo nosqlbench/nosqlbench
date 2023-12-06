@@ -18,15 +18,14 @@ package io.nosqlbench.adapters.api.templating;
 
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.api.config.standard.TestComponent;
-import io.nosqlbench.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpData;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
-import io.nosqlbench.api.config.standard.ConfigModel;
-import io.nosqlbench.api.config.standard.NBConfiguration;
-import io.nosqlbench.api.config.standard.Param;
-import io.nosqlbench.components.NBComponent;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.Param;
+import io.nosqlbench.nb.api.components.NBComponent;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
