@@ -21,10 +21,11 @@ import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.hdf5.from_long.AbstractHdfFileToVectorType;
 
+import java.util.Arrays;
 import java.util.function.LongFunction;
 
 /**
- * This function reads a dataset from an HDF5 file. The dataset itself is not
+ * This function reads a dataset of any supported type from an HDF5 file. The dataset itself is not
  * read into memory, only the metadata (the "dataset" Java Object). The lambda function
  * reads a single vector from the dataset, based on the long input value.
  */
@@ -42,11 +43,30 @@ public class HdfDatasetToStrings extends AbstractHdfFileToVectorType implements 
         int[] sliceDimensions = new int[dims.length];
         sliceDimensions[0] = 1;
         if (dims.length > 1) {
-            for (int i = 1; i < dims.length; i++) {
-                sliceDimensions[i] = dims[i];
-            }
+            System.arraycopy(dims, 1, sliceDimensions, 1, dims.length - 1);
         }
-        return ((String[])dataset.getData(sliceOffset, sliceDimensions))[0];
+        String payload = null;
+        switch(dataset.getJavaType().getSimpleName().toLowerCase()) {
+            case "string" ->
+                payload = ((String[])dataset.getData(sliceOffset, sliceDimensions))[0];
+            case "int" ->
+                payload = Arrays.toString(((int[][]) dataset.getData(sliceOffset, sliceDimensions))[0]);
+            case "float" ->
+                payload = Arrays.toString(((float[][]) dataset.getData(sliceOffset, sliceDimensions))[0]);
+            case "short" ->
+                payload = Arrays.toString(((short[][]) dataset.getData(sliceOffset, sliceDimensions))[0]);
+            case "long" ->
+                payload = Arrays.toString(((long[][]) dataset.getData(sliceOffset, sliceDimensions))[0]);
+            case "double" ->
+                payload = Arrays.toString(((double[][]) dataset.getData(sliceOffset, sliceDimensions))[0]);
+            case "char" ->
+                payload = String.valueOf(((char[][])dataset.getData(sliceOffset, sliceDimensions))[0]);
+        }
+        if (payload == null) {
+            throw new RuntimeException("Unsupported datatype: " + dataset.getJavaType().getSimpleName());
+        }
+        payload = payload.replaceAll("\\[", "").replaceAll("]", "");
+        return payload;
     }
 
 }

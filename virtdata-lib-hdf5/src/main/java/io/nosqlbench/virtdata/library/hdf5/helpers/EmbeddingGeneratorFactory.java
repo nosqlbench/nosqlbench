@@ -43,6 +43,12 @@ public class EmbeddingGeneratorFactory {
                 }
                 return generators.get(type);
             }
+            case "long" -> {
+                if (!generators.containsKey(type)) {
+                    generators.put(type, new LongEmbeddingGenerator());
+                }
+                return generators.get(type);
+            }
             default -> throw new RuntimeException("Unknown embedding type: " + type);
         }
     }
