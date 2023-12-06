@@ -508,6 +508,35 @@
         "test",
         "userTesting"
       ]
+    },
+    {
+      "login": "MarkWolters",
+      "name": "Mark Wolters",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24706027?v=4",
+      "profile": "https://github.com/MarkWolters",
+      "contributions": [
+        "bug",
+        "business",
+        "code",
+        "content",
+        "data",
+        "doc",
+        "design",
+        "example",
+        "ideas",
+        "infra",
+        "maintenance",
+        "mentoring",
+        "platform",
+        "plugin",
+        "projectManagement",
+        "research",
+        "review",
+        "security",
+        "tool",
+        "test",
+        "userTesting"
+      ]
     }
   ],
   "commitType": "docs"
