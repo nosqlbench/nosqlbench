@@ -18,7 +18,7 @@ package io.nosqlbench.datamappers.functions.hdf_to_cql;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
-import io.nosqlbench.api.content.NBIO;
+import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
