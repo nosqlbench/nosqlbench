@@ -32,6 +32,8 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     protected final NBComponent parent;
     protected final NBLabels labels;
     private final List<NBComponent> children = new ArrayList<>();
+    protected NBMetricsBuffer metricsBuffer = new NBMetricsBuffer();
+    protected boolean bufferOrphanedMetrics = false;
 
     public NBBaseComponent(NBComponent parentComponent) {
         this(parentComponent, NBLabels.forKV());
@@ -191,6 +193,22 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     @Override
     public Map<String, String> getTokens() {
         return getLabels().asMap();
+    }
+
+    /**
+     * This method is called by the engine to report a component going out of scope. The metrics for that component
+     * will bubble up through the component layers and can be buffered for reporting at multiple levels.
+     *
+     * @param m The metric to report
+     */
+    @Override
+    public void reportExecutionMetric(NBMetric m) {
+        if (bufferOrphanedMetrics) {
+            metricsBuffer.addSummaryMetric(m);
+        }
+        if (parent != null) {
+            parent.reportExecutionMetric(m);
+        }
     }
 
 }

@@ -17,6 +17,7 @@
 package io.nosqlbench.nb.api.components;
 
 import io.nosqlbench.nb.api.components.decorators.NBProviderSearch;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
@@ -59,4 +60,6 @@ public interface NBComponent extends
 
     @Override
     void close() throws RuntimeException;
+
+    void reportExecutionMetric(NBMetric m);
 }
