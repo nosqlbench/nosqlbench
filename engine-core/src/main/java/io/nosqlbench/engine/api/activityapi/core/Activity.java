@@ -108,7 +108,7 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
 
     /**
      * Set the cycle rate limiter for this activity. This method should only
-     * be used in a non-concurrent context. Otherwise, the supplier version
+     * be used non-concurrently. Otherwise, the supplier version
      * {@link #getCycleRateLimiter(Supplier)} should be used.
      * @param rateLimiter The cycle {@link RateLimiter} for this activity
      */
@@ -133,7 +133,7 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
 
     /**
      * Set the stride rate limiter for this activity. This method should only
-     * be used in a non-concurrent context. Otherwise, the supplier version
+     * be used non-concurrently. Otherwise, the supplier version
      * {@link #getStrideRateLimiter(Supplier)}} should be used.
      * @param rateLimiter The stride {@link RateLimiter} for this activity.
      */

@@ -16,11 +16,11 @@
 
 package io.nosqlbench.scenarios.simframe.findmax;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.findmax.planners.FindmaxPlannerType;
@@ -56,12 +56,12 @@ import java.io.Reader;
 public class NB_findmax extends NBBaseCommand {
     private final static Logger logger = LogManager.getLogger(NB_findmax.class);
 
-    public NB_findmax(NBBufferedCommandContext parentComponent, String scenarioName, String context) {
+    public NB_findmax(NBBufferedContainer parentComponent, String scenarioName, String context) {
         super(parentComponent, scenarioName, context);
     }
 
     @Override
-    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
         Activity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));
         stdout.println("starting analysis on activity '" + flywheel.getAlias() + "'");
         SimFrameUtils.awaitActivity(flywheel);

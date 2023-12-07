@@ -16,7 +16,7 @@
 
 package io.nosqlbench.scenarios.simframe.findmax.planners;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.scenarios.simframe.findmax.planners.ratchet.FindmaxRatchet;
 import io.nosqlbench.scenarios.simframe.planning.SimFramePlanner;
 

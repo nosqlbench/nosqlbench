@@ -19,7 +19,7 @@ package io.nosqlbench.scenarios.simframe.optimo;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 
@@ -44,7 +44,7 @@ public class SimFrameUtils {
         }
     }
 
-    public static Activity findFlywheelActivity(ContextActivitiesController controller, String providedActivityName) {
+    public static Activity findFlywheelActivity(ContainerActivitiesController controller, String providedActivityName) {
         Optional<Activity> optionalActivity = Optional.ofNullable(providedActivityName).flatMap(controller::getActivity);
         if (providedActivityName!=null && optionalActivity.isEmpty()) {
             throw new RuntimeException("you specified activity '" + providedActivityName + "' but it was not found.");

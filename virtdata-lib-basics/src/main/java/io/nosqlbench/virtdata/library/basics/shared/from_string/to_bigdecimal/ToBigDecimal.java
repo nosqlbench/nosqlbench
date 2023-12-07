@@ -31,11 +31,11 @@ import java.util.function.Function;
 @Categories(Category.conversion)
 public class ToBigDecimal implements Function<String, BigDecimal> {
 
-    private final MathContext context;
+    private final MathContext mathCtx;
 
     @Example({"Convert strings to BigDecimal according to default precision (unlimited) and rounding (HALF_UP)"})
     public ToBigDecimal() {
-        this.context = MathContext.UNLIMITED;
+        this.mathCtx = MathContext.UNLIMITED;
     }
 
     /**
@@ -46,14 +46,14 @@ public class ToBigDecimal implements Function<String, BigDecimal> {
      * In the latter form, roundingMode can be any valid value for {@link RoundingMode}, like
      * UP, DOWN, CEILING, FLOOR, HALF_UP, HALF_DOWN, HALF_EVEN, or UNNECESSARY.
      */
-    public ToBigDecimal(String context) {
-        this.context =
-            MathContextReader.getMathContext(context);
+    public ToBigDecimal(String mathCtx) {
+        this.mathCtx =
+            MathContextReader.getMathContext(mathCtx);
     }
 
     @Override
     public BigDecimal apply(String s) {
-        return new BigDecimal(s, context);
+        return new BigDecimal(s, mathCtx);
 
     }
 }

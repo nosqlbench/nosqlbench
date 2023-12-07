@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario.context;
+package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class InterjectingCharArrayWriter extends CharArrayWriter {

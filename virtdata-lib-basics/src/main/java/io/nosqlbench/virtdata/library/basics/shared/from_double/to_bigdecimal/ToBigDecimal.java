@@ -41,7 +41,7 @@ public class ToBigDecimal implements DoubleFunction<BigDecimal> {
 
     /**
      * Convert all input values to BigDecimal values with a specific MathContext.
-     * The value for context can be one of UNLIMITED,
+     * The value for mathCtx can be one of UNLIMITED,
      * DECIMAL32, DECIMAL64, DECIMAL128, or any valid configuration supported by
      * {@link MathContext#MathContext(String)}, such as {@code "precision=32 roundingMode=CEILING"}.
      * In the latter form, roundingMode can be any valid value for {@link RoundingMode}, like
@@ -52,8 +52,8 @@ public class ToBigDecimal implements DoubleFunction<BigDecimal> {
     @Example({"ToBigDecimal('DECIMAL128')", "IEEE 754R Decimal128 format, 34 digits, HALF_EVEN"})
     @Example({"ToBigDecimal('UNLIMITED')", "unlimited precision, HALF_UP"})
     @Example({"ToBigDecimal('precision=17 roundingMode=UNNECESSARY')", "Custom precision with no rounding performed"})
-    public ToBigDecimal(String context) {
-        this.mathContext = MathContextReader.getMathContext(context);
+    public ToBigDecimal(String mathCtx) {
+        this.mathContext = MathContextReader.getMathContext(mathCtx);
     }
 
     @Override

@@ -20,7 +20,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
-import io.nosqlbench.adapters.api.evalcontext.CycleFunction;
+import io.nosqlbench.adapters.api.evalctx.CycleFunction;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.ResultVerificationError;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;

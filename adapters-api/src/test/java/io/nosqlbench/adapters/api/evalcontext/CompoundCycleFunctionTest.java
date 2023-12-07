@@ -16,6 +16,8 @@
 
 package io.nosqlbench.adapters.api.evalcontext;
 
+import io.nosqlbench.adapters.api.evalctx.CompoundCycleFunction;
+import io.nosqlbench.adapters.api.evalctx.GroovyCycleFunction;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

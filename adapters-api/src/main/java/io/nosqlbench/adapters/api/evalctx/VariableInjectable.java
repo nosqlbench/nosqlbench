@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.session;
+package io.nosqlbench.adapters.api.evalctx;
 
-import io.nosqlbench.engine.cmdstream.Cmd;
-import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
+/**
+ * Implementors of this type can have variables set on them for later use.
+ */
+public interface VariableInjectable {
 
-public interface NBInvokableResolver {
-    NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName);
-
+    /**
+     * Set a variable by name.
+     */
+    <V> void setVariable(String name, V value);
 }

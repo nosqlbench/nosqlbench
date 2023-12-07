@@ -16,19 +16,16 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
-import io.nosqlbench.engine.cmdstream.BasicScriptBuffer;
 import io.nosqlbench.engine.cmdstream.Cmd;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedCommand;
 import io.nosqlbench.nb.annotations.Service;
 
-import java.util.List;
-
 @Service(value = NBInvokableResolver.class, selector = "js")
 public class NBScriptCommandResolver implements NBInvokableResolver {
     @Override
-    public NBInvokableCommand resolve(Cmd cmd, NBBufferedCommandContext parent, String phaseName) {
+    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName) {
         return switch (cmd.getCmdType()) {
             case run, await, forceStop, stop, start, waitMillis, fragment, script->
             new NBScriptedCommand(parent, phaseName, cmd.getTargetContext()).add(cmd);

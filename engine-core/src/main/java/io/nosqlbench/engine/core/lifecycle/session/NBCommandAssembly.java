@@ -17,9 +17,9 @@
 package io.nosqlbench.engine.core.lifecycle.session;
 
 import io.nosqlbench.engine.cmdstream.*;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,10 +31,10 @@ public class NBCommandAssembly {
 
     private final static Logger logger = LogManager.getLogger(NBCommandAssembly.class);
 
-    public static record CommandInvocation(NBInvokableCommand command, NBCommandParams params, String contextName) {
+    public static record CommandInvocation(NBInvokableCommand command, NBCommandParams params, String containerName) {
     }
 
-    public static List<CommandInvocation> assemble(List<Cmd> cmds, Function<String, NBBufferedCommandContext> ctxprovider) {
+    public static List<CommandInvocation> assemble(List<Cmd> cmds, Function<String, NBBufferedContainer> ctxprovider) {
         List<Cmd> mappedCmds = tagCommandsWithContext(cmds);
         List<CommandInvocation> invocations = prepareMappedPhases(mappedCmds, ctxprovider);
         return invocations;
@@ -42,27 +42,27 @@ public class NBCommandAssembly {
 
     private static List<Cmd> tagCommandsWithContext(List<Cmd> cmds) {
         LinkedList<Cmd> tagged = new LinkedList<>();
-        String contextName = Cmd.DEFAULT_TARGET_CONTEXT;
+        String containerName = Cmd.DEFAULT_TARGET_CONTEXT;
         for (Cmd cmd : cmds) {
 
-            if (cmd.getArgs().containsKey("context")) {
-                String ctx = cmd.getArgs().remove("context").getValue();
+            if (cmd.getArgs().containsKey("container")) {
+                String ctx = cmd.getArgs().remove("container").getValue();
                 String step = cmd.getArgs().containsKey("step") ? cmd.getArgs().remove("step").getValue() : "no-step";
-                tagged.add(cmd.forTargetContext(ctx, step));
-            } else if (cmd.getCmdType() == CmdType.context) {
-                contextName = cmd.getArgValue("context_name");
-                if (contextName.equals(Cmd.DEFAULT_TARGET_CONTEXT)) {
+                tagged.add(cmd.forContainer(ctx, step));
+            } else if (cmd.getCmdType() == CmdType.container) {
+                containerName = cmd.getArgValue("container");
+                if (containerName.equals(Cmd.DEFAULT_TARGET_CONTEXT)) {
                     logger.warn("You are explicitly setting the scenario name to " + Cmd.DEFAULT_TARGET_CONTEXT + "'. This is likely an error. " +
                         "This is the default scenario name, and if you are using different scenario names you should pick something that is different and specific.");
                 }
             } else {
-                tagged.add(cmd.forTargetContext(contextName, null));
+                tagged.add(cmd.forContainer(containerName, null));
             }
         }
         return new ArrayList<>(tagged);
     }
 
-    private static List<CommandInvocation> prepareMappedPhases(List<Cmd> mappedCmds, Function<String, NBBufferedCommandContext> ctxProvider) {
+    private static List<CommandInvocation> prepareMappedPhases(List<Cmd> mappedCmds, Function<String, NBBufferedContainer> ctxProvider) {
         List<CommandInvocation> parameterizedInvocations = new ArrayList<>();
         NBCoreInvokableResolver core_resolver = new NBCoreInvokableResolver();
         String basename = "phase_";
@@ -72,7 +72,7 @@ public class NBCommandAssembly {
             String phaseName = basename + count;
 
             NBCommandParams params = switch (cmd.getCmdType()) {
-                case indirect, java, context -> NBCommandParams.of(cmd.getArgMap());
+                case indirect, java, container -> NBCommandParams.of(cmd.getArgMap());
                 default -> NBCommandParams.of(Map.of());
             };
 
@@ -81,8 +81,8 @@ public class NBCommandAssembly {
             if (command==null) {
                 throw new BasicError("Found zero commands for spec;" + cmd);
             }
-            String contextName = cmd.getTargetContext();
-            parameterizedInvocations.add(new CommandInvocation(command, params, contextName));
+            String containerName = cmd.getTargetContext();
+            parameterizedInvocations.add(new CommandInvocation(command, params, containerName));
         }
         return parameterizedInvocations;
     }

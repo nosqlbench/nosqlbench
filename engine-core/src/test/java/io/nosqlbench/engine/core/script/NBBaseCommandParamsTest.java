@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.script;
 
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

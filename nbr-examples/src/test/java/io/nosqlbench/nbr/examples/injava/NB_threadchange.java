@@ -16,18 +16,17 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
-import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 
 import java.io.PrintWriter;
 import java.io.Reader;
 
 
 public class NB_threadchange extends NBBaseCommand {
-    public NB_threadchange(NBBufferedCommandContext parentComponent, String scenarioName) {
+    public NB_threadchange(NBBufferedContainer parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -45,7 +44,7 @@ public class NB_threadchange extends NBBaseCommand {
      * }</pre>
      */
     @Override
-    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
 
         var activity = controller.start("driver=diag;alias=threadchange;cycles=0..60000;threads=1;interval=2000;op='noop';rate=1000");
         activity.getActivityDef().setThreads(1);

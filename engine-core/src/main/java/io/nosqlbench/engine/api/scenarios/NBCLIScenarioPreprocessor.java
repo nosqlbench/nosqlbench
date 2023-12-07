@@ -204,8 +204,8 @@ public class NBCLIScenarioPreprocessor {
                     buildingCmd.put("alias", "alias=" + WORKLOAD_SCENARIO_STEP);
                 }
 
-                if (!buildingCmd.containsKey("context")) {
-                    buildingCmd.put("context","context="+scenarioName);
+                if (!buildingCmd.containsKey("container")) {
+                    buildingCmd.put("container","container="+scenarioName);
                 }
                 if (!buildingCmd.containsKey("step")) {
                     buildingCmd.put("step","step="+stepName);

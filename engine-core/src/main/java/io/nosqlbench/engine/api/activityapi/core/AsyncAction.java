@@ -56,7 +56,7 @@ public interface AsyncAction<D> extends Action {
      * be started (according to the configured concurrency limits),
      * then it can signal such by returning true from this method.
      *
-     * @param opc The op context that holds state for this operation
+     * @param opc The op ctx that holds state for this operation
      * @return true, if the action is ready immediately for another operation
      */
     boolean enqueue(TrackedOp<D> opc);

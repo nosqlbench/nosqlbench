@@ -16,7 +16,7 @@
 
 package io.nosqlbench.scenarios.simframe.findmax;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 
 /**
  * These search parameters are based on the original findmax algorithm, and

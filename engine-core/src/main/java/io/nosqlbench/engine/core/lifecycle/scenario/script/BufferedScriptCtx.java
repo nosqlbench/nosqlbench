@@ -16,19 +16,17 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.script;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
-
 import javax.script.SimpleScriptContext;
 import java.io.Reader;
 import java.io.Writer;
 
-public class BufferedScriptContext extends SimpleScriptContext {
+public class BufferedScriptCtx extends SimpleScriptContext {
 
     Reader reader;
     Writer writer;
     Writer errorWriter;
 
-    public BufferedScriptContext(Writer writer, Writer errorWriter,Reader reader) {
+    public BufferedScriptCtx(Writer writer, Writer errorWriter, Reader reader) {
         this.writer = writer;
         this.errorWriter = errorWriter;
         this.reader = reader;

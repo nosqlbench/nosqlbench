@@ -19,19 +19,15 @@ package io.nosqlbench.engine.cli;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.engine.cmdstream.NBJavaCommandLoader;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.engine.core.lifecycle.session.NBInvokableResolver;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.components.NBComponent;
-
-import java.util.List;
 
 @Service(value= NBInvokableResolver.class,selector = "java")
 public class NBJavaNativeResolver implements NBInvokableResolver {
     @Override
-    public NBInvokableCommand resolve(Cmd cmd, NBBufferedCommandContext parent, String phaseName) {
+    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName) {
         return switch (cmd.getCmdType()) {
             case CmdType.indirect -> NBJavaCommandLoader.init(cmd.getArgValue("_impl"), parent, phaseName, cmd.getTargetContext());
             case CmdType.java -> NBJavaCommandLoader.init(cmd.getArgValue("class"), parent, phaseName, cmd.getTargetContext());

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapters.api.activityimpl;
 
-import io.nosqlbench.adapters.api.evalcontext.CycleFunction;
+import io.nosqlbench.adapters.api.evalctx.CycleFunction;
 
 import java.util.function.LongFunction;
 

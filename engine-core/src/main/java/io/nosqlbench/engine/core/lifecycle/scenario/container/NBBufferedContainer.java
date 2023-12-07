@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario.context;
+package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
@@ -38,12 +38,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class NBBufferedCommandContext extends NBBaseComponent implements NBCommandContext {
+public class NBBufferedContainer extends NBBaseComponent implements NBContainer {
 
-    private final static Logger logger = LogManager.getLogger(NBBufferedCommandContext.class);
-    private final ContextActivitiesController controller;
+    private final static Logger logger = LogManager.getLogger(NBBufferedContainer.class);
+    private final ContainerActivitiesController controller;
     private final ActivitiesProgressIndicator activitiesProgressIndicator;
-    private ContextShutdownHook contextShutdownHook;
+    private ContextShutdownHook containerShutdownHook;
     private long startedAtMillis;
     private Exception error;
     private long endedAtMillis;
@@ -60,10 +60,10 @@ public class NBBufferedCommandContext extends NBBaseComponent implements NBComma
     private DiagWriter stderrBuffer;
     private DiagReader stdinBuffer;
 
-    public NBBufferedCommandContext(NBComponent parent, String name, IOType ioTypes) {
-        super(parent, NBLabels.forKV("context",name));
+    public NBBufferedContainer(NBComponent parent, String name, IOType ioTypes) {
+        super(parent, NBLabels.forKV("container",name));
         this.iotype = ioTypes;
-        this.controller = new ContextActivitiesController(this);
+        this.controller = new ContainerActivitiesController(this);
 
         switch (iotype) {
             case traced:
@@ -83,9 +83,9 @@ public class NBBufferedCommandContext extends NBBaseComponent implements NBComma
                 break;
         }
 
-        this.contextShutdownHook = new ContextShutdownHook(this);
+        this.containerShutdownHook = new ContextShutdownHook(this);
 
-        Runtime.getRuntime().addShutdownHook(this.contextShutdownHook);
+        Runtime.getRuntime().addShutdownHook(this.containerShutdownHook);
 
         Annotators.recordAnnotation(
             Annotation.newBuilder()
@@ -100,7 +100,7 @@ public class NBBufferedCommandContext extends NBBaseComponent implements NBComma
 
 
     @Override
-    public ContextActivitiesController controller() {
+    public ContainerActivitiesController controller() {
         return controller;
     }
 
@@ -123,13 +123,13 @@ public class NBBufferedCommandContext extends NBBaseComponent implements NBComma
         return this.stdoutBuffer.getTimedLog() + this.stderrBuffer.getTimedLog();
     }
 
-    public NBCommandContext asFixtures() {
-        return (NBCommandContext) this;
+    public NBContainer asFixtures() {
+        return (NBContainer) this;
     }
 
 
-    public static ContextBuilderFacets.WantsName builder() {
-        return new NBScenarioContextBuilder();
+    public static ContainerBuilderFacets.WantsName builder() {
+        return new NBScenarioContainerBuilder();
     }
 
     @Override
@@ -168,11 +168,11 @@ public class NBBufferedCommandContext extends NBBaseComponent implements NBComma
             // ignore
 //        } else {
 //
-//            RuntimeException error = new RuntimeException("Unrecognizable type to set context vars with:" + object.getClass().getCanonicalName());
+//            RuntimeException error = new RuntimeException("Unrecognizable type to set container vars with:" + object.getClass().getCanonicalName());
 //            logger.error(error);
-////            throw new RuntimeException("Unrecognizable type to set context vars with:" + object.getClass().getCanonicalName());
+////            throw new RuntimeException("Unrecognizable type to set container vars with:" + object.getClass().getCanonicalName());
         } else {
-            logger.debug("no object was provided to set the context result");
+            logger.debug("no object was provided to set the container result");
         }
 
         return safeCmdResult;
@@ -180,7 +180,7 @@ public class NBBufferedCommandContext extends NBBaseComponent implements NBComma
 
     @Override
     public void doShutdown() {
-        NBCommandContext.super.doShutdown();
+        NBContainer.super.doShutdown();
     }
 
     @Override
@@ -190,11 +190,11 @@ public class NBBufferedCommandContext extends NBBaseComponent implements NBComma
 
     @Override
     public void beforeDetach() {
-        // TODO, shutdown hooks need to be moved to context
-        Runtime.getRuntime().removeShutdownHook(this.contextShutdownHook);
-        final var retiringScenarioShutdownHook = this.contextShutdownHook;
-        this.contextShutdownHook = null;
+        // TODO, shutdown hooks need to be moved to container
+        Runtime.getRuntime().removeShutdownHook(this.containerShutdownHook);
+        final var retiringScenarioShutdownHook = this.containerShutdownHook;
+        this.containerShutdownHook = null;
         retiringScenarioShutdownHook.run();
-        this.logger.debug("removing context shutdown hook");
+        this.logger.debug("removing container shutdown hook");
     }
 }

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.nb.api.components.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +37,7 @@ public abstract class NBCommandInfo {
     public NBInvokableCommand create(NBComponent parent, String cmdName, String ctxName) {
         Constructor<? extends NBInvokableCommand> cmdCtor;
         try {
-            cmdCtor = getType().getConstructor(NBBufferedCommandContext.class, String.class, String.class);
+            cmdCtor = getType().getConstructor(NBBufferedContainer.class, String.class, String.class);
             return cmdCtor.newInstance(parent, cmdName, ctxName);
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("Unable to instantiate command via ctor(parent,name,ctx): " + e,e);

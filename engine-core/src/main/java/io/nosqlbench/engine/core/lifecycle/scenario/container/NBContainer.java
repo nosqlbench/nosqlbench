@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario.context;
+package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.api.components.NBComponent;
-import os.CommandResult;
 
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
-public interface NBCommandContext extends NBComponent, BiFunction<NBInvokableCommand,NBCommandParams, NBCommandResult> {
+public interface NBContainer extends NBComponent, BiFunction<NBInvokableCommand,NBCommandParams, NBCommandResult> {
 //    ScenarioPhaseParams params();
-    ContextActivitiesController controller();
+    ContainerActivitiesController controller();
     PrintWriter out();
     PrintWriter err();
     Reader in();
-    public static ContextBuilderFacets.WantsName builder() {
-        return new NBScenarioContextBuilder();
+    public static ContainerBuilderFacets.WantsName builder() {
+        return new NBScenarioContainerBuilder();
     }
 
     default void doShutdown() {

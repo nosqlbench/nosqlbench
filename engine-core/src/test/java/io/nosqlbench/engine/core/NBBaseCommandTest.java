@@ -20,12 +20,9 @@ import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.CmdArg;
 import io.nosqlbench.engine.cmdstream.CmdParam;
 import io.nosqlbench.engine.core.lifecycle.session.NBCommandInvoker;
-import io.nosqlbench.engine.core.lifecycle.session.NBSession;
-import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedCommand;
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +38,7 @@ public class NBBaseCommandTest {
 
     @Test
     public void shouldLoadScriptText() {
-        NBBufferedCommandContext ctx = NBCommandContext.builder().name("testing").build(NBComponent.EMPTY_COMPONENT);
+        NBBufferedContainer ctx = NBContainer.builder().name("testing").build(NBComponent.EMPTY_COMPONENT);
         NBScriptedCommand cmd = NBScriptedCommand.ofScripted("testing", Map.of(),ctx, NBScriptedCommand.Invocation.EXECUTE_SCRIPT);
         cmd.add(new Cmd("fragment",Map.of(
             "fragment",new CmdArg(new CmdParam("fragment",s->s,false),"=","print('loaded script environment...');")

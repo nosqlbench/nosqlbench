@@ -16,7 +16,7 @@
 
 package io.nosqlbench.scenarios.simframe.optimo;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 
 public record OptimoSearchSettings(
     long sample_time_ms,

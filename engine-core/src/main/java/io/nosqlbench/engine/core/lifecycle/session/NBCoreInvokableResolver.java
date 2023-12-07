@@ -17,11 +17,9 @@
 package io.nosqlbench.engine.core.lifecycle.session;
 
 import io.nosqlbench.engine.cmdstream.Cmd;
-import io.nosqlbench.engine.cmdstream.CmdType;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.components.NBComponent;
 
 import java.util.*;
 
@@ -35,7 +33,7 @@ public class NBCoreInvokableResolver implements NBInvokableResolver {
     private SequencedMap<String,NBInvokableResolver> resolvers = new LinkedHashMap<>();
 
     @Override
-    public NBInvokableCommand resolve(Cmd cmd, NBBufferedCommandContext parent, String phaseName) {
+    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName) {
         for (NBInvokableResolver resolver : getResolvers().values()) {
             NBInvokableCommand loadedCommand = resolver.resolve(cmd, parent, phaseName);
             if (loadedCommand!=null) {
