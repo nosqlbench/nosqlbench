@@ -16,35 +16,33 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.nb.api.components.NBBaseComponent;
-import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Objects;
 import java.util.function.BiFunction;
 
-public abstract class NBInvokableCommand extends NBBaseComponent implements BiFunction<NBBufferedCommandContext, NBCommandParams, Object> {
+public abstract class NBInvokableCommand extends NBBaseComponent implements BiFunction<NBBufferedContainer, NBCommandParams, Object> {
     private static final Logger logger = LogManager.getLogger(NBInvokableCommand.class);
 
-    public NBInvokableCommand(NBBufferedCommandContext parentComponent, NBLabels componentSpecificLabelsOnly) {
+    public NBInvokableCommand(NBBufferedContainer parentComponent, NBLabels componentSpecificLabelsOnly) {
         super(parentComponent, componentSpecificLabelsOnly);
     }
 
     @Override
-    public abstract Object apply(NBBufferedCommandContext nbBufferedCommandContext, NBCommandParams nbCommandParams);
+    public abstract Object apply(NBBufferedContainer nbBufferedContainer, NBCommandParams nbCommandParams);
 
-    public NBCommandResult invokeSafe(NBBufferedCommandContext context, NBCommandParams params) {
+    public NBCommandResult invokeSafe(NBBufferedContainer container, NBCommandParams params) {
         Object resultObject = null;
         Exception exception = null;
         long startAt = System.currentTimeMillis();
         NBCommandResult result = null;
         try {
             logger.debug("invoking command: " + this);
-            resultObject=apply(context, params);
+            resultObject=apply(container, params);
             logger.debug("cmd produced: " + (resultObject==null ? "NULL" : resultObject.toString()));
         } catch (Exception e) {
             exception = e;
@@ -52,7 +50,7 @@ public abstract class NBInvokableCommand extends NBBaseComponent implements BiFu
             exception.printStackTrace(System.out);
         } finally {
             long endAt = System.currentTimeMillis();
-            result = new NBCommandResult(context, startAt, endAt, exception);
+            result = new NBCommandResult(container, startAt, endAt, exception);
             if (resultObject!=null) {
                 result.setResultObject(resultObject);
             }

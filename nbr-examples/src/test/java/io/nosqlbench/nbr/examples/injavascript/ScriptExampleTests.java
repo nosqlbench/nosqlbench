@@ -17,11 +17,11 @@
 package io.nosqlbench.nbr.examples.injavascript;
 
 import io.nosqlbench.engine.cmdstream.BasicScriptBuffer;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedCommand;
 import org.apache.commons.compress.utils.IOUtils;
@@ -62,7 +62,7 @@ public class ScriptExampleTests {
         System.out.println("=".repeat(29) + " Running integration test for example scenario: " + scenarioName);
 
         NBComponent root = new TestComponent("exampletest",scriptname);
-        NBBufferedCommandContext ctx = NBCommandContext.builder().name(scriptname).build(root);
+        NBBufferedContainer ctx = NBContainer.builder().name(scriptname).build(root);
         NBScriptedCommand s = NBScriptedCommand.ofScripted(scenarioName,Map.of(),ctx, NBScriptedCommand.Invocation.EXECUTE_SCRIPT);
 
         ClassLoader cl = ScriptExampleTests.class.getClassLoader();

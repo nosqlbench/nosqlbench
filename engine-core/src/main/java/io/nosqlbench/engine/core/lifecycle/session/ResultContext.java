@@ -55,7 +55,7 @@ public class ResultContext implements AutoCloseable {
         if (this.status==null) {
             this.status= ExecutionResult.Status.ERROR;
             if (this.error!=null) {
-                this.error=new RuntimeException("early execution result with no asserted status. Call setStatus on your result context or end with `return ctx.ok() or ctx.error(...)`");
+                this.error=new RuntimeException("early execution result with no asserted status. Call setStatus on your result object or end with `return ctx.ok() or ctx.error(...)`");
             }
         }
         receiver.accept(this);

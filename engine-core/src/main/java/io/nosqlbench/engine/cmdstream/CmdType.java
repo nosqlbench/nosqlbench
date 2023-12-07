@@ -32,7 +32,7 @@ public enum CmdType {
     await(CmdParam.of("activity")),
     waitMillis(CmdParam.of("ms", Long::parseLong)),
     fragment(CmdParam.ofFreeform("fragment")),
-    context(CmdParam.of("name")),
+    container(CmdParam.of("name")),
     indirect(CmdParam.of("indirect"));
 
     private final CmdParam<?>[] positional;

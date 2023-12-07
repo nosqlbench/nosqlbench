@@ -16,7 +16,8 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
@@ -24,8 +25,7 @@ import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 
 
 import java.io.PrintWriter;
@@ -33,7 +33,7 @@ import java.io.Reader;
 import java.util.Map;
 
 public class NB_cocycledelay_bursty extends NBBaseCommand {
-    public NB_cocycledelay_bursty(NBBufferedCommandContext parentComponent, String scenarioName) {
+    public NB_cocycledelay_bursty(NBBufferedContainer parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -89,7 +89,7 @@ public class NB_cocycledelay_bursty extends NBBaseCommand {
      * }</pre>
      */
     @Override
-    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
         int diagrate = 500;
         var co_cycle_delay_bursty = Map.of(
             "alias", "co_cycle_delay_bursty",
@@ -100,9 +100,9 @@ public class NB_cocycledelay_bursty extends NBBaseCommand {
             "op", "diagrate: diagrate=" + diagrate
 //            "dryrun", "op" // silent
         );
-        NBComponent context = this;
-        while (context.getParent()!=null) {
-            context=context.getParent();
+        NBComponent container = this;
+        while (container.getParent()!=null) {
+            container=container.getParent();
         }
 
         controller.waitMillis(500);
@@ -110,8 +110,8 @@ public class NB_cocycledelay_bursty extends NBBaseCommand {
         Activity activity = controller.start(co_cycle_delay_bursty);
         controller.waitMillis(1000);
 
-        NBMetricTimer service_time_counter = context.find().topMetric("activity=co_cycle_delay_bursty,name=cycles_servicetime", NBMetricTimer.class);
-        NBMetricGauge wait_time_gauge = context.find().topMetric("activity=co_cycle_delay_bursty,name=cycles_waittime",NBMetricGauge.class);
+        NBMetricTimer service_time_counter = container.find().topMetric("activity=co_cycle_delay_bursty,name=cycles_servicetime", NBMetricTimer.class);
+        NBMetricGauge wait_time_gauge = container.find().topMetric("activity=co_cycle_delay_bursty,name=cycles_waittime",NBMetricGauge.class);
 
         for (int i = 0; i < 5; i++) {
             controller.waitMillis(1000);

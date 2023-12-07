@@ -17,6 +17,8 @@
 package io.nosqlbench.adapters.api.evalcontext;
 
 import groovy.lang.MissingPropertyException;
+import io.nosqlbench.adapters.api.evalctx.GroovyBooleanCycleFunction;
+import io.nosqlbench.adapters.api.evalctx.GroovyCycleFunction;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import org.junit.jupiter.api.Test;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.core.lifecycle.scenario.context;
+package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
@@ -40,9 +40,9 @@ import java.util.stream.Collectors;
  * A ScenarioController provides a way to start Activities,
  * modify them while running, and forceStopMotors, pause or restart them.
  */
-public class ContextActivitiesController extends NBBaseComponent {
+public class ContainerActivitiesController extends NBBaseComponent {
 
-    private static final Logger logger = LogManager.getLogger(ContextActivitiesController.class);
+    private static final Logger logger = LogManager.getLogger(ContainerActivitiesController.class);
     private static final Logger scenariologger = LogManager.getLogger("SCENARIO");
 
     private final ActivityLoader activityLoader;
@@ -51,7 +51,7 @@ public class ContextActivitiesController extends NBBaseComponent {
 
     private final ExecutorService executorService;
 
-    public ContextActivitiesController(NBComponent parent) {
+    public ContainerActivitiesController(NBComponent parent) {
         super(parent);
         this.activityLoader = new ActivityLoader();
         ActivitiesExceptionHandler exceptionHandler = new ActivitiesExceptionHandler(this);

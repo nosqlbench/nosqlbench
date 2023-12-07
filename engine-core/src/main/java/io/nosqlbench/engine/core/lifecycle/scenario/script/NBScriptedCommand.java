@@ -18,12 +18,12 @@ package io.nosqlbench.engine.core.lifecycle.scenario.script;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import io.nosqlbench.engine.cmdstream.BasicScriptBuffer;
 import io.nosqlbench.engine.cmdstream.Cmd;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.engine.core.lifecycle.ExecutionMetricsResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine.Builder;
 import org.graalvm.polyglot.EnvironmentAccess;
@@ -43,7 +43,7 @@ public class NBScriptedCommand extends NBBaseCommand {
     private Exception error;
 
     private ExecutionMetricsResult result;
-    private BufferedScriptContext context;
+    private BufferedScriptCtx ctx;
     private GraalJSScriptEngine _engine;
 
     public Optional<ExecutionMetricsResult> getResultIfComplete() {
@@ -77,7 +77,7 @@ public class NBScriptedCommand extends NBBaseCommand {
     }
 
     public NBScriptedCommand(
-        NBBufferedCommandContext parentComponent,
+        NBBufferedContainer parentComponent,
         String phaseName,
         String targetScenario
     ) {
@@ -87,7 +87,7 @@ public class NBScriptedCommand extends NBBaseCommand {
         this.buffer = new BasicScriptBuffer();
     }
 
-    public static NBScriptedCommand ofScripted(String name, Map<String, String> params, NBBufferedCommandContext parent, Invocation invocation) {
+    public static NBScriptedCommand ofScripted(String name, Map<String, String> params, NBBufferedContainer parent, Invocation invocation) {
         return new NBScriptedCommand(parent, name, "default");
     }
     public NBScriptedCommand add(Cmd... cmds) {
@@ -118,10 +118,10 @@ public class NBScriptedCommand extends NBBaseCommand {
 //        return this;
 //    }
 
-    private BufferedScriptContext initializeScriptContext(PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
-        BufferedScriptContext ctx = new BufferedScriptContext(stdout, stderr, stdin);
+    private BufferedScriptCtx initializeScriptContext(PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
+        BufferedScriptCtx ctx = new BufferedScriptCtx(stdout, stderr, stdin);
         ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("this", this);
-        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("context", context);
+        ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("container", this.ctx);
         ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("controller", controller);
         ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("stdout", stdout);
         ctx.getBindings(ScriptContext.ENGINE_SCOPE).put("stderr", stderr);
@@ -155,13 +155,13 @@ public class NBScriptedCommand extends NBBaseCommand {
     }
 
     @Override
-    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
         try {
             this.logger.debug("Initializing scripting engine for {}.", phaseName);
             GraalJSScriptEngine engine = this.initializeScriptingEngine();
-            this.context = this.initializeScriptContext(stdout, stderr, stdin, controller);
+            this.ctx = this.initializeScriptContext(stdout, stderr, stdin, controller);
             this.logger.debug("Running control script for {}.", phaseName);
-            engine.setContext(context);
+            engine.setContext(ctx);
             engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).put("params", params);
 
             Object resultObject = null;

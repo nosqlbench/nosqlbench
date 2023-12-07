@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 
 import java.util.function.Supplier;
 
@@ -25,11 +25,11 @@ public class NBCommandResult implements Supplier<ExecutionResult> {
     private final long startedAt;
     private final long endedAt;
     private final Exception exception;
-    private final NBBufferedCommandContext fixtures;
+    private final NBBufferedContainer fixtures;
 
     private Object resultObject;
 
-    public NBCommandResult(NBBufferedCommandContext fixtures, long start, long end, Exception exception) {
+    public NBCommandResult(NBBufferedContainer fixtures, long start, long end, Exception exception) {
         this.fixtures = fixtures;
         this.startedAt=start;
         this.endedAt=end;

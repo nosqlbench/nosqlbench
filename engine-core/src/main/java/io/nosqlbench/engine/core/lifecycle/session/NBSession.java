@@ -26,8 +26,8 @@ import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.core.clientload.*;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +47,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
     private final String sessionName;
     private final ClientSystemMetricChecker clientMetricChecker;
 
-    private final Map<String, NBBufferedCommandContext> contexts = new ConcurrentHashMap<>();
+    private final Map<String, NBBufferedContainer> containers = new ConcurrentHashMap<>();
 
     public enum STATUS {
         OK,
@@ -55,10 +55,10 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         ERROR
     }
 
-    private NBBufferedCommandContext getContext(String name) {
-        return contexts.computeIfAbsent(
+    private NBBufferedContainer getContext(String name) {
+        return containers.computeIfAbsent(
             name,
-            n -> NBCommandContext.builder().name(n).build(this)
+            n -> NBContainer.builder().name(n).build(this)
         );
     }
 
@@ -99,19 +99,19 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
      */
     public ExecutionResult apply(List<Cmd> cmds) {
 
-        // TODO: add context closing command
-        // TODO: inject context closing commands after the last command referencing each context
+        // TODO: add container closing command
+        // TODO: inject container closing commands after the last command referencing each container
         List<NBCommandAssembly.CommandInvocation> invocationCalls = NBCommandAssembly.assemble(cmds, this::getContext);
         ResultCollector collector = new ResultCollector();
         try (ResultContext results = new ResultContext(collector).ok()) {
             for (NBCommandAssembly.CommandInvocation invocation : invocationCalls) {
                 try {
-                    String targetContext = invocation.contextName();
-                    NBBufferedCommandContext context = getContext(targetContext);
-                    NBCommandResult cmdResult = context.apply(invocation.command(), invocation.params());
+                    String targetContext = invocation.containerName();
+                    NBBufferedContainer container = getContext(targetContext);
+                    NBCommandResult cmdResult = container.apply(invocation.command(), invocation.params());
                     results.apply(cmdResult);
                 } catch (Exception e) {
-                    String msg = "While running command '" + invocation.command() + "' in context '" + invocation.contextName() + "', an error occurred: " + e.toString();
+                    String msg = "While running command '" + invocation.command() + "' in container '" + invocation.containerName() + "', an error occurred: " + e.toString();
                     logger.error(msg);
                     results.error(e);
                     break;
@@ -119,9 +119,9 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
             }
         }
 
-        for (String ctxName : contexts.keySet()) {
-            NBBufferedCommandContext ctx = contexts.get(ctxName);
-            logger.debug("awaiting end of activities in context '" + ctxName + "':" +
+        for (String containerName : containers.keySet()) {
+            NBBufferedContainer ctx = containers.get(containerName);
+            logger.debug("awaiting end of activities in container '" + containerName + "':" +
                 ctx.controller().getActivityDefs().stream().map(ActivityDef::getAlias).toList());
             ctx.controller().shutdown();
             ctx.controller().awaitCompletion(Long.MAX_VALUE);

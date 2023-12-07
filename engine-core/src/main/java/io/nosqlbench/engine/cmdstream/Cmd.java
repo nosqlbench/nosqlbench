@@ -16,13 +16,11 @@
 
 package io.nosqlbench.engine.cmdstream;
 
-import io.nosqlbench.engine.core.lifecycle.session.CmdParser;
 import io.nosqlbench.nb.api.errors.BasicError;
 import jakarta.validation.constraints.NotNull;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-import java.security.InvalidParameterException;
 import java.util.*;
 
 /**
@@ -44,8 +42,8 @@ public class Cmd {
         return targetContextName;
     }
 
-    public Cmd forTargetContext(String contextName, String stepName) {
-        return new Cmd(cmdType, cmdArgs, contextName, stepName);
+    public Cmd forContainer(String containerName, String stepName) {
+        return new Cmd(cmdType, cmdArgs, containerName, stepName);
     }
 
 

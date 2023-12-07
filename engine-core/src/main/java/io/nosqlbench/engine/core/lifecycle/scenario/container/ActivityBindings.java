@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.core.lifecycle.scenario.context;
+package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import org.graalvm.polyglot.Value;
@@ -28,11 +28,11 @@ import java.util.stream.Collectors;
  */
 public class ActivityBindings implements Bindings, ProxyObject {
 
-    private final ContextActivitiesController scenario;
+    private final ContainerActivitiesController scenario;
     private final Map<String, Bindings> elementMap = new HashMap<String, Bindings>();
 
-    public ActivityBindings(ContextActivitiesController contextActivitiesController) {
-        this.scenario = contextActivitiesController;
+    public ActivityBindings(ContainerActivitiesController containerActivitiesController) {
+        this.scenario = containerActivitiesController;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class ActivityBindings implements Bindings, ProxyObject {
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends Object> toMerge) {
+    public void putAll(Map<? extends String, ?> toMerge) {
         throw new RuntimeException("ScenarioBindings do not allow putAll(...)");
     }
 

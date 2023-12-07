@@ -20,9 +20,9 @@ import io.nosqlbench.engine.api.activityapi.core.RunState;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.nb.api.engine.metrics.PeriodicRunnable;
 import io.nosqlbench.nb.api.engine.util.Unit;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,14 +35,14 @@ public class ActivitiesProgressIndicator implements Runnable {
 
     private final static Logger logger = LogManager.getLogger("PROGRESS");
     private final String indicatorSpec;
-    private final ContextActivitiesController sc;
+    private final ContainerActivitiesController sc;
     private PeriodicRunnable<ActivitiesProgressIndicator> runnable;
     private IndicatorMode indicatorMode = IndicatorMode.console;
     private final Set<String> seen = new HashSet<>();
 
     private long intervalMillis = 1L;
 
-    public ActivitiesProgressIndicator(ContextActivitiesController sc, String indicatorSpec) {
+    public ActivitiesProgressIndicator(ContainerActivitiesController sc, String indicatorSpec) {
         this.sc = sc;
         this.indicatorSpec = indicatorSpec;
         start();

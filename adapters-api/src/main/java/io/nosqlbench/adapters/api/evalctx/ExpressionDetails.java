@@ -14,22 +14,8 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapters.api.evalcontext;
+package io.nosqlbench.adapters.api.evalctx;
 
-import groovy.lang.Binding;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
-
-import java.util.List;
-
-public class GroovyBooleanCycleFunction extends GroovyCycleFunction<Boolean> {
-
-    public GroovyBooleanCycleFunction(String name, ParsedTemplateString template, List<String> imports, List<Class<?>> staticSymbolImports, Binding binding) {
-        super(name, template, imports, staticSymbolImports, binding);
-    }
-
-    @Override
-    public Boolean apply(long value) {
-        return super.apply(value);
-    }
-
+public interface ExpressionDetails {
+    String getExpressionDetails();
 }

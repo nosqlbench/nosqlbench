@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapters.api.evalcontext;
+package io.nosqlbench.adapters.api.evalctx;
 
-/**
- * Implementors of this type can have variables set on them for later use.
- */
-public interface VariableInjectable {
+import java.util.function.LongFunction;
+
+public interface CycleFunction<T> extends LongFunction<T>, VariableInjectable, ExpressionDetails {
 
     /**
-     * Set a variable by name.
+     * Produce a result from a cycle. This is an encapsulating type for any implementations which need
+     * to
+     * @param value the function argument
+     * @return
      */
-    <V> void setVariable(String name, V value);
+    @Override
+    T apply(long value);
+
+    /**
+     * Get a new instance of a CycleFunction, based on the current one, but with its own instance of any
+     * non-threadsafe elements.
+     * @return A new CycleFunction
+     */
+    CycleFunction<T> newInstance();
 }

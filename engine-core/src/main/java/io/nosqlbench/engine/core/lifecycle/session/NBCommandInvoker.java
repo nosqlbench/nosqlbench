@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
@@ -26,7 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
-import java.util.Objects;
 
 public class NBCommandInvoker {
     private final static Logger logger = LogManager.getLogger(NBCommandInvoker.class);
@@ -35,15 +34,15 @@ public class NBCommandInvoker {
         return invoke(createContext(),command,params);
     }
 
-    public static NBCommandResult invoke(NBBufferedCommandContext context, NBInvokableCommand command) {
-        return invoke(context, command, NBCommandParams.of(Map.of()));
+    public static NBCommandResult invoke(NBBufferedContainer container, NBInvokableCommand command) {
+        return invoke(container, command, NBCommandParams.of(Map.of()));
     }
 
-    private static NBBufferedCommandContext createContext() {
-        return NBCommandContext.builder().name("testing").build(TestComponent.EMPTY_COMPONENT);
+    private static NBBufferedContainer createContext() {
+        return NBContainer.builder().name("testing").build(TestComponent.EMPTY_COMPONENT);
     }
 
-    public static NBCommandResult invoke(NBBufferedCommandContext context, NBInvokableCommand command, NBCommandParams params) {
-        return command.invokeSafe(context,params);
+    public static NBCommandResult invoke(NBBufferedContainer container, NBInvokableCommand command, NBCommandParams params) {
+        return command.invokeSafe(container,params);
     }
 }

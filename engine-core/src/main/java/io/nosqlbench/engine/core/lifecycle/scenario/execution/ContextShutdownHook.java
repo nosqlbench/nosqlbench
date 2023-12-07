@@ -16,19 +16,19 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
 
 public class ContextShutdownHook extends Thread {
 
-    private final NBCommandContext context;
+    private final NBContainer container;
 
-    public ContextShutdownHook(NBCommandContext context) {
-        this.context = context;
+    public ContextShutdownHook(NBContainer container) {
+        this.container = container;
     }
 
     @Override
     public void run() {
-        context.doShutdown();
+        container.doShutdown();
     }
 
 }

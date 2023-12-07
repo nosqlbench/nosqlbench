@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.core.lifecycle.scenario.context;
+package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
 /*
  * Copyright (c) 2022 nosqlbench
@@ -24,7 +24,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 
-public interface ContextBuilderFacets {
+public interface ContainerBuilderFacets {
     public interface ALL extends
         WantsName,
         WantsController,
@@ -41,7 +41,7 @@ public interface ContextBuilderFacets {
     }
 
     public interface WantsController extends WantsStdin, WantsIoType {
-        public WantsStdin controller(ContextActivitiesController controller);
+        public WantsStdin controller(ContainerActivitiesController controller);
     }
 
 
@@ -82,7 +82,7 @@ public interface ContextBuilderFacets {
     }
 
     public interface CanBuild {
-        NBBufferedCommandContext build(NBComponent forComponent);
+        NBBufferedContainer build(NBComponent forComponent);
     }
 
 }

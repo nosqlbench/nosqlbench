@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapters.api.evalcontext;
+package io.nosqlbench.adapters.api.evalctx;
 
 import java.util.List;
 import java.util.function.BinaryOperator;

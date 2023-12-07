@@ -18,7 +18,7 @@ package io.nosqlbench.scenarios.simframe.optimo;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.RunState;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
@@ -29,10 +29,10 @@ public class OptimoFrameFunction implements SimFrameFunction {
     private final SimFrameCapture capture;
     private final SimFrameJournal<OptimoFrameParams> journal;
     private final OptimoSearchSettings settings;
-    private final ContextActivitiesController controller;
+    private final ContainerActivitiesController controller;
 
     public OptimoFrameFunction(
-        ContextActivitiesController controller,
+        ContainerActivitiesController controller,
         OptimoSearchSettings settings,
         Activity flywheel,
         SimFrameCapture capture,

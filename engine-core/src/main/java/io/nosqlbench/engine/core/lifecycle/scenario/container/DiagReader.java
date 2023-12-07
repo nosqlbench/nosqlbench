@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.scenario.context;
+package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;

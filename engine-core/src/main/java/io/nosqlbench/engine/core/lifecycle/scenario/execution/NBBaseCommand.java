@@ -16,16 +16,10 @@
 
 package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
-import io.nosqlbench.nb.api.annotations.Annotation;
-import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.nb.api.components.NBComponentErrorHandler;
-import io.nosqlbench.engine.core.annotation.Annotators;
-import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,12 +31,12 @@ public abstract class NBBaseCommand extends NBInvokableCommand {
     private final String targetScenario;
     protected Logger logger = LogManager.getLogger("COMMAND");
 
-    public NBBaseCommand(NBBufferedCommandContext parentComponent, String stepName, String targetScenario) {
+    public NBBaseCommand(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
         super(parentComponent, NBLabels.forKV("step", stepName));
         this.targetScenario = targetScenario;
     }
 
-    public NBBaseCommand(NBBufferedCommandContext parentComponent, String commandLabel) {
+    public NBBaseCommand(NBBufferedContainer parentComponent, String commandLabel) {
         this(parentComponent, commandLabel, "_testing_");
     }
 
@@ -55,7 +49,7 @@ public abstract class NBBaseCommand extends NBInvokableCommand {
     }
 
     @Override
-    public final Object apply(NBBufferedCommandContext sctx, NBCommandParams params) {
+    public final Object apply(NBBufferedContainer sctx, NBCommandParams params) {
         return invoke(params, sctx.out(), sctx.err(), sctx.in(), sctx.controller());
     }
 
@@ -69,7 +63,7 @@ public abstract class NBBaseCommand extends NBInvokableCommand {
         PrintWriter stdout,
         PrintWriter stderr,
         Reader stdin,
-        ContextActivitiesController controller
+        ContainerActivitiesController controller
     );
 
 

@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.core.lifecycle.scenario.context;
+package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
 /*
  * Copyright (c) 2022 nosqlbench
@@ -25,74 +25,74 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 
-public class NBScenarioContextBuilder implements ContextBuilderFacets.ALL {
+public class NBScenarioContainerBuilder implements ContainerBuilderFacets.ALL {
     private Map<String,String> params = Map.of();
-    private ContextActivitiesController controller;
+    private ContainerActivitiesController controller;
     private PrintWriter out = new PrintWriter(System.out);
     private PrintWriter err = new PrintWriter(System.err);
     private Reader in = new InputStreamReader(System.in);
-    private NBBufferedCommandContext.IOType iotype = NBBufferedCommandContext.IOType.traced;
-    private String contextName;
+    private NBBufferedContainer.IOType iotype = NBBufferedContainer.IOType.traced;
+    private String containerName;
 
 
-    public NBScenarioContextBuilder() {}
-    public NBBufferedCommandContext build(NBComponent contextParentComponent) {
-        return new NBBufferedCommandContext(contextParentComponent,contextName,iotype);
+    public NBScenarioContainerBuilder() {}
+    public NBBufferedContainer build(NBComponent contextParentComponent) {
+        return new NBBufferedContainer(contextParentComponent, containerName,iotype);
     }
 
 
     @Override
-    public NBScenarioContextBuilder controller(ContextActivitiesController controller) {
+    public NBScenarioContainerBuilder controller(ContainerActivitiesController controller) {
         this.controller = controller;
         return this;
     }
 
     @Override
-    public NBScenarioContextBuilder out(PrintWriter out) {
+    public NBScenarioContainerBuilder out(PrintWriter out) {
         this.out = out;
         return this;
     }
 
     @Override
-    public ContextBuilderFacets.WantsParams err(PrintWriter err) {
+    public ContainerBuilderFacets.WantsParams err(PrintWriter err) {
         this.err = err;
         return this;
     }
 
     @Override
-    public NBScenarioContextBuilder in(Reader in) {
+    public NBScenarioContainerBuilder in(Reader in) {
         this.in = in;
         return this;
 
     }
 
     @Override
-    public NBScenarioContextBuilder params(Map<String, String> params) {
+    public NBScenarioContainerBuilder params(Map<String, String> params) {
         this.params=params;
         return this;
     }
 
     @Override
-    public ContextBuilderFacets.WantsParams virtualIO() {
-        this.iotype= NBBufferedCommandContext.IOType.virtual;
+    public ContainerBuilderFacets.WantsParams virtualIO() {
+        this.iotype= NBBufferedContainer.IOType.virtual;
         return this;
     }
 
     @Override
-    public ContextBuilderFacets.WantsParams connectedIO() {
-        this.iotype = NBBufferedCommandContext.IOType.connected;
+    public ContainerBuilderFacets.WantsParams connectedIO() {
+        this.iotype = NBBufferedContainer.IOType.connected;
         return this;
     }
 
     @Override
-    public ContextBuilderFacets.WantsParams tracedIO() {
-        this.iotype= NBBufferedCommandContext.IOType.traced;
+    public ContainerBuilderFacets.WantsParams tracedIO() {
+        this.iotype= NBBufferedContainer.IOType.traced;
         return this;
     }
 
     @Override
-    public ContextBuilderFacets.WantsController name(String contextName) {
-        this.contextName = contextName;
+    public ContainerBuilderFacets.WantsController name(String contextName) {
+        this.containerName = contextName;
         return this;
     }
 }

@@ -16,19 +16,18 @@
 
 package io.nosqlbench.scenarios.simframe.optimo;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
-import io.nosqlbench.nb.api.components.NBComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.nb.api.components.events.SetThreads;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.findmax.NB_findmax;
@@ -46,9 +45,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * If the initial trust radius is not large enough with respect to the stopping trust radius, then the search will stop
@@ -69,12 +65,12 @@ import java.util.concurrent.locks.LockSupport;
 public class NB_optimo extends NBBaseCommand {
     private final static Logger logger = LogManager.getLogger(NB_findmax.class);
 
-    public NB_optimo(NBBufferedCommandContext parentComponent, String phaseName, String targetScenario) {
+    public NB_optimo(NBBufferedContainer parentComponent, String phaseName, String targetScenario) {
         super(parentComponent, phaseName, targetScenario);
     }
 
     @Override
-    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
         // TODO: having "scenario" here as well as in "named scenario" in workload templates is confusing. Make this clearer.
 
         Activity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));

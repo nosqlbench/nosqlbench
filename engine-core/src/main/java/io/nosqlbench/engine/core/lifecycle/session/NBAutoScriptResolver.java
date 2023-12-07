@@ -19,8 +19,7 @@ package io.nosqlbench.engine.core.lifecycle.session;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.CmdArg;
 import io.nosqlbench.engine.cmdstream.CmdParam;
-import io.nosqlbench.engine.cmdstream.CmdType;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.engine.core.lifecycle.scenario.script.NBScriptedCommand;
 import io.nosqlbench.nb.annotations.Service;
@@ -29,14 +28,13 @@ import io.nosqlbench.nb.api.nbio.NBIO;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @Service(value = NBInvokableResolver.class, selector = "autojs")
 public class NBAutoScriptResolver implements NBInvokableResolver {
     @Override
-    public NBInvokableCommand resolve(Cmd cmd, NBBufferedCommandContext parent, String phaseName) {
+    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName) {
 
         Optional<Content<?>> scriptfile = NBIO.local()
             .searchPrefixes("scripts/auto")

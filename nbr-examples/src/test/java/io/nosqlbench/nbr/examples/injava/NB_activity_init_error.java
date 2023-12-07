@@ -16,11 +16,10 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBBufferedCommandContext;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
-import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.ContextActivitiesController;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 
 import io.nosqlbench.nb.annotations.Service;
 
@@ -30,7 +29,7 @@ import java.util.Map;
 
 @Service(value= NBBaseCommand.class,selector="activity_init_error")
 public class NB_activity_init_error extends NBBaseCommand {
-    public NB_activity_init_error(NBBufferedCommandContext parentComponent, String scenarioName) {
+    public NB_activity_init_error(NBBufferedContainer parentComponent, String scenarioName) {
         super(parentComponent, scenarioName);
     }
 
@@ -53,7 +52,7 @@ public class NB_activity_init_error extends NBBaseCommand {
      *
      */
     @Override
-    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContextActivitiesController controller) {
+    public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
         var activitydef1 = Map.of(
             "alias","activity_init_error",
             "driver","diag",

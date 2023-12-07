@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapters.api.evalcontext;
+package io.nosqlbench.adapters.api.evalctx;
 
 import java.io.Serializable;
 
-public class ResultVerificationError extends RuntimeException {
+public class ResultMismatchError extends RuntimeException {
     private final int triesLeft;
     private final String expressionDetails;
 
-    public ResultVerificationError(String message, int triesLeft, String expressionDetails) {
+    public ResultMismatchError(String message, int triesLeft, String expressionDetails) {
         super("Error while verifying result with " + triesLeft + " tries remaining: " + message);
         this.triesLeft = triesLeft;
         this.expressionDetails = expressionDetails;
     }
 
-    public ResultVerificationError(Throwable throwable, int triesLeft, String expressionDetails) {
+    public ResultMismatchError(Throwable throwable, int triesLeft, String expressionDetails) {
         super("Error while verifying result with " + triesLeft + " tries remaining: " + throwable.getMessage(),throwable);
         this.triesLeft = triesLeft;
         this.expressionDetails = expressionDetails;

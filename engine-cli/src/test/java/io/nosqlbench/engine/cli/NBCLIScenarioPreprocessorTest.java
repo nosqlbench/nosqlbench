@@ -106,7 +106,7 @@ public class NBCLIScenarioPreprocessorTest {
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
             "alias", "with_template",
-            "context", "template_test",
+            "container", "template_test",
             "cycles", "20",
             "cycles-test", "20",
             "driver", "stdout",
@@ -123,7 +123,7 @@ public class NBCLIScenarioPreprocessorTest {
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
             "alias", "schema",
-            "context", "schema_only",
+            "container", "schema_only",
             "cycles-test", "20",
             "driver", "stdout",
             "labels", "workload:scenario_test,scenario:schema_only",
@@ -177,7 +177,7 @@ public class NBCLIScenarioPreprocessorTest {
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
             "alias", "schema",
-            "context", "schema_only",
+            "container", "schema_only",
             "cycles-test", "20",
             "driver", "stdout",
             "labels", "workload:scenario_test,scenario:schema_only",

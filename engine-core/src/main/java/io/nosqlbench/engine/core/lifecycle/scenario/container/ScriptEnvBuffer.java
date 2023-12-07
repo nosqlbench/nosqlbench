@@ -13,11 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.nosqlbench.engine.core.lifecycle.scenario.context;
-
-import io.nosqlbench.engine.core.lifecycle.scenario.context.DiagReader;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.DiagWriter;
-import io.nosqlbench.engine.core.lifecycle.scenario.context.InterjectingCharArrayWriter;
+package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
 import javax.script.SimpleScriptContext;
 import java.io.Reader;
