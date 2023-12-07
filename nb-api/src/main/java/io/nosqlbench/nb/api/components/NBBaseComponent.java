@@ -17,6 +17,7 @@
 package io.nosqlbench.nb.api.components;
 
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
+import io.nosqlbench.nb.api.components.events.ComponentOutOfScope;
 import io.nosqlbench.nb.api.components.events.DownEvent;
 import io.nosqlbench.nb.api.components.events.NBEvent;
 import io.nosqlbench.nb.api.components.events.UpEvent;
@@ -169,6 +170,14 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
             case DownEvent de -> {
                 for (NBComponent child : children) {
                     child.onEvent(de);
+                }
+            }
+            case ComponentOutOfScope coos -> {
+                for (NBMetric m : this.getComponentMetrics()) {
+                    reportExecutionMetric(m);
+                }
+                if (bufferOrphanedMetrics) {
+                    metricsBuffer.printMetricSummary(this);
                 }
             }
             default -> logger.warn("dropping event " + event);
