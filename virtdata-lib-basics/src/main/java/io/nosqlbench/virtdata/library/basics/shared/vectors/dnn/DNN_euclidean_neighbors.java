@@ -44,7 +44,7 @@ public class DNN_euclidean_neighbors implements IntFunction<int[]> {
 
     /**
      * <P>Compute neighbor indices with a (hopefully) fast implementation. There are surely some simplifications to be
-     * made in the functions below, but even in the current for it avoids a significant number of branches.</P>
+     * made in the functions below, but even in the current form it avoids a significant number of branches.</P>
      *
      * <P>This code is not as simple as it could be. It was built more for speed than simplicity since it will be a hot
      * spot for testing. The unit tests for this are essential.</P>
