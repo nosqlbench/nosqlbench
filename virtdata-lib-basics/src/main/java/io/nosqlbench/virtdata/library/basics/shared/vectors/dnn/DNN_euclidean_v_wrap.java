@@ -26,20 +26,26 @@ import java.util.function.LongFunction;
 @Categories(Category.experimental)
 public class DNN_euclidean_v_wrap implements LongFunction<float[]> {
 
-    private final int dimensions;
-    private final long population;
+    private final int D;
+    private final long N;
+    private final double scale;
 
-    public DNN_euclidean_v_wrap(int dimensions, long population) {
-        this.dimensions = dimensions;
-        this.population = population;
+    public DNN_euclidean_v_wrap(int D, long N, double scale) {
+        this.D = D;
+        this.N = N;
+        this.scale = scale;
+    }
+
+    public DNN_euclidean_v_wrap(int D, long N) {
+        this(D,N,1.0d);
     }
 
     @Override
     public float[] apply(long value) {
-        value = value % population;
-        float[] vector = new float[dimensions];
+        value = value % N;
+        float[] vector = new float[D];
         for (int idx = 0; idx < vector.length; idx++) {
-            vector[idx]= (float)idx+value;
+            vector[idx]= (float)((idx+value)*scale);
         }
         return vector;
     }
