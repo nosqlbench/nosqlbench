@@ -78,7 +78,7 @@ public class DNN_euclidean_neighbors implements IntFunction<int[]> {
         for (int i = 0; i < unbounded; i++) {
             // Leave this here as an explainer, please
             // int sign = ((((i + 1) & 1) << 1) - 1); // this gives us -1 or +1 depending on odd or even, and is inverted
-            // int offset = ((i + 1)>>1); // half rounded down, shifted biased by 1
+            // int offset = ((i + 1)>>1); // half rounded down, shifted by 1
             // offset *= sign;
             // int v = value + (((((i + 1) & 1) << 1) - 1) * ((i + 1) >> 1));
             indices[i] = value + (((((i + 1) & 1) << 1) - 1) * ((i + 1) >> 1));
