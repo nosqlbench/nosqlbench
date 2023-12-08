@@ -80,7 +80,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         registerNetworkInterfaceMetrics();
         registerCpuStatMetrics();
         clientMetricChecker.start();
-
+        bufferOrphanedMetrics = true;
     }
 
 
@@ -127,7 +127,7 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
             ctx.controller().awaitCompletion(Long.MAX_VALUE);
             logger.debug("completed");
         }
-
+        metricsBuffer.printMetricSummary(this);
         return collector.toExecutionResult();
     }
 

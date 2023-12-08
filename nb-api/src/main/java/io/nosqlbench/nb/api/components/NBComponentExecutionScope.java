@@ -16,6 +16,7 @@
 
 package io.nosqlbench.nb.api.components;
 
+import io.nosqlbench.nb.api.components.events.ComponentOutOfScope;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 
 public class NBComponentExecutionScope implements AutoCloseable {
@@ -29,6 +30,7 @@ public class NBComponentExecutionScope implements AutoCloseable {
     public void close() throws RuntimeException {
         for (NBComponent component : components) {
             component.beforeDetach();
+            component.onEvent(new ComponentOutOfScope(component));
             NBComponent parent = component.getParent();
             if (parent!=null) {
                 parent.detachChild(component);

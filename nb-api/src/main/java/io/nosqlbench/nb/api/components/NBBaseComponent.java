@@ -17,6 +17,7 @@
 package io.nosqlbench.nb.api.components;
 
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
+import io.nosqlbench.nb.api.components.events.ComponentOutOfScope;
 import io.nosqlbench.nb.api.components.events.DownEvent;
 import io.nosqlbench.nb.api.components.events.NBEvent;
 import io.nosqlbench.nb.api.components.events.UpEvent;
@@ -32,6 +33,8 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     protected final NBComponent parent;
     protected final NBLabels labels;
     private final List<NBComponent> children = new ArrayList<>();
+    protected NBMetricsBuffer metricsBuffer = new NBMetricsBuffer();
+    protected boolean bufferOrphanedMetrics = false;
 
     public NBBaseComponent(NBComponent parentComponent) {
         this(parentComponent, NBLabels.forKV());
@@ -169,6 +172,14 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
                     child.onEvent(de);
                 }
             }
+            case ComponentOutOfScope coos -> {
+                for (NBMetric m : this.getComponentMetrics()) {
+                    reportExecutionMetric(m);
+                }
+                if (bufferOrphanedMetrics) {
+                    metricsBuffer.printMetricSummary(this);
+                }
+            }
             default -> logger.warn("dropping event " + event);
         }
     }
@@ -191,6 +202,22 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     @Override
     public Map<String, String> getTokens() {
         return getLabels().asMap();
+    }
+
+    /**
+     * This method is called by the engine to report a component going out of scope. The metrics for that component
+     * will bubble up through the component layers and can be buffered for reporting at multiple levels.
+     *
+     * @param m The metric to report
+     */
+    @Override
+    public void reportExecutionMetric(NBMetric m) {
+        if (bufferOrphanedMetrics) {
+            metricsBuffer.addSummaryMetric(m);
+        }
+        if (parent != null) {
+            parent.reportExecutionMetric(m);
+        }
     }
 
 }
