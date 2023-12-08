@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DNNEuclideanNeighborsTest {
 
     @Test
-    public void test_DNN_k3_p7_d5() {
+    public void test_DNN_K3_N7_D5() {
         DNN_euclidean_neighbors idxF = new DNN_euclidean_neighbors(3, 7, 5);
         assertThat(idxF.apply(0)).isEqualTo(new int[]{0,1,2});
         assertThat(idxF.apply(1)).isEqualTo(new int[]{1,0,2});
@@ -53,10 +53,12 @@ class DNNEuclideanNeighborsTest {
     }
 
     @Test
-    public void test_DNN_k6_n101_d10() {
+    public void test_DNN_K6_N101_D10() {
         DNN_euclidean_neighbors idxF = new DNN_euclidean_neighbors(6, 101, 10);
+        assertThat(idxF.apply(101)).isEqualTo(new int[]{100,99,98,97,96,95});
         assertThat(idxF.apply(100)).isEqualTo(new int[]{100,99,98,97,96,95});
         assertThat(idxF.apply(99)).isEqualTo(new int[]{99,98,100,97,96,95});
+        assertThat(idxF.apply(98)).isEqualTo(new int[]{98,97,99,96,100,95});
     }
 
 }

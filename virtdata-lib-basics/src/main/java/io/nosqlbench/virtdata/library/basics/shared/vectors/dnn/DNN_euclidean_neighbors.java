@@ -76,12 +76,13 @@ public class DNN_euclidean_neighbors implements IntFunction<int[]> {
      */
     @Override
     public int[] apply(int value) {
+        value = Math.min(Math.max(0,value),N-1);
         int[] indices = new int[k];
 
         int leftBoundary = (value << 1) + 1;
         int rightBoundary = ((N - (value + 1)) << 1) + 1;
-        int unbounded = Math.min(k, Math.min(leftBoundary, rightBoundary));
-        for (int i = 0; i < unbounded; i++) {
+        int insideNeighbors = Math.min(k, Math.min(leftBoundary, rightBoundary));
+        for (int i = 0; i < insideNeighbors; i++) {
             // Leave this here as an explainer, please
             // int sign = ((((i + 1) & 1) << 1) - 1); // this gives us -1 or +1 depending on odd or even, and is inverted
             // int offset = ((i + 1)>>1); // half rounded down, shifted by 1
@@ -90,12 +91,13 @@ public class DNN_euclidean_neighbors implements IntFunction<int[]> {
             indices[i] = value + (((((i + 1) & 1) << 1) - 1) * ((i + 1) >> 1));
         }
         int leftFill = Math.max(0, k - leftBoundary);
+        // TODO: Evaluate optimization from Dave2Wave for reducing additions
         for (int i = 0; i < leftFill; i++) {
-            indices[unbounded + i] = unbounded + i;
+            indices[insideNeighbors + i] = insideNeighbors + i;
         }
         int rightFill = Math.max(0, k - rightBoundary);
         for (int i = 0; i < rightFill; i++) {
-            indices[unbounded + i] = (N - 1) - (unbounded + i);
+            indices[insideNeighbors + i] = (N - 1) - (insideNeighbors + i);
         }
         return indices;
     }
