@@ -55,7 +55,7 @@ public class DNN_euclidean_neighbors implements IntFunction<int[]> {
      * starting at the central vector (the index of the query vector).</LI>
      * <LI>Layer these in rank order using closed-form index functions.</LI>
      * <LI>Layer in any zero-boundary values which were deferred from above.</LI>
-     * <LI>Layer in an N-boundary values which were deferred above.</LI>
+     * <LI>Layer in an N-boundary values which were deferred from above.</LI>
      * </OL>
      * </P>
      *
@@ -77,8 +77,8 @@ public class DNN_euclidean_neighbors implements IntFunction<int[]> {
         int unbounded = Math.min(k, Math.min(leftBoundary, rightBoundary));
         for (int i = 0; i < unbounded; i++) {
             // Leave this here as an explainer, please
-            // int sign = ((((i + 1) & 1) << 1) - 1);
-            // int offset = ((i + 1)>>1);
+            // int sign = ((((i + 1) & 1) << 1) - 1); // this gives us -1 or +1 depending on odd or even, and is inverted
+            // int offset = ((i + 1)>>1); // half rounded down, shifted biased by 1
             // offset *= sign;
             // int v = value + (((((i + 1) & 1) << 1) - 1) * ((i + 1) >> 1));
             indices[i] = value + (((((i + 1) & 1) << 1) - 1) * ((i + 1) >> 1));
