@@ -47,7 +47,7 @@ public class DNN_euclidean_v implements LongFunction<float[]> {
         }
         float[] vector = new float[D];
         for (int idx = 0; idx < vector.length; idx++) {
-            vector[idx]= (float)((idx+value)*scale);
+            vector[idx]= (float)(value+(idx*scale));
         }
         return vector;
     }

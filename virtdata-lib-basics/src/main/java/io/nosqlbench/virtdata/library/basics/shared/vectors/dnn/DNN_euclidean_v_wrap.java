@@ -45,7 +45,7 @@ public class DNN_euclidean_v_wrap implements LongFunction<float[]> {
         value = value % N;
         float[] vector = new float[D];
         for (int idx = 0; idx < vector.length; idx++) {
-            vector[idx]= (float)((idx+value)*scale);
+            vector[idx]= (float)(value+(idx*scale));
         }
         return vector;
     }
