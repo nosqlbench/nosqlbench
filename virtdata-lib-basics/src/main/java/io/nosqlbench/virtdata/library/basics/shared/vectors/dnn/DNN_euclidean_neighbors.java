@@ -16,12 +16,18 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.vectors.dnn;
 
+import io.nosqlbench.virtdata.api.annotations.Categories;
+import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+
 import java.util.function.IntFunction;
 
 /**
  * Compute the indices of the neighbors of a given v using DNN mapping.
  * To avoid ambiguity on equidistant neighbors, odd neighborhood sizes are preferred.
  */
+@ThreadSafeMapper
+@Categories(Category.experimental)
 public class DNN_euclidean_neighbors implements IntFunction<int[]> {
 
     private final int D;
