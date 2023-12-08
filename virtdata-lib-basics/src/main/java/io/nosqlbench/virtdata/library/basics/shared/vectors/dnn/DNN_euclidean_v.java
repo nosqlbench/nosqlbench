@@ -28,10 +28,16 @@ public class DNN_euclidean_v implements LongFunction<float[]> {
 
     private final int D;
     private final long N;
+    private final double scale;
 
     public DNN_euclidean_v(int D, long N) {
+        this(D,N,1.0d);
+    }
+
+    public DNN_euclidean_v(int D, long N, double scale) {
         this.D = D;
         this.N = N;
+        this.scale = scale;
     }
 
     @Override
@@ -41,7 +47,7 @@ public class DNN_euclidean_v implements LongFunction<float[]> {
         }
         float[] vector = new float[D];
         for (int idx = 0; idx < vector.length; idx++) {
-            vector[idx]= (float)idx+value;
+            vector[idx]= (float)((idx+value)*scale);
         }
         return vector;
     }

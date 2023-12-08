@@ -31,6 +31,14 @@ class DNNEuclideanVTest {
     }
 
     @Test
+    public void testBasicVectorsScaled() {
+        DNN_euclidean_v vf = new DNN_euclidean_v(5, 7, 3.0);
+        assertThat(vf.apply(3L)).isEqualTo(new float[]{9f,12f,15f,18f,21f});
+        assertThrows(RuntimeException.class, () -> vf.apply(7));
+    }
+
+
+    @Test
     public void testWrappingVectors() {
         DNN_euclidean_v_wrap vf = new DNN_euclidean_v_wrap(5, 7);
         assertThat(vf.apply(3L)).isEqualTo(new float[]{3f,4f,5f,6f,7f});
