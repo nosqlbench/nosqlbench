@@ -39,7 +39,7 @@ public class ToDouble implements LongToDoubleFunction {
 
     private final LongToDoubleFunction func;
 
-    ToDouble(Object func) {
+    public ToDouble(Object func) {
         if (func instanceof Number number) {
             final double aDouble = number.doubleValue();
             this.func = l -> aDouble;
