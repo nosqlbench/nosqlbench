@@ -51,7 +51,6 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DryRunOpDispenserWrapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.adapters.api.templating.CommandTemplate;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -416,31 +415,6 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
         }
     }
 
-    /**
-     * Given a function that can create an op of type <O> from a CommandTemplate, generate
-     * an indexed sequence of ready to call operations.
-     * <p>
-     * This method works almost exactly like the ,
-     * except that it uses the {@link CommandTemplate} semantics, which are more general and allow
-     * for map-based specification of operations with bindings in each field.
-     * <p>
-     * It is recommended to use the CommandTemplate form
-     * than the
-     *
-     * @param <O>
-     * @param opinit
-     * @param strict
-     * @return
-     */
-    protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSequenceFromCommands(
-            Function<CommandTemplate, OpDispenser<O>> opinit,
-            boolean strict
-    ) {
-        Function<OpTemplate, CommandTemplate> f = CommandTemplate::new;
-        Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
-
-        return createOpSequence(opTemplateOFunction, strict, Optional.empty());
-    }
 
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromParsedOps(
             Map<String, DriverAdapter> adapterCache,
@@ -502,27 +476,7 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
 
     }
 
-
-    protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromCommands(
-            Function<ParsedOp, OpDispenser<? extends O>> opinit,
-            NBConfiguration cfg,
-            List<Function<Map<String, Object>, Map<String, Object>>> parsers,
-            boolean strict
-    ) {
-        Function<OpTemplate, ParsedOp> f = t -> new ParsedOp(t, cfg, parsers, this);
-        Function<OpTemplate, OpDispenser<? extends O>> opTemplateOFunction = f.andThen(opinit);
-
-        return createOpSequence(opTemplateOFunction, strict, Optional.empty());
-    }
-
-    protected List<ParsedOp> loadParsedOps(NBConfiguration cfg, Optional<DriverAdapter> defaultAdapter) {
-        List<ParsedOp> parsedOps = loadOpTemplates(defaultAdapter).stream().map(
-                ot -> new ParsedOp(ot, cfg, List.of(), this)
-        ).toList();
-        return parsedOps;
-    }
-
-    protected List<OpTemplate> loadOpTemplates(Optional<DriverAdapter> defaultDriverAdapter) {
+    protected List<OpTemplate> loadOpTemplates(Optional<DriverAdapter<?,?>> defaultDriverAdapter) {
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
 

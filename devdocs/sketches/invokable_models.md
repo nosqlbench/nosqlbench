@@ -38,7 +38,7 @@ To clarify the differences, here are some basic examples:
     jmxOp.execute();
     kafkaSequencer.get(cycle).write(cycle);
     mongoResultDoc = activity.getDatabase().runCommand(queryBson, rms.getReadPreference());
-    WebDriverVerbs.execute(cycle, commandTemplate, context, dryrun);
+    WebDriverVerbs.execute(cycle, cmdTemplate, context, dryrun);
 
 
 ActivityType<A extends Activity>
