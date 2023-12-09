@@ -18,8 +18,8 @@ package io.nosqlbench.nb.api.histo;
 
 import io.nosqlbench.nb.api.engine.metrics.HistoIntervalLogger;
 import io.nosqlbench.nb.api.engine.util.Unit;
-import io.nosqlbench.nb.api.components.NBBaseComponent;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.io.File;
 import java.util.regex.Pattern;

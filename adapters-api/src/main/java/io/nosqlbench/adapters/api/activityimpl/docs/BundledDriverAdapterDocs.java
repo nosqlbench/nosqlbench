@@ -24,7 +24,7 @@ import io.nosqlbench.nb.api.docsapi.Docs;
 import io.nosqlbench.nb.api.docsapi.DocsBinder;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
 

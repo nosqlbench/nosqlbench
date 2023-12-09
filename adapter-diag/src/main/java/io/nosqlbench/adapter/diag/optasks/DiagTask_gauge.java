@@ -22,7 +22,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.Param;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBParentComponentInjection;
+import io.nosqlbench.nb.api.components.core.NBParentComponentInjection;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;

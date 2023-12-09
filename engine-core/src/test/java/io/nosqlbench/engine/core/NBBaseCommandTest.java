@@ -20,7 +20,7 @@ import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.CmdArg;
 import io.nosqlbench.engine.cmdstream.CmdParam;
 import io.nosqlbench.engine.core.lifecycle.session.NBCommandInvoker;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;

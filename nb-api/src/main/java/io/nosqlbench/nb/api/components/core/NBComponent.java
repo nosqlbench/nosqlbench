@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.nb.api.components.core;
 
 import io.nosqlbench.nb.api.components.decorators.NBProviderSearch;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
@@ -42,7 +42,8 @@ public interface NBComponent extends
     NBComponentMetrics,
     NBComponentServices,
     NBComponentEvents,
-    NBProviderSearch {
+    NBProviderSearch,
+    NBComponentProps {
 
     NBComponent EMPTY_COMPONENT = new NBBaseComponent(null);
 
@@ -62,4 +63,6 @@ public interface NBComponent extends
     void close() throws RuntimeException;
 
     void reportExecutionMetric(NBMetric m);
+
+    long getNanosSinceStart();
 }

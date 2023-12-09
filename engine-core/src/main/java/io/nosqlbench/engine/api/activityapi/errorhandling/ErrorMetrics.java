@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.errorhandling;
 
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionExpectedResultVerificationMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;

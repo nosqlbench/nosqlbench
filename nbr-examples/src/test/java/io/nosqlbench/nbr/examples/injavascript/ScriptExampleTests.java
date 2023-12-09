@@ -19,7 +19,7 @@ package io.nosqlbench.nbr.examples.injavascript;
 import io.nosqlbench.engine.cmdstream.BasicScriptBuffer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;

@@ -17,7 +17,7 @@
 package io.nosqlbench.cqlgen.model;
 
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBNamedElement;
+import io.nosqlbench.nb.api.components.core.NBNamedElement;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 
 public abstract class CqlColumnBase implements NBNamedElement, NBLabeledElement {

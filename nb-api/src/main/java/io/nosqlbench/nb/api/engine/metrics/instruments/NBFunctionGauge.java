@@ -18,7 +18,7 @@ package io.nosqlbench.nb.api.engine.metrics.instruments;
 
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.util.Map;
 import java.util.function.Supplier;

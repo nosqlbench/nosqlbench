@@ -18,7 +18,7 @@ package io.nosqlbench.nb.api.tagging;
 
 import io.nosqlbench.nb.api.engine.util.Tagged;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.util.*;
 import java.util.function.BiFunction;

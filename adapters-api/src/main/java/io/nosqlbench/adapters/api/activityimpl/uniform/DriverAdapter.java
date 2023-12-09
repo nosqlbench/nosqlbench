@@ -22,7 +22,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.nb.api.docsapi.Docs;
 import io.nosqlbench.nb.api.docsapi.DocsBinder;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;

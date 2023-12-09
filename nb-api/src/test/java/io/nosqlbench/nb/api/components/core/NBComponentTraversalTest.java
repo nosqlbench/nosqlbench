@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.nb.api.components.core;
 
-import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.nb.api.components.NBComponentTraversal;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponentTraversal;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import org.junit.jupiter.api.Test;
 

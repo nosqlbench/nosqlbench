@@ -22,7 +22,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.NBReconfigurable;
-import io.nosqlbench.nb.api.components.NBParentComponentInjection;
+import io.nosqlbench.nb.api.components.core.NBParentComponentInjection;
 import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
 import io.nosqlbench.nb.annotations.ServiceSelector;
 import org.apache.logging.log4j.LogManager;

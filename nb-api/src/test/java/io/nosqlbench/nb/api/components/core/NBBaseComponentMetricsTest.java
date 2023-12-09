@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.nb.api.components.core;
 
-import io.nosqlbench.nb.api.components.NBBaseComponentMetrics;
+import io.nosqlbench.nb.api.components.core.NBBaseComponentMetrics;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBBaseMetric;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import org.junit.jupiter.api.Test;

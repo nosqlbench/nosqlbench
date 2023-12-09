@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.nb.api.components.core;
 
 import io.nosqlbench.nb.api.components.events.NBEvent;
 

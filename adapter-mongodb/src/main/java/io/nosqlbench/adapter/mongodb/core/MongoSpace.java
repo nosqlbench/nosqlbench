@@ -22,7 +22,7 @@ import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import io.nosqlbench.nb.api.components.NBNamedElement;
+import io.nosqlbench.nb.api.components.core.NBNamedElement;
 import com.mongodb.client.MongoDatabase;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;

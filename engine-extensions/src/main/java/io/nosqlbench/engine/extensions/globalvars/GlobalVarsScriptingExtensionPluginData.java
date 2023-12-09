@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.extensions.globalvars;
 
 import io.nosqlbench.nb.api.extensions.ScriptingExtensionPluginInfo;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import org.apache.logging.log4j.Logger;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.nb.api.components.core;
 
 public interface NBParentComponentInjection {
     void applyParentComponent(NBComponent component);

@@ -19,7 +19,7 @@ package io.nosqlbench.engine.extensions.vectormath;
 
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
-import io.nosqlbench.nb.api.components.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.pinecone.proto.QueryResponse;
 import io.pinecone.proto.ScoredVector;
 import org.junit.jupiter.api.Test;

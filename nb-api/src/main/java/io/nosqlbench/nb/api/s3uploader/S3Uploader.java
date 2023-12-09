@@ -24,8 +24,8 @@ import io.nosqlbench.nb.api.addins.s3.s3urlhandler.S3ClientCache;
 import io.nosqlbench.nb.api.addins.s3.s3urlhandler.S3UrlFields;
 import io.nosqlbench.nb.api.metadata.ScenarioMetadata;
 import io.nosqlbench.nb.api.system.NBEnvironment;
-import io.nosqlbench.nb.api.components.NBBaseComponent;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

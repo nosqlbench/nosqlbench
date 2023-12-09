@@ -19,8 +19,8 @@ package io.nosqlbench.nb.api.engine.metrics.reporters;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.system.NBEnvironment;
-import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.nb.api.components.PeriodicTaskComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.components.core.PeriodicTaskComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

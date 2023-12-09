@@ -19,7 +19,7 @@ import com.codahale.metrics.Gauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBComponentExecutionScope;
+import io.nosqlbench.nb.api.components.core.NBComponentExecutionScope;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityimpl.MotorState;
 import io.nosqlbench.nb.api.annotations.Annotation;

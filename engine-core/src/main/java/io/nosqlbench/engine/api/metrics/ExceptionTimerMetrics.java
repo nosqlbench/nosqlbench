@@ -18,7 +18,7 @@ package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Timer;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.util.ArrayList;
 import java.util.List;

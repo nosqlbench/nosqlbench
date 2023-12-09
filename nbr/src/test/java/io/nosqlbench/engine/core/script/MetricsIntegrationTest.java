@@ -18,7 +18,7 @@ package io.nosqlbench.engine.core.script;
 
 import com.codahale.metrics.Histogram;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

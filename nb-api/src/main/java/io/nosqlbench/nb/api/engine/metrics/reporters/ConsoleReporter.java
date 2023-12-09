@@ -19,9 +19,9 @@ package io.nosqlbench.nb.api.engine.metrics.reporters;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.nb.api.components.NBFinders;
-import io.nosqlbench.nb.api.components.PeriodicTaskComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBFinders;
+import io.nosqlbench.nb.api.components.core.PeriodicTaskComponent;
 import io.nosqlbench.nb.api.engine.metrics.instruments.*;
 
 import java.io.PrintStream;
