@@ -596,23 +596,31 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
     protected OpsDocList loadStmtsDocList() {
 
         try {
-            Optional<String> stmt = activityDef.getParams().getOptionalString("op", "stmt", "statement");
-            Optional<String> op_yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
-            if (stmt.isPresent()) {
-                String op = stmt.get();
-                workloadSource = "commandline:" + stmt.get();
-                if (op.startsWith("{") || op.startsWith("[")) {
-                    return OpsLoader.loadString(stmt.get(), OpTemplateFormat.json, activityDef.getParams(), null);
-                } else {
-                    return OpsLoader.loadString(stmt.get(), OpTemplateFormat.inline, activityDef.getParams(), null);
-                }
-            }
-            if (op_yaml_loc.isPresent()) {
-                workloadSource = "yaml:" + op_yaml_loc.get();
-                return OpsLoader.loadPath(op_yaml_loc.get(), activityDef.getParams(), "activities");
+            String op = activityDef.getParams().getOptionalString("op").orElse(null);
+            String stmt = activityDef.getParams().getOptionalString("stmt", "statement").orElse(null);
+            String workload = activityDef.getParams().getOptionalString("workload").orElse(null);
+            if ((op!=null ? 1 : 0) + (stmt!=null ? 1 : 0) + (workload!=null ? 1 : 0) > 1) {
+                throw new OpConfigError("Only op, statement, or workload may be provided, not more than one.");
             }
 
-            return OpsDocList.none();
+            if (op!=null && op.matches("^\\{[^}]+:[^}]+}$(?s)(?m)")) {
+                workloadSource = "commandline: (op/json): '" + op + "'";
+                return OpsLoader.loadString(op, OpTemplateFormat.json, activityDef.getParams(), null);
+            } else if (op!=null && op.matches("^\\[[^]]+]$")) {
+                workloadSource = "commandline: (op/json): '" + op + "'";
+                return OpsLoader.loadString(op, OpTemplateFormat.json, activityDef.getParams(), null);
+            } else if (op!=null) {
+                workloadSource = "commandline: (op/inline): '" + op + "'";
+                return OpsLoader.loadString(op, OpTemplateFormat.inline, activityDef.getParams(), null);
+            } else if (stmt!=null) {
+                workloadSource = "commandline: (stmt/inline): '" + stmt + "'";
+                return OpsLoader.loadString(stmt, OpTemplateFormat.inline, activityDef.getParams(), null);
+            } else if (workload!=null) {
+                workloadSource = "yaml:" + workload;
+                return OpsLoader.loadPath(workload, activityDef.getParams(), "activities");
+            } else {
+                return OpsDocList.none();
+            }
 
         } catch (Exception e) {
             throw new OpConfigError("Error loading op templates: " + e, workloadSource, e);
