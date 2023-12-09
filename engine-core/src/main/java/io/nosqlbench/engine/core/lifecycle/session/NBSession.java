@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
+import io.nosqlbench.nb.api.components.core.NBComponentProps;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
