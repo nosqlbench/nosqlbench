@@ -64,9 +64,9 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
      */
     void closeAutoCloseables();
 
-    MotorDispenser getMotorDispenserDelegate();
+    MotorDispenser<?> getMotorDispenserDelegate();
 
-    void setMotorDispenserDelegate(MotorDispenser motorDispenser);
+    void setMotorDispenserDelegate(MotorDispenser<?> motorDispenser);
 
     InputDispenser getInputDispenserDelegate();
 

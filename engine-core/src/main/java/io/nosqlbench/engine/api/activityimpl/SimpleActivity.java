@@ -32,7 +32,6 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
@@ -146,12 +145,12 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
     }
 
     @Override
-    public final MotorDispenser getMotorDispenserDelegate() {
+    public final MotorDispenser<?> getMotorDispenserDelegate() {
         return motorDispenser;
     }
 
     @Override
-    public final void setMotorDispenserDelegate(MotorDispenser motorDispenser) {
+    public final void setMotorDispenserDelegate(MotorDispenser<?> motorDispenser) {
         this.motorDispenser = motorDispenser;
     }
 
@@ -485,19 +484,19 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
         List<OpTemplate> unfilteredOps = opsDocList.getOps(false);
         List<OpTemplate> filteredOps = opsDocList.getOps(tagfilter, true);
 
-        if (0 == filteredOps.size()) {
+        if (filteredOps.isEmpty()) {
             // There were no ops, and it *wasn't* because they were all filtered out.
             // In this case, let's try to synthesize the ops as long as at least a default driver was provided
             // But if there were no ops, and there was no default driver provided, we can't continue
             // There were no ops, and it was because they were all filtered out
-            if (0 < unfilteredOps.size()) {
+            if (!unfilteredOps.isEmpty()) {
                 throw new BasicError("There were no active op templates with tag filter '"
                         + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
             }
             if (defaultDriverAdapter.isPresent() && defaultDriverAdapter.get() instanceof SyntheticOpTemplateProvider sotp) {
                 filteredOps = sotp.getSyntheticOpTemplates(opsDocList, this.activityDef.getParams());
                 Objects.requireNonNull(filteredOps);
-                if (0 == filteredOps.size()) {
+                if (filteredOps.isEmpty()) {
                     throw new BasicError("Attempted to create synthetic ops from driver '" + defaultDriverAdapter.get().getAdapterName() + '\'' +
                             " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
                 }
@@ -508,13 +507,12 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
                         2) op='inline template'
                         3) driver=stdout (or any other drive that can synthesize ops)""");
             }
-            if (0 == filteredOps.size()) {
-
+            if (filteredOps.isEmpty()) {
                 throw new BasicError("There were no active op templates with tag filter '" + tagfilter + '\'');
             }
         }
 
-        if (0 == filteredOps.size()) {
+        if (filteredOps.isEmpty()) {
             throw new OpConfigError("No op templates found. You must provide either workload=... or op=..., or use " +
                     "a default driver (driver=___). This includes " +
                     ServiceLoader.load(DriverAdapter.class).stream()
@@ -560,7 +558,7 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
      * @return The sequence of operations as determined by filtering and ratios
      */
     @Deprecated(forRemoval = true)
-    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate, OpDispenser<? extends O>> opinit, boolean strict, Optional<DriverAdapter> defaultAdapter) {
+    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate, OpDispenser<? extends O>> opinit, boolean strict, Optional<DriverAdapter<?,?>> defaultAdapter) {
 
         var stmts = loadOpTemplates(defaultAdapter);
 
