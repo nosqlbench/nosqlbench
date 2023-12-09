@@ -83,7 +83,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         }
 
         Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
-        Optional<DriverAdapter> defaultAdapter =  activityDef.getParams().getOptionalString("driver")
+        Optional<DriverAdapter<?,?>> defaultAdapter =  activityDef.getParams().getOptionalString("driver")
             .flatMap(name ->  ServiceSelector.of(name,ServiceLoader.load(DriverAdapterLoader.class)).get())
             .map(l -> l.load(this,NBLabels.forKV()));
 
