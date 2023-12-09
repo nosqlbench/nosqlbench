@@ -122,7 +122,7 @@
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-graphite</artifactId>
-                <version>4.2.21</version>
+                <version>4.2.22</version>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
