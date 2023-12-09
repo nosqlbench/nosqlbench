@@ -272,6 +272,29 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             return NBCLI.EXIT_OK;
         }
 
+        if (options.wantsToCatResource()) {
+            final String resourceToCat = options.wantsToCatResourceNamed();
+            NBCLI.logger.debug(() -> "user requests to cat " + resourceToCat);
+
+            Optional<Content<?>> tocat = NBIO.classpath()
+                .searchPrefixes("activities")
+                .searchPrefixes(options.wantsIncludes())
+                .pathname(resourceToCat).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
+
+            if (tocat.isEmpty()) tocat = NBIO.classpath()
+                .searchPrefixes().searchPrefixes(options.wantsIncludes())
+                .searchPrefixes(options.wantsIncludes())
+                .pathname(resourceToCat).first();
+
+            final Content<?> data = tocat.orElseThrow(
+                () -> new BasicError("Unable to find " + resourceToCat +
+                    " in classpath to cat out"));
+
+            System.out.println(data.get());
+            NBCLI.logger.info(() -> "Dumped internal resource '" + data.asPath() + "' to stdout");
+            return NBCLI.EXIT_OK;
+        }
+
         if (options.wantsToCopyResource()) {
             final String resourceToCopy = options.wantsToCopyResourceNamed();
             NBCLI.logger.debug(() -> "user requests to copy out " + resourceToCopy);
