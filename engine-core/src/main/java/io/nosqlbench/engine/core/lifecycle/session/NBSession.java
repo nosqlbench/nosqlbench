@@ -56,13 +56,6 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         ERROR
     }
 
-    private NBBufferedContainer getContext(String name) {
-        return containers.computeIfAbsent(
-            name,
-            n -> NBContainer.builder().name(n).build(this)
-        );
-    }
-
     public NBSession(
         NBLabeledElement labelContext,
         String sessionName
@@ -204,6 +197,13 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         NBMetricGauge cpuTotalGauge = create().gauge("cpu_total", reader::getTotalTime);
         // add checking for percent of time spent in user space; TODO: Modify percent threshold
         clientMetricChecker.addRatioMetricToCheck(cpuUserGauge, cpuTotalGauge, 50.0, true);
+    }
+
+    private NBBufferedContainer getContext(String name) {
+        return containers.computeIfAbsent(
+            name,
+            n -> NBContainer.builder().name(n).build(this)
+        );
     }
 
 }

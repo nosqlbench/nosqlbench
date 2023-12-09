@@ -233,13 +233,17 @@ public class ConsoleReporter extends PeriodicTaskComponent {
         for (NBMetric metric : summaryMetrics) {
             if (metric instanceof NBMetricGauge) {
                 gauges.add((NBMetricGauge) metric);
-            } if (metric instanceof NBMetricCounter) {
+            }
+            if (metric instanceof NBMetricCounter) {
                 counters.add((NBMetricCounter) metric);
-            } if (metric instanceof NBMetricHistogram) {
+            }
+            if (metric instanceof NBMetricHistogram) {
                 histograms.add((NBMetricHistogram) metric);
-            } if (metric instanceof NBMetricMeter) {
+            }
+            if (metric instanceof NBMetricMeter) {
                 meters.add((NBMetricMeter) metric);
-            } if (metric instanceof NBMetricTimer) {
+            }
+            if (metric instanceof NBMetricTimer) {
                 timers.add((NBMetricTimer) metric);
             }
         }
