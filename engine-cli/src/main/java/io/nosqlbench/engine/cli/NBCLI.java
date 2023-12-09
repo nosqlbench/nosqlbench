@@ -413,6 +413,11 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             ),
             sessionName
         );
+        // TODO: Decide whether this should be part of ctor consistency
+        Map.of(
+            "summary", options.getReportSummaryTo(),
+            "logsdir", options.getLogsDirectory().toString()
+        ).forEach(session::setComponentProp);
 
         options.wantsReportCsvTo().ifPresent(cfg -> {
             MetricInstanceFilter filter = new MetricInstanceFilter();
@@ -439,7 +444,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
 
         ExecutionResult sessionResult = session.apply(options.getCommands());
-        sessionResult.printSummary(System.out);
+//        sessionResult.printSummary(System.out);
+        logger.info(sessionResult);
         return sessionResult.getStatus().code;
 
     }

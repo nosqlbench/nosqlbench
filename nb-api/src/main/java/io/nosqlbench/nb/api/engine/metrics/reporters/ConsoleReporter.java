@@ -41,9 +41,10 @@ public class ConsoleReporter extends PeriodicTaskComponent {
     private final long rateFactor;
     private final String durationUnit = TimeUnit.NANOSECONDS.toString().toLowerCase(Locale.US);
     private final long durationFactor = TimeUnit.NANOSECONDS.toNanos(1);
+
     public ConsoleReporter(NBComponent node, NBLabels extraLabels, long millis, boolean oneLastTime,
                            PrintStream output, Set<MetricAttribute> disabledMetricAttributes) {
-        super(node, extraLabels, millis, oneLastTime,"REPORT-CONSOLE");
+        super(node, extraLabels, millis, oneLastTime, "REPORT-CONSOLE");
         this.output = output;
         this.dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT,
             DateFormat.MEDIUM,
@@ -190,8 +191,10 @@ public class ConsoleReporter extends PeriodicTaskComponent {
     /**
      * Print only if the attribute is enabled
      *
-     * @param type   Metric attribute
-     * @param status Status to be logged
+     * @param type
+     *     Metric attribute
+     * @param status
+     *     Status to be logged
      */
     private void printIfEnabled(MetricAttribute type, String status) {
         if (getDisabledMetricAttributes().contains(type)) {
@@ -241,5 +244,10 @@ public class ConsoleReporter extends PeriodicTaskComponent {
             }
         }
         report(gauges, counters, histograms, meters, timers);
+    }
+
+    public void reportCountsOnce(List<NBMetric> summaryMetrics) {
+        // TODO: implement counts only renderer
+        // TODO: resolve ambiguity around reporting counts only or reporting nothing for short sessions
     }
 }
