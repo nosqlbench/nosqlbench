@@ -84,6 +84,7 @@ public class NBCLIOptions {
     private static final String COMPILE_SCRIPT = "--compile-script";
     private static final String SCRIPT_FILE = "--script-file";
     private static final String COPY = "--copy";
+    private static final String CAT = "--cat";
     private static final String SHOW_STACKTRACES = "--show-stacktraces";
     private static final String EXPERIMENTAL = "--experimental";
     private static final String MATURITY = "--maturity";
@@ -199,6 +200,7 @@ public class NBCLIOptions {
     private boolean wantsConsoleMetrics = true;
     private String annotateLabelSpec = "";
     private String metricsLabelSpec = "";
+    private String wantsToCatResource ="";
 
     public boolean wantsLoggedMetrics() {
         return this.wantsConsoleMetrics;
@@ -262,6 +264,10 @@ public class NBCLIOptions {
 
     public NBLabels getLabels() {
         return this.labels;
+    }
+
+    public boolean wantsToCatResource() {
+        return this.wantsToCatResource!=null && !this.wantsToCatResource.isEmpty();
     }
 
     public enum Mode {
@@ -629,6 +635,10 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     this.wantsToCopyWorkload = this.readWordOrThrow(arglist, "workload to copy");
                     break;
+                case NBCLIOptions.CAT:
+                    arglist.removeFirst();
+                    this.wantsToCatResource = this.readWordOrThrow(arglist, "workload to cat");
+                    break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
             }
@@ -886,6 +896,11 @@ public class NBCLIOptions {
     public String wantsToCopyResourceNamed() {
         return this.wantsToCopyWorkload;
     }
+
+    public String wantsToCatResourceNamed() {
+        return this.wantsToCatResource;
+    }
+
 
     public boolean wantsWorkloadsList() {
         return this.wantsWorkloadsList;
