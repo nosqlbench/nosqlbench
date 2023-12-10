@@ -176,7 +176,7 @@ public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent
                 .add(Param.optional("instrument", Boolean.class))
                 .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
                 .add(Param.optional("driver", String.class))
-                .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|none)"))
+                .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|emit|none)"))
                 .add(Param.optional("maxtries", Integer.class))
                 .asReadOnly();
     }
