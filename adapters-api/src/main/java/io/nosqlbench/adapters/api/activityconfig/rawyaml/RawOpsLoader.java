@@ -16,6 +16,8 @@
 
 package io.nosqlbench.adapters.api.activityconfig.rawyaml;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -36,12 +38,26 @@ public class RawOpsLoader {
 
     private final ArrayList<Function<String,String>> transformers = new ArrayList<>();
 
+    private static LoadSettings loadSettings = LoadSettings.builder().build();
+    private final Load yaml = new Load(loadSettings);
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+
     public RawOpsLoader(Function<String,String> transformer) {
         addTransformer(transformer);
     }
 
     public RawOpsLoader() {
         addTransformer(new StrInterpolator());
+    }
+
+    public boolean isJson(String workload) {
+        try  {
+            Object canLoad = gson.fromJson(workload, Object.class);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     private void addTransformer(Function<String, String> newTransformer) {
@@ -79,8 +95,6 @@ public class RawOpsLoader {
     }
 
     public RawOpsDocList parseYaml(String data) {
-        LoadSettings loadSettings = LoadSettings.builder().build();
-        Load yaml = new Load(loadSettings);
         Iterable<Object> objects = yaml.loadAllFromString(data);
         List<RawOpsDoc> newDocList = new ArrayList<>();
 

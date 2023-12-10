@@ -17,6 +17,7 @@
 package io.nosqlbench.adapters.api.activityconfig;
 
 import com.amazonaws.util.StringInputStream;
+import com.google.gson.GsonBuilder;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -27,6 +28,8 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.templating.StrInterpolator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 import scala.Option;
 import sjsonnet.DefaultParseCache;
 import sjsonnet.SjsonnetMain;
@@ -146,4 +149,25 @@ public class OpsLoader {
         return stdoutOutput;
     }
 
+    // TODO These should not be exception based, use explicit pattern checks instead, or tap
+    // into the parsers in a non-exception way
+    public static boolean isJson(String workload) {
+        try {
+            new GsonBuilder().setPrettyPrinting().create().fromJson(workload, Map.class);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // TODO These should not be exception based, use explicit pattern checks instead, or tap
+    // into the parsers in a non-exception way
+    public static boolean isYaml(String workload) {
+        try {
+            new Load(LoadSettings.builder().build()).loadFromString(workload);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
