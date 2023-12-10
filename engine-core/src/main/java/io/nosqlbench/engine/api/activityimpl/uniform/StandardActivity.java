@@ -16,7 +16,6 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
-import com.codahale.metrics.Gauge;
 import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
@@ -59,21 +58,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StandardActivity<R extends Op, S> extends SimpleActivity implements SyntheticOpTemplateProvider, ActivityDefObserver {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
-
     private final OpSequence<OpDispenser<? extends Op>> sequence;
-    private final NBConfigModel yamlmodel;
-    private final ConcurrentHashMap<String, DriverAdapter> adapters = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, OpMapper<Op>> mappers = new ConcurrentHashMap<>();
-
-    private final Gauge<Double> pendingOpsGauge;
-    private final Gauge<Double> activeOpsGauge;
-    private final Gauge<Double> completeOpsGauge;
+    private final ConcurrentHashMap<String, DriverAdapter<?,?>> adapters = new ConcurrentHashMap<>();
 
     public StandardActivity(NBComponent parent, ActivityDef activityDef) {
         super(parent,activityDef);
         OpsDocList workload;
 
         Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+        NBConfigModel yamlmodel;
         if (yaml_loc.isPresent()) {
             Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
             workload = OpsLoader.loadPath(yaml_loc.get(), disposable, "activities");
@@ -92,14 +85,15 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         }
 
         // HERE, op templates are loaded before drivers are loaded
-        List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter);
+        List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter.orElse(null));
 
 
         List<ParsedOp> pops = new ArrayList<>();
-        List<DriverAdapter> adapterlist = new ArrayList<>();
+        List<DriverAdapter<?,?>> adapterlist = new ArrayList<>();
         NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(yamlmodel);
 
         Optional<String> defaultDriverOption = activityDef.getParams().getOptionalString("driver");
+        ConcurrentHashMap<String, OpMapper<? extends Op>> mappers = new ConcurrentHashMap<>();
         for (OpTemplate ot : opTemplates) {
 //            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
             String driverName = ot.getOptionalStringParam("driver", String.class)
@@ -116,7 +110,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             // HERE
             if (!adapters.containsKey(driverName)) {
 
-                DriverAdapter adapter =  Optional.of(driverName)
+                DriverAdapter<?,?> adapter =  Optional.of(driverName)
                     .flatMap(name ->  ServiceSelector.of(name,ServiceLoader.load(DriverAdapterLoader.class)).get())
                     .map(l -> l.load(this,NBLabels.forKV())).orElseThrow();
 
@@ -137,7 +131,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
             supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
 
-            DriverAdapter adapter = adapters.get(driverName);
+            DriverAdapter<?,?> adapter = adapters.get(driverName);
             adapterlist.add(adapter);
             ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
             Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
@@ -152,8 +146,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         }
 
         try {
-            boolean strict = activityDef.getParams().getOptionalBoolean("strict").orElse(false);
-            sequence = createOpSourceFromParsedOps(adapters, mappers, adapterlist, pops);
+            sequence = createOpSourceFromParsedOps(adapterlist, pops);
         } catch (Exception e) {
             if (e instanceof OpConfigError) {
                 throw e;
@@ -161,12 +154,12 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
         }
 
-        this.pendingOpsGauge = create().gauge(
-            "ops_pending",() -> this.getProgressMeter().getSummary().pending());
-        this.activeOpsGauge = create().gauge(
-            "ops_active",() -> this.getProgressMeter().getSummary().current());
-        this.completeOpsGauge = create().gauge(
-            "ops_complete",() -> this.getProgressMeter().getSummary().complete());
+       create().gauge(
+            "ops_pending", () -> this.getProgressMeter().getSummary().pending());
+       create().gauge(
+            "ops_active", () -> this.getProgressMeter().getSummary().current());
+       create().gauge(
+            "ops_complete", () -> this.getProgressMeter().getSummary().complete());
     }
 
     @Override
@@ -196,7 +189,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
 
-        for (DriverAdapter adapter : adapters.values()) {
+        for (DriverAdapter<?,?> adapter : adapters.values()) {
             if (adapter instanceof NBReconfigurable configurable) {
                 NBConfigModel cfgModel = configurable.getReconfigModel();
                 NBConfiguration cfg = cfgModel.matchConfig(activityDef.getParams());
@@ -227,7 +220,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
     @Override
     public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> cfg) {
         List<OpTemplate> opTemplates = new ArrayList<>();
-        for (DriverAdapter adapter : adapters.values()) {
+        for (DriverAdapter<?,?> adapter : adapters.values()) {
             if (adapter instanceof SyntheticOpTemplateProvider sotp) {
                 List<OpTemplate> newTemplates = sotp.getSyntheticOpTemplates(opsDocList, cfg);
                 opTemplates.addAll(newTemplates);
@@ -243,7 +236,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
      */
     @Override
     public void shutdownActivity() {
-        for (Map.Entry<String, DriverAdapter> entry : adapters.entrySet()) {
+        for (Map.Entry<String, DriverAdapter<?,?>> entry : adapters.entrySet()) {
             String adapterName = entry.getKey();
             DriverAdapter<?, ?> adapter = entry.getValue();
             adapter.getSpaceCache().getElements().forEach((spaceName, space) -> {
