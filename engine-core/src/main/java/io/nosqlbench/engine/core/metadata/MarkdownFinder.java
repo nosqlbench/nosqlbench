@@ -16,7 +16,11 @@
 
 package io.nosqlbench.engine.core.metadata;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.nb.annotations.ServiceSelector;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
@@ -28,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
+import java.util.ServiceLoader;
 
 public class MarkdownFinder {
     private static final Logger logger = LogManager.getLogger(MarkdownFinder.class);
@@ -35,7 +40,7 @@ public class MarkdownFinder {
     public static Optional<String> forHelpTopic(final String topic) {
         String help = null;
         try {
-            help = new MarkdownFinder().forActivityInstance(topic);
+            help = new MarkdownFinder().forDriverAdapterType(topic);
             return Optional.ofNullable(help);
         } catch (final Exception e) {
             MarkdownFinder.logger.debug("Did not find help topic for activity instance: {}", topic);
@@ -63,12 +68,11 @@ public class MarkdownFinder {
         return docs.map(Content::asString).orElse(null);
     }
 
-    public String forActivityInstance(final String s) {
-        final ActivityType activityType = new ActivityTypeLoader().load(ActivityDef.parseActivityDef("driver="+s), TestComponent.INSTANCE).orElseThrow(
-            () -> new BasicError("Unable to find driver for '" + s + '\'')
-        );
-        return this.forResourceMarkdown(activityType.getClass().getAnnotation(Service.class)
-            .selector() + ".md", "docs/");
+    public String forDriverAdapterType(final String selector) {
+
+        ServiceSelector.of(selector, ServiceLoader.load(DriverAdapterLoader.class)).get()
+            .orElseThrow(() -> new BasicError("Unable to find driver for '" + selector + "'"));
+        return this.forResourceMarkdown(selector + ".md", "docs/");
     }
 
 }
