@@ -416,7 +416,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         // TODO: Decide whether this should be part of ctor consistency
         Map.of(
             "summary", options.getReportSummaryTo(),
-            "logsdir", options.getLogsDirectory().toString()
+            "logsdir", options.getLogsDirectory().toString(),
+            "progress", options.getProgressSpec()
         ).forEach(session::setComponentProp);
 
         options.wantsReportCsvTo().ifPresent(cfg -> {
