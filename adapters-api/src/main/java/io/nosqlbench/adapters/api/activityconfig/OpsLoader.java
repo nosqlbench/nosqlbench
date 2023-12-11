@@ -164,8 +164,8 @@ public class OpsLoader {
     // into the parsers in a non-exception way
     public static boolean isYaml(String workload) {
         try {
-            new Load(LoadSettings.builder().build()).loadFromString(workload);
-            return true;
+            Object result = new Load(LoadSettings.builder().build()).loadFromString(workload);
+            return (result instanceof Map);
         } catch (Exception e) {
             return false;
         }
