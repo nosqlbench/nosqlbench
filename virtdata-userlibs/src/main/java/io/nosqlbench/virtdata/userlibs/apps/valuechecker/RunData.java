@@ -42,10 +42,10 @@ public class RunData {
     public String toString() {
         return  "         run data = [derived values in brackets]\n" +
                 "        specifier = '" + spec + "'\n" +
+                "           cycles = [" + min + ".." + max + ")\n" +
                 "          threads = " + threads + "\n" +
-                "              min = " + min + "\n" +
-                "              max = " + max + "\n" +
-                "          [count] = " + (max - min) + "\n" +
+                "   [count/thread] = " + (max - min) + "\n" +
+                "          [total] = " + (max - min) * threads + "\n" +
                 "       buffersize = " + buffersize + "\n" +
                 " [totalGenTimeMs] = " + totalGenTimeMs + "\n" +
                 " [totalCmpTimeMs] = " + totalCmpTimeMs + "\n" +
