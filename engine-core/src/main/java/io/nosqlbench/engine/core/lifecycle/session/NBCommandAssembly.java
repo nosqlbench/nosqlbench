@@ -46,11 +46,11 @@ public class NBCommandAssembly {
         for (Cmd cmd : cmds) {
 
             if (cmd.getArgs().containsKey("container")) {
-                String ctx = cmd.getArgs().remove("container").getValue();
+                String specificContainer = cmd.getArgs().remove("container").getValue();
                 String step = cmd.getArgs().containsKey("step") ? cmd.getArgs().remove("step").getValue() : "no-step";
-                tagged.add(cmd.forContainer(ctx, step));
+                tagged.add(cmd.forContainer(specificContainer, step));
             } else if (cmd.getCmdType() == CmdType.container) {
-                containerName = cmd.getArgValue("container");
+                containerName = cmd.getArgValue("name");
                 if (containerName.equals(Cmd.DEFAULT_TARGET_CONTEXT)) {
                     logger.warn("You are explicitly setting the scenario name to " + Cmd.DEFAULT_TARGET_CONTEXT + "'. This is likely an error. " +
                         "This is the default scenario name, and if you are using different scenario names you should pick something that is different and specific.");
