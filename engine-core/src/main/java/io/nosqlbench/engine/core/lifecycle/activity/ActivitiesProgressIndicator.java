@@ -80,6 +80,10 @@ public class ActivitiesProgressIndicator implements Runnable {
 
     @Override
     public void run() {
+        report();
+    }
+
+    private void report() {
         Collection<ProgressMeterDisplay> progressMeterDisplays = sc.getProgressMeters();
         for (ProgressMeterDisplay meter : progressMeterDisplays) {
 
@@ -117,4 +121,7 @@ public class ActivitiesProgressIndicator implements Runnable {
         return "ProgressIndicator/" + this.indicatorSpec;
     }
 
+    public void finish() {
+        report();
+    }
 }

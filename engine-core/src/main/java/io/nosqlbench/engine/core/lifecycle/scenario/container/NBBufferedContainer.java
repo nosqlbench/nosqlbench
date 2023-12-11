@@ -95,7 +95,8 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
                 .build()
         );
 
-        this.activitiesProgressIndicator = new ActivitiesProgressIndicator(this.controller, "console:10s");
+        String progress = getComponentProp("progress").orElse("console:10s");
+        this.activitiesProgressIndicator = new ActivitiesProgressIndicator(this.controller, progress);
     }
 
 
@@ -175,6 +176,7 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
             logger.debug("no object was provided to set the container result");
         }
 
+        activitiesProgressIndicator.finish();
         return safeCmdResult;
     }
 
@@ -195,6 +197,6 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
         final var retiringScenarioShutdownHook = this.containerShutdownHook;
         this.containerShutdownHook = null;
         retiringScenarioShutdownHook.run();
-        this.logger.debug("removing container shutdown hook");
+        logger.debug("removing container shutdown hook");
     }
 }
