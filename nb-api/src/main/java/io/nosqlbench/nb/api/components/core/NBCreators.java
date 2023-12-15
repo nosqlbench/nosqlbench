@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.nb.api.components.core;
 
 import io.nosqlbench.nb.api.csvoutput.CsvOutputPluginWriter;
 import com.codahale.metrics.Meter;
@@ -38,7 +38,6 @@ import com.codahale.metrics.MetricFilter;
 import org.apache.logging.log4j.Marker;
 
 import java.io.PrintStream;
-import java.net.URI;
 import java.util.*;
 
 import java.nio.file.Path;

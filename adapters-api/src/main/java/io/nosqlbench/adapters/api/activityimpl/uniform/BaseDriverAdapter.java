@@ -21,8 +21,8 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.fieldmappers.FieldDestruc
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.nb.api.components.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -176,7 +176,7 @@ public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent
                 .add(Param.optional("instrument", Boolean.class))
                 .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
                 .add(Param.optional("driver", String.class))
-                .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|none)"))
+                .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|emit|none)"))
                 .add(Param.optional("maxtries", Integer.class))
                 .asReadOnly();
     }

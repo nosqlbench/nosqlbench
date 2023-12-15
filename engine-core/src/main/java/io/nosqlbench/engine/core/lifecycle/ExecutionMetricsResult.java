@@ -23,10 +23,10 @@ import com.codahale.metrics.MetricFilter;
 import io.nosqlbench.nb.api.engine.metrics.instruments.*;
 import io.nosqlbench.nb.api.engine.metrics.reporters.ConsoleReporter;
 import io.nosqlbench.nb.api.engine.metrics.reporters.Log4JMetricsReporter;
-import io.nosqlbench.nb.api.components.NBCreators;
-import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.nb.api.components.NBComponentTraversal;
-import io.nosqlbench.nb.api.components.NBFinders;
+import io.nosqlbench.nb.api.components.core.NBCreators;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponentTraversal;
+import io.nosqlbench.nb.api.components.core.NBFinders;
 import io.nosqlbench.engine.core.metrics.NBMetricsSummary;
 
 import java.io.ByteArrayOutputStream;

@@ -18,7 +18,7 @@ package io.nosqlbench.engine.core.lifecycle.scenario.container;
  */
 
 
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.io.InputStreamReader;
 import java.io.PrintWriter;

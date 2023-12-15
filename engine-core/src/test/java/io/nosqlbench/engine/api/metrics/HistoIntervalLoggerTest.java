@@ -20,7 +20,7 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.nb.api.engine.metrics.HistoIntervalLogger;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
-import io.nosqlbench.nb.api.components.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogReader;

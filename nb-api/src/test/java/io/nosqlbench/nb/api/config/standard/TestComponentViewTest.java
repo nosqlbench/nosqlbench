@@ -16,8 +16,7 @@
 
 package io.nosqlbench.nb.api.config.standard;
 
-import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

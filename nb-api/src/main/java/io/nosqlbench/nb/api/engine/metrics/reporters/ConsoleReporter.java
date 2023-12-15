@@ -19,9 +19,9 @@ package io.nosqlbench.nb.api.engine.metrics.reporters;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.nb.api.components.NBFinders;
-import io.nosqlbench.nb.api.components.PeriodicTaskComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBFinders;
+import io.nosqlbench.nb.api.components.core.PeriodicTaskComponent;
 import io.nosqlbench.nb.api.engine.metrics.instruments.*;
 
 import java.io.PrintStream;
@@ -41,9 +41,10 @@ public class ConsoleReporter extends PeriodicTaskComponent {
     private final long rateFactor;
     private final String durationUnit = TimeUnit.NANOSECONDS.toString().toLowerCase(Locale.US);
     private final long durationFactor = TimeUnit.NANOSECONDS.toNanos(1);
+
     public ConsoleReporter(NBComponent node, NBLabels extraLabels, long millis, boolean oneLastTime,
                            PrintStream output, Set<MetricAttribute> disabledMetricAttributes) {
-        super(node, extraLabels, millis, oneLastTime,"REPORT-CONSOLE");
+        super(node, extraLabels, millis, oneLastTime, "REPORT-CONSOLE");
         this.output = output;
         this.dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT,
             DateFormat.MEDIUM,
@@ -190,8 +191,10 @@ public class ConsoleReporter extends PeriodicTaskComponent {
     /**
      * Print only if the attribute is enabled
      *
-     * @param type   Metric attribute
-     * @param status Status to be logged
+     * @param type
+     *     Metric attribute
+     * @param status
+     *     Status to be logged
      */
     private void printIfEnabled(MetricAttribute type, String status) {
         if (getDisabledMetricAttributes().contains(type)) {
@@ -230,16 +233,25 @@ public class ConsoleReporter extends PeriodicTaskComponent {
         for (NBMetric metric : summaryMetrics) {
             if (metric instanceof NBMetricGauge) {
                 gauges.add((NBMetricGauge) metric);
-            } if (metric instanceof NBMetricCounter) {
+            }
+            if (metric instanceof NBMetricCounter) {
                 counters.add((NBMetricCounter) metric);
-            } if (metric instanceof NBMetricHistogram) {
+            }
+            if (metric instanceof NBMetricHistogram) {
                 histograms.add((NBMetricHistogram) metric);
-            } if (metric instanceof NBMetricMeter) {
+            }
+            if (metric instanceof NBMetricMeter) {
                 meters.add((NBMetricMeter) metric);
-            } if (metric instanceof NBMetricTimer) {
+            }
+            if (metric instanceof NBMetricTimer) {
                 timers.add((NBMetricTimer) metric);
             }
         }
         report(gauges, counters, histograms, meters, timers);
+    }
+
+    public void reportCountsOnce(List<NBMetric> summaryMetrics) {
+        // TODO: implement counts only renderer
+        // TODO: resolve ambiguity around reporting counts only or reporting nothing for short sessions
     }
 }

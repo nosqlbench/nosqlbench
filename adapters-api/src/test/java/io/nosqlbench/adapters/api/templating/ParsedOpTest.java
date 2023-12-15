@@ -25,7 +25,7 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.Param;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

@@ -17,7 +17,7 @@
 
 package io.nosqlbench.nb.api.components.events;
 
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 public class ComponentOutOfScope implements NBEvent {
     private final NBComponent component;

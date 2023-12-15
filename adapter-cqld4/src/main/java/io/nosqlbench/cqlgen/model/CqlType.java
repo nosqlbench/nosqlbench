@@ -18,7 +18,7 @@ package io.nosqlbench.cqlgen.model;
 
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBNamedElement;
+import io.nosqlbench.nb.api.components.core.NBNamedElement;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.nb.api.components.core;
 
-import io.nosqlbench.nb.api.components.events.NBEvent;
-
-public interface NBComponentEvents {
-    public void onEvent(NBEvent event);
+public interface NBComponentErrorHandler {
+    public void notifyException(Thread t, Throwable e);
 }

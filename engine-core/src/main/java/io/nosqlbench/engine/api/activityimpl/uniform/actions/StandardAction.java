@@ -103,7 +103,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                     if (op instanceof RunnableOp) {
                         ((RunnableOp) op).run();
                     } else if (op instanceof CycleOp<?>) {
-                        result = ((CycleOp) op).apply(cycle);
+                        result = ((CycleOp<?>) op).apply(cycle);
                     } else if (op instanceof ChainingOp) {
                         result = ((ChainingOp) op).apply(result);
                     } else {

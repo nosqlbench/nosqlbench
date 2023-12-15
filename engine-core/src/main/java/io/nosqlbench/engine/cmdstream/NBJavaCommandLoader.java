@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.cmdstream;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
 import io.nosqlbench.nb.annotations.ServiceSelector;
 

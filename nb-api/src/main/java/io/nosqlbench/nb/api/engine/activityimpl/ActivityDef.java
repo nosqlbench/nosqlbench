@@ -16,7 +16,7 @@
 
 package io.nosqlbench.nb.api.engine.activityimpl;
 
-import io.nosqlbench.nb.api.components.NBNamedElement;
+import io.nosqlbench.nb.api.components.core.NBNamedElement;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.labels.NBLabelSpec;
 import io.nosqlbench.nb.api.labels.NBLabels;

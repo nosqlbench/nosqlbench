@@ -496,7 +496,7 @@ public class NBCLIArgsFile {
         }
         String opt = iter.next();
 
-        if (!opt.startsWith("-") || reservedPredicate.test(opt)) {
+        if (!opt.startsWith("-")) {
             throw new RuntimeException("Arguments following the --pin option must not" +
                     " be commands like '" + opt + "'");
         }

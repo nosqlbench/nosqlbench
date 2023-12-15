@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.sandbox;
 
 import io.nosqlbench.nb.api.config.standard.TestComponent;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRate;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import org.junit.jupiter.api.Disabled;

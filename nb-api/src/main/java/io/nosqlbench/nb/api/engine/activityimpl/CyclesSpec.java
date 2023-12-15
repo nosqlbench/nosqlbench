@@ -28,9 +28,6 @@ public record CyclesSpec(long first_inclusive, long last_exclusive, String first
         if (first_inclusive>last_exclusive) {
             throw new InvalidParameterException("cycles must start with a lower first cycle than last cycle");
         }
-        if (first_inclusive==last_exclusive) {
-            logger.warn("This cycles interval means zero total:" + this);
-        }
     }
 
     public static CyclesSpec parse(String spec) {

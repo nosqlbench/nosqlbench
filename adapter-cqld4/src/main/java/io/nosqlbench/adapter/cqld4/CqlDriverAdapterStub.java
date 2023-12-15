@@ -18,7 +18,7 @@ package io.nosqlbench.adapter.cqld4;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 
 @Service(value = DriverAdapter.class, selector = "cql")

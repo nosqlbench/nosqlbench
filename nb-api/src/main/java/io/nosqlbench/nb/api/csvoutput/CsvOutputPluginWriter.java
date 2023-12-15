@@ -16,8 +16,8 @@
 
 package io.nosqlbench.nb.api.csvoutput;
 
-import io.nosqlbench.nb.api.components.NBBaseComponent;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.graalvm.polyglot.Value;

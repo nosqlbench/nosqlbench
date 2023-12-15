@@ -22,7 +22,7 @@ import java.util.*;
 
 public class OpsOwner extends RawOpFields {
 
-    private final static List<String> opsFieldNames = List.of("op","ops","operation","statement","statements");
+    private final static List<String> opsFieldNames = List.of("op","ops","operation","stmt","statement","statements");
 
     private List<RawOpDef> rawOpDefs = new ArrayList<>();
 

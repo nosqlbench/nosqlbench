@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.core;
 
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
@@ -64,9 +64,9 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
      */
     void closeAutoCloseables();
 
-    MotorDispenser getMotorDispenserDelegate();
+    MotorDispenser<?> getMotorDispenserDelegate();
 
-    void setMotorDispenserDelegate(MotorDispenser motorDispenser);
+    void setMotorDispenserDelegate(MotorDispenser<?> motorDispenser);
 
     InputDispenser getInputDispenserDelegate();
 

@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.nb.api.components.core;
 
-public interface NBParentComponentInjection {
-    void applyParentComponent(NBComponent component);
+import java.util.Optional;
+
+public interface NBComponentProps {
+    String SUMMARY = "summary";
+
+    Optional<String> getComponentProp(String name);
+    NBComponentProps setComponentProp(String name, String value);
 }

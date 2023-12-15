@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits;
 
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRate;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import org.apache.logging.log4j.LogManager;

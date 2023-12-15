@@ -18,7 +18,7 @@ package io.nosqlbench.cqlgen.model;
 
 import com.datastax.oss.driver.internal.core.util.Strings;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBNamedElement;
+import io.nosqlbench.nb.api.components.core.NBNamedElement;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.cqlgen.core.CGKeyspaceStats;
 

@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.extensions.vectormath;
 
 import com.datastax.oss.driver.api.core.cql.Row;
-import io.nosqlbench.nb.api.components.NBBaseComponent;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.util.List;
 import java.util.Objects;

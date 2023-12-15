@@ -16,7 +16,7 @@
 
 package io.nosqlbench.nb.api.engine.metrics;
 
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.HistogramLogWriter;
 import org.apache.logging.log4j.Logger;

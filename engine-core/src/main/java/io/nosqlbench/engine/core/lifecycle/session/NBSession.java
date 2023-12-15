@@ -16,12 +16,13 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
+import io.nosqlbench.nb.api.components.core.NBComponentProps;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.core.clientload.*;
@@ -53,13 +54,6 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         OK,
         WARNING,
         ERROR
-    }
-
-    private NBBufferedContainer getContext(String name) {
-        return containers.computeIfAbsent(
-            name,
-            n -> NBContainer.builder().name(n).build(this)
-        );
     }
 
     public NBSession(
@@ -203,6 +197,13 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         NBMetricGauge cpuTotalGauge = create().gauge("cpu_total", reader::getTotalTime);
         // add checking for percent of time spent in user space; TODO: Modify percent threshold
         clientMetricChecker.addRatioMetricToCheck(cpuUserGauge, cpuTotalGauge, 50.0, true);
+    }
+
+    private NBBufferedContainer getContext(String name) {
+        return containers.computeIfAbsent(
+            name,
+            n -> NBContainer.builder().name(n).build(this)
+        );
     }
 
 }

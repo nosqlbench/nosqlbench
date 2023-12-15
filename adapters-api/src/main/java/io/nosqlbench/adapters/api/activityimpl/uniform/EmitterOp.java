@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.adapters.api.activityimpl.uniform;
 
-public interface NBNamedElement {
-    String getName();
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+
+public class EmitterOp implements CycleOp<Object> {
+
+    private final CycleOp<?> cycleOp;
+    public EmitterOp(CycleOp<?> cycleOp) {
+        this.cycleOp = cycleOp;
+    }
+
+    @Override
+    public Object apply(long value) {
+            Object result = cycleOp.apply(value);
+            System.out.println("result from cycle " + value + ":\n"+result);
+            return result;
+    }
 }

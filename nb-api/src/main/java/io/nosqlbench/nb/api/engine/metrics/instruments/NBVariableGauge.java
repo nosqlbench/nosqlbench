@@ -18,7 +18,7 @@ package io.nosqlbench.nb.api.engine.metrics.instruments;
 
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 /**
  * Use this gauge type when you are setting the gauge value directly. It is merely a holder

@@ -14,27 +14,32 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.nb.api.components.core;
 
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.nb.api.components.events.ComponentOutOfScope;
 import io.nosqlbench.nb.api.components.events.DownEvent;
 import io.nosqlbench.nb.api.components.events.NBEvent;
 import io.nosqlbench.nb.api.components.events.UpEvent;
+import io.nosqlbench.nb.api.config.params.ElementData;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent, NBTokenWords {
     private final static Logger logger = LogManager.getLogger("RUNTIME");
     protected final NBComponent parent;
     protected final NBLabels labels;
     private final List<NBComponent> children = new ArrayList<>();
+    private long endAt=0L;
+    private final long startAt;
     protected NBMetricsBuffer metricsBuffer = new NBMetricsBuffer();
     protected boolean bufferOrphanedMetrics = false;
+    private ConcurrentHashMap<String,String> props = new ConcurrentHashMap<>();
 
     public NBBaseComponent(NBComponent parentComponent) {
         this(parentComponent, NBLabels.forKV());
@@ -42,6 +47,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
 
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
         this.labels = componentSpecificLabelsOnly;
+        this.startAt = System.nanoTime();
         if (parentComponent != null) {
             parent = parentComponent;
             parent.attachChild(this);
@@ -134,6 +140,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
      */
     protected void teardown() {
         logger.debug("tearing down " + description());
+        this.endAt = System.nanoTime();
     }
 
     @Override
@@ -220,4 +227,32 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         }
     }
 
+    @Override
+    public long getNanosSinceStart() {
+        if (endAt==0) {
+            return System.nanoTime()-startAt;
+        } else {
+            return endAt-startAt;
+        }
+    }
+
+    @Override
+    public Optional<String> getComponentProp(String name) {
+        if (this.props!=null && this.props.containsKey(name)) {
+            return Optional.ofNullable(this.props.get(name));
+        } else if (this.getParent()!=null) {
+                return this.getParent().getComponentProp(name);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public NBComponentProps setComponentProp(String name, String value) {
+        if (this.props==null) {
+            this.props = new ConcurrentHashMap<>();
+        }
+        props.put(name, value);
+        return this;
+    }
 }

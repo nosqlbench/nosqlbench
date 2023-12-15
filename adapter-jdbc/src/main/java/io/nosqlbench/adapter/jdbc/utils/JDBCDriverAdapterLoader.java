@@ -21,7 +21,7 @@ package io.nosqlbench.adapter.jdbc.utils;
 import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapter.jdbc.JDBCDriverAdapter;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 
 @Service(value = DriverAdapterLoader.class, selector = "jdbc")

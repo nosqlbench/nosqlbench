@@ -17,9 +17,9 @@ package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
-import io.nosqlbench.nb.api.components.NBComponent;
-import io.nosqlbench.nb.api.components.NBBaseComponent;
-import io.nosqlbench.nb.api.components.NBComponentErrorHandler;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBComponentErrorHandler;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;

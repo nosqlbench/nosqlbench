@@ -14,33 +14,30 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.nb.api.components.core;
 
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
-class NBComponentScaffoldingTest {
+class NBComponentLifecycleTest {
+    private final static Logger logger = LogManager.getLogger(NBComponentLifecycleTest.class);
 
-    private final static Logger logger = LogManager.getLogger(NBComponentScaffoldingTest.class);
     @Test
-    public void testBasicLayeringTeardown() {
-        TestComponent root = new TestComponent("root","root");
-        TestComponent a1 = new TestComponent(root,"a1","a1") {
-            @Override
-            protected void teardown() {
-                logger.debug("tearing down " + description());
-            }
-        };
-        TestComponent b2 = new TestComponent(a1,"b2","b2") {
-            @Override
-            protected void teardown() {
-                logger.debug("tearing down " + description());
-            }
-        };
+    public void testBasicLifecycleHooks() {
+        TestComponent root = new TestComponent("role", "root");
+        TestComponent node1 = new TestComponent(root, "node1", "node1");
+        TestComponent node2 = new TestComponent(root, "node2", "node2");
 
-        root.close();
+        try (NBComponentExecutionScope scope = new NBComponentExecutionScope(node1)) {
+            logger.info(node1.description() + " active");
+       }
+        try (NBComponentExecutionScope scope = new NBComponentExecutionScope(node2)) {
+            logger.info(node2.description() + " active");
+        }
+
+        logger.info("all inactive");
 
     }
 

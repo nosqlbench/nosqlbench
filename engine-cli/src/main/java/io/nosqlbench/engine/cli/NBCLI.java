@@ -34,7 +34,7 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.logging.NBLogLevel;
 import io.nosqlbench.nb.api.metadata.SessionNamer;
 import io.nosqlbench.nb.api.metadata.SystemId;
-import io.nosqlbench.nb.api.components.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
@@ -42,7 +42,6 @@ import io.nosqlbench.engine.api.activityapi.output.OutputType;
 import io.nosqlbench.engine.cli.NBCLIOptions.Mode;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
-import io.nosqlbench.engine.core.clientload.ClientSystemMetricChecker;
 import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
@@ -273,6 +272,29 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             return NBCLI.EXIT_OK;
         }
 
+        if (options.wantsToCatResource()) {
+            final String resourceToCat = options.wantsToCatResourceNamed();
+            NBCLI.logger.debug(() -> "user requests to cat " + resourceToCat);
+
+            Optional<Content<?>> tocat = NBIO.classpath()
+                .searchPrefixes("activities")
+                .searchPrefixes(options.wantsIncludes())
+                .pathname(resourceToCat).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
+
+            if (tocat.isEmpty()) tocat = NBIO.classpath()
+                .searchPrefixes().searchPrefixes(options.wantsIncludes())
+                .searchPrefixes(options.wantsIncludes())
+                .pathname(resourceToCat).first();
+
+            final Content<?> data = tocat.orElseThrow(
+                () -> new BasicError("Unable to find " + resourceToCat +
+                    " in classpath to cat out"));
+
+            System.out.println(data.get());
+            NBCLI.logger.info(() -> "Dumped internal resource '" + data.asPath() + "' to stdout");
+            return NBCLI.EXIT_OK;
+        }
+
         if (options.wantsToCopyResource()) {
             final String resourceToCopy = options.wantsToCopyResourceNamed();
             NBCLI.logger.debug(() -> "user requests to copy out " + resourceToCopy);
@@ -391,6 +413,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             ),
             sessionName
         );
+        // TODO: Decide whether this should be part of ctor consistency
+        Map.of(
+            "summary", options.getReportSummaryTo(),
+            "logsdir", options.getLogsDirectory().toString(),
+            "progress", options.getProgressSpec()
+        ).forEach(session::setComponentProp);
 
         options.wantsReportCsvTo().ifPresent(cfg -> {
             MetricInstanceFilter filter = new MetricInstanceFilter();
@@ -417,7 +445,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
 
         ExecutionResult sessionResult = session.apply(options.getCommands());
-        sessionResult.printSummary(System.out);
+//        sessionResult.printSummary(System.out);
+        logger.info(sessionResult);
         return sessionResult.getStatus().code;
 
     }

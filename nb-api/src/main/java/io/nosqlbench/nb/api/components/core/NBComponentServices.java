@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.components;
+package io.nosqlbench.nb.api.components.core;
 
-public interface NBComponentErrorHandler {
-    public void notifyException(Thread t, Throwable e);
+public interface NBComponentServices {
+
+    public NBCreators create();
+    public NBFinders find();
 }

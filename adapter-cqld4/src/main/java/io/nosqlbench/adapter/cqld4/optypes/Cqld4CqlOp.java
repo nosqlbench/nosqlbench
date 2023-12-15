@@ -99,7 +99,7 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
         this.metrics = metrics;
     }
 
-    public final List<Row> apply(long cycle) {
+    public final ArrayList<Row> apply(long cycle) {
 
         Statement<?> statement = getStmt();
         logger.trace(() -> "apply() invoked, statement obtained, executing async with page size: " + statement.getPageSize() + " thread local rows: ");
@@ -118,7 +118,7 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
         });
 
         try {
-            return rowsStage.toCompletableFuture().get(300, TimeUnit.SECONDS);
+            return new PrintableRowList(rowsStage.toCompletableFuture().get(300, TimeUnit.SECONDS));
         } catch (ExecutionException exe) {
             Throwable ee = exe.getCause();
             if (ee instanceof RuntimeException re) {
@@ -140,6 +140,21 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
 //
 //            results.set(completeRowSet);
 //            processors.flush();
+    }
+
+    private static class PrintableRowList extends ArrayList<Row> {
+        public PrintableRowList(List<Row> values) {
+            super(values);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            for (Row row : this) {
+                sb.append(row.getFormattedContents());
+            }
+            return sb.toString();
+        }
     }
 
     //    private BiFunction<AsyncResultSet,Throwable> handler
