@@ -30,9 +30,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -56,9 +54,13 @@ public class BundledMarkdownZipExporter {
 
             DocsBinder docsNameSpaces = BundledMarkdownLoader.loadBundledMarkdown(); //Loads the drivers under @Service Annotation
 
+            Set<Path> loaded = new HashSet<>();
             for (DocsNameSpace docs_ns : docsNameSpaces) {
                 for (Path p : docs_ns) {
-                    addEntry(p, p.getParent(), zipstream, docs_ns.getName() + "/");
+                    if (!loaded.contains(p)) {
+                        addEntry(p, p.getParent(), zipstream, docs_ns.getName() + "/");
+                        loaded.add(p);
+                    }
                 }
             }
 

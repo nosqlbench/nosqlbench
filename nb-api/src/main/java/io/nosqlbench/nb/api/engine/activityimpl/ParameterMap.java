@@ -47,8 +47,6 @@ public class ParameterMap extends ConcurrentHashMap<String, Object> implements B
     private final static Logger logger = LogManager.getLogger("PARAMS");
     private final static Gson gson = new GsonBuilder().create();
 
-
-    //    private final ConcurrentHashMap<String, String> paramMap = new ConcurrentHashMap<>(10);
     private final AtomicLong changeCounter;
     private final LinkedList<Listener> listeners = new LinkedList<>();
 
@@ -73,7 +71,6 @@ public class ParameterMap extends ConcurrentHashMap<String, Object> implements B
                     + ". Just use one of them.");
         }
         return Arrays.stream(objects).map(String::valueOf).findAny();
-        //return Optional.ofNullable(super.get(paramName)).map(String::valueOf);
     }
 
     public Optional<String> removeOptionalString(String... paramName) {
@@ -181,9 +178,6 @@ public class ParameterMap extends ConcurrentHashMap<String, Object> implements B
 
 
     public void set(String paramName, Object newValue) {
-//        if (paramName.equals("cycles")) {
-//            logger.warn("Setting 'cycles' on the parameter map is likely causing a bug in your activity. Call setCycles on the def instead.");
-//        }
         super.put(paramName, String.valueOf(newValue));
         logger.info(() -> "setting param " + paramName + "=" + newValue);
         markMutation();
