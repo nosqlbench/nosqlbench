@@ -103,6 +103,7 @@ public class ExecutionResult {
             "status=" + status +
             ", startedAt=" + startedAt +
             ", endedAt=" + endedAt +
+            ", total=" + String.format("%.2fS",(((double)getElapsedMillis())/1000.0)) +
             ", exception=" + exception +
             ", iolog='" + iolog + '\'' +
             '}';
