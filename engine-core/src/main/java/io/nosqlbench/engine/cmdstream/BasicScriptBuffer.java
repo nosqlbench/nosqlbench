@@ -77,7 +77,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
             case start: // start activity
             case run: // run activity
             case await: // await activity
-            case stop: // stop activity
+//            case stop: // stop activity
             case forceStop: // force stopping activity
             case waitMillis:
 
