@@ -70,10 +70,10 @@ public abstract class SimFramePlanner<C,P extends Record> {
             applyParams(frameParams,flywheel);
             capture.startWindow();
             capture.awaitSteadyState();
-            applyParams(frameParams,flywheel);
-            capture.restartWindow();
-//            controller.waitMillis(500);
-            capture.awaitSteadyState();
+//            applyParams(frameParams,flywheel);
+//            capture.restartWindow();
+////            controller.waitMillis(500);
+//            capture.awaitSteadyState();
             capture.stopWindow();
             journal.record(frameParams, capture.last());
             stdout.println(capture.last());

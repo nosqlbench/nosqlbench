@@ -38,8 +38,8 @@ public record RatchetConfig(
             params.maybeGet("sample_max").map(Integer::parseInt).orElse(10000),
             params.maybeGet("sample_incr").map(Double::parseDouble).orElse(1.2d),
             params.maybeGet("rate_base").map(Double::parseDouble).orElse(5d),
-            params.maybeGet("rate_step").map(Double::parseDouble).orElse(1000d),
-            params.maybeGet("rate_minstep").map(Double::parseDouble).orElse(1000d),
+            params.maybeGet("rate_step").map(Double::parseDouble).orElse(10000d),
+            params.maybeGet("rate_minstep").map(Double::parseDouble).orElse(10000d),
             params.maybeGet("rate_scaledown").map(Double::parseDouble).orElse(0.25),
             params.maybeGet("max_attempts").map(Integer::parseInt).orElse(3)
         );

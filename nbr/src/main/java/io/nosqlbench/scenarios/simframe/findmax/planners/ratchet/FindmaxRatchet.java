@@ -69,7 +69,7 @@ public class FindmaxRatchet extends SimFramePlanner<RatchetConfig, RatchetFrameP
             double newStepSize = best.params().step_size() * config.rate_scaledown();
             return new RatchetFrameParams(
                 best.params().rate() + newStepSize, best.params().attempt(), newStepSize,
-                "SMALLER-STEP: " + newStepSize + " from fram " + best.index()
+                "SMALLER-STEP: " + newStepSize + " from frame " + best.index()
             );
         } else if (last.params().attempt() < config.max_attempts()) {
             return new RatchetFrameParams(
