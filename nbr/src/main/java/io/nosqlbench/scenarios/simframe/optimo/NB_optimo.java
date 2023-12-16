@@ -80,13 +80,15 @@ public class NB_optimo extends NBBaseCommand {
         SimFrameJournal<OptimoFrameParams> journal = new SimFrameJournal<>();
         OptimoParamModel model = new OptimoParamModel();
 
-        model.add("rate", 20, 50, 1000000,
+        OptimoSearchSettings optimoSearchParams = new OptimoSearchSettings(params, model);
+
+        model.add("rate", 20, optimoSearchParams.startRate(), optimoSearchParams.startRate()*4,
             rate -> flywheel.onEvent(ParamChange.of(new CycleRateSpec(rate, 1.1d, SimRateSpec.Verb.restart)))
         );
         model.add("threads", 10, 50, 2000,
             threads -> flywheel.onEvent(ParamChange.of(new SetThreads((int) (threads))))
         );
-        OptimoSearchSettings optimoSearchParams = new OptimoSearchSettings(params, model);
+
         SimFrameCapture capture = this.perfValueMeasures(flywheel, optimoSearchParams);
         SimFrameFunction frameFunction = new OptimoFrameFunction(controller, optimoSearchParams, flywheel, capture, journal);
 

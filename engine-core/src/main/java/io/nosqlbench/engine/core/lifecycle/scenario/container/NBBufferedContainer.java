@@ -33,6 +33,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -170,20 +173,56 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
         return NBCommandParams.of(interpolated);
     }
 
+    /**
+     * Apply the result of a command execution to the container variables.
+     *
+     * @param stepname The step name of the command result.
+     * @param object   The result object of the command execution.
+     */
     private void applyResult(String stepname, Object object) {
-        if (object instanceof InvokableResult ir) {
+        Map<String,String> results = new LinkedHashMap<>();
+        if (object instanceof Record record) {
+            HashSet<String> filtered = new HashSet<>(Set.of("hashCode","toString","getClass","notify","notifyAll","wait"));
+            RecordComponent[] recordComponents = record.getClass().getRecordComponents();
+            for (RecordComponent component : recordComponents) {
+                try {
+                    String name = component.getName();
+                    Object value = component.getAccessor().invoke(record);
+                    results.put(stepname+"."+name,value.toString());
+                    filtered.add(name);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            List<Method> properties = Arrays.stream(record.getClass().getMethods())
+                .filter(m -> m.getParameterCount() == 0)
+                .filter(m -> !filtered.contains(m.getName()))
+                .toList();
+            for (Method property : properties) {
+                try {
+                    Object value = property.invoke(record);
+                    results.put(stepname+"."+property.getName(),value.toString());
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } else if (object instanceof InvokableResult ir) {
             ir.asResult().forEach((k, v) -> {
                 logger.debug("setting InvokableResult command result for '" + stepname + "." + k + "' to '" + v + "'");
-                getContainerVars().put(stepname + "." + k, v);
+                results.put(stepname + "." + k, v);
             });
         } else if (object instanceof Map<?, ?> map) {
             map.forEach((k, v) -> {
                 logger.debug("setting command result for '" + stepname + "." + k + "' to '" + v.toString() + "'");
-                getContainerVars().put(stepname + "." + k, v.toString());
+                results.put(stepname + "." + k, v.toString());
             });
         } else if (object instanceof List<?> list) {
             for (int i = 0; i < list.size(); i++) {
-                getContainerVars().put(stepname + "." + String.valueOf(i), list.get(i).toString());
+                results.put(stepname + "." + i, list.get(i).toString());
             }
         } else if (object instanceof Set<?> set) {
             ArrayList<String> values = new ArrayList<>();
@@ -191,18 +230,21 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
                 values.add(o.toString());
             }
             for (int i = 0; i < values.size(); i++) {
-                getContainerVars().put(stepname + "." + String.valueOf(i), values.get(i));
+                results.put(stepname + "." + i, values.get(i));
             }
         } else if (object != null && object.getClass().isArray()) {
             Object[] ary = (Object[]) object;
             for (int i = 0; i < ary.length; i++) {
-                getContainerVars().put(stepname + "." + String.valueOf(i), String.valueOf(ary[i]));
+                results.put(stepname + "." + i, String.valueOf(ary[i]));
             }
         } else if (object != null) {
-            getContainerVars().put(stepname, object.toString());
+            results.put(stepname, object.toString());
         } else {
             logger.debug("no object was provided to set the container result");
         }
+        logger.info("VARS:"+results);
+
+        getContainerVars().putAll(results);
     }
 
     @Override

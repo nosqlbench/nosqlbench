@@ -17,8 +17,10 @@
 package io.nosqlbench.scenarios.simframe.optimo;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
+import io.nosqlbench.nb.api.engine.util.Unit;
 
 public record OptimoSearchSettings(
+    double startRate,
     long sample_time_ms,
     double cutoff_quantile,
     double cutoff_ms,
@@ -26,6 +28,7 @@ public record OptimoSearchSettings(
 ) {
     public OptimoSearchSettings(NBCommandParams params, OptimoParamModel model) {
         this(
+            params.maybeGet("startrate").flatMap(Unit::doubleCountFor).orElse(1000.0d),
             params.maybeGet("sample_time_ms").map(Long::parseLong).orElse(5000L),
             params.maybeGet("cutoff_quantile").map(Double::parseDouble).orElse(0.99),
             params.maybeGet("cutoff_ms").map(Double::parseDouble).orElse(50.0d),
