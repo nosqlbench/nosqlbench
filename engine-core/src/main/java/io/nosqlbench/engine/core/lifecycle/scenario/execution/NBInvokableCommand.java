@@ -26,7 +26,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.function.BiFunction;
 
 public abstract class NBInvokableCommand extends NBBaseComponent implements BiFunction<NBBufferedContainer, NBCommandParams, Object> {
-    private static final Logger logger = LogManager.getLogger(NBInvokableCommand.class);
+    private static final Logger logger = LogManager.getLogger("NBINVOKE");
 
     public NBInvokableCommand(NBBufferedContainer parentComponent, NBLabels componentSpecificLabelsOnly) {
         super(parentComponent, componentSpecificLabelsOnly);
@@ -41,12 +41,12 @@ public abstract class NBInvokableCommand extends NBBaseComponent implements BiFu
         long startAt = System.currentTimeMillis();
         NBCommandResult result = null;
         try {
-            logger.debug("invoking command: " + this);
+            logger.info("invoking [" + this.description() + "] (" + params.toString() + ")");
             resultObject=apply(container, params);
-            logger.debug("cmd produced: " + (resultObject==null ? "NULL" : resultObject.toString()));
+            logger.info("result   ["+ this.description() + "]: " + (resultObject==null ? "NULL" : resultObject.toString()));
         } catch (Exception e) {
             exception = e;
-            logger.error("error in command (stack trace follows): " + this.description() + ": " + exception);
+            logger.error("error   [" + this.description() + "]: (stack trace follows): " + this.description() + ": " + exception);
             exception.printStackTrace(System.out);
         } finally {
             long endAt = System.currentTimeMillis();

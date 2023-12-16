@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.EmitterOpDispenserWrapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
@@ -66,7 +67,7 @@ import java.util.function.Supplier;
 /**
  * A default implementation of an Activity, suitable for building upon.
  */
-public class SimpleActivity extends NBBaseComponent implements Activity {
+public class SimpleActivity extends NBBaseComponent implements Activity, InvokableResult {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
 
     protected ActivityDef activityDef;
@@ -665,4 +666,8 @@ public class SimpleActivity extends NBBaseComponent implements Activity {
     }
 
 
+    @Override
+    public Map<String, String> asResult() {
+        return Map.of("activity",this.getAlias());
+    }
 }
