@@ -39,9 +39,7 @@ import java.util.*;
 public class NBScriptedCommand extends NBBaseCommand {
     private final Invocation invocation = Invocation.EXECUTE_SCRIPT;
     private final BasicScriptBuffer buffer;
-
     private Exception error;
-
     private ExecutionMetricsResult result;
     private BufferedScriptCtx ctx;
     private GraalJSScriptEngine _engine;
