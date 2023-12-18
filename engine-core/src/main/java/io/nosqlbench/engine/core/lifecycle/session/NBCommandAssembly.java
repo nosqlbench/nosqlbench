@@ -56,7 +56,7 @@ public class NBCommandAssembly {
                         "This is the default scenario name, and if you are using different scenario names you should pick something that is different and specific.");
                 }
             } else {
-                tagged.add(cmd.forContainer(containerName, null));
+                tagged.add(cmd.forContainer(containerName, containerName));
             }
         }
         return new ArrayList<>(tagged);
