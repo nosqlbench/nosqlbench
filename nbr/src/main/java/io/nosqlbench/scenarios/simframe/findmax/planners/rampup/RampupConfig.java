@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax;
+package io.nosqlbench.scenarios.simframe.findmax.planners.rampup;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 
@@ -22,7 +22,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
  * These search parameters are based on the original findmax algorithm, and
  * should be reduced down to the minimum set needed.
  */
-public record FindmaxSearchParams(
+public record RampupConfig(
     int sample_time_ms,
     int sample_max,
     double sample_incr,
@@ -32,7 +32,7 @@ public record FindmaxSearchParams(
     int average_of,
     long min_settling_ms
 ) {
-    public FindmaxSearchParams(NBCommandParams params) {
+    public RampupConfig(NBCommandParams params) {
         this(
             params.maybeGet("sample_time_ms").map(Integer::parseInt).orElse(4000),
             params.maybeGet("sample_max").map(Integer::parseInt).orElse(10000),

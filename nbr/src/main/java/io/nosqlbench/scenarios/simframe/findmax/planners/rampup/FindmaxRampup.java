@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax.planners;
+package io.nosqlbench.scenarios.simframe.findmax.planners.rampup;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
@@ -22,8 +22,6 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.scenarios.simframe.capture.JournalView;
-import io.nosqlbench.scenarios.simframe.findmax.FindMaxFrameParams;
-import io.nosqlbench.scenarios.simframe.findmax.FindmaxSearchParams;
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
 import io.nosqlbench.scenarios.simframe.planning.SimFramePlanner;
 import org.apache.logging.log4j.LogManager;
@@ -31,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Comparator;
 
-public class FindmaxRampup extends SimFramePlanner<FindmaxSearchParams, FindMaxFrameParams> {
+public class FindmaxRampup extends SimFramePlanner<RampupConfig, RampupFrameParams> {
     private final Logger logger = LogManager.getLogger(FindmaxRampup.class);
 
     public FindmaxRampup(NBCommandParams analyzerParams) {
@@ -39,12 +37,12 @@ public class FindmaxRampup extends SimFramePlanner<FindmaxSearchParams, FindMaxF
     }
 
     @Override
-    public FindmaxSearchParams getConfig(NBCommandParams params) {
-        return new FindmaxSearchParams(params);
+    public RampupConfig getConfig(NBCommandParams params) {
+        return new RampupConfig(params);
     }
 
-    public FindMaxFrameParams initialStep() {
-        return new FindMaxFrameParams(
+    public RampupFrameParams initialStep() {
+        return new RampupFrameParams(
             config.rate_base(), config.rate_step(), config.sample_time_ms(), config.min_settling_ms(), "INITIAL"
         );
     }
@@ -59,11 +57,11 @@ public class FindmaxRampup extends SimFramePlanner<FindmaxSearchParams, FindMaxF
      * @return Optionally, a set of paramValues which indicates another simulation frame should be sampled, else null
      */
     @Override
-    public FindMaxFrameParams nextStep(JournalView<FindMaxFrameParams> journal) {
-        SimFrame<FindMaxFrameParams> last = journal.last();
-        SimFrame<FindMaxFrameParams> best = journal.bestRun();
+    public RampupFrameParams nextStep(JournalView<RampupFrameParams> journal) {
+        SimFrame<RampupFrameParams> last = journal.last();
+        SimFrame<RampupFrameParams> best = journal.bestRun();
         if (best.index() == last.index()) { // got better consecutively
-            return new FindMaxFrameParams(
+            return new RampupFrameParams(
                 last.params().rate_shelf(),
                 last.params().rate_delta() * config.rate_incr(),
                 last.params().sample_time_ms(),
@@ -76,7 +74,7 @@ public class FindmaxRampup extends SimFramePlanner<FindmaxSearchParams, FindMaxF
                 logger.info("could not divide search space further, stop condition met");
                 return null;
             } else {
-                return new FindMaxFrameParams(
+                return new RampupFrameParams(
                     best.params().computed_rate(),
                     config.rate_step(),
                     (long) (last.params().sample_time_ms() * config.sample_incr()),
@@ -86,13 +84,13 @@ public class FindmaxRampup extends SimFramePlanner<FindmaxSearchParams, FindMaxF
             }
         } else { // any other case
             // find next frame with higher rate but lower value, the closest one by rate
-            SimFrame<FindMaxFrameParams> nextWorseFrameWithHigherRate = journal.frames().stream()
+            SimFrame<RampupFrameParams> nextWorseFrameWithHigherRate = journal.frames().stream()
                     .filter(f -> f.value() < best.value())
                     .filter(f -> f.params().computed_rate() > best.params().computed_rate())
                 .min(Comparator.comparingDouble(f -> f.params().computed_rate()))
                 .orElseThrow(() -> new RuntimeException("inconsistent samples"));
             if ((nextWorseFrameWithHigherRate.params().computed_rate() - best.params().computed_rate()) > config.rate_step()) {
-                return new FindMaxFrameParams(
+                return new RampupFrameParams(
                     best.params().computed_rate(),
                     config.rate_step(),
                     (long) (last.params().sample_time_ms() * config.sample_incr()),
@@ -107,7 +105,7 @@ public class FindmaxRampup extends SimFramePlanner<FindmaxSearchParams, FindMaxF
     }
 
     @Override
-    public void applyParams(FindMaxFrameParams params, Activity flywheel) {
+    public void applyParams(RampupFrameParams params, Activity flywheel) {
         flywheel.onEvent(ParamChange.of(new CycleRateSpec(params.rate_shelf()+params.rate_delta(), 1.1d, SimRateSpec.Verb.restart)));
     }
 

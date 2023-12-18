@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax;
+package io.nosqlbench.scenarios.simframe.findmax.planners.rampup;
 
 /**
  * These parameters are calculated by the planner based on previous simulation frame history.
  */
-public record FindMaxFrameParams(
+public record RampupFrameParams(
     /**
      * The base rate upon which we add higher deltas
      */
