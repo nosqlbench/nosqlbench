@@ -33,10 +33,12 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.RecordComponent;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NBBufferedContainer extends NBBaseComponent implements NBContainer {
 
@@ -47,7 +49,7 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
     private long startedAtMillis;
     private Exception error;
     private long endedAtMillis;
-    private final Map<String, Object> vars = new LinkedHashMap<>();
+    private final Map<String, String> vars = new LinkedHashMap<>();
 
     public enum IOType {
         connected,
@@ -61,7 +63,7 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
     private DiagReader stdinBuffer;
 
     public NBBufferedContainer(NBComponent parent, String name, IOType ioTypes) {
-        super(parent, NBLabels.forKV("container",name));
+        super(parent, NBLabels.forKV("container", name));
         this.iotype = ioTypes;
         this.controller = new ContainerActivitiesController(this);
 
@@ -124,20 +126,17 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
         return this.stdoutBuffer.getTimedLog() + this.stderrBuffer.getTimedLog();
     }
 
-    public NBContainer asFixtures() {
-        return (NBContainer) this;
-    }
-
-
     public static ContainerBuilderFacets.WantsName builder() {
         return new NBScenarioContainerBuilder();
     }
 
     @Override
     public NBCommandResult apply(NBInvokableCommand nbCmd, NBCommandParams nbCmdParams) {
-        NBCommandResult safeCmdResult = nbCmd.invokeSafe(this, nbCmdParams);
-        error=safeCmdResult.getException();
-        if (error!=null) {
+        String stepname = nbCmd.getLabels().valueOfOptional("step").orElse("unknownstep");
+        NBCommandParams interpolated = interpolate(nbCmdParams, this.getContainerVars(), stepname);
+        NBCommandResult safeCmdResult = nbCmd.invokeSafe(this, interpolated);
+        error = safeCmdResult.getException();
+        if (error != null) {
             try {
                 controller.forceStopActivities(3000);
             } catch (final Exception eInner) {
@@ -147,37 +146,105 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
         }
 
         Object object = safeCmdResult.getResultObject();
-        String stepname = getLabels().valueOfOptional("step").orElse("unknownstep");
-        if (object instanceof Map<?,?> map) {
-            map.forEach((k,v) -> {
-                logger.debug("setting command result for '" + stepname + "." + k + "' to '" + v.toString()+"'");
-                getContainerVars().put(stepname+"."+k,v.toString());
-            });
-            getContainerVars().put(stepname+"._map",map);
-        } else if (object instanceof List<?> list) {
-            for (int i = 0; i < list.size(); i++) {
-                getContainerVars().put(stepname+"."+String.valueOf(i),list.get(i));
-            }
-            getContainerVars().put(stepname+"._list",list);
-        } else if (object instanceof Set<?> set) {
-            getContainerVars().put(stepname+"._set",set);
-        } else if (object != null && object.getClass().isArray()) {
-            getContainerVars().put(stepname + "._array", object);
-        } else if (object !=null) {
-            getContainerVars().put(stepname + "._object", object);
-
-            // ignore
-//        } else {
-//
-//            RuntimeException error = new RuntimeException("Unrecognizable type to set container vars with:" + object.getClass().getCanonicalName());
-//            logger.error(error);
-////            throw new RuntimeException("Unrecognizable type to set container vars with:" + object.getClass().getCanonicalName());
-        } else {
-            logger.debug("no object was provided to set the container result");
-        }
+        applyResult(stepname, object);
 
         activitiesProgressIndicator.finish();
         return safeCmdResult;
+    }
+
+    private final static Pattern pattern = Pattern.compile("\\$\\{(?<name>[a-zA-Z_][a-zA-Z0-9_.]*)}");
+
+    private NBCommandParams interpolate(NBCommandParams params, Map<String, String> vars, String stepname) {
+        Map<String, String> interpolated = new LinkedHashMap<>();
+        params.forEach((k, v) -> {
+            Matcher varmatcher = pattern.matcher(v);
+            StringBuilder sb = new StringBuilder();
+            while (varmatcher.find()) {
+                String varname = varmatcher.group("name");
+                if (vars.containsKey(varname)) {
+                    varmatcher.appendReplacement(sb, vars.get(varname));
+                } else {
+                    throw new RuntimeException("context var '" + varname + " was referenced in step '" + stepname + "', but it was not found in " + vars);
+                }
+            }
+            varmatcher.appendTail(sb);
+            interpolated.put(k, sb.toString());
+        });
+        return NBCommandParams.of(interpolated);
+    }
+
+    /**
+     * Apply the result of a command execution to the container variables.
+     *
+     * @param stepname The step name of the command result.
+     * @param object   The result object of the command execution.
+     */
+    private void applyResult(String stepname, Object object) {
+        Map<String,String> results = new LinkedHashMap<>();
+        if (object instanceof Record record) {
+            HashSet<String> filtered = new HashSet<>(Set.of("hashCode","toString","getClass","notify","notifyAll","wait"));
+            RecordComponent[] recordComponents = record.getClass().getRecordComponents();
+            for (RecordComponent component : recordComponents) {
+                try {
+                    String name = component.getName();
+                    Object value = component.getAccessor().invoke(record);
+                    results.put(stepname+"."+name,value.toString());
+                    filtered.add(name);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            List<Method> properties = Arrays.stream(record.getClass().getMethods())
+                .filter(m -> m.getParameterCount() == 0)
+                .filter(m -> !filtered.contains(m.getName()))
+                .toList();
+            for (Method property : properties) {
+                try {
+                    Object value = property.invoke(record);
+                    results.put(stepname+"."+property.getName(),value.toString());
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } else if (object instanceof InvokableResult ir) {
+            ir.asResult().forEach((k, v) -> {
+                logger.debug("setting InvokableResult command result for '" + stepname + "." + k + "' to '" + v + "'");
+                results.put(stepname + "." + k, v);
+            });
+        } else if (object instanceof Map<?, ?> map) {
+            map.forEach((k, v) -> {
+                logger.debug("setting command result for '" + stepname + "." + k + "' to '" + v.toString() + "'");
+                results.put(stepname + "." + k, v.toString());
+            });
+        } else if (object instanceof List<?> list) {
+            for (int i = 0; i < list.size(); i++) {
+                results.put(stepname + "." + i, list.get(i).toString());
+            }
+        } else if (object instanceof Set<?> set) {
+            ArrayList<String> values = new ArrayList<>();
+            for (Object o : set) {
+                values.add(o.toString());
+            }
+            for (int i = 0; i < values.size(); i++) {
+                results.put(stepname + "." + i, values.get(i));
+            }
+        } else if (object != null && object.getClass().isArray()) {
+            Object[] ary = (Object[]) object;
+            for (int i = 0; i < ary.length; i++) {
+                results.put(stepname + "." + i, String.valueOf(ary[i]));
+            }
+        } else if (object != null) {
+            results.put(stepname, object.toString());
+        } else {
+            logger.debug("no object was provided to set the container result");
+        }
+        logger.info("VARS:"+results);
+
+        getContainerVars().putAll(results);
     }
 
     @Override
@@ -186,13 +253,12 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
     }
 
     @Override
-    public Map<String, Object> getContainerVars() {
+    public Map<String, String> getContainerVars() {
         return this.vars;
     }
 
     @Override
     public void beforeDetach() {
-        // TODO, shutdown hooks need to be moved to container
         Runtime.getRuntime().removeShutdownHook(this.containerShutdownHook);
         final var retiringScenarioShutdownHook = this.containerShutdownHook;
         this.containerShutdownHook = null;

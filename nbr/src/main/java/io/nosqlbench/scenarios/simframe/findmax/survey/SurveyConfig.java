@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.optimo;
+package io.nosqlbench.scenarios.simframe.findmax.survey;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
-import io.nosqlbench.nb.api.engine.util.Unit;
 
-public record OptimoSearchSettings(
-    double startRate,
-    long sample_time_ms,
-    double cutoff_quantile,
-    double cutoff_ms,
-    OptimoParamModel model
+/**
+ * These search parameters are based on the original findmax algorithm, and
+ * should be reduced down to the minimum set needed.
+ */
+public record SurveyConfig(
+    double max_rate,
+    int steps
 ) {
-    public OptimoSearchSettings(NBCommandParams params, OptimoParamModel model) {
+    public SurveyConfig(NBCommandParams params) {
         this(
-            params.maybeGet("startrate").flatMap(Unit::doubleCountFor).orElse(1000.0d),
-            params.maybeGet("sample_time_ms").map(Long::parseLong).orElse(5000L),
-            params.maybeGet("cutoff_quantile").map(Double::parseDouble).orElse(0.99),
-            params.maybeGet("cutoff_ms").map(Double::parseDouble).orElse(50.0d),
-            model
+            params.maybeGet("max_rate").map(Double::parseDouble).orElse(1.2d),
+            params.maybeGet("steps").map(Integer::parseInt).orElse(3)
         );
+
     }
 }

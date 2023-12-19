@@ -35,6 +35,7 @@ public final class StatBucket {
     }
 
     public StatBucket apply(double value) {
+//        System.out.println("stat->" + value + " bucket:" + toString());
         double popped = ringbuf.push(value);
         if (ringbuf.count() == 1) {
             mean = value;

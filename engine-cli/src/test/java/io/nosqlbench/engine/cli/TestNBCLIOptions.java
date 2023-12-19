@@ -155,16 +155,16 @@ public class TestNBCLIOptions {
 
     }
 
-    @Test
-    public void shouldRecognizeStopActivityCmd() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "stop", "activity=woah" });
-        List<Cmd> cmds = opts.getCommands();
-        assertThat(cmds).hasSize(1);
-        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.stop);
-        assertThat(cmds.get(0).getArgValue("activity")).isEqualTo("woah");
-
-    }
-
+//    @Test
+//    public void shouldRecognizeStopActivityCmd() {
+//        NBCLIOptions opts = new NBCLIOptions(new String[]{ "stop", "activity=woah" });
+//        List<Cmd> cmds = opts.getCommands();
+//        assertThat(cmds).hasSize(1);
+//        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.stop);
+//        assertThat(cmds.get(0).getArgValue("activity")).isEqualTo("woah");
+//
+//    }
+//
     @Disabled("semantic parsing is deferred until later")
     @Test
     public void shouldThrowErrorForInvalidStopActivity() {

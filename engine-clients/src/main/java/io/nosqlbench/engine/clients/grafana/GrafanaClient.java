@@ -203,6 +203,8 @@ public class GrafanaClient {
         try {
             HttpRequest request = rqb.build();
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (InterruptedException ie) {
+            logger.warn("The annotation client was interrupted while submitting a request.");
         } catch (Exception e) {
             if (e.getMessage()!=null && e.getMessage().contains("WWW-Authenticate header missing")) {
                 throw new RuntimeException("Java HttpClient was not authorized, and it saw no WWW-Authenticate header" +

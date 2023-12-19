@@ -45,7 +45,6 @@ import java.util.function.Function;
  */
 public class NBSession extends NBBaseComponent implements Function<List<Cmd>, ExecutionResult>, NBTokenWords {
     private final static Logger logger = LogManager.getLogger(NBSession.class);
-    private final String sessionName;
     private final ClientSystemMetricChecker clientMetricChecker;
 
     private final Map<String, NBBufferedContainer> containers = new ConcurrentHashMap<>();
@@ -65,7 +64,6 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
             labelContext.getLabels()
                 .and("session", sessionName)
         );
-        this.sessionName = sessionName;
 
         this.clientMetricChecker = new ClientSystemMetricChecker(this, NBLabels.forKV(), 10);
         registerLoadAvgMetrics();

@@ -25,7 +25,7 @@ package io.nosqlbench.engine.cmdstream;
 public enum CmdType {
     run(),
     start(),
-    stop(CmdParam.of("activity")),
+//    stop(CmdParam.of("activity")),
     forceStop(CmdParam.of("activity")),
     script(CmdParam.of("path", s -> s)),
     java(CmdParam.of("class", s -> s)),

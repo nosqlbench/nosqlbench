@@ -153,60 +153,6 @@ public class Cmd {
         return sb.toString();
     }
 
-
-//    public static Cmd parseArg(LinkedList<String> arglist, PathCanonicalizer fixer) {
-//
-//        String cmdName = arglist.removeFirst();
-//        CmdType cmdType = CmdType.valueOfAnyCaseOrIndirect(cmdName);
-//
-//        Map<String, String> params = new LinkedHashMap<>();
-//
-//        for (CmdParam<?> cmdParam : cmdType.getPositionalArgs()) {
-//
-//            String nextarg = arglist.peekFirst();
-//
-//            if (nextarg == null) {
-//                throw new InvalidParameterException(
-//                    "command '" + cmdName + " requires a value for " + cmdParam.name
-//                        + ", but there were no remaining arguments after it.");
-//            } else if (cmdParam.freeform) {
-//                logger.debug(() -> "freeform parameter:" + nextarg);
-//            } else if (nextarg.contains("=")) {
-//                throw new InvalidParameterException(
-//                    "command '" + cmdName + "' requires a value for " + cmdParam.name +
-//                        ", but a named parameter was found instead: " + nextarg);
-//            } else if (CmdType.anyMatches(nextarg)) {
-//                throw new InvalidParameterException(
-//                    "command '" + cmdName + "' requires a value for " + cmdParam.name
-//                        + ", but a reserved word was found instead: " + nextarg);
-//            }
-//
-//            logger.debug(() -> "cmd name:" + cmdName + ", positional " + cmdParam.name + ": " + nextarg);
-//            params.put(cmdParam.name, cmdParam.converter.apply(arglist.removeFirst()).toString());
-//        }
-//
-//        while (arglist.size() > 0 &&
-//            !CmdType.anyMatches(arglist.peekFirst())
-//            && arglist.peekFirst().contains("=")) {
-//            String arg = arglist.removeFirst();
-//            String[] assigned = arg.split("=", 2);
-//            String pname = assigned[0];
-//            String pval = assigned[1];
-//
-//
-//            if (pname.equals("yaml") || pname.equals("workload")) {
-//                pval = fixer.canonicalizePath(pval);
-//            }
-//            if (params.containsKey(pname)) {
-//                throw new InvalidParameterException("parameter '" + pname + "' is already set for '" + cmdType + "' command. For each command," +
-//                    " a named parameter may only be set once. Multiple occurrences are disallowed to avoid errors or ambiguity.");
-//            }
-//            params.put(pname, pval);
-//        }
-//
-//        return new Cmd(cmdType, params);
-//    }
-
     public static String toJSONBlock(Map<String, String> map, boolean oneline) {
 
         int klen = map.keySet().stream().mapToInt(String::length).max().orElse(1);
@@ -245,6 +191,10 @@ public class Cmd {
             argmap.put(k,v.getValue());
         });
         return argmap;
+    }
+
+    public String getStepName() {
+        return this.stepName;
     }
 
 //    public static List<Cmd> parseCmds(String... arglist) {

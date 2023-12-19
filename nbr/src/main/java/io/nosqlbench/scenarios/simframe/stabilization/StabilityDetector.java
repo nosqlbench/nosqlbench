@@ -23,12 +23,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class StabilityDetector implements Runnable {
     private final static Logger logger = LogManager.getLogger(StabilityDetector.class);
     private final double timeSliceSeconds;
     private final double threshold;
     private final DoubleSupplier source;
+    private final Supplier<String> summary;
     private StatBucket[] buckets;
     private int[] windows;
     private volatile boolean running = true;
@@ -53,13 +55,20 @@ public class StabilityDetector implements Runnable {
      *     The size of each window in the set of diminishing sizes. These contain the last N samples by size,
      *     respectively.
      */
-    public StabilityDetector(double timeSliceSeconds, double minThreshold, DoubleSupplier source, int... windows) {
+    public StabilityDetector(
+        double timeSliceSeconds,
+        double minThreshold,
+        DoubleSupplier source,
+        Supplier<String> summary,
+        int... windows
+    ) {
         if (windows.length < 2) {
             throw new RuntimeException("you must provide at least to summarization windows, ordered in decreasing size.");
         }
         this.timeSliceSeconds = timeSliceSeconds;
         this.threshold = minThreshold;
         this.source = source;
+        this.summary = summary;
         this.windows = windows;
         for (int i = 0; i < windows.length - 1; i++) {
             if (windows[i] < windows[i + 1]) {
@@ -122,6 +131,8 @@ public class StabilityDetector implements Runnable {
             for (int i = 0; i < stddev.length; i++) {
                 System.out.printf("[%d]: %g ", windows[i], stddev[i]);
             }
+            System.out.println("stddevs: "+ Arrays.toString(stddev));
+            System.out.printf(this.summary.get());
             System.out.println();
         }
         return basis;
@@ -133,6 +144,18 @@ public class StabilityDetector implements Runnable {
      */
     @Override
     public void run() {
+        try {
+//            System.out.println("Detector> OPEN");
+            updateAndAwait();
+        } catch (Exception e) {
+//            System.out.println("Detector> ERROR ERROR:" + e.toString());
+            throw new RuntimeException(e);
+        } finally {
+//            System.out.println("Detector> CLOSE");
+        }
+    }
+
+    private void updateAndAwait() {
         int interval = (int) (this.timeSliceSeconds * 1000);
         startedAt = System.currentTimeMillis();
         reset();
@@ -145,10 +168,10 @@ public class StabilityDetector implements Runnable {
                 try {
                     Thread.sleep(delay);
                 } catch (InterruptedException ignored) {
+                    System.out.println("Interrupted>");
                 }
                 delay = nextCheckAt - System.currentTimeMillis();
             }
-
             double value = source.getAsDouble();
             apply(value);
             double stabilityFactor = computeStability();
@@ -164,7 +187,7 @@ public class StabilityDetector implements Runnable {
         }
     }
 
-    private static String levels8 = " ▁▂▃▄▅▆▇";
+    private static final String levels8 = " ▁▂▃▄▅▆▇";
     public String stabilitySummary(double[] stddev) {
         StringBuilder sb = new StringBuilder("[");
         double bias=(1.0d/16.0);

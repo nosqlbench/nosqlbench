@@ -20,6 +20,7 @@ import io.nosqlbench.scenarios.simframe.stabilization.StabilityDetector;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.*;
 
@@ -39,7 +40,7 @@ public class SimFrameCapture implements SimFrameResults {
     private final StabilityDetector stabilizer;
 
     public SimFrameCapture() {
-        stabilizer = new StabilityDetector(0.1,0.98,this::getPartialValue, 10,5);
+        stabilizer = new StabilityDetector(0.1,0.98,this::getPartialValue, this::toString, 10,5);
     }
 
     private double getPartialValue() {
@@ -138,10 +139,11 @@ public class SimFrameCapture implements SimFrameResults {
 
     @Override
     public double getValue() {
-        if (allFrames.isEmpty()) {
-            return Double.NaN;
+        FrameSampleSet lastFrame = allFrames.peekLast();
+        if (lastFrame==null) {
+            System.out.println("no last frame");
         }
-        return allFrames.getLast().value();
+        return lastFrame != null ? lastFrame.value() : Double.NaN;
     }
 
     @Override
@@ -152,7 +154,8 @@ public class SimFrameCapture implements SimFrameResults {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("PERF VALUE=").append(getValue()).append("\n");
-        sb.append("windows:\n").append(allFrames.getLast().toString());
+        FrameSampleSet lastFrame = allFrames.peekLast();
+        sb.append("windows:\n").append(lastFrame==null ? "NONE" : lastFrame.toString());
         return sb.toString();
     }
 
@@ -175,6 +178,7 @@ public class SimFrameCapture implements SimFrameResults {
             throw new RuntimeException("cant start window twice in a row. Must close window first");
         }
         restartWindow(now);
+//        System.out.println("after (re)start):\n"+ frameCaptureSummary(activeFrame));
     }
 
     private String frameCaptureSummary(FrameSampleSet currentFrame) {
@@ -195,7 +199,7 @@ public class SimFrameCapture implements SimFrameResults {
             activeFrame.set(i, activeFrame.get(i).stop(now));
         }
         allFrames.add(activeFrame);
-//        System.out.println("after stop:\n"+ frameCaptureSummary(currentFrame));
+//        System.out.println("after stop:\n"+ frameCaptureSummary(activeFrame));
         activeFrame = null;
     }
 
@@ -212,7 +216,7 @@ public class SimFrameCapture implements SimFrameResults {
     }
 
 
-    public static class FrameSamples extends ArrayList<FrameSampleSet> {
+    public static class FrameSamples extends LinkedList<FrameSampleSet> {
     }
 
 }

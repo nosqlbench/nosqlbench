@@ -33,9 +33,9 @@ public class NBCoreInvokableResolver implements NBInvokableResolver {
     private SequencedMap<String,NBInvokableResolver> resolvers = new LinkedHashMap<>();
 
     @Override
-    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName) {
+    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String stepname) {
         for (NBInvokableResolver resolver : getResolvers().values()) {
-            NBInvokableCommand loadedCommand = resolver.resolve(cmd, parent, phaseName);
+            NBInvokableCommand loadedCommand = resolver.resolve(cmd, parent, stepname);
             if (loadedCommand!=null) {
                 return loadedCommand;
             }

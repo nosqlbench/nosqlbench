@@ -38,5 +38,5 @@ public interface NBContainer extends NBComponent, BiFunction<NBInvokableCommand,
     default void doShutdown() {
     };
 
-    Map<String,Object> getContainerVars();
+    Map<String,String> getContainerVars();
 }
