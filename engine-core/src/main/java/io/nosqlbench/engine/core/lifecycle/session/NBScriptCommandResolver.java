@@ -27,7 +27,7 @@ public class NBScriptCommandResolver implements NBInvokableResolver {
     @Override
     public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName) {
         return switch (cmd.getCmdType()) {
-            case run, await, forceStop, start, waitMillis, fragment, script->
+            case fragment, script->
             new NBScriptedCommand(parent, phaseName, cmd.getTargetContext()).add(cmd);
 //            case fragment ->
 //                new NBScriptedCommand(parent, phaseName, cmd.getTargetContext()).addScriptText(cmd.getArgValue("fragment"));

@@ -137,23 +137,23 @@ public class TestNBCLIOptions {
                 .isThrownBy(() -> new NBCLIOptions(new String[]{"script"}));
     }
 
-    @Test
-    public void shouldRecognizeStartActivityCmd() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "start", "driver=woot" });
-        List<Cmd> cmds = opts.getCommands();
-        assertThat(cmds).hasSize(1);
-        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.start);
-
-    }
-
-    @Test
-    public void shouldRecognizeRunActivityCmd() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "run", "driver=runwoot" });
-        List<Cmd> cmds = opts.getCommands();
-        assertThat(cmds).hasSize(1);
-        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.run);
-
-    }
+//    @Test
+//    public void shouldRecognizeStartActivityCmd() {
+//        NBCLIOptions opts = new NBCLIOptions(new String[]{ "start", "driver=woot" });
+//        List<Cmd> cmds = opts.getCommands();
+//        assertThat(cmds).hasSize(1);
+//        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.start);
+//
+//    }
+//
+//    @Test
+//    public void shouldRecognizeRunActivityCmd() {
+//        NBCLIOptions opts = new NBCLIOptions(new String[]{ "run", "driver=runwoot" });
+//        List<Cmd> cmds = opts.getCommands();
+//        assertThat(cmds).hasSize(1);
+//        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.run);
+//
+//    }
 
 //    @Test
 //    public void shouldRecognizeStopActivityCmd() {
@@ -172,14 +172,14 @@ public class TestNBCLIOptions {
                 .isThrownBy(() -> new NBCLIOptions(new String[]{ "stop", "woah=woah" }));
     }
 
-    @Test
-    public void shouldRecognizeAwaitActivityCmd() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "await", "activity=awaitme" });
-        List<Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.await);
-        assertThat(cmds.get(0).getArgValue("activity")).isEqualTo("awaitme");
-
-    }
+//    @Test
+//    public void shouldRecognizeAwaitActivityCmd() {
+//        NBCLIOptions opts = new NBCLIOptions(new String[]{ "await", "activity=awaitme" });
+//        List<Cmd> cmds = opts.getCommands();
+//        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.await);
+//        assertThat(cmds.get(0).getArgValue("activity")).isEqualTo("awaitme");
+//
+//    }
 
     @Disabled("semantic parsing is reserved until later after generalizing syntax")
     @Test
@@ -188,14 +188,14 @@ public class TestNBCLIOptions {
                 .isThrownBy(() -> new NBCLIOptions(new String[]{ "await", "awaitme=notvalid" }));
     }
 
-    @Test
-    public void shouldRecognizewaitMillisCmd() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "waitmillis", "ms=23234" });
-        List<Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.waitMillis);
-        assertThat(cmds.get(0).getArgValue("ms")).isEqualTo("23234");
-
-    }
+//    @Test
+//    public void shouldRecognizewaitMillisCmd() {
+//        NBCLIOptions opts = new NBCLIOptions(new String[]{ "waitmillis", "ms=23234" });
+//        List<Cmd> cmds = opts.getCommands();
+//        assertThat(cmds.get(0).getCmdType()).isEqualTo(CmdType.waitMillis);
+//        assertThat(cmds.get(0).getArgValue("ms")).isEqualTo("23234");
+//
+//    }
 
     @Test
     public void listWorkloads() {

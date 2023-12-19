@@ -23,14 +23,14 @@ package io.nosqlbench.engine.cmdstream;
  * or an error is thrown.
  */
 public enum CmdType {
-    run(),
-    start(),
+//    run(),
+//    start(),
 //    stop(CmdParam.of("activity")),
-    forceStop(CmdParam.of("activity")),
+//    forceStop(CmdParam.of("activity")),
     script(CmdParam.of("path", s -> s)),
     java(CmdParam.of("class", s -> s)),
-    await(CmdParam.of("activity")),
-    waitMillis(CmdParam.of("ms", Long::parseLong)),
+//    await(CmdParam.of("activity")),
+//    waitMillis(CmdParam.of("ms", Long::parseLong)),
     fragment(CmdParam.ofFreeform("fragment")),
     container(CmdParam.of("name")),
     indirect(CmdParam.of("indirect"));
