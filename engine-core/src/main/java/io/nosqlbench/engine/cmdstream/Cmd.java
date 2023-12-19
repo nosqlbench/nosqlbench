@@ -55,6 +55,12 @@ public class Cmd {
         return cmdArg.getValue();
 
     }
+
+    public String takeArgValue(String paramName) {
+        String argValue = getArgValue(paramName);
+        this.cmdArgs.remove(paramName);
+        return argValue;
+    }
     public String getArgValue(String paramName) {
         CmdArg cmdArg = this.cmdArgs.get(paramName);
         if (cmdArg==null) {

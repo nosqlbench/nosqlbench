@@ -155,6 +155,9 @@ public class StabilityDetector implements Runnable {
         }
     }
 
+    // TODO: Add a check for when stddev is lower than some fixed value, or when both
+    // (or all) windows are below some small threshold
+    // and perhaps add auto-correlation checks for (any of) style unblocking
     private void updateAndAwait() {
         int interval = (int) (this.timeSliceSeconds * 1000);
         startedAt = System.currentTimeMillis();
@@ -175,9 +178,9 @@ public class StabilityDetector implements Runnable {
             double value = source.getAsDouble();
             apply(value);
             double stabilityFactor = computeStability();
-//            if (Double.isNaN(stabilityFactor)) {
-//                System.out.println("NaN stability factor");
-//            }
+            if (Double.isNaN(stabilityFactor)) {
+                throw new RuntimeException("NaN stability factor:" + this);
+            }
 
             if (stabilityFactor > threshold) {
                 detectionTime = ((double) (nextCheckAt - startedAt)) / 1000d;

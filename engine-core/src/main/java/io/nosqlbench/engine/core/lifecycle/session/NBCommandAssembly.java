@@ -77,6 +77,9 @@ public class NBCommandAssembly {
                 throw new BasicError("Found zero commands for spec;" + cmd);
             }
             String containerName = cmd.getTargetContext();
+
+            // TODO, make this unnecessary by moving the impl out of the map to a dedicated cmd structure
+            params.remove("_impl");
             parameterizedInvocations.add(new CommandInvocation(command, params, containerName));
         }
         return parameterizedInvocations;

@@ -105,6 +105,7 @@ public class NBCLIScenarioPreprocessorTest {
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
+            "_impl","run",
             "alias", "with_template",
             "container", "template_test",
             "cycles", "20",
@@ -122,6 +123,7 @@ public class NBCLIScenarioPreprocessorTest {
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
+            "_impl", "run",
             "alias", "schema",
             "container", "schema_only",
             "cycles-test", "20",
@@ -176,6 +178,7 @@ public class NBCLIScenarioPreprocessorTest {
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
+            "_impl","run",
             "alias", "schema",
             "container", "schema_only",
             "cycles-test", "20",
