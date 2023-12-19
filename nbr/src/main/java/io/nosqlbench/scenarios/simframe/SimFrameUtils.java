@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.optimo;
+package io.nosqlbench.scenarios.simframe;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.concurrent.locks.LockSupport;
 
 public class SimFrameUtils {
-
 
     public static void awaitActivity(Activity flywheel) {
         // await flywheel actually spinning, or timeout with error

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax.survey;
+package io.nosqlbench.scenarios.simframe.optimizers.planners.rcurve;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 
@@ -22,15 +22,21 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
  * These search parameters are based on the original findmax algorithm, and
  * should be reduced down to the minimum set needed.
  */
-public record SurveyConfig(
+public record RCurveConfig(
+    double min_rate,
     double max_rate,
     int steps
 ) {
-    public SurveyConfig(NBCommandParams params) {
+    public RCurveConfig(NBCommandParams params) {
         this(
-            params.maybeGet("max_rate").map(Double::parseDouble).orElse(1.2d),
-            params.maybeGet("steps").map(Integer::parseInt).orElse(3)
+            params.maybeGet("min_rate").map(Double::parseDouble).orElse(0.0),
+            params.maybeGet("max_rate").map(Double::parseDouble).orElse(10.0),
+            params.maybeGet("steps").map(Integer::parseInt).orElse(10)
         );
-
     }
+
+    double rateForStep(int step) {
+        return min_rate + ((max_rate-min_rate)*((double)step/(double)steps));
+    }
+
 }

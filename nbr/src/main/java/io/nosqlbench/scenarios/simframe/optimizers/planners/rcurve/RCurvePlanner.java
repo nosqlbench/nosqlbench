@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax.survey;
+package io.nosqlbench.scenarios.simframe.optimizers.planners.rcurve;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
@@ -27,21 +27,21 @@ import io.nosqlbench.scenarios.simframe.planning.SimFramePlanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FindmaxSurvey extends SimFramePlanner<SurveyConfig, SurveyFrameParams> {
-    private final Logger logger = LogManager.getLogger(FindmaxSurvey.class);
+public class RCurvePlanner extends SimFramePlanner<RCurveConfig, RCurveFrameParams> {
+    private final Logger logger = LogManager.getLogger(RCurvePlanner.class);
 
-    public FindmaxSurvey(NBCommandParams params) {
+    public RCurvePlanner(NBCommandParams params) {
         super(params);
     }
 
 
     @Override
-    public SurveyConfig getConfig(NBCommandParams params) {
-        return new SurveyConfig(params);
+    public RCurveConfig getConfig(NBCommandParams params) {
+        return new RCurveConfig(params);
     }
 
-    public SurveyFrameParams initialStep() {
-        return new SurveyFrameParams(config.max_rate(), config.steps(), "INITIAL");
+    public RCurveFrameParams initialStep() {
+        return new RCurveFrameParams(config.rateForStep(1), 1, "INITIAL");
     }
 
     /**
@@ -55,14 +55,18 @@ public class FindmaxSurvey extends SimFramePlanner<SurveyConfig, SurveyFramePara
      */
 
     @Override
-    public SurveyFrameParams nextStep(JournalView<SurveyFrameParams> journal) {
-        return null;
+    public RCurveFrameParams nextStep(JournalView<RCurveFrameParams> journal) {
+        SimFrame<RCurveFrameParams> last = journal.last();
+        int nextStep = last.params().step() +1;
+        if (nextStep<=config.steps()) {
+            return new RCurveFrameParams(config.rateForStep(nextStep),nextStep,"Advancing to step " + nextStep);
+        } else {
+            return null;
+        }
     }
 
-
     @Override
-    public void applyParams(SurveyFrameParams params, Activity flywheel) {
+    public void applyParams(RCurveFrameParams params, Activity flywheel) {
         flywheel.onEvent(ParamChange.of(new CycleRateSpec(params.rate(), 1.1d, SimRateSpec.Verb.restart)));
-
     }
 }

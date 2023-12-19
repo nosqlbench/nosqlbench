@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax.planners.rampup;
+package io.nosqlbench.scenarios.simframe.optimizers.planners.findmax;
 
 /**
  * These parameters are calculated by the planner based on previous simulation frame history.
  */
-public record RampupFrameParams(
+public record FindmaxFrameParams(
     /**
      * The base rate upon which we add higher deltas
      */
     double rate_shelf,
 
-        /**
-         * The incremental rate which we stack on top of the base rate to find a new limit
-         */
-        double rate_delta,
-        /**
-         * How many millis we sample the current frame for
-         */
-        long sample_time_ms,
-        /**
-         * How many millis we let the workload settle for to achieve stability, such as when it has recently
-         * be in in over-saturation mode with a too-high delta
-         */
-        long settling_time_ms,
-        /**
-         * Narrate the reason for the current parameters being set the way the are
-         */
-        String description
+    /**
+     * The incremental rate which we stack on top of the base rate to find a new limit
+     */
+    double rate_delta,
+    /**
+     * How many millis we sample the current frame for
+     */
+    long sample_time_ms,
+    /**
+     * How many millis we let the workload settle for to achieve stability, such as when it has recently
+     * be in in over-saturation mode with a too-high delta
+     */
+    long settling_time_ms,
+    /**
+     * Narrate the reason for the current parameters being set the way the are
+     */
+    String description
 
 ) {
     public double computed_rate() {

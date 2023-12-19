@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.optimo;
+package io.nosqlbench.scenarios.simframe.optimizers.planners.ratchet;
 
-public class ThreadSpec {
-    public ThreadSpec(double threads) {
-    }
+public record RatchetFrameParams(
+    double rate,
+    int attempt,
+    double step_size,
+    String description
+
+) {
 }

@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax.planners;
+package io.nosqlbench.scenarios.simframe.optimizers.planners;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
-import io.nosqlbench.scenarios.simframe.findmax.planners.rampup.FindmaxRampup;
-import io.nosqlbench.scenarios.simframe.findmax.planners.ratchet.FindmaxRatchet;
-import io.nosqlbench.scenarios.simframe.findmax.survey.FindmaxSurvey;
+import io.nosqlbench.scenarios.simframe.optimizers.planners.findmax.FindmaxPlanner;
+import io.nosqlbench.scenarios.simframe.optimizers.planners.ratchet.RatchetPlanner;
+import io.nosqlbench.scenarios.simframe.optimizers.planners.rcurve.RCurvePlanner;
 import io.nosqlbench.scenarios.simframe.planning.SimFramePlanner;
 
-public enum FindmaxPlannerType {
+public enum OptimizerPlannerTypes {
     //    survey,
     ratchet,
-    rampup,
-    survey,
+    findmax,
+    rcurve,
     ;
     public SimFramePlanner<?,?> createPlanner(NBCommandParams params) {
         return switch (this) {
-            case ratchet -> new FindmaxRatchet(params);
-            case rampup -> new FindmaxRampup(params);
-            case survey -> new FindmaxSurvey(params);
+            case findmax -> new FindmaxPlanner(params);
+            case rcurve -> new RCurvePlanner(params);
+            case ratchet -> new RatchetPlanner(params);
         };
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax;
+package io.nosqlbench.scenarios.simframe.capture;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
@@ -22,8 +22,8 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 
-public class FindmaxFrameData extends SimFrameCapture {
-    public FindmaxFrameData(Activity activity) {
+public class SimFrameValueData extends SimFrameCapture {
+    public SimFrameValueData(Activity activity) {
         NBMetricTimer result_timer = activity.find().timer("name:result");
         NBMetricTimer result_success_timer = activity.find().timer("name:result_success");
         NBMetricGauge cyclerate_gauge = activity.find().gauge("name=config_cyclerate");
@@ -31,13 +31,13 @@ public class FindmaxFrameData extends SimFrameCapture {
         NBMetricHistogram tries_histo = tries_histo_src.attachHdrDeltaHistogram();
 
         addDirect("target_rate",
-            () -> cyclerate_gauge.getValue(),
+                cyclerate_gauge::getValue,
             Double.NaN);
         addDeltaTime("achieved_oprate",
-            () -> result_timer.getCount(),
+                result_timer::getCount,
             Double.NaN);
         addDeltaTime("achieved_ok_oprate",
-            () -> result_success_timer.getCount()
+                result_success_timer::getCount
             , 1.0);
 
         addRemix("achieved_success_ratio", vars -> {

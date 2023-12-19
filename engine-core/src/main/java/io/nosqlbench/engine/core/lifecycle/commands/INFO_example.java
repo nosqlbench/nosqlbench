@@ -20,7 +20,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(value = NBCommandInfo.class,selector = "start")
+@Service(value = NBCommandInfo.class,selector = "example")
 public class INFO_example extends NBCommandInfo {
     @Override
     public Class<? extends NBInvokableCommand> getType() {

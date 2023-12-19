@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax.planners.ratchet;
+package io.nosqlbench.scenarios.simframe.optimizers.planners.ratchet;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 

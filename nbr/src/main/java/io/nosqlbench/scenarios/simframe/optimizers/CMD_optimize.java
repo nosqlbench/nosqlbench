@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax;
+package io.nosqlbench.scenarios.simframe.optimizers;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
@@ -23,8 +23,9 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitie
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
-import io.nosqlbench.scenarios.simframe.findmax.planners.FindmaxPlannerType;
-import io.nosqlbench.scenarios.simframe.optimo.SimFrameUtils;
+import io.nosqlbench.scenarios.simframe.capture.SimFrameValueData;
+import io.nosqlbench.scenarios.simframe.optimizers.planners.OptimizerPlannerTypes;
+import io.nosqlbench.scenarios.simframe.SimFrameUtils;
 import io.nosqlbench.scenarios.simframe.planning.SimFramePlanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,11 +53,11 @@ import java.io.Reader;
  *
  * <P>This can be tested as <PRE>{@code nb5 --show-stacktraces java io.nosqlbench.scenarios.findmax.SC_findmax threads=36}</PRE></P>
  */
-@Service(value = NBBaseCommand.class,selector = "findmax")
-public class NB_findmax extends NBBaseCommand {
-    private final static Logger logger = LogManager.getLogger(NB_findmax.class);
+@Service(value = NBBaseCommand.class,selector = "optimize")
+public class CMD_optimize extends NBBaseCommand {
+    private final static Logger logger = LogManager.getLogger(CMD_optimize.class);
 
-    public NB_findmax(NBBufferedContainer parentComponent, String scenarioName, String context) {
+    public CMD_optimize(NBBufferedContainer parentComponent, String scenarioName, String context) {
         super(parentComponent, scenarioName, context);
     }
 
@@ -65,9 +66,9 @@ public class NB_findmax extends NBBaseCommand {
         Activity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));
         stdout.println("starting analysis on activity '" + flywheel.getAlias() + "'");
         SimFrameUtils.awaitActivity(flywheel);
-        SimFrameCapture capture = new FindmaxFrameData(flywheel);
+        SimFrameCapture capture = new SimFrameValueData(flywheel);
         String plannerType = params.getOrDefault("planner", "ratchet");
-        FindmaxPlannerType plannerImpl = FindmaxPlannerType.valueOf(plannerType);
+        OptimizerPlannerTypes plannerImpl = OptimizerPlannerTypes.valueOf(plannerType);
         SimFramePlanner<?,?> planner = plannerImpl.createPlanner(params);
         Record result = planner.analyze(flywheel, capture, stdout, stderr, controller);
         stdout.println("result:\n" + result);

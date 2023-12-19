@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax.planners.ratchet;
+package io.nosqlbench.scenarios.simframe.optimizers.planners.ratchet;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
@@ -27,10 +27,10 @@ import io.nosqlbench.scenarios.simframe.planning.SimFramePlanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FindmaxRatchet extends SimFramePlanner<RatchetConfig, RatchetFrameParams> {
-    private final Logger logger = LogManager.getLogger(FindmaxRatchet.class);
+public class RatchetPlanner extends SimFramePlanner<RatchetConfig, RatchetFrameParams> {
+    private final Logger logger = LogManager.getLogger(RatchetPlanner.class);
 
-    public FindmaxRatchet(NBCommandParams params) {
+    public RatchetPlanner(NBCommandParams params) {
         super(params);
     }
 

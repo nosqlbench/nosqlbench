@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax.survey;
-
-public record SurveyFrameParams(
-    double rate,
-    double step,
-    String description
-
-) {
-}
+/**
+ * The types in this package are used to define observable dependent variables,
+ * specify how they are measured, formulate them into a value function, and provide
+ * a view of these over time as frames are executed.
+ */
+package io.nosqlbench.scenarios.simframe.capture;

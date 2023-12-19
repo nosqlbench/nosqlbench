@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb;
+package io.nosqlbench.scenarios.simframe.optimizers;
 
-/**
- * This class is just a place holder. It holds a place.
- * If only nexus understood aggregator module without src...
- */
-public class PlaceHolder {
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
+import io.nosqlbench.nb.annotations.Service;
+
+@Service(value = NBCommandInfo.class,selector = "optimize")
+public class INFO_optimize extends NBCommandInfo {
+    @Override
+    public Class<? extends NBBaseCommand> getType() {
+        return CMD_optimize.class;
+    }
 }

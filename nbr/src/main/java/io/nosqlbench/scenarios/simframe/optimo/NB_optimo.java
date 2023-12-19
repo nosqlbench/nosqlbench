@@ -28,9 +28,10 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
+import io.nosqlbench.scenarios.simframe.SimFrameUtils;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
-import io.nosqlbench.scenarios.simframe.findmax.NB_findmax;
+import io.nosqlbench.scenarios.simframe.optimizers.CMD_optimize;
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
 import io.nosqlbench.scenarios.simframe.stabilization.StatFunctions;
@@ -63,7 +64,7 @@ import java.util.List;
  * </OL>
  */
 public class NB_optimo extends NBBaseCommand {
-    private final static Logger logger = LogManager.getLogger(NB_findmax.class);
+    private final static Logger logger = LogManager.getLogger(CMD_optimize.class);
 
     public NB_optimo(NBBufferedContainer parentComponent, String phaseName, String targetScenario) {
         super(parentComponent, phaseName, targetScenario);

@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.findmax.planners.ratchet;
+package io.nosqlbench.scenarios.simframe.optimizers.planners.rcurve;
 
-import io.nosqlbench.scenarios.simframe.planning.GenericParamModel;
-
-public record RatchetFrameParams(
+public record RCurveFrameParams(
     double rate,
-    int attempt,
-    double step_size,
+    int step,
     String description
-
 ) {
 }

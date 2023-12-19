@@ -29,7 +29,10 @@ public class NBJavaNativeResolver implements NBInvokableResolver {
     @Override
     public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName) {
         return switch (cmd.getCmdType()) {
-            case CmdType.indirect -> NBJavaCommandLoader.init(cmd.getArgValue("_impl"), parent, phaseName, cmd.getTargetContext());
+            case CmdType.indirect -> {
+                String implName = cmd.takeArgValue("_impl");
+                yield NBJavaCommandLoader.init(implName, parent, phaseName, cmd.getTargetContext());
+            }
             case CmdType.java -> NBJavaCommandLoader.init(cmd.getArgValue("class"), parent, phaseName, cmd.getTargetContext());
             default -> null;
         };
