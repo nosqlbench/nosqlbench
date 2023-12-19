@@ -20,20 +20,26 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.scenarios.simframe.capture.JournalView;
+import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
+import io.nosqlbench.scenarios.simframe.planning.HoldAndSample;
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
 import io.nosqlbench.scenarios.simframe.planning.SimFramePlanner;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-public class RCurvePlanner extends SimFramePlanner<RCurveConfig, RCurveFrameParams> {
-    private final Logger logger = LogManager.getLogger(RCurvePlanner.class);
+import java.util.concurrent.locks.LockSupport;
 
-    public RCurvePlanner(NBCommandParams params) {
-        super(params);
+public class RCurvePlanner extends SimFramePlanner<RCurveConfig, RCurveFrameParams> implements HoldAndSample {
+    private RCurveFrameParams lastFrame;
+
+    public RCurvePlanner(NBBaseComponent parent, NBCommandParams params) {
+        super(parent,params);
+        create().gauge("rcuve_step",() -> lastFrame==null ? 0 : (double)lastFrame.step());
+        create().gauge("rcurve_maxstep",() -> lastFrame==null ? 0 : (double)lastFrame.maxsteps());
+        create().gauge("rcurve_ratio",() -> lastFrame==null ? 0.0 : lastFrame.ratio());
+        create().gauge("rcurve_rate",() -> lastFrame==null ? 0.0 : lastFrame.rate());
     }
-
 
     @Override
     public RCurveConfig getConfig(NBCommandParams params) {
@@ -41,7 +47,7 @@ public class RCurvePlanner extends SimFramePlanner<RCurveConfig, RCurveFramePara
     }
 
     public RCurveFrameParams initialStep() {
-        return new RCurveFrameParams(config.rateForStep(1), 1, "INITIAL");
+        return new RCurveFrameParams(config.rateForStep(1), 1,config.maxstep(),"INITIAL");
     }
 
     /**
@@ -58,8 +64,8 @@ public class RCurvePlanner extends SimFramePlanner<RCurveConfig, RCurveFramePara
     public RCurveFrameParams nextStep(JournalView<RCurveFrameParams> journal) {
         SimFrame<RCurveFrameParams> last = journal.last();
         int nextStep = last.params().step() +1;
-        if (nextStep<=config.steps()) {
-            return new RCurveFrameParams(config.rateForStep(nextStep),nextStep,"Advancing to step " + nextStep);
+        if (nextStep<=config.maxstep()) {
+            return new RCurveFrameParams(config.rateForStep(nextStep),nextStep,config.maxstep(),"Advancing to step " + nextStep);
         } else {
             return null;
         }
@@ -68,5 +74,12 @@ public class RCurvePlanner extends SimFramePlanner<RCurveConfig, RCurveFramePara
     @Override
     public void applyParams(RCurveFrameParams params, Activity flywheel) {
         flywheel.onEvent(ParamChange.of(new CycleRateSpec(params.rate(), 1.1d, SimRateSpec.Verb.restart)));
+    }
+
+    @Override
+    public void holdAndSample(SimFrameCapture capture) {
+        logger.info("holding and sampling for " + config.min_sample_seconds() + " seconds");
+        LockSupport.parkNanos((long)(config.min_sample_seconds()*1_000_000_000));
+        capture.awaitSteadyState();
     }
 }

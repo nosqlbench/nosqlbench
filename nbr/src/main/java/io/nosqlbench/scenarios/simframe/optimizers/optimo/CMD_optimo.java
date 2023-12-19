@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.optimo;
+package io.nosqlbench.scenarios.simframe.optimizers.optimo;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
@@ -63,10 +63,10 @@ import java.util.List;
  *          to contain a reasonably representative character of the overall manifold</LI>
  * </OL>
  */
-public class NB_optimo extends NBBaseCommand {
+public class CMD_optimo extends NBBaseCommand {
     private final static Logger logger = LogManager.getLogger(CMD_optimize.class);
 
-    public NB_optimo(NBBufferedContainer parentComponent, String phaseName, String targetScenario) {
+    public CMD_optimo(NBBufferedContainer parentComponent, String phaseName, String targetScenario) {
         super(parentComponent, phaseName, targetScenario);
     }
 

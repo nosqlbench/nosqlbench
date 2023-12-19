@@ -69,7 +69,7 @@ public class CMD_optimize extends NBBaseCommand {
         SimFrameCapture capture = new SimFrameValueData(flywheel);
         String plannerType = params.getOrDefault("planner", "ratchet");
         OptimizerPlannerTypes plannerImpl = OptimizerPlannerTypes.valueOf(plannerType);
-        SimFramePlanner<?,?> planner = plannerImpl.createPlanner(params);
+        SimFramePlanner<?,?> planner = plannerImpl.createPlanner(this,params);
         Record result = planner.analyze(flywheel, capture, stdout, stderr, controller);
         stdout.println("result:\n" + result);
         return result;

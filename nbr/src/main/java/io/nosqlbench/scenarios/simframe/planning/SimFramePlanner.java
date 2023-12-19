@@ -19,6 +19,8 @@ package io.nosqlbench.scenarios.simframe.planning;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.scenarios.simframe.capture.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,12 +34,13 @@ import java.io.PrintWriter;
  * @param <C>
  *     The configuration type for the planner
  */
-public abstract class SimFramePlanner<C,P extends Record> {
-    private final Logger logger = LogManager.getLogger(SimFramePlanner.class);
+public abstract class SimFramePlanner<C,P extends Record> extends NBBaseComponent {
+    protected final Logger logger = LogManager.getLogger(SimFramePlanner.class);
     protected final C config;
     protected final SimFrameJournal<P> journal;
 
-    public SimFramePlanner(NBCommandParams analyzerParams) {
+    public SimFramePlanner(NBBaseComponent parent, NBCommandParams analyzerParams) {
+        super(parent, NBLabels.forKV());
         this.config = getConfig(analyzerParams);
         this.journal = initJournal();
     }
@@ -69,11 +72,11 @@ public abstract class SimFramePlanner<C,P extends Record> {
             stdout.println(frameParams);
             applyParams(frameParams,flywheel);
             capture.startWindow();
-            capture.awaitSteadyState();
-//            applyParams(frameParams,flywheel);
-//            capture.restartWindow();
-////            controller.waitMillis(500);
-//            capture.awaitSteadyState();
+            if (this instanceof HoldAndSample has) {
+                has.holdAndSample(capture);
+            } else {
+                capture.awaitSteadyState();
+            }
             capture.stopWindow();
             journal.record(frameParams, capture.last());
             stdout.println(capture.last());

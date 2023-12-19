@@ -17,6 +17,7 @@
 package io.nosqlbench.scenarios.simframe.optimizers.planners;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.scenarios.simframe.optimizers.planners.findmax.FindmaxPlanner;
 import io.nosqlbench.scenarios.simframe.optimizers.planners.ratchet.RatchetPlanner;
 import io.nosqlbench.scenarios.simframe.optimizers.planners.rcurve.RCurvePlanner;
@@ -28,11 +29,11 @@ public enum OptimizerPlannerTypes {
     findmax,
     rcurve,
     ;
-    public SimFramePlanner<?,?> createPlanner(NBCommandParams params) {
+    public SimFramePlanner<?,?> createPlanner(NBBaseComponent parent, NBCommandParams params) {
         return switch (this) {
-            case findmax -> new FindmaxPlanner(params);
-            case rcurve -> new RCurvePlanner(params);
-            case ratchet -> new RatchetPlanner(params);
+            case findmax -> new FindmaxPlanner(parent, params);
+            case rcurve -> new RCurvePlanner(parent, params);
+            case ratchet -> new RatchetPlanner(parent, params);
         };
     }
 }

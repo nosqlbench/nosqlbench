@@ -20,6 +20,7 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.scenarios.simframe.capture.JournalView;
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
@@ -30,10 +31,8 @@ import org.apache.logging.log4j.Logger;
 import java.util.Comparator;
 
 public class FindmaxPlanner extends SimFramePlanner<FindmaxConfig, FindmaxFrameParams> {
-    private final Logger logger = LogManager.getLogger(FindmaxPlanner.class);
-
-    public FindmaxPlanner(NBCommandParams analyzerParams) {
-        super(analyzerParams);
+    public FindmaxPlanner(NBBaseComponent parent, NBCommandParams analyzerParams) {
+        super(parent, analyzerParams);
     }
 
     @Override

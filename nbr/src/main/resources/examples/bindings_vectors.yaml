@@ -21,7 +21,7 @@ bindings:
 
 
     # create a simple 2-d vector from a step function over the unit interval
-    # of 10 steps (the maximum number of characters per digit)
+    # of 10 maxstep (the maximum number of characters per digit)
     v2d: DoubleVectors('0-2*2')
 
     # use Stringify() to visualize the value of numeric array types

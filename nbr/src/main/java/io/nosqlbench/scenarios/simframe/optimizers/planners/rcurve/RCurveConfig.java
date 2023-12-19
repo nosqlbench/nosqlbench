@@ -23,20 +23,20 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
  * should be reduced down to the minimum set needed.
  */
 public record RCurveConfig(
-    double min_rate,
-    double max_rate,
-    int steps
+    double maxrate,
+    int maxstep,
+    double min_sample_seconds
 ) {
     public RCurveConfig(NBCommandParams params) {
         this(
-            params.maybeGet("min_rate").map(Double::parseDouble).orElse(0.0),
             params.maybeGet("max_rate").map(Double::parseDouble).orElse(10.0),
-            params.maybeGet("steps").map(Integer::parseInt).orElse(10)
+            params.maybeGet("max_step").map(Integer::parseInt).orElse(10),
+            params.maybeGet("min_sample_seconds").map(Double::parseDouble).orElse(10.0)
         );
     }
 
     double rateForStep(int step) {
-        return min_rate + ((max_rate-min_rate)*((double)step/(double)steps));
+        return ((double)step/(double) maxstep)*maxrate;
     }
 
 }

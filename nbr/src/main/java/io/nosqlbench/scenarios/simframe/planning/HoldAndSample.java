@@ -14,30 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.optimo;
+package io.nosqlbench.scenarios.simframe.planning;
 
+import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-public class OptimoFrameParams{
-
-    OptimoParamModel model;
-    double[] paramValues;
-
-    public OptimoFrameParams(OptimoParamModel model, double[] paramValues) {
-        this.model = model;
-        this.paramValues = paramValues;
-    }
-
-    @Override
-    public String toString() {
-        return model.summarizeParams(paramValues);
-    }
-
-    public double[] paramValues() {
-        return paramValues;
-    }
-
+public interface HoldAndSample {
+    /**
+     * This should block until it is ready to stop sampling.
+     * @param capture The capture data for the current frame.
+     */
+    void holdAndSample(SimFrameCapture capture);
 }

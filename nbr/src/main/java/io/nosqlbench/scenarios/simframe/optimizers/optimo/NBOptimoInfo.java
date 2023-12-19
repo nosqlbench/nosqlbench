@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.optimo;
+package io.nosqlbench.scenarios.simframe.optimizers.optimo;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
@@ -24,6 +24,6 @@ import io.nosqlbench.nb.annotations.Service;
 public class NBOptimoInfo extends NBCommandInfo {
     @Override
     public Class<? extends NBBaseCommand> getType() {
-        return NB_optimo.class;
+        return CMD_optimo.class;
     }
 }

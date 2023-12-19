@@ -19,6 +19,10 @@ package io.nosqlbench.scenarios.simframe.optimizers.planners.rcurve;
 public record RCurveFrameParams(
     double rate,
     int step,
+    int maxsteps,
     String description
 ) {
+    public double ratio() {
+        return ((double)step/(double)maxsteps);
+    }
 }
