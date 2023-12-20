@@ -48,9 +48,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> implements SyncAction, ActivityDefObserver {
     private final static Logger logger = LogManager.getLogger("ACTION");
-
-    private final A activity;
-    private final int slot;
     private final Timer executeTimer;
     private final Histogram triesHistogram;
     private final Timer resultSuccessTimer;
@@ -62,9 +59,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     private final Timer verifierTimer;
 
     public StandardAction(A activity, int slot) {
-        this.activity = activity;
         this.opsequence = activity.getOpSequence();
-        this.slot = slot;
         this.maxTries = activity.getMaxTries();
         bindTimer = activity.getInstrumentation().getOrCreateBindTimer();
         executeTimer = activity.getInstrumentation().getOrCreateExecuteTimer();

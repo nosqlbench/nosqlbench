@@ -41,7 +41,6 @@ public class ComponentActivityInstrumentation implements ActivityInstrumentation
     private NBMetricTimer cyclesServiceTimer;
     private NBMetricTimer cyclesResponseTimer;
     private NBMetricCounter pendingOpsCounter;
-    private NBMetricCounter opTrackerBlockedCounter;
     private NBMetricTimer bindTimer;
     private NBMetricTimer executeTimer;
     private NBMetricTimer resultTimer;
@@ -118,11 +117,6 @@ public class ComponentActivityInstrumentation implements ActivityInstrumentation
     @Override
     public  Counter getOrCreatePendingOpCounter() {
         return pendingOpsCounter;
-    }
-
-    @Override
-    public  Counter getOrCreateOpTrackerBlockedCounter() {
-        return opTrackerBlockedCounter;
     }
 
     @Override

@@ -126,7 +126,6 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
         Binding variables = new Binding();
 
         Map<String, ParsedTemplateString> initBlocks = op.getTemplateMap().takeAsNamedTemplates(VERIFIER_INIT);
-        List<CycleFunction<?>> verifierInitFunctions = new ArrayList<>();
         try {
             initBlocks.forEach((initName, stringTemplate) -> {
                 GroovyCycleFunction<?> initFunction =

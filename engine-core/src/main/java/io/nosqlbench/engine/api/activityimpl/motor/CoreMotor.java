@@ -75,8 +75,6 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
     private int stride = 1;
 
     private OpTracker<D> opTracker;
-    private Counter optrackerBlockCounter;
-
 
     /**
      * Create an ActivityMotor.
@@ -194,7 +192,6 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
             inputTimer = activity.getInstrumentation().getOrCreateInputTimer();
             strideServiceTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
             stridesResponseTimer = activity.getInstrumentation().getStridesResponseTimerOrNull();
-            optrackerBlockCounter = activity.getInstrumentation().getOrCreateOpTrackerBlockedCounter();
 
             strideRateLimiter = activity.getStrideLimiter();
             cycleRateLimiter = activity.getCycleLimiter();
