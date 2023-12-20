@@ -47,7 +47,7 @@ public class RCurvePlanner extends SimFramePlanner<RCurveConfig, RCurveFramePara
     }
 
     public RCurveFrameParams initialStep() {
-        return new RCurveFrameParams(config.rateForStep(1), 1,config.maxstep(),"INITIAL");
+        return new RCurveFrameParams(config.rateForStep(1), 1,config.max_step(),"INITIAL");
     }
 
     /**
@@ -64,8 +64,8 @@ public class RCurvePlanner extends SimFramePlanner<RCurveConfig, RCurveFramePara
     public RCurveFrameParams nextStep(JournalView<RCurveFrameParams> journal) {
         SimFrame<RCurveFrameParams> last = journal.last();
         int nextStep = last.params().step() +1;
-        if (nextStep<=config.maxstep()) {
-            return new RCurveFrameParams(config.rateForStep(nextStep),nextStep,config.maxstep(),"Advancing to step " + nextStep);
+        if (nextStep<=config.max_step()) {
+            return new RCurveFrameParams(config.rateForStep(nextStep),nextStep,config.max_step(),"Advancing to step " + nextStep);
         } else {
             return null;
         }
