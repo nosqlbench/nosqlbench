@@ -71,11 +71,11 @@ public class AtomicInput extends NBBaseComponent implements Input, ActivityDefOb
     }
 
     private double getTotalRecycles() {
-        return 0.0d;
+        return ((double)this.recycles_max.get())-((double)this.recycles_min.get());
     }
 
     private double getTotalCycles() {
-        return 0.0d;
+        return ((double)this.cycles_max.get())-((double)this.cycles_min.get());
     }
 
     @Override
