@@ -16,6 +16,7 @@
 
 package io.nosqlbench.nb.api.components.core;
 
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.tagging.TagFilter;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 
@@ -28,7 +29,7 @@ public class NBBaseComponentMetrics implements NBComponentMetrics {
     private final Lock lock = new ReentrantLock(false);
     private final Map<String, NBMetric> metrics = new ConcurrentHashMap<>();
     @Override
-    public String addComponentMetric(NBMetric metric) {
+    public String addComponentMetric(NBMetric metric, MetricCategory category, String requiredDescription) {
         try {
             lock.lock();
             String openMetricsName = metric.getLabels().linearizeAsMetrics();

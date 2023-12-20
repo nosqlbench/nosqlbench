@@ -77,8 +77,6 @@ public interface ActivityInstrumentation {
      */
     Counter getOrCreatePendingOpCounter();
 
-    Counter getOrCreateOpTrackerBlockedCounter();
-
     /**
      * The bind timer keeps track of how long it takes for NoSQLBench to create an instance
      * of an executable operation, given the cycle. This is usually done by using an

@@ -19,6 +19,7 @@ package io.nosqlbench.engine.core.script;
 import com.codahale.metrics.Histogram;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +33,12 @@ public class MetricsIntegrationTest {
     @Test
     public void testHistogramLogger() {
         NBComponent parent = new TestComponent("metricstest","metricstest","alias","foo","driver","diag","op","noop");
-        final Histogram testhistogram = parent.create().histogram("testhistogram", 3);
+        final Histogram testhistogram = parent.create().histogram(
+            "testhistogram",
+            3,
+            MetricCategory.Verification,
+            "test metric"
+        );
         // TODO: metrics
 //        ActivityMetrics.addHistoLogger("testsession", ".*","testhisto.log","1s");
         testhistogram.update(400);

@@ -17,6 +17,7 @@
 package io.nosqlbench.nb.api.components.core;
 
 import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBBaseMetric;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import org.junit.jupiter.api.Test;
@@ -31,11 +32,23 @@ class NBMetricsQueryTest {
     private final static TestComponent root_c2 = new TestComponent(root,"c2","c2");
     private final static TestComponent root_c3 = new TestComponent(root,"c3","c3");
     private final static NBMetric m1 = new NBBaseMetric("m1","m1");
-    private final static String m1Handle = root.addComponentMetric(m1);
+    private final static String m1Handle = root.addComponentMetric(
+        m1,
+        MetricCategory.Verification,
+        "testing metric"
+    );
     private final static NBMetric m2 = new NBBaseMetric("m2","m2");
-    private final static String m2Handle = root_c2.addComponentMetric(m2);
+    private final static String m2Handle = root_c2.addComponentMetric(
+        m2,
+        MetricCategory.Verification,
+        "testing metric"
+    );
     private final static NBMetric m3 = new NBBaseMetric("m3","m3");
-    private final static String m3Handle = root_c3.addComponentMetric(m3);
+    private final static String m3Handle = root_c3.addComponentMetric(
+        m3,
+        MetricCategory.Verification,
+        "testing metric"
+    );
 
     @Test
     public void testFindInTree() {

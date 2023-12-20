@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.ratelimits.simrate;
 
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.core.NBComponent;
@@ -86,9 +87,25 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
     }
 
     private void initMetrics() {
-        create().gauge("cycles_waittime",() -> (double)getWaitTimeDuration().get(ChronoUnit.NANOS));
-        create().gauge("config_cyclerate", () -> spec.opsPerSec);
-        create().gauge("config_burstrate", () -> spec.burstRatio);
+        create().gauge(
+            "cycles_waittime",
+            () -> (double)getWaitTimeDuration().get(ChronoUnit.NANOS),
+            MetricCategory.Core,
+            "The cumulative scheduling delay which accrues when" +
+                " an activity is not able to execute operations as fast as requested."
+        );
+        create().gauge(
+            "config_cyclerate",
+            () -> spec.opsPerSec,
+            MetricCategory.Config,
+            "The configured cycle rate in ops/s"
+        );
+        create().gauge(
+            "config_burstrate",
+            () -> spec.burstRatio,
+            MetricCategory.Config,
+            "the configured burst rate as a multiplier to the configured cycle rate. ex: 1.05 means 5% faster is allowed."
+        );
     }
 
     public long refill() {

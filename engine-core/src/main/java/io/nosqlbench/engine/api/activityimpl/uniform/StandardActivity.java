@@ -26,6 +26,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.lifecycle.Shutdownable;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.*;
@@ -155,11 +156,23 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         }
 
        create().gauge(
-            "ops_pending", () -> this.getProgressMeter().getSummary().pending());
+            "ops_pending",
+           () -> this.getProgressMeter().getSummary().pending(),
+           MetricCategory.Core,
+           "The current number of operations which have not been dispatched for processing yet."
+       );
        create().gauge(
-            "ops_active", () -> this.getProgressMeter().getSummary().current());
+            "ops_active",
+           () -> this.getProgressMeter().getSummary().current(),
+           MetricCategory.Core,
+           "The current number of operations which have been dispatched for processing, but which have not yet completed."
+       );
        create().gauge(
-            "ops_complete", () -> this.getProgressMeter().getSummary().complete());
+            "ops_complete",
+           () -> this.getProgressMeter().getSummary().complete(),
+           MetricCategory.Core,
+           "The current number of operations which have been completed"
+       );
     }
 
     @Override

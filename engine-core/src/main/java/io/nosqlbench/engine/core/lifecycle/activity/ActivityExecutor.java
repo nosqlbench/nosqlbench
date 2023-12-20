@@ -16,6 +16,7 @@
 package io.nosqlbench.engine.core.lifecycle.activity;
 
 import com.codahale.metrics.Gauge;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
@@ -463,7 +464,12 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
 //    }
 
     private void registerMetrics() {
-        this.activity.create().gauge("threads",() -> (double) this.motors.size());
+        this.activity.create().gauge(
+            "threads",
+            () -> (double) this.motors.size(),
+            MetricCategory.Core,
+            "The current number of threads in activity " + this.description()
+        );
     }
 
 

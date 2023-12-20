@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.metrics;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,14 +39,24 @@ public class ExceptionTimerMetrics {
         this.activityDef = activityDef;
         this.parentLabels = parent;
 
-        this.allerrors=parent.create().timer("errortimers_ALL",4);
+        this.allerrors=parent.create().timer(
+            "errortimers_ALL",
+            4,
+            MetricCategory.Errors,
+            "exception timers for all error types"
+        );
     }
 
     public void update(final String name, final long nanosDuration) {
         Timer timer = this.timers.get(name);
         if (null == timer) synchronized (this.timers) {
             timer = this.timers.computeIfAbsent(
-                name, k -> parentLabels.create().timer("errortimers_" + name, 3)
+                name, k -> parentLabels.create().timer(
+                    "errortimers_" + name,
+                    3,
+                    MetricCategory.Errors,
+                    "exception timers for specific error '" + name + "'"
+                )
             );
         }
         timer.update(nanosDuration, TimeUnit.NANOSECONDS);

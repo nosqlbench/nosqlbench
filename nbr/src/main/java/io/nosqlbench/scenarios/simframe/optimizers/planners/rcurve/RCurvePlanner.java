@@ -22,6 +22,7 @@ import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.scenarios.simframe.capture.JournalView;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.planning.HoldAndSample;
@@ -35,10 +36,29 @@ public class RCurvePlanner extends SimFramePlanner<RCurveConfig, RCurveFramePara
 
     public RCurvePlanner(NBBaseComponent parent, NBCommandParams params) {
         super(parent,params);
-        create().gauge("rcuve_step",() -> lastFrame==null ? 0 : (double)lastFrame.step());
-        create().gauge("rcurve_maxstep",() -> lastFrame==null ? 0 : (double)lastFrame.maxsteps());
-        create().gauge("rcurve_ratio",() -> lastFrame==null ? 0.0 : lastFrame.ratio());
-        create().gauge("rcurve_rate",() -> lastFrame==null ? 0.0 : lastFrame.rate());
+        create().gauge(
+            "rcurve_step",
+            () -> lastFrame==null ? 0 : (double)lastFrame.step(),
+            MetricCategory.Analysis,
+            "The current step which the response curve analyzer is on"
+        );
+        create().gauge(
+            "rcurve_maxstep",
+            () -> lastFrame==null ? 0 : (double)lastFrame.maxsteps(),
+            MetricCategory.Analysis,
+            "The maximum step that the response curve analyzer will run"
+        );
+        create().gauge(
+            "rcurve_ratio",
+            () -> lastFrame==null ? 0.0 : lastFrame.ratio(),
+            MetricCategory.Analysis,
+            "The fractional throughput capacity of the current response curve step"
+        );
+        create().gauge(
+            "rcurve_rate",() -> lastFrame==null ? 0.0 : lastFrame.rate(),
+            MetricCategory.Analysis,
+            "The actual throughput target of the current response curve step"
+        );
     }
 
     @Override

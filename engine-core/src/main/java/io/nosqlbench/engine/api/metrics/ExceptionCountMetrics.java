@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Counter;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,11 @@ public class ExceptionCountMetrics {
 
     public ExceptionCountMetrics(final NBComponent parent) {
         this.parent = parent;
-        this.allerrors=parent.create().counter( "errors_ALL");
+        this.allerrors=parent.create().counter(
+            "errors_ALL",
+            MetricCategory.Errors,
+            "all errors, regardless of type type, for " + parent.description()
+        );
     }
 
     public void count(final String name) {
@@ -41,7 +46,11 @@ public class ExceptionCountMetrics {
         if (null == c) synchronized (this.counters) {
             c = this.counters.computeIfAbsent(
                 name,
-                k -> parent.create().counter("errors_" + name)
+                k -> parent.create().counter(
+                    "errors_" + name,
+                    MetricCategory.Errors,
+                    name + " errors for " + parent.description()
+                )
             );
         }
         c.inc();

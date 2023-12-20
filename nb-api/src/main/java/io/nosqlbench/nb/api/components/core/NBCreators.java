@@ -53,63 +53,64 @@ public class NBCreators {
         this.base = base;
     }
 
-    public NBMetricTimer timer(String metricFamilyName) {
-        return timer(metricFamilyName,3);
+    public NBMetricTimer timer(String metricFamilyName, MetricCategory category, String description) {
+        return timer(metricFamilyName,3, category,description);
     }
-    public NBMetricTimer timer(String metricFamilyName, int hdrdigits) {
+
+    public NBMetricTimer timer(String metricFamilyName, int hdrdigits, MetricCategory category, String description) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
         NBMetricTimer timer = new NBMetricTimer(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits));
-        base.addComponentMetric(timer);
+        base.addComponentMetric(timer, category, description);
         return timer;
     }
 
-    public Meter meter(String metricFamilyName) {
+    public Meter meter(String metricFamilyName, MetricCategory category, String requiredDescription) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
         NBMetricMeter meter = new NBMetricMeter(labels);
-        base.addComponentMetric(meter);
+        base.addComponentMetric(meter, category, requiredDescription);
         return meter;
     }
 
 
-    public NBMetricCounter counter(String metricFamilyName) {
+    public NBMetricCounter counter(String metricFamilyName, MetricCategory category, String requiredDescription) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
         NBMetricCounter counter = new NBMetricCounter(labels);
-        base.addComponentMetric(counter);
+        base.addComponentMetric(counter, category, requiredDescription);
         return counter;
     }
 
 
-    public NBFunctionGauge gauge(String metricFamilyName, Supplier<Double> valueSource) {
+    public NBFunctionGauge gauge(String metricFamilyName, Supplier<Double> valueSource, MetricCategory category, String requiredDescription) {
         NBFunctionGauge gauge = new NBFunctionGauge(base, valueSource, metricFamilyName);
-        base.addComponentMetric(gauge);
+        base.addComponentMetric(gauge, category, requiredDescription);
         return gauge;
     }
 
-    public NBVariableGauge variableGauge(String metricFamilyName, double initialValue, String... additionalLabels) {
+    public NBVariableGauge variableGauge(String metricFamilyName, double initialValue, MetricCategory category, String requiredDescription, String... additionalLabels) {
         NBVariableGauge gauge = new NBVariableGauge(base, metricFamilyName, initialValue, additionalLabels);
-        base.addComponentMetric(gauge);
+        base.addComponentMetric(gauge, category, requiredDescription);
         return gauge;
     }
 
 
-    public DoubleSummaryGauge summaryGauge(String name, String... statspecs) {
-        List<DoubleSummaryGauge.Stat> stats = Arrays.stream(statspecs).map(DoubleSummaryGauge.Stat::valueOf).toList();
+    public DoubleSummaryGauge summaryGauge(String name, List<String> statspecs, MetricCategory category, String requiredDescription) {
+        List<DoubleSummaryGauge.Stat> stats = statspecs.stream().map(DoubleSummaryGauge.Stat::valueOf).toList();
         DoubleSummaryStatistics reservoir = new DoubleSummaryStatistics();
         DoubleSummaryGauge anyGauge = null;
         for (DoubleSummaryGauge.Stat stat : stats) {
             anyGauge = new DoubleSummaryGauge(base.getLabels().and(NBLabels.forKV("name",name,"stat", stat)), stat, reservoir);
-            base.addComponentMetric(anyGauge);
+            base.addComponentMetric(anyGauge, category, requiredDescription);
         }
         return anyGauge;
     }
 
-    public NBMetricHistogram histogram(String metricFamilyName) {
-        return histogram(metricFamilyName,4);
+    public NBMetricHistogram histogram(String metricFamilyName, MetricCategory category, String requiredDescription) {
+        return histogram(metricFamilyName,4, category, requiredDescription);
     }
-    public NBMetricHistogram histogram(String metricFamilyName, int hdrdigits) {
+    public NBMetricHistogram histogram(String metricFamilyName, int hdrdigits, MetricCategory category, String requiredDescription) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
         NBMetricHistogram histogram = new NBMetricHistogram(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits));
-        base.addComponentMetric(histogram);
+        base.addComponentMetric(histogram, category, requiredDescription);
         return histogram;
     }
 

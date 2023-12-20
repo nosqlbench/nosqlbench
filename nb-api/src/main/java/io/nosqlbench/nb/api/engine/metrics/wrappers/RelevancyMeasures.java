@@ -16,6 +16,7 @@
 
 package io.nosqlbench.nb.api.engine.metrics.wrappers;
 
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.engine.metrics.DoubleSummaryGauge;
@@ -58,7 +59,7 @@ public class RelevancyMeasures implements NBLabeledElement {
         for (RelevancyFunction function : f) {
             this.functions.add(function);
             function.prependLabels(this);
-            DoubleSummaryGauge gauge = parent.create().summaryGauge(function.getUniqueName(),DoubleSummaryGauge.Stat.Average.toString());
+            DoubleSummaryGauge gauge = parent.create().summaryGauge(function.getUniqueName(), List.of("average"), MetricCategory.Accuracy, DoubleSummaryGauge.Stat.Average.toString());
             this.gauges.add(gauge);
         }
         return this;

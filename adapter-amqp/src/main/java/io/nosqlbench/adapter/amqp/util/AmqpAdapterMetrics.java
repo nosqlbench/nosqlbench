@@ -20,6 +20,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.amqp.dispensers.AmqpBaseOpDispenser;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
@@ -55,17 +56,45 @@ public class AmqpAdapterMetrics {
 
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
-        messageSizeHistogram = amqpBaseOpDispenser.create().histogram("message_size");
+        messageSizeHistogram = amqpBaseOpDispenser.create().histogram(
+            "amqp_message_size",
+            MetricCategory.Driver,
+            "AMQP message size"
+        );
         // Timer metrics
-        bindTimer = amqpBaseOpDispenser.create().timer("bind");
-        executeTimer = amqpBaseOpDispenser.create().timer("execute");
+        bindTimer = amqpBaseOpDispenser.create().timer(
+            "amqp_bind",
+            MetricCategory.Driver,
+            "AMQP bind timer"
+        );
+        executeTimer = amqpBaseOpDispenser.create().timer(
+            "amqp_execute",
+            MetricCategory.Driver,
+            "AMQP execute timer"
+        );
         // End-to-end metrics
         // Latency
-        e2eMsgProcLatencyHistogram = amqpBaseOpDispenser.create().histogram("e2e_msg_latency");
+        e2eMsgProcLatencyHistogram = amqpBaseOpDispenser.create().histogram(
+            "amqp_e2e_msg_latency",
+            MetricCategory.Driver,
+            "AMQP end-to-end message processing latency"
+        );
         // Error metrics
-        msgErrOutOfSeqCounter = amqpBaseOpDispenser.create().counter("err_msg_oos");
-        msgErrLossCounter = amqpBaseOpDispenser.create().counter("err_msg_loss");
-        msgErrDuplicateCounter = amqpBaseOpDispenser.create().counter("err_msg_dup");
+        msgErrOutOfSeqCounter = amqpBaseOpDispenser.create().counter(
+            "amqp_err_msg_oos",
+            MetricCategory.Driver,
+            "AMQP out-of-sequence error count"
+        );
+        msgErrLossCounter = amqpBaseOpDispenser.create().counter(
+            "amqp_err_msg_loss",
+            MetricCategory.Driver,
+            "AMQP lost message error count"
+        );
+        msgErrDuplicateCounter = amqpBaseOpDispenser.create().counter(
+            "err_msg_dup",
+            MetricCategory.Driver,
+            "AMQP duplicate message count"
+        );
     }
 
     public Timer getBindTimer() { return bindTimer; }
