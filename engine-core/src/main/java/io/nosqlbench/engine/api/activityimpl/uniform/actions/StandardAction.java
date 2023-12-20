@@ -105,7 +105,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                         throw new RuntimeException("The op implementation did not implement any active logic. Implement " +
                             "one of [RunnableOp, CycleOp, or ChainingOp]");
                     }
-
+                    // TODO: break out validation timer from execute
                     try (Timer.Context ignored = verifierTimer.time()) {
                         CycleFunction<Boolean> verifier = dispenser.getVerifier();
                         try {
