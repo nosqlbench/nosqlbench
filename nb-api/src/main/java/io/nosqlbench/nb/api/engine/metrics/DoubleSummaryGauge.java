@@ -16,6 +16,7 @@
 
 package io.nosqlbench.nb.api.engine.metrics;
 
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 
@@ -30,10 +31,22 @@ public class DoubleSummaryGauge implements NBMetricGauge, DoubleConsumer {
     private final NBLabels labels;
     private final Stat stat;
     private final DoubleSummaryStatistics stats;
+    private final String description;
+    private final MetricCategory[] categories;
 
     @Override
     public String typeName() {
         return "gauge";
+    }
+
+    @Override
+    public String getDescription() {
+        return this.description;
+    }
+
+    @Override
+    public MetricCategory[] getCategories() {
+        return this.categories;
     }
 
     public enum Stat {
@@ -44,16 +57,20 @@ public class DoubleSummaryGauge implements NBMetricGauge, DoubleConsumer {
         Sum
     }
 
-    public DoubleSummaryGauge(NBLabels labels, Stat stat, DoubleSummaryStatistics stats) {
+    public DoubleSummaryGauge(NBLabels labels, Stat stat, DoubleSummaryStatistics stats, String description, MetricCategory... categories) {
         this.labels = labels;
         this.stat = stat;
         this.stats = stats;
+        this.description = description;
+        this.categories = categories;
     }
 
-    public DoubleSummaryGauge(NBLabels labels, Stat stat) {
+    public DoubleSummaryGauge(NBLabels labels, Stat stat,String description, MetricCategory... categories) {
         this.labels = labels;
         this.stat = stat;
         this.stats = new DoubleSummaryStatistics();
+        this.description = description;
+        this.categories = categories;
     }
 
     public synchronized void accept(double value) {

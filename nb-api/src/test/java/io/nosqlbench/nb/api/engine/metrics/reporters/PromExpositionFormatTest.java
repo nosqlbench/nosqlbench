@@ -46,7 +46,11 @@ public class PromExpositionFormatTest {
     }
     @Test
     public void testCounterFormat() {
-        Counter counter = new NBMetricCounter(NBLabels.forKV("name","counter_test_2342", "origin","mars"));
+        Counter counter = new NBMetricCounter(
+            NBLabels.forKV("name","counter_test_2342", "origin","mars"),
+            "test counter format",
+            MetricCategory.Verification
+        );
         counter.inc(23423L);
 
         String buffer = PromExpositionFormat.format(nowclock, counter);
@@ -64,7 +68,12 @@ public class PromExpositionFormatTest {
         for (long i = 0; 1000 > i; i++) {
             hdr.update(i * 37L);
         }
-        NBMetricHistogram nbHistogram = new NBMetricHistogram(NBLabels.forKV("name","mynameismud","label3", "value3"), hdr);
+        NBMetricHistogram nbHistogram = new NBMetricHistogram(
+            NBLabels.forKV("name","mynameismud","label3", "value3"),
+            hdr,
+            "test histogram format",
+            MetricCategory.Verification
+            );
         String formatted = PromExpositionFormat.format(nowclock, nbHistogram);
 
         assertThat(formatted).matches(Pattern.compile("""
@@ -95,7 +104,12 @@ public class PromExpositionFormatTest {
     public void testTimerFormat() {
 
         DeltaHdrHistogramReservoir hdr = new DeltaHdrHistogramReservoir(NBLabels.forKV("name","monsieurmarius","label4","value4"),3);
-        NBMetricTimer nbMetricTimer = new NBMetricTimer(NBLabels.forKV("name","monsieurmarius","label4", "value4"), hdr);
+        NBMetricTimer nbMetricTimer = new NBMetricTimer(
+            NBLabels.forKV("name","monsieurmarius","label4", "value4"),
+            hdr,
+            "test timer format",
+            MetricCategory.Verification
+        );
         for (long i = 0; 1000 > i; i++)
             nbMetricTimer.update(i * 37L, TimeUnit.NANOSECONDS);
 
@@ -135,7 +149,11 @@ public class PromExpositionFormatTest {
 
     @Test
     public void testMeterFormat() {
-        NBMetricMeter nbMetricMeter = new NBMetricMeter(NBLabels.forKV("name","eponine","label5", "value5"));
+        NBMetricMeter nbMetricMeter = new NBMetricMeter(
+            NBLabels.forKV("name","eponine","label5", "value5"),
+            "test meter format",
+            MetricCategory.Verification
+        );
         String formatted = PromExpositionFormat.format(nowclock, nbMetricMeter);
 
         assertThat(formatted).matches(Pattern.compile("""
@@ -155,7 +173,12 @@ public class PromExpositionFormatTest {
     @Test
     public void testGaugeFormat() {
         Gauge cosetteGauge = () -> 1500d;
-        NBMetricGauge nbMetricGauge = new NBMetricGaugeWrapper(NBLabels.forKV("name","cosette","label6", "value6"), cosetteGauge);
+        NBMetricGauge nbMetricGauge = new NBMetricGaugeWrapper(
+            NBLabels.forKV("name","cosette","label6", "value6"),
+            cosetteGauge,
+            "test gauge format",
+            MetricCategory.Verification
+        );
         String formatted = PromExpositionFormat.format(nowclock, nbMetricGauge);
 
         assertThat(formatted).matches(Pattern.compile("""
@@ -164,7 +187,12 @@ public class PromExpositionFormatTest {
             """));
 
         Gauge cosetteGauge2 = () -> 2000.0d;
-        NBMetricGauge nbMetricGauge2 = new NBMetricGaugeWrapper(NBLabels.forKV("name","cosette2","label7", "value7"), cosetteGauge2);
+        NBMetricGauge nbMetricGauge2 = new NBMetricGaugeWrapper(
+            NBLabels.forKV("name","cosette2","label7", "value7"),
+            cosetteGauge2,
+            "test gauge format 2",
+            MetricCategory.Verification
+        );
         String formatted2 = PromExpositionFormat.format(nowclock, nbMetricGauge2);
 
         assertThat(formatted2).matches(Pattern.compile("""

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.metrics;
 
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.engine.metrics.ConvenientSnapshot;
 import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
@@ -28,8 +29,15 @@ public class NBMetricHistogramTest {
 
     @Test
     public void testNicerHistogramValues() {
-        NBMetricHistogram nh = new NBMetricHistogram(NBLabels.forKV("name","testhisto"), new DeltaHdrHistogramReservoir(
-                NBLabels.forKV("name", "testhisto"), 4));
+        NBMetricHistogram nh = new NBMetricHistogram(
+            NBLabels.forKV("name","testhisto"),
+            new DeltaHdrHistogramReservoir(
+                NBLabels.forKV("name", "testhisto"),
+                4
+            ),
+            "test nicer histogram values",
+            MetricCategory.Verification
+        );
         for (int i = 1; 100 >= i; i++) {
             nh.update(i);
         }

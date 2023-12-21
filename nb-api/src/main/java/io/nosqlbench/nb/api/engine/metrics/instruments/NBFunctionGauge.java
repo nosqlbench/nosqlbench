@@ -28,14 +28,31 @@ public class NBFunctionGauge implements NBMetricGauge {
     private final Supplier<Double> source;
     private final NBLabeledElement parent;
     private final NBLabels labels;
+    private String description;
+    private MetricCategory[] categories;
 
-    public NBFunctionGauge(NBComponent parent, Supplier<Double> source, String metricFamilyName, Map<String,String> additionalLabels) {
+    public NBFunctionGauge(
+        NBComponent parent,
+        Supplier<Double> source,
+        String metricFamilyName,
+        Map<String,String> additionalLabels,
+        String description,
+        MetricCategory... categories
+    ) {
         this.parent = parent;
         this.labels = NBLabels.forMap(additionalLabels).and("name",metricFamilyName);
         this.source = source;
+        this.description = description;
+        this.categories = categories;
     }
-    public NBFunctionGauge(NBComponent parent, Supplier<Double> source, String metricFamilyName) {
-        this(parent, source, metricFamilyName,Map.of());
+    public NBFunctionGauge(
+        NBComponent parent,
+        Supplier<Double> source,
+        String metricFamilyName,
+        String description,
+        MetricCategory... categories
+    ) {
+        this(parent, source, metricFamilyName,Map.of(), description, categories);
     }
     @Override
     public Double getValue() {
@@ -55,6 +72,16 @@ public class NBFunctionGauge implements NBMetricGauge {
     @Override
     public String typeName() {
         return "gauge";
+    }
+
+    @Override
+    public String getDescription() {
+        return this.description;
+    }
+
+    @Override
+    public MetricCategory[] getCategories() {
+        return this.categories;
     }
 }
 

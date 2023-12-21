@@ -20,9 +20,13 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 
 public class NBBaseMetric implements NBMetric {
     private final NBLabels labels;
+    private String description;
+    private MetricCategory[] categories;
 
-    public NBBaseMetric(String... labels) {
-        this.labels = NBLabels.forKV((Object[]) labels);
+    public NBBaseMetric(NBLabels labels, String description, MetricCategory... categories) {
+        this.labels = labels;
+        this.description = description;
+        this.categories = categories;
     }
     @Override
     public NBLabels getLabels() {
@@ -32,5 +36,15 @@ public class NBBaseMetric implements NBMetric {
     @Override
     public String typeName() {
         return "basetype";
+    }
+
+    @Override
+    public String getDescription() {
+        return this.description;
+    }
+
+    @Override
+    public MetricCategory[] getCategories() {
+        return this.categories;
     }
 }

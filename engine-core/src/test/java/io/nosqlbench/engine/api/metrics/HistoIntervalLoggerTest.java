@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.metrics;
 
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.nb.api.engine.metrics.HistoIntervalLogger;
@@ -47,7 +48,14 @@ public class HistoIntervalLoggerTest {
         final int significantDigits = 4;
 
         NBMetricHistogram NBHistogram = new NBMetricHistogram(
-                NBLabels.forKV("name", "histo1"), new DeltaHdrHistogramReservoir(NBLabels.forKV("name", "histo1"), significantDigits));
+            NBLabels.forKV("name", "histo1"),
+            new DeltaHdrHistogramReservoir(
+                NBLabels.forKV("name", "histo1"),
+                significantDigits
+            ),
+            "test basic logger",
+            MetricCategory.Verification
+        );
 
         hil.onHistogramAdded("histo1", NBHistogram);
 
