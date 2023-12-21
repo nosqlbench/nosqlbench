@@ -41,6 +41,9 @@ public class StatFunctions {
      */
     public static double sigmoidE4LowPass(double input, double highcut) {
         double v = 1.0d/(1.0d + Math.pow(Math.E, (10000.0d * (input - (highcut + 0.001d)))));
+        // If this value is too small to be interpreted as a double it gets converted to
+        // zero, which is not what we want. So we use the smallest possible double value
+        if (v == 0) v = Double.MIN_VALUE;
         return v;
     }
 
