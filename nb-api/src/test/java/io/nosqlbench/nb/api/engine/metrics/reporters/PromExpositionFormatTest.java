@@ -55,6 +55,8 @@ public class PromExpositionFormatTest {
 
         String buffer = PromExpositionFormat.format(nowclock, counter);
         assertThat(buffer).matches(Pattern.compile("""
+            # CATEGORIES: Verification
+            # DESCRIPTION: test counter format
             # TYPE counter_test_2342_total counter
             counter_test_2342_total\\{origin="mars"} \\d+ \\d+
             """));
@@ -77,6 +79,8 @@ public class PromExpositionFormatTest {
         String formatted = PromExpositionFormat.format(nowclock, nbHistogram);
 
         assertThat(formatted).matches(Pattern.compile("""
+            # CATEGORIES: Verification
+            # DESCRIPTION: test histogram format
             # TYPE mynameismud_total counter
             mynameismud_total\\{label3="value3"} 0 \\d+
             # TYPE mynameismud histogram
@@ -116,6 +120,8 @@ public class PromExpositionFormatTest {
         String formatted = PromExpositionFormat.format(nowclock, nbMetricTimer);
 
         assertThat(formatted).matches(Pattern.compile("""
+            # CATEGORIES: Verification
+            # DESCRIPTION: test timer format
             # TYPE monsieurmarius_total counter
             monsieurmarius_total\\{label4="value4"} 1000 \\d+
             # TYPE monsieurmarius histogram
@@ -157,6 +163,8 @@ public class PromExpositionFormatTest {
         String formatted = PromExpositionFormat.format(nowclock, nbMetricMeter);
 
         assertThat(formatted).matches(Pattern.compile("""
+            # CATEGORIES: Verification
+            # DESCRIPTION: test meter format
             # TYPE eponine_total counter
             eponine_total\\{label5="value5"} 0 \\d+
             # TYPE eponine_1mRate gauge
@@ -182,6 +190,8 @@ public class PromExpositionFormatTest {
         String formatted = PromExpositionFormat.format(nowclock, nbMetricGauge);
 
         assertThat(formatted).matches(Pattern.compile("""
+            # CATEGORIES: Verification
+            # DESCRIPTION: test gauge format
             # TYPE cosette gauge
             cosette\\{label6="value6"} 1500.0
             """));
@@ -196,6 +206,8 @@ public class PromExpositionFormatTest {
         String formatted2 = PromExpositionFormat.format(nowclock, nbMetricGauge2);
 
         assertThat(formatted2).matches(Pattern.compile("""
+            # CATEGORIES: Verification
+            # DESCRIPTION: test gauge format 2
             # TYPE cosette2 gauge
             cosette2\\{label7="value7"} 2000.0
             """));
