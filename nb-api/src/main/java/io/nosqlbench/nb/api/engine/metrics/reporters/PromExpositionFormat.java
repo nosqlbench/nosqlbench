@@ -17,6 +17,8 @@
 package io.nosqlbench.nb.api.engine.metrics.reporters;
 
 import com.codahale.metrics.*;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
@@ -26,7 +28,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Format NBMetrics according to the prometheus exposition format.
@@ -58,6 +62,16 @@ public class PromExpositionFormat {
 
         for (final Object metric : metrics) {
             NBLabels labels = null;
+
+            if (metric instanceof NBMetric nbm) {
+                MetricCategory[] categories = nbm.getCategories();
+                buffer.append("# CATEGORIES: ")
+                    .append(Arrays.stream(categories).map(MetricCategory::name).collect(Collectors.joining(", ")))
+                    .append("\n");
+                String description = nbm.getDescription();
+                buffer.append("# DESCRIPTION: ").append(description).append("\n");
+
+            }
 
             if (metric instanceof final NBLabeledElement labeled) labels = labeled.getLabels();
             else throw new RuntimeException(

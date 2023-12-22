@@ -91,7 +91,7 @@ public class ComponentActivityInstrumentation implements ActivityInstrumentation
                 "cycles" + ComponentActivityInstrumentation.RESPONSE_TIME,
                 hdrdigits,
                 MetricCategory.Core,
-                "response timer for a cycle, including all of bind, execut, result and result_success;" +
+                "response timer for a cycle, including all of bind, execute, result and result_success;" +
                     " response timers include scheduling delays which occur when an activity falls behind its target rate"
             );
         }
