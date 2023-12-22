@@ -54,7 +54,7 @@ public class S4JAdapterMetrics  {
         this.executeTimer = s4jBaseOpDispenser.create().timer(
             "s4j_execute",
             MetricCategory.Driver,
-            "S4j execut timer"
+            "S4j execute timer"
         );
     }
 
