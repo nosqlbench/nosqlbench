@@ -83,7 +83,7 @@ public class CMD_optimo extends NBBaseCommand {
 
         OptimoSearchSettings optimoSearchParams = new OptimoSearchSettings(params, model);
 
-        model.add("rate", 20, optimoSearchParams.startRate(), optimoSearchParams.startRate()*4,
+        model.add("rate", 10, optimoSearchParams.startRate(), optimoSearchParams.startRate()*4,
             rate -> flywheel.onEvent(ParamChange.of(new CycleRateSpec(rate, 1.1d, SimRateSpec.Verb.restart)))
         );
         model.add("threads", 10, 50, 2000,
