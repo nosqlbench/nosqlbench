@@ -64,7 +64,16 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
             labelContext.getLabels()
                 .and("session", sessionName)
         );
+
         new NBSessionSafetyMetrics(this);
+
+        create().gauge(
+            "session_time",
+            () -> (double)System.nanoTime(),
+            MetricCategory.Core,
+            "session time in nanoseconds"
+        );
+
         bufferOrphanedMetrics = true;
     }
 
