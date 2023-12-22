@@ -417,7 +417,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         Map.of(
             "summary", options.getReportSummaryTo(),
             "logsdir", options.getLogsDirectory().toString(),
-            "progress", options.getProgressSpec()
+            "progress", options.getProgressSpec(),
+            "prompush_cache", "prompush_cache.txt"
         ).forEach(session::setComponentProp);
 
         options.wantsReportCsvTo().ifPresent(cfg -> {

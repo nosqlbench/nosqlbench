@@ -22,6 +22,11 @@ public enum MetricCategory {
      */
     Core,
     /**
+     * Some metrics are provided only to inform the user of relative or absolute progress,
+     * in terms of cycles remaining or similar
+     */
+    Progress,
+    /**
      * Metrics which mirror configuration data, either static or dynamic during the lifetime
      * of an activity, session, or container. These are shared because they may need to be known
      * for further understanding or evaluation. For example, the target rate puts the achieved
