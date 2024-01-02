@@ -23,15 +23,13 @@ import java.net.URLStreamHandler;
 public class S3UrlStreamHandler extends URLStreamHandler {
 
     private final S3ClientCache clientCache;
-    private final String protocol;
 
-    public S3UrlStreamHandler(S3ClientCache clientCache, String protocol) {
+    public S3UrlStreamHandler(S3ClientCache clientCache) {
         this.clientCache = clientCache;
-        this.protocol = protocol;
     }
 
     @Override
-    protected S3UrlConnection openConnection(URL url) throws IOException {
+    protected S3UrlConnection openConnection(URL url) {
         return new S3UrlConnection(clientCache, url);
     }
 }

@@ -34,7 +34,7 @@ public class S3UrlConnection extends URLConnection {
     }
 
     @Override
-    public InputStream getInputStream() throws IOException {
+    public InputStream getInputStream() {
         S3UrlFields fields = new S3UrlFields(url);
         AmazonS3 s3 = clientCache.get(fields);
         S3Object object = s3.getObject(fields.bucket, fields.key);

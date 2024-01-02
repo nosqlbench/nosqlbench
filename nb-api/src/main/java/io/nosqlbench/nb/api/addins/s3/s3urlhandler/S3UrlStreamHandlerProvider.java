@@ -30,7 +30,7 @@ public class S3UrlStreamHandlerProvider extends URLStreamHandlerProvider {
     @Override
     public URLStreamHandler createURLStreamHandler(String protocol) {
         if ("s3".equals(protocol)) {
-            return new S3UrlStreamHandler(clientCache, protocol);
+            return new S3UrlStreamHandler(clientCache);
         }
         return null;
     }
