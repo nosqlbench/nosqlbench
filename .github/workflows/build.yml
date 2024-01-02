@@ -14,24 +14,20 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: checkout nosqlbench
-        with:
-          node-version: '16'
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         name: setup java
         with:
-          node-version: '16'
-          java-version: '21'
-          java-package: jdk
           architecture: x64
           distribution: 'oracle'
+          java-package: jdk
+          java-version: '21'
 
       - name: Cache Maven packages
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
-          node-version: '16'
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
@@ -71,9 +67,8 @@ jobs:
 
       - name: upload docs artifact
         if: success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          node-version: '16'
           name: exported-docs
           path: exported_docs.zip
 
@@ -90,9 +85,8 @@ jobs:
         run: git config --global user.name "${{ secrets.NBDROID_NAME }}"
 
       - name: download exported_docs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          node-version: '16'
           name: exported-docs
 
       - run: ls -la
