@@ -23,12 +23,14 @@ package io.nosqlbench.nb.api.annotations;
 public interface Annotator {
 
     /**
-     * Submit an annotation to some type of annotation store, logging or eventing mechanism.
+     * <P>Submit an annotation to some type of annotation store, logging or eventing mechanism.
      * Implementations of this service are responsible for mapping the scenario and labels
      * into appropriate key data, and the details in to a native payload. The least surprising
      * and most obvious mapping should be used in each case.
+     *</P>
      *
-     * For details on constructing a useful annotation to submit to this service, see {@link Annotation#newBuilder()}
+     * <P>For details on constructing a useful annotation to submit to this service, see {@link Annotation#newBuilder()}
+     * </P>
      */
     void recordAnnotation(Annotation annotation);
 

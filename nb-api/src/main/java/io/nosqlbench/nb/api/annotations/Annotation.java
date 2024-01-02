@@ -56,7 +56,7 @@ public interface Annotation extends NBLabeledElement {
      * Annotations must be associated with a processing layer in NoSQLBench.
      * For more details on layers, see {@link Layer}
      *
-     * @return
+     * @return the {@link Layer} to which the annotations applies
      */
     Layer getLayer();
 
