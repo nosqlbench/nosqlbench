@@ -21,6 +21,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 
 import java.util.concurrent.Future;
 
@@ -32,6 +33,16 @@ import java.util.concurrent.Future;
  *
  */
 public interface ActivityInstrumentation {
+
+    NBMetricGauge getOrCreateErrorsTotal();
+
+    NBMetricGauge getOrCreateErrorRate1m();
+
+    NBMetricGauge getOrCreateErrorRate5m();
+
+    NBMetricGauge getOrCreateErrorRate15m();
+
+    NBMetricGauge getOrCreateErrorRateTotal();
 
     /**
      * The input timer measures how long it takes to get the cycle value to be used for
