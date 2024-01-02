@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityapi.ratelimits;
+package io.nosqlbench.engine.api.activityapi.simrate;
 
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRate;
-import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

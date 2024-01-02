@@ -17,8 +17,8 @@
 package io.nosqlbench.scenarios.simframe.optimizers.planners.rcurve;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
-import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
+import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
+import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityapi.ratelimits.simrate;
+package io.nosqlbench.engine.api.activityapi.simrate;
 
 import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 

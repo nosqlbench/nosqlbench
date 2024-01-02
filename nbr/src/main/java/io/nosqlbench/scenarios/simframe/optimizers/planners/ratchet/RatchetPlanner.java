@@ -17,16 +17,14 @@
 package io.nosqlbench.scenarios.simframe.optimizers.planners.ratchet;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.CycleRateSpec;
-import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
+import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
+import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.scenarios.simframe.capture.JournalView;
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
 import io.nosqlbench.scenarios.simframe.planning.SimFramePlanner;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class RatchetPlanner extends SimFramePlanner<RatchetConfig, RatchetFrameParams> {
     public RatchetPlanner(NBBaseComponent parent, NBCommandParams params) {

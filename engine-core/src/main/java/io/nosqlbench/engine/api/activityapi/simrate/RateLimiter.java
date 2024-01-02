@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.api.activityapi.ratelimits;
+package io.nosqlbench.engine.api.activityapi.simrate;
 
-import io.nosqlbench.engine.api.activityapi.ratelimits.simrate.SimRateSpec;
+import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
 
 import java.time.Duration;
 

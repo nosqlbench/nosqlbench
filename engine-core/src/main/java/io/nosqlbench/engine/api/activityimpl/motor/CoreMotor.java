@@ -15,20 +15,16 @@
  */
 package io.nosqlbench.engine.api.activityimpl.motor;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityapi.core.*;
-import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
-import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.op_output.StrideOutputConsumer;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityimpl.MotorState;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.OpTracker;
-import io.nosqlbench.engine.api.activityapi.core.ops.fluent.OpTrackerImpl;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.output.Output;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
+import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
