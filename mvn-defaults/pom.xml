@@ -641,7 +641,6 @@
                     <release>21</release>
                     <doctitle>${javadoc.name}</doctitle>
                     <windowtitle>${javadoc.name}</windowtitle>
-                    <isOffline>false</isOffline>
                     <detectJavaApiLink>false</detectJavaApiLink>
                     <detectLinks>false</detectLinks>
                     <detectOfflineLinks>false</detectOfflineLinks>
