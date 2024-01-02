@@ -69,7 +69,7 @@ public class SSLKsFactory implements NBMapConfigurable {
     };
 
     /**
-     * Consider: https://gist.github.com/artem-smotrakov/bd14e4bde4d7238f7e5ab12c697a86a3
+     * Consider: <a href="https://gist.github.com/artem-smotrakov/bd14e4bde4d7238f7e5ab12c697a86a3">...</a>
      */
     private SSLKsFactory() {
     }
