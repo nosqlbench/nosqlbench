@@ -97,8 +97,18 @@ public class Cqld4Space implements AutoCloseable {
 //        int port = cfg.getOptional(int.class, "port").orElse(9042);
 
         Optional<String> scb = cfg.getOptional(String.class, "secureconnectbundle", "scb");
-        scb.flatMap(s -> NBIO.all().pathname(s).first().map(Content::getInputStream))
-            .map(builder::withCloudSecureConnectBundle);
+        
+        if (scb.isPresent()) {
+            Optional<InputStream> stream =
+                scb.flatMap(s -> NBIO.all().pathname(s).first().map(Content::getInputStream));
+            if (stream.isPresent()) {
+                stream.map(builder::withCloudSecureConnectBundle);
+            } else {
+                String error = String.format("Unable to load Secure Connect Bundle from path %s", scb.get());
+                logger.error(error);
+                throw new RuntimeException(error);
+            }
+        }
 
         Optional<List<InetSocketAddress>> contactPointsOption = cfg
             .getOptional("host", "hosts")
