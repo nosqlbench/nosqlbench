@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioPreprocessor;
+import io.nosqlbench.engine.cli.atfiles.NBAtFile;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.PathCanonicalizer;
 import io.nosqlbench.engine.core.lifecycle.session.CmdParser;
@@ -293,6 +294,8 @@ public class NBCLIOptions {
     private LinkedList<String> parseGlobalOptions(final String[] args) {
 
         LinkedList<String> arglist = new LinkedList<>(Arrays.asList(args));
+        NBAtFile.includeAt(arglist);
+
         if (null == arglist.peekFirst()) {
             this.wantsBasicHelp = true;
             return arglist;
