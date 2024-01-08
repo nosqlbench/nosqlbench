@@ -18,6 +18,9 @@ package io.nosqlbench.engine.cli.atfiles;
 
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
+import io.nosqlbench.nb.api.nbio.NBPathsAPI;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
@@ -26,6 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NBAtFile {
+    private final static Logger logger = LogManager.getLogger(NBAtFile.class);
 
     /**
      * This will take a command line in raw form, which may include some arguments
@@ -77,12 +81,25 @@ public class NBAtFile {
     public static LinkedList<String> includeAt(String spec) {
         Matcher matcher = includePattern.matcher(spec);
         if (matcher.matches()) {
-            String filepath = matcher.group("filepath");
+            String filepathSpec = matcher.group("filepath");
             String dataPathSpec = matcher.group("datapath");
             String formatSpec = matcher.group("formatter");
             String[] datapath = (dataPathSpec!=null && !dataPathSpec.isBlank()) ? dataPathSpec.split("(/|\\.)") : new String[] {};
-            Content<?> argsfrom = NBIO.local().pathname(filepath).one();
-            String argsdata = argsfrom.asString();
+
+            String[] parts = filepathSpec.split("\\.",2);
+            if (parts.length==2 && !parts[1].toLowerCase().matches("yaml")) {
+                throw new RuntimeException("Only the yaml format and extension is supported for at-files." +
+                    " You specified " + parts[1]);
+            }
+
+            NBPathsAPI.GetExtensions wantsExtension = NBIO.local().pathname(filepathSpec);
+            String extension = (!filepathSpec.toLowerCase().endsWith(".yaml")) ? "yaml" : "";
+            if (!extension.isEmpty()) {
+                logger.debug("adding extension 'yaml' to at-file path '" + filepathSpec + "'");
+                wantsExtension.extensionSet("yaml");
+            }
+            Content<?> argsContent = wantsExtension.one();
+            String argsdata = argsContent.asString();
             Fmt fmt = (formatSpec!=null) ? Fmt.valueOfSymbol(formatSpec) : Fmt.Default;
 
             Object scopeOfInclude = null;
@@ -95,7 +112,7 @@ public class NBAtFile {
 
             if (datapath.length>0) {
                 if (scopeOfInclude instanceof Map<?,?> mapdata) {
-                    scopeOfInclude = traverseData(filepath,(Map<String,Object>) mapdata,datapath);
+                    scopeOfInclude = traverseData(filepathSpec,(Map<String,Object>) mapdata,datapath);
                 } else {
                     throw new RuntimeException("You can not traverse a non-map object type with spec '" + spec + "'");
                 }
