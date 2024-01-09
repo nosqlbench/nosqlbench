@@ -30,6 +30,7 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.util.List;
+import java.util.Map;
 
 @Disabled
 @Execution(ExecutionMode.SAME_THREAD)
@@ -44,7 +45,7 @@ public class ScenarioExampleTests {
         NBCLIOptions parser = new NBCLIOptions(params);
         List<Cmd> commands = parser.getCommands();
         var myroot = new TestComponent("test_"+params[0]);
-        NBSession session = new NBSession(myroot,"session_"+params[0]);
+        NBSession session = new NBSession(myroot,"session_"+params[0], Map.of());
         System.out.println("=".repeat(29) + " Running scenario test for example scenario: " + params[0]);
         ExecutionResult result = session.apply(commands);
         return result;
