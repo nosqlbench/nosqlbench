@@ -21,7 +21,6 @@ import io.nosqlbench.nb.api.components.events.ComponentOutOfScope;
 import io.nosqlbench.nb.api.components.events.DownEvent;
 import io.nosqlbench.nb.api.components.events.NBEvent;
 import io.nosqlbench.nb.api.components.events.UpEvent;
-import io.nosqlbench.nb.api.config.params.ElementData;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
@@ -30,30 +29,37 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent, NBTokenWords {
+public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent, NBTokenWords, NBComponentTimeline {
     private final static Logger logger = LogManager.getLogger("RUNTIME");
     protected final NBComponent parent;
     protected final NBLabels labels;
     private final List<NBComponent> children = new ArrayList<>();
-    private long endAt=0L;
-    private final long startAt;
     protected NBMetricsBuffer metricsBuffer = new NBMetricsBuffer();
     protected boolean bufferOrphanedMetrics = false;
     private ConcurrentHashMap<String,String> props = new ConcurrentHashMap<>();
+    protected Exception error;
+    protected long started_ns, teardown_ns, closed_ns, errored_ns;
+    protected NBInvokableState state = NBInvokableState.STARTING;
 
     public NBBaseComponent(NBComponent parentComponent) {
         this(parentComponent, NBLabels.forKV());
     }
 
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
+        this.started_ns = System.nanoTime();
         this.labels = componentSpecificLabelsOnly;
-        this.startAt = System.nanoTime();
         if (parentComponent != null) {
             parent = parentComponent;
             parent.attachChild(this);
         } else {
             parent = null;
         }
+        state = (state==NBInvokableState.ERRORED) ? state : NBInvokableState.RUNNING;
+    }
+
+    public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly, Map<String, String> props) {
+        this(parentComponent,componentSpecificLabelsOnly);
+        props.forEach(this::setComponentProp);
     }
 
     @Override
@@ -117,30 +123,40 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
 
     @Override
     public final void close() throws RuntimeException {
+        state = (state==NBInvokableState.ERRORED) ? state : NBInvokableState.CLOSING;
+        closed_ns = System.nanoTime();
+
         try {
             logger.debug("cleaning up");
             ArrayList<NBComponent> children = new ArrayList<>(getChildren());
             for (NBComponent child : children) {
                 child.close();
             }
-            teardown();
         } catch (Exception e) {
-            logger.error(e);
+            onError(e);
         } finally {
             logger.debug("detaching " + description());
             if (parent != null) {
                 parent.detachChild(this);
             }
+            teardown();
         }
     }
 
+    public void onError(Exception e) {
+        RuntimeException wrapped = new RuntimeException("While in state " + this.state + ", an error occured: " + e, e);
+        logger.error(wrapped);
+        this.error = wrapped;
+        state=NBInvokableState.ERRORED;
+    }
     /**
      * Override this method in your component implementations when you need to do something
      * to close out your component.
      */
     protected void teardown() {
         logger.debug("tearing down " + description());
-        this.endAt = System.nanoTime();
+        this.teardown_ns = System.nanoTime();
+        this.state=(state==NBInvokableState.ERRORED) ? state : NBInvokableState.STOPPED;
     }
 
     @Override
@@ -229,10 +245,10 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
 
     @Override
     public long getNanosSinceStart() {
-        if (endAt==0) {
-            return System.nanoTime()-startAt;
+        if (teardown_ns ==0) {
+            return System.nanoTime()- started_ns;
         } else {
-            return endAt-startAt;
+            return teardown_ns - started_ns;
         }
     }
 
@@ -254,5 +270,30 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         }
         props.put(name, value);
         return this;
+    }
+
+    @Override
+    public NBInvokableState getComponentState() {
+        return state;
+    }
+
+    @Override
+    public long nanosof_start() {
+        return this.started_ns;
+    }
+
+    @Override
+    public long nanosof_close() {
+        return this.closed_ns;
+    }
+
+    @Override
+    public long nanosof_teardown() {
+        return this.teardown_ns;
+    }
+
+    @Override
+    public long nanosof_error() {
+        return this.errored_ns;
     }
 }

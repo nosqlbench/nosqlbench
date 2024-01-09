@@ -62,6 +62,8 @@ public class NBCLIOptions {
     private static final String LABELSPEC = "--labelspec";
     private static final String ANNOTATORS_CONFIG = "--annotators";
 
+    private static final String HEARTBEAT_MILLIS = "--heartbeat-millis";
+
     // Enabled if the TERM env var is provided
     private static final String ANSI = "--ansi";
 
@@ -201,6 +203,7 @@ public class NBCLIOptions {
     private String annotateLabelSpec = "";
     private String metricsLabelSpec = "";
     private String wantsToCatResource ="";
+    private long heartbeatIntervalMs;
 
     public boolean wantsLoggedMetrics() {
         return this.wantsConsoleMetrics;
@@ -639,6 +642,11 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     this.wantsToCatResource = this.readWordOrThrow(arglist, "workload to cat");
                     break;
+                case HEARTBEAT_MILLIS:
+                    arglist.removeFirst();
+                    this.heartbeatIntervalMs =
+                            Long.parseLong(this.readWordOrThrow(arglist, "heartbeat interval in ms"));
+                    break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
             }
@@ -734,6 +742,10 @@ public class NBCLIOptions {
 
     public boolean wantsActivityTypes() {
         return this.wantsActivityTypes;
+    }
+
+    public long wantsHeartbeatIntervalMs() {
+        return this.heartbeatIntervalMs;
     }
 
     public boolean wantsTopicalHelp() {

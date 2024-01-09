@@ -391,7 +391,7 @@ public class LoggerConfig extends ConfigurationFactory {
 
     private void attachAuxLogger(ConfigurationBuilder<BuiltConfiguration> builder, String loggerName, Level fileLevel) {
         String appenderName = loggerName+(("_APPENDER").toUpperCase());
-        String fileName = loggerDir.resolve(getFileBase() + "_"+loggerName+".log").toString().toLowerCase();
+        String fileName = loggerDir.resolve(getFileBase() + "_"+loggerName.toLowerCase()+".log").toString();
         var appender = builder
             .newAppender(appenderName, FileAppender.PLUGIN_NAME)
             .addAttribute("append", false)

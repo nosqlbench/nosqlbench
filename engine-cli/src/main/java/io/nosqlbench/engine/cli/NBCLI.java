@@ -95,7 +95,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
      * for scenario encapsulation and concurrent testing.
      *
      * @param args
-     *     Command Line Args
+     *         Command Line Args
      */
     public static void main(final String[] args) {
         try {
@@ -158,17 +158,17 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         this.sessionName = SessionNamer.format(globalOptions.getSessionName(), sessionTime).replaceAll("SESSIONCODE", sessionCode);
 
         NBCLI.loggerConfig
-            .setSessionName(sessionName)
-            .setConsoleLevel(globalOptions.getConsoleLogLevel())
-            .setConsolePattern(globalOptions.getConsoleLoggingPattern())
-            .setLogfileLevel(globalOptions.getScenarioLogLevel())
-            .setLogfilePattern(globalOptions.getLogfileLoggingPattern())
-            .setLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
-            .setMaxLogs(globalOptions.getLogsMax())
-            .setLogsDirectory(globalOptions.getLogsDirectory())
-            .setAnsiEnabled(globalOptions.isEnableAnsi())
-            .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
-            .activate();
+                .setSessionName(sessionName)
+                .setConsoleLevel(globalOptions.getConsoleLogLevel())
+                .setConsolePattern(globalOptions.getConsoleLoggingPattern())
+                .setLogfileLevel(globalOptions.getScenarioLogLevel())
+                .setLogfilePattern(globalOptions.getLogfileLoggingPattern())
+                .setLoggerLevelOverrides(globalOptions.getLogLevelOverrides())
+                .setMaxLogs(globalOptions.getLogsMax())
+                .setLogsDirectory(globalOptions.getLogsDirectory())
+                .setAnsiEnabled(globalOptions.isEnableAnsi())
+                .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
+                .activate();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
 
         NBCLI.logger = LogManager.getLogger("NBCLI");
@@ -208,8 +208,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         if (annotatorsConfig == null || annotatorsConfig.isBlank()) {
             List<Map<String, String>> annotatorsConfigs = new ArrayList<>();
             annotatorsConfigs.add(Map.of(
-                "type", "log",
-                "level", "info"
+                    "type", "log",
+                    "level", "info"
             ));
 
             Gson gson = new GsonBuilder().create();
@@ -277,18 +277,18 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             NBCLI.logger.debug(() -> "user requests to cat " + resourceToCat);
 
             Optional<Content<?>> tocat = NBIO.classpath()
-                .searchPrefixes("activities")
-                .searchPrefixes(options.wantsIncludes())
-                .pathname(resourceToCat).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
+                    .searchPrefixes("activities")
+                    .searchPrefixes(options.wantsIncludes())
+                    .pathname(resourceToCat).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
 
             if (tocat.isEmpty()) tocat = NBIO.classpath()
-                .searchPrefixes().searchPrefixes(options.wantsIncludes())
-                .searchPrefixes(options.wantsIncludes())
-                .pathname(resourceToCat).first();
+                    .searchPrefixes().searchPrefixes(options.wantsIncludes())
+                    .searchPrefixes(options.wantsIncludes())
+                    .pathname(resourceToCat).first();
 
             final Content<?> data = tocat.orElseThrow(
-                () -> new BasicError("Unable to find " + resourceToCat +
-                    " in classpath to cat out"));
+                    () -> new BasicError("Unable to find " + resourceToCat +
+                            " in classpath to cat out"));
 
             System.out.println(data.get());
             NBCLI.logger.info(() -> "Dumped internal resource '" + data.asPath() + "' to stdout");
@@ -300,19 +300,19 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             NBCLI.logger.debug(() -> "user requests to copy out " + resourceToCopy);
 
             Optional<Content<?>> tocopy = NBIO.classpath()
-                .searchPrefixes("activities")
-                .searchPrefixes(options.wantsIncludes())
-                .pathname(resourceToCopy).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
+                    .searchPrefixes("activities")
+                    .searchPrefixes(options.wantsIncludes())
+                    .pathname(resourceToCopy).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
 
             if (tocopy.isEmpty()) tocopy = NBIO.classpath()
-                .searchPrefixes().searchPrefixes(options.wantsIncludes())
-                .searchPrefixes(options.wantsIncludes())
-                .pathname(resourceToCopy).first();
+                    .searchPrefixes().searchPrefixes(options.wantsIncludes())
+                    .searchPrefixes(options.wantsIncludes())
+                    .pathname(resourceToCopy).first();
 
             final Content<?> data = tocopy.orElseThrow(
-                () -> new BasicError(
-                    "Unable to find " + resourceToCopy +
-                        " in classpath to copy out")
+                    () -> new BasicError(
+                            "Unable to find " + resourceToCopy +
+                                    " in classpath to copy out")
             );
 
             final Path writeTo = Path.of(data.asPath().getFileName().toString());
@@ -350,7 +350,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         if (options.wantsTopicalHelp()) {
             final Optional<String> helpDoc = MarkdownFinder.forHelpTopic(options.wantsTopicalHelpFor());
             System.out.println(helpDoc.orElseThrow(
-                () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
+                    () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
             ));
             return NBCLI.EXIT_OK;
         }
@@ -358,12 +358,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         NBCLI.logger.debug("initializing annotators with config:'{}'", annotatorsConfig);
         Annotators.init(annotatorsConfig, options.getAnnotateLabelSpec());
         Annotators.recordAnnotation(
-            Annotation.newBuilder()
-                .element(this)
-                .now()
-                .layer(Layer.Session)
-                .addDetail("cli", String.join("\n", args))
-                .build()
+                Annotation.newBuilder()
+                        .element(this)
+                        .now()
+                        .layer(Layer.Session)
+                        .addDetail("cli", String.join("\n", args))
+                        .build()
         );
 
 //        if ((null != reportPromPushTo) || (null != reportGraphiteTo) || (null != options.wantsReportCsvTo())) {
@@ -401,54 +401,58 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         // intentionally not shown for warn-only
         NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
 
+        Map<String, String> props = Map.of(
+                "summary", options.getReportSummaryTo(),
+                "logsdir", options.getLogsDirectory().toString(),
+                "progress", options.getProgressSpec(),
+                "prompush_cache", "prompush_cache.txt",
+                "heartbeat", String.valueOf(options.wantsHeartbeatIntervalMs())
+        );
         /**
          * At this point, the command stream from the CLI should be handed into the session, and the session should
          * marshal and transform it for any scenario invocations directly.
          */
-        NBSession session = new NBSession(
-            new NBBaseComponent(null,
-                options.getLabelMap()
-                    .andDefault("jobname", "nosqlbench")
-                    .andDefault("instance", "default")
-            ),
-            sessionName
-        );
-        // TODO: Decide whether this should be part of ctor consistency
-        Map.of(
-            "summary", options.getReportSummaryTo(),
-            "logsdir", options.getLogsDirectory().toString(),
-            "progress", options.getProgressSpec(),
-            "prompush_cache", "prompush_cache.txt"
-        ).forEach(session::setComponentProp);
 
-        options.wantsReportCsvTo().ifPresent(cfg -> {
-            MetricInstanceFilter filter = new MetricInstanceFilter();
-            filter.addPattern(cfg.pattern);
-            new CsvReporter(session, Path.of(cfg.file), cfg.millis, filter);
-        });
+        try (
+                NBSession session = new NBSession(
+                        new NBBaseComponent(null,
+                                options.getLabelMap()
+                                        .andDefault("jobname", "nosqlbench")
+                                        .andDefault("instance", "default")
+                        ),
+                        sessionName,
+                        props
+                )) {
 
-        options.wantsReportPromPushTo().ifPresent(cfg -> {
-            String[] words = cfg.split(",");
-            String uri;
-            long intervalMs = 10_000L;
+            options.wantsReportCsvTo().ifPresent(cfg -> {
+                MetricInstanceFilter filter = new MetricInstanceFilter();
+                filter.addPattern(cfg.pattern);
+                new CsvReporter(session, Path.of(cfg.file), cfg.millis, filter);
+            });
 
-            switch (words.length) {
-                case 2:
-                    intervalMs = Unit.msFor(words[1]).orElseThrow(() -> new RuntimeException("can't parse '" + words[1] + "!"));
-                case 1:
-                    uri = words[0];
-                    break;
-                default:
-                    throw new RuntimeException("Unable to parse '" + cfg + "', must be in <URI> or <URI>,ms form");
-            }
-            session.create().pushReporter(uri, intervalMs, NBLabels.forKV());
-        });
+            options.wantsReportPromPushTo().ifPresent(cfg -> {
+                String[] words = cfg.split(",");
+                String uri;
+                long intervalMs = 10_000L;
+
+                switch (words.length) {
+                    case 2:
+                        intervalMs = Unit.msFor(words[1]).orElseThrow(() -> new RuntimeException("can't parse '" + words[1] + "!"));
+                    case 1:
+                        uri = words[0];
+                        break;
+                    default:
+                        throw new RuntimeException("Unable to parse '" + cfg + "', must be in <URI> or <URI>,ms form");
+                }
+                session.create().pushReporter(uri, intervalMs, NBLabels.forKV());
+            });
 
 
-        ExecutionResult sessionResult = session.apply(options.getCommands());
+            ExecutionResult sessionResult = session.apply(options.getCommands());
+            logger.info(sessionResult);
+            return sessionResult.getStatus().code;
+        }
 //        sessionResult.printSummary(System.out);
-        logger.info(sessionResult);
-        return sessionResult.getStatus().code;
 
     }
 
@@ -465,9 +469,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
         basicHelp = basicHelp.replaceAll("PROG", this.commandName);
         return basicHelp;
-
     }
-
 
     @Override
     public NBLabels getLabels() {

@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
+import io.nosqlbench.nb.api.components.status.NBLiveComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBFunctionGauge;
@@ -43,7 +45,7 @@ import java.util.function.Function;
  * on.
  * All NBScenarios are run within an NBSession.
  */
-public class NBSession extends NBBaseComponent implements Function<List<Cmd>, ExecutionResult>, NBTokenWords {
+public class NBSession extends NBLiveComponent implements Function<List<Cmd>, ExecutionResult>, NBTokenWords {
     private final static Logger logger = LogManager.getLogger(NBSession.class);
 //    private final ClientSystemMetricChecker clientMetricChecker;
 
@@ -57,19 +59,22 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
 
     public NBSession(
         NBLabeledElement labelContext,
-        String sessionName
+        String sessionName,
+        Map<String, String> props
     ) {
         super(
             null,
             labelContext.getLabels()
-                .and("session", sessionName)
+                .and("session", sessionName),
+            props,
+            "session"
         );
 
         new NBSessionSafetyMetrics(this);
 
         create().gauge(
             "session_time",
-            () -> (double)System.nanoTime(),
+            () -> (double) System.nanoTime(),
             MetricCategory.Core,
             "session time in nanoseconds"
         );
@@ -86,13 +91,16 @@ public class NBSession extends NBBaseComponent implements Function<List<Cmd>, Ex
         ResultCollector collector = new ResultCollector();
         try (ResultContext results = new ResultContext(collector).ok()) {
             for (NBCommandAssembly.CommandInvocation invocation : invocationCalls) {
-                try {
-                    String targetContext = invocation.containerName();
+                String targetContext = invocation.containerName();
+                String explanation = "in context '" + targetContext + "'";
+                try (NBInvokableCommand command = invocation.command()) {
+                    explanation += " command '" + command.toString() + "'";
                     NBBufferedContainer container = getContext(targetContext);
-                    NBCommandResult cmdResult = container.apply(invocation.command(), invocation.params());
+                    NBCommandResult cmdResult = container.apply(command, invocation.params());
                     results.apply(cmdResult);
                 } catch (Exception e) {
-                    String msg = "While running command '" + invocation.command() + "' in container '" + invocation.containerName() + "', an error occurred: " + e.toString();
+                    String msg = "While running " + explanation + "', an error occurred: " + e.toString();
+                    onError(e);
                     logger.error(msg);
                     results.error(e);
                     break;
