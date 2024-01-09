@@ -100,7 +100,7 @@ public class NBAtFile {
             }
             Content<?> argsContent = wantsExtension.one();
             String argsdata = argsContent.asString();
-            Fmt fmt = (formatSpec!=null) ? Fmt.valueOfSymbol(formatSpec) : Fmt.Default;
+            NBAtFileFormats fmt = (formatSpec!=null) ? NBAtFileFormats.valueOfSymbol(formatSpec) : NBAtFileFormats.Default;
 
             Object scopeOfInclude = null;
             try {
@@ -124,7 +124,7 @@ public class NBAtFile {
 
     }
 
-    private static LinkedList<String> formatted(Object scopeOfInclude, Fmt fmt) {
+    private static LinkedList<String> formatted(Object scopeOfInclude, NBAtFileFormats fmt) {
         LinkedList<String> emitted = new LinkedList<>();
         if (scopeOfInclude instanceof Map<?,?> map) {
             Map<String,String> included = new LinkedHashMap<>();
