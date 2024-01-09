@@ -23,9 +23,9 @@ bindings:
   boolean: ToBoolean();
   date: EpochMillisToJavaLocalDate();
   decimal: ToBigDecimal();
-  double: ToDouble()
+  double: HashRange(0.0,1.0);
   duration: ToCqlDurationNanos();
-  float: ToFloat()
+  float: HashRange(0.0,1.0); DoubleToFloat();
   frozen<list<int>>: ListSizedHashed(HashRange(3,7),ToInt()));
   list<text>: ListStepped(NumberNameToString(),NumberNameToString())
   map<text,text>: MapSized(3, Combinations('A-Z;0-9'), NumberNameToString(), ToString());
@@ -47,11 +47,7 @@ blocks:
     ops:
       create-keyspace-ks_00001:
         simple: |
-          create keyspace ks_00001
-          with replication = {'class': 'SimpleStrategy',
-          'replication_factor': 'TEMPLATE(rf:1)'
-          }
-           and durable writes = false;
+          create keyspace IF NOT EXISTS ks_00001 with replication = {'class': 'SimpleStrategy','replication_factor': 'TEMPLATE(rf,1)'};
   schema-tables:
     params:
       timeout: 60.0
@@ -150,7 +146,7 @@ blocks:
       timeout: 30.0
     ops:
       scan-tb_00001-table-tb_00001:
-        prepared: "select * from ks_00001.tb_00001\nwhere \n LIMIT 10;\n"
+        prepared: "select * from ks_00001.tb_00001 LIMIT 10;"
         ratio: 1
   main-update:
     params:
@@ -159,7 +155,7 @@ blocks:
       update-tb_00001-table-tb_00001:
         prepared: |
           update ks_00001.tb_00001
-          set col_00001={text}, col_00002={bigint}, col_00003={blob}, col_00004={boolean}, col_00005={date}, col_00006={decimal}, col_00007={double}, col_00008={duration}, col_00009={float}, col_00010={frozen<list<int>>}, col_00011={list<text>}, col_00012={map<text,text>}, col_00013={set<text>}, col_00014={smallint}, col_00015={text}, col_00016={time}, col_00017={timestamp}, col_00018={timeuuid}, col_00019={tinyint}, col_00020={uuid}, col_00021={text}, col_00022={varint}, col_00023={ascii}, col_00024={inet}, col_00025={int}
+          set col_00002={bigint}, col_00003={blob}, col_00004={boolean}, col_00005={date}, col_00006={decimal}, col_00007={double}, col_00008={duration}, col_00009={float}, col_00010={frozen<list<int>>}, col_00011={list<text>}, col_00012={map<text,text>}, col_00013={set<text>}, col_00014={smallint}, col_00015={text}, col_00016={time}, col_00017={timestamp}, col_00018={timeuuid}, col_00019={tinyint}, col_00020={uuid}, col_00021={text}, col_00022={varint}, col_00023={ascii}, col_00024={inet}, col_00025={int}
           where col_00001={text};
         ratio: 1
 params:
