@@ -290,7 +290,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.610</version>
+                <version>1.12.621</version>
             </dependency>
             <dependency>
                 <groupId>com.elega9t</groupId>
