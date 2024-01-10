@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * TODO: provide before and after atfile processing logs for diagnostics
  */
 public class NBAtFile {
-    private final static Logger logger = LogManager.getLogger(NBAtFile.class);
+//    private final static Logger logger = LogManager.getLogger(NBAtFile.class);
 
     /**
      * This will take a command line in raw form, which may include some arguments
@@ -51,7 +51,7 @@ public class NBAtFile {
      * @throws RuntimeException for any errors finding, traversing, parsing, or rendering values
      */
     public static LinkedList<String> includeAt(LinkedList<String> processInPlace) {
-        logger.trace("argv stream before processing: " + String.join("|",processInPlace));
+//        logger.trace("argv stream before processing: " + String.join("|",processInPlace));
         ListIterator<String> iter = processInPlace.listIterator();
         while (iter.hasNext()) {
             String spec = iter.next();
@@ -64,7 +64,7 @@ public class NBAtFile {
                 }
             }
         }
-        logger.trace("argv stream after atfile processing: "+ String.join("|",processInPlace));
+//        logger.trace("argv stream after atfile processing: "+ String.join("|",processInPlace));
 
         return processInPlace;
     }
@@ -101,7 +101,7 @@ public class NBAtFile {
             NBPathsAPI.GetExtensions wantsExtension = NBIO.local().pathname(filepathSpec);
             String extension = (!filepathSpec.toLowerCase().endsWith(".yaml")) ? "yaml" : "";
             if (!extension.isEmpty()) {
-                logger.debug("adding extension 'yaml' to at-file path '" + filepathSpec + "'");
+//                logger.debug("adding extension 'yaml' to at-file path '" + filepathSpec + "'");
                 wantsExtension.extensionSet("yaml");
             }
             Content<?> argsContent = wantsExtension.one();

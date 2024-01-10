@@ -45,7 +45,7 @@ import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
-import io.nosqlbench.engine.core.logging.LoggerConfig;
+import io.nosqlbench.engine.core.logging.NBLoggerConfig;
 import io.nosqlbench.engine.core.metadata.MarkdownFinder;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.annotations.ServiceSelector;
@@ -68,13 +68,13 @@ import java.util.stream.Collectors;
 public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
     private static Logger logger;
-    private static final LoggerConfig loggerConfig;
+    private static final NBLoggerConfig loggerConfig;
     private static final int EXIT_OK = 0;
     private static final int EXIT_WARNING = 1;
     private static final int EXIT_ERROR = 2;
 
     static {
-        loggerConfig = new LoggerConfig();
+        loggerConfig = new NBLoggerConfig();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
     }
 
@@ -169,9 +169,9 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 .setAnsiEnabled(globalOptions.isEnableAnsi())
                 .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
                 .activate();
-        ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
+        ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig); // THIS should be the first time log4j2 is invoked!
 
-        NBCLI.logger = LogManager.getLogger("NBCLI");
+        NBCLI.logger = LogManager.getLogger("NBCLI"); // TODO: Detect if the logger config was already initialized (error)
         NBCLI.loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
         if (NBCLI.logger.isInfoEnabled())
             NBCLI.logger.info(() -> "Configured scenario log at " + NBCLI.loggerConfig.getLogfileLocation());
@@ -185,7 +185,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         NBCLI.logger.info(() -> "Running NoSQLBench Version " + new VersionInfo().getVersion());
-        NBCLI.logger.info(() -> "command-line: " + Arrays.stream(args).collect(Collectors.joining(" ")));
+        NBCLI.logger.info(() -> "command-line: " + String.join(" ", args));
         NBCLI.logger.info(() -> "client-hardware: " + SystemId.getHostSummary());
 
 

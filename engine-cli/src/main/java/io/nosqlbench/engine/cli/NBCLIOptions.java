@@ -670,16 +670,24 @@ public class NBCLIOptions {
 
                 You can discover available ways to invoke PROG by using the various --list-* commands:
                 [ --list-commands, --list-scripts, --list-workloads (and --list-scenarios), --list-apps ]
+                """
+                .replaceAll("ARG", cmdParam)
+                .replaceAll("PROG", "nb5")
+                .replaceAll("INCLUDES", String.join(",", wantsIncludes()))
+                ;
+
+            final String debugMessage = """
 
                 After parsing all global options out of the command line, the remaining commands were found,
                 and mapped to valid options as describe above. This command stream was:
                 COMMANDSTREAM
                 """
-                .replaceAll("ARG", cmdParam)
-                .replaceAll("PROG", "nb5")
-                .replaceAll("INCLUDES", String.join(",", wantsIncludes()))
                 .replaceAll("COMMANDSTREAM",
                     String.join(" ",arglist));
+            if (consoleLevel.isGreaterOrEqualTo(NBLogLevel.INFO)) {
+                System.out.println(debugMessage);
+            }
+
             throw new BasicError(helpmsg);
 
         }

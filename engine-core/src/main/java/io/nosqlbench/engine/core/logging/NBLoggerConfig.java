@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://logging.apache.org/log4j/2.x/manual/layouts.html#Pattern_Layout">Pattern Layout</a>
  */
-public class LoggerConfig extends ConfigurationFactory {
+public class NBLoggerConfig extends ConfigurationFactory {
 
     public static Map<String, String> STANDARD_FORMATS = Map.of(
             "TERSE", "%8r %-5level [%t] %-12logger{0} %msg%n%throwable",
@@ -92,25 +92,25 @@ public class LoggerConfig extends ConfigurationFactory {
     private boolean isDedicatedVerificationLoggerEnabled = false;
 
 
-    public LoggerConfig() {
+    public NBLoggerConfig() {
     }
 
-    public LoggerConfig setAnsiEnabled(boolean ansiEnabled) {
+    public NBLoggerConfig setAnsiEnabled(boolean ansiEnabled) {
         this.ansiEnabled = ansiEnabled;
         return this;
     }
 
-    public LoggerConfig setConsoleLevel(NBLogLevel level) {
+    public NBLoggerConfig setConsoleLevel(NBLogLevel level) {
         this.consoleLevel = level;
         return this;
     }
 
-    public LoggerConfig setLogfileLevel(NBLogLevel level) {
+    public NBLoggerConfig setLogfileLevel(NBLogLevel level) {
         this.fileLevel = level;
         return this;
     }
 
-    public LoggerConfig setDedicatedVerificationLogger(boolean enabled) {
+    public NBLoggerConfig setDedicatedVerificationLogger(boolean enabled) {
         this.isDedicatedVerificationLoggerEnabled = enabled;
         return this;
     }
@@ -128,7 +128,7 @@ public class LoggerConfig extends ConfigurationFactory {
         }
     }
 
-    public LoggerConfig setMaxLogs(int maxLogfiles) {
+    public NBLoggerConfig setMaxLogs(int maxLogfiles) {
         this.maxLogfiles = maxLogfiles;
         return this;
     }
@@ -298,7 +298,7 @@ public class LoggerConfig extends ConfigurationFactory {
         ConfigurationFactory.setConfigurationFactory(this);
     }
 
-    public LoggerConfig setConsolePattern(String consoleLoggingPattern) {
+    public NBLoggerConfig setConsolePattern(String consoleLoggingPattern) {
 
         consoleLoggingPattern = (ansiEnabled && STANDARD_FORMATS.containsKey(consoleLoggingPattern + "-ANSI"))
                 ? consoleLoggingPattern + "-ANSI" : consoleLoggingPattern;
@@ -307,7 +307,7 @@ public class LoggerConfig extends ConfigurationFactory {
         return this;
     }
 
-    public LoggerConfig setLogfilePattern(String logfileLoggingPattern) {
+    public NBLoggerConfig setLogfilePattern(String logfileLoggingPattern) {
         logfileLoggingPattern = (logfileLoggingPattern.endsWith("-ANSI") && STANDARD_FORMATS.containsKey(logfileLoggingPattern))
                 ? logfileLoggingPattern.substring(logfileLoggingPattern.length() - 5) : logfileLoggingPattern;
 
@@ -315,7 +315,7 @@ public class LoggerConfig extends ConfigurationFactory {
         return this;
     }
 
-    public LoggerConfig setLoggerLevelOverrides(Map<String, String> logLevelOverrides) {
+    public NBLoggerConfig setLoggerLevelOverrides(Map<String, String> logLevelOverrides) {
         this.logLevelOverrides = logLevelOverrides;
         return this;
     }
@@ -324,12 +324,12 @@ public class LoggerConfig extends ConfigurationFactory {
         return logLevelOverrides;
     }
 
-    public LoggerConfig setSessionName(String sessionName) {
+    public NBLoggerConfig setSessionName(String sessionName) {
         this.sessionName = sessionName;
         return this;
     }
 
-    public LoggerConfig purgeOldFiles(Logger logger) {
+    public NBLoggerConfig purgeOldFiles(Logger logger) {
         if (maxLogfiles == 0) {
             logger.debug("Not purging old files, since maxLogFiles is 0.");
             return this;
@@ -384,7 +384,7 @@ public class LoggerConfig extends ConfigurationFactory {
         return logfileLocation;
     }
 
-    public LoggerConfig setLogsDirectory(Path logsDirectory) {
+    public NBLoggerConfig setLogsDirectory(Path logsDirectory) {
         this.loggerDir = logsDirectory;
         return this;
     }
