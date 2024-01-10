@@ -30,7 +30,7 @@ public class NBCLIScenarioPreprocessorTemplateVarTest {
 
     @Test
     public void testMultipleOccurencesOfSameTemplateVar() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "local/example_scenarios_templatevars" });
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "local/example_scenarios_templatevars" }, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
         cmds.forEach(System.out::println);
 
@@ -47,7 +47,7 @@ public class NBCLIScenarioPreprocessorTemplateVarTest {
 
     @Test
     public void testThatCLIOverridesWorkForTemplateVars() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "local/example_scenarios_templatevars", "tvar1=overridden" });
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "local/example_scenarios_templatevars", "tvar1=overridden" }, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
         cmds.forEach(System.out::println);
 
@@ -59,7 +59,7 @@ public class NBCLIScenarioPreprocessorTemplateVarTest {
 
     @Test
     public void testThatAdditionalCLIParamIsAdded() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"local/example_scenarios_templatevars", "tvar3=tval3"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"local/example_scenarios_templatevars", "tvar3=tval3"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
         cmds.forEach(System.out::println);
         assertThat(cmds).hasSize(2);

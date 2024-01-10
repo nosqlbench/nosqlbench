@@ -36,7 +36,7 @@ public class TestNBCLIOptions {
 
     @Test
     public void shouldRecognizeActivities() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"start", "foo=wan", "start", "bar=lan"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"start", "foo=wan", "start", "bar=lan"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.getCommands()).isNotNull();
         assertThat(opts.getCommands().size()).isEqualTo(2);
 //        assertThat(opts.getCommands().get(0).getArgs()).containsEntry("foo","wan");
@@ -46,7 +46,7 @@ public class TestNBCLIOptions {
     @Test
     public void shouldParseLongActivityForm() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"start", "param1=param2", "param3=param4",
-                                                          "--report-graphite-to", "woot", "--report-interval", "23"});
+                                                          "--report-graphite-to", "woot", "--report-interval", "23"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.getCommands().size()).isEqualTo(1);
 //        assertThat(opts.getCommands().get(0).getArgs()).containsEntry("param1","param2");
 //        assertThat(opts.getCommands().get(0).getArgs()).containsEntry("param3","param4");
@@ -56,21 +56,21 @@ public class TestNBCLIOptions {
 
     @Test
     public void shouldRecognizeShortVersion() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"--version"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"--version"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.isWantsVersionShort()).isTrue();
         assertThat(opts.wantsVersionCoords()).isFalse();
     }
 
     @Test
     public void shouldRecognizeVersion() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"--version-coords"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"--version-coords"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.isWantsVersionShort()).isFalse();
         assertThat(opts.wantsVersionCoords()).isTrue();
     }
 
     @Test
     public void shouldRecognizeScripts() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "path=ascriptaone", "script", "path=ascriptatwo"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "path=ascriptaone", "script", "path=ascriptatwo"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.getCommands()).isNotNull();
         assertThat(opts.getCommands().size()).isEqualTo(2);
         assertThat(opts.getCommands().get(0).getCmdType()).isEqualTo(CmdType.script);
@@ -81,41 +81,41 @@ public class TestNBCLIOptions {
 
     @Test
     public void shouldRecognizeWantsActivityTypes() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"--list-activity-types"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"--list-activity-types"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsActivityTypes()).isTrue();
-        opts = new NBCLIOptions(new String[]{"--version"});
+        opts = new NBCLIOptions(new String[]{"--version"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsActivityTypes()).isFalse();
-        opts = new NBCLIOptions(new String[]{"--list-drivers"});
+        opts = new NBCLIOptions(new String[]{"--list-drivers"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsActivityTypes()).isTrue();
 
     }
 
     @Test
     public void shouldRecognizeWantsBasicHelp() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"--help"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"--help"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsBasicHelp()).isTrue();
-        opts = new NBCLIOptions(new String[]{"--version"});
+        opts = new NBCLIOptions(new String[]{"--version"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsTopicalHelp()).isFalse();
     }
 
     @Test
     public void shouldRecognizeWantsActivityHelp() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"--help", "foo"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"--help", "foo"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsTopicalHelp()).isTrue();
         assertThat(opts.wantsTopicalHelpFor()).isEqualTo("foo");
-        opts = new NBCLIOptions(new String[]{"--version"});
+        opts = new NBCLIOptions(new String[]{"--version"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsTopicalHelp()).isFalse();
     }
 
     @Test
     public void shouldErrorSanelyWhenNoMatch() {
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> new NBCLIOptions(new String[]{"unrecognizable command"}));
+                .isThrownBy(() -> new NBCLIOptions(new String[]{"unrecognizable command"}, NBCLIOptions.Mode.ParseAllOptions));
     }
 
     @Test
     public void testShouldRecognizeScriptParams() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "path=ascript", "param1=value1"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "path=ascript", "param1=value1"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.getCommands().size()).isEqualTo(1);
         Cmd cmd = opts.getCommands().get(0);
         assertThat(cmd.getArgs().size()).isEqualTo(2);
@@ -127,14 +127,14 @@ public class TestNBCLIOptions {
     @Test
     public void testShouldErrorSanelyWhenScriptNameSkipped() {
         assertThatExceptionOfType(InvalidParameterException.class)
-                .isThrownBy(() -> new NBCLIOptions(new String[]{"script", "param1=value1"}));
+                .isThrownBy(() -> new NBCLIOptions(new String[]{"script", "param1=value1"}, NBCLIOptions.Mode.ParseAllOptions));
     }
 
     @Disabled("semantic parsing is deferred until later")
     @Test
     public void testShouldErrorForMissingScriptName() {
         assertThatExceptionOfType(InvalidParameterException.class)
-                .isThrownBy(() -> new NBCLIOptions(new String[]{"script"}));
+                .isThrownBy(() -> new NBCLIOptions(new String[]{"script"}, NBCLIOptions.Mode.ParseAllOptions));
     }
 
 //    @Test
@@ -169,7 +169,7 @@ public class TestNBCLIOptions {
     @Test
     public void shouldThrowErrorForInvalidStopActivity() {
         assertThatExceptionOfType(InvalidParameterException.class)
-                .isThrownBy(() -> new NBCLIOptions(new String[]{ "stop", "woah=woah" }));
+                .isThrownBy(() -> new NBCLIOptions(new String[]{ "stop", "woah=woah" }, NBCLIOptions.Mode.ParseAllOptions));
     }
 
 //    @Test
@@ -185,7 +185,7 @@ public class TestNBCLIOptions {
     @Test
     public void shouldThrowErrorForInvalidAwaitActivity() {
         assertThatExceptionOfType(InvalidParameterException.class)
-                .isThrownBy(() -> new NBCLIOptions(new String[]{ "await", "awaitme=notvalid" }));
+                .isThrownBy(() -> new NBCLIOptions(new String[]{ "await", "awaitme=notvalid" }, NBCLIOptions.Mode.ParseAllOptions));
     }
 
 //    @Test
@@ -199,19 +199,19 @@ public class TestNBCLIOptions {
 
     @Test
     public void listWorkloads() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-workloads"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-workloads"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsWorkloadsList()).isTrue();
     }
 
     @Test
     public void listScenarios() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-scenarios"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-scenarios"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsScenariosList()).isTrue();
     }
 
     @Test
     public void listScripts() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-scripts"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-scripts"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsListScripts()).isTrue();
     }
 

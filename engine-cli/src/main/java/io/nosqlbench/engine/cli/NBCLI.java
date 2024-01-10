@@ -216,7 +216,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             annotatorsConfig = gson.toJson(annotatorsConfigs);
         }
 
-        final NBCLIOptions options = new NBCLIOptions(args);
+        final NBCLIOptions options = new NBCLIOptions(args,Mode.ParseAllOptions);
         NBCLI.logger = LogManager.getLogger("NBCLI");
 
         NBIO.addGlobalIncludes(options.wantsIncludes());

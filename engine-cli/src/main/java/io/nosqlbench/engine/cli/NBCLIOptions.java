@@ -279,10 +279,6 @@ public class NBCLIOptions {
         ParseAllOptions
     }
 
-    public NBCLIOptions(final String[] args) {
-        this(args, Mode.ParseAllOptions);
-    }
-
     public NBCLIOptions(final String[] args, final Mode mode) {
         switch (mode) {
             case ParseGlobalsOnly:
@@ -306,8 +302,8 @@ public class NBCLIOptions {
 
         // Process --include and --statedir, separately first
         // regardless of position
-        LinkedList<String> nonincludes = new LinkedList<>();
-        while (null != arglist.peekFirst()) {
+        LinkedList<String> everythingButIncludes = new LinkedList<>();
+        while (!arglist.isEmpty()) {
             final String word = arglist.peekFirst();
             if (word.startsWith("--") && word.contains("=")) {
                 final String wordToSplit = arglist.removeFirst();
@@ -328,13 +324,13 @@ public class NBCLIOptions {
                     this.wantsToIncludePaths.add(include);
                     break;
                 default:
-                    nonincludes.addLast(arglist.removeFirst());
+                    everythingButIncludes.addLast(arglist.removeFirst());
             }
         }
         this.statepath = NBStatePath.initialize(statedirs);
 
-        arglist = nonincludes;
-        nonincludes = new LinkedList<>();
+        arglist = everythingButIncludes;
+        everythingButIncludes = new LinkedList<>();
 
         // Now that statdirs is settled, auto load argsfile if it is present
         final NBCLIArgsFile argsfile = new NBCLIArgsFile();
@@ -507,11 +503,11 @@ public class NBCLIOptions {
                     this.metricsLabelSpec = this.readWordOrThrow(arglist, "labels validator specification for metric labels");
                     break;
                 default:
-                    nonincludes.addLast(arglist.removeFirst());
+                    everythingButIncludes.addLast(arglist.removeFirst());
             }
         }
 
-        return nonincludes;
+        return everythingButIncludes;
     }
 
     private void setLabels(String labeldata) {
@@ -674,10 +670,16 @@ public class NBCLIOptions {
 
                 You can discover available ways to invoke PROG by using the various --list-* commands:
                 [ --list-commands, --list-scripts, --list-workloads (and --list-scenarios), --list-apps ]
+
+                After parsing all global options out of the command line, the remaining commands were found,
+                and mapped to valid options as describe above. This command stream was:
+                COMMANDSTREAM
                 """
                 .replaceAll("ARG", cmdParam)
                 .replaceAll("PROG", "nb5")
-                .replaceAll("INCLUDES", String.join(",", wantsIncludes()));
+                .replaceAll("INCLUDES", String.join(",", wantsIncludes()))
+                .replaceAll("COMMANDSTREAM",
+                    String.join(" ",arglist));
             throw new BasicError(helpmsg);
 
         }

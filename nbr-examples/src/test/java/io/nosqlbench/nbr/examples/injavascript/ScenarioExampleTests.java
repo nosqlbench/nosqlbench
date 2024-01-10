@@ -42,7 +42,7 @@ public class ScenarioExampleTests {
             throw new RuntimeException("Found [" + sources.size() +"] sources for '" + params[0] +"'");
         }
 
-        NBCLIOptions parser = new NBCLIOptions(params);
+        NBCLIOptions parser = new NBCLIOptions(params, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> commands = parser.getCommands();
         var myroot = new TestComponent("test_"+params[0]);
         NBSession session = new NBSession(myroot,"session_"+params[0], Map.of());
