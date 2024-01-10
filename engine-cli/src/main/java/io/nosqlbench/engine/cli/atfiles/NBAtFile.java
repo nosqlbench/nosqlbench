@@ -28,6 +28,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * TODO: provide before and after atfile processing logs for diagnostics
+ */
 public class NBAtFile {
     private final static Logger logger = LogManager.getLogger(NBAtFile.class);
 
@@ -48,6 +51,7 @@ public class NBAtFile {
      * @throws RuntimeException for any errors finding, traversing, parsing, or rendering values
      */
     public static LinkedList<String> includeAt(LinkedList<String> processInPlace) {
+        logger.trace("argv stream before processing: " + String.join("|",processInPlace));
         ListIterator<String> iter = processInPlace.listIterator();
         while (iter.hasNext()) {
             String spec = iter.next();
@@ -60,10 +64,12 @@ public class NBAtFile {
                 }
             }
         }
+        logger.trace("argv stream after atfile processing: "+ String.join("|",processInPlace));
+
         return processInPlace;
     }
     private final static Pattern includePattern =
-        Pattern.compile("@(?<filepath>[a-zA-Z_][a-zA-Z_./]*)(:(?<datapath>[a-zA-Z_][a-zA-Z0-9_./]*))?(>(?<formatter>.+))?");
+        Pattern.compile("@(?<filepath>[a-zA-Z_][a-zA-Z0-9_./]*)(:(?<datapath>[a-zA-Z_][a-zA-Z0-9_./]*))?(>(?<formatter>.+))?");
 
     /**
      * Format specifiers:
