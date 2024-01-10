@@ -37,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -97,7 +98,7 @@ public class Cqld4Space implements AutoCloseable {
 //        int port = cfg.getOptional(int.class, "port").orElse(9042);
 
         Optional<String> scb = cfg.getOptional(String.class, "secureconnectbundle", "scb");
-        
+
         if (scb.isPresent()) {
             Optional<InputStream> stream =
                 scb.flatMap(s -> NBIO.all().pathname(s).first().map(Content::getInputStream));
