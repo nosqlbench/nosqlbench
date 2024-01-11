@@ -26,6 +26,7 @@ public class HeartbeatRepresenter extends StandardRepresenter {
     public HeartbeatRepresenter(DumpSettings settings) {
         super(settings);
         this.representers.put(NBInvokableState.class, new RepresentEnumToString());
+        this.representers.put(Status.class, new RepresentStatusToMap());
     }
 
     public class RepresentEnumToString implements RepresentToNode {
@@ -37,6 +38,17 @@ public class HeartbeatRepresenter extends StandardRepresenter {
                 return HeartbeatRepresenter.this.represent(name);
             } else {
                 throw new RuntimeException("Unable to represent as enum: " + o.toString() + " (class " + o.getClass().getSimpleName() + "'");
+            }
+        }
+    }
+
+    private class RepresentStatusToMap implements RepresentToNode {
+        @Override
+        public Node representData(Object data) {
+            if (data instanceof Status status) {
+                return represent(status.toMap());
+            } else {
+                throw new RuntimeException("Unable to represent object " + data.toString() + "\n(" + data.getClass().getCanonicalName() + ")");
             }
         }
     }

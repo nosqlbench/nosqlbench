@@ -22,32 +22,35 @@ import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-public record Heartbeat(
-        NBLabels labels,
-        NBInvokableState state,
-        long started_at,
-        long session_time_ns,
-        long heartbeat_interval_ms,
-        long heartbeat_epoch_ms
+public record Status(
+    NBLabels labels,
+    NBInvokableState state,
+    long started_epoch_ms,
+    long session_time_ms,
+    long heartbeat_interval_ms,
+    long heartbeat_epoch_ms,
+    List<Status> substatus
 ) {
     public final static Dump dump = createDump();
 
     private static Dump createDump() {
-
         DumpSettings settings = DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build();
         return new Dump(settings, new HeartbeatRepresenter(settings));
     }
 
-    public Heartbeat withHeartbeatDetails(long new_heartbeat_interval_ms, long new_heartbeat_ms_epoch) {
-        return new Heartbeat(
-                labels,
-                state,
-                started_at,
-                session_time_ns,
-                new_heartbeat_interval_ms,
-                new_heartbeat_ms_epoch
+    public Status withHeartbeatDetails(long new_heartbeat_interval_ms, long new_heartbeat_ms_epoch) {
+        return new Status(
+            labels,
+            state,
+            started_epoch_ms,
+            session_time_ms,
+            new_heartbeat_interval_ms,
+            new_heartbeat_ms_epoch,
+            substatus
         );
     }
 
@@ -56,14 +59,15 @@ public record Heartbeat(
     }
 
     public Map<String, Object> toMap() {
-        return Map.of(
-                "labels", labels.asMap(),
-                "state", state,
-                "started_at_epochms", started_at,
-                "session_time_ns", session_time_ns,
-                "heartbeat_interval_ms", heartbeat_interval_ms,
-                "heartbeat_epoch_ms", heartbeat_epoch_ms
-        );
+        return new LinkedHashMap<>() {{
+            put("labels", labels.asMap());
+            put("state", state);
+            put("started_at_epochms", started_epoch_ms);
+            put("session_time_ms", session_time_ms);
+            put("heartbeat_interval_ms", heartbeat_interval_ms);
+            put("heartbeat_epoch_ms", heartbeat_epoch_ms);
+            put("substatus", substatus);
+        }};
     }
 
     @Override
