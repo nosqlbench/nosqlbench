@@ -52,6 +52,11 @@ public class ComponentPulse extends UnstartedPeriodicTaskComponent {
         Heartbeat heartbeat = pulseOf.heartbeat().withHeartbeatDetails(intervalmillis,System.currentTimeMillis());
         try {
             Files.writeString(hbpath, heartbeat.toYaml(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.deleteIfExists(linkpath);
+            Files.createSymbolicLink(
+                linkpath,
+                hbpath.getFileName()
+            );
         } catch (IOException e) {
             logger.error("Unable to write heartbeat data to " + hbpath.toString() + ": " + e);
         }
