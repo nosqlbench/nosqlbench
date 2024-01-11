@@ -24,6 +24,9 @@ import org.apache.logging.log4j.Logger;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -98,14 +101,15 @@ public class NBAtFile {
                     " You specified " + parts[1]);
             }
 
-            NBPathsAPI.GetExtensions wantsExtension = NBIO.local().pathname(filepathSpec);
-            String extension = (!filepathSpec.toLowerCase().endsWith(".yaml")) ? "yaml" : "";
-            if (!extension.isEmpty()) {
-//                logger.debug("adding extension 'yaml' to at-file path '" + filepathSpec + "'");
-                wantsExtension.extensionSet("yaml");
+            filepathSpec=(filepathSpec.endsWith(".yaml") ? filepathSpec : filepathSpec+".yaml");
+            Path atPath = Path.of(filepathSpec);
+            String argsdata = "";
+            try {
+                argsdata = Files.readString(atPath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            Content<?> argsContent = wantsExtension.one();
-            String argsdata = argsContent.asString();
+
             NBAtFileFormats fmt = (formatSpec!=null) ? NBAtFileFormats.valueOfSymbol(formatSpec) : NBAtFileFormats.Default;
 
             Object scopeOfInclude = null;
