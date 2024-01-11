@@ -239,6 +239,10 @@ public class NBLoggerConfig extends ConfigurationFactory {
                 builder.newAppenderRef("SESSION_APPENDER")
                     .addAttribute("level", fileLevel)
             );
+        } else {
+            throw new RuntimeException("Session name must be set in logger config. If you are getting this error, then it means" +
+                " that the session has not initialized properly, and that some unexpected error occurred before the logging" +
+                " system was initialized. Look for errors prior to this.");
         }
 
         rootBuilder.add(

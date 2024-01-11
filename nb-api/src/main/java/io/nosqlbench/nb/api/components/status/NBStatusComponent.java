@@ -40,18 +40,12 @@ public class NBStatusComponent extends NBBaseComponent {
     }
 
     public Status status() {
+
         List<Status> subbeats = new ArrayList<>();
         StatusVisitor statusVisitor = new StatusVisitor(subbeats);
-
         for (NBComponent child : getChildren()) {
             NBComponentTraversal.visitDepthFirstLimited(child,statusVisitor,c -> c instanceof NBStatusComponent);
         }
-
-//        for (NBComponent child : getChildren()) {
-//            if (child instanceof NBStatusComponent beat) {
-//                subbeats.add(beat.heartbeat());
-//            }
-//        }
 
         return new Status(
             getLabels(),
