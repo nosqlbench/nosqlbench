@@ -27,43 +27,43 @@ class NBAtFileTest {
 
     @Test
     public void testParseSimpleListDefaultFmt() {
-        LinkedList<String> strings = NBAtFile.includeAt("@atfiles/simple_list.yaml");
+        LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/simple_list.yaml");
         assertThat(strings).containsExactly("arg1","arg2","arg3");
     }
 
     @Test
     public void testParseSimpleMapDefaultFmt() {
-        LinkedList<String> strings = NBAtFile.includeAt("@atfiles/simple_map.yaml");
+        LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/simple_map.yaml");
         assertThat(strings).containsExactly("arg1:val1","arg2:val2","arg3:val3");
     }
 
     @Test
     public void testThatEmptyPathWithPathSpecifierIsInvalid() {
-        assertThrows(RuntimeException.class, () -> NBAtFile.includeAt("@atfiles/simple_map.yaml:>:"));
+        assertThrows(RuntimeException.class, () -> NBAtFile.includeAt("@src/test/resources/atfiles/simple_map.yaml:>:"));
     }
 
     @Test
     public void testParseSimpleMapWithFormatter() {
-        LinkedList<String> strings = NBAtFile.includeAt("@atfiles/simple_map.yaml>:");
+        LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/simple_map.yaml>:");
         assertThat(strings).containsExactly("arg1:val1","arg2:val2","arg3:val3");
     }
 
 
     @Test
     public void testParseSimpleMapSlashesOrDots() {
-        LinkedList<String> strings = NBAtFile.includeAt("@atfiles/mixed_structures.yaml:amap/ofamap.ofalist");
+        LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/mixed_structures.yaml:amap/ofamap.ofalist");
         assertThat(strings).containsExactly("option1","option2");
     }
 
     @Test
     public void testMapPathWithColonFormat() {
-        LinkedList<String> strings = NBAtFile.includeAt("@atfiles/mixed_structures.yaml:amap/ofamap.ofentries>:");
+        LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/mixed_structures.yaml:amap/ofamap.ofentries>:");
         assertThat(strings).containsExactly("key1:value1","key2:value2");
     }
 
     @Test
     public void testMapPathWithEqualsFormat() {
-        LinkedList<String> strings = NBAtFile.includeAt("@atfiles/mixed_structures.yaml:amap/ofamap.ofentries>=");
+        LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/mixed_structures.yaml:amap/ofamap.ofentries>=");
         assertThat(strings).containsExactly("key1=value1","key2=value2");
     }
 
