@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.files;
+package io.nosqlbench.nb.api.nbio;
 
 import io.nosqlbench.nb.api.nbio.NBIO;
 

@@ -27,7 +27,7 @@ import io.nosqlbench.nb.api.histo.HistoStats;
 import io.nosqlbench.nb.api.http.HttpPlugin;
 import io.nosqlbench.nb.api.labels.MapLabels;
 import io.nosqlbench.nb.api.optimizers.BobyqaOptimizerInstance;
-import io.nosqlbench.nb.api.files.FileAccess;
+import io.nosqlbench.nb.api.nbio.FileAccess;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.shutdown.NBShutdownHook;
 import io.nosqlbench.nb.api.loaders.BundledExtensionsLoader;
