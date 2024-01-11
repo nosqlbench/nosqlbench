@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 
 /**
  * TODO: provide before and after atfile processing logs for diagnostics
+ * TODO:ERRORHANDLER Cannot invoke "Object.getClass()" because "scopeOfInclude" is null on file full of comments only
  */
 public class NBAtFile {
 //    private final static Logger logger = LogManager.getLogger(NBAtFile.class);
