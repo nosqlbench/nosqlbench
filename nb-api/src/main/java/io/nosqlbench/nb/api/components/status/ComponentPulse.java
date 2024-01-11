@@ -42,12 +42,15 @@ public class ComponentPulse extends UnstartedPeriodicTaskComponent {
         );
         this.pulseOf = pulseOf;
         String logsdir = getComponentProp("logsdir").orElseThrow();
-        this.hbpath = Path.of(logsdir).resolve(pulseOf.getLabels().valueOf(fileNameLabel)+"_status.yaml");
+        String labelElement = pulseOf.getLabels().valueOf(fileNameLabel);
+        this.hbpath = Path.of(logsdir).resolve(labelElement +"_status.yaml");
+        this.linkpath = Path.of(logsdir).resolve("status.yaml");
         start();
     }
 
     @Override
     protected void task() {
+
         logger.debug("emitting pulse for :" + this.pulseOf.description());
         Heartbeat heartbeat = pulseOf.heartbeat().withHeartbeatDetails(intervalmillis,System.currentTimeMillis());
         try {
