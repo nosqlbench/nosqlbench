@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.components.core;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class NBComponentTraversal {
 
@@ -29,6 +30,7 @@ public class NBComponentTraversal {
     public static void visitDepthFirst(NBComponent component, Visitor visitor) {
         visitDepthFirst(component,visitor,0);
     }
+
     private static void visitDepthFirst(NBComponent component, Visitor visitor, int depth) {
         visitor.visit(component,depth);
         List<NBComponent> children = component.getChildren();
@@ -36,6 +38,35 @@ public class NBComponentTraversal {
             visitDepthFirst(child,visitor,depth+1);
         }
     }
+
+
+    /**
+     * Visits each component. If the component does NOT match the predicate, then NON-matching visitor
+     * method applies. Otherwise the MATCHing visitor method applies and the search stops at that node,
+     * continuing again for every sibling.
+     * @param component The component to test and visit
+     * @param visitor The methods for non-matching and matching nodes
+     * @param predicate A test to determine whether to apply the matching predicate and stop searching deeper
+     */
+    public static void visitDepthFirstLimited(NBComponent component, FilterVisitor visitor, Predicate<NBComponent> predicate) {
+        visitDepthFirstLimited(component, visitor, 0, predicate);
+    }
+
+    private static void visitDepthFirstLimited(NBComponent component, FilterVisitor visitor, int depth, Predicate<NBComponent> predicate) {
+        if (predicate.test(component)) {
+            visitor.visitMatching(component,depth);
+            return;
+        } else {
+            visitor.visitNonMatching(component,depth);
+            List<NBComponent> children = component.getChildren();
+
+            for (NBComponent child : children) {
+                visitDepthFirstLimited(child,visitor,depth+1,predicate);
+            }
+        }
+
+    }
+
 
     public static Iterator<NBComponent> traverseBreadth(NBComponent component) {
         return new IterBreadthFirst(component);
@@ -85,5 +116,9 @@ public class NBComponentTraversal {
 
     public interface Visitor {
         void visit(NBComponent component, int depth);
+    }
+    public interface FilterVisitor {
+        void visitMatching(NBComponent component, int depth);
+        void visitNonMatching(NBComponent component, int depth);
     }
 }
