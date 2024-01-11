@@ -130,7 +130,7 @@ public class NBAtFile {
             }
             return formatted(scopeOfInclude, fmt);
         } else {
-            throw new RuntimeException("Unable to match at-file specifier: " + spec + " to known syntax");
+            throw new RuntimeException("Unable to match at-file specifier: " + spec + " to pattern '" + includePattern.pattern() + "'");
         }
 
     }

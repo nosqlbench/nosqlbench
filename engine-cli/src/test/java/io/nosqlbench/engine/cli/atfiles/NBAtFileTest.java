@@ -34,7 +34,7 @@ class NBAtFileTest {
     @Test
     public void testParseSimpleMapDefaultFmt() {
         LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/simple_map.yaml");
-        assertThat(strings).containsExactly("arg1:val1","arg2:val2","arg3:val3");
+        assertThat(strings).containsExactly("arg1=val1","arg2=val2","arg3=val3");
     }
 
     @Test
@@ -65,6 +65,12 @@ class NBAtFileTest {
     public void testMapPathWithEqualsFormat() {
         LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/mixed_structures.yaml:amap/ofamap.ofentries>=");
         assertThat(strings).containsExactly("key1=value1","key2=value2");
+    }
+
+    @Test
+    public void testGlobalOptionForms() {
+        LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/global_opts.yaml>--");
+        assertThat(strings).containsExactly("--option1", "--option2=value2", "--option3=value3", "--option4=value4");
     }
 
 }
