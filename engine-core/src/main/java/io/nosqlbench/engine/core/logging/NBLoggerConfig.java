@@ -19,11 +19,10 @@ package io.nosqlbench.engine.core.logging;
 import io.nosqlbench.nb.api.logging.NBLogLevel;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.ConsoleAppender;
-import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.appender.*;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
@@ -40,6 +39,8 @@ import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 //@Plugin(name = "CustomConfigurationFactory", category = ConfigurationFactory.CATEGORY)
@@ -54,11 +55,12 @@ import java.util.stream.Collectors;
  */
 public class NBLoggerConfig extends ConfigurationFactory {
 
+    public static final String SESSION_APPENDER = "SESSION_APPENDER";
     public static Map<String, String> STANDARD_FORMATS = Map.of(
-            "TERSE", "%8r %-5level [%t] %-12logger{0} %msg%n%throwable",
-            "VERBOSE", "%d{DEFAULT}{GMT} [%t] %logger %-5level: %msg%n%throwable",
-            "TERSE-ANSI", "%8r %highlight{%-5level} %style{%C{1.} [%t] %-12logger{0}} %msg%n%throwable",
-            "VERBOSE-ANSI", "%d{DEFAULT}{GMT} [%t] %highlight{%logger %-5level}: %msg%n%throwable"
+        "TERSE", "%8r %-5level [%t] %-12logger{0} %msg%n%throwable",
+        "VERBOSE", "%d{DEFAULT}{GMT} [%t] %logger %-5level: %msg%n%throwable",
+        "TERSE-ANSI", "%8r %highlight{%-5level} %style{%C{1.} [%t] %-12logger{0}} %msg%n%throwable",
+        "VERBOSE-ANSI", "%d{DEFAULT}{GMT} [%t] %highlight{%logger %-5level}: %msg%n%throwable"
     );
 
     /**
@@ -66,8 +68,8 @@ public class NBLoggerConfig extends ConfigurationFactory {
      * we squelch them to some reasonable level so they aren't a nuisance.
      */
     public static Map<String, Level> BUILTIN_OVERRIDES = Map.of(
-            // ERROR StatusConsoleListener Unable to locate appender "SCENARIO_APPENDER" for logger config "oshi.util"
-            "oshi.util", Level.INFO
+        // ERROR StatusConsoleListener Unable to locate appender "SESSION_APPENDER" for logger config "oshi.util"
+        "oshi.util", Level.INFO
     );
 
     /**
@@ -158,20 +160,20 @@ public class NBLoggerConfig extends ConfigurationFactory {
         builder.setStatusLevel(internalLoggingStatusThreshold);
 
         builder.add(
-                builder.newFilter(
-                        "ThresholdFilter",
-                        Filter.Result.ACCEPT,
-                        Filter.Result.NEUTRAL
-                ).addAttribute("level", builderThresholdLevel)
+            builder.newFilter(
+                "ThresholdFilter",
+                Filter.Result.ACCEPT,
+                Filter.Result.NEUTRAL
+            ).addAttribute("level", builderThresholdLevel)
         );
 
         // CONSOLE appender
         AppenderComponentBuilder appenderBuilder =
-                builder.newAppender("console", "CONSOLE")
-                        .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
+            builder.newAppender("console", "CONSOLE")
+                .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
 
         appenderBuilder.add(builder.newLayout("PatternLayout")
-                .addAttribute("pattern", consolePattern));
+            .addAttribute("pattern", consolePattern));
 
 //        appenderBuilder.add(
 //                builder.newFilter("MarkerFilter", Filter.Result.DENY, Filter.Result.NEUTRAL)
@@ -181,8 +183,8 @@ public class NBLoggerConfig extends ConfigurationFactory {
 
         // Log4J internal logging
         builder.add(builder.newLogger("org.apache.logging.log4j", Level.DEBUG)
-                .add(builder.newAppenderRef("console"))
-                .addAttribute("additivity", false));
+            .add(builder.newAppenderRef("console"))
+            .addAttribute("additivity", false));
 
         if (sessionName != null) {
 
@@ -196,25 +198,32 @@ public class NBLoggerConfig extends ConfigurationFactory {
 
             // LOGFILE appender
             LayoutComponentBuilder logfileLayout = builder.newLayout("PatternLayout")
-                    .addAttribute("pattern", logfilePattern);
+                .addAttribute("pattern", logfilePattern);
 
 
             String logfilePath = loggerDir.resolve(getFileBase() + ".log").toString();
             this.logfileLocation = logfilePath;
             String archivePath = loggerDir.resolve(getFileBase() + "-TIMESTAMP.log.gz").toString()
-                    .replaceAll("TIMESTAMP", "%d{MM-dd-yy}");
+                .replaceAll("TIMESTAMP", "%d{MM-dd-yy}");
 
-            ComponentBuilder triggeringPolicy = builder.newComponent("Policies")
-                    .addComponent(builder.newComponent("CronTriggeringPolicy").addAttribute("schedule", "0 0 0 * * ?"))
-                    .addComponent(builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", "100M"));
+//            ComponentBuilder triggeringPolicy = builder.newComponent("Policies")
+//                .addComponent(builder.newComponent("CronTriggeringPolicy").addAttribute("schedule", "0 0 0 * * ?"))
+//                .addComponent(builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", "100M"));
 
+//            AppenderComponentBuilder logsAppenderBuilder =
+//                builder.newAppender("SESSION_APPENDER", RollingFileAppender.PLUGIN_NAME)
+//                    .addAttribute("fileName", logfilePath)
+//                    .addAttribute("filePattern", archivePath)
+//                    .addAttribute("append", false)
+//                    .add(logfileLayout)
+//                    .addComponent(triggeringPolicy);
             AppenderComponentBuilder logsAppenderBuilder =
-                    builder.newAppender("SCENARIO_APPENDER", RollingFileAppender.PLUGIN_NAME)
-                            .addAttribute("fileName", logfilePath)
-                            .addAttribute("filePattern", archivePath)
-                            .addAttribute("append", false)
-                            .add(logfileLayout)
-                            .addComponent(triggeringPolicy);
+                builder.newAppender("SESSION_APPENDER", FileAppender.PLUGIN_NAME)
+                    .addAttribute("fileName", logfilePath)
+//                    .addAttribute("filePattern", archivePath)
+                    .addAttribute("append", false)
+                    .add(logfileLayout);
+
             builder.add(logsAppenderBuilder);
 
             if (isDedicatedVerificationLoggerEnabled) {
@@ -222,46 +231,89 @@ public class NBLoggerConfig extends ConfigurationFactory {
             }
             // TODO: build stop-words transcoder, add padding to end of alphabet, substitute stopwords
 
-            if (fileLevel.isInRange(Level.INFO,Level.TRACE)) {
+            if (fileLevel.isInRange(Level.INFO, Level.TRACE)) {
                 attachAuxLogger(builder, "RUNTIME", fileLevel);
             }
 
             rootBuilder.add(
-                    builder.newAppenderRef("SCENARIO_APPENDER")
-                            .addAttribute("level", fileLevel)
+                builder.newAppenderRef("SESSION_APPENDER")
+                    .addAttribute("level", fileLevel)
             );
         }
 
         rootBuilder.add(
-                builder.newAppenderRef("console")
-                        .addAttribute("level",
-                                consoleLevel
-                        )
+            builder.newAppenderRef("console")
+                .addAttribute("level",
+                    consoleLevel
+                )
         );
 
         builder.add(rootBuilder);
 
         BUILTIN_OVERRIDES.forEach((k, v) -> {
             builder.add(builder.newLogger(k, v)
-                    .add(builder.newAppenderRef("console"))
-                    .add(builder.newAppenderRef("SCENARIO_APPENDER"))
-                    .addAttribute("additivity", true));
+                .add(builder.newAppenderRef("console"))
+                .add(builder.newAppenderRef("SESSION_APPENDER"))
+                .addAttribute("additivity", true));
         });
 
         logLevelOverrides.forEach((k, v) -> {
             Level olevel = Level.valueOf(v);
             builder.add(builder.newLogger(k, olevel)
-                    .add(builder.newAppenderRef("console"))
-                    .add(builder.newAppenderRef("SCENARIO_APPENDER"))
-                    .addAttribute("additivity", true));
+                .add(builder.newAppenderRef("console"))
+                .add(builder.newAppenderRef(SESSION_APPENDER))
+                .addAttribute("additivity", true));
         });
 
         BuiltConfiguration builtConfig = builder.build();
+        updateLink(logfileLocation);
         return builtConfig;
     }
 
+    private void updateLink(String logfileLocation) {
+        Path logpath = Path.of(logfileLocation);
+        Path logdir = logpath.getParent();
+        if (Files.exists(logpath)) {
+            String basename = logpath.getFileName().toString();
+            String linkname = basename.replace(getSessionName()+"_","");
+            Path linkPath = logdir.resolve(linkname);
+            try {
+                Files.deleteIfExists(linkPath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            Path targetPath = Path.of(basename);
+
+            try {
+                Files.createSymbolicLink(
+                    linkPath,
+                    targetPath.getFileName()
+                );
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            System.out.println("Unable to find " + logfileLocation + " for symlink update");
+        }
+    }
+
+    private void attachFileRotationObserver(BuiltConfiguration builtConfig) {
+        Appender appender = builtConfig.getAppender(SESSION_APPENDER);
+        if (appender instanceof AbstractOutputStreamAppender<?> sa) {
+            OutputStreamManager manager = sa.getManager();
+
+        }
+
+    }
+
+    private final static Pattern validSessionName = Pattern.compile("^[a-zA-Z~][a-zA-Z0-9_~]*$");
+
     private String getFileBase() {
-        return getSessionName().replaceAll("\\s", "_");
+        Matcher matcher = validSessionName.matcher(getSessionName());
+        if (!matcher.matches()) {
+            throw new RuntimeException("Session name invalid. Must follow pattern " + validSessionName.pattern());
+        }
+        return getSessionName() + "_session";
     }
 
     private String getSessionName() {
@@ -288,7 +340,7 @@ public class NBLoggerConfig extends ConfigurationFactory {
         if (!Files.exists(loggerDir)) {
             try {
                 FileAttribute<Set<PosixFilePermission>> attrs = PosixFilePermissions.asFileAttribute(
-                        PosixFilePermissions.fromString("rwxrwx---")
+                    PosixFilePermissions.fromString("rwxrwx---")
                 );
                 Path directory = Files.createDirectory(loggerDir, attrs);
             } catch (Exception e) {
@@ -301,7 +353,7 @@ public class NBLoggerConfig extends ConfigurationFactory {
     public NBLoggerConfig setConsolePattern(String consoleLoggingPattern) {
 
         consoleLoggingPattern = (ansiEnabled && STANDARD_FORMATS.containsKey(consoleLoggingPattern + "-ANSI"))
-                ? consoleLoggingPattern + "-ANSI" : consoleLoggingPattern;
+            ? consoleLoggingPattern + "-ANSI" : consoleLoggingPattern;
 
         this.consolePattern = STANDARD_FORMATS.getOrDefault(consoleLoggingPattern, consoleLoggingPattern);
         return this;
@@ -309,7 +361,7 @@ public class NBLoggerConfig extends ConfigurationFactory {
 
     public NBLoggerConfig setLogfilePattern(String logfileLoggingPattern) {
         logfileLoggingPattern = (logfileLoggingPattern.endsWith("-ANSI") && STANDARD_FORMATS.containsKey(logfileLoggingPattern))
-                ? logfileLoggingPattern.substring(logfileLoggingPattern.length() - 5) : logfileLoggingPattern;
+            ? logfileLoggingPattern.substring(logfileLoggingPattern.length() - 5) : logfileLoggingPattern;
 
         this.logfileLocation = STANDARD_FORMATS.getOrDefault(logfileLoggingPattern, logfileLoggingPattern);
         return this;
@@ -354,9 +406,9 @@ public class NBLoggerConfig extends ConfigurationFactory {
         }
 
         List<File> toDelete = filesList.stream()
-                .sorted(fileTimeComparator)
-                .limit(remove)
-                .collect(Collectors.toList());
+            .sorted(fileTimeComparator)
+            .limit(remove)
+            .collect(Collectors.toList());
 
         for (File file : toDelete) {
             logger.info(() -> "removing extra logfile: " + file.getPath());
@@ -390,12 +442,14 @@ public class NBLoggerConfig extends ConfigurationFactory {
     }
 
     private void attachAuxLogger(ConfigurationBuilder<BuiltConfiguration> builder, String loggerName, Level fileLevel) {
-        String appenderName = loggerName+(("_APPENDER").toUpperCase());
-        String fileName = loggerDir.resolve(getFileBase() + "_"+loggerName.toLowerCase()+".log").toString();
+        String appenderName = loggerName + (("_APPENDER").toUpperCase());
+        Path logPath = loggerDir.resolve(getFileBase() + "_" + loggerName.toLowerCase() + ".log");
+        Path linkPath = loggerDir.resolve(loggerName.toLowerCase()+".log");
+
         var appender = builder
             .newAppender(appenderName, FileAppender.PLUGIN_NAME)
             .addAttribute("append", false)
-            .addAttribute("fileName", fileName)
+            .addAttribute("fileName", logPath.toString())
             .add(builder
                 .newLayout("PatternLayout")
                 .addAttribute("pattern", "%d %p %C{1.} [%t] %m%n")
@@ -406,6 +460,14 @@ public class NBLoggerConfig extends ConfigurationFactory {
             .addAttribute("additivity", false);
         builder.add(appender);
         builder.add(logger);
+
+        try {
+            Files.deleteIfExists(linkPath);
+            Files.createSymbolicLink(linkPath,logPath.getFileName());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
     }
 }
