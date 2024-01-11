@@ -17,17 +17,12 @@
 package io.nosqlbench.engine.core.lifecycle.session;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
-import io.nosqlbench.nb.api.components.status.NBLiveComponent;
+import io.nosqlbench.nb.api.components.status.NBHeartbeatComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
-import io.nosqlbench.nb.api.engine.metrics.instruments.NBFunctionGauge;
-import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
-import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.engine.cmdstream.Cmd;
-import io.nosqlbench.engine.core.clientload.*;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
@@ -45,7 +40,7 @@ import java.util.function.Function;
  * on.
  * All NBScenarios are run within an NBSession.
  */
-public class NBSession extends NBLiveComponent implements Function<List<Cmd>, ExecutionResult>, NBTokenWords {
+public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd>, ExecutionResult>, NBTokenWords {
     private final static Logger logger = LogManager.getLogger(NBSession.class);
 //    private final ClientSystemMetricChecker clientMetricChecker;
 

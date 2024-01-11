@@ -20,7 +20,6 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.EmitterOpDispenserWrapper
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
@@ -34,6 +33,7 @@ import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
+import io.nosqlbench.nb.api.components.status.NBStatusComponent;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -67,7 +67,7 @@ import java.util.function.Supplier;
 /**
  * A default implementation of an Activity, suitable for building upon.
  */
-public class SimpleActivity extends NBBaseComponent implements Activity, InvokableResult {
+public class SimpleActivity extends NBStatusComponent implements Activity, InvokableResult {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
 
     protected ActivityDef activityDef;
