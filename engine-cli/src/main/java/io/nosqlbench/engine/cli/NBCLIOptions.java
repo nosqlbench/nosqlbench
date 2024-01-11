@@ -204,7 +204,7 @@ public class NBCLIOptions {
     private String annotateLabelSpec = "";
     private String metricsLabelSpec = "";
     private String wantsToCatResource ="";
-    private long heartbeatIntervalMs;
+    private long heartbeatIntervalMs = 10000;
 
     public boolean wantsLoggedMetrics() {
         return this.wantsConsoleMetrics;
