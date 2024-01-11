@@ -160,6 +160,21 @@
                     <compilerArgs>--enable-preview</compilerArgs>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <additionalOptions>--enable-preview</additionalOptions>
+                </configuration>
+                <!-- NO Executions by default for main project builds.
+                     This plugin should be called directly on the command line
+                     The site plugin appears to be broken or at least not properly maintained,
+                     so invoking via the site phase is more trouble than it is worth.
+                     -->
+                <!--                <executions>-->
+                <!--                </executions>-->
+            </plugin>
         </plugins>
         <resources>
             <resource>
