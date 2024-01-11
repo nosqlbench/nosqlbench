@@ -121,7 +121,7 @@ public class NBCLIOptions {
     private static final String GRAPHITE_LOG_LEVEL = "--graphite-log-level";
     private static final String REPORT_CSV_TO = "--report-csv-to";
     private static final String REPORT_SUMMARY_TO = "--report-summary-to";
-    private static final String REPORT_SUMMARY_TO_DEFAULT = "stdout:60,_LOGS_/_SESSION_.summary";
+    private static final String REPORT_SUMMARY_TO_DEFAULT = "stdout:60,_LOGS_/_SESSION__summary.txt";
     private static final String PROGRESS = "--progress";
     private static final String WITH_LOGGING_PATTERN = "--with-logging-pattern";
     private static final String LOGGING_PATTERN = "--logging-pattern";
