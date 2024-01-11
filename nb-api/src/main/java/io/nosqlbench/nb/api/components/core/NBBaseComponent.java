@@ -38,7 +38,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     protected boolean bufferOrphanedMetrics = false;
     private ConcurrentHashMap<String,String> props = new ConcurrentHashMap<>();
     protected Exception error;
-    protected long started_ns, teardown_ns, closed_ns, errored_ns;
+    protected long started_ns, teardown_ns, closed_ns, errored_ns, started_epoch_ms;
     protected NBInvokableState state = NBInvokableState.STARTING;
 
     public NBBaseComponent(NBComponent parentComponent) {
@@ -47,6 +47,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
 
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
         this.started_ns = System.nanoTime();
+        this.started_epoch_ms = System.currentTimeMillis();
         this.labels = componentSpecificLabelsOnly;
         if (parentComponent != null) {
             parent = parentComponent;
@@ -295,5 +296,10 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     @Override
     public long nanosof_error() {
         return this.errored_ns;
+    }
+
+    @Override
+    public long started_epoch_ms() {
+        return this.started_epoch_ms;
     }
 }

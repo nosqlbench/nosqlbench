@@ -47,4 +47,6 @@ public interface NBComponentTimeline {
      * @return nanosecond time of the error
      */
     long nanosof_error();
+
+    long started_epoch_ms();
 }
