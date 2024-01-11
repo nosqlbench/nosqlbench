@@ -49,7 +49,7 @@ public class DateRangeParser implements Function<String, DateRange> {
         try {
             return DateRange.parse(value);
         } catch (ParseException e) {
-            throw new RuntimeException("unable to parse date range input '" + value + "': " + e.getMessage());
+            throw new RuntimeException(STR."unable to parse date range input '\{value}': \{e.getMessage()}");
         }
     }
 }

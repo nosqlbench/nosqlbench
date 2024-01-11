@@ -54,7 +54,7 @@ public class NormalizeCqlVector implements Function<CqlVector, CqlVector> {
             List<Double> list = Arrays.stream(vals).mapToObj(d -> Double.valueOf((float) (d * factor))).toList();
             return CqlVector.newInstance(list);
         } else {
-            throw new RuntimeException(NormalizeCqlVector.class.getCanonicalName()+ " only supports Double and Float type");
+            throw new RuntimeException(STR."\{NormalizeCqlVector.class.getCanonicalName()} only supports Double and Float type");
         }
     }
 }

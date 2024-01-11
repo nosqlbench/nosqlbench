@@ -45,14 +45,14 @@ public class DefaultDatasetParser implements DatasetParser {
 
     @Override
     public String parse(String raw) {
-        logger.debug(() -> "Parsing: " + raw);
+        logger.debug(() -> STR."Parsing: \{raw}");
         JsonObject conditions = JsonParser.parseString(raw).getAsJsonObject().get(CONDITIONS).getAsJsonObject();
         if (conditions.has(AND)) {
             return parseAndConditionsInline(conditions);
         } else if (conditions.has(OR)) {
             return parseOrConditionsInline(conditions);
         } else {
-            throw new RuntimeException("Unknown predicate type: " + conditions.keySet());
+            throw new RuntimeException(STR."Unknown predicate type: \{conditions.keySet()}");
         }
     }
 
@@ -79,7 +79,7 @@ public class DefaultDatasetParser implements DatasetParser {
                         SINGLE_QUOTE + match.getAsJsonObject().get(VALUE).getAsString() + SINGLE_QUOTE
                 );
             } else {
-                logger.error(() -> "No match found for: " + condition.keySet());
+                logger.error(() -> STR."No match found for: \{condition.keySet()}");
             }
         }
         builder.append(RIGHT_PAREN);
@@ -108,7 +108,7 @@ public class DefaultDatasetParser implements DatasetParser {
                         SINGLE_QUOTE + match.getAsJsonObject().get(VALUE).getAsString() + SINGLE_QUOTE
                 );
             } else {
-                logger.error(() -> "No match found for: " + condition.keySet());
+                logger.error(() -> STR."No match found for: \{condition.keySet()}");
             }
         }
         return builder.toString();

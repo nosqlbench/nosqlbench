@@ -31,7 +31,7 @@ public interface DatasetParser {
             case "default" -> new DefaultDatasetParser();
             case "noop" -> new NoopDatasetParser();
             case "jaw" -> new JAWDatasetParser();
-            default -> throw new RuntimeException("Unknown parser name: " + parsername);
+            default -> throw new RuntimeException(STR."Unknown parser name: \{parsername}");
         };
     }
 

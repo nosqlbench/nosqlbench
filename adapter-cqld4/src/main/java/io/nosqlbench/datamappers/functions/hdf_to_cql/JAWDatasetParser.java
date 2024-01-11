@@ -26,7 +26,7 @@ public class JAWDatasetParser implements DatasetParser {
     @Override
     public String parse(String raw) {
         if (!raw.toUpperCase().startsWith(WHERE)) {
-            raw = WHERE + " " + raw;
+            raw = STR."\{WHERE} \{raw}";
         }
         return raw;
     }
