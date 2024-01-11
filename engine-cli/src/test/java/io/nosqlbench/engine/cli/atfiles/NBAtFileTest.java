@@ -32,6 +32,12 @@ class NBAtFileTest {
     }
 
     @Test
+    public void testRelativizedPaths() {
+        LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/relativized.yaml");
+        assertThat(strings).containsExactly("--option1=src/test/resources/atfiles/value1");
+    }
+
+    @Test
     public void testParseSimpleMapDefaultFmt() {
         LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/simple_map.yaml");
         assertThat(strings).containsExactly("arg1=val1","arg2=val2","arg3=val3");
