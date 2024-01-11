@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public class CqlModelBuilder extends CqlParserBaseListener {
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/buidler");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/buidler");
 
     private final CGErrorListener errorListener;
     private final CqlModel model;
@@ -49,17 +49,17 @@ public class CqlModelBuilder extends CqlParserBaseListener {
     @Override
     public void exitEveryRule(ParserRuleContext ctx) {
         if ((counted++ & 0b11111111111111) == 0b10000000000000) {
-            logger.trace(() -> "parsed " + counted + " elements...");
+            logger.trace(() -> STR."parsed \{counted} elements...");
         }
     }
 
     @Override
     public void visitErrorNode(ErrorNode node) {
-        System.out.println("error parsing: " + node.toString());
+        System.out.println(STR."error parsing: \{node.toString()}");
         ParseTree parent = node.getParent();
         String errorNodeType = parent.getClass().getSimpleName();
 
-        logger.info(() -> "PARSE ERROR: " + errorNodeType + "\n" + node.getSourceInterval());
+        logger.info(() -> STR."PARSE ERROR: \{errorNodeType}\n\{node.getSourceInterval()}");
 
         super.visitErrorNode(node);
     }

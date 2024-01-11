@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 public class CGColumnRebinder {
 
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/rebinder");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/rebinder");
     private final BindingsAccumulator accumulator;
     private final double partitionMultiplier;
     private final int quantizerDigits;
@@ -58,8 +58,8 @@ public class CGColumnRebinder {
             return accumulator.forColumn(column);
         }
         modulo = quantizeModuloByMagnitude(modulo, 1);
-        logger.debug("Set partition modulo for " + column.getFullName() + " to " + modulo);
-        Binding binding = accumulator.forColumn(column, "Mod(" + modulo + "L); ");
+        logger.debug(STR."Set partition modulo for \{column.getFullName()} to \{modulo}");
+        Binding binding = accumulator.forColumn(column, STR."Mod(\{modulo}L); ");
         return binding;
     }
 

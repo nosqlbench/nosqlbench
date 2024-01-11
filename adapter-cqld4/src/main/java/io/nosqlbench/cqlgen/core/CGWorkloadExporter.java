@@ -92,34 +92,35 @@ public class CGWorkloadExporter implements BundledApp {
     @Override
     public int applyAsInt(String[] args) {
 
-        logger.info(() -> "running CQL workload exporter with args:" + Arrays.toString(args));
+        logger.info(() -> STR."running CQL workload exporter with args:\{Arrays.toString(args)}");
 
         if (args.length == 0) {
             throw new RuntimeException("Usage example: PROG filepath.cql filepath.yaml");
         }
         Path srcpath = Path.of(args[0]);
         if (!srcpath.toString().endsWith(".cql")) {
-            throw new RuntimeException("File '" + srcpath + "' must end in .cql");
+            throw new RuntimeException(STR."File '\{srcpath}' must end in .cql");
         }
         if (!Files.exists(srcpath)) {
-            throw new RuntimeException("File '" + srcpath + "' does not exist.");
+            throw new RuntimeException(STR."File '\{srcpath}' does not exist.");
         }
 
         Path target = null;
         if (args.length >= 2) {
             target = Path.of(args[1]);
-            logger.info("using output path as '" + target + "'");
+            logger.info(STR."using output path as '\{target}'");
         } else {
             target = Path.of(srcpath.toString().replace(".cql", ".yaml"));
-            logger.info("assumed output path as '" + target + "'");
+            logger.info(STR."assumed output path as '\{target}'");
 
         }
 
         if (!target.toString().endsWith(".yaml")) {
-            throw new RuntimeException("Target file must end in .yaml, but it is '" + target + "'");
+            throw new RuntimeException(STR."Target file must end in .yaml, but it is '\{target}'");
         }
         if (Files.exists(target) && !target.toString().startsWith("_")) {
-            throw new RuntimeException("Target file '" + target + "' exists. Please remove it first or use a different target file name.");
+            throw new RuntimeException(
+                    STR."Target file '\{target}' exists. Please remove it first or use a different target file name.");
         }
 
         Yaml yaml = new Yaml();
@@ -146,7 +147,7 @@ public class CGWorkloadExporter implements BundledApp {
         String ddl;
         try {
             ddl = Files.readString(srcpath);
-            logger.info("read " + ddl.length() + " character DDL file, parsing");
+            logger.info(STR."read \{ddl.length()} character DDL file, parsing");
             if (textTransformers != null) {
                 ddl = textTransformers.process(ddl);
             }
@@ -170,7 +171,7 @@ public class CGWorkloadExporter implements BundledApp {
             for (String error : errorlist) {
                 logger.error(error);
             }
-            throw new RuntimeException("there were " + errorlist.size() + " reference errors in the model.");
+            throw new RuntimeException(STR."there were \{errorlist.size()} reference errors in the model.");
         }
         this.model = modelTransformers.apply(this.model);
 
@@ -181,10 +182,10 @@ public class CGWorkloadExporter implements BundledApp {
                     workload,
                     StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING
             );
-            logger.info("Wrote workload template as '" + target + "'. Bear in mind that this is simply one version " +
-                    "of a workload using this schema, and may not be representative of actual production usage patterns.");
+            logger.info(
+                    STR."Wrote workload template as '\{target}'. Bear in mind that this is simply one version of a workload using this schema, and may not be representative of actual production usage patterns.");
         } catch (IOException e) {
-            String errmsg = "There was an error writing '" + target + "'.";
+            String errmsg = STR."There was an error writing '\{target}'.";
             logger.error(errmsg);
             throw new RuntimeException(errmsg);
         }
@@ -195,7 +196,7 @@ public class CGWorkloadExporter implements BundledApp {
     private String loadFile(Path path) {
         try {
             String ddl = Files.readString(path);
-            logger.info(() -> "read " + ddl.length() + " character DDL file");
+            logger.info(() -> STR."read \{ddl.length()} character DDL file");
             return ddl;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -242,7 +243,7 @@ public class CGWorkloadExporter implements BundledApp {
                     case "select-seq" -> genSelectOpTemplates(model, blockname);
                     case "scan-10-seq" -> genScanOpTemplates(model, blockname);
                     case "update-seq" -> genUpdateOpTemplates(model, blockname);
-                    default -> throw new RuntimeException("Unable to create block entries for " + component + ".");
+                    default -> throw new RuntimeException(STR."Unable to create block entries for \{component}.");
                 };
                 block.putAll(additions);
             }
@@ -284,7 +285,8 @@ public class CGWorkloadExporter implements BundledApp {
             }
             this.blockplan = planmap;
         } else {
-            throw new RuntimeException("Unrecognized type '" + generate_blocks_spec.getClass().getSimpleName() + "' for 'blockplan' config.");
+            throw new RuntimeException(
+                    STR."Unrecognized type '\{generate_blocks_spec.getClass().getSimpleName()}' for 'blockplan' config.");
         }
     }
 
@@ -295,11 +297,11 @@ public class CGWorkloadExporter implements BundledApp {
                     Object value = specmap.get(key.toString());
                     if (value instanceof Number number) {
                         this.timeouts.put(key.toString(), number.doubleValue());
-                        logger.info("configured '" + key + "' timeout as " + this.timeouts.get(key.toString()) + "S");
+                        logger.info(STR."configured '\{key}' timeout as \{this.timeouts.get(key.toString())}S");
                     }
 
                 } else {
-                    throw new RuntimeException("timeout type '" + key + "' unknown. Known types: " + this.timeouts.keySet());
+                    throw new RuntimeException(STR."timeout type '\{key}' unknown. Known types: \{this.timeouts.keySet()}");
                 }
 
             }
@@ -348,7 +350,7 @@ public class CGWorkloadExporter implements BundledApp {
         blockdata.put("ops", ops);
         for (CqlTable table : model.getTableDefs()) {
             if (table.getClusteringColumns().size() == 0) {
-                logger.debug(() -> "skipping table " + table.getFullName() + " for scan since there are no clustering columns");
+                logger.debug(() -> STR."skipping table \{table.getFullName()} for scan since there are no clustering columns");
             }
             ops.put(
                     namer.nameFor(table, "optype", "scan", "blockname", blockname),
@@ -429,7 +431,7 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genInsertSyntax(CqlTable table) {
         if (isCounterTable(table)) {
-            logger.warn("skipping insert on counter table '" + table.getFullName());
+            logger.warn(STR."skipping insert on counter table '\{table.getFullName()}");
         }
 
         return """
@@ -448,7 +450,7 @@ public class CGWorkloadExporter implements BundledApp {
                         String.join(", ",
                                 table.getColumnDefs().stream()
                                         .map(c -> binder.forColumn(c))
-                                        .map(c -> "{" + c.getName() + "}").toList()));
+                                        .map(c -> STR."{\{c.getName()}}").toList()));
     }
 
 
@@ -535,7 +537,7 @@ public class CGWorkloadExporter implements BundledApp {
         var lastcount = keycount;
         keycount = Math.max(table.getPartitionKeys().size(), keycount);
         if (keycount != lastcount) {
-            logger.debug("minimum keycount for " + table.getFullName() + " adjusted from " + lastcount + " to " + keycount);
+            logger.debug(STR."minimum keycount for \{table.getFullName()} adjusted from \{lastcount} to \{keycount}");
         }
 
         // TODO; constraints on predicates based on valid constructions
@@ -552,7 +554,7 @@ public class CGWorkloadExporter implements BundledApp {
     private String genPredicatePart(CqlTableColumn def) {
         String typeName = def.getTrimmedTypedef();
         Binding binding = binder.forColumn(def);
-        return def.getName() + "={" + binding.getName() + "}";
+        return STR."\{def.getName()}={\{binding.getName()}}";
     }
 
     private String genUpdateSyntax(CqlTable table) {
@@ -639,7 +641,7 @@ public class CGWorkloadExporter implements BundledApp {
             ops.put(
                     namer.nameFor(table, "optype", "drop", "blockname", blockname),
                     Map.of(
-                            "simple", "drop table if exists " + table.getFullName() + ";",
+                            "simple", STR."drop table if exists \{table.getFullName()};",
                             "timeout", timeouts.get("drop")
                     )
             );
@@ -655,7 +657,7 @@ public class CGWorkloadExporter implements BundledApp {
             ops.put(
                     namer.nameFor(type, "optype", "drop-type", "blockname", blockname),
                     Map.of(
-                            "simple", "drop type if exists " + type.getKeyspace() + "." + type.getName() + ";",
+                            "simple", STR."drop type if exists \{type.getKeyspace()}.\{type.getName()};",
                             "timeout", timeouts.get("drop")
                     )
             );
@@ -671,7 +673,7 @@ public class CGWorkloadExporter implements BundledApp {
             ops.put(
                     namer.nameFor(type, "optype", "drop-keyspace", "blockname", blockname),
                     Map.of(
-                            "simple", "drop keyspace if exists " + type.getKeyspace() + ";",
+                            "simple", STR."drop keyspace if exists \{type.getKeyspace()};",
                             "timeout", timeouts.get("drop")
                     )
             );
@@ -689,7 +691,7 @@ public class CGWorkloadExporter implements BundledApp {
             ops.put(
                     namer.nameFor(table, "optype", "truncate", "blockname", blockname),
                     Map.of(
-                            "simple", "truncate " + table.getFullName() + ";",
+                            "simple", STR."truncate \{table.getFullName()};",
                             "timeout", timeouts.get("truncate")
                     )
             );
@@ -773,12 +775,12 @@ public class CGWorkloadExporter implements BundledApp {
                 .replace("KEYSPACE", type.getKeyspace().getName())
                 .replace("TYPENAME", type.getName())
                 .replace("TYPEDEF", type.getColumnDefs().stream()
-                        .map(def -> def.getName() + " " + def.getTypedef()).collect(Collectors.joining(",\n")));
+                        .map(def -> STR."\{def.getName()} \{def.getTypedef()}").collect(Collectors.joining(",\n")));
     }
 
     private Object genTableDDL(CqlTable cqltable) {
         if (cqltable.isCompactStorage()) {
-            logger.warn("COMPACT STORAGE is not supported, eliding this option for table '" + cqltable.getFullName() + "'");
+            logger.warn(STR."COMPACT STORAGE is not supported, eliding this option for table '\{cqltable.getFullName()}'");
         }
 
         return """
@@ -829,7 +831,7 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genTableColumnDDL(CqlTable cqltable) {
         return cqltable.getColumnDefs().stream()
-                .map(cd -> cd.getName() + " " + cd.getTrimmedTypedef())
+                .map(cd -> STR."\{cd.getName()} \{cd.getTrimmedTypedef()}")
                 .collect(Collectors.joining(",\n"));
     }
 

@@ -79,7 +79,7 @@ public class CqlType implements NBNamedElement, NBLabeledElement {
 
     public void getReferenceErrors(List<String> errors) {
         if (!defined) {
-            errors.add("type " + this.name + " was referenced but not defined.");
+            errors.add(STR."type \{this.name} was referenced but not defined.");
         }
     }
 

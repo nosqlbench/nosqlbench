@@ -27,6 +27,6 @@ public class UnresolvedBindingException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return super.getMessage() + " (for column def '" + def.toString() + "')";
+        return STR."\{super.getMessage()} (for column def '\{def.toString()}')";
     }
 }

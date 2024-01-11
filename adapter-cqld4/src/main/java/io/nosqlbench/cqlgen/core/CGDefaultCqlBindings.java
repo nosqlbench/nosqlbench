@@ -41,8 +41,8 @@ public class CGDefaultCqlBindings implements BindingsLibrary {
             .first()
             .or(() -> NBIO.all().searchPrefixes(DEFAULT_CFG_DIR).pathname(DEFAULT_BINDINGS_FILE).first())
             .orElseThrow(
-                () -> new RuntimeException("Unable to load " + DEFAULT_BINDINGS_FILE +
-                    ", from local dir or internally as cqlgen" + DEFAULT_BINDINGS_FILE)
+                () -> new RuntimeException(
+                        STR."Unable to load \{DEFAULT_BINDINGS_FILE}, from local dir or internally as cqlgen\{DEFAULT_BINDINGS_FILE}")
             );
 
         OpsDocList opsDocList = OpsLoader.loadContent(content, Map.of());

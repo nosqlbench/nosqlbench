@@ -23,9 +23,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public enum CGLiteralFormat {
-    TEXT(v -> "\""+v+"\""),
-    ASCII(v -> "\""+v+"\""),
-    VARCHAR(v -> "\""+v+"\""),
+    TEXT(v -> STR."\"\{v}\""),
+    ASCII(v -> STR."\"\{v}\""),
+    VARCHAR(v -> STR."\"\{v}\""),
     TINYINT,
     SMALLINT,
     INT,

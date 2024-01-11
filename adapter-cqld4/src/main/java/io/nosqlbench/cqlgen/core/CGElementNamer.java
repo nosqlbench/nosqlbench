@@ -127,25 +127,19 @@ public class CGElementNamer implements Function<Map<String, String>, String> {
                 return template.replace(name, labels.get(name.toUpperCase()));
             }
             if (required) {
-                throw new RuntimeException("Section label '" + name + "' was not provided for template, but it is required.");
+                throw new RuntimeException(STR."Section label '\{name}' was not provided for template, but it is required.");
             }
             return "";
         }
 
         @Override
         public String toString() {
-            return "Section{" +
-                "name='" + name + '\'' +
-                ", template='" + template + '\'' +
-                ", required=" + required +
-                '}';
+            return STR."Section{name='\{name}\{'\''}, template='\{template}\{'\''}, required=\{required}\{'}'}";
         }
     }
 
     @Override
     public String toString() {
-        return "ElementNamer: " + this.spec + "]\n" +
-            "sections=" + sections +
-            '}';
+        return STR."ElementNamer: \{this.spec}]\nsections=\{sections}\{'}'}";
     }
 }

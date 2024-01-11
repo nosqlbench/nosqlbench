@@ -63,11 +63,10 @@ public class CqlTable implements NBNamedElement, NBLabeledElement {
 
     @Override
     public String toString() {
-        return "cql table: '" + this.name + "':\n"
-            + this.coldefs.stream()
-            .map(Object::toString)
-            .map(s -> "   " + s)
-            .collect(Collectors.joining("\n"));
+        return STR."cql table: '\{this.name}':\n\{this.coldefs.stream()
+                .map(Object::toString)
+                .map(s -> STR."   \{s}")
+                .collect(Collectors.joining("\n"))}";
     }
 
     public List<CqlTableColumn> getColumnDefs() {
@@ -104,7 +103,7 @@ public class CqlTable implements NBNamedElement, NBLabeledElement {
             }
         }
         if (new_partitioning== partitioning) {
-            throw new RuntimeException("Unable to assign partition key '" + pkey + "' to a known column of the same name.");
+            throw new RuntimeException(STR."Unable to assign partition key '\{pkey}' to a known column of the same name.");
         }
         this.partitioning = new_partitioning;
 
@@ -123,7 +122,7 @@ public class CqlTable implements NBNamedElement, NBLabeledElement {
             }
         }
         if (new_clustering == clustering) {
-            throw new RuntimeException("Unable to assign clustering field '" + ccol + " to a known column of the same name.");
+            throw new RuntimeException(STR."Unable to assign clustering field '\{ccol} to a known column of the same name.");
         }
         this.clustering = new_clustering;
     }
@@ -151,8 +150,8 @@ public class CqlTable implements NBNamedElement, NBLabeledElement {
             .filter(c -> c.getName().equalsIgnoreCase(colname))
             .findFirst();
         if (!def.isPresent()) {
-            throw new RuntimeException("Unable to find column definition in table '" +
-                this.name + "' for column '" + colname + '\'');
+            throw new RuntimeException(
+                    STR."Unable to find column definition in table '\{this.name}' for column '\{colname}\{'\''}");
         }
         return def.orElseThrow();
     }

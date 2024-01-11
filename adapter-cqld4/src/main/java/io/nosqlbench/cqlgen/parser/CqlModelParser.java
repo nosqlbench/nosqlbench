@@ -36,15 +36,15 @@ import java.util.List;
 
 
 public class CqlModelParser {
-    private final static Logger logger  = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/parser");
+    private final static Logger logger  = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/parser");
 
 
     public static CqlModel parse(Path path) {
         try {
             String ddl = Files.readString(path);
-            logger.info(() -> "read " + ddl.length() + " character DDL file, parsing");
+            logger.info(() -> STR."read \{ddl.length()} character DDL file, parsing");
             CqlModel parsed = parse(ddl, null);
-            logger.info(() -> "parsed cql model: " + parsed.getSummaryLine());
+            logger.info(() -> STR."parsed cql model: \{parsed.getSummaryLine()}");
             return parsed;
 
         } catch (IOException e) {
@@ -79,13 +79,13 @@ public class CqlModelParser {
             CqlModel model = cqlModelBuilder.getModel();
             if (model.getErrors().size()>0) {
                 System.out.println(model.getErrors());
-                throw new RuntimeException("Unable to render model for unparsable input with errors:\n" + model.getErrors());
+                throw new RuntimeException(STR."Unable to render model for unparsable input with errors:\n\{model.getErrors()}");
             } else {
                 return model;
             }
 
         } catch (Exception e) {
-            logger.warn(() -> "Error while parsing flow:" + e.getMessage());
+            logger.warn(() -> STR."Error while parsing flow:\{e.getMessage()}");
             throw e;
 //            return new ParseResult(e);
         }

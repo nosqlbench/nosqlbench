@@ -47,7 +47,7 @@ import java.util.function.Supplier;
  * </p>
  */
 public class CqlModel {
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/model");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/model");
 
     private final Supplier<List<String>> errors;
     private final List<CqlKeyspaceDef> keyspaceDefs = new ArrayList();
@@ -75,18 +75,18 @@ public class CqlModel {
 
             CqlKeyspaceDef ksdef = getKeyspace(statsKeyspacename);
             if (ksdef !=null) {
-                logger.debug(() -> "setting         keyspace stats for '" + statsKeyspacename + "'");
+                logger.debug(() -> STR."setting         keyspace stats for '\{statsKeyspacename}'");
                 ksdef.setStats(keyspaceStats);
                 keyspaceStats.getKeyspaceTables().forEach((tbname, tbstats) -> {
                     CqlTable table = ksdef.getTable(tbname);
                     if (table != null) {
                         table.setStats(tbstats);
                     } else {
-                        logger.debug(() -> " skipping table '" + statsKeyspacename + "." + tbname + ", since it was not found in the model.");
+                        logger.debug(() -> STR." skipping table '\{statsKeyspacename}.\{tbname}, since it was not found in the model.");
                     }
                 });
             } else {
-                logger.debug(() -> "       skipping keyspace stats for '" + statsKeyspacename + "'");
+                logger.debug(() -> STR."       skipping keyspace stats for '\{statsKeyspacename}'");
             }
 
         }
@@ -128,9 +128,8 @@ public class CqlModel {
     }
 
     public String getSummaryLine() {
-        return "keyspaces: " + keyspaceDefs.size() + ", tables: " + getTableDefs().size() +
-            ", columns: " + getTableDefs().stream().mapToInt(t -> t.getColumnDefs().size()).sum() +
-            ", types: " + getTypeDefs().size();
+        return STR."keyspaces: \{keyspaceDefs.size()}, tables: \{getTableDefs().size()}, columns: \{getTableDefs().stream()
+                .mapToInt(t -> t.getColumnDefs().size()).sum()}, types: \{getTypeDefs().size()}";
     }
 
     public List<CqlTable> getTableDefs() {

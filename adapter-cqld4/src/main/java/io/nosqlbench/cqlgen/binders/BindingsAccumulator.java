@@ -27,7 +27,7 @@ import java.io.File;
 import java.util.*;
 
 public class BindingsAccumulator {
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/bindings-cache");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/bindings-cache");
 
     private final NamingFolio namer;
     private final List<BindingsLibrary> libraries;
@@ -81,9 +81,8 @@ public class BindingsAccumulator {
             Optional<Binding> binding = library.resolveBindingsFor(def);
             if (binding.isPresent()) {
                 if (binding.get().getRecipe()==null) {
-                    throw new RuntimeException("Binding returned from library " + library + "' was null, for def '" + def + "'. " +
-                        "This probably means you need to add a default binding for '" + def.getTrimmedTypedef() + "' to " +
-                    CGDefaultCqlBindings.DEFAULT_CFG_DIR+ File.separator+CGDefaultCqlBindings.DEFAULT_BINDINGS_FILE+" (see cqlgen help for details)");
+                    throw new RuntimeException(
+                            STR."Binding returned from library \{library}' was null, for def '\{def}'. This probably means you need to add a default binding for '\{def.getTrimmedTypedef()}' to \{CGDefaultCqlBindings.DEFAULT_CFG_DIR}\{File.separator}\{CGDefaultCqlBindings.DEFAULT_BINDINGS_FILE} (see cqlgen help for details)");
                 }
                 return binding;
             }
@@ -117,7 +116,7 @@ public class BindingsAccumulator {
         accumulated.forEach((k,v) -> {
             inverted.computeIfAbsent(v,def -> new HashSet<>()).add(k);
         });
-        logger.info(() -> "computed " + accumulated.size() + " raw bindings, consisting of " + inverted.size() + " unique definitions.");
+        logger.info(() -> STR."computed \{accumulated.size()} raw bindings, consisting of \{inverted.size()} unique definitions.");
         return accumulated;
     }
 }

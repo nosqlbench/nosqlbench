@@ -40,8 +40,7 @@ public class CGErrorListener extends BaseErrorListener implements Supplier<List<
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
         String locref= getLocationRef(origin,line, charPositionInLine);
-        String errmsg = "Error in " + origin.toString()+ ":\n" +
-            e.toString() + ":\n"+locref;
+        String errmsg = STR."Error in \{origin.toString()}:\n\{e.toString()}:\n\{locref}";
         errors.add(errmsg);
     }
 
@@ -50,7 +49,7 @@ public class CGErrorListener extends BaseErrorListener implements Supplier<List<
         Path vcwd = cwd;
 
         while (vcwd!=null) {
-            if (Files.exists(Path.of(vcwd + File.separator + ".git"))) {
+            if (Files.exists(Path.of(STR."\{vcwd}\{File.separator}.git"))) {
                 break;
             }
             vcwd = vcwd.getParent();
@@ -68,7 +67,7 @@ public class CGErrorListener extends BaseErrorListener implements Supplier<List<
         if (inij) {
             path = Path.of(path.toString().replace("target/classes/","src/main/resources/"));
         }
-        return "\tat (" + path + ":" + line+":"+charPositionInLine + ")";
+        return STR."\tat (\{path}:\{line}:\{charPositionInLine})";
     }
 
     @Override

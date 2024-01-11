@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class UnusedTableRemover implements CGModelTransformer, CGTransformerConfigurable {
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/unused-table-remover");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/unused-table-remover");
     private double minimumThreshold = 0.0001;
     private String name;
 
@@ -46,7 +46,8 @@ public class UnusedTableRemover implements CGModelTransformer, CGTransformerConf
             double weightedOps = Double.parseDouble(weightedOpsSpec);
             if (weightedOps < minimumThreshold) {
                 logger.info(() -> String.format(
-                    "removing table " + table.getKeyspace().getName() + "." + table.getName() + " with minimum weighted_ops of %1.5f under %1.5f",
+                        STR."removing table \{table.getKeyspace()
+                                .getName()}.\{table.getName()} with minimum weighted_ops of %1.5f under %1.5f",
                     weightedOps, minimumThreshold)
                 );
                 table.getKeyspace().removeTable(table);

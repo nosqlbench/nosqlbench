@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class CGTextTransformers implements Consumer<List<Map<String, ?>>>, Supplier<List<CGTextTransformer>> {
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/text-transformers");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/text-transformers");
     private final List<CGTextTransformer> transformers = new ArrayList<>();
 
     @Override
@@ -49,8 +49,8 @@ public class CGTextTransformers implements Consumer<List<Map<String, ?>>>, Suppl
 
             String classname = cfgmap.get("class").toString();
             if (!classname.contains(".")) {
-                String newname = CGNameObfuscator.class.getPackageName() + "." + classname;
-                logger.info("qualified transformer '" + classname + "' as '" + newname + "'");
+                String newname = STR."\{CGNameObfuscator.class.getPackageName()}.\{classname}";
+                logger.info(STR."qualified transformer '\{classname}' as '\{newname}'");
                 classname = newname;
             }
             Class<?> txclass = null;
@@ -62,7 +62,8 @@ public class CGTextTransformers implements Consumer<List<Map<String, ?>>>, Suppl
                 if (instance instanceof CGTextTransformer t) {
                     transformer = t;
                 } else {
-                    throw new RuntimeException("Object " + instance.getClass().getName() + " is not a " + CGTextTransformer.class.getName());
+                    throw new RuntimeException(
+                            STR."Object \{instance.getClass().getName()} is not a \{CGTextTransformer.class.getName()}");
                 }
             } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
                 throw new RuntimeException(e);
@@ -74,7 +75,7 @@ public class CGTextTransformers implements Consumer<List<Map<String, ?>>>, Suppl
                 Object cfgvalues = cfgmap.get("config");
                 if (cfgvalues != null) {
                     configurable.accept((cfgvalues));
-                    logger.info(() -> "configured transformer with " + cfgvalues);
+                    logger.info(() -> STR."configured transformer with \{cfgvalues}");
                 }
             }
 

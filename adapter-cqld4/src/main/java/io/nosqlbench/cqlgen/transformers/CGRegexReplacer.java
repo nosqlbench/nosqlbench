@@ -33,7 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CGRegexReplacer implements CGTextTransformer, CGTransformerConfigurable {
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/replacer");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/replacer");
     private List<Replacer> replacers;
     private String prefix = "";
     private String suffix = "";
@@ -49,11 +49,11 @@ public class CGRegexReplacer implements CGTextTransformer, CGTransformerConfigur
             int steps = 0;
             int replacements = 0;
             for (Replacer replacer : replacers) {
-                logger.info("applying regex replacer #" + ++steps);
+                logger.info(STR."applying regex replacer #\{++steps}");
                 text = replacer.apply(text);
                 replacements += replacer.replacements;
             }
-            logger.info(steps + " replacers applied. " + replacements + " replacements found total.");
+            logger.info(STR."\{steps} replacers applied. \{replacements} replacements found total.");
             if (outfile != null) {
                 try {
                     if (outfile.startsWith("_")) {
@@ -97,7 +97,7 @@ public class CGRegexReplacer implements CGTextTransformer, CGTransformerConfigur
         public int replacements = 0;
 
         Replacer(String from, String to) {
-            this.pattern = Pattern.compile("(?m)(?i)" + from);
+            this.pattern = Pattern.compile(STR."(?m)(?i)\{from}");
             this.replacement = to;
         }
 

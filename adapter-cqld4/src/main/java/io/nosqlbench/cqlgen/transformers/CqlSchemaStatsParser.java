@@ -62,7 +62,7 @@ public class CqlSchemaStatsParser {
         } else if (currentKeyspace != null) {
             currentKeyspace.setKeyspaceAttribute(keyval.getFirst(), keyval.getSecond());
         } else {
-            throw new RuntimeException("Orphaned attribute: " + keyval.toString());
+            throw new RuntimeException(STR."Orphaned attribute: \{keyval.toString()}");
         }
     }
 
@@ -97,7 +97,7 @@ public class CqlSchemaStatsParser {
     private void writeCurrentTable() {
         if (currentTable != null) {
             if (currentKeyspace == null) {
-                throw new RuntimeException("Table " + currentTable.getTableName() + "has no associated keyspace");
+                throw new RuntimeException(STR."Table \{currentTable.getTableName()}has no associated keyspace");
             } else {
                 currentKeyspace.setKeyspaceTable(currentTable.getTableName(), currentTable);
             }

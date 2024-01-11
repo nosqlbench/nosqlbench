@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 
 public class CGKeyspaceFilter implements CGModelTransformer, CGTransformerConfigurable {
 
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/keyspace-filter");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/keyspace-filter");
     private List<TriStateFilter> patterns;
     private String name;
 
@@ -61,10 +61,10 @@ public class CGKeyspaceFilter implements CGModelTransformer, CGTransformerConfig
                 action = pattern.apply(keyspace);
                 switch (action) {
                     case add:
-                        logger.debug(() -> "including all definitions in " + keyspace + " with inclusion pattern " + pattern);
+                        logger.debug(() -> STR."including all definitions in \{keyspace} with inclusion pattern \{pattern}");
                         break;
                     case remove:
-                        logger.info(() -> "removing all definitions in " + keyspace + " with exclusion pattern " + pattern);
+                        logger.info(() -> STR."removing all definitions in \{keyspace} with exclusion pattern \{pattern}");
                         model.removeKeyspaceDef(keyspace);
                     case inderminate:
                 }
@@ -109,7 +109,7 @@ public class CGKeyspaceFilter implements CGModelTransformer, CGTransformerConfig
         }
 
         public String toString() {
-            return filterType + ": " + pattern.pattern();
+            return STR."\{filterType}: \{pattern.pattern()}";
         }
     }
 

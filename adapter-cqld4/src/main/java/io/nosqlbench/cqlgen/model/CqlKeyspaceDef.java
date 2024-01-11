@@ -55,12 +55,7 @@ public class CqlKeyspaceDef implements NBNamedElement, NBLabeledElement {
 
     @Override
     public String toString() {
-        return "CqlKeyspace{" +
-            "keyspaceName='" + keyspaceName + '\'' +
-            ", stats=" + stats +
-            ", isDurableWrites=" + isDurableWrites +
-            ", replicationData='" + replicationData + '\'' +
-            '}';
+        return STR."CqlKeyspace{keyspaceName='\{keyspaceName}\{'\''}, stats=\{stats}, isDurableWrites=\{isDurableWrites}, replicationData='\{replicationData}\{'\''}\{'}'}";
     }
 
     @Override
@@ -115,7 +110,7 @@ public class CqlKeyspaceDef implements NBNamedElement, NBLabeledElement {
 
     public void getReferenceErrors(List<String> errors) {
         if (!defined) {
-            errors.add("keyspace " + this.keyspaceName + " was referenced but not defined.");
+            errors.add(STR."keyspace \{this.keyspaceName} was referenced but not defined.");
         }
         for (CqlType typedef : typeDefs) {
             typedef.getReferenceErrors(errors);

@@ -40,7 +40,7 @@ public class CGModelTransformers implements
     Supplier<List<CGModelTransformer>>,
     Function<CqlModel,CqlModel> {
 
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/transformers");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/transformers");
     private final List<CGModelTransformer> transformers = new ArrayList<>();
 
     public CGModelTransformers() {
@@ -58,8 +58,8 @@ public class CGModelTransformers implements
             String name = Optional.ofNullable(cfgmap.get("name")).orElseThrow().toString();
 
             if (!classname.contains(".")) {
-                String newname = CGNameObfuscator.class.getPackageName() + "." + classname;
-                logger.debug("qualified transformer '" + classname + "' as '" + newname + "'");
+                String newname = STR."\{CGNameObfuscator.class.getPackageName()}.\{classname}";
+                logger.debug(STR."qualified transformer '\{classname}' as '\{newname}'");
                 classname = newname;
             }
             Class<?> txclass = null;
@@ -72,7 +72,8 @@ public class CGModelTransformers implements
                     transformer = t;
                     t.setName(name);
                 } else {
-                    throw new RuntimeException("Object " + instance.getClass().getName() + " is not a " + CGModelTransformer.class.getName());
+                    throw new RuntimeException(
+                            STR."Object \{instance.getClass().getName()} is not a \{CGModelTransformer.class.getName()}");
                 }
             } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
                 throw new RuntimeException(e);
@@ -84,7 +85,7 @@ public class CGModelTransformers implements
                     NBConfiguration configuration = nbc.getConfigModel().apply((Map<String, ?>) cfg);
                     nbc.applyConfig(configuration);
                 } else {
-                    throw new RuntimeException("config for " + nbc.getClass().getSimpleName() + " must be map.");
+                    throw new RuntimeException(STR."config for \{nbc.getClass().getSimpleName()} must be map.");
                 }
 
             }
@@ -93,7 +94,7 @@ public class CGModelTransformers implements
                 Object cfgvalues = cfgmap.get("config");
                 if (cfgvalues !=null ) {
                     configurable.accept((cfgvalues));
-                    logger.info(() -> "configured transformer with " + cfgvalues);
+                    logger.info(() -> STR."configured transformer with \{cfgvalues}");
                 }
             }
 

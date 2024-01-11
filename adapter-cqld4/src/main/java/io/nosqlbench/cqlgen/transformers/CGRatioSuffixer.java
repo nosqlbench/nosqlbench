@@ -59,12 +59,14 @@ public class CGRatioSuffixer implements CGModelTransformer, NBConfigurable {
     public void applyConfig(NBConfiguration cfg) {
         this.format = cfg.get("format", String.class);
         if (!format.contains("%1$s")) {
-            throw new RuntimeException("format config param for the CGRatioSuffixer must contain '%1$s', but it is '" + format + "'");
+            throw new RuntimeException(
+                    STR."format config param for the CGRatioSuffixer must contain '%1$s', but it is '\{format}'");
         }
         Pattern pattern = Pattern.compile(".*?%2\\$(?<resolution>\\d+)d.*");
         Matcher matcher = pattern.matcher(format);
         if (!matcher.matches()) {
-            throw new RuntimeException("Could not find the required decimal format specifier for the format config parameter of " + CGRatioSuffixer.class);
+            throw new RuntimeException(
+                    STR."Could not find the required decimal format specifier for the format config parameter of \{CGRatioSuffixer.class}");
         }
         this.resolution = Double.parseDouble(matcher.group("resolution"))-1;
         this.resolution=Math.max(resolution,2);

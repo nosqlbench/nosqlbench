@@ -31,7 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public class CGGenStatsInjector implements CGModelTransformer, CGTransformerConfigurable {
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/stats-injector");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/stats-injector");
 
     private CGSchemaStats schemaStats = null;
     private String name;
@@ -59,11 +59,12 @@ public class CGGenStatsInjector implements CGModelTransformer, CGTransformerConf
             String histogramPath = config.get("path").toString();
             if (histogramPath != null) {
                 if (!Files.exists(Path.of(histogramPath))) {
-                    logger.info(() -> "No tablestats file was found. at '" + histogramPath + "'.");
+                    logger.info(() -> STR."No tablestats file was found. at '\{histogramPath}'.");
                     Object onmissing = config.get("onmissing");
                     if (onmissing==null || !String.valueOf(onmissing).toLowerCase(Locale.ROOT).equals("skip")) {
-                        logger.error("Unable to load tablestats file from '" + histogramPath + "' because it doesn't exists, and onmissing!=skip.");
-                        throw new RuntimeException("Unable to continue. onmissing=" + onmissing.toString());
+                        logger.error(
+                                STR."Unable to load tablestats file from '\{histogramPath}' because it doesn't exists, and onmissing!=skip.");
+                        throw new RuntimeException(STR."Unable to continue. onmissing=\{onmissing.toString()}");
                     } else {
                         return;
                     }

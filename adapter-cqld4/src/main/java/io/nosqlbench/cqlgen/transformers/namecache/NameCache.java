@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class NameCache {
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/namecache");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/namecache");
 
     private String path;
     private final Map<String, NamedKeyspace> keyspaces = new LinkedHashMap();
@@ -70,9 +70,9 @@ public class NameCache {
     public NameCache setPath(String path) {
         if (this.path!=null) {
             if (this.path.equals(path)) {
-                logger.debug("mapfile unchanged '" + path + "'");
+                logger.debug(STR."mapfile unchanged '\{path}'");
             } else {
-                logger.info(() -> "mapfile changed from '" + this.path + "' to '" + path + "'");
+                logger.info(() -> STR."mapfile changed from '\{this.path}' to '\{path}'");
                 this.path = path;
             }
         }

@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class CGUdtReplacer implements CGModelTransformer {
-    private final static Logger logger = LogManager.getLogger(CGWorkloadExporter.APPNAME+"/udt-replacer");
+    private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/udt-replacer");
     private String name;
 
     @Override
@@ -38,7 +38,7 @@ public class CGUdtReplacer implements CGModelTransformer {
         List<String> toReplace = new ArrayList<>();
 
         model.getTypeDefs().stream()
-            .map(t -> t.getKeyspace().getName() + "." + t.getName())
+            .map(t -> STR."\{t.getKeyspace().getName()}.\{t.getName()}")
             .forEach(toReplace::add);
 
         model.getTypeDefs().stream()
@@ -52,7 +52,7 @@ public class CGUdtReplacer implements CGModelTransformer {
                     String[] words = typedef.split("\\W+");
                     for (String word : words) {
                         if (word.toLowerCase(Locale.ROOT).equals(searchFor.toLowerCase(Locale.ROOT))) {
-                            logger.info(() -> "replacing '" + typedef + "' with blob");
+                            logger.info(() -> STR."replacing '\{typedef}' with blob");
                             coldef.setTypeDef("blob");
                             break;
                         }
