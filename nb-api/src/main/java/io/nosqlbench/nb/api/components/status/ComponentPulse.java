@@ -29,9 +29,10 @@ import java.nio.file.StandardOpenOption;
 public class ComponentPulse extends UnstartedPeriodicTaskComponent {
     private final static Logger logger = LogManager.getLogger(ComponentPulse.class);
     private final Path hbpath;
-    private final NBLiveComponent pulseOf;
+    private final NBHeartbeatComponent pulseOf;
+    private final Path linkpath;
 
-    public ComponentPulse(NBLiveComponent pulseOf, NBLabels extraLabels, String fileNameLabel, long millis) {
+    public ComponentPulse(NBHeartbeatComponent pulseOf, NBLabels extraLabels, String fileNameLabel, long millis) {
         super(
             pulseOf,
             extraLabels,
@@ -52,7 +53,8 @@ public class ComponentPulse extends UnstartedPeriodicTaskComponent {
     protected void task() {
 
         logger.debug("emitting pulse for :" + this.pulseOf.description());
-        Heartbeat heartbeat = pulseOf.heartbeat().withHeartbeatDetails(intervalmillis,System.currentTimeMillis());
+
+        Status heartbeat = pulseOf.status().withHeartbeatDetails(intervalmillis,System.currentTimeMillis());
         try {
             Files.writeString(hbpath, heartbeat.toYaml(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             Files.deleteIfExists(linkpath);
