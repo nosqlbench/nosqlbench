@@ -27,6 +27,6 @@ public class UndefinedResultSetException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "Attempted to access a result set which was not defined in op " + cqld4op.toString();
+        return STR."Attempted to access a result set which was not defined in op \{cqld4op.toString()}";
     }
 }

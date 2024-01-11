@@ -59,10 +59,8 @@ public class UnexpectedPagingException extends RuntimeException {
     }
 
     public String getMessage() {
-        String sb = "Additional paging would be required to read the results from this query fully" +
-            ", but the user has not explicitly indicated that paging was expected." +
-            " fetched/allowed: " + fetchedPages + "/" + maxpages +
-            " fetchSize(" + fetchSize + "): " + queryString;
+        String sb =
+                STR."Additional paging would be required to read the results from this query fully, but the user has not explicitly indicated that paging was expected. fetched/allowed: \{fetchedPages}/\{maxpages} fetchSize(\{fetchSize}): \{queryString}";
         return sb;
     }
 }

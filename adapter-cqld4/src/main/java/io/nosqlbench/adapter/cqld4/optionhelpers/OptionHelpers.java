@@ -63,8 +63,8 @@ public class OptionHelpers implements NBConfigurable {
 
         add("speculative", "Speculative Execution", (m, v) -> {
             if (PERCENTILE_EAGER_PATTERN.matcher(v).matches()) {
-                throw new RuntimeException("Option 'speculative' with percentile thresholds (" + v + ") is not supported in driver 4." +
-                    " If you want to provide a custom speculative execution policy, you can configure it directly via the Java driver options.");
+                throw new RuntimeException(
+                        STR."Option 'speculative' with percentile thresholds (\{v}) is not supported in driver 4. If you want to provide a custom speculative execution policy, you can configure it directly via the Java driver options.");
             }
             Matcher constantMatcher = CONSTANT_EAGER_PATTERN.matcher(v);
             if (constantMatcher.matches()) {
@@ -94,7 +94,9 @@ public class OptionHelpers implements NBConfigurable {
                     for (Field field : ProtocolVersion.class.getFields()) {
                         known.add(field.getName());
                     }
-                    throw new RuntimeException("There was no protocol name that matched '" + v + "'. The known values are " + known.stream().sorted().toList().toString());
+                    throw new RuntimeException(
+                            STR."There was no protocol name that matched '\{v}'. The known values are \{known.stream().sorted()
+                                    .toList().toString()}");
                 }
             }
             m.put(TypedDriverOption.PROTOCOL_VERSION, version);
@@ -154,7 +156,7 @@ public class OptionHelpers implements NBConfigurable {
                 .ifPresent(bs -> m.put(TypedDriverOption.SOCKET_SEND_BUFFER_SIZE, bs));
 
             for (String s : values.keySet()) {
-                throw new RuntimeException("socket_options field '" + s + "' was not recognized.");
+                throw new RuntimeException(STR."socket_options field '\{s}' was not recognized.");
             }
 
         });
@@ -186,8 +188,8 @@ public class OptionHelpers implements NBConfigurable {
                 Optional<Integer> maxLocal = Optional.ofNullable(matcher.group("max")).map(Integer::valueOf);
                 Optional<Integer> localRq = Optional.ofNullable(matcher.group("rq")).map(Integer::valueOf);
                 if (coreLocal.isPresent() && maxLocal.isPresent() && !coreLocal.get().equals(maxLocal.get())) {
-                    throw new RuntimeException("In CQL Java driver 4, core and max connections have been reduced to a single value." +
-                        " You have two different values in (" + spec + "). If you make them the same, you can continue to use the 'pooling' helper option.");
+                    throw new RuntimeException(
+                            STR."In CQL Java driver 4, core and max connections have been reduced to a single value. You have two different values in (\{spec}). If you make them the same, you can continue to use the 'pooling' helper option.");
                 }
                 coreLocal.ifPresent(i -> m.put(TypedDriverOption.CONNECTION_POOL_LOCAL_SIZE, i));
                 localRq.ifPresent(r -> m.put(TypedDriverOption.CONNECTION_MAX_REQUESTS, r));
@@ -196,15 +198,13 @@ public class OptionHelpers implements NBConfigurable {
                 Optional<Integer> maxRemote = Optional.ofNullable(matcher.group("rmax")).map(Integer::valueOf);
                 Optional<Integer> rqRemote = Optional.ofNullable(matcher.group("rrq")).map(Integer::valueOf);
                 if (coreRemote.isPresent() && maxRemote.isPresent() && !coreRemote.get().equals(maxRemote.get())) {
-                    throw new RuntimeException("In CQL Java driver 4, rcore and rmax connections have been reduced to a single value." +
-                        " You have two different values in (" + spec + "). If you make them the same, you can continue to use the 'pooling' helper option." +
-                        " Otherwise, set the driver options directly according to driver 4 docs.");
+                    throw new RuntimeException(
+                            STR."In CQL Java driver 4, rcore and rmax connections have been reduced to a single value. You have two different values in (\{spec}). If you make them the same, you can continue to use the 'pooling' helper option. Otherwise, set the driver options directly according to driver 4 docs.");
                 }
 
                 if (localRq.isPresent() && rqRemote.isPresent() && !localRq.get().equals(rqRemote.get())) {
-                    throw new RuntimeException("In CQL Java driver 4, remote and local max requests per connection have been reduced to a single value." +
-                        " You have two different values in (" + spec + "). If you make them the same, you can continue to use the 'pooling' helper option." +
-                        " Otherwise, set the driver options directly according to driver 4 docs.");
+                    throw new RuntimeException(
+                            STR."In CQL Java driver 4, remote and local max requests per connection have been reduced to a single value. You have two different values in (\{spec}). If you make them the same, you can continue to use the 'pooling' helper option. Otherwise, set the driver options directly according to driver 4 docs.");
                 }
                 coreRemote.ifPresent(i -> m.put(TypedDriverOption.CONNECTION_POOL_REMOTE_SIZE, i));
                 localRq.ifPresent(r -> m.put(TypedDriverOption.CONNECTION_MAX_REQUESTS, r));
@@ -221,7 +221,7 @@ public class OptionHelpers implements NBConfigurable {
                         m.put(TypedDriverOption.HEARTBEAT_TIMEOUT, Duration.ofMillis(ito));
                     });
             } else {
-                throw new RuntimeException("No pooling options could be parsed from spec: " + spec);
+                throw new RuntimeException(STR."No pooling options could be parsed from spec: \{spec}");
             }
         });
 

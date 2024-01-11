@@ -69,7 +69,7 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
         try {
             preparedStmt = boundSession.prepare(preparedQueryString);
         } catch (Exception e) {
-            throw new OpConfigError(e + "( for statement '" + stmtTpl + "')");
+            throw new OpConfigError(STR."\{e}( for statement '\{stmtTpl}')");
         }
 
         LongFunction<Statement> boundStmtFunc = c -> {

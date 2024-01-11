@@ -61,7 +61,7 @@ public class Cqld4Space implements AutoCloseable {
         for (TypedDriverOption<?> builtin : builtins) {
             String path = builtin.getRawOption().getPath();
             Class<?> rawType = builtin.getExpectedType().getRawType();
-            driverOpts.add(Param.optional("driver." + path, rawType));
+            driverOpts.add(Param.optional(STR."driver.\{path}", rawType));
         }
         return driverOpts.asReadOnly();
     }
@@ -135,7 +135,7 @@ public class Cqld4Space implements AutoCloseable {
             try {
                 username = Files.readAllLines(path).get(0);
             } catch (IOException e) {
-                String error = "Error while reading username from file:" + path;
+                String error = STR."Error while reading username from file:\{path}";
                 logger.error(error, e);
                 throw new RuntimeException(e);
             }
@@ -151,7 +151,7 @@ public class Cqld4Space implements AutoCloseable {
                 try {
                     password = Files.readAllLines(path).get(0);
                 } catch (IOException e) {
-                    String error = "Error while reading password from file:" + path;
+                    String error = STR."Error while reading password from file:\{path}";
                     logger.error(error, e);
                     throw new RuntimeException(e);
                 }
@@ -259,7 +259,8 @@ public class Cqld4Space implements AutoCloseable {
         }
 
         if (loaders.size() == 0) {
-            throw new RuntimeException("The driverconfig parameter was provided, but no loader could be found for '" + driverconfig + "'. Ensure files or URLs are accessible.");
+            throw new RuntimeException(
+                    STR."The driverconfig parameter was provided, but no loader could be found for '\{driverconfig}'. Ensure files or URLs are accessible.");
         } else if (loaders.size() == 1) {
             return Optional.of(loaders.getFirst());
         } else {
@@ -304,7 +305,7 @@ public class Cqld4Space implements AutoCloseable {
         try {
             this.getSession().close();
         } catch (Exception e) {
-            logger.warn("auto-closeable cql session threw exception in cql space(" + this.space + "): " + e);
+            logger.warn(STR."auto-closeable cql session threw exception in cql space(\{this.space}): \{e}");
             throw e;
         }
     }

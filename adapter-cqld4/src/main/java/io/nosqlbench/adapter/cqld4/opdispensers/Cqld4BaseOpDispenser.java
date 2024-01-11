@@ -133,15 +133,15 @@ public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, C
 
     private Statement showstmt(Statement stmt, boolean input) {
         String query = cqlFor(stmt, new StringBuilder());
-        logger.info(() -> "CQL(SIMPLE): " + query);
+        logger.info(() -> STR."CQL(SIMPLE): \{query}");
         return stmt;
     }
 
     private String cqlFor(Statement stmt, StringBuilder sb) {
         if (stmt instanceof SimpleStatement ss) {
-            sb.append("(SIMPLE):" + ss.getQuery());
+            sb.append(STR."(SIMPLE):\{ss.getQuery()}");
         } else if (stmt instanceof BoundStatement bs) {
-            sb.append("(BOUND+" + bs.getValues().size() + " values): " + bs.getPreparedStatement().getQuery());
+            sb.append(STR."(BOUND+\{bs.getValues().size()} values): \{bs.getPreparedStatement().getQuery()}");
         } else if (stmt instanceof FluentGraphStatement fgs) {
             sb.append("(FLUENT): non-printable");
         } else if (stmt instanceof BatchStatement bs) {
@@ -154,7 +154,7 @@ public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, C
                 }
             }
         } else {
-            sb.append("Unknown statement type for extraction (showstmt):" + stmt.getClass().getSimpleName());
+            sb.append(STR."Unknown statement type for extraction (showstmt):\{stmt.getClass().getSimpleName()}");
         }
         return sb.toString();
     }

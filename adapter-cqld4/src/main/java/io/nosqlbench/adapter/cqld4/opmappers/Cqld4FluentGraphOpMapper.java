@@ -98,14 +98,14 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
         for (Object name : l) {
             String candidateName = name.toString();
             if (candidateName.endsWith(".*")) {
-                throw new RuntimeException("You can not use wildcard package imports like '" + candidateName + "'");
+                throw new RuntimeException(STR."You can not use wildcard package imports like '\{candidateName}'");
             }
             try {
                 loader.loadClass(candidateName);
                 classNames.add(candidateName);
-                logger.debug(() -> "added import " + candidateName);
+                logger.debug(() -> STR."added import \{candidateName}");
             } catch (Exception e) {
-                throw new RuntimeException("Class '" + candidateName + "' was not found for fluent imports.");
+                throw new RuntimeException(STR."Class '\{candidateName}' was not found for fluent imports.");
             }
         }
         return classNames.toArray(new String[0]);

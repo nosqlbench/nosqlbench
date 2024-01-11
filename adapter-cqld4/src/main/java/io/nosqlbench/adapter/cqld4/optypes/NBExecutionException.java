@@ -27,7 +27,7 @@ public class NBExecutionException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "Wrapped Exception: " + exception.getMessage();
+        return STR."Wrapped Exception: \{exception.getMessage()}";
     }
 
     @Override

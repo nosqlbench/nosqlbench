@@ -102,7 +102,7 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
     public final ArrayList<Row> apply(long cycle) {
 
         Statement<?> statement = getStmt();
-        logger.trace(() -> "apply() invoked, statement obtained, executing async with page size: " + statement.getPageSize() + " thread local rows: ");
+        logger.trace(() -> STR."apply() invoked, statement obtained, executing async with page size: \{statement.getPageSize()} thread local rows: ");
         CompletionStage<AsyncResultSet> statementStage = session.executeAsync(statement);
 
         CompletionStage<List<Row>> rowsStage = statementStage.thenCompose((rs) -> {

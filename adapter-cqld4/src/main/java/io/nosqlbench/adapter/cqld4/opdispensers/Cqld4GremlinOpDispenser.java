@@ -58,7 +58,8 @@ public class Cqld4GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp,
     public Cqld4ScriptGraphOp apply(long value) {
         ScriptGraphStatement stmt = stmtFunc.apply(value);
         if (diagFunc.apply(value)>0L) {
-            System.out.println("## GREMLIN DIAG: ScriptGraphStatement on graphname(" + stmt.getGraphName() + "):\n" + stmt.getScript());
+            System.out.println(
+                    STR."## GREMLIN DIAG: ScriptGraphStatement on graphname(\{stmt.getGraphName()}):\n\{stmt.getScript()}");
         }
         return new Cqld4ScriptGraphOp(sessionFunc.apply(value), stmt);
     }

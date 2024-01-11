@@ -110,7 +110,7 @@ public class LWTRebinder {
                         bs = bs.setTupleValue(name,bs.getTupleValue(name));
                         break;
                     default:
-                        throw new RuntimeException("Unrecognized type:" + typeName);
+                        throw new RuntimeException(STR."Unrecognized type:\{typeName}");
                 }
             }
         }

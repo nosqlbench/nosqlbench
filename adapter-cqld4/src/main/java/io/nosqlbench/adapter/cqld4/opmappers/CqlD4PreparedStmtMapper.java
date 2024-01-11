@@ -52,7 +52,7 @@ public class CqlD4PreparedStmtMapper implements OpMapper<Cqld4CqlOp> {
     public OpDispenser<Cqld4CqlOp> apply(ParsedOp op) {
 
         ParsedTemplateString stmtTpl = op.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
-            "No statement was found in the op template:" + op
+                STR."No statement was found in the op template:\{op}"
         ));
 
         RSProcessors processors = new RSProcessors();

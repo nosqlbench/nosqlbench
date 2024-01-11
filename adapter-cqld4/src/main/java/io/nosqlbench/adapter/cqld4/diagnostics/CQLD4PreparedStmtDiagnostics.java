@@ -74,10 +74,13 @@ public class CQLD4PreparedStmtDiagnostics {
                         TypeCodec<float[]> codec = vectorCodecs.computeIfAbsent(vt, v -> ExtraTypeCodecs.floatVectorToArray(v.getDimensions()));
                         yield bound.set(colname, floatAry, codec);
                     } else {
-                        throw new RuntimeException("Unrecognized vector Java type to bind to " + coltype.asCql(true, true) + " value=" +colval.getClass().getSimpleName());
+                        throw new RuntimeException(STR."Unrecognized vector Java type to bind to \{coltype.asCql(true,
+                                true)} value=\{colval.getClass().getSimpleName()}");
                     }
                 } else {
-                    throw new RuntimeException("Unrecognized custom type for diagnostics: " + coltype.asCql(true, true) + " value= " +colval.getClass().getSimpleName());
+                    throw new RuntimeException(
+                            STR."Unrecognized custom type for diagnostics: \{coltype.asCql(true, true)} value= \{colval.getClass()
+                                    .getSimpleName()}");
                 }
             }
             case ASCII, VARCHAR -> bound.setString(colname, (String) colval);
@@ -125,8 +128,8 @@ public class CQLD4PreparedStmtDiagnostics {
                 TupleValue tuple = (TupleValue) colval;
                 yield bound.setTupleValue(colname, tuple);
             }
-            default -> throw new RuntimeException("Unknown CQL type for diagnostic " +
-                "(type:'" + coltype + "',code:'" + coltype.getProtocolCode() + "'");
+            default -> throw new RuntimeException(
+                    STR."Unknown CQL type for diagnostic (type:'\{coltype}',code:'\{coltype.getProtocolCode()}'");
         };
     }
 
@@ -140,8 +143,8 @@ public class CQLD4PreparedStmtDiagnostics {
         ColumnDefinitions defs = preparedStmt.getVariableDefinitions();
         Object[] values = fieldsF.apply(cycle);
         if (defs.size() != values.length) {
-            throw new OpConfigError("There are " + defs.size() + " anchors in statement '" + preparedStmt.getQuery() + "'" +
-                "but " + values.length + " values were provided. These must match.");
+            throw new OpConfigError(
+                    STR."There are \{defs.size()} anchors in statement '\{preparedStmt.getQuery()}'but \{values.length} values were provided. These must match.");
         }
 
         BoundStatement bound = preparedStmt.bind();
@@ -155,7 +158,8 @@ public class CQLD4PreparedStmtDiagnostics {
                 bound = CQLD4PreparedStmtDiagnostics.bindStatement(bound, defname, value, type);
             } catch (Exception e) {
                 String fullValue = value.toString();
-                String valueToPrint = fullValue.length() > 100 ? fullValue.substring(0, 100) + " ... (abbreviated for console, since the size is " + fullValue.length() + ")" : fullValue;
+                String valueToPrint = fullValue.length() > 100 ? STR."\{fullValue.substring(0,
+                        100)} ... (abbreviated for console, since the size is \{fullValue.length()})" : fullValue;
                 String errormsg = String.format(
                     "Unable to bind column '%s' to cql type '%s' with value '%s' (class '%s')",
                     defname,

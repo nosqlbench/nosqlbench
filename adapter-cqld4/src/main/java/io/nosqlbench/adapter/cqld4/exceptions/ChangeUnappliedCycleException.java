@@ -32,7 +32,7 @@ public class ChangeUnappliedCycleException extends CqlGenericCycleException {
     private final String queryString;
 
     public ChangeUnappliedCycleException(AsyncResultSet resultSet, String queryString) {
-        super("Operation was not applied:" + queryString);
+        super(STR."Operation was not applied:\{queryString}");
         this.resultSet = resultSet;
         this.queryString = queryString;
     }
