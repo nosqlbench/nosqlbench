@@ -27,6 +27,8 @@ import org.apache.logging.log4j.Logger;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.FormatProcessor.FMT;
+
 public class UnusedTableRemover implements CGModelTransformer, CGTransformerConfigurable {
     private final static Logger logger = LogManager.getLogger(STR."\{CGWorkloadExporter.APPNAME}/unused-table-remover");
     private double minimumThreshold = 0.0001;
@@ -45,11 +47,7 @@ public class UnusedTableRemover implements CGModelTransformer, CGTransformerConf
             String weightedOpsSpec = table.getTableAttributes().getAttribute("weighted_ops");
             double weightedOps = Double.parseDouble(weightedOpsSpec);
             if (weightedOps < minimumThreshold) {
-                logger.info(() -> String.format(
-                        STR."removing table \{table.getKeyspace()
-                                .getName()}.\{table.getName()} with minimum weighted_ops of %1.5f under %1.5f",
-                    weightedOps, minimumThreshold)
-                );
+                logger.info(FMT."removing table \{table.getKeyspace().getName()}.\{table.getName()} with minimum weighted_ops of %1.5f\{weightedOps} under %1.5f\{minimumThreshold}");
                 table.getKeyspace().removeTable(table);
             }
         }

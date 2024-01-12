@@ -97,7 +97,7 @@ public class CqlSchemaStatsParser {
     private void writeCurrentTable() {
         if (currentTable != null) {
             if (currentKeyspace == null) {
-                throw new RuntimeException(STR."Table \{currentTable.getTableName()}has no associated keyspace");
+                throw new RuntimeException(STR."Table \{currentTable.getTableName()} has no associated keyspace");
             } else {
                 currentKeyspace.setKeyspaceTable(currentTable.getTableName(), currentTable);
             }
