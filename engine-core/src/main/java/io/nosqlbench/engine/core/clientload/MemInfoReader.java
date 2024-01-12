@@ -46,9 +46,10 @@ public class MemInfoReader extends LinuxSystemFileReader {
 
     public Double getMemUsedkB() {
         Double memTotal = getMemTotalkB();
-        Double memFree = getMemFreekB();
-        if (memTotal != null && memFree != null)
-            return memTotal - memFree;
+        Double memAvailable = getMemAvailablekB();
+//        Double memFree = getMemFreekB();
+        if (memTotal != null && memAvailable != null)
+            return memTotal - memAvailable;
         return null;
     }
 
