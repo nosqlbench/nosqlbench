@@ -55,7 +55,7 @@ public class CqlKeyspaceDef implements NBNamedElement, NBLabeledElement {
 
     @Override
     public String toString() {
-        return STR."CqlKeyspace{keyspaceName='\{keyspaceName}\{'\''}, stats=\{stats}, isDurableWrites=\{isDurableWrites}, replicationData='\{replicationData}\{'\''}\{'}'}";
+        return STR."CqlKeyspace{keyspaceName='\{keyspaceName}', stats='\{stats}', isDurableWrites='\{isDurableWrites}', replicationData='\{replicationData}'}";
     }
 
     @Override

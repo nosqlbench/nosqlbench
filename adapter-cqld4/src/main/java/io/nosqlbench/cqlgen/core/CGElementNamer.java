@@ -134,7 +134,7 @@ public class CGElementNamer implements Function<Map<String, String>, String> {
 
         @Override
         public String toString() {
-            return STR."Section{name='\{name}\{'\''}, template='\{template}\{'\''}, required=\{required}\{'}'}";
+            return STR."Section{name='\{name}', template='\{template}', required='\{required}'";
         }
     }
 
