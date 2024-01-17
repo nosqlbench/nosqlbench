@@ -104,6 +104,7 @@ public class NBAtFile {
 
             filepathSpec=(filepathSpec.endsWith(".yaml") ? filepathSpec : filepathSpec+".yaml");
             Path atPath = Path.of(filepathSpec);
+
             String argsdata = "";
             try {
                 argsdata = Files.readString(atPath);
@@ -128,11 +129,26 @@ public class NBAtFile {
                     throw new RuntimeException("You can not traverse a non-map object type with spec '" + spec + "'");
                 }
             }
-            return formatted(scopeOfInclude, fmt);
+            LinkedList<String> formatted = formatted(scopeOfInclude, fmt);
+            formatted=interposePath(formatted, atPath);
+            return formatted;
         } else {
-            throw new RuntimeException("Unable to match at-file specifier: " + spec + " to known syntax");
+            throw new RuntimeException("Unable to match at-file specifier: " + spec + " to pattern '" + includePattern.pattern() + "'");
         }
 
+    }
+
+    private static LinkedList<String> interposePath(LinkedList<String> formatted, Path atPath) {
+        Path parent = (atPath.getNameCount()==1 ? Path.of(".") : atPath.getParent());
+
+        ListIterator<String> iter = formatted.listIterator();
+        while (iter.hasNext()) {
+            String word = iter.next();
+            String modified = word.replaceAll("\\$\\{DIR}",parent.toString());
+            iter.remove();
+            iter.add(modified);
+        }
+        return formatted;
     }
 
     private static LinkedList<String> formatted(Object scopeOfInclude, NBAtFileFormats fmt) {

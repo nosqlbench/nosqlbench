@@ -80,7 +80,7 @@
             <dependency>
                 <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy</artifactId>
-                <version>4.0.16</version>
+                <version>4.0.17</version>
             </dependency>
             <dependency>
                 <groupId>org.snakeyaml</groupId>
@@ -188,7 +188,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.102.Final</version>
+                <version>4.1.104.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
@@ -290,7 +290,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.621</version>
+                <version>1.12.622</version>
             </dependency>
             <dependency>
                 <groupId>com.elega9t</groupId>

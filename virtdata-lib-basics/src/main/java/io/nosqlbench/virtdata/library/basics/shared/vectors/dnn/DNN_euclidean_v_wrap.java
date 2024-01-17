@@ -22,6 +22,11 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.function.LongFunction;
 
+/**
+ * This represents an enumerated population of vectors of some dimension,
+ * where any ordinal values which address outside of that enumeration
+ * simply wrap with modulo.
+ */
 @ThreadSafeMapper
 @Categories(Category.experimental)
 public class DNN_euclidean_v_wrap implements LongFunction<float[]> {

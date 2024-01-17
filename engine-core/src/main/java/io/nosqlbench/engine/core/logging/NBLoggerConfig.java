@@ -186,6 +186,13 @@ public class NBLoggerConfig extends ConfigurationFactory {
             .add(builder.newAppenderRef("console"))
             .addAttribute("additivity", false));
 
+        if (sessionName == null) {
+            sessionName = "LOGINIT";
+            System.out.println("Session was not set in logger config. If you are getting this error, then it means" +
+                " that the session has not initialized properly, and that some unexpected error occurred before the logging" +
+                " system was initialized. Look for errors prior to this.");
+        }
+
         if (sessionName != null) {
 
             if (!Files.exists(loggerDir)) {
@@ -275,7 +282,7 @@ public class NBLoggerConfig extends ConfigurationFactory {
         Path logdir = logpath.getParent();
         if (Files.exists(logpath)) {
             String basename = logpath.getFileName().toString();
-            String linkname = basename.replace(getSessionName()+"_","");
+            String linkname = basename.replace(getSessionName() + "_", "");
             Path linkPath = logdir.resolve(linkname);
             try {
                 Files.deleteIfExists(linkPath);
@@ -444,7 +451,7 @@ public class NBLoggerConfig extends ConfigurationFactory {
     private void attachAuxLogger(ConfigurationBuilder<BuiltConfiguration> builder, String loggerName, Level fileLevel) {
         String appenderName = loggerName + (("_APPENDER").toUpperCase());
         Path logPath = loggerDir.resolve(getFileBase() + "_" + loggerName.toLowerCase() + ".log");
-        Path linkPath = loggerDir.resolve(loggerName.toLowerCase()+".log");
+        Path linkPath = loggerDir.resolve(loggerName.toLowerCase() + ".log");
 
         var appender = builder
             .newAppender(appenderName, FileAppender.PLUGIN_NAME)
@@ -463,7 +470,7 @@ public class NBLoggerConfig extends ConfigurationFactory {
 
         try {
             Files.deleteIfExists(linkPath);
-            Files.createSymbolicLink(linkPath,logPath.getFileName());
+            Files.createSymbolicLink(linkPath, logPath.getFileName());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

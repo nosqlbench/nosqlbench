@@ -84,6 +84,7 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
         // TODO: inject container closing commands after the last command referencing each container
         List<NBCommandAssembly.CommandInvocation> invocationCalls = NBCommandAssembly.assemble(cmds, this::getContext);
         ResultCollector collector = new ResultCollector();
+        // TODO: When a command is not successful, automatically break out of the command loop
         try (ResultContext results = new ResultContext(collector).ok()) {
             for (NBCommandAssembly.CommandInvocation invocation : invocationCalls) {
                 String targetContext = invocation.containerName();
@@ -93,11 +94,14 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
                     NBBufferedContainer container = getContext(targetContext);
                     NBCommandResult cmdResult = container.apply(command, invocation.params());
                     results.apply(cmdResult);
+                    if (cmdResult.hasException()) {
+                        throw cmdResult.getException();
+                    }
                 } catch (Exception e) {
                     String msg = "While running " + explanation + "', an error occurred: " + e.toString();
+                    results.error(e);
                     onError(e);
                     logger.error(msg);
-                    results.error(e);
                     break;
                 }
             }
