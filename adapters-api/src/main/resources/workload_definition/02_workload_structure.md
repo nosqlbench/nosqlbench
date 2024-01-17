@@ -375,24 +375,24 @@ blocks:
 
 [
   {
-    "name": "namedblock1__op1",
+    "name": "op1",
     "op": {
       "stmt": "select * from bar.table;"
     },
     "tags": {
-      "name": "namedblock1__op1",
+      "name": "op1",
       "block": "namedblock1",
       "op": "op1"
     }
   },
   {
-    "name": "namedblock1__op2",
+    "name": "op2",
     "op": {
       "stmt": "insert into bar.table (a,b,c) values (1,2,3);",
       "type": "batch"
     },
     "tags": {
-      "name": "namedblock1__op2",
+      "name": "op2",
       "block": "namedblock1",
       "op": "op2"
     }
@@ -450,35 +450,35 @@ blocks:
 
 [
   {
-    "name": "block1__op1",
+    "name": "op1",
     "op": {
       "stmt": "select * from bar.table;"
     },
     "tags": {
-      "name": "block1__op1",
+      "name": "op1",
       "block": "block1",
       "op": "op1"
     }
   },
   {
-    "name": "block1__op2",
+    "name": "op2",
     "op": {
       "stmt": "insert into bar.table (a,b,c) values (1,2,3);",
       "type": "batch"
     },
     "tags": {
-      "name": "block1__op2",
+      "name": "op2",
       "block": "block1",
       "op": "op2"
     }
   },
   {
-    "name": "this_is_block_2__op3",
+    "name": "op3",
     "op": {
       "stmt": "select * from foo.table;"
     },
     "tags": {
-      "name": "this_is_block_2__op3",
+      "name": "op3",
       "block": "this_is_block_2",
       "op": "op3"
     }
@@ -523,12 +523,12 @@ blocks:
 
 [
   {
-    "name": "myblock__stmt1",
+    "name": "stmt1",
     "op": {
       "stmt": "test op"
     },
     "tags": {
-      "name": "myblock__stmt1",
+      "name": "stmt1",
       "block": "myblock",
       "op": "stmt1"
     }
