@@ -21,6 +21,8 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContaine
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 
 public interface NBInvokableResolver {
-    NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName);
+    NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String stepname);
+
+    boolean verify(Cmd cmd);
 
 }

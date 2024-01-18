@@ -53,5 +53,15 @@ public class NBAutoScriptResolver implements NBInvokableResolver {
         }
     }
 
+    @Override
+    public boolean verify(Cmd cmd) {
+        return NBIO.local()
+                .searchPrefixes("scripts/auto")
+                .pathname(cmd.getArgValue("_impl"))
+                .extensionSet("js")
+                .first()
+            .isPresent();
+    }
+
 
 }

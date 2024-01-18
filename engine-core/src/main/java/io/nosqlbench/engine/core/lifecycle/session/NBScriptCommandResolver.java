@@ -37,5 +37,8 @@ public class NBScriptCommandResolver implements NBInvokableResolver {
         };
     }
 
-
+    @Override
+    public boolean verify(Cmd cmd) {
+        return true;
+    }
 }
