@@ -23,15 +23,16 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * A service loader filter which works with {@link io.nosqlbench.nb.annotations.Service} to load a named service.
- * This version requires the caller to provide the service loader instance, since it is now caller sensitive.
- *
+ * <P>A service loader filter which works with {@link io.nosqlbench.nb.annotations.Service} to load a named service.
+ * This version requires the caller to provide the service loader instance, since it is now caller sensitive.</P>
+ * <p>
  * Use it like this:<pre>{@code
  *       ResultValueFilterType filterType =
  *           ServiceSelector.of("core", ServiceLoader.load(ResultValueFilterType.class)).get();
  * }</pre>
  *
- * @param <T> The service type
+ * @param <T>
+ *     The service type
  */
 public class ServiceSelector<T> implements Predicate<ServiceLoader.Provider<? extends T>> {
     private final String name;
@@ -61,11 +62,13 @@ public class ServiceSelector<T> implements Predicate<ServiceLoader.Provider<? ex
 
     public ServiceLoader.Provider<? extends T> getOneProvider() {
         List<? extends ServiceLoader.Provider<? extends T>> providers = getAllProviders();
-        if (providers.size()==0 || providers.size()>1) {
-            throw new RuntimeException("You requested exactly one instance of a service by name '" + name + "', but got " +
-                (providers.stream().map(s -> s.getClass().getSimpleName())).collect(Collectors.joining(",")) + " (" + providers.stream().count() + ")");
+        if (providers.size() != 1) {
+            throw new RuntimeException(
+                "You requested exactly one instance of a service by name '" + name + "', but got " +
+                (providers.stream().map(s -> s.getClass().getSimpleName())).collect(Collectors.joining(",")) + " (" + providers.size() + ")"
+            );
         }
-        return providers.get(0);
+        return providers.getFirst();
     }
 
     public T getOne() {
@@ -73,7 +76,7 @@ public class ServiceSelector<T> implements Predicate<ServiceLoader.Provider<? ex
     }
 
     public List<? extends ServiceLoader.Provider<? extends T>> getAllProviders() {
-        List<? extends ServiceLoader.Provider<? extends T>> providers = loader
+        return loader
             .stream()
             .peek(l -> {
                     if (l.type().getAnnotation(Service.class) == null) {
@@ -87,8 +90,8 @@ public class ServiceSelector<T> implements Predicate<ServiceLoader.Provider<? ex
             .filter(l -> l.type().getAnnotation(Service.class) != null)
             .filter(l -> l.type().getAnnotation(Service.class).selector().equals(name))
             .toList();
-        return providers;
     }
+
     public List<? extends T> getAll() {
         List<? extends ServiceLoader.Provider<? extends T>> providers = getAllProviders();
         return providers.stream()
@@ -99,7 +102,7 @@ public class ServiceSelector<T> implements Predicate<ServiceLoader.Provider<? ex
     public Optional<? extends T> get() {
         List<? extends T> services = getAll();
         if (services.size() == 1) {
-            return Optional.of(services.get(0));
+            return Optional.of(services.getFirst());
         } else {
             return Optional.empty();
         }
