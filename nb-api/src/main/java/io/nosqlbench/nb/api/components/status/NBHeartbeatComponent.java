@@ -20,10 +20,13 @@ import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
- * A <EM>live</EM> component is one which provides evidence that it is either
- * in a healthy state or that it is not, via a heartbeat mechanism.
+ * A <EM>heartbeat</EM> component is one which provides evidence that it is either
+ * in a healthy state or that it is not, via a heartbeat mechanism. This requires
+ * that a component property 'heartbeat' is provides which is the millisecond interval
+ * between beats.
  */
 public class NBHeartbeatComponent extends NBStatusComponent {
 
@@ -33,8 +36,12 @@ public class NBHeartbeatComponent extends NBStatusComponent {
 
     public NBHeartbeatComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly, Map<String, String> props, String liveLabel) {
         super(parentComponent, componentSpecificLabelsOnly, props);
-        // attaches, no further reference needed
-        new ComponentPulse(this, NBLabels.forKV(), liveLabel, Long.parseLong(getComponentProp("heartbeat").orElse("60000")));
+        getComponentProp("heartbeat")
+            .map(Long::parseLong)
+            .ifPresent(
+                // attaches, no further reference needed
+                hbmillis -> new ComponentPulse(this, NBLabels.forKV(), liveLabel, hbmillis)
+            );
     }
 
 }

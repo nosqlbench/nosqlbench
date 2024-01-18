@@ -39,9 +39,9 @@ public class NBJavaCommandLoader {
         }
     }
 
-    public static NBInvokableCommand init(String cmdSelector, NBComponent parent, String cmdAlias, String ctxName) {
+    public static NBInvokableCommand init(String cmdSelector, NBComponent parent, String stepName, String ctxName) {
         NBCommandInfo cmdInfo = getSelector(cmdSelector).getOne();
-        NBInvokableCommand command = cmdInfo.create(parent, cmdAlias, ctxName);
+        NBInvokableCommand command = cmdInfo.create(parent, cmdSelector, ctxName);
         return command;
     }
 

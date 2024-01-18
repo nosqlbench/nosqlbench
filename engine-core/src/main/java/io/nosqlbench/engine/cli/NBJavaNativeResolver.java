@@ -27,14 +27,21 @@ import io.nosqlbench.nb.annotations.Service;
 @Service(value= NBInvokableResolver.class,selector = "java")
 public class NBJavaNativeResolver implements NBInvokableResolver {
     @Override
-    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName) {
+    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String stepname) {
         return switch (cmd.getCmdType()) {
             case CmdType.indirect -> {
-                String implName = cmd.takeArgValue("_impl");
-                yield NBJavaCommandLoader.init(implName, parent, phaseName, cmd.getTargetContext());
+                String implName = cmd.getArgValue("_impl");
+                NBInvokableCommand invokable = NBJavaCommandLoader.init(implName, parent, stepname, cmd.getTargetContext());
+                cmd.takeArgValue("_impl");
+                yield invokable;
             }
-            case CmdType.java -> NBJavaCommandLoader.init(cmd.getArgValue("class"), parent, phaseName, cmd.getTargetContext());
+            case CmdType.java -> NBJavaCommandLoader.init(cmd.getArgValue("class"), parent, stepname, cmd.getTargetContext());
             default -> null;
         };
+    }
+
+    @Override
+    public boolean verify(Cmd cmd) {
+        return NBJavaCommandLoader.oneExists(cmd.getArgValue("_impl")) != null;
     }
 }

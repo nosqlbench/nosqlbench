@@ -25,10 +25,10 @@ import io.nosqlbench.nb.annotations.Service;
 @Service(value = NBInvokableResolver.class, selector = "js")
 public class NBScriptCommandResolver implements NBInvokableResolver {
     @Override
-    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName) {
+    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String stepname) {
         return switch (cmd.getCmdType()) {
             case fragment, script->
-            new NBScriptedCommand(parent, phaseName, cmd.getTargetContext()).add(cmd);
+            new NBScriptedCommand(parent, stepname, cmd.getTargetContext()).add(cmd);
 //            case fragment ->
 //                new NBScriptedCommand(parent, phaseName, cmd.getTargetContext()).addScriptText(cmd.getArgValue("fragment"));
 //            case script ->
@@ -37,5 +37,8 @@ public class NBScriptCommandResolver implements NBInvokableResolver {
         };
     }
 
-
+    @Override
+    public boolean verify(Cmd cmd) {
+        return true;
+    }
 }

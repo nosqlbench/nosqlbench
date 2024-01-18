@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.api.components.status.NBHeartbeatComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
@@ -82,23 +83,22 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
 
         // TODO: add container closing command
         // TODO: inject container closing commands after the last command referencing each container
-        List<NBCommandAssembly.CommandInvocation> invocationCalls = NBCommandAssembly.assemble(cmds, this::getContext);
+        List<Cmd> assembledCommands = NBCommandAssembly.assemble(cmds, this::getContext);
         ResultCollector collector = new ResultCollector();
-        // TODO: When a command is not successful, automatically break out of the command loop
+
         try (ResultContext results = new ResultContext(collector).ok()) {
-            for (NBCommandAssembly.CommandInvocation invocation : invocationCalls) {
-                String targetContext = invocation.containerName();
-                String explanation = "in context '" + targetContext + "'";
-                try (NBInvokableCommand command = invocation.command()) {
-                    explanation += " command '" + command.toString() + "'";
-                    NBBufferedContainer container = getContext(targetContext);
-                    NBCommandResult cmdResult = container.apply(command, invocation.params());
+            for (Cmd cmd : assembledCommands) {
+                String explanation = " in context " + cmd.getTargetContext() + ", command '" + cmd.toString() + "'";
+                try (NBInvokableCommand command = NBCommandAssembly.resolve(cmd,this::getContext)) {
+                    NBCommandParams params = NBCommandAssembly.paramsFor(cmd);
+                    NBBufferedContainer container = getContext(cmd.getTargetContext());
+                    NBCommandResult cmdResult = container.apply(command, params);
                     results.apply(cmdResult);
                     if (cmdResult.hasException()) {
                         throw cmdResult.getException();
                     }
                 } catch (Exception e) {
-                    String msg = "While running " + explanation + "', an error occurred: " + e.toString();
+                    String msg = "While running " + explanation + ", an error occurred: " + e.toString();
                     results.error(e);
                     onError(e);
                     logger.error(msg);

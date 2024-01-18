@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.session;
+package io.nosqlbench.engine.core.lifecycle.commands.fortesting;
 
-import io.nosqlbench.engine.cmdstream.Cmd;
-import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
+import io.nosqlbench.nb.annotations.Service;
 
-public interface NBInvokableResolver {
-    NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String stepname);
-
-    boolean verify(Cmd cmd);
-
+@Service(value = NBCommandInfo.class,selector = "test_error")
+public class INFO_error extends NBCommandInfo {
+    @Override
+    public Class<? extends NBInvokableCommand> getType() {
+        return CMD_error.class;
+    }
 }

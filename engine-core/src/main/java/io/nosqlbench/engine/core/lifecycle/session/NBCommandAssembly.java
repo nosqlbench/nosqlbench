@@ -29,15 +29,35 @@ import java.util.function.Function;
 
 public class NBCommandAssembly {
 
+    private static NBCoreInvokableResolver core_resolver = new NBCoreInvokableResolver();
+
     private final static Logger logger = LogManager.getLogger(NBCommandAssembly.class);
+
+    public static NBCommandParams paramsFor(Cmd cmd) {
+        return switch (cmd.getCmdType()) {
+            case indirect, java, container -> {
+                Map<String, String> params = cmd.getArgMap();
+                params.remove("_impl");
+                yield NBCommandParams.of(params);
+            }
+            default -> NBCommandParams.of(Map.of());
+        };
+    }
 
     public static record CommandInvocation(NBInvokableCommand command, NBCommandParams params, String containerName) {
     }
 
-    public static List<CommandInvocation> assemble(List<Cmd> cmds, Function<String, NBBufferedContainer> ctxprovider) {
+    public static List<Cmd> assemble(List<Cmd> cmds, Function<String, NBBufferedContainer> ctxprovider) {
         List<Cmd> mappedCmds = tagCommandsWithContext(cmds);
-        List<CommandInvocation> invocations = prepareMappedPhases(mappedCmds, ctxprovider);
-        return invocations;
+        NBCoreInvokableResolver core_resolver = new NBCoreInvokableResolver();
+        for (Cmd mappedCmd : mappedCmds) {
+            core_resolver.verify(mappedCmd);
+        }
+
+        return mappedCmds;
+
+//        List<CommandInvocation> invocations = prepareMappedPhases(mappedCmds, ctxprovider);
+//        return invocations;
     }
 
     private static List<Cmd> tagCommandsWithContext(List<Cmd> cmds) {
@@ -62,6 +82,40 @@ public class NBCommandAssembly {
         return new ArrayList<>(tagged);
     }
 
+
+    public static NBInvokableCommand resolve(Cmd cmd, Function<String, NBBufferedContainer> ctxProvider) {
+        try {
+            NBCommandParams params = switch (cmd.getCmdType()) {
+                case indirect, java, container -> NBCommandParams.of(cmd.getArgMap());
+                default -> NBCommandParams.of(Map.of());
+            };
+
+            String targetContext = cmd.getTargetContext();
+            NBInvokableCommand command = core_resolver.resolve(cmd, ctxProvider.apply(targetContext), cmd.getStepName());
+            return command;
+        } catch (Exception e) {
+            throw new UnresolvedCommand(cmd, e);
+        }
+    }
+
+    public static CommandInvocation assembleCommand(Cmd cmd, Function<String, NBBufferedContainer> ctxProvider) {
+        NBCommandParams params = switch (cmd.getCmdType()) {
+            case indirect, java, container -> NBCommandParams.of(cmd.getArgMap());
+            default -> NBCommandParams.of(Map.of());
+        };
+
+        String targetContext = cmd.getTargetContext();
+        NBInvokableCommand command = core_resolver.resolve(cmd, ctxProvider.apply(targetContext), cmd.getStepName());
+        if (command == null) {
+            throw new BasicError("Found zero commands for spec;" + cmd);
+        }
+        String containerName = cmd.getTargetContext();
+
+        // TODO, make this unnecessary by moving the impl out of the map to a dedicated cmd structure
+        params.remove("_impl");
+        return new CommandInvocation(command, params, containerName);
+    }
+
     private static List<CommandInvocation> prepareMappedPhases(List<Cmd> mappedCmds, Function<String, NBBufferedContainer> ctxProvider) {
         List<CommandInvocation> parameterizedInvocations = new ArrayList<>();
         NBCoreInvokableResolver core_resolver = new NBCoreInvokableResolver();
@@ -73,7 +127,7 @@ public class NBCommandAssembly {
 
             String targetContext = cmd.getTargetContext();
             NBInvokableCommand command = core_resolver.resolve(cmd, ctxProvider.apply(targetContext), cmd.getStepName());
-            if (command==null) {
+            if (command == null) {
                 throw new BasicError("Found zero commands for spec;" + cmd);
             }
             String containerName = cmd.getTargetContext();
