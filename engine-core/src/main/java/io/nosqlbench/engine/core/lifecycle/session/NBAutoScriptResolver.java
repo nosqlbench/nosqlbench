@@ -34,7 +34,7 @@ import java.util.Optional;
 @Service(value = NBInvokableResolver.class, selector = "autojs")
 public class NBAutoScriptResolver implements NBInvokableResolver {
     @Override
-    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String phaseName) {
+    public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String stepname) {
 
         Optional<Content<?>> scriptfile = NBIO.local()
             .searchPrefixes("scripts/auto")
@@ -47,7 +47,7 @@ public class NBAutoScriptResolver implements NBInvokableResolver {
             Map<String, CmdArg> newArgs = new LinkedHashMap<>(cmd.getArgs());
             newArgs.put("path",new CmdArg(new CmdParam("name",s->s,false),"=",pathOf.toString()));
             Cmd reformattedCmd = new Cmd("script", newArgs);
-            return new NBScriptedCommand(parent, phaseName, cmd.getTargetContext()).add(reformattedCmd);
+            return new NBScriptedCommand(parent, stepname, cmd.getTargetContext()).add(reformattedCmd);
         } else {
             return null;
         }
