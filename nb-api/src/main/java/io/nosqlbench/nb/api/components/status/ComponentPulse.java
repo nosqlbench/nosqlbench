@@ -42,7 +42,7 @@ public class ComponentPulse extends UnstartedPeriodicTaskComponent {
             LastReport.OnInterrupt
         );
         this.pulseOf = pulseOf;
-        String logsdir = getComponentProp("logsdir").orElseThrow();
+        String logsdir = getComponentProp("logsdir").orElse("logs");
         String labelElement = pulseOf.getLabels().valueOf(fileNameLabel);
         this.hbpath = Path.of(logsdir).resolve(labelElement +"_status.yaml");
         this.linkpath = Path.of(logsdir).resolve("status.yaml");
