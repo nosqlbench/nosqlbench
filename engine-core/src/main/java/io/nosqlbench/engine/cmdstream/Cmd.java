@@ -133,8 +133,12 @@ public class Cmd {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(cmdType.toString());
+        sb.append(switch (cmdType) {
+            case indirect -> getArgs().containsKey("_impl") ? getArgs().get("_impl").getValue() : "[]";
+            default -> cmdType.name();
+        });
         for (CmdArg value : getArgs().values()) {
+            if (value.getParam().name.startsWith("_impl")) continue;
             sb.append(" ").append(value);
         }
         return sb.toString();
