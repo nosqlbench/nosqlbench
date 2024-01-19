@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.http.core;
 
 import com.codahale.metrics.Histogram;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
@@ -29,7 +30,12 @@ public class HttpMetrics implements NBLabeledElement {
     public HttpMetrics(NBComponent parent, HttpSpace space) {
         this.parent = parent;
         this.space = space;
-        statusCodeHistogram = parent.create().histogram("statuscode",space.getHdrDigits());
+        statusCodeHistogram = parent.create().histogram(
+            "statuscode",
+            space.getHdrDigits(),
+            MetricCategory.Payload,
+            "A histogram of status codes received by the HTTP client"
+        );
     }
 
     public String getName() {

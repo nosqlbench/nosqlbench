@@ -59,7 +59,7 @@ public class Unit {
         Matcher m = numberFmtPattern.matcher(spec);
         if (m.matches()) {
             String numberpart = m.group("number");
-            Double base = Double.valueOf(numberpart);
+            double base = Double.parseDouble(numberpart);
             String unitpart = m.group("unit");
             if (unitpart != null) {
                 Duration durationDuration = Duration.valueOfSuffix(unitpart);
@@ -71,7 +71,7 @@ public class Unit {
                 double multiplier = (double) specnanos / (double) resultnanos;
                 base = base * multiplier;
             }
-            return Optional.of(base.longValue());
+            return Optional.of((long)base);
         } else {
             logger.error("Parsing error for specifier: '" + spec + "'");
             return Optional.empty();
@@ -86,15 +86,15 @@ public class Unit {
     public static Optional<Double> convertDoubleCount(Count resultUnit, String spec) {
         Matcher e = numberExponentPattern.matcher(spec);
         if (e.matches()) {
-            double base= Double.valueOf(e.group("number"));
-            double exponent = Double.valueOf(e.group("exponent"));
+            double base= Double.parseDouble(e.group("number"));
+            double exponent = Double.parseDouble(e.group("exponent"));
             double value= Math.pow(base, exponent);
             spec = e.group("pre")+ value + e.group("post");
         }
         Matcher m = numberFmtPattern.matcher(spec);
         if (m.matches()) {
             String numberpart = m.group("number");
-            double base = Double.valueOf(numberpart);
+            double base = Double.parseDouble(numberpart);
             String unitpart = m.group("unit");
             if (unitpart != null) {
                 Count specifierUnit = Count.valueOfSuffix(unitpart);
@@ -130,7 +130,7 @@ public class Unit {
         Matcher m = numberFmtPattern.matcher(spec);
         if (m.matches()) {
             String numberpart = m.group("number");
-            long base = Long.valueOf(numberpart);
+            long base = Long.parseLong(numberpart);
             String unitpart = m.group("unit");
             if (unitpart != null) {
                 Count specifierUnit = Count.valueOfSuffix(unitpart);
@@ -140,7 +140,7 @@ public class Unit {
                 double specifierScale = specifierUnit.getMultiplier();
                 double resultScale = resultUnit.getMultiplier();
                 double multiplier = (specifierScale / resultScale);
-                base *= multiplier;
+                base *= (long) multiplier;
             }
             return Optional.of(base);
         } else {
@@ -162,14 +162,14 @@ public class Unit {
         if (scinoteMatcher.matches() &&
                 ( scinoteMatcher.group("to10power")!=null
                 || scinoteMatcher.group("fractional")!=null)) {
-            Double doubleValue = Double.valueOf(scinoteMatcher.group("number"));
-            spec = spec.replace(scinoteMatcher.group("number"),String.valueOf(doubleValue.longValue()));
+            double doubleValue = Double.parseDouble(scinoteMatcher.group("number"));
+            spec = spec.replace(scinoteMatcher.group("number"),String.valueOf((long) doubleValue));
         }
 
         Matcher exponentMatcher = numberExponentPattern.matcher(spec);
         if (exponentMatcher.matches()) {
-            long number = Long.valueOf(exponentMatcher.group("number"));
-            long exponent = Long.valueOf(exponentMatcher.group("exponent"));
+            long number = Long.parseLong(exponentMatcher.group("number"));
+            long exponent = Long.parseLong(exponentMatcher.group("exponent"));
             if (number == 1L) {
                 logger.warn("If you are using exponent notation for '" + spec + "', you'll only ever get 1L.  " +
                         "Did you intend to use scientific notation, where the exponent is implied to the base 10? " +
@@ -196,7 +196,7 @@ public class Unit {
         Matcher m = numberFmtPattern.matcher(spec);
         if (m.matches()) {
             String numberpart = m.group("number");
-            double base = Double.valueOf(numberpart);
+            double base = Double.parseDouble(numberpart);
             String unitpart = m.group("unit");
             if (unitpart != null) {
                 Bytes specifierUnit = Bytes.valueOfSuffix(unitpart);

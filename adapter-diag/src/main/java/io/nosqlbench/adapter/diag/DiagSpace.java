@@ -17,7 +17,7 @@
 package io.nosqlbench.adapter.diag;
 
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
-import io.nosqlbench.engine.api.activityapi.ratelimits.RateLimiter;
+import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;

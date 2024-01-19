@@ -17,8 +17,10 @@
 package io.nosqlbench.nb.api.components.core;
 
 import io.nosqlbench.nb.api.components.core.NBBaseComponentMetrics;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBBaseMetric;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
+import io.nosqlbench.nb.api.labels.NBLabels;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -30,10 +32,18 @@ class NBBaseComponentMetricsTest {
     @Test
     void testBasicAddAndLookup() {
         NBBaseComponentMetrics cm = new NBBaseComponentMetrics();
-        NBMetric m1 = new NBBaseMetric("k","20");
-        String m1Handle = cm.addComponentMetric(m1);
-        NBMetric m2 = new NBBaseMetric("k","27","l","62");
-        String m2Handle = cm.addComponentMetric(m2);
+        NBMetric m1 = new NBBaseMetric(NBLabels.forKV("k","20"),"test metric", MetricCategory.Verification);
+        String m1Handle = cm.addComponentMetric(
+            m1,
+            MetricCategory.Verification,
+            "testing metric"
+        );
+        NBMetric m2 = new NBBaseMetric(NBLabels.forKV("k","27","l","62"),"test metric", MetricCategory.Verification);
+        String m2Handle = cm.addComponentMetric(
+            m2,
+            MetricCategory.Verification,
+            "testing metric"
+        );
 
         assertThat(cm.getComponentMetric(m1Handle)).isEqualTo(m1);
         assertThat(cm.getComponentMetric(m2Handle)).isEqualTo(m2);
@@ -41,10 +51,18 @@ class NBBaseComponentMetricsTest {
     @Test
     void find() {
         NBBaseComponentMetrics cm = new NBBaseComponentMetrics();
-        NBMetric m1 = new NBBaseMetric("k","20");
-        String m1Handle = cm.addComponentMetric(m1);
-        NBMetric m2 = new NBBaseMetric("k","27","l","62");
-        String m2Handle = cm.addComponentMetric(m2);
+        NBMetric m1 = new NBBaseMetric(NBLabels.forKV("k","20"),"test metric", MetricCategory.Verification);
+        String m1Handle = cm.addComponentMetric(
+            m1,
+            MetricCategory.Verification,
+            "testing metric"
+        );
+        NBMetric m2 = new NBBaseMetric(NBLabels.forKV("k","27","l","62"),"test metric", MetricCategory.Verification);
+        String m2Handle = cm.addComponentMetric(
+            m2,
+            MetricCategory.Verification,
+            "testing metric"
+        );
 
         assertThat(cm.findComponentMetrics("k=27")).isEqualTo(List.of(m2));
         assertThat(cm.findComponentMetrics("k=20")).isNotEqualTo(List.of(m2));

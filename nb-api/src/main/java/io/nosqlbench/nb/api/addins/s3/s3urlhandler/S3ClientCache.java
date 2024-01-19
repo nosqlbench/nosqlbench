@@ -38,9 +38,10 @@ public class S3ClientCache {
     }
 
     public AmazonS3 get(S3UrlFields fields) {
-        AmazonS3 s3 = cache.computeIfAbsent(fields.getCredentialsFingerprint(),
-            cfp -> createAuthorizedClient(fields));
-        return s3;
+        return cache.computeIfAbsent(
+            fields.getCredentialsFingerprint(),
+            cfp -> createAuthorizedClient(fields)
+        );
     }
 
     private AmazonS3 createAuthorizedClient(S3UrlFields fields) {

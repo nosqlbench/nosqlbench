@@ -33,8 +33,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -49,18 +51,18 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
     private String bearerToken;
 
     public PromPushReporterComponent(NBComponent parent, String endpoint, long intervalMs, NBLabels nbLabels) {
-        super(parent,nbLabels.and("_type","prom-push"),intervalMs,true,"REPORT-PROMPUSH");
+        super(parent, nbLabels.and("_type", "prom-push"), intervalMs,  "REPORT-PROMPUSH",FirstReport.OnInterval, LastReport.OnInterrupt);
         String jobname = getLabels().valueOfOptional("jobname").orElse("default");
         String instance = getLabels().valueOfOptional("instance").orElse("default");
-        if (jobname.equals("default")||instance.equals("default")) {
+        if (jobname.equals("default") || instance.equals("default")) {
             logger.warn("It is highly recommended that you set a value for labels jobname and instance other than 'default'.");
         }
 
         if (endpoint.matches("victoria:[a-zA-Z0-9._-]+:[0-9]+")) {
             String[] parts = endpoint.split(":", 2);
-            endpoint = "https://"+parts[1]+"/api/v1/import/prometheus/metrics/job/JOBNAME/instance/INSTANCE";
+            endpoint = "https://" + parts[1] + "/api/v1/import/prometheus/metrics/job/JOBNAME/instance/INSTANCE";
         }
-        endpoint=endpoint.replace("JOBNAME",jobname).replace("INSTANCE",instance);
+        endpoint = endpoint.replace("JOBNAME", jobname).replace("INSTANCE", instance);
         if (!endpoint.contains(jobname)) {
             throw new BasicError("Mismatch between jobname in prompush URI and specified jobname label. You should use the short form for --report-prompush-to victoria:addr:port and set the jobname with --add-labels");
         }
@@ -109,9 +111,24 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
             remainingRetries--;
             final HttpClient client = getCachedClient();
             final HttpRequest.Builder rb = HttpRequest.newBuilder().uri(uri);
-            if (bearerToken!=null) {
+            if (bearerToken != null) {
                 rb.setHeader("Authorization", "Bearer " + bearerToken);
             }
+            getComponentProp("prompush_cache")
+                .map(cache -> Path.of(getComponentProp("logsdir").orElse("."))
+                    .resolve("cache")).ifPresent(
+                    prompush_cache_path -> {
+                        try {
+                            Files.writeString(
+                                prompush_cache_path,
+                                    exposition,
+                                StandardOpenOption.TRUNCATE_EXISTING,
+                                StandardOpenOption.CREATE,
+                                StandardOpenOption.WRITE);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
             final HttpRequest request = rb.POST(BodyPublishers.ofString(exposition)).build();
             final BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
             HttpResponse<String> response = null;

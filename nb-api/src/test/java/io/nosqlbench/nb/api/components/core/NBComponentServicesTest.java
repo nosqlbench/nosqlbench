@@ -17,6 +17,7 @@
 package io.nosqlbench.nb.api.components.core;
 
 import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
@@ -35,7 +36,12 @@ class NBComponentServicesTest {
         TestComponent a1 = new TestComponent(root, "a1", "a1");
         TestComponent b1 = new TestComponent(a1, "b1", "b1");
 
-        NBMetricTimer timer1 = a1.create().timer("mfn1", 3);
+        NBMetricTimer timer1 = a1.create().timer(
+            "mfn1",
+            3,
+            MetricCategory.Verification,
+            "testing metric"
+        );
         String handle = timer1.getHandle();
         timer1.update(23L, TimeUnit.MILLISECONDS);
 
@@ -45,7 +51,12 @@ class NBComponentServicesTest {
         NBMetric foundByPattern = root.find().metric("name:mfn1");
         assertThat(foundByPattern).isEqualTo(timer1);
 
-        NBFunctionGauge gauge = b1.create().gauge("test_gauge", () -> 5.2d);
+        NBFunctionGauge gauge = b1.create().gauge(
+            "test_gauge",
+            () -> 5.2d,
+            MetricCategory.Verification,
+            "testing metric"
+        );
         String gaugeHandle = gauge.getHandle();
 
         List<NBMetric> metricsInTree = root.find().metrics();

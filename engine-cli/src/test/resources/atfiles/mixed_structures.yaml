@@ -1,0 +1,17 @@
+# This not valid for traversas, as only maps are supported till the leaf node
+alist:
+  - ofmaps:
+      oflist:
+        - arg1
+        - arg2
+
+# This is valid, and both types are valid for reference at the leaf level
+amap:
+ ofamap:
+   ofentries:
+     key1: value1
+     key2: value2
+   ofalist:
+     - option1
+     - option2
+

@@ -19,6 +19,7 @@ package io.nosqlbench.adapters.api.metrics;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.Timer.Context;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +42,12 @@ public class ThreadLocalNamedTimers {
     public static void addTimer(final ParsedOp pop, final String name) {
         if (ThreadLocalNamedTimers.timers.containsKey("name"))
             ThreadLocalNamedTimers.logger.warn("A timer named '{}' was already defined and initialized.", name);
-        NBMetricTimer timer = pop.create().timer(name, 3);
+        NBMetricTimer timer = pop.create().timer(
+            name,
+            3,
+            MetricCategory.User,
+            "User-provided metric, defined on op '" + pop.getName() + "'"
+        );
         ThreadLocalNamedTimers.timers.put(name, timer);
     }
 

@@ -23,6 +23,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.evalctx.*;
 import io.nosqlbench.adapters.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
@@ -99,7 +100,12 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
         verifiers = configureVerifiers(op);
         this._verifier = CycleFunctions.of((a, b) -> a && b, verifiers, true);
         this.tlVerifier = ThreadLocal.withInitial(_verifier::newInstance);
-        this.verifierTimer = create().timer("verifier",3);
+        this.verifierTimer = create().timer(
+            "verifier",
+            3,
+            MetricCategory.Verification,
+            "Time verifier execution, if any."
+        );
     }
 
     private CycleFunction<Boolean> cloneVerifiers() {
@@ -126,7 +132,6 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
         Binding variables = new Binding();
 
         Map<String, ParsedTemplateString> initBlocks = op.getTemplateMap().takeAsNamedTemplates(VERIFIER_INIT);
-        List<CycleFunction<?>> verifierInitFunctions = new ArrayList<>();
         try {
             initBlocks.forEach((initName, stringTemplate) -> {
                 GroovyCycleFunction<?> initFunction =
@@ -180,8 +185,18 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
         if (this.instrument) {
             final int hdrDigits = pop.getStaticConfigOr("hdr_digits", 4);
 
-            successTimer = create().timer("successfor_"+getOpName(),hdrDigits);
-            errorTimer = create().timer("errorsfor_"+getOpName(),hdrDigits);
+            successTimer = create().timer(
+                "successfor_"+getOpName(),
+                hdrDigits,
+                MetricCategory.Core,
+                "Successful result timer for specific operation '" + pop.getName() + "'"
+            );
+            errorTimer = create().timer(
+                "errorsfor_"+getOpName(),
+                hdrDigits,
+                MetricCategory.Core,
+                "Errored result timer for specific operation '" + pop.getName() + "'"
+            );
         }
     }
 

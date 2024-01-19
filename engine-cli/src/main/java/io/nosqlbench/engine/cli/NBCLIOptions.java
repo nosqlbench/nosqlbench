@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.engine.api.scenarios.NBCLIScenarioPreprocessor;
+import io.nosqlbench.engine.cli.atfiles.NBAtFile;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.PathCanonicalizer;
 import io.nosqlbench.engine.core.lifecycle.session.CmdParser;
@@ -61,6 +62,8 @@ public class NBCLIOptions {
     private static final String METRICS_LABELSPEC = "--metrics-labelspec";
     private static final String LABELSPEC = "--labelspec";
     private static final String ANNOTATORS_CONFIG = "--annotators";
+
+    private static final String HEARTBEAT_MILLIS = "--heartbeat-millis";
 
     // Enabled if the TERM env var is provided
     private static final String ANSI = "--ansi";
@@ -118,7 +121,7 @@ public class NBCLIOptions {
     private static final String GRAPHITE_LOG_LEVEL = "--graphite-log-level";
     private static final String REPORT_CSV_TO = "--report-csv-to";
     private static final String REPORT_SUMMARY_TO = "--report-summary-to";
-    private static final String REPORT_SUMMARY_TO_DEFAULT = "stdout:60,_LOGS_/_SESSION_.summary";
+    private static final String REPORT_SUMMARY_TO_DEFAULT = "stdout:60,_LOGS_/_SESSION__summary.txt";
     private static final String PROGRESS = "--progress";
     private static final String WITH_LOGGING_PATTERN = "--with-logging-pattern";
     private static final String LOGGING_PATTERN = "--logging-pattern";
@@ -201,6 +204,7 @@ public class NBCLIOptions {
     private String annotateLabelSpec = "";
     private String metricsLabelSpec = "";
     private String wantsToCatResource ="";
+    private long heartbeatIntervalMs = 10000;
 
     public boolean wantsLoggedMetrics() {
         return this.wantsConsoleMetrics;
@@ -275,10 +279,6 @@ public class NBCLIOptions {
         ParseAllOptions
     }
 
-    public NBCLIOptions(final String[] args) {
-        this(args, Mode.ParseAllOptions);
-    }
-
     public NBCLIOptions(final String[] args, final Mode mode) {
         switch (mode) {
             case ParseGlobalsOnly:
@@ -293,6 +293,8 @@ public class NBCLIOptions {
     private LinkedList<String> parseGlobalOptions(final String[] args) {
 
         LinkedList<String> arglist = new LinkedList<>(Arrays.asList(args));
+        NBAtFile.includeAt(arglist);
+
         if (null == arglist.peekFirst()) {
             this.wantsBasicHelp = true;
             return arglist;
@@ -300,8 +302,8 @@ public class NBCLIOptions {
 
         // Process --include and --statedir, separately first
         // regardless of position
-        LinkedList<String> nonincludes = new LinkedList<>();
-        while (null != arglist.peekFirst()) {
+        LinkedList<String> everythingButIncludes = new LinkedList<>();
+        while (!arglist.isEmpty()) {
             final String word = arglist.peekFirst();
             if (word.startsWith("--") && word.contains("=")) {
                 final String wordToSplit = arglist.removeFirst();
@@ -322,13 +324,13 @@ public class NBCLIOptions {
                     this.wantsToIncludePaths.add(include);
                     break;
                 default:
-                    nonincludes.addLast(arglist.removeFirst());
+                    everythingButIncludes.addLast(arglist.removeFirst());
             }
         }
         this.statepath = NBStatePath.initialize(statedirs);
 
-        arglist = nonincludes;
-        nonincludes = new LinkedList<>();
+        arglist = everythingButIncludes;
+        everythingButIncludes = new LinkedList<>();
 
         // Now that statdirs is settled, auto load argsfile if it is present
         final NBCLIArgsFile argsfile = new NBCLIArgsFile();
@@ -501,11 +503,11 @@ public class NBCLIOptions {
                     this.metricsLabelSpec = this.readWordOrThrow(arglist, "labels validator specification for metric labels");
                     break;
                 default:
-                    nonincludes.addLast(arglist.removeFirst());
+                    everythingButIncludes.addLast(arglist.removeFirst());
             }
         }
 
-        return nonincludes;
+        return everythingButIncludes;
     }
 
     private void setLabels(String labeldata) {
@@ -639,6 +641,11 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     this.wantsToCatResource = this.readWordOrThrow(arglist, "workload to cat");
                     break;
+                case HEARTBEAT_MILLIS:
+                    arglist.removeFirst();
+                    this.heartbeatIntervalMs =
+                            Long.parseLong(this.readWordOrThrow(arglist, "heartbeat interval in ms"));
+                    break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
             }
@@ -666,7 +673,21 @@ public class NBCLIOptions {
                 """
                 .replaceAll("ARG", cmdParam)
                 .replaceAll("PROG", "nb5")
-                .replaceAll("INCLUDES", String.join(",", wantsIncludes()));
+                .replaceAll("INCLUDES", String.join(",", wantsIncludes()))
+                ;
+
+            final String debugMessage = """
+
+                After parsing all global options out of the command line, the remaining commands were found,
+                and mapped to valid options as describe above. This command stream was:
+                COMMANDSTREAM
+                """
+                .replaceAll("COMMANDSTREAM",
+                    String.join(" ",arglist));
+            if (consoleLevel.isGreaterOrEqualTo(NBLogLevel.INFO)) {
+                System.out.println(debugMessage);
+            }
+
             throw new BasicError(helpmsg);
 
         }
@@ -734,6 +755,10 @@ public class NBCLIOptions {
 
     public boolean wantsActivityTypes() {
         return this.wantsActivityTypes;
+    }
+
+    public long wantsHeartbeatIntervalMs() {
+        return this.heartbeatIntervalMs;
     }
 
     public boolean wantsTopicalHelp() {

@@ -35,7 +35,7 @@ import java.util.function.Function;
 public class MutableAnnotation implements Annotation {
 
     private final static Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-    private String session = "SESSION_UNNAMED";
+    public static String session = "SESSION_UNNAMED";
     private final ZoneId GMT = ZoneId.of("GMT");
 
     private final LinkedList<Function<NBLabels,NBLabels>> labelfuncs = new LinkedList<>();
@@ -79,7 +79,7 @@ public class MutableAnnotation implements Annotation {
     }
 
     public void setSession(String sessionName) {
-        this.session = sessionName;
+        session = sessionName;
     }
 
     public void setStartMillis(long intervalStart) {

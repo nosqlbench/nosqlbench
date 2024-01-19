@@ -16,9 +16,7 @@
 
 package io.nosqlbench.nb.api.addins.s3.s3urlhandler;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -31,13 +29,12 @@ public class S3UrlFields {
     private final String endpoint;
 
     public static S3UrlFields fromURLString(String urlString) {
-        URL url = null;
         try {
-            url = new URL(urlString);
-        } catch (MalformedURLException e) {
+            URL url = new URI(urlString).toURL();
+            return new S3UrlFields(url);
+        } catch (MalformedURLException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        return new S3UrlFields(url);
     }
     public S3UrlFields(URL url) {
 
@@ -94,11 +91,11 @@ public class S3UrlFields {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            S3UrlFields that = (S3UrlFields) o;
+            CredentialsFingerprint that = (CredentialsFingerprint) o;
 
-            if (!Objects.equals(fields.secretKey, that.secretKey)) return false;
-            if (!Objects.equals(fields.accessKey, that.accessKey)) return false;
-            return Objects.equals(fields.endpoint, that.endpoint);
+            if (!Objects.equals(fields.secretKey, that.fields.secretKey)) return false;
+            if (!Objects.equals(fields.accessKey, that.fields.accessKey)) return false;
+            return Objects.equals(fields.endpoint, that.fields.endpoint);
         }
 
         @Override

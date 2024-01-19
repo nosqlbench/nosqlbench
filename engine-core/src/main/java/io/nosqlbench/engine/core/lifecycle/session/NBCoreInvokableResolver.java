@@ -45,6 +45,16 @@ public class NBCoreInvokableResolver implements NBInvokableResolver {
         return null;
     }
 
+    @Override
+    public boolean verify(Cmd cmd) {
+        for (NBInvokableResolver resolver : getResolvers().values()) {
+            if (resolver.verify(cmd)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private SequencedMap<String, NBInvokableResolver> getResolvers() {
         if (this.resolvers == null || this.resolvers.isEmpty()) {
             SequencedMap<String,NBInvokableResolver> resolverMap = new LinkedHashMap<>();

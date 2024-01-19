@@ -16,6 +16,7 @@
 
 package io.nosqlbench.nb.api.components.core;
 
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 
 import java.util.Collection;
@@ -29,7 +30,7 @@ import java.util.List;
  *
  */
 public interface NBComponentMetrics {
-    String addComponentMetric(NBMetric metric);
+    String addComponentMetric(NBMetric metric, MetricCategory category, String requiredDescription);
 
     /**
      * If you have the serialized open metrics name of a metric, you can ask for it

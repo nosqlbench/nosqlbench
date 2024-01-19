@@ -20,8 +20,10 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.kafka.dispensers.KafkaBaseOpDispenser;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
+import org.apache.kafka.common.Metric;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,37 +52,70 @@ public class KafkaAdapterMetrics {
 
     public KafkaAdapterMetrics(final KafkaBaseOpDispenser kafkaBaseOpDispenser, final NBLabeledElement labeledParent) {
         this.kafkaBaseOpDispenser = kafkaBaseOpDispenser;
-        labels=labeledParent.getLabels().and("name",KafkaAdapterMetrics.class.getSimpleName());
+        labels = labeledParent.getLabels().and("name", KafkaAdapterMetrics.class.getSimpleName());
     }
 
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
-        messageSizeHistogram = kafkaBaseOpDispenser.create().histogram("message_size");
+        messageSizeHistogram = kafkaBaseOpDispenser.create().histogram(
+            "kafka_message_size",
+            MetricCategory.Payload,
+            "kafka message size"
+        );
 
         // Timer metrics
         bindTimer =
             this.kafkaBaseOpDispenser.create().timer(
-                    "bind");
+                "kafka_bind",
+                MetricCategory.Payload,
+                "kafka bind timer");
         executeTimer =
             this.kafkaBaseOpDispenser.create().timer(
-                     "execute");
+                "kafka_execute",
+                MetricCategory.Payload,
+                "kafka execute timer"
+            );
 
         // End-to-end metrics
         // Latency
         e2eMsgProcLatencyHistogram =
-            kafkaBaseOpDispenser.create().histogram("e2e_msg_latency");
+            kafkaBaseOpDispenser.create().histogram(
+                "e2e_msg_latency",
+                MetricCategory.Driver,
+                "End-to-end kafka message latency"
+            );
         // Error metrics
         msgErrOutOfSeqCounter =
-            kafkaBaseOpDispenser.create().counter("err_msg_oos");
+            kafkaBaseOpDispenser.create().counter(
+                "kafka_err_msg_oos",
+                MetricCategory.Driver,
+                "kafka Out-of-sequence errors"
+            );
         msgErrLossCounter =
-            kafkaBaseOpDispenser.create().counter("err_msg_loss");
+            kafkaBaseOpDispenser.create().counter(
+                "kafka_err_msg_loss",
+                MetricCategory.Driver,
+                "kafka message loss errors"
+            );
         msgErrDuplicateCounter =
-            kafkaBaseOpDispenser.create().counter( "err_msg_dup");
+            kafkaBaseOpDispenser.create().counter(
+                "kafka_err_msg_dup",
+                MetricCategory.Driver,
+                "kafka duplicate message errors"
+            );
     }
 
-    public Timer getBindTimer() { return bindTimer; }
-    public Timer getExecuteTimer() { return executeTimer; }
-    public Histogram getMessagesizeHistogram() { return messageSizeHistogram; }
+    public Timer getBindTimer() {
+        return bindTimer;
+    }
+
+    public Timer getExecuteTimer() {
+        return executeTimer;
+    }
+
+    public Histogram getMessagesizeHistogram() {
+        return messageSizeHistogram;
+    }
 
     public Counter getMsgErrOutOfSeqCounter() {
         return msgErrOutOfSeqCounter;

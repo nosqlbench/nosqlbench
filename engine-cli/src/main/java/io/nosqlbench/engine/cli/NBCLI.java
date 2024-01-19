@@ -45,7 +45,7 @@ import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
-import io.nosqlbench.engine.core.logging.LoggerConfig;
+import io.nosqlbench.engine.core.logging.NBLoggerConfig;
 import io.nosqlbench.engine.core.metadata.MarkdownFinder;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.annotations.ServiceSelector;
@@ -68,13 +68,13 @@ import java.util.stream.Collectors;
 public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
     private static Logger logger;
-    private static final LoggerConfig loggerConfig;
+    private static final NBLoggerConfig loggerConfig;
     private static final int EXIT_OK = 0;
     private static final int EXIT_WARNING = 1;
     private static final int EXIT_ERROR = 2;
 
     static {
-        loggerConfig = new LoggerConfig();
+        loggerConfig = new NBLoggerConfig();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
     }
 
@@ -169,9 +169,9 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             .setAnsiEnabled(globalOptions.isEnableAnsi())
             .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
             .activate();
-        ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
+        ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig); // THIS should be the first time log4j2 is invoked!
 
-        NBCLI.logger = LogManager.getLogger("NBCLI");
+        NBCLI.logger = LogManager.getLogger("NBCLI"); // TODO: Detect if the logger config was already initialized (error)
         NBCLI.loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
         if (NBCLI.logger.isInfoEnabled())
             NBCLI.logger.info(() -> "Configured scenario log at " + NBCLI.loggerConfig.getLogfileLocation());
@@ -185,7 +185,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         NBCLI.logger.info(() -> "Running NoSQLBench Version " + new VersionInfo().getVersion());
-        NBCLI.logger.info(() -> "command-line: " + Arrays.stream(args).collect(Collectors.joining(" ")));
+        NBCLI.logger.info(() -> "command-line: " + String.join(" ", args));
         NBCLI.logger.info(() -> "client-hardware: " + SystemId.getHostSummary());
 
 
@@ -216,7 +216,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             annotatorsConfig = gson.toJson(annotatorsConfigs);
         }
 
-        final NBCLIOptions options = new NBCLIOptions(args);
+        final NBCLIOptions options = new NBCLIOptions(args, Mode.ParseAllOptions);
         NBCLI.logger = LogManager.getLogger("NBCLI");
 
         NBIO.addGlobalIncludes(options.wantsIncludes());
@@ -401,53 +401,64 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         // intentionally not shown for warn-only
         NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
 
+        Map<String, String> props = Map.of(
+            "summary", options.getReportSummaryTo(),
+            "logsdir", options.getLogsDirectory().toString(),
+            "progress", options.getProgressSpec(),
+            "prompush_cache", "prompush_cache.txt",
+            "heartbeat", String.valueOf(options.wantsHeartbeatIntervalMs())
+        );
         /**
          * At this point, the command stream from the CLI should be handed into the session, and the session should
          * marshal and transform it for any scenario invocations directly.
          */
-        NBSession session = new NBSession(
-            new NBBaseComponent(null,
-                options.getLabelMap()
-                    .andDefault("jobname", "nosqlbench")
-                    .andDefault("instance", "default")
-            ),
-            sessionName
-        );
-        // TODO: Decide whether this should be part of ctor consistency
-        Map.of(
-            "summary", options.getReportSummaryTo(),
-            "logsdir", options.getLogsDirectory().toString(),
-            "progress", options.getProgressSpec()
-        ).forEach(session::setComponentProp);
 
-        options.wantsReportCsvTo().ifPresent(cfg -> {
-            MetricInstanceFilter filter = new MetricInstanceFilter();
-            filter.addPattern(cfg.pattern);
-            new CsvReporter(session, Path.of(cfg.file), cfg.millis, filter);
-        });
+        try (
+            NBSession session = new NBSession(
+                new NBBaseComponent(null,
+                    options.getLabelMap()
+                        .andDefault("jobname", "nosqlbench")
+                        .andDefault("instance", "default")
+                ),
+                sessionName,
+                props
+            )) {
 
-        options.wantsReportPromPushTo().ifPresent(cfg -> {
-            String[] words = cfg.split(",");
-            String uri;
-            long intervalMs = 10_000L;
+            options.wantsReportCsvTo().ifPresent(cfg -> {
+                MetricInstanceFilter filter = new MetricInstanceFilter();
+                filter.addPattern(cfg.pattern);
+                new CsvReporter(session, Path.of(cfg.file), cfg.millis, filter);
+            });
 
-            switch (words.length) {
-                case 2:
-                    intervalMs = Unit.msFor(words[1]).orElseThrow(() -> new RuntimeException("can't parse '" + words[1] + "!"));
-                case 1:
-                    uri = words[0];
-                    break;
-                default:
-                    throw new RuntimeException("Unable to parse '" + cfg + "', must be in <URI> or <URI>,ms form");
+            options.wantsReportPromPushTo().ifPresent(cfg -> {
+                String[] words = cfg.split(",");
+                String uri;
+                long intervalMs = 10_000L;
+
+                switch (words.length) {
+                    case 2:
+                        intervalMs = Unit.msFor(words[1]).orElseThrow(() -> new RuntimeException("can't parse '" + words[1] + "!"));
+                    case 1:
+                        uri = words[0];
+                        break;
+                    default:
+                        throw new RuntimeException("Unable to parse '" + cfg + "', must be in <URI> or <URI>,ms form");
+                }
+                session.create().pushReporter(uri, intervalMs, NBLabels.forKV());
+            });
+
+
+            ExecutionResult sessionResult = session.apply(options.getCommands());
+            logger.info(sessionResult);
+            if (sessionResult.getException() instanceof RuntimeException rte) {
+                throw rte;
+            } else if (sessionResult.getException() instanceof Throwable t) {
+                throw new RuntimeException(t);
             }
-            session.create().pushReporter(uri, intervalMs, NBLabels.forKV());
-        });
 
-
-        ExecutionResult sessionResult = session.apply(options.getCommands());
+            return sessionResult.getStatus().code;
+        }
 //        sessionResult.printSummary(System.out);
-        logger.info(sessionResult);
-        return sessionResult.getStatus().code;
 
     }
 
@@ -464,9 +475,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
         basicHelp = basicHelp.replaceAll("PROG", this.commandName);
         return basicHelp;
-
     }
-
 
     @Override
     public NBLabels getLabels() {

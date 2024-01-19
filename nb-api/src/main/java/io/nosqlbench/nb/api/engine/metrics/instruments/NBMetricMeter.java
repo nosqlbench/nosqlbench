@@ -22,9 +22,13 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 public class NBMetricMeter extends Meter implements NBMetric {
 
     private final NBLabels labels;
+    private final MetricCategory[] categories;
+    private final String description;
 
-    public NBMetricMeter(NBLabels labels) {
+    public NBMetricMeter(NBLabels labels, String description, MetricCategory... categories) {
         this.labels = labels;
+        this.description = description;
+        this.categories = categories;
     }
 
     @Override
@@ -35,5 +39,15 @@ public class NBMetricMeter extends Meter implements NBMetric {
     @Override
     public String typeName() {
         return "meter";
+    }
+
+    @Override
+    public String getDescription() {
+        return this.description;
+    }
+
+    @Override
+    public MetricCategory[] getCategories() {
+        return this.categories;
     }
 }

@@ -23,6 +23,7 @@ import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.input.Input;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,22 +61,62 @@ public class AtomicInput extends NBBaseComponent implements Input, ActivityDefOb
         super(parent);
         this.activityDef = activityDef;
         onActivityDefUpdate(activityDef);
-        create().gauge("input_cycles_first",() -> (double) this.cycles_min.get());
-        create().gauge("input_cycles_last",() -> (double) this.cycles_max.get());
-        create().gauge("input_cycle",() -> (double) this.cycle_value.get());
-        create().gauge("input_cycles_total",this::getTotalCycles);
-        create().gauge("input_recycles_first",() -> (double) this.recycles_min.get());
-        create().gauge("input_recycles_last",() -> (double) this.recycles_max.get());
-        create().gauge("input_recycle",() -> (double) this.recycle_value.get());
-        create().gauge("input_recycles_total",this::getTotalRecycles);
+        create().gauge(
+            "input_cycles_first",
+            () -> (double) this.cycles_min.get(),
+            MetricCategory.Config,
+            "The first cycle of the cycle interval, inclusive"
+        );
+        create().gauge(
+            "input_cycles_last",
+            () -> (double) this.cycles_max.get(),
+            MetricCategory.Config,
+            "The last cycle of the cycle interval, exclusive"
+        );
+        create().gauge(
+            "input_cycle",
+            () -> (double) this.cycle_value.get(),
+            MetricCategory.Core,
+            "The next input cycle that will be dispatched to a thread"
+        );
+        create().gauge(
+            "input_cycles_total",
+            this::getTotalCycles,
+            MetricCategory.Config,
+            "The total number of cycles to be executed"
+        );
+        create().gauge(
+            "input_recycles_first",
+            () -> (double) this.recycles_min.get(),
+            MetricCategory.Config,
+            "The first recycle value, inclusive"
+        );
+        create().gauge(
+            "input_recycles_last",
+            () -> (double) this.recycles_max.get(),
+            MetricCategory.Config,
+            "The last recycle value, exclusive"
+        );
+        create().gauge(
+            "input_recycle",
+            () -> (double) this.recycle_value.get(),
+            MetricCategory.Core,
+            "The next recycle value that will be dispatched once cycles are completed"
+        );
+        create().gauge(
+            "input_recycles_total",
+            this::getTotalRecycles,
+            MetricCategory.Config,
+            "The total number of recycles to be executed, within which each set of cycles will be executed"
+        );
     }
 
     private double getTotalRecycles() {
-        return 0.0d;
+        return ((double)this.recycles_max.get())-((double)this.recycles_min.get());
     }
 
     private double getTotalCycles() {
-        return 0.0d;
+        return ((double)this.cycles_max.get())-((double)this.cycles_min.get());
     }
 
     @Override

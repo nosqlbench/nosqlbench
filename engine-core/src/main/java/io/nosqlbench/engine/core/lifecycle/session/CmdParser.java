@@ -24,7 +24,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 /**
  * <P>Take zero or more strings containing combined argv and return
  * a single {@link Cmd} list containing zero or more commands.</P>
@@ -46,7 +45,7 @@ public class CmdParser {
     private record parameter(String name, String op, String value) {}
     private record command(String name){}
     private final static Pattern combinedPattern =
-        Pattern.compile("(?<varname>[a-zA-Z_][a-zA-Z0-9_.-]+)(?<operator>=+)(?<value>.+)|(?<command>[a-zA-Z_][a-zA-Z0-9_.]+)",Pattern.DOTALL);
+        Pattern.compile("(?<varname>[a-zA-Z_][a-zA-Z0-9_.-]*)(?<operator>=+)(?<value>.+)|(?<command>[a-zA-Z_][a-zA-Z0-9_.]*)",Pattern.DOTALL);
     private final static Pattern commandName =Pattern.compile("^$");
     public static LinkedList<Cmd> parseArgvCommands(LinkedList<String> args) {
         LinkedList<Record> cmdstructs = new LinkedList<>();

@@ -74,12 +74,7 @@ public class BasicScriptBuffer implements ScriptBuffer {
                 }
                 break;
             case java:
-            case start: // start activity
-            case run: // run activity
-            case await: // await activity
 //            case stop: // stop activity
-            case forceStop: // force stopping activity
-            case waitMillis:
 
                 sb.append("controller.").append(cmd.asScriptText()).append("\n");
 ////                // Sanity check that this can parse before using it

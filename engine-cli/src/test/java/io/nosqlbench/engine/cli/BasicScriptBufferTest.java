@@ -28,7 +28,7 @@ public class BasicScriptBufferTest {
 
     @Test
     public void testScriptInterpolation() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "path=script_to_interpolate", "parameter1=replaced"});
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"script", "path=script_to_interpolate", "parameter1=replaced"}, NBCLIOptions.Mode.ParseAllOptions);
 
         BasicScriptBuffer b = new BasicScriptBuffer();
         b.add(opts.getCommands().toArray(new Cmd[0]));
@@ -40,7 +40,7 @@ public class BasicScriptBufferTest {
 
     @Test
     public void testAutoScriptCommand() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "script","path=acommand" });
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "script","path=acommand" }, NBCLIOptions.Mode.ParseAllOptions);
         BasicScriptBuffer b = new BasicScriptBuffer();
         b.add(opts.getCommands().toArray(new Cmd[0]));
         String s = b.getParsedScript();
@@ -53,8 +53,8 @@ public class BasicScriptBufferTest {
         NBCLIOptions opts = new NBCLIOptions(new String[] {
             "script",
             "path=testscripts/printscript.js",
-            "param1=value1"
-        });
+            "param1=value1",
+        }, NBCLIOptions.Mode.ParseAllOptions);
         BasicScriptBuffer b = new BasicScriptBuffer();
         b.add(opts.getCommands().toArray(new Cmd[0]));
         String script = b.getParsedScript();
@@ -72,7 +72,7 @@ public class BasicScriptBufferTest {
             "path=testscripts/printparam.js",
             "paramname=another",
             "param2=andanother"
-        });
+        }, NBCLIOptions.Mode.ParseAllOptions);
         BasicScriptBuffer b = new BasicScriptBuffer();
         b.add(opts.getCommands().toArray(new Cmd[0]));
         String script = b.getParsedScript();
@@ -84,6 +84,6 @@ public class BasicScriptBufferTest {
     @Test
     public void shouldThrowErrorForInvalidWaitMillisOperand() {
         assertThatExceptionOfType(NumberFormatException.class)
-                .isThrownBy(() -> new NBCLIOptions(new String[]{ "waitmillis", "ms=noway" }));
+                .isThrownBy(() -> new NBCLIOptions(new String[]{ "waitmillis", "ms=noway" }, NBCLIOptions.Mode.ParseAllOptions));
     }
 }

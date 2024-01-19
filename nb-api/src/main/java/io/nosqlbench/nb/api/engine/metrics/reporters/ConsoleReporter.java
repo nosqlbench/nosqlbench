@@ -44,7 +44,7 @@ public class ConsoleReporter extends PeriodicTaskComponent {
 
     public ConsoleReporter(NBComponent node, NBLabels extraLabels, long millis, boolean oneLastTime,
                            PrintStream output, Set<MetricAttribute> disabledMetricAttributes) {
-        super(node, extraLabels, millis, oneLastTime, "REPORT-CONSOLE");
+        super(node, extraLabels, millis, "REPORT-CONSOLE", FirstReport.OnInterval, LastReport.OnInterrupt);
         this.output = output;
         this.dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT,
             DateFormat.MEDIUM,

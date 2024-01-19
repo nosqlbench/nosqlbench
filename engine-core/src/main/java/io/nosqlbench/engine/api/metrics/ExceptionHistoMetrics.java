@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.metrics;
 import com.codahale.metrics.Histogram;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,12 @@ public class ExceptionHistoMetrics {
     public ExceptionHistoMetrics(final NBComponent parent, final ActivityDef activityDef) {
         this.parent = parent;
         this.activityDef = activityDef;
-        this.allerrors = parent.create().histogram( "errorhistos_ALL", activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4));
+        this.allerrors = parent.create().histogram(
+            "errorhistos_ALL",
+            activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4),
+            MetricCategory.Errors,
+            "A histogram for all exceptions"
+        );
     }
 
     public void update(final String name, final long magnitude) {
@@ -46,7 +52,12 @@ public class ExceptionHistoMetrics {
         if (null == h) synchronized (this.histos) {
             h = this.histos.computeIfAbsent(
                 name,
-                errName -> parent.create().histogram( "errorhistos_"+errName, this.activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4))
+                errName -> parent.create().histogram(
+                    "errorhistos_"+errName,
+                    this.activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4),
+                    MetricCategory.Errors,
+                    "error histogram for exception '" + errName + "'"
+                )
             );
         }
         h.update(magnitude);

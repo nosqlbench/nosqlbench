@@ -27,7 +27,7 @@ import io.nosqlbench.nb.api.histo.HistoStats;
 import io.nosqlbench.nb.api.http.HttpPlugin;
 import io.nosqlbench.nb.api.labels.MapLabels;
 import io.nosqlbench.nb.api.optimizers.BobyqaOptimizerInstance;
-import io.nosqlbench.nb.api.files.FileAccess;
+import io.nosqlbench.nb.api.nbio.FileAccess;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.shutdown.NBShutdownHook;
 import io.nosqlbench.nb.api.loaders.BundledExtensionsLoader;
@@ -53,63 +53,68 @@ public class NBCreators {
         this.base = base;
     }
 
-    public NBMetricTimer timer(String metricFamilyName) {
-        return timer(metricFamilyName,3);
+    public NBMetricTimer timer(String metricFamilyName, MetricCategory category, String description) {
+        return timer(metricFamilyName,3, category,description);
     }
-    public NBMetricTimer timer(String metricFamilyName, int hdrdigits) {
+
+    public NBMetricTimer timer(String metricFamilyName, int hdrdigits, MetricCategory category, String description) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
-        NBMetricTimer timer = new NBMetricTimer(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits));
-        base.addComponentMetric(timer);
+        NBMetricTimer timer = new NBMetricTimer(
+            labels,
+            new DeltaHdrHistogramReservoir(labels, hdrdigits),
+            description, category
+        );
+        base.addComponentMetric(timer, category, description);
         return timer;
     }
 
-    public Meter meter(String metricFamilyName) {
+    public Meter meter(String metricFamilyName, MetricCategory category, String description) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
-        NBMetricMeter meter = new NBMetricMeter(labels);
-        base.addComponentMetric(meter);
+        NBMetricMeter meter = new NBMetricMeter(labels,description, category);
+        base.addComponentMetric(meter, category, description);
         return meter;
     }
 
 
-    public NBMetricCounter counter(String metricFamilyName) {
+    public NBMetricCounter counter(String metricFamilyName, MetricCategory category, String description) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
-        NBMetricCounter counter = new NBMetricCounter(labels);
-        base.addComponentMetric(counter);
+        NBMetricCounter counter = new NBMetricCounter(labels, description, category);
+        base.addComponentMetric(counter, category, description);
         return counter;
     }
 
 
-    public NBFunctionGauge gauge(String metricFamilyName, Supplier<Double> valueSource) {
-        NBFunctionGauge gauge = new NBFunctionGauge(base, valueSource, metricFamilyName);
-        base.addComponentMetric(gauge);
+    public NBFunctionGauge gauge(String metricFamilyName, Supplier<Double> valueSource, MetricCategory category, String description) {
+        NBFunctionGauge gauge = new NBFunctionGauge(base, valueSource, metricFamilyName, description, category);
+        base.addComponentMetric(gauge, category, description);
         return gauge;
     }
 
-    public NBVariableGauge variableGauge(String metricFamilyName, double initialValue, String... additionalLabels) {
-        NBVariableGauge gauge = new NBVariableGauge(base, metricFamilyName, initialValue, additionalLabels);
-        base.addComponentMetric(gauge);
+    public NBVariableGauge variableGauge(String metricFamilyName, double initialValue, MetricCategory category, String description, NBLabels additionalLabels) {
+        NBVariableGauge gauge = new NBVariableGauge(base, metricFamilyName, initialValue, additionalLabels, description, category);
+        base.addComponentMetric(gauge, category, description);
         return gauge;
     }
 
 
-    public DoubleSummaryGauge summaryGauge(String name, String... statspecs) {
-        List<DoubleSummaryGauge.Stat> stats = Arrays.stream(statspecs).map(DoubleSummaryGauge.Stat::valueOf).toList();
+    public DoubleSummaryGauge summaryGauge(String name, List<String> statspecs, MetricCategory category, String description) {
+        List<DoubleSummaryGauge.Stat> stats = statspecs.stream().map(DoubleSummaryGauge.Stat::valueOf).toList();
         DoubleSummaryStatistics reservoir = new DoubleSummaryStatistics();
         DoubleSummaryGauge anyGauge = null;
         for (DoubleSummaryGauge.Stat stat : stats) {
-            anyGauge = new DoubleSummaryGauge(base.getLabels().and(NBLabels.forKV("name",name,"stat", stat)), stat, reservoir);
-            base.addComponentMetric(anyGauge);
+            anyGauge = new DoubleSummaryGauge(base.getLabels().and(NBLabels.forKV("name",name,"stat", stat)), stat, reservoir, description, category);
+            base.addComponentMetric(anyGauge, category, description);
         }
         return anyGauge;
     }
 
-    public NBMetricHistogram histogram(String metricFamilyName) {
-        return histogram(metricFamilyName,4);
+    public NBMetricHistogram histogram(String metricFamilyName, MetricCategory category, String description) {
+        return histogram(metricFamilyName,4, category, description);
     }
-    public NBMetricHistogram histogram(String metricFamilyName, int hdrdigits) {
+    public NBMetricHistogram histogram(String metricFamilyName, int hdrdigits, MetricCategory category, String description) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
-        NBMetricHistogram histogram = new NBMetricHistogram(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits));
-        base.addComponentMetric(histogram);
+        NBMetricHistogram histogram = new NBMetricHistogram(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits), description, category);
+        base.addComponentMetric(histogram, category, description);
         return histogram;
     }
 

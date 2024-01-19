@@ -31,17 +31,33 @@ public class NBMetricHistogram extends Histogram implements DeltaSnapshotter, Hd
     private long cacheExpiryMillis;
     private long cacheTimeMillis;
     private List<Histogram> mirrors;
+    private MetricCategory[] categories;
+    private String description;
 
-    public NBMetricHistogram(NBLabels labels, DeltaHdrHistogramReservoir hdrHistogramReservoir) {
+    public NBMetricHistogram(
+        NBLabels labels,
+        DeltaHdrHistogramReservoir hdrHistogramReservoir,
+        String description,
+        MetricCategory... categories
+    ) {
         super(hdrHistogramReservoir);
         this.labels = labels;
         this.hdrDeltaReservoir = hdrHistogramReservoir;
+        this.description = description;
+        this.categories = categories;
     }
 
-    public NBMetricHistogram(String name, DeltaHdrHistogramReservoir hdrHistogramReservoir) {
+    public NBMetricHistogram(
+        String name,
+        DeltaHdrHistogramReservoir hdrHistogramReservoir,
+        String description,
+        MetricCategory... categories
+    ) {
         super(hdrHistogramReservoir);
         this.labels = NBLabels.forKV("name",name);
         this.hdrDeltaReservoir = hdrHistogramReservoir;
+        this.description = description;
+        this.categories = categories;
     }
 
     @Override
@@ -76,7 +92,7 @@ public class NBMetricHistogram extends Histogram implements DeltaSnapshotter, Hd
             mirrors = new CopyOnWriteArrayList<>();
         }
         DeltaHdrHistogramReservoir mirrorReservoir = this.hdrDeltaReservoir.copySettings();
-        NBMetricHistogram mirror = new NBMetricHistogram("mirror-" + this.labels.linearizeValues("name"), mirrorReservoir);
+        NBMetricHistogram mirror = new NBMetricHistogram("mirror-" + this.labels.linearizeValues("name"), mirrorReservoir, description, categories);
         mirrors.add(mirror);
         return mirror;
     }
@@ -113,6 +129,16 @@ public class NBMetricHistogram extends Histogram implements DeltaSnapshotter, Hd
     @Override
     public String typeName() {
         return "histogram";
+    }
+
+    @Override
+    public String getDescription() {
+        return this.description;
+    }
+
+    @Override
+    public MetricCategory[] getCategories() {
+        return this.categories;
     }
 
     @Override

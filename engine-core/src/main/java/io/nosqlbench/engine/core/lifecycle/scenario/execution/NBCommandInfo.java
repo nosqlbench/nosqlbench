@@ -40,7 +40,7 @@ public abstract class NBCommandInfo {
             cmdCtor = getType().getConstructor(NBBufferedContainer.class, String.class, String.class);
             return cmdCtor.newInstance(parent, cmdName, ctxName);
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("Unable to instantiate command via ctor(parent,name,ctx): " + e,e);
+            throw new RuntimeException("Unable to instantiate command via ctor(parent,name,ctx): " + e + (e.getCause()!=null ? "cause: " + e.getCause().toString() : ""),e);
         }
     }
 }

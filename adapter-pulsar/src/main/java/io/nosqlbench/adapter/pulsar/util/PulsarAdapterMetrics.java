@@ -20,6 +20,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.pulsar.dispensers.PulsarBaseOpDispenser;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.Consumer;
@@ -66,22 +67,52 @@ public class PulsarAdapterMetrics {
     public void initPulsarAdapterInstrumentation() {
         // Counter metrics
         msgErrOutOfSeqCounter =
-            pulsarBaseOpDispenser.create().counter("err_msg_oos");
+            pulsarBaseOpDispenser.create().counter("pulsar_err_msg_oos",
+                MetricCategory.Driver,
+                "pulsar out-of-sequence error counter"
+            );
         msgErrLossCounter =
-            pulsarBaseOpDispenser.create().counter("err_msg_loss");
+            pulsarBaseOpDispenser.create().counter("pulsar_err_msg_loss",
+                MetricCategory.Driver,
+                "pulsar lost message error counter"
+            );
         msgErrDuplicateCounter =
-            pulsarBaseOpDispenser.create().counter("err_msg_dup");
+            pulsarBaseOpDispenser.create().counter("pulsar_err_msg_dup",
+                MetricCategory.Driver,
+                "pulsar duplicate message error counter"
+            );
 
         // Histogram metrics
-        messageSizeHistogram = pulsarBaseOpDispenser.create().histogram("message_size");
-        e2eMsgProcLatencyHistogram = pulsarBaseOpDispenser.create().histogram("e2e_msg_latency");
-        payloadRttHistogram = pulsarBaseOpDispenser.create().histogram("payload_rtt");
+        messageSizeHistogram = pulsarBaseOpDispenser.create().histogram("pulsar_message_size",
+            MetricCategory.Driver,
+            "pulsar message size"
+        );
+        e2eMsgProcLatencyHistogram = pulsarBaseOpDispenser.create().histogram("pulsar_e2e_msg_latency",
+            MetricCategory.Driver,
+            "pulsar end-to-end message latency"
+        );
+        payloadRttHistogram = pulsarBaseOpDispenser.create().histogram("pulsar_payload_rtt",
+            MetricCategory.Driver,
+            "pulsar payload round-trip-time"
+        );
 
         // Timer metrics
-        bindTimer = pulsarBaseOpDispenser.create().timer("bind");
-        executeTimer = pulsarBaseOpDispenser.create().timer("execute");
-        createTransactionTimer = pulsarBaseOpDispenser.create().timer("create_transaction");
-        commitTransactionTimer = pulsarBaseOpDispenser.create().timer("commit_transaction");
+        bindTimer = pulsarBaseOpDispenser.create().timer("pulsar_bind",
+            MetricCategory.Driver,
+            "pulsar bind timer"
+        );
+        executeTimer = pulsarBaseOpDispenser.create().timer("pulsar_execute",
+            MetricCategory.Driver,
+            "pulsar execution timer"
+        );
+        createTransactionTimer = pulsarBaseOpDispenser.create().timer("pulsar_create_transaction",
+            MetricCategory.Driver,
+            "pulsar create transaction timer"
+        );
+        commitTransactionTimer = pulsarBaseOpDispenser.create().timer("pulsar_commit_transaction",
+            MetricCategory.Driver,
+            "pulsar commit transaction timer"
+        );
     }
 
     public Counter getMsgErrOutOfSeqCounter() {
@@ -154,12 +185,36 @@ public class PulsarAdapterMetrics {
 
     public void registerProducerApiMetrics(final Producer<?> producer) {
 
-        pulsarBaseOpDispenser.create().gauge("total_bytes_sent", PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalBytesSent() + s.getNumBytesSent()));
-        pulsarBaseOpDispenser.create().gauge("total_msg_sent", PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalMsgsSent() + s.getNumMsgsSent()));
-        pulsarBaseOpDispenser.create().gauge("total_send_failed", PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalSendFailed() + s.getNumSendFailed()));
-        pulsarBaseOpDispenser.create().gauge("total_ack_received", PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalAcksReceived() + s.getNumAcksReceived()));
-        pulsarBaseOpDispenser.create().gauge("send_bytes_rate", PulsarAdapterMetrics.producerSafeExtractMetric(producer, ProducerStats::getSendBytesRate));
-        pulsarBaseOpDispenser.create().gauge("send_msg_rate", PulsarAdapterMetrics.producerSafeExtractMetric(producer, ProducerStats::getSendMsgsRate));
+        pulsarBaseOpDispenser.create().gauge(
+            "pulsar_total_bytes_sent",
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalBytesSent() + s.getNumBytesSent()),
+            MetricCategory.Driver,
+            "pulsar total bytes sent"
+        );
+        pulsarBaseOpDispenser.create().gauge(
+            "pulsar_total_msg_sent",
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalMsgsSent() + s.getNumMsgsSent()),
+            MetricCategory.Driver,
+            "pulsar total message sent"
+        );
+        pulsarBaseOpDispenser.create().gauge(
+            "pulsar_total_send_failed",
+            PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalSendFailed() + s.getNumSendFailed()),
+            MetricCategory.Driver,
+            "pulsar message send failures"
+        );
+        pulsarBaseOpDispenser.create().gauge("pulsar_total_ack_received", PulsarAdapterMetrics.producerSafeExtractMetric(producer, s -> (double) s.getTotalAcksReceived() + s.getNumAcksReceived()),
+            MetricCategory.Driver,
+            "pulsar total acknowledgements received"
+        );
+        pulsarBaseOpDispenser.create().gauge("pulsar_send_bytes_rate", PulsarAdapterMetrics.producerSafeExtractMetric(producer, ProducerStats::getSendBytesRate),
+            MetricCategory.Driver,
+            "pulsar rate of bytes sent"
+        );
+        pulsarBaseOpDispenser.create().gauge("pulsar_send_msg_rate", PulsarAdapterMetrics.producerSafeExtractMetric(producer, ProducerStats::getSendMsgsRate),
+            MetricCategory.Driver,
+            "pulsar rate of messages sent"
+        );
     }
 
 
@@ -193,17 +248,38 @@ public class PulsarAdapterMetrics {
 
     public void registerConsumerApiMetrics(final Consumer<?> consumer, final String pulsarApiMetricsPrefix) {
 
-        pulsarBaseOpDispenser.create().gauge("total_bytes_recv",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getTotalBytesReceived() + s.getNumBytesReceived()));
-        pulsarBaseOpDispenser.create().gauge("total_msg_recv",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getTotalMsgsReceived() + s.getNumMsgsReceived()));
-        pulsarBaseOpDispenser.create().gauge("total_recv_failed",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getTotalReceivedFailed() + s.getNumReceiveFailed()));
-        pulsarBaseOpDispenser.create().gauge("total_acks_sent",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getTotalAcksSent() + s.getNumAcksSent()));
-        pulsarBaseOpDispenser.create().gauge("recv_bytes_rate",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getRateBytesReceived()));
-        pulsarBaseOpDispenser.create().gauge("recv_msg_rate",
-            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getRateMsgsReceived()));
+        pulsarBaseOpDispenser.create().gauge(
+            "pulsar_total_bytes_recv",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getTotalBytesReceived() + s.getNumBytesReceived()),
+            MetricCategory.Driver,
+            "pulsar total bytes received"
+        );
+        pulsarBaseOpDispenser.create().gauge(
+            "pulsar_total_msg_recv",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getTotalMsgsReceived() + s.getNumMsgsReceived()),
+            MetricCategory.Driver,
+            "pulsar total messages received"
+        );
+        pulsarBaseOpDispenser.create().gauge(
+            "pulsar_total_recv_failed",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getTotalReceivedFailed() + s.getNumReceiveFailed()),
+            MetricCategory.Driver,
+            "pulsar total receive failures"
+        );
+        pulsarBaseOpDispenser.create().gauge("pulsar_total_acks_sent",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getTotalAcksSent() + s.getNumAcksSent()),
+            MetricCategory.Driver,
+            "pulsar total acknowledgements sent"
+        );
+        pulsarBaseOpDispenser.create().gauge("pulsar_recv_bytes_rate",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getRateBytesReceived()),
+            MetricCategory.Driver,
+            "pulsar rate of bytes received"
+        );
+        pulsarBaseOpDispenser.create().gauge("pulsar_recv_msg_rate",
+            PulsarAdapterMetrics.consumerSafeExtractMetric(consumer, s -> (double) s.getRateMsgsReceived()),
+            MetricCategory.Driver,
+            "pulsar rate of message received"
+        );
     }
 }

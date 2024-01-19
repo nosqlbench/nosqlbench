@@ -21,6 +21,7 @@ import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.Param;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBParentComponentInjection;
 import io.nosqlbench.nb.annotations.Service;
@@ -136,7 +137,12 @@ public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double>, NBPar
         }
 
         logger.info("Registering gauge for diag task with labels:" + getParentLabels().getLabels() + " label:" + label);
-        this.gauge=parent.create().gauge(label,() -> this.sampleValue);
+        this.gauge=parent.create().gauge(
+            label,
+            () -> this.sampleValue,
+            MetricCategory.Verification,
+            "a diagnostic gauge for the purposes of testing " + description()
+        );
     }
 
     @Override

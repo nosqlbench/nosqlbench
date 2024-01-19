@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Counter;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 
 
 /**
@@ -30,8 +31,16 @@ public class ExceptionExpectedResultVerificationMetrics {
 
     public ExceptionExpectedResultVerificationMetrics(final NBComponent parent) {
         this.parent = parent;
-        this.verificationRetries=parent.create().counter("verificationcounts_RETRIES");
-        this.verificationErrors=parent.create().counter( "verificationcounts_ERRORS");
+        this.verificationRetries=parent.create().counter(
+            "verificationcounts_RETRIES",
+            MetricCategory.Verification,
+            "The number of retries used by the optional verifier logic for a given operation"
+        );
+        this.verificationErrors=parent.create().counter(
+            "verificationcounts_ERRORS",
+            MetricCategory.Verification,
+            "The number of errors encountered while attempting to verify the result of an soperation"
+        );
     }
 
     public void countVerificationRetries() {

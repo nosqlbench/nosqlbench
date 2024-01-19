@@ -24,4 +24,7 @@ public interface NBMetric extends Metric, NBLabeledElement {
         return this.getLabels().linearizeAsMetrics();
     }
     String typeName();
+
+    String getDescription();
+    MetricCategory[] getCategories();
 }

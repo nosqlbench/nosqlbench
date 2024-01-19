@@ -31,6 +31,7 @@ import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,9 +58,24 @@ public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, C
         this.maxpages = op.getStaticConfigOr("maxpages", 1);
         this.isRetryReplace = op.getStaticConfigOr("retryreplace", false);
         this.maxLwtRetries = op.getStaticConfigOr("maxlwtretries", 1);
-        this.rowsHistogram = create().histogram("rows", op.getStaticConfigOr("hdr_digits", 3));
-        this.pagesHistogram = create().histogram("pages", op.getStaticConfigOr("hdr_digits", 3));
-        this.payloadBytesHistogram = create().histogram("payload_bytes", op.getStaticConfigOr("hdr_digits", 3));
+        this.rowsHistogram = create().histogram(
+            "rows",
+            op.getStaticConfigOr("hdr_digits", 3),
+            MetricCategory.Payload,
+            "The number of rows returned in the CQL result"
+        );
+        this.pagesHistogram = create().histogram(
+            "pages",
+            op.getStaticConfigOr("hdr_digits", 3),
+            MetricCategory.Payload,
+            "The number of pages returned in the CQL result"
+        );
+        this.payloadBytesHistogram = create().histogram(
+            "payload_bytes",
+            op.getStaticConfigOr("hdr_digits", 3),
+            MetricCategory.Payload,
+            "The number of bytes returned in the CQL result"
+        );
     }
 
     public int getMaxPages() {

@@ -43,7 +43,7 @@ public class OpDef extends OpTemplate {
 
     @Override
     public String getName() {
-        return block.getName() + "__" + rawOpDef.getName();
+        return rawOpDef.getName();
     }
 
     @Override
@@ -100,7 +100,7 @@ public class OpDef extends OpTemplate {
     private LinkedHashMap<String, String> composeTags() {
         LinkedHashMap<String, String> tagsWithName = new LinkedHashMap<>(new MultiMapLookup<>(rawOpDef.getTags(), block.getTags()));
         tagsWithName.put("block",block.getName());
-        tagsWithName.put("name",getName());
+        tagsWithName.put("name",this.rawOpDef.getName());
         tagsWithName.put("op",this.rawOpDef.getName());
         return tagsWithName;
     }

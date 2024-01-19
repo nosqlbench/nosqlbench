@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.s4j.util;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.s4j.dispensers.S4JBaseOpDispenser;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,11 +39,23 @@ public class S4JAdapterMetrics  {
 
     public void initS4JAdapterInstrumentation() {
         // Histogram metrics
-        this.messageSizeHistogram = s4jBaseOpDispenser.create().histogram("message_size");
+        this.messageSizeHistogram = s4jBaseOpDispenser.create().histogram(
+            "s4j_message_size",
+            MetricCategory.Driver,
+            "S4J message size"
+        );
 
         // Timer metrics
-        this.bindTimer = s4jBaseOpDispenser.create().timer("bind");
-        this.executeTimer = s4jBaseOpDispenser.create().timer("execute");
+        this.bindTimer = s4jBaseOpDispenser.create().timer(
+            "s4j_bind",
+            MetricCategory.Driver,
+            "S4J bind timer"
+        );
+        this.executeTimer = s4jBaseOpDispenser.create().timer(
+            "s4j_execute",
+            MetricCategory.Driver,
+            "S4j execute timer"
+        );
     }
 
     public Timer getBindTimer() { return bindTimer; }

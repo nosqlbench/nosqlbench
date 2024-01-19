@@ -23,14 +23,18 @@ public class NBMetricGaugeWrapper implements NBMetricGauge, NBMetric {
 
     private final Gauge<Double> gauge;
     private final NBLabels labels;
+    private final String description;
+    private final MetricCategory[] categories;
 
-    public NBMetricGaugeWrapper(NBLabels labels, Gauge<Double> gauge) {
+    public NBMetricGaugeWrapper(NBLabels labels, Gauge<Double> gauge, String description, MetricCategory... categories) {
         this.gauge = gauge;
         if (gauge.getValue() instanceof Double d) {
         } else {
             throw new RuntimeException("NBMetricGauges only support Double values");
         }
         this.labels = labels;
+        this.description = description;
+        this.categories = categories;
     }
 
     @Override
@@ -46,5 +50,15 @@ public class NBMetricGaugeWrapper implements NBMetricGauge, NBMetric {
     @Override
     public String typeName() {
         return "gauge";
+    }
+
+    @Override
+    public String getDescription() {
+        return this.description;
+    }
+
+    @Override
+    public MetricCategory[] getCategories() {
+        return this.categories;
     }
 }
