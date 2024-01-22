@@ -18,8 +18,6 @@ package io.nosqlbench.engine.extensions.computefunctions;
 
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
@@ -45,8 +43,6 @@ import java.util.HashSet;
  * elide duplicates internally.
  */
 public class ComputeFunctions extends NBBaseComponent {
-    private final static Logger logger = LogManager.getLogger("RUNTIME");
-
     public ComputeFunctions(NBComponent parentComponent) {
         super(parentComponent);
     }
@@ -68,13 +64,14 @@ public class ComputeFunctions extends NBBaseComponent {
     }
 
     public static double recall(long[] relevant, long[] actual, int k) {
-        if (actual.length < k) {
-            logger.warn("Returned indices fewer than limit in recall calculation: index count=" + actual.length + ", limit=" + k);
+
+        if (relevant.length < actual.length) {
+            throw new RuntimeException("Result indices greater than ground truth size, invalid precision computation: " +
+                "index count=" + actual.length + ", ground truth=" + relevant.length + ", limit=" + k);
         }
         long divisor = Math.min(relevant.length, k);
-        int arrayLength = Math.max(relevant.length, actual.length);
-        relevant = Arrays.copyOfRange(relevant,0,arrayLength);
-        actual = Arrays.copyOfRange(actual, 0, arrayLength);
+        relevant = Arrays.copyOfRange(relevant,0,relevant.length);
+        actual = Arrays.copyOfRange(actual, 0, relevant.length);
         Arrays.sort(relevant);
         Arrays.sort(actual);
         long[] intersection = Intersections.find(relevant, actual);
@@ -89,12 +86,12 @@ public class ComputeFunctions extends NBBaseComponent {
     }
 
     public static double precision(long[] relevant, long[] actual, int k) {
-        if (actual.length < k) {
-            logger.warn("Returned indices fewer than limit in recall calculation: index count=" + actual.length + ", limit=" + k);
+        if (relevant.length < actual.length) {
+            throw new RuntimeException("Result indices greater than ground truth size, invalid precision computation: " +
+                "index count=" + actual.length + ", ground truth=" + relevant.length + ", limit=" + k);
         }
-        int arrayLength = Math.max(relevant.length, actual.length);
-        relevant = Arrays.copyOfRange(relevant,0,arrayLength);
-        actual = Arrays.copyOfRange(actual, 0, arrayLength);
+        relevant = Arrays.copyOfRange(relevant,0,relevant.length);
+        actual = Arrays.copyOfRange(actual, 0, relevant.length);
         Arrays.sort(relevant);
         Arrays.sort(actual);
         long[] intersection = Intersections.find(relevant, actual);
@@ -118,13 +115,13 @@ public class ComputeFunctions extends NBBaseComponent {
     }
 
     public static double recall(int[] relevant, int[] actual, int k) {
-        if (actual.length < k) {
-            logger.warn("Returned indices fewer than limit in recall calculation: index count=" + actual.length + ", limit=" + k);
+        if (relevant.length < actual.length) {
+            throw new RuntimeException("Result indices greater than ground truth size, invalid precision computation: " +
+                "index count=" + actual.length + ", ground truth=" + relevant.length + ", limit=" + k);
         }
         long divisor = Math.min(relevant.length, k);
-        int arrayLength = Math.max(relevant.length, actual.length);
-        relevant = Arrays.copyOfRange(relevant,0,arrayLength);
-        actual = Arrays.copyOfRange(actual, 0, arrayLength);
+        relevant = Arrays.copyOfRange(relevant,0,relevant.length);
+        actual = Arrays.copyOfRange(actual, 0, relevant.length);
         Arrays.sort(relevant);
         Arrays.sort(actual);
         int intersection = Intersections.count(relevant, actual);
@@ -139,12 +136,12 @@ public class ComputeFunctions extends NBBaseComponent {
     }
 
     public static double precision(int[] relevant, int[] actual, int k) {
-        if (actual.length < k) {
-            logger.warn("Returned indices fewer than limit in recall calculation: index count=" + actual.length + ", limit=" + k);
+        if (relevant.length < actual.length) {
+            throw new RuntimeException("Result indices greater than ground truth size, invalid precision computation: " +
+                "index count=" + actual.length + ", ground truth=" + relevant.length + ", limit=" + k);
         }
-        int arrayLength = Math.max(relevant.length, actual.length);
-        relevant = Arrays.copyOfRange(relevant,0,arrayLength);
-        actual = Arrays.copyOfRange(actual, 0, arrayLength);
+        relevant = Arrays.copyOfRange(relevant,0,relevant.length);
+        actual = Arrays.copyOfRange(actual, 0, relevant.length);
         Arrays.sort(relevant);
         Arrays.sort(actual);
         int intersection = Intersections.count(relevant, actual);
