@@ -29,11 +29,11 @@ import java.util.function.LongToIntFunction;
 
 /**
  * Create a List from a long input based on a set of provided functions.
- *
+ * <p>
  * As a 'Sized' function, the first argument is a function which determines the size of the resulting list.
  * Additional functions provided are used to generate the elements to add to the collection. If the size
  * is larger than the number of provided functions, the last provided function is used repeatedly as needed.
- *
+ * <p>
  * As a 'Stepped' function, the input value is incremented before being used by each element function.
  */
 @Categories({Category.collections})
@@ -44,12 +44,16 @@ public class ListSizedStepped implements LongFunction<List<Object>> {
     private final LongToIntFunction sizeFunc;
 
     @Example({
-        "ListFunctions(NumberNameToString(),NumberNameToString())",
-        "Create a list of ['one','one']"
+        "ListSizedStepped(2,NumberNameToString(),NumberNameToString())",
+        "Create a list of elements like ['zero','one']"
+    })
+    @Example({
+        "ListSizedStepped(2,HashRange(1f,10f))",
+        "Create a list of elements like [3.8738558, 7.139979]"
     })
     public ListSizedStepped(Object sizeFunc, Object... funcs) {
         if (sizeFunc instanceof Number) {
-            int size = ((Number)sizeFunc).intValue();
+            int size = ((Number) sizeFunc).intValue();
             this.sizeFunc = s -> size;
         } else {
             this.sizeFunc = VirtDataConversions.adaptFunction(sizeFunc, LongToIntFunction.class);
@@ -64,7 +68,7 @@ public class ListSizedStepped implements LongFunction<List<Object>> {
         for (int i = 0; i < size; i++) {
             int selector = Math.min(i, valueFuncs.size() - 1);
             LongFunction<?> func = valueFuncs.get(selector);
-            list.add(func.apply(i+value));
+            list.add(func.apply(i + value));
         }
         return list;
     }
