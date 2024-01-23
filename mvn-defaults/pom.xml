@@ -280,7 +280,7 @@
             <dependency>
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core-java11</artifactId>
-                <version>6.4.9</version>
+                <version>6.4.10</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -290,7 +290,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.622</version>
+                <version>1.12.639</version>
             </dependency>
             <dependency>
                 <groupId>com.elega9t</groupId>
