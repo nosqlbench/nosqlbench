@@ -148,8 +148,9 @@ public class NBConfiguration {
 
     public <T> Optional<T> getOptional(Class<T> type, String... names) {
         Object o = null;
+        Param<?> param=null;
         for (String name : names) {
-            Param<?> param = model.getParam(names);
+            param = model.getParam(names);
             if (param != null) {
                 for (String pname : param.getNames()) {
                     o = data.get(pname);
@@ -162,7 +163,11 @@ public class NBConfiguration {
             }
         }
         if (o == null) {
-            return Optional.empty();
+            if (param!=null && param.isRequired()) {
+                o = param.getDefaultValue();
+            } else {
+                return Optional.empty();
+            }
         }
         if (type.isInstance(o)) {
             return Optional.of((T) o);
