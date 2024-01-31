@@ -52,6 +52,8 @@ public class DNN_angular1_neighbors implements IntFunction<int[]> {
                 )
             );
         }
+        // need to ensure each of the modulus clusters has size >= k, so that top-k nearest neighbors don't
+        // spill to another cluster with non-zero angle
         if (k * modulus > N) {
             throw new IllegalArgumentException(
                 String.format(
