@@ -18,16 +18,18 @@ package io.nosqlbench.adapter.cqld4;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
-import com.datastax.oss.driver.api.core.config.DriverConfig;
-import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
-import com.datastax.oss.driver.api.core.config.OptionsMap;
-import com.datastax.oss.driver.api.core.config.TypedDriverOption;
+import com.datastax.oss.driver.api.core.config.*;
+import com.datastax.oss.driver.api.core.session.SessionBuilder;
 import com.datastax.oss.driver.internal.core.config.composite.CompositeDriverConfigLoader;
 import com.datastax.oss.driver.internal.core.loadbalancing.helper.NodeFilterToDistanceEvaluatorAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapter.cqld4.optionhelpers.OptionHelpers;
+import io.nosqlbench.adapter.cqld4.wrapper.Cqld4LoadBalancerObserver;
+import io.nosqlbench.adapter.cqld4.wrapper.Cqld4SessionBuilder;
+import io.nosqlbench.adapter.cqld4.wrapper.NodeSummary;
 import io.nosqlbench.nb.api.config.standard.*;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.engine.util.SSLKsFactory;
@@ -68,7 +70,13 @@ public class Cqld4Space implements AutoCloseable {
     }
 
     private CqlSession createSession(NBConfiguration cfg) {
-        CqlSessionBuilder builder = new CqlSessionBuilder();
+
+        NodeSummary diag = NodeSummary.valueOf(cfg.get("diag"));
+
+        CqlSessionBuilder builder = switch (diag) {
+            default -> new CqlSessionBuilder();
+            case NodeSummary.addr, NodeSummary.mid, NodeSummary.all -> new Cqld4SessionBuilder();
+        };
 
         // stop insights for testing
         OptionsMap defaults = new OptionsMap();
@@ -211,6 +219,19 @@ public class Cqld4Space implements AutoCloseable {
         }
 
         builder.withConfigLoader(dcl);
+//        for (String profileName : dcl.getInitialConfig().getProfiles().keySet()) {
+//            logger.info("Installing load balancer observer in profile '" + profileName);
+//            DriverExecutionProfile profile = dcl.getInitialConfig().getProfile(profileName);
+//            String string = profile.getString(TypedDriverOption.LOAD_BALANCING_POLICY_CLASS.getRawOption());
+//            dcl.getInitialConfig().getDefaultProfile(profileName).getp
+//            Cqld4LoadBalancerObserver observer = new Cqld4LoadBalancerObserver(string);
+//        }
+//
+//
+//        builder.withNodeFilter()
+        if (builder instanceof Cqld4SessionBuilder cqld4sb) {
+            cqld4sb.setNodeSummarizer(diag);
+        }
         CqlSession session = builder.build();
         return session;
     }
@@ -303,11 +324,15 @@ public class Cqld4Space implements AutoCloseable {
             .add(Param.optional("cloud_proxy_address", String.class, "Cloud Proxy Address"))
             .add(Param.optional("maxpages", Integer.class, "Maximum number of pages allowed per CQL request"))
             .add(Param.optional("maxretryreplace", Integer.class, "Maximum number of retry replaces with LWT for a CQL request"))
+            .add(Param.defaultTo("diag", "none").setDescription("What level of diagnostics to report"))
             .add(SSLKsFactory.get().getConfigModel())
             .add(getDriverOptionsModel())
             .add(new OptionHelpers(new OptionsMap()).getConfigModel())
             .asReadOnly();
+    }
 
+    private static enum Diagnostics {
+        queryplan
     }
 
     @Override

@@ -62,6 +62,11 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
         return varbinder;
     }
 
+    @Override
+    public LongFunction<CqlSession> getSessionFunc() {
+        return super.getSessionFunc();
+    }
+
     protected LongFunction<Statement> createStmtFunc(LongFunction<Object[]> fieldsF, ParsedOp op) {
 
         String preparedQueryString = stmtTpl.getPositionalStatement(s -> "?");
