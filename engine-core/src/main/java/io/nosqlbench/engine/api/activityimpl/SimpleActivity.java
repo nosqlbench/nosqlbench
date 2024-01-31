@@ -89,6 +89,8 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     private ActivityMetricProgressMeter progressMeter;
     private String workloadSource = "unspecified";
     private final RunStateTally tally = new RunStateTally();
+    public static final String STRIDE = "stride";
+    public static final String CYCLE = "cycle";
 
     public SimpleActivity(NBComponent parent, ActivityDef activityDef) {
         super(parent, NBLabels.forKV("activity", activityDef.getAlias()).and(activityDef.auxLabels()));
@@ -315,11 +317,11 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     }
 
     public void createOrUpdateStrideLimiter(SimRateSpec spec) {
-        strideLimiter = RateLimiters.createOrUpdate(this, strideLimiter, spec);
+        strideLimiter = RateLimiters.createOrUpdate(this, strideLimiter, spec, STRIDE);
     }
 
     public void createOrUpdateCycleLimiter(SimRateSpec spec) {
-        cycleLimiter = RateLimiters.createOrUpdate(this, cycleLimiter, spec);
+        cycleLimiter = RateLimiters.createOrUpdate(this, cycleLimiter, spec, CYCLE);
     }
 
     /**

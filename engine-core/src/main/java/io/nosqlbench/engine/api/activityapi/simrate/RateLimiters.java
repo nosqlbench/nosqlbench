@@ -25,9 +25,13 @@ public enum RateLimiters {
     private static final Logger logger = LogManager.getLogger(RateLimiters.class);
 
     public static synchronized RateLimiter createOrUpdate(final NBComponent parent, final RateLimiter extant, final SimRateSpec spec) {
+        return createOrUpdate(parent, extant, spec, "cycle");
+    }
+
+    public static synchronized RateLimiter createOrUpdate(final NBComponent parent, final RateLimiter extant, final SimRateSpec spec,final String type) {
 
         if (null == extant) {
-            final RateLimiter rateLimiter= new SimRate(parent, spec);
+            final RateLimiter rateLimiter= new SimRate(parent, spec, type);
 
             RateLimiters.logger.info(() -> "Using rate limiter: " + rateLimiter);
             return rateLimiter;
