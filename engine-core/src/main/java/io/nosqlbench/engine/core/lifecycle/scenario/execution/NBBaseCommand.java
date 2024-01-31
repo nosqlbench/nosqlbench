@@ -55,7 +55,7 @@ public abstract class NBBaseCommand extends NBInvokableCommand {
 
     @Override
     public String toString() {
-        return "SCENARIO (" + this.getClass().getSuperclass().getSimpleName() + ") { scenarioName: " + getScenarioName() + " }";
+        return "CMD (" + this.getClass().getSimpleName();
     }
 
     public abstract Object invoke(

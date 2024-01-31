@@ -51,7 +51,7 @@ public class CmdParser {
         LinkedList<Record> cmdstructs = new LinkedList<>();
         LinkedList<Cmd> cmds = new LinkedList<>();
 
-        while (args.size()>0) {
+        while (!args.isEmpty()) {
             String arg=args.peekFirst();
             Matcher matcher = combinedPattern.matcher(arg);
             if (matcher.matches()) {
