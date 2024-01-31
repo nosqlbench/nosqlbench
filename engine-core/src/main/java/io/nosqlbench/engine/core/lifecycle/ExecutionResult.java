@@ -92,6 +92,15 @@ public class ExecutionResult {
     public Exception getException() {
         return exception;
     }
+    public void rethrow() {
+        if (exception!=null) {
+            if (exception instanceof RuntimeException rte) {
+                throw rte;
+            } else {
+                throw new RuntimeException("Exception in result:" + exception,exception);
+            }
+        }
+    }
 
     public Status getStatus() {
         return this.status;

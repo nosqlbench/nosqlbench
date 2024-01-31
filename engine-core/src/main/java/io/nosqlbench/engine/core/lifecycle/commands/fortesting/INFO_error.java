@@ -20,7 +20,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(value = NBCommandInfo.class,selector = "test_error")
+@Service(value = NBCommandInfo.class,selector = "error")
 public class INFO_error extends NBCommandInfo {
     @Override
     public Class<? extends NBInvokableCommand> getType() {

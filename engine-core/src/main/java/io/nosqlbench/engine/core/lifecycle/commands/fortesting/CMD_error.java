@@ -33,6 +33,10 @@ public class CMD_error extends NBBaseCommand {
 
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        throw new RuntimeException("Command '" + this + "' throws ERROR.");
+        StringBuilder sb = new StringBuilder();
+        for (String pkey : params.keySet()) {
+            sb.append(pkey).append("=").append(params.get(pkey)).append(" ");
+        }
+        throw new RuntimeException("Command '" + this + "' throws ERROR. params:" + sb);
     }
 }
