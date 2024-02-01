@@ -46,24 +46,22 @@ class DNNAngular1VTest {
     public void testBasicAngularVectors() {
         int M = 7;
         DNN_angular1_v vf = new DNN_angular1_v(10, 100, M);
+        // populate 100 training cycles of DNN angular
         float[][] vectors = new float[100][];
         for (int i = 0; i < 100; i++) {
             vectors[i] = vf.apply(i);
         }
-        int[] same = new int[100];
-        Arrays.fill(same, -1);
-        for (int vidx = 0; vidx < same.length; vidx++) {
+        // pair-wise check of non-scaled cosine similarity between training vectors
+        for (int vidx = 0; vidx < vectors.length; vidx++) {
             for (int compare_to = 0; compare_to <= vidx; compare_to++) {
                 double similarity = cosine_similarity(vectors[vidx], vectors[compare_to]);
+                // two of the generated vectors have angle 0 between them if and only if indexes are congruent % M
                 if (Math.abs(similarity - 1.0d) < 0.00000001d) {
-                    same[vidx] = compare_to;
-                    break;
+                    assertThat(vidx % M).isEqualTo(compare_to % M);
+                } else {
+                    assertThat(vidx % M).isNotEqualTo(compare_to % M);
                 }
             }
-        }
-        for (int sameas = M; sameas < same.length; sameas++) {
-//            System.out.println("idx:" + sameas + ", same[sameas] -> " + same[sameas] + " sameas%7=" + sameas % M);
-            assertThat(same[sameas] % M).isEqualTo(sameas % M);
         }
     }
 
