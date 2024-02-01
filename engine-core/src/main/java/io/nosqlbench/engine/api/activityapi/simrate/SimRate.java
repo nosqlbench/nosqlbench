@@ -79,28 +79,30 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
     private long startTime;
 
     public SimRate(NBComponent parent, SimRateSpec spec) {
-        super(parent, NBLabels.forKV());
+        super(parent, NBLabels.forKV().and("rateType",
+            (spec instanceof CycleRateSpec? "cycle" : "stride")));
         this.spec = spec;
         initMetrics();
         startFiller();
     }
 
     private void initMetrics() {
+        String rateType = getLabels().valueOf("rateType");
         create().gauge(
-            "cycles_waittime",
-            () -> (double)getWaitTimeDuration().get(ChronoUnit.NANOS),
+            rateType + "s_waittime",
+            () -> (double) getWaitTimeDuration().get(ChronoUnit.NANOS),
             MetricCategory.Core,
             "The cumulative scheduling delay which accrues when" +
                 " an activity is not able to execute operations as fast as requested."
         );
         create().gauge(
-            "config_cyclerate",
+            "config_" + rateType + "rate",
             () -> spec.opsPerSec,
             MetricCategory.Config,
             "The configured cycle rate in ops/s"
         );
         create().gauge(
-            "config_burstrate",
+            rateType + "_config_burstrate",
             () -> spec.burstRatio,
             MetricCategory.Config,
             "the configured burst rate as a multiplier to the configured cycle rate. ex: 1.05 means 5% faster is allowed."
