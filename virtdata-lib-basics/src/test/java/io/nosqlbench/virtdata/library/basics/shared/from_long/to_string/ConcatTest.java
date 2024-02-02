@@ -32,7 +32,8 @@ class ConcatTest {
 
     @Test
     public void testMismatchedInserts() {
-        assertThrows(RuntimeException.class, () -> new Concat((c, s) -> c+s, "{}"));
+        Concat c = new Concat("{}");
+        assertThat(c.apply(3L)).isEqualTo("v:3");
     }
 
     @Test
