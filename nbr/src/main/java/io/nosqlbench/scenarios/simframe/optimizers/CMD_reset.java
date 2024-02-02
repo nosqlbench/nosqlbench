@@ -27,16 +27,12 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.nb.api.components.events.SetThreads;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
-import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.scenarios.simframe.SimFrameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.util.Map;
 import java.util.Optional;
 
 @Service(value = NBBaseCommand.class,selector = "reset")
@@ -60,7 +56,15 @@ public class CMD_reset extends NBBaseCommand {
 
         /*
          Set the CycleRateSpec. This should be found in params.get("rate") if the value from a previous step is specified.
-         If not, the original might be found in the activity definition. If not, default to 100.
+         If no value from a previous step is used, the original can be found in the flywheel activity definition.
+         If a value is passed in on the command line as opposed to specified in the yaml file it will override other values, so don't do this.
+
+         cli rate|   yaml rate|  reset rate| params rate| flywheel params rate
+         null	 |   1	      |  50	       | 50	        | 1
+         null	 |   null	  |  50	       | 50	        | null
+         null	 |   1	      |  null	   | null	    | 1
+         1	     |   5	      |  50	       | 1	        | 1
+         1	     |   null	  |  50	       | 1	        | 1
          */
         String rateStr = params.hasMember("rate") ? params.get("rate") :
             flywheel.getActivityDef().getParams().getOptionalString("rate").orElse(DEFAULT_RATE);
@@ -73,16 +77,23 @@ public class CMD_reset extends NBBaseCommand {
         flywheel.getActivityDef().setEndCycle(cycles);
 
         /*
-         Set the thread count. First check for threads=${optimo.threads}. If that is not present check for
-         threads specification in the original activity. If that also is not present default to UNDEF.
-         Some odd behavior is noted with the optimo.threads value moving from params to the flywheel params
-         if threads were initially set, and that initial value being present in params. So if you're going to use
-         the reset command try not to explicitly set threads in the initial activity.
+         Set the thread count. This should be found in params and the flywheel if the value from a previous step is specified.
+         If no value from a previous step is used, the original can be found in the flywheel activity definition.
+         If a value is passed in on the command line as opposed to specified in the yaml file it will be found in params
+         and the correct optimo thread count can be found in the flywheel, so in this case we go to the flywheel first
+
+         cli threads|   yaml threads|  reset threads| params threads| flywheel params threads
+         null	    |   1	        |  50	        | 50	        | 50
+         null	    |   null	    |  50	        | 50	        | 50
+         null	    |   1	        |  null	        | null	        | 1
+         1	        |   5	        |  50	        | 1	            | 50
+         1	        |   null	    |  50	        | 1	            | 50
          */
-        String threadStr = params.hasMember("threads") ? params.get("threads") :
-            flywheel.getActivityDef().getParams().getOptionalString("threads").orElse(DEFAULT_THREADS);
+
+        String threadStr = flywheel.getActivityDef().getParams().getOptionalString("threads")
+                .orElse(params.hasMember("threads") ? params.get("threads") : DEFAULT_THREADS);
         logger.debug("Resetting threads to " + threadStr);
-        flywheel.onEvent(ParamChange.of(new SetThreads((int)Math.round(Double.valueOf(threadStr)))));
+        flywheel.onEvent(ParamChange.of(new SetThreads((int)Math.round(Double.parseDouble(threadStr)))));
 
         SimFrameUtils.awaitActivity(flywheel);
 
