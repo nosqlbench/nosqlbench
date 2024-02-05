@@ -62,12 +62,12 @@ class CircularPartitionerTest {
     @Test
     public void assertOrdMapping() {
         CircularPartitioner cp16 = new CircularPartitioner(16);
-        int[] ordinals = range(0,15);
+        int[] ordinals = range(0,16);
         int[] remapped = remap(cp16,
             ordinals
         );
         assertThat(remapped).containsExactly(
-            new int[]{16,8,4,12,2,6,10,14,1,3,5,7,9,11,13,15}
+            new int[]{0,8,4,12,2,6,10,14,1,3,5,7,9,11,13,15}
         );
 
         double[] unitLens = this.intOffsetsToUnitLen(cp16, remapped);
@@ -111,14 +111,14 @@ class CircularPartitionerTest {
     @Test
     public void testOrdinalFractions() {
         CircularPartitioner cp16 = new CircularPartitioner(16);
-        int[] ordinals = range(0,15);
+        int[] ordinals = range(0,16);
         int[][] fractions = new int[ordinals.length][];
         for (int i = 0; i <ordinals.length; i++) {
             int ord = ordinals[i];
             fractions[i]=cp16.ordinalToFraction(ord);
         }
         assertThat(fractions[0]).isEqualTo(new int[]{0,16});
-        assertThat(fractions[7]).isEqualTo(new int[]{0,16});
-        assertThat(fractions[15]).isEqualTo(new int[]{0,16});
+        assertThat(fractions[7]).isEqualTo(new int[]{14,16});
+        assertThat(fractions[15]).isEqualTo(new int[]{15,16});
     }
 }
