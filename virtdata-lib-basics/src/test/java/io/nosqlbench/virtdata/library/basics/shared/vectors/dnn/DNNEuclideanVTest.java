@@ -16,6 +16,9 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.vectors.dnn;
 
+import io.nosqlbench.virtdata.library.basics.shared.vectors.dnn.euclidean.DNN_euclidean_v;
+import io.nosqlbench.virtdata.library.basics.shared.vectors.dnn.euclidean.DNN_euclidean_v_series;
+import io.nosqlbench.virtdata.library.basics.shared.vectors.dnn.euclidean.DNN_euclidean_v_wrap;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

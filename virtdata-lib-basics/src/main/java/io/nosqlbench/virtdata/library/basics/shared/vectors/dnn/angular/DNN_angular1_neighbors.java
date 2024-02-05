@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2023-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.vectors.dnn;
+package io.nosqlbench.virtdata.library.basics.shared.vectors.dnn.angular;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
@@ -39,7 +39,7 @@ public class DNN_angular1_neighbors implements IntFunction<int[]> {
      *     The size of neighborhood
      * @param N
      *     The number of total vectors, necessary for boundary conditions of defined vector
-     * @param module
+     * @param modulus
      *     The modulus used during training of angular1 data; this corresponds to how periodically we cycle back
      *     to vectors with the same angle (hence have angular distance zero between them)
      */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2023-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.basics.shared.vectors.dnn;
+package io.nosqlbench.virtdata.library.basics.shared.vectors.dnn.euclidean;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;

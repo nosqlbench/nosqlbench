@@ -16,6 +16,7 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.vectors.dnn;
 
+import io.nosqlbench.virtdata.library.basics.shared.vectors.dnn.angular.DNN_angular1_neighbors;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

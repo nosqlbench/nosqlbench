@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,27 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.vectors.dnn;
 
-import io.nosqlbench.virtdata.api.annotations.Categories;
-import io.nosqlbench.virtdata.api.annotations.Category;
-import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.function.LongFunction;
 
-@ThreadSafeMapper
-@Categories(Category.experimental)
-public class DNN_angular1_v implements LongFunction<float[]> {
-
+public class DNN_angular_v_decimal implements LongFunction<BigDecimal[]> {
     private final int d;
     private final long n;
     private final long m;
 
-    /**
-     * @param D
-     *     Dimensions in each vector
-     * @param N
-     *     The number of vectors in the training set
-     * @param M
-     *     The modulo which is used to construct equivalence classes
-     */
-    public DNN_angular1_v(int D, long N, long M) {
-        d = D;
-        n = N;
-        m = M;
+    public DNN_angular_v_decimal(int d, long n, long m) {
+        this.d = d;
+        this.n = n;
+        this.m = m;
     }
 
     @Override
-    public float[] apply(long i) {
-        float[] vector = new float[d];
-        Arrays.fill(vector, i + 1);
-        vector[vector.length - 1] = (i + 1) * (i % m);
+    public BigDecimal[] apply(long i) {
+        BigDecimal[] vector = new BigDecimal[d];
+        BigDecimal fillValue = BigDecimal.valueOf(i + 1);
+        Arrays.fill(vector, fillValue);
+        vector[vector.length - 1] = BigDecimal.valueOf(i).multiply(BigDecimal.valueOf(i%m));
         return vector;
     }
 }
