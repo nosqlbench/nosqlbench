@@ -96,6 +96,7 @@ public class CMD_reset extends NBBaseCommand {
         flywheel.onEvent(ParamChange.of(new SetThreads((int)Math.round(Double.parseDouble(threadStr)))));
 
         SimFrameUtils.awaitActivity(flywheel);
+        flywheel.getMotorDispenserDelegate().getMotor(flywheel.getActivityDef(), 0).run();
 
         return null;
     }
