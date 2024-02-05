@@ -20,10 +20,7 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.function.LongFunction;
@@ -69,6 +66,18 @@ public class VirtDataConversions {
     }
 
     private static final Logger logger = LogManager.getLogger(VirtDataConversions.class);
+
+    public static <F,T> T[] adaptFunctionArray(F[] functionObjects, Class<T> functionType, Class<Object>... resultSignature) {
+        T[] functions = (T[]) Array.newInstance(functionType, functionObjects.length);
+
+        for (int i = 0; i < functionObjects.length; i++) {
+            F func = functionObjects[i];
+            T adapted = adaptFunction(func, functionType, resultSignature);
+            functions[i]=adapted;
+        }
+        return functions;
+    }
+
 
     public static <F, T> List<T> adaptFunctionList(F[] funcs, Class<T> functionType, Class<Object>... resultSignature) {
         List<T> functions = new ArrayList<>();
