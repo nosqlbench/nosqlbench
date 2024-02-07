@@ -16,5 +16,7 @@
 
 package io.nosqlbench.adapter.opensearch;
 
-public class AwsOsServiceType {
+public enum AwsOsServiceType {
+    aoss,
+    es
 }

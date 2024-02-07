@@ -59,25 +59,29 @@ public class OpenSearchSpace implements AutoCloseable {
 
         String host = cfg.get("host");
 
-        ProfileCredentialsProvider creds = ProfileCredentialsProvider.builder()
-            .profileName("686157956141_ENG-TESTENG_AWS-ENG-PERF")
-            .build();
-
 
         SdkAsyncHttpClient httpClient =
             AwsCrtAsyncHttpClient.builder()
                 .build();
 
-        AwsSdk2TransportOptions transportOptions =
-            AwsSdk2TransportOptions.builder()
-                .setCredentials(creds)
-                .build();
+        AwsSdk2TransportOptions.Builder transportOptionsBuilder
+            = AwsSdk2TransportOptions.builder();
+
+        cfg.getOptional("profile").map(
+                p -> ProfileCredentialsProvider.builder()
+                    .profileName(p)
+                    .build())
+            .ifPresent(transportOptionsBuilder::setCredentials);
+
+        AwsSdk2TransportOptions transportOptions = transportOptionsBuilder.build();
+
+        AwsOsServiceType svctype = AwsOsServiceType.valueOf(cfg.get("svctype"));
 
         AwsSdk2Transport awsSdk2Transport =
             new AwsSdk2Transport(
                 httpClient,
                 host,
-                "es",
+                svctype.name(),
                 selectedRegion,
                 transportOptions
             );
@@ -92,20 +96,16 @@ public class OpenSearchSpace implements AutoCloseable {
         }
 
         return client;
-
-//        // Create a new domain, update its configuration, and delete it.
-//        createDomain(client, domainName);
-//        //waitForDomainProcessing(client, domainName);
-//        updateDomain(client, domainName);
-//        //waitForDomainProcessing(client, domainName);
-//        deleteDomain(client, domainName);
-
     }
 
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(OpenSearchSpace.class)
             .add(Param.required("region", String.class).setDescription("The region to connect to"))
             .add(Param.required("host", String.class).setDescription("The Open Search API endpoint host"))
+            .add(Param.optional("profile")
+                .setDescription("The AWS auth profile to use. Required to activate profile based auth"))
+            .add(Param.defaultTo("svctype", "es")
+                .setDescription("one of es or aoss, defaults to es for OpenSearch domains"))
             .asReadOnly();
     }
 
@@ -115,42 +115,6 @@ public class OpenSearchSpace implements AutoCloseable {
             client.shutdown();
         }
     }
-
-
-//    /**
-//     * Waits for the domain to finish processing changes. New domains typically take 15-30 minutes
-//     * to initialize, but can take longer depending on the configuration. Most updates to existing domains
-//     * take a similar amount of time. This method checks every 15 seconds and finishes only when
-//     * the domain's processing status changes to false.
-//     *
-//     * @param client
-//     *            The client to use for the requests to Amazon OpenSearch Service
-//     * @param domainName
-//     *            The name of the domain that you want to check
-//     */
-//
-//    public static void waitForDomainProcessing(OpenSearchClient client, String domainName) {
-//        // Create a new request to check the domain status.
-//        DescribeDomainRequest describeRequest = DescribeDomainRequest.builder()
-//            .domainName(domainName)
-//            .build();
-//
-//        // Every 15 seconds, check whether the domain is processing.
-//        DescribeDomainResponse describeResponse = client.describeDomain(describeRequest);
-//        while (describeResponse.domainStatus().processing()) {
-//            try {
-//                System.out.println("Domain still processing...");
-//                TimeUnit.SECONDS.sleep(15);
-//                describeResponse = client.describeDomain(describeRequest);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        // Once we exit that loop, the domain is available
-//        System.out.println("Amazon OpenSearch Service has finished processing changes for your domain.");
-//        System.out.println("Domain description: "+describeResponse.toString());
-//    }
 
 
 }
