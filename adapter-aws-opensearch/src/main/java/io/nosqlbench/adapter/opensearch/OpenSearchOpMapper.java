@@ -39,11 +39,11 @@ public class OpenSearchOpMapper implements OpMapper<Op> {
         TypeAndTarget<OpenSearchOpTypes, String> typeAndTarget =
             op.getTypeAndTarget(OpenSearchOpTypes.class, String.class, "verb", "index");
         return switch (typeAndTarget.enumId) {
-            case create_index -> new CreateIndexOpDispenser(adapter, op);
-            case delete_index -> new DeleteIndexOpDispenser(adapter, op);
-            case index -> new IndexOpDispenser(adapter,op);
-            case update -> new UpdateOpDispenser(adapter,op);
-            case delete -> new DeleteOpDispenser(adapter,op);
+            case create_index -> new CreateIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case delete_index -> new DeleteIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case index -> new IndexOpDispenser(adapter,op, typeAndTarget.targetFunction);
+            case update -> new UpdateOpDispenser(adapter,op, typeAndTarget.targetFunction);
+            case delete -> new DeleteOpDispenser(adapter,op, typeAndTarget.targetFunction);
             default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
                 "mapping parsed op " + op);
         };

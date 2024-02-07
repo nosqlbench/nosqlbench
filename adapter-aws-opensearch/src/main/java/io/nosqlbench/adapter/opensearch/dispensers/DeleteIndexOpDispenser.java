@@ -17,78 +17,28 @@
 package io.nosqlbench.adapter.opensearch.dispensers;
 
 import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
-import io.nosqlbench.adapter.opensearch.ops.CreateIndexOp;
+import io.nosqlbench.adapter.opensearch.ops.DeleteIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.opensearch.client.json.JsonData;
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch._types.mapping.*;
-import org.opensearch.client.opensearch.indices.CreateIndexRequest;
+import org.opensearch.client.opensearch.indices.DeleteIndexRequest;
 
 import java.util.Map;
 import java.util.function.LongFunction;
 
 public class DeleteIndexOpDispenser extends BaseOpenSearchOpDispenser {
 
-    public DeleteIndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op) {
+    private final LongFunction<String> targetF;
+
+    public DeleteIndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op);
+        this.targetF = targetF;
     }
 
-    /**
-     * {@see
-     * <a href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/serverless-vector-search.html">doc
-     * </a>}
-     * <pre>{@code
-     *           {
-     *             "mappings": {
-     *               "properties": {
-     *                 "value": {
-     *                   "type": "dense_vector",
-     *                   "dims": TEMPLATE(dimensions, 25),
-     *                   "index": true,
-     *                   "similarity": "TEMPLATE(similarity_function, cosine)"
-     *                 },
-     *                 "key": {
-     *                   "type": "text"
-     *                 }
-     *               }
-     *             }
-     *           }}</pre>
-     *
-     * @return
-     */
     @Override
-    public LongFunction<CreateIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
-        CreateIndexRequest.Builder eb = new CreateIndexRequest.Builder();
-        LongFunction<CreateIndexRequest.Builder> bfunc = l -> new CreateIndexRequest.Builder().index("testindex1");
-        bfunc = op.enhanceFunc(bfunc, "mappings", Map.class, this::resolveTypeMapping);
-
-        LongFunction<CreateIndexRequest.Builder> finalBfunc = bfunc;
-        return (long l) -> new CreateIndexOp(clientF.apply(l), finalBfunc.apply(l).build());
+    public LongFunction<DeleteIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
+        DeleteIndexRequest.Builder eb = new DeleteIndexRequest.Builder();
+        LongFunction<DeleteIndexRequest.Builder> f =
+            l -> new DeleteIndexRequest.Builder().index(targetF.apply(l));
+        return l -> new DeleteIndexOp(clientF.apply(l),f.apply(1).build());
     }
-
-    // https://opensearch.org/docs/latest/search-plugins/knn/knn-index/
-    private CreateIndexRequest.Builder resolveTypeMapping(CreateIndexRequest.Builder eb, Map<?, ?> mappings) {
-        TypeMapping.Builder builder = new TypeMapping.Builder().properties(
-                Map.of(
-                    "p1",
-                    new Property.Builder().knnVector(new KnnVectorProperty.Builder()
-                        .dimension(23)
-                        .method(
-                            new KnnVectorMethod.Builder()
-                                .name("hnsw")
-                                .engine("faiss")
-                                .spaceType("l2")
-                                .parameters(Map.of("ef_construction", JsonData.of(256),"m",JsonData.of(8)))
-                                .build()
-                        ).build()
-                    ).build()
-                ))
-            .indexField(new IndexField.Builder()
-                .enabled(true).build())
-            .fieldNames(new FieldNamesField.Builder()
-                .enabled(true).build()
-            );
-        return eb.mappings(b -> builder);
-    }
-
 }

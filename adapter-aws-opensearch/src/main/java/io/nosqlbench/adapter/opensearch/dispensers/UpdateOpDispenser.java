@@ -31,43 +31,18 @@ import java.util.function.LongFunction;
 
 public class UpdateOpDispenser extends BaseOpenSearchOpDispenser {
 
-    public UpdateOpDispenser(OpenSearchAdapter adapter, ParsedOp op) {
+    private final LongFunction<String> targetF;
+
+    public UpdateOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op);
+        this.targetF = targetF;
     }
 
-    /**
-     * {@see
-     * <a href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/serverless-vector-search.html">doc
-     * </a>}
-     * <pre>{@code
-     *           {
-     *             "mappings": {
-     *               "properties": {
-     *                 "value": {
-     *                   "type": "dense_vector",
-     *                   "dims": TEMPLATE(dimensions, 25),
-     *                   "index": true,
-     *                   "similarity": "TEMPLATE(similarity_function, cosine)"
-     *                 },
-     *                 "key": {
-     *                   "type": "text"
-     *                 }
-     *               }
-     *             }
-     *           }}</pre>
-     *
-     * @return
-     */
     @Override
     public LongFunction<UpdateOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
-        return null;
-//        LongFunction<UpdateRequest.Builder> bfunc = l -> new UpdateRequest.Builder();
-//        op.getAsRequiredFunction("type")
-//        return l -> new UpdateOp(clientF.apply(l),bfunc.apply(l).build());
-//        bfunc = op.enhanceFunc(bfunc, "mappings", Map.class, this::resolveTypeMapping);
-//
-//        LongFunction<CreateIndexRequest.Builder> finalBfunc = bfunc;
-//        return (long l) -> new CreateIndexOp(clientF.apply(l), finalBfunc.apply(l).build());
+        LongFunction<UpdateRequest.Builder> bfunc = l -> new UpdateRequest.Builder().index(targetF.apply(l));
+        // TODO: add details here
+        return l -> new UpdateOp(clientF.apply(l),bfunc.apply(l).build(),Object.class);
     }
 
 }

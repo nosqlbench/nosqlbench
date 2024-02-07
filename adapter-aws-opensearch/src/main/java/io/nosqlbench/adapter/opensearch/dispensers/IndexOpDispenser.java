@@ -29,8 +29,11 @@ import java.util.Map;
 import java.util.function.LongFunction;
 
 public class IndexOpDispenser extends BaseOpenSearchOpDispenser {
-    public IndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op) {
+    private final LongFunction<String> targetF;
+
+    public IndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op);
+        this.targetF =targetF;
     }
 
     @Override

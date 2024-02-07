@@ -29,37 +29,19 @@ import java.util.function.LongFunction;
 
 public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
 
-    public CreateIndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op) {
+    private final LongFunction<String> targetF;
+
+    public CreateIndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op);
+        this.targetF = targetF;
     }
 
-    /**
-     * {@see
-     * <a href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/serverless-vector-search.html">doc
-     * </a>}
-     * <pre>{@code
-     *           {
-     *             "mappings": {
-     *               "properties": {
-     *                 "value": {
-     *                   "type": "dense_vector",
-     *                   "dims": TEMPLATE(dimensions, 25),
-     *                   "index": true,
-     *                   "similarity": "TEMPLATE(similarity_function, cosine)"
-     *                 },
-     *                 "key": {
-     *                   "type": "text"
-     *                 }
-     *               }
-     *             }
-     *           }}</pre>
-     *
-     * @return
-     */
     @Override
     public LongFunction<CreateIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
         CreateIndexRequest.Builder eb = new CreateIndexRequest.Builder();
-        LongFunction<CreateIndexRequest.Builder> bfunc = l -> new CreateIndexRequest.Builder().index("testindex1");
+        LongFunction<CreateIndexRequest.Builder> bfunc =
+            l -> new CreateIndexRequest.Builder()
+                .index(targetF.apply(1));
         bfunc = op.enhanceFunc(bfunc, "mappings", Map.class, this::resolveTypeMapping);
 
         LongFunction<CreateIndexRequest.Builder> finalBfunc = bfunc;
@@ -70,18 +52,23 @@ public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
     private CreateIndexRequest.Builder resolveTypeMapping(CreateIndexRequest.Builder eb, Map<?, ?> mappings) {
         TypeMapping.Builder builder = new TypeMapping.Builder().properties(
                 Map.of(
-                    "p1",
-                    new Property.Builder().knnVector(new KnnVectorProperty.Builder()
-                        .dimension(23)
-                        .method(
-                            new KnnVectorMethod.Builder()
-                                .name("hnsw")
-                                .engine("faiss")
-                                .spaceType("l2")
-                                .parameters(Map.of("ef_construction", JsonData.of(256),"m",JsonData.of(8)))
-                                .build()
+                    "key",
+                    new Property.Builder()
+                        .text(b -> b)
+                        .build(),
+                    "value",
+                    new Property.Builder()
+                        .knnVector(new KnnVectorProperty.Builder()
+                            .dimension(23)
+                            .method(
+                                new KnnVectorMethod.Builder()
+                                    .name("hnsw")
+                                    .engine("faiss")
+                                    .spaceType("l2")
+                                    .parameters(Map.of("ef_construction", JsonData.of(256), "m", JsonData.of(8)))
+                                    .build()
+                            ).build()
                         ).build()
-                    ).build()
                 ))
             .fieldNames(new FieldNamesField.Builder()
                 .enabled(true).build()
