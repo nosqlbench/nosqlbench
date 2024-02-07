@@ -21,8 +21,11 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.labels.NBLabels;
+
+import java.util.function.Function;
 
 public class OpenSearchAdapter extends BaseDriverAdapter<Op,OpenSearchSpace> {
     public OpenSearchAdapter(NBComponent parentComponent, NBLabels labels) {
@@ -30,7 +33,17 @@ public class OpenSearchAdapter extends BaseDriverAdapter<Op,OpenSearchSpace> {
     }
 
     @Override
+    public Function<String, ? extends OpenSearchSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (String spaceName) -> new OpenSearchSpace(cfg);
+    }
+
+    @Override
     public OpMapper<Op> getOpMapper() {
         return new OpenSearchOpMapper(this);
+    }
+
+    @Override
+    public NBConfigModel getConfigModel() {
+        return super.getConfigModel().add(OpenSearchSpace.getConfigModel());
     }
 }

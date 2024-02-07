@@ -85,10 +85,16 @@
             <artifactId>aws-crt-client</artifactId>
             <version>2.20.109</version>
         </dependency>
+
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>regions</artifactId>
             <version>2.23.18</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>auth</artifactId>
+            <version>2.23.19</version>
         </dependency>
 
 

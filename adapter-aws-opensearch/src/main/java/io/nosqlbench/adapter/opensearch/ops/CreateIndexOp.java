@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.opensearch.ops;
 
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch.indices.CreateIndexRequest;
+import org.opensearch.client.opensearch.indices.CreateIndexResponse;
 
 import java.io.IOException;
 
@@ -32,7 +33,8 @@ public class CreateIndexOp extends BaseOpenSearchOp {
     @Override
     public Object apply(long value) {
         try {
-            return client.indices().create(rq);
+            CreateIndexResponse response = client.indices().create(rq);
+            return response;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

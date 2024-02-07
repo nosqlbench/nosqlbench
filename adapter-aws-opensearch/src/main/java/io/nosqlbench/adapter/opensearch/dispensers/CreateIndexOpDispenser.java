@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.opensearch.dispensers;
 import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
 import io.nosqlbench.adapter.opensearch.ops.CreateIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import org.opensearch.client.json.JsonData;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch._types.mapping.*;
 import org.opensearch.client.opensearch.indices.CreateIndexRequest;
@@ -58,22 +59,30 @@ public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
     @Override
     public LongFunction<CreateIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
         CreateIndexRequest.Builder eb = new CreateIndexRequest.Builder();
-        LongFunction<CreateIndexRequest.Builder> bfunc = l -> new CreateIndexRequest.Builder();
+        LongFunction<CreateIndexRequest.Builder> bfunc = l -> new CreateIndexRequest.Builder().index("testindex1");
         bfunc = op.enhanceFunc(bfunc, "mappings", Map.class, this::resolveTypeMapping);
 
         LongFunction<CreateIndexRequest.Builder> finalBfunc = bfunc;
         return (long l) -> new CreateIndexOp(clientF.apply(l), finalBfunc.apply(l).build());
     }
 
-    private CreateIndexRequest.Builder resolveTypeMapping(CreateIndexRequest.Builder eb, Map<?,?> mappings) {
-        TypeMapping.Builder builder = new TypeMapping.Builder()
-            .properties(Map.of(
-                "p1", new Property.Builder().knnVector(new KnnVectorProperty.Builder()
-                    .dimension(23)
-                    .method(b -> b.spaceType("sdf"))
-                    .build()
-                ).build()
-            ))
+    // https://opensearch.org/docs/latest/search-plugins/knn/knn-index/
+    private CreateIndexRequest.Builder resolveTypeMapping(CreateIndexRequest.Builder eb, Map<?, ?> mappings) {
+        TypeMapping.Builder builder = new TypeMapping.Builder().properties(
+                Map.of(
+                    "p1",
+                    new Property.Builder().knnVector(new KnnVectorProperty.Builder()
+                        .dimension(23)
+                        .method(
+                            new KnnVectorMethod.Builder()
+                                .name("hnsw")
+                                .engine("faiss")
+                                .spaceType("l2")
+                                .parameters(Map.of("ef_construction", JsonData.of(256),"m",JsonData.of(8)))
+                                .build()
+                        ).build()
+                    ).build()
+                ))
             .indexField(new IndexField.Builder()
                 .enabled(true).build())
             .fieldNames(new FieldNamesField.Builder()

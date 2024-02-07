@@ -17,18 +17,27 @@
 package io.nosqlbench.adapter.opensearch;
 
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.profile.internal.BasicProfile;
+import com.amazonaws.auth.profile.internal.ProfileKeyConstants;
+import com.amazonaws.auth.profile.internal.ProfileStaticCredentialsProvider;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.Param;
 import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch.core.InfoResponse;
 import org.opensearch.client.transport.aws.AwsSdk2Transport;
 import org.opensearch.client.transport.aws.AwsSdk2TransportOptions;
+import software.amazon.awssdk.auth.credentials.*;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.http.crt.AwsCrtAsyncHttpClient;
 import software.amazon.awssdk.regions.Region;
 
-public class OpenSearchSpace {
+import java.io.IOException;
+import java.util.Map;
+
+public class OpenSearchSpace implements AutoCloseable {
 
     private final NBConfiguration cfg;
     protected OpenSearchClient client;
@@ -38,7 +47,7 @@ public class OpenSearchSpace {
     }
 
     public synchronized OpenSearchClient getClient() {
-        if (client!=null) {
+        if (client == null) {
             client = createClient();
         }
         return client;
@@ -49,12 +58,39 @@ public class OpenSearchSpace {
         Region selectedRegion = Region.of(region);
 
         String host = cfg.get("host");
-        // https://ecj69wlzmday6hvr2586.eu-central-1.aoss.amazonaws.com
 
-        SdkAsyncHttpClient client1 = AwsCrtAsyncHttpClient.builder().build();
-        AwsSdk2TransportOptions transportOptions = AwsSdk2TransportOptions.builder().build();
-        AwsSdk2Transport awsSdk2Transport = new AwsSdk2Transport(client1,host,selectedRegion,transportOptions);
+        ProfileCredentialsProvider creds = ProfileCredentialsProvider.builder()
+            .profileName("686157956141_ENG-TESTENG_AWS-ENG-PERF")
+            .build();
+
+
+        SdkAsyncHttpClient httpClient =
+            AwsCrtAsyncHttpClient.builder()
+                .build();
+
+        AwsSdk2TransportOptions transportOptions =
+            AwsSdk2TransportOptions.builder()
+                .setCredentials(creds)
+                .build();
+
+        AwsSdk2Transport awsSdk2Transport =
+            new AwsSdk2Transport(
+                httpClient,
+                host,
+                "es",
+                selectedRegion,
+                transportOptions
+            );
+
         OpenSearchClient client = new OpenSearchClient(awsSdk2Transport);
+
+        try {
+            InfoResponse info = client.info();
+            System.out.println(info.version().distribution() + ": " + info.version().number());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         return client;
 
 //        // Create a new domain, update its configuration, and delete it.
@@ -69,8 +105,15 @@ public class OpenSearchSpace {
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(OpenSearchSpace.class)
             .add(Param.required("region", String.class).setDescription("The region to connect to"))
-            .add(Param.required("host",String.class).setDescription("The Open Search API endpoint"))
+            .add(Param.required("host", String.class).setDescription("The Open Search API endpoint host"))
             .asReadOnly();
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (client != null) {
+            client.shutdown();
+        }
     }
 
 
@@ -108,5 +151,6 @@ public class OpenSearchSpace {
 //        System.out.println("Amazon OpenSearch Service has finished processing changes for your domain.");
 //        System.out.println("Domain description: "+describeResponse.toString());
 //    }
+
 
 }

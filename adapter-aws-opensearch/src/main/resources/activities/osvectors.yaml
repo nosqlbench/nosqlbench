@@ -13,3 +13,4 @@ blocks:
       index:
         create_index: TEMPLATE(indexname,vectors_index)
         mappings:
+          m1: v1

@@ -95,12 +95,12 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                 dispenser.onStart(cycle);
 
                 try (Timer.Context ct = executeTimer.time()) {
-                    if (op instanceof RunnableOp) {
-                        ((RunnableOp) op).run();
-                    } else if (op instanceof CycleOp<?>) {
-                        result = ((CycleOp<?>) op).apply(cycle);
-                    } else if (op instanceof ChainingOp) {
-                        result = ((ChainingOp) op).apply(result);
+                    if (op instanceof RunnableOp runnableOp) {
+                        runnableOp.run();
+                    } else if (op instanceof CycleOp<?> cycleOp) {
+                        result = cycleOp.apply(cycle);
+                    } else if (op instanceof ChainingOp chainingOp) {
+                        result = chainingOp.apply(result);
                     } else {
                         throw new RuntimeException("The op implementation did not implement any active logic. Implement " +
                             "one of [RunnableOp, CycleOp, or ChainingOp]");
