@@ -950,4 +950,51 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
     public Map<String, String> getBindPoints() {
         return null;
     }
+
+    public boolean isDefinedExactly(String... fields) {
+        return tmap.isDefinedExactly(fields);
+    }
+
+
+    public <FA,FE,FF> LongFunction<FA> enhanceFuncOptionally2(
+        LongFunction<FA> func,
+        String field,
+        Class<FE> type,
+        String field2,
+        Class<FF> type2,
+        TriFunction<FA,FE,FF> triCombiner
+    ) {
+        Optional<LongFunction<FE>> enhancer1 = getAsOptionalFunction(field, type);
+        if (enhancer1.isEmpty()) {
+            return func;
+        }
+        Optional<LongFunction<FF>> enhancer2 = getAsOptionalFunction(field2, type2);
+        if (enhancer2.isEmpty()) {
+            return func;
+        }
+
+        LongFunction<FE> ef1 = enhancer1.get();
+        LongFunction<FF> ef2 = enhancer2.get();
+
+        LongFunction<FA> lfa = l -> triCombiner.apply(func.apply(l),ef1.apply(l),ef2.apply(l));
+        return lfa;
+    }
+
+    public <FA,FE,FR> LongFunction<FR> enhanceFuncPivot(
+        LongFunction<FA> func,
+        String field,
+        Class<FE> type,
+        BiFunction<FA,FE,FR> combiner
+    ) {
+        Optional<LongFunction<FE>> fieldEnhancerFunc = getAsOptionalFunction(field, type);
+        if (fieldEnhancerFunc.isEmpty()) {
+            throw new RuntimeException("required function enhancer field '" + field + " was not found in op:" + this);
+        }
+        LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
+        LongFunction<FR> lfa = l -> combiner.apply(func.apply(l),feLongFunction.apply(l));
+        return lfa;
+    }
+
+
+
 }

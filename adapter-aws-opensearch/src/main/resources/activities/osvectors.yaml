@@ -1,0 +1,15 @@
+description: |
+  basic test for vectors in open search
+  https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html
+
+scenarios:
+  schema: run driver=opensearch tags=block:create threads===1 cycles===undef
+
+bindings:
+
+blocks:
+  create:
+    ops:
+      index:
+        create_index: TEMPLATE(indexname,vectors_index)
+        mappings:
