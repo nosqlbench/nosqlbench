@@ -17,5 +17,9 @@
 package io.nosqlbench.adapter.opensearch;
 
 public enum OpenSearchOpTypes {
-    create_index
+    create_index,
+    delete_index,
+    index,
+    update,
+    delete
 }

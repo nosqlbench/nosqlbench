@@ -16,7 +16,8 @@
 
 package io.nosqlbench.adapter.opensearch;
 
-import io.nosqlbench.adapter.opensearch.dispensers.CreateIndexOpDispenser;
+import io.nosqlbench.adapter.opensearch.dispensers.*;
+import io.nosqlbench.adapter.opensearch.ops.UpdateOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
@@ -39,6 +40,10 @@ public class OpenSearchOpMapper implements OpMapper<Op> {
             op.getTypeAndTarget(OpenSearchOpTypes.class, String.class, "verb", "index");
         return switch (typeAndTarget.enumId) {
             case create_index -> new CreateIndexOpDispenser(adapter, op);
+            case delete_index -> new DeleteIndexOpDispenser(adapter, op);
+            case index -> new IndexOpDispenser(adapter,op);
+            case update -> new UpdateOpDispenser(adapter,op);
+            case delete -> new DeleteOpDispenser(adapter,op);
             default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
                 "mapping parsed op " + op);
         };

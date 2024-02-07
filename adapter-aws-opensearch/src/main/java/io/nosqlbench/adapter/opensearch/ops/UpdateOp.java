@@ -17,21 +17,22 @@
 package io.nosqlbench.adapter.opensearch.ops;
 
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch.indices.CreateIndexRequest;
-import org.opensearch.client.opensearch.indices.DeleteIndexRequest;
+import org.opensearch.client.opensearch.core.UpdateRequest;
 
 import java.io.IOException;
 
-public class DeleteIndexOp extends BaseOpenSearchOp {
-    private final DeleteIndexRequest rq;
+public class UpdateOp extends BaseOpenSearchOp {
+    private final UpdateRequest rq;
+    private final Class<?> doctype;
 
-    public DeleteIndexOp(OpenSearchClient client, DeleteIndexRequest rq) {
+    public UpdateOp(OpenSearchClient client, UpdateRequest rq, Class<?> doctype) {
         super(client);
         this.rq = rq;
+        this.doctype = doctype;
     }
 
     @Override
     public Object applyOp(long value) throws IOException {
-        return client.indices().delete(rq);
+        return client.update(rq, doctype);
     }
 }

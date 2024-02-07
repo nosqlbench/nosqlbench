@@ -27,5 +27,18 @@ public abstract class BaseOpenSearchOp implements CycleOp<Object> {
     }
 
     @Override
-    public abstract Object apply(long value);
+    public final Object apply(long value) {
+        try {
+            Object result = applyOp(value);
+            return result;
+        } catch (Exception e) {
+            if (e instanceof RuntimeException rte) {
+                throw rte;
+            } else {
+                throw new RuntimeException(e);
+            }
+        }
+    };
+
+    public abstract Object applyOp(long value) throws Exception;
 }

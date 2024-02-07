@@ -31,12 +31,9 @@ public class CreateIndexOp extends BaseOpenSearchOp {
     }
 
     @Override
-    public Object apply(long value) {
-        try {
-            CreateIndexResponse response = client.indices().create(rq);
-            return response;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public Object applyOp(long value) throws Exception {
+        CreateIndexResponse response = client.indices().create(rq);
+        return response;
     }
+
 }
