@@ -16,6 +16,8 @@
 
 package io.nosqlbench.adapter.opensearch.ops;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch.core.IndexRequest;
 import org.opensearch.client.opensearch.core.IndexResponse;
@@ -24,6 +26,7 @@ import org.opensearch.client.opensearch.core.UpdateRequest;
 import java.io.IOException;
 
 public class IndexOp extends BaseOpenSearchOp {
+    private final static Logger logger = LogManager.getLogger(IndexOp.class);
     private final IndexRequest<?> rq;
 
     public IndexOp(OpenSearchClient client, IndexRequest<?> rq) {
@@ -33,6 +36,8 @@ public class IndexOp extends BaseOpenSearchOp {
 
 
     public Object applyOp(long value) throws IOException {
-        return client.index(rq);
+        IndexResponse response = client.index(rq);
+        logger.debug("IndexResponse:" + response);
+        return response;
     }
 }
