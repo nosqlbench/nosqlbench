@@ -83,8 +83,6 @@ public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
                         ).build()
                     ).build()
                 ))
-            .indexField(new IndexField.Builder()
-                .enabled(true).build())
             .fieldNames(new FieldNamesField.Builder()
                 .enabled(true).build()
             );
