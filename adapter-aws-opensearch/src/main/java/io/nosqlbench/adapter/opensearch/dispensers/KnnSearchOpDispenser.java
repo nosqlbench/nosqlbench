@@ -19,18 +19,11 @@ package io.nosqlbench.adapter.opensearch.dispensers;
 import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
 import io.nosqlbench.adapter.opensearch.ops.KnnSearchOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.opensearch.client.json.JsonData;
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch._types.mapping.*;
 import org.opensearch.client.opensearch._types.query_dsl.KnnQuery;
-import org.opensearch.client.opensearch._types.query_dsl.MatchAllQuery;
 import org.opensearch.client.opensearch._types.query_dsl.Query;
-import org.opensearch.client.opensearch.core.IndexRequest;
 import org.opensearch.client.opensearch.core.SearchRequest;
-import org.opensearch.client.opensearch.indices.CreateIndexRequest;
-import org.opensearch.client.opensearch.indices.GetIndexRequest;
 
-import java.util.Map;
 import java.util.function.LongFunction;
 
 public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {

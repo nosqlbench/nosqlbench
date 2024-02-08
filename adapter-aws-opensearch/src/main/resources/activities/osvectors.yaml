@@ -14,3 +14,7 @@ blocks:
         create_index: TEMPLATE(indexname,vectors_index)
         mappings:
           m1: v1
+      search:
+        knn_search: TEMPLATE(indexname,vectors_index)
+        k: 100
+        vector: [1f,2f,3f,4f,5f,6f,7f,8f,9f,10f,11f,12f,13f,14f,15f,16f,17f,18f,19f,20f,21f,22f,23f,24f,25f]
