@@ -1,16 +1,68 @@
 description: |
   basic test for vectors in open search
   https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html
+  template vars:
+     TEMPLATE(indexname,vectors_index)
+     TEMPLATE(dimensions,25)
+
+params:
+  driver: opensearch
+  instrument: true
 
 scenarios:
-  schema: run driver=opensearch tags=block:create threads===1 cycles===undef
+  # schema: run tags=block:schema threads===1 cycles===undef
+  # rampup: run tags=block:rampup threads=auto cycles=TEMPLATE(rampup_cycles,10)
+
+  vectors:
+    drop: run tags='block:drop' labels='target:opensearch' threads===1 cycles===UNDEF
+    schema: run tags='block:schema' labels='target:astra' threads===1 cycles===UNDEF
+    rampup: run tags='block:rampup' labels='target:astra' threads=1 cycles=TEMPLATE(trainsize)
+      # threads=auto
+      #  errors=counter,warn,log
+      #    search_and_index: >-
+      #      run alias=search_and_index tags='block:search_and_index,optype=select' labels='target:astra'
+      #      cycles=TEMPLATE(testsize) errors=count,retry rate=100
+    #      errors=counter,warn threads=auto
 
 bindings:
+  id: ToString()
+  test_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/test");
+  relevant_indices: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
+  distance_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/distance")
+  train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train");
+  synthetic_vectors: HashedFloatVectors(TEMPLATE(dimensions));
 
 blocks:
-  create:
+  drop:
     ops:
-      index:
-        create_index: TEMPLATE(indexname,vectors_index)
+      drop_index:
+        delete_index: TEMPLATE(indexname,vectors_index)
+
+  schema:
+    ops:
+      create_index:
+        create_index: TEMPLATE(indexname)
         mappings:
           m1: v1
+  bulkrampup:
+    ops:
+      bulk_index:
+        bulk_index:
+          - '{"key":"{id}","value":"{train_floatlist}"'
+          -
+
+  rampup:
+    ops:
+      index:
+        index: TEMPLATE(indexname)
+        document:
+          key: "{id}"
+          value: "{train_floatlist}"
+
+
+
+#        document: |
+#          {
+#            "key": "{id}",
+#            "value": {train_floatlist}
+#          }

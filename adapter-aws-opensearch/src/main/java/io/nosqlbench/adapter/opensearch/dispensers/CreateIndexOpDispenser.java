@@ -23,6 +23,7 @@ import org.opensearch.client.json.JsonData;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch._types.mapping.*;
 import org.opensearch.client.opensearch.indices.CreateIndexRequest;
+import org.opensearch.client.opensearch.indices.IndexSettings;
 
 import java.util.Map;
 import java.util.function.LongFunction;
@@ -41,6 +42,7 @@ public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
         CreateIndexRequest.Builder eb = new CreateIndexRequest.Builder();
         LongFunction<CreateIndexRequest.Builder> bfunc =
             l -> new CreateIndexRequest.Builder()
+                .settings(b -> b.knn(true))
                 .index(targetF.apply(1));
         bfunc = op.enhanceFunc(bfunc, "mappings", Map.class, this::resolveTypeMapping);
 
