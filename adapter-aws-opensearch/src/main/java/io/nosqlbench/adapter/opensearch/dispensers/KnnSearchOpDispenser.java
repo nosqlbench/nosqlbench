@@ -52,7 +52,7 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
                 .index(targetF.apply(1))
                 .query(new Query.Builder().knn(finalKnnfunc.apply(l).build()).build());
 
-        return (long l) -> new KnnSearchOp(clientF.apply(l), bfunc.apply(l).build(), Object.class);
+        return (long l) -> new KnnSearchOp(clientF.apply(l), bfunc.apply(l).build(), Doc.class);
     }
 
     private KnnQuery.Builder convertVector(KnnQuery.Builder builder, List list) {
@@ -63,5 +63,22 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
         return builder.vector(vector);
     }
 
+    public static class Doc {
+        private float[] values;
+        public Doc() {}
+        public Doc(float[] values) {
+            this.values = values;
+        }
+        public float[] getValues() {
+            return values;
+        }
+        public void setValues(float[] values) {
+            this.values = values;
+        }
+        @Override
+        public String toString() {
+            return "{" + "values=" + values + "}";
+        }
+    }
 
 }
