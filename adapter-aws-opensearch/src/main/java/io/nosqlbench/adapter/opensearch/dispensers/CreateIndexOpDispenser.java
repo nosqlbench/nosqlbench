@@ -59,7 +59,7 @@ public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
                     "value",
                     new Property.Builder()
                         .knnVector(new KnnVectorProperty.Builder()
-                            .dimension(23)
+                            .dimension(25)
                             .method(
                                 new KnnVectorMethod.Builder()
                                     .name("hnsw")
