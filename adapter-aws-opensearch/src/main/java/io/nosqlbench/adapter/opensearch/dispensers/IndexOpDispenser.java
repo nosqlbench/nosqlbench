@@ -16,6 +16,8 @@
 
 package io.nosqlbench.adapter.opensearch.dispensers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
 import io.nosqlbench.adapter.opensearch.ops.IndexOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
@@ -29,6 +31,7 @@ import java.util.Map;
 import java.util.function.LongFunction;
 
 public class IndexOpDispenser extends BaseOpenSearchOpDispenser {
+    private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final LongFunction<String> targetF;
 
     public IndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
@@ -38,7 +41,7 @@ public class IndexOpDispenser extends BaseOpenSearchOpDispenser {
 
     @Override
     public LongFunction<? extends Op> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
-        LongFunction<IndexRequest.Builder<?>> func = l -> new IndexRequest.Builder<>();
+        LongFunction<IndexRequest.Builder<?>> func = l -> new IndexRequest.Builder<>().tDocumentSerializer();
         func = op.enhanceFuncOptionally(func, "index",String.class, IndexRequest.Builder::index);
         func = op.enhanceFuncOptionally(func,"id",String.class, IndexRequest.Builder::id);
         func = op.enhanceFuncOptionally(func,"ifPrimaryTerm",long.class, IndexRequest.Builder::ifPrimaryTerm);
@@ -57,7 +60,8 @@ public class IndexOpDispenser extends BaseOpenSearchOpDispenser {
     }
 
     private IndexRequest.Builder<?> bindDocument(IndexRequest.Builder builder, Object docdata) {
-        return builder.document(docdata);
+        String document = gson.toJson(docdata);
+        return builder.document(document);
     }
 
 }
