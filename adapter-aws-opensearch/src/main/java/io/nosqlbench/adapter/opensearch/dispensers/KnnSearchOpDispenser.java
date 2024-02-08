@@ -64,23 +64,23 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
     }
 
     public static class Doc {
-        private float[] values;
+        private float[] value;
         private String key;
 
         public Doc() {}
-        public Doc(float[] values, String key) {
-            this.values = values;
+        public Doc(float[] value, String key) {
+            this.value = value;
             this.key = key;
         }
-        public float[] getValues() {
-            return values;
+        public float[] getValue() {
+            return value;
         }
-        public void setValues(float[] values) {
-            this.values = values;
+        public void setValue(float[] value) {
+            this.value = value;
         }
         @Override
         public String toString() {
-            return "{" + "values=" + values + "}";
+            return "{" + "values=" + value + "}";
         }
 
         public String getKey() {
