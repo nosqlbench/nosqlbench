@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.opensearch.dispensers;
 
 import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
 import io.nosqlbench.adapter.opensearch.ops.KnnSearchOp;
+import io.nosqlbench.adapter.opensearch.pojos.Doc;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch._types.query_dsl.KnnQuery;
@@ -61,35 +62,6 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
             vector[i] = (float) list.get(i);
         }
         return builder.vector(vector);
-    }
-
-    public static class Doc {
-        private float[] value;
-        private String key;
-
-        public Doc() {}
-        public Doc(float[] value, String key) {
-            this.value = value;
-            this.key = key;
-        }
-        public float[] getValue() {
-            return value;
-        }
-        public void setValue(float[] value) {
-            this.value = value;
-        }
-        @Override
-        public String toString() {
-            return "{" + "values=" + value + "}";
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public void setKey(String key) {
-            this.key = key;
-        }
     }
 
 }
