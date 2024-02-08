@@ -24,6 +24,7 @@ import org.opensearch.client.opensearch._types.query_dsl.KnnQuery;
 import org.opensearch.client.opensearch._types.query_dsl.Query;
 import org.opensearch.client.opensearch.core.SearchRequest;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
@@ -39,7 +40,8 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
     public LongFunction<KnnSearchOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
         LongFunction<KnnQuery.Builder> knnfunc = l -> new KnnQuery.Builder();
         knnfunc = op.enhanceFuncOptionally(knnfunc, "k",Integer.class, KnnQuery.Builder::k);
-        knnfunc = op.enhanceFuncOptionally(knnfunc, "vector",float[].class, KnnQuery.Builder::vector);
+        knnfunc = op.enhanceFuncOptionally(knnfunc, "vector", List.class, this::convertVector);//(b, v) -> b.vector((float[])v.toArray()));
+
         //TODO: Implement the filter query builder here
         //knnfunc = op.enhanceFuncOptionally(knnfunc, "filter",Query.class, KnnQuery.Builder::filter);
 
@@ -50,6 +52,14 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
                 .query(new Query.Builder().knn(finalKnnfunc.apply(l).build()).build());
 
         return (long l) -> new KnnSearchOp(clientF.apply(l), bfunc.apply(l).build(), Object.class);
+    }
+
+    private KnnQuery.Builder convertVector(KnnQuery.Builder builder, List list) {
+        float[] vector = new float[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            vector[i] = (float) list.get(i);
+        }
+        return builder.vector(vector);
     }
 
 
