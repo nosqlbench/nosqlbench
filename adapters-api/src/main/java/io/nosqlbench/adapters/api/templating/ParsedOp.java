@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapters.api.templating;
 
+import io.nosqlbench.adapters.api.activityconfig.yaml.OpData;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.nb.api.labels.NBLabelSpec;
 import io.nosqlbench.nb.api.labels.NBLabels;
