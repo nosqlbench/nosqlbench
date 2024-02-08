@@ -65,9 +65,12 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
 
     public static class Doc {
         private float[] values;
+        private String key;
+
         public Doc() {}
-        public Doc(float[] values) {
+        public Doc(float[] values, String key) {
             this.values = values;
+            this.key = key;
         }
         public float[] getValues() {
             return values;
@@ -78,6 +81,14 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
         @Override
         public String toString() {
             return "{" + "values=" + values + "}";
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setKey(String key) {
+            this.key = key;
         }
     }
 
