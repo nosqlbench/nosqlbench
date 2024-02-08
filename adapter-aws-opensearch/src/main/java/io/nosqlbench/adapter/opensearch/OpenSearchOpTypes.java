@@ -21,5 +21,6 @@ public enum OpenSearchOpTypes {
     delete_index,
     index,
     update,
-    delete
+    delete,
+    knn_search
 }

@@ -44,6 +44,7 @@ public class OpenSearchOpMapper implements OpMapper<Op> {
             case index -> new IndexOpDispenser(adapter,op, typeAndTarget.targetFunction);
             case update -> new UpdateOpDispenser(adapter,op, typeAndTarget.targetFunction);
             case delete -> new DeleteOpDispenser(adapter,op, typeAndTarget.targetFunction);
+            case knn_search -> new KnnSearchOpDispenser(adapter,op, typeAndTarget.targetFunction);
             default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
                 "mapping parsed op " + op);
         };

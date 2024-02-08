@@ -10,6 +10,8 @@ params:
   instrument: true
 
 scenarios:
+  schema: run driver=opensearch tags=block:create threads===1 cycles===undef
+  query: run driver=opensearch tags=block:query threads=TEMPLATE(search_threads,10) cycles===undef
   # schema: run tags=block:schema threads===1 cycles===undef
   # rampup: run tags=block:rampup threads=auto cycles=TEMPLATE(rampup_cycles,10)
 
@@ -44,6 +46,13 @@ blocks:
         create_index: TEMPLATE(indexname)
         mappings:
           m1: v1
+  query:
+    ops:
+      search:
+        knn_search: TEMPLATE(indexname,vectors_index)
+        k: 100
+        vector: [1f,2f,3f,4f,5f,6f,7f,8f,9f,10f,11f,12f,13f,14f,15f,16f,17f,18f,19f,20f,21f,22f,23f,24f,25f]
+        field: value
   bulkrampup:
     ops:
       bulk_index:
