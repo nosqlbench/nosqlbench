@@ -4,6 +4,7 @@ description: |
 
 scenarios:
   schema: run driver=opensearch tags=block:create threads===1 cycles===undef
+  query: run driver=opensearch tags=block:query threads=TEMPLATE(search_threads,10) cycles===undef
 
 bindings:
 
@@ -14,6 +15,8 @@ blocks:
         create_index: TEMPLATE(indexname,vectors_index)
         mappings:
           m1: v1
+  query:
+    ops:
       search:
         knn_search: TEMPLATE(indexname,vectors_index)
         k: 100
