@@ -48,7 +48,7 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
 
         LongFunction<KnnQuery.Builder> finalKnnfunc = knnfunc;
         LongFunction<SearchRequest.Builder> bfunc =
-            l -> new SearchRequest.Builder()
+            l -> new SearchRequest.Builder().size(100)
                 .index(targetF.apply(1))
                 .query(new Query.Builder().knn(finalKnnfunc.apply(l).build()).build());
 
