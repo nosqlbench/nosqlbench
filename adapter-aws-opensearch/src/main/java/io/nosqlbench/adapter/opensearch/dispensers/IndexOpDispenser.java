@@ -61,7 +61,7 @@ public class IndexOpDispenser extends BaseOpenSearchOpDispenser {
 
     private IndexRequest.Builder<?> bindDocument(IndexRequest.Builder builder, Object docdata) {
         String document = gson.toJson(docdata);
-        return builder.document(document);
+        return builder.document(docdata);
     }
 
 }
