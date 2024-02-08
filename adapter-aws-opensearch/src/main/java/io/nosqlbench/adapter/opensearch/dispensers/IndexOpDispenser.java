@@ -41,7 +41,7 @@ public class IndexOpDispenser extends BaseOpenSearchOpDispenser {
 
     @Override
     public LongFunction<? extends Op> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
-        LongFunction<IndexRequest.Builder<?>> func = l -> new IndexRequest.Builder<>().tDocumentSerializer();
+        LongFunction<IndexRequest.Builder<?>> func = l -> new IndexRequest.Builder<>();
         func = op.enhanceFuncOptionally(func, "index",String.class, IndexRequest.Builder::index);
         func = op.enhanceFuncOptionally(func,"id",String.class, IndexRequest.Builder::id);
         func = op.enhanceFuncOptionally(func,"ifPrimaryTerm",long.class, IndexRequest.Builder::ifPrimaryTerm);
