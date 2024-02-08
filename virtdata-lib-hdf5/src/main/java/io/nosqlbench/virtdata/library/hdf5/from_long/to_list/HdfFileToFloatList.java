@@ -22,6 +22,7 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.hdf5.from_long.AbstractHdfFileToVectorType;
 import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGenerator;
 import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGeneratorFactory;
+import io.nosqlbench.virtdata.library.wrappers.JsonListWrapper;
 
 import java.util.List;
 import java.util.function.LongFunction;
@@ -49,7 +50,7 @@ public class HdfFileToFloatList extends AbstractHdfFileToVectorType implements L
     @Override
     public List<Float> apply(long l) {
         Object data = getDataFrom(l);
-        return embeddingGenerator.generateFloatListEmbeddingFrom(data, dims);
+        return new JsonListWrapper<>(embeddingGenerator.generateFloatListEmbeddingFrom(data, dims));
     }
 
 }
