@@ -1093,5 +1093,15 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return sb.toString();
     }
 
+    public boolean isDefinedExactly(String[] fields) {
+        for (String field : fields) {
+            if (isUndefined(field)) {
+                return false;
+            }
+        }
+        return statics.size() + dynamics.size() == fields.length;
+    }
+
+
 
 }

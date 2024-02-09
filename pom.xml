@@ -108,6 +108,7 @@
         <module>adapter-amqp</module>
         <module>adapter-jdbc</module>
         <module>adapter-pinecone</module>
+        <module>adapter-aws-opensearch</module>
 
         <!-- VIRTDATA MODULES -->
         <module>virtdata-api</module>

@@ -55,7 +55,7 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
     public static final String STOP_TIMERS = "stop-timers";
 
     private final String opName;
-    protected final DriverAdapter<T, S> adapter;
+    protected final DriverAdapter<? extends T, ? extends S> adapter;
     private final NBLabels labels;
     public final Timer verifierTimer;
     private boolean instrument;
@@ -77,7 +77,7 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
     private final CycleFunction<Boolean> _verifier;
     private final ThreadLocal<CycleFunction<Boolean>> tlVerifier;
 
-    protected BaseOpDispenser(final DriverAdapter<T, S> adapter, final ParsedOp op) {
+    protected BaseOpDispenser(final DriverAdapter<? extends T, ? extends S> adapter, final ParsedOp op) {
         super(adapter);
         opName = op.getName();
         this.adapter = adapter;
@@ -176,7 +176,7 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
         return this.opName;
     }
 
-    public DriverAdapter<T, S> getAdapter() {
+    public DriverAdapter<? extends T, ? extends S> getAdapter() {
         return this.adapter;
     }
 
