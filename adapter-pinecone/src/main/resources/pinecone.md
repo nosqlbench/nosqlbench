@@ -7,8 +7,8 @@ https://github.com/pinecone-io/pinecone-java-client
 The following parameters must be supplied to the adapter at runtime in order to successfully connect to an
 instance of the Pinecone database:
 
-* api key - In order to use the pinecone database you must have an account. Once the account is created you can request
-            an api key. This key will need to be provided any time a database connection is desired.
+* api key - In order to use the pinecone database you must have an account. Once the account is created you can [request
+            an api key](https://docs.pinecone.io/docs/quickstart#2-get-your-api-key). This key will need to be provided any time a database connection is desired.
 * environment - When an Index is created in the database the environment must be specified as well. The adapter will
                 use the default value of us-east-1 if none is provided at runtime.
 * project name - A project name must also be provided at time of index creation. This name then needs to be provided

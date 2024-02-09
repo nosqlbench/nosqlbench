@@ -27,13 +27,19 @@ import io.pinecone.PineconeConnectionConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class PineconeSpace {
 
     private final static Logger logger = LogManager.getLogger(PineconeSpace.class);
     private final String apiKey;
+    private final String apiKeyFile;
     private final String environment;
     private final String projectName;
     private final String name;
@@ -51,7 +57,23 @@ public class PineconeSpace {
      * @param cfg   The configuration ({@link NBConfiguration}) for this nb run
      */
     public PineconeSpace(String name, NBConfiguration cfg) {
-        this.apiKey = cfg.get("apiKey");
+        String apiKeyFromFile = null;
+        this.apiKeyFile = cfg.get("apiKeyFile");
+        if(null != this.apiKeyFile && this.apiKeyFile.length() > 0) {
+            Optional<String> apiKeyFileOpt = cfg.getOptional("apiKeyFile");
+            if(apiKeyFileOpt.isPresent()) {
+                Path path = Paths.get(apiKeyFileOpt.get());
+                try {
+                    apiKeyFromFile = Files.readAllLines(path).getFirst();
+                } catch (IOException e) {
+                    String error = "Error while reading api key from file:" + path;
+                    logger.error(error, e);
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        this.apiKey = (apiKeyFromFile != null) ? apiKeyFromFile : cfg.get("apiKey");
         this.environment = cfg.get("environment");
         this.projectName = cfg.get("projectName");
         this.name = name;
@@ -59,7 +81,7 @@ public class PineconeSpace {
             .withApiKey(apiKey)
             .withEnvironment(environment)
             .withProjectName(projectName);
-        logger.info(this.name + ": Creating new Pinecone Client with api key " + apiKey + ", environment "
+        logger.info(this.name + ": Creating new Pinecone Client with api key " + maskDigits(apiKey) + ", environment "
             + environment + " and project name " + projectName);
         this.client = new PineconeClient(config);
     }
@@ -86,7 +108,10 @@ public class PineconeSpace {
 
         return ConfigModel.of(PineconeSpace.class)
             .add(
-                Param.required("apiKey",String.class)
+                Param.optional("apiKeyFile", String.class, "file to load the api key from")
+            )
+            .add(
+                Param.optional("apiKey",String.class)
                     .setDescription("the Pinecone API key to use to connect to the database")
             )
             .add(
@@ -98,6 +123,19 @@ public class PineconeSpace {
                     .setDescription("the project name associated with the desired index")
             )
             .asReadOnly();
+    }
+
+    private static String maskDigits(String unmasked) {
+        int inputLength = (null == unmasked) ? 0 : unmasked.length();
+        StringBuilder masked = new StringBuilder(inputLength);
+        for(char ch : unmasked.toCharArray()) {
+            if (Character.isDigit(ch)) {
+                masked.append("*");
+            } else {
+                masked.append(ch);
+            }
+        }
+        return masked.toString();
     }
 
 }
