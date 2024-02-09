@@ -22,6 +22,8 @@ import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
 import io.nosqlbench.adapter.opensearch.ops.IndexOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch._types.OpType;
 import org.opensearch.client.opensearch._types.VersionType;
@@ -31,12 +33,15 @@ import java.util.Map;
 import java.util.function.LongFunction;
 
 public class IndexOpDispenser extends BaseOpenSearchOpDispenser {
+    private final static Logger logger = LogManager.getLogger(IndexOpDispenser.class);
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final LongFunction<String> targetF;
+    private final String diag;
 
     public IndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op);
         this.targetF =targetF;
+        this.diag = op.getStaticConfigOr("daig","false");
     }
 
     @Override
@@ -61,6 +66,9 @@ public class IndexOpDispenser extends BaseOpenSearchOpDispenser {
 
     private IndexRequest.Builder<?> bindDocument(IndexRequest.Builder builder, Object docdata) {
         String document = gson.toJson(docdata);
+        if (diag.equals("true")) {
+            logger.debug("index_op document:\n----\n" + document + "\n----\n");
+        }
         return builder.document(docdata);
     }
 
