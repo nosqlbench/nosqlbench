@@ -18,8 +18,10 @@ package io.nosqlbench.adapter.opensearch;
 
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -27,6 +29,7 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
 
+@Service(value= DriverAdapter.class, selector = "opensearch")
 public class OpenSearchAdapter extends BaseDriverAdapter<Op,OpenSearchSpace> {
     public OpenSearchAdapter(NBComponent parentComponent, NBLabels labels) {
         super(parentComponent, labels);
