@@ -61,38 +61,40 @@ public class OpenSearchSpace implements AutoCloseable {
 
 
         SdkAsyncHttpClient httpClient =
-            AwsCrtAsyncHttpClient.builder()
-                .build();
+                AwsCrtAsyncHttpClient.builder()
+                        .build();
 
         AwsSdk2TransportOptions.Builder transportOptionsBuilder
-            = AwsSdk2TransportOptions.builder();
+                = AwsSdk2TransportOptions.builder();
 
         cfg.getOptional("profile").map(
-                p -> ProfileCredentialsProvider.builder()
-                    .profileName(p)
-                    .build())
-            .ifPresent(transportOptionsBuilder::setCredentials);
+                        p -> ProfileCredentialsProvider.builder()
+                                .profileName(p)
+                                .build())
+                .ifPresent(transportOptionsBuilder::setCredentials);
 
         AwsSdk2TransportOptions transportOptions = transportOptionsBuilder.build();
 
         AwsOsServiceType svctype = AwsOsServiceType.valueOf(cfg.get("svctype"));
 
         AwsSdk2Transport awsSdk2Transport =
-            new AwsSdk2Transport(
-                httpClient,
-                host,
-                svctype.name(),
-                selectedRegion,
-                transportOptions
-            );
+                new AwsSdk2Transport(
+                        httpClient,
+                        host,
+                        svctype.name(),
+                        selectedRegion,
+                        transportOptions
+                );
 
         OpenSearchClient client = new OpenSearchClient(awsSdk2Transport);
 
-        try {
-            InfoResponse info = client.info();
-            System.out.println(info.version().distribution() + ": " + info.version().number());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (cfg.get("getinfo").equals("true")) {
+            try {
+                InfoResponse info = client.info();
+                System.out.println(info.version().distribution() + ": " + info.version().number());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         return client;
@@ -100,15 +102,17 @@ public class OpenSearchSpace implements AutoCloseable {
 
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(OpenSearchSpace.class)
-            .add(Param.required("region", String.class).setDescription("The region to connect to"))
-            .add(Param.required("host", String.class).setDescription("The Open Search API endpoint host"))
-            .add(Param.optional("profile")
-                .setDescription("The AWS auth profile to use. Required to activate profile based auth"))
-            .add(Param.defaultTo("svctype", "es")
-                .setDescription("one of es or aoss, defaults to es for OpenSearch domains"))
-                .add(Param.defaultTo("diag","false")
+                .add(Param.required("region", String.class).setDescription("The region to connect to"))
+                .add(Param.required("host", String.class).setDescription("The Open Search API endpoint host"))
+                .add(Param.optional("profile")
+                        .setDescription("The AWS auth profile to use. Required to activate profile based auth"))
+                .add(Param.defaultTo("getinfo", "false").setDescription("whether to call info after connect or " +
+                        "not, true|false"))
+                .add(Param.defaultTo("svctype", "es")
+                        .setDescription("one of es or aoss, defaults to es for OpenSearch domains"))
+                .add(Param.defaultTo("diag", "false")
                         .setDescription("enable payload diagnostics or not"))
-            .asReadOnly();
+                .asReadOnly();
     }
 
     @Override
