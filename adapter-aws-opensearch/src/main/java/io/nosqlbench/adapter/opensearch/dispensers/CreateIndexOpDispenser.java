@@ -30,15 +30,13 @@ import java.util.function.LongFunction;
 
 public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
 
-    private final LongFunction<String> targetF;
-
     public CreateIndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
-        super(adapter, op);
-        this.targetF = targetF;
+        super(adapter, op, targetF);
     }
 
     @Override
-    public LongFunction<CreateIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
+    public LongFunction<CreateIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op,
+                                                    LongFunction<String> targetF) {
         CreateIndexRequest.Builder eb = new CreateIndexRequest.Builder();
         LongFunction<CreateIndexRequest.Builder> bfunc =
             l -> new CreateIndexRequest.Builder()

@@ -30,15 +30,12 @@ import java.util.function.LongFunction;
 
 public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
 
-    private final LongFunction<String> targetF;
-
     public KnnSearchOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
-        super(adapter, op);
-        this.targetF = targetF;
+        super(adapter, op, targetF);
     }
 
     @Override
-    public LongFunction<KnnSearchOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
+    public LongFunction<KnnSearchOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op,LongFunction<String> targetF) {
         LongFunction<KnnQuery.Builder> knnfunc = l -> new KnnQuery.Builder();
         knnfunc = op.enhanceFuncOptionally(knnfunc, "k",Integer.class, KnnQuery.Builder::k);
         knnfunc = op.enhanceFuncOptionally(knnfunc, "vector", List.class, this::convertVector);

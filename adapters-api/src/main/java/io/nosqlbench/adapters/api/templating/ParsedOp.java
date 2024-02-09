@@ -338,7 +338,7 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         List<Function<Map<String, Object>, Map<String, Object>>> preprocessors,
         NBComponent parent
     ) {
-        super(parent,NBLabels.forKV("op",opTemplate.getName()));
+        super(parent,NBLabels.forKV(((parent instanceof ParsedOp) ? "subop":"op"),opTemplate.getName()));
         this._opTemplate = opTemplate;
         this.activityCfg = activityCfg;
 
@@ -357,7 +357,7 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
             activityCfg.getMap())
         );
 
-        NBLabels opLabels = parent.getLabels().and("op", this.getName());
+        NBLabels opLabels = parent.getLabels().and((parent instanceof ParsedOp) ? "subop" : "op", this.getName());
         if (tmap.isStatic("labels")) {
             Object labelSpecObject = tmap.takeStaticValue("labels", Object.class);
             if (labelSpecObject instanceof String labelsSpec) {
@@ -908,9 +908,10 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
     }
 
     public ParsedOp getAsSubOp(String name) {
-        Object o = getStaticValue(name);
+        Object o = _opTemplate.getOp().map(raw -> raw.get(name)).orElseThrow(() ->
+            new OpConfigError("Could not find op field '" + name + "' for subop on parent op '" + name + "'"));
         if (o instanceof Map map) {
-            return makeSubOp(name, name, map);
+            return makeSubOp(this.getName(), name, map);
         } else {
             throw new RuntimeException("Not allowed: op field named '" + name + "' as sub-op");
         }

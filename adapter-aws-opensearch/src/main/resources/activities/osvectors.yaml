@@ -4,6 +4,9 @@ description: |
   template vars:
      TEMPLATE(indexname,vectors_index)
      TEMPLATE(dimensions,25)
+     TEMPLATE(search_cycles,1M)
+     TEMPLATE(rampup_cycles,TEMPLATE(trainsize))
+     TEMPLATE(size,100)
 
 params:
   driver: opensearch
@@ -11,14 +14,30 @@ params:
 
 scenarios:
 
+  vectors_brief:
+    bulkrampup: >-
+      run tags='block:bulkrampup' labels='target:opensearch'
+      threads=TEMPLATE(rampup_threads,10) cycles=TEMPLATE(trainsize)
+      errors=count,warn
+    #    search: run tags='block:search' labels='target:opensearch' threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
+    #rampup: >-
+    #  run tags='block:rampup' labels='target:opensearch'
+    #  threads=TEMPLATE(rampup_threads,10) cycles=TEMPLATE(trainsize)
+    #  errors=count,warn
+    ##    search: run tags='block:search' labels='target:opensearch' threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
+    search_and_verify: >-
+      run tags='block:search_and_verify' labels='target:opensearch'
+      threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
+      errors=count,warn
+
   vectors:
-    drop: run tags='block:drop' labels='target:opensearch' threads===1 cycles===UNDEF
+#    drop: run tags='block:drop' labels='target:opensearch' threads===1 cycles===UNDEF
     schema: run tags='block:schema' labels='target:opensearch' threads===1 cycles===UNDEF
     rampup: >-
       run tags='block:rampup' labels='target:opensearch'
       threads=TEMPLATE(rampup_threads,10) cycles=TEMPLATE(trainsize)
       errors=count,warn
-      #    search: run tags='block:search' labels='target:opensearch' threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
+    #    search: run tags='block:search' labels='target:opensearch' threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
     search_and_verify: >-
       run tags='block:search_and_verify' labels='target:opensearch'
       threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
@@ -76,8 +95,13 @@ blocks:
   bulkrampup:
     ops:
       bulk_index:
-        bulk_index:
-          - '{"key":"{id}","value":"{train_floatlist}"'
+        bulk: TEMPLATE(indexname)
+        op_template:
+          repeat: TEMPLATE(bulk_repeat,100)
+          index: TEMPLATE(indexname)
+          document:
+            key: "{id}"
+            value: "{train_floatlist}"
 
   rampup:
     ops:

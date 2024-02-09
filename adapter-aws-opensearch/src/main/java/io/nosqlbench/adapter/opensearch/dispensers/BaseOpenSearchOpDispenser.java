@@ -30,14 +30,18 @@ public abstract class BaseOpenSearchOpDispenser extends BaseOpDispenser<Op,Objec
     protected final LongFunction<OpenSearchClient> clientF;
     private final LongFunction<? extends Op> opF;
 
-    protected BaseOpenSearchOpDispenser(OpenSearchAdapter adapter, ParsedOp op) {
+    protected BaseOpenSearchOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op);
         this.spaceF =adapter.getSpaceFunc(op);
         this.clientF = (long l) -> this.spaceF.apply(l).getClient();
-        this.opF = createOpFunc(clientF, op);
+        this.opF = createOpFunc(clientF, op, targetF);
     }
 
-    public abstract LongFunction<? extends Op> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op);
+    public abstract LongFunction<? extends Op> createOpFunc(
+        LongFunction<OpenSearchClient> clientF,
+        ParsedOp op,
+        LongFunction<String> targetF
+    );
 
     @Override
     public Op apply(long value) {

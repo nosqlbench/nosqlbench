@@ -31,15 +31,12 @@ import java.util.function.LongFunction;
 
 public class DeleteOpDispenser extends BaseOpenSearchOpDispenser {
 
-    private final LongFunction<String> targetF;
-
     public DeleteOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
-        super(adapter, op);
-        this.targetF = targetF;
+        super(adapter, op, targetF);
     }
 
     @Override
-    public LongFunction<DeleteOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
+    public LongFunction<DeleteOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         DeleteRequest.Builder eb = new DeleteRequest.Builder();
         LongFunction<DeleteRequest.Builder> bfunc = l -> new DeleteRequest.Builder().index(targetF.apply(l));
         return (long l) -> new DeleteOp(clientF.apply(l), bfunc.apply(l).build());

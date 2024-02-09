@@ -19,30 +19,44 @@ package io.nosqlbench.adapter.opensearch.dispensers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
+import io.nosqlbench.adapter.opensearch.ops.BulkOp;
 import io.nosqlbench.adapter.opensearch.ops.IndexOp;
+import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpDef;
+import io.nosqlbench.adapters.api.activityconfig.yaml.OpDef;
+import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch._types.OpType;
+import org.opensearch.client.opensearch._types.Refresh;
+import org.opensearch.client.opensearch._types.VersionType;
+import org.opensearch.client.opensearch.core.BulkRequest;
 import org.opensearch.client.opensearch.core.IndexRequest;
+import org.snakeyaml.engine.v2.api.lowlevel.Parse;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class IndexOpDispenser extends BaseOpenSearchOpDispenser {
-    private final static Logger logger = LogManager.getLogger(IndexOpDispenser.class);
+public class BulkOpDispenser extends BaseOpenSearchOpDispenser {
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private final String diag;
 
-    public IndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
+    public BulkOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op, targetF);
-        this.diag = op.getStaticConfigOr("daig","false");
     }
 
     @Override
-    public LongFunction<? extends Op> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
-        LongFunction<IndexRequest> irqF = OpenSearchRequests.index(op);
-        return l -> new IndexOp(clientF.apply(l), irqF.apply(l));
+    public LongFunction<? extends Op> createOpFunc(
+        LongFunction<OpenSearchClient> clientF,
+        ParsedOp op,
+        LongFunction<String> targetF
+    ) {
+        LongFunction<BulkRequest> func = OpenSearchRequests.bulk(op,targetF);
+        return l -> new BulkOp(clientF.apply(l), func.apply(l));
     }
 
 }

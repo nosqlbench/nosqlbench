@@ -31,15 +31,12 @@ import java.util.function.LongFunction;
 
 public class UpdateOpDispenser extends BaseOpenSearchOpDispenser {
 
-    private final LongFunction<String> targetF;
-
     public UpdateOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
-        super(adapter, op);
-        this.targetF = targetF;
+        super(adapter, op, targetF);
     }
 
     @Override
-    public LongFunction<UpdateOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
+    public LongFunction<UpdateOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<UpdateRequest.Builder> bfunc = l -> new UpdateRequest.Builder().index(targetF.apply(l));
         // TODO: add details here
         return l -> new UpdateOp(clientF.apply(l),bfunc.apply(l).build(),Object.class);

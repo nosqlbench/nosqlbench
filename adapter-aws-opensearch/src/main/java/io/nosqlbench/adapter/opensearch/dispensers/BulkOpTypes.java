@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.opensearch;
+package io.nosqlbench.adapter.opensearch.dispensers;
 
-public enum OpenSearchOpTypes {
-    create_index,
-    delete_index,
+public enum BulkOpTypes {
+    create,
     index,
-    update,
     delete,
-    knn_search,
-    bulk
+    update
 }

@@ -27,15 +27,12 @@ import java.util.function.LongFunction;
 
 public class DeleteIndexOpDispenser extends BaseOpenSearchOpDispenser {
 
-    private final LongFunction<String> targetF;
-
     public DeleteIndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
-        super(adapter, op);
-        this.targetF = targetF;
+        super(adapter, op, targetF);
     }
 
     @Override
-    public LongFunction<DeleteIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op) {
+    public LongFunction<DeleteIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         DeleteIndexRequest.Builder eb = new DeleteIndexRequest.Builder();
         LongFunction<DeleteIndexRequest.Builder> f =
             l -> new DeleteIndexRequest.Builder().index(targetF.apply(l));
