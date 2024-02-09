@@ -49,7 +49,7 @@
     <dependency>
         <groupId>io.pinecone</groupId>
         <artifactId>pinecone-client</artifactId>
-        <version>0.2.3</version>
+        <version>0.7.4</version>
     </dependency>
 </dependencies>
 
