@@ -106,6 +106,8 @@ public class OpenSearchSpace implements AutoCloseable {
                 .setDescription("The AWS auth profile to use. Required to activate profile based auth"))
             .add(Param.defaultTo("svctype", "es")
                 .setDescription("one of es or aoss, defaults to es for OpenSearch domains"))
+                .add(Param.defaultTo("diag","false")
+                        .setDescription("enable payload diagnostics or not"))
             .asReadOnly();
     }
 
