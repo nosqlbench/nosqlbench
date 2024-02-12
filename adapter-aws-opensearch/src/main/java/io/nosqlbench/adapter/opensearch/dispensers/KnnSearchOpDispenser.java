@@ -29,9 +29,16 @@ import java.util.List;
 import java.util.function.LongFunction;
 
 public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
+    private Class<?> schemaClass;
 
     public KnnSearchOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op, targetF);
+        String schemaClassStr = op.getStaticConfigOr("schema", "io.nosqlbench.adapter.opensearch.pojos.Doc");
+        try {
+            schemaClass = Class.forName(schemaClassStr);
+        } catch (Exception e) {
+            schemaClass = Doc.class;
+        }
     }
 
     @Override
@@ -46,11 +53,11 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
 
         LongFunction<KnnQuery.Builder> finalKnnfunc = knnfunc;
         LongFunction<SearchRequest.Builder> bfunc =
-            l -> new SearchRequest.Builder().size(100)
+            l -> new SearchRequest.Builder().size(op.getStaticValueOr("size", 100))
                 .index(targetF.apply(l))
                 .query(new Query.Builder().knn(finalKnnfunc.apply(l).build()).build());
 
-        return (long l) -> new KnnSearchOp(clientF.apply(l), bfunc.apply(l).build(), Doc.class);
+        return (long l) -> new KnnSearchOp(clientF.apply(l), bfunc.apply(l).build(), schemaClass);
     }
 
     private KnnQuery.Builder convertVector(KnnQuery.Builder builder, List list) {
