@@ -122,12 +122,12 @@
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-graphite</artifactId>
-                <version>4.2.23</version>
+                <version>4.2.24</version>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-core</artifactId>
-                <version>4.2.23</version>
+                <version>4.2.24</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -188,7 +188,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.105.Final</version>
+                <version>4.1.106.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
@@ -361,23 +361,23 @@
             <dependency>
                 <groupId>org.graalvm.sdk</groupId>
                 <artifactId>graal-sdk</artifactId>
-                <version>23.0.2</version>
+                <version>23.1.2</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js</artifactId>
-                <version>23.0.2</version>
+                <version>23.0.3</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
-                <version>23.0.1</version>
+                <version>23.1.2</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.tools</groupId>
                 <artifactId>profiler</artifactId>
-                <version>23.0.1</version>
+                <version>23.0.3</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
