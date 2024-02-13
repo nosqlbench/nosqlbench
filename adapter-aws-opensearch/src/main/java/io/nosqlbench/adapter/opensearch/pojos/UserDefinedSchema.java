@@ -32,9 +32,10 @@ public class UserDefinedSchema {
     public UserDefinedSchema() {
     }
 
-    public UserDefinedSchema(float[] value, String key) {
+    public UserDefinedSchema(float[] value, String key, String type) {
         this.vectorValues = value;
         this.recordKey = key;
+        this.type = type;
     }
 
     public float[] getVectorValues() {
