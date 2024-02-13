@@ -84,6 +84,10 @@ blocks:
         field: value
         schema: io.nosqlbench.adapter.opensearch.pojos.UserDefinedSchema
         size: 100
+        filter:
+            field: "age"
+            comparator: "gt"
+            value: "30"
   search_and_verify:
     ops:
       select_ann_limit_TEMPLATE(k,100):
