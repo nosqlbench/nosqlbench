@@ -104,5 +104,4 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
         }
         return builder.vector(vector);
     }
-
 }
