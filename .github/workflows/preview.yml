@@ -79,7 +79,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: docker test build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v5.1.0
         with:
           context: .
           file: Dockerfile
@@ -130,7 +130,7 @@ jobs:
           scripts/bump-minor-version
 
       - name: docker push to hub
-        uses: docker/build-push-action@v3.3.0
+        uses: docker/build-push-action@v5.1.0
         with:
           context: .
           platforms: linux/amd64,linux/arm64
