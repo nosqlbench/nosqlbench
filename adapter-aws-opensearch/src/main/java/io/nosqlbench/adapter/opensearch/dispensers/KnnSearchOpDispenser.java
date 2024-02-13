@@ -41,7 +41,7 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
         try {
             schemaClass = Class.forName(schemaClassStr);
         } catch (Exception e) {
-            schemaClass = Doc.class;
+            throw new RuntimeException("Unable to load schema class: " + schemaClassStr, e);
         }
     }
 
