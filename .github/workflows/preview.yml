@@ -100,7 +100,7 @@ jobs:
           cp nb5/target/nb5.jar nb5/target/nb5 staging
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: binaries
           path: staging
