@@ -16,12 +16,12 @@
 
 package io.nosqlbench.datamappers.functions.hdf_to_cql;
 
-import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.DefaultDatasetParser;
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.DefaultCqlDatasetParser;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DefaultDatasetParserTest {
+public class DefaultCqlDatasetParserTest {
     String test1 = "{\"conditions\": {\"and\": [{\"a\": {\"match\": {\"value\": 53}}}]}}";
     String test2 = "{\"conditions\": {\"and\": [{\"a\": {\"match\": {\"value\": \"thirteen\"}}}, {\"b\": {\"match\": {\"value\": \"fifty-four\"}}}]}}";
     String test3 = "{\"conditions\": {\"and\": [{\"a\": {\"match\": {\"value\": 13}}}, {\"b\": {\"match\": {\"value\": 54}}},  {\"a\": {\"match\": {\"value\": 154}}}]}}";
@@ -32,7 +32,7 @@ public class DefaultDatasetParserTest {
 
     @Test
     public void testParse() {
-        DefaultDatasetParser parser = new DefaultDatasetParser();
+        DefaultCqlDatasetParser parser = new DefaultCqlDatasetParser();
         String parsed = parser.parse(test1);
         assertEquals("WHERE a=53", parsed);
 

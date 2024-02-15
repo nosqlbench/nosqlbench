@@ -11,7 +11,7 @@ ops:
     raw: |
       SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) {query_predicates} ORDER BY value ANN OF {test_floatlist} LIMIT TEMPLATE(select_limit,100);
 
-query_predicates: HdfDatasetToCqlPredicates("testdata/TEMPLATE(dataset).hdf5", "/predicates", "jaw")
+query_predicates: HdfDatasetToCqlPredicates("testdata/TEMPLATE(dataset).hdf5", "/predicates", "defaultCql")
 
 In this case the parser needs to return a string representation of the predicates that limit the result set returned by the query using the expected cql syntax.
 
@@ -38,9 +38,11 @@ op1:
   
     comparator: {comparator_predicate}
 
-filterfield_predicate: HdfDatasetToPcFilterPredicates("testdata/TEMPLATE(dataset).hdf5", "/predicates", "pcfilterfield")
+filterfield_predicate: HdfDatasetToPcFilterPredicates("testdata/TEMPLATE(dataset).hdf5", "/predicates", "pcfilter", "field")
 
-operator_predicate: HdfDatasetToPcFilterPredicates("testdata/TEMPLATE(dataset).hdf5", "/predicates", "pcoperator")
+operator_predicate: HdfDatasetToPcFilterPredicates("testdata/TEMPLATE(dataset).hdf5", "/predicates", "pcfilter", "operator")
 
-comparator_predicate: HdfDatasetToPcFilterPredicates("testdata/TEMPLATE(dataset).hdf5", "/predicates", "pccomparator")
+comparator_predicate: HdfDatasetToPcFilterPredicates("testdata/TEMPLATE(dataset).hdf5", "/predicates", "pcfilter", "comparator")
+
+The same parser instance should be used across the three predicate portions with the desired field an additional parameter in order to avoid having to reparse for each binding.
 

@@ -18,7 +18,7 @@
 package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser;
 
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.NoopDatasetParser;
-import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.DefaultDatasetParser;
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.DefaultCqlDatasetParser;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.JAWDatasetParser;
 
 /**
@@ -33,7 +33,7 @@ public interface DatasetParser {
      */
     static DatasetParser parserFactory(String parsername) {
         return switch (parsername) {
-            case "default" -> new DefaultDatasetParser();
+            case "defaultCql" -> new DefaultCqlDatasetParser();
             case "noop" -> new NoopDatasetParser();
             case "jaw" -> new JAWDatasetParser();
             default -> throw new RuntimeException("Unknown parser name: " + parsername);
