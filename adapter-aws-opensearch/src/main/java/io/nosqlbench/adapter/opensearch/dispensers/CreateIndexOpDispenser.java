@@ -30,8 +30,17 @@ import java.util.function.LongFunction;
 
 public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
 
+    private final ParsedOp pop;
+    private final int dimensions;
+    private final int ef_construction;
+    private final int m;
+
     public CreateIndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op, targetF);
+        this.pop = op;
+        this.dimensions = pop.getStaticValue("dimensions",Integer.class).intValue();
+        this.ef_construction = pop.getStaticValue("ef_construction",Integer.class).intValue();
+        this.m = pop.getStaticValue("m",Integer.class).intValue();
     }
 
     @Override
@@ -50,6 +59,7 @@ public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
 
     // https://opensearch.org/docs/latest/search-plugins/knn/knn-index/
     private CreateIndexRequest.Builder resolveTypeMapping(CreateIndexRequest.Builder eb, Map<?, ?> mappings) {
+
         TypeMapping.Builder builder = new TypeMapping.Builder().properties(
                 Map.of(
                     "key",
@@ -59,13 +69,18 @@ public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
                     "value",
                     new Property.Builder()
                         .knnVector(new KnnVectorProperty.Builder()
-                            .dimension(25)
+                            .dimension(dimensions)
                             .method(
                                 new KnnVectorMethod.Builder()
                                     .name("hnsw")
                                     .engine("faiss")
                                     .spaceType("l2")
-                                    .parameters(Map.of("ef_construction", JsonData.of(256), "m", JsonData.of(8)))
+                                    .parameters(
+                                        Map.of(
+                                            "ef_construction", JsonData.of(ef_construction),
+                                            "m", JsonData.of(m)
+                                        )
+                                    )
                                     .build()
                             ).build()
                         ).build()
