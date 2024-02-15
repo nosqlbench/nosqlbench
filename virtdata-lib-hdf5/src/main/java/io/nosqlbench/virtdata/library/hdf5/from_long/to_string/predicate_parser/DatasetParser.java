@@ -17,7 +17,9 @@
 
 package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser;
 
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.NoopDatasetParser;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.DefaultDatasetParser;
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.JAWDatasetParser;
 
 /**
  * This interface is used to parse the raw JSON from the HDF dataset into a CQL predicate.

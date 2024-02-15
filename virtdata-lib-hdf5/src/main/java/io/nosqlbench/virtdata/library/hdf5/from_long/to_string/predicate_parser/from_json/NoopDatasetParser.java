@@ -15,23 +15,18 @@
  *
  */
 
-package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser;
+package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json;
 
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.DatasetParser;
 
 /**
  * This class is used to parse the raw JSON from the HDF dataset into a CQL predicate. This implementation
- * accepts a string consisting of the desired CQL predicate as translated from the original jsonl files
- * and simply adds the WHERE keyword to the beginning of the string if it is not already present, hence
- * the new Just Add Where (JAW) parser.
+ * accepts a string consisting of the desired CQL predicate as translated from the original jsonl files and
+ * simply returns the raw string, hence the name NoopDatasetParser.
  */
-public class JAWDatasetParser implements DatasetParser {
-    private static final String WHERE = "WHERE";
+public class NoopDatasetParser implements DatasetParser {
     @Override
     public String parse(String raw) {
-        if (!raw.toUpperCase().startsWith(WHERE)) {
-            raw = WHERE + " " + raw;
-        }
         return raw;
     }
 }
