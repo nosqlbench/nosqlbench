@@ -16,6 +16,7 @@
 
 package io.nosqlbench.datamappers.functions.hdf_to_cql;
 
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.DefaultDatasetParser;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
