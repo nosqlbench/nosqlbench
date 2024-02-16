@@ -29,7 +29,7 @@ import org.apache.logging.log4j.Logger;
  * implementation. It accepts a JSON string of the form found at <a href="https://github.com/qdrant/ann-filtering-benchmark-datasets">...</a>
  * and converts it into a CQL predicate in String form
  */
-public class DefaultCqlDatasetParser implements DatasetParser {
+public class CqlDatasetParser implements DatasetParser {
     private static final String WHERE = "WHERE";
     private static final String MATCH = "match";
     private static final String AND = "and";
@@ -43,7 +43,7 @@ public class DefaultCqlDatasetParser implements DatasetParser {
     private static final String COMMA = ",";
     private static final String LEFT_PAREN = "(";
     private static final String RIGHT_PAREN = ")";
-    private static final Logger logger = LogManager.getLogger(DefaultCqlDatasetParser.class);
+    private static final Logger logger = LogManager.getLogger(CqlDatasetParser.class);
 
     @Override
     public String parse(String raw) {

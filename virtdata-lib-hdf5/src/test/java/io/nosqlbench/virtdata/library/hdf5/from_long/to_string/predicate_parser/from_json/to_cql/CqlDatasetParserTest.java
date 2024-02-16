@@ -17,12 +17,11 @@
 
 package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql;
 
-import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.DefaultCqlDatasetParser;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DefaultCqlDatasetParserTest {
+public class CqlDatasetParserTest {
     String test1 = "{\"conditions\": {\"and\": [{\"a\": {\"match\": {\"value\": 53}}}]}}";
     String test2 = "{\"conditions\": {\"and\": [{\"a\": {\"match\": {\"value\": \"thirteen\"}}}, {\"b\": {\"match\": {\"value\": \"fifty-four\"}}}]}}";
     String test3 = "{\"conditions\": {\"and\": [{\"a\": {\"match\": {\"value\": 13}}}, {\"b\": {\"match\": {\"value\": 54}}},  {\"a\": {\"match\": {\"value\": 154}}}]}}";
@@ -33,7 +32,7 @@ public class DefaultCqlDatasetParserTest {
 
     @Test
     public void testParse() {
-        DefaultCqlDatasetParser parser = new DefaultCqlDatasetParser();
+        CqlDatasetParser parser = new CqlDatasetParser();
         String parsed = parser.parse(test1);
         assertEquals("WHERE a=53", parsed);
 

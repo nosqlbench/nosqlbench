@@ -18,8 +18,9 @@
 package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser;
 
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.NoopDatasetParser;
-import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.DefaultCqlDatasetParser;
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.CqlDatasetParser;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql.JAWDatasetParser;
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_pineconefilter.PineconeFilterParser;
 
 /**
  * This interface is used to parse the raw JSON from the HDF dataset into a CQL predicate.
@@ -33,9 +34,16 @@ public interface DatasetParser {
      */
     static DatasetParser parserFactory(String parsername) {
         return switch (parsername) {
-            case "defaultCql" -> new DefaultCqlDatasetParser();
+            case "cql" -> new CqlDatasetParser();
             case "noop" -> new NoopDatasetParser();
             case "jaw" -> new JAWDatasetParser();
+            default -> throw new RuntimeException("Unknown parser name: " + parsername);
+        };
+    }
+
+    static FilteredDatasetParser filteredParserFactory(String parsername) {
+        return switch (parsername) {
+            case "pcfilter" -> new PineconeFilterParser();
             default -> throw new RuntimeException("Unknown parser name: " + parsername);
         };
     }
