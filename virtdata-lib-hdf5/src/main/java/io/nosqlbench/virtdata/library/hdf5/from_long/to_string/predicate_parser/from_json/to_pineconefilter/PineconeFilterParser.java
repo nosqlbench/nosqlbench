@@ -31,7 +31,10 @@ public class PineconeFilterParser implements FilteredDatasetParser {
     @Override
     public String parse(String raw) {
         logger.debug(() -> "Parsing: " + raw);
-        JsonObject conditions = JsonParser.parseString(raw).getAsJsonObject().get(CONDITIONS).getAsJsonObject();
+        JsonObject preconditions = JsonParser.parseString(raw).getAsJsonObject();
+        JsonObject conditions = preconditions.has(CONDITIONS) ?
+            preconditions.get(CONDITIONS).getAsJsonObject() :
+            preconditions;
         return filter.applyFilter(conditions);
     }
 
