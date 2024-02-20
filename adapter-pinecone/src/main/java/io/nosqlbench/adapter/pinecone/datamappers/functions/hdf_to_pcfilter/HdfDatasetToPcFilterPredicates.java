@@ -48,14 +48,15 @@ public class HdfDatasetToPcFilterPredicates implements LongFunction<String> {
      * @param filename
      * @param datasetname
      * @param parsername
-     * @param filterportion
+     * @param level
+     * @param isValue
      */
-    public HdfDatasetToPcFilterPredicates(String filename, String datasetname, String parsername, String filterportion) {
+    public HdfDatasetToPcFilterPredicates(String filename, String datasetname, String parsername, int level, boolean isValue) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
         dataset = hdfFile.getDatasetByPath(datasetname);
         recordCount = dataset.getDimensions()[0];
         parser = DatasetParser.filteredParserFactory(parsername);
-        filter = new MultiConditionFilter(filterportion);
+        filter = new MultiConditionFilter(level, isValue);
         parser.setFilter(filter);
     }
 

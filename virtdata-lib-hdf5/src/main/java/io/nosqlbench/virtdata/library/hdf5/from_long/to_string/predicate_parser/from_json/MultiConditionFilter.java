@@ -18,21 +18,19 @@
 package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.DatasetFilter;
 
 public class MultiConditionFilter implements DatasetFilter {
-    private final String filterString;
+    private final int filterLevel;
+    private final boolean isValue;
     private static final String AND = "and";
     private static final String OR = "or";
-    private static final String FIELD = "field";
-    private static final String OPERATOR = "operator";
-    private static final String COMPARATOR = "comparator";
     private static final String COMMA = ",";
     private static final String VALUE = "value";
 
-    public MultiConditionFilter(String filterString) {
-        this.filterString = filterString;
+    public MultiConditionFilter(int filterLevel, boolean isValue) {
+        this.filterLevel = filterLevel;
+        this.isValue = isValue;
     }
 
     @Override
@@ -48,30 +46,48 @@ public class MultiConditionFilter implements DatasetFilter {
 
     private String parseConditions(JsonObject json, String conditionType) {
         StringBuilder sb = new StringBuilder();
-        switch (filterString) {
-            case FIELD: {
-                json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet()
-                    .forEach(field -> sb.append(field).append(COMMA)));
+        switch (filterLevel) {
+            case 1: {
+                if (isValue) {
+                    json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet()
+                        .forEach(field -> sb.append(condition.getAsJsonObject().get(field).getAsJsonObject().get(VALUE)).append(COMMA)));
+                } else {
+                    json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet()
+                        .forEach(field -> sb.append(field).append(COMMA)));
+                }
                 sb.deleteCharAt(sb.length() - 1);
                 return sb.toString().replaceAll("\"", ""); // remove quotes from sb;
             }
-            case OPERATOR: {
-                json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet()
-                    .forEach(field -> condition.getAsJsonObject().get(field).getAsJsonObject().keySet()
-                        .forEach(operator -> sb.append(operator).append(COMMA))));
+            case 2: {
+                if (isValue) {
+                    json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet()
+                        .forEach(field -> condition.getAsJsonObject().get(field).getAsJsonObject().keySet()
+                            .forEach(operator -> sb.append(condition.getAsJsonObject().get(field).getAsJsonObject().get(operator).getAsJsonObject().get(VALUE)).append(COMMA))));
+                } else {
+                    json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet()
+                        .forEach(field -> condition.getAsJsonObject().get(field).getAsJsonObject().keySet()
+                            .forEach(operator -> sb.append(operator).append(COMMA))));
+                }
                 sb.deleteCharAt(sb.length() - 1);
                 return sb.toString().replaceAll("\"", ""); // remove quotes from sb;
             }
-            case COMPARATOR: {
-                json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet().forEach(field -> {
-                    JsonObject p = condition.getAsJsonObject().get(field).getAsJsonObject();
-                    p.keySet().forEach(operator -> sb.append(p.get(operator).getAsJsonObject().get(VALUE) ).append(COMMA));
-                }));
+            case 3: {
+                if (isValue) {
+                    json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet().forEach(field -> {
+                        JsonObject p = condition.getAsJsonObject().get(field).getAsJsonObject();
+                        p.keySet().forEach(operator -> sb.append(p.get(operator).getAsJsonObject().get(VALUE)).append(COMMA));
+                    }));
+                } else {
+                    json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet().forEach(field -> {
+                        JsonObject p = condition.getAsJsonObject().get(field).getAsJsonObject();
+                        p.keySet().forEach(operator -> sb.append(operator).append(COMMA));
+                    }));
+                }
                 sb.deleteCharAt(sb.length() - 1);
                 return sb.toString().replaceAll("\"", ""); // remove quotes from sb;
             }
             default: {
-                throw new RuntimeException("Unknown filter string: " + filterString);
+                throw new RuntimeException("Unsupported Filter Level: " + filterLevel);
             }
         }
     }

@@ -47,7 +47,7 @@ public class PineconeFilterParserTest {
     @Test
     public void testComparatorParse() {
         PineconeFilterParser parser = new PineconeFilterParser();
-        MultiConditionFilter mcf = new MultiConditionFilter("comparator");
+        MultiConditionFilter mcf = new MultiConditionFilter(3, true);
         parser.setFilter(mcf);
         String parsed = parser.parse(test1);
         assertEquals("Divided Shoes,Footwear", parsed);
@@ -56,7 +56,7 @@ public class PineconeFilterParserTest {
     @Test
     public void testFieldParse() {
         PineconeFilterParser parser = new PineconeFilterParser();
-        MultiConditionFilter mcf = new MultiConditionFilter("field");
+        MultiConditionFilter mcf = new MultiConditionFilter(1, false);
         parser.setFilter(mcf);
         String parsed = parser.parse(test1);
         assertEquals("department_name,department_type", parsed);
@@ -65,7 +65,7 @@ public class PineconeFilterParserTest {
     @Test
     public void testOperatorParse() {
         PineconeFilterParser parser = new PineconeFilterParser();
-        MultiConditionFilter mcf = new MultiConditionFilter("operator");
+        MultiConditionFilter mcf = new MultiConditionFilter(2, false);
         parser.setFilter(mcf);
         String parsed = parser.parse(test1);
         assertEquals("EQ,EQ", parsed);
