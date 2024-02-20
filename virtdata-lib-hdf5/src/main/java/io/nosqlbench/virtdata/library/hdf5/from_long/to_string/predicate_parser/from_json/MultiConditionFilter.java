@@ -31,38 +31,6 @@ public class MultiConditionFilter implements DatasetFilter {
     private static final String COMMA = ",";
     private static final String VALUE = "value";
 
-    //TODO: MOVE TO TEST CLASS
-    private static String test = "{\n" +
-        //"  \"query\": [-0.034, -0.185, -0.21, ...],\n" +
-        "  \"conditions\": {\n" +
-        "    \"and\": [\n" +
-        "      {\n" +
-        "        \"department_name\": {\n" +
-        "          \"EQ\": {\n" +
-        "            \"value\": \"Divided Shoes\"\n" +
-        "          }\n" +
-        "        }\n" +
-        "      },\n" +
-        "      {\n" +
-        "        \"department_type\": {\n" +
-        "          \"EQ\": {\n" +
-        "            \"value\": \"Footwear\"\n" +
-        "          }\n" +
-        "        }\n" +
-        "      }\n"  +
-        "    ]\n" +
-        "  },\n" +
-        "  \"closest_ids\": [565, 15631, 100747, ....],\n" +
-        "  \"closest_scores\": [0.734, 0.698, 0.697, 0.689, ...]\n" +
-        "}";
-    public static void main(String[] args) {
-        MultiConditionFilter mcf = new MultiConditionFilter("comparator");
-        JsonObject conditions = JsonParser.parseString(test).getAsJsonObject().get("conditions").getAsJsonObject();
-        mcf.applyFilter(conditions);
-    }
-
-    ///////////////////
-
     public MultiConditionFilter(String filterString) {
         this.filterString = filterString;
     }
@@ -85,14 +53,14 @@ public class MultiConditionFilter implements DatasetFilter {
                 json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet()
                     .forEach(field -> sb.append(field).append(COMMA)));
                 sb.deleteCharAt(sb.length() - 1);
-                return sb.toString();
+                return sb.toString().replaceAll("\"", ""); // remove quotes from sb;
             }
             case OPERATOR: {
                 json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet()
                     .forEach(field -> condition.getAsJsonObject().get(field).getAsJsonObject().keySet()
                         .forEach(operator -> sb.append(operator).append(COMMA))));
                 sb.deleteCharAt(sb.length() - 1);
-                return sb.toString();
+                return sb.toString().replaceAll("\"", ""); // remove quotes from sb;
             }
             case COMPARATOR: {
                 json.get(conditionType).getAsJsonArray().forEach(condition -> condition.getAsJsonObject().keySet().forEach(field -> {
@@ -100,7 +68,7 @@ public class MultiConditionFilter implements DatasetFilter {
                     p.keySet().forEach(operator -> sb.append(p.get(operator).getAsJsonObject().get(VALUE) ).append(COMMA));
                 }));
                 sb.deleteCharAt(sb.length() - 1);
-                return sb.toString();
+                return sb.toString().replaceAll("\"", ""); // remove quotes from sb;
             }
             default: {
                 throw new RuntimeException("Unknown filter string: " + filterString);
