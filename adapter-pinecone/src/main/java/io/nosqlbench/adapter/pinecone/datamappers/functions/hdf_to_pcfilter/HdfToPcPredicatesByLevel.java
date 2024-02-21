@@ -26,7 +26,7 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.DatasetFilter;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.DatasetParser;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.FilteredDatasetParser;
-import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.MultiConditionFilter;
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.MultiConditionFilterByLevel;
 
 import java.util.function.LongFunction;
 
@@ -36,7 +36,7 @@ import java.util.function.LongFunction;
  */
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class HdfDatasetToPcFilterPredicates implements LongFunction<String> {
+public class HdfToPcPredicatesByLevel implements LongFunction<String> {
     private final HdfFile hdfFile;
     private final Dataset dataset;
     private final int recordCount;
@@ -51,12 +51,12 @@ public class HdfDatasetToPcFilterPredicates implements LongFunction<String> {
      * @param level
      * @param isValue
      */
-    public HdfDatasetToPcFilterPredicates(String filename, String datasetname, String parsername, int level, boolean isValue) {
+    public HdfToPcPredicatesByLevel(String filename, String datasetname, String parsername, int level, boolean isValue) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
         dataset = hdfFile.getDatasetByPath(datasetname);
         recordCount = dataset.getDimensions()[0];
         parser = DatasetParser.filteredParserFactory(parsername);
-        filter = new MultiConditionFilter(level, isValue);
+        filter = new MultiConditionFilterByLevel(level, isValue);
         parser.setFilter(filter);
     }
 

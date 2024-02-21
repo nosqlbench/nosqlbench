@@ -17,7 +17,7 @@
 
 package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_pineconefilter;
 
-import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.MultiConditionFilter;
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.MultiConditionFilterByLevel;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +47,7 @@ public class PineconeFilterParserTest {
     @Test
     public void testComparatorParse() {
         PineconeFilterParser parser = new PineconeFilterParser();
-        MultiConditionFilter mcf = new MultiConditionFilter(3, true);
+        MultiConditionFilterByLevel mcf = new MultiConditionFilterByLevel(3, true);
         parser.setFilter(mcf);
         String parsed = parser.parse(test1);
         assertEquals("Divided Shoes,Footwear", parsed);
@@ -56,7 +56,7 @@ public class PineconeFilterParserTest {
     @Test
     public void testFieldParse() {
         PineconeFilterParser parser = new PineconeFilterParser();
-        MultiConditionFilter mcf = new MultiConditionFilter(1, false);
+        MultiConditionFilterByLevel mcf = new MultiConditionFilterByLevel(1, false);
         parser.setFilter(mcf);
         String parsed = parser.parse(test1);
         assertEquals("department_name,department_type", parsed);
@@ -65,7 +65,7 @@ public class PineconeFilterParserTest {
     @Test
     public void testOperatorParse() {
         PineconeFilterParser parser = new PineconeFilterParser();
-        MultiConditionFilter mcf = new MultiConditionFilter(2, false);
+        MultiConditionFilterByLevel mcf = new MultiConditionFilterByLevel(2, false);
         parser.setFilter(mcf);
         String parsed = parser.parse(test1);
         assertEquals("EQ,EQ", parsed);

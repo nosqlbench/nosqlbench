@@ -20,7 +20,7 @@ package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser
 import com.google.gson.JsonObject;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.DatasetFilter;
 
-public class MultiConditionFilter implements DatasetFilter {
+public class MultiConditionFilterByLevel implements DatasetFilter {
     private final int filterLevel;
     private final boolean isValue;
     private static final String AND = "and";
@@ -28,7 +28,7 @@ public class MultiConditionFilter implements DatasetFilter {
     private static final String COMMA = ",";
     private static final String VALUE = "value";
 
-    public MultiConditionFilter(int filterLevel, boolean isValue) {
+    public MultiConditionFilterByLevel(int filterLevel, boolean isValue) {
         this.filterLevel = filterLevel;
         this.isValue = isValue;
     }
