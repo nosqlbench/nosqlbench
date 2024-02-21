@@ -17,6 +17,7 @@
 
 package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_pineconefilter;
 
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.MultiConditionFilterByKeyword;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.MultiConditionFilterByLevel;
 import org.junit.jupiter.api.Test;
 
@@ -24,28 +25,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PineconeFilterParserTest {
 
-    private static String test1 = "{\n" +
-        "  \"conditions\": {\n" +
-        "    \"and\": [\n" +
-        "      {\n" +
-        "        \"department_name\": {\n" +
-        "          \"EQ\": {\n" +
-        "            \"value\": \"Divided Shoes\"\n" +
-        "          }\n" +
-        "        }\n" +
-        "      },\n" +
-        "      {\n" +
-        "        \"department_type\": {\n" +
-        "          \"EQ\": {\n" +
-        "            \"value\": \"Footwear\"\n" +
-        "          }\n" +
-        "        }\n" +
-        "      }\n"  +
-        "    ]\n" +
-        "  }\n" +
-        "}";
+    private static final String test1 = """
+            {
+              "conditions": {
+                "and": [
+                  {
+                    "department_name": {
+                      "EQ": {
+                        "value": "Divided Shoes"
+                      }
+                    }
+                  },
+                  {
+                    "department_type": {
+                      "EQ": {
+                        "value": "Footwear"
+                      }
+                    }
+                  }
+                ]
+              }
+            }""";
     @Test
-    public void testComparatorParse() {
+    public void testComparatorParseByLevel() {
         PineconeFilterParser parser = new PineconeFilterParser();
         MultiConditionFilterByLevel mcf = new MultiConditionFilterByLevel(3, true);
         parser.setFilter(mcf);
@@ -54,7 +56,16 @@ public class PineconeFilterParserTest {
     }
 
     @Test
-    public void testFieldParse() {
+    public void testComparatorParseByKeyword() {
+        PineconeFilterParser parser = new PineconeFilterParser();
+        MultiConditionFilterByKeyword mcf = new MultiConditionFilterByKeyword("comparator");
+        parser.setFilter(mcf);
+        String parsed = parser.parse(test1);
+        assertEquals("Divided Shoes,Footwear", parsed);
+    }
+
+    @Test
+    public void testFieldParseByLevel() {
         PineconeFilterParser parser = new PineconeFilterParser();
         MultiConditionFilterByLevel mcf = new MultiConditionFilterByLevel(1, false);
         parser.setFilter(mcf);
@@ -63,9 +74,27 @@ public class PineconeFilterParserTest {
     }
 
     @Test
-    public void testOperatorParse() {
+    public void testFieldParseByKeyword() {
+        PineconeFilterParser parser = new PineconeFilterParser();
+        MultiConditionFilterByKeyword mcf = new MultiConditionFilterByKeyword("field");
+        parser.setFilter(mcf);
+        String parsed = parser.parse(test1);
+        assertEquals("department_name,department_type", parsed);
+    }
+
+    @Test
+    public void testOperatorParseByLevel() {
         PineconeFilterParser parser = new PineconeFilterParser();
         MultiConditionFilterByLevel mcf = new MultiConditionFilterByLevel(2, false);
+        parser.setFilter(mcf);
+        String parsed = parser.parse(test1);
+        assertEquals("EQ,EQ", parsed);
+    }
+
+    @Test
+    public void testOperatorParseByKeyword() {
+        PineconeFilterParser parser = new PineconeFilterParser();
+        MultiConditionFilterByKeyword mcf = new MultiConditionFilterByKeyword("operator");
         parser.setFilter(mcf);
         String parsed = parser.parse(test1);
         assertEquals("EQ,EQ", parsed);
