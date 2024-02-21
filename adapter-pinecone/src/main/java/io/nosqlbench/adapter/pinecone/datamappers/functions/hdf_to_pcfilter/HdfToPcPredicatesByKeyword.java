@@ -26,7 +26,7 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.DatasetFilter;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.DatasetParser;
 import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.FilteredDatasetParser;
-import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.MultiConditionFilterByKeyword;
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.SingleConditionFilterByKeyword;
 
 import java.util.function.LongFunction;
 
@@ -55,7 +55,7 @@ public class HdfToPcPredicatesByKeyword implements LongFunction<String> {
         dataset = hdfFile.getDatasetByPath(datasetname);
         recordCount = dataset.getDimensions()[0];
         parser = DatasetParser.filteredParserFactory(parsername);
-        filter = new MultiConditionFilterByKeyword(filterportion);
+        filter = new SingleConditionFilterByKeyword(filterportion);
         parser.setFilter(filter);
     }
 
@@ -64,6 +64,6 @@ public class HdfToPcPredicatesByKeyword implements LongFunction<String> {
         long[] sliceOffset = {(l % recordCount)};
         int[] sliceDimensions = {1};
         String raw = ((String[])dataset.getData(sliceOffset, sliceDimensions))[0];
-        return parser.parse(raw);
+        return parser.parse(raw).replaceAll("match", "EQ");
     }
 }
