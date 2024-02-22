@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-rewrite</artifactId>
-            <version>11.0.19</version>
+            <version>11.0.20</version>
         </dependency>
 
         <dependency>
