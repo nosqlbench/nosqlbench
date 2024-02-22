@@ -43,7 +43,11 @@ import java.util.regex.Pattern;
  * computed at initialization time. The content is assumed to be static during the lifetime of this function.
  * </P>
  * <p>
- * The value returned for a given cycle is stable, so long as the underlying data is stable.
+ * The value returned for a given cycle is stable, so long as the underlying data is stable.</P>
+ * <HR/>
+ * <P><EM>This caches all
+ * data at initialization time. If you need to buffer the data in stream mode, use {@link DirectoryLines} instead,
+ * which is not order-stable.</EM>
  * </P>
  */
 @ThreadSafeMapper
