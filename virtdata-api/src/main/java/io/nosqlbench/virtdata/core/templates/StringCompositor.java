@@ -61,12 +61,12 @@ public class StringCompositor implements LongFunction<String> {
         spans[spans.length - 1] = even_odd_spans[even_odd_spans.length - 1];
         this.stringfunc = stringfunc;
 
-        int minsize = 0;
-        for (int i = 0; i < 100; i++) {
-            String result = apply(i);
-            minsize = Math.max(minsize, result.length());
-        }
-        bufsize = minsize * 2;
+//        int minsize = 0;
+//        for (int i = 0; i < 100; i++) {
+//            String result = apply(i);
+//            minsize = Math.max(minsize,result.length());
+//        }
+        bufsize = spans.length*1024;
     }
 
     public StringCompositor(ParsedTemplateString template, Map<String, Object> fconfig) {
@@ -78,7 +78,9 @@ public class StringCompositor implements LongFunction<String> {
         StringBuilder sb = new StringBuilder(bufsize);
         String[] ary = new String[mappers.length];
         for (int i = 0; i < ary.length; i++) {
-            ary[i] = stringfunc.apply(mappers[i].apply(value));
+            DataMapper<?> mapperType = mappers[i];
+            Object object = mapperType.apply(value);
+            ary[i] = stringfunc.apply(object);
         }
         for (int i = 0; i < LUT.length; i++) {
             sb.append(spans[i]).append(ary[LUT[i]]);

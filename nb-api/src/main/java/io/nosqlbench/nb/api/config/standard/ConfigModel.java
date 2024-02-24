@@ -236,7 +236,7 @@ public class ConfigModel implements NBConfigModel {
 
     private ConfigModel expand(ConfigModel configModel, Map<String, ?> config) {
         List<Param<?>> expanders = configModel.params.stream()
-            .filter(p -> p.getExpander()!=null).toList();
+            .filter(p -> p.getExpander() != null).toList();
 
         for (Param<?> expandingParameter : expanders) {
             for (String name : expandingParameter.getNames()) {
@@ -294,16 +294,23 @@ public class ConfigModel implements NBConfigModel {
         // For each provided configuration element ...
         for (String configkey : config.keySet()) {
             Param<?> element = this.paramsByName.get(configkey);
+            String warning = "Unknown config parameter '" + configkey + "' in config model while configuring " + getOf().getSimpleName()
+                + ", possible parameter names are " + this.paramsByName.keySet() + ".";
             if (element == null) {
-                StringBuilder paramhelp = new StringBuilder(
-                    "Unknown config parameter '" + configkey + "' in config model while configuring " + getOf().getSimpleName()
-                        + ", possible parameter names are " + this.paramsByName.keySet() + "."
-                );
+                String warnonly = System.getenv("NB_CONFIG_WARNINGS_ONLY");
+                if (warnonly != null) {
+                    System.out.println("WARNING: " + warning);
+                } else {
+                    StringBuilder paramhelp = new StringBuilder(
+                        "Unknown config parameter '" + configkey + "' in config model while configuring " + getOf().getSimpleName()
+                            + ", possible parameter names are " + this.paramsByName.keySet() + "."
+                    );
 
-                ConfigSuggestions.getForParam(this, configkey)
-                    .ifPresent(suggestion -> paramhelp.append(" ").append(suggestion));
+                    ConfigSuggestions.getForParam(this, configkey)
+                        .ifPresent(suggestion -> paramhelp.append(" ").append(suggestion));
 
-                throw new BasicError(paramhelp.toString());
+                    throw new BasicError(paramhelp.toString());
+                }
             }
             Object value = config.get(configkey);
         }
