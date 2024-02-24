@@ -45,5 +45,4 @@ public class CqlUtils extends NBBaseComponent {
         return rows.stream().mapToInt(r -> Integer.parseInt(Objects.requireNonNull(r.getString(fieldName)))).toArray();
     }
 
-
 }
