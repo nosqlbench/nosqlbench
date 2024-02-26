@@ -140,6 +140,13 @@ ops:
     raw: |
      create table if not exist {ksname}.{tblname} ...
 
+  example-batch-stmt:
+    batch:
+      repeat: 50
+      op_template:
+        prepared: |
+         select three, four from knock.onthedoor where ...
+
   # gremlin statement using the fluent API, as it would be written in a client application
   example-fluent-graph-stmt:
     fluent: >-
