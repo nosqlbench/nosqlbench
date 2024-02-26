@@ -94,4 +94,24 @@ public class JsonElementUtils {
         return floats;
     }
 
+    public static float[][] customNumberArrayToFloatArrayBatch(JsonElement element) {
+        JsonObject o1 = element.getAsJsonObject();
+        JsonElement data = o1.get("data");
+        JsonArray dary = data.getAsJsonArray();
+        float[][] floats2dary = new float[dary.size()][];
+        for (int vector_idx = 0; vector_idx < dary.size(); vector_idx++) {
+            JsonElement element0 = dary.get(vector_idx);
+            JsonObject eobj1 = element0.getAsJsonObject();
+            JsonElement embedding = eobj1.get("embedding");
+            JsonArray ary = embedding.getAsJsonArray();
+            float[] newV = new float[ary.size()];
+            for (int component_idx = 0; component_idx < floats2dary.length; component_idx++) {
+                newV[component_idx]=ary.get(component_idx).getAsFloat();
+            }
+            floats2dary[vector_idx]=newV;
+        }
+        return floats2dary;
+    }
+
+
 }
