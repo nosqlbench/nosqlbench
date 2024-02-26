@@ -17,24 +17,15 @@
 package io.nosqlbench.adapter.cqld4.opmappers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import io.nosqlbench.adapter.cqld4.Cqld4Processors;
-import io.nosqlbench.adapter.cqld4.RSProcessors;
-import io.nosqlbench.adapter.cqld4.ResultSetProcessor;
-import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4PreparedStmtDispenser;
+import io.nosqlbench.adapter.cqld4.opdispensers.CqlD4BatchStmtDispenser;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlBatchStatement;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
-import io.nosqlbench.adapter.cqld4.processors.CqlFieldCaptureProcessor;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
-import io.nosqlbench.nb.api.config.params.ParamsParser;
-import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class CqlD4BatchStmtMapper implements OpMapper<Cqld4CqlOp> {
@@ -52,28 +43,32 @@ public class CqlD4BatchStmtMapper implements OpMapper<Cqld4CqlOp> {
     public OpDispenser<Cqld4CqlOp> apply(ParsedOp op) {
 
         ParsedOp subop = op.getAsSubOp("op_template");
-        int repeat = subop.getStaticConfigOr("repeat", 1);
+        int repeat = op.getStaticValue("repeat");
+        OpMapper<Cqld4CqlOp> subopMapper = adapter.getOpMapper();
+        OpDispenser<? extends Cqld4CqlOp> subopDispenser = subopMapper.apply(subop);
+        return new CqlD4BatchStmtDispenser(adapter, sessionFunc, op,repeat, subop, subopDispenser);
 
-        ParsedTemplateString stmtTpl = op.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
-            "No statement was found in the op template:" + op
-        ));
 
-        RSProcessors processors = new RSProcessors();
-        if (stmtTpl.getCaptures().size()>0) {
-            processors.add(() -> new CqlFieldCaptureProcessor(stmtTpl.getCaptures()));
-        }
-
-        Optional<List> processorList = op.getOptionalStaticConfig("processors", List.class);
-
-        processorList.ifPresent(l -> {
-            l.forEach(m -> {
-                Map<String, String> pconfig = ParamsParser.parseToMap(m, "type");
-                ResultSetProcessor processor = Cqld4Processors.resolve(pconfig);
-                processors.add(() -> processor);
-            });
-        });
-
-        return new Cqld4PreparedStmtDispenser(adapter, sessionFunc, op, stmtTpl, processors);
+//        ParsedTemplateString stmtTpl = op.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
+//            "No statement was found in the op template:" + op
+//        ));
+//
+//        RSProcessors processors = new RSProcessors();
+//        if (stmtTpl.getCaptures().size()>0) {
+//            processors.add(() -> new CqlFieldCaptureProcessor(stmtTpl.getCaptures()));
+//        }
+//
+//        Optional<List> processorList = op.getOptionalStaticConfig("processors", List.class);
+//
+//        processorList.ifPresent(l -> {
+//            l.forEach(m -> {
+//                Map<String, String> pconfig = ParamsParser.parseToMap(m, "type");
+//                ResultSetProcessor processor = Cqld4Processors.resolve(pconfig);
+//                processors.add(() -> processor);
+//            });
+//        });
+//
+//        return new Cqld4PreparedStmtDispenser(adapter, sessionFunc, op, stmtTpl, processors);
 
     }
 }
