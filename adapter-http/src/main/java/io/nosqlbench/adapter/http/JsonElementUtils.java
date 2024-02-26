@@ -103,10 +103,10 @@ public class JsonElementUtils {
             JsonElement element0 = dary.get(vector_idx);
             JsonObject eobj1 = element0.getAsJsonObject();
             JsonElement embedding = eobj1.get("embedding");
-            JsonArray ary = embedding.getAsJsonArray();
-            float[] newV = new float[ary.size()];
-            for (int component_idx = 0; component_idx < floats2dary.length; component_idx++) {
-                newV[component_idx]=ary.get(component_idx).getAsFloat();
+            JsonArray vectorAry = embedding.getAsJsonArray();
+            float[] newV = new float[vectorAry.size()];
+            for (int component_idx = 0; component_idx < vectorAry.size(); component_idx++) {
+                newV[component_idx]=vectorAry.get(component_idx).getAsFloat();
             }
             floats2dary[vector_idx]=newV;
         }
