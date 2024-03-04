@@ -61,11 +61,13 @@ public class StringCompositor implements LongFunction<String> {
         spans[spans.length-1]=even_odd_spans[even_odd_spans.length-1];
         this.stringfunc = stringfunc;
 
-//        int minsize = 0;
-//        for (int i = 0; i < 100; i++) {
-//            String result = apply(i);
-//            minsize = Math.max(minsize,result.length());
-//        }
+        int minsize = 0;
+        for (int i = 0; i < 100; i++) {
+            String result = apply(i);
+            if (result!=null) {
+                minsize = Math.max(minsize,result.length());
+            }
+        }
         bufsize = spans.length*1024;
     }
 
