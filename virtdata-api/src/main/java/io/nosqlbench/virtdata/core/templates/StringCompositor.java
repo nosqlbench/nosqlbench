@@ -40,37 +40,37 @@ public class StringCompositor implements LongFunction<String> {
 
     private final Function<Object, String> stringfunc;
 
-    public StringCompositor(ParsedTemplateString template, Map<String,Object> fconfig, Function<Object,String> stringfunc) {
-        Map<String,Integer> specs = new HashMap<>();
+    public StringCompositor(ParsedTemplateString template, Map<String, Object> fconfig, Function<Object, String> stringfunc) {
+        Map<String, Integer> specs = new HashMap<>();
         List<BindPoint> bindpoints = template.getBindPoints();
         for (BindPoint bindPoint : bindpoints) {
             String spec = bindPoint.getBindspec();
-            specs.compute(spec,(s,i) -> i==null ? specs.size() : i);
+            specs.compute(spec, (s, i) -> i == null ? specs.size() : i);
         }
         mappers = new DataMapper<?>[specs.size()];
-        specs.forEach((k,v) -> {
-            mappers[v]= VirtData.getOptionalMapper(k,fconfig).orElseThrow();
+        specs.forEach((k, v) -> {
+            mappers[v] = VirtData.getOptionalMapper(k, fconfig).orElseThrow();
         });
         String[] even_odd_spans = template.getSpans();
-        this.spans = new String[bindpoints.size()+1];
+        this.spans = new String[bindpoints.size() + 1];
         LUT = new int[bindpoints.size()];
         for (int i = 0; i < bindpoints.size(); i++) {
-            spans[i]=even_odd_spans[i<<1];
-            LUT[i]=specs.get(template.getBindPoints().get(i).getBindspec());
+            spans[i] = even_odd_spans[i << 1];
+            LUT[i] = specs.get(template.getBindPoints().get(i).getBindspec());
         }
-        spans[spans.length-1]=even_odd_spans[even_odd_spans.length-1];
+        spans[spans.length - 1] = even_odd_spans[even_odd_spans.length - 1];
         this.stringfunc = stringfunc;
 
         int minsize = 0;
         for (int i = 0; i < 100; i++) {
             String result = apply(i);
-            minsize = Math.max(minsize,result.length());
+            minsize = Math.max(minsize, result.length());
         }
-        bufsize = minsize*2;
+        bufsize = minsize * 2;
     }
 
-    public StringCompositor(ParsedTemplateString template, Map<String,Object> fconfig) {
-        this(template,fconfig,Object::toString);
+    public StringCompositor(ParsedTemplateString template, Map<String, Object> fconfig) {
+        this(template, fconfig, s -> s != null ? s.toString() : "NULL");
     }
 
     @Override
@@ -81,9 +81,9 @@ public class StringCompositor implements LongFunction<String> {
             ary[i] = stringfunc.apply(mappers[i].apply(value));
         }
         for (int i = 0; i < LUT.length; i++) {
-          sb.append(spans[i]).append(ary[LUT[i]]);
+            sb.append(spans[i]).append(ary[LUT[i]]);
         }
-        sb.append(spans[spans.length-1]);
+        sb.append(spans[spans.length - 1]);
         return sb.toString();
     }
 }
