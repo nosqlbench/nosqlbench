@@ -70,7 +70,7 @@ public class StringCompositor implements LongFunction<String> {
     }
 
     public StringCompositor(ParsedTemplateString template, Map<String,Object> fconfig) {
-        this(template,fconfig,Object::toString);
+        this(template,fconfig,s -> s!=null ? s.toString() : "NULL");
     }
 
     @Override
