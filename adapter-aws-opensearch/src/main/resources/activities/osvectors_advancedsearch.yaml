@@ -1,0 +1,130 @@
+description: |
+  advanced options for knn search in open search
+  https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html
+  template vars:
+     TEMPLATE(indexname,vectors_index)
+     TEMPLATE(dimensions,25)
+     TEMPLATE(search_cycles,1M)
+     TEMPLATE(rampup_cycles,TEMPLATE(trainsize))
+     TEMPLATE(size,100)
+
+params:
+  driver: opensearch
+  instrument: true
+
+scenarios:
+
+  vectors_brief:
+    bulkrampup: >-
+      run tags='block:bulkrampup' labels='target:opensearch'
+      threads=TEMPLATE(rampup_threads,10) cycles=TEMPLATE(trainsize)
+      errors=count,warn
+    #    search: run tags='block:search' labels='target:opensearch' threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
+    #rampup: >-
+    #  run tags='block:rampup' labels='target:opensearch'
+    #  threads=TEMPLATE(rampup_threads,10) cycles=TEMPLATE(trainsize)
+    #  errors=count,warn
+    ##    search: run tags='block:search' labels='target:opensearch' threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
+    search_and_verify: >-
+      run tags='block:search_and_verify' labels='target:opensearch'
+      threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
+      errors=count,warn
+
+    search_specify_schema: >-
+      run tags='block:search_specify_schema' labels='target:opensearch'
+      threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
+      errors=count,warn
+
+  vectors:
+#    drop: run tags='block:drop' labels='target:opensearch' threads===1 cycles===UNDEF
+    schema: run tags='block:schema' labels='target:opensearch' threads===1 cycles===UNDEF
+    rampup: >-
+      run tags='block:rampup' labels='target:opensearch'
+      threads=TEMPLATE(rampup_threads,10) cycles=TEMPLATE(trainsize)
+      errors=count,warn
+    #    search: run tags='block:search' labels='target:opensearch' threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
+    search_and_verify: >-
+      run tags='block:search_and_verify' labels='target:opensearch'
+      threads=TEMPLATE(search_threads,10) cycles=TEMPLATE(testsize)
+      errors=count,warn
+    #  errors=counter,warn,log
+
+bindings:
+  id: ToString()
+  test_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/test");
+  relevant_indices: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
+  distance_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/distance")
+  train_floatlist: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train");
+
+blocks:
+  drop:
+    ops:
+      drop_index:
+        delete_index: TEMPLATE(indexname,vectors_index)
+
+  schema:
+    ops:
+      create_index:
+        create_index: TEMPLATE(indexname)
+        mappings:
+          m1: v1
+  search:
+    ops:
+      search:
+        knn_search: TEMPLATE(indexname,vectors_index)
+        k: 100
+        vector: "{test_floatlist}"
+        field: value
+  search_specify_schema:
+    ops:
+      search:
+        knn_search: TEMPLATE(indexname,vectors_index)
+        k: 100
+        vector: "{test_floatlist}"
+        field: value
+        schema: io.nosqlbench.adapter.opensearch.pojos.UserDefinedSchema
+        size: 100
+        filter:
+            field: "type"
+            comparator: "eq"
+            value: "experimental"
+  search_and_verify:
+    ops:
+      select_ann_limit_TEMPLATE(k,100):
+        knn_search: TEMPLATE(indexname,vectors_index)
+        k: 100
+        vector: "{test_floatlist}"
+        field: value
+        verifier-init: |
+          relevancy=new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op)
+          for (int k in List.of(100)) {
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+          }
+        verifier: |
+          // driver-specific function
+          actual_indices=io.nosqlbench.adapter.opensearch.Utils.DocHitsToIntIndicesArray(result)
+          // driver-agnostic function
+          relevancy.accept({relevant_indices},actual_indices);
+          return true;
+  bulkrampup:
+    ops:
+      bulk_index:
+        bulk: TEMPLATE(indexname)
+        op_template:
+          repeat: TEMPLATE(bulk_repeat,100)
+          index: TEMPLATE(indexname)
+          document:
+            key: "{id}"
+            value: "{train_floatlist}"
+
+  rampup:
+    ops:
+      index:
+        index: TEMPLATE(indexname)
+        document:
+          key: "{id}"
+          value: "{train_floatlist}"
