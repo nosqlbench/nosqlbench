@@ -47,6 +47,26 @@ public class PineconeFilterParserTest {
                 ]
               }
             }""";
+    private final static String test2 = """
+        {
+        "conditions": {
+          "or": [
+            {
+              "a": {
+                "range": {
+                  "gt": 0.30328462495055897, "lt": 0.5387830095849688
+                }
+              }
+            },
+            {
+              "a": {
+                "range": {
+                  "gt": 0.20352843950042498, "lt": 0.8888583828498567
+                }
+              }
+            }
+          ]
+        }""";
     @Test
     public void testComparatorParseByLevel() {
         PineconeFilterParser parser = new PineconeFilterParser();
