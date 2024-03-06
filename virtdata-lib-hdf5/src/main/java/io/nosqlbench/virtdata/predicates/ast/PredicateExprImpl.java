@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package io.nosqlbench.virtdata.predicates.ast;
@@ -19,17 +20,18 @@ package io.nosqlbench.virtdata.predicates.ast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PredicateAndExpr extends PredicateExprImpl {
+public class PredicateExprImpl implements PredicateExpr {
+
     public final List<PredicateTerm> terms = new ArrayList<>();
+    public PConjunction conjunction;
 
-    public PredicateAndExpr()  {
-
+    public PredicateExprImpl()  {
     }
-    public PredicateAndExpr(List<PredicateTerm> terms) {
+    public PredicateExprImpl(List<PredicateTerm> terms) {
         this.terms.addAll(terms);
     }
 
-    public PredicateAndExpr term(PredicateTerm term) {
+    public PredicateExprImpl term(PredicateTerm term) {
         this.terms.add(term);
         return this;
     }

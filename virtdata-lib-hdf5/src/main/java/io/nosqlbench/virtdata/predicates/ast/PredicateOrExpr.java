@@ -18,6 +18,6 @@ package io.nosqlbench.virtdata.predicates.ast;
 
 import java.util.List;
 
-public class PredicateOrExpr implements PredicateExpr {
+public class PredicateOrExpr extends PredicateExprImpl {
     public List<PredicateTerm> terms;
 }

@@ -20,11 +20,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import io.nosqlbench.virtdata.predicates.ast.PredicateExpr;
+import io.nosqlbench.virtdata.predicates.ast.PredicateExprImpl;
+import io.nosqlbench.virtdata.predicates.ast.PredicateTerm;
 import io.nosqlbench.virtdata.predicates.types.PredicateSerDes;
 
 public class JsonPredicateSerDes implements PredicateSerDes {
     private final static Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private final static TypeToken<PredicateExpr> pexprType = TypeToken.get(PredicateExpr.class);
+    private final static TypeToken<PredicateExprImpl> pexprType = TypeToken.get(PredicateExprImpl.class);
 
     @Override
     public PredicateExpr unserialize(String predicateData) {
