@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ExamplePredicateAdapterTest {
 
     public static PredicateExpr exampleExpr =
-        new PredicateExprImpl()
+        new PredicateExprDefaultImpl()
             .term(
                 new PredicateTerm(new PField("username"), POperator.eq,new PComparator("joe"))
             );

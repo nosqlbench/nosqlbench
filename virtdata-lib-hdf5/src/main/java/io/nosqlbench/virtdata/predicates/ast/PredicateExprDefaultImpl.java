@@ -20,18 +20,18 @@ package io.nosqlbench.virtdata.predicates.ast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PredicateExprImpl implements PredicateExpr {
+public class PredicateExprDefaultImpl implements PredicateExpr {
 
     public final List<PredicateTerm> terms = new ArrayList<>();
-    public PConjunction conjunction;
+    public PConjunction conjunction = PConjunction.none;
 
-    public PredicateExprImpl()  {
+    public PredicateExprDefaultImpl()  {
     }
-    public PredicateExprImpl(List<PredicateTerm> terms) {
+    public PredicateExprDefaultImpl(List<PredicateTerm> terms) {
         this.terms.addAll(terms);
     }
 
-    public PredicateExprImpl term(PredicateTerm term) {
+    public PredicateExprDefaultImpl term(PredicateTerm term) {
         this.terms.add(term);
         return this;
     }

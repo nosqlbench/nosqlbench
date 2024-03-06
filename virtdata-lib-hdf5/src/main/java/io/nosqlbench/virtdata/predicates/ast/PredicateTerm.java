@@ -16,7 +16,7 @@
 
 package io.nosqlbench.virtdata.predicates.ast;
 
-public class PredicateTerm extends PredicateExprImpl {
+public class PredicateTerm extends PredicateExprDefaultImpl {
     public PredicateTerm(PField field, POperator operator, PComparator value) {
         this.field = field;
         this.operator = operator;
