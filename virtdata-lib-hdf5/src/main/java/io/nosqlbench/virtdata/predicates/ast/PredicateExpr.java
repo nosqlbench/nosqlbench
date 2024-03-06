@@ -16,5 +16,11 @@
 
 package io.nosqlbench.virtdata.predicates.ast;
 
+import java.util.List;
+import java.util.Map;
+
 public interface PredicateExpr {
+    PConjunction getConjunction();
+
+    List<PredicateTerm> getTerms();
 }

@@ -16,10 +16,7 @@
 
 package io.nosqlbench.virtdata.predicates.adapter;
 
-import io.nosqlbench.virtdata.predicates.ast.PredicateAndExpr;
-import io.nosqlbench.virtdata.predicates.ast.PredicateExpr;
-import io.nosqlbench.virtdata.predicates.ast.PredicateOrExpr;
-import io.nosqlbench.virtdata.predicates.ast.PredicateTerm;
+import io.nosqlbench.virtdata.predicates.ast.*;
 import io.nosqlbench.virtdata.predicates.types.PredicateAdapter;
 
 import java.util.stream.Collectors;
@@ -39,29 +36,29 @@ public class ExamplePredicateAdapter implements PredicateAdapter {
     @Override
     public String getPredicate(PredicateExpr model) {
         StringBuilder sb = new StringBuilder();
-        String fragment = switch (model) {
-            case PredicateTerm pt -> renderTerm(pt);
-            case PredicateAndExpr pae -> renderTerm(pae);
-            case PredicateOrExpr po -> renderTerm(po);
-            default -> throw new IllegalStateException("Unexpected value: " + model);
+        String fragment = switch (model.getConjunction()) {
+            case PConjunction.none -> renderTerm(model);
+            case PConjunction.and -> renderTermsAnd(model);
+            case PConjunction.or -> renderTermsOr(model);
         };
         sb.append(fragment);
 
         return sb.toString();
     }
 
-    private String renderTerm(PredicateTerm pt) {
+    private String renderTerm(PredicateExpr pe) {
+        PredicateTerm pt = pe.getTerms().get(0);
         String value = pt.field.name + " " + pt.operator.name() + " " + pt.comparator.value;
         return value;
     }
 
-    private String renderTerm(PredicateAndExpr pae) {
-        String value = pae.terms.stream().map(this::renderTerm).collect(Collectors.joining(" and "));
+    private String renderTermsAnd(PredicateExpr pae) {
+        String value = pae.getTerms().stream().map(this::renderTerm).collect(Collectors.joining(" and "));
         return value;
     }
 
-    private String renderTerm(PredicateOrExpr poe) {
-        String value = poe.terms.stream().map(this::renderTerm).collect(Collectors.joining(" or "));
+    private String renderTermsOr(PredicateExpr poe) {
+        String value = poe.getTerms().stream().map(this::renderTerm).collect(Collectors.joining(" or "));
         return value;
     }
 }

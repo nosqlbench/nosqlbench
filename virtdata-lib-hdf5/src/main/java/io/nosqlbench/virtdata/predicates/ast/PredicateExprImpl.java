@@ -36,11 +36,13 @@ public class PredicateExprImpl implements PredicateExpr {
         return this;
     }
 
-    public PredicateExpr asSubExpr() {
-        return switch (conjunction) {
-            case none -> (PredicateTerm) this;
-            case and -> (PredicateAndExpr) this;
-            case or -> (PredicateOrExpr) this;
-        };
+    @Override
+    public PConjunction getConjunction() {
+        return this.conjunction;
+    }
+
+    @Override
+    public List<PredicateTerm> getTerms() {
+        return terms;
     }
 }
