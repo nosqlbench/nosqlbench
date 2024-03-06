@@ -20,17 +20,4 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PredicateAndExpr extends PredicateExprImpl {
-    public final List<PredicateTerm> terms = new ArrayList<>();
-
-    public PredicateAndExpr()  {
-
-    }
-    public PredicateAndExpr(List<PredicateTerm> terms) {
-        this.terms.addAll(terms);
-    }
-
-    public PredicateAndExpr term(PredicateTerm term) {
-        this.terms.add(term);
-        return this;
-    }
 }
