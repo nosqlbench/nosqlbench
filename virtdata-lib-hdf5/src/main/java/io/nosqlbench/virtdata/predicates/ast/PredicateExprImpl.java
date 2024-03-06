@@ -35,4 +35,12 @@ public class PredicateExprImpl implements PredicateExpr {
         this.terms.add(term);
         return this;
     }
+
+    public PredicateExpr asSubExpr() {
+        return switch (conjunction) {
+            case none -> (PredicateTerm) this;
+            case and -> (PredicateAndExpr) this;
+            case or -> (PredicateOrExpr) this;
+        };
+    }
 }
