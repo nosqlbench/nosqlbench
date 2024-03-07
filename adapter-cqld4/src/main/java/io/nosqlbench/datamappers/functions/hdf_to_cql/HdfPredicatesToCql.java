@@ -19,17 +19,18 @@ package io.nosqlbench.datamappers.functions.hdf_to_cql;
 
 import io.jhdf.HdfFile;
 import io.jhdf.api.Dataset;
+import io.nosqlbench.nb.annotations.ServiceSelector;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.predicates.JsonPredicateSerDes;
 import io.nosqlbench.virtdata.predicates.ast.PConjunction;
 import io.nosqlbench.virtdata.predicates.ast.PredicateExpr;
 import io.nosqlbench.virtdata.predicates.ast.PredicateTerm;
 import io.nosqlbench.virtdata.predicates.types.PredicateAdapter;
 import io.nosqlbench.virtdata.predicates.types.PredicateSerDes;
 
+import java.util.ServiceLoader;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
@@ -48,14 +49,13 @@ public class HdfPredicatesToCql implements LongFunction<String>, PredicateAdapte
     /**
      * Create a new binding function that accepts a long input value for the cycle and returns a string
      * @param filename The HDF5 file to read the predicate dataset from
-     * @param datasetname The name of the dataset internal to the HDRF5 file
+     * @param datasetname The name of the dataset internal to the HDF5 file
      */
     public HdfPredicatesToCql(String filename, String datasetname) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
         dataset = hdfFile.getDatasetByPath(datasetname);
         recordCount = dataset.getDimensions()[0];
-        //TODO: -- use spi service loader interface for serDes implementation
-        serDes = new JsonPredicateSerDes();
+        serDes = ServiceSelector.of("json-serdes", ServiceLoader.load(PredicateSerDes.class)).getOne();
     }
 
     @Override
