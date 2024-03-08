@@ -501,7 +501,7 @@ public class CGWorkloadExporter implements BundledApp {
 
     /**
      * If keycount is 0, all key fields including partition and clustering fields
-     * are qualfied with predicates.md.
+     * are qualfied with predicates.
      * If keycount is positive, then only that many will be included.
      * If keycount is negative, then that many keyfields will be removed from the
      * predicate starting with the rightmost (innermost) fields first.
@@ -538,7 +538,7 @@ public class CGWorkloadExporter implements BundledApp {
             logger.debug("minimum keycount for " + table.getFullName() + " adjusted from " + lastcount + " to " + keycount);
         }
 
-        // TODO; constraints on predicates.md based on valid constructions
+        // TODO; constraints on predicates based on valid constructions
         pkeys.stream().map(this::genPredicatePart)
                 .forEach(p -> {
                     sb.append(p).append("\n  AND ");
