@@ -51,11 +51,11 @@ public class HdfPredicatesToCql implements LongFunction<String>, PredicateAdapte
      * @param filename The HDF5 file to read the predicate dataset from
      * @param datasetname The name of the dataset internal to the HDF5 file
      */
-    public HdfPredicatesToCql(String filename, String datasetname) {
+    public HdfPredicatesToCql(String filename, String datasetname, String serDesType) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
         dataset = hdfFile.getDatasetByPath(datasetname);
         recordCount = dataset.getDimensions()[0];
-        serDes = ServiceSelector.of("json-serdes", ServiceLoader.load(PredicateSerDes.class)).getOne();
+        serDes = ServiceSelector.of(serDesType, ServiceLoader.load(PredicateSerDes.class)).getOne();
     }
 
     @Override
