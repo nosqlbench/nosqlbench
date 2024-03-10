@@ -77,7 +77,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         }
 
         Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
-        Optional<DriverAdapter<?,?>> defaultAdapter =  activityDef.getParams().getOptionalString("driver")
+        Optional<DriverAdapter<?,?>> defaultAdapter =  defaultDriverName
             .flatMap(name ->  ServiceSelector.of(name,ServiceLoader.load(DriverAdapterLoader.class)).get())
             .map(l -> l.load(this,NBLabels.forKV()));
 
@@ -93,7 +93,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         List<DriverAdapter<?,?>> adapterlist = new ArrayList<>();
         NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(yamlmodel);
 
-        Optional<String> defaultDriverOption = activityDef.getParams().getOptionalString("driver");
+        Optional<String> defaultDriverOption = defaultDriverName;
         ConcurrentHashMap<String, OpMapper<? extends Op>> mappers = new ConcurrentHashMap<>();
         for (OpTemplate ot : opTemplates) {
 //            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
