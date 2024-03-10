@@ -64,6 +64,8 @@
         <module.adapter-kafka>adapter-kafka</module.adapter-kafka>
         <module.adapter-kafka>adapter-amqp</module.adapter-kafka>
         <module.adapter-jdbc>adapter-jdbc</module.adapter-jdbc>
+        <module.adapter-pinecone>adapter-pinecone</module.adapter-pinecone>
+        <module.adapter-milvus>adapter-milvus</module.adapter-milvus>
 
         <!-- VIRTDATA MODULES -->
         <module.virtdata-api>virtdata-api</module.virtdata-api>
@@ -109,6 +111,7 @@
         <module>adapter-jdbc</module>
         <module>adapter-pinecone</module>
         <module>adapter-aws-opensearch</module>
+        <module>adapter-milvus</module>
 
         <!-- VIRTDATA MODULES -->
         <module>virtdata-api</module>

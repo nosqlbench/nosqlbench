@@ -1,0 +1,82 @@
+min_version: 5.21.1
+
+scenarios:
+  default:
+    drop_col: run tags==blocks:drop cycles===UNDEF threads===1 databaseName="baselines" uri="localhost:19530" token="root:Milvus" errors=counter,warn
+    schema: run tags==blocks:schema cycles===2 threads===1 databaseName="baselines" uri="localhost:195 token="root:Milvus" errors=counter,warn
+    rampup: run tags==blocks:rampup cycles===TEMPLATE(rampup_cycles,100) threads===TEMPLATE(rampup_threads,10) databaseName="baselines" uri="localhost:195
+    search: run tags==blocks:search cycles===TEMPLATE(search_cycles,100) threads===TEMPLATE(search_threads,10) databaseName="baselines" uri="localhost:195
+
+params:
+  driver: milvus
+  instrument: true
+
+blocks:
+  drop:
+    ops:
+      # https://milvus.io/api-reference/java/v2.3.x/Collection/dropCollection().md
+      drop_col_op:
+        drop_collection:
+          collection_name: "TEMPLATE(collection,vector)"
+
+      # https://milvus.io/api-reference/java/v2.3.x/Index/dropIndex().md
+      drop_index_op:
+        drop_index:
+          collection_name: "TEMPLATE(collection,vector)"
+          index_name: "TEMPLATE(collection,vector)_TEMPLATE(vector_field,value)_idx"
+  schema:
+    ops:
+      # https://milvus.io/api-reference/java/v2.3.x/Collection/createCollection().md
+      create_col_op:
+        create_collection:
+          collection_name: "TEMPLATE(collection,vector)"
+          shards_num: TEMPLATE(shards_number,0)
+          description: "TEMPLATE(desc,a simple milvus/zilliz vector collection)"
+          consistency_level: "BOUNDED"
+          field_types:
+            - field_1:
+                name: "key"
+                primary_key: true
+                description: "primary/part key of the collection"
+                data_type: "VarChar"
+                auto_id: false
+                partition_key: true
+            - field_2:
+                name: "value"
+                primary_key: false
+                description: "vector column/field"
+                data_type: "FloatVector"
+                dimension: TEMPLATE(vec_dimension,25)
+
+      # https://milvus.io/api-reference/java/v2.3.x/Index/createIndex().md
+      create_index_op:
+        create_index:
+          collection_name: "TEMPLATE(collection,vector)"
+          field_name: "TEMPLATE(vector_field,value)"
+          index_name: "TEMPLATE(collection,vector)_TEMPLATE(vector_field,value)_idx"
+          index_type: "TEMPLATE(idx_type,DISKANN)"
+          metric_type: "TEMPLATE(similarity_function,COSINE)"
+          sync_mode: TEMPLATE(sync_mode,true)
+
+  rampup:
+    ops:
+      # https://milvus.io/api-reference/java/v2.3.x/Collection/insert().md
+      insert_op:
+        insert:
+          collection_name: "TEMPLATE(collection,vector)"
+          field:
+            key: {row_key}
+            value: {row_vector}
+
+  search:
+    ops:
+      # https://milvus.io/api-reference/java/v2.3.x/High-level%20API/search().md
+      search_op:
+        search:
+          collection_name: "TEMPLATE(collection,vector)"
+          output_fields:
+            - key
+            - value
+          vectors: {row_vector}
+          limit: TEMPLATE(top_k,100)
+          consistency_level: "TEMPLATE(read_cl,EVENTUALLY)"
