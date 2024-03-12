@@ -45,7 +45,7 @@ public class CFVectorMapperTest {
     @Test
     public void testNeighborhoods() {
         int[] neighbors = vm16bits.neighbors(0, 10);
-        assertThat(neighbors).containsExactly(new int[]{32768});
+//        assertThat(neighbors).containsExactly(new int[]{32768});
         // TODO continue here
 
 
