@@ -25,7 +25,7 @@ public class DNN_angular_distance_decimalTest {
     @Test
     public void testBigDecimalDotProduct() {
         DNN_angular_v_decimal v_dec = new DNN_angular_v_decimal(10, 100_000, 100);
-        DNN_angular1_v v_fp = new DNN_angular1_v(10, 100_000, 100);
+        DnnAngular1V v_fp = new DnnAngular1V(10, 100_000, 100);
 
         var v1d = v_dec.apply(90000);
         var v1f = v_fp.apply(90000);

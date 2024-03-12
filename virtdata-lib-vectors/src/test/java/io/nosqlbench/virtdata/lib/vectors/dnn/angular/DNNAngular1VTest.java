@@ -30,7 +30,7 @@ class DNNAngular1VTest {
 
     @Test
     public void testSimpleGeneration() {
-        DNN_angular1_v vs = new DNN_angular1_v(2, 100, 3);
+        DnnAngular1V vs = new DnnAngular1V(2, 100, 3);
         assertThat(vs.apply(0)).isEqualTo(new float[]{1, 0});
         assertThat(vs.apply(1)).isEqualTo(new float[]{2, 2});
         assertThat(vs.apply(2)).isEqualTo(new float[]{3, 6});
@@ -43,7 +43,7 @@ class DNNAngular1VTest {
     @Test
     public void testBasicAngularVectors() {
         int M = 7;
-        DNN_angular1_v vf = new DNN_angular1_v(10, 100, M);
+        DnnAngular1V vf = new DnnAngular1V(10, 100, M);
         // populate 100 training cycles of DNN angular
         float[][] vectors = new float[100][];
         for (int i = 0; i < 100; i++) {

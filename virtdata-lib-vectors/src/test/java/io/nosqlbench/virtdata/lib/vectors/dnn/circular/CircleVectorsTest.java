@@ -16,7 +16,7 @@
 
 package io.nosqlbench.virtdata.lib.vectors.dnn.circular;
 
-import io.nosqlbench.virtdata.lib.vectors.CircleVectors;
+import io.nosqlbench.virtdata.lib.vectors.dnn.types.CircleVectors;
 import io.nosqlbench.virtdata.lib.vectors.algorithms.GoldenAngle;
 import io.nosqlbench.virtdata.lib.vectors.algorithms.LatLonBased;
 import org.junit.jupiter.api.Test;

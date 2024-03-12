@@ -16,6 +16,7 @@
 
 package io.nosqlbench.virtdata.lib.vectors.dnn.circular;
 
+import io.nosqlbench.virtdata.lib.vectors.util.BitFields;
 import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,17 +26,17 @@ class CircularPartitionerTest {
 
     @Test
     public void testMsbPositions() {
-        assertThat(CircularPartitioner.getMsbPosition(1)).isEqualTo(1);
-        assertThat(CircularPartitioner.getMsbPosition(2)).isEqualTo(2);
-        assertThat(CircularPartitioner.getMsbPosition(7)).isEqualTo(3);
-        assertThat(CircularPartitioner.getMsbPosition(8)).isEqualTo(4);
-        assertThat(CircularPartitioner.getMsbPosition(Integer.MAX_VALUE)).isEqualTo(31);
+        assertThat(BitFields.getMsbPosition(1)).isEqualTo(1);
+        assertThat(BitFields.getMsbPosition(2)).isEqualTo(2);
+        assertThat(BitFields.getMsbPosition(7)).isEqualTo(3);
+        assertThat(BitFields.getMsbPosition(8)).isEqualTo(4);
+        assertThat(BitFields.getMsbPosition(Integer.MAX_VALUE)).isEqualTo(31);
     }
 
     @Test
     public void assertBoundaryErrors() {
-        assertThat(CircularPartitioner.getMsbPosition(0)).isEqualTo(0);
-        assertThrows(RuntimeException.class, () -> CircularPartitioner.getMsbPosition(-1));
+        assertThat(BitFields.getMsbPosition(0)).isEqualTo(0);
+        assertThrows(RuntimeException.class, () -> BitFields.getMsbPosition(-1));
     }
 
     private int[] remap(CircularPartitioner cp, int[] inputs) {

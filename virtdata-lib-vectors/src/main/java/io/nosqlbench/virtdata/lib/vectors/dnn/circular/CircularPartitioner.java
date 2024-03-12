@@ -16,6 +16,8 @@
 
 package io.nosqlbench.virtdata.lib.vectors.dnn.circular;
 
+import io.nosqlbench.virtdata.lib.vectors.util.BitFields;
+
 /**
  * <hr/>
  * <H2>Examples</H2>
@@ -70,7 +72,7 @@ public class CircularPartitioner {
 
     public CircularPartitioner(int maxOrdinalExcluded) {
         this.maxOrdinalExcluded = maxOrdinalExcluded;
-        this.msb = getMsbPosition(maxOrdinalExcluded - 1);
+        this.msb = BitFields.getMsbPosition(maxOrdinalExcluded - 1);
         this.mask = (1<<msb) - 1;
     }
 
@@ -86,7 +88,7 @@ public class CircularPartitioner {
 
     public int ordinalToOffset(int ordinal) {
 
-        int ordMsb = getMsbPosition(ordinal);
+        int ordMsb = BitFields.getMsbPosition(ordinal);
         int phaseBits = ordMsb - 1;
         int phaseMask = ((1 << phaseBits) - 1) & mask;
         int floorShift = msb - ordMsb;
@@ -105,37 +107,13 @@ public class CircularPartitioner {
 
     public double ordinalToUnitInterval(int ordinal) {
         int remapped = ordinalToOffset(ordinal);
+
         return ((double) remapped) / (double) maxOrdinalExcluded;
     }
 
     public double[] vecOnCircle(double unit) {
         double radians = 2.0d * Math.PI * unit;
         return new double[]{Math.cos(radians), Math.sin(radians)};
-    }
-
-    private static final int[] msbs = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4};
-
-    public static int getMsbPosition(int value) {
-        if (value < 0) {
-            throw new RuntimeException("Only values between 1 and " + Integer.MAX_VALUE +
-                " are supported, and you tried to get the MSB position for value " + value +
-                " or possible overflowed to a negative value."
-            );
-        }
-        int r = 0;
-        if ((value & 0x00000000FFFF0000L) > 0) {
-            r += 16;
-            value >>= 16;
-        }
-        if ((value & 0x000000000000FF00L) > 0) {
-            r += 8;
-            value >>= 8;
-        }
-        if ((value & 0x00000000000000F0) > 0) {
-            r += 4;
-            value >>= 4;
-        }
-        return r + msbs[(int) value];
     }
 
 }

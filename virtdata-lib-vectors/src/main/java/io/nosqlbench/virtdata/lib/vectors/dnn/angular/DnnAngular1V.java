@@ -25,7 +25,7 @@ import java.util.function.LongFunction;
 
 @ThreadSafeMapper
 @Categories(Category.experimental)
-public class DNN_angular1_v implements LongFunction<float[]> {
+public class DnnAngular1V implements LongFunction<float[]> {
 
     private final int d;
     private final long n;
@@ -39,7 +39,7 @@ public class DNN_angular1_v implements LongFunction<float[]> {
      * @param M
      *     The modulo which is used to construct equivalence classes
      */
-    public DNN_angular1_v(int D, long N, long M) {
+    public DnnAngular1V(int D, long N, long M) {
         d = D;
         n = N;
         m = M;
