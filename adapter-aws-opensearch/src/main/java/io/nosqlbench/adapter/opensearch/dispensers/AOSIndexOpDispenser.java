@@ -18,8 +18,8 @@ package io.nosqlbench.adapter.opensearch.dispensers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
-import io.nosqlbench.adapter.opensearch.ops.IndexOp;
+import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSIndexOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
@@ -29,20 +29,20 @@ import org.opensearch.client.opensearch.core.IndexRequest;
 
 import java.util.function.LongFunction;
 
-public class IndexOpDispenser extends BaseOpenSearchOpDispenser {
-    private final static Logger logger = LogManager.getLogger(IndexOpDispenser.class);
+public class AOSIndexOpDispenser extends AOSBaseOpDispenser {
+    private final static Logger logger = LogManager.getLogger(AOSIndexOpDispenser.class);
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final String diag;
 
-    public IndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
+    public AOSIndexOpDispenser(AOSAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op, targetF);
         this.diag = op.getStaticConfigOr("daig","false");
     }
 
     @Override
     public LongFunction<? extends Op> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
-        LongFunction<IndexRequest> irqF = OpenSearchRequests.index(op);
-        return l -> new IndexOp(clientF.apply(l), irqF.apply(l));
+        LongFunction<IndexRequest> irqF = AOSRequests.index(op);
+        return l -> new AOSIndexOp(clientF.apply(l), irqF.apply(l));
     }
 
 }

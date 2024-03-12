@@ -17,10 +17,6 @@
 package io.nosqlbench.adapter.opensearch;
 
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.profile.internal.BasicProfile;
-import com.amazonaws.auth.profile.internal.ProfileKeyConstants;
-import com.amazonaws.auth.profile.internal.ProfileStaticCredentialsProvider;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -35,14 +31,13 @@ import software.amazon.awssdk.http.crt.AwsCrtAsyncHttpClient;
 import software.amazon.awssdk.regions.Region;
 
 import java.io.IOException;
-import java.util.Map;
 
-public class OpenSearchSpace implements AutoCloseable {
+public class AOSSpace implements AutoCloseable {
 
     private final NBConfiguration cfg;
     protected OpenSearchClient client;
 
-    public OpenSearchSpace(NBConfiguration cfg) {
+    public AOSSpace(NBConfiguration cfg) {
         this.cfg = cfg;
     }
 
@@ -75,7 +70,7 @@ public class OpenSearchSpace implements AutoCloseable {
 
         AwsSdk2TransportOptions transportOptions = transportOptionsBuilder.build();
 
-        AwsOsServiceType svctype = AwsOsServiceType.valueOf(cfg.get("svctype"));
+        AOSServiceType svctype = AOSServiceType.valueOf(cfg.get("svctype"));
 
         AwsSdk2Transport awsSdk2Transport =
                 new AwsSdk2Transport(
@@ -101,7 +96,7 @@ public class OpenSearchSpace implements AutoCloseable {
     }
 
     public static NBConfigModel getConfigModel() {
-        return ConfigModel.of(OpenSearchSpace.class)
+        return ConfigModel.of(AOSSpace.class)
                 .add(Param.required("region", String.class).setDescription("The region to connect to"))
                 .add(Param.required("host", String.class).setDescription("The Open Search API endpoint host"))
                 .add(Param.optional("profile")

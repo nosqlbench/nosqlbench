@@ -19,24 +19,24 @@ package io.nosqlbench.adapter.opensearch.ops;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch.core.BulkRequest;
-import org.opensearch.client.opensearch.core.BulkResponse;
 import org.opensearch.client.opensearch.core.IndexRequest;
 import org.opensearch.client.opensearch.core.IndexResponse;
 
 import java.io.IOException;
 
-public class BulkOp extends BaseOpenSearchOp {
-    private final static Logger logger = LogManager.getLogger(BulkOp.class);
-    private final BulkRequest rq;
+public class AOSIndexOp extends AOSBaseOp {
+    private final static Logger logger = LogManager.getLogger(AOSIndexOp.class);
+    private final IndexRequest<?> rq;
 
-    public BulkOp(OpenSearchClient client, BulkRequest rq) {
+    public AOSIndexOp(OpenSearchClient client, IndexRequest<?> rq) {
         super(client);
         this.rq = rq;
     }
 
 
     public Object applyOp(long value) throws IOException {
-        return client.bulk(rq);
+        IndexResponse response = client.index(rq);
+        logger.debug("IndexResponse:" + response);
+        return response;
     }
 }
