@@ -19,7 +19,6 @@ package io.nosqlbench.adapter.opensearch;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.components.core.NBComponent;
@@ -30,23 +29,23 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 import java.util.function.Function;
 
 @Service(value= DriverAdapter.class, selector = "opensearch")
-public class OpenSearchAdapter extends BaseDriverAdapter<Op,OpenSearchSpace> {
-    public OpenSearchAdapter(NBComponent parentComponent, NBLabels labels) {
+public class AOSAdapter extends BaseDriverAdapter<Op, AOSSpace> {
+    public AOSAdapter(NBComponent parentComponent, NBLabels labels) {
         super(parentComponent, labels);
     }
 
     @Override
-    public Function<String, ? extends OpenSearchSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (String spaceName) -> new OpenSearchSpace(cfg);
+    public Function<String, ? extends AOSSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (String spaceName) -> new AOSSpace(cfg);
     }
 
     @Override
     public OpMapper<Op> getOpMapper() {
-        return new OpenSearchOpMapper(this);
+        return new AOSOpMapper(this);
     }
 
     @Override
     public NBConfigModel getConfigModel() {
-        return super.getConfigModel().add(OpenSearchSpace.getConfigModel());
+        return super.getConfigModel().add(AOSSpace.getConfigModel());
     }
 }
