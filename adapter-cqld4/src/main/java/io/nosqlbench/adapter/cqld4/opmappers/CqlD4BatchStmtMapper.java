@@ -40,6 +40,12 @@ public class CqlD4BatchStmtMapper implements OpMapper<Cqld4CqlOp> {
         this.adapter = adapter;
     }
 
+    /**
+     * TODO: Make this not require a sub-op element for "uniform batches",
+     * but allow a sub-op sequence for custom batches.
+     * @param op the function argument
+     * @return
+     */
     public OpDispenser<Cqld4CqlOp> apply(ParsedOp op) {
 
         ParsedOp subop = op.getAsSubOp("op_template");
