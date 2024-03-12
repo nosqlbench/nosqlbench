@@ -34,6 +34,7 @@ public class CqlD4BatchStmtMapper implements OpMapper<Cqld4CqlOp> {
     private final TypeAndTarget<CqlD4OpType, String> target;
     private final DriverAdapter adapter;
 
+
     public CqlD4BatchStmtMapper(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, TypeAndTarget<CqlD4OpType,String> target) {
         this.sessionFunc=sessionFunc;
         this.target = target;
