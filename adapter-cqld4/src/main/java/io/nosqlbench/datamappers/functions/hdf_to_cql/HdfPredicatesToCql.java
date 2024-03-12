@@ -25,6 +25,7 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.predicates.ast.PConjunction;
+import io.nosqlbench.virtdata.predicates.ast.POperator;
 import io.nosqlbench.virtdata.predicates.ast.PredicateExpr;
 import io.nosqlbench.virtdata.predicates.ast.PredicateTerm;
 import io.nosqlbench.virtdata.predicates.types.PredicateAdapter;
@@ -45,6 +46,7 @@ public class HdfPredicatesToCql implements LongFunction<String>, PredicateAdapte
     private final Dataset dataset;
     private final int recordCount;
     private final PredicateSerDes serDes;
+    private String lastFieldName;
 
     /**
      * Create a new binding function that accepts a long input value for the cycle and returns a string
@@ -68,16 +70,17 @@ public class HdfPredicatesToCql implements LongFunction<String>, PredicateAdapte
 
     @Override
     public String getPredicate(PredicateExpr model) {
-        return switch (model.getConjunction()) {
-            case PConjunction.none -> renderTerm(model);
+        StringBuilder sb = new StringBuilder().append("WHERE ");
+        sb.append(switch (model.getConjunction()) {
+            case PConjunction.none -> renderTerm((PredicateTerm) model);
             case PConjunction.and -> renderTermsAnd(model);
             case PConjunction.or -> renderTermsOr(model);
-        };
+        });
+        return sb.toString();
     }
 
-    private String renderTerm(PredicateExpr pe) {
-        PredicateTerm pt = pe.getTerms().getFirst();
-        return pt.field.name + " " + pt.operator.name() + " " + pt.comparator.value;
+    private String renderTerm(PredicateTerm pt) {
+        return pt.field.name + " " + pt.operator.symbol() + " " + pt.comparator.formattedValue();
     }
 
     private String renderTermsAnd(PredicateExpr pae) {
@@ -85,6 +88,22 @@ public class HdfPredicatesToCql implements LongFunction<String>, PredicateAdapte
     }
 
     private String renderTermsOr(PredicateExpr poe) {
-        return poe.getTerms().stream().map(this::renderTerm).collect(Collectors.joining(" or "));
+        /*
+         * There is no OR term in CQL, so we need to convert it to IN. For each record we need to check the following:
+         *   1. Does the field name match
+         *   2. is the operator eq
+         * If either of these are not true this is an invalid expression for CQL
+         */
+        lastFieldName = poe.getTerms().getFirst().field.name;
+        return lastFieldName + " " + "IN(" +
+            poe.getTerms().stream().map(this::validateOrConditions).collect(Collectors.joining(",")) + ")";
+    }
+
+    private String validateOrConditions(PredicateTerm term) {
+        if ((term.field.name.equalsIgnoreCase(lastFieldName)) && term.operator.equals(POperator.eq)) {
+            return term.comparator.formattedValue();
+        } else {
+            throw new RuntimeException("OR term invalid for CQL: " + term);
+        }
     }
 }

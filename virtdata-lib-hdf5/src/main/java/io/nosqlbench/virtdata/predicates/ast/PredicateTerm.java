@@ -26,4 +26,8 @@ public class PredicateTerm extends PredicateExprDefaultImpl {
     public PField field;
     public POperator operator;
     public PComparator comparator;
+
+    public String toString() {
+        return field.name + " " + operator.name() + " " + comparator.value;
+    }
 }

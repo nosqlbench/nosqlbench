@@ -22,4 +22,11 @@ public class PComparator {
     public PComparator(Object value) {
         this.value = value;
     }
+
+    public String formattedValue() {
+        return switch (value.getClass().getSimpleName()) {
+            case "String" -> "'" + value + "'";
+            default -> value.toString();
+        };
+    }
 }

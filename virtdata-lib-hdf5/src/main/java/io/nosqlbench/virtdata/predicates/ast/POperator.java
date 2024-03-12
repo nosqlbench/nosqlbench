@@ -19,5 +19,17 @@ package io.nosqlbench.virtdata.predicates.ast;
 public enum POperator {
     eq,
     gt,
-    lt
+    lt,
+    lte,
+    gte;
+
+    public String symbol() {
+        return switch (this) {
+            case eq -> "=";
+            case gt -> ">";
+            case lt -> "<";
+            case lte -> "<=";
+            case gte -> ">=";
+        };
+    }
 }
