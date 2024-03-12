@@ -17,35 +17,31 @@
 package io.nosqlbench.adapter.opensearch;
 
 import io.nosqlbench.adapter.opensearch.dispensers.*;
-import io.nosqlbench.adapter.opensearch.ops.UpdateOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
-import org.opensearch.client.opensearch.OpenSearchClient;
 
-public class OpenSearchOpMapper implements OpMapper<Op> {
-    private final OpenSearchAdapter adapter;
+public class AOSOpMapper implements OpMapper<Op> {
+    private final AOSAdapter adapter;
 
-    public OpenSearchOpMapper(OpenSearchAdapter openSearchAdapter) {
-        this.adapter = openSearchAdapter;
+    public AOSOpMapper(AOSAdapter AOSAdapter) {
+        this.adapter = AOSAdapter;
     }
 
     @Override
     public OpDispenser<? extends Op> apply(ParsedOp op) {
-        TypeAndTarget<OpenSearchOpTypes, String> typeAndTarget =
-            op.getTypeAndTarget(OpenSearchOpTypes.class, String.class, "verb", "index");
+        TypeAndTarget<AOSOpTypes, String> typeAndTarget =
+            op.getTypeAndTarget(AOSOpTypes.class, String.class, "verb", "index");
         return switch (typeAndTarget.enumId) {
-            case create_index -> new CreateIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case delete_index -> new DeleteIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case index -> new IndexOpDispenser(adapter,op, typeAndTarget.targetFunction);
-            case update -> new UpdateOpDispenser(adapter,op, typeAndTarget.targetFunction);
-            case delete -> new DeleteOpDispenser(adapter,op, typeAndTarget.targetFunction);
-            case knn_search -> new KnnSearchOpDispenser(adapter,op, typeAndTarget.targetFunction);
-            case bulk -> new BulkOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_index -> new AOSCreateIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case delete_index -> new AOSDeleteIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case index -> new AOSIndexOpDispenser(adapter,op, typeAndTarget.targetFunction);
+            case update -> new AOSUpdateOpDispenser(adapter,op, typeAndTarget.targetFunction);
+            case delete -> new AOSDeleteOpDispenser(adapter,op, typeAndTarget.targetFunction);
+            case knn_search -> new AOSKnnSearchOpDispenser(adapter,op, typeAndTarget.targetFunction);
+            case bulk -> new AOSBulkOpDispenser(adapter, op, typeAndTarget.targetFunction);
             default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
                 "mapping parsed op " + op);
         };

@@ -16,29 +16,23 @@
 
 package io.nosqlbench.adapter.opensearch.ops;
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch.core.UpdateRequest;
 
-public abstract class BaseOpenSearchOp implements CycleOp<Object> {
-    protected final OpenSearchClient client;
+import java.io.IOException;
 
-    public BaseOpenSearchOp(OpenSearchClient client) {
-        this.client = client;
+public class AOSUpdateOp extends AOSBaseOp {
+    private final UpdateRequest rq;
+    private final Class<?> doctype;
+
+    public AOSUpdateOp(OpenSearchClient client, UpdateRequest rq, Class<?> doctype) {
+        super(client);
+        this.rq = rq;
+        this.doctype = doctype;
     }
 
     @Override
-    public final Object apply(long value) {
-        try {
-            Object result = applyOp(value);
-            return result;
-        } catch (Exception e) {
-            if (e instanceof RuntimeException rte) {
-                throw rte;
-            } else {
-                throw new RuntimeException(e);
-            }
-        }
-    };
-
-    public abstract Object applyOp(long value) throws Exception;
+    public Object applyOp(long value) throws IOException {
+        return client.update(rq, doctype);
+    }
 }

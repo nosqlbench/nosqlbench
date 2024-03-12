@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.opensearch.dispensers;
+package io.nosqlbench.adapter.opensearch;
 
-public enum BulkOpTypes {
-    create,
-    index,
-    delete,
-    update
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
+import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.labels.NBLabels;
+
+@Service(value = DriverAdapterLoader.class,selector = "opensearch")
+public class AOSAdapterLoader implements DriverAdapterLoader {
+    @Override
+    public AOSAdapter load(NBComponent parent, NBLabels childLabels) {
+        return new AOSAdapter(parent, childLabels);
+    }
 }

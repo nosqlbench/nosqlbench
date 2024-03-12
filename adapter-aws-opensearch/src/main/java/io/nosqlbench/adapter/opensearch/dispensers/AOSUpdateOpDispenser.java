@@ -16,30 +16,25 @@
 
 package io.nosqlbench.adapter.opensearch.dispensers;
 
-import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
-import io.nosqlbench.adapter.opensearch.ops.CreateIndexOp;
-import io.nosqlbench.adapter.opensearch.ops.UpdateOp;
+import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSUpdateOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.opensearch.client.json.JsonData;
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch._types.mapping.*;
 import org.opensearch.client.opensearch.core.UpdateRequest;
-import org.opensearch.client.opensearch.indices.CreateIndexRequest;
 
-import java.util.Map;
 import java.util.function.LongFunction;
 
-public class UpdateOpDispenser extends BaseOpenSearchOpDispenser {
+public class AOSUpdateOpDispenser extends AOSBaseOpDispenser {
 
-    public UpdateOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
+    public AOSUpdateOpDispenser(AOSAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op, targetF);
     }
 
     @Override
-    public LongFunction<UpdateOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<AOSUpdateOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<UpdateRequest.Builder> bfunc = l -> new UpdateRequest.Builder().index(targetF.apply(l));
         // TODO: add details here
-        return l -> new UpdateOp(clientF.apply(l),bfunc.apply(l).build(),Object.class);
+        return l -> new AOSUpdateOp(clientF.apply(l),bfunc.apply(l).build(),Object.class);
     }
 
 }

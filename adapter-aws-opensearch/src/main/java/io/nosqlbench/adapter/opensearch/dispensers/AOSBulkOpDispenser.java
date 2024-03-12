@@ -16,35 +16,32 @@
 
 package io.nosqlbench.adapter.opensearch.dispensers;
 
-import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
-import io.nosqlbench.adapter.opensearch.OpenSearchSpace;
-import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSBulkOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch.core.BulkRequest;
 
 import java.util.function.LongFunction;
 
-public abstract class BaseOpenSearchOpDispenser extends BaseOpDispenser<Op,Object> {
-    protected final LongFunction<OpenSearchSpace> spaceF;
-    protected final LongFunction<OpenSearchClient> clientF;
-    private final LongFunction<? extends Op> opF;
+public class AOSBulkOpDispenser extends AOSBaseOpDispenser {
+    private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    protected BaseOpenSearchOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
-        super(adapter, op);
-        this.spaceF =adapter.getSpaceFunc(op);
-        this.clientF = (long l) -> this.spaceF.apply(l).getClient();
-        this.opF = createOpFunc(clientF, op, targetF);
+    public AOSBulkOpDispenser(AOSAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
+        super(adapter, op, targetF);
     }
 
-    public abstract LongFunction<? extends Op> createOpFunc(
+    @Override
+    public LongFunction<? extends Op> createOpFunc(
         LongFunction<OpenSearchClient> clientF,
         ParsedOp op,
         LongFunction<String> targetF
-    );
-
-    @Override
-    public Op apply(long value) {
-        return opF.apply(value);
+    ) {
+        LongFunction<BulkRequest> func = AOSRequests.bulk(op,targetF);
+        return l -> new AOSBulkOp(clientF.apply(l), func.apply(l));
     }
+
 }

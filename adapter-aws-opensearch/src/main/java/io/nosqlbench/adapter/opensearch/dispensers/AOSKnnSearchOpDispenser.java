@@ -16,9 +16,8 @@
 
 package io.nosqlbench.adapter.opensearch.dispensers;
 
-import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
-import io.nosqlbench.adapter.opensearch.ops.KnnSearchOp;
-import io.nosqlbench.adapter.opensearch.pojos.Doc;
+import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSKnnSearchOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.opensearch.client.json.JsonData;
 import org.opensearch.client.opensearch.OpenSearchClient;
@@ -32,10 +31,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
+public class AOSKnnSearchOpDispenser extends AOSBaseOpDispenser {
     private Class<?> schemaClass;
 
-    public KnnSearchOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
+    public AOSKnnSearchOpDispenser(AOSAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op, targetF);
         String schemaClassStr = op.getStaticConfigOr("schema", "io.nosqlbench.adapter.opensearch.pojos.Doc");
         try {
@@ -46,7 +45,7 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
     }
 
     @Override
-    public LongFunction<KnnSearchOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op,LongFunction<String> targetF) {
+    public LongFunction<AOSKnnSearchOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<KnnQuery.Builder> knnfunc = l -> new KnnQuery.Builder();
         knnfunc = op.enhanceFuncOptionally(knnfunc, "k",Integer.class, KnnQuery.Builder::k);
         knnfunc = op.enhanceFuncOptionally(knnfunc, "vector", List.class, this::convertVector);
@@ -64,7 +63,7 @@ public class KnnSearchOpDispenser extends BaseOpenSearchOpDispenser {
                 .index(targetF.apply(l))
                 .query(new Query.Builder().knn(finalKnnfunc.apply(l).build()).build());
 
-        return (long l) -> new KnnSearchOp(clientF.apply(l), bfunc.apply(l).build(), schemaClass);
+        return (long l) -> new AOSKnnSearchOp(clientF.apply(l), bfunc.apply(l).build(), schemaClass);
     }
 
     private LongFunction<Query> buildFilterQuery(LongFunction<Map> mapLongFunction) {

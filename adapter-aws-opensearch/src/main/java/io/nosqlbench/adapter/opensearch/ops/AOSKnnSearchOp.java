@@ -17,22 +17,23 @@
 package io.nosqlbench.adapter.opensearch.ops;
 
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch.core.UpdateRequest;
+import org.opensearch.client.opensearch.core.SearchRequest;
+import org.opensearch.client.opensearch.core.SearchResponse;
 
-import java.io.IOException;
-
-public class UpdateOp extends BaseOpenSearchOp {
-    private final UpdateRequest rq;
+public class AOSKnnSearchOp extends AOSBaseOp {
+    private final SearchRequest rq;
     private final Class<?> doctype;
 
-    public UpdateOp(OpenSearchClient client, UpdateRequest rq, Class<?> doctype) {
+    public AOSKnnSearchOp(OpenSearchClient client, SearchRequest rq, Class<?> doctype) {
         super(client);
         this.rq = rq;
         this.doctype = doctype;
     }
 
     @Override
-    public Object applyOp(long value) throws IOException {
-        return client.update(rq, doctype);
+    public Object applyOp(long value) throws Exception {
+        SearchResponse response = client.search(rq, doctype);
+        return response;
     }
+
 }
