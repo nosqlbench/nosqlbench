@@ -75,6 +75,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-lib-vectors</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>docsys</artifactId>
             <version>${revision}</version>
             <scope>compile</scope>

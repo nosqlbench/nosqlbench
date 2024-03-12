@@ -30,11 +30,12 @@ public class DocForFunc implements DocFuncData {
     private String inType;
     private String outType;
     private final ArrayList<DocCtorData> ctors = new ArrayList<>();
-    private Category[] categories = new Category[] { };
+    private Category[] categories = new Category[]{};
 
     public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
+
     @Override
     public String getPackageName() {
         return this.packageName;
@@ -48,6 +49,7 @@ public class DocForFunc implements DocFuncData {
     public void setClassName(String className) {
         this.className = className;
     }
+
     @Override
     public String getClassName() {
         return className;
@@ -56,6 +58,7 @@ public class DocForFunc implements DocFuncData {
     public void setClassJavadoc(String classJavadoc) {
         this.classJavadoc = classJavadoc;
     }
+
     @Override
     public String getClassJavadoc() {
         return classJavadoc;
@@ -64,6 +67,7 @@ public class DocForFunc implements DocFuncData {
     public void setInType(String inType) {
         this.inType = inType;
     }
+
     @Override
     public String getInType() {
         return inType;
@@ -72,13 +76,14 @@ public class DocForFunc implements DocFuncData {
     public void setOutType(String outType) {
         this.outType = outType;
     }
+
     @Override
     public String getOutType() {
         return outType;
     }
 
     public void addCtor(String ctorDoc, LinkedHashMap<String, String> args, List<List<String>> examples) {
-        if (this.className==null || this.className.isEmpty()) {
+        if (this.className == null || this.className.isEmpty()) {
             throw new RuntimeException("Unable to document ctor without known class name first.");
         }
         DocForFuncCtor ctor = new DocForFuncCtor(getClassName(), ctorDoc, args, examples);
@@ -93,16 +98,19 @@ public class DocForFunc implements DocFuncData {
     @Override
     public String toString() {
         return "DocForFunction{" +
-                "packageName='" + packageName + '\'' +
-                ", className='" + className + '\'' +
-                ", classJavadoc='" + classJavadoc + '\'' +
-                ", inType='" + inType + '\'' +
-                ", outType='" + outType + '\'' +
-                ", ctors=" + ctors +
-                '}';
+            "(" + className + ")" +
+            "packageName='" + packageName + '\'' +
+            ", className='" + className + '\'' +
+            ", classJavadoc='" + classJavadoc + '\'' +
+            ", inType='" + inType + '\'' +
+            ", outType='" + outType + '\'' +
+            ", ctors=" + ctors +
+            '}';
     }
 
     public void addCategories(Category[] categories) {
         this.categories = categories;
     }
+
+
 }

@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2023 nosqlbench
+  ~ Copyright (c) 2023-2024 nosqlbench
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
-    <artifactId>virtdata-lib-realer</artifactId>
+    <artifactId>virtdata-lib-vectors</artifactId>
     <packaging>jar</packaging>
-    <name>virtdata-lib-realer</name>
+    <name>virtdata-lib-vectors</name>
     <url>http://nosqlbench.io/</url>
 
     <description>With inspiration from other libraries</description>
@@ -38,6 +38,12 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>virtdata-lib-basics</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-api</artifactId>
             <version>${revision}</version>
         </dependency>
 

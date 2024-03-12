@@ -19,6 +19,20 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>nosqlbench</artifactId>
     <packaging>pom</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-api</artifactId>
+            <version>5.21.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-lib-basics</artifactId>
+            <version>5.21.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
     <parent>
         <artifactId>mvn-defaults</artifactId>
@@ -34,47 +48,6 @@
     </description>
 
     <properties>
-        <!-- CORE MODULES -->
-        <module.mvn-defaults>mvn-defaults</module.mvn-defaults>
-        <module.nb-api>nb-api</module.nb-api>
-        <module.nb-annotations>nb-annotations</module.nb-annotations>
-        <module.adapters-api>adapters-api</module.adapters-api>
-        <module.engine-api>engine-api</module.engine-api>
-
-        <module.engine-extensions>engine-extensions</module.engine-extensions>
-        <module.engine-docker>engine-docker</module.engine-docker>
-        <module.engine-cli>engine-cli</module.engine-cli>
-
-        <module.nb5>nb5</module.nb5>
-        <module.nbr>nbr</module.nbr>
-
-        <module.nb-spectest>nb-spectest</module.nb-spectest>
-<!--        <module.nbr-examples>nbr-examples</module.nbr-examples>-->
-
-        <!-- driver modules -->
-        <module.adapter-diag>adapter-diag</module.adapter-diag>
-        <module.adapter-stdout>adapter-stdout</module.adapter-stdout>
-        <module.adapter-cqld4>adapter-cqld4</module.adapter-cqld4>
-        <module.adapter-http>adapter-http</module.adapter-http>
-        <module.adapter-tcp>adapter-tcp</module.adapter-tcp>
-        <module.adapter-dynamodb>adapter-dynamodb</module.adapter-dynamodb>
-        <module.adapter-mongodb>adapter-mongodb</module.adapter-mongodb>
-        <module.adapter-pulsar>adapter-pulsar</module.adapter-pulsar>
-        <module.adapter-s4j>adapter-s4j</module.adapter-s4j>
-        <module.adapter-kafka>adapter-kafka</module.adapter-kafka>
-        <module.adapter-kafka>adapter-amqp</module.adapter-kafka>
-        <module.adapter-jdbc>adapter-jdbc</module.adapter-jdbc>
-
-        <!-- VIRTDATA MODULES -->
-        <module.virtdata-api>virtdata-api</module.virtdata-api>
-        <module.virtdata-lang>virtdata-lang</module.virtdata-lang>
-        <module.virtdata-realdata>virtdata-realdata</module.virtdata-realdata>
-        <module.virtdata-lib-basics>virtdata-lib-basics</module.virtdata-lib-basics>
-        <module.virtdata-lib-random>virtdata-lib-random</module.virtdata-lib-random>
-        <module.virtdata-lib-curves4>virtdata-lib-curves4</module.virtdata-lib-curves4>
-        <module.virtdata-lib-realer>virtdata-lib-realer</module.virtdata-lib-realer>
-        <module.virtdata-lib-realer>virtdata-lib-hdf5</module.virtdata-lib-realer>
-        <module.virtdata-userlibs>virtdata-userlibs</module.virtdata-userlibs>
     </properties>
     <modules>
 
@@ -119,6 +92,7 @@
         <module>virtdata-lib-curves4</module>
         <module>virtdata-lib-realer</module>
         <module>virtdata-lib-hdf5</module>
+        <module>virtdata-lib-vectors</module>
         <module>virtdata-userlibs</module>
 
         <!-- Documentation -->
