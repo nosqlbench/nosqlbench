@@ -54,27 +54,5 @@ public class CqlD4BatchStmtMapper implements OpMapper<Cqld4CqlOp> {
         OpDispenser<? extends Cqld4CqlOp> subopDispenser = subopMapper.apply(subop);
         return new CqlD4BatchStmtDispenser(adapter, sessionFunc, op,repeat, subop, subopDispenser);
 
-
-//        ParsedTemplateString stmtTpl = op.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
-//            "No statement was found in the op template:" + op
-//        ));
-//
-//        RSProcessors processors = new RSProcessors();
-//        if (stmtTpl.getCaptures().size()>0) {
-//            processors.add(() -> new CqlFieldCaptureProcessor(stmtTpl.getCaptures()));
-//        }
-//
-//        Optional<List> processorList = op.getOptionalStaticConfig("processors", List.class);
-//
-//        processorList.ifPresent(l -> {
-//            l.forEach(m -> {
-//                Map<String, String> pconfig = ParamsParser.parseToMap(m, "type");
-//                ResultSetProcessor processor = Cqld4Processors.resolve(pconfig);
-//                processors.add(() -> processor);
-//            });
-//        });
-//
-//        return new Cqld4PreparedStmtDispenser(adapter, sessionFunc, op, stmtTpl, processors);
-
     }
 }
