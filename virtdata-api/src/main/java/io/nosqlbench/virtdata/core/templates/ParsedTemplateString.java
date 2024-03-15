@@ -141,7 +141,7 @@ public class ParsedTemplateString {
         this.rawtemplate = rawtemplate;
 
         CapturePointParser capturePointParser = new CapturePointParser();
-        CapturePointParser.Result captureData = capturePointParser.apply(rawtemplate);
+        CapturePointParser.ParsedCapturePoint captureData = capturePointParser.apply(rawtemplate);
         this.captures.addAll(captureData.getCaptures());
 
         BindPointParser bindPointParser = new BindPointParser();

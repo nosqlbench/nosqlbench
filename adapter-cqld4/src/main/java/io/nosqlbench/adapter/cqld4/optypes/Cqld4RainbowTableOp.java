@@ -22,7 +22,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
 import java.util.Map;
 
 // Need to create RainbowTableStatement
-public class Cqld4RainbowTableOp implements CycleOp<ResultSet>, VariableCapture, OpGenerator, OpResultSize {
+public class Cqld4RainbowTableOp implements CycleOp<ResultSet>, OpGenerator, OpResultSize {
 //    private final CqlSession session;
 //    private final RainbowTableStatement stmt;
 
@@ -37,14 +37,5 @@ public class Cqld4RainbowTableOp implements CycleOp<ResultSet>, VariableCapture,
     public Op getNextOp() {
         throw new RuntimeException("implement me");
     }
-
-    @Override
-    public Map<String, ?> capture() {
-        throw new RuntimeException("implement me");
-   }
-//
-//    public Cqld4RainbowTableOp(CqlSession session, RainbowTableStatement stmt, int maxpages, boolean retryreplace) {
-//        //
-//    }
 
 }

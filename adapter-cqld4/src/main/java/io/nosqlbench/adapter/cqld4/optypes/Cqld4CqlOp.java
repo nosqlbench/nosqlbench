@@ -29,6 +29,7 @@ import io.nosqlbench.adapter.cqld4.exceptions.ExceededRetryReplaceException;
 import io.nosqlbench.adapter.cqld4.exceptions.UnexpectedPagingException;
 import io.nosqlbench.adapter.cqld4.instruments.CqlOpMetrics;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
+import io.nosqlbench.virtdata.core.templates.CapturePoint;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +50,7 @@ import java.util.concurrent.*;
 // TODO: add rows histogram resultSetSizeHisto
 
 
-public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture, OpGenerator, OpResultSize {
+public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture<List<Row>>, OpGenerator, OpResultSize {
     private final static Logger logger = LogManager.getLogger(Cqld4CqlOp.class);
 
     private final CqlSession session;
@@ -165,8 +166,10 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture,
         return next;
     }
 
-    public Map<String, ?> capture() {
-        throw new NotImplementedException("Not implemented for Cqld4CqlOp");
+
+    @Override
+    public List<?> capture(List<Row> input, List<CapturePoint> capturePoints) {
+
     }
 
     public abstract Statement<?> getStmt();

@@ -23,34 +23,70 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CapturePointParser implements Function<String, CapturePointParser.Result> {
+public class CapturePointParser implements Function<String, CapturePointParser.ParsedCapturePoint> {
 
-    public final static Pattern CAPTUREPOINT_PATTERN = Pattern.compile(
-        "(\\[(?<capture>\\w+[-_\\d\\w.]*)(\\s+[aA][sS]\\s+(?<alias>\\w+[-_\\d\\w.]*))?])"
+    public final static Pattern CAPTURE_PARAM_PATTERN = Pattern.compile(
+        "(\\s*(?<param>as|scope|type)\\s*:\\s*(?<value>[-_.a-zA-Z0-9<>]+))"
     );
+    public final static Pattern CAPTURE_POINT_PATTERN = Pattern.compile(
+        "\\[\\s*(?<name>[a-z][_a-zA-Z0-9]*)(?<params>" + CAPTURE_PARAM_PATTERN.pattern() + "+)*]"
+    );
+
     @Override
-    public Result apply(String template) {
+    public ParsedCapturePoint apply(String template) {
         StringBuilder raw = new StringBuilder();
-        Matcher m = CAPTUREPOINT_PATTERN.matcher(template);
-        List<CapturePoint> captures = new ArrayList<>();
+        Matcher m = CAPTURE_POINT_PATTERN.matcher(template);
+        List<io.nosqlbench.virtdata.core.templates.CapturePoint> captures = new ArrayList<>();
 
         while (m.find()) {
-            CapturePoint captured = CapturePoint.of(m.group("capture"), m.group("alias"));
+            String captureName = m.group("name");
+            String captureParams = m.group("params");
+            String storedName = captureName;
+            Class<?> storedClass = Object.class;
+            Class<?> elementType = null;
+            io.nosqlbench.virtdata.core.templates.CapturePoint.Scope storedScope = io.nosqlbench.virtdata.core.templates.CapturePoint.Scope.stanza;
+
+            if (captureParams != null) {
+                Matcher pfinder = CAPTURE_PARAM_PATTERN.matcher(captureParams);
+                while (pfinder.find()) {
+                    String param = pfinder.group("param");
+                    String value = pfinder.group("value");
+                    switch (param) {
+                        case "as":
+                            storedName = value;
+                            break;
+                        case "scope":
+                            storedScope = io.nosqlbench.virtdata.core.templates.CapturePoint.Scope.valueOf(value);
+                            break;
+                        case "type":
+                            try {
+                                storedClass = Class.forName(value);
+                            } catch (ClassNotFoundException e) {
+                                throw new RuntimeException(e);
+                            }
+                            break;
+                    }
+                }
+            }
+            io.nosqlbench.virtdata.core.templates.CapturePoint captured =
+                io.nosqlbench.virtdata.core.templates.CapturePoint.of(captureName, storedName, storedScope, storedClass,
+                    null);
             captures.add(captured);
-            m.appendReplacement(raw,captured.getName());
+            m.appendReplacement(raw, captured.getCapturedName());
+
+
         }
         m.appendTail(raw);
 
-        return new Result(raw.toString(),captures);
+        return new ParsedCapturePoint(raw.toString(), captures);
     }
 
-    public final static class Result {
+    public final static class ParsedCapturePoint {
 
         private final String rawTemplate;
-        private final List<CapturePoint> captures;
+        private final List<io.nosqlbench.virtdata.core.templates.CapturePoint> captures;
 
-        public Result(String rawTemplate, List<CapturePoint> captures) {
-
+        public ParsedCapturePoint(String rawTemplate, List<io.nosqlbench.virtdata.core.templates.CapturePoint> captures) {
             this.rawTemplate = rawTemplate;
             this.captures = captures;
         }
@@ -59,7 +95,7 @@ public class CapturePointParser implements Function<String, CapturePointParser.R
             return this.rawTemplate;
         }
 
-        public List<CapturePoint> getCaptures() {
+        public List<io.nosqlbench.virtdata.core.templates.CapturePoint> getCaptures() {
             return this.captures;
         }
 
@@ -67,8 +103,8 @@ public class CapturePointParser implements Function<String, CapturePointParser.R
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Result result = (Result) o;
-            return Objects.equals(rawTemplate, result.rawTemplate) && Objects.equals(captures, result.captures);
+            ParsedCapturePoint capturePoint = (ParsedCapturePoint) o;
+            return Objects.equals(rawTemplate, capturePoint.rawTemplate) && Objects.equals(captures, capturePoint.captures);
         }
 
         @Override

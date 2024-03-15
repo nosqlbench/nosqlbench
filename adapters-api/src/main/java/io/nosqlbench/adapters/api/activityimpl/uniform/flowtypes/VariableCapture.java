@@ -16,9 +16,11 @@
 
 package io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes;
 
+import io.nosqlbench.virtdata.core.templates.CapturePoint;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
+import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * If an op implements VariableCapture, then it is known to be able to
@@ -29,6 +31,24 @@ import java.util.Map;
  * and to allow for auto documentation tha the feature is supported for
  * a given adapter.
  */
-public interface VariableCapture {
-    Map<String,?> capture();
+public interface VariableCapture<I> {
+    List<?> capture(I input, List<CapturePoint> capturePoints);
+
+    default void applyCaptures(List<CapturePoint> capturePoints, List<?> values) {
+        for (int i = 0; i < capturePoints.size(); i++) {
+            CapturePoint cp = capturePoints.get(i);
+            String storeAs = cp.getStoredName();
+            CapturePoint.Scope storeScope = cp.getStoredScope();
+            Class<?> storedType = cp.getStoredType();
+
+
+            switch (storeScope) {
+                case stanza, container, thread ->
+                    SharedState.tl_ObjectMap.get().put(storeAs, storedType.cast(values.get(i)));
+                case session ->
+                    SharedState.gl_ObjectMap.put(storeAs, storedType.cast(values.get(i)));
+            }
+        }
+
+    }
 }

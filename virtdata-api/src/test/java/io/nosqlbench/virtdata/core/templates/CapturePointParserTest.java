@@ -27,13 +27,27 @@ public class CapturePointParserTest {
     @Test
     public void testCapturePoint1() {
         CapturePointParser cpp = new CapturePointParser();
-        CapturePointParser.Result result = cpp.apply("string with [capture1]");
-        assertThat(result).isEqualTo(
-            new CapturePointParser.Result(
+        CapturePointParser.ParsedCapturePoint capturePoint = cpp.apply("string with [capture1]");
+        assertThat(capturePoint).isEqualTo(
+            new CapturePointParser.ParsedCapturePoint(
                 "string with capture1",
-                List.of(CapturePoint.of("capture1"))
+                List.of(io.nosqlbench.virtdata.core.templates.CapturePoint.of("capture1"))
             )
         );
+    }
+
+    @Test
+    public void testCaptureStoredName() {
+        CapturePointParser cpp = new CapturePointParser();
+        CapturePointParser.ParsedCapturePoint capturePoint = cpp.apply("string with [capture1 as:captured-as-name scope:stanza]");
+        assertThat(capturePoint).isEqualTo(
+            new CapturePointParser.ParsedCapturePoint(
+                "string with capture1",
+                List.of(io.nosqlbench.virtdata.core.templates.CapturePoint.of("capture1", "captured-as-name",
+                    io.nosqlbench.virtdata.core.templates.CapturePoint.Scope.stanza, Object.class, null))
+            )
+        );
+
     }
 
 }

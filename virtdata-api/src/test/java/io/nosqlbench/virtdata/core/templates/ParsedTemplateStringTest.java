@@ -92,11 +92,12 @@ public class ParsedTemplateStringTest {
     @Test
     public void shouldMatchBasicCapturePoint() {
         ParsedTemplateString pt = new ParsedTemplateString(
-            "select [u],[v as v1] from users where userid={userid}", Map.of("userid", "NumberNameToString()")
+            "select [u],[v as:v1] from users where userid={userid}", Map.of("userid", "NumberNameToString()")
         );
         assertThat(pt.getAnchors()).containsExactly("userid");
         assertThat(pt.getType()).isEqualTo(ParsedSpanType.concat);
-        assertThat(pt.getCaptures()).containsExactly(CapturePoint.of("u"),CapturePoint.of("v","v1"));
+        assertThat(pt.getCaptures()).containsExactly(CapturePoint.of("u"),CapturePoint.of("v","v1",
+            CapturePoint.Scope.stanza,Object.class,null));
 
     }
 

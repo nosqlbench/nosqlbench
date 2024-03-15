@@ -56,6 +56,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DryRunOpDispenserWrapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.virtdata.core.templates.CapturePoint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -450,6 +451,22 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                 DriverAdapter<?,?> adapter = adapters.get(i);
                 OpMapper<? extends Op> opMapper = adapter.getOpMapper();
                 OpDispenser<? extends Op> dispenser = opMapper.apply(pop);
+
+                List<CapturePoint> captures = pop.getCaptures();
+                if (!captures.isEmpty()) {
+                    logger.debug("Creating test op for variable capture configuration (for " + pop.getName() + ")");
+                    Op op = dispenser.apply(0);
+                    if (op instanceof VariableCapture cap) {
+                        if (op instanceof CycleOp<?> cycleOp) {
+                            dispenser = new VarCapOpDispenserWrapper((DriverAdapter<Op,Object>) adapter, pop,
+                                dispenser);
+                        } else {
+                            throw new RuntimeException("Unable to wrap op dispenser for variable capture because of " +
+                                "the core op implementation does not return a result. Use CycleOp for this.");
+                        }
+
+                    }
+                }
 
                 String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
                 if ("op".equalsIgnoreCase(dryrunSpec)) {

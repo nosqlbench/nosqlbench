@@ -28,10 +28,11 @@ public class CapturePointTest {
     public void testBasicCaptures() {
         CapturePointParser cpp = new CapturePointParser();
         assertThat(cpp.apply("test [point1] [point2 as alias3]")).isEqualTo(
-            new CapturePointParser.Result("test point1 point2",
+            new CapturePointParser.ParsedCapturePoint("test point1 point2",
                 List.of(
-                    CapturePoint.of("point1"),
-                    CapturePoint.of("point2","alias3")
+                    io.nosqlbench.virtdata.core.templates.CapturePoint.of("point1"),
+                    io.nosqlbench.virtdata.core.templates.CapturePoint.of("point2","alias3",
+                        io.nosqlbench.virtdata.core.templates.CapturePoint.Scope.stanza,Object.class, null)
                 ))
         );
     }
@@ -40,7 +41,7 @@ public class CapturePointTest {
     public void testBypass() {
         CapturePointParser cpp = new CapturePointParser();
         assertThat(cpp.apply("")).isEqualTo(
-            new CapturePointParser.Result("", List.of())
+            new CapturePointParser.ParsedCapturePoint("", List.of())
         );
     }
 
