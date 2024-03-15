@@ -99,11 +99,9 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                         runnableOp.run();
                     } else if (op instanceof CycleOp<?> cycleOp) {
                         result = cycleOp.apply(cycle);
-                    } else if (op instanceof ChainingOp chainingOp) {
-                        result = chainingOp.apply(result);
                     } else {
                         throw new RuntimeException("The op implementation did not implement any active logic. Implement " +
-                            "one of [RunnableOp, CycleOp, or ChainingOp]");
+                            "one of [RunnableOp, CycleOp]");
                     }
                     // TODO: break out validation timer from execute
                     try (Timer.Context ignored = verifierTimer.time()) {
