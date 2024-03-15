@@ -22,7 +22,7 @@ At high level, this adapter supports the following Kafka functionalities
     * manual message commit with a configurable number of message commits in one batch
 * Kafka Transaction support
 
-## 1.1. Example NB Yaml
+## 1.1. Example NB Yaml {#11-example-nb-yaml}
 * [kafka_producer.yaml](scenarios/kafka_producer.yaml)
 *
 * [kafka_consumer.yaml](scenarios/kafka_consumer.yaml)
@@ -37,7 +37,7 @@ $ <nb_cmd> run driver=kafka -vv cycles=100 threads=2 num_clnt=2 yaml=kafka_produ
 $ <nb_cmd> run driver=kafka -vv cycles=100 threads=4 num_clnt=2 num_cons_grp=2 yaml=kafka_producer.yaml config=kafka_config.properties bootstrap_server=PLAINTEXT://localhost:9092
 ```
 
-## 2.1. NB Kafka adapter specific CLI parameters
+## 2.1. NB Kafka adapter specific CLI parameters {#21-nb-kafka-adapter-specific-cli-parameters}
 
 * `num_clnt`: the number of Kafka clients to publish messages to or to receive messages from
     * For producer workload, this is the number of the producer threads to publish messages to the same topic
