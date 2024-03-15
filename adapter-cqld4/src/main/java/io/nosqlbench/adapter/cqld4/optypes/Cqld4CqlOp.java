@@ -169,7 +169,7 @@ public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture<
 
     @Override
     public List<?> capture(List<Row> input, List<CapturePoint> capturePoints) {
-
+        return List.of();
     }
 
     public abstract Statement<?> getStmt();
