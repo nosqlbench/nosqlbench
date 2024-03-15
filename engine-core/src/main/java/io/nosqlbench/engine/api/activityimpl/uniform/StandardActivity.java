@@ -84,11 +84,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         if (defaultDriverName.isPresent() && defaultAdapter.isEmpty()) {
             throw new BasicError("Unable to load default driver adapter '" + defaultDriverName.get() + '\'');
         }
-
-        // HERE, op templates are loaded before drivers are loaded
         List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter.orElse(null));
-
-
         List<ParsedOp> pops = new ArrayList<>();
         List<DriverAdapter<?,?>> adapterlist = new ArrayList<>();
         NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(yamlmodel);
@@ -96,19 +92,11 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
         Optional<String> defaultDriverOption = activityDef.getParams().getOptionalString("driver");
         ConcurrentHashMap<String, OpMapper<? extends Op>> mappers = new ConcurrentHashMap<>();
         for (OpTemplate ot : opTemplates) {
-//            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
             String driverName = ot.getOptionalStringParam("driver", String.class)
                 .or(() -> ot.getOptionalStringParam("type", String.class))
                 .or(() -> defaultDriverOption)
                 .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
 
-//            String driverName = ot.getOptionalStringParam("driver")
-//                .or(() -> activityDef.getParams().getOptionalString("driver"))
-//                .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
-
-
-
-            // HERE
             if (!adapters.containsKey(driverName)) {
 
                 DriverAdapter<?,?> adapter =  Optional.of(driverName)

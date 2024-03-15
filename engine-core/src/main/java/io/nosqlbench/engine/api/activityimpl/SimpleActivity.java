@@ -18,6 +18,8 @@ package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.EmitterOpDispenserWrapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.VariableCapture;
+import io.nosqlbench.engine.api.activityimpl.varcap.VarCapOpDispenserWrapper;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
@@ -418,9 +420,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
 
 
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromParsedOps(
-//        Map<String, DriverAdapter<?,?>> adapterCache,
-//        Map<String, OpMapper<? extends Op>> mapperCache,
-        List<DriverAdapter<?,?>> adapters,
+        List<DriverAdapter<?, ?>> adapters,
         List<ParsedOp> pops
     ) {
         try {
@@ -457,7 +457,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                     dryrunCount++;
                 } else if ("emit".equalsIgnoreCase(dryrunSpec)) {
                     dispenser = new EmitterOpDispenserWrapper(
-                        (DriverAdapter<Op,Object>)adapter,
+                        (DriverAdapter<Op, Object>) adapter,
                         pop,
                         (OpDispenser<? extends CycleOp<?>>) dispenser
                     );
@@ -560,7 +560,8 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
      * @param opinit
      *     A function to map an OpTemplate to the executable operation form required by
      *     the native driver for this activity.
-     * @param defaultAdapter The adapter which will be used for any op templates with no explicit adapter
+     * @param defaultAdapter
+     *     The adapter which will be used for any op templates with no explicit adapter
      * @return The sequence of operations as determined by filtering and ratios
      */
     @Deprecated(forRemoval = true)
@@ -628,8 +629,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
             if (op != null && OpsLoader.isJson(op)) {
                 workloadSource = "commandline: (op/json): '" + op + "'";
                 return OpsLoader.loadString(op, OpTemplateFormat.json, activityDef.getParams(), null);
-            }
-            else if (op != null) {
+            } else if (op != null) {
                 workloadSource = "commandline: (op/inline): '" + op + "'";
                 return OpsLoader.loadString(op, OpTemplateFormat.inline, activityDef.getParams(), null);
             }
@@ -668,6 +668,6 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
 
     @Override
     public Map<String, String> asResult() {
-        return Map.of("activity",this.getAlias());
+        return Map.of("activity", this.getAlias());
     }
 }
