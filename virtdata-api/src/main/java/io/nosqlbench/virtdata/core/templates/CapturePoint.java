@@ -34,7 +34,7 @@ import java.util.Objects;
  * The name of the variable to be captured is <em>username</em>. It is to be captured under
  * a different variable name <em>u1</em>.
  *
- * If the name is the same in both cases, i.e. the variable is named in the result type as it
+ * If the name is the same in both cases, i.e. the variable is named in the result as it
  * should be known after extraction, then you can elide the <em>as u1</em> clause as in this example:
  *
  * <pre>{@code
