@@ -28,7 +28,6 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
 
-
 public class MilvusDriverAdapter extends BaseDriverAdapter<MilvusOp, MilvusSpace> {
 
     public MilvusDriverAdapter(NBComponent parentComponent, NBLabels labels) {
@@ -51,3 +50,4 @@ public class MilvusDriverAdapter extends BaseDriverAdapter<MilvusOp, MilvusSpace
     }
 
 }
+

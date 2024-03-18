@@ -16,9 +16,7 @@
 
 package io.nosqlbench.adapter.milvus;
 
-import io.nosqlbench.adapter.milvus.opdispensers.MilvusDropCollectionOpDispenser;
-import io.nosqlbench.adapter.milvus.opdispensers.MilvusOpDispenser;
-import io.nosqlbench.adapter.milvus.opdispensers.MilvusCreateCollectionOpDispenser;
+import io.nosqlbench.adapter.milvus.opdispensers.*;
 import io.nosqlbench.adapter.milvus.ops.MilvusOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusOpTypes;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
@@ -60,6 +58,9 @@ public class MilvusOpMapper implements OpMapper<MilvusOp> {
         return switch (typeAndTarget.enumId) {
             case drop_collection -> new MilvusDropCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_collection ->  new MilvusCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_index -> new MilvusCreateIndexOpDispenser(adapter,op, typeAndTarget.targetFunction);
+            case drop_index -> new MilvusDropIndexOpDispenser(adapter,op,typeAndTarget.targetFunction);
+            case insert -> new MilvusInsertOpDispenser(adapter,op,typeAndTarget.targetFunction);
             default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
                 "mapping parsed op " + op);
         };

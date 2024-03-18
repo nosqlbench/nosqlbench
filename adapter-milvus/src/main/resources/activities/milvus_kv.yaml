@@ -38,16 +38,15 @@ blocks:
             description: A value within part_key
             auto_id: false # Generate primary key?
       create_index:
-        description: "https://milvus.io/api-reference/java/v2.3.x/Index/createIndex().md"
+        create_index: example_idx
         collection_name: "example_collection"
+        description: "https://milvus.io/api-reference/java/v2.3.x/Index/createIndex().md"
         field_name: value
-        index_name: "example_idx"
         index_type: DISKANN
         metric_type: COSINE # L2 | IP | COSINE | HAMMING | JACCARD | TANIMOTO
 #        extra_param: "none"
         sync_mode: true # whether to block till indexing is complete
         sync_waiting_interval: 1000 # ms for polling interval on sync_mode: true
-
 #  rampup:
 #    ops:
 #      write:
