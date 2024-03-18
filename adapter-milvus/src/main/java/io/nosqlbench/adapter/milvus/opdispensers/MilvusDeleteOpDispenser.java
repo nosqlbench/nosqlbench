@@ -1,7 +1,7 @@
 package io.nosqlbench.adapter.milvus.opdispensers;
 
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) 2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,14 @@ package io.nosqlbench.adapter.milvus.opdispensers;
  */
 
 
-import com.alibaba.fastjson.JSONObject;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.dml.DeleteParam;
-import io.milvus.param.dml.InsertParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.ops.MilvusDeleteOp;
-import io.nosqlbench.adapter.milvus.ops.MilvusInsertOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.function.LongFunction;
 
 public class MilvusDeleteOpDispenser extends MilvusOpDispenser {
