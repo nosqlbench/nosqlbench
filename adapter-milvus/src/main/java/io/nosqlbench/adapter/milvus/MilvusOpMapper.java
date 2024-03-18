@@ -17,8 +17,8 @@
 package io.nosqlbench.adapter.milvus;
 
 import io.nosqlbench.adapter.milvus.opdispensers.*;
-import io.nosqlbench.adapter.milvus.ops.MilvusOp;
-import io.nosqlbench.adapter.milvus.ops.MilvusOpTypes;
+import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
+import io.nosqlbench.adapter.milvus.types.MilvusOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -26,7 +26,7 @@ import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class MilvusOpMapper implements OpMapper<MilvusOp> {
+public class MilvusOpMapper implements OpMapper<MilvusBaseOp> {
     private static final Logger logger = LogManager.getLogger(MilvusOpMapper.class);
     private final MilvusDriverAdapter adapter;
 
@@ -46,9 +46,9 @@ public class MilvusOpMapper implements OpMapper<MilvusOp> {
      * @return The correct {@link MilvusOpDispenser} subclass based on the op type
      */
     @Override
-    public OpDispenser<? extends MilvusOp> apply(ParsedOp op) {
-        TypeAndTarget<MilvusOpTypes, String> typeAndTarget = op.getTypeAndTarget(
-            MilvusOpTypes.class,
+    public OpDispenser<? extends MilvusBaseOp> apply(ParsedOp op) {
+        TypeAndTarget<MilvusOpType, String> typeAndTarget = op.getTypeAndTarget(
+            MilvusOpType.class,
             String.class,
             "type",
             "target"

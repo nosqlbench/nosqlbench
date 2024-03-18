@@ -22,7 +22,7 @@ import io.milvus.param.R;
 import io.milvus.param.dml.InsertParam;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-public class MilvusInsertOp extends MilvusOp<InsertParam> {
+public class MilvusInsertOp extends MilvusBaseOp<InsertParam> {
 
     /**
      * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method

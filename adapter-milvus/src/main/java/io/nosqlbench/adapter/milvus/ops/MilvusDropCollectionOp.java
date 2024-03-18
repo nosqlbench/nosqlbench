@@ -19,10 +19,8 @@ package io.nosqlbench.adapter.milvus.ops;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.collection.DropCollectionParam;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-public class MilvusDropCollectionOp extends MilvusOp<DropCollectionParam> {
+public class MilvusDropCollectionOp extends MilvusBaseOp<DropCollectionParam> {
     /**
      * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method
      *

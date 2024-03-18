@@ -17,14 +17,10 @@
 package io.nosqlbench.adapter.milvus.ops;
 
 import io.milvus.client.MilvusServiceClient;
-import io.milvus.param.R;
-import io.milvus.param.RpcStatus;
 import io.milvus.param.collection.CreateCollectionParam;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-public class MilvusCreateCollectionOp extends MilvusOp<CreateCollectionParam> {
+public class MilvusCreateCollectionOp extends MilvusBaseOp<CreateCollectionParam> {
     /**
      * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method
      *

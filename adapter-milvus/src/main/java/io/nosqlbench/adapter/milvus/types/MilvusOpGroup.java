@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.milvus.ops;
+package io.nosqlbench.adapter.milvus.types;
 
-import io.milvus.client.MilvusServiceClient;
-import io.milvus.param.index.CreateIndexParam;
+public enum MilvusOpGroup {
+    Alias,
+    Authentication,
+    BulkInsert,
+    Collection,
+    Connections,
+    Database,
+    HighLevel,
+    Index,
+    Management,
+    Misc,
+    Partition,
+    QueryAndSearch,
+    RBAC
 
-public class MilvusCreateIndexOp extends MilvusBaseOp<CreateIndexParam> {
-    public MilvusCreateIndexOp(MilvusServiceClient client, CreateIndexParam request) {
-        super(client, request);
-    }
-
-    @Override
-    public Object applyOp(long value) {
-        return client.createIndex(request);
-    }
 }

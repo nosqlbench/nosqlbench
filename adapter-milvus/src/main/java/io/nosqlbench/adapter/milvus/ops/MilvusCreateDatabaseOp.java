@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,16 @@
 
 package io.nosqlbench.adapter.milvus.ops;
 
-public enum MilvusOpTypes {
-    drop_collection,
-    create_index,
+import io.milvus.client.MilvusServiceClient;
+import io.milvus.param.collection.CreateDatabaseParam;
 
-    drop_index,
-    insert,
-//    update,
-    search,
-    delete,
+public class MilvusCreateDatabaseOp extends MilvusBaseOp<CreateDatabaseParam> {
+    public MilvusCreateDatabaseOp(MilvusServiceClient client, CreateDatabaseParam request) {
+        super(client, request);
+    }
 
-//    alter_alias,
-//    create_alias,
-//    drop_alias,
-
-//    create_credential,
-//    delete_credential,
-//    list_cred_users,
-//    update_credential,
-
-//    bulk_insert,
-//    get_bulk_insert_state,
-//    list_bulk_insert_tasks,
-
-    create_collection,
-//    alter_collection,
-//    describe_collection,
-//    upsert,
-//    describeindexstats,
-//    fetch
+    @Override
+    public Object applyOp(long value) {
+        return client.createDatabase(request);
+    }
 }

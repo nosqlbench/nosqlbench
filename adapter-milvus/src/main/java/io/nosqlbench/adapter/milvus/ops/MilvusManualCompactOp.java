@@ -17,22 +17,16 @@
 package io.nosqlbench.adapter.milvus.ops;
 
 import io.milvus.client.MilvusServiceClient;
-import io.milvus.param.index.DropIndexParam;
-import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.milvus.grpc.ManualCompactionRequest;
+import io.milvus.param.control.ManualCompactParam;
 
-public class MilvusDropIndexOp extends MilvusBaseOp<DropIndexParam> {
-    /**
-     * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method
-     *
-     * @param client    The associated {@link MilvusServiceClient} used to communicate with the database
-     * @param request   The {@link DropIndexParam} built for this operation
-     */
-    public MilvusDropIndexOp(MilvusServiceClient client, DropIndexParam request) {
-        super(client,request);
+public class MilvusManualCompactOp extends MilvusBaseOp<ManualCompactParam> {
+    public MilvusManualCompactOp(MilvusServiceClient client, ManualCompactParam request) {
+        super(client, request);
     }
 
     @Override
     public Object applyOp(long value) {
-        return client.dropIndex(request);
+        return client.manualCompact(request);
     }
 }

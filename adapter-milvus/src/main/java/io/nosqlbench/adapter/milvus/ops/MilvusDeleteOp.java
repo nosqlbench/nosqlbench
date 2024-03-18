@@ -17,15 +17,9 @@
 package io.nosqlbench.adapter.milvus.ops;
 
 import io.milvus.client.MilvusServiceClient;
-import io.milvus.grpc.MutationResult;
-import io.milvus.param.R;
-import io.milvus.param.RpcStatus;
 import io.milvus.param.dml.DeleteParam;
-import io.milvus.param.index.CreateIndexParam;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-public class MilvusDeleteOp extends MilvusOp<DeleteParam> {
+public class MilvusDeleteOp extends MilvusBaseOp<DeleteParam> {
 
     public MilvusDeleteOp(MilvusServiceClient client, DeleteParam request) {
         super(client,request);

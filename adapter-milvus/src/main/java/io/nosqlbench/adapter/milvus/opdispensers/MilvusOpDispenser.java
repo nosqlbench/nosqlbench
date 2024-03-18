@@ -19,17 +19,17 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.MilvusSpace;
-import io.nosqlbench.adapter.milvus.ops.MilvusOp;
+import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public abstract class MilvusOpDispenser extends BaseOpDispenser<MilvusOp, MilvusSpace> {
+public abstract class MilvusOpDispenser extends BaseOpDispenser<MilvusBaseOp, MilvusSpace> {
 
     protected final LongFunction<MilvusSpace> mzSpaceFunction;
     protected final LongFunction<MilvusServiceClient> clientFunction;
-    private final LongFunction<? extends MilvusOp> opF;
+    private final LongFunction<? extends MilvusBaseOp> opF;
 
     protected MilvusOpDispenser(MilvusDriverAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op);
@@ -38,14 +38,14 @@ public abstract class MilvusOpDispenser extends BaseOpDispenser<MilvusOp, Milvus
         this.opF = createOpFunc(this.clientFunction, op, targetF);
     }
 
-    public abstract LongFunction<? extends MilvusOp> createOpFunc(
+    public abstract LongFunction<? extends MilvusBaseOp> createOpFunc(
         LongFunction<MilvusServiceClient> clientF,
         ParsedOp op,
         LongFunction<String> targetF
     );
 
     @Override
-    public MilvusOp apply(long value) {
+    public MilvusBaseOp apply(long value) {
         return opF.apply(value);
     }
 }

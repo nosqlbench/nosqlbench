@@ -21,16 +21,27 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class MilvusOp<T> implements CycleOp<Object> {
+import java.util.function.Function;
+import java.util.function.LongFunction;
 
-    protected final static Logger logger = LogManager.getLogger(MilvusOp.class);
+public abstract class MilvusBaseOp<T> implements CycleOp<Object> {
+
+    protected final static Logger logger = LogManager.getLogger(MilvusBaseOp.class);
 
     protected final MilvusServiceClient client;
     protected final T request;
+    protected final LongFunction<Object> apiCall;
 
-    public MilvusOp(MilvusServiceClient client, T requestParam) {
+    public MilvusBaseOp(MilvusServiceClient client, T requestParam) {
         this.client = client;
         this.request = requestParam;
+        this.apiCall = this::applyOp;
+    }
+
+    public MilvusBaseOp(MilvusServiceClient client, T requestParam, LongFunction<Object> call) {
+        this.client = client;
+        this.request = requestParam;
+        this.apiCall = call;
     }
 
     @Override
@@ -49,7 +60,7 @@ public abstract class MilvusOp<T> implements CycleOp<Object> {
         }
     };
 
-    public abstract Object applyOp(long value) throws Exception;
+    public abstract Object applyOp(long value);
 
     @Override
     public String toString() {

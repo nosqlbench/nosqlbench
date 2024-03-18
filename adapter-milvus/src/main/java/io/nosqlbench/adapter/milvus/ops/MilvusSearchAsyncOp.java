@@ -16,13 +16,21 @@
 
 package io.nosqlbench.adapter.milvus.ops;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.grpc.SearchResults;
 import io.milvus.param.R;
 import io.milvus.param.dml.SearchParam;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-public class MilvusSearchOp extends MilvusBaseOp<SearchParam> {
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+public class MilvusSearchAsyncOp extends MilvusBaseOp<SearchParam> {
+
+    private final long timeout;
+    private final TimeUnit timeUnit;
 
     /**
      * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method
@@ -30,13 +38,22 @@ public class MilvusSearchOp extends MilvusBaseOp<SearchParam> {
      * @param client    The associated {@link MilvusServiceClient} used to communicate with the database
      * @param request   The {@link SearchParam} built for this operation
      */
-    public MilvusSearchOp(MilvusServiceClient client, SearchParam request) {
+    public MilvusSearchAsyncOp(MilvusServiceClient client, SearchParam request, long timeout, TimeUnit timeUnit) {
         super(client, request);
+        this.timeout = timeout;
+        this.timeUnit = timeUnit;
     }
 
     @Override
     public R<SearchResults> applyOp(long value) {
-        R<SearchResults> response = client.search(request);
-        return response;
+        ListenableFuture<R<SearchResults>> call = client.searchAsync(request);
+        try {
+            return call.get(timeout,timeUnit);
+        } catch (Exception e) {
+            if (e instanceof RuntimeException rte) {
+                throw rte;
+            }
+            else throw new RuntimeException(e);
+        }
     }
 }
