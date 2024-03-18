@@ -64,19 +64,21 @@ blocks:
       insert_op:
         insert:
           collection_name: "TEMPLATE(collection,vector)"
-          field:
+          fields:
             key: {row_key}
             value: {row_vector}
 
   search:
     ops:
       # https://milvus.io/api-reference/java/v2.3.x/High-level%20API/search().md
+      # https://milvus.io/api-reference/java/v2.3.x/Query%20and%20Search/search().md
       search_op:
         search:
           collection_name: "TEMPLATE(collection,vector)"
           output_fields:
             - key
             - value
+          vector_field_name: "value"
           vectors: {row_vector}
-          limit: TEMPLATE(top_k,100)
+          top_k: TEMPLATE(top_k,100)
           consistency_level: "TEMPLATE(read_cl,EVENTUALLY)"

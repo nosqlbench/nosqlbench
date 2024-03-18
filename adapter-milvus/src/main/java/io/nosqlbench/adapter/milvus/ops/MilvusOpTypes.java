@@ -22,10 +22,6 @@ public enum MilvusOpTypes {
     create_index,
 
     drop_index,
-    insert
-//    update,
-//    upsert,
-//    delete,
-//    describeindexstats,
-//    fetch
+    insert,
+    search,
 }

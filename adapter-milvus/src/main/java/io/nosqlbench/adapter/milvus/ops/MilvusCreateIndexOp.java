@@ -19,7 +19,6 @@ package io.nosqlbench.adapter.milvus.ops;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.R;
 import io.milvus.param.RpcStatus;
-import io.milvus.param.collection.CreateCollectionParam;
 import io.milvus.param.index.CreateIndexParam;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
@@ -29,6 +28,12 @@ public class MilvusCreateIndexOp extends MilvusOp {
     private static final Logger logger = LogManager.getLogger(MilvusCreateIndexOp.class);
     private final CreateIndexParam request;
 
+    /**
+     * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method
+     *
+     * @param client    The associated {@link MilvusServiceClient} used to communicate with the database
+     * @param request   The {@link CreateIndexParam} built for this operation
+     */
     public MilvusCreateIndexOp(MilvusServiceClient client, CreateIndexParam request) {
         super(client);
         this.request = request;

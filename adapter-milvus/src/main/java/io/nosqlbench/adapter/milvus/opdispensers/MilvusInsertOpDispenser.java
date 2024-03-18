@@ -19,12 +19,9 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonObject;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.dml.InsertParam;
-import io.milvus.param.index.DropIndexParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
-import io.nosqlbench.adapter.milvus.ops.MilvusDropIndexOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusInsertOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
@@ -41,12 +38,9 @@ public class MilvusInsertOpDispenser extends MilvusOpDispenser {
     /**
      * Create a new MilvusDeleteOpDispenser subclassed from {@link MilvusOpDispenser}.
      *
-     * @param adapter
-     *     The associated {@link MilvusDriverAdapter}
-     * @param op
-     *     The {@link ParsedOp} encapsulating the activity for this cycle
-     * @param targetFunction
-     *     A LongFunction that returns the specified Milvus Index for this Op
+     * @param adapter        The associated {@link MilvusDriverAdapter}
+     * @param op             The {@link ParsedOp} encapsulating the activity for this cycle
+     * @param targetFunction A LongFunction that returns the specified Milvus Index for this Op
      */
     public MilvusInsertOpDispenser(MilvusDriverAdapter adapter,
                                    ParsedOp op,
@@ -80,12 +74,12 @@ public class MilvusInsertOpDispenser extends MilvusOpDispenser {
     }
 
     private LongFunction<List<InsertParam.Field>> createFieldsF(ParsedOp op) {
-        LongFunction<Map> fielddata = op.getAsRequiredFunction("fields", Map.class);
+        LongFunction<Map> fieldDataF = op.getAsRequiredFunction("fields", Map.class);
         LongFunction<List<InsertParam.Field>> fieldsF = l -> {
-            Map<String,Object> fieldmap = fielddata.apply(l);
+            Map<String, Object> fieldmap = fieldDataF.apply(l);
             List<InsertParam.Field> fields = new ArrayList<>();
-            fieldmap.forEach((name,value)->{
-                fields.add(new InsertParam.Field(name,(List)value));
+            fieldmap.forEach((name, value) -> {
+                fields.add(new InsertParam.Field(name, (List) value));
             });
             return fields;
         };

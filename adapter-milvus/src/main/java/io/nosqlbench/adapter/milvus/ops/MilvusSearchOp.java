@@ -17,29 +17,28 @@
 package io.nosqlbench.adapter.milvus.ops;
 
 import io.milvus.client.MilvusServiceClient;
-import io.milvus.param.index.DropIndexParam;
+import io.milvus.grpc.SearchResults;
+import io.milvus.param.R;
+import io.milvus.param.dml.SearchParam;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class MilvusDropIndexOp extends MilvusOp {
-    private static final Logger logger = LogManager.getLogger(MilvusDropIndexOp.class);
-    private final DropIndexParam request;
+public class MilvusSearchOp extends MilvusOp<SearchParam> {
 
     /**
      * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method
      *
      * @param client    The associated {@link MilvusServiceClient} used to communicate with the database
-     * @param request   The {@link DropIndexParam} built for this operation
+     * @param request   The {@link SearchParam} built for this operation
      */
-    public MilvusDropIndexOp(MilvusServiceClient client, DropIndexParam request) {
-        super(client);
-        this.request = request;
+    public MilvusSearchOp(MilvusServiceClient client, SearchParam request) {
+        super(client, request);
     }
 
     @Override
-    public Object applyOp(long value) {
-        logger.debug("Milvus/Zilliz drop collection request");
-        return client.dropIndex(request);
+    public R<SearchResults> applyOp(long value) {
+        R<SearchResults> response = client.search(request);
+        return response;
     }
 }
