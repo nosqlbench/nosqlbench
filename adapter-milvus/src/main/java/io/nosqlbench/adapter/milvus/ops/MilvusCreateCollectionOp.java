@@ -24,10 +24,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class MilvusCreateCollectionOp extends MilvusOp {
-    private static final Logger logger = LogManager.getLogger(MilvusCreateCollectionOp.class);
-    private final CreateCollectionParam request;
-
+public class MilvusCreateCollectionOp extends MilvusOp<CreateCollectionParam> {
     /**
      * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method
      *
@@ -35,14 +32,11 @@ public class MilvusCreateCollectionOp extends MilvusOp {
      * @param request   The {@link CreateCollectionParam} built for this operation
      */
     public MilvusCreateCollectionOp(MilvusServiceClient client, CreateCollectionParam request) {
-        super(client);
-        this.request = request;
+        super(client, request);
     }
 
     @Override
     public Object applyOp(long value) {
-        logger.debug("Milvus/Zilliz create collection request");
-        R<RpcStatus> response = client.createCollection(request);
-        return response;
+        return client.createCollection(request);
     }
 }

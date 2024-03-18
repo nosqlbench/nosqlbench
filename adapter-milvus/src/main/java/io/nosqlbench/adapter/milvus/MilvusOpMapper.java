@@ -61,6 +61,7 @@ public class MilvusOpMapper implements OpMapper<MilvusOp> {
             case create_index -> new MilvusCreateIndexOpDispenser(adapter,op, typeAndTarget.targetFunction);
             case drop_index -> new MilvusDropIndexOpDispenser(adapter,op,typeAndTarget.targetFunction);
             case insert -> new MilvusInsertOpDispenser(adapter,op,typeAndTarget.targetFunction);
+            case delete -> new MilvusDeleteOpDispenser(adapter,op,typeAndTarget.targetFunction);
             default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
                 "mapping parsed op " + op);
         };

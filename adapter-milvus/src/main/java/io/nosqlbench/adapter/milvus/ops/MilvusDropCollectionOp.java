@@ -22,10 +22,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class MilvusDropCollectionOp extends MilvusOp {
-    private static final Logger logger = LogManager.getLogger(MilvusDropCollectionOp.class);
-    private final DropCollectionParam request;
-
+public class MilvusDropCollectionOp extends MilvusOp<DropCollectionParam> {
     /**
      * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method
      *
@@ -33,13 +30,11 @@ public class MilvusDropCollectionOp extends MilvusOp {
      * @param request   The {@link DropCollectionParam} built for this operation
      */
     public MilvusDropCollectionOp(MilvusServiceClient client, DropCollectionParam request) {
-        super(client);
-        this.request = request;
+        super(client, request);
     }
 
     @Override
     public Object applyOp(long value) {
-        logger.debug("Milvus/Zilliz drop collection request");
         return client.dropCollection(request);
     }
 }

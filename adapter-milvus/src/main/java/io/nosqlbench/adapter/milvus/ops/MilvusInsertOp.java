@@ -26,9 +26,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class MilvusInsertOp extends MilvusOp {
-    private static final Logger logger = LogManager.getLogger(MilvusInsertOp.class);
-    private final InsertParam request;
+public class MilvusInsertOp extends MilvusOp<InsertParam> {
 
     /**
      * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method
@@ -37,14 +35,11 @@ public class MilvusInsertOp extends MilvusOp {
      * @param request   The {@link CreateCollectionParam} built for this operation
      */
     public MilvusInsertOp(MilvusServiceClient client, InsertParam request) {
-        super(client);
-        this.request = request;
+        super(client,request);
     }
 
     @Override
     public R<MutationResult> applyOp(long value) {
-        logger.debug("Milvus/Zilliz create collection request");
-        R<MutationResult> response = client.insert(request);
-        return response;
+        return client.insert(request);
     }
 }
