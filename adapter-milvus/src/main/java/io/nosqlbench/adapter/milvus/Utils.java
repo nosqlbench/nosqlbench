@@ -17,7 +17,6 @@
 package io.nosqlbench.adapter.milvus;
 
 public class Utils {
-    public static final String DRIVER_TYPE = "milvus";
 
     /**
      * Mask the digits in the given string with '*'

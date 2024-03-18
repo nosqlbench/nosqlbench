@@ -17,7 +17,9 @@
 package io.nosqlbench.adapter.milvus.opdispensers;
 
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.grpc.DataType;
 import io.milvus.param.collection.CreateCollectionParam;
+import io.milvus.param.collection.FieldType;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.ops.MilvusCreateCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -45,9 +47,21 @@ public class MilvusCreateCollectionOpDispenser extends MilvusOpDispenser {
     // https://milvus.io/docs/create_collection.md
     @Override
     public LongFunction<MilvusCreateCollectionOp> createOpFunc(LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
-        CreateCollectionParam.Builder eb = CreateCollectionParam.newBuilder();
+
+        LongFunction<CreateCollectionParam.Builder> builderF = l ->CreateCollectionParam.newBuilder();
+
+//        builderF.apply(0).addFieldType(FieldType.newBuilder().withDataType(DataType.BinaryVector).build());
+
+        builderF = op.enhanceFuncOptionally(
+            builderF, "description",
+            String.class,
+            CreateCollectionParam.Builder::withDescription
+        );
+
+
         LongFunction<CreateCollectionParam.Builder> f =
             l -> CreateCollectionParam.newBuilder().withCollectionName(targetF.apply(l));
+
         return l -> new MilvusCreateCollectionOp(clientF.apply(l), f.apply(1).build());
     }
 }

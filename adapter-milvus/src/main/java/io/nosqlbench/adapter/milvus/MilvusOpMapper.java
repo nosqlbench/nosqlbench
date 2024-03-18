@@ -49,7 +49,12 @@ public class MilvusOpMapper implements OpMapper<MilvusOp> {
      */
     @Override
     public OpDispenser<? extends MilvusOp> apply(ParsedOp op) {
-        TypeAndTarget<MilvusOpTypes, String> typeAndTarget = op.getTypeAndTarget(MilvusOpTypes.class, String.class, "type", "index");
+        TypeAndTarget<MilvusOpTypes, String> typeAndTarget = op.getTypeAndTarget(
+            MilvusOpTypes.class,
+            String.class,
+            "type",
+            "target"
+        );
         logger.info(() -> "Using " + typeAndTarget.enumId + " statement form for '" + op.getName());
 
         return switch (typeAndTarget.enumId) {

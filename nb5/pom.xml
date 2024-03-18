@@ -131,6 +131,12 @@
             <version>${revision}</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-milvus</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
     </dependencies>
 
     <build>

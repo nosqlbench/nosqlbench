@@ -23,7 +23,7 @@ import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
-@Service(value = DriverAdapterLoader.class, selector = Utils.DRIVER_TYPE)
+@Service(value = DriverAdapterLoader.class, selector = "milvus")
 public class MilvusDriverAdapterLoader implements DriverAdapterLoader {
     @Override
     public MilvusDriverAdapter load(NBComponent parent, NBLabels childLabels) {

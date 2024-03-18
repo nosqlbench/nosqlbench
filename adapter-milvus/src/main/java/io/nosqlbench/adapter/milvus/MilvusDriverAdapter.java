@@ -28,7 +28,7 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
 
-@Service(value = DriverAdapter.class, selector = Utils.DRIVER_TYPE)
+
 public class MilvusDriverAdapter extends BaseDriverAdapter<MilvusOp, MilvusSpace> {
 
     public MilvusDriverAdapter(NBComponent parentComponent, NBLabels labels) {
