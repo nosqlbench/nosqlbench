@@ -18,14 +18,31 @@ package io.nosqlbench.adapter.milvus.ops;
 
 public enum MilvusOpTypes {
     drop_collection,
-    create_collection,
     create_index,
 
     drop_index,
     insert,
-    update,
+//    update,
+    search,
+    delete,
+
+//    alter_alias,
+//    create_alias,
+//    drop_alias,
+
+//    create_credential,
+//    delete_credential,
+//    list_cred_users,
+//    update_credential,
+
+//    bulk_insert,
+//    get_bulk_insert_state,
+//    list_bulk_insert_tasks,
+
+    create_collection,
+//    alter_collection,
+//    describe_collection,
 //    upsert,
-//    delete,
 //    describeindexstats,
 //    fetch
 }

@@ -33,7 +33,7 @@ public class MilvusOpMapper implements OpMapper<MilvusOp> {
     /**
      * Create a new MilvusOpMapper implementing the {@link OpMapper} interface.
      *
-     * @param adapter    The associated {@link MilvusDriverAdapter}
+     * @param adapter The associated {@link MilvusDriverAdapter}
      */
     public MilvusOpMapper(MilvusDriverAdapter adapter) {
         this.adapter = adapter;
@@ -42,8 +42,8 @@ public class MilvusOpMapper implements OpMapper<MilvusOp> {
     /**
      * Given an instance of a {@link ParsedOp} returns the appropriate {@link MilvusOpDispenser} subclass
      *
-     * @param op    The ParsedOp to be evaluated
-     * @return      The correct MilvusOpDispenser subclass based on the op type
+     * @param op The {@link ParsedOp} to be evaluated
+     * @return The correct {@link MilvusOpDispenser} subclass based on the op type
      */
     @Override
     public OpDispenser<? extends MilvusOp> apply(ParsedOp op) {
@@ -57,11 +57,12 @@ public class MilvusOpMapper implements OpMapper<MilvusOp> {
 
         return switch (typeAndTarget.enumId) {
             case drop_collection -> new MilvusDropCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case create_collection ->  new MilvusCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case create_index -> new MilvusCreateIndexOpDispenser(adapter,op, typeAndTarget.targetFunction);
-            case drop_index -> new MilvusDropIndexOpDispenser(adapter,op,typeAndTarget.targetFunction);
-            case insert -> new MilvusInsertOpDispenser(adapter,op,typeAndTarget.targetFunction);
+            case create_collection -> new MilvusCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_index -> new MilvusCreateIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case drop_index -> new MilvusDropIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case insert -> new MilvusInsertOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case delete -> new MilvusDeleteOpDispenser(adapter,op,typeAndTarget.targetFunction);
+            case search -> new MilvusSearchOpDispenser(adapter, op, typeAndTarget.targetFunction);
             default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
                 "mapping parsed op " + op);
         };

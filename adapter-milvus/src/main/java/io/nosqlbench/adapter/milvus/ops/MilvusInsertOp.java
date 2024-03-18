@@ -19,12 +19,8 @@ package io.nosqlbench.adapter.milvus.ops;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.grpc.MutationResult;
 import io.milvus.param.R;
-import io.milvus.param.RpcStatus;
-import io.milvus.param.collection.CreateCollectionParam;
 import io.milvus.param.dml.InsertParam;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class MilvusInsertOp extends MilvusOp<InsertParam> {
 
@@ -32,7 +28,7 @@ public class MilvusInsertOp extends MilvusOp<InsertParam> {
      * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method
      *
      * @param client    The associated {@link MilvusServiceClient} used to communicate with the database
-     * @param request   The {@link CreateCollectionParam} built for this operation
+     * @param request   The {@link InsertParam} built for this operation
      */
     public MilvusInsertOp(MilvusServiceClient client, InsertParam request) {
         super(client,request);

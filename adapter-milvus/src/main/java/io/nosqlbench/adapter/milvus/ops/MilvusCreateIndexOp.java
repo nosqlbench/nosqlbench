@@ -19,7 +19,6 @@ package io.nosqlbench.adapter.milvus.ops;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.R;
 import io.milvus.param.RpcStatus;
-import io.milvus.param.collection.CreateCollectionParam;
 import io.milvus.param.index.CreateIndexParam;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
