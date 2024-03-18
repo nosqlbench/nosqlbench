@@ -24,30 +24,21 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContaine
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.nb.api.components.events.ParamChange;
-import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
-import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
-import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.scenarios.simframe.SimFrameUtils;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
+import io.nosqlbench.scenarios.simframe.capture.SimFrameValueData;
 import io.nosqlbench.scenarios.simframe.optimizers.CMD_optimize;
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
-import io.nosqlbench.scenarios.simframe.stabilization.StatFunctions;
 import org.apache.commons.math4.legacy.exception.MathIllegalStateException;
-import org.apache.commons.math4.legacy.optim.InitialGuess;
-import org.apache.commons.math4.legacy.optim.MaxEval;
 import org.apache.commons.math4.legacy.optim.OptimizationData;
 import org.apache.commons.math4.legacy.optim.PointValuePair;
-import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math4.legacy.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math4.legacy.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.util.List;
 
 public class CMD_findmax extends NBBaseCommand {
     private final static Logger logger = LogManager.getLogger(CMD_optimize.class);
@@ -62,108 +53,55 @@ public class CMD_findmax extends NBBaseCommand {
         stdout.println("starting analysis on activity '" + flywheel.getAlias() + "'");
         SimFrameUtils.awaitActivity(flywheel);
 
-        /*
-        var frameParams = initialStep();
-
-        while (frameParams != null) {
-            stdout.println(frameParams);
-            applyParams(frameParams,flywheel);
-            capture.startWindow();
-            if (this instanceof HoldAndSample has) {
-                has.holdAndSample(capture);
-            } else {
-                capture.awaitSteadyState();
-            }
-            capture.stopWindow();
-            journal.record(frameParams, capture.last());
-            stdout.println(capture.last());
-            stdout.println("-".repeat(40));
-            frameParams = nextStep(journal);
-        }
-        return journal.bestRun().params();
-
-         */
         SimFrameJournal<FindmaxFrameParams> journal = new SimFrameJournal<>();
         FindmaxParamModel model = new FindmaxParamModel();
 
-        FindmaxSearchSettings findmaxSearchParams = new FindmaxSearchSettings(params, model);
+        FindmaxConfig findmaxConfig = new FindmaxConfig(params);
 
-//  initial step:
-//        new io.nosqlbench.scenarios.simframe.optimizers.planners.findmax.FindmaxFrameParams(
-//            findmaxSearchParams.rate_base(),
-//            findmaxSearchParams.rate_step(),
-//            findmaxSearchParams.sample_time_ms(),
-//            findmaxSearchParams.min_settling_ms(),
-//            "INITIAL"
-//        );
-
-        model.add("rate", 10, findmaxSearchParams.rate_base(), findmaxSearchParams.rate_base()*10,
-            rate -> flywheel.onEvent(ParamChange.of(new CycleRateSpec(rate, 1.1d, SimRateSpec.Verb.restart)))
-            //rate -> flywheel.onEvent(ParamChange.of(new CycleRateSpec(params.rate_shelf()+params.rate_delta(), 1.1d, SimRateSpec.Verb.restart)));
+        model.add("rate",
+            findmaxConfig.rate_base(),    // min
+            findmaxConfig.rate_base(),    // initial
+            findmaxConfig.sample_max(),   // max
+            rate -> flywheel.onEvent(ParamChange.of(new CycleRateSpec(
+                findmaxConfig.rate_base() + findmaxConfig.rate_step(),
+                1.1d,
+                SimRateSpec.Verb.restart)))
         );
 
-        SimFrameCapture capture = this.perfValueMeasures(flywheel, findmaxSearchParams);
-        SimFrameFunction frameFunction = new FindmaxFrameFunction(controller, findmaxSearchParams, flywheel, capture, journal);
-
-        List<OptimizationData> od = List.of(
-            new ObjectiveFunction(frameFunction),
-            GoalType.MAXIMIZE,
-            new InitialGuess(model.getInitialGuess()),
-            new MaxEval(100),
-            model.getBounds()
-        );
-
-        BOBYQAOptimizer mo = new BOBYQAOptimizer(
-            6,
-            25,
-            1E-4
-        );
-        PointValuePair result = null;
-        try {
-            result = mo.optimize(od.toArray(new OptimizationData[0]));
-        } catch (MathIllegalStateException missed) {
-            if (missed.getMessage().contains("trust region step has failed to reduce Q")) {
-                logger.warn(missed.getMessage() + ", so returning current result.");
-                result = new PointValuePair(journal.last().params().paramValues(), journal.last().value());
-            } else {
-                throw missed;
-            }
-        }
+        SimFrameCapture capture = new SimFrameValueData(flywheel);
+        SimFrameFunction frameFunction = new FindmaxFrameFunction(controller, findmaxConfig, flywheel, capture, journal, model);
+        FindmaxAnalyzer analyzer = new FindmaxAnalyzer(frameFunction, model);
+        FindmaxFrameParams result = analyzer.analyze();
         stdout.println("result:" + result);
 
         SimFrame<FindmaxFrameParams> best = journal.bestRun();
         stdout.println("bestrun:\n" + best);
         return best.params();
-        // could be a better result if the range is arbitrarily limiting the parameter space.
     }
 
-    private SimFrameCapture perfValueMeasures(Activity activity, FindmaxSearchSettings settings) {
-        SimFrameCapture sampler = new SimFrameCapture();
+    private class FindmaxAnalyzer {
+        private final SimFrameFunction frameFunction;
+        private final FindmaxParamModel model;
+        public FindmaxAnalyzer(SimFrameFunction frameFunction, FindmaxParamModel model) {
+            this.frameFunction = frameFunction;
+            this.model = model;
+        }
 
-        NBMetricTimer result_timer = activity.find().timer("name:result");
-        NBMetricTimer latency_histo = result_timer.attachHdrDeltaHistogram();
+        public FindmaxFrameParams analyze() {
+            FindmaxFrameParams frameParams = new FindmaxFrameParams(model, null);
 
-        NBMetricTimer result_success_timer = activity.find().timer("name:result_success");
-        NBMetricGauge cyclerate_gauge = activity.find().gauge("name=config_cyclerate");
-        NBMetricHistogram tries_histo_src = activity.find().histogram("name=tries");
-        NBMetricHistogram tries_histo = tries_histo_src.attachHdrDeltaHistogram();
-
-        sampler.addDirect("target_rate", cyclerate_gauge::getValue, Double.NaN);
-        sampler.addDeltaTime("achieved_oprate", result_timer::getCount, Double.NaN);
-        sampler.addDeltaTime("achieved_ok_oprate", result_success_timer::getCount, 1.0);
-
-        sampler.addRemix("retries_p99", (vars) -> {
-            double triesP99 = tries_histo.getDeltaSnapshot(90).get99thPercentile();
-            if (Double.isNaN(triesP99) || Double.isInfinite(triesP99) || triesP99 == 0.0d) {
-                return 1.0d;
-            }
-            return 1 / triesP99;
-        });
-//        sampler.addDirect("latency_cutoff_50", () -> {
-//            double latencyP99 = (latency_histo.getDeltaSnapshot(90).getValue(settings.cutoff_quantile())) / 1_000_000d;
-//            double v = (StatFunctions.sigmoidE4LowPass(latencyP99, settings.cutoff_ms()));
-//            return v;
-//        }, 1.0d);
-        return sampler;
+//            while (frameParams != null) {
+//                applyParams(frameParams,flywheel);
+//                capture.startWindow();
+//                capture.awaitSteadyState();
+//                capture.stopWindow();
+//                journal.record(frameParams, capture.last());
+//                stdout.println(capture.last());
+//                stdout.println("-".repeat(40));
+//                frameParams = nextStep(journal);
+//            }
+//            return journal.bestRun().params();
+            return null;
+        }
     }
 }

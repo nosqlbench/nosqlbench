@@ -21,38 +21,44 @@ import io.nosqlbench.engine.api.activityapi.core.RunState;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
+import io.nosqlbench.scenarios.simframe.planning.HoldAndSample;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
+
+import java.io.PrintWriter;
 
 public class FindmaxFrameFunction implements SimFrameFunction {
 
     private final Activity flywheel;
     private final SimFrameCapture capture;
     private final SimFrameJournal<FindmaxFrameParams> journal;
-    private final FindmaxSearchSettings settings;
+    private final FindmaxConfig settings;
     private final ContainerActivitiesController controller;
+    private final FindmaxParamModel model;
 
     public FindmaxFrameFunction(
         ContainerActivitiesController controller,
-        FindmaxSearchSettings settings,
+        FindmaxConfig settings,
         Activity flywheel,
         SimFrameCapture capture,
-        SimFrameJournal<FindmaxFrameParams> journal
+        SimFrameJournal<FindmaxFrameParams> journal,
+        FindmaxParamModel model
     ) {
         this.controller = controller;
         this.settings = settings;
         this.flywheel = flywheel;
         this.capture = capture;
         this.journal = journal;
+        this.model = model;
     }
 
     @Override
     public double value(double[] point) {
         System.out.println("━".repeat(40));
-        FindmaxFrameParams params = settings.model().apply(point);
+        FindmaxFrameParams params = model.apply(point);
         System.out.println(params);
         capture.startWindow();
         capture.awaitSteadyState();
-        settings.model().apply(point);
+        model.apply(point);
         capture.restartWindow();
         System.out.println("sampling for " + settings.sample_time_ms()+"ms");
         controller.waitMillis((long) settings.sample_time_ms());

@@ -18,7 +18,7 @@ package io.nosqlbench.scenarios.simframe.optimizers.findmax;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 
-public record FindmaxSearchSettings(
+public record FindmaxConfig(
     double sample_time_ms,
     double sample_max,
     double sample_incr,
@@ -26,10 +26,9 @@ public record FindmaxSearchSettings(
     double rate_step,
     double rate_incr,
     double average_of,
-    double min_settling_ms,
-    FindmaxParamModel model
+    double min_settling_ms
 ) {
-    public FindmaxSearchSettings(NBCommandParams params, FindmaxParamModel model) {
+    public FindmaxConfig(NBCommandParams params) {
         this(
             params.maybeGet("sample_time_ms").map(Double::parseDouble).orElse(4000d),
             params.maybeGet("sample_max").map(Double::parseDouble).orElse(10000d),
@@ -38,8 +37,7 @@ public record FindmaxSearchSettings(
             params.maybeGet("rate_step").map(Double::parseDouble).orElse(100d),
             params.maybeGet("rate_incr").map(Double::parseDouble).orElse(2d),
             params.maybeGet("average_of").map(Double::parseDouble).orElse(2d),
-            params.maybeGet("min_settling_ms").map(Double::parseDouble).orElse(4000d),
-            model
+            params.maybeGet("min_settling_ms").map(Double::parseDouble).orElse(4000d)
         );
     }
 }
