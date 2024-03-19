@@ -24,6 +24,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContaine
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.nb.api.components.events.ParamChange;
+import io.nosqlbench.nb.api.components.events.SetThreads;
 import io.nosqlbench.scenarios.simframe.SimFrameUtils;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
@@ -53,16 +54,30 @@ public class CMD_findmax extends NBBaseCommand {
         FindmaxParamModel model = new FindmaxParamModel();
 
         FindmaxConfig findmaxConfig = new FindmaxConfig(params);
+        switch(findmaxConfig.optimization_type()) {
+            case "rate":
+                model.add("rate",
+                    findmaxConfig.min_value(),      // min
+                    findmaxConfig.base_value(),     // initial
+                    findmaxConfig.max_value(),      // max
+                    rate -> flywheel.onEvent(ParamChange.of(new CycleRateSpec(
+                        rate,
+                        1.1d,
+                        SimRateSpec.Verb.restart)))
+                );
+                break;
+            case "threads":
+                model.add("threads",
+                    findmaxConfig.min_value(),      // min
+                    findmaxConfig.base_value(),     // initial
+                    findmaxConfig.max_value(),      // max
+                    threads -> flywheel.onEvent(ParamChange.of(new SetThreads((int) (threads))))
+                );
+                break;
+            default:
+                throw new RuntimeException("Unsupported optimization type: " + findmaxConfig.optimization_type());
+        }
 
-        model.add("rate",
-            findmaxConfig.base_value(),    // min
-            findmaxConfig.base_value(),    // initial
-            findmaxConfig.sample_max(),   // max
-            rate -> flywheel.onEvent(ParamChange.of(new CycleRateSpec(
-                rate,
-                1.1d,
-                SimRateSpec.Verb.restart)))
-        );
 
         SimFrameCapture capture = new SimFrameValueData(flywheel);
         FindmaxFrameFunction frameFunction = new FindmaxFrameFunction(controller, findmaxConfig, flywheel, capture, journal, model);
