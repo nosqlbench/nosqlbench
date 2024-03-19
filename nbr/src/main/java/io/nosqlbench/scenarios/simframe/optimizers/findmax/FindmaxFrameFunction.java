@@ -19,14 +19,11 @@ package io.nosqlbench.scenarios.simframe.optimizers.findmax;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.RunState;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
-import io.nosqlbench.scenarios.simframe.capture.JournalView;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
-import io.nosqlbench.scenarios.simframe.planning.HoldAndSample;
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
 
-import java.io.PrintWriter;
 import java.util.Comparator;
 
 import static io.nosqlbench.virtdata.core.bindings.VirtDataLibrary.logger;
@@ -78,20 +75,20 @@ public class FindmaxFrameFunction implements SimFrameFunction {
     }
 
     public double nextStep() {
-        double newRate = 0.0d;
+        double newRate;
         SimFrame<FindmaxFrameParams> last = journal.last();
         SimFrame<FindmaxFrameParams> best = journal.bestRun();
         if (best.index() == last.index()) { // got better consecutively
-            newRate = last.params().paramValues()[0] + settings.rate_step();
-            settings.setRate_step(settings.rate_step() * settings.rate_incr());
+            newRate = last.params().paramValues()[0] + settings.step_value();
+            settings.setStep_value(settings.step_value() * settings.value_incr());
         } else if (best.index() == last.index() - 1) {
             // got worse consecutively, this may be collapsed out since the general case below covers it (test first)
-            if (((last.params().paramValues()[0] + settings.rate_step()) -
-                (best.params().paramValues()[0] + settings.rate_step())) <= settings.rate_step()) {
+            if (((last.params().paramValues()[0] + settings.step_value()) -
+                (best.params().paramValues()[0] + settings.step_value())) <= settings.step_value()) {
                 logger.info("could not divide search space further, stop condition met");
                 return 0;
             } else {
-                newRate = best.params().paramValues()[0] + settings.rate_step();
+                newRate = best.params().paramValues()[0] + settings.step_value();
                 settings.setSample_time_ms(settings.sample_time_ms() * settings.sample_incr());
                 settings.setMin_settling_ms(settings.min_settling_ms() * 4);
             }
@@ -99,12 +96,12 @@ public class FindmaxFrameFunction implements SimFrameFunction {
             // find next frame with higher rate but lower value, the closest one by rate
             SimFrame<FindmaxFrameParams> nextWorseFrameWithHigherRate = journal.frames().stream()
                 .filter(f -> f.value() < best.value())
-                .filter(f -> f.params().paramValues()[0] + settings.rate_step() > (best.params().paramValues()[0] + settings.rate_step()))
-                .min(Comparator.comparingDouble(f -> f.params().paramValues()[0] + settings.rate_step()))
+                .filter(f -> f.params().paramValues()[0] + settings.step_value() > (best.params().paramValues()[0] + settings.step_value()))
+                .min(Comparator.comparingDouble(f -> f.params().paramValues()[0] + settings.step_value()))
                 .orElseThrow(() -> new RuntimeException("inconsistent samples"));
-            if ((nextWorseFrameWithHigherRate.params().paramValues()[0] + settings.rate_step() -
-                best.params().paramValues()[0] + settings.rate_step()) > settings.rate_step()) {
-                newRate = best.params().paramValues()[0] + settings.rate_step();
+            if ((nextWorseFrameWithHigherRate.params().paramValues()[0] + settings.step_value() -
+                best.params().paramValues()[0] + settings.step_value()) > settings.step_value()) {
+                newRate = best.params().paramValues()[0] + settings.step_value();
                 settings.setSample_time_ms(settings.sample_time_ms() * settings.sample_incr());
                 settings.setMin_settling_ms(settings.min_settling_ms() * 2);
             } else {

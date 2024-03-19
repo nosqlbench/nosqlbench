@@ -25,23 +25,16 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.scenarios.simframe.SimFrameUtils;
-import io.nosqlbench.scenarios.simframe.capture.JournalView;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameValueData;
 import io.nosqlbench.scenarios.simframe.optimizers.CMD_optimize;
-import io.nosqlbench.scenarios.simframe.planning.HoldAndSample;
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
-import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
-import org.apache.commons.math4.legacy.exception.MathIllegalStateException;
-import org.apache.commons.math4.legacy.optim.OptimizationData;
-import org.apache.commons.math4.legacy.optim.PointValuePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.util.Comparator;
 
 public class CMD_findmax extends NBBaseCommand {
     private final static Logger logger = LogManager.getLogger(CMD_optimize.class);
@@ -62,8 +55,8 @@ public class CMD_findmax extends NBBaseCommand {
         FindmaxConfig findmaxConfig = new FindmaxConfig(params);
 
         model.add("rate",
-            findmaxConfig.rate_base(),    // min
-            findmaxConfig.rate_base(),    // initial
+            findmaxConfig.base_value(),    // min
+            findmaxConfig.base_value(),    // initial
             findmaxConfig.sample_max(),   // max
             rate -> flywheel.onEvent(ParamChange.of(new CycleRateSpec(
                 rate,
@@ -72,15 +65,15 @@ public class CMD_findmax extends NBBaseCommand {
         );
 
         SimFrameCapture capture = new SimFrameValueData(flywheel);
-        SimFrameFunction frameFunction = new FindmaxFrameFunction(controller, findmaxConfig, flywheel, capture, journal, model);
-        double[] initialPoint = {findmaxConfig.rate_base()};
+        FindmaxFrameFunction frameFunction = new FindmaxFrameFunction(controller, findmaxConfig, flywheel, capture, journal, model);
+        double[] initialPoint = {findmaxConfig.base_value()};
         double result = frameFunction.value(initialPoint);
         while (result != 0.0d) {
-            result = ((FindmaxFrameFunction) frameFunction).nextStep();
+            result = frameFunction.nextStep();
         }
 
-        SimFrame<FindmaxFrameParams> best = ((FindmaxFrameFunction)frameFunction).journal().bestRun();
-        stdout.println("bestrun:\n" + best);
+        SimFrame<FindmaxFrameParams> best = frameFunction.journal().bestRun();
+        stdout.println("Best Run:\n" + best);
         return best.params();
     }
 
