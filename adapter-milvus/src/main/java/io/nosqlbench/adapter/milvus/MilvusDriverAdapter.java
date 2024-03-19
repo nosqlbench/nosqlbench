@@ -26,14 +26,14 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
 
-public class MilvusDriverAdapter extends BaseDriverAdapter<MilvusBaseOp, MilvusSpace> {
+public class MilvusDriverAdapter extends BaseDriverAdapter<MilvusBaseOp<?>, MilvusSpace> {
 
     public MilvusDriverAdapter(NBComponent parentComponent, NBLabels labels) {
         super(parentComponent, labels);
     }
 
     @Override
-    public OpMapper<MilvusBaseOp> getOpMapper() {
+    public OpMapper<MilvusBaseOp<?>> getOpMapper() {
         return new MilvusOpMapper(this);
     }
 

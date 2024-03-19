@@ -97,7 +97,7 @@ public class MilvusSpace implements AutoCloseable {
             .withToken(token)
             .withDatabaseName(databaseName)
             .build();
-        logger.info(this.name + ": Creating new Milvus/Zilliz Client with (masked) token [" + Utils.maskDigits(token) + "], uri/endpoint ["
+        logger.info(this.name + ": Creating new Milvus/Zilliz Client with (masked) token [" + MilvusUtils.maskDigits(token) + "], uri/endpoint ["
             + uri + "]");
         this.client = new MilvusServiceClient(connectParam);
         return this.client;

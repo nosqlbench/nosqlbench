@@ -17,35 +17,38 @@
 package io.nosqlbench.adapter.milvus.opdispensers;
 
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.param.highlevel.collection.ListCollectionsParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
-import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
-import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.adapter.milvus.ops.MilvusListCollectionsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public abstract class MilvusOpDispenser extends BaseOpDispenser<MilvusBaseOp, MilvusSpace> {
+public class MilvusListCollectionsOpDispenser extends MilvusBaseOpDispenser<ListCollectionsParam> {
 
-    protected final LongFunction<MilvusSpace> mzSpaceFunction;
-    protected final LongFunction<MilvusServiceClient> clientFunction;
-    private final LongFunction<? extends MilvusBaseOp> opF;
-
-    protected MilvusOpDispenser(MilvusDriverAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
-        super(adapter, op);
-        this.mzSpaceFunction = adapter.getSpaceFunc(op);
-        this.clientFunction = (long l) -> this.mzSpaceFunction.apply(l).getClient();
-        this.opF = createOpFunc(this.clientFunction, op, targetF);
+    public MilvusListCollectionsOpDispenser(MilvusDriverAdapter adapter,
+                                            ParsedOp op,
+                                            LongFunction<String> targetFunction) {
+        super(adapter, op, targetFunction);
     }
 
-    public abstract LongFunction<? extends MilvusBaseOp> createOpFunc(
+    @Override
+    public LongFunction<ListCollectionsParam> getParamFunc(
         LongFunction<MilvusServiceClient> clientF,
         ParsedOp op,
         LongFunction<String> targetF
-    );
+    ) {
+        return l -> ListCollectionsParam.newBuilder().build();
+    }
 
     @Override
-    public MilvusBaseOp apply(long value) {
-        return opF.apply(value);
+    public LongFunction<MilvusBaseOp<ListCollectionsParam>> createOpFunc(
+        LongFunction<ListCollectionsParam> paramF,
+        LongFunction<MilvusServiceClient> clientF,
+        ParsedOp op,
+        LongFunction<String> targetF
+    ) {
+        return l -> new MilvusListCollectionsOp(clientF.apply(l),paramF.apply(l));
     }
 }

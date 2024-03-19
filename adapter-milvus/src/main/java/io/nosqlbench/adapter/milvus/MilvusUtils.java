@@ -16,7 +16,22 @@
 
 package io.nosqlbench.adapter.milvus;
 
-public class Utils {
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
+public class MilvusUtils {
+
+    public static List<String> splitNames(String input) {
+        Objects.requireNonNull(input);
+        return Arrays.asList(input.split("( +| *, *)"));
+    }
+
+    public static List<Long> splitLongs(String input) {
+        Objects.requireNonNull(input);
+        return Arrays.stream(input.split("( +| *, *)")).map(Long::parseLong).toList();
+    }
+
 
     /**
      * Mask the digits in the given string with '*'

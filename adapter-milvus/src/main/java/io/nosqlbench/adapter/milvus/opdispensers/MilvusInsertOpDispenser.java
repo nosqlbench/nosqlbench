@@ -22,6 +22,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.dml.InsertParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusInsertOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
@@ -32,11 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public class MilvusInsertOpDispenser extends MilvusOpDispenser {
+public class MilvusInsertOpDispenser extends MilvusBaseOpDispenser<InsertParam> {
     private static final Logger logger = LogManager.getLogger(MilvusInsertOpDispenser.class);
 
     /**
-     * Create a new MilvusDeleteOpDispenser subclassed from {@link MilvusOpDispenser}.
+     * Create a new MilvusDeleteOpDispenser subclassed from {@link MilvusBaseOpDispenser}.
      *
      * @param adapter        The associated {@link MilvusDriverAdapter}
      * @param op             The {@link ParsedOp} encapsulating the activity for this cycle
@@ -49,12 +50,7 @@ public class MilvusInsertOpDispenser extends MilvusOpDispenser {
     }
 
     @Override
-    public LongFunction<MilvusInsertOp> createOpFunc(
-        LongFunction<MilvusServiceClient> clientF,
-        ParsedOp op,
-        LongFunction<String> targetF
-    ) {
-
+    public LongFunction<InsertParam> getParamFunc(LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<InsertParam.Builder> f =
             l -> InsertParam.newBuilder().withCollectionName(targetF.apply(l));
         f = op.enhanceFuncOptionally(f, "partition", String.class, InsertParam.Builder::withPartitionName);
@@ -68,10 +64,18 @@ public class MilvusInsertOpDispenser extends MilvusOpDispenser {
         LongFunction<InsertParam.Builder> finalF1 = f;
         LongFunction<List<InsertParam.Field>> fieldsF = createFieldsF(op);
         LongFunction<InsertParam> insertParamsF = l -> finalF1.apply(l).withFields(fieldsF.apply(l)).build();
-        LongFunction<MilvusInsertOp> insertOpF = l -> new MilvusInsertOp(clientF.apply(l), insertParamsF.apply(l));
-        return insertOpF;
-
+        return insertParamsF;
     }
+
+    @Override
+    public LongFunction<MilvusBaseOp<InsertParam>> createOpFunc(
+        LongFunction<InsertParam> paramF,
+        LongFunction<MilvusServiceClient> clientF,
+        ParsedOp op, LongFunction<String> targetF
+    ) {
+        return l -> new MilvusInsertOp(clientF.apply(l), paramF.apply(l));
+    }
+
 
     private LongFunction<List<InsertParam.Field>> createFieldsF(ParsedOp op) {
         LongFunction<Map> fieldDataF = op.getAsRequiredFunction("fields", Map.class);

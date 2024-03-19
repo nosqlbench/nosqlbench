@@ -17,29 +17,21 @@
 package io.nosqlbench.adapter.milvus.opdispensers;
 
 import io.milvus.client.MilvusServiceClient;
-import io.milvus.common.clientenum.ConsistencyLevelEnum;
-import io.milvus.grpc.CreateIndexRequest;
-import io.milvus.grpc.DataType;
-import io.milvus.param.collection.CreateCollectionParam;
-import io.milvus.param.collection.FieldType;
 import io.milvus.param.index.CreateIndexParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
-import io.nosqlbench.adapter.milvus.ops.MilvusCreateCollectionOp;
+import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusCreateIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.function.LongFunction;
 
-public class MilvusCreateIndexOpDispenser extends MilvusOpDispenser {
+public class MilvusCreateIndexOpDispenser extends MilvusBaseOpDispenser<CreateIndexParam> {
     private static final Logger logger = LogManager.getLogger(MilvusCreateIndexOpDispenser.class);
 
     /**
-     * Create a new MilvusCreateIndexOpDispenser subclassed from {@link MilvusOpDispenser}.
+     * Create a new MilvusCreateIndexOpDispenser subclassed from {@link MilvusBaseOpDispenser}.
      *
      * @param adapter
      *     The associated {@link MilvusDriverAdapter}
@@ -56,14 +48,8 @@ public class MilvusCreateIndexOpDispenser extends MilvusOpDispenser {
         super(adapter, op, targetFunction);
     }
 
-    // https://milvus.io/api-reference/java/v2.3.x/Index/createIndex().md
     @Override
-    public LongFunction<MilvusCreateIndexOp> createOpFunc(
-        LongFunction<MilvusServiceClient> clientF,
-        ParsedOp op,
-        LongFunction<String> targetF
-    ) {
-
+    public LongFunction<CreateIndexParam> getParamFunc(LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<CreateIndexParam.Builder> bF =
             l -> CreateIndexParam.newBuilder().withIndexName(targetF.apply(l));
 
@@ -75,9 +61,12 @@ public class MilvusCreateIndexOpDispenser extends MilvusOpDispenser {
         bF = op.enhanceFuncOptionally(bF, "sync_mode", Boolean.class, CreateIndexParam.Builder::withSyncMode);
         bF = op.enhanceFuncOptionally(bF, "sync_waiting_interval", Long.class, CreateIndexParam.Builder::withSyncWaitingInterval);
         bF = op.enhanceFuncOptionally(bF, "sync_waiting_timeout", Long.class, CreateIndexParam.Builder::withSyncWaitingTimeout);
-
-        LongFunction<CreateIndexParam.Builder> finalBF = bF;
-        return l -> new MilvusCreateIndexOp(clientF.apply(l), finalBF.apply(l).build());
+        LongFunction<CreateIndexParam.Builder> finalBF1 = bF;
+        return l -> finalBF1.apply(l).build();
     }
 
+    @Override
+    public LongFunction<MilvusBaseOp<CreateIndexParam>> createOpFunc(LongFunction<CreateIndexParam> paramF, LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+        return l -> new MilvusCreateIndexOp(clientF.apply(l), paramF.apply(l));
+    }
 }

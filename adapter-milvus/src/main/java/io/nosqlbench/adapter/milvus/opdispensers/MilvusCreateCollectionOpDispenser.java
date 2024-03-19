@@ -19,9 +19,11 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.grpc.DataType;
+import io.milvus.param.alias.CreateAliasParam;
 import io.milvus.param.collection.CreateCollectionParam;
 import io.milvus.param.collection.FieldType;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusCreateCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
@@ -32,11 +34,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public class MilvusCreateCollectionOpDispenser extends MilvusOpDispenser {
+public class MilvusCreateCollectionOpDispenser extends MilvusBaseOpDispenser<CreateCollectionParam> {
     private static final Logger logger = LogManager.getLogger(MilvusCreateCollectionOpDispenser.class);
 
     /**
-     * Create a new MilvusCreateCollectionOpDispenser subclassed from {@link MilvusOpDispenser}.
+     * Create a new MilvusCreateCollectionOpDispenser subclassed from {@link MilvusBaseOpDispenser}.
      *
      * @param adapter
      *     The associated {@link MilvusDriverAdapter}
@@ -51,14 +53,12 @@ public class MilvusCreateCollectionOpDispenser extends MilvusOpDispenser {
         super(adapter, op, targetFunction);
     }
 
-    // https://milvus.io/docs/create_collection.md
     @Override
-    public LongFunction<MilvusCreateCollectionOp> createOpFunc(
+    public LongFunction<CreateCollectionParam> getParamFunc(
         LongFunction<MilvusServiceClient> clientF,
         ParsedOp op,
         LongFunction<String> targetF
     ) {
-
         LongFunction<CreateCollectionParam.Builder> ebF =
             l -> CreateCollectionParam.newBuilder().withCollectionName(targetF.apply(l));
 
@@ -74,9 +74,18 @@ public class MilvusCreateCollectionOpDispenser extends MilvusOpDispenser {
         final LongFunction<CreateCollectionParam.Builder> f = ebF;
         ebF = l -> f.apply(l).withFieldTypes(fieldTypes);
         final LongFunction<CreateCollectionParam.Builder> lastF = ebF;
-        final LongFunction<CreateCollectionParam> collectionParamF = l -> lastF.apply(l).build();
+        return l -> lastF.apply(l).build();
+    }
 
-        return l -> new MilvusCreateCollectionOp(clientF.apply(l), collectionParamF.apply(l));
+    // https://milvus.io/docs/create_collection.md
+    @Override
+    public LongFunction<MilvusBaseOp<CreateCollectionParam>> createOpFunc(
+        LongFunction<CreateCollectionParam> paramF,
+        LongFunction<MilvusServiceClient> clientF,
+        ParsedOp op,
+        LongFunction<String> targetF
+    ) {
+        return l -> new MilvusCreateCollectionOp(clientF.apply(l), paramF.apply(l));
     }
 
     /**

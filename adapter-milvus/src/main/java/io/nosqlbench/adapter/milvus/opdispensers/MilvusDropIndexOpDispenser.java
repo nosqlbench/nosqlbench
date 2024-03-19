@@ -19,10 +19,9 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 
 
 import io.milvus.client.MilvusServiceClient;
-import io.milvus.param.collection.DropCollectionParam;
 import io.milvus.param.index.DropIndexParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
-import io.nosqlbench.adapter.milvus.ops.MilvusDropCollectionOp;
+import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusDropIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
@@ -30,11 +29,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class MilvusDropIndexOpDispenser extends MilvusOpDispenser {
-    private static final Logger logger = LogManager.getLogger(MilvusDropIndexOpDispenser.class);
-
+public class MilvusDropIndexOpDispenser extends MilvusBaseOpDispenser<DropIndexParam> {
     /**
-     * Create a new MilvusDeleteOpDispenser subclassed from {@link MilvusOpDispenser}.
+     * <P>Create a new MilvusDeleteOpDispenser subclassed from {@link MilvusBaseOpDispenser}.</P>
+     * <P>{@see <a href="https://milvus.io/docs/drop_collection.md">Drop Index</a>}</P>
+     *
      *
      * @param adapter
      *     The associated {@link MilvusDriverAdapter}
@@ -49,18 +48,18 @@ public class MilvusDropIndexOpDispenser extends MilvusOpDispenser {
         super(adapter, op, targetFunction);
     }
 
-    // https://milvus.io/docs/drop_collection.md
     @Override
-    public LongFunction<MilvusDropIndexOp> createOpFunc(
-        LongFunction<MilvusServiceClient> clientF,
-        ParsedOp op,
-        LongFunction<String> targetF
-    ) {
+    public LongFunction<DropIndexParam> getParamFunc(LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<DropIndexParam.Builder> f =
             l -> DropIndexParam.newBuilder().withIndexName(targetF.apply(l));
         f = op.enhanceFunc(f,"collection_name",String.class, DropIndexParam.Builder::withCollectionName);
-
         LongFunction<DropIndexParam.Builder> finalF = f;
-        return l -> new MilvusDropIndexOp(clientF.apply(l), finalF.apply(1).build());
+        return l -> finalF.apply(1).build();
     }
+
+    @Override
+    public LongFunction<MilvusBaseOp<DropIndexParam>> createOpFunc(LongFunction<DropIndexParam> paramF, LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+        return l -> new MilvusDropIndexOp(clientF.apply(l),paramF.apply(l));
+    }
+
 }

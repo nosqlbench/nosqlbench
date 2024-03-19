@@ -17,11 +17,10 @@
 package io.nosqlbench.adapter.milvus.ops;
 
 import io.milvus.client.MilvusServiceClient;
-import io.milvus.param.dml.DeleteParam;
 
-public class MilvusDeleteOp extends MilvusBaseOp<DeleteParam> {
+public class MilvusDeleteParamOp extends MilvusBaseOp<io.milvus.param.dml.DeleteParam> {
 
-    public MilvusDeleteOp(MilvusServiceClient client, DeleteParam request) {
+    public MilvusDeleteParamOp(MilvusServiceClient client, io.milvus.param.dml.DeleteParam request) {
         super(client,request);
     }
 

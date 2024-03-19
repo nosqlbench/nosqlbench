@@ -16,11 +16,6 @@
 
 package io.nosqlbench.adapter.milvus.types;
 
-import io.milvus.client.MilvusClient;
-import io.milvus.param.alias.AlterAliasParam;
-
-import java.util.function.Function;
-
 import static io.nosqlbench.adapter.milvus.types.MilvusOpGroup.*;
 
 public enum MilvusOpType {
@@ -47,11 +42,10 @@ public enum MilvusOpType {
     get_collection_statistics(Collection),
     get_load_state(Collection),
     get_loading_progress(Collection),
-    get_persistent_segment(Collection),
+    get_persistent_segment_info(Collection),
     get_query_segment_info(Collection),
     get_replicas(Collection),
     insert(Collection),
-    insert_async(Collection),
     load_collection(Collection),
     release_collection(Collection),
     show_collections(Collection),
@@ -71,12 +65,6 @@ public enum MilvusOpType {
     get_metrics(Management),
     load_balance(Management),
     manual_compact(Management),
-    consistency_level_enum(Misc),
-    data_type(Misc),
-    index_type(Misc),
-    log_level(Misc),
-    metric_type(Misc),
-    R(Misc),
     create_partition(Partition),
     drop_partition(Partition),
     get_partition_statistics(Partition),
@@ -85,20 +73,18 @@ public enum MilvusOpType {
     release_partitions(Partition),
     show_partitions(Partition),
     query(QueryAndSearch),
-    query_async(QueryAndSearch),
     search(QueryAndSearch),
-    search_async(QueryAndSearch),
-    add_user_to_role(RBAC),
-    create_role(RBAC),
-    drop_role(RBAC),
-    grant_role_privilege(RBAC),
-    remove_user_from_role(RBAC),
-    revoke_role_privilege(RBAC),
-    select_grant_for_role(RBAC),
-    select_grant_for_role_and_object(RBAC),
-    select_role(RBAC),
-    select_user(RBAC);
-
+//    add_user_to_role(RBAC),
+//    create_role(RBAC),
+//    drop_role(RBAC),
+//    grant_role_privilege(RBAC),
+//    remove_user_from_role(RBAC),
+//    revoke_role_privilege(RBAC),
+//    select_grant_for_role(RBAC),
+//    select_grant_for_role_and_object(RBAC),
+//    select_role(RBAC),
+//    select_user(RBAC),
+    ;
     private final MilvusOpGroup group;
 
     MilvusOpType(MilvusOpGroup group) {

@@ -21,6 +21,7 @@ import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.param.MetricType;
 import io.milvus.param.dml.SearchParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusSearchOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
@@ -31,16 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public class MilvusSearchOpDispenser extends MilvusOpDispenser {
-    private static final Logger logger = LogManager.getLogger(MilvusSearchOpDispenser.class);
-
-    /**
-     * Create a new {@ link MilvusSearchOpDispenser} subclassed from {@link MilvusOpDispenser}.
-     *
-     * @param adapter        The associated {@link MilvusDriverAdapter}
-     * @param op             The {@link ParsedOp} encapsulating the activity for this cycle
-     * @param targetFunction A LongFunction that returns the specified Milvus Index for this Op
-     */
+public class MilvusSearchOpDispenser extends MilvusBaseOpDispenser<SearchParam> {
     public MilvusSearchOpDispenser(
         MilvusDriverAdapter adapter,
         ParsedOp op,
@@ -49,104 +41,37 @@ public class MilvusSearchOpDispenser extends MilvusOpDispenser {
     }
 
     @Override
-    public LongFunction<MilvusSearchOp> createOpFunc(
+    public LongFunction<SearchParam> getParamFunc(LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+
+
+        LongFunction<SearchParam.Builder> ebF =
+            l -> SearchParam.newBuilder().withCollectionName(targetF.apply(l));
+
+        ebF = op.enhanceFuncOptionally(ebF,"partition_names",List.class,SearchParam.Builder::withPartitionNames);
+        ebF = op.enhanceFuncOptionally(ebF,"out_fields",List.class,SearchParam.Builder::withOutFields);
+
+
+        ebF = op.enhanceEnumOptionally(ebF, "consistency_level", ConsistencyLevelEnum.class, SearchParam.Builder::withConsistencyLevel);
+        ebF = op.enhanceFuncOptionally(ebF, "expr", String.class, SearchParam.Builder::withExpr);
+        ebF = op.enhanceDefaultFunc(ebF, "top_k", Integer.class, 100, SearchParam.Builder::withTopK);
+        ebF = op.enhanceEnumOptionally(ebF, "metric_type", MetricType.class, SearchParam.Builder::withMetricType);
+        ebF = op.enhanceFuncOptionally(ebF, "round_decimal", Integer.class, SearchParam.Builder::withRoundDecimal);
+        ebF = op.enhanceFuncOptionally(ebF, "ignore_growing", Boolean.class, SearchParam.Builder::withIgnoreGrowing);
+        ebF = op.enhanceFuncOptionally(ebF, "params", String.class, SearchParam.Builder::withParams);
+        ebF = op.enhanceFunc(ebF, "vector_field_name", String.class, SearchParam.Builder::withVectorFieldName);
+        ebF = op.enhanceFuncOptionally(ebF,"vectors",List.class,SearchParam.Builder::withVectors);
+        LongFunction<SearchParam.Builder> finalEbF = ebF;
+        return l -> finalEbF.apply(l).build();
+    }
+
+    @Override
+    public LongFunction<MilvusBaseOp<SearchParam>> createOpFunc(
+        LongFunction<SearchParam> paramF,
         LongFunction<MilvusServiceClient> clientF,
         ParsedOp op,
-        LongFunction<String> targetF) {
-        LongFunction<SearchParam.Builder> f =
-            l -> SearchParam.newBuilder().withCollectionName(targetF.apply(l));
-        f = op.enhanceFuncOptionally(f, "partition_name", String.class, SearchParam.Builder::addPartitionName);
-        if(op.isDefined("partition_names", List.class)) {
-            LongFunction<List<String>> partitionNamesF = createPartitionNamesF(op);
-            LongFunction<SearchParam.Builder> finalF = f;
-            f = l -> finalF.apply(l).withPartitionNames(partitionNamesF.apply(l));
-            f = op.enhanceFuncOptionally(f, "partition_names", List.class, SearchParam.Builder::withPartitionNames);
-        }
-        f = op.enhanceFuncOptionally(f, "out_field", String.class, SearchParam.Builder::addOutField);
-        if(op.isDefined("out_fields", List.class)) {
-            LongFunction<List<String>> outFieldsF = createOutFieldsF(op);
-            LongFunction<SearchParam.Builder> finalF1 = f;
-            f = l -> finalF1.apply(l).withOutFields(outFieldsF.apply(l));
-        }
-
-        f = op.enhanceEnumOptionally(f, "consistency_level", ConsistencyLevelEnum.class, SearchParam.Builder::withConsistencyLevel);
-        f = op.enhanceFuncOptionally(f, "expr", String.class, SearchParam.Builder::withExpr);
-        f = op.enhanceDefaultFunc(f, "top_k", Integer.class, 100, SearchParam.Builder::withTopK);
-        f = op.enhanceDefaultFunc(f, "metric_type", MetricType.class, MetricType.COSINE, SearchParam.Builder::withMetricType);
-        f = op.enhanceFuncOptionally(f, "round_decimal", Integer.class, SearchParam.Builder::withRoundDecimal);
-        f = op.enhanceFuncOptionally(f, "ignore_growing", Boolean.class, SearchParam.Builder::withIgnoreGrowing);
-        f = op.enhanceFuncOptionally(f, "params", String.class, SearchParam.Builder::withParams);
-
-        f = op.enhanceFunc(f, "vector_field_name", String.class, SearchParam.Builder::withVectorFieldName);
-        LongFunction<List<?>> queryVectorsF = createQueryVectorsF(op);
-        LongFunction<SearchParam.Builder> finalF2 = f;
-        f = l -> finalF2.apply(l).withVectors(queryVectorsF.apply(l));
-
-        LongFunction<SearchParam.Builder> searchParamsF = f;
-        LongFunction<MilvusSearchOp> searchOpF = l -> new MilvusSearchOp(clientF.apply(l), searchParamsF.apply(l).build());
-        return searchOpF;
+        LongFunction<String> targetF
+    ) {
+        return l -> new MilvusSearchOp(clientF.apply(l),paramF.apply(l));
     }
 
-    /**
-     * Prepare the {@code query_vectors} parameter list for the search operation.
-     * @param op {@link ParsedOp}
-     * @return {@link LongFunction<List<?>>}
-     */
-    private LongFunction<List<?>> createQueryVectorsF(ParsedOp op) {
-        LongFunction<Map> outVectorF = op.getAsRequiredFunction("vectors", Map.class);
-        LongFunction<List<?>> outFieldsListF = l -> {
-            Map<String, Object> fieldmap = outVectorF.apply(l);
-            //List<?> floatVectorList = new ArrayList<Float>();
-            //List<?> byteBufferVectorList = new ArrayList<>();
-            List<Object> finalVectorList = new ArrayList<>();
-            fieldmap.forEach((name, value) -> {
-                // TODO - validate if we really need to do these type checking here or let the DB barf at us if we
-                // use it otherwise https://milvus.io/api-reference/java/v2.3.x/Query%20and%20Search/search().md
-//                if(value instanceof Float) {
-//                    floatVectorList.add((Float) value);
-//                } else {
-//                    byteBufferVectorList.add((ByteBuffer) value);
-//                }
-                finalVectorList.add(value);
-            });
-            return finalVectorList;
-        };
-        return outFieldsListF;
-    }
-
-    /**
-     * Prepare the {@code out_fields} parameter list for the search operation.
-     * @param op {@link ParsedOp}
-     * @return {@link LongFunction<List<String>>}
-     */
-    private LongFunction<List<String>> createOutFieldsF(ParsedOp op) {
-        LongFunction<Map> outFieldDataF = op.getAsRequiredFunction("out_fields", Map.class);
-        LongFunction<List<String>> outFieldsListF = l -> {
-            Map<String, Object> fieldmap = outFieldDataF.apply(l);
-            List<String> fields = new ArrayList<>();
-            fieldmap.forEach((name, value) -> {
-                fields.add(String.valueOf(value));
-            });
-            return fields;
-        };
-        return outFieldsListF;
-    }
-
-    /**
-     * Prepare the {@code partition_names} parameter list for the search operation.
-     * @param op {@link ParsedOp}
-     * @return {@link LongFunction<List<String>>}
-     */
-    private LongFunction<List<String>> createPartitionNamesF(ParsedOp op) {
-        LongFunction<Map> partitionNamesDataF = op.getAsRequiredFunction("partition_names", Map.class);
-        LongFunction<List<String>> partitionNamesListF = l -> {
-            Map<String, Object> fieldmap = partitionNamesDataF.apply(l);
-            List<String> fields = new ArrayList<>();
-            fieldmap.forEach((name, value) -> {
-                fields.add(String.valueOf(value));
-            });
-            return fields;
-        };
-        return partitionNamesListF;
-    }
 }

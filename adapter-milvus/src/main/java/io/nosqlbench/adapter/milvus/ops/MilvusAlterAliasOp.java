@@ -19,8 +19,8 @@ package io.nosqlbench.adapter.milvus.ops;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.alias.AlterAliasParam;
 
-public class MilvusAlterliasOp extends MilvusBaseOp<AlterAliasParam> {
-    public MilvusAlterliasOp(MilvusServiceClient client, AlterAliasParam request) {
+public class MilvusAlterAliasOp extends MilvusBaseOp<AlterAliasParam> {
+    public MilvusAlterAliasOp(MilvusServiceClient client, AlterAliasParam request) {
         super(client, request);
     }
 

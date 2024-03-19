@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  *     The type of operation
  */
 public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent implements OpDispenser<T>{
-    private final static Logger logger = LogManager.getLogger(BaseOpDispenser.class);
+    protected final static Logger logger = LogManager.getLogger(BaseOpDispenser.class);
     public static final String VERIFIER = "verifier";
     public static final String VERIFIER_INIT = "verifier-init";
     public static final String EXPECTED_RESULT = "expected-result";

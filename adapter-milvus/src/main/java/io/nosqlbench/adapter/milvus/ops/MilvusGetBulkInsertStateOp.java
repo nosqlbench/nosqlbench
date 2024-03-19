@@ -17,14 +17,16 @@
 package io.nosqlbench.adapter.milvus.ops;
 
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.param.bulkinsert.GetBulkInsertStateParam;
+import io.milvus.param.collection.GetCollectionStatisticsParam;
 
-public class MilvusListDatabasesOp extends MilvusBaseOp<Object> {
-    public MilvusListDatabasesOp(MilvusServiceClient client, String request) {
+public class MilvusGetBulkInsertStateOp extends MilvusBaseOp<GetBulkInsertStateParam> {
+    public MilvusGetBulkInsertStateOp(MilvusServiceClient client, GetBulkInsertStateParam request) {
         super(client, request);
     }
 
     @Override
     public Object applyOp(long value) {
-        return client.listDatabases();
+        return client.getBulkInsertState(request);
     }
 }

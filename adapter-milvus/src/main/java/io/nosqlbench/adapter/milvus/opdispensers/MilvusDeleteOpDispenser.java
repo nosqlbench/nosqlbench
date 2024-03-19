@@ -21,23 +21,14 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.dml.DeleteParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
-import io.nosqlbench.adapter.milvus.ops.MilvusDeleteOp;
+import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
+import io.nosqlbench.adapter.milvus.ops.MilvusDeleteParamOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import io.milvus.param.dml.DeleteParam.Builder;
 
 import java.util.function.LongFunction;
 
-public class MilvusDeleteOpDispenser extends MilvusOpDispenser {
-    private static final Logger logger = LogManager.getLogger(MilvusDeleteOpDispenser.class);
-
-    /**
-     * Create a new MilvusDeleteOpDispenser subclassed from {@link MilvusOpDispenser}.
-     *
-     * @param adapter        The associated {@link MilvusDriverAdapter}
-     * @param op             The {@link ParsedOp} encapsulating the activity for this cycle
-     * @param targetFunction A LongFunction that returns the specified Milvus Index for this Op
-     */
+public class MilvusDeleteOpDispenser extends MilvusBaseOpDispenser<DeleteParam> {
     public MilvusDeleteOpDispenser(MilvusDriverAdapter adapter,
                                    ParsedOp op,
                                    LongFunction<String> targetFunction) {
@@ -45,21 +36,19 @@ public class MilvusDeleteOpDispenser extends MilvusOpDispenser {
     }
 
     @Override
-    public LongFunction<MilvusDeleteOp> createOpFunc(
-        LongFunction<MilvusServiceClient> clientF,
-        ParsedOp op,
-        LongFunction<String> targetF
-    ) {
-
+    public LongFunction<DeleteParam> getParamFunc(LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<DeleteParam.Builder> f =
             l -> DeleteParam.newBuilder().withCollectionName(targetF.apply(l));
         f = op.enhanceFuncOptionally(f, "partition", String.class, DeleteParam.Builder::withPartitionName);
         f = op.enhanceFuncOptionally(f, "expression", String.class, DeleteParam.Builder::withExpr);
-        f = op.enhanceFuncOptionally(f, "expr", String.class, DeleteParam.Builder::withExpr);
-
+        f = op.enhanceFuncOptionally(f, "expr", String.class, Builder::withExpr);
         LongFunction<DeleteParam.Builder> finalF = f;
-        LongFunction<MilvusDeleteOp> opF = l -> new MilvusDeleteOp(clientF.apply(l), finalF.apply(l).build());
-        return opF;
+        return l -> finalF.apply(l).build();
+    }
+
+    @Override
+    public LongFunction<MilvusBaseOp<DeleteParam>> createOpFunc(LongFunction<DeleteParam> paramF, LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+        return l -> new MilvusDeleteParamOp(clientF.apply(l), paramF.apply(l));
     }
 
 }
