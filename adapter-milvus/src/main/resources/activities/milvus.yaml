@@ -1,15 +1,40 @@
 min_version: 5.21.1
+description: |
+  This is a template for live vector search testing.
+
+  schema: Install the schema required to run the test
+  rampup: Measure how long it takes to load a set of embeddings
+  search: Measure how the system responds to queries while it
+   is indexing recently ingested data.
+  search: Run vector search with a set of default (or overridden) parameters
+  In all of these phases, it is important to instance the metrics with distinct names.
+  Also, aggregates of recall should include total aggregate as well as a moving average.
 
 scenarios:
   default:
     drop_col: run tags==blocks:drop cycles===UNDEF threads===1 databaseName="baselines" uri="localhost:19530" token="root:Milvus" errors=counter,warn
     schema: run tags==blocks:schema cycles===2 threads===1 databaseName="baselines" uri="localhost:195 token="root:Milvus" errors=counter,warn
-    rampup: run tags==blocks:rampup cycles===TEMPLATE(rampup_cycles,100) threads===TEMPLATE(rampup_threads,10) databaseName="baselines" uri="localhost:195
-    search: run tags==blocks:search cycles===TEMPLATE(search_cycles,100) threads===TEMPLATE(search_threads,10) databaseName="baselines" uri="localhost:195
+    rampup: run tags==blocks:rampup cycles===TEMPLATE(rampup_cycles,100) threads===TEMPLATE(rampup_threads,10) databaseName="baselines" uri="localhost:195 errors=counter,warn
+    search: run tags==blocks:search cycles===TEMPLATE(search_cycles,100) threads===TEMPLATE(search_threads,10) databaseName="baselines" uri="localhost:195 errors=counter,warn
 
 params:
   driver: milvus
   instrument: true
+
+bindings:
+  row_key: ToString()
+  # filetype=hdf5 for TEMPLATE(filetype,hdf5)
+  test_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/test"); ToCqlVector();
+  relevant_indices_hdf5: HdfFileToIntArray("testdata/TEMPLATE(datafile).hdf5", "/neighbors")
+  distance_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/distance")
+  train_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/train"); ToCqlVector();
+  # filetype=fvec for TEMPLATE(filetype,fvec)
+  test_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_query_vectors.fvec"); ToCqlVector();
+  relevant_indices_fvec: IVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_indices_query.ivec");
+  distance_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(testsize)_distances_count.fvec",TEMPLATE(dimensions),0);
+  train_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0); ToCqlVector();
+  # synthetic
+  # synthetic_vectors: HashedFloatVectors(TEMPLATE(dimensions));
 
 blocks:
   drop:
@@ -66,7 +91,7 @@ blocks:
           collection_name: "TEMPLATE(collection,vector)"
           fields:
             key: {row_key}
-            value: {row_vector}
+            value: {train_floatlist_TEMPLATE(filetype,hdf5)}
 
   search:
     ops:
@@ -79,6 +104,6 @@ blocks:
             - key
             - value
           vector_field_name: "value"
-          vectors: {row_vector}
+          vectors: {test_floatlist_TEMPLATE(filetype,hdf5)}
           top_k: TEMPLATE(top_k,100)
           consistency_level: "TEMPLATE(read_cl,EVENTUALLY)"
