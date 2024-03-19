@@ -75,11 +75,11 @@ public class FindmaxFrameFunction implements SimFrameFunction {
     }
 
     public double nextStep() {
-        double newRate;
+        double newValue;
         SimFrame<FindmaxFrameParams> last = journal.last();
         SimFrame<FindmaxFrameParams> best = journal.bestRun();
         if (best.index() == last.index()) { // got better consecutively
-            newRate = last.params().paramValues()[0] + settings.step_value();
+            newValue = last.params().paramValues()[0] + settings.step_value();
             settings.setStep_value(settings.step_value() * settings.value_incr());
         } else if (best.index() == last.index() - 1) {
             // got worse consecutively, this may be collapsed out since the general case below covers it (test first)
@@ -88,7 +88,7 @@ public class FindmaxFrameFunction implements SimFrameFunction {
                 logger.info("could not divide search space further, stop condition met");
                 return 0;
             } else {
-                newRate = best.params().paramValues()[0] + settings.step_value();
+                newValue = best.params().paramValues()[0] + settings.step_value();
                 settings.setSample_time_ms(settings.sample_time_ms() * settings.sample_incr());
                 settings.setMin_settling_ms(settings.min_settling_ms() * 4);
             }
@@ -101,7 +101,7 @@ public class FindmaxFrameFunction implements SimFrameFunction {
                 .orElseThrow(() -> new RuntimeException("inconsistent samples"));
             if ((nextWorseFrameWithHigherRate.params().paramValues()[0] + settings.step_value() -
                 best.params().paramValues()[0] + settings.step_value()) > settings.step_value()) {
-                newRate = best.params().paramValues()[0] + settings.step_value();
+                newValue = best.params().paramValues()[0] + settings.step_value();
                 settings.setSample_time_ms(settings.sample_time_ms() * settings.sample_incr());
                 settings.setMin_settling_ms(settings.min_settling_ms() * 2);
             } else {
@@ -109,7 +109,7 @@ public class FindmaxFrameFunction implements SimFrameFunction {
                 return 0.0d;
             }
         }
-        double[] point = {newRate};
+        double[] point = {newValue};
         return value(point);
     }
 
