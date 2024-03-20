@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.datamappers.functions.hdf_to_cql;
-/**
- * This class is used to parse the raw JSON from the HDF dataset into a CQL predicate. This implementation
- * accepts a string consisting of the desired CQL predicate as translated from the original jsonl files and
- * simply returns the raw string, hence the name NoopDatasetParser.
- */
-public class NoopDatasetParser implements DatasetParser {
-    @Override
-    public String parse(String raw) {
-        return raw;
+package io.nosqlbench.virtdata.predicates.ast;
+
+public class PField {
+    public String name;
+
+    public PField(String name) {
+        this.name = name;
     }
 }

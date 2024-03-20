@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2023-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,22 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package io.nosqlbench.datamappers.functions.hdf_to_cql;
+package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.from_json.to_cql;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser.DatasetParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
  * This class is used to parse the raw JSON from the HDF dataset into a CQL predicate. This is the default
- * implementation. It accepts a JSON string of the form found at https://github.com/qdrant/ann-filtering-benchmark-datasets
+ * implementation. It accepts a JSON string of the form found at <a href="https://github.com/qdrant/ann-filtering-benchmark-datasets">...</a>
  * and converts it into a CQL predicate in String form
  */
-public class DefaultDatasetParser implements DatasetParser {
+public class CqlDatasetParser implements DatasetParser {
     private static final String WHERE = "WHERE";
     private static final String MATCH = "match";
     private static final String AND = "and";
@@ -41,7 +43,7 @@ public class DefaultDatasetParser implements DatasetParser {
     private static final String COMMA = ",";
     private static final String LEFT_PAREN = "(";
     private static final String RIGHT_PAREN = ")";
-    private static final Logger logger = LogManager.getLogger(DefaultDatasetParser.class);
+    private static final Logger logger = LogManager.getLogger(CqlDatasetParser.class);
 
     @Override
     public String parse(String raw) {
