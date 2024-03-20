@@ -16,18 +16,18 @@ scenarios:
   default:
     drop: >-
       run tags==block:drop errors===stop cycles===UNDEF threads===UNDEF
-      database_name=baselines uri=http://TEMPLATE(milvushost):19530 token=root:Milvus
+      database_name=baselines uri="http://TEMPLATE(milvushost):19530" token=root:Milvus
     schema: >-
       run tags==block:schema errors===stop cycles===2 threads===1
-      database_name=baselines uri=http://TEMPLATE(milvushost):19530 token=root:Milvus
+      database_name=baselines uri="http://TEMPLATE(milvushost):19530" token=root:Milvus
     rampup: >-
       run tags==block:rampup errors=counter,warn
-      cycles===TEMPLATE(rampup_cycles,100) threads===TEMPLATE(rampup_threads,10)
-      database_name=baselines uri=http://TEMPLATE(milvushost):19530 token=root:Milvus
+      cycles===TEMPLATE(trainsize,100) threads===TEMPLATE(rampup_threads,10)
+      database_name=baselines uri="http://TEMPLATE(milvushost):19530" token=root:Milvus
     search: >-
       run tags==block:search errors=counter,warn
-      cycles===TEMPLATE(search_cycles,100) threads===TEMPLATE(search_threads,10)
-      database_name=baselines uri=http://TEMPLATE(milvushost):19530 token=root:Milvus
+      cycles===TEMPLATE(testsize,100) threads===TEMPLATE(search_threads,10)
+      database_name=baselines uri="http://TEMPLATE(milvushost):19530" token=root:Milvus
 
 params:
   driver: milvus

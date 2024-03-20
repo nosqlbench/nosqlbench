@@ -29,23 +29,17 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-import static org.matheclipse.core.expression.S.l;
-
 public class MilvusDropCollectionOpDispenser extends MilvusBaseOpDispenser<DropCollectionParam> {
     private static final Logger logger = LogManager.getLogger(MilvusDropCollectionOpDispenser.class);
 
     /**
-     * <P>Create a new MilvusDeleteOpDispenser subclassed from {@link MilvusBaseOpDispenser}.</P>
+     * <P>Create a new {@link MilvusDropCollectionOpDispenser} subclassed from {@link MilvusBaseOpDispenser}.</P>
      *
      * <P>{@see <A HREF="https://milvus.io/docs/drop_collection.md">Drop Collection</A>}</P>
      *
-     * @param adapter
-     *     The associated {@link MilvusDriverAdapter}
-     * @param op
-     *     The {@link ParsedOp} encapsulating the activity for this cycle
-     * @param targetFunction
-     *     A LongFunction that returns the specified Milvus Index for this Op
-     *
+     * @param adapter        The associated {@link MilvusDriverAdapter}
+     * @param op             The {@link ParsedOp} encapsulating the activity for this cycle
+     * @param targetFunction A LongFunction that returns the specified Milvus Index for this Op
      */
     public MilvusDropCollectionOpDispenser(MilvusDriverAdapter adapter,
                                            ParsedOp op,
@@ -54,18 +48,23 @@ public class MilvusDropCollectionOpDispenser extends MilvusBaseOpDispenser<DropC
     }
 
     @Override
-    public LongFunction<DropCollectionParam> getParamFunc(LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<DropCollectionParam> getParamFunc(
+        LongFunction<MilvusServiceClient> clientF,
+        ParsedOp op,
+        LongFunction<String> targetF) {
         LongFunction<DropCollectionParam.Builder> f =
             l -> DropCollectionParam.newBuilder().withCollectionName(targetF.apply(l));
-        f = op.enhanceFuncOptionally(f,"database_name",String.class,DropCollectionParam.Builder::withDatabaseName);
+        f = op.enhanceFuncOptionally(f, "database_name", String.class, DropCollectionParam.Builder::withDatabaseName);
         LongFunction<DropCollectionParam.Builder> finalF = f;
         return l -> finalF.apply(l).build();
     }
 
     @Override
-    public LongFunction<MilvusBaseOp<DropCollectionParam>> createOpFunc(LongFunction<DropCollectionParam> paramF, LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<MilvusBaseOp<DropCollectionParam>> createOpFunc(LongFunction<DropCollectionParam> paramF,
+                                                                        LongFunction<MilvusServiceClient> clientF,
+                                                                        ParsedOp op, LongFunction<String> targetF) {
 
-        return l -> new MilvusDropCollectionOp(clientF.apply(l),paramF.apply(l));
+        return l -> new MilvusDropCollectionOp(clientF.apply(l), paramF.apply(l));
     }
 
 }

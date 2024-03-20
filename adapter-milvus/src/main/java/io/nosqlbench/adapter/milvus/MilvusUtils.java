@@ -16,32 +16,40 @@
 
 package io.nosqlbench.adapter.milvus;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class MilvusUtils {
 
     public static List<String> splitNames(String input) {
-        Objects.requireNonNull(input);
-        return Arrays.asList(input.split("( +| *, *)"));
+        assert StringUtils.isNotBlank(input) && StringUtils.isNotEmpty(input);
+        return Arrays.stream(input.split("( +| *, *)"))
+            .filter(StringUtils::isNotBlank)
+            .toList();
     }
 
     public static List<Long> splitLongs(String input) {
-        Objects.requireNonNull(input);
-        return Arrays.stream(input.split("( +| *, *)")).map(Long::parseLong).toList();
+        assert StringUtils.isNotBlank(input) && StringUtils.isNotEmpty(input);
+        return Arrays.stream(input.split("( +| *, *)"))
+            .filter(StringUtils::isNotBlank)
+            .map(Long::parseLong)
+            .toList();
     }
 
 
     /**
      * Mask the digits in the given string with '*'
+     *
      * @param unmasked The string to mask
      * @return The masked string
      */
     protected static String maskDigits(String unmasked) {
-        int inputLength = (null == unmasked) ? 0 : unmasked.length();
+        assert StringUtils.isNotBlank(unmasked) && StringUtils.isNotEmpty(unmasked);
+        int inputLength = unmasked.length();
         StringBuilder masked = new StringBuilder(inputLength);
-        for(char ch : unmasked.toCharArray()) {
+        for (char ch : unmasked.toCharArray()) {
             if (Character.isDigit(ch)) {
                 masked.append("*");
             } else {

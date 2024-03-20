@@ -53,7 +53,7 @@ public class MilvusOpMapper implements OpMapper<MilvusBaseOp<?>> {
             "type",
             "target"
         );
-        logger.info(() -> "Using " + typeAndTarget.enumId + " statement form for '" + op.getName());
+        logger.info(() -> "Using '" + typeAndTarget.enumId + "' statement form for '" + op.getName() + "'");
 
         return switch (typeAndTarget.enumId) {
             case drop_collection -> new MilvusDropCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
@@ -61,7 +61,7 @@ public class MilvusOpMapper implements OpMapper<MilvusBaseOp<?>> {
             case create_index -> new MilvusCreateIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case drop_index -> new MilvusDropIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case insert -> new MilvusInsertOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case delete -> new MilvusDeleteOpDispenser(adapter,op,typeAndTarget.targetFunction);
+            case delete -> new MilvusDeleteOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case search -> new MilvusSearchOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case alter_alias -> new MilvusAlterAliasOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case alter_collection -> new MilvusAlterCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
@@ -74,7 +74,8 @@ public class MilvusOpMapper implements OpMapper<MilvusBaseOp<?>> {
             case create_database -> new MilvusCreateDatabaseOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case query -> new MilvusQueryOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case delete_credential -> new MilvusDeleteCredentialOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case describe_collection -> new MilvusDescribeCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case describe_collection ->
+                new MilvusDescribeCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case describe_index -> new MilvusDescribeIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case drop_alias -> new MilvusDropAliasOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case get_metrics -> new MilvusGetMetricsOpDispenser(adapter, op, typeAndTarget.targetFunction);
