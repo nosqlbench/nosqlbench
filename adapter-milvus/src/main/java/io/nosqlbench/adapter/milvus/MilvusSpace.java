@@ -41,15 +41,10 @@ import java.util.Optional;
  */
 public class MilvusSpace implements AutoCloseable {
     private final static Logger logger = LogManager.getLogger(MilvusSpace.class);
-    private String uri;
-    private String token;
-    private String tokenFile;
-    private String databaseName;
     private final String name;
     private final NBConfiguration cfg;
 
     protected MilvusServiceClient client;
-    private ConnectParam connectParam;
 
     private final Map<String, ConnectParam> connections = new HashMap<>();
 
@@ -57,8 +52,10 @@ public class MilvusSpace implements AutoCloseable {
      * Create a new MilvusSpace Object which stores all stateful contextual information needed to interact
      * with the Milvus/Zilliz database instance.
      *
-     * @param name  The name of this space
-     * @param cfg   The configuration ({@link NBConfiguration}) for this nb run
+     * @param name
+     *     The name of this space
+     * @param cfg
+     *     The configuration ({@link NBConfiguration}) for this nb run
      */
     public MilvusSpace(String name, NBConfiguration cfg) {
         this.name = name;
@@ -73,41 +70,43 @@ public class MilvusSpace implements AutoCloseable {
     }
 
     private MilvusServiceClient createClient() {
-        this.uri = cfg.get("uri");
-        this.databaseName = cfg.get("databaseName");
-        String tokenFromFile = null;
-        this.tokenFile = cfg.get("tokenFile");
-        if(null != this.tokenFile && this.tokenFile.length() > 0) {
-            Optional<String> tokenFileOpt = cfg.getOptional("tokenFile");
-            if(tokenFileOpt.isPresent()) {
-                Path path = Paths.get(tokenFileOpt.get());
-                try {
-                    tokenFromFile = Files.readAllLines(path).getFirst();
-                } catch (IOException e) {
-                    String error = "Error while reading token from file:" + path;
-                    logger.error(error, e);
-                    throw new RuntimeException(e);
-                }
-            }
-        }
+        var builder = ConnectParam.newBuilder();
+        builder = builder.withUri(cfg.get("uri"));
+        builder = builder.withDatabaseName(cfg.get("database_name"));
 
-        this.token = (null != tokenFromFile) ? tokenFromFile : cfg.get("token");
-        connectParam = ConnectParam.newBuilder()
-            .withUri(uri)
-            .withToken(token)
-            .withDatabaseName(databaseName)
-            .build();
-        logger.info(this.name + ": Creating new Milvus/Zilliz Client with (masked) token [" + MilvusUtils.maskDigits(token) + "], uri/endpoint ["
-            + uri + "]");
-        this.client = new MilvusServiceClient(connectParam);
-        return this.client;
+        var requiredToken = cfg.getOptional("token_file")
+            .map(Paths::get)
+            .map(
+                tokenFilePath -> {
+                    try {
+                        return Files.readAllLines(tokenFilePath).getFirst();
+                    } catch (IOException e) {
+                        String error = "Error while reading token from file:" + tokenFilePath;
+                        logger.error(error, e);
+                        throw new RuntimeException(e);
+                    }
+                }
+            ).orElseGet(
+                () -> cfg.getOptional("token")
+                    .orElseThrow(() -> new RuntimeException("You must provide either a token_file or a token to " +
+                        "configure a Milvus client"))
+            );
+
+        builder = builder.withToken(requiredToken);
+
+        ConnectParam connectParams = builder.build();
+
+        logger.info(this.name + ": Creating new Milvus/Zilliz Client with (masked) " +
+            "token [" + MilvusUtils.maskDigits(builder.getToken()) + "], uri/endpoint [" + builder.getUri() + "]"
+        );
+        return new MilvusServiceClient(connectParams);
     }
 
     public static NBConfigModel getConfigModel() {
 
         return ConfigModel.of(MilvusSpace.class)
             .add(
-                Param.optional("tokenFile", String.class, "the file to load the token from")
+                Param.optional("token_file", String.class, "the file to load the token from")
             )
             .add(
                 Param.defaultTo("token", "root:Milvus")
@@ -118,7 +117,7 @@ public class MilvusSpace implements AutoCloseable {
                     .setDescription("the URI endpoint in which the database is running.")
             )
             .add(
-                Param.defaultTo("databaseName", "baselines")
+                Param.defaultTo("database_name", "baselines")
                     .setDescription("the name of the database to use. Defaults to 'baselines'")
             )
             .asReadOnly();

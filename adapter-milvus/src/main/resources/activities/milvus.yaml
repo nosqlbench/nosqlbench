@@ -1,6 +1,8 @@
 min_version: 5.21.1
 description: |
   This is a template for live vector search testing.
+  Template Variables:
+  TEMPLATE(milvushost,localhost)
 
   schema: Install the schema required to run the test
   rampup: Measure how long it takes to load a set of embeddings
@@ -12,10 +14,20 @@ description: |
 
 scenarios:
   default:
-    drop_col: run tags==blocks:drop cycles===UNDEF threads===1 databaseName="baselines" uri="localhost:19530" token="root:Milvus" errors=counter,warn
-    schema: run tags==blocks:schema cycles===2 threads===1 databaseName="baselines" uri="localhost:195 token="root:Milvus" errors=counter,warn
-    rampup: run tags==blocks:rampup cycles===TEMPLATE(rampup_cycles,100) threads===TEMPLATE(rampup_threads,10) databaseName="baselines" uri="localhost:195 errors=counter,warn
-    search: run tags==blocks:search cycles===TEMPLATE(search_cycles,100) threads===TEMPLATE(search_threads,10) databaseName="baselines" uri="localhost:195 errors=counter,warn
+    drop: >-
+      run tags==block:drop errors===stop cycles===UNDEF threads===UNDEF
+      database_name=baselines uri=http://TEMPLATE(milvushost):19530 token=root:Milvus
+    schema: >-
+      run tags==block:schema errors===stop cycles===2 threads===1
+      database_name=baselines uri=http://TEMPLATE(milvushost):19530 token=root:Milvus
+    rampup: >-
+      run tags==block:rampup errors=counter,warn
+      cycles===TEMPLATE(rampup_cycles,100) threads===TEMPLATE(rampup_threads,10)
+      database_name=baselines uri=http://TEMPLATE(milvushost):19530 token=root:Milvus
+    search: >-
+      run tags==block:search errors=counter,warn
+      cycles===TEMPLATE(search_cycles,100) threads===TEMPLATE(search_threads,10)
+      database_name=baselines uri=http://TEMPLATE(milvushost):19530 token=root:Milvus
 
 params:
   driver: milvus
@@ -41,69 +53,63 @@ blocks:
     ops:
       # https://milvus.io/api-reference/java/v2.3.x/Collection/dropCollection().md
       drop_col_op:
-        drop_collection:
-          collection_name: "TEMPLATE(collection,vector)"
+        drop_collection: "TEMPLATE(collection,vector)"
 
       # https://milvus.io/api-reference/java/v2.3.x/Index/dropIndex().md
       drop_index_op:
-        drop_index:
-          collection_name: "TEMPLATE(collection,vector)"
-          index_name: "TEMPLATE(collection,vector)_TEMPLATE(vector_field,value)_idx"
+        drop_index: "TEMPLATE(collection,vector)_TEMPLATE(vector_field,value)_idx"
+        collection_name: "TEMPLATE(collection,vector)"
   schema:
     ops:
       # https://milvus.io/api-reference/java/v2.3.x/Collection/createCollection().md
       create_col_op:
-        create_collection:
-          collection_name: "TEMPLATE(collection,vector)"
-          shards_num: TEMPLATE(shards_number,0)
-          description: "TEMPLATE(desc,a simple milvus/zilliz vector collection)"
-          consistency_level: "BOUNDED"
-          field_types:
-            - field_1:
-                name: "key"
-                primary_key: true
-                description: "primary/part key of the collection"
-                data_type: "VarChar"
-                auto_id: false
-                partition_key: true
-            - field_2:
-                name: "value"
-                primary_key: false
-                description: "vector column/field"
-                data_type: "FloatVector"
-                dimension: TEMPLATE(vec_dimension,25)
+        create_collection: "TEMPLATE(collection,vector)"
+        shards_num: TEMPLATE(shards_number,0)
+        description: "TEMPLATE(desc,a simple milvus/zilliz vector collection)"
+        consistency_level: "BOUNDED"
+        field_types:
+          - field_1:
+              name: "key"
+              primary_key: true
+              description: "primary/part key of the collection"
+              data_type: "VarChar"
+              auto_id: false
+              partition_key: true
+          - field_2:
+              name: "value"
+              primary_key: false
+              description: "vector column/field"
+              data_type: "FloatVector"
+              dimension: TEMPLATE(vec_dimension,25)
 
       # https://milvus.io/api-reference/java/v2.3.x/Index/createIndex().md
       create_index_op:
-        create_index:
-          collection_name: "TEMPLATE(collection,vector)"
-          field_name: "TEMPLATE(vector_field,value)"
-          index_name: "TEMPLATE(collection,vector)_TEMPLATE(vector_field,value)_idx"
-          index_type: "TEMPLATE(idx_type,DISKANN)"
-          metric_type: "TEMPLATE(similarity_function,COSINE)"
-          sync_mode: TEMPLATE(sync_mode,true)
+        create_index: "TEMPLATE(collection,vector)_TEMPLATE(vector_field,value)_idx"
+        collection_name: "TEMPLATE(collection,vector)"
+        field_name: "TEMPLATE(vector_field,value)"
+        index_type: "TEMPLATE(idx_type,DISKANN)"
+        metric_type: "TEMPLATE(similarity_function,COSINE)"
+        sync_mode: TEMPLATE(sync_mode,true)
 
   rampup:
     ops:
       # https://milvus.io/api-reference/java/v2.3.x/Collection/insert().md
       insert_op:
-        insert:
-          collection_name: "TEMPLATE(collection,vector)"
-          fields:
-            key: {row_key}
-            value: {train_floatlist_TEMPLATE(filetype,hdf5)}
+        insert: "TEMPLATE(collection,vector)"
+        fields:
+          key: "{row_key}"
+          value: "{train_floatlist_TEMPLATE(filetype,hdf5)}"
 
   search:
     ops:
       # https://milvus.io/api-reference/java/v2.3.x/High-level%20API/search().md
       # https://milvus.io/api-reference/java/v2.3.x/Query%20and%20Search/search().md
       search_op:
-        search:
-          collection_name: "TEMPLATE(collection,vector)"
-          output_fields:
-            - key
-            - value
-          vector_field_name: "value"
-          vectors: {test_floatlist_TEMPLATE(filetype,hdf5)}
-          top_k: TEMPLATE(top_k,100)
-          consistency_level: "TEMPLATE(read_cl,EVENTUALLY)"
+        search: "TEMPLATE(collection,vector)"
+        vectors: "{test_floatlist_TEMPLATE(filetype,hdf5)}"
+        output_fields:
+          - key
+          - value
+        vector_field_name: "value"
+        top_k: TEMPLATE(top_k,100)
+        consistency_level: "TEMPLATE(read_cl,EVENTUALLY)"
