@@ -19,6 +19,8 @@ package io.nosqlbench.adapter.milvus;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -26,6 +28,9 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
 
+import static io.nosqlbench.adapter.milvus.MilvusUtils.MILVUS;
+
+@Service(value = DriverAdapter.class, selector = MILVUS)
 public class MilvusDriverAdapter extends BaseDriverAdapter<MilvusBaseOp<?>, MilvusSpace> {
 
     public MilvusDriverAdapter(NBComponent parentComponent, NBLabels labels) {

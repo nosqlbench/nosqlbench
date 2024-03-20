@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MilvusUtils {
+    public static final String MILVUS = "milvus";
 
     public static List<String> splitNames(String input) {
         assert StringUtils.isNotBlank(input) && StringUtils.isNotEmpty(input);
