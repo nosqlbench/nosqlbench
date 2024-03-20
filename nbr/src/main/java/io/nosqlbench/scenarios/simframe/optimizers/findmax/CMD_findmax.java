@@ -78,16 +78,10 @@ public class CMD_findmax extends NBBaseCommand {
                 throw new RuntimeException("Unsupported optimization type: " + findmaxConfig.optimization_type());
         }
 
-
         SimFrameCapture capture = new SimFrameValueData(flywheel);
         FindmaxFrameFunction frameFunction = new FindmaxFrameFunction(controller, findmaxConfig, flywheel, capture, journal, model);
-        double[] initialPoint = {findmaxConfig.base_value()};
-        double result = frameFunction.value(initialPoint);
-        while (result != 0.0d) {
-            result = frameFunction.nextStep();
-        }
-
-        SimFrame<FindmaxFrameParams> best = frameFunction.journal().bestRun();
+        FindmaxAnalyzer analyzer = new FindmaxAnalyzer(frameFunction, findmaxConfig);
+        SimFrame<FindmaxFrameParams> best = analyzer.analyze();
         stdout.println("Best Run:\n" + best);
         return best.params();
     }
