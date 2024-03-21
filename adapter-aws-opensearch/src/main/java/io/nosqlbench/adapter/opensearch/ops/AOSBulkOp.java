@@ -16,22 +16,24 @@
 
 package io.nosqlbench.adapter.opensearch.ops;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch.indices.CreateIndexRequest;
-import org.opensearch.client.opensearch.indices.CreateIndexResponse;
+import org.opensearch.client.opensearch.core.BulkRequest;
 
-public class CreateIndexOp extends BaseOpenSearchOp {
-    private final CreateIndexRequest rq;
+import java.io.IOException;
 
-    public CreateIndexOp(OpenSearchClient client, CreateIndexRequest rq) {
+public class AOSBulkOp extends AOSBaseOp {
+    private final static Logger logger = LogManager.getLogger(AOSBulkOp.class);
+    private final BulkRequest rq;
+
+    public AOSBulkOp(OpenSearchClient client, BulkRequest rq) {
         super(client);
         this.rq = rq;
     }
 
-    @Override
-    public Object applyOp(long value) throws Exception {
-        CreateIndexResponse response = client.indices().create(rq);
-        return response;
-    }
 
+    public Object applyOp(long value) throws IOException {
+        return client.bulk(rq);
+    }
 }

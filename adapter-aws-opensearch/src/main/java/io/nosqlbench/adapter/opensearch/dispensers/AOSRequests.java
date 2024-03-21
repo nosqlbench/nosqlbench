@@ -35,13 +35,11 @@ import org.opensearch.client.opensearch.core.bulk.IndexOperation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class OpenSearchRequests {
+public class AOSRequests {
 
-    private final static Logger logger = LogManager.getLogger(IndexOpDispenser.class);
+    private final static Logger logger = LogManager.getLogger(AOSIndexOpDispenser.class);
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public static <T> LongFunction<BulkRequest> bulk(ParsedOp op, LongFunction<String> targetF) {
@@ -57,12 +55,12 @@ public class OpenSearchRequests {
         ParsedOp subop = op.getAsSubOp("op_template");
         int repeat = subop.getStaticConfigOr("repeat", 1);
 
-        TypeAndTarget<BulkOpTypes, String> typeinfo =
-            subop.getTypeAndTarget(BulkOpTypes.class, String.class);
+        TypeAndTarget<AOSBulkOpTypes, String> typeinfo =
+            subop.getTypeAndTarget(AOSBulkOpTypes.class, String.class);
 
         LongFunction<BulkOperationVariant> bop = switch (typeinfo.enumId) {
-            case create -> OpenSearchRequests.createOperation(subop);
-            case index -> OpenSearchRequests.indexOperation(subop);
+            case create -> AOSRequests.createOperation(subop);
+            case index -> AOSRequests.indexOperation(subop);
             default -> throw new OpConfigError("Unsupported type in bulk operation: '" + typeinfo.enumId + "'");
         };
 
@@ -116,7 +114,7 @@ public class OpenSearchRequests {
         func = op.enhanceFuncOptionally(func, "version", long.class, IndexRequest.Builder::version);
         func = op.enhanceEnumOptionally(func, "opType", OpType.class, IndexRequest.Builder::opType);
         func = op.enhanceEnumOptionally(func, "versionType", VersionType.class, IndexRequest.Builder::versionType);
-        func = op.enhanceFuncPivot(func, "document", Object.class, OpenSearchRequests::bindDocument);
+        func = op.enhanceFuncPivot(func, "document", Object.class, AOSRequests::bindDocument);
         LongFunction<IndexRequest.Builder> finalFunc1 = func;
         return l -> finalFunc1.apply(l).build();
     }

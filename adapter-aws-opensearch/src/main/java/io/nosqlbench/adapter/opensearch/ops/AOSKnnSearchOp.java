@@ -16,27 +16,24 @@
 
 package io.nosqlbench.adapter.opensearch.ops;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch.core.BulkRequest;
-import org.opensearch.client.opensearch.core.BulkResponse;
-import org.opensearch.client.opensearch.core.IndexRequest;
-import org.opensearch.client.opensearch.core.IndexResponse;
+import org.opensearch.client.opensearch.core.SearchRequest;
+import org.opensearch.client.opensearch.core.SearchResponse;
 
-import java.io.IOException;
+public class AOSKnnSearchOp extends AOSBaseOp {
+    private final SearchRequest rq;
+    private final Class<?> doctype;
 
-public class BulkOp extends BaseOpenSearchOp {
-    private final static Logger logger = LogManager.getLogger(BulkOp.class);
-    private final BulkRequest rq;
-
-    public BulkOp(OpenSearchClient client, BulkRequest rq) {
+    public AOSKnnSearchOp(OpenSearchClient client, SearchRequest rq, Class<?> doctype) {
         super(client);
         this.rq = rq;
+        this.doctype = doctype;
     }
 
-
-    public Object applyOp(long value) throws IOException {
-        return client.bulk(rq);
+    @Override
+    public Object applyOp(long value) throws Exception {
+        SearchResponse response = client.search(rq, doctype);
+        return response;
     }
+
 }

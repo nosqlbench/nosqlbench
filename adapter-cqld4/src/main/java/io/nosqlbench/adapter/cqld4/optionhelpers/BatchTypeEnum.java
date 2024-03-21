@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.opensearch.dispensers;
+package io.nosqlbench.adapter.cqld4.optionhelpers;
 
-public enum BulkOpTypes {
-    create,
-    index,
-    delete,
-    update
+import com.datastax.oss.driver.api.core.cql.BatchType;
+
+public enum BatchTypeEnum {
+
+    logged(BatchType.LOGGED),
+    unlogged(BatchType.UNLOGGED),
+    counter(BatchType.COUNTER);
+
+    public final BatchType batchtype;
+
+    BatchTypeEnum(BatchType batchtype) {
+        this.batchtype = batchtype;
+    }
 }
