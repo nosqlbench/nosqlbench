@@ -23,6 +23,7 @@ import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetIndexBuildProgressOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusGetIndexBuildProgressOpDispenser extends MilvusBaseOpDispenser<GetIndexBuildProgressParam> {
@@ -41,7 +42,8 @@ public class MilvusGetIndexBuildProgressOpDispenser extends MilvusBaseOpDispense
     ) {
         LongFunction<GetIndexBuildProgressParam.Builder> ebF =
             l -> GetIndexBuildProgressParam.newBuilder().withIndexName(targetF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,"collection_name",String.class,GetIndexBuildProgressParam.Builder::withCollectionName);
+        ebF = op.enhanceFuncOptionally(ebF, List.of("collection_name","collection"),String.class,
+            GetIndexBuildProgressParam.Builder::withCollectionName);
 
         final LongFunction<GetIndexBuildProgressParam.Builder> lastF = ebF;
         final LongFunction<GetIndexBuildProgressParam> collectionParamF = l -> lastF.apply(l).build();

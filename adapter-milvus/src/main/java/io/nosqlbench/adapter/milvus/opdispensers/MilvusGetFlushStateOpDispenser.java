@@ -52,7 +52,8 @@ public class MilvusGetFlushStateOpDispenser extends MilvusBaseOpDispenser<GetFlu
         };
         LongFunction<GetFlushStateParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withSegmentIDs(idsF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,"collection_name",String.class,GetFlushStateParam.Builder::withCollectionName);
+        ebF = op.enhanceFuncOptionally(ebF,List.of("collection","collection_name"),String.class,
+            GetFlushStateParam.Builder::withCollectionName);
         ebF = op.enhanceFuncOptionally(ebF,"flush_ts",Long.class,GetFlushStateParam.Builder::withFlushTs);
 
         final LongFunction<GetFlushStateParam.Builder> lastF = ebF;

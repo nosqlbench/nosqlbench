@@ -60,7 +60,7 @@ public class ActivityMetricProgressMeter implements ProgressMeterDisplay, Comple
 
     @Override
     public double getCurrentValue() {
-        return activity.getInstrumentation().getOrCreateCyclesServiceTimer().getCount();
+        return activity.getInstrumentation().getOrCreateBindTimer().getCount();
     }
 
     @Override

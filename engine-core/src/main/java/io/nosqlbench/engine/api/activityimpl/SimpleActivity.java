@@ -442,31 +442,36 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
-                if (0 == ratio) {
-                    logger.info(() -> "skipped mapping op '" + pop.getName() + '\'');
-                    continue;
-                }
 
-                DriverAdapter<?,?> adapter = adapters.get(i);
-                OpMapper<? extends Op> opMapper = adapter.getOpMapper();
-                OpDispenser<? extends Op> dispenser = opMapper.apply(pop);
+                try {
+                    if (0 == ratio) {
+                        logger.info(() -> "skipped mapping op '" + pop.getName() + '\'');
+                        continue;
+                    }
 
-                String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
-                if ("op".equalsIgnoreCase(dryrunSpec)) {
-                    dispenser = new DryRunOpDispenserWrapper((DriverAdapter<Op,Object>)adapter, pop, dispenser);
-                    dryrunCount++;
-                } else if ("emit".equalsIgnoreCase(dryrunSpec)) {
-                    dispenser = new EmitterOpDispenserWrapper(
-                        (DriverAdapter<Op,Object>)adapter,
-                        pop,
-                        (OpDispenser<? extends CycleOp<?>>) dispenser
-                    );
-                }
+                    DriverAdapter<?, ?> adapter = adapters.get(i);
+                    OpMapper<? extends Op> opMapper = adapter.getOpMapper();
+                    OpDispenser<? extends Op> dispenser = opMapper.apply(pop);
+
+                    String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
+                    if ("op".equalsIgnoreCase(dryrunSpec)) {
+                        dispenser = new DryRunOpDispenserWrapper((DriverAdapter<Op, Object>) adapter, pop, dispenser);
+                        dryrunCount++;
+                    } else if ("emit".equalsIgnoreCase(dryrunSpec)) {
+                        dispenser = new EmitterOpDispenserWrapper(
+                            (DriverAdapter<Op, Object>) adapter,
+                            pop,
+                            (OpDispenser<? extends CycleOp<?>>) dispenser
+                        );
+                    }
 
 //                if (strict) {
 //                    optemplate.assertConsumed();
 //                }
-                planner.addOp((OpDispenser<? extends O>) dispenser, ratio);
+                    planner.addOp((OpDispenser<? extends O>) dispenser, ratio);
+                } catch (Exception e) {
+                    throw new OpConfigError("Error while mapping op from template named '" + pop.getName() + "': " + e.getMessage(),e);
+                }
             }
             if (0 < dryrunCount) {
                 logger.warn("initialized {} op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.", dryrunCount);
@@ -475,7 +480,11 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
             return planner.resolve();
 
         } catch (Exception e) {
-            throw new OpConfigError(e.getMessage(), workloadSource, e);
+            if (e instanceof OpConfigError oce) {
+                throw oce;
+            } else {
+                throw new OpConfigError(e.getMessage(), workloadSource, e);
+            }
         }
 
 

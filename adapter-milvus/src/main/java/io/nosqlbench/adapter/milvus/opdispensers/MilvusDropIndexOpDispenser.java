@@ -27,6 +27,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusDropIndexOpDispenser extends MilvusBaseOpDispenser<DropIndexParam> {
@@ -52,7 +53,8 @@ public class MilvusDropIndexOpDispenser extends MilvusBaseOpDispenser<DropIndexP
     public LongFunction<DropIndexParam> getParamFunc(LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<DropIndexParam.Builder> f =
             l -> DropIndexParam.newBuilder().withIndexName(targetF.apply(l));
-        f = op.enhanceFunc(f,"collection_name",String.class, DropIndexParam.Builder::withCollectionName);
+        f = op.enhanceFunc(f, List.of("collection_name","collection"),String.class,
+            DropIndexParam.Builder::withCollectionName);
         LongFunction<DropIndexParam.Builder> finalF = f;
         return l -> finalF.apply(1).build();
     }

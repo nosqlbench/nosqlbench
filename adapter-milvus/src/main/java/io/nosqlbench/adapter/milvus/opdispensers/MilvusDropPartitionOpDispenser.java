@@ -24,6 +24,7 @@ import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusDropPartitionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusDropPartitionOpDispenser extends MilvusBaseOpDispenser<DropPartitionParam> {
@@ -42,7 +43,8 @@ public class MilvusDropPartitionOpDispenser extends MilvusBaseOpDispenser<DropPa
     ) {
         LongFunction<DropPartitionParam.Builder> ebF =
             l -> DropPartitionParam.newBuilder().withPartitionName(targetF.apply(l));
-        ebF = op.enhanceFunc(ebF,"collection_name",String.class, DropPartitionParam.Builder::withCollectionName);
+        ebF = op.enhanceFunc(ebF, List.of("collection_name","collection"),String.class,
+            DropPartitionParam.Builder::withCollectionName);
 
         final LongFunction<DropPartitionParam.Builder> lastF = ebF;
         final LongFunction<DropPartitionParam> collectionParamF = l -> lastF.apply(l).build();

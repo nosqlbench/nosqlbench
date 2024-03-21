@@ -44,7 +44,8 @@ public class MilvusQueryOpDispenser extends MilvusBaseOpDispenser<QueryParam> {
         LongFunction<QueryParam.Builder> ebF =
             l -> QueryParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF,"partition_names", List.class,QueryParam.Builder::withPartitionNames);
+        ebF = op.enhanceFuncOptionally(ebF,List.of("partition_names","partitions"), List.class,
+            QueryParam.Builder::withPartitionNames);
         ebF = op.enhanceEnumOptionally(ebF,"consistency_level", ConsistencyLevelEnum.class, QueryParam.Builder::withConsistencyLevel);
         ebF = op.enhanceFuncOptionally(ebF,"expr",String.class,QueryParam.Builder::withExpr);
         ebF = op.enhanceFuncOptionally(ebF,"limit",Long.class,QueryParam.Builder::withLimit);

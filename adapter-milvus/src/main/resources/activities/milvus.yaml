@@ -3,6 +3,10 @@ description: |
   This is a template for live vector search testing.
   Template Variables:
   TEMPLATE(milvushost,localhost)
+  TEMPLATE(datafile)
+  TEMPLATE(database,baselines)
+  TEMPLATE(trainsize)
+  TEMPLATE(testsize)
 
   schema: Install the schema required to run the test
   rampup: Measure how long it takes to load a set of embeddings
@@ -15,19 +19,19 @@ description: |
 scenarios:
   default:
     drop: >-
-      run tags==block:drop errors===stop cycles===UNDEF threads===UNDEF
-      database_name=baselines uri="http://TEMPLATE(milvushost):19530" token=root:Milvus
+      run tags==block:drop errors===warn cycles===UNDEF threads===UNDEF
+      uri=http://TEMPLATE(milvushost):19530 database=TEMPLATE(database) token=root:Milvus
     schema: >-
-      run tags==block:schema errors===stop cycles===2 threads===1
-      database_name=baselines uri="http://TEMPLATE(milvushost):19530" token=root:Milvus
+      run tags==block:schema errors===stop cycles===UNDEF threads===1
+      uri=http://TEMPLATE(milvushost):19530 database=TEMPLATE(database) token=root:Milvus
     rampup: >-
       run tags==block:rampup errors=counter,warn
-      cycles===TEMPLATE(trainsize,100) threads===TEMPLATE(rampup_threads,10)
-      database_name=baselines uri="http://TEMPLATE(milvushost):19530" token=root:Milvus
+      cycles===TEMPLATE(rampup_cycles,TEMPLATE(trainsize,100)) threads===TEMPLATE(rampup_threads,10)
+      uri=http://TEMPLATE(milvushost):19530 database=TEMPLATE(database) token=root:Milvus
     search: >-
       run tags==block:search errors=counter,warn
-      cycles===TEMPLATE(testsize,100) threads===TEMPLATE(search_threads,10)
-      database_name=baselines uri="http://TEMPLATE(milvushost):19530" token=root:Milvus
+      cycles===TEMPLATE(search_cycles,TEMPLATE(testsize,100)) threads===TEMPLATE(search_threads,10)
+      uri=http://TEMPLATE(milvushost):19530 database=TEMPLATE(database) token=root:Milvus
 
 params:
   driver: milvus
@@ -36,15 +40,15 @@ params:
 bindings:
   row_key: ToString()
   # filetype=hdf5 for TEMPLATE(filetype,hdf5)
-  test_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/test"); ToCqlVector();
+  test_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/test");
   relevant_indices_hdf5: HdfFileToIntArray("testdata/TEMPLATE(datafile).hdf5", "/neighbors")
   distance_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/distance")
-  train_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/train"); ToCqlVector();
+  train_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/train");
   # filetype=fvec for TEMPLATE(filetype,fvec)
-  test_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_query_vectors.fvec"); ToCqlVector();
+  test_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_query_vectors.fvec");
   relevant_indices_fvec: IVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_indices_query.ivec");
   distance_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(testsize)_distances_count.fvec",TEMPLATE(dimensions),0);
-  train_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0); ToCqlVector();
+  train_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0);
   # synthetic
   # synthetic_vectors: HashedFloatVectors(TEMPLATE(dimensions));
 
@@ -54,33 +58,36 @@ blocks:
       # https://milvus.io/api-reference/java/v2.3.x/Collection/dropCollection().md
       drop_col_op:
         drop_collection: "TEMPLATE(collection,vector)"
-
+        database_name: "TEMPLATE(database)"
       # https://milvus.io/api-reference/java/v2.3.x/Index/dropIndex().md
       drop_index_op:
         drop_index: "TEMPLATE(collection,vector)_TEMPLATE(vector_field,value)_idx"
         collection_name: "TEMPLATE(collection,vector)"
+        database_name: "TEMPLATE(database)"
+      drop_db_op:
+        drop_database: "TEMPLATE(database)"
   schema:
     ops:
+      create_db_op:
+        create_database: "TEMPLATE(database)"
       # https://milvus.io/api-reference/java/v2.3.x/Collection/createCollection().md
       create_col_op:
         create_collection: "TEMPLATE(collection,vector)"
-        shards_num: TEMPLATE(shards_number,0)
         description: "TEMPLATE(desc,a simple milvus/zilliz vector collection)"
         consistency_level: "BOUNDED"
         field_types:
-          - field_1:
-              name: "key"
-              primary_key: true
-              description: "primary/part key of the collection"
-              data_type: "VarChar"
-              auto_id: false
-              partition_key: true
-          - field_2:
-              name: "value"
-              primary_key: false
-              description: "vector column/field"
-              data_type: "FloatVector"
-              dimension: TEMPLATE(vec_dimension,25)
+          key:
+            primary_key: true
+            description: "primary/part key of the collection"
+            data_type: "VarChar"
+            max_length: 1024
+            auto_id: false
+#            partition_key: true
+          value:
+            primary_key: false
+            description: "vector column/field"
+            data_type: "FloatVector"
+            dimension: TEMPLATE(vec_dimension,25)
 
       # https://milvus.io/api-reference/java/v2.3.x/Index/createIndex().md
       create_index_op:

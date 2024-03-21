@@ -47,7 +47,8 @@ public class MilvusShowCollectionsOpDispenser extends MilvusBaseOpDispenser<Show
         LongFunction<List<String>> collectionsF = l -> MilvusUtils.splitNames(targetF.apply(l));
         LongFunction<ShowCollectionsParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withCollectionNames(collectionsF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,"database_name",String.class,ShowCollectionsParam.Builder::withDatabaseName);
+        ebF = op.enhanceFuncOptionally(ebF,List.of("database_name","database"),String.class,
+            ShowCollectionsParam.Builder::withDatabaseName);
         ebF = op.enhanceEnumOptionally(ebF,"show_type", ShowType.class,ShowCollectionsParam.Builder::withShowType);
         logger.warn(this.getClass().getSimpleName() + " is deprecated, use get_loading_progress instead");
 

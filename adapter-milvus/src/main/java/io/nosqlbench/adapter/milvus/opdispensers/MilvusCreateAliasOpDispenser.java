@@ -23,6 +23,7 @@ import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusCreateAliasOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusCreateAliasOpDispenser extends MilvusBaseOpDispenser<CreateAliasParam> {
@@ -41,8 +42,9 @@ public class MilvusCreateAliasOpDispenser extends MilvusBaseOpDispenser<CreateAl
     ) {
         LongFunction<CreateAliasParam.Builder> ebF =
             l -> CreateAliasParam.newBuilder().withAlias(targetF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF, "collection_name",String.class,
+        ebF = op.enhanceFuncOptionally(ebF, List.of("collection_name","collection"),String.class,
             CreateAliasParam.Builder::withCollectionName);
+
 
         final LongFunction<CreateAliasParam.Builder> lastF = ebF;
         final LongFunction<CreateAliasParam> collectionParamF = l -> lastF.apply(l).build();

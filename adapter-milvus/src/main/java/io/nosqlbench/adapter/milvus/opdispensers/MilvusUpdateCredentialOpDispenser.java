@@ -42,7 +42,7 @@ public class MilvusUpdateCredentialOpDispenser extends MilvusBaseOpDispenser<Upd
         LongFunction<UpdateCredentialParam.Builder> ebF =
             l -> UpdateCredentialParam.newBuilder().withUsername(targetF.apply(l));
         ebF = op.enhanceFuncOptionally(ebF,"old_password",String.class,UpdateCredentialParam.Builder::withOldPassword);
-        ebF = op.enhanceFuncOptionally(ebF,"nwe_password",String.class,UpdateCredentialParam.Builder::withNewPassword);
+        ebF = op.enhanceFuncOptionally(ebF,"new_password",String.class,UpdateCredentialParam.Builder::withNewPassword);
 
         final LongFunction<UpdateCredentialParam.Builder> lastF = ebF;
         final LongFunction<UpdateCredentialParam> collectionParamF = l -> lastF.apply(l).build();

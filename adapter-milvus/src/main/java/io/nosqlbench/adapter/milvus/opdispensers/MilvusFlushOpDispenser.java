@@ -51,7 +51,8 @@ public class MilvusFlushOpDispenser extends MilvusBaseOpDispenser<FlushParam> {
         };
         LongFunction<FlushParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withCollectionNames(cnames.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF, "database_name",String.class,FlushParam.Builder::withDatabaseName);
+        ebF = op.enhanceFuncOptionally(ebF, List.of("database_name","database"),String.class,
+            FlushParam.Builder::withDatabaseName);
         ebF = op.enhanceFuncOptionally(ebF, "sync_flush_waiting_interval",Long.class,
             FlushParam.Builder::withSyncFlushWaitingInterval);
         ebF = op.enhanceFuncOptionally(ebF, "sync_flush_waiting_timeout",Long.class,

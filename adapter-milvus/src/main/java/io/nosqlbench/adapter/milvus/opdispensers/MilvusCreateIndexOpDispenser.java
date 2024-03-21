@@ -17,6 +17,8 @@
 package io.nosqlbench.adapter.milvus.opdispensers;
 
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.param.IndexType;
+import io.milvus.param.MetricType;
 import io.milvus.param.index.CreateIndexParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
@@ -25,6 +27,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusCreateIndexOpDispenser extends MilvusBaseOpDispenser<CreateIndexParam> {
@@ -53,14 +56,17 @@ public class MilvusCreateIndexOpDispenser extends MilvusBaseOpDispenser<CreateIn
         LongFunction<CreateIndexParam.Builder> bF =
             l -> CreateIndexParam.newBuilder().withIndexName(targetF.apply(l));
 
-        bF = op.enhanceFunc(bF, "collection_name", String.class, CreateIndexParam.Builder::withCollectionName);
+        bF = op.enhanceFunc(bF, List.of("collection","collection_name"), String.class,
+            CreateIndexParam.Builder::withCollectionName);
         bF = op.enhanceFunc(bF, "field_name", String.class, CreateIndexParam.Builder::withFieldName);
-        bF = op.enhanceFunc(bF, "index_type", String.class, CreateIndexParam.Builder::withFieldName);
-        bF = op.enhanceFunc(bF, "metric_type", String.class, CreateIndexParam.Builder::withFieldName);
-        bF = op.enhanceFuncOptionally(bF, "extra_param", String.class, CreateIndexParam.Builder::withFieldName);
+        bF = op.enhanceEnumOptionally(bF, "index_type", IndexType.class, CreateIndexParam.Builder::withIndexType);
+        bF = op.enhanceEnumOptionally(bF, "metric_type", MetricType.class, CreateIndexParam.Builder::withMetricType);
+        bF = op.enhanceFuncOptionally(bF, "extra_param", String.class, CreateIndexParam.Builder::withExtraParam);
         bF = op.enhanceFuncOptionally(bF, "sync_mode", Boolean.class, CreateIndexParam.Builder::withSyncMode);
         bF = op.enhanceFuncOptionally(bF, "sync_waiting_interval", Long.class, CreateIndexParam.Builder::withSyncWaitingInterval);
         bF = op.enhanceFuncOptionally(bF, "sync_waiting_timeout", Long.class, CreateIndexParam.Builder::withSyncWaitingTimeout);
+        bF = op.enhanceFuncOptionally(bF, List.of("database","database_name"), String.class,
+            CreateIndexParam.Builder::withDatabaseName);
         LongFunction<CreateIndexParam.Builder> finalBF1 = bF;
         return l -> finalBF1.apply(l).build();
     }

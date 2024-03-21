@@ -26,6 +26,7 @@ import io.nosqlbench.adapter.milvus.ops.MilvusDeleteParamOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.milvus.param.dml.DeleteParam.Builder;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusDeleteOpDispenser extends MilvusBaseOpDispenser<DeleteParam> {
@@ -39,7 +40,8 @@ public class MilvusDeleteOpDispenser extends MilvusBaseOpDispenser<DeleteParam> 
     public LongFunction<DeleteParam> getParamFunc(LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<DeleteParam.Builder> f =
             l -> DeleteParam.newBuilder().withCollectionName(targetF.apply(l));
-        f = op.enhanceFuncOptionally(f, "partition", String.class, DeleteParam.Builder::withPartitionName);
+        f = op.enhanceFuncOptionally(f, List.of("partition_name","partition"), String.class,
+            DeleteParam.Builder::withPartitionName);
         f = op.enhanceFuncOptionally(f, "expression", String.class, DeleteParam.Builder::withExpr);
         f = op.enhanceFuncOptionally(f, "expr", String.class, Builder::withExpr);
         LongFunction<DeleteParam.Builder> finalF = f;

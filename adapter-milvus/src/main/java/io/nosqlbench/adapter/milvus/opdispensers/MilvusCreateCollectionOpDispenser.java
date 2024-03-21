@@ -19,7 +19,6 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.grpc.DataType;
-import io.milvus.param.alias.CreateAliasParam;
 import io.milvus.param.collection.CreateCollectionParam;
 import io.milvus.param.collection.FieldType;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
@@ -64,15 +63,22 @@ public class MilvusCreateCollectionOpDispenser extends MilvusBaseOpDispenser<Cre
 
         ebF = op.enhanceFuncOptionally(ebF, "shards_num", Integer.class,
             CreateCollectionParam.Builder::withShardsNum);
+        ebF = op.enhanceFuncOptionally(ebF, "partition_num", Integer.class,
+            CreateCollectionParam.Builder::withPartitionsNum);
         ebF = op.enhanceFuncOptionally(ebF, "description", String.class,
             CreateCollectionParam.Builder::withDescription);
         ebF = op.enhanceEnumOptionally(ebF, "consistency_level",
             ConsistencyLevelEnum.class, CreateCollectionParam.Builder::withConsistencyLevel);
+        ebF = op.enhanceFuncOptionally(ebF, "database_name", String.class,
+            CreateCollectionParam.Builder::withDatabaseName);
 
-        Map<String,Object> fieldTypesMap = op.getStaticValue("field_types", Map.class);
-        List<FieldType> fieldTypes = buildFieldTypesStruct(fieldTypesMap);
+        List<FieldType> fieldTypes = buildFieldTypesStruct(
+            op.getAsSubOps("field_types", ParsedOp.SubOpNaming.SubKey),
+            ebF
+        );
         final LongFunction<CreateCollectionParam.Builder> f = ebF;
         ebF = l -> f.apply(l).withFieldTypes(fieldTypes);
+
         final LongFunction<CreateCollectionParam.Builder> lastF = ebF;
         return l -> lastF.apply(l).build();
     }
@@ -91,39 +97,39 @@ public class MilvusCreateCollectionOpDispenser extends MilvusBaseOpDispenser<Cre
     /**
      * Function to build the {@link FieldType}s for the {@link CreateCollectionParam}.
      *
-     * @param fieldTypesData The static map of config data from the create collection request
+     * @param fieldTypesData
+     *     The static map of config data from the create collection request
+     * @param ebF
      * @return a list of static field types
      */
-    private List<FieldType> buildFieldTypesStruct(Map<String,Object> fieldTypesData) {
-
+    private List<FieldType> buildFieldTypesStruct(Map<String, ParsedOp> fieldTypesData, LongFunction<CreateCollectionParam.Builder> ebF) {
         List<FieldType> fieldTypes = new ArrayList<>();
-        fieldTypesData.forEach((name, properties) -> {
-            FieldType.Builder fieldTypeBuilder = FieldType.newBuilder()
+        fieldTypesData.forEach((name, fieldspec) -> {
+            FieldType.Builder builder = FieldType.newBuilder()
                 .withName(name);
 
-            if (properties instanceof Map<?,?> map) {
+            fieldspec.getOptionalStaticValue("primary_key", Boolean.class)
+                .ifPresent(builder::withPrimaryKey);
+            fieldspec.getOptionalStaticValue("auto_id", Boolean.class)
+                .ifPresent(builder::withAutoID);
+            fieldspec.getOptionalStaticConfig("max_length", Integer.class)
+                .ifPresent(builder::withMaxLength);
+            fieldspec.getOptionalStaticConfig("max_capacity", Integer.class)
+                .ifPresent(builder::withMaxCapacity);
+            fieldspec.getOptionalStaticValue(List.of("partition_key","partition"), Boolean.class)
+                .ifPresent(builder::withPartitionKey);
+            fieldspec.getOptionalStaticValue("dimension", Integer.class)
+                .ifPresent(builder::withDimension);
+            fieldspec.getOptionalStaticConfig("data_type", String.class)
+                .map(DataType::valueOf)
+                .ifPresent(builder::withDataType);
+            fieldspec.getOptionalStaticConfig("type_params", Map.class)
+                .ifPresent(builder::withTypeParams);
+            fieldspec.getOptionalStaticConfig("element_type",String.class)
+                    .map(DataType::valueOf)
+                        .ifPresent(builder::withElementType);
 
-                if (map.containsKey("primary_key")) {
-                    fieldTypeBuilder.withPrimaryKey(Boolean.parseBoolean((String) map.get("primary_key")));
-                }
-                if (map.containsKey("auto_id")) {
-                    fieldTypeBuilder.withAutoID(Boolean.parseBoolean((String) map.get("auto_id")));
-                }
-                if (map.containsKey("partition_key")) {
-                    fieldTypeBuilder.withPartitionKey(Boolean.parseBoolean((String) map.get("partition_key")));
-                }
-                if (map.containsKey("dimension")) {
-                    fieldTypeBuilder.withDimension(Integer.parseInt((String) map.get("dimension")));
-                }
-                if (map.containsKey("data_type")) {
-                    fieldTypeBuilder.withDataType(DataType.valueOf((String) map.get("data_type")));
-                }
-            } else {
-                throw new RuntimeException("Invalid type for field_types specified." +
-                    " It needs to be a map. Check out the examples in the driver documentation.");
-            }
-
-            fieldTypes.add(fieldTypeBuilder.build());
+            fieldTypes.add(builder.build());
         });
         return fieldTypes;
     }

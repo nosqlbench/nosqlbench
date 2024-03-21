@@ -25,12 +25,14 @@ import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusInsertOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class MilvusInsertOpDispenser extends MilvusBaseOpDispenser<InsertParam> {
@@ -53,18 +55,40 @@ public class MilvusInsertOpDispenser extends MilvusBaseOpDispenser<InsertParam> 
     public LongFunction<InsertParam> getParamFunc(LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<InsertParam.Builder> f =
             l -> InsertParam.newBuilder().withCollectionName(targetF.apply(l));
-        f = op.enhanceFuncOptionally(f, "partition", String.class, InsertParam.Builder::withPartitionName);
-        f = op.enhanceFuncOptionally(f, "database", String.class, InsertParam.Builder::withDatabaseName);
-        if (op.isDefined("rows")) {
-            LongFunction<List<JSONObject>> rowsF = createRowsF(op);
-            LongFunction<InsertParam.Builder> finalF = f;
-            f = l -> finalF.apply(l).withRows(rowsF.apply(l));
-            f = op.enhanceFuncOptionally(f, "rows", List.class, InsertParam.Builder::withRows);
+
+        f = op.enhanceFuncOptionally(
+            f, List.of("partition_name","partition"), String.class,
+            InsertParam.Builder::withPartitionName
+        );
+        f = op.enhanceFuncOptionally(
+            f, List.of("database_name","database"), String.class,
+            InsertParam.Builder::withDatabaseName
+        );
+
+        Optional<LongFunction<List<JSONObject>>> optionalRowsF = MilvusOpUtils.getHighLevelRowsFunction(op, "rows");
+        Optional<LongFunction<List<InsertParam.Field>>> optionalFieldsF = MilvusOpUtils.getFieldsFunction(op, "fields");
+
+        if (optionalFieldsF.isPresent() && optionalRowsF.isPresent()) {
+            throw new OpConfigError("Must provide either rows or fields, but not both.");
         }
-        LongFunction<InsertParam.Builder> finalF1 = f;
-        LongFunction<List<InsertParam.Field>> fieldsF = createFieldsF(op);
-        LongFunction<InsertParam> insertParamsF = l -> finalF1.apply(l).withFields(fieldsF.apply(l)).build();
-        return insertParamsF;
+        if (optionalFieldsF.isEmpty() && optionalRowsF.isEmpty()) {
+            throw new OpConfigError("Must provide either rows or fields");
+        }
+
+        if (optionalRowsF.isPresent()) {
+            var rf = optionalRowsF.get();
+            LongFunction<InsertParam.Builder> finalF2 = f;
+            f = l -> finalF2.apply(l).withRows(rf.apply(l));
+        }
+
+        if (optionalFieldsF.isPresent()) {
+            var ff = optionalFieldsF.get();
+            LongFunction<InsertParam.Builder> finalF3 = f;
+            f = l -> finalF3.apply(l).withFields(ff.apply(l));
+        }
+
+        LongFunction<InsertParam.Builder> finalF = f;
+        return l -> finalF.apply(l).build();
     }
 
     @Override
@@ -76,21 +100,4 @@ public class MilvusInsertOpDispenser extends MilvusBaseOpDispenser<InsertParam> 
         return l -> new MilvusInsertOp(clientF.apply(l), paramF.apply(l));
     }
 
-
-    private LongFunction<List<InsertParam.Field>> createFieldsF(ParsedOp op) {
-        LongFunction<Map> fieldDataF = op.getAsRequiredFunction("fields", Map.class);
-        LongFunction<List<InsertParam.Field>> fieldsF = l -> {
-            Map<String, Object> fieldmap = fieldDataF.apply(l);
-            List<InsertParam.Field> fields = new ArrayList<>();
-            fieldmap.forEach((name, value) -> {
-                fields.add(new InsertParam.Field(name, (List) value));
-            });
-            return fields;
-        };
-        return fieldsF;
-    }
-
-    private LongFunction<List<JSONObject>> createRowsF(ParsedOp op) {
-        throw new RuntimeException("This is not implemented yet");
-    }
 }

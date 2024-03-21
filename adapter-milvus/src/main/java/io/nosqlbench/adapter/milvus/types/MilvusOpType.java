@@ -45,7 +45,8 @@ public enum MilvusOpType {
     get_persistent_segment_info(Collection),
     get_query_segment_info(Collection),
     get_replicas(Collection),
-    insert(Collection),
+    insert_fields(Collection),
+    insert_rows(Collection), // Added because of generic signature causing ambiguous patterns on insert(...)
     load_collection(Collection),
     release_collection(Collection),
     show_collections(Collection),
