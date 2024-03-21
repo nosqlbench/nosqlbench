@@ -42,7 +42,7 @@ public class MilvusLoadBalanceOpDispenser extends MilvusBaseOpDispenser<LoadBala
         LongFunction<LoadBalanceParam.Builder> ebF =
             l -> LoadBalanceParam.newBuilder();
         LongFunction<String> segmentsStringF = op.getAsRequiredFunction("segment_ids");
-//        ebF = l -> ebF.apply(l).withSegmentIDs(MilvusUtils.splitLongs(segmentsStringF.apply(l)));
+//        ebF = l -> ebF.apply(l).withSegmentIDs(MilvusAdapterUtils.splitLongs(segmentsStringF.apply(l)));
 
         throw new RuntimeException("implement me");
         // todo: implement me
@@ -59,6 +59,6 @@ public class MilvusLoadBalanceOpDispenser extends MilvusBaseOpDispenser<LoadBala
         ParsedOp op,
         LongFunction<String> targetF
     ) {
-        return l -> new MilvusLoadBalanceOp(clientF.apply(l),paramF.apply(l));
+        return l -> new MilvusLoadBalanceOp(clientF.apply(l), paramF.apply(l));
     }
 }

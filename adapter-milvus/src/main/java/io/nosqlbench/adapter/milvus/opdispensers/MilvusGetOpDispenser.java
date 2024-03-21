@@ -19,8 +19,8 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.param.highlevel.dml.GetIdsParam;
-import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.MilvusAdapterUtils;
+import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -59,7 +59,7 @@ public class MilvusGetOpDispenser extends MilvusBaseOpDispenser<GetIdsParam> {
         LongFunction<GetIdsParam.Builder> ebF =
             l -> GetIdsParam.newBuilder();
 
-//        ebF = l -> ebF.apply(l).withPrimaryIds(MilvusUtils.splitNames(targetF.apply(l)));
+//        ebF = l -> ebF.apply(l).withPrimaryIds(MilvusAdapterUtils.splitNames(targetF.apply(l)));
         LongFunction<Object> valueFunc = op.getAsRequiredFunction("primary_ids", Object.class);
         Object testValue = valueFunc.apply(0L);
         LongFunction<List<Object>> pidsF;
@@ -75,7 +75,7 @@ public class MilvusGetOpDispenser extends MilvusBaseOpDispenser<GetIdsParam> {
         LongFunction<GetIdsParam.Builder> finalEbF2 = ebF;
         ebF = l -> finalEbF2.apply(l).withPrimaryIds(pidsF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF, List.of("collection_name","collection"), String.class,
+        ebF = op.enhanceFuncOptionally(ebF, List.of("collection_name", "collection"), String.class,
             GetIdsParam.Builder::withCollectionName);
         ebF = op.enhanceEnumOptionally(ebF, "consistency_level", ConsistencyLevelEnum.class,
             GetIdsParam.Builder::withConsistencyLevel);

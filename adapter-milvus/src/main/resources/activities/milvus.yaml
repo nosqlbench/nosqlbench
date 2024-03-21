@@ -63,10 +63,10 @@ blocks:
       drop_index_op:
         drop_index: "TEMPLATE(collection)_TEMPLATE(vector_field,value)_idx"
         collection_name: "TEMPLATE(collection)"
-#        database_name: "TEMPLATE(database)"
+      #        database_name: "TEMPLATE(database)"
       drop_col_op:
         drop_collection: "TEMPLATE(collection)"
-#        database_name: "TEMPLATE(database)"
+      #        database_name: "TEMPLATE(database)"
       # https://milvus.io/api-reference/java/v2.3.x/Index/dropIndex().md
       drop_db_op:
         drop_database: "TEMPLATE(database)"
@@ -86,7 +86,7 @@ blocks:
             data_type: "VarChar"
             max_length: 1024
             auto_id: false
-#            partition_key: true
+          #            partition_key: true
           value:
             primary_key: false
             description: "vector column/field"
@@ -110,9 +110,9 @@ blocks:
         rows:
           key: "{row_key}"
           value: "{train_floatlist_TEMPLATE(filetype)}"
-#        fields:
-#          key: (List this) "{row_key}"
-#          value: (List this) "{train_floatlist_TEMPLATE(filetype)}"
+  #        fields:
+  #          key: (List this) "{row_key}"
+  #          value: (List this) "{train_floatlist_TEMPLATE(filetype)}"
 
   search:
     ops:
@@ -137,16 +137,16 @@ blocks:
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
           }
-#          for (int k in List.of(1,2,3,5,10,25,50,75)) {
-#            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("s_recall",k));
-#            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("s_precision",k));
-#            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("s_F1",k));
-#            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("s_RR",k));
-#            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("s_AP",k));
-#          }
+        #          for (int k in List.of(1,2,3,5,10,25,50,75)) {
+        #            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("s_recall",k));
+        #            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("s_precision",k));
+        #            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("s_F1",k));
+        #            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("s_RR",k));
+        #            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("s_AP",k));
+        #          }
         verifier: |
           // driver-specific function
-          actual_indices=io.nosqlbench.adapter.milvus.MilvusUtils.intArrayFromMilvusSearchResults("key",result)
+          actual_indices=io.nosqlbench.adapter.milvus.MilvusAdapterUtils.intArrayFromMilvusSearchResults("key",result)
           // driver-agnostic function
           relevancy.accept({relevant_indices_TEMPLATE(filetype)},actual_indices);
           // because we are "verifying" although this needs to be reorganized
