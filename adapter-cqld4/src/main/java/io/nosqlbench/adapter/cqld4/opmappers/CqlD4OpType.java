@@ -44,6 +44,14 @@ public enum CqlD4OpType {
     prepared,
 
     /**
+     * Allows for a statement template to be used to create a batch statement.
+     * The fields 'op_template', and 'repeat' are required, and all fields below
+     * the op_template field are a nested version of the other op types here, but
+     * supports only the simple and prepared forms for historic compatibility reasons.
+     */
+    batch,
+
+    /**
      * uses {@link com.datastax.dse.driver.api.core.graph.ScriptGraphStatement}
      * This is the "raw" mode of using gremlin. It is not as efficient, and thus
      * is only recommended for testing or legacy apps.

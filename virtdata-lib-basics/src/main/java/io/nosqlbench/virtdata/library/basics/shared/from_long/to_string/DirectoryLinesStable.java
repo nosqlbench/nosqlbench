@@ -91,6 +91,14 @@ public class DirectoryLinesStable implements LongFunction<String> {
         this.totalSize = accumulator;
     }
 
+    private String getLine(int index, int offset) {
+        try {
+            IntFunction<String> func = fileFunctions.get(index);
+            return func.apply(offset);
+        } catch (Exception e)  {
+            throw new RuntimeException("Error while binding index=" + index + " offset=" + offset + " for " + this);
+        }
+    }
     @Override
     public synchronized String apply(long cycle) {
         int value = (int) (cycle % totalSize);
@@ -100,9 +108,7 @@ public class DirectoryLinesStable implements LongFunction<String> {
             index++;
         }
 
-        IntFunction<String> func = fileFunctions.get(index);
-        return func.apply(value);
-
+        return this.getLine(index,value);
     }
 
     @Override

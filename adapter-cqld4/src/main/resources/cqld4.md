@@ -69,6 +69,8 @@ nb5 ... driverconfig='http://gist.github.com...'
 * **showstmt** - enable per-statement diagnostics which show as much of the statement as possible
   for the given statement type. *WARNING* - Do not use this for performance testing, only for
   diagnostics.
+* **diag** - a set of options for advanced diagnostics for CQL. Defaults to `diag=none`.
+  Valid values are  none, addr, mid, all. Presently, only none and all are supported.
 * **maxpages** - configure the maximum number of pages allowed in a CQL result set. This is
   configured to `maxpages=1` by default, so that users will be aware of any paging that occurs
   by default. If you expect and want to allow paging in your operation, then set this number
@@ -139,6 +141,13 @@ ops:
   example-raw-cql-stmt:
     raw: |
      create table if not exist {ksname}.{tblname} ...
+
+  example-batch-stmt:
+    batch:
+      repeat: 50
+      op_template:
+        prepared: |
+         select three, four from knock.onthedoor where ...
 
   # gremlin statement using the fluent API, as it would be written in a client application
   example-fluent-graph-stmt:

@@ -16,18 +16,7 @@
 
 package io.nosqlbench.adapter.opensearch;
 
-import io.nosqlbench.adapter.opensearch.pojos.Doc;
-import org.opensearch.client.opensearch.core.SearchResponse;
-import org.opensearch.client.opensearch.core.search.Hit;
-
-public class Utils {
-
-    public static int[] DocHitsToIntIndicesArray(SearchResponse<Doc> response) {
-        int[] indices = response.hits().hits()
-            .stream()
-            .map(Hit::source)
-            .mapToInt(doc -> Integer.parseInt(doc.getKey()))
-            .toArray();
-        return indices;
-    }
+public enum AOSServiceType {
+    aoss,
+    es
 }

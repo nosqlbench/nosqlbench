@@ -16,26 +16,29 @@
 
 package io.nosqlbench.adapter.opensearch.ops;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch.core.SearchRequest;
-import org.opensearch.client.opensearch.core.SearchResponse;
-import org.opensearch.client.opensearch.indices.GetIndexRequest;
-import org.opensearch.client.opensearch.indices.GetIndexResponse;
 
-public class KnnSearchOp extends BaseOpenSearchOp {
-    private final SearchRequest rq;
-    private final Class<?> doctype;
+public abstract class AOSBaseOp implements CycleOp<Object> {
+    protected final OpenSearchClient client;
 
-    public KnnSearchOp(OpenSearchClient client, SearchRequest rq, Class<?> doctype) {
-        super(client);
-        this.rq = rq;
-        this.doctype = doctype;
+    public AOSBaseOp(OpenSearchClient client) {
+        this.client = client;
     }
 
     @Override
-    public Object applyOp(long value) throws Exception {
-        SearchResponse response = client.search(rq, doctype);
-        return response;
-    }
+    public final Object apply(long value) {
+        try {
+            Object result = applyOp(value);
+            return result;
+        } catch (Exception e) {
+            if (e instanceof RuntimeException rte) {
+                throw rte;
+            } else {
+                throw new RuntimeException(e);
+            }
+        }
+    };
 
+    public abstract Object applyOp(long value) throws Exception;
 }

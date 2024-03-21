@@ -16,30 +16,25 @@
 
 package io.nosqlbench.adapter.opensearch.dispensers;
 
-import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
-import io.nosqlbench.adapter.opensearch.ops.CreateIndexOp;
-import io.nosqlbench.adapter.opensearch.ops.DeleteOp;
+import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSDeleteOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.opensearch.client.json.JsonData;
 import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch._types.mapping.*;
 import org.opensearch.client.opensearch.core.DeleteRequest;
-import org.opensearch.client.opensearch.indices.CreateIndexRequest;
 
-import java.util.Map;
 import java.util.function.LongFunction;
 
-public class DeleteOpDispenser extends BaseOpenSearchOpDispenser {
+public class AOSDeleteOpDispenser extends AOSBaseOpDispenser {
 
-    public DeleteOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
+    public AOSDeleteOpDispenser(AOSAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op, targetF);
     }
 
     @Override
-    public LongFunction<DeleteOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<AOSDeleteOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         DeleteRequest.Builder eb = new DeleteRequest.Builder();
         LongFunction<DeleteRequest.Builder> bfunc = l -> new DeleteRequest.Builder().index(targetF.apply(l));
-        return (long l) -> new DeleteOp(clientF.apply(l), bfunc.apply(l).build());
+        return (long l) -> new AOSDeleteOp(clientF.apply(l), bfunc.apply(l).build());
     }
 
 }

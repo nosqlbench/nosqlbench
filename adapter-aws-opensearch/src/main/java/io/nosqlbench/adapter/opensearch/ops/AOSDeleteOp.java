@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.opensearch;
+package io.nosqlbench.adapter.opensearch.ops;
 
-import io.nosqlbench.adapter.diag.DriverAdapterLoader;
-import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.labels.NBLabels;
+import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch.core.DeleteRequest;
 
-@Service(value = DriverAdapterLoader.class,selector = "opensearch")
-public class OpenSearchAdapterLoader implements DriverAdapterLoader {
-    @Override
-    public OpenSearchAdapter load(NBComponent parent, NBLabels childLabels) {
-        return new OpenSearchAdapter(parent, childLabels);
+import java.io.IOException;
+
+public class AOSDeleteOp extends AOSBaseOp {
+    private final DeleteRequest rq;
+
+    public AOSDeleteOp(OpenSearchClient client, DeleteRequest rq) {
+        super(client);
+        this.rq = rq;
+    }
+
+    public Object applyOp(long value) throws IOException {
+        return client.delete(rq);
     }
 }

@@ -16,29 +16,27 @@
 
 package io.nosqlbench.adapter.opensearch.ops;
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch.core.IndexRequest;
+import org.opensearch.client.opensearch.core.IndexResponse;
 
-public abstract class BaseOpenSearchOp implements CycleOp<Object> {
-    protected final OpenSearchClient client;
+import java.io.IOException;
 
-    public BaseOpenSearchOp(OpenSearchClient client) {
-        this.client = client;
+public class AOSIndexOp extends AOSBaseOp {
+    private final static Logger logger = LogManager.getLogger(AOSIndexOp.class);
+    private final IndexRequest<?> rq;
+
+    public AOSIndexOp(OpenSearchClient client, IndexRequest<?> rq) {
+        super(client);
+        this.rq = rq;
     }
 
-    @Override
-    public final Object apply(long value) {
-        try {
-            Object result = applyOp(value);
-            return result;
-        } catch (Exception e) {
-            if (e instanceof RuntimeException rte) {
-                throw rte;
-            } else {
-                throw new RuntimeException(e);
-            }
-        }
-    };
 
-    public abstract Object applyOp(long value) throws Exception;
+    public Object applyOp(long value) throws IOException {
+        IndexResponse response = client.index(rq);
+        logger.debug("IndexResponse:" + response);
+        return response;
+    }
 }
