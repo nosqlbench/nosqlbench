@@ -36,6 +36,7 @@ scenarios:
 params:
   driver: milvus
   instrument: true
+  database: TEMPLATE(database)
 
 bindings:
   row_key: ToString()
@@ -103,9 +104,12 @@ blocks:
       # https://milvus.io/api-reference/java/v2.3.x/Collection/insert().md
       insert_op:
         insert: "TEMPLATE(collection,vector)"
-        fields:
+        rows:
           key: "{row_key}"
           value: "{train_floatlist_TEMPLATE(filetype,hdf5)}"
+#        fields:
+#          key: (List this) "{row_key}"
+#          value: (List this) "{train_floatlist_TEMPLATE(filetype,hdf5)}"
 
   search:
     ops:
