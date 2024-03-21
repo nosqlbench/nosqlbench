@@ -23,6 +23,7 @@ import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetPartitionStatisticsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusGetPartitionStatisticsOpDispenser extends MilvusBaseOpDispenser<GetPartitionStatisticsParam> {
@@ -41,7 +42,8 @@ public class MilvusGetPartitionStatisticsOpDispenser extends MilvusBaseOpDispens
     ) {
         LongFunction<GetPartitionStatisticsParam.Builder> ebF =
             l -> GetPartitionStatisticsParam.newBuilder().withPartitionName(targetF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,"collection_name",String.class,GetPartitionStatisticsParam.Builder::withCollectionName);
+        ebF = op.enhanceFuncOptionally(ebF, List.of("collection_name","collection"),String.class,
+            GetPartitionStatisticsParam.Builder::withCollectionName);
         ebF = op.enhanceFuncOptionally(ebF, "flush",Boolean.class, GetPartitionStatisticsParam.Builder::withFlush);
 
         final LongFunction<GetPartitionStatisticsParam.Builder> lastF = ebF;

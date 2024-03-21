@@ -47,7 +47,8 @@ public class MilvusReleasePartitionsOpDispenser extends MilvusBaseOpDispenser<Re
 
         LongFunction<ReleasePartitionsParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withPartitionNames(partNamesF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,"collection_name",String.class,ReleasePartitionsParam.Builder::withCollectionName);
+        ebF = op.enhanceFuncOptionally(ebF,List.of("collection_name","collection"),String.class,
+            ReleasePartitionsParam.Builder::withCollectionName);
 
         final LongFunction<ReleasePartitionsParam.Builder> lastF = ebF;
         final LongFunction<ReleasePartitionsParam> collectionParamF = l -> lastF.apply(l).build();

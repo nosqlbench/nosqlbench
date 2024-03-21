@@ -77,8 +77,11 @@ public class MilvusGetOpDispenser extends MilvusBaseOpDispenser<GetIdsParam> {
         LongFunction<GetIdsParam.Builder> finalEbF2 = ebF;
         ebF = l -> finalEbF2.apply(l).withPrimaryIds(pidsF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF, "collection_name", String.class, GetIdsParam.Builder::withCollectionName);
+        ebF = op.enhanceFuncOptionally(ebF, List.of("collection_name","collection"), String.class,
+            GetIdsParam.Builder::withCollectionName);
         ebF = op.enhanceEnumOptionally(ebF, "consistency_level", ConsistencyLevelEnum.class,
+            GetIdsParam.Builder::withConsistencyLevel);
+        ebF = op.enhanceEnumOptionally(ebF, "cl", ConsistencyLevelEnum.class,
             GetIdsParam.Builder::withConsistencyLevel);
 
         if (op.isDefined("output_fields")) {

@@ -23,6 +23,7 @@ import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusCreatePartitionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusCreatePartitionOpDispenser extends MilvusBaseOpDispenser<CreatePartitionParam> {
@@ -42,7 +43,8 @@ public class MilvusCreatePartitionOpDispenser extends MilvusBaseOpDispenser<Crea
         LongFunction<CreatePartitionParam.Builder> ebF =
             l -> CreatePartitionParam.newBuilder().withCollectionName(targetF.apply(l));
         // Add enhancement functions here
-        ebF = op.enhanceFunc(ebF,"collection_name",String.class,CreatePartitionParam.Builder::withCollectionName);
+        ebF = op.enhanceFunc(ebF, List.of("collection","collection_name"),String.class,
+            CreatePartitionParam.Builder::withCollectionName);
 
         final LongFunction<CreatePartitionParam.Builder> lastF = ebF;
         final LongFunction<CreatePartitionParam> collectionParamF = l -> lastF.apply(l).build();

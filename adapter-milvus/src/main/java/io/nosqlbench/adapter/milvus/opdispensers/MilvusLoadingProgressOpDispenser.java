@@ -42,7 +42,8 @@ public class MilvusLoadingProgressOpDispenser extends MilvusBaseOpDispenser<GetL
     ) {
         LongFunction<GetLoadingProgressParam.Builder> ebF =
             l -> GetLoadingProgressParam.newBuilder().withCollectionName(targetF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,"partition_names", List.class,GetLoadingProgressParam.Builder::withPartitionNames);
+        ebF = op.enhanceFuncOptionally(ebF,List.of("partition_names","partitions"), List.class,
+            GetLoadingProgressParam.Builder::withPartitionNames);
 
         final LongFunction<GetLoadingProgressParam.Builder> lastF = ebF;
         final LongFunction<GetLoadingProgressParam> collectionParamF = l -> lastF.apply(l).build();

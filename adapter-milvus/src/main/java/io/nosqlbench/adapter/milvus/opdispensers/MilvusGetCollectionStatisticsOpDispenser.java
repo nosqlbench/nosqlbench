@@ -23,6 +23,7 @@ import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetCollectionStatisticsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusGetCollectionStatisticsOpDispenser extends MilvusBaseOpDispenser<GetCollectionStatisticsParam> {
@@ -42,7 +43,7 @@ public class MilvusGetCollectionStatisticsOpDispenser extends MilvusBaseOpDispen
         LongFunction<GetCollectionStatisticsParam.Builder> ebF =
             l -> GetCollectionStatisticsParam.newBuilder().withCollectionName(targetF.apply(l));
         // Add enhancement functions here
-        ebF = op.enhanceFuncOptionally(ebF,"database_name", String.class,
+        ebF = op.enhanceFuncOptionally(ebF, List.of("database_name","database"), String.class,
             GetCollectionStatisticsParam.Builder::withDatabaseName);
         ebF = op.enhanceFuncOptionally(ebF,"flush",Boolean.class,GetCollectionStatisticsParam.Builder::withFlush);
 

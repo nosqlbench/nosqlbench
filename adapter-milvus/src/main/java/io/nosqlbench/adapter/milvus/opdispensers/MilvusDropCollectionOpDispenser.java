@@ -27,6 +27,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusDropCollectionOpDispenser extends MilvusBaseOpDispenser<DropCollectionParam> {
@@ -54,7 +55,8 @@ public class MilvusDropCollectionOpDispenser extends MilvusBaseOpDispenser<DropC
         LongFunction<String> targetF) {
         LongFunction<DropCollectionParam.Builder> f =
             l -> DropCollectionParam.newBuilder().withCollectionName(targetF.apply(l));
-        f = op.enhanceFuncOptionally(f, "database_name", String.class, DropCollectionParam.Builder::withDatabaseName);
+        f = op.enhanceFuncOptionally(f, List.of("database","database_name"),String.class,
+            DropCollectionParam.Builder::withDatabaseName);
         LongFunction<DropCollectionParam.Builder> finalF = f;
         return l -> finalF.apply(l).build();
     }

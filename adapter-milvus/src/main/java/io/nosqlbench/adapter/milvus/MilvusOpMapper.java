@@ -60,7 +60,10 @@ public class MilvusOpMapper implements OpMapper<MilvusBaseOp<?>> {
             case create_collection -> new MilvusCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_index -> new MilvusCreateIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case drop_index -> new MilvusDropIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case insert -> new MilvusInsertOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            // Uses the Collection-specific fields (columnar) insert mode
+            case insert_fields -> new MilvusInsertOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            // Uses the High-Level row-by-row JSONObject (tabular) insert mode
+            case insert_rows -> new MilvusInsertRowsOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case delete -> new MilvusDeleteOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case search -> new MilvusSearchOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case alter_alias -> new MilvusAlterAliasOpDispenser(adapter, op, typeAndTarget.targetFunction);

@@ -72,7 +72,7 @@ public class MilvusSpace implements AutoCloseable {
     private MilvusServiceClient createClient() {
         var builder = ConnectParam.newBuilder();
         builder = builder.withUri(cfg.get("uri"));
-        builder = builder.withDatabaseName(cfg.get("database_name"));
+        cfg.getOptional("database_name").ifPresent(builder::withDatabaseName);
 
         var requiredToken = cfg.getOptional("token_file")
             .map(Paths::get)
@@ -113,11 +113,11 @@ public class MilvusSpace implements AutoCloseable {
                     .setDescription("the Milvus/Zilliz token to use to connect to the database")
             )
             .add(
-                Param.defaultTo("uri", "localhost:19530")
+                Param.defaultTo("uri", "127.0.0.1:19530")
                     .setDescription("the URI endpoint in which the database is running.")
             )
             .add(
-                Param.defaultTo("database_name", "baselines")
+                Param.optional("database_name")
                     .setDescription("the name of the database to use. Defaults to 'baselines'")
             )
             .asReadOnly();

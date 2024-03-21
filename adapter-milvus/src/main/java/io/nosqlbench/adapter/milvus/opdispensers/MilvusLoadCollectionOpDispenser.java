@@ -43,7 +43,8 @@ public class MilvusLoadCollectionOpDispenser extends MilvusBaseOpDispenser<LoadC
         LongFunction<LoadCollectionParam.Builder> ebF =
             l -> LoadCollectionParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF,"database_name",String.class,LoadCollectionParam.Builder::withDatabaseName);
+        ebF = op.enhanceFuncOptionally(ebF,List.of("database_name","database"),String.class,
+            LoadCollectionParam.Builder::withDatabaseName);
 
         ebF = op.enhanceFuncOptionally(ebF,"refresh",Boolean.class,LoadCollectionParam.Builder::withRefresh);
         ebF = op.enhanceFuncOptionally(ebF,"sync_load",Boolean.class,LoadCollectionParam.Builder::withSyncLoad);

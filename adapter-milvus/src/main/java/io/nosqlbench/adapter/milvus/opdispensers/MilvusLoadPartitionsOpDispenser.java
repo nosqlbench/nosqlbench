@@ -50,11 +50,17 @@ public class MilvusLoadPartitionsOpDispenser extends MilvusBaseOpDispenser<LoadP
         LongFunction<LoadPartitionsParam.Builder> ebF =
             l -> LoadPartitionsParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFunc(ebF, "partition_names", List.class, LoadPartitionsParam.Builder::withPartitionNames);
-        ebF = op.enhanceFuncOptionally(ebF, "resource_groups", List.class, LoadPartitionsParam.Builder::withResourceGroups);
-        ebF = op.enhanceFuncOptionally(ebF, "database_name", String.class, LoadPartitionsParam.Builder::withDatabaseName);
+        ebF = op.enhanceFunc(ebF, List.of("partition_names","partitions"), List.class,
+            LoadPartitionsParam.Builder::withPartitionNames);
+        ebF = op.enhanceFuncOptionally(
+            ebF, "resource_groups", List.class,
+            LoadPartitionsParam.Builder::withResourceGroups
+        );
+        ebF = op.enhanceFuncOptionally(
+            ebF, List.of("database_name","database"), String.class,
+            LoadPartitionsParam.Builder::withDatabaseName
+        );
         ebF = op.enhanceFuncOptionally(ebF, "refresh", Boolean.class, LoadPartitionsParam.Builder::withRefresh);
-        ebF = op.enhanceFuncOptionally(ebF, "database_name", String.class, LoadPartitionsParam.Builder::withDatabaseName);
         ebF = op.enhanceFuncOptionally(ebF, "replica_number", Integer.class, LoadPartitionsParam.Builder::withReplicaNumber);
         ebF = op.enhanceFuncOptionally(ebF,"sync_load",Boolean.class,LoadPartitionsParam.Builder::withSyncLoad);
         ebF = op.enhanceFuncOptionally(ebF,"sync_load_waiting_interval",Long.class,LoadPartitionsParam.Builder::withSyncLoadWaitingInterval);

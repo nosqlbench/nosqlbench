@@ -52,7 +52,8 @@ public class MilvusAlterAliasOpDispenser extends MilvusBaseOpDispenser<AlterAlia
             l -> AlterAliasParam.newBuilder().withAlias(targetF.apply(l));
         // Add enhancement functions here
 
-        ebF = op.enhanceFuncOptionally(ebF,"collection_name",String.class,AlterAliasParam.Builder::withCollectionName);
+        ebF = op.enhanceFuncOptionally(
+            ebF,List.of("collection_name","collection"),String.class,AlterAliasParam.Builder::withCollectionName);
 
         final LongFunction<AlterAliasParam.Builder> lastF = ebF;
         final LongFunction<AlterAliasParam> collectionParamF = l -> lastF.apply(l).build();

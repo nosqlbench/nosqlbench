@@ -172,7 +172,8 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
         return verifierFunctions;
     }
 
-    String getOpName() {
+    @Override
+    public String getOpName() {
         return this.opName;
     }
 
@@ -224,5 +225,7 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
     public NBLabels getLabels() {
         return this.labels;
     }
+
+
 
 }

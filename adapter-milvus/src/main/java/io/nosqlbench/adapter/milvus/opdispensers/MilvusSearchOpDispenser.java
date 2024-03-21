@@ -47,7 +47,8 @@ public class MilvusSearchOpDispenser extends MilvusBaseOpDispenser<SearchParam> 
         LongFunction<SearchParam.Builder> ebF =
             l -> SearchParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF,"partition_names",List.class,SearchParam.Builder::withPartitionNames);
+        ebF = op.enhanceFuncOptionally(ebF,List.of("partition_names","partitions"),List.class,
+            SearchParam.Builder::withPartitionNames);
         ebF = op.enhanceFuncOptionally(ebF,"out_fields",List.class,SearchParam.Builder::withOutFields);
 
 

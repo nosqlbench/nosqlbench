@@ -24,6 +24,7 @@ import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusDescribeCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusDescribeCollectionOpDispenser extends MilvusBaseOpDispenser<DescribeCollectionParam> {
@@ -43,7 +44,8 @@ public class MilvusDescribeCollectionOpDispenser extends MilvusBaseOpDispenser<D
         LongFunction<DescribeCollectionParam.Builder> ebF =
             l -> DescribeCollectionParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF,"database_name",String.class, DescribeCollectionParam.Builder::withDatabaseName);
+        ebF = op.enhanceFuncOptionally(ebF, List.of("database","database_name"),String.class,
+            DescribeCollectionParam.Builder::withDatabaseName);
 
         final LongFunction<DescribeCollectionParam.Builder> lastF = ebF;
         final LongFunction<DescribeCollectionParam> collectionParamF = l -> lastF.apply(l).build();

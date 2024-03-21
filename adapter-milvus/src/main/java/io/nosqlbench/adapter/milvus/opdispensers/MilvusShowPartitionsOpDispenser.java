@@ -48,7 +48,8 @@ public class MilvusShowPartitionsOpDispenser extends MilvusBaseOpDispenser<ShowP
         LongFunction<List<String>> partitionsF = l -> MilvusUtils.splitNames(targetF.apply(l));
         LongFunction<ShowPartitionsParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withPartitionNames(partitionsF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,"collection_name",String.class,ShowPartitionsParam.Builder::withCollectionName);
+        ebF = op.enhanceFuncOptionally(ebF,List.of("collection_name","collection"),String.class,
+            ShowPartitionsParam.Builder::withCollectionName);
         final LongFunction<ShowPartitionsParam.Builder> lastF = ebF;
         final LongFunction<ShowPartitionsParam> collectionParamF = l -> lastF.apply(l).build();
         return collectionParamF;

@@ -25,6 +25,7 @@ import io.nosqlbench.adapter.milvus.ops.MilvusGetLoadStateOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
@@ -44,7 +45,8 @@ public class MilvusGetLoadStateOpDispenser extends MilvusBaseOpDispenser<GetLoad
     ) {
         LongFunction<GetLoadStateParam.Builder> ebF =
             l -> GetLoadStateParam.newBuilder().withCollectionName(targetF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,"database_name",String.class,GetLoadStateParam.Builder::withDatabaseName);
+        ebF = op.enhanceFuncOptionally(ebF, List.of("database_name","database"),String.class,
+            GetLoadStateParam.Builder::withDatabaseName);
 
         Optional<LongFunction<String>> partitionsF = op.getAsOptionalFunction("partition_name", String.class);
         if (partitionsF.isPresent()) {
