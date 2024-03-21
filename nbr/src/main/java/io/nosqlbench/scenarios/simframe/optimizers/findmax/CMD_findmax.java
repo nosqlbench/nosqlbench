@@ -20,6 +20,7 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
@@ -31,6 +32,7 @@ import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameValueData;
 import io.nosqlbench.scenarios.simframe.optimizers.CMD_optimize;
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
+import io.nosqlbench.scenarios.simframe.planning.SimFrameFunctionAnalyzer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -80,8 +82,8 @@ public class CMD_findmax extends NBBaseCommand {
 
         SimFrameCapture capture = new SimFrameValueData(flywheel);
         FindmaxFrameFunction frameFunction = new FindmaxFrameFunction(controller, findmaxConfig, flywheel, capture, journal, model);
-        FindmaxAnalyzer analyzer = new FindmaxAnalyzer(frameFunction, findmaxConfig);
-        SimFrame<FindmaxFrameParams> best = analyzer.analyze();
+        SimFrameFunctionAnalyzer<FindmaxFrameFunction,FindmaxConfig> analyzer = new FindmaxAnalyzer(frameFunction, findmaxConfig);
+        SimFrame<? extends InvokableResult> best = analyzer.analyze();
         stdout.println("Best Run:\n" + best);
         return best.params();
     }

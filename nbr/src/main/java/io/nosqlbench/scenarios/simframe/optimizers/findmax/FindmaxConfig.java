@@ -17,8 +17,9 @@
 package io.nosqlbench.scenarios.simframe.optimizers.findmax;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
+import io.nosqlbench.scenarios.simframe.planning.SimFrameConfig;
 
-public class FindmaxConfig {
+public class FindmaxConfig extends SimFrameConfig {
     private double sample_time_ms;
     private double max_value;
     private double base_value;
@@ -39,6 +40,11 @@ public class FindmaxConfig {
 
     public double base_value() {
         return base_value;
+    }
+
+    @Override
+    public double[] initialPoint() {
+        return new double[]{base_value};
     }
 
     public double min_value() {
