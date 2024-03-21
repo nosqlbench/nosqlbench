@@ -926,7 +926,7 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         BiFunction<FA, FE, FA> combiner
     ) {
         for (String field : fields) {
-            if (isDynamic(field)) {
+            if (isDefined(field)) {
                 LongFunction<FE> fieldEnhancerFunc = getAsRequiredFunction(field, type);
                 LongFunction<FA> lfa = l -> combiner.apply(func.apply(l), fieldEnhancerFunc.apply(l));
                 return lfa;

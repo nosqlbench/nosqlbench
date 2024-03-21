@@ -20,15 +20,13 @@ import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.param.highlevel.dml.GetIdsParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
-import io.nosqlbench.adapter.milvus.MilvusUtils;
+import io.nosqlbench.adapter.milvus.MilvusAdapterUtils;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.List;
 import java.util.function.LongFunction;
-
-import static org.matheclipse.core.expression.S.l;
 
 /**
  * Because we are using type-and-target logic to identify the op variant,
@@ -66,7 +64,7 @@ public class MilvusGetOpDispenser extends MilvusBaseOpDispenser<GetIdsParam> {
         Object testValue = valueFunc.apply(0L);
         LongFunction<List<Object>> pidsF;
         if (testValue instanceof String string) {
-            pidsF = l -> MilvusUtils.splitNames((String) valueFunc.apply(l))
+            pidsF = l -> MilvusAdapterUtils.splitNames((String) valueFunc.apply(l))
                 .stream().map(s -> (Object) s).toList();
         } else if (testValue instanceof List) {
             pidsF = l -> (List<Object>) valueFunc.apply(l);
@@ -95,7 +93,7 @@ public class MilvusGetOpDispenser extends MilvusBaseOpDispenser<GetIdsParam> {
             } else if (oftv instanceof String) {
                 var sF = op.getAsRequiredFunction("output_fields", String.class);
                 LongFunction<GetIdsParam.Builder> finalEbF1 = ebF;
-                ebF = l -> finalEbF1.apply(l).withOutputFields(MilvusUtils.splitNames(sF.apply(l)));
+                ebF = l -> finalEbF1.apply(l).withOutputFields(MilvusAdapterUtils.splitNames(sF.apply(l)));
             } else throw new RuntimeException("Invalid type for output fields:" + oftv.getClass().getCanonicalName());
         }
 

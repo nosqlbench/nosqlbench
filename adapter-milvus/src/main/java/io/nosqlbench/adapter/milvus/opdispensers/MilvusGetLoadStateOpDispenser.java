@@ -19,12 +19,11 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.collection.GetLoadStateParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
-import io.nosqlbench.adapter.milvus.MilvusUtils;
+import io.nosqlbench.adapter.milvus.MilvusAdapterUtils;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetLoadStateOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.LongFunction;
@@ -52,7 +51,7 @@ public class MilvusGetLoadStateOpDispenser extends MilvusBaseOpDispenser<GetLoad
         if (partitionsF.isPresent()) {
             LongFunction<String> pfunc = partitionsF.get();
             LongFunction<GetLoadStateParam.Builder> finalEbF = ebF;
-            ebF = l -> finalEbF.apply(l).withPartitionNames(MilvusUtils.splitNames(pfunc.apply(l)));
+            ebF = l -> finalEbF.apply(l).withPartitionNames(MilvusAdapterUtils.splitNames(pfunc.apply(l)));
         }
 
         final LongFunction<GetLoadStateParam.Builder> lastF = ebF;

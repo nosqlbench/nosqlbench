@@ -28,7 +28,7 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
 
-import static io.nosqlbench.adapter.milvus.MilvusUtils.MILVUS;
+import static io.nosqlbench.adapter.milvus.MilvusAdapterUtils.MILVUS;
 
 @Service(value = DriverAdapter.class, selector = MILVUS)
 public class MilvusDriverAdapter extends BaseDriverAdapter<MilvusBaseOp<?>, MilvusSpace> {

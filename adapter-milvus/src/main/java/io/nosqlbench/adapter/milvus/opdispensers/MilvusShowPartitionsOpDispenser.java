@@ -17,10 +17,9 @@
 package io.nosqlbench.adapter.milvus.opdispensers;
 
 import io.milvus.client.MilvusServiceClient;
-import io.milvus.param.collection.ShowCollectionsParam;
 import io.milvus.param.partition.ShowPartitionsParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
-import io.nosqlbench.adapter.milvus.MilvusUtils;
+import io.nosqlbench.adapter.milvus.MilvusAdapterUtils;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusShowPartitionsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -45,7 +44,7 @@ public class MilvusShowPartitionsOpDispenser extends MilvusBaseOpDispenser<ShowP
         LongFunction<ShowPartitionsParam.Builder> ebF =
             l -> ShowPartitionsParam.newBuilder();
 
-        LongFunction<List<String>> partitionsF = l -> MilvusUtils.splitNames(targetF.apply(l));
+        LongFunction<List<String>> partitionsF = l -> MilvusAdapterUtils.splitNames(targetF.apply(l));
         LongFunction<ShowPartitionsParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withPartitionNames(partitionsF.apply(l));
         ebF = op.enhanceFuncOptionally(ebF,List.of("collection_name","collection"),String.class,
