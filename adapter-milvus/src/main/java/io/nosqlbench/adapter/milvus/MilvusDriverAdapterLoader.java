@@ -21,7 +21,7 @@ import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
-import static io.nosqlbench.adapter.milvus.MilvusUtils.MILVUS;
+import static io.nosqlbench.adapter.milvus.MilvusAdapterUtils.MILVUS;
 
 @Service(value = DriverAdapterLoader.class, selector = MILVUS)
 public class MilvusDriverAdapterLoader implements DriverAdapterLoader {

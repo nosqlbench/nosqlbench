@@ -16,47 +16,23 @@
 
 package io.nosqlbench.adapter.milvus;
 
-import org.apache.commons.lang3.StringUtils;
+import io.milvus.grpc.SearchResults;
+import io.milvus.param.R;
+import io.milvus.response.SearchResultsWrapper;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class MilvusUtils {
-    public static final String MILVUS = "milvus";
 
-    public static List<String> splitNames(String input) {
-        assert StringUtils.isNotBlank(input) && StringUtils.isNotEmpty(input);
-        return Arrays.stream(input.split("( +| *, *)"))
-            .filter(StringUtils::isNotBlank)
-            .toList();
-    }
+    public static int[] intArrayFromMilvusSearchResults(String fieldname, R<SearchResults> result) {
 
-    public static List<Long> splitLongs(String input) {
-        assert StringUtils.isNotBlank(input) && StringUtils.isNotEmpty(input);
-        return Arrays.stream(input.split("( +| *, *)"))
-            .filter(StringUtils::isNotBlank)
-            .map(Long::parseLong)
-            .toList();
-    }
-
-
-    /**
-     * Mask the digits in the given string with '*'
-     *
-     * @param unmasked The string to mask
-     * @return The masked string
-     */
-    protected static String maskDigits(String unmasked) {
-        assert StringUtils.isNotBlank(unmasked) && StringUtils.isNotEmpty(unmasked);
-        int inputLength = unmasked.length();
-        StringBuilder masked = new StringBuilder(inputLength);
-        for (char ch : unmasked.toCharArray()) {
-            if (Character.isDigit(ch)) {
-                masked.append("*");
-            } else {
-                masked.append(ch);
-            }
+        SearchResultsWrapper wrapper = new SearchResultsWrapper(result.getData().getResults());
+        List<String> fieldData = (List<String>) wrapper.getFieldData(fieldname, 0);
+        int[] indices = new int[fieldData.size()];
+        for (int i = 0; i < indices.length; i++) {
+            indices[i]=Integer.parseInt(fieldData.get(i));
         }
-        return masked.toString();
+        return indices;
+
     }
 }

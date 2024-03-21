@@ -20,7 +20,7 @@ import io.milvus.client.MilvusServiceClient;
 import io.milvus.grpc.ShowType;
 import io.milvus.param.collection.ShowCollectionsParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
-import io.nosqlbench.adapter.milvus.MilvusUtils;
+import io.nosqlbench.adapter.milvus.MilvusAdapterUtils;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusShowCollectionsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -44,7 +44,7 @@ public class MilvusShowCollectionsOpDispenser extends MilvusBaseOpDispenser<Show
     ) {
         LongFunction<ShowCollectionsParam.Builder> ebF =
             l -> ShowCollectionsParam.newBuilder();
-        LongFunction<List<String>> collectionsF = l -> MilvusUtils.splitNames(targetF.apply(l));
+        LongFunction<List<String>> collectionsF = l -> MilvusAdapterUtils.splitNames(targetF.apply(l));
         LongFunction<ShowCollectionsParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withCollectionNames(collectionsF.apply(l));
         ebF = op.enhanceFuncOptionally(ebF,List.of("database_name","database"),String.class,

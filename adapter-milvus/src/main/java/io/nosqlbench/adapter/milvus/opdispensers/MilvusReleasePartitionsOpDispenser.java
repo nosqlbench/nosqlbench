@@ -19,7 +19,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.partition.ReleasePartitionsParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
-import io.nosqlbench.adapter.milvus.MilvusUtils;
+import io.nosqlbench.adapter.milvus.MilvusAdapterUtils;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusReleasePartitionsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -43,7 +43,7 @@ public class MilvusReleasePartitionsOpDispenser extends MilvusBaseOpDispenser<Re
     ) {
         LongFunction<ReleasePartitionsParam.Builder> ebF =
             l -> ReleasePartitionsParam.newBuilder();
-        LongFunction<List<String>> partNamesF = l -> MilvusUtils.splitNames(targetF.apply(l));
+        LongFunction<List<String>> partNamesF = l -> MilvusAdapterUtils.splitNames(targetF.apply(l));
 
         LongFunction<ReleasePartitionsParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withPartitionNames(partNamesF.apply(l));

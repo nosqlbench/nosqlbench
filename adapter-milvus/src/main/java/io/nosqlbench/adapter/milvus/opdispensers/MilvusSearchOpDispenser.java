@@ -47,9 +47,8 @@ public class MilvusSearchOpDispenser extends MilvusBaseOpDispenser<SearchParam> 
         LongFunction<SearchParam.Builder> ebF =
             l -> SearchParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF,List.of("partition_names","partitions"),List.class,
-            SearchParam.Builder::withPartitionNames);
-        ebF = op.enhanceFuncOptionally(ebF,"out_fields",List.class,SearchParam.Builder::withOutFields);
+        ebF = op.enhanceFuncOptionally(ebF, List.of("partition_names", "partitions"), List.class, SearchParam.Builder::withPartitionNames);
+        ebF = op.enhanceFuncOptionally(ebF, "out_fields", List.class, SearchParam.Builder::withOutFields);
 
 
         ebF = op.enhanceEnumOptionally(ebF, "consistency_level", ConsistencyLevelEnum.class, SearchParam.Builder::withConsistencyLevel);
@@ -59,8 +58,11 @@ public class MilvusSearchOpDispenser extends MilvusBaseOpDispenser<SearchParam> 
         ebF = op.enhanceFuncOptionally(ebF, "round_decimal", Integer.class, SearchParam.Builder::withRoundDecimal);
         ebF = op.enhanceFuncOptionally(ebF, "ignore_growing", Boolean.class, SearchParam.Builder::withIgnoreGrowing);
         ebF = op.enhanceFuncOptionally(ebF, "params", String.class, SearchParam.Builder::withParams);
-        ebF = op.enhanceFunc(ebF, "vector_field_name", String.class, SearchParam.Builder::withVectorFieldName);
-        ebF = op.enhanceFuncOptionally(ebF,"vectors",List.class,SearchParam.Builder::withVectors);
+        ebF = op.enhanceFunc(ebF, List.of("vector_field_name", "vector_field"), String.class,
+            SearchParam.Builder::withVectorFieldName);
+        // TODO: sanity check List of Floats vs List of List of Floats at func construction time.
+        ebF = op.enhanceFuncOptionally(ebF, "vectors", List.class, SearchParam.Builder::withVectors);
+        ebF = op.enhanceFuncOptionally(ebF, "vector", List.class, (b, l) -> b.withVectors(List.of(l)));
         LongFunction<SearchParam.Builder> finalEbF = ebF;
         return l -> finalEbF.apply(l).build();
     }
@@ -72,7 +74,7 @@ public class MilvusSearchOpDispenser extends MilvusBaseOpDispenser<SearchParam> 
         ParsedOp op,
         LongFunction<String> targetF
     ) {
-        return l -> new MilvusSearchOp(clientF.apply(l),paramF.apply(l));
+        return l -> new MilvusSearchOp(clientF.apply(l), paramF.apply(l));
     }
 
 }

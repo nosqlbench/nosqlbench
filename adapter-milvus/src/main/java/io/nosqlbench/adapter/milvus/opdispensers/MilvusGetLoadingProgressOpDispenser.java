@@ -18,16 +18,12 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.collection.GetLoadingProgressParam;
-import io.milvus.param.collection.GetLoadingProgressParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
-import io.nosqlbench.adapter.milvus.MilvusUtils;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
-import io.nosqlbench.adapter.milvus.ops.MilvusGetLoadStateOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetLoadingProgressOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class MilvusGetLoadingProgressOpDispenser extends MilvusBaseOpDispenser<GetLoadingProgressParam> {

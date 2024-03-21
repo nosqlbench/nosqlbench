@@ -27,11 +27,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * The MilvusSpace class is a context object which stores all stateful contextual information needed to interact
@@ -73,6 +72,7 @@ public class MilvusSpace implements AutoCloseable {
         var builder = ConnectParam.newBuilder();
         builder = builder.withUri(cfg.get("uri"));
         cfg.getOptional("database_name").ifPresent(builder::withDatabaseName);
+        cfg.getOptional("database").ifPresent(builder::withDatabaseName);
 
         var requiredToken = cfg.getOptional("token_file")
             .map(Paths::get)
@@ -97,7 +97,7 @@ public class MilvusSpace implements AutoCloseable {
         ConnectParam connectParams = builder.build();
 
         logger.info(this.name + ": Creating new Milvus/Zilliz Client with (masked) " +
-            "token [" + MilvusUtils.maskDigits(builder.getToken()) + "], uri/endpoint [" + builder.getUri() + "]"
+            "token [" + MilvusAdapterUtils.maskDigits(builder.getToken()) + "], uri/endpoint [" + builder.getUri() + "]"
         );
         return new MilvusServiceClient(connectParams);
     }
@@ -117,7 +117,7 @@ public class MilvusSpace implements AutoCloseable {
                     .setDescription("the URI endpoint in which the database is running.")
             )
             .add(
-                Param.optional("database_name")
+                Param.optional(List.of("database_name","database"))
                     .setDescription("the name of the database to use. Defaults to 'baselines'")
             )
             .asReadOnly();
