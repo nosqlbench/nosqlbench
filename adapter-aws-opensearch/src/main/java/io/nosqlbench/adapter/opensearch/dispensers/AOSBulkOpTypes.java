@@ -14,23 +14,11 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.opensearch.ops;
+package io.nosqlbench.adapter.opensearch.dispensers;
 
-import org.opensearch.client.opensearch.OpenSearchClient;
-import org.opensearch.client.opensearch.core.DeleteRequest;
-import org.opensearch.client.opensearch.core.IndexRequest;
-
-import java.io.IOException;
-
-public class DeleteOp extends BaseOpenSearchOp {
-    private final DeleteRequest rq;
-
-    public DeleteOp(OpenSearchClient client, DeleteRequest rq) {
-        super(client);
-        this.rq = rq;
-    }
-
-    public Object applyOp(long value) throws IOException {
-        return client.delete(rq);
-    }
+public enum AOSBulkOpTypes {
+    create,
+    index,
+    delete,
+    update
 }

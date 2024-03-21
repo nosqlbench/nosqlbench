@@ -16,26 +16,25 @@
 
 package io.nosqlbench.adapter.opensearch.dispensers;
 
-import io.nosqlbench.adapter.opensearch.OpenSearchAdapter;
-import io.nosqlbench.adapter.opensearch.ops.CreateIndexOp;
+import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSCreateIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.opensearch.client.json.JsonData;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch._types.mapping.*;
 import org.opensearch.client.opensearch.indices.CreateIndexRequest;
-import org.opensearch.client.opensearch.indices.IndexSettings;
 
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
+public class AOSCreateIndexOpDispenser extends AOSBaseOpDispenser {
 
     private final ParsedOp pop;
     private final int dimensions;
     private final int ef_construction;
     private final int m;
 
-    public CreateIndexOpDispenser(OpenSearchAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
+    public AOSCreateIndexOpDispenser(AOSAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super(adapter, op, targetF);
         this.pop = op;
         this.dimensions = pop.getStaticValue("dimensions",Integer.class).intValue();
@@ -44,8 +43,8 @@ public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
     }
 
     @Override
-    public LongFunction<CreateIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op,
-                                                    LongFunction<String> targetF) {
+    public LongFunction<AOSCreateIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op,
+                                                       LongFunction<String> targetF) {
         CreateIndexRequest.Builder eb = new CreateIndexRequest.Builder();
         LongFunction<CreateIndexRequest.Builder> bfunc =
             l -> new CreateIndexRequest.Builder()
@@ -54,7 +53,7 @@ public class CreateIndexOpDispenser extends BaseOpenSearchOpDispenser {
         bfunc = op.enhanceFunc(bfunc, "mappings", Map.class, this::resolveTypeMapping);
 
         LongFunction<CreateIndexRequest.Builder> finalBfunc = bfunc;
-        return (long l) -> new CreateIndexOp(clientF.apply(l), finalBfunc.apply(l).build());
+        return (long l) -> new AOSCreateIndexOp(clientF.apply(l), finalBfunc.apply(l).build());
     }
 
     // https://opensearch.org/docs/latest/search-plugins/knn/knn-index/

@@ -9,10 +9,16 @@ description: |
   population are replaced with new values which never repeat. During the main phase, random partitions are selected for
   upsert, with row values never repeating.
 
+  TEMPLATE(batchsize,100)
+
 scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+  batch:
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup_batch cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
     main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
   astra:
     schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
@@ -26,6 +32,7 @@ scenarios:
 bindings:
   seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString() -> String
   seq_value: Hash(); Mod(TEMPLATE(valuecount,1000000000)); ToString() -> String
+  batch_seq_value: Mul(TEMPLATE(batchsize,100)L); Hash(); Mod(TEMPLATE(valuecount,1000000000)); ToString() -> String
   rw_key: TEMPLATE(keydist,Uniform(0,1000000000)); ToString() -> String
   rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)); ToString() -> String
 
@@ -62,6 +69,18 @@ blocks:
         insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
         (key, value)
         values ({seq_key},{seq_value});
+  rampup_batch:
+    params:
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    ops:
+      rampup_insert:
+        batch: testing
+        repeat: 100
+        op_template:
+          prepared: |
+            insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
+            (key, value)
+            values ({seq_key},{seq_value});
   verify:
     params:
       cl: TEMPLATE(read_cl,LOCAL_QUORUM)
