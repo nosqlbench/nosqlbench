@@ -17,5 +17,25 @@
 
 package io.nosqlbench.scenarios.simframe.planning;
 
-public interface SimFrameFunctionAnalyzer {
+import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
+
+public abstract class SimFrameFunctionAnalyzer<A extends SimFrameFunction<? extends InvokableResult>, C extends SimFrameConfig> {
+    protected final A function;
+    protected final C config;
+
+    protected SimFrameFunctionAnalyzer(A function, C config) {
+        this.function = function;
+        this.config = config;
+    }
+
+    public SimFrame<? extends InvokableResult> analyze() {
+        double[] initialPoint = config.initialPoint();
+        double result = function.value(initialPoint);
+        while (result != Double.MIN_VALUE) {
+            result = nextFrame();
+        }
+        return function.getJournal().bestRun();
+    }
+
+    protected abstract double nextFrame();
 }

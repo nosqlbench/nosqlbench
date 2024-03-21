@@ -23,7 +23,7 @@ import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
 
-public class OptimoFrameFunction implements SimFrameFunction {
+public class OptimoFrameFunction implements SimFrameFunction<OptimoFrameParams> {
 
     private final Activity flywheel;
     private final SimFrameCapture capture;
@@ -64,5 +64,10 @@ public class OptimoFrameFunction implements SimFrameFunction {
             throw new RuntimeException("Early exit of flywheel activity '" + flywheel.getAlias() + "'. Can't continue.");
         }
         return journal.last().value();
+    }
+
+    @Override
+    public SimFrameJournal<OptimoFrameParams> getJournal() {
+        return journal;
     }
 }

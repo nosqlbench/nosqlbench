@@ -24,27 +24,17 @@ import java.util.Comparator;
 
 import static io.nosqlbench.virtdata.core.bindings.VirtDataLibrary.logger;
 
-public class FindmaxAnalyzer implements SimFrameFunctionAnalyzer {
-    private final FindmaxFrameFunction function;
-    private final FindmaxConfig config;
+public class FindmaxAnalyzer extends SimFrameFunctionAnalyzer<FindmaxFrameFunction,FindmaxConfig> {
 
     public FindmaxAnalyzer(FindmaxFrameFunction function, FindmaxConfig config) {
-        this.function = function;
-        this.config = config;
-    }
-    public SimFrame<FindmaxFrameParams> analyze() {
-        double[] initialPoint = {config.base_value()};
-        double result = function.value(initialPoint);
-        while (result != 0.0d) {
-            result = nextStep();
-        }
-        return function.journal().bestRun();
+        super(function, config);
     }
 
-    public double nextStep() {
+    @Override
+    protected double nextFrame() {
         double newValue;
-        SimFrame<FindmaxFrameParams> last = function.journal().last();
-        SimFrame<FindmaxFrameParams> best = function.journal().bestRun();
+        SimFrame<FindmaxFrameParams> last = function.getJournal().last();
+        SimFrame<FindmaxFrameParams> best = function.getJournal().bestRun();
         if (best.index() == last.index()) { // got better consecutively
             newValue = last.params().paramValues()[0] + config.step_value();
             config.setStep_value(config.step_value() * config.value_incr());
@@ -53,7 +43,7 @@ public class FindmaxAnalyzer implements SimFrameFunctionAnalyzer {
             if (((last.params().paramValues()[0] + config.step_value()) -
                 (best.params().paramValues()[0] + config.step_value())) <= config.step_value()) {
                 logger.info("could not divide search space further, stop condition met");
-                return 0;
+                return Double.MIN_VALUE;
             } else {
                 newValue = best.params().paramValues()[0] + config.step_value();
                 config.setSample_time_ms(config.sample_time_ms() * config.sample_incr());
@@ -61,7 +51,7 @@ public class FindmaxAnalyzer implements SimFrameFunctionAnalyzer {
             }
         } else { // any other case
             // find next frame with higher rate but lower value, the closest one by rate
-            SimFrame<FindmaxFrameParams> nextWorseFrameWithHigherRate = function.journal().frames().stream()
+            SimFrame<FindmaxFrameParams> nextWorseFrameWithHigherRate = function.getJournal().frames().stream()
                 .filter(f -> f.value() < best.value())
                 .filter(f -> f.params().paramValues()[0] + config.step_value() > (best.params().paramValues()[0] + config.step_value()))
                 .min(Comparator.comparingDouble(f -> f.params().paramValues()[0] + config.step_value()))
@@ -73,7 +63,7 @@ public class FindmaxAnalyzer implements SimFrameFunctionAnalyzer {
                 config.setMin_settling_ms(config.min_settling_ms() * 2);
             } else {
                 logger.info("could not divide search space further, stop condition met");
-                return 0.0d;
+                return Double.MIN_VALUE;
             }
         }
         double[] point = {newValue};

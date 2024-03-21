@@ -23,7 +23,7 @@ import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
 
-public class FindmaxFrameFunction implements SimFrameFunction {
+public class FindmaxFrameFunction implements SimFrameFunction<FindmaxFrameParams> {
 
     private final Activity flywheel;
     private final SimFrameCapture capture;
@@ -69,7 +69,8 @@ public class FindmaxFrameFunction implements SimFrameFunction {
         return journal.last().value();
     }
 
-    public SimFrameJournal<FindmaxFrameParams>  journal() {
+    @Override
+    public SimFrameJournal<FindmaxFrameParams> getJournal() {
         return journal;
     }
 }
