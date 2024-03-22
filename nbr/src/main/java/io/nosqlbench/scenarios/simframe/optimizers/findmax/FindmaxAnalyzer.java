@@ -18,6 +18,7 @@
 package io.nosqlbench.scenarios.simframe.optimizers.findmax;
 
 import io.nosqlbench.scenarios.simframe.planning.SimFrame;
+import io.nosqlbench.scenarios.simframe.planning.SimFrameAction;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunctionAnalyzer;
 
 import java.util.Comparator;
@@ -31,23 +32,44 @@ public class FindmaxAnalyzer extends SimFrameFunctionAnalyzer<FindmaxFrameFuncti
     }
 
     @Override
-    protected double nextFrame() {
+    protected FrameResult nextFrame() {
         double newValue;
         SimFrame<FindmaxFrameParams> last = function.getJournal().last();
         SimFrame<FindmaxFrameParams> best = function.getJournal().bestRun();
         if (best.index() == last.index()) { // got better consecutively
             newValue = last.params().paramValues()[0] + config.step_value();
-            config.setStep_value(config.step_value() * config.value_incr());
+            config = new FindmaxConfig(
+                config.sample_time_ms(),
+                config.max_value(),
+                config.base_value(),
+                config.min_value(),
+                (config.step_value() * config.value_incr()),
+                config.value_incr(),
+                config.sample_incr(),
+                config.min_settling_ms(),
+                config.optimization_type(),
+                new double[]{newValue}
+            );
         } else if (best.index() == last.index() - 1) {
             // got worse consecutively, this may be collapsed out since the general case below covers it (test first)
             if (((last.params().paramValues()[0] + config.step_value()) -
                 (best.params().paramValues()[0] + config.step_value())) <= config.step_value()) {
                 logger.info("could not divide search space further, stop condition met");
-                return Double.MIN_VALUE;
+                return new FrameResult(best.params().paramValues()[0], SimFrameAction.stop_run);
             } else {
                 newValue = best.params().paramValues()[0] + config.step_value();
-                config.setSample_time_ms(config.sample_time_ms() * config.sample_incr());
-                config.setMin_settling_ms(config.min_settling_ms() * 4);
+                config = new FindmaxConfig(
+                    (config.sample_time_ms() * config.sample_incr()),
+                    config.max_value(),
+                    config.base_value(),
+                    config.min_value(),
+                    config.step_value(),
+                    config.value_incr(),
+                    config.sample_incr(),
+                    (config.min_settling_ms() * 4),
+                    config.optimization_type(),
+                    new double[]{newValue}
+                );
             }
         } else { // any other case
             // find next frame with higher rate but lower value, the closest one by rate
@@ -59,14 +81,30 @@ public class FindmaxAnalyzer extends SimFrameFunctionAnalyzer<FindmaxFrameFuncti
             if ((nextWorseFrameWithHigherRate.params().paramValues()[0] + config.step_value() -
                 best.params().paramValues()[0] + config.step_value()) > config.step_value()) {
                 newValue = best.params().paramValues()[0] + config.step_value();
-                config.setSample_time_ms(config.sample_time_ms() * config.sample_incr());
-                config.setMin_settling_ms(config.min_settling_ms() * 2);
+                config = new FindmaxConfig(
+                    (config.sample_time_ms() * config.sample_incr()),
+                    config.max_value(),
+                    config.base_value(),
+                    config.min_value(),
+                    config.step_value(),
+                    config.value_incr(),
+                    config.sample_incr(),
+                    (config.min_settling_ms() * 2),
+                    config.optimization_type(),
+                    new double[]{newValue}
+                );
             } else {
                 logger.info("could not divide search space further, stop condition met");
-                return Double.MIN_VALUE;
+                return new FrameResult(best.params().paramValues()[0], SimFrameAction.stop_run);
             }
         }
         double[] point = {newValue};
-        return function.value(point);
+        return new FrameResult(function.value(point), SimFrameAction.continue_run);
     }
+
+    @Override
+    protected FrameResult initialFrame() {
+        return new FrameResult(function.value(config.initialPoint()), SimFrameAction.continue_run);
+    }
+
 }

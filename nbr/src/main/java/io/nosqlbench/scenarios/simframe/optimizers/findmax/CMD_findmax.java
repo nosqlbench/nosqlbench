@@ -57,7 +57,7 @@ public class CMD_findmax extends NBBaseCommand {
 
         FindmaxConfig findmaxConfig = new FindmaxConfig(params);
         switch(findmaxConfig.optimization_type()) {
-            case "rate":
+            case "rate" ->
                 model.add("rate",
                     findmaxConfig.min_value(),      // min
                     findmaxConfig.base_value(),     // initial
@@ -67,16 +67,14 @@ public class CMD_findmax extends NBBaseCommand {
                         1.1d,
                         SimRateSpec.Verb.restart)))
                 );
-                break;
-            case "threads":
+            case "threads" ->
                 model.add("threads",
                     findmaxConfig.min_value(),      // min
                     findmaxConfig.base_value(),     // initial
                     findmaxConfig.max_value(),      // max
                     threads -> flywheel.onEvent(ParamChange.of(new SetThreads((int) (threads))))
                 );
-                break;
-            default:
+            default ->
                 throw new RuntimeException("Unsupported optimization type: " + findmaxConfig.optimization_type());
         }
 
