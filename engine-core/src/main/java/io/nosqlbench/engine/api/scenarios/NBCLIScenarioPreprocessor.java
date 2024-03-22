@@ -170,7 +170,7 @@ public class NBCLIScenarioPreprocessor {
                 // here, we should actually parse the command using argv rules
 
                 cmd = userParamsInterp.apply(cmd);
-                LinkedHashMap<String, SCNamedParam> parsedStep = parseStep(cmd);
+                LinkedHashMap<String, SCNamedParam> parsedStep = parseStep(cmd, stepName, scenarioName);
                 LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userProvidedParams);
                 LinkedHashMap<String, String> buildingCmd = new LinkedHashMap<>();
 
@@ -252,7 +252,7 @@ public class NBCLIScenarioPreprocessor {
 
     private static final Pattern WordAndMaybeAssignment = Pattern.compile("(?<name>\\w[-_\\d\\w.]+)((?<oper>=+)(?<val>.+))?");
 
-    private static LinkedHashMap<String, SCNamedParam> parseStep(String cmd) {
+    private static LinkedHashMap<String, SCNamedParam> parseStep(String cmd, String stepName, String scenarioName) {
         LinkedHashMap<String, SCNamedParam> parsedStep = new LinkedHashMap<>();
 
         String[] namedStepPieces = cmd.split(" +");
@@ -270,6 +270,10 @@ public class NBCLIScenarioPreprocessor {
             String commandName = matcher.group("name");
             String assignmentOp = matcher.group("oper");
             String assignedValue = matcher.group("val");
+            if (parsedStep.containsKey(commandName)) {
+                String errorMessage = String.format("Duplicate occurrence of parameter \"%s\" on step \"%s\" of scenario \"%s\", step command: \"%s\"", commandName, stepName, scenarioName, cmd);
+                throw new BasicError(errorMessage);
+            }
             parsedStep.put(commandName, new SCNamedParam(commandName, assignmentOp, assignedValue));
         }
         return parsedStep;

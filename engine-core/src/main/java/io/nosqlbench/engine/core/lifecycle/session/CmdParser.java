@@ -72,6 +72,9 @@ public class CmdParser {
                 Map<String,CmdArg> params = new LinkedHashMap<>();
                 while (cmdstructs.peekFirst() instanceof parameter param) {
                     cmdstructs.removeFirst();
+                    if (params.containsKey(param.name())) {
+                        throw new BasicError("Duplicate occurrence of option: " + param.name());
+                    }
                     params.put(param.name(),CmdArg.of(cmd.name(),param.name(),param.op(),param.value()));
                 }
                 cmds.add(new Cmd(cmd.name(),params));
