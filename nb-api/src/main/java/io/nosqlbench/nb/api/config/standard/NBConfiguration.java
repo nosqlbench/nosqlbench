@@ -33,8 +33,10 @@ public class NBConfiguration {
      * This method is restricted to encourage construction of readers only by passing
      * through the friendly {@link NBConfigModel#apply(Map)} method.
      *
-     * @param model       A configuration model, describing what is allowed to be configured by name and type.
-     * @param validConfig A valid config reader.
+     * @param model
+     *     A configuration model, describing what is allowed to be configured by name and type.
+     * @param validConfig
+     *     A valid config reader.
      */
     protected NBConfiguration(NBConfigModel model, LinkedHashMap<String, Object> validConfig) {
         this.data = validConfig;
@@ -53,7 +55,8 @@ public class NBConfiguration {
      * Returns the value of the named parameter as {@link #getOptional(String)}, so long
      * as no env vars were reference OR all env var references were found.
      *
-     * @param name The name of the variable to look up
+     * @param name
+     *     The name of the variable to look up
      * @return An optional value, if present and (optionally) interpolated correctly from the environment
      */
     public Optional<String> getEnvOptional(String name) {
@@ -96,14 +99,30 @@ public class NBConfiguration {
      * call this within an assignment or context where the Java compiler knows what type you
      * are expecting, then use {@link #get(String, Class)} instead.
      *
-     * @param name The name of the configuration parameter
-     * @param <T>  The (inferred) generic type of the configuration value
+     * @param name
+     *     The name of the configuration parameter
+     * @param <T>
+     *     The (inferred) generic type of the configuration value
      * @return The value of type T, matching the config model type for the provided field name
      */
     public <T> T get(String name) {
         Param<T> param = (Param<T>) model.getNamedParams().get(name);
+        if (param == null) {
+            throw new NBConfigError("Attempted to get parameter for name '" + name + "' but this parameter has no " +
+                "model defined for " + this.getModel().getOf());
+        }
+//        if (param.isRequired() && (param.getDefaultValue()==null) && )
         Object object = this.data.get(name);
         object = object != null ? object : param.getDefaultValue();
+        if (object == null && param.isRequired()) {
+            throw new NBConfigError("An object by name '" + name + "' was requested as required, and no value was" +
+                " defined for it. This user provided value must be set or otherwise marked optional or given a" +
+                " default value in the parameter model.");
+        } else if (object == null && !param.isRequired()) {
+            throw new NBConfigError("An object by name '" + name + "' was requested as given by the config layer," +
+                " but no value was present, and no default was found in the config model. This is an ambiguous " +
+                "scenario. Either access the object as optional, or give it a default value. (code change)");
+        }
         if (param.type.isInstance(object)) {
             return (T) object;
         } else if (param.type.isAssignableFrom(object.getClass())) {
@@ -124,7 +143,7 @@ public class NBConfiguration {
 
         if ((!param.isRequired()) && param.getDefaultValue() == null) {
             throw new RuntimeException("Non-optional get on optional parameter " + name + "' which has no default value while configuring " + model.getOf() + "." +
-                    "\nTo avoid user impact, ensure that ConfigModel and NBConfigurable usage are aligned.");
+                "\nTo avoid user impact, ensure that ConfigModel and NBConfigurable usage are aligned.");
         }
 
         Object o = data.get(name);
@@ -148,7 +167,7 @@ public class NBConfiguration {
 
     public <T> Optional<T> getOptional(Class<T> type, String... names) {
         Object o = null;
-        Param<?> param=null;
+        Param<?> param = null;
         for (String name : names) {
             param = model.getParam(names);
             if (param != null) {
@@ -163,7 +182,7 @@ public class NBConfiguration {
             }
         }
         if (o == null) {
-            if (param!=null && param.isRequired()) {
+            if (param != null && param.isRequired()) {
                 o = param.getDefaultValue();
             } else {
                 return Optional.empty();
