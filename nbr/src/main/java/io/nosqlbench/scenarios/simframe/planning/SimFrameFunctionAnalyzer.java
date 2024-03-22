@@ -19,23 +19,25 @@ package io.nosqlbench.scenarios.simframe.planning;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 
-public abstract class SimFrameFunctionAnalyzer<A extends SimFrameFunction<? extends InvokableResult>, C extends SimFrameConfig> {
+public abstract class SimFrameFunctionAnalyzer<A extends SimFrameFunction<? extends InvokableResult>, C extends Record> {
     protected final A function;
-    protected final C config;
+    protected C config;
 
     protected SimFrameFunctionAnalyzer(A function, C config) {
         this.function = function;
         this.config = config;
     }
 
+    public record FrameResult(double value, SimFrameAction action) {}
+
     public SimFrame<? extends InvokableResult> analyze() {
-        double[] initialPoint = config.initialPoint();
-        double result = function.value(initialPoint);
-        while (result != Double.MIN_VALUE) {
+        FrameResult result = initialFrame();
+        while (result.action() == SimFrameAction.continue_run) {
             result = nextFrame();
         }
         return function.getJournal().bestRun();
     }
 
-    protected abstract double nextFrame();
+    protected abstract FrameResult nextFrame();
+    protected abstract FrameResult initialFrame();
 }

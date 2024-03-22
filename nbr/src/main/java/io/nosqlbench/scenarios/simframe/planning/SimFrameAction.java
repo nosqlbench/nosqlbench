@@ -17,8 +17,7 @@
 
 package io.nosqlbench.scenarios.simframe.planning;
 
-public abstract class SimFrameConfig {
-    public abstract double base_value();
-
-    public abstract double[] initialPoint();
+public enum SimFrameAction {
+    continue_run,
+    stop_run
 }
