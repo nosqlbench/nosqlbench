@@ -17,6 +17,8 @@
 package io.nosqlbench.adapter.milvus.ops;
 
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.param.R;
+import io.milvus.param.RpcStatus;
 import io.milvus.param.index.CreateIndexParam;
 
 public class MilvusCreateIndexOp extends MilvusBaseOp<CreateIndexParam> {
@@ -26,6 +28,7 @@ public class MilvusCreateIndexOp extends MilvusBaseOp<CreateIndexParam> {
 
     @Override
     public Object applyOp(long value) {
-        return client.createIndex(request);
+        R<RpcStatus> result = client.createIndex(request);
+        return result;
     }
 }
