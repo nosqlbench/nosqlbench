@@ -112,8 +112,19 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             if (!adapters.containsKey(driverName)) {
 
                 DriverAdapter<?,?> adapter =  Optional.of(driverName)
-                    .flatMap(name ->  ServiceSelector.of(name,ServiceLoader.load(DriverAdapterLoader.class)).get())
-                    .map(l -> l.load(this,NBLabels.forKV())).orElseThrow();
+                    .flatMap(
+                        name ->  ServiceSelector.of(
+                            name,
+                            ServiceLoader.load(DriverAdapterLoader.class)
+                        )
+                            .get())
+                    .map(
+                        l -> l.load(
+                            this,
+                            NBLabels.forKV()
+                        )
+                    )
+                    .orElseThrow(() -> new OpConfigError("driver adapter not present for name '" + driverName + "'"));
 
                 NBConfigModel combinedModel = yamlmodel;
                 NBConfiguration combinedConfig = combinedModel.matchConfig(activityDef.getParams());
