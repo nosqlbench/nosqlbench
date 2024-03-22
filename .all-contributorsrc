@@ -576,6 +576,17 @@
         "code",
         "userTesting"
       ]
+    },
+    {
+      "login": "stheodosius-sky",
+      "name": "Simon Theodosius",
+      "avatar_url": "https://avatars.githubusercontent.com/u/110117464?v=4",
+      "profile": "https://github.com/stheodosius-sky",
+      "contributions": [
+        "design",
+        "example",
+        "ideas"
+      ]
     }
   ],
   "commitType": "docs"
