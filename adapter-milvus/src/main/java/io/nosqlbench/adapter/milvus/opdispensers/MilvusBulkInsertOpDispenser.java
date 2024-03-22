@@ -23,6 +23,8 @@ import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusBulkInsertOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.List;
+import java.util.Map;
 import java.util.function.LongFunction;
 
 public class MilvusBulkInsertOpDispenser extends MilvusBaseOpDispenser<BulkInsertParam> {
@@ -41,17 +43,20 @@ public class MilvusBulkInsertOpDispenser extends MilvusBaseOpDispenser<BulkInser
     ) {
         LongFunction<BulkInsertParam.Builder> ebF =
             l -> BulkInsertParam.newBuilder().withCollectionName(targetF.apply(l));
-        // Add enhancement functions here
-        throw new RuntimeException("implement me");
 
-
-
-        // And remove test function
-        // BulkInsertParam.Builder test = ebF.apply(0);
-
-//        final LongFunction<BulkInsertParam.Builder> lastF = ebF;
-//        final LongFunction<BulkInsertParam> collectionParamF = l -> lastF.apply(l).build();
-//        return null;
+        ebF = op.enhanceFuncOptionally(ebF, "options", Map.class,
+            (BulkInsertParam.Builder builder, Map map) -> {
+                map.forEach((k, v) -> {
+                    builder.withOption(k.toString(), v.toString());
+                });
+                return builder;
+            }
+        );
+        ebF = op.enhanceFuncOptionally(ebF, "files", List.class, BulkInsertParam.Builder::withFiles);
+        ebF = op.enhanceFuncOptionally(ebF, List.of("partition_name", "partition"), String.class,
+            BulkInsertParam.Builder::withPartitionName);
+        LongFunction<BulkInsertParam.Builder> finalEbF = ebF;
+        return l -> finalEbF.apply(l).build();
     }
 
     @Override
@@ -61,6 +66,6 @@ public class MilvusBulkInsertOpDispenser extends MilvusBaseOpDispenser<BulkInser
         ParsedOp op,
         LongFunction<String> targetF
     ) {
-        return l -> new MilvusBulkInsertOp(clientF.apply(l),paramF.apply(l));
+        return l -> new MilvusBulkInsertOp(clientF.apply(l), paramF.apply(l));
     }
 }
