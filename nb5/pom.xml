@@ -14,7 +14,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -57,6 +58,12 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>adapter-stdout</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapter-http</artifactId>
             <version>${revision}</version>
         </dependency>
 
@@ -161,9 +168,9 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
+
             <build>
                 <plugins>
-
                     <plugin>
                         <executions>
                             <execution>
@@ -186,7 +193,8 @@
         <profile>
             <id>adapter-opensearch</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-opensearch/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
@@ -200,7 +208,8 @@
         <profile>
             <id>adapter-cqld4</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-cqld4/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
@@ -213,7 +222,8 @@
         <profile>
             <id>adapter-s4j</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-s4j/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
@@ -226,7 +236,8 @@
         <profile>
             <id>adapter-pinecone</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-pinecone/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
@@ -239,7 +250,8 @@
         <profile>
             <id>adapter-mongodb</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-mongodb/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
@@ -252,7 +264,8 @@
         <profile>
             <id>adapter-tcp</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-tcp/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
@@ -265,7 +278,8 @@
         <profile>
             <id>adapter-dynamodb</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-dynamodb/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
@@ -275,23 +289,25 @@
                 </dependency>
             </dependencies>
         </profile>
-        <profile>
-            <id>adapter-http</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>io.nosqlbench</groupId>
-                    <artifactId>adapter-http</artifactId>
-                    <version>${revision}</version>
-                </dependency>
-            </dependencies>
-        </profile>
+                <profile>
+                    <id>adapter-http</id>
+                    <activation>
+<!--                        <activeByDefault>true</activeByDefault>-->
+                        <file><exists>../adapter-http/target</exists></file>
+                    </activation>
+                    <dependencies>
+                        <dependency>
+                            <groupId>io.nosqlbench</groupId>
+                            <artifactId>adapter-http</artifactId>
+                            <version>${revision}</version>
+                        </dependency>
+                    </dependencies>
+                </profile>
         <profile>
             <id>adapter-pulsar</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-pulsar/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
@@ -304,7 +320,8 @@
         <profile>
             <id>adapter-kafka</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-kafka/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
@@ -317,7 +334,8 @@
         <profile>
             <id>adapter-amqp</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-amqp/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
@@ -330,7 +348,8 @@
         <profile>
             <id>adapter-jdbc</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-jdbc/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
@@ -343,7 +362,8 @@
         <profile>
             <id>adapter-milvus</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+<!--                <activeByDefault>true</activeByDefault>-->
+                <file><exists>../adapter-milvus/target</exists></file>
             </activation>
             <dependencies>
                 <dependency>
