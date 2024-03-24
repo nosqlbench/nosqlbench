@@ -59,19 +59,18 @@
         <module>adapter-diag</module>
         <module>adapter-stdout</module>
 
-        <module>adapter-pinecone</module>
-        <module>adapter-dynamodb</module>
-        <module>adapter-http</module>
-        <module>adapter-tcp</module>
-        <module>adapter-pulsar</module>
-        <module>adapter-kafka</module>
-        <module>adapter-amqp</module>
-        <module>adapter-jdbc</module>
         <module>adapter-milvus</module>
-        <module>adapter-mongodb</module>
-        <module>adapter-aws-opensearch</module>
-        <module>adapter-cqld4</module>
-        <module>adapter-s4j</module>
+<!--        <module>adapter-dynamodb</module>-->
+<!--        <module>adapter-http</module>-->
+<!--        <module>adapter-tcp</module>-->
+<!--        <module>adapter-pulsar</module>-->
+<!--        <module>adapter-kafka</module>-->
+<!--        <module>adapter-amqp</module>-->
+<!--        <module>adapter-jdbc</module>-->
+<!--        <module>adapter-mongodb</module>-->
+<!--        <module>adapter-aws-opensearch</module>-->
+<!--        <module>adapter-cqld4</module>-->
+<!--        <module>adapter-s4j</module>-->
 
         <!-- VIRTDATA MODULES -->
         <module>virtdata-api</module>

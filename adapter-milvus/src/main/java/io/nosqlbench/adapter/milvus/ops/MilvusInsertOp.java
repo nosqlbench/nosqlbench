@@ -36,6 +36,7 @@ public class MilvusInsertOp extends MilvusBaseOp<InsertParam> {
 
     @Override
     public R<MutationResult> applyOp(long value) {
-        return client.insert(request);
+        R<MutationResult> insert = client.insert(request);
+        return insert;
     }
 }
