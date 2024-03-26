@@ -129,7 +129,7 @@ public class DiagOpDispenser extends BaseOpDispenser<DiagOp,DiagSpace> implement
     }
 
     @Override
-    public DiagOp apply(long value) {
+    public DiagOp getOp(long value) {
         return opFunc.apply(value);
     }
 }

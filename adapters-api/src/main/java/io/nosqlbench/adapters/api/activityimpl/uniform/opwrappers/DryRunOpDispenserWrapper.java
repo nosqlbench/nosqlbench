@@ -31,8 +31,8 @@ public class DryRunOpDispenserWrapper extends BaseOpDispenser<Op, Object> {
         this.realDispenser = realDispenser;
     }
     @Override
-    public DryRunOp apply(long cycle) {
-        Op op = realDispenser.apply(cycle);
+    public DryRunOp getOp(long cycle) {
+        Op op = realDispenser.getOp(cycle);
         return new DryRunOp(op);
     }
 }

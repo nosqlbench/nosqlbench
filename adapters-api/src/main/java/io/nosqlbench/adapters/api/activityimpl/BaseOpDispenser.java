@@ -226,6 +226,9 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
         return this.labels;
     }
 
-
-
+    @Override
+    public final T apply(long value) {
+        T op = getOp(value);
+        return op;
+    }
 }

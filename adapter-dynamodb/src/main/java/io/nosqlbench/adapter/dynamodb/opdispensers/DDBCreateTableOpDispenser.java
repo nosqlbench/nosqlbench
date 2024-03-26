@@ -128,7 +128,7 @@ public class DDBCreateTableOpDispenser extends BaseOpDispenser<DynamoDBOp, Dynam
     }
 
     @Override
-    public DDBCreateTableOp apply(long cycle) {
+    public DDBCreateTableOp getOp(long cycle) {
         CreateTableRequest rq = new CreateTableRequest();
         rq.setTableName(tableNameFunc.apply(cycle));
         rq.setKeySchema(keySchemaFunc.apply(cycle));

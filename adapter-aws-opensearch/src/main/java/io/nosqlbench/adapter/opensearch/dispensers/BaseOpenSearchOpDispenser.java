@@ -44,7 +44,7 @@ public abstract class BaseOpenSearchOpDispenser extends BaseOpDispenser<Op,Objec
     );
 
     @Override
-    public Op apply(long value) {
+    public Op getOp(long value) {
         return opF.apply(value);
     }
 }

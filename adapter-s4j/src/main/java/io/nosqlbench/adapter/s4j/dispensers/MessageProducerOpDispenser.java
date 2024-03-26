@@ -269,7 +269,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
     }
 
     @Override
-    public MessageProducerOp apply(long cycle) {
+    public MessageProducerOp getOp(long cycle) {
         String destName = destNameStrFunc.apply(cycle);
         String jmsMsgHeaderRawJsonStr = msgHeaderRawJsonStrFunc.apply(cycle);
         String jmsMsgPropertyRawJsonStr = msgPropRawJsonStrFunc.apply(cycle);

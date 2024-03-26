@@ -16,10 +16,8 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
-import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterOpDispenserWrapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.PollingOpDispenserWrapper;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;

@@ -43,7 +43,7 @@ public class AdminTenantOpDispenser extends PulsarAdminOpDispenser {
     }
 
     @Override
-    public AdminTenantOp apply(long cycle) {
+    public AdminTenantOp getOp(long cycle) {
         return new AdminTenantOp(
             pulsarAdapterMetrics,
             pulsarAdmin,

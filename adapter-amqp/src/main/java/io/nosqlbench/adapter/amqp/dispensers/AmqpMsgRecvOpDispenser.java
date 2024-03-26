@@ -120,7 +120,7 @@ public class AmqpMsgRecvOpDispenser extends AmqpBaseOpDispenser {
 
 
     @Override
-    public AmqpTimeTrackOp apply(long cycle) {
+    public AmqpTimeTrackOp getOp(long cycle) {
         Channel channel = getAmqpChannelForReceiver(cycle);
         if (channel == null) {
             throw new AmqpAdapterUnexpectedException(

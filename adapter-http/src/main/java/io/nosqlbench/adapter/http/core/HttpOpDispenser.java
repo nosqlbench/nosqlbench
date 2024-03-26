@@ -128,7 +128,7 @@ public class HttpOpDispenser extends BaseOpDispenser<HttpOp, HttpSpace> {
     }
 
     @Override
-    public HttpOp apply(long value) {
+    public HttpOp getOp(long value) {
         HttpOp op = this.opFunc.apply(value);
         return op;
 

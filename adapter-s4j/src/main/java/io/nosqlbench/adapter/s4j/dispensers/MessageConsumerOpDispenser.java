@@ -122,7 +122,7 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
     }
 
     @Override
-    public MessageConsumerOp apply(long cycle) {
+    public MessageConsumerOp getOp(long cycle) {
         S4JJMSContextWrapper s4JJMSContextWrapper = getS4jJmsContextWrapper(cycle, this.combinedS4jConfigObjMap);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
         boolean commitTransact = super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), cycle);

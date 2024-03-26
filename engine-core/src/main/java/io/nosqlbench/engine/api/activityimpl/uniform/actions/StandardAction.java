@@ -78,7 +78,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
 
         try (Timer.Context ct = bindTimer.time()) {
             dispenser = opsequence.apply(cycle);
-            op = dispenser.apply(cycle);
+            op = dispenser.getOp(cycle);
         } catch (Exception e) {
             throw new RuntimeException("while binding request in cycle " + cycle + " for op template named '" + (dispenser!=null?dispenser.getOpName():"NULL")+
                 "': " + e.getMessage(), e);

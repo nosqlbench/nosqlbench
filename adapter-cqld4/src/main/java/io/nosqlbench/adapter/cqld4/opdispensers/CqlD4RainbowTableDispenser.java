@@ -35,7 +35,7 @@ public class CqlD4RainbowTableDispenser extends Cqld4BaseOpDispenser {
     }
 
     @Override
-    public Cqld4CqlOp apply(long cycle) {
+    public Cqld4CqlOp getOp(long cycle) {
         throw new RuntimeException("implement me");
 //        return new Cqld4RainbowTableOp(
 //            getSessionFunc().apply(value),

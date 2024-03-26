@@ -49,7 +49,7 @@ public class MongoDbUpdateOpDispenser extends BaseOpDispenser<Op, MongoSpace> {
     }
 
     @Override
-    public Op apply(long value) {
+    public Op getOp(long value) {
         Op op = opF.apply(value);
         return op;
     }

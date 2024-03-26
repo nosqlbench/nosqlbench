@@ -32,8 +32,8 @@ public class EmitterOpDispenserWrapper extends BaseOpDispenser<Op, Object> {
         this.realDispenser = realDispenser;
     }
     @Override
-    public EmitterOp apply(long cycle) {
-        CycleOp<?> cycleOp = realDispenser.apply(cycle);
+    public EmitterOp getOp(long cycle) {
+        CycleOp<?> cycleOp = realDispenser.getOp(cycle);
         return new EmitterOp(cycleOp);
     }
 }

@@ -37,7 +37,7 @@ public class AdminNamespaceOpDispenser extends PulsarAdminOpDispenser {
     }
 
     @Override
-    public AdminNamespaceOp apply(long cycle) {
+    public AdminNamespaceOp getOp(long cycle) {
         return new AdminNamespaceOp(
             pulsarAdapterMetrics,
             pulsarAdmin,

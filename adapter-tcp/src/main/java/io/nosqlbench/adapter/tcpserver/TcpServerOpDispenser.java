@@ -35,7 +35,7 @@ public class TcpServerOpDispenser extends BaseOpDispenser<TcpServerOp,TcpServerA
     }
 
     @Override
-    public TcpServerOp apply(long value) {
+    public TcpServerOp getOp(long value) {
         TcpServerAdapterSpace ctx = ctxFunction.apply(value);
         String output = outFunction.apply(value);
         return new TcpServerOp(ctx,output);
