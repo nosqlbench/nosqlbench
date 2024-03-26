@@ -71,7 +71,10 @@ public class MilvusCreateIndexOpDispenser extends MilvusBaseOpDispenser<CreateIn
     }
 
     @Override
-    public LongFunction<MilvusBaseOp<CreateIndexParam>> createOpFunc(LongFunction<CreateIndexParam> paramF, LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<MilvusBaseOp<CreateIndexParam>> createOpFunc(
+        LongFunction<CreateIndexParam> paramF,
+        LongFunction<MilvusServiceClient> clientF,
+        ParsedOp op, LongFunction<String> targetF) {
         return l -> new MilvusCreateIndexOp(clientF.apply(l), paramF.apply(l));
     }
 }

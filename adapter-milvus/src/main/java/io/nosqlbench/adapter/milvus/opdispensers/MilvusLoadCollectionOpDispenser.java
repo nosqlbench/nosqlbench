@@ -43,17 +43,18 @@ public class MilvusLoadCollectionOpDispenser extends MilvusBaseOpDispenser<LoadC
         LongFunction<LoadCollectionParam.Builder> ebF =
             l -> LoadCollectionParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF,List.of("database_name","database"),String.class,
+        ebF = op.enhanceFuncOptionally(ebF, List.of("database_name", "database"), String.class,
             LoadCollectionParam.Builder::withDatabaseName);
 
-        ebF = op.enhanceFuncOptionally(ebF,"refresh",Boolean.class,LoadCollectionParam.Builder::withRefresh);
-        ebF = op.enhanceFuncOptionally(ebF,"sync_load",Boolean.class,LoadCollectionParam.Builder::withSyncLoad);
-        ebF = op.enhanceFuncOptionally(ebF,"replica_number",Integer.class,LoadCollectionParam.Builder::withReplicaNumber);
-        ebF = op.enhanceFuncOptionally(ebF,"resource_groups", List.class,LoadCollectionParam.Builder::withResourceGroups);
-        ebF = op.enhanceFuncOptionally(ebF,"sync_load_waiting_interval",Number.class,
-            (LoadCollectionParam.Builder b,Number n) -> b.withSyncLoadWaitingInterval(n.longValue()));
-        ebF = op.enhanceFuncOptionally(ebF,"sync_load_waiting_timeout",Number.class,
-            (LoadCollectionParam.Builder b,Number n) -> b.withSyncLoadWaitingTimeout(n.longValue()));
+        ebF = op.enhanceFuncOptionally(ebF, "refresh", Boolean.class, LoadCollectionParam.Builder::withRefresh);
+        ebF = op.enhanceFuncOptionally(ebF, "sync_load", Boolean.class, LoadCollectionParam.Builder::withSyncLoad);
+        ebF = op.enhanceFuncOptionally(ebF, "replica_number", Number.class,
+            (LoadCollectionParam.Builder b, Number n) -> b.withReplicaNumber(n.intValue()));
+        ebF = op.enhanceFuncOptionally(ebF, "resource_groups", List.class, LoadCollectionParam.Builder::withResourceGroups);
+        ebF = op.enhanceFuncOptionally(ebF, "sync_load_waiting_interval", Number.class,
+            (LoadCollectionParam.Builder b, Number n) -> b.withSyncLoadWaitingInterval(n.longValue()));
+        ebF = op.enhanceFuncOptionally(ebF, "sync_load_waiting_timeout", Number.class,
+            (LoadCollectionParam.Builder b, Number n) -> b.withSyncLoadWaitingTimeout(n.longValue()));
 
         final LongFunction<LoadCollectionParam.Builder> lastF = ebF;
         final LongFunction<LoadCollectionParam> collectionParamF = l -> lastF.apply(l).build();
@@ -67,6 +68,6 @@ public class MilvusLoadCollectionOpDispenser extends MilvusBaseOpDispenser<LoadC
         ParsedOp op,
         LongFunction<String> targetF
     ) {
-        return l -> new MilvusLoadCollectionOp(clientF.apply(l),paramF.apply(l));
+        return l -> new MilvusLoadCollectionOp(clientF.apply(l), paramF.apply(l));
     }
 }

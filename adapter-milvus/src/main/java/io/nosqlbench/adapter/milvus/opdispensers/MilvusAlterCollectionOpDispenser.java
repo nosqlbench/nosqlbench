@@ -42,7 +42,8 @@ public class MilvusAlterCollectionOpDispenser extends MilvusBaseOpDispenser<Alte
         LongFunction<AlterCollectionParam.Builder> ebF =
             l -> AlterCollectionParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF,"ttl", Integer.class, AlterCollectionParam.Builder::withTTL);
+        ebF = op.enhanceFuncOptionally(ebF, "ttl", Number.class,
+            (AlterCollectionParam.Builder b, Number n) -> b.withTTL(n.intValue()));
 
         final LongFunction<AlterCollectionParam.Builder> lastF = ebF;
         final LongFunction<AlterCollectionParam> collectionParamF = l -> lastF.apply(l).build();
@@ -56,6 +57,6 @@ public class MilvusAlterCollectionOpDispenser extends MilvusBaseOpDispenser<Alte
         ParsedOp op,
         LongFunction<String> targetF
     ) {
-        return l -> new MilvusAlterCollectionOp(clientF.apply(l),paramF.apply(l));
+        return l -> new MilvusAlterCollectionOp(clientF.apply(l), paramF.apply(l));
     }
 }

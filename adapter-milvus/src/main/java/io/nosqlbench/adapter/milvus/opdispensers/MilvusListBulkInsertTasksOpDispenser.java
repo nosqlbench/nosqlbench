@@ -41,7 +41,8 @@ public class MilvusListBulkInsertTasksOpDispenser extends MilvusBaseOpDispenser<
     ) {
         LongFunction<ListBulkInsertTasksParam.Builder> ebF =
             l -> ListBulkInsertTasksParam.newBuilder().withCollectionName(targetF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,"limit",Integer.class,ListBulkInsertTasksParam.Builder::withLimit);
+        ebF = op.enhanceFuncOptionally(ebF, "limit", Number.class,
+            (ListBulkInsertTasksParam.Builder b, Number n) -> b.withLimit(n.intValue()));
 
         final LongFunction<ListBulkInsertTasksParam.Builder> lastF = ebF;
         final LongFunction<ListBulkInsertTasksParam> collectionParamF = l -> lastF.apply(l).build();
@@ -55,6 +56,6 @@ public class MilvusListBulkInsertTasksOpDispenser extends MilvusBaseOpDispenser<
         ParsedOp op,
         LongFunction<String> targetF
     ) {
-        return l -> new MilvusListBulkInsertTasksOp(clientF.apply(l),paramF.apply(l));
+        return l -> new MilvusListBulkInsertTasksOp(clientF.apply(l), paramF.apply(l));
     }
 }
