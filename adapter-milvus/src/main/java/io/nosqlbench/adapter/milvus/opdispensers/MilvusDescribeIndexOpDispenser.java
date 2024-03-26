@@ -18,7 +18,6 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.index.DescribeIndexParam;
-import io.milvus.param.partition.CreatePartitionParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusDescribeIndexOp;
@@ -28,6 +27,9 @@ import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<DescribeIndexParam> {
+
+    private LongFunction<Boolean> doAwaitIndexFunction;
+    private LongFunction<Integer> awaitIndexTriesFunction;
 
     public MilvusDescribeIndexOpDispenser(MilvusDriverAdapter adapter,
                                           ParsedOp op,
@@ -48,6 +50,9 @@ public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<Descri
         ebF = op.enhanceFunc(ebF,List.of("database_name","database"),String.class,
             DescribeIndexParam.Builder::withDatabaseName);
 
+        this.doAwaitIndexFunction = op.getAsFunctionOr("await_index", false);
+        this.awaitIndexTriesFunction = op.getAsFunctionOr("await_index_tries", 100);
+
         final LongFunction<DescribeIndexParam.Builder> lastF = ebF;
         final LongFunction<DescribeIndexParam> collectionParamF = l -> lastF.apply(l).build();
         return collectionParamF;
@@ -60,6 +65,11 @@ public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<Descri
         ParsedOp op,
         LongFunction<String> targetF
     ) {
-        return l -> new MilvusDescribeIndexOp(clientF.apply(l),paramF.apply(l));
+        return l -> new MilvusDescribeIndexOp(
+            clientF.apply(l),
+            paramF.apply(l),
+            doAwaitIndexFunction.apply(l),
+            awaitIndexTriesFunction.apply(l)
+        );
     }
 }
