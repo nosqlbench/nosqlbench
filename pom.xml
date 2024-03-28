@@ -14,25 +14,13 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>nosqlbench</artifactId>
     <packaging>pom</packaging>
-    <dependencies>
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>virtdata-api</artifactId>
-            <version>5.21.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>virtdata-lib-basics</artifactId>
-            <version>5.21.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
 
     <parent>
         <artifactId>mvn-defaults</artifactId>
@@ -54,7 +42,7 @@
         <!-- TODO - consider using properties in the module defs. -->
         <!-- CORE MODULES -->
         <module>mvn-defaults</module>
-<!--        <module>nb5-proof</module>-->
+        <!--        <module>nb5-proof</module>-->
         <module>nb5</module>
         <module>nbr</module>
         <module>nbr-examples</module>
@@ -70,18 +58,20 @@
         <!-- driver modules -->
         <module>adapter-diag</module>
         <module>adapter-stdout</module>
-        <module>adapter-cqld4</module>
+
+        <module>adapter-pinecone</module>
+        <module>adapter-dynamodb</module>
         <module>adapter-http</module>
         <module>adapter-tcp</module>
-        <module>adapter-dynamodb</module>
-        <module>adapter-mongodb</module>
         <module>adapter-pulsar</module>
-        <module>adapter-s4j</module>
         <module>adapter-kafka</module>
         <module>adapter-amqp</module>
         <module>adapter-jdbc</module>
-        <module>adapter-pinecone</module>
+        <module>adapter-milvus</module>
+        <module>adapter-mongodb</module>
         <module>adapter-aws-opensearch</module>
+        <module>adapter-cqld4</module>
+        <module>adapter-s4j</module>
 
         <!-- VIRTDATA MODULES -->
         <module>virtdata-api</module>
@@ -98,6 +88,9 @@
         <!-- Documentation -->
         <module>docsys</module>
     </modules>
+
+    <profiles>
+    </profiles>
 
     <licenses>
         <license>
@@ -116,21 +109,6 @@
                     <releaseProfiles>release</releaseProfiles>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.4.1</version>
-                <configuration>
-                </configuration>
-                <!-- NO Executions by default for main project builds.
-                     This plugin should be called directly on the command line
-                     The site plugin appears to be broken or at least not properly maintained,
-                     so invoking via the site phase is more trouble than it is worth.
-                     -->
-                <!--                <executions>-->
-                <!--                </executions>-->
             </plugin>
 
         </plugins>

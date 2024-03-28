@@ -1,0 +1,154 @@
+min_version: 5.21.1
+description: |
+  This is a template for live vector search testing.
+  Template Variables:
+  TEMPLATE(milvushost,localhost)
+  TEMPLATE(datafile)
+  TEMPLATE(database,baselines)
+  TEMPLATE(collection,vector)
+  TEMPLATE(trainsize,1183514)
+  TEMPLATE(testsize,10000)
+  TEMPLATE(top_k,100)
+  TEMPLATE(filetype,hdf5)
+
+  schema: Install the schema required to run the test
+  rampup: Measure how long it takes to load a set of embeddings
+  search: Measure how the system responds to queries while it
+   is indexing recently ingested data.
+  search: Run vector search with a set of default (or overridden) parameters
+  In all of these phases, it is important to instance the metrics with distinct names.
+  Also, aggregates of recall should include total aggregate as well as a moving average.
+
+scenarios:
+  default:
+    drop: >-
+      run tags==block:drop errors===warn cycles===UNDEF threads===UNDEF
+      uri=http://TEMPLATE(milvushost):19530 database=TEMPLATE(database) token=root:Milvus
+    schema: >-
+      run tags==block:schema errors===stop cycles===UNDEF threads===1
+      uri=http://TEMPLATE(milvushost):19530 database=TEMPLATE(database) token=root:Milvus
+    rampup: >-
+      run tags==block:rampup errors=counter,warn
+      cycles===TEMPLATE(rampup_cycles,TEMPLATE(trainsize)) threads===TEMPLATE(rampup_threads,auto)
+      uri=http://TEMPLATE(milvushost):19530 database=TEMPLATE(database) token=root:Milvus
+    search: >-
+      run tags==block:search errors=counter,warn
+      cycles===TEMPLATE(search_cycles,TEMPLATE(testsize)) threads===TEMPLATE(search_threads,auto)
+      uri=http://TEMPLATE(milvushost):19530 database=TEMPLATE(database) token=root:Milvus
+
+params:
+  driver: milvus
+  instrument: true
+  database: TEMPLATE(database)
+
+bindings:
+  row_key: ToString()
+  # filetype=hdf5 for TEMPLATE(filetype,hdf5)
+  test_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/test");
+  relevant_indices_hdf5: HdfFileToIntArray("testdata/TEMPLATE(datafile).hdf5", "/neighbors")
+  distance_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/distance")
+  train_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(datafile).hdf5", "/train");
+  # filetype=fvec for TEMPLATE(filetype,fvec)
+  test_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_query_vectors.fvec");
+  relevant_indices_fvec: IVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_indices_query.ivec");
+  distance_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(testsize)_distances_count.fvec",TEMPLATE(dimensions),0);
+  train_floatlist_fvec: FVecReader("testdata/TEMPLATE(datafile)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0);
+  # synthetic
+  # synthetic_vectors: HashedFloatVectors(TEMPLATE(dimensions));
+
+blocks:
+  drop:
+    ops:
+      # https://milvus.io/api-reference/java/v2.3.x/Collection/dropCollection().md
+      drop_index_op:
+        drop_index: "TEMPLATE(collection)_TEMPLATE(vector_field,value)_idx"
+        collection_name: "TEMPLATE(collection)"
+      #        database_name: "TEMPLATE(database)"
+      drop_col_op:
+        drop_collection: "TEMPLATE(collection)"
+      #        database_name: "TEMPLATE(database)"
+      # https://milvus.io/api-reference/java/v2.3.x/Index/dropIndex().md
+      drop_db_op:
+        drop_database: "TEMPLATE(database)"
+  schema:
+    ops:
+      create_db_op:
+        create_database: "TEMPLATE(database)"
+      # https://milvus.io/api-reference/java/v2.3.x/Collection/createCollection().md
+      create_col_op:
+        create_collection: "TEMPLATE(collection)"
+        description: "TEMPLATE(desc,a simple milvus/zilliz vector collection)"
+        consistency_level: "BOUNDED"
+        field_types:
+          key:
+            primary_key: true
+            description: "primary/part key of the collection"
+            data_type: "VarChar"
+            max_length: 1024
+            auto_id: false
+          #            partition_key: true
+          value:
+            primary_key: false
+            description: "vector column/field"
+            data_type: "FloatVector"
+            dimension: TEMPLATE(vec_dimension,25)
+
+      # https://milvus.io/api-reference/java/v2.3.x/Index/createIndex().md
+      create_index_op:
+        create_index: "TEMPLATE(collection)_TEMPLATE(vector_field,value)_idx"
+        collection_name: "TEMPLATE(collection)"
+        field_name: "TEMPLATE(vector_field,value)"
+        index_type: "TEMPLATE(idx_type,DISKANN)"
+        metric_type: "TEMPLATE(similarity_function,COSINE)"
+        sync_mode: TEMPLATE(sync_mode,true)
+
+  rampup:
+    ops:
+      # https://milvus.io/api-reference/java/v2.3.x/Collection/insert().md
+      insert_op:
+        insert: "TEMPLATE(collection)"
+        rows:
+          key: "{row_key}"
+          value: "{train_floatlist_TEMPLATE(filetype)}"
+  #        fields:
+  #          key: (List this) "{row_key}"
+  #          value: (List this) "{train_floatlist_TEMPLATE(filetype)}"
+
+  search:
+    ops:
+      # https://milvus.io/api-reference/java/v2.3.x/High-level%20API/search().md
+      # https://milvus.io/api-reference/java/v2.3.x/Query%20and%20Search/search().md
+      search_op:
+        search: "TEMPLATE(collection)"
+        vector: "{test_floatlist_TEMPLATE(filetype)}"
+        metric_type: COSINE
+        out_fields:
+          - key
+          - value
+        vector_field_name: "value"
+        top_k: TEMPLATE(top_k)
+        consistency_level: "TEMPLATE(read_cl,EVENTUALLY)"
+        verifier-init: |
+          relevancy= new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op);
+          for (int k in List.of(100)) {
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+          }
+        #          for (int k in List.of(1,2,3,5,10,25,50,75)) {
+        #            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("s_recall",k));
+        #            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("s_precision",k));
+        #            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("s_F1",k));
+        #            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("s_RR",k));
+        #            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("s_AP",k));
+        #          }
+        verifier: |
+          // driver-specific function
+          actual_indices=io.nosqlbench.adapter.milvus.MilvusAdapterUtils.intArrayFromMilvusSearchResults("key",result)
+          // driver-agnostic function
+          relevancy.accept({relevant_indices_TEMPLATE(filetype)},actual_indices);
+          // because we are "verifying" although this needs to be reorganized
+          return true;
+

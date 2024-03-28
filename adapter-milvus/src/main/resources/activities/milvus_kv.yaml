@@ -1,0 +1,57 @@
+
+bindings:
+
+scenarios:
+  default:
+    drop: run driver=milvus tags=block:drop threads==UNSET cycles==UNSET
+    schema: run driver=milvus tags=block:schema threads==UNSET cycles==UNSET
+    rampup: run driver=milvus tags=block:rampup threads=TEMPLATE(rampup_threads,auto) cycles=TEMPLATE(rampup_cycles,10k)
+    main: run driver=milvus tags=block:'main-.*' threads=TEMPLATE(rampup_threads,auto) cycles=TEMPLATE(rampup_cycles,10k)
+
+blocks:
+
+#  drop:
+#    ops:
+#      drop_index:
+
+  schema:
+    ops:
+      create_collection_op:
+        create_collection: example_collection
+        description: "https://milvus.io/api-reference/java/v2.3.x/Collection/createCollection().md"
+        shards_num: 10
+        consistency_level: BOUNDED # BOUNDED, SESSION, EVENTUAL
+        partition_num: 1024 # number of partitions
+        field_types:
+          key:
+            data_type: Varchar
+            max_length: 1024 # for String only, >0
+            primary_key: true # only for Int64 and Varchar types
+            partition_key: true # how does this relate to primary_key?
+            description: field description
+            auto_id: false # Generate primary key?
+          value:
+            data_type: FloatVector
+            dimension: 1024 # >0
+            primary_key: false # only for Int64 and Varchar types
+            partition_key: false
+            description: A value within part_key
+            auto_id: false # Generate primary key?
+      create_index:
+        create_index: example_idx
+        collection_name: "example_collection"
+        description: "https://milvus.io/api-reference/java/v2.3.x/Index/createIndex().md"
+        field_name: value
+        index_type: DISKANN
+        metric_type: COSINE # L2 | IP | COSINE | HAMMING | JACCARD | TANIMOTO
+#        extra_param: "none"
+        sync_mode: true # whether to block till indexing is complete
+        sync_waiting_interval: 1000 # ms for polling interval on sync_mode: true
+#  rampup:
+#    ops:
+#      write:
+#
+#  main-query:
+#    ops:
+#      query:
+

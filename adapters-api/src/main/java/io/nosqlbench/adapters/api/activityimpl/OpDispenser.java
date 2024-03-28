@@ -86,4 +86,5 @@ public interface OpDispenser<T> extends LongFunction<T>, OpResultTracker {
 
     CycleFunction<Boolean> getVerifier();
 
+    String getOpName();
 }

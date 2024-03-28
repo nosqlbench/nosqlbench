@@ -589,7 +589,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
 
     public <V> LongFunction<V> getAsRequiredFunction(String name, Class<? extends V> type) {
         Optional<? extends LongFunction<V>> sf = getAsOptionalFunction(name, type);
-        return sf.orElseThrow(() -> new OpConfigError("The op field '" + name + "' is required, but it wasn't found in the op template."));
+        return sf.orElseThrow(() -> new OpConfigError("The op field '" + name + "' is required, but it wasn't found " +
+            "in the op template named '" + this.getName() + "'"));
     }
 
 
@@ -640,7 +641,9 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 return l -> oc.apply(fs.apply(l));
             } else {
                 throw new OpConfigError(
-                    "Unable to compose string func to obj cache with non-String function of type " + f.getClass().getCanonicalName()
+                    "Unable to compose string func to obj cache with non-String function of type "
+                        + f.getClass().getCanonicalName() + " in op template named '"
+                        + this.getName() + "'"
                 );
             }
         }
@@ -650,7 +653,9 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 V defaultObject = init.apply(s);
                 return l -> defaultObject;
             } else {
-                throw new OpConfigError("Unable to compose string to object cache with non-String value of type " + defaultValue.getClass().getCanonicalName());
+                throw new OpConfigError("Unable to compose string to object cache with non-String value " +
+                    "of type " + defaultValue.getClass().getCanonicalName()
+                    + " in op template named '" + this.getName() + "'");
             }
         }
         if (isConfig(fieldname)) {
@@ -698,22 +703,31 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             if (type.isAssignableFrom(testObject.getClass())) {
                 return true;
             } else {
-                throw new OpConfigError("field " + field + " was defined as a function, but not one that returns the" +
-                    " requested type " + testObject.getClass().getCanonicalName());
+                throw new OpConfigError("field " + field + " was defined as a function, " +
+                    "but not one that returns the requested type "
+                    + testObject.getClass().getCanonicalName()
+                    + " in op template named '" + this.getName() + "'"
+                );
             }
         }
         if (isStatic(field)) {
             if (type.isAssignableFrom(statics.get(field).getClass())) {
                 return true;
             } else {
-                throw new OpConfigError("field " + field + " was defined (static), but not as the requested type " + type.getCanonicalName());
+                throw new OpConfigError("field " + field + " was defined (static), " +
+                    "but not as the requested type " + type.getCanonicalName()
+                    + " in op template named '" + this.getName() + "'"
+                );
             }
         }
         if (isConfig(field)) {
             if (type.isAssignableFrom(getConfig(field).getClass())) {
                 return true;
             } else {
-                throw new OpConfigError("field " + field + " was defined (config), but not as the requested type " + type.getCanonicalName());
+                throw new OpConfigError("field " + field + " was defined (config), " +
+                    "but not as the requested type " + type.getCanonicalName()
+                    + " in op template named '" + this.getName() + "'"
+                );
             }
         }
         return false;
@@ -896,7 +910,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         if (isConfig(fieldname)) {
             return getConfig(fieldname).getClass();
         }
-        throw new OpConfigError("Unable to determine value type for undefined op field '" + fieldname + "'");
+        throw new OpConfigError("Unable to determine value type for undefined op field '"
+            + fieldname + "'" + " in op template named '" + this.getName() + "'");
     }
 
     public <E extends Enum<E>, V> Optional<TypeAndTarget<E, V>> getOptionalTargetEnum(
@@ -912,8 +927,10 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             try {
                 verifiedEnumValue = Enum.valueOf(enumclass, enumValue);
             } catch (IllegalArgumentException iae) {
-                throw new OpConfigError("type designator field '" + typeFieldName + "' had value of '" + enumValue + ", but this failed to match " +
-                    "any of known types in " + EnumSet.allOf(enumclass));
+                throw new OpConfigError("type designator field '" + typeFieldName
+                    + "' had value of '" + enumValue + ", but this failed to match " +
+                    "any of known types in " + EnumSet.allOf(enumclass)
+                    + " in op template named '" + this.getName() + "'");
             }
 
             if (isDefined(valueFieldName)) {
@@ -928,7 +945,10 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 }
             }
         } else if (isDynamic(typeFieldName)) {
-            throw new OpConfigError("The op template field '" + typeFieldName + "' must be a static value. You can not vary it by cycle.");
+            throw new OpConfigError("The op template field '" + typeFieldName +
+                "' must be a static value. You can not vary it by cycle"
+                + " in op template named '" + this.getName() + "'"
+            );
         }
 
         return Optional.empty();
@@ -984,7 +1004,10 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             return Optional.of(new TypeAndTarget<E, V>(prototype.enumId, prototype.field, asFunction));
         } else if (matched.size() > 1) {
             throw new OpConfigError("Multiple matches were found from op template fieldnames ["
-                + getOpFieldNames() + "] to possible enums: [" + EnumSet.allOf(enumclass) + "]");
+                + getOpFieldNames() + "] to possible enums: ["
+                + EnumSet.allOf(enumclass) + "]"
+                + " in op template named '" + this.getName() + "'"
+            );
         }
 
         return Optional.empty();
@@ -1004,8 +1027,13 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         if (optionalSpecifiedEnum.isPresent()) {
             return optionalSpecifiedEnum.get();
         }
-        throw new OpConfigError("While mapping op template named '" + this.getName() + "', Unable to map the type and target for possible values " + EnumSet.allOf(enumclass) + " either by key or by fields " + tname + " and " + vname + ". " +
-            "Fields considered: static:" + statics.keySet() + " dynamic:" + dynamics.keySet());
+        throw new OpConfigError("While mapping op template named '"
+            + this.getName() + "', Unable to map the type and target for possible values "
+            + EnumSet.allOf(enumclass) + " either by key or by fields " + tname
+            + " and " + vname + ". " +
+            "Fields considered: static:" + statics.keySet() + " dynamic:"
+            + dynamics.keySet() + " in op template named '" + this.getName() + "'"
+        );
     }
 
     private String getName() {
@@ -1019,9 +1047,12 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             () -> {
                 String values = EnumSet.allOf(enumclass).toString();
                 Set<String> definedNames = getOpFieldNames();
-                return new OpConfigError("Unable to match op template fields [" + definedNames + "] with " +
-                    "possible op types [" + values + "]. " +
-                    "If you are specifying an op type which should be implemented, please file an issue.");
+                return new OpConfigError("Unable to match op template fields [" + definedNames
+                    + "] with possible op types [" + values + "] " +
+                    "in op template named '" + this.getName() + "'" +
+                    "If you are specifying an op type which should be implemented, " +
+                    "please file an issue."
+                );
             }
         );
     }
