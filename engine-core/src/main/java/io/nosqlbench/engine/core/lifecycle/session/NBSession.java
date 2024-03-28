@@ -20,10 +20,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.api.components.status.NBHeartbeatComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.engine.metrics.ClassicHistoListener;
-import io.nosqlbench.nb.api.engine.metrics.ClassicTimerListener;
-import io.nosqlbench.nb.api.engine.metrics.HistoIntervalLogger;
-import io.nosqlbench.nb.api.engine.metrics.HistoStatsLogger;
+import io.nosqlbench.nb.api.engine.metrics.*;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.util.Unit;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
@@ -51,6 +48,7 @@ import java.util.regex.Pattern;
  */
 public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd>, ExecutionResult>, NBTokenWords {
     private final static Logger logger = LogManager.getLogger(NBSession.class);
+    private static final List<MetricsCloseable> metricsCloseables = new ArrayList<>();
 //    private final ClientSystemMetricChecker clientMetricChecker;
 
     private final Map<String, NBBufferedContainer> containers = new ConcurrentHashMap<>();
@@ -146,7 +144,7 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
             new HistoIntervalLogger(this, sessionName, logfile, compiledPattern, millis);
         logger.debug(() -> "Adding " + histoIntervalLogger + " to session " + sessionName);
         //get().addListener(histoIntervalLogger);
-        //metricsCloseables.add(histoIntervalLogger);
+        metricsCloseables.add(histoIntervalLogger);
     }
 
     public void addStatsLogger(String sessionName, String pattern, String filename, long millis) {
@@ -160,7 +158,19 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
             new HistoStatsLogger(this, sessionName, logfile, compiledPattern, millis, TimeUnit.NANOSECONDS);
         logger.debug(() -> "Adding " + histoStatsLogger + " to session " + sessionName);
 //        get().addListener(histoStatsLogger);
-//        metricsCloseables.add(histoStatsLogger);
+        metricsCloseables.add(histoStatsLogger);
+    }
+
+    /**
+     * This should be called at the end of a process, so that open intervals can be finished, logs closed properly,
+     * etc.
+     */
+    public static void closeMetrics() {
+        logger.trace("Closing all registered metrics closable objects.");
+        for (MetricsCloseable metricsCloseable : metricsCloseables) {
+            logger.trace(() -> "closing metrics closeable: " + metricsCloseable);
+            metricsCloseable.closeMetrics();
+        }
     }
 
 }
