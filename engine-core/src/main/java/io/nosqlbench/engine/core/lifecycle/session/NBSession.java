@@ -143,7 +143,6 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
         HistoIntervalLogger histoIntervalLogger =
             new HistoIntervalLogger(this, sessionName, logfile, compiledPattern, millis);
         logger.debug(() -> "Adding " + histoIntervalLogger + " to session " + sessionName);
-        //get().addListener(histoIntervalLogger);
         metricsCloseables.add(histoIntervalLogger);
     }
 
@@ -157,7 +156,6 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
         HistoStatsLogger histoStatsLogger =
             new HistoStatsLogger(this, sessionName, logfile, compiledPattern, millis, TimeUnit.NANOSECONDS);
         logger.debug(() -> "Adding " + histoStatsLogger + " to session " + sessionName);
-//        get().addListener(histoStatsLogger);
         metricsCloseables.add(histoStatsLogger);
     }
 
