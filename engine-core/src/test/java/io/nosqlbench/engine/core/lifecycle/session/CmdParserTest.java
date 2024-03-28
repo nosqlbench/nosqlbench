@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
 
 // test for dots and underscores in names
@@ -96,6 +97,13 @@ class CmdParserTest {
         assertThat(cmds.getFirst().getCmdType()).isEqualTo(CmdType.indirect);
         assertThat(cmds.getFirst().getArgValue("_impl")).isEqualTo("_cmd4");
         assertThat(cmds.getFirst().getArgValue("param1")).isEqualTo("value1");
+    }
+
+    @Test
+    public void testThatDuplicateParameterThrowsBasicError() {
+        assertThatExceptionOfType(BasicError.class)
+            .isThrownBy(() -> CmdParser.parseArgvCommands(new LinkedList<>(List.of("run", "threads=auto", "threads=1"))))
+            .withMessageContaining("Duplicate occurrence of option: threads");
     }
 
 }

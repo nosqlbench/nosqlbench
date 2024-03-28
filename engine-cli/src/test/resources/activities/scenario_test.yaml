@@ -11,6 +11,10 @@ scenarios:
   template_test:
     with_template: run driver=stdout cycles=TEMPLATE(cycles-test,10)
 
+  duplicate_param:
+    schema: run driver=stdout workload==scenario_test threads=auto tags=block:"schema.*" threads=1 doundef==undef
+
+
 blocks:
   schema:
     ops:
