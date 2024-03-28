@@ -28,7 +28,8 @@ public class FindmaxParamModel {
 
     public FindmaxParamModel add(String name, double min, double initial, double max, DoubleConsumer effector) {
         if (min>initial || initial > max) {
-            throw new RuntimeException("parameters must be in min<initial<max order, but " + name + " was min=" + min + ", max=" + max);
+            throw new RuntimeException("parameters must be in min<initial<max order, but " + name + " was min=" + min +
+                ", initial=" + initial + ", max=" + max);
         }
         this.params.add(new GenericParamModel(name, min, initial, max, effector));
         return this;
