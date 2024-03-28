@@ -193,7 +193,11 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent
     }
 
     default String getAdapterName() {
-        return this.getClass().getAnnotation(Service.class).selector();
+        Service svc = this.getClass().getAnnotation(Service.class);
+        if (svc==null) {
+            throw new RuntimeException("The Service annotation for adapter of type " + this.getClass().getCanonicalName() + " is missing.");
+        }
+        return svc.selector();
     }
 
     default Maturity getAdapterMaturity() {

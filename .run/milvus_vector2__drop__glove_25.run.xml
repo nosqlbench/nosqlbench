@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="milvus_vector2__drop__glove_25" type="JarApplication" folderName="Milvus">
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <option name="JAR_PATH" value="$PROJECT_DIR$/nb5/target/nb5.jar" />
+    <option name="PROGRAM_PARAMETERS" value="milvus default.drop --show-stacktraces dimensions=25 testsize=10000 trainsize=100000 datafile=glove-25-angular filetype=hdf5 collection=glove_25 similarity_function=cosine --progress console:1s -v --add-labels &quot;dimensions:25,dataset=glove-25&quot;" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/local/milvus" />
+    <option name="ALTERNATIVE_JRE_PATH" value="jdk21" />
+    <method v="2" />
+  </configuration>
+</component>

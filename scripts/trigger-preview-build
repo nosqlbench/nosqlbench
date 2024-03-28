@@ -1,4 +1,5 @@
 #!/bin/bash
+
 cd mvn-defaults
 #set -x
 CURRENT_VERSION=$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)

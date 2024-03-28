@@ -73,14 +73,15 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     @Override
     public int runCycle(long cycle) {
 
-        OpDispenser<? extends Op> dispenser;
+        OpDispenser<? extends Op> dispenser=null;
         Op op = null;
 
         try (Timer.Context ct = bindTimer.time()) {
             dispenser = opsequence.apply(cycle);
             op = dispenser.apply(cycle);
         } catch (Exception e) {
-            throw new RuntimeException("while binding request in cycle " + cycle + ": " + e.getMessage(), e);
+            throw new RuntimeException("while binding request in cycle " + cycle + " for op template named '" + (dispenser!=null?dispenser.getOpName():"NULL")+
+                "': " + e.getMessage(), e);
         }
 
         int code = 0;

@@ -54,7 +54,7 @@ public class OpenSearchRequests {
         func = op.enhanceFuncOptionally(func, "requireAlias", boolean.class, BulkRequest.Builder::requireAlias);
         func = op.enhanceFuncOptionally(func, "sourceExcludes", List.class, BulkRequest.Builder::sourceExcludes);
 
-        ParsedOp subop = op.getAsSubOp("op_template");
+        ParsedOp subop = op.getAsSubOp("op_template", ParsedOp.SubOpNaming.ParentAndSubKey);
         int repeat = subop.getStaticConfigOr("repeat", 1);
 
         TypeAndTarget<BulkOpTypes, String> typeinfo =

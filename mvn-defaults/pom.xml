@@ -80,7 +80,7 @@
             <dependency>
                 <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy</artifactId>
-                <version>4.0.18</version>
+                <version>4.0.19</version>
             </dependency>
             <dependency>
                 <groupId>org.snakeyaml</groupId>
@@ -280,7 +280,7 @@
             <dependency>
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core-java11</artifactId>
-                <version>6.4.12</version>
+                <version>6.4.13</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -633,34 +633,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Javadoc -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <release>21</release>
-                    <doctitle>${javadoc.name}</doctitle>
-                    <windowtitle>${javadoc.name}</windowtitle>
-                    <detectJavaApiLink>false</detectJavaApiLink>
-                    <detectLinks>false</detectLinks>
-                    <detectOfflineLinks>false</detectOfflineLinks>
-                    <!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
-                    <additionalOptions>
-                        <additionalOption>-Xdoclint:none</additionalOption>
-                    </additionalOptions>
-                    <!--                    <additionalJOption>-Xdoclint:none</additionalJOption>-->
-                    <doclint>none</doclint>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadoc</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-
-                </executions>
-            </plugin>
 
             <!-- Sources -->
             <plugin>
@@ -892,6 +864,60 @@
                             </execution>
                         </executions>
                     </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>javadoc</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+
+            <build>
+                <plugins>
+                    <!-- Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <release>21</release>
+                            <doctitle>${javadoc.name}</doctitle>
+                            <windowtitle>${javadoc.name}</windowtitle>
+                            <detectJavaApiLink>false</detectJavaApiLink>
+                            <detectLinks>false</detectLinks>
+                            <detectOfflineLinks>false</detectOfflineLinks>
+                            <!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
+                            <additionalOptions>
+                                <additionalOption>-Xdoclint:none</additionalOption>
+                            </additionalOptions>
+                            <!--                    <additionalJOption>-Xdoclint:none</additionalJOption>-->
+                            <doclint>none</doclint>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadoc</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+
+                        </executions>
+                    </plugin>
+<!--                    <plugin>-->
+<!--                        <groupId>org.apache.maven.plugins</groupId>-->
+<!--                        <artifactId>maven-javadoc-plugin</artifactId>-->
+<!--                        <version>3.4.1</version>-->
+<!--                        <configuration>-->
+<!--                        </configuration>-->
+<!--                        &lt;!&ndash; NO Executions by default for main project builds.-->
+<!--                             This plugin should be called directly on the command line-->
+<!--                             The site plugin appears to be broken or at least not properly maintained,-->
+<!--                             so invoking via the site phase is more trouble than it is worth.-->
+<!--                             &ndash;&gt;-->
+<!--                        &lt;!&ndash;                <executions>&ndash;&gt;-->
+<!--                        &lt;!&ndash;                </executions>&ndash;&gt;-->
+<!--                    </plugin>-->
                 </plugins>
             </build>
         </profile>
