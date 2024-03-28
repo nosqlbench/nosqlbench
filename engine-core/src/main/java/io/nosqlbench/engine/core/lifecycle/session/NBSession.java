@@ -20,7 +20,12 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.api.components.status.NBHeartbeatComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.metrics.ClassicHistoListener;
+import io.nosqlbench.nb.api.engine.metrics.ClassicTimerListener;
+import io.nosqlbench.nb.api.engine.metrics.HistoIntervalLogger;
+import io.nosqlbench.nb.api.engine.metrics.HistoStatsLogger;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
+import io.nosqlbench.nb.api.engine.util.Unit;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.engine.cmdstream.Cmd;
@@ -31,9 +36,12 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 /**
  * A session represents a single execution of NoSQLBench, whether episodic or persistent under some service layer.
@@ -125,6 +133,34 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
             name,
             n -> NBContainer.builder().name(n).build(this)
         );
+    }
+
+    public void addHistoLogger(String sessionName, String pattern, String filename, long millis) {
+        if (filename.contains("_SESSION_")) {
+            filename = filename.replace("_SESSION_", sessionName);
+        }
+        Pattern compiledPattern = Pattern.compile(pattern);
+        File logfile = new File(filename);
+
+        HistoIntervalLogger histoIntervalLogger =
+            new HistoIntervalLogger(this, sessionName, logfile, compiledPattern, millis);
+        logger.debug(() -> "Adding " + histoIntervalLogger + " to session " + sessionName);
+        //get().addListener(histoIntervalLogger);
+        //metricsCloseables.add(histoIntervalLogger);
+    }
+
+    public void addStatsLogger(String sessionName, String pattern, String filename, long millis) {
+        if (filename.contains("_SESSION_")) {
+            filename = filename.replace("_SESSION_", sessionName);
+        }
+        Pattern compiledPattern = Pattern.compile(pattern);
+        File logfile = new File(filename);
+
+        HistoStatsLogger histoStatsLogger =
+            new HistoStatsLogger(this, sessionName, logfile, compiledPattern, millis, TimeUnit.NANOSECONDS);
+        logger.debug(() -> "Adding " + histoStatsLogger + " to session " + sessionName);
+//        get().addListener(histoStatsLogger);
+//        metricsCloseables.add(histoStatsLogger);
     }
 
 }
