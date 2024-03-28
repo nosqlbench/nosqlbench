@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.planning;
+package io.nosqlbench.scenarios.simframe.optimizers.findmax;
 
-import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
-import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
-import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
+import io.nosqlbench.nb.annotations.Service;
 
-public interface SimFrameFunction<P extends InvokableResult> extends MultivariateFunction {
+@Service(value = NBCommandInfo.class,selector = "findmax")
+public class NBFindmaxInfo extends NBCommandInfo {
     @Override
-    double value(double[] point);
-
-    SimFrameJournal<P> getJournal();
+    public Class<? extends NBBaseCommand> getType() {
+        return CMD_findmax.class;
+    }
 }

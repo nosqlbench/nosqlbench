@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.optimizers.optimo;
+package io.nosqlbench.scenarios.simframe.optimizers.findmax;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.RunState;
@@ -23,39 +23,42 @@ import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
 
-public class OptimoFrameFunction implements SimFrameFunction<OptimoFrameParams> {
+public class FindmaxFrameFunction implements SimFrameFunction<FindmaxFrameParams> {
 
     private final Activity flywheel;
     private final SimFrameCapture capture;
-    private final SimFrameJournal<OptimoFrameParams> journal;
-    private final OptimoSearchSettings settings;
+    private final SimFrameJournal<FindmaxFrameParams> journal;
+    private final FindmaxConfig settings;
     private final ContainerActivitiesController controller;
+    private final FindmaxParamModel model;
 
-    public OptimoFrameFunction(
+    public FindmaxFrameFunction(
         ContainerActivitiesController controller,
-        OptimoSearchSettings settings,
+        FindmaxConfig settings,
         Activity flywheel,
         SimFrameCapture capture,
-        SimFrameJournal<OptimoFrameParams> journal
+        SimFrameJournal<FindmaxFrameParams> journal,
+        FindmaxParamModel model
     ) {
         this.controller = controller;
         this.settings = settings;
         this.flywheel = flywheel;
         this.capture = capture;
         this.journal = journal;
+        this.model = model;
     }
 
     @Override
     public double value(double[] point) {
         System.out.println("━".repeat(40));
-        OptimoFrameParams params = settings.model().apply(point);
+        FindmaxFrameParams params = model.apply(point);
         System.out.println(params);
         capture.startWindow();
         capture.awaitSteadyState();
-        settings.model().apply(point);
+        model.apply(point);
         capture.restartWindow();
         System.out.println("sampling for " + settings.sample_time_ms()+"ms");
-        controller.waitMillis(settings.sample_time_ms());
+        controller.waitMillis((long) settings.sample_time_ms());
         capture.stopWindow();
         journal.record(params,capture.last());
         System.out.println(journal.last());
@@ -67,7 +70,7 @@ public class OptimoFrameFunction implements SimFrameFunction<OptimoFrameParams> 
     }
 
     @Override
-    public SimFrameJournal<OptimoFrameParams> getJournal() {
+    public SimFrameJournal<FindmaxFrameParams> getJournal() {
         return journal;
     }
 }
