@@ -16,18 +16,22 @@
 
 package io.nosqlbench.nb.api.components.core;
 
+import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.tagging.TagFilter;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class NBBaseComponentMetrics implements NBComponentMetrics {
     private final Lock lock = new ReentrantLock(false);
     private final Map<String, NBMetric> metrics = new ConcurrentHashMap<>();
+    private final static List<MetricRegistryListener> listeners = new CopyOnWriteArrayList<>();
     @Override
     public String addComponentMetric(NBMetric metric, MetricCategory category, String requiredDescription) {
         try {
@@ -37,9 +41,52 @@ public class NBBaseComponentMetrics implements NBComponentMetrics {
                 throw new RuntimeException("Can't add the same metric by label set to the same live component:" + openMetricsName);
             }
             metrics.put(openMetricsName,metric);
+            for (MetricRegistryListener listener : listeners) {
+                notifyListenerOfAddedMetric(listener, metric, openMetricsName);
+            }
             return metric.getLabels().linearizeAsMetrics();
         } finally {
             lock.unlock();
+        }
+    }
+
+    public void addListener(MetricRegistryListener listener) {
+        listeners.add(listener);
+
+        for (Map.Entry<String, NBMetric> entry : metrics.entrySet()) {
+            notifyListenerOfAddedMetric(listener, entry.getValue(), entry.getKey());
+        }
+    }
+
+    public void removeListener(MetricRegistryListener listener) {
+        listeners.remove(listener);
+    }
+
+    private void notifyListenerOfAddedMetric(MetricRegistryListener listener, NBMetric metric, String name) {
+        switch (metric) {
+            case Gauge gauge -> listener.onGaugeAdded(name, gauge);
+            case Counter counter -> listener.onCounterAdded(name, counter);
+            case Histogram histogram -> listener.onHistogramAdded(name, histogram);
+            case Meter meter -> listener.onMeterAdded(name, meter);
+            case Timer timer -> listener.onTimerAdded(name, timer);
+            case null, default -> throw new IllegalArgumentException("Unknown metric type: " + metric.getClass());
+        }
+    }
+
+    private void onMetricRemoved(String name, NBMetric metric) {
+        for (MetricRegistryListener listener : listeners) {
+            notifyListenerOfRemovedMetric(name, metric, listener);
+        }
+    }
+
+    private void notifyListenerOfRemovedMetric(String name, NBMetric metric, MetricRegistryListener listener) {
+        switch (metric) {
+            case Gauge gauge -> listener.onGaugeRemoved(name);
+            case Counter counter -> listener.onCounterRemoved(name);
+            case Histogram histogram -> listener.onHistogramRemoved(name);
+            case Meter meter -> listener.onMeterRemoved(name);
+            case Timer timer -> listener.onTimerRemoved(name);
+            case null, default -> throw new IllegalArgumentException("Unknown metric type: " + metric.getClass());
         }
     }
     @Override
