@@ -48,7 +48,6 @@ import java.util.regex.Pattern;
  */
 public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd>, ExecutionResult>, NBTokenWords {
     private final static Logger logger = LogManager.getLogger(NBSession.class);
-    private static final List<MetricsCloseable> metricsCloseables = new ArrayList<>();
 //    private final ClientSystemMetricChecker clientMetricChecker;
 
     private final Map<String, NBBufferedContainer> containers = new ConcurrentHashMap<>();
@@ -131,44 +130,6 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
             name,
             n -> NBContainer.builder().name(n).build(this)
         );
-    }
-
-    public void addHistoLogger(String sessionName, String pattern, String filename, long millis) {
-        if (filename.contains("_SESSION_")) {
-            filename = filename.replace("_SESSION_", sessionName);
-        }
-        Pattern compiledPattern = Pattern.compile(pattern);
-        File logfile = new File(filename);
-
-        HistoIntervalLogger histoIntervalLogger =
-            new HistoIntervalLogger(this, sessionName, logfile, compiledPattern, millis);
-        logger.debug(() -> "Adding " + histoIntervalLogger + " to session " + sessionName);
-        metricsCloseables.add(histoIntervalLogger);
-    }
-
-    public void addStatsLogger(String sessionName, String pattern, String filename, long millis) {
-        if (filename.contains("_SESSION_")) {
-            filename = filename.replace("_SESSION_", sessionName);
-        }
-        Pattern compiledPattern = Pattern.compile(pattern);
-        File logfile = new File(filename);
-
-        HistoStatsLogger histoStatsLogger =
-            new HistoStatsLogger(this, sessionName, logfile, compiledPattern, millis, TimeUnit.NANOSECONDS);
-        logger.debug(() -> "Adding " + histoStatsLogger + " to session " + sessionName);
-        metricsCloseables.add(histoStatsLogger);
-    }
-
-    /**
-     * This should be called at the end of a process, so that open intervals can be finished, logs closed properly,
-     * etc.
-     */
-    public static void closeMetrics() {
-        logger.trace("Closing all registered metrics closable objects.");
-        for (MetricsCloseable metricsCloseable : metricsCloseables) {
-            logger.trace(() -> "closing metrics closeable: " + metricsCloseable);
-            metricsCloseable.closeMetrics();
-        }
     }
 
 }
