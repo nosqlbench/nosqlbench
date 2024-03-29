@@ -21,6 +21,8 @@ import io.nosqlbench.nb.api.components.events.ComponentOutOfScope;
 import io.nosqlbench.nb.api.components.events.DownEvent;
 import io.nosqlbench.nb.api.components.events.NBEvent;
 import io.nosqlbench.nb.api.components.events.UpEvent;
+import io.nosqlbench.nb.api.engine.metrics.HistoIntervalLogger;
+import io.nosqlbench.nb.api.engine.metrics.MetricsCloseable;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
@@ -40,6 +42,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     protected Exception error;
     protected long started_ns, teardown_ns, closed_ns, errored_ns, started_epoch_ms;
     protected NBInvokableState state = NBInvokableState.STARTING;
+    private static final List<MetricsCloseable> metricsCloseables = new ArrayList<>();
 
     public NBBaseComponent(NBComponent parentComponent) {
         this(parentComponent, NBLabels.forKV());
@@ -132,6 +135,9 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
             ArrayList<NBComponent> children = new ArrayList<>(getChildren());
             for (NBComponent child : children) {
                 child.close();
+            }
+            for (MetricsCloseable metricsCloseable : metricsCloseables) {
+                metricsCloseable.closeMetrics();
             }
         } catch (Exception e) {
             onError(e);
@@ -302,4 +308,9 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     public long started_epoch_ms() {
         return this.started_epoch_ms;
     }
+
+    public void addMetricsCloseable(MetricsCloseable metric) {
+        metricsCloseables.add(metric);
+    }
+
 }

@@ -436,12 +436,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 }
                 session.create().pushReporter(uri, intervalMs, NBLabels.forKV());
             });
-            for (
-                final NBCLIOptions.LoggerConfigData histoLogger : options.getHistoLoggerConfigs())
-                session.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.millis);
-            for (
-                final NBCLIOptions.LoggerConfigData statsLogger : options.getStatsLoggerConfigs())
-                session.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.millis);
+            for (final NBCLIOptions.LoggerConfigData histoLogger : options.getHistoLoggerConfigs()) {
+                session.create().histoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.millis);
+            }
+            for (final NBCLIOptions.LoggerConfigData statsLogger : options.getStatsLoggerConfigs()) {
+                session.create().histoStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.millis);
+            }
 
             ExecutionResult sessionResult = session.apply(options.getCommands());
             logger.info(sessionResult);
