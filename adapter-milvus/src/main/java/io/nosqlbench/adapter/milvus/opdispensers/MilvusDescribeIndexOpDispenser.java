@@ -23,18 +23,26 @@ import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusDescribeIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<DescribeIndexParam> {
 
-    private LongFunction<Boolean> doAwaitIndexFunction;
-    private LongFunction<Integer> awaitIndexTriesFunction;
+    private Duration awaitTimeout = Duration.ZERO;
+    private Duration awaitInterval = Duration.of(10, ChronoUnit.SECONDS);
 
     public MilvusDescribeIndexOpDispenser(MilvusDriverAdapter adapter,
                                           ParsedOp op,
                                           LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
+
+        op.getOptionalStaticValue("await_timeout", Number.class)
+            .map(Number::doubleValue)
+            .ifPresent(v->this.awaitTimeout = Duration.of((long)(v*1000), ChronoUnit.MILLIS));
+        op.getOptionalStaticValue("await_interval", Number.class)
+            .map(Number::doubleValue).ifPresent(v->this.awaitInterval =Duration.of((long)(v*1000),ChronoUnit.MILLIS));
     }
 
     @Override
@@ -50,8 +58,6 @@ public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<Descri
         ebF = op.enhanceFunc(ebF,List.of("database_name","database"),String.class,
             DescribeIndexParam.Builder::withDatabaseName);
 
-        this.doAwaitIndexFunction = op.getAsFunctionOr("await_index", false);
-        this.awaitIndexTriesFunction = op.getAsFunctionOr("await_index_tries", 100);
 
         final LongFunction<DescribeIndexParam.Builder> lastF = ebF;
         final LongFunction<DescribeIndexParam> collectionParamF = l -> lastF.apply(l).build();
@@ -68,8 +74,8 @@ public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<Descri
         return l -> new MilvusDescribeIndexOp(
             clientF.apply(l),
             paramF.apply(l),
-            doAwaitIndexFunction.apply(l),
-            awaitIndexTriesFunction.apply(l)
+            awaitTimeout,
+            awaitInterval
         );
     }
 }

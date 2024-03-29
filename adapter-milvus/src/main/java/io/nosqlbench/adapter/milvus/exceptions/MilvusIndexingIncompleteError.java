@@ -24,9 +24,9 @@ import java.util.List;
 public class MilvusIndexingIncompleteError extends RuntimeException {
     private final DescribeIndexParam milvusDescribeIndexOp;
     private final int tried;
-    private final List<MilvusDescribeIndexOp.IndexStats> stats;
+    private final List<MilvusDescribeIndexOp.IndexStat> stats;
 
-    public MilvusIndexingIncompleteError(DescribeIndexParam milvusDescribeIndexOp, int tried, List<MilvusDescribeIndexOp.IndexStats> stats) {
+    public MilvusIndexingIncompleteError(DescribeIndexParam milvusDescribeIndexOp, int tried, List<MilvusDescribeIndexOp.IndexStat> stats) {
         this.milvusDescribeIndexOp = milvusDescribeIndexOp;
         this.tried = tried;
         this.stats = stats;

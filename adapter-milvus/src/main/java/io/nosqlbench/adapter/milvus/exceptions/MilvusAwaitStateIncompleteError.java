@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.milvus.ops;
+package io.nosqlbench.adapter.milvus.exceptions;
 
-import io.milvus.client.MilvusServiceClient;
-import io.milvus.grpc.DescribeCollectionResponse;
+import io.milvus.grpc.GetLoadStateResponse;
 import io.milvus.param.R;
-import io.milvus.param.collection.DescribeCollectionParam;
 
-public class MilvusDescribeCollectionOp extends MilvusBaseOp<DescribeCollectionParam> {
-    public MilvusDescribeCollectionOp(MilvusServiceClient client, DescribeCollectionParam request) {
-        super(client, request);
+import java.time.Duration;
+
+public class MilvusAwaitStateIncompleteError extends RuntimeException {
+    private final R<GetLoadStateResponse> loadState;
+    private final Duration timeout;
+    private final String timeSummary;
+
+    public MilvusAwaitStateIncompleteError(R<GetLoadStateResponse> loadState, Duration timeout, String timeSummary) {
+        this.loadState = loadState;
+        this.timeout = timeout;
+        this.timeSummary = timeSummary;
     }
 
     @Override
-    public Object applyOp(long value) {
-        R<DescribeCollectionResponse> describeCollectionResponseR = client.describeCollection(request);
-        return describeCollectionResponseR;
+    public String getMessage() {
+        return super.getMessage() + ": at time " +timeSummary;
     }
 }

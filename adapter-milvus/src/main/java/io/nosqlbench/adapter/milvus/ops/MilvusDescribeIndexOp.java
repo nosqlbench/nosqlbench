@@ -21,72 +21,70 @@ import io.milvus.grpc.DescribeIndexResponse;
 import io.milvus.grpc.IndexDescription;
 import io.milvus.param.R;
 import io.milvus.param.index.DescribeIndexParam;
-import io.nosqlbench.adapter.milvus.exceptions.MilvusIndexingIncompleteError;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.OpGenerator;
+import io.nosqlbench.adapters.api.scheduling.TimeoutPredicate;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.LockSupport;
 
 public class MilvusDescribeIndexOp extends MilvusBaseOp<DescribeIndexParam> implements OpGenerator {
-    private final boolean doPollTillIndexed;
-    private final int awaitIndexTries;
-    private int tried = 0;
+    private final Duration timeout;
+    private final Duration interval;
+    private final TimeoutPredicate<Integer> timeoutPredicate;
     private MilvusDescribeIndexOp nextOp;
     private long lastAttemptAt = 0L;
 
     public MilvusDescribeIndexOp(
         MilvusServiceClient client,
         DescribeIndexParam request,
-        boolean doPollTillIndexed,
-        int awaitIndexTries
+        Duration timeout,
+        Duration interval
     ) {
         super(client, request);
-        this.doPollTillIndexed = doPollTillIndexed;
-        this.awaitIndexTries = awaitIndexTries;
+        this.timeout = timeout;
+        this.interval = interval;
+        this.timeoutPredicate = TimeoutPredicate.of(p -> p>=100, timeout, interval, true);
     }
 
     @Override
     public Object applyOp(long value) {
-        long attemptAt = System.currentTimeMillis();
-        long gap = attemptAt - lastAttemptAt;
-        if (gap < 500) {
-            logger.warn("You are polling index state at " + gap + "ms interval. Forcing 1S delay.");
-            LockSupport.parkNanos(1_000_000_000L);
-        }
-        lastAttemptAt = attemptAt;
+        nextOp = null;
+        timeoutPredicate.blockUntilNextInterval();
 
         R<DescribeIndexResponse> describeIndexResponseR = client.describeIndex(request);
-        tried++;
         DescribeIndexResponse data = describeIndexResponseR.getData();
 
-        if (doPollTillIndexed) {
-            this.nextOp = null;
-            List<IndexStats> stats = getIndexStats(data);
-            int maxpct = stats.stream().mapToInt(IndexStats::percent).max().orElse(100);
-            if (maxpct < 100 && tried < awaitIndexTries) {
-                logger.info("indexing at " + maxpct + "% on try " + tried + "/" + awaitIndexTries + ", retrying");
-                this.nextOp = this;
-            } else if (maxpct >= 100) {
-                logger.info("indexing at " + maxpct + "% on try " + tried + "/" + awaitIndexTries + ", complete");
-            } else { // tried >= awaitIndexTries
-                logger.info("indexing  at " + maxpct + " on try " + tried + "/" + awaitIndexTries + ", throwing error");
-                throw new MilvusIndexingIncompleteError(request, tried, stats);
-            }
+        TimeoutPredicate.Result<Integer> result = timeoutPredicate.test(getIndexStats(data).percent());
+        String message = result.status().name() + " await state " + result.value() + " at time " + result.timeSummary();
+        logger.info(message);
+
+        if (result.isPending()) {
+            this.nextOp=this;
         }
+
         return describeIndexResponseR;
     }
 
-    private List<IndexStats> getIndexStats(DescribeIndexResponse data) {
-        var stats = new ArrayList<IndexStats>();
+    private IndexStats getIndexStats(DescribeIndexResponse data) {
+        var stats = new ArrayList<IndexStat>();
         for (IndexDescription desc : data.getIndexDescriptionsList()) {
-            stats.add(new IndexStats(desc.getIndexName(), desc.getIndexedRows(), desc.getPendingIndexRows()));
+            stats.add(new IndexStat(desc.getIndexName(), desc.getIndexedRows(), desc.getPendingIndexRows()));
         }
-        return stats;
+        return new IndexStats(stats);
     }
 
-    public static final record IndexStats(
+    public static class IndexStats extends ArrayList<IndexStat> {
+        public IndexStats(List<IndexStat> stats) {
+            super(stats);
+        }
+
+        public int percent() {
+            return stream().mapToInt(IndexStat::percent).max().orElse(0);
+        }
+    }
+    public static final record IndexStat(
         String index_name,
         long indexed_rows,
         long pending_rows

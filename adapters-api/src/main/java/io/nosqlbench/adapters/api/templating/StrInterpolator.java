@@ -118,6 +118,7 @@ public class StrInterpolator implements Function<String, String> {
 
             accesses.put(key,value);
             logger.debug("Template parameter '" + key + "' applied as '" + value + "'");
+            // TODO summarize these to how many times
             return value;
 
         }
