@@ -21,14 +21,16 @@ import io.nosqlbench.nb.api.components.events.ComponentOutOfScope;
 import io.nosqlbench.nb.api.components.events.DownEvent;
 import io.nosqlbench.nb.api.components.events.NBEvent;
 import io.nosqlbench.nb.api.components.events.UpEvent;
-import io.nosqlbench.nb.api.engine.metrics.HistoIntervalLogger;
 import io.nosqlbench.nb.api.engine.metrics.MetricsCloseable;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent, NBTokenWords, NBComponentTimeline {
