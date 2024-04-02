@@ -81,7 +81,7 @@ public class MilvusDescribeIndexOp extends MilvusBaseOp<DescribeIndexParam> impl
         }
 
         public int percent() {
-            return stream().mapToInt(IndexStat::percent).max().orElse(0);
+            return stream().mapToInt(IndexStat::percent).min().orElse(0);
         }
     }
     public static final record IndexStat(
