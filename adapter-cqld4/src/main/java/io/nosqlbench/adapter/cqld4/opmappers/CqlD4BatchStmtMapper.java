@@ -48,7 +48,7 @@ public class CqlD4BatchStmtMapper implements OpMapper<Cqld4CqlOp> {
      */
     public OpDispenser<Cqld4CqlOp> apply(ParsedOp op) {
 
-        ParsedOp subop = op.getAsSubOp("op_template");
+        ParsedOp subop = op.getAsSubOp("op_template", ParsedOp.SubOpNaming.ParentAndSubKey);
         int repeat = op.getStaticValue("repeat");
         OpMapper<Cqld4CqlOp> subopMapper = adapter.getOpMapper();
         OpDispenser<? extends Cqld4CqlOp> subopDispenser = subopMapper.apply(subop);

@@ -83,7 +83,7 @@ public class CqlD4BatchStmtDispenser extends Cqld4BaseOpDispenser {
     }
 
     @Override
-    public Cqld4CqlOp apply(long value) {
+    public Cqld4CqlOp getOp(long value) {
         Statement bstmt = opfunc.apply(value);
         return new Cqld4CqlBatchStatement(
             getSessionFunc().apply(value),
