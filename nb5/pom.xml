@@ -61,64 +61,6 @@
             <version>${revision}</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-milvus</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>adapter-dynamodb</artifactId>-->
-        <!--            <version>${revision}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>adapter-http</artifactId>-->
-        <!--            <version>${revision}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>adapter-tcp</artifactId>-->
-        <!--            <version>${revision}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>adapter-pulsar</artifactId>-->
-        <!--            <version>${revision}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>adapter-kafka</artifactId>-->
-        <!--            <version>${revision}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>adapter-amqp</artifactId>-->
-        <!--            <version>${revision}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>adapter-jdbc</artifactId>-->
-        <!--            <version>${revision}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>adapter-mongodb</artifactId>-->
-        <!--            <version>${revision}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>adapter-aws-opensearch</artifactId>-->
-        <!--            <version>${revision}</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.nosqlbench</groupId>-->
-        <!--            <artifactId>adapter-s4j</artifactId>-->
-        <!--            <version>${revision}</version>-->
-        <!--        </dependency>-->
-
-
     </dependencies>
 
 
