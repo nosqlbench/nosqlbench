@@ -56,7 +56,7 @@
         <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>openapi-generator</artifactId>
-            <version>7.3.0</version>
+            <version>7.4.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

@@ -194,4 +194,11 @@ public class NBCLIScenarioPreprocessorTest {
         assertThat(cmds1.get(0).getArgValueOrNull("cycles_test")).isNull();
 
     }
+
+    @Test
+    public void testThatDuplicateParamInScenarioDefThrowsError() {
+        assertThatExceptionOfType(BasicError.class)
+            .isThrownBy(() -> new NBCLIOptions(new String[]{"scenario_test", "duplicate_param"}, NBCLIOptions.Mode.ParseAllOptions))
+            .withMessageContaining("Duplicate occurrence of parameter \"threads\"");
+    }
 }

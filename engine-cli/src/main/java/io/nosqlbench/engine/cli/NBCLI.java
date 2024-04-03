@@ -381,16 +381,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 //            reporters.start(10, options.getReportInterval());
 //        }
 //
-//        for (
-//            final LoggerConfigData histoLogger : options.getHistoLoggerConfigs())
-//            ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
-//        for (
-//            final LoggerConfigData statsLogger : options.getStatsLoggerConfigs())
-//            ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
-//        for (
-//            final LoggerConfigData classicConfigs : options.getClassicHistoConfigs())
-//            ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
-//
 //        if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
 //            options.setWantsStackTraces(true);
 //            NBCLI.logger.debug(() -> "enabling stack traces since log level is " + options.getConsoleLogLevel());
@@ -446,7 +436,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 }
                 session.create().pushReporter(uri, intervalMs, NBLabels.forKV());
             });
-
+            for (final NBCLIOptions.LoggerConfigData histoLogger : options.getHistoLoggerConfigs()) {
+                session.create().histoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.millis);
+            }
+            for (final NBCLIOptions.LoggerConfigData statsLogger : options.getStatsLoggerConfigs()) {
+                session.create().histoStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.millis);
+            }
 
             ExecutionResult sessionResult = session.apply(options.getCommands());
             logger.info(sessionResult);
