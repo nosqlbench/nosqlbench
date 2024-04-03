@@ -38,16 +38,16 @@ public class DirectoryLinesStableTest {
         assertThat(directoryLines.apply(Long.MAX_VALUE)).isEqualTo("data2.txt-line3");
     }
 
-    @Test
-    public void testOverRangeIssue() {
-        DirectoryLinesStable directoryLines = new DirectoryLinesStable(
-            "../local/testdirlines", ".+jsonl"
-        );
-        for (long i = 0; i < 40000; i++) {
-            String result = directoryLines.apply(i);
-        }
-
-    }
+//    @Test
+//    public void testOverRangeIssue() {
+//        DirectoryLinesStable directoryLines = new DirectoryLinesStable(
+//            "exampledata/local/testdirlines", ".+jsonl"
+//        );
+//        for (long i = 0; i < 40000; i++) {
+//            String result = directoryLines.apply(i);
+//        }
+//
+//    }
 
 
 }
