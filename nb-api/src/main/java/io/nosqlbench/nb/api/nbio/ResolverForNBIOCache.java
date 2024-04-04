@@ -20,7 +20,6 @@ package io.nosqlbench.nb.api.nbio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,9 +38,11 @@ public class ResolverForNBIOCache implements ContentResolver {
     //TODO: This needs to be set somehow - envvar, yaml setting, etc.
     private static final String cache = "~/.nosqlbench/nbio-cache/";
     //TODO: This needs to be set through configuration at runtime
-    private boolean forceUpdate = false;
+    private final boolean forceUpdate = false;
     //TODO: This needs to be set through configuration at runtime
-    private boolean verifyChecksum = true;
+    private final boolean verifyChecksum = true;
+    //TODO: This needs to be set through configuration at runtime
+    private final int maxRetries = 3;
     @Override
     public List<Content<?>> resolve(URI uri) {
         List<Content<?>> contents = new ArrayList<>();
@@ -78,21 +79,76 @@ public class ResolverForNBIOCache implements ContentResolver {
         return null;
     }
 
+    private boolean downloadFile(URI uri, Path cachePath) {
+        int retries = 0;
+        boolean success = false;
+        while (retries < maxRetries) {
+            try {
+                URLContent urlContent = resolveURI(uri);
+                if (urlContent != null) {
+                    Files.copy(urlContent.getInputStream(), cachePath);
+                    logger.debug("Downloaded remote file to cache at " + cachePath);
+                    success = true;
+                    break;
+                } else {
+                    logger.error("Error downloading remote file to cache at " + cachePath + ", retrying...");
+                    retries++;
+                }
+            } catch (IOException e) {
+                logger.error("Error downloading remote file to cache at " + cachePath + ", retrying...");
+                retries++;
+            }
+        }
+        return success;
+    }
+
     private Path pathFromRemoteUrl(URI uri) {
-        URLContent urlContent = resolveURI(uri);
         /*
          * File is not in cache - next steps:
          * 1. Download the file and put it in the cache
-         *   1a. If the remote file does not exist throw an exception
+         *   1a. If the remote file does not exist log error and return null
          *   1b. If the download fails jump to step 6
-         * 2. Download the checksum and put it in the cache
-         * 3. Generate a new checksum for the file
+         * 2. Download the checksum and store in memory
+         * 3. Generate a new checksum for the file and put it in the cache
          * 4. compare the checksums
          * 5. If they match, return the path to the file in the cache
          * 6. If they don't match/exception downloading repeat steps 1-5 up to a configurable number of times
          *   6a. If the max attempts have been exceeded throw an exception and clean up the cache
          */
-        return null;
+        Path cachePath = Path.of(cache + uri.getPath());
+        if (downloadFile(uri, cachePath)) {
+            String remoteChecksumFileStr = uri.getPath().substring(0, uri.getPath().indexOf('.')) + ".sha256";
+            try {
+                String localChecksumStr = generateSHA256Checksum(cachePath.toString());
+                URLContent checksum = resolveURI(URI.create(uri.toString().replace(uri.getPath(), remoteChecksumFileStr)));
+                if (checksum == null) {
+                    logger.warn("Remote checksum file does not exist");
+                    return cachePath;
+                } else {
+                    Path checksumPath = Path.of(cachePath.toString().substring(0, cachePath.toString().indexOf('.')) + ".sha256");
+                    Files.writeString(checksumPath, localChecksumStr);
+                    logger.debug("Generated local checksum and saved to cache at " + checksumPath);
+                    String remoteChecksum = new String(checksum.getInputStream().readAllBytes());
+                    if (localChecksumStr.equals(remoteChecksum)) {
+                        return cachePath;
+                    } else {
+                        if (!cachePath.toFile().delete())
+                            logger.warn(() -> "Could not delete cached file " + cachePath);
+                        if (!checksumPath.toFile().delete())
+                            logger.warn(() -> "Could not delete cached checksum " + checksumPath);
+                        throw new RuntimeException("Checksums do not match");
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            cleanupCache();
+            throw new RuntimeException("Error downloading remote file to cache at " + cachePath);
+        }
+    }
+
+    private void cleanupCache() {
     }
 
     private Path pathFromLocalCache(Path cachePath, URI uri) {
@@ -110,10 +166,10 @@ public class ResolverForNBIOCache implements ContentResolver {
          * 5. If checksums match return the local file
          * 6. If checksums do not match remove the local file and go to "File is not in cache" operations
          */
-        String checksumFileStr = cachePath.toString().substring(0, cachePath.toString().indexOf('.')) + ".sha256";
-        if (!Files.isReadable(Path.of(checksumFileStr))) {
+        Path checksumPath = Path.of(cachePath.toString().substring(0, cachePath.toString().indexOf('.')) + ".sha256");
+        if (!Files.isReadable(checksumPath)) {
             try {
-                Files.writeString(Path.of(checksumFileStr), generateSHA256Checksum(cachePath.toString()));
+                Files.writeString(checksumPath, generateSHA256Checksum(cachePath.toString()));
             } catch (IOException | NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }
@@ -121,8 +177,8 @@ public class ResolverForNBIOCache implements ContentResolver {
         if (forceUpdate) {
             if (!cachePath.toFile().delete())
                 logger.warn(() -> "Could not delete cached file " + cachePath);
-            if (!new File(checksumFileStr).delete())
-                logger.warn(() -> "Could not delete cached checksum " + checksumFileStr);
+            if (!checksumPath.toFile().delete())
+                logger.warn(() -> "Could not delete cached checksum " + checksumPath);
             return pathFromRemoteUrl(uri);
         }
         if (!verifyChecksum) {
@@ -141,7 +197,7 @@ public class ResolverForNBIOCache implements ContentResolver {
             return cachePath;
         }
         try {
-            String localChecksum = Files.readString(Path.of(checksumFileStr));
+            String localChecksum = Files.readString(checksumPath);
             String remoteChecksum = new String(checksum.getInputStream().readAllBytes());
             if (localChecksum.equals(remoteChecksum)) {
                 return cachePath;
@@ -180,7 +236,7 @@ public class ResolverForNBIOCache implements ContentResolver {
             logger.debug("Found accessible remote file at " + url);
             return new URLContent(url, inputStream);
         } catch (IOException e) {
-            logger.warn("Unable to find content at URI '" + uri + "', this often indicates a configuration error.");
+            logger.error("Unable to find content at URI '" + uri + "', this often indicates a configuration error.");
             return null;
         }
     }
