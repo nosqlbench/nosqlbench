@@ -77,7 +77,7 @@
 
     <profiles>
         <profile>
-            <id>adapter-cqld4</id>
+            <id>build-adapter-cqld4</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -89,7 +89,7 @@
             </modules>
         </profile>
         <profile>
-            <id>adapter-milvus</id>
+            <id>build-adapter-milvus</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
@@ -101,7 +101,7 @@
             </modules>
         </profile>
         <profile>
-            <id>adapter-dynamodb</id>
+            <id>build-adapter-dynamodb</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -113,7 +113,7 @@
             </modules>
         </profile>
         <profile>
-            <id>adapter-http</id>
+            <id>build-adapter-http</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -125,7 +125,7 @@
             </modules>
         </profile>
         <profile>
-            <id>adapter-tcp</id>
+            <id>build-adapter-tcp</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -137,7 +137,7 @@
             </modules>
         </profile>
         <profile>
-            <id>adapter-pulsar</id>
+            <id>build-adapter-pulsar</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -149,7 +149,7 @@
             </modules>
         </profile>
         <profile>
-            <id>adapter-kafka</id>
+            <id>build-adapter-kafka</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -161,7 +161,7 @@
             </modules>
         </profile>
         <profile>
-            <id>adapter-amqp</id>
+            <id>build-adapter-amqp</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -173,7 +173,7 @@
             </modules>
         </profile>
         <profile>
-            <id>adapter-jdbc</id>
+            <id>build-adapter-jdbc</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -185,7 +185,7 @@
             </modules>
         </profile>
         <profile>
-            <id>adapter-mongodb</id>
+            <id>build-adapter-mongodb</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -197,7 +197,7 @@
             </modules>
         </profile>
         <profile>
-            <id>adapter-aws-opensearch</id>
+            <id>build-adapter-aws-opensearch</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -209,7 +209,7 @@
             </modules>
         </profile>
         <profile>
-            <id>adapter-s4j</id>
+            <id>build-adapter-s4j</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>

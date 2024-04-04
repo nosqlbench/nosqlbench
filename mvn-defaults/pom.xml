@@ -358,33 +358,22 @@
                 <version>2.4.0-b180830.0438</version>
             </dependency>
             <!-- graalvm -->
+
             <dependency>
-                <groupId>org.graalvm.sdk</groupId>
-                <artifactId>graal-sdk</artifactId>
-                <version>23.0.3</version>
+                <groupId>org.graalvm.polyglot</groupId>
+                <artifactId>polyglot</artifactId>
+                <version>23.1.0</version>
             </dependency>
             <dependency>
-                <groupId>org.graalvm.js</groupId>
+                <groupId>org.graalvm.polyglot</groupId>
                 <artifactId>js</artifactId>
-                <version>23.0.3</version>
-                <scope>runtime</scope>
+                <version>23.1.0</version>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
-                <version>23.0.3</version>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.tools</groupId>
-                <artifactId>profiler</artifactId>
-                <version>23.0.3</version>
-                <scope>runtime</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.tools</groupId>
-                <artifactId>chromeinspector</artifactId>
-                <version>23.0.3</version>
-                <scope>runtime</scope>
+                <version>23.1.2</version>
             </dependency>
 
         </dependencies>
@@ -906,20 +895,6 @@
 
                         </executions>
                     </plugin>
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-javadoc-plugin</artifactId>-->
-<!--                        <version>3.4.1</version>-->
-<!--                        <configuration>-->
-<!--                        </configuration>-->
-<!--                        &lt;!&ndash; NO Executions by default for main project builds.-->
-<!--                             This plugin should be called directly on the command line-->
-<!--                             The site plugin appears to be broken or at least not properly maintained,-->
-<!--                             so invoking via the site phase is more trouble than it is worth.-->
-<!--                             &ndash;&gt;-->
-<!--                        &lt;!&ndash;                <executions>&ndash;&gt;-->
-<!--                        &lt;!&ndash;                </executions>&ndash;&gt;-->
-<!--                    </plugin>-->
                 </plugins>
             </build>
         </profile>
