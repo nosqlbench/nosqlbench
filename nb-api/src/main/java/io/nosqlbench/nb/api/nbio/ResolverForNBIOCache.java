@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -129,7 +130,7 @@ public class ResolverForNBIOCache implements ContentResolver {
                     logger.warn(() -> "Remote checksum file " + remoteChecksumFileStr + " does not exist");
                     return cachePath;
                 } else {
-                    Path checksumPath = Path.of(cachePath.toString().substring(0, cachePath.toString().indexOf('.')) + ".sha256");
+                    Path checksumPath = Path.of(cachePath.toString().substring(0, cachePath.toString().lastIndexOf('.')) + ".sha256");
                     Files.writeString(checksumPath, localChecksumStr);
                     logger.debug(() -> "Generated local checksum and saved to cache at " + checksumPath);
                     String remoteChecksum = new String(checksum.getInputStream().readAllBytes());
@@ -181,7 +182,7 @@ public class ResolverForNBIOCache implements ContentResolver {
          * 5. If checksums match return the local file
          * 6. If checksums do not match remove the local file and go to "File is not in cache" operations
          */
-        Path checksumPath = Path.of(cachePath.toString().substring(0, cachePath.toString().indexOf('.')) + ".sha256");
+        Path checksumPath = Path.of(cachePath.toString().substring(0, cachePath.toString().lastIndexOf('.')) + ".sha256");
         if (!Files.isReadable(checksumPath)) {
             try {
                 Files.writeString(checksumPath, generateSHA256Checksum(cachePath.toString()));
@@ -260,8 +261,8 @@ public class ResolverForNBIOCache implements ContentResolver {
     public List<Path> resolveDirectory(URI uri) {
         List<Path> dirs = new ArrayList<>();
 
-        Path path = resolvePath(uri);
-        if (path!=null && Files.isDirectory(path)) {
+        Path path = Path.of(cache + uri.getPath());
+        if (Files.isDirectory(path)) {
             dirs.add(path);
         }
         return dirs;
