@@ -35,14 +35,15 @@ import java.util.List;
 public class ResolverForNBIOCache implements ContentResolver {
     public static final ResolverForNBIOCache INSTANCE = new ResolverForNBIOCache();
     private final static Logger logger = LogManager.getLogger(ResolverForNBIOCache.class);
+    private static final String userHomeDirectory = System.getProperty("user.home");
     //TODO: This needs to be set somehow - envvar, yaml setting, etc.
-    private static final String cache = "~/.nosqlbench/nbio-cache/";
+    private static String cache = userHomeDirectory + "/.nosqlbench/nbio-cache/";
     //TODO: This needs to be set through configuration at runtime
-    private final boolean forceUpdate = false;
+    private static boolean forceUpdate = false;
     //TODO: This needs to be set through configuration at runtime
-    private final boolean verifyChecksum = true;
+    private static boolean verifyChecksum = true;
     //TODO: This needs to be set through configuration at runtime
-    private final int maxRetries = 3;
+    private static int maxRetries = 3;
     @Override
     public List<Content<?>> resolve(URI uri) {
         List<Content<?>> contents = new ArrayList<>();
@@ -64,6 +65,7 @@ public class ResolverForNBIOCache implements ContentResolver {
          * TODO: Need to handle situation where file is in the cache, we want to force update but the update fails.
          *       In this case we don't want to delete the local file because we need to return it.
          * Suggestion: add enum type defining behavior (force update, for update IF condition x, do not update, etc.)
+         * See NBIOResolverConditions
         */
         if (uri.getScheme() != null && !uri.getScheme().isEmpty() &&
             (uri.getScheme().equalsIgnoreCase("http") ||
@@ -86,16 +88,17 @@ public class ResolverForNBIOCache implements ContentResolver {
             try {
                 URLContent urlContent = resolveURI(uri);
                 if (urlContent != null) {
+                    logger.info(() -> "Downloading remote file " + uri + " to cache at " + cachePath);
                     Files.copy(urlContent.getInputStream(), cachePath);
-                    logger.debug("Downloaded remote file to cache at " + cachePath);
+                    logger.info(() -> "Downloaded remote file to cache at " + cachePath);
                     success = true;
                     break;
                 } else {
-                    logger.error("Error downloading remote file to cache at " + cachePath + ", retrying...");
+                    logger.error(() -> "Error downloading remote file to cache at " + cachePath + ", retrying...");
                     retries++;
                 }
             } catch (IOException e) {
-                logger.error("Error downloading remote file to cache at " + cachePath + ", retrying...");
+                logger.error(() -> "Error downloading remote file to cache at " + cachePath + ", retrying...");
                 retries++;
             }
         }
@@ -116,18 +119,19 @@ public class ResolverForNBIOCache implements ContentResolver {
          *   6a. If the max attempts have been exceeded throw an exception and clean up the cache
          */
         Path cachePath = Path.of(cache + uri.getPath());
+        createCacheDir(cachePath);
         if (downloadFile(uri, cachePath)) {
             String remoteChecksumFileStr = uri.getPath().substring(0, uri.getPath().indexOf('.')) + ".sha256";
             try {
                 String localChecksumStr = generateSHA256Checksum(cachePath.toString());
                 URLContent checksum = resolveURI(URI.create(uri.toString().replace(uri.getPath(), remoteChecksumFileStr)));
                 if (checksum == null) {
-                    logger.warn("Remote checksum file does not exist");
+                    logger.warn(() -> "Remote checksum file " + remoteChecksumFileStr + " does not exist");
                     return cachePath;
                 } else {
                     Path checksumPath = Path.of(cachePath.toString().substring(0, cachePath.toString().indexOf('.')) + ".sha256");
                     Files.writeString(checksumPath, localChecksumStr);
-                    logger.debug("Generated local checksum and saved to cache at " + checksumPath);
+                    logger.debug(() -> "Generated local checksum and saved to cache at " + checksumPath);
                     String remoteChecksum = new String(checksum.getInputStream().readAllBytes());
                     if (localChecksumStr.equals(remoteChecksum)) {
                         return cachePath;
@@ -145,6 +149,17 @@ public class ResolverForNBIOCache implements ContentResolver {
         } else {
             cleanupCache();
             throw new RuntimeException("Error downloading remote file to cache at " + cachePath);
+        }
+    }
+
+    private void createCacheDir(Path cachePath) {
+        Path dir = cachePath.getParent();
+        if (!Files.exists(dir)) {
+            try {
+                Files.createDirectories(dir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -233,10 +248,10 @@ public class ResolverForNBIOCache implements ContentResolver {
         try {
             URL url = uri.toURL();
             InputStream inputStream = url.openStream();
-            logger.debug("Found accessible remote file at " + url);
+            logger.debug(() -> "Found accessible remote file at " + url);
             return new URLContent(url, inputStream);
         } catch (IOException e) {
-            logger.error("Unable to find content at URI '" + uri + "', this often indicates a configuration error.");
+            logger.error(() -> "Unable to find content at URI '" + uri + "', this often indicates a configuration error.");
             return null;
         }
     }
@@ -251,4 +266,21 @@ public class ResolverForNBIOCache implements ContentResolver {
         }
         return dirs;
     }
+
+    public static void setCache(String cache) {
+        ResolverForNBIOCache.cache = cache;
+    }
+
+    public static void setForceUpdate(boolean forceUpdate) {
+        ResolverForNBIOCache.forceUpdate = forceUpdate;
+    }
+
+    public static void setVerifyChecksum(boolean verifyChecksum) {
+        ResolverForNBIOCache.verifyChecksum = verifyChecksum;
+    }
+
+    public static void setMaxRetries(int maxRetries) {
+        ResolverForNBIOCache.maxRetries = maxRetries;
+    }
+
 }

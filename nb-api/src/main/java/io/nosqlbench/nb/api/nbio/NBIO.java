@@ -163,7 +163,7 @@ public class NBIO implements NBPathsAPI.Facets {
      */
     @Override
     public NBPathsAPI.GetPrefixes allContent() {
-        this.resolver = URIResolvers.inFS().inCP().inURLs();
+        this.resolver = URIResolvers.inFS().inCP().inURLs().inNBIOCache();
         return this;
     }
 

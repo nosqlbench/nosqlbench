@@ -36,7 +36,8 @@ public class URIResolver implements ContentResolver {
     private static final List<ContentResolver> EVERYWHERE = List.of(
         ResolverForURL.INSTANCE,
         ResolverForFilesystem.INSTANCE,
-        ResolverForClasspath.INSTANCE
+        ResolverForClasspath.INSTANCE,
+        ResolverForNBIOCache.INSTANCE
     );
 
     private List<String> extensions;
@@ -84,6 +85,16 @@ public class URIResolver implements ContentResolver {
      */
     public URIResolver inCP() {
         loaders.add(ResolverForClasspath.INSTANCE);
+        return this;
+    }
+
+    /**
+     * Include resources within the NBIO cache or download them if they are not found.
+     *
+     * @return this URISearch
+     */
+    public URIResolver inNBIOCache() {
+        loaders.add(ResolverForNBIOCache.INSTANCE);
         return this;
     }
 
