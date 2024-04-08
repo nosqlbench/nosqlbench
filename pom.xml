@@ -69,6 +69,7 @@
         <module>adapter-jdbc</module>
         <module>adapter-milvus</module>
         <module>adapter-mongodb</module>
+        <module>adapter-neo4j</module>
         <module>adapter-aws-opensearch</module>
         <module>adapter-cqld4</module>
         <module>adapter-s4j</module>
