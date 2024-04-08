@@ -53,9 +53,9 @@ public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<Descri
     ) {
         LongFunction<DescribeIndexParam.Builder> ebF =
             l -> DescribeIndexParam.newBuilder().withIndexName(targetF.apply(l));
-        ebF = op.enhanceFunc(ebF, List.of("collection","collection_name"),String.class,
+        ebF = op.enhanceFunc(ebF, List.of("collection","collection_name"), String.class,
             DescribeIndexParam.Builder::withCollectionName);
-        ebF = op.enhanceFunc(ebF,List.of("database_name","database"),String.class,
+        ebF = op.enhanceFuncOptionally(ebF, List.of("database_name","database"), String.class,
             DescribeIndexParam.Builder::withDatabaseName);
 
 
