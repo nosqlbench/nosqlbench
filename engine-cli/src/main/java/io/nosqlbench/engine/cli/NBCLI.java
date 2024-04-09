@@ -220,6 +220,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         NBCLI.logger = LogManager.getLogger("NBCLI");
 
         NBIO.addGlobalIncludes(options.wantsIncludes());
+        NBIO.setUseNBIOCache(options.wantsToUseNBIOCache());
 
         if (options.wantsBasicHelp()) {
             System.out.println(this.loadHelpFile("basic.md"));

@@ -136,6 +136,7 @@ public class NBCLIOptions {
     private static final String DEFAULT_CONSOLE_PATTERN = "TERSE";
     private static final String DEFAULT_LOGFILE_PATTERN = "VERBOSE";
     private final static String ENABLE_DEDICATED_VERIFICATION_LOGGER = "--enable-dedicated-verification-logging";
+    private final static String USE_NBIO_CACHE = "--use-nbio-cache";
 
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
@@ -205,6 +206,7 @@ public class NBCLIOptions {
     private String metricsLabelSpec = "";
     private String wantsToCatResource ="";
     private long heartbeatIntervalMs = 10000;
+    private boolean useNBIOCache = false;
 
     public boolean wantsLoggedMetrics() {
         return this.wantsConsoleMetrics;
@@ -646,6 +648,10 @@ public class NBCLIOptions {
                     this.heartbeatIntervalMs =
                             Long.parseLong(this.readWordOrThrow(arglist, "heartbeat interval in ms"));
                     break;
+                case USE_NBIO_CACHE:
+                    arglist.removeFirst();
+                    this.useNBIOCache = true;
+                    break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
             }
@@ -807,6 +813,9 @@ public class NBCLIOptions {
 
     public NBLogLevel getConsoleLogLevel() {
         return this.consoleLevel;
+    }
+    public boolean wantsToUseNBIOCache() {
+        return this.useNBIOCache;
     }
 
     private String readWordOrThrow(final LinkedList<String> arglist, final String required) {
