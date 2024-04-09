@@ -49,6 +49,7 @@ import io.nosqlbench.engine.core.logging.NBLoggerConfig;
 import io.nosqlbench.engine.core.metadata.MarkdownFinder;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.annotations.ServiceSelector;
+import io.nosqlbench.nb.api.nbio.ResolverForNBIOCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
@@ -221,6 +222,25 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
         NBIO.addGlobalIncludes(options.wantsIncludes());
         NBIO.setUseNBIOCache(options.wantsToUseNBIOCache());
+        if(options.wantsToUseNBIOCache()) {
+            logger.info(() -> "Configuring options for NBIO Cache");
+            logger.info(() -> "Setting NBIO Cache Force Update to " + options.wantsNbioCacheForceUpdate());
+            ResolverForNBIOCache.setForceUpdate(options.wantsNbioCacheForceUpdate());
+            logger.info(() -> "Setting NBIO Cache Verify Checksum to " + options.wantsNbioCacheVerify());
+            ResolverForNBIOCache.setVerifyChecksum(options.wantsNbioCacheVerify());
+            if (options.getNbioCacheDir() != null) {
+                logger.info(() -> "Setting NBIO Cache directory to " + options.getNbioCacheDir());
+                ResolverForNBIOCache.setCacheDir(options.getNbioCacheDir());
+            }
+            if (options.getNbioCacheMaxRetries() != null) {
+                try {
+                    ResolverForNBIOCache.setMaxRetries(Integer.parseInt(options.getNbioCacheMaxRetries()));
+                    logger.info(() -> "Setting NBIO Cache max retries to " + options.getNbioCacheMaxRetries());
+                } catch (NumberFormatException e) {
+                    logger.error("Invalid value for nbio-cache-max-retries: " + options.getNbioCacheMaxRetries());
+                }
+            }
+        }
 
         if (options.wantsBasicHelp()) {
             System.out.println(this.loadHelpFile("basic.md"));

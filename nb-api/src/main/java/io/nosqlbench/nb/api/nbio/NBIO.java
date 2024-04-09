@@ -164,6 +164,15 @@ public class NBIO implements NBPathsAPI.Facets {
      * {@inheritDoc}
      */
     @Override
+    public NBPathsAPI.GetPrefixes cachedContent() {
+        this.resolver = URIResolvers.inNBIOCache();
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public NBPathsAPI.GetPrefixes allContent() {
         if (useNBIOCache) {
             this.resolver = URIResolvers.inFS().inCP().inNBIOCache();
@@ -348,6 +357,14 @@ public class NBIO implements NBPathsAPI.Facets {
     public static NBPathsAPI.GetPrefixes remote() {
         return new NBIO().remoteContent();
     }
+
+    /**
+     * Return content from the NBIO cache. If the content is not in the cache look for it in the given
+     * URL and put it in the cache.
+     *
+     * @return this builder
+     */
+    public static NBPathsAPI.GetPrefixes cached() { return new NBIO().cachedContent(); }
 
 
     /**
