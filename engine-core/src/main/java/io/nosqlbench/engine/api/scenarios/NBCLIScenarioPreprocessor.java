@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2022-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,13 @@ import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.adapters.api.templating.StrInterpolator;
-import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.CmdType;
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.nbio.NBPathsAPI;
-import io.nosqlbench.nb.api.errors.BasicError;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -88,7 +87,7 @@ public class NBCLIScenarioPreprocessor {
         while (!arglist.isEmpty()
             && !arglist.peekFirst().contains("=")
             && !arglist.peekFirst().startsWith("-")
-            && CmdType.valueOfAnyCaseOrIndirect(arglist.peekFirst())==CmdType.indirect) {
+            && CmdType.valueOfAnyCaseOrIndirect(arglist.peekFirst()) == CmdType.indirect) {
             scenarioNames.add(arglist.removeFirst());
         }
         if (scenarioNames.isEmpty()) {
@@ -128,27 +127,27 @@ public class NBCLIScenarioPreprocessor {
             OpsDocList scenariosYaml = OpsLoader.loadContent(yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
             Scenarios scenarios = scenariosYaml.getDocScenarios();
 
-            String[] nameparts = scenarioName.split("\\.",2);
-            Map<String,String> namedSteps = new LinkedHashMap<>();
-            if (nameparts.length==1) {
+            String[] nameparts = scenarioName.split("\\.", 2);
+            Map<String, String> namedSteps = new LinkedHashMap<>();
+            if (nameparts.length == 1) {
                 Map<String, String> namedScenario = scenarios.getNamedScenario(scenarioName);
-                if (namedScenario==null) {
+                if (namedScenario == null) {
                     throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
-                    + "', but you can pick from one of: " + String.join(", ", scenarios.getScenarioNames()));
+                        + "', but you can pick from one of: " + String.join(", ", scenarios.getScenarioNames()));
                 }
                 namedSteps.putAll(namedScenario);
             } else {
                 Map<String, String> selectedScenario = scenarios.getNamedScenario(nameparts[0]);
-                if (selectedScenario==null) {
+                if (selectedScenario == null) {
                     throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
                         + "', but you can pick from one of: " + String.join(", ", scenarios.getScenarioNames()));
                 }
                 String stepname = nameparts[1];
                 if (stepname.matches("\\d+")) {
-                    stepname = String.format("%03d",Integer.parseInt(nameparts[1]));
+                    stepname = String.format("%03d", Integer.parseInt(nameparts[1]));
                 }
                 if (selectedScenario.containsKey(stepname)) {
-                    namedSteps.put(stepname,selectedScenario.get(stepname));
+                    namedSteps.put(stepname, selectedScenario.get(stepname));
                 } else {
                     throw new BasicError("Unable to find named scenario.step '" + scenarioName + "' in workload '" + workloadName
                         + "', but you can pick from one of: " + selectedScenario.keySet().stream().map(n -> nameparts[0].concat(".").concat(n)).collect(Collectors.joining(", ")));
@@ -205,10 +204,10 @@ public class NBCLIScenarioPreprocessor {
                 }
 
                 if (!buildingCmd.containsKey("container")) {
-                    buildingCmd.put("container","container="+scenarioName);
+                    buildingCmd.put("container", "container=" + scenarioName);
                 }
                 if (!buildingCmd.containsKey("step")) {
-                    buildingCmd.put("step","step="+stepName);
+                    buildingCmd.put("step", "step=" + stepName);
                 }
 
                 // TODO: simplify this
@@ -220,7 +219,7 @@ public class NBCLIScenarioPreprocessor {
                 alias = alias.replaceAll("STEP", sanitize(stepName));
                 alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
                 buildingCmd.put("alias", alias);
-                buildingCmd.put("labels","labels=workload:"+sanitize(workloadToken)+",scenario:"+scenarioName);
+                buildingCmd.put("labels", "labels=workload:" + sanitize(workloadToken) + ",scenario:" + scenarioName);
 
                 logger.debug(() -> "rebuilt command: " + String.join(" ", buildingCmd.values()));
                 buildCmdBuffer.addAll(buildingCmd.values());
@@ -235,17 +234,17 @@ public class NBCLIScenarioPreprocessor {
         String sanitized = word;
         sanitized = sanitized.replaceAll("\\..+$", "");
         String shortened = sanitized;
-        sanitized = sanitized.replaceAll("-","_");
+        sanitized = sanitized.replaceAll("-", "_");
         sanitized = sanitized.replaceAll("[^a-zA-Z0-9_]+", "");
 
         if (!shortened.equals(sanitized)) {
-            logger.warn("The identifier or value '" + shortened + "' was sanitized to '" + sanitized + "' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.");
+            logger.warn("The identifier or value '{}' was sanitized to '{}' to be compatible with monitoring systems. You should probably change this to make diagnostics easier.", shortened, sanitized);
             StackTraceElement[] elements = Thread.currentThread().getStackTrace();
             StringBuilder stb = new StringBuilder();
             for (StackTraceElement element : elements) {
-                    stb.append("\tat ").append(element).append("\n");
+                stb.append("\tat ").append(element).append("\n");
             }
-            logger.warn("stacktrace: " + stb.toString());
+            logger.warn("stacktrace: {}", stb.toString());
         }
         return sanitized;
     }
@@ -280,7 +279,7 @@ public class NBCLIScenarioPreprocessor {
     }
 
     private static final Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
-    private static final Pattern innerTemplatePattern = Pattern.compile("TEMPLATE\\((.+?)$");
+    private static final Pattern innerTemplatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)$");
     private static final Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
 
     public static List<WorkloadDesc> filterForScenarios(List<Content<?>> candidates) {
@@ -312,11 +311,11 @@ public class NBCLIScenarioPreprocessor {
                 try {
                     stmts = OpsLoader.loadContent(content, new LinkedHashMap<>());
                     if (stmts.getStmtDocs().isEmpty()) {
-                        logger.warn("Encountered yaml with no docs in '" + referenced + "'");
+                        logger.warn("Encountered yaml with no docs in '{}'", referenced);
                         continue;
                     }
                 } catch (Exception e) {
-                    logger.warn("Error while loading scenario at '" + referenced + "': " + e);
+                    logger.warn("Error while loading scenario at '{}': {}", referenced, e);
                     continue;
                 }
 
@@ -412,8 +411,8 @@ public class NBCLIScenarioPreprocessor {
 
             Matcher innerMatcher = innerTemplatePattern.matcher(match);
             String[] matchArray = match.split("[,:]");
-            if (matchArray.length==1) {
-                matchArray = new String[]{matchArray[0],""};
+            if (matchArray.length == 1) {
+                matchArray = new String[]{matchArray[0], ""};
             }
 //            if (matchArray.length!=2) {
 //                throw new BasicError("TEMPLATE form must have two arguments separated by a comma, like 'TEMPLATE(a,b), not '" + match +"'");
