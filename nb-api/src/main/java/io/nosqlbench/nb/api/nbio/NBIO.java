@@ -43,6 +43,8 @@ public class NBIO implements NBPathsAPI.Facets {
 
     private static String[] globalIncludes = new String[0];
 
+    private static boolean useNBIOCache;
+
     public synchronized static void addGlobalIncludes(String[] globalIncludes) {
         NBIO.globalIncludes = globalIncludes;
     }
@@ -163,7 +165,11 @@ public class NBIO implements NBPathsAPI.Facets {
      */
     @Override
     public NBPathsAPI.GetPrefixes allContent() {
-        this.resolver = URIResolvers.inFS().inCP().inURLs().inNBIOCache();
+        if (useNBIOCache) {
+            this.resolver = URIResolvers.inFS().inCP().inNBIOCache();
+        } else {
+            this.resolver = URIResolvers.inFS().inCP().inURLs();
+        }
         return this;
     }
 
@@ -628,4 +634,13 @@ public class NBIO implements NBPathsAPI.Facets {
             ", extensionSets=" + extensionSets +
             '}';
     }
+
+    public boolean useNBIOCache() {
+        return useNBIOCache;
+    }
+
+    public static void setUseNBIOCache(boolean wantsToUseNBIOCache) {
+        useNBIOCache = wantsToUseNBIOCache;
+    }
+
 }
