@@ -44,14 +44,14 @@ public class MilvusQueryOpDispenser extends MilvusBaseOpDispenser<QueryParam> {
         LongFunction<QueryParam.Builder> ebF =
             l -> QueryParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF,List.of("partition_names","partitions"), List.class,
+        ebF = op.enhanceFuncOptionally(ebF, List.of("partition_names", "partitions"), List.class,
             QueryParam.Builder::withPartitionNames);
-        ebF = op.enhanceEnumOptionally(ebF,"consistency_level", ConsistencyLevelEnum.class, QueryParam.Builder::withConsistencyLevel);
-        ebF = op.enhanceFuncOptionally(ebF,"expr",String.class,QueryParam.Builder::withExpr);
-        ebF = op.enhanceFuncOptionally(ebF,"limit",Long.class,QueryParam.Builder::withLimit);
-        ebF = op.enhanceFuncOptionally(ebF,"offset",Long.class,QueryParam.Builder::withOffset);
-        ebF = op.enhanceFuncOptionally(ebF,"ignore_growing",Boolean.class,QueryParam.Builder::withIgnoreGrowing);
-        ebF = op.enhanceFuncOptionally(ebF,"out_fields",List.class,QueryParam.Builder::withOutFields);
+        ebF = op.enhanceEnumOptionally(ebF, "consistency_level", ConsistencyLevelEnum.class, QueryParam.Builder::withConsistencyLevel);
+        ebF = op.enhanceFuncOptionally(ebF, "expr", String.class, QueryParam.Builder::withExpr);
+        ebF = op.enhanceFuncOptionally(ebF, "limit", Number.class, (QueryParam.Builder b, Number n) -> b.withLimit(n.longValue()));
+        ebF = op.enhanceFuncOptionally(ebF, "offset", Number.class, (QueryParam.Builder b, Number n) -> b.withOffset(n.longValue()));
+        ebF = op.enhanceFuncOptionally(ebF, "ignore_growing", Boolean.class, QueryParam.Builder::withIgnoreGrowing);
+        ebF = op.enhanceFuncOptionally(ebF, "out_fields", List.class, QueryParam.Builder::withOutFields);
 
         final LongFunction<QueryParam.Builder> lastF = ebF;
         final LongFunction<QueryParam> collectionParamF = l -> lastF.apply(l).build();
@@ -65,6 +65,6 @@ public class MilvusQueryOpDispenser extends MilvusBaseOpDispenser<QueryParam> {
         ParsedOp op,
         LongFunction<String> targetF
     ) {
-        return l -> new MilvusQueryOp(clientF.apply(l),paramF.apply(l));
+        return l -> new MilvusQueryOp(clientF.apply(l), paramF.apply(l));
     }
 }

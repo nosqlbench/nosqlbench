@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="rampup_batch 100x local" type="JarApplication" folderName="milvus_vectors local">
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <option name="JAR_PATH" value="$PROJECT_DIR$/nb5/target/nb5.jar" />
+    <option name="PROGRAM_PARAMETERS" value="milvus_vector_live milvus_vectors.rampup_batch dataset=&quot;vector/ANN/glove-25-angular/glove-25-angular&quot; batch_size=100 rampup_threads=10 rampup_cycles=11836 milvushost=localhost --show-stacktraces --progress console:1s -v" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/local/milvus" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2" />
+  </configuration>
+</component>

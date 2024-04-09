@@ -121,7 +121,8 @@ public class NBCLIOptions {
     private static final String GRAPHITE_LOG_LEVEL = "--graphite-log-level";
     private static final String REPORT_CSV_TO = "--report-csv-to";
     private static final String REPORT_SUMMARY_TO = "--report-summary-to";
-    private static final String REPORT_SUMMARY_TO_DEFAULT = "stdout:60,_LOGS_/_SESSION__summary.txt";
+    private static final String SUMMARY = "--summary";
+    private static final String REPORT_SUMMARY_TO_DEFAULT = "_LOGS_/_SESSION__summary.txt";
     private static final String PROGRESS = "--progress";
     private static final String WITH_LOGGING_PATTERN = "--with-logging-pattern";
     private static final String LOGGING_PATTERN = "--logging-pattern";
@@ -208,7 +209,7 @@ public class NBCLIOptions {
     private boolean wantsConsoleMetrics = true;
     private String annotateLabelSpec = "";
     private String metricsLabelSpec = "";
-    private String wantsToCatResource ="";
+    private String wantsToCatResource = "";
     private long heartbeatIntervalMs = 10000;
     private boolean useNBIOCache = false;
     private boolean nbioCacheForceUpdate = false;
@@ -281,7 +282,7 @@ public class NBCLIOptions {
     }
 
     public boolean wantsToCatResource() {
-        return this.wantsToCatResource!=null && !this.wantsToCatResource.isEmpty();
+        return this.wantsToCatResource != null && !this.wantsToCatResource.isEmpty();
     }
 
     public enum Mode {
@@ -606,6 +607,10 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     this.reportCsvTo = arglist.removeFirst();
                     break;
+                case NBCLIOptions.SUMMARY:
+                    arglist.removeFirst();
+                    this.reportSummaryTo = "stdout:0";
+                    break;
                 case NBCLIOptions.REPORT_SUMMARY_TO:
                     arglist.removeFirst();
                     this.reportSummaryTo = this.readWordOrThrow(arglist, "report summary file");
@@ -654,7 +659,7 @@ public class NBCLIOptions {
                 case HEARTBEAT_MILLIS:
                     arglist.removeFirst();
                     this.heartbeatIntervalMs =
-                            Long.parseLong(this.readWordOrThrow(arglist, "heartbeat interval in ms"));
+                        Long.parseLong(this.readWordOrThrow(arglist, "heartbeat interval in ms"));
                     break;
                 case USE_NBIO_CACHE:
                     arglist.removeFirst();
@@ -703,8 +708,7 @@ public class NBCLIOptions {
                 """
                 .replaceAll("ARG", cmdParam)
                 .replaceAll("PROG", "nb5")
-                .replaceAll("INCLUDES", String.join(",", wantsIncludes()))
-                ;
+                .replaceAll("INCLUDES", String.join(",", wantsIncludes()));
 
             final String debugMessage = """
 
@@ -713,7 +717,7 @@ public class NBCLIOptions {
                 COMMANDSTREAM
                 """
                 .replaceAll("COMMANDSTREAM",
-                    String.join(" ",arglist));
+                    String.join(" ", arglist));
             if (consoleLevel.isGreaterOrEqualTo(NBLogLevel.INFO)) {
                 System.out.println(debugMessage);
             }

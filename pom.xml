@@ -59,19 +59,20 @@
         <module>adapter-diag</module>
         <module>adapter-stdout</module>
 
-        <module>adapter-pinecone</module>
-        <module>adapter-dynamodb</module>
+        <module>adapter-cqld4</module>
         <module>adapter-http</module>
         <module>adapter-tcp</module>
+        <module>adapter-dynamodb</module>
+        <module>adapter-mongodb</module>
         <module>adapter-pulsar</module>
+        <module>adapter-s4j</module>
         <module>adapter-kafka</module>
         <module>adapter-amqp</module>
         <module>adapter-jdbc</module>
-        <module>adapter-milvus</module>
-        <module>adapter-mongodb</module>
+<!--        <module>adapter-pinecone</module>-->
         <module>adapter-aws-opensearch</module>
-        <module>adapter-cqld4</module>
-        <module>adapter-s4j</module>
+<!--        <module>adapter-milvus</module>-->
+
 
         <!-- VIRTDATA MODULES -->
         <module>virtdata-api</module>
@@ -90,6 +91,151 @@
     </modules>
 
     <profiles>
+<!--        <profile>-->
+<!--            <id>build-adapter-cqld4</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-cqld4>true</build-adapter-cqld4>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-cqld4</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+<!--        <profile>-->
+<!--            <id>build-adapter-milvus</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>false</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-milvus>true</build-adapter-milvus>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-milvus</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+<!--        <profile>-->
+<!--            <id>build-adapter-dynamodb</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-dynamodb>true</build-adapter-dynamodb>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-dynamodb</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+<!--        <profile>-->
+<!--            <id>build-adapter-http</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-http>true</build-adapter-http>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-http</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+<!--        <profile>-->
+<!--            <id>build-adapter-tcp</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-tcp>true</build-adapter-tcp>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-tcp</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+<!--        <profile>-->
+<!--            <id>build-adapter-pulsar</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-pulsar>true</build-adapter-pulsar>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-pulsar</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+<!--        <profile>-->
+<!--            <id>build-adapter-kafka</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-kafka>true</build-adapter-kafka>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-kafka</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+<!--        <profile>-->
+<!--            <id>build-adapter-amqp</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-amqp>true</build-adapter-amqp>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-amqp</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+<!--        <profile>-->
+<!--            <id>build-adapter-jdbc</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-jdbc>true</build-adapter-jdbc>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-jdbc</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+<!--        <profile>-->
+<!--            <id>build-adapter-mongodb</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-mongodb>true</build-adapter-mongodb>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-mongodb</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+<!--        <profile>-->
+<!--            <id>build-adapter-aws-opensearch</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-aws-opensearch>true</build-adapter-aws-opensearch>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-aws-opensearch</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+<!--        <profile>-->
+<!--            <id>build-adapter-s4j</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <build-adapter-s4j>true</build-adapter-s4j>-->
+<!--            </properties>-->
+<!--            <modules>-->
+<!--                <module>adapter-s4j</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
+
     </profiles>
 
     <licenses>

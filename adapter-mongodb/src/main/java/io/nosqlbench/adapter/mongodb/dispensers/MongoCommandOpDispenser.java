@@ -60,7 +60,7 @@ public class MongoCommandOpDispenser extends BaseOpDispenser<Op, MongoSpace> {
     }
 
     @Override
-    public Op apply(long cycle) {
+    public Op getOp(long cycle) {
         return mongoOpF.apply(cycle);
     }
 }

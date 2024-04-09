@@ -58,7 +58,7 @@ public abstract class MilvusBaseOpDispenser<T> extends BaseOpDispenser<MilvusBas
     );
 
     @Override
-    public MilvusBaseOp<T> apply(long value) {
+    public MilvusBaseOp<T> getOp(long value) {
         return opF.apply(value);
     }
 }

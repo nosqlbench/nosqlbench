@@ -85,7 +85,7 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
     }
 
     @Override
-    public Cqld4CqlOp apply(long cycle) {
+    public Cqld4CqlOp getOp(long cycle) {
 
         BoundStatement boundStatement;
         try {

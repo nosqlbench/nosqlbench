@@ -16,7 +16,12 @@
 
 package io.nosqlbench.adapter.milvus.ops;
 
+import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.grpc.GetIndexBuildProgressResponse;
+import io.milvus.param.R;
 import io.milvus.param.index.GetIndexBuildProgressParam;
 
 public class MilvusGetIndexBuildProgressOp extends MilvusBaseOp<GetIndexBuildProgressParam> {
@@ -26,6 +31,13 @@ public class MilvusGetIndexBuildProgressOp extends MilvusBaseOp<GetIndexBuildPro
 
     @Override
     public Object applyOp(long value) {
-        return client.getIndexBuildProgress(request);
+        R<GetIndexBuildProgressResponse> indexBuildProgress = client.getIndexBuildProgress(request);
+        GetIndexBuildProgressResponse r = indexBuildProgress.getData();
+        try {
+            String responseJson = JsonFormat.printer().print(r);
+            return responseJson;
+        } catch (InvalidProtocolBufferException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

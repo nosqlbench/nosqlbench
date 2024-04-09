@@ -51,12 +51,12 @@ public class MilvusFlushOpDispenser extends MilvusBaseOpDispenser<FlushParam> {
         };
         LongFunction<FlushParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withCollectionNames(cnames.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF, List.of("database_name","database"),String.class,
+        ebF = op.enhanceFuncOptionally(ebF, List.of("database_name", "database"), String.class,
             FlushParam.Builder::withDatabaseName);
-        ebF = op.enhanceFuncOptionally(ebF, "sync_flush_waiting_interval",Long.class,
-            FlushParam.Builder::withSyncFlushWaitingInterval);
-        ebF = op.enhanceFuncOptionally(ebF, "sync_flush_waiting_timeout",Long.class,
-            FlushParam.Builder::withSyncFlushWaitingTimeout);
+        ebF = op.enhanceFuncOptionally(ebF, "sync_flush_waiting_interval", Number.class,
+            (FlushParam.Builder b, Number n) -> b.withSyncFlushWaitingInterval(n.longValue()));
+        ebF = op.enhanceFuncOptionally(ebF, "sync_flush_waiting_timeout", Number.class,
+            (FlushParam.Builder b, Number n) -> b.withSyncFlushWaitingTimeout(n.longValue()));
 
         final LongFunction<FlushParam.Builder> lastF = ebF;
         final LongFunction<FlushParam> collectionParamF = l -> lastF.apply(l).build();
@@ -70,6 +70,6 @@ public class MilvusFlushOpDispenser extends MilvusBaseOpDispenser<FlushParam> {
         ParsedOp op,
         LongFunction<String> targetF
     ) {
-        return l -> new MilvusFlushOp(clientF.apply(l),paramF.apply(l));
+        return l -> new MilvusFlushOp(clientF.apply(l), paramF.apply(l));
     }
 }
