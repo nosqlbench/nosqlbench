@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -36,14 +35,9 @@ import java.util.List;
 public class ResolverForNBIOCache implements ContentResolver {
     public static final ResolverForNBIOCache INSTANCE = new ResolverForNBIOCache();
     private final static Logger logger = LogManager.getLogger(ResolverForNBIOCache.class);
-    private static final String userHomeDirectory = System.getProperty("user.home");
-    //TODO: This needs to be set somehow - envvar, yaml setting, etc.
-    private static String cache = userHomeDirectory + "/.nosqlbench/nbio-cache/";
-    //TODO: This needs to be set through configuration at runtime
+    private static String cacheDir = System.getProperty("user.home") + "/.nosqlbench/nbio-cache/";
     private static boolean forceUpdate = false;
-    //TODO: This needs to be set through configuration at runtime
     private static boolean verifyChecksum = true;
-    //TODO: This needs to be set through configuration at runtime
     private static int maxRetries = 3;
     @Override
     public List<Content<?>> resolve(URI uri) {
@@ -71,7 +65,7 @@ public class ResolverForNBIOCache implements ContentResolver {
         if (uri.getScheme() != null && !uri.getScheme().isEmpty() &&
             (uri.getScheme().equalsIgnoreCase("http") ||
                 uri.getScheme().equalsIgnoreCase("https"))) {
-            Path cachePath = Path.of(cache + uri.getPath());
+            Path cachePath = Path.of(cacheDir + uri.getPath());
             if (Files.isReadable(cachePath)) {
                 return pathFromLocalCache(cachePath, uri);
             }
@@ -119,7 +113,7 @@ public class ResolverForNBIOCache implements ContentResolver {
          * 6. If they don't match/exception downloading repeat steps 1-5 up to a configurable number of times
          *   6a. If the max attempts have been exceeded throw an exception and clean up the cache
          */
-        Path cachePath = Path.of(cache + uri.getPath());
+        Path cachePath = Path.of(cacheDir + uri.getPath());
         createCacheDir(cachePath);
         if (downloadFile(uri, cachePath)) {
             String remoteChecksumFileStr = uri.getPath().substring(0, uri.getPath().indexOf('.')) + ".sha256";
@@ -261,15 +255,15 @@ public class ResolverForNBIOCache implements ContentResolver {
     public List<Path> resolveDirectory(URI uri) {
         List<Path> dirs = new ArrayList<>();
 
-        Path path = Path.of(cache + uri.getPath());
+        Path path = Path.of(cacheDir + uri.getPath());
         if (Files.isDirectory(path)) {
             dirs.add(path);
         }
         return dirs;
     }
 
-    public static void setCache(String cache) {
-        ResolverForNBIOCache.cache = cache;
+    public static void setCacheDir(String cacheDir) {
+        ResolverForNBIOCache.cacheDir = cacheDir;
     }
 
     public static void setForceUpdate(boolean forceUpdate) {

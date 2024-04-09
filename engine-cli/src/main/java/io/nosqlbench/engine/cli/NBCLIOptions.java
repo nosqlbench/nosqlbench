@@ -138,6 +138,10 @@ public class NBCLIOptions {
     private static final String DEFAULT_LOGFILE_PATTERN = "VERBOSE";
     private final static String ENABLE_DEDICATED_VERIFICATION_LOGGER = "--enable-dedicated-verification-logging";
     private final static String USE_NBIO_CACHE = "--use-nbio-cache";
+    private final static String NBIO_CACHE_FORCE_UPDATE = "--nbio-cache-force-update";
+    private final static String NBIO_CACHE_NO_VERIFY = "--nbio-cache-no-verify";
+    private final static String NBIO_CACHE_DIR = "--nbio-cache-dir";
+    private final static String NBIO_CACHE_MAX_RETRIES = "--nbio-cache-max-retries";
 
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
@@ -208,6 +212,10 @@ public class NBCLIOptions {
     private String wantsToCatResource = "";
     private long heartbeatIntervalMs = 10000;
     private boolean useNBIOCache = false;
+    private boolean nbioCacheForceUpdate = false;
+    private boolean nbioCacheVerify = true;
+    private String nbioCachDir;
+    private String nbioCacheMaxRetries;
 
     public boolean wantsLoggedMetrics() {
         return this.wantsConsoleMetrics;
@@ -657,6 +665,22 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     this.useNBIOCache = true;
                     break;
+                case NBIO_CACHE_FORCE_UPDATE:
+                    arglist.removeFirst();
+                    this.nbioCacheForceUpdate = true;
+                    break;
+                case NBIO_CACHE_NO_VERIFY:
+                    arglist.removeFirst();
+                    this.nbioCacheVerify = false;
+                    break;
+                case NBCLIOptions.NBIO_CACHE_DIR:
+                    arglist.removeFirst();
+                    this.nbioCachDir = this.readWordOrThrow(arglist, "a NBIO cache directory");
+                    break;
+                case NBIO_CACHE_MAX_RETRIES:
+                    arglist.removeFirst();
+                    this.nbioCacheMaxRetries = this.readWordOrThrow(arglist, "the maximum number of attempts to fetch a resource from the cache");
+                    break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
             }
@@ -820,6 +844,18 @@ public class NBCLIOptions {
     }
     public boolean wantsToUseNBIOCache() {
         return this.useNBIOCache;
+    }
+    public boolean wantsNbioCacheForceUpdate() {
+        return nbioCacheForceUpdate;
+    }
+    public boolean wantsNbioCacheVerify() {
+        return nbioCacheVerify;
+    }
+    public String getNbioCacheDir() {
+        return nbioCachDir;
+    }
+    public String getNbioCacheMaxRetries() {
+        return nbioCacheMaxRetries;
     }
 
     private String readWordOrThrow(final LinkedList<String> arglist, final String required) {
