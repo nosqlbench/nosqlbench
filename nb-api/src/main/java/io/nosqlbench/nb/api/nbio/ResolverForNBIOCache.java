@@ -20,11 +20,12 @@ package io.nosqlbench.nb.api.nbio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -80,10 +81,13 @@ public class ResolverForNBIOCache implements ContentResolver {
         boolean success = false;
         while (retries < maxRetries) {
             try {
-                URLContent urlContent = resolveURI(uri);
-                if (urlContent != null) {
+                if (this.remoteFileExists(uri)) {
                     logger.info(() -> "Downloading remote file " + uri + " to cache at " + cachePath);
-                    Files.copy(urlContent.getInputStream(), cachePath);
+                    ReadableByteChannel channel = Channels.newChannel(uri.toURL().openStream());
+                    FileOutputStream outputStream = new FileOutputStream(cachePath.toFile());
+                    outputStream.getChannel().transferFrom(channel, 0, Long.MAX_VALUE);
+                    outputStream.close();
+                    channel.close();
                     logger.info(() -> "Downloaded remote file to cache at " + cachePath);
                     if(checksum == null || verifyChecksum(cachePath, checksum)) {
                         success = true;
@@ -273,6 +277,17 @@ public class ResolverForNBIOCache implements ContentResolver {
         } catch (IOException e) {
             logger.error(() -> "Unable to find content at URI '" + uri + "', this often indicates a configuration error.");
             return null;
+        }
+    }
+
+    private boolean remoteFileExists(URI uri) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+            connection.setRequestMethod("HEAD");
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_OK;
+        } catch (Exception e) {
+            return false; // Error occurred or file does not exist
         }
     }
 
