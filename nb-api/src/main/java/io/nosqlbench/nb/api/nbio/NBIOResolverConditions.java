@@ -18,4 +18,8 @@
 package io.nosqlbench.nb.api.nbio;
 
 public enum NBIOResolverConditions {
+    UPDATE_AND_VERIFY,
+    UPDATE_NO_VERIFY,
+    LOCAL_VERIFY,
+    LOCAL_NO_VERIFY
 }
