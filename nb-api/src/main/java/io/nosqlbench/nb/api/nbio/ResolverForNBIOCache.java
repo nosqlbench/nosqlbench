@@ -39,6 +39,7 @@ public class ResolverForNBIOCache implements ContentResolver {
     private static boolean forceUpdate = false;
     private static boolean verifyChecksum = true;
     private static int maxRetries = 3;
+
     @Override
     public List<Content<?>> resolve(URI uri) {
         List<Content<?>> contents = new ArrayList<>();
@@ -50,18 +51,16 @@ public class ResolverForNBIOCache implements ContentResolver {
         return contents;
     }
 
+    /**
+     * This method is used to resolve the path of a given URI.
+     * It first checks if the URI has a scheme (http or https) and if it does, it tries to resolve the path from the cache.
+     * If the file is not in the cache, it tries to download it from the remote URL.
+     * If the URI does not have a scheme, it returns null.
+     *
+     * @param uri the URI to resolve the path for
+     * @return the resolved Path object, or null if the URI does not have a scheme or the path could not be resolved
+     */
     private Path resolvePath(URI uri) {
-        /*
-         * 1st time through this will just be the name of the file. On the second path it will include the full
-         * URI, including the scheme (eg file:/// or https://, etc.). Since we need to at least verify the
-         * existence of the remote file, and more typically compare checksums, we don't do anything until
-         * we get the full URI
-         *
-         * TODO: Need to handle situation where file is in the cache, we want to force update but the update fails.
-         *       In this case we don't want to delete the local file because we need to return it.
-         * Suggestion: add enum type defining behavior (force update, for update IF condition x, do not update, etc.)
-         * See NBIOResolverConditions
-        */
         if (uri.getScheme() != null && !uri.getScheme().isEmpty() &&
             (uri.getScheme().equalsIgnoreCase("http") ||
                 uri.getScheme().equalsIgnoreCase("https"))) {
@@ -100,19 +99,19 @@ public class ResolverForNBIOCache implements ContentResolver {
         return success;
     }
 
+    /**
+     * This method is used to download a file from a remote URL and store it in a local cache.
+     * It first creates the cache directory if it doesn't exist.
+     * Then it tries to download the file and if successful, it generates a SHA256 checksum for the downloaded file.
+     * It then compares the generated checksum with the remote checksum.
+     * If the checksums match, it returns the path to the cached file.
+     * If the checksums don't match or if there was an error during the download, it cleans up the cache and throws a RuntimeException.
+     *
+     * @param uri the URI of the remote file to download
+     * @return the Path to the downloaded file in the local cache
+     * @throws RuntimeException if there was an error during the download or if the checksums don't match
+     */
     private Path pathFromRemoteUrl(URI uri) {
-        /*
-         * File is not in cache - next steps:
-         * 1. Download the file and put it in the cache
-         *   1a. If the remote file does not exist log error and return null
-         *   1b. If the download fails jump to step 6
-         * 2. Download the checksum and store in memory
-         * 3. Generate a new checksum for the file and put it in the cache
-         * 4. compare the checksums
-         * 5. If they match, return the path to the file in the cache
-         * 6. If they don't match/exception downloading repeat steps 1-5 up to a configurable number of times
-         *   6a. If the max attempts have been exceeded throw an exception and clean up the cache
-         */
         Path cachePath = Path.of(cacheDir + uri.getPath());
         createCacheDir(cachePath);
         if (downloadFile(uri, cachePath)) {
@@ -142,7 +141,7 @@ public class ResolverForNBIOCache implements ContentResolver {
                 throw new RuntimeException(e);
             }
         } else {
-            cleanupCache();
+            cleanupCache(cachePath);
             throw new RuntimeException("Error downloading remote file to cache at " + cachePath);
         }
     }
@@ -158,24 +157,30 @@ public class ResolverForNBIOCache implements ContentResolver {
         }
     }
 
-    private void cleanupCache() {
+    private void cleanupCache(Path cachePath) {
+        if (!cachePath.toFile().delete())
+            logger.warn(() -> "Could not delete cached file " + cachePath);
+        Path checksumPath = Path.of(cachePath.toString().substring(0, cachePath.toString().lastIndexOf('.')) + ".sha256");
+        if (!checksumPath.toFile().delete())
+            logger.warn(() -> "Could not delete cached checksum " + checksumPath);
     }
 
+    /**
+     * This method is used to retrieve a file from the local cache.
+     * It first checks if the file exists in the cache and if a checksum file is present.
+     * If the checksum file is not present, it generates a new one.
+     * If the "force update" option is enabled, it deletes the cached file and downloads it from the remote URL.
+     * If the "checksum verification" option is enabled, it compares the local checksum with the remote checksum.
+     * If the checksums match, it returns the path to the cached file.
+     * If the checksums don't match, it deletes the cached file and downloads it from the remote URL.
+     * If the remote file or checksum does not exist, it returns the cached file.
+     *
+     * @param cachePath the Path to the cached file
+     * @param uri the URI of the remote file
+     * @return the Path to the cached file
+     * @throws RuntimeException if there was an error during the checksum comparison or if the checksums don't match
+     */
     private Path pathFromLocalCache(Path cachePath, URI uri) {
-        /*
-         * File is in cache - next steps:
-         * 1. Check "force update" option
-         *   1a. If true remove file from cache and go to "File is not in cache" operations
-         *   1b. If not specified default to false
-         * 2. Check for existence of remote file
-         *   2a. If the remote file does not exist generate warning message and return local file
-         * 3. Check "checksum verification" option (default = true)
-         *   3a. If false generate warning message and return local file
-         * 4. If a local checksum exists compare it against the remote checksum
-         *   4a. If none exists generate a new one and compare it against the remote checksum
-         * 5. If checksums match return the local file
-         * 6. If checksums do not match remove the local file and go to "File is not in cache" operations
-         */
         Path checksumPath = Path.of(cachePath.toString().substring(0, cachePath.toString().lastIndexOf('.')) + ".sha256");
         if (!Files.isReadable(checksumPath)) {
             try {
