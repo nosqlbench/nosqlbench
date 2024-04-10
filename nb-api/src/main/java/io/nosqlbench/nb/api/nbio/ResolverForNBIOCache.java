@@ -85,7 +85,7 @@ public class ResolverForNBIOCache implements ContentResolver {
                     logger.info(() -> "Downloading remote file " + uri + " to cache at " + cachePath);
                     Files.copy(urlContent.getInputStream(), cachePath);
                     logger.info(() -> "Downloaded remote file to cache at " + cachePath);
-                    if(checksum != null && verifyChecksum(cachePath, checksum)) {
+                    if(checksum == null || verifyChecksum(cachePath, checksum)) {
                         success = true;
                         break;
                     }
