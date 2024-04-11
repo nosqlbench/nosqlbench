@@ -214,7 +214,7 @@ public class NBCLIOptions {
     private boolean useNBIOCache = false;
     private boolean nbioCacheForceUpdate = false;
     private boolean nbioCacheVerify = true;
-    private String nbioCachDir;
+    private String nbioCacheDir;
     private String nbioCacheMaxRetries;
 
     public boolean wantsLoggedMetrics() {
@@ -675,7 +675,7 @@ public class NBCLIOptions {
                     break;
                 case NBCLIOptions.NBIO_CACHE_DIR:
                     arglist.removeFirst();
-                    this.nbioCachDir = this.readWordOrThrow(arglist, "a NBIO cache directory");
+                    this.nbioCacheDir = this.readWordOrThrow(arglist, "a NBIO cache directory");
                     break;
                 case NBIO_CACHE_MAX_RETRIES:
                     arglist.removeFirst();
@@ -852,7 +852,7 @@ public class NBCLIOptions {
         return nbioCacheVerify;
     }
     public String getNbioCacheDir() {
-        return nbioCachDir;
+        return nbioCacheDir;
     }
     public String getNbioCacheMaxRetries() {
         return nbioCacheMaxRetries;
