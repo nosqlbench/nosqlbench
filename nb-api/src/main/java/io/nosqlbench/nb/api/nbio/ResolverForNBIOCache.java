@@ -108,7 +108,7 @@ public class ResolverForNBIOCache implements ContentResolver {
     private boolean verifyChecksum(Path cachedFilePath, URLContent checksum) {
         try {
             String localChecksumStr = generateSHA256Checksum(cachedFilePath.toString());
-            Path checksumPath = Path.of(cachedFilePath + ".sha256");
+            Path checksumPath = checksumPath(cachedFilePath);
             Files.writeString(checksumPath, localChecksumStr);
             logger.debug(() -> "Generated local checksum and saved to cache at " + checksumPath);
             String remoteChecksum = new String(checksum.getInputStream().readAllBytes());
@@ -160,7 +160,7 @@ public class ResolverForNBIOCache implements ContentResolver {
     private void cleanupCache(Path cachedFilePath) {
         if (!cachedFilePath.toFile().delete())
             logger.warn(() -> "Could not delete cached file " + cachedFilePath);
-        Path checksumPath = Path.of(cachedFilePath + ".sha256");
+        Path checksumPath = checksumPath(cachedFilePath);
         if (!checksumPath.toFile().delete())
             logger.warn(() -> "Could not delete cached checksum " + checksumPath);
     }
@@ -240,7 +240,7 @@ public class ResolverForNBIOCache implements ContentResolver {
     }
 
     private Path getOrCreateChecksum(Path cachedFilePath) {
-        Path checksumPath = Path.of(cachedFilePath + ".sha256");
+        Path checksumPath = checksumPath(cachedFilePath);
         if (!Files.isReadable(checksumPath)) {
             try {
                 Files.writeString(checksumPath, generateSHA256Checksum(cachedFilePath.toString()));
@@ -249,6 +249,10 @@ public class ResolverForNBIOCache implements ContentResolver {
             }
         }
         return checksumPath;
+    }
+
+    private Path checksumPath(Path cachedFilePath) {
+        return Path.of(cachedFilePath + ".sha256");
     }
 
     private static String generateSHA256Checksum(String filePath) throws IOException, NoSuchAlgorithmException {
