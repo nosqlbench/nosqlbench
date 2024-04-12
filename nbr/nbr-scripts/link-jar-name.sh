@@ -2,6 +2,7 @@
 set -e
 set -x
 
+echo "PWD:" $(pwd)
 NBJAR_VERSION=${NBJAR_VERSION:?NBJAR_VERSION must be specified}
 echo "NBJAR_VERSION: ${NBJAR_VERSION}"
 

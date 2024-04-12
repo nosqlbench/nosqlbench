@@ -44,7 +44,7 @@
     </properties>
 
     <name>${project.artifactId}</name>
-    <url>http://nosqlbench.io/</url>
+    <url>https://nosqlbench.io/</url>
     <description>
         nosqlbench is the core of a programmable workload simulation runtime.
         This module acts as the parent pom for nosqlbench Maven modules.
@@ -549,6 +549,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.10</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -807,13 +808,13 @@
             <name>Jonathan Shook</name>
             <email>jshook@gmail.com</email>
             <organization>nosqlbench.io</organization>
-            <organizationUrl>http://nosqlbench.io/</organizationUrl>
+            <organizationUrl>https://nosqlbench.io/</organizationUrl>
         </developer>
         <developer>
             <name>Sebastián Estévez</name>
             <email>estevezsebastian@gmail.com</email>
             <organization>nosqlbench.io</organization>
-            <organizationUrl>http://nosqlbench.io/</organizationUrl>
+            <organizationUrl>https://nosqlbench.io/</organizationUrl>
         </developer>
     </developers>
 
@@ -861,7 +862,7 @@
         </profile>
 
         <profile>
-            <id>javadoc</id>
+            <id>build-javadoc</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
