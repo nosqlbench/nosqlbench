@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2022-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,36 +30,36 @@ public class NBCLIScenarioPreprocessorTemplateVarTest {
 
     @Test
     public void testMultipleOccurencesOfSameTemplateVar() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "local/example_scenarios_templatevars" }, NBCLIOptions.Mode.ParseAllOptions);
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"activities/example_scenarios_templatevars"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
         cmds.forEach(System.out::println);
 
-        OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArgValue("workload"),cmds.get(0).getArgMap());
+        OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArgValue("workload"), cmds.get(0).getArgMap());
         OpTemplate optpl1 = workload1.getOps(true).get(0);
-        System.out.println("op from cmd1:"+optpl1);
+        System.out.println("op from cmd1:" + optpl1);
         assertThat(optpl1.getStmt()).contains("cycle {cycle} replaced replaced\n");
 
-        OpsDocList workload2 = OpsLoader.loadPath(cmds.get(1).getArgValue("workload"),cmds.get(1).getArgMap());
+        OpsDocList workload2 = OpsLoader.loadPath(cmds.get(1).getArgValue("workload"), cmds.get(1).getArgMap());
         OpTemplate optpl2 = workload2.getOps(true).get(0);
-        System.out.println("op from cmd2:"+optpl2);
+        System.out.println("op from cmd2:" + optpl2);
         assertThat(optpl2.getStmt()).contains("cycle {cycle} def1 def1\n");
     }
 
     @Test
     public void testThatCLIOverridesWorkForTemplateVars() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{ "local/example_scenarios_templatevars", "tvar1=overridden" }, NBCLIOptions.Mode.ParseAllOptions);
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"activities/example_scenarios_templatevars", "tvar1=overridden"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
         cmds.forEach(System.out::println);
 
-        OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArgValue("workload"),cmds.get(0).getArgMap());
+        OpsDocList workload1 = OpsLoader.loadPath(cmds.get(0).getArgValue("workload"), cmds.get(0).getArgMap());
         OpTemplate optpl1 = workload1.getOps(true).get(0);
-        System.out.println("op from cmd1:"+optpl1);
+        System.out.println("op from cmd1:" + optpl1);
         assertThat(optpl1.getStmt()).contains("cycle {cycle} overridden overridden\n");
     }
 
     @Test
     public void testThatAdditionalCLIParamIsAdded() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"local/example_scenarios_templatevars", "tvar3=tval3"}, NBCLIOptions.Mode.ParseAllOptions);
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"activities/example_scenarios_templatevars", "tvar3=tval3"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
         cmds.forEach(System.out::println);
         assertThat(cmds).hasSize(2);

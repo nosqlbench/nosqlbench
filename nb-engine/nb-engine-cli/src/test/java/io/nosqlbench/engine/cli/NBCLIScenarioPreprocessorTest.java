@@ -33,7 +33,7 @@ public class NBCLIScenarioPreprocessorTest {
 
     @Test
     public void providePathForScenario() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"local/example_scenarios"}, NBCLIOptions.Mode.ParseAllOptions);
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"example_scenarios"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
     }
 

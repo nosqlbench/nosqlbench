@@ -1,4 +1,4 @@
-# example-scenarios.yaml
+# example_scenarios.yaml
 scenarios:
   default:
     one: run cycles=3 alias=A driver=stdout
