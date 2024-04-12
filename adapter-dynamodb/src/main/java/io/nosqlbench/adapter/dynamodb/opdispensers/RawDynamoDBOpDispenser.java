@@ -44,7 +44,7 @@ public class RawDynamoDBOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDB
     }
 
     @Override
-    public DynamoDBOp apply(long value) {
+    public DynamoDBOp getOp(long value) {
         String body = jsonFunction.apply(value);
         return new RawDynamodOp(ddb,body);
     }

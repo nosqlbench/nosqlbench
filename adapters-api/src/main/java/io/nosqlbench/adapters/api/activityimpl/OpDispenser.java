@@ -82,7 +82,7 @@ public interface OpDispenser<T> extends LongFunction<T>, OpResultTracker {
      * @return an executable operation
      */
 
-    T apply(long value);
+    T getOp(long value);
 
     CycleFunction<Boolean> getVerifier();
 

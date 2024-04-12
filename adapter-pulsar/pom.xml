@@ -34,7 +34,7 @@
     </description>
 
     <properties>
-        <pulsar.version>3.2.0</pulsar.version>
+        <pulsar.version>3.2.1</pulsar.version>
     </properties>
 
     <dependencies>
@@ -49,6 +49,12 @@
             <groupId>org.apache.pulsar</groupId>
             <artifactId>pulsar-client</artifactId>
             <version>${pulsar.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>protobuf-java</artifactId>
+                    <groupId>com.google.protobuf</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

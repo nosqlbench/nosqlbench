@@ -17,6 +17,8 @@
 package io.nosqlbench.adapter.milvus.ops;
 
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.grpc.DescribeCollectionResponse;
+import io.milvus.param.R;
 import io.milvus.param.collection.DescribeCollectionParam;
 
 public class MilvusDescribeCollectionOp extends MilvusBaseOp<DescribeCollectionParam> {
@@ -26,6 +28,7 @@ public class MilvusDescribeCollectionOp extends MilvusBaseOp<DescribeCollectionP
 
     @Override
     public Object applyOp(long value) {
-        return client.describeCollection(request);
+        R<DescribeCollectionResponse> describeCollectionResponseR = client.describeCollection(request);
+        return describeCollectionResponseR;
     }
 }

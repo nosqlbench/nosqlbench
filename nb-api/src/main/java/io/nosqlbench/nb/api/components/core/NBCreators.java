@@ -18,8 +18,7 @@ package io.nosqlbench.nb.api.components.core;
 
 import io.nosqlbench.nb.api.csvoutput.CsvOutputPluginWriter;
 import com.codahale.metrics.Meter;
-import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
-import io.nosqlbench.nb.api.engine.metrics.DoubleSummaryGauge;
+import io.nosqlbench.nb.api.engine.metrics.*;
 import io.nosqlbench.nb.api.engine.metrics.instruments.*;
 import io.nosqlbench.nb.api.engine.metrics.reporters.*;
 import io.nosqlbench.nb.api.histo.HdrHistoLog;
@@ -37,11 +36,14 @@ import com.codahale.metrics.MetricAttribute;
 import com.codahale.metrics.MetricFilter;
 import org.apache.logging.log4j.Marker;
 
+import java.io.File;
 import java.io.PrintStream;
 import java.util.*;
 
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 public class NBCreators {
 
@@ -157,6 +159,34 @@ public class NBCreators {
 
     public NBShutdownHook shutdownHook(NBComponent component) {
         return new NBShutdownHook(component);
+    }
+
+    public void histoLogger(String sessionName, String pattern, String filename, long millis) {
+        if (filename.contains("_SESSION_")) {
+            filename = filename.replace("_SESSION_", sessionName);
+        }
+        Pattern compiledPattern = Pattern.compile(pattern);
+        File logfile = new File(filename);
+
+        HistoIntervalLogger histoIntervalLogger =
+            new HistoIntervalLogger(base, sessionName, logfile, compiledPattern, millis);
+        logger.debug(() -> "Adding " + histoIntervalLogger + " to session " + sessionName);
+        base.addMetricsCloseable(histoIntervalLogger);
+        base.addListener(histoIntervalLogger);
+    }
+
+    public void histoStatsLogger(String sessionName, String pattern, String filename, long millis) {
+        if (filename.contains("_SESSION_")) {
+            filename = filename.replace("_SESSION_", sessionName);
+        }
+        Pattern compiledPattern = Pattern.compile(pattern);
+        File logfile = new File(filename);
+
+        HistoStatsLogger histoStatsLogger =
+            new HistoStatsLogger(base, sessionName, logfile, compiledPattern, millis, TimeUnit.NANOSECONDS);
+        logger.debug(() -> "Adding " + histoStatsLogger + " to session " + sessionName);
+        base.addMetricsCloseable(histoStatsLogger);
+        base.addListener(histoStatsLogger);
     }
 
     public static class Log4jReporterBuilder {

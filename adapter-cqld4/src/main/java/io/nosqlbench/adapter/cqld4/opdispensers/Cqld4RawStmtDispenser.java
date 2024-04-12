@@ -44,7 +44,7 @@ public class Cqld4RawStmtDispenser extends Cqld4BaseOpDispenser {
     }
 
     @Override
-    public Cqld4CqlOp apply(long value) {
+    public Cqld4CqlOp getOp(long value) {
         return new Cqld4CqlSimpleStatement(
             getSessionFunc().apply(value),
             (SimpleStatement) stmtFunc.apply(value),

@@ -44,7 +44,7 @@ public class AdminTopicOpDispenser extends PulsarAdminOpDispenser {
     }
 
     @Override
-    public AdminTopicOp apply(long cycle) {
+    public AdminTopicOp getOp(long cycle) {
 
         return new AdminTopicOp(
             pulsarAdapterMetrics,

@@ -39,12 +39,9 @@ public class MilvusCreateCollectionOpDispenser extends MilvusBaseOpDispenser<Cre
     /**
      * Create a new MilvusCreateCollectionOpDispenser subclassed from {@link MilvusBaseOpDispenser}.
      *
-     * @param adapter
-     *     The associated {@link MilvusDriverAdapter}
-     * @param op
-     *     The {@link ParsedOp} encapsulating the activity for this cycle
-     * @param targetFunction
-     *     A LongFunction that returns the specified Milvus Index for this Op
+     * @param adapter        The associated {@link MilvusDriverAdapter}
+     * @param op             The {@link ParsedOp} encapsulating the activity for this cycle
+     * @param targetFunction A LongFunction that returns the specified Milvus Index for this Op
      */
     public MilvusCreateCollectionOpDispenser(MilvusDriverAdapter adapter,
                                              ParsedOp op,
@@ -61,10 +58,10 @@ public class MilvusCreateCollectionOpDispenser extends MilvusBaseOpDispenser<Cre
         LongFunction<CreateCollectionParam.Builder> ebF =
             l -> CreateCollectionParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF, "shards_num", Integer.class,
-            CreateCollectionParam.Builder::withShardsNum);
-        ebF = op.enhanceFuncOptionally(ebF, "partition_num", Integer.class,
-            CreateCollectionParam.Builder::withPartitionsNum);
+        ebF = op.enhanceFuncOptionally(ebF, "shards_num", Number.class,
+            (CreateCollectionParam.Builder b, Number n) -> b.withShardsNum(n.intValue()));
+        ebF = op.enhanceFuncOptionally(ebF, "partition_num", Number.class,
+            (CreateCollectionParam.Builder b, Number n) -> b.withPartitionsNum(n.intValue()));
         ebF = op.enhanceFuncOptionally(ebF, "description", String.class,
             CreateCollectionParam.Builder::withDescription);
         ebF = op.enhanceEnumOptionally(ebF, "consistency_level",
@@ -97,8 +94,7 @@ public class MilvusCreateCollectionOpDispenser extends MilvusBaseOpDispenser<Cre
     /**
      * Function to build the {@link FieldType}s for the {@link CreateCollectionParam}.
      *
-     * @param fieldTypesData
-     *     The static map of config data from the create collection request
+     * @param fieldTypesData The static map of config data from the create collection request
      * @param ebF
      * @return a list of static field types
      */
@@ -112,22 +108,22 @@ public class MilvusCreateCollectionOpDispenser extends MilvusBaseOpDispenser<Cre
                 .ifPresent(builder::withPrimaryKey);
             fieldspec.getOptionalStaticValue("auto_id", Boolean.class)
                 .ifPresent(builder::withAutoID);
-            fieldspec.getOptionalStaticConfig("max_length", Integer.class)
-                .ifPresent(builder::withMaxLength);
-            fieldspec.getOptionalStaticConfig("max_capacity", Integer.class)
-                .ifPresent(builder::withMaxCapacity);
-            fieldspec.getOptionalStaticValue(List.of("partition_key","partition"), Boolean.class)
+            fieldspec.getOptionalStaticConfig("max_length", Number.class)
+                .ifPresent((Number n) -> builder.withMaxLength(n.intValue()));
+            fieldspec.getOptionalStaticConfig("max_capacity", Number.class)
+                .ifPresent((Number n) -> builder.withMaxCapacity(n.intValue()));
+            fieldspec.getOptionalStaticValue(List.of("partition_key", "partition"), Boolean.class)
                 .ifPresent(builder::withPartitionKey);
-            fieldspec.getOptionalStaticValue("dimension", Integer.class)
-                .ifPresent(builder::withDimension);
+            fieldspec.getOptionalStaticValue("dimension", Number.class)
+                .ifPresent((Number n) -> builder.withDimension(n.intValue()));
             fieldspec.getOptionalStaticConfig("data_type", String.class)
                 .map(DataType::valueOf)
                 .ifPresent(builder::withDataType);
             fieldspec.getOptionalStaticConfig("type_params", Map.class)
                 .ifPresent(builder::withTypeParams);
-            fieldspec.getOptionalStaticConfig("element_type",String.class)
-                    .map(DataType::valueOf)
-                        .ifPresent(builder::withElementType);
+            fieldspec.getOptionalStaticConfig("element_type", String.class)
+                .map(DataType::valueOf)
+                .ifPresent(builder::withElementType);
 
             fieldTypes.add(builder.build());
         });

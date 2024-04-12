@@ -56,7 +56,7 @@ public class MessageProducerOpDispenser extends PulsarClientOpDispenser {
     }
 
     @Override
-    public MessageProducerOp apply(long cycle) {
+    public MessageProducerOp getOp(long cycle) {
         return new MessageProducerOp(
             pulsarAdapterMetrics,
             pulsarClient,

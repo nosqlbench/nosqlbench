@@ -80,7 +80,7 @@
             <dependency>
                 <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy</artifactId>
-                <version>4.0.18</version>
+                <version>4.0.20</version>
             </dependency>
             <dependency>
                 <groupId>org.snakeyaml</groupId>
@@ -280,7 +280,7 @@
             <dependency>
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core-java11</artifactId>
-                <version>6.4.12</version>
+                <version>6.5.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -290,7 +290,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.658</version>
+                <version>1.12.681</version>
             </dependency>
             <dependency>
                 <groupId>com.elega9t</groupId>
@@ -358,33 +358,22 @@
                 <version>2.4.0-b180830.0438</version>
             </dependency>
             <!-- graalvm -->
+
             <dependency>
-                <groupId>org.graalvm.sdk</groupId>
-                <artifactId>graal-sdk</artifactId>
-                <version>23.0.3</version>
+                <groupId>org.graalvm.polyglot</groupId>
+                <artifactId>polyglot</artifactId>
+                <version>23.1.0</version>
             </dependency>
             <dependency>
-                <groupId>org.graalvm.js</groupId>
+                <groupId>org.graalvm.polyglot</groupId>
                 <artifactId>js</artifactId>
-                <version>23.0.3</version>
-                <scope>runtime</scope>
+                <version>23.1.2</version>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
-                <version>23.0.3</version>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.tools</groupId>
-                <artifactId>profiler</artifactId>
-                <version>23.0.3</version>
-                <scope>runtime</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.tools</groupId>
-                <artifactId>chromeinspector</artifactId>
-                <version>23.0.3</version>
-                <scope>runtime</scope>
+                <version>23.1.2</version>
             </dependency>
 
         </dependencies>
@@ -397,30 +386,30 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.23.0</version>
+            <version>2.23.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.23.0</version>
+            <version>2.23.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.23.0</version>
+            <version>2.23.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
-            <version>2.23.0</version>
+            <version>2.23.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
-            <version>2.23.0</version>
+            <version>2.23.1</version>
         </dependency>
 
         <dependency>
@@ -694,6 +683,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <id>enforce-java</id>
@@ -705,6 +695,7 @@
                                 <requireJavaVersion>
                                     <version>[21,)</version>
                                 </requireJavaVersion>
+                                <requireProfileIdsExist/>
                             </rules>
                         </configuration>
                     </execution>
@@ -846,7 +837,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -904,20 +895,6 @@
 
                         </executions>
                     </plugin>
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-javadoc-plugin</artifactId>-->
-<!--                        <version>3.4.1</version>-->
-<!--                        <configuration>-->
-<!--                        </configuration>-->
-<!--                        &lt;!&ndash; NO Executions by default for main project builds.-->
-<!--                             This plugin should be called directly on the command line-->
-<!--                             The site plugin appears to be broken or at least not properly maintained,-->
-<!--                             so invoking via the site phase is more trouble than it is worth.-->
-<!--                             &ndash;&gt;-->
-<!--                        &lt;!&ndash;                <executions>&ndash;&gt;-->
-<!--                        &lt;!&ndash;                </executions>&ndash;&gt;-->
-<!--                    </plugin>-->
                 </plugins>
             </build>
         </profile>

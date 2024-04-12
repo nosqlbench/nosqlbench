@@ -30,7 +30,7 @@ import java.util.function.LongFunction;
 public interface OpSource<T> extends LongFunction<T> {
 
     static <O extends Op> OpSource<O> of(OpSequence<OpDispenser<? extends O>> seq) {
-        return (long l) -> seq.apply(l).apply(l);
+        return (long l) -> seq.apply(l).getOp(l);
     }
 
     /**

@@ -200,7 +200,7 @@ public class MessageProducerOpDispenser extends KafkaBaseOpDispenser {
     }
 
     @Override
-    public KafkaOp apply(final long cycle) {
+    public KafkaOp getOp(final long cycle) {
         final String topicName = this.topicNameStrFunc.apply(cycle);
         final String clientId = this.getEffectiveClientId(cycle);
 

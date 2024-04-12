@@ -47,7 +47,7 @@ public class DDBDeleteTableOpDispenser extends BaseOpDispenser<DynamoDBOp, Dynam
     }
 
     @Override
-    public DDBDeleteTableOp apply(long cycle) {
+    public DDBDeleteTableOp getOp(long cycle) {
         DeleteTableRequest rq = new DeleteTableRequest();
         rq.setTableName(tableNameFunc.apply(cycle));
         return new DDBDeleteTableOp(ddb, rq);

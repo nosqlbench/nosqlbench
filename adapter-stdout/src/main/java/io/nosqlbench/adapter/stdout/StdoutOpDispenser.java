@@ -37,7 +37,7 @@ public class StdoutOpDispenser extends BaseOpDispenser<StdoutOp,StdoutSpace> {
     }
 
     @Override
-    public StdoutOp apply(long value) {
+    public StdoutOp getOp(long value) {
         StdoutSpace ctx = ctxfunc.apply(value);
         String output = outFunction.apply(value);
         return new StdoutOp(ctx,output);

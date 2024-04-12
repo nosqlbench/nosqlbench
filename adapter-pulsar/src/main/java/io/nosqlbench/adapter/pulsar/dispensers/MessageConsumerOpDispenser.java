@@ -76,7 +76,7 @@ public class MessageConsumerOpDispenser extends PulsarClientOpDispenser {
     }
 
     @Override
-    public MessageConsumerOp apply(final long cycle) {
+    public MessageConsumerOp getOp(final long cycle) {
         return new MessageConsumerOp(
             this.pulsarAdapterMetrics,
             this.pulsarClient,

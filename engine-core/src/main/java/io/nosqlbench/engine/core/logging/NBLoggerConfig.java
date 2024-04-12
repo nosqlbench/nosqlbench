@@ -69,7 +69,8 @@ public class NBLoggerConfig extends ConfigurationFactory {
      */
     public static Map<String, Level> BUILTIN_OVERRIDES = Map.of(
         // ERROR StatusConsoleListener Unable to locate appender "SESSION_APPENDER" for logger config "oshi.util"
-        "oshi.util", Level.INFO
+        "oshi.util", Level.INFO,
+        "io.jhdf", Level.INFO
     );
 
     /**

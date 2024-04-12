@@ -18,21 +18,31 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.index.DescribeIndexParam;
-import io.milvus.param.partition.CreatePartitionParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusDescribeIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.LongFunction;
 
 public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<DescribeIndexParam> {
 
+    private Duration awaitTimeout = Duration.ZERO;
+    private Duration awaitInterval = Duration.of(10, ChronoUnit.SECONDS);
+
     public MilvusDescribeIndexOpDispenser(MilvusDriverAdapter adapter,
                                           ParsedOp op,
                                           LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
+
+        op.getOptionalStaticValue("await_timeout", Number.class)
+            .map(Number::doubleValue)
+            .ifPresent(v->this.awaitTimeout = Duration.of((long)(v*1000), ChronoUnit.MILLIS));
+        op.getOptionalStaticValue("await_interval", Number.class)
+            .map(Number::doubleValue).ifPresent(v->this.awaitInterval =Duration.of((long)(v*1000),ChronoUnit.MILLIS));
     }
 
     @Override
@@ -43,10 +53,11 @@ public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<Descri
     ) {
         LongFunction<DescribeIndexParam.Builder> ebF =
             l -> DescribeIndexParam.newBuilder().withIndexName(targetF.apply(l));
-        ebF = op.enhanceFunc(ebF, List.of("collection","collection_name"),String.class,
+        ebF = op.enhanceFunc(ebF, List.of("collection","collection_name"), String.class,
             DescribeIndexParam.Builder::withCollectionName);
-        ebF = op.enhanceFunc(ebF,List.of("database_name","database"),String.class,
+        ebF = op.enhanceFuncOptionally(ebF, List.of("database_name","database"), String.class,
             DescribeIndexParam.Builder::withDatabaseName);
+
 
         final LongFunction<DescribeIndexParam.Builder> lastF = ebF;
         final LongFunction<DescribeIndexParam> collectionParamF = l -> lastF.apply(l).build();
@@ -60,6 +71,11 @@ public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<Descri
         ParsedOp op,
         LongFunction<String> targetF
     ) {
-        return l -> new MilvusDescribeIndexOp(clientF.apply(l),paramF.apply(l));
+        return l -> new MilvusDescribeIndexOp(
+            clientF.apply(l),
+            paramF.apply(l),
+            awaitTimeout,
+            awaitInterval
+        );
     }
 }

@@ -16,10 +16,13 @@
 
 package io.nosqlbench.scenarios.simframe.planning;
 
+import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
+import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
 import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
 
-public interface SimFrameFunction extends MultivariateFunction {
+public interface SimFrameFunction<P extends InvokableResult> extends MultivariateFunction {
     @Override
     double value(double[] point);
 
+    SimFrameJournal<P> getJournal();
 }

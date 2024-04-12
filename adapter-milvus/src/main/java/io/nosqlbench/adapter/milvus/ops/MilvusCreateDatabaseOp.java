@@ -17,6 +17,8 @@
 package io.nosqlbench.adapter.milvus.ops;
 
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.param.R;
+import io.milvus.param.RpcStatus;
 import io.milvus.param.collection.CreateDatabaseParam;
 
 public class MilvusCreateDatabaseOp extends MilvusBaseOp<CreateDatabaseParam> {
@@ -26,6 +28,7 @@ public class MilvusCreateDatabaseOp extends MilvusBaseOp<CreateDatabaseParam> {
 
     @Override
     public Object applyOp(long value) {
-        return client.createDatabase(request);
+        R<RpcStatus> database = client.createDatabase(request);
+        return database;
     }
 }

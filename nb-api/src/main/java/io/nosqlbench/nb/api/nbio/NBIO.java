@@ -43,6 +43,8 @@ public class NBIO implements NBPathsAPI.Facets {
 
     private static String[] globalIncludes = new String[0];
 
+    private static boolean useNBIOCache;
+
     public synchronized static void addGlobalIncludes(String[] globalIncludes) {
         NBIO.globalIncludes = globalIncludes;
     }
@@ -162,8 +164,21 @@ public class NBIO implements NBPathsAPI.Facets {
      * {@inheritDoc}
      */
     @Override
+    public NBPathsAPI.GetPrefixes cachedContent() {
+        this.resolver = URIResolvers.inNBIOCache();
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public NBPathsAPI.GetPrefixes allContent() {
-        this.resolver = URIResolvers.inFS().inCP().inURLs();
+        if (useNBIOCache) {
+            this.resolver = URIResolvers.inFS().inCP().inNBIOCache();
+        } else {
+            this.resolver = URIResolvers.inFS().inCP().inURLs();
+        }
         return this;
     }
 
@@ -342,6 +357,14 @@ public class NBIO implements NBPathsAPI.Facets {
     public static NBPathsAPI.GetPrefixes remote() {
         return new NBIO().remoteContent();
     }
+
+    /**
+     * Return content from the NBIO cache. If the content is not in the cache look for it in the given
+     * URL and put it in the cache.
+     *
+     * @return this builder
+     */
+    public static NBPathsAPI.GetPrefixes cached() { return new NBIO().cachedContent(); }
 
 
     /**
@@ -628,4 +651,13 @@ public class NBIO implements NBPathsAPI.Facets {
             ", extensionSets=" + extensionSets +
             '}';
     }
+
+    public boolean useNBIOCache() {
+        return useNBIOCache;
+    }
+
+    public static void setUseNBIOCache(boolean wantsToUseNBIOCache) {
+        useNBIOCache = wantsToUseNBIOCache;
+    }
+
 }

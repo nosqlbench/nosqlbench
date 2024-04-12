@@ -150,7 +150,7 @@ public class DDBQueryOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBSpa
     }
 
     @Override
-    public DDBQueryOp apply(long cycle) {
+    public DDBQueryOp getOp(long cycle) {
         Table table = tableFunc.apply(cycle);
         QuerySpec queryspec = querySpecFunc.apply(cycle);
         return new DDBQueryOp(ddb,table,queryspec);

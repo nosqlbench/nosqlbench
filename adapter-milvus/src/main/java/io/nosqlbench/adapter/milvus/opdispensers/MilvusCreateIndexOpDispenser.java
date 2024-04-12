@@ -36,12 +36,9 @@ public class MilvusCreateIndexOpDispenser extends MilvusBaseOpDispenser<CreateIn
     /**
      * Create a new MilvusCreateIndexOpDispenser subclassed from {@link MilvusBaseOpDispenser}.
      *
-     * @param adapter
-     *     The associated {@link MilvusDriverAdapter}
-     * @param op
-     *     The {@link ParsedOp} encapsulating the activity for this cycle
-     * @param targetFunction
-     *     A LongFunction that returns the specified Milvus Index for this Op
+     * @param adapter        The associated {@link MilvusDriverAdapter}
+     * @param op             The {@link ParsedOp} encapsulating the activity for this cycle
+     * @param targetFunction A LongFunction that returns the specified Milvus Index for this Op
      */
     public MilvusCreateIndexOpDispenser(
         MilvusDriverAdapter adapter,
@@ -56,23 +53,28 @@ public class MilvusCreateIndexOpDispenser extends MilvusBaseOpDispenser<CreateIn
         LongFunction<CreateIndexParam.Builder> bF =
             l -> CreateIndexParam.newBuilder().withIndexName(targetF.apply(l));
 
-        bF = op.enhanceFunc(bF, List.of("collection","collection_name"), String.class,
+        bF = op.enhanceFunc(bF, List.of("collection", "collection_name"), String.class,
             CreateIndexParam.Builder::withCollectionName);
         bF = op.enhanceFunc(bF, "field_name", String.class, CreateIndexParam.Builder::withFieldName);
         bF = op.enhanceEnumOptionally(bF, "index_type", IndexType.class, CreateIndexParam.Builder::withIndexType);
         bF = op.enhanceEnumOptionally(bF, "metric_type", MetricType.class, CreateIndexParam.Builder::withMetricType);
         bF = op.enhanceFuncOptionally(bF, "extra_param", String.class, CreateIndexParam.Builder::withExtraParam);
         bF = op.enhanceFuncOptionally(bF, "sync_mode", Boolean.class, CreateIndexParam.Builder::withSyncMode);
-        bF = op.enhanceFuncOptionally(bF, "sync_waiting_interval", Long.class, CreateIndexParam.Builder::withSyncWaitingInterval);
-        bF = op.enhanceFuncOptionally(bF, "sync_waiting_timeout", Long.class, CreateIndexParam.Builder::withSyncWaitingTimeout);
-        bF = op.enhanceFuncOptionally(bF, List.of("database","database_name"), String.class,
+        bF = op.enhanceFuncOptionally(bF, "sync_waiting_interval", Number.class,
+            (CreateIndexParam.Builder b, Number n) -> b.withSyncWaitingInterval(n.longValue()));
+        bF = op.enhanceFuncOptionally(bF, "sync_waiting_timeout", Number.class,
+            (CreateIndexParam.Builder b, Number n) -> b.withSyncWaitingTimeout(n.longValue()));
+        bF = op.enhanceFuncOptionally(bF, List.of("database", "database_name"), String.class,
             CreateIndexParam.Builder::withDatabaseName);
         LongFunction<CreateIndexParam.Builder> finalBF1 = bF;
         return l -> finalBF1.apply(l).build();
     }
 
     @Override
-    public LongFunction<MilvusBaseOp<CreateIndexParam>> createOpFunc(LongFunction<CreateIndexParam> paramF, LongFunction<MilvusServiceClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<MilvusBaseOp<CreateIndexParam>> createOpFunc(
+        LongFunction<CreateIndexParam> paramF,
+        LongFunction<MilvusServiceClient> clientF,
+        ParsedOp op, LongFunction<String> targetF) {
         return l -> new MilvusCreateIndexOp(clientF.apply(l), paramF.apply(l));
     }
 }

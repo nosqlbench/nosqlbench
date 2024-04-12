@@ -16,22 +16,23 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
+import io.nosqlbench.engine.cmdstream.Cmd;
+import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
+import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.nb.api.components.status.NBHeartbeatComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
-import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
-import io.nosqlbench.engine.cmdstream.Cmd;
-import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
-import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
-import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
-import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 

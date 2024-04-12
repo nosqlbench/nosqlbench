@@ -40,7 +40,7 @@ public class Cqld4SsTableDispenser extends Cqld4BaseOpDispenser {
     }
 
     @Override
-    public Cqld4CqlOp apply(long cycle) {
+    public Cqld4CqlOp getOp(long cycle) {
 //        return new CqlD4SsTable(
 //            getSessionFunc().apply(value),
 //            (SsTable) stmtFunc.apply(value),

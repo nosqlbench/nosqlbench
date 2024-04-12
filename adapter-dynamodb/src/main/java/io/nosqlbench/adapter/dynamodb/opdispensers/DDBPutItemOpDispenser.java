@@ -51,7 +51,7 @@ public class DDBPutItemOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBS
     }
 
     @Override
-    public DynamoDBOp apply(long value) {
+    public DynamoDBOp getOp(long value) {
         String tablename = tableNameFunc.apply(value);
         Item item = itemfunc.apply(value);
         return new DDBPutItemOp(ddb,tablename,item);

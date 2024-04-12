@@ -24,12 +24,8 @@ import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusSearchOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.LongFunction;
 
 public class MilvusSearchOpDispenser extends MilvusBaseOpDispenser<SearchParam> {
@@ -53,9 +49,11 @@ public class MilvusSearchOpDispenser extends MilvusBaseOpDispenser<SearchParam> 
 
         ebF = op.enhanceEnumOptionally(ebF, "consistency_level", ConsistencyLevelEnum.class, SearchParam.Builder::withConsistencyLevel);
         ebF = op.enhanceFuncOptionally(ebF, "expr", String.class, SearchParam.Builder::withExpr);
-        ebF = op.enhanceDefaultFunc(ebF, "top_k", Integer.class, 100, SearchParam.Builder::withTopK);
+        ebF = op.enhanceDefaultFunc(ebF, "top_k", Number.class, 100,
+            (SearchParam.Builder b, Number n) -> b.withTopK(n.intValue()));
         ebF = op.enhanceEnumOptionally(ebF, "metric_type", MetricType.class, SearchParam.Builder::withMetricType);
-        ebF = op.enhanceFuncOptionally(ebF, "round_decimal", Integer.class, SearchParam.Builder::withRoundDecimal);
+        ebF = op.enhanceFuncOptionally(ebF, "round_decimal", Number.class,
+            (SearchParam.Builder b, Number n) -> b.withRoundDecimal(n.intValue()));
         ebF = op.enhanceFuncOptionally(ebF, "ignore_growing", Boolean.class, SearchParam.Builder::withIgnoreGrowing);
         ebF = op.enhanceFuncOptionally(ebF, "params", String.class, SearchParam.Builder::withParams);
         ebF = op.enhanceFunc(ebF, List.of("vector_field_name", "vector_field"), String.class,

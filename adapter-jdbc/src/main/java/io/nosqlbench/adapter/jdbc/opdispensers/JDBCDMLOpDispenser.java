@@ -101,7 +101,7 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
     }
 
     @Override
-    public JDBCDMLOp apply(long cycle) {
+    public JDBCDMLOp getOp(long cycle) {
         if (isReadStatement) {
             return new JDBCDMLReadOp(
                 jdbcSpace,
