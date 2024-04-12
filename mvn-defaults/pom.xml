@@ -362,7 +362,7 @@
             <dependency>
                 <groupId>org.graalvm.polyglot</groupId>
                 <artifactId>polyglot</artifactId>
-                <version>23.1.0</version>
+                <version>23.1.2</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.polyglot</groupId>
