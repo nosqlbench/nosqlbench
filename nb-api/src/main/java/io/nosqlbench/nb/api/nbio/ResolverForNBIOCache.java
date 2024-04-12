@@ -111,7 +111,7 @@ public class ResolverForNBIOCache implements ContentResolver {
             Path checksumPath = checksumPath(cachedFilePath);
             Files.writeString(checksumPath, localChecksumStr);
             logger.debug(() -> "Generated local checksum and saved to cache at " + checksumPath);
-            String remoteChecksum = new String(checksum.getInputStream().readAllBytes());
+            String remoteChecksum = stripControlCharacters(new String(checksum.getInputStream().readAllBytes()));
             if (localChecksumStr.equals(remoteChecksum)) {
                 return true;
             } else {
@@ -121,6 +121,10 @@ public class ResolverForNBIOCache implements ContentResolver {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static String stripControlCharacters(String input) {
+        return input.replaceAll("[\\p{Cntrl}]+$", "");
     }
 
     /**
@@ -192,7 +196,7 @@ public class ResolverForNBIOCache implements ContentResolver {
                 }
                 try {
                     String localChecksum = Files.readString(getOrCreateChecksum(cachedFilePath));
-                    String remoteChecksum = new String(checksum.getInputStream().readAllBytes());
+                    String remoteChecksum = stripControlCharacters(new String(checksum.getInputStream().readAllBytes()));
                     if (localChecksum.equals(remoteChecksum)) {
                         return cachedFilePath;
                     }
