@@ -198,6 +198,20 @@
         </profile>
 
         <profile>
+            <id>adapter-neo4j-include</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>adapter-neo4j</artifactId>
+                    <version>${revision}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
             <id>adapter-kafka-include</id>
             <activation>
                 <activeByDefault>false</activeByDefault>

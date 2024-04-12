@@ -125,6 +125,16 @@
         </profile>
 
         <profile>
+            <id>adapter-neo4j-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-neo4j</module>
+            </modules>
+        </profile>
+
+        <profile>
             <id>adapter-pulsar-module</id>
             <activation>
                 <activeByDefault>true</activeByDefault>

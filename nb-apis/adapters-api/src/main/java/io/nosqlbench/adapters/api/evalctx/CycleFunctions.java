@@ -21,10 +21,10 @@ import java.util.function.BinaryOperator;
 
 public class CycleFunctions {
     public static <T> CycleFunction<T> of(BinaryOperator<T> reducer, List<CycleFunction<T>> verifiers, T defaultResult) {
-        if (verifiers.size()==0) {
+        if (verifiers.isEmpty()) {
             return new NOOPVerifier<>(defaultResult);
         } else if (verifiers.size()==1) {
-            return verifiers.get(0);
+            return verifiers.getFirst();
         } else {
             return new CompoundCycleFunction<>(reducer, verifiers);
         }
@@ -53,7 +53,7 @@ public class CycleFunctions {
         }
 
         @Override
-        public <V> void setVariable(String name, V value) {
+        public <VT> void setVariable(String name, VT value) {
         }
 
         @Override
