@@ -52,4 +52,8 @@ public class URIResolvers {
     public static URIResolver inClasspath() {
         return new URIResolver().inCP();
     }
+
+    public static URIResolver inNBIOCache() {
+        return new URIResolver().inNBIOCache();
+    }
 }

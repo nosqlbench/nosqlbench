@@ -53,7 +53,7 @@ public class MilvusOpMapper implements OpMapper<MilvusBaseOp<?>> {
             "type",
             "target"
         );
-        logger.info(() -> "Using '" + typeAndTarget.enumId + "' statement form for '" + op.getName() + "'");
+        logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
 
         return switch (typeAndTarget.enumId) {
             case drop_collection -> new MilvusDropCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);

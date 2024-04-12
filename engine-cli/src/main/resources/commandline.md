@@ -226,13 +226,21 @@ The classic metrics logging format is used to report results into the logfile fo
 This format is not generally human-friendly, so a better summary report is provided by default to
 the console and/or a specified summary file by default.
 
+By default, summaries are always reported to a summary file in the logs directory.
+It is highly recommended that you use this form in general. Users are often more interested
+in seeing play-by-play high-level details on console, and more human-readable forms of metrics
+summaries are easily created with other options.
+
 Examples:
+
+    # report to auto-named summary file for every session
+    --report-summary-to _LOGS_/_SESSION_.summary
 
     # report to console if session ran more than 60 seconds
     --report-summary-to stdout:60
 
-    # report to auto-named summary file for every session
-    --report-summary-to _LOGS_/_SESSION_.summary
+    # simply enable reporting summary to console only, same as above
+    --summary
 
     # do both (the default)
     --report-summary-to stdout:60,_LOGS_/_SESSION_.summary

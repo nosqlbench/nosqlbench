@@ -68,6 +68,14 @@ public interface NBPathsAPI {
         GetPrefixes fileContent();
 
         /**
+         * Return content from the NBIO cache. If the content is not in the cache look for it in the given
+         * URL and put it in the cache.
+         *
+         * @return this builder
+         */
+        GetPrefixes cachedContent();
+
+        /**
          * Return content from everywhere, from remote URls, or from the file system and then the internal
          * bundled content if not found in the file system first.
          *

@@ -121,7 +121,8 @@ public class NBCLIOptions {
     private static final String GRAPHITE_LOG_LEVEL = "--graphite-log-level";
     private static final String REPORT_CSV_TO = "--report-csv-to";
     private static final String REPORT_SUMMARY_TO = "--report-summary-to";
-    private static final String REPORT_SUMMARY_TO_DEFAULT = "stdout:60,_LOGS_/_SESSION__summary.txt";
+    private static final String SUMMARY = "--summary";
+    private static final String REPORT_SUMMARY_TO_DEFAULT = "_LOGS_/_SESSION__summary.txt";
     private static final String PROGRESS = "--progress";
     private static final String WITH_LOGGING_PATTERN = "--with-logging-pattern";
     private static final String LOGGING_PATTERN = "--logging-pattern";
@@ -136,6 +137,11 @@ public class NBCLIOptions {
     private static final String DEFAULT_CONSOLE_PATTERN = "TERSE";
     private static final String DEFAULT_LOGFILE_PATTERN = "VERBOSE";
     private final static String ENABLE_DEDICATED_VERIFICATION_LOGGER = "--enable-dedicated-verification-logging";
+    private final static String USE_NBIO_CACHE = "--use-nbio-cache";
+    private final static String NBIO_CACHE_FORCE_UPDATE = "--nbio-cache-force-update";
+    private final static String NBIO_CACHE_NO_VERIFY = "--nbio-cache-no-verify";
+    private final static String NBIO_CACHE_DIR = "--nbio-cache-dir";
+    private final static String NBIO_CACHE_MAX_RETRIES = "--nbio-cache-max-retries";
 
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
@@ -203,8 +209,13 @@ public class NBCLIOptions {
     private boolean wantsConsoleMetrics = true;
     private String annotateLabelSpec = "";
     private String metricsLabelSpec = "";
-    private String wantsToCatResource ="";
+    private String wantsToCatResource = "";
     private long heartbeatIntervalMs = 10000;
+    private boolean useNBIOCache = false;
+    private boolean nbioCacheForceUpdate = false;
+    private boolean nbioCacheVerify = true;
+    private String nbioCacheDir;
+    private String nbioCacheMaxRetries;
 
     public boolean wantsLoggedMetrics() {
         return this.wantsConsoleMetrics;
@@ -271,7 +282,7 @@ public class NBCLIOptions {
     }
 
     public boolean wantsToCatResource() {
-        return this.wantsToCatResource!=null && !this.wantsToCatResource.isEmpty();
+        return this.wantsToCatResource != null && !this.wantsToCatResource.isEmpty();
     }
 
     public enum Mode {
@@ -596,6 +607,10 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     this.reportCsvTo = arglist.removeFirst();
                     break;
+                case NBCLIOptions.SUMMARY:
+                    arglist.removeFirst();
+                    this.reportSummaryTo = "stdout:0";
+                    break;
                 case NBCLIOptions.REPORT_SUMMARY_TO:
                     arglist.removeFirst();
                     this.reportSummaryTo = this.readWordOrThrow(arglist, "report summary file");
@@ -644,7 +659,27 @@ public class NBCLIOptions {
                 case HEARTBEAT_MILLIS:
                     arglist.removeFirst();
                     this.heartbeatIntervalMs =
-                            Long.parseLong(this.readWordOrThrow(arglist, "heartbeat interval in ms"));
+                        Long.parseLong(this.readWordOrThrow(arglist, "heartbeat interval in ms"));
+                    break;
+                case USE_NBIO_CACHE:
+                    arglist.removeFirst();
+                    this.useNBIOCache = true;
+                    break;
+                case NBIO_CACHE_FORCE_UPDATE:
+                    arglist.removeFirst();
+                    this.nbioCacheForceUpdate = true;
+                    break;
+                case NBIO_CACHE_NO_VERIFY:
+                    arglist.removeFirst();
+                    this.nbioCacheVerify = false;
+                    break;
+                case NBCLIOptions.NBIO_CACHE_DIR:
+                    arglist.removeFirst();
+                    this.nbioCacheDir = this.readWordOrThrow(arglist, "a NBIO cache directory");
+                    break;
+                case NBIO_CACHE_MAX_RETRIES:
+                    arglist.removeFirst();
+                    this.nbioCacheMaxRetries = this.readWordOrThrow(arglist, "the maximum number of attempts to fetch a resource from the cache");
                     break;
                 default:
                     nonincludes.addLast(arglist.removeFirst());
@@ -673,8 +708,7 @@ public class NBCLIOptions {
                 """
                 .replaceAll("ARG", cmdParam)
                 .replaceAll("PROG", "nb5")
-                .replaceAll("INCLUDES", String.join(",", wantsIncludes()))
-                ;
+                .replaceAll("INCLUDES", String.join(",", wantsIncludes()));
 
             final String debugMessage = """
 
@@ -683,7 +717,7 @@ public class NBCLIOptions {
                 COMMANDSTREAM
                 """
                 .replaceAll("COMMANDSTREAM",
-                    String.join(" ",arglist));
+                    String.join(" ", arglist));
             if (consoleLevel.isGreaterOrEqualTo(NBLogLevel.INFO)) {
                 System.out.println(debugMessage);
             }
@@ -807,6 +841,21 @@ public class NBCLIOptions {
 
     public NBLogLevel getConsoleLogLevel() {
         return this.consoleLevel;
+    }
+    public boolean wantsToUseNBIOCache() {
+        return this.useNBIOCache;
+    }
+    public boolean wantsNbioCacheForceUpdate() {
+        return nbioCacheForceUpdate;
+    }
+    public boolean wantsNbioCacheVerify() {
+        return nbioCacheVerify;
+    }
+    public String getNbioCacheDir() {
+        return nbioCacheDir;
+    }
+    public String getNbioCacheMaxRetries() {
+        return nbioCacheMaxRetries;
     }
 
     private String readWordOrThrow(final LinkedList<String> arglist, final String required) {

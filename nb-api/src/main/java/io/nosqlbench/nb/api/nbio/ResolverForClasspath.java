@@ -101,9 +101,11 @@ public class ResolverForClasspath implements ContentResolver {
     public List<Path> resolveDirectory(URI uri) {
         List<Path> path = resolvePaths(uri);
         List<Path> dirs = new ArrayList<>();
-        for (Path dirpath : path) {
-            if (Files.isDirectory(dirpath)) {
-                dirs.add(dirpath);
+        if (path != null) {
+            for (Path dirpath : path) {
+                if (Files.isDirectory(dirpath)) {
+                    dirs.add(dirpath);
+                }
             }
         }
         return dirs;

@@ -1134,5 +1134,11 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     }
 
 
-
+    public Map<String,Object> getCombinedPrototype() {
+        Map<String,Object> prototype = new LinkedHashMap<>();
+        prototype.putAll(getDynamicPrototype());
+        prototype.putAll(getStaticPrototype());
+        prototype.putAll(getConfigPrototype());
+        return prototype;
+    }
 }

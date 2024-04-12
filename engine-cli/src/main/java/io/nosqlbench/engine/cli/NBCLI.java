@@ -49,6 +49,7 @@ import io.nosqlbench.engine.core.logging.NBLoggerConfig;
 import io.nosqlbench.engine.core.metadata.MarkdownFinder;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.annotations.ServiceSelector;
+import io.nosqlbench.nb.api.nbio.ResolverForNBIOCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
@@ -220,6 +221,26 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         NBCLI.logger = LogManager.getLogger("NBCLI");
 
         NBIO.addGlobalIncludes(options.wantsIncludes());
+        NBIO.setUseNBIOCache(options.wantsToUseNBIOCache());
+        if(options.wantsToUseNBIOCache()) {
+            logger.info(() -> "Configuring options for NBIO Cache");
+            logger.info(() -> "Setting NBIO Cache Force Update to " + options.wantsNbioCacheForceUpdate());
+            ResolverForNBIOCache.setForceUpdate(options.wantsNbioCacheForceUpdate());
+            logger.info(() -> "Setting NBIO Cache Verify Checksum to " + options.wantsNbioCacheVerify());
+            ResolverForNBIOCache.setVerifyChecksum(options.wantsNbioCacheVerify());
+            if (options.getNbioCacheDir() != null) {
+                logger.info(() -> "Setting NBIO Cache directory to " + options.getNbioCacheDir());
+                ResolverForNBIOCache.setCacheDir(options.getNbioCacheDir());
+            }
+            if (options.getNbioCacheMaxRetries() != null) {
+                try {
+                    ResolverForNBIOCache.setMaxRetries(Integer.parseInt(options.getNbioCacheMaxRetries()));
+                    logger.info(() -> "Setting NBIO Cache max retries to " + options.getNbioCacheMaxRetries());
+                } catch (NumberFormatException e) {
+                    logger.error("Invalid value for nbio-cache-max-retries: " + options.getNbioCacheMaxRetries());
+                }
+            }
+        }
 
         if (options.wantsBasicHelp()) {
             System.out.println(this.loadHelpFile("basic.md"));
@@ -381,16 +402,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 //            reporters.start(10, options.getReportInterval());
 //        }
 //
-//        for (
-//            final LoggerConfigData histoLogger : options.getHistoLoggerConfigs())
-//            ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
-//        for (
-//            final LoggerConfigData statsLogger : options.getStatsLoggerConfigs())
-//            ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
-//        for (
-//            final LoggerConfigData classicConfigs : options.getClassicHistoConfigs())
-//            ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
-//
 //        if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
 //            options.setWantsStackTraces(true);
 //            NBCLI.logger.debug(() -> "enabling stack traces since log level is " + options.getConsoleLogLevel());
@@ -446,7 +457,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 }
                 session.create().pushReporter(uri, intervalMs, NBLabels.forKV());
             });
-
+            for (final NBCLIOptions.LoggerConfigData histoLogger : options.getHistoLoggerConfigs()) {
+                session.create().histoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.millis);
+            }
+            for (final NBCLIOptions.LoggerConfigData statsLogger : options.getStatsLoggerConfigs()) {
+                session.create().histoStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.millis);
+            }
 
             ExecutionResult sessionResult = session.apply(options.getCommands());
             logger.info(sessionResult);

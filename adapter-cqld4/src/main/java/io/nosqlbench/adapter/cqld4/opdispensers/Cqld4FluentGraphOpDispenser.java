@@ -57,7 +57,7 @@ public class Cqld4FluentGraphOpDispenser extends BaseOpDispenser<Op, Cqld4Space>
     }
 
     @Override
-    public Op apply(long value) {
+    public Op getOp(long value) {
         String graphname = graphnameFunc.apply(value);
         Script script = tlScript.get();
         Map<String, Object> allMap = virtdataBindings.getAllMap(value);

@@ -117,14 +117,15 @@ public class StrInterpolator implements Function<String, String> {
 //            }
 
             accesses.put(key,value);
-            logger.debug("Template parameter '" + key + "' applied as '" + value + "'");
+            logger.trace("Template parameter '" + key + "' applied as '" + value + "'");
+            // TODO summarize these to how many times
             return value;
 
         }
 
         public Map<String,String> checkpointAccesses() {
             LinkedHashMap<String,String> accesses = new LinkedHashMap<>(this.accesses);
-            logger.debug("removed template params after applying:" + accesses);
+            logger.trace("removed template params after applying:" + accesses);
             this.accesses.clear();
             return accesses;
 

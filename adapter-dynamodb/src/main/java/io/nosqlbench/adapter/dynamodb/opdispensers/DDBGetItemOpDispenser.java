@@ -83,7 +83,7 @@ public class DDBGetItemOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBS
     }
 
     @Override
-    public DDBGetItemOp apply(long value) {
+    public DDBGetItemOp getOp(long value) {
         Table table = targetTableFunction.apply(value);
         GetItemSpec getitemSpec = getItemSpecFunc.apply(value);
         return new DDBGetItemOp(ddb, table, getitemSpec);

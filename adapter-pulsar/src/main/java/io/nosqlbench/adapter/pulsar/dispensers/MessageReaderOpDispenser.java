@@ -52,7 +52,7 @@ public class MessageReaderOpDispenser extends PulsarClientOpDispenser {
     }
 
     @Override
-    public MessageReaderOp apply(long cycle) {
+    public MessageReaderOp getOp(long cycle) {
 
         return new MessageReaderOp(
             pulsarAdapterMetrics,

@@ -175,7 +175,7 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
     }
 
     @Override
-    public AmqpTimeTrackOp apply(long cycle) {
+    public AmqpTimeTrackOp getOp(long cycle) {
         String msgPayload = msgPayloadFunc.apply(cycle);
         if (StringUtils.isBlank(msgPayload)) {
             throw new AmqpAdapterInvalidParamException("Message payload must be specified and can't be empty!");

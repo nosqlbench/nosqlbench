@@ -17,6 +17,8 @@
 package io.nosqlbench.adapter.milvus.ops;
 
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.param.R;
+import io.milvus.param.RpcStatus;
 import io.milvus.param.collection.LoadCollectionParam;
 
 public class MilvusLoadCollectionOp extends MilvusBaseOp<LoadCollectionParam> {
@@ -26,6 +28,7 @@ public class MilvusLoadCollectionOp extends MilvusBaseOp<LoadCollectionParam> {
 
     @Override
     public Object applyOp(long value) {
-        return client.loadCollection(request);
+        R<RpcStatus> rpcStatusR = client.loadCollection(request);
+        return rpcStatusR;
     }
 }

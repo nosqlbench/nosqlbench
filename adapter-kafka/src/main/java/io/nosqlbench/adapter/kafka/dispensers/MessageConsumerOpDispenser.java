@@ -155,7 +155,7 @@ public class MessageConsumerOpDispenser extends KafkaBaseOpDispenser {
     }
 
     @Override
-    public KafkaOp apply(final long cycle) {
+    public KafkaOp getOp(final long cycle) {
         final List<String> topicNameList = this.getEffectiveTopicNameList(cycle);
         final String groupId = this.getEffectiveGroupId(cycle);
         if ((0 == topicNameList.size()) || StringUtils.isBlank(groupId)) throw new KafkaAdapterInvalidParamException(

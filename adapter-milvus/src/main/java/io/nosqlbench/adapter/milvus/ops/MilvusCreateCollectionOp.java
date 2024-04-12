@@ -17,6 +17,8 @@
 package io.nosqlbench.adapter.milvus.ops;
 
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.param.R;
+import io.milvus.param.RpcStatus;
 import io.milvus.param.collection.CreateCollectionParam;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
@@ -33,6 +35,7 @@ public class MilvusCreateCollectionOp extends MilvusBaseOp<CreateCollectionParam
 
     @Override
     public Object applyOp(long value) {
-        return client.createCollection(request);
+        R<RpcStatus> collection = client.createCollection(request);
+        return collection;
     }
 }
