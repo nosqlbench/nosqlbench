@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2022-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public class NBCLIScenarioPreprocessorTest {
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
-            "_impl","run",
+            "_impl", "run",
             "alias", "with_template",
             "container", "template_test",
             "cycles", "20",
@@ -178,7 +178,7 @@ public class NBCLIScenarioPreprocessorTest {
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
-            "_impl","run",
+            "_impl", "run",
             "alias", "schema",
             "container", "schema_only",
             "cycles-test", "20",
@@ -188,7 +188,7 @@ public class NBCLIScenarioPreprocessorTest {
             "tags", "block:\"schema.*\"",
             "workload", "scenario_test"
         ));
-        NBCLIOptions opts1 = new NBCLIOptions(new String[]{"local/example_scenarios", "namedsteps.one", "testparam1=testvalue2"}, NBCLIOptions.Mode.ParseAllOptions);
+        NBCLIOptions opts1 = new NBCLIOptions(new String[]{"example_scenarios", "namedsteps.one", "testparam1=testvalue2"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds1 = opts1.getCommands();
         assertThat(cmds1.size()).isEqualTo(1);
         assertThat(cmds1.get(0).getArgValueOrNull("cycles_test")).isNull();
