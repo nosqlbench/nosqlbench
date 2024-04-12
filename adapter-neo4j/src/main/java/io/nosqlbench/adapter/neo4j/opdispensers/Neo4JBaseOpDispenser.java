@@ -61,7 +61,7 @@ public abstract class Neo4JBaseOpDispenser extends BaseOpDispenser<Neo4JBaseOp, 
     public abstract LongFunction<? extends Neo4JBaseOp> createOpFunc();
 
     @Override
-    public Neo4JBaseOp apply(long cycle) {
+    public Neo4JBaseOp getOp(long cycle) {
         return opFunc.apply(cycle);
     }
 }

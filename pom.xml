@@ -70,8 +70,7 @@
         <module>adapter-amqp</module>
         <module>adapter-jdbc</module>
 <!--        <module>adapter-pinecone</module>-->
-        <module>adapter-milvus</module>
-        <module>adapter-mongodb</module>
+<!--        <module>adapter-milvus</module>-->
         <module>adapter-neo4j</module>
         <module>adapter-aws-opensearch</module>
 <!--        <module>adapter-milvus</module>-->
