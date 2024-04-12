@@ -69,9 +69,10 @@
         <module>adapter-kafka</module>
         <module>adapter-amqp</module>
         <module>adapter-jdbc</module>
+        <module>adapter-neo4j</module>
 <!--        <module>adapter-pinecone</module>-->
-        <module>adapter-aws-opensearch</module>
 <!--        <module>adapter-milvus</module>-->
+        <module>adapter-aws-opensearch</module>
 
 
         <!-- VIRTDATA MODULES -->

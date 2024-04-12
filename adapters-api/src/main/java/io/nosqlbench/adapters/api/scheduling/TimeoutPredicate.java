@@ -91,10 +91,8 @@ public class TimeoutPredicate<T> {
             if (isComplete) {
                 return new Result<>(value, Status.complete, totalNanos, timeoutNanos, null);
             } else if (remaining > 0) {
-//                System.out.println("pulse:" + pulseTime + " end:" + endNanos + " remaining:" + remaining);
                 return new Result<>(value, Status.pending, totalNanos, timeoutNanos, null);
             } else {
-//                System.out.println("pulse:" + pulseTime + " end:" + endNanos + " remaining:" + remaining);
                 return new Result<>(value, Status.incomplete, totalNanos, timeoutNanos, null);
             }
         } catch (Exception e) {

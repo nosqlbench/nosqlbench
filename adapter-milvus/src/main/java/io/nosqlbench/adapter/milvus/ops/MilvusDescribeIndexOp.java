@@ -84,7 +84,7 @@ public class MilvusDescribeIndexOp extends MilvusBaseOp<DescribeIndexParam> impl
             return stream().mapToInt(IndexStat::percent).min().orElse(0);
         }
     }
-    public static final record IndexStat(
+    public record IndexStat(
         String index_name,
         long indexed_rows,
         long pending_rows
