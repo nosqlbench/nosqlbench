@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ public class TimeoutPredicateTest {
 
     @Test
     public void testNeverCompletablePreciate() {
-        int interval=10;
-        int timeout=500;
+        int interval = 10;
+        int timeout = 500;
 
         TimeoutPredicate<Boolean> wontMakeIt = TimeoutPredicate.of(
-            ()->false,
+            () -> false,
             l -> l,
             Duration.ofMillis(timeout),
             Duration.ofMillis(interval),
@@ -43,12 +43,12 @@ public class TimeoutPredicateTest {
         assertThat(resultNow.status()).isEqualTo(TimeoutPredicate.Status.pending);
 
         resultNow = wontMakeIt.test();
-        assertThat(resultNow.duration_ns()).isBetween(10*1_000_000L,50*1_000_000L);
+        assertThat(resultNow.duration_ns()).isBetween(10 * 1_000_000L, 50 * 1_000_000_000L);
         assertThat(resultNow.value()).isFalse();
         assertThat(resultNow.status()).isEqualTo(TimeoutPredicate.Status.pending);
 
-        while (resultNow.status()== TimeoutPredicate.Status.pending) {
-            resultNow=wontMakeIt.test();
+        while (resultNow.status() == TimeoutPredicate.Status.pending) {
+            resultNow = wontMakeIt.test();
         }
 
         assertThat(resultNow.status()).isEqualTo(TimeoutPredicate.Status.incomplete);
@@ -57,10 +57,10 @@ public class TimeoutPredicateTest {
 
     @Test
     public void testImmediatelyCompletablePreciate() {
-        int interval=10;
-        int timeout=5000;
+        int interval = 10;
+        int timeout = 5000;
         TimeoutPredicate<Boolean> canMakeIt = TimeoutPredicate.of(
-            ()->true,
+            () -> true,
             l -> l,
             Duration.ofMillis(timeout),
             Duration.ofMillis(interval),
@@ -77,13 +77,13 @@ public class TimeoutPredicateTest {
     @Test
     public void testEventuallyCompletePredicate() {
 
-        int interval=250;
-        int timeout=5000;
+        int interval = 250;
+        int timeout = 5000;
         long now = System.currentTimeMillis();
-        long inASec = now+1000;
+        long inASec = now + 1000;
         TimeoutPredicate<Long> canMakeIt = TimeoutPredicate.of(
             System::currentTimeMillis,
-            l -> l>inASec,
+            l -> l > inASec,
             Duration.ofMillis(timeout),
             Duration.ofMillis(interval),
             true
@@ -92,9 +92,9 @@ public class TimeoutPredicateTest {
         TimeoutPredicate.Result<Long> result = canMakeIt.test();
         System.out.println(result);
 
-        while (result.status()== TimeoutPredicate.Status.pending) {
+        while (result.status() == TimeoutPredicate.Status.pending) {
 //            canMakeIt.blockUntilNextInterval();
-            result=canMakeIt.test();
+            result = canMakeIt.test();
             System.out.println(canMakeIt);
             System.out.println(result);
         }
