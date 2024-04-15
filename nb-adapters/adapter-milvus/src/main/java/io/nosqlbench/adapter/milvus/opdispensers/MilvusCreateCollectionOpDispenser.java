@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.grpc.DataType;
+import io.milvus.param.collection.CollectionSchemaParam;
 import io.milvus.param.collection.CreateCollectionParam;
 import io.milvus.param.collection.FieldType;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
@@ -70,11 +71,10 @@ public class MilvusCreateCollectionOpDispenser extends MilvusBaseOpDispenser<Cre
             CreateCollectionParam.Builder::withDatabaseName);
 
         List<FieldType> fieldTypes = buildFieldTypesStruct(
-            op.getAsSubOps("field_types", ParsedOp.SubOpNaming.SubKey),
-            ebF
+            op.getAsSubOps("field_types", ParsedOp.SubOpNaming.SubKey)
         );
         final LongFunction<CreateCollectionParam.Builder> f = ebF;
-        ebF = l -> f.apply(l).withFieldTypes(fieldTypes);
+        ebF = l -> f.apply(l).withSchema(CollectionSchemaParam.newBuilder().withFieldTypes(fieldTypes).build());
 
         final LongFunction<CreateCollectionParam.Builder> lastF = ebF;
         return l -> lastF.apply(l).build();
@@ -95,10 +95,9 @@ public class MilvusCreateCollectionOpDispenser extends MilvusBaseOpDispenser<Cre
      * Function to build the {@link FieldType}s for the {@link CreateCollectionParam}.
      *
      * @param fieldTypesData The static map of config data from the create collection request
-     * @param ebF
      * @return a list of static field types
      */
-    private List<FieldType> buildFieldTypesStruct(Map<String, ParsedOp> fieldTypesData, LongFunction<CreateCollectionParam.Builder> ebF) {
+    private List<FieldType> buildFieldTypesStruct(Map<String, ParsedOp> fieldTypesData) {
         List<FieldType> fieldTypes = new ArrayList<>();
         fieldTypesData.forEach((name, fieldspec) -> {
             FieldType.Builder builder = FieldType.newBuilder()

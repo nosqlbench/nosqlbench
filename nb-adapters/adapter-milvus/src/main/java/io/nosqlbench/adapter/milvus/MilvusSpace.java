@@ -51,10 +51,8 @@ public class MilvusSpace implements AutoCloseable {
      * Create a new MilvusSpace Object which stores all stateful contextual information needed to interact
      * with the Milvus/Zilliz database instance.
      *
-     * @param name
-     *     The name of this space
-     * @param cfg
-     *     The configuration ({@link NBConfiguration}) for this nb run
+     * @param name The name of this space
+     * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
      */
     public MilvusSpace(String name, NBConfiguration cfg) {
         this.name = name;
@@ -89,16 +87,13 @@ public class MilvusSpace implements AutoCloseable {
             ).orElseGet(
                 () -> cfg.getOptional("token")
                     .orElseThrow(() -> new RuntimeException("You must provide either a token_file or a token to " +
-                        "configure a Milvus client"))
+                        "configure a Milvus/Zilliz client"))
             );
-
         builder = builder.withToken(requiredToken);
 
         ConnectParam connectParams = builder.build();
-
-        logger.info(this.name + ": Creating new Milvus/Zilliz Client with (masked) " +
-            "token [" + MilvusAdapterUtils.maskDigits(builder.getToken()) + "], uri/endpoint [" + builder.getUri() + "]"
-        );
+        logger.info("{}: Creating new Milvus/Zilliz Client with (masked) token [{}], uri/endpoint [{}]",
+            this.name, MilvusAdapterUtils.maskDigits(builder.getToken()), builder.getUri());
         return new MilvusServiceClient(connectParams);
     }
 
@@ -117,8 +112,8 @@ public class MilvusSpace implements AutoCloseable {
                     .setDescription("the URI endpoint in which the database is running.")
             )
             .add(
-                Param.optional(List.of("database_name","database"))
-                    .setDescription("the name of the database to use. Defaults to 'baselines'")
+                Param.optional(List.of("database_name", "database"))
+                    .setDescription("the name of the database to use.")
             )
             .asReadOnly();
     }
