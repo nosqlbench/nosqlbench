@@ -46,4 +46,19 @@ public class SimRateSpecTest {
         SimRateSpec c = new SimRateSpec("12345,1.1");
         assertThat(c.verb).isEqualTo(SimRateSpec.Verb.start);
     }
+
+    @Test
+    public void testScopeSelection() {
+        SimRateSpec asd = new SimRateSpec("12345,1.4");
+        assertThat(asd.getScope()).isEqualTo(SimRateSpec.Scope.activity);
+        SimRateSpec ts = new SimRateSpec("12345,1.4,start,thread");
+        assertThat(ts.getScope()).isEqualTo(SimRateSpec.Scope.thread);
+        SimRateSpec as = new SimRateSpec("12345,1.4,start,activity");
+        assertThat(as.getScope()).isEqualTo(SimRateSpec.Scope.activity);
+        SimRateSpec asa = new SimRateSpec("12345,1.4,activity");
+        assertThat(asa.getScope()).isEqualTo(SimRateSpec.Scope.activity);
+        SimRateSpec ast = new SimRateSpec("12345,1.4,thread");
+        assertThat(ast.getScope()).isEqualTo(SimRateSpec.Scope.thread);
+
+    }
 }

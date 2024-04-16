@@ -106,22 +106,6 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
      */
     RateLimiter getCycleLimiter();
 
-    /**
-     * Set the cycle rate limiter for this activity. This method should only
-     * be used non-concurrently. Otherwise, the supplier version
-     * {@link #getCycleRateLimiter(Supplier)} should be used.
-     * @param rateLimiter The cycle {@link RateLimiter} for this activity
-     */
-    void setCycleLimiter(RateLimiter rateLimiter);
-
-    /**
-     * Get or create the cycle rate limiter in a safe way. Implementations
-     * should ensure that this method is synchronized or that each requester
-     * gets the same cycle rate limiter for the activity.
-     * @param supplier A {@link RateLimiter} {@link Supplier}
-     * @return An extant or newly created cycle {@link RateLimiter}
-     */
-    RateLimiter getCycleRateLimiter(Supplier<? extends RateLimiter> supplier);
 
     /**
      * Get the current stride rate limiter for this activity.
@@ -130,23 +114,6 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
      * @return The stride {@link RateLimiter}
      */
     RateLimiter getStrideLimiter();
-
-    /**
-     * Set the stride rate limiter for this activity. This method should only
-     * be used non-concurrently. Otherwise, the supplier version
-     * {@link #getStrideRateLimiter(Supplier)}} should be used.
-     * @param rateLimiter The stride {@link RateLimiter} for this activity.
-     */
-    void setStrideLimiter(RateLimiter rateLimiter);
-
-    /**
-     * Get or create the stride {@link RateLimiter} in a concurrent-safe
-     * way. Implementations should ensure that this method is synchronized or
-     * that each requester gets the same stride rate limiter for the activity.
-     * @param supplier A {@link RateLimiter} {@link Supplier}
-     * @return An extant or newly created stride {@link RateLimiter}
-     */
-    RateLimiter getStrideRateLimiter(Supplier<? extends RateLimiter> supplier);
 
     /**
      * Get or create the instrumentation needed for this activity. This provides

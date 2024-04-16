@@ -49,7 +49,6 @@ import java.time.temporal.ChronoUnit;
  * </UL>
  * <p>
  * Where:
- *
  * <EM>rate</EM> is the ops per second, expressed as any positive floating point value.
  * <EM>burst ratio</EM> is a floating point value greater than 1.0 which determines how much faster
  * the rate limiter may go to catch up to the overall.
@@ -128,8 +127,13 @@ public class SimRateSpec {
     public static final double DEFAULT_RATE_OPS_S = 1.0D;
     public static final double DEFAULT_BURST_RATIO = 1.1D;
     public static Verb DEFAULT_VERB = Verb.start;
+    public enum Scope {
+        thread,
+        activity
+    }
 
     public ChronoUnit unit;
+    private Scope scope = Scope.activity;
 
     /**
      * Target rate in Operations Per Second
@@ -212,16 +216,23 @@ public class SimRateSpec {
     public SimRateSpec(double opsPerSec, double burstRatio) {
         this(opsPerSec, burstRatio, DEFAULT_VERB);
     }
-
-    public SimRateSpec(double opsPerSec, double burstRatio, Verb type) {
-        apply(opsPerSec, burstRatio, verb);
+    public SimRateSpec(double opsPerSec, double burstRatio, Verb verb) {
+        apply(opsPerSec, burstRatio, verb, Scope.activity);
+    }
+    public SimRateSpec(double opsPerSec, double burstRatio, Scope scope) {
+        apply(opsPerSec, burstRatio, DEFAULT_VERB, scope);
+    }
+    public SimRateSpec(double opsPerSec, double burstRatio, Verb verb, Scope scope) {
+        apply(opsPerSec, burstRatio, verb, scope);
     }
 
-    private void apply(double opsPerSec, double burstRatio, Verb verb) {
+
+    private void apply(double opsPerSec, double burstRatio, Verb verb, Scope scope) {
         this.opsPerSec = opsPerSec;
         this.burstRatio = burstRatio;
         this.verb = verb;
         this.unit = chronoUnitFor(opsPerSec);
+        this.scope = scope;
 
         // TODO: include burst into ticks calculation
     }
@@ -245,13 +256,21 @@ public class SimRateSpec {
 
     public SimRateSpec(String spec) {
         String[] specs = spec.split("[,:;]");
-        Verb verb = Verb.start;
-        double burstRatio = DEFAULT_BURST_RATIO;
         double opsPerSec;
+        double burstRatio = DEFAULT_BURST_RATIO;
+        Verb verb = Verb.start;
+        Scope scope = Scope.activity;
         switch (specs.length) {
+            case 4:
+                scope = Scope.valueOf(specs[3].toLowerCase());
             case 3:
-                verb = Verb.valueOf(specs[2].toLowerCase());
-                logger.debug("selected rate limiter type: " + verb);
+                try {
+                    scope = Scope.valueOf(specs[2].toLowerCase());
+                    logger.debug("selected rate limiter scope: " + scope);
+                } catch (IllegalArgumentException iae) {
+                    verb = Verb.valueOf(specs[2].toLowerCase());
+                    logger.debug("selected rate limiter type: " + verb);
+                }
             case 2:
                 burstRatio = Double.valueOf(specs[1]);
                 if (burstRatio < 1.0) {
@@ -263,7 +282,7 @@ public class SimRateSpec {
             default:
                 throw new RuntimeException("Rate specs must be either '<rate>' or '<rate>:<burstRatio>' as in 5000.0 or 5000.0:1.0");
         }
-        apply(opsPerSec, burstRatio, verb);
+        apply(opsPerSec, burstRatio, verb, scope);
     }
 
     public String toString() {
@@ -318,6 +337,11 @@ public class SimRateSpec {
     public boolean isRestart() {
         return this.verb == Verb.restart;
     }
+
+    public Scope getScope() {
+        return this.scope;
+    }
+
 
 
 }
