@@ -4,7 +4,7 @@ description: |
   Template Variables:
   TEMPLATE(milvushost,localhost)
   TEMPLATE(datafile)
-  TEMPLATE(database,baselines)
+  TEMPLATE(database,default)
   TEMPLATE(collection,vector)
   TEMPLATE(trainsize,1183514)
   TEMPLATE(testsize,10000)
