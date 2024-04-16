@@ -48,17 +48,31 @@ public class SimRateSpecTest {
     }
 
     @Test
-    public void testScopeSelection() {
-        SimRateSpec asd = new SimRateSpec("12345,1.4");
-        assertThat(asd.getScope()).isEqualTo(SimRateSpec.Scope.activity);
-        SimRateSpec ts = new SimRateSpec("12345,1.4,start,thread");
-        assertThat(ts.getScope()).isEqualTo(SimRateSpec.Scope.thread);
-        SimRateSpec as = new SimRateSpec("12345,1.4,start,activity");
-        assertThat(as.getScope()).isEqualTo(SimRateSpec.Scope.activity);
-        SimRateSpec asa = new SimRateSpec("12345,1.4,activity");
-        assertThat(asa.getScope()).isEqualTo(SimRateSpec.Scope.activity);
-        SimRateSpec ast = new SimRateSpec("12345,1.4,thread");
-        assertThat(ast.getScope()).isEqualTo(SimRateSpec.Scope.thread);
+    public void testVariantFormats() {
+        assertThat(new SimRateSpec("12345"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.1d, SimRateSpec.Verb.start, SimRateSpec.Scope.activity
+                ));
+        assertThat(new SimRateSpec("12345,1.4"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.4d, SimRateSpec.Verb.start, SimRateSpec.Scope.activity
+                ));
+        assertThat(new SimRateSpec("12345,configure"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.1d, SimRateSpec.Verb.configure, SimRateSpec.Scope.activity
+                ));
+        assertThat(new SimRateSpec("12345,thread"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.1d, SimRateSpec.Verb.start, SimRateSpec.Scope.thread
+                ));
+        assertThat(new SimRateSpec("12345,1.4,thread"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.4d, SimRateSpec.Verb.start, SimRateSpec.Scope.thread
+                ));
+        assertThat(new SimRateSpec("12345,configure,activity"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.1d, SimRateSpec.Verb.configure, SimRateSpec.Scope.activity
+                ));
 
     }
 }
