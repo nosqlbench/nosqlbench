@@ -74,7 +74,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     }
 
     @Override
-    public NBComponent attachChild(NBComponent... children) {
+    public synchronized NBComponent attachChild(NBComponent... children) {
 
         for (NBComponent child : children) {
             logger.debug(() -> "attaching " + child.description() + " to parent " + this.description());

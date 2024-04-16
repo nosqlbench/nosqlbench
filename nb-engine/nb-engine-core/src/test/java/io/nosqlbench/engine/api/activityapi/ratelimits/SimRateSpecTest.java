@@ -46,4 +46,33 @@ public class SimRateSpecTest {
         SimRateSpec c = new SimRateSpec("12345,1.1");
         assertThat(c.verb).isEqualTo(SimRateSpec.Verb.start);
     }
+
+    @Test
+    public void testVariantFormats() {
+        assertThat(new SimRateSpec("12345"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.1d, SimRateSpec.Verb.start, SimRateSpec.Scope.activity
+                ));
+        assertThat(new SimRateSpec("12345,1.4"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.4d, SimRateSpec.Verb.start, SimRateSpec.Scope.activity
+                ));
+        assertThat(new SimRateSpec("12345,configure"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.1d, SimRateSpec.Verb.configure, SimRateSpec.Scope.activity
+                ));
+        assertThat(new SimRateSpec("12345,thread"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.1d, SimRateSpec.Verb.start, SimRateSpec.Scope.thread
+                ));
+        assertThat(new SimRateSpec("12345,1.4,thread"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.4d, SimRateSpec.Verb.start, SimRateSpec.Scope.thread
+                ));
+        assertThat(new SimRateSpec("12345,configure,activity"))
+                .isEqualTo(new SimRateSpec(
+                        12345.0d, 1.1d, SimRateSpec.Verb.configure, SimRateSpec.Scope.activity
+                ));
+
+    }
 }
