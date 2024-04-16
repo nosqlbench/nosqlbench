@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterOpDispenserWrapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.engine.api.activityapi.simrate.*;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
@@ -28,9 +29,6 @@ import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
-import io.nosqlbench.engine.api.activityapi.simrate.RateLimiters;
-import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
-import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.nb.api.components.status.NBStatusComponent;
@@ -42,12 +40,10 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispens
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
-import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
-import io.nosqlbench.engine.api.activityapi.simrate.StrideRateSpec;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.DryRunOpDispenserWrapper;
@@ -78,8 +74,8 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     private OutputDispenser markerDispenser;
     private IntPredicateDispenser resultFilterDispenser;
     private RunState runState = RunState.Uninitialized;
-    private RateLimiter strideLimiter;
-    private RateLimiter cycleLimiter;
+    private ThreadLocal<RateLimiter> strideLimiterSource;
+    private ThreadLocal<RateLimiter> cycleLimiterSource;
     private ActivityInstrumentation activityInstrumentation;
     private PrintWriter console;
     private long startedAtMillis;
@@ -229,40 +225,20 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
 
     @Override
     public RateLimiter getCycleLimiter() {
-        return this.cycleLimiter;
-    }
-
-    @Override
-    public synchronized void setCycleLimiter(RateLimiter rateLimiter) {
-        this.cycleLimiter = rateLimiter;
-    }
-
-    @Override
-    public synchronized RateLimiter getCycleRateLimiter(Supplier<? extends RateLimiter> s) {
-        if (null == this.cycleLimiter) {
-            cycleLimiter = s.get();
+        if (cycleLimiterSource!=null) {
+            return cycleLimiterSource.get();
+        } else {
+            return null;
         }
-        return cycleLimiter;
     }
-
     @Override
     public synchronized RateLimiter getStrideLimiter() {
-        return this.strideLimiter;
-    }
-
-    @Override
-    public synchronized void setStrideLimiter(RateLimiter rateLimiter) {
-        this.strideLimiter = rateLimiter;
-    }
-
-    @Override
-    public synchronized RateLimiter getStrideRateLimiter(Supplier<? extends RateLimiter> s) {
-        if (null == this.strideLimiter) {
-            strideLimiter = s.get();
+        if (strideLimiterSource!=null) {
+            return strideLimiterSource.get();
+        } else {
+            return null;
         }
-        return strideLimiter;
     }
-
 
     @Override
     public synchronized ActivityInstrumentation getInstrumentation() {
@@ -306,6 +282,8 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
 
     public synchronized void initOrUpdateRateLimiters(ActivityDef activityDef) {
 
+//        cycleratePerThread = activityDef.getParams().takeBoolOrDefault("cyclerate_per_thread", false);
+
         activityDef.getParams().getOptionalNamedParameter("striderate")
             .map(StrideRateSpec::new).ifPresent(sr -> this.onEvent(new ParamChange<>(sr)));
 
@@ -315,12 +293,13 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     }
 
     public void createOrUpdateStrideLimiter(SimRateSpec spec) {
-        strideLimiter = RateLimiters.createOrUpdate(this, strideLimiter, spec);
+        strideLimiterSource = ThreadLocalRateLimiters.createOrUpdate(this, strideLimiterSource, spec);
     }
 
     public void createOrUpdateCycleLimiter(SimRateSpec spec) {
-        cycleLimiter = RateLimiters.createOrUpdate(this, cycleLimiter, spec);
+        cycleLimiterSource = ThreadLocalRateLimiters.createOrUpdate(this, cycleLimiterSource, spec);
     }
+
 
     /**
      * Modify the provided ActivityDef with defaults for stride and cycles, if they haven't been provided, based on the
@@ -344,10 +323,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
         if (cyclesOpt.isEmpty()) {
             String cycles = getParams().getOptionalString("stride").orElseThrow();
             logger.info(() -> "defaulting cycles to " + cycles + " (the stride length)");
-//            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
-//            getParams().setSilently("cycles", getParams().getOptionalString("stride").orElseThrow());
             this.getActivityDef().setCycles(getParams().getOptionalString("stride").orElseThrow());
-//            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
         } else {
             if (0 == activityDef.getCycleCount()) {
                 throw new RuntimeException(
@@ -680,4 +656,22 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     public Map<String, String> asResult() {
         return Map.of("activity",this.getAlias());
     }
+
+//    private final ThreadLocal<RateLimiter> cycleLimiterThreadLocal = ThreadLocal.withInitial(() -> {
+//        RateLimiters.createOrUpdate(this,null,new SimRateSpec()
+//        if (cycleratePerThread) {
+//            return RateLimiters.createOrUpdate(new NBThreadComponent(this),null,)
+//        } else {
+//            RateLimiters.createOrUpdate(new NBThreadComponent(this),null,activityDef)
+//        }
+//        if (getCycleLimiter() != null) {
+//            return RateLimiters.createOrUpdate(
+//                new NBThreadComponent(this),
+//                getCycleLimiter(),
+//                getCycleLimiter().getSpec());
+//        } else {
+//            return null;
+//        }
+//    });
+
 }
