@@ -22,11 +22,13 @@ public record FindmaxConfig (
     double sample_time_ms,
     double max_value,
     double base_value,
+    double contra_base_value,
     double min_value,
     double step_value,
     double value_incr,
     double sample_incr,
     long min_settling_ms,
+    long min_frames,
     String optimization_type,
     double[] initial_point
 ) {
@@ -39,11 +41,13 @@ public record FindmaxConfig (
             params.maybeGet("sample_time_ms").map(Double::parseDouble).orElse(4000d),
             params.maybeGet("max_value").map(Double::parseDouble).orElse(10000d),
             params.maybeGet("base_value").map(Double::parseDouble).orElse(10d),
+            params.maybeGet("contra_base_value").map(Double::parseDouble).orElse(0d),
             params.maybeGet("min_value").map(Double::parseDouble).orElse(0d),
             params.maybeGet("step_value").map(Double::parseDouble).orElse(100d),
             params.maybeGet("value_incr").map(Double::parseDouble).orElse(2d),
             params.maybeGet("sample_incr").map(Double::parseDouble).orElse(1.2d),
             params.maybeGet("min_settling_ms").map(Long::parseLong).orElse(4000L),
+            params.maybeGet("min_frames").map(Long::parseLong).orElse(5L),
             params.maybeGet("optimization_type").orElse("rate"),
             new double[]{params.maybeGet("base_value").map(Double::parseDouble).orElse(10d)}
         );

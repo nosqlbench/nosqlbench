@@ -31,6 +31,12 @@ public class FindmaxAnalyzer extends SimFrameFunctionAnalyzer<FindmaxFrameFuncti
         super(function, config);
     }
 
+    protected boolean shouldStop(SimFrame<FindmaxFrameParams> compFrame) {
+        return function.getJournal().frames().size() >= config.min_frames() &&
+            ((compFrame.params().paramValues()[0] + config.step_value()) -
+                (function.getJournal().bestRun().params().paramValues()[0] + config.step_value())) <= config.step_value();
+    }
+
     @Override
     protected FrameResult nextFrame() {
         double newValue;
@@ -42,54 +48,36 @@ public class FindmaxAnalyzer extends SimFrameFunctionAnalyzer<FindmaxFrameFuncti
                 config.sample_time_ms(),
                 config.max_value(),
                 config.base_value(),
+                config.contra_base_value(),
                 config.min_value(),
                 (config.step_value() * config.value_incr()),
                 config.value_incr(),
                 config.sample_incr(),
                 config.min_settling_ms(),
+                config.min_frames(),
                 config.optimization_type(),
                 new double[]{newValue}
             );
-        } else if (best.index() == last.index() - 1) {
-            // got worse consecutively, this may be collapsed out since the general case below covers it (test first)
-            if (((last.params().paramValues()[0] + config.step_value()) -
-                (best.params().paramValues()[0] + config.step_value())) <= config.step_value()) {
-                logger.info("could not divide search space further, stop condition met");
-                return new FrameResult(best.params().paramValues()[0], SimFrameAction.stop_run);
-            } else {
-                newValue = best.params().paramValues()[0] + config.step_value();
-                config = new FindmaxConfig(
-                    (config.sample_time_ms() * config.sample_incr()),
-                    config.max_value(),
-                    config.base_value(),
-                    config.min_value(),
-                    config.step_value(),
-                    config.value_incr(),
-                    config.sample_incr(),
-                    (config.min_settling_ms() * 4),
-                    config.optimization_type(),
-                    new double[]{newValue}
-                );
-            }
-        } else { // any other case
+        } else {
             // find next frame with higher rate but lower value, the closest one by rate
             SimFrame<FindmaxFrameParams> nextWorseFrameWithHigherRate = function.getJournal().frames().stream()
                 .filter(f -> f.value() < best.value())
                 .filter(f -> f.params().paramValues()[0] + config.step_value() > (best.params().paramValues()[0] + config.step_value()))
                 .min(Comparator.comparingDouble(f -> f.params().paramValues()[0] + config.step_value()))
                 .orElseThrow(() -> new RuntimeException("inconsistent samples"));
-            if ((nextWorseFrameWithHigherRate.params().paramValues()[0] + config.step_value() -
-                best.params().paramValues()[0] + config.step_value()) > config.step_value()) {
+            if (!shouldStop(nextWorseFrameWithHigherRate)) {
                 newValue = best.params().paramValues()[0] + config.step_value();
                 config = new FindmaxConfig(
                     (config.sample_time_ms() * config.sample_incr()),
                     config.max_value(),
                     config.base_value(),
+                    config.contra_base_value(),
                     config.min_value(),
                     config.step_value(),
                     config.value_incr(),
                     config.sample_incr(),
                     (config.min_settling_ms() * 2),
+                    config.min_frames(),
                     config.optimization_type(),
                     new double[]{newValue}
                 );
