@@ -37,7 +37,7 @@
     </description>
 
     <properties>
-        <s4j.version>4.0.1</s4j.version>
+        <s4j.version>4.1.2-alpha</s4j.version>
     </properties>
 
     <dependencies>
@@ -81,7 +81,7 @@
             <groupId>org.conscrypt</groupId>
             <artifactId>conscrypt-openjdk</artifactId>
             <version>2.5.2</version>
-            <classifier>${os.detected.classifier}</classifier>
+            <type>pom</type>
         </dependency>
 
     </dependencies>
