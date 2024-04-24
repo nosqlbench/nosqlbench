@@ -24,7 +24,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 public class MilvusCreateCollectionOp extends MilvusBaseOp<CreateCollectionParam> {
     /**
-     * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client delete method
+     * Create a new {@link ParsedOp} encapsulating a call to the Milvus/Zilliz client create method.
      *
      * @param client    The associated {@link MilvusServiceClient} used to communicate with the database
      * @param request   The {@link CreateCollectionParam} built for this operation
