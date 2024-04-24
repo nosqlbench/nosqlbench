@@ -1,0 +1,105 @@
+min_version: "5.17.1"
+
+description: |
+  A workload with only text keys and text values.
+  The CQL Key-Value workload demonstrates the simplest possible schema with payload data. This is useful for measuring
+  system capacity most directly in terms of raw operations. As a reference point, it provides some insight around types of
+  workloads that are constrained around messaging, threading, and tasking, rather than bulk throughput.
+  During preload, all keys are set with a value. During the main phase of the workload, random keys from the known
+  population are replaced with new values which never repeat. During the main phase, random partitions are selected for
+  upsert, with row values never repeating.
+
+  TEMPLATE(batchsize,100)
+
+scenarios:
+  default:
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+  batch:
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup_batch cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+  astra:
+    schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+  basic_check:
+    schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
+    main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+
+bindings:
+  seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString() -> String
+  seq_value: Hash(); Mod(TEMPLATE(valuecount,1000000000)); ToString() -> String
+  batch_seq_value: Mul(TEMPLATE(batchsize,100)L); Hash(); Mod(TEMPLATE(valuecount,1000000000)); ToString() -> String
+  rw_key: TEMPLATE(keydist,Uniform(0,1000000000)); ToString() -> String
+  rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)); ToString() -> String
+
+blocks:
+  schema:
+    params:
+      prepared: false
+    ops:
+      create_keyspace: |
+        create keyspace if not exists TEMPLATE(keyspace,baselines)
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf:1)'}
+        AND durable_writes = true;
+      create_table: |
+        create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
+        key text,
+         value text,
+         PRIMARY KEY (key)
+        );
+  schema_astra:
+    params:
+      prepared: false
+    statements:
+      create_table: |
+        create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) (
+        key text,
+         value text,
+         PRIMARY KEY (key)
+        );
+  rampup:
+    params:
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    ops:
+      rampup_insert: |
+        insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
+        (key, value)
+        values ({seq_key},{seq_value});
+  rampup_batch:
+    params:
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    ops:
+      rampup_insert:
+        batch: testing
+        repeat: 100
+        op_template:
+          prepared: |
+            insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
+            (key, value)
+            values ({seq_key},{seq_value});
+  verify:
+    params:
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+    ops:
+      verify_select: |
+        select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) where key={seq_key};
+      verify-fields: key->seq_key, value->seq_value
+  main_read:
+    params:
+      ratio: 5
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
+    statements:
+      main_select: |
+        select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) where key={rw_key};
+  main_write:
+    params:
+      ratio: 5
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+    statements:
+      main_insert: |
+        insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue)
+        (key, value) values ({rw_key}, {rw_value});

@@ -1,0 +1,14 @@
+scenarios:
+  optimize_rate:
+    query: start alias=query_step tags='block:query' driver=stdout cycles=1000
+    findmax: findmax activity=query_step base_value=100 step_value=50 min_frames=5 optimization_type=rate
+    optimo: optimo activity=query_step startrate=${findmax.rate}
+
+bindings:
+  number: Identity()
+
+blocks:
+  query:
+    ops:
+      query_op: "SELECT * FROM my_table WHERE id={number};"
+

@@ -1,0 +1,178 @@
+<!--
+  ~ Copyright (c) 2022-2023 nosqlbench
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>mvn-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>${revision}</version>
+        <relativePath>../mvn-defaults</relativePath>
+    </parent>
+
+    <artifactId>nb-adapters</artifactId>
+    <packaging>pom</packaging>
+    <name>${project.artifactId}</name>
+    <url>https://nosqlbench.io/</url>
+    <version>${revision}</version>
+
+    <modules>
+        <module>adapter-diag</module>
+        <module>adapter-stdout</module>
+        <module>nb-adapters-included</module>
+    </modules>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>META_INF/services/**</include>
+                    <include>META-INF/functions</include>
+                    <include>data/**</include>
+                    <include>docs-for-virtdata/**</include>
+                    <include>docs/**</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>adapter-cqld4-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-cqld4</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-milvus-module</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-milvus</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-http-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-http</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-jdbc-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-jdbc</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-tcp-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-tcp</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-dynamodb-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-dynamodb</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-mongodb-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-mongodb</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-neo4j-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-neo4j</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-pulsar-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-pulsar</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-s4j-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-s4j</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-kafka-module</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-kafka</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-amqp-module</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-amqp</module>
+            </modules>
+        </profile>
+
+    </profiles>
+</project>

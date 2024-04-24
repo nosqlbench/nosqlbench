@@ -1,0 +1,15 @@
+# example_scenarios.yaml
+scenarios:
+  default:
+    one: run cycles=3 alias=A driver=stdout
+    two: run cycles=5 alias=B driver=stdout
+  namedsteps:
+    one: run cycles=3 alias=A driver=stdout testparam1=testvalue1
+    two: run cycles=5 alias=B driver=stdout
+
+bindings:
+  cycle: Identity()
+  name: NumberNameToCycle()
+
+ops:
+  cycle: "cycle {cycle}\n"

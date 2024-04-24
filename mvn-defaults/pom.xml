@@ -44,7 +44,7 @@
     </properties>
 
     <name>${project.artifactId}</name>
-    <url>http://nosqlbench.io/</url>
+    <url>https://nosqlbench.io/</url>
     <description>
         nosqlbench is the core of a programmable workload simulation runtime.
         This module acts as the parent pom for nosqlbench Maven modules.
@@ -80,7 +80,7 @@
             <dependency>
                 <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy</artifactId>
-                <version>4.0.16</version>
+                <version>4.0.20</version>
             </dependency>
             <dependency>
                 <groupId>org.snakeyaml</groupId>
@@ -96,7 +96,7 @@
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna</artifactId>
-                <version>5.13.0</version>
+                <version>5.14.0</version>
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
@@ -122,12 +122,12 @@
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-graphite</artifactId>
-                <version>4.2.23</version>
+                <version>4.2.25</version>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-core</artifactId>
-                <version>4.2.23</version>
+                <version>4.2.25</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -188,7 +188,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.101.Final</version>
+                <version>4.1.107.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
@@ -280,7 +280,7 @@
             <dependency>
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core-java11</artifactId>
-                <version>6.4.8</version>
+                <version>6.5.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -290,7 +290,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>1.12.598</version>
+                <version>1.12.681</version>
             </dependency>
             <dependency>
                 <groupId>com.elega9t</groupId>
@@ -315,7 +315,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.12.5</version>
+                <version>2.12.7</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -325,12 +325,12 @@
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.16.0</version>
+                <version>1.16.1</version>
             </dependency>
             <dependency>
                 <groupId>org.mvel</groupId>
                 <artifactId>mvel2</artifactId>
-                <version>2.5.1.Final</version>
+                <version>2.5.2.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.antlr</groupId>
@@ -340,7 +340,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>1.21</version>
+                <version>1.26.0</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -358,33 +358,22 @@
                 <version>2.4.0-b180830.0438</version>
             </dependency>
             <!-- graalvm -->
+
             <dependency>
-                <groupId>org.graalvm.sdk</groupId>
-                <artifactId>graal-sdk</artifactId>
-                <version>23.0.2</version>
+                <groupId>org.graalvm.polyglot</groupId>
+                <artifactId>polyglot</artifactId>
+                <version>23.1.2</version>
             </dependency>
             <dependency>
-                <groupId>org.graalvm.js</groupId>
+                <groupId>org.graalvm.polyglot</groupId>
                 <artifactId>js</artifactId>
-                <version>23.0.2</version>
-                <scope>runtime</scope>
+                <version>23.1.2</version>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
-                <version>23.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.tools</groupId>
-                <artifactId>profiler</artifactId>
-                <version>23.0.1</version>
-                <scope>runtime</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.tools</groupId>
-                <artifactId>chromeinspector</artifactId>
-                <version>23.0.1</version>
-                <scope>runtime</scope>
+                <version>23.1.2</version>
             </dependency>
 
         </dependencies>
@@ -397,30 +386,30 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.22.0</version>
+            <version>2.23.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.22.0</version>
+            <version>2.23.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.22.0</version>
+            <version>2.23.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
-            <version>2.22.0</version>
+            <version>2.23.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
-            <version>2.22.0</version>
+            <version>2.23.1</version>
         </dependency>
 
         <dependency>
@@ -560,6 +549,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.10</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -633,34 +623,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Javadoc -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <release>21</release>
-                    <doctitle>${javadoc.name}</doctitle>
-                    <windowtitle>${javadoc.name}</windowtitle>
-                    <detectJavaApiLink>false</detectJavaApiLink>
-                    <detectLinks>false</detectLinks>
-                    <detectOfflineLinks>false</detectOfflineLinks>
-                    <!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
-                    <additionalOptions>
-                        <additionalOption>-Xdoclint:none</additionalOption>
-                    </additionalOptions>
-                    <!--                    <additionalJOption>-Xdoclint:none</additionalJOption>-->
-                    <doclint>none</doclint>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadoc</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-
-                </executions>
-            </plugin>
 
             <!-- Sources -->
             <plugin>
@@ -713,6 +675,7 @@
                     <excludes>
                         <exclude>**/generated/**</exclude>
                         <exclude>**/jmh_generated/**</exclude>
+                        <exclude>**/generated-sources/**</exclude>
                     </excludes>
                     <addLicenseHeaders>true</addLicenseHeaders>
                     <copyrightMessage>Copyright (c) 2022 nosqlbench</copyrightMessage>
@@ -722,6 +685,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <id>enforce-java</id>
@@ -733,6 +697,7 @@
                                 <requireJavaVersion>
                                     <version>[21,)</version>
                                 </requireJavaVersion>
+                                <requireProfileIdsExist/>
                             </rules>
                         </configuration>
                     </execution>
@@ -843,13 +808,13 @@
             <name>Jonathan Shook</name>
             <email>jshook@gmail.com</email>
             <organization>nosqlbench.io</organization>
-            <organizationUrl>http://nosqlbench.io/</organizationUrl>
+            <organizationUrl>https://nosqlbench.io/</organizationUrl>
         </developer>
         <developer>
             <name>Sebastián Estévez</name>
             <email>estevezsebastian@gmail.com</email>
             <organization>nosqlbench.io</organization>
-            <organizationUrl>http://nosqlbench.io/</organizationUrl>
+            <organizationUrl>https://nosqlbench.io/</organizationUrl>
         </developer>
     </developers>
 
@@ -874,7 +839,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -890,6 +855,46 @@
                                     </gpgArguments>
                                 </configuration>
                             </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>build-javadoc</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+
+            <build>
+                <plugins>
+                    <!-- Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <release>21</release>
+                            <doctitle>${javadoc.name}</doctitle>
+                            <windowtitle>${javadoc.name}</windowtitle>
+                            <detectJavaApiLink>false</detectJavaApiLink>
+                            <detectLinks>false</detectLinks>
+                            <detectOfflineLinks>false</detectOfflineLinks>
+                            <!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
+                            <additionalOptions>
+                                <additionalOption>-Xdoclint:none</additionalOption>
+                            </additionalOptions>
+                            <!--                    <additionalJOption>-Xdoclint:none</additionalJOption>-->
+                            <doclint>none</doclint>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadoc</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+
                         </executions>
                     </plugin>
                 </plugins>

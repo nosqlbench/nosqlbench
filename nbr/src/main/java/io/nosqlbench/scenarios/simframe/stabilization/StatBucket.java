@@ -63,7 +63,8 @@ public final class StatBucket {
     }
 
     public double variance() {
-        return dSquared / ringbuf.count();
+        double variance = dSquared / ringbuf.count();
+        return (variance < 0) ? Math.abs(variance) : variance;
     }
 
     public double stddev() {

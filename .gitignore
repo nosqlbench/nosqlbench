@@ -1,7 +1,9 @@
+**/cache/**
 exported_docs.zip
 .nosqlbench/**
 workspaces/**
 workshop/**
+local*
 local/**
 metrics/**
 bin/**

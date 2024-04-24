@@ -14,7 +14,9 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
 
@@ -32,98 +34,23 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <javadoc.name>nosqlbench Command Line</javadoc.name>
+        <javadoc.name>nb5</javadoc.name>
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nbr</artifactId>
             <version>${revision}</version>
-
         </dependency>
 
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-adapters-included</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- Everything below this line is in common between nb and nb5 -->
         <!-- The nb5 modules should contain NO driver-* modules, and all adapter-* modules -->
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-tcp</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-mongodb</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-stdout</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-diag</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-dynamodb</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-cqld4</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-http</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-pulsar</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-s4j</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-kafka</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-amqp</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-jdbc</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapter-pinecone</artifactId>
-            <version>${revision}</version>
-        </dependency>
 
     </dependencies>
 
@@ -179,28 +106,16 @@
                                 <NBJAR_VERSION>${project.version}</NBJAR_VERSION>
                             </environmentVariables>
                             <basedir>${project.basedir}</basedir>
-                            <executable>${project.basedir}/nb-scripts/link-jar-name.sh</executable>
+                            <executable>${project.basedir}/nb5-scripts/link-jar-name.sh</executable>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 
     <profiles>
-        <profile>
-            <id>with-mongodb</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>io.nosqlbench</groupId>
-                    <artifactId>adapter-mongodb</artifactId>
-                    <version>${revision}</version>
-                </dependency>
-            </dependencies>
-        </profile>
         <profile>
             <id>build-nb5-appimage</id>
             <activation>
@@ -224,7 +139,7 @@
                                 </goals>
                                 <configuration>
                                     <basedir>${project.basedir}</basedir>
-                                    <executable>${project.basedir}/build-bin.sh</executable>
+                                    <executable>${project.basedir}/nb-appimage/build-bin.sh</executable>
                                 </configuration>
                             </execution>
                         </executions>
@@ -233,7 +148,7 @@
             </build>
         </profile>
         <profile>
-            <id>enforce</id>
+            <id>converge-nb5</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
@@ -252,7 +167,7 @@
                         <artifactId>maven-enforcer-plugin</artifactId>
                         <configuration>
                             <rules>
-                                <dependencyConvergence />
+                                <dependencyConvergence/>
                             </rules>
                         </configuration>
                     </plugin>
@@ -260,4 +175,5 @@
             </build>
         </profile>
     </profiles>
+
 </project>

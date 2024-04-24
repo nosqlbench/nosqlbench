@@ -118,6 +118,9 @@ public class StabilityDetector implements Runnable {
             // if previous bigger window had a higher stddev than the one after, then it is converging
             double reductionFactor = (stddev[i + 1] / stddev[i]);
             basis *= reductionFactor;
+            if (Double.isNaN(basis)) {
+                throw new RuntimeException("basis is NaN");
+            }
         }
 
         // TODO: investigate why we get NaN sometimes and what it means for stability checks

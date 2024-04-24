@@ -14,7 +14,9 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
 
@@ -25,9 +27,9 @@
         <relativePath>../mvn-defaults</relativePath>
     </parent>
 
+    <name>nbr</name>
     <artifactId>nbr</artifactId>
     <packaging>jar</packaging>
-    <name>${project.artifactId}</name>
     <description>Runtime-Only CLI for nosqlbench</description>
 
     <properties>
@@ -39,19 +41,7 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-cli</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-core</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-extensions</artifactId>
+            <artifactId>nb-engine-all</artifactId>
             <version>${revision}</version>
         </dependency>
 
@@ -63,7 +53,7 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>engine-clients</artifactId>
+            <artifactId>adapter-stdout</artifactId>
             <version>${revision}</version>
         </dependency>
 
@@ -175,32 +165,36 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>enforce</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>enforce</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-enforcer-plugin</artifactId>
-                        <configuration>
-                            <rules>
-                                <dependencyConvergence />
-                            </rules>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+        <!--        <profile>-->
+        <!--            <id>converge-nbr</id>-->
+        <!--            <activation>-->
+        <!--                <activeByDefault>false</activeByDefault>-->
+        <!--            </activation>-->
+        <!--            <build>-->
+        <!--                <plugins>-->
+        <!--                    <plugin>-->
+        <!--                        <executions>-->
+        <!--                            <execution>-->
+        <!--                                <goals>-->
+        <!--                                    <goal>enforce</goal>-->
+        <!--                                </goals>-->
+        <!--                            </execution>-->
+        <!--                        </executions>-->
+        <!--                        <groupId>org.apache.maven.plugins</groupId>-->
+        <!--                        <artifactId>maven-enforcer-plugin</artifactId>-->
+        <!--                        <configuration>-->
+        <!--                            <rules>-->
+        <!--                                <dependencyConvergence>-->
+        <!--                                    <excludes>-->
+        <!--                                        <exclude>com.amazonaws:*</exclude>-->
+        <!--                                    </excludes>-->
+        <!--                                </dependencyConvergence>-->
+        <!--                            </rules>-->
+        <!--                        </configuration>-->
+        <!--                    </plugin>-->
+        <!--                </plugins>-->
+        <!--            </build>-->
+        <!--        </profile>-->
 
     </profiles>
 
