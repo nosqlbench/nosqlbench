@@ -16,8 +16,10 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.CmdArg;
+import io.nosqlbench.nb.annotations.ServiceSelector;
 import io.nosqlbench.nb.api.errors.BasicError;
 
 import java.util.*;
@@ -72,6 +74,13 @@ public class CmdParser {
                 cmdstructs.removeFirst();
                 Map<String,CmdArg> params = new LinkedHashMap<>();
                 while (cmdstructs.peekFirst() instanceof parameter param) {
+                    if (Objects.equals(param.name(), "driver")) {
+                        Optional<? extends DriverAdapterLoader> driverAdapter =
+                            ServiceSelector.of(param.value(), ServiceLoader.load(DriverAdapterLoader.class)).get();
+                        if (driverAdapter.isEmpty()) {
+                            throw new BasicError("Unable to load default driver adapter '" + param.value() + '\'');
+                        }
+                    }
                     cmdstructs.removeFirst();
                     params.put(param.name(),CmdArg.of(cmd.name(),param.name(),param.op(),param.value()));
                 }
