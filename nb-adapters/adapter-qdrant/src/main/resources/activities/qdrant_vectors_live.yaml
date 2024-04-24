@@ -1,0 +1,53 @@
+min_version: 5.21
+description: |
+  This is a template for live vector search testing.
+  Template Variables:
+
+  schema: Install the schema required to run the test
+  rampup: Measure how long it takes to load a set of embeddings
+  search: Measure how the system responds to queries while it
+   is indexing recently ingested data.
+  search: Run vector search with a set of default (or overridden) parameters
+  In all of these phases, it is important to instance the metrics with distinct names.
+  Also, aggregates of recall should include total aggregate as well as a moving average.
+
+scenarios:
+  qdrant_vectors:
+    schema_collection: >-
+      run tags==block:schema_collection
+      errors===stop
+      cycles===UNDEF threads===UNDEF
+      uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
+
+params:
+  driver: qdrant
+  instrument: true
+
+bindings:
+  row_key: ToString()
+  row_key_batch: Mul(TEMPLATE(batch_size)L); ListSizedStepped(TEMPLATE(batch_size),long->ToString());
+  # filetype=hdf5 for TEMPLATE(filetype,hdf5)
+  test_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/test");
+  relevant_indices_hdf5: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
+  distance_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/distance")
+  train_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train");
+  train_floatlist_hdf5_batch: Mul(TEMPLATE(batch_size)L); ListSizedStepped(TEMPLATE(batch_size),HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train"));
+  # filetype=fvec for TEMPLATE(filetype,fvec)
+  test_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_query_vectors.fvec");
+  relevant_indices_fvec: IVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_indices_query.ivec");
+  distance_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(testsize)_distances_count.fvec",TEMPLATE(dimensions),0);
+  train_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0);
+  train_floatlist_fvec_batch: Mul(TEMPLATE(batch_size,10)L); ListSizedStepped(TEMPLATE(batch_size),FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0));
+
+blocks:
+  schema_collection:
+    ops:
+      # https://qdrant.github.io/qdrant/redoc/index.html#tag/collections/operation/create_collection
+      create_col_op:
+        create_collection: "TEMPLATE(collection)"
+#        description: "TEMPLATE(desc,a simple qdrant vector collection)"
+#        consistency_level: "TEMPLATE(write_cl,BOUNDED)"
+        vectors:
+          value:
+            size: TEMPLATE(dimensions,25)
+            distance: TEMPLATE(similarity_function,cosine)
