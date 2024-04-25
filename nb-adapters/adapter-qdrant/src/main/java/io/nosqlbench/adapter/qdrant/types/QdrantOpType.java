@@ -18,4 +18,5 @@ package io.nosqlbench.adapter.qdrant.types;
 
 public enum QdrantOpType {
     create_collection,
+    delete_collection,
 }
