@@ -813,7 +813,7 @@ dataTypeName
    | K_INET
    | K_INT
    | K_LIST
-//   | K_MAP
+   | K_MAP
    | K_SMALLINT
    | K_TEXT
    | K_TIME
@@ -901,7 +901,6 @@ kwAggregate
 
 kwAll
    : K_ALL
-   | OBJECT_NAME
    ;
 
 kwAllPermissions

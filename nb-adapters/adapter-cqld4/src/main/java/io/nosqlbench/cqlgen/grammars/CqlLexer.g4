@@ -302,7 +302,7 @@ K_USING_: K_USING -> type(K_USING), popMode;
 K_WHERE_: K_WHERE -> type(K_WHERE), popMode;
 K_WITH_: K_WITH -> type(K_WITH), popMode;
 
-// handeling cases like 'frozen<','map<','list<','set<' and 'TIMETAMP WITH 1234'
+// handeling cases like 'frozen<','map<','list<','set<' and 'TIMESTAMP WITH 1234'
 K_MAP_WITH_OPERATOR_LT_: K_MAP_WITH_OPERATOR_LT -> type(K_MAP_WITH_OPERATOR_LT);
 K_TIMESTAMP_WITH_DECIMAL_LITERAL_: K_TIMESTAMP_WITH_DECIMAL_LITERAL -> type(K_TIMESTAMP_WITH_DECIMAL_LITERAL);
 K_FROZEN_WITH_OPERATOR_LT_: K_FROZEN_WITH_OPERATOR_LT -> type(K_FROZEN_WITH_OPERATOR_LT);
