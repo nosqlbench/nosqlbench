@@ -73,13 +73,6 @@ public class CmdParser {
                 cmdstructs.removeFirst();
                 Map<String,CmdArg> params = new LinkedHashMap<>();
                 while (cmdstructs.peekFirst() instanceof parameter param) {
-                    if (Objects.equals(param.name(), "driver")) {
-                        Optional<? extends DriverAdapterLoader> driverAdapter =
-                            ServiceSelector.of(param.value(), ServiceLoader.load(DriverAdapterLoader.class)).get();
-                        if (driverAdapter.isEmpty()) {
-                            throw new BasicError("Unable to load default driver adapter '" + param.value() + '\'');
-                        }
-                    }
                     cmdstructs.removeFirst();
                     if (params.containsKey(param.name())) {
                         throw new BasicError("Duplicate occurrence of option: " + param.name());
