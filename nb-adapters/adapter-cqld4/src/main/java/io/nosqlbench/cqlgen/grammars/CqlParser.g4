@@ -615,7 +615,7 @@ usingTtlTimestamp
    ;
 
 timestamp
-   : kwTimestamp decimalLiteral
+   : K_TIMESTAMP_WITH_DECIMAL_LITERAL
    ;
 
 ttl
@@ -767,7 +767,6 @@ stringLiteral
 booleanLiteral
    : K_TRUE
    | K_FALSE
-   | OBJECT_NAME
    ;
 
 hexadecimalLiteral
@@ -791,10 +790,10 @@ column
 
 dataType
    : dataTypeName
-   | kwFrozen syntaxBracketLa dataType syntaxBracketRa
-   | K_SET syntaxBracketLa dataType syntaxBracketRa
-   | K_LIST syntaxBracketLa dataType syntaxBracketRa
-   | K_MAP syntaxBracketLa dataType syntaxComma dataType syntaxBracketRa
+   | K_FROZEN_WITH_OPERATOR_LT dataType syntaxBracketRa
+   | K_SET_WITH_OPERATOR_LT dataType syntaxBracketRa
+   | K_LIST_WITH_OPERATOR_LT dataType syntaxBracketRa
+   | K_MAP_WITH_OPERATOR_LT dataType syntaxComma dataType syntaxBracketRa
    ;
 
 dataTypeName
@@ -814,7 +813,7 @@ dataTypeName
    | K_INET
    | K_INT
    | K_LIST
-   | K_MAP
+//   | K_MAP
    | K_SMALLINT
    | K_TEXT
    | K_TIME
@@ -915,11 +914,6 @@ kwAllow
 
 kwAlter
    : K_ALTER
-   ;
-
-kwFrozen
-   : K_FROZEN
-   | OBJECT_NAME
    ;
 
 kwAnd
@@ -1108,7 +1102,6 @@ kwLogged
 
 kwLogin
    : K_LOGIN
-   | OBJECT_NAME
    ;
 
 kwMaterialized
@@ -1217,7 +1210,6 @@ kwTable
 
 kwTimestamp
    : K_TIMESTAMP
-   | OBJECT_NAME
    ;
 
 kwTo
