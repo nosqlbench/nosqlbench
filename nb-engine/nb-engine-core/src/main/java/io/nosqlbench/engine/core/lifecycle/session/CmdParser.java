@@ -16,10 +16,8 @@
 
 package io.nosqlbench.engine.core.lifecycle.session;
 
-import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.CmdArg;
-import io.nosqlbench.nb.annotations.ServiceSelector;
 import io.nosqlbench.nb.api.errors.BasicError;
 
 import java.util.*;
