@@ -81,15 +81,14 @@ public class S4JClientConfConverter {
             if (StringUtils.equalsAnyIgnoreCase(confVal, "LZ4", "ZLIB", "ZSTD", "SNAPPY")) {
                 CompressionType compressionType = CompressionType.NONE;
 
-                switch (StringUtils.upperCase(confVal)) {
-                    case "LZ4":
-                        compressionType = CompressionType.LZ4;
-                    case "ZLIB":
-                        compressionType = CompressionType.ZLIB;
-                    case "ZSTD":
-                        compressionType = CompressionType.ZSTD;
-                    case "SNAPPY":
-                        compressionType = CompressionType.SNAPPY;
+                if (StringUtils.equalsIgnoreCase(confVal, "LZ4")) {
+                    compressionType = CompressionType.LZ4;
+                } else if (StringUtils.equalsIgnoreCase(confVal, "ZLIB")) {
+                    compressionType = CompressionType.ZLIB;
+                } else if (StringUtils.equalsIgnoreCase(confVal, "ZSTD")) {
+                    compressionType = CompressionType.ZSTD;
+                } else if (StringUtils.equalsIgnoreCase(confVal, "SNAPPY")) {
+                    compressionType = CompressionType.SNAPPY;
                 }
 
                 s4jProducerConfObjMap.put(confKeyName, compressionType);
