@@ -25,9 +25,10 @@ public class NBCLITest {
 
     @Test
     public void testNonExistentDriverThrowsError() {
+        final NBCLI cli = new NBCLI("nb5");
         assertThatExceptionOfType(BasicError.class)
-            .isThrownBy(() -> new NBCLI("run driver=nonexistent --show-stacktraces"))
-            .withMessageContaining("Unable to load default driver adapter 'nonexistent'");
+            .isThrownBy(() -> cli.applyDirect(new String[] {"run", "driver=nonexistent"}))
+            .withMessageContaining("Unable to load default driver adapter 'nonexistent'");;
     }
 }
 
