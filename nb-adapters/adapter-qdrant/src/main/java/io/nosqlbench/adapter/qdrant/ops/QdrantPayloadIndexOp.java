@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.qdrant.types;
+package io.nosqlbench.adapter.qdrant.ops;
 
-public enum QdrantOpType {
-    create_collection,
-    delete_collection,
-    create_payload_index,
-    // https://qdrant.github.io/qdrant/redoc/index.html#tag/points/operation/search_points
-    search_points,
+import io.qdrant.client.QdrantClient;
+import io.qdrant.client.grpc.Collections.PayloadIndexParams;
+
+public class QdrantPayloadIndexOp extends QdrantBaseOp<PayloadIndexParams> {
+    public QdrantPayloadIndexOp(QdrantClient client, PayloadIndexParams request) {
+        super(client, request);
+    }
+
+    @Override
+    public Object applyOp(long value) {
+        return null;
+    }
 }

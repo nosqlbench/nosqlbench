@@ -13,10 +13,20 @@ description: |
 
 scenarios:
   qdrant_vectors:
+    delete_collection: >-
+      run tags==block:delete_collection
+      errors===stop
+      cycles===UNDEF threads===UNDEF
+      uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
     schema_collection: >-
       run tags==block:schema_collection
       errors===stop
       cycles===UNDEF threads===UNDEF
+      uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
+    search_points: >-
+      run tags==block:search_points
+      errors===stop
+      cycles===TEMPLATE(testann_cycles,1000) threads===TEMPLATE(testann_threads,AUTO)
       uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
 
 params:
@@ -40,14 +50,73 @@ bindings:
   train_floatlist_fvec_batch: Mul(TEMPLATE(batch_size,10)L); ListSizedStepped(TEMPLATE(batch_size),FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0));
 
 blocks:
+  delete_collection:
+    ops:
+      # https://qdrant.github.io/qdrant/redoc/index.html#tag/collections/operation/delete_collection
+      delete_col_op:
+        delete_collection: "TEMPLATE(collection)"
+
   schema_collection:
     ops:
       # https://qdrant.github.io/qdrant/redoc/index.html#tag/collections/operation/create_collection
       create_col_op:
         create_collection: "TEMPLATE(collection)"
-#        description: "TEMPLATE(desc,a simple qdrant vector collection)"
-#        consistency_level: "TEMPLATE(write_cl,BOUNDED)"
+        on_disk_payload: true
+        shard_number: 1
+        replication_factor: 1
+        write_consistency_factor: 1
         vectors:
           value:
             size: TEMPLATE(dimensions,25)
-            distance: TEMPLATE(similarity_function,cosine)
+            # https://github.com/qdrant/qdrant/blob/v1.9.0/lib/api/src/grpc/proto/collections.proto#L90-L96
+            # 1 = Cosine, 2 = Euclid, 3 = Dot, 4 = Manhattan, 0 = UnknownDistance
+            distance_value: TEMPLATE(similarity_function,1)
+            on_disk: true
+            # https://github.com/qdrant/qdrant/blob/v1.9.0/lib/api/src/grpc/proto/collections.proto#L5-L9
+            # 0 = Default, 1 = Float32, 2 = Uint8
+            datatype_value: 1
+            hnsw_config:
+              m: 16
+              ef_construct: 100
+              full_scan_threshold: 10000
+              max_indexing_threads: 0
+              on_disk: true
+              #payload_m: 16
+            quantization_config:
+              binary:
+                always_ram: false
+              #scalar:
+              #  # https://github.com/qdrant/qdrant/blob/v1.9.0/lib/api/src/grpc/proto/collections.proto#L117-L120
+              #  # 0 = UnknownQuantization, 1 = Inet8
+              #  type: 1
+              #  quantile: 0.99
+              #  always_ram: false
+              #product:
+              #  compression: x16
+              #  always_ram: false
+        wal_config:
+          wal_capacity_mb: 32
+          wal_segments_ahead: 0
+        optimizer_config:
+          deleted_threshold: 0.2
+          vacuum_min_vector_number: 1000
+          default_segment_number: 0
+          indexing_threshold: 20000
+          flush_interval_sec: 5
+        #sparse_vectors:
+        #  svec1:
+        #    full_scan_threshold: 100
+        #    on_disk: true
+
+  search_points:
+    ops:
+      search_points_op:
+        search_points: "TEMPLATE(collection)"
+        vector_name: "value"
+        vector_vector: "{test_floatlist_TEMPLATE(filetype)}"
+        limit: TEMPLATE(select_limit,100)
+        with_payload: true
+        with_vector: true
+        # https://github.com/qdrant/qdrant/blob/v1.9.0/lib/api/src/grpc/proto/points.proto#L21-L25
+        # 0 - All, 1 - Majority, 2 - Quorum
+        read_consistency: 2

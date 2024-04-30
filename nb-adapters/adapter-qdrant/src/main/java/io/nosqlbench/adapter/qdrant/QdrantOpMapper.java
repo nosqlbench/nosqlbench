@@ -16,9 +16,7 @@
 
 package io.nosqlbench.adapter.qdrant;
 
-import io.nosqlbench.adapter.qdrant.opdispensers.QdrantBaseOpDispenser;
-import io.nosqlbench.adapter.qdrant.opdispensers.QdrantCreateCollectionOpDispenser;
-import io.nosqlbench.adapter.qdrant.opdispensers.QdrantDeleteCollectionOpDispenser;
+import io.nosqlbench.adapter.qdrant.opdispensers.*;
 import io.nosqlbench.adapter.qdrant.ops.QdrantBaseOp;
 import io.nosqlbench.adapter.qdrant.types.QdrantOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
@@ -60,6 +58,9 @@ public class QdrantOpMapper implements OpMapper<QdrantBaseOp<?>> {
         return switch (typeAndTarget.enumId) {
             case delete_collection -> new QdrantDeleteCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_collection -> new QdrantCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_payload_index ->
+                new QdrantCreatePayloadIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case search_points -> new QdrantSearchPointsOpDispenser(adapter, op, typeAndTarget.targetFunction);
 //            default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
 //                "mapping parsed op " + op);
         };
