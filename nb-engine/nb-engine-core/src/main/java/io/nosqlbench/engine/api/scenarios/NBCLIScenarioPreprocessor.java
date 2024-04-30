@@ -252,10 +252,66 @@ public class NBCLIScenarioPreprocessor {
 
     private static final Pattern WordAndMaybeAssignment = Pattern.compile("(?<name>\\w[-_\\d\\w.]+)((?<oper>=+)(?<val>.+))?");
 
+    public static List<String> splitCommand(String cmd) {
+        List<String> cmdSplit = new ArrayList<>();
+        Stack<Character> stack = new Stack<>();
+        StringBuilder builder = new StringBuilder();
+        for (char c : cmd.toCharArray()) {
+            switch (c) {
+                case ' ':
+                    if (!stack.isEmpty() && (stack.peek() == '\'' || stack.peek() == '\"')) {
+                        builder.append(c);
+                    } else if (!builder.isEmpty()) {
+                        cmdSplit.add(builder.toString());
+                        builder.delete(0, builder.length());
+                    }
+                    break;
+                case '\"':
+                case '\'':
+                    if (!stack.isEmpty()) {
+                        if (stack.peek() == c) {
+                            stack.pop();
+                        } else if (stack.peek() == '\\') {
+                            stack.pop();
+                            builder.append(c);
+                        } else {
+                            stack.push(c);
+                        }
+                    } else {
+                        stack.push(c);
+                    }
+                    break;
+                case '\\':
+                    if (!stack.isEmpty() && stack.peek() == c) {
+                        stack.pop();
+                        builder.append(c);
+                    } else {
+                        stack.push(c);
+                    }
+                    break;
+                default:
+                    builder.append(c);
+            }
+        }
+        if (!stack.isEmpty()) {
+            if (stack.peek() == '\'') {
+                throw new BasicError("Unclosed single quote found in scenario cmd '" + cmd + "'");
+            } else if (stack.peek() == '\"') {
+                throw new BasicError("Unclosed double quote found in scenario cmd '" + cmd + "'");
+            } else {
+                throw new BasicError("Unused escape character \"\\\" found in scenario cmd '" + cmd + "'");
+            }
+        }
+        if (!builder.isEmpty()) {
+            cmdSplit.add(builder.toString());
+        }
+        return cmdSplit;
+    }
+
     private static LinkedHashMap<String, SCNamedParam> parseStep(String cmd, String stepName, String scenarioName) {
         LinkedHashMap<String, SCNamedParam> parsedStep = new LinkedHashMap<>();
 
-        String[] namedStepPieces = cmd.split(" +");
+        List<String> namedStepPieces = splitCommand(cmd);
         for (String commandFragment : namedStepPieces) {
             Matcher matcher = WordAndMaybeAssignment.matcher(commandFragment);
 
