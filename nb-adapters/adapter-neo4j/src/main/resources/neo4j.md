@@ -13,10 +13,13 @@ instance of the Neo4J/Aura database:
 
 ## Op Templates
 
-The Neo4J adapter supports three different op types:
-- autocommit
-- read_transaction
-- write_transaction
+The Neo4J adapter supports six different op types:
+- sync_autocommit
+- async_autocommit
+- sync_read_transaction
+- async_read_transaction
+- sync_write_transaction
+- async_write_transaction
 
 A good reference for when to use each is located at https://neo4j.com/docs/driver-manual/1.7/sessions-transactions/
 
@@ -32,7 +35,7 @@ vector search functionality has been properly worked through, currently.
 ```yaml
 ops:
   example_create_vector_index:
-    autocommit: |
+    sync_autocommit: |
       CREATE VECTOR INDEX $index_name IF NOT EXISTS FOR (n:TEMPLATE(node_label,Node))
       ON (n.embedding) OPTIONS
       {indexConfig: {`vector.dimensions`: $dimension, `vector.similarity_function`: $similarity_function}}
@@ -42,14 +45,14 @@ ops:
       similarity_function: TEMPLATE(similarity_function,cosine)
 
   example_insert_node:
-    write_transaction: |
+    async_write_transaction: |
       CREATE (v:TEMPLATE(node_label,Node) {id: $id, embedding: $vector})
     query_params:
       id: '{id}'
       vector: '{train_vector}'
 
   example_search:
-      read_transaction: |
+      async_read_transaction: |
         WITH $query_vector AS queryVector
         CALL db.index.vector.queryNodes($index_name, $k, queryVector)
         YIELD node
