@@ -22,7 +22,12 @@ import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
 
-public record CyclesSpec(long first_inclusive, long last_exclusive, String firstSpec, String lastSpec) {
+public record CyclesSpec(
+    long first_inclusive,
+    long last_exclusive,
+    String firstSpec,
+    String lastSpec
+) {
     private final static Logger logger = LogManager.getLogger(CyclesSpec.class);
     public CyclesSpec {
         if (first_inclusive>last_exclusive) {
@@ -32,16 +37,24 @@ public record CyclesSpec(long first_inclusive, long last_exclusive, String first
 
     public static CyclesSpec parse(String spec) {
         int rangeAt = spec.indexOf("..");
-        String beginningInclusive = "0";
-        String endingExclusive = spec;
+        String beginningSpec = "0";
+        String endingSpec = spec;
         if (0 < rangeAt) {
-            beginningInclusive = spec.substring(0, rangeAt);
-            endingExclusive = spec.substring(rangeAt+2);
+            beginningSpec = spec.substring(0, rangeAt);
+            endingSpec = spec.substring(rangeAt+2);
         }
-        long first = Unit.longCountFor(beginningInclusive).orElseThrow(() -> new RuntimeException("Unable to parse start cycles from " + spec));
-        long last = Unit.longCountFor(endingExclusive).orElseThrow(() -> new RuntimeException("Unable to parse start cycles from " + spec));
+        long first = Unit.longCountFor(beginningSpec).orElseThrow(() -> new RuntimeException("Unable to parse start cycles from " + spec));
+        long last=first;
+        if (endingSpec.startsWith("+")) {
+            long added=Unit.longCountFor(endingSpec.substring(1)).orElseThrow(() -> new RuntimeException(
+                "Unable to parse incremental cycle interval. Use one of these forms: 100 or 0..100 or 0..+100"
+            ));
+            last = first+added;
+        } else {
+            last = Unit.longCountFor(endingSpec).orElseThrow(() -> new RuntimeException("Unable to parse start cycles from " + spec));
+        }
 
-        return new CyclesSpec(first, last, beginningInclusive, endingExclusive);
+        return new CyclesSpec(first, last, beginningSpec, endingSpec);
     }
 
     public String summary() {
@@ -73,5 +86,31 @@ public record CyclesSpec(long first_inclusive, long last_exclusive, String first
 
     public long cycle_count() {
         return last_exclusive -first_inclusive;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof CyclesSpec that))
+            return false;
+        if (last_exclusive!=that.last_exclusive)
+            return false;
+        if (first_inclusive!=that.first_inclusive)
+            return false;
+        if (!firstSpec.equals(that.firstSpec))
+            return false;
+        if (!lastSpec.equals(that.lastSpec))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Long.hashCode(first_inclusive);
+        result = 31 * result + Long.hashCode(last_exclusive);
+        result = 31 * result + firstSpec.hashCode();
+        result = 31 * result + lastSpec.hashCode();
+        return result;
     }
 }
