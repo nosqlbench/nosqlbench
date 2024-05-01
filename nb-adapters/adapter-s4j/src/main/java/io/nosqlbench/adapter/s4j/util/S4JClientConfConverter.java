@@ -76,31 +76,22 @@ public class S4JClientConfConverter {
         String confKeyName = "compressionType";
         String confVal = pulsarProducerConfMapRaw.get(confKeyName);
 
-        if (StringUtils.isNotBlank(confVal) && S4JAdapterUtil.isValidMsgCompressionTypeStr(confVal)) {
-            CompressionType compressionType;
-            try {
-                S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR compressionTypeStr =
-                    S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR.valueOf(confVal);
-                compressionType = switch (compressionTypeStr) {
-                    case LZ4 -> CompressionType.LZ4;
-                    case ZLIB -> CompressionType.ZLIB;
-                    case ZSTD -> CompressionType.ZSTD;
-                    case SNAPPY -> CompressionType.SNAPPY;
-                };
-            }
-            catch (Exception e) {
-                // Any invalid value will be treated as no compression
-                compressionType = CompressionType.NONE;
-            }
-            s4jProducerConfObjMap.put(confKeyName, compressionType);
-        } else {
-            throw new S4JAdapterInvalidParamException(
-                getInvalidConfValStr(
-                    confKeyName,
-                    confVal,
-                    "producer",
-                    S4JAdapterUtil.getValidMsgCompressionTypeList()));
+        CompressionType compressionType = CompressionType.NONE;
+        try {
+            S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR compressionTypeStr =
+                S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR.valueOf(confVal);
+            compressionType = switch (compressionTypeStr) {
+                case LZ4 -> CompressionType.LZ4;
+                case ZLIB -> CompressionType.ZLIB;
+                case ZSTD -> CompressionType.ZSTD;
+                case SNAPPY -> CompressionType.SNAPPY;
+            };
         }
+        catch (IllegalArgumentException e) {
+            // Any invalid value will be treated as no compression
+        }
+
+        s4jProducerConfObjMap.put(confKeyName, compressionType);
 
         // TODO: Skip the following Pulsar configuration items for now because they're not really
         //       needed in the NB S4J testing at the moment. Add support for them when needed.
