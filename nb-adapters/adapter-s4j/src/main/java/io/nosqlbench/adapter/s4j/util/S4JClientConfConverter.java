@@ -308,7 +308,9 @@ public class S4JClientConfConverter {
         Map.entry("jms.usePulsarAdmin","boolean"),
         Map.entry("jms.useServerSideFiltering","boolean"),
         Map.entry("jms.waitForServerStartupTimeout","int"),
-        Map.entry("jms.transactionsStickyPartitions", "boolean")
+        Map.entry("jms.transactionsStickyPartitions", "boolean"),
+        Map.entry("jms.enableJMSPriority","boolean"),
+        Map.entry("jms.priorityMapping","String")
     );
     public static Map<String, Object> convertRawJmsConf(Map<String, String> s4jJmsConfMapRaw) {
         Map<String, Object> s4jJmsConfObjMap = new HashMap<>();

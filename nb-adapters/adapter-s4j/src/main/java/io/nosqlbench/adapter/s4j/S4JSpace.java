@@ -129,6 +129,7 @@ public class S4JSpace implements  AutoCloseable {
         this.sessionMode = S4JAdapterUtil.getSessionModeFromStr(
             cfg.getOptional("session_mode").orElse(""));
         this.s4JClientConf = new S4JClientConf(webSvcUrl, pulsarSvcUrl, s4jClientConfFileName);
+        logger.info("{}", s4JClientConf.toString());
 
         this.setS4JActivityStartTimeMills(System.currentTimeMillis());
 
