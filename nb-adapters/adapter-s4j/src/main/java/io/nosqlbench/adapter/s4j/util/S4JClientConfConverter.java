@@ -88,7 +88,7 @@ public class S4JClientConfConverter {
                     case SNAPPY -> CompressionType.SNAPPY;
                 };
             }
-            catch (IllegalArgumentException e) {
+            catch (Exception e) {
                 // Any invalid value will be treated as no compression
                 compressionType = CompressionType.NONE;
             }
