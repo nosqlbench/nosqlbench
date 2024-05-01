@@ -77,14 +77,21 @@ public class S4JClientConfConverter {
         String confVal = pulsarProducerConfMapRaw.get(confKeyName);
 
         if (StringUtils.isNotBlank(confVal) && S4JAdapterUtil.isValidMsgCompressionTypeStr(confVal)) {
-            S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR compressionTypeStr =
-                S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR.valueOf(confVal);
-            CompressionType compressionType = switch (compressionTypeStr) {
-                case LZ4 -> CompressionType.LZ4;
-                case ZLIB -> CompressionType.ZLIB;
-                case ZSTD -> CompressionType.ZSTD;
-                case SNAPPY -> CompressionType.SNAPPY;
-            };
+            CompressionType compressionType;
+            try {
+                S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR compressionTypeStr =
+                    S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR.valueOf(confVal);
+                compressionType = switch (compressionTypeStr) {
+                    case LZ4 -> CompressionType.LZ4;
+                    case ZLIB -> CompressionType.ZLIB;
+                    case ZSTD -> CompressionType.ZSTD;
+                    case SNAPPY -> CompressionType.SNAPPY;
+                };
+            }
+            catch (IllegalArgumentException e) {
+                // Any invalid value will be treated as no compression
+                compressionType = CompressionType.NONE;
+            }
             s4jProducerConfObjMap.put(confKeyName, compressionType);
         } else {
             throw new S4JAdapterInvalidParamException(
