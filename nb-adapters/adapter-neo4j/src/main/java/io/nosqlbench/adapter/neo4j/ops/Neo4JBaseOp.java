@@ -24,20 +24,17 @@ import org.neo4j.driver.async.AsyncSession;
 
 
 public abstract class Neo4JBaseOp implements CycleOp<Record[]> {
-
-    protected final AsyncSession session;
     protected final Query query;
 
-    public Neo4JBaseOp(AsyncSession session, Query query) {
-        this.session = session;
+    public Neo4JBaseOp(Query query) {
         this.query = query;
     }
 
     /**
      * In the child classes, this method will be responsible for:
-     * - using the Neo4J AsyncSession object to run the Neo4J Query
+     * - using the Neo4J Session/AsyncSession object to run the Neo4J Query
      * - process the Result to get an array of Records
-     * - close the AsyncSession
+     * - close the Session/AsyncSession
      * - Return the array of Records
      *
      * Session creation and closing is considered light-weight. Reference:

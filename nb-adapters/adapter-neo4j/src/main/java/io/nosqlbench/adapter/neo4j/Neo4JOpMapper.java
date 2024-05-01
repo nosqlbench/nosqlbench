@@ -43,13 +43,22 @@ public class Neo4JOpMapper implements OpMapper<Neo4JBaseOp> {
         LongFunction<String> spaceNameFunc = op.getAsFunctionOr("space", "default");
         LongFunction<Neo4JSpace> spaceFunc = l -> cache.get(spaceNameFunc.apply(l));
         return switch (typeAndTarget.enumId) {
-            case autocommit -> new Neo4JAutoCommitOpDispenser(
+            case sync_autocommit -> new Neo4JSyncAutoCommitOpDispenser(
                 adapter, op, spaceFunc, typeAndTarget.enumId.getValue()
             );
-            case read_transaction -> new Neo4JReadTxnOpDispenser(
+            case async_autocommit -> new Neo4JAsyncAutoCommitOpDispenser(
                 adapter, op, spaceFunc, typeAndTarget.enumId.getValue()
             );
-            case write_transaction -> new Neo4JWriteTxnOpDispenser(
+            case sync_read_transaction -> new Neo4JSyncReadTxnOpDispenser(
+                adapter, op, spaceFunc, typeAndTarget.enumId.getValue()
+            );
+            case async_read_transaction -> new Neo4JAsyncReadTxnOpDispenser(
+                adapter, op, spaceFunc, typeAndTarget.enumId.getValue()
+            );
+            case sync_write_transaction -> new Neo4JSyncWriteTxnOpDispenser(
+                adapter, op, spaceFunc, typeAndTarget.enumId.getValue()
+            );
+            case async_write_transaction -> new Neo4JAsyncWriteTxnOpDispenser(
                 adapter, op, spaceFunc, typeAndTarget.enumId.getValue()
             );
         };
