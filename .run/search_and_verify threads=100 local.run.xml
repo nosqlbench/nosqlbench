@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="search_and_verify threads=100 local" type="JarApplication" folderName="milvus_vectors local">
+  <configuration default="false" name="search_and_verify threads=100 local" type="JarApplication">
     <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
       <option name="credential" />
       <option name="region" />
