@@ -257,9 +257,6 @@ public class S4JSpace implements  AutoCloseable {
             logger.error("Unable to initialize JMS connection factory with the following configuration parameters: {}", s4JClientConnInfo.toString());
             throw new S4JAdapterUnexpectedException("Unable to initialize JMS connection factory with the following error message: " + e.getCause());
         }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public void shutdownSpace() {

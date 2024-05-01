@@ -205,6 +205,31 @@ public class S4JAdapterUtil {
         return StringUtils.join(JMS_MESSAGE_TYPES.LABELS, ", ");
     }
 
+    // Message compression types
+    public enum MSG_COMPRESSION_TYPE_STR {
+        LZ4("LZ4"),
+        ZSTD("ZSTD"),
+        ZLIB("ZLIB"),
+        SNAPPY("SNAPPY");
+        public final String label;
+        MSG_COMPRESSION_TYPE_STR(String label) {
+            // case insensitive
+            this.label = StringUtils.upperCase(label);
+        }
+
+        private static final Set<String> LABELS = Stream.of(values()).map(v -> v.label)
+            .collect(Collectors.toUnmodifiableSet());
+        private static boolean isValidLabel(String label) {
+            return LABELS.contains(StringUtils.upperCase(label));
+        }
+    }
+    public static String getValidMsgCompressionTypeList() {
+        return StringUtils.join(MSG_COMPRESSION_TYPE_STR.LABELS, ", ");
+    }
+    public static boolean isValidMsgCompressionTypeStr(String type) {
+        return MSG_COMPRESSION_TYPE_STR.isValidLabel(type);
+    }
+
     ///////
     // Convert JSON string to a key/value map
     public static Map<String, String> convertJsonToMap(String jsonStr) throws Exception {

@@ -75,27 +75,24 @@ public class S4JClientConfConverter {
         // - expecting the following values: 'LZ4', 'ZLIB', 'ZSTD', 'SNAPPY'
         String confKeyName = "compressionType";
         String confVal = pulsarProducerConfMapRaw.get(confKeyName);
-        String expectedVal = "(LZ4|ZLIB|ZSTD|SNAPPY)";
 
-        if (StringUtils.isNotBlank(confVal)) {
-            if (StringUtils.equalsAnyIgnoreCase(confVal, "LZ4", "ZLIB", "ZSTD", "SNAPPY")) {
-                CompressionType compressionType = CompressionType.NONE;
-
-                if (StringUtils.equalsIgnoreCase(confVal, "LZ4")) {
-                    compressionType = CompressionType.LZ4;
-                } else if (StringUtils.equalsIgnoreCase(confVal, "ZLIB")) {
-                    compressionType = CompressionType.ZLIB;
-                } else if (StringUtils.equalsIgnoreCase(confVal, "ZSTD")) {
-                    compressionType = CompressionType.ZSTD;
-                } else if (StringUtils.equalsIgnoreCase(confVal, "SNAPPY")) {
-                    compressionType = CompressionType.SNAPPY;
-                }
-
-                s4jProducerConfObjMap.put(confKeyName, compressionType);
-            } else {
-                throw new S4JAdapterInvalidParamException(
-                    getInvalidConfValStr(confKeyName, confVal, "producer", expectedVal));
-            }
+        if (StringUtils.isNotBlank(confVal) && S4JAdapterUtil.isValidMsgCompressionTypeStr(confVal)) {
+            S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR compressionTypeStr =
+                S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR.valueOf(confVal);
+            CompressionType compressionType = switch (compressionTypeStr) {
+                case LZ4 -> CompressionType.LZ4;
+                case ZLIB -> CompressionType.ZLIB;
+                case ZSTD -> CompressionType.ZSTD;
+                case SNAPPY -> CompressionType.SNAPPY;
+            };
+            s4jProducerConfObjMap.put(confKeyName, compressionType);
+        } else {
+            throw new S4JAdapterInvalidParamException(
+                getInvalidConfValStr(
+                    confKeyName,
+                    confVal,
+                    "producer",
+                    S4JAdapterUtil.getValidMsgCompressionTypeList()));
         }
 
         // TODO: Skip the following Pulsar configuration items for now because they're not really
