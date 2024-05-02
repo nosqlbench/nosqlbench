@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nosqlbench.adapter.s4j.exception.S4JAdapterInvalidParamException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +36,8 @@ import java.util.Map;
  * the S4J driver
  */
 public class S4JClientConfConverter {
+
+    private final static Logger logger = LogManager.getLogger(S4JClientConfConverter.class);
 
     public static Map<String, Object> convertRawClientConf(Map<String, String> pulsarClientConfMapRaw) {
         Map<String, Object> s4jClientConfObjMap = new HashMap<>();
@@ -87,6 +91,11 @@ public class S4JClientConfConverter {
                 };
             } catch (IllegalArgumentException e) {
                 // Any invalid value will be treated as no compression
+                logger.warn("Invalid producer \"compressionType\" value ({}) in the config properties file. " +
+                    "Expecting one of the following values: {}. " +
+                    "No message compression will be applied (for producers).",
+                    confVal,
+                    S4JAdapterUtil.getValidMsgCompressionTypeList());
             }
         }
 
