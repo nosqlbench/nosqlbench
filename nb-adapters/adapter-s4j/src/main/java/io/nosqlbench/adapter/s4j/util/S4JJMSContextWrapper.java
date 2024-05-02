@@ -34,7 +34,7 @@ public class S4JJMSContextWrapper {
 
     public int getJmsSessionMode() { return jmsSessionMode; }
     public boolean isTransactedMode() { return Session.SESSION_TRANSACTED == this.getJmsSessionMode(); }
-    public String getJmsContextIdentifer() { return jmsContextIdentifer; }
+    public String getJmsContextIdentifier() { return jmsContextIdentifer; }
     public JMSContext getJmsContext() { return jmsContext; }
 
     public void close() {
@@ -45,7 +45,7 @@ public class S4JJMSContextWrapper {
 
     public String toString() {
         return new ToStringBuilder(this).
-            append("jmsContextIdentifer", jmsContextIdentifer).
+            append("jmsContextIdentifier", jmsContextIdentifer).
             append("jmsContext", jmsContext.toString()).
             toString();
     }
