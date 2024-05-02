@@ -22,19 +22,19 @@ import javax.jms.Session;
  * under the License.
  */
 public class S4JJMSContextWrapper {
-    private final String jmsContextIdentifer;
+    private final String jmsContextIdentifier;
     private final JMSContext jmsContext;
     private final int jmsSessionMode;
 
     public S4JJMSContextWrapper(String identifer, JMSContext jmsContext) {
-        this.jmsContextIdentifer = identifer;
+        this.jmsContextIdentifier = identifer;
         this.jmsContext = jmsContext;
         this.jmsSessionMode = jmsContext.getSessionMode();
     }
 
     public int getJmsSessionMode() { return jmsSessionMode; }
     public boolean isTransactedMode() { return Session.SESSION_TRANSACTED == this.getJmsSessionMode(); }
-    public String getJmsContextIdentifier() { return jmsContextIdentifer; }
+    public String getJmsContextIdentifier() { return jmsContextIdentifier; }
     public JMSContext getJmsContext() { return jmsContext; }
 
     public void close() {
@@ -45,7 +45,7 @@ public class S4JJMSContextWrapper {
 
     public String toString() {
         return new ToStringBuilder(this).
-            append("jmsContextIdentifier", jmsContextIdentifer).
+            append("jmsContextIdentifier", jmsContextIdentifier).
             append("jmsContext", jmsContext.toString()).
             toString();
     }
