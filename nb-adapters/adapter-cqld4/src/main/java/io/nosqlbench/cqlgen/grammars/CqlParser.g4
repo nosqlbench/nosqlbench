@@ -767,6 +767,7 @@ stringLiteral
 booleanLiteral
    : K_TRUE
    | K_FALSE
+   | OBJECT_NAME
    ;
 
 hexadecimalLiteral
@@ -901,6 +902,7 @@ kwAggregate
 
 kwAll
    : K_ALL
+   | OBJECT_NAME
    ;
 
 kwAllPermissions
@@ -1101,6 +1103,7 @@ kwLogged
 
 kwLogin
    : K_LOGIN
+   | OBJECT_NAME
    ;
 
 kwMaterialized
@@ -1137,6 +1140,7 @@ kwOn
 
 kwOptions
    : K_OPTIONS
+   | OBJECT_NAME
    ;
 
 kwOr
@@ -1149,6 +1153,7 @@ kwOrder
 
 kwPassword
    : K_PASSWORD
+   | OBJECT_NAME
    ;
 
 kwPrimary
@@ -1201,6 +1206,7 @@ kwStype
 
 kwSuperuser
    : K_SUPERUSER
+   | OBJECT_NAME
    ;
 
 kwTable
