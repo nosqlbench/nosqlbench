@@ -5,6 +5,7 @@ bindings:
   mymap_val1: AlphaNumericString(10)
   mymap_val2: AlphaNumericString(20)
   mystream_val1: AlphaNumericString(50)
+  my_priority: WeightedLongs('2:20;4:70;8:10')
 
 # document level parameters that apply to all Pulsar client types:
 params:
@@ -24,6 +25,12 @@ blocks:
           {
             "JMSPriority": "9"
           }
+
+        ## (Optional) S4J Message priority emulation (since Pulsar doesn't have native message priority)
+        # - jms.enableJMSPriority must be set to true in S4J configuration;
+        #   otherwise, the priority value will be ignored.
+        # - If this is set, the "JMSPriority" value in the header will be ignored.
+        msg_priority: "{my_priority}"
 
         ## (Optional) JMS properties, predefined or customized (in JSON format).
         msg_property: |
