@@ -56,12 +56,6 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
         LongFunction<CreateCollection.Builder> ebF =
             l -> CreateCollection.newBuilder().setCollectionName(targetF.apply(l));
 
-//        VectorParams namedVectorsMap = buildNamedVectorsStruct(
-//            op.getAsSubOps("vectors", ParsedOp.SubOpNaming.SubKey)
-//        );
-//        final LongFunction<CreateCollection.Builder> namedVectorsF = ebF;
-//        ebF = l -> namedVectorsF.apply(l).setVectorsConfig(VectorsConfig.newBuilder().setParams(namedVectorsMap));
-
         Map<String, VectorParams> namedVectorParamsMap = buildNamedVectorsStruct(
             op.getAsSubOps("vectors", ParsedOp.SubOpNaming.SubKey)
         );
@@ -100,11 +94,13 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
             ebF = l -> qcConfigF.apply(l).setQuantizationConfig(qcDiff);
         }
 
-        SparseVectorConfig sparseVectorsMap = buildSparseVectorsStruct(
-            op.getAsSubOps("sparse_vectors", ParsedOp.SubOpNaming.SubKey)
-        );
-        final LongFunction<CreateCollection.Builder> sparseVectorsF = ebF;
-        ebF = l -> sparseVectorsF.apply(l).setSparseVectorsConfig(sparseVectorsMap);
+        if (op.isDefined("sparse_vectors")) {
+            SparseVectorConfig sparseVectorsMap = buildSparseVectorsStruct(
+                op.getAsSubOps("sparse_vectors", ParsedOp.SubOpNaming.SubKey)
+            );
+            final LongFunction<CreateCollection.Builder> sparseVectorsF = ebF;
+            ebF = l -> sparseVectorsF.apply(l).setSparseVectorsConfig(sparseVectorsMap);
+        }
 
         final LongFunction<CreateCollection.Builder> lastF = ebF;
         return l -> lastF.apply(l).build();
@@ -180,12 +176,7 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
      * @param {@link Map<String, ParsedOp>} namedVectorsData
      * @return {@link VectorParams} containing the named vectors
      */
-    private Map<String, VectorParams>/*VectorParams*/ buildNamedVectorsStruct(Map<String, ParsedOp> namedVectorsData) {
-//        if (namedVectorsData.size() != 1) {
-//            // TODO - we need this form somehow to support the mapped version
-//            // https://github.com/qdrant/java-client/blob/v1.9.0/src/main/java/io/qdrant/client/QdrantClient.java#L232-L243
-//            throw new UnsupportedOperationException("Empty or more than one named vectors are not supported at this time");
-//        }
+    private Map<String, VectorParams> buildNamedVectorsStruct(Map<String, ParsedOp> namedVectorsData) {
         Map<String, VectorParams> namedVectors = new HashMap<>();
         VectorParams.Builder builder = VectorParams.newBuilder();
         namedVectorsData.forEach((name, fieldSpec) -> {
@@ -201,7 +192,6 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
 
             namedVectors.put(name, builder.build());
         });
-        //return builder.build();
         return namedVectors;
     }
 
@@ -355,12 +345,7 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
                 }
             }
         });
-//        if (hnswConfigBuilder.hasM() || hnswConfigBuilder.hasEfConstruct() || hnswConfigBuilder.hasOnDisk()
-//            || hnswConfigBuilder.hasPayloadM() || hnswConfigBuilder.hasFullScanThreshold()
-//            || hnswConfigBuilder.hasMaxIndexingThreads()) {
         return hnswConfigBuilder.build();
-//        }
-//        return null;
     }
 
     /**
