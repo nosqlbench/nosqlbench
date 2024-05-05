@@ -18,9 +18,7 @@ package io.nosqlbench.engine.cli;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
-import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
@@ -220,9 +218,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         final NBCLIOptions options = new NBCLIOptions(args, Mode.ParseAllOptions);
-
-
-
         NBCLI.logger = LogManager.getLogger("NBCLI");
 
         NBIO.addGlobalIncludes(options.wantsIncludes());
