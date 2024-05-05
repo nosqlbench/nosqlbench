@@ -221,17 +221,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
         final NBCLIOptions options = new NBCLIOptions(args, Mode.ParseAllOptions);
 
-        for (Cmd cmd : options.getCommands()) {
-            Map<String, String> cmdArgMap = cmd.getArgMap();
-            if (cmdArgMap.containsKey("driver")) {
-                String driverName = cmdArgMap.get("driver");
-                Optional<? extends DriverAdapterLoader> driverAdapter =
-                    ServiceSelector.of(driverName, ServiceLoader.load(DriverAdapterLoader.class)).get();
-                if (driverAdapter.isEmpty()) {
-                    throw new BasicError("Unable to load default driver adapter '" + driverName + '\'');
-                }
-            }
-        }
+
 
         NBCLI.logger = LogManager.getLogger("NBCLI");
 
