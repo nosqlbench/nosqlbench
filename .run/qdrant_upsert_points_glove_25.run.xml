@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="qdrant_upsert_points_glove_25" type="JarApplication" folderName="Qdrant">
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <option name="JAR_PATH" value="$PROJECT_DIR$/nb5/target/nb5.jar" />
+    <option name="PROGRAM_PARAMETERS" value="qdrant_vectors_live qdrant_vectors.rampup dimensions=25 testsize=10000 trainsize=1183514 train_threads=AUTO train_cycles=5..10 dataset=glove-25-angular filetype=hdf5 collection=glove_25 similarity_function=1 qdranthost=ded78a51-8370-47d8-adb0-6147f0fcbba2.us-east4-0.gcp.cloud.qdrant.io token_file=./apikey grpc_port=6334 --progress console:1s -v --add-labels &quot;dimensions:25,dataset=glove-25&quot; --show-stacktraces --logs-max 5" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/local/qdrant" />
+    <option name="ALTERNATIVE_JRE_PATH" value="jdk21" />
+    <method v="2" />
+  </configuration>
+</component>

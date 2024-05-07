@@ -42,7 +42,10 @@ public class QdrantSearchPointsOpDispenser extends QdrantBaseOpDispenser<SearchP
     }
 
     @Override
-    public LongFunction<SearchPoints> getParamFunc(LongFunction<QdrantClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<SearchPoints> getParamFunc(
+        LongFunction<QdrantClient> clientF,
+        ParsedOp op,
+        LongFunction<String> targetF) {
         LongFunction<SearchPoints.Builder> ebF =
             l -> SearchPoints.newBuilder().setCollectionName(targetF.apply(l));
 
@@ -55,7 +58,7 @@ public class QdrantSearchPointsOpDispenser extends QdrantBaseOpDispenser<SearchP
             (SearchPoints.Builder b, Boolean wp) -> b.setWithVectors(WithVectorsSelector.newBuilder().setEnable(wp).build()));
         ebF = op.enhanceFuncOptionally(ebF, "read_consistency", Number.class,
             (SearchPoints.Builder b, Number rc) -> b.setReadConsistency(
-                ReadConsistency.newBuilder().setType(ReadConsistencyType.valueOf(rc.intValue())).build()));
+                ReadConsistency.newBuilder().setType(ReadConsistencyType.forNumber(rc.intValue())).build()));
 //        ebF = op.enhanceFunc(ebF, List.of("vector_vector", "vectors"), List.class,
 //            (SearchPoints.Builder b, List<Float> vec) -> b.addAllVector(vec));
 

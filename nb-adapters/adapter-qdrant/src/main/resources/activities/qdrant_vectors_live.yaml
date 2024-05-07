@@ -23,10 +23,15 @@ scenarios:
       errors===stop
       cycles===UNDEF threads===UNDEF
       uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
+    rampup: >-
+      run tags==block:rampup
+      errors===warn,counter
+      cycles===TEMPLATE(train_cycles,TEMPLATE(trainsize,1000)) threads===TEMPLATE(train_threads,AUTO)
+      uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
     search_points: >-
       run tags==block:search_points
-      errors===stop
-      cycles===TEMPLATE(testann_cycles,1000) threads===TEMPLATE(testann_threads,AUTO)
+      errors===warn,counter
+      cycles===TEMPLATE(testann_cycles,TEMPLATE(testsize,1000)) threads===TEMPLATE(testann_threads,AUTO)
       uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
 
 params:
@@ -34,6 +39,7 @@ params:
   instrument: true
 
 bindings:
+  id_val: Identity();
   row_key: ToString()
   row_key_batch: Mul(TEMPLATE(batch_size)L); ListSizedStepped(TEMPLATE(batch_size),long->ToString());
   # filetype=hdf5 for TEMPLATE(filetype,hdf5)
@@ -48,6 +54,8 @@ bindings:
   distance_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(testsize)_distances_count.fvec",TEMPLATE(dimensions),0);
   train_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0);
   train_floatlist_fvec_batch: Mul(TEMPLATE(batch_size,10)L); ListSizedStepped(TEMPLATE(batch_size),FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0));
+  test_2d_fl_vecs: HashedFloatVectors(2)
+  list_sized: ListSized(HashaRange(2,2), Identity(), Identity())
 
 blocks:
   delete_collection:
@@ -107,6 +115,27 @@ blocks:
         #  svec1:
         #    full_scan_threshold: 100
         #    on_disk: true
+
+  rampup:
+    ops:
+      upsert_points_op:
+        upsert_points: "TEMPLATE(collection)"
+        wait: TEMPLATE(upsert_point_wait,true)
+        # https://github.com/qdrant/qdrant/blob/v1.9.0/lib/api/src/grpc/proto/points.proto#L11-L15
+        # 0 - Weak, 1 - Medium, 2 - Strong
+        ordering: TEMPLATE(upsert_point_ordering,1)
+        #shard_key: "{row_key}"
+        id: "{id_val}"
+        payload:
+          key: "{row_key}"
+        vector:
+          # For dense vectors, use the below format
+          value: "{train_floatlist_TEMPLATE(filetype)}"
+          # For sparse vectors, use the below format
+          #value_sv:
+          #  indices: your array of numbers
+          #  values: your array of floats
+
 
   search_points:
     ops:

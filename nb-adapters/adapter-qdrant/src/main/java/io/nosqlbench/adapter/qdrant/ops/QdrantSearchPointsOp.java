@@ -16,12 +16,12 @@
 
 package io.nosqlbench.adapter.qdrant.ops;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.grpc.Points.ScoredPoint;
 import io.qdrant.client.grpc.Points.SearchPoints;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class QdrantSearchPointsOp extends QdrantBaseOp<SearchPoints> {
     public QdrantSearchPointsOp(QdrantClient client, SearchPoints request) {
@@ -30,8 +30,12 @@ public class QdrantSearchPointsOp extends QdrantBaseOp<SearchPoints> {
 
     @Override
     public Object applyOp(long value) {
-        ListenableFuture<List<ScoredPoint>> result =
-            client.searchAsync(request);
+        List<ScoredPoint> result = null;
+        try {
+            result = client.searchAsync(request).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         return result;
     }
 }

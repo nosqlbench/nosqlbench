@@ -16,10 +16,11 @@
 
 package io.nosqlbench.adapter.qdrant.ops;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.grpc.Collections.CollectionOperationResponse;
 import io.qdrant.client.grpc.Collections.DeleteCollection;
+
+import java.util.concurrent.ExecutionException;
 
 public class QdrantDeleteCollectionOp extends QdrantBaseOp<DeleteCollection> {
     public QdrantDeleteCollectionOp(QdrantClient client, DeleteCollection request) {
@@ -28,7 +29,12 @@ public class QdrantDeleteCollectionOp extends QdrantBaseOp<DeleteCollection> {
 
     @Override
     public Object applyOp(long value) {
-        ListenableFuture<CollectionOperationResponse> response = client.deleteCollectionAsync(request.getCollectionName());
+        CollectionOperationResponse response = null;
+        try {
+            response = client.deleteCollectionAsync(request.getCollectionName()).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
 
         return response;
     }

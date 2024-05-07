@@ -16,11 +16,12 @@
 
 package io.nosqlbench.adapter.qdrant.ops;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.grpc.Collections.CollectionOperationResponse;
 import io.qdrant.client.grpc.Collections.CreateCollection;
+
+import java.util.concurrent.ExecutionException;
 
 public class QdrantCreateCollectionOp extends QdrantBaseOp<CreateCollection> {
     /**
@@ -35,19 +36,12 @@ public class QdrantCreateCollectionOp extends QdrantBaseOp<CreateCollection> {
 
     @Override
     public Object applyOp(long value) {
-//        ListenableFuture<CollectionOperationResponse> response = client.createCollectionAsync(
-//            CreateCollection.newBuilder()
-//                .setCollectionName("test")
-//                .setVectorsConfig(VectorsConfig.newBuilder()
-//                    .setParams(
-//                        VectorParams.newBuilder()
-//                            .setDistance(Distance.Cosine)
-//                            .setSize(25)
-//                            .build()
-//                    ).build()
-//                ).build()
-//        );
-        ListenableFuture<CollectionOperationResponse> response = client.createCollectionAsync(request);
+        CollectionOperationResponse response = null;
+        try {
+            response = client.createCollectionAsync(request).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         return response;
     }
 }

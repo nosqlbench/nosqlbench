@@ -26,6 +26,7 @@ public class QdrantPayloadIndexOp extends QdrantBaseOp<PayloadIndexParams> {
 
     @Override
     public Object applyOp(long value) {
+        //client.createPayloadIndexAsync(PayloadIndexParams.get);
         return null;
     }
 }

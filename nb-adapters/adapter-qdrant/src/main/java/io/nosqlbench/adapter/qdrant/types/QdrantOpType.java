@@ -22,4 +22,7 @@ public enum QdrantOpType {
     create_payload_index,
     // https://qdrant.github.io/qdrant/redoc/index.html#tag/points/operation/search_points
     search_points,
+    // https://qdrant.tech/documentation/concepts/points/
+    // https://qdrant.github.io/qdrant/redoc/index.html#tag/points/operation/upsert_points
+    upsert_points,
 }
