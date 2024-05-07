@@ -25,4 +25,7 @@ public enum QdrantOpType {
     // https://qdrant.tech/documentation/concepts/points/
     // https://qdrant.github.io/qdrant/redoc/index.html#tag/points/operation/upsert_points
     upsert_points,
+    // https://qdrant.github.io/qdrant/redoc/index.html#tag/points/operation/count_points
+    // https://qdrant.tech/documentation/concepts/points/#counting-points
+    count_points,
 }

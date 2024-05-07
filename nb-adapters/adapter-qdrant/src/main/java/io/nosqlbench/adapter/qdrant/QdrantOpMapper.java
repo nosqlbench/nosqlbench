@@ -62,6 +62,7 @@ public class QdrantOpMapper implements OpMapper<QdrantBaseOp<?>> {
                 new QdrantCreatePayloadIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case search_points -> new QdrantSearchPointsOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case upsert_points -> new QdrantUpsertPointsOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case count_points -> new QdrantCountPointsOpDispenser(adapter, op, typeAndTarget.targetFunction);
 //            default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
 //                "mapping parsed op " + op);
         };

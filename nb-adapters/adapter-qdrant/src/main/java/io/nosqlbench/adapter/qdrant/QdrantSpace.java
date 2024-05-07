@@ -46,8 +46,6 @@ public class QdrantSpace implements AutoCloseable {
 
     protected QdrantClient client;
 
-//    private final Map<String, ConnectParam> connections = new HashMap<>();
-
     /**
      * Create a new QdrantSpace Object which stores all stateful contextual information needed to interact
      * with the Qdrant database instance.

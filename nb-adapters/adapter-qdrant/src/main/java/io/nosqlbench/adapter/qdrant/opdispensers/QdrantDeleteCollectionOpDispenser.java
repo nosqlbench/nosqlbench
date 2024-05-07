@@ -22,13 +22,10 @@ import io.nosqlbench.adapter.qdrant.ops.QdrantDeleteCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.grpc.Collections.DeleteCollection;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
 public class QdrantDeleteCollectionOpDispenser extends QdrantBaseOpDispenser<DeleteCollection> {
-    private static final Logger logger = LogManager.getLogger(QdrantDeleteCollectionOpDispenser.class);
 
     /**
      * Create a new {@link QdrantDeleteCollectionOpDispenser} subclassed from {@link QdrantBaseOpDispenser}.

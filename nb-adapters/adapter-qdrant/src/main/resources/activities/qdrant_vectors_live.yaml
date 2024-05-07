@@ -28,6 +28,11 @@ scenarios:
       errors===warn,counter
       cycles===TEMPLATE(train_cycles,TEMPLATE(trainsize,1000)) threads===TEMPLATE(train_threads,AUTO)
       uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
+    count_vectors: >-
+      run tags==block:count_vectors
+      errors===stop
+      cycles===UNDEF threads===UNDEF
+      uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
     search_points: >-
       run tags==block:search_points
       errors===warn,counter
@@ -149,3 +154,9 @@ blocks:
         # https://github.com/qdrant/qdrant/blob/v1.9.0/lib/api/src/grpc/proto/points.proto#L21-L25
         # 0 - All, 1 - Majority, 2 - Quorum
         read_consistency: 2
+
+  count_vectors:
+    ops:
+      count_points_op:
+        count_points: "TEMPLATE(collection)"
+        exact: true

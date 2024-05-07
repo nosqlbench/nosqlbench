@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="qdrant_search_points_collection_glove_25" type="JarApplication" folderName="Qdrant">
+  <configuration default="false" name="qdrant_search_points_glove_25" type="JarApplication" folderName="Qdrant">
     <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
       <option name="credential" />
       <option name="region" />
