@@ -16,12 +16,18 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
+import com.datastax.astra.client.model.Filter;
+import com.datastax.astra.client.model.Filters;
 import io.nosqlbench.adapter.dataapi.DataApiSpace;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, DataApiSpace> {
@@ -33,6 +39,41 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         super(adapter, op);
         this.targetFunction = targetFunction;
         this.spaceFunction = adapter.getSpaceFunc(op);
+    }
+
+    protected Filter getFilterFromOp(ParsedOp op, long l) {
+        Filter filter = null;
+        Optional<LongFunction<Map>> filterFunction = op.getAsOptionalFunction("filters", Map.class);
+        if (filterFunction.isPresent()) {
+            Map<String,Object> filters = filterFunction.get().apply(l);
+            List<Filter> filterList = new ArrayList<>();
+            String conjunction = "and";
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase("filter")) {
+                    Map<String,Object> filterFields = (Map<String, Object>) entry.getValue();
+                    switch (filterFields.get("operation").toString()) {
+                        case "lt" ->
+                            filterList.add(Filters.lt(filters.get("field").toString(), (long) filters.get("value")));
+                        case "gt" ->
+                            filterList.add(Filters.gt(filters.get("field").toString(), (long) filters.get("value")));
+                        case "eq" -> filterList.add(Filters.eq(filters.get("field").toString(), filters.get("value")));
+                        default -> logger.error("Operation not supported");
+                    }
+                } else if (entry.getKey().equalsIgnoreCase("conjunction")) {
+                    conjunction = (String) entry.getValue();
+                } else {
+                    logger.error("Filter " + entry.getKey() + " not supported");
+                }
+            }
+            if (conjunction.equalsIgnoreCase("and")) {
+                filter = Filters.and(filterList);
+            } else if (conjunction.equalsIgnoreCase("or")) {
+                filter = Filters.or(filterList);
+            } else {
+                logger.error("Conjunction " + conjunction + " not supported");
+            }
+        }
+        return filter;
     }
 
 }

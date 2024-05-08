@@ -45,9 +45,9 @@ public class DataApiCreateCollectionOpDispenser extends DataApiOpDispenser {
                 LongFunction<Integer> af = dimFunc.get();
                 optionsBldr.vectorDimension(af.apply(l));
             }
-//                COSINE("cosine"),
-//                EUCLIDEAN("euclidean"),
-//                DOT_PRODUCT("dot_product");
+//          COSINE("cosine"),
+//          EUCLIDEAN("euclidean"),
+//          DOT_PRODUCT("dot_product");
             Optional<LongFunction<String>> simFunc = op.getAsOptionalFunction("similarity", String.class);
             if (simFunc.isPresent()) {
                 LongFunction<String> sf = simFunc.get();

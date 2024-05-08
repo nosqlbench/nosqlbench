@@ -16,19 +16,57 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
+import com.datastax.astra.client.Database;
+import com.datastax.astra.client.model.Filter;
+import com.datastax.astra.client.model.Filters;
+import com.datastax.astra.client.model.FindOneAndDeleteOptions;
+import com.datastax.astra.client.model.Sorts;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiFindOneAndDeleteOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class DataApiFindOneAndDeleteOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiFindOneAndDeleteOpDispenser.class);
+    private final LongFunction<DataApiFindOneAndDeleteOp> opFunction;
+
     public DataApiFindOneAndDeleteOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
+        this.opFunction = createOpFunction(op);
+    }
+
+    private LongFunction<DataApiFindOneAndDeleteOp> createOpFunction(ParsedOp op) {
+        return (l) -> {
+            Database db = spaceFunction.apply(l).getDatabase();
+            Filter filter = getFilterFromOp(op, l);
+            FindOneAndDeleteOptions options = new FindOneAndDeleteOptions();
+            Optional<LongFunction<Map>> sortFunction = op.getAsOptionalFunction("sort", Map.class);
+            if (sortFunction.isPresent()) {
+                Map<String,Object> sortFields = sortFunction.get().apply(l);
+                String sortOrder = sortFields.get("type").toString();
+                String sortField = sortFields.get("field").toString();
+                switch(sortOrder) {
+                    case "asc" -> options = options.sort(Sorts.ascending(sortField));
+                    case "desc" -> options = options.sort(Sorts.descending(sortField));
+                }
+            }
+            return new DataApiFindOneAndDeleteOp(
+                db,
+                db.getCollection(targetFunction.apply(l)),
+                filter,
+                options
+            );
+        };
     }
 
     @Override
     public DataApiBaseOp getOp(long value) {
-        return null;
+        return opFunction.apply(value);
     }
 }

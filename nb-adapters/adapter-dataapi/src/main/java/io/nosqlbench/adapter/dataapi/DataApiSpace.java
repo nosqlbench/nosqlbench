@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapter.dataapi;
 
-import com.datastax.astra.client.Collection;
 import com.datastax.astra.client.DataAPIClient;
 import com.datastax.astra.client.Database;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
@@ -40,11 +39,13 @@ public class DataApiSpace {
     private String astraApiEndpoint;
     private DataAPIClient dataAPIClient;
     private Database database;
+    private String namespace;
     public DataApiSpace(String name, NBConfiguration cfg) {
         this.config = cfg;
         this.name = name;
         setToken();
         setApiEndpoint();
+        setNamespace();
         createClient();
     }
 
@@ -58,15 +59,20 @@ public class DataApiSpace {
 
     private void createClient() {
         this.dataAPIClient = new DataAPIClient(astraToken);
-        this.database = dataAPIClient.getDatabase(astraApiEndpoint);
-//        database.getCollection("test");
-//        database.listCollections().forEach(System.out::println);
-//        Collection collection = database.getCollection("test");
-//        collection.deleteMany()
+        if (namespace != null) {
+            this.database = dataAPIClient.getDatabase(astraApiEndpoint, namespace);
+        } else {
+            this.database = dataAPIClient.getDatabase(astraApiEndpoint);
+        }
     }
 
     private void setApiEndpoint() {
         this.astraApiEndpoint = config.get("astraApiEndpoint");
+    }
+
+    private void setNamespace() {
+        Optional<String> maybeNamespace = config.getOptional("namespace");
+        maybeNamespace.ifPresent(s -> this.namespace = s);
     }
 
     private void setToken() {
