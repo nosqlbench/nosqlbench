@@ -22,13 +22,13 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class DataApiFindOneOpDispenser extends DataApiBaseOpDispenser {
+public class DataApiFindOneOpDispenser extends DataApiOpDispenser {
     public DataApiFindOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
-        super(adapter, op);
+        super(adapter, op, targetFunction);
     }
 
     @Override
-    public DataApiBaseOp<DataApiBaseOp<?>> getOp(long value) {
+    public DataApiBaseOp getOp(long value) {
         return null;
     }
 }

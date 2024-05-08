@@ -16,19 +16,23 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
+import io.nosqlbench.adapter.dataapi.DataApiSpace;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
+import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class DataApiDeleteCollectionOpDispenser extends DataApiBaseOpDispenser {
-    public DataApiDeleteCollectionOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, DataApiSpace> {
+    protected final LongFunction<String> targetFunction;
+    protected final LongFunction<DataApiSpace> spaceFunction;
+
+    protected DataApiOpDispenser(DriverAdapter<? extends DataApiBaseOp, DataApiSpace> adapter, ParsedOp op,
+                                 LongFunction<String> targetFunction) {
         super(adapter, op);
+        this.targetFunction = targetFunction;
+        this.spaceFunction = adapter.getSpaceFunc(op);
     }
 
-    @Override
-    public DataApiBaseOp<DataApiBaseOp<?>> getOp(long value) {
-        return null;
-    }
 }

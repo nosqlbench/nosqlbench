@@ -16,7 +16,13 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import com.datastax.astra.client.Database;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
-public class DataApiBaseOp<T> implements Op {
+public abstract class DataApiBaseOp implements CycleOp {
+    protected final Database db;
+
+    public DataApiBaseOp(Database db) {
+        this.db = db;
+    }
 }

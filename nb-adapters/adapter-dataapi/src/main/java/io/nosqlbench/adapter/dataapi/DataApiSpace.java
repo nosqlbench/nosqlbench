@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.dataapi;
 
+import com.datastax.astra.client.Collection;
 import com.datastax.astra.client.DataAPIClient;
 import com.datastax.astra.client.Database;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
@@ -58,6 +59,10 @@ public class DataApiSpace {
     private void createClient() {
         this.dataAPIClient = new DataAPIClient(astraToken);
         this.database = dataAPIClient.getDatabase(astraApiEndpoint);
+//        database.getCollection("test");
+//        database.listCollections().forEach(System.out::println);
+//        Collection collection = database.getCollection("test");
+//        collection.deleteMany()
     }
 
     private void setApiEndpoint() {

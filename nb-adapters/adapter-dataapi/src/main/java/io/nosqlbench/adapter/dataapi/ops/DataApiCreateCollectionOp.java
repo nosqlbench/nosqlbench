@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.dataapi.opdispensers;
+package io.nosqlbench.adapter.dataapi.ops;
 
-import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
-import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapters.api.templating.ParsedOp;
+import com.datastax.astra.client.Database;
+import com.datastax.astra.client.model.CollectionOptions;
 
-import java.util.function.LongFunction;
+public class DataApiCreateCollectionOp extends DataApiBaseOp {
+    private final String collectionName;
+    private final CollectionOptions options;
 
-public class DataApiUpdateOneOpDispenser extends DataApiOpDispenser {
-    public DataApiUpdateOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+    public DataApiCreateCollectionOp(Database db, String collectionName, CollectionOptions options) {
+        super(db);
+        this.collectionName = collectionName;
+        this.options = options;
     }
 
     @Override
-    public DataApiBaseOp getOp(long value) {
-        return null;
+    public Object apply(long value) {
+        return db.createCollection(collectionName, options);
     }
 }

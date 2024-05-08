@@ -29,13 +29,13 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 import java.util.function.Function;
 
 @Service(value = DriverAdapter.class, selector = "dataapi")
-public class DataApiDriverAdapter extends BaseDriverAdapter<DataApiBaseOp<?>, DataApiSpace> {
+public class DataApiDriverAdapter extends BaseDriverAdapter<DataApiBaseOp, DataApiSpace> {
     public DataApiDriverAdapter(NBComponent parent, NBLabels childLabels) {
         super(parent, childLabels);
     }
 
     @Override
-    public OpMapper<DataApiBaseOp<?>> getOpMapper() {
+    public OpMapper getOpMapper() {
         return new DataApiOpMapper(this);
     }
 

@@ -18,17 +18,30 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiDropCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiUpdateOneOpDispenser extends DataApiOpDispenser {
-    public DataApiUpdateOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiDropCollectionOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiDropCollectionOpDispenser.class);
+    private final LongFunction<DataApiDropCollectionOp> opFunction;
+    public DataApiDropCollectionOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
+        this.opFunction = createOpFunction(op);
+    }
+
+    private LongFunction<DataApiDropCollectionOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiDropCollectionOp(
+            spaceFunction.apply(l).getDatabase(),
+            targetFunction.apply(l)
+        );
     }
 
     @Override
     public DataApiBaseOp getOp(long value) {
-        return null;
+        return opFunction.apply(value);
     }
 }

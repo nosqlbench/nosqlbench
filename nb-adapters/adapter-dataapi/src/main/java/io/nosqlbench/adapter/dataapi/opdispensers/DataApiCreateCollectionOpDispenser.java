@@ -16,46 +16,58 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
+import com.datastax.astra.client.model.CollectionOptions;
+import com.datastax.astra.client.model.SimilarityMetric;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapters.api.evalctx.CycleFunction;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCreateCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCreateCollectionOpDispenser extends DataApiBaseOpDispenser {
+public class DataApiCreateCollectionOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCreateCollectionOpDispenser.class);
+    private final LongFunction<DataApiCreateCollectionOp> opFunction;
+
     public DataApiCreateCollectionOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
-        super(adapter, op);
+        super(adapter, op, targetFunction);
+        this.opFunction = createOpFunction(op);
+    }
+
+    private LongFunction<DataApiCreateCollectionOp> createOpFunction(ParsedOp op) {
+        return (l) -> {
+            CollectionOptions.CollectionOptionsBuilder optionsBldr = CollectionOptions.builder();
+            Optional<LongFunction<Integer>> dimFunc = op.getAsOptionalFunction("dimensions", Integer.class);
+            if (dimFunc.isPresent()) {
+                LongFunction<Integer> af = dimFunc.get();
+                optionsBldr.vectorDimension(af.apply(l));
+            }
+//                COSINE("cosine"),
+//                EUCLIDEAN("euclidean"),
+//                DOT_PRODUCT("dot_product");
+            Optional<LongFunction<String>> simFunc = op.getAsOptionalFunction("similarity", String.class);
+            if (simFunc.isPresent()) {
+                LongFunction<String> sf = simFunc.get();
+                optionsBldr.vectorSimilarity(SimilarityMetric.valueOf(sf.apply(l)));
+            }
+
+            DataApiCreateCollectionOp dataApiCreateCollectionOp =
+                new DataApiCreateCollectionOp(
+                    spaceFunction.apply(l).getDatabase(),
+                    targetFunction.apply(l),
+                    optionsBldr.build());
+
+            return dataApiCreateCollectionOp;
+        };
     }
 
     @Override
-    public DataApiBaseOp<?> getOp(long value) {
-        return null;
+    public DataApiBaseOp getOp(long value) {
+        return opFunction.apply(value);
     }
 
-    @Override
-    public CycleFunction<Boolean> getVerifier() {
-        return null;
-    }
-
-    @Override
-    public String getOpName() {
-        return null;
-    }
-
-    @Override
-    public void onStart(long cycleValue) {
-
-    }
-
-    @Override
-    public void onSuccess(long cycleValue, long nanoTime) {
-
-    }
-
-    @Override
-    public void onError(long cycleValue, long resultNanos, Throwable t) {
-
-    }
 
 }

@@ -26,7 +26,7 @@ import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DataApiOpMapper implements OpMapper<DataApiBaseOp<?>> {
+public class DataApiOpMapper implements OpMapper<DataApiBaseOp> {
     private static final Logger logger = LogManager.getLogger(DataApiOpMapper.class);
     private final DataApiDriverAdapter adapter;
 
@@ -35,7 +35,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp<?>> {
     }
 
     @Override
-    public OpDispenser<? extends DataApiBaseOp<?>> apply(ParsedOp op) {
+    public OpDispenser<? extends DataApiBaseOp> apply(ParsedOp op) {
         TypeAndTarget<DataApiOpType, String> typeAndTarget = op.getTypeAndTarget(
             DataApiOpType.class,
             String.class,
@@ -55,7 +55,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp<?>> {
             case update_many -> new DataApiUpdateManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case delete_one -> new DataApiDeleteOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case delete_many -> new DataApiDeleteManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case delete_collection -> new DataApiDeleteCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case delete_collection -> new DataApiDropCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 }
