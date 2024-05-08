@@ -25,7 +25,7 @@ scenarios:
       uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
     rampup: >-
       run tags==block:rampup
-      errors===warn,counter
+      errors===warn,counter,retry
       cycles===TEMPLATE(train_cycles,TEMPLATE(trainsize,1000)) threads===TEMPLATE(train_threads,AUTO)
       uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
     count_vectors: >-
@@ -59,8 +59,6 @@ bindings:
   distance_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(testsize)_distances_count.fvec",TEMPLATE(dimensions),0);
   train_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0);
   train_floatlist_fvec_batch: Mul(TEMPLATE(batch_size,10)L); ListSizedStepped(TEMPLATE(batch_size),FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0));
-  test_2d_fl_vecs: HashedFloatVectors(2)
-  list_sized: ListSized(HashaRange(2,2), Identity(), Identity())
 
 blocks:
   delete_collection:
@@ -130,17 +128,17 @@ blocks:
         # 0 - Weak, 1 - Medium, 2 - Strong
         ordering: TEMPLATE(upsert_point_ordering,1)
         #shard_key: "{row_key}"
-        id: "{id_val}"
-        payload:
-          key: "{row_key}"
-        vector:
-          # For dense vectors, use the below format
-          value: "{train_floatlist_TEMPLATE(filetype)}"
-          # For sparse vectors, use the below format
-          #value_sv:
-          #  indices: your array of numbers
-          #  values: your array of floats
-
+        points:
+          - id: "{id_val}"
+            payload:
+              key: "{row_key}"
+            vector:
+              # For dense vectors, use the below format
+              value: "{train_floatlist_TEMPLATE(filetype)}"
+              # For sparse vectors, use the below format
+              #value_sv:
+              #  indices: your array of numbers
+              #  values: your array of floats
 
   search_points:
     ops:

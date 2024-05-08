@@ -33,15 +33,19 @@ public class QdrantUpsertPointsOp extends QdrantBaseOp<UpsertPoints> {
         String responseStatus;
         long responseOperationId;
         try {
+            logger.debug("[QdrantUpsertPointsOp] Cycle {} has Request: {}", value, request.toString());
             response = client.upsertAsync(request).get();
             responseStatus = response.getStatus().toString();
             responseOperationId = response.getOperationId();
             switch(response.getStatus()) {
-                case Completed, Acknowledged -> logger.trace("Upsert points finished successfully." +
+                case Completed, Acknowledged ->
+                    logger.trace("[QdrantUpsertPointsOp] Upsert points finished successfully." +
                     " [Status ({}) for Operation id ({})]", responseStatus, responseOperationId);
-                case UnknownUpdateStatus, ClockRejected -> logger.error("Upsert points failed with status '{}'" +
+                case UnknownUpdateStatus, ClockRejected ->
+                    logger.error("[QdrantUpsertPointsOp] Upsert points failed with status '{}'" +
                         " for operation id '{}'", responseStatus, responseOperationId);
-                default -> logger.error("Unknown status '{}' for operation id '{}'", responseStatus, responseOperationId);
+                default ->
+                    logger.error("[QdrantUpsertPointsOp] Unknown status '{}' for operation id '{}'", responseStatus, responseOperationId);
             }
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
