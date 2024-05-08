@@ -3,7 +3,7 @@ grammar VirtData;
 
 virtdataRecipe : virtdataFlow (specend virtdataFlow?)* EOF ;
 
-virtdataFlow : (COMPOSE)? expression (';' expression?)* ;
+virtdataFlow : (COMPOSE)? expression (';' expression? | WS? expression)* ;
 
 expression : (lvalue ASSIGN)? virtdataCall ;
 

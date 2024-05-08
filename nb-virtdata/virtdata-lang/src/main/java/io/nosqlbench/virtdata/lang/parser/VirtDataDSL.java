@@ -20,9 +20,7 @@ import io.nosqlbench.virtdata.lang.ast.VirtDataAST;
 import io.nosqlbench.virtdata.lang.ast.VirtDataFlow;
 import io.nosqlbench.virtdata.lang.generated.VirtDataLexer;
 import io.nosqlbench.virtdata.lang.generated.VirtDataParser;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CodePointCharStream;
-import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,14 +34,11 @@ public class VirtDataDSL {
 
         try {
             CodePointCharStream cstream = CharStreams.fromString(input);
-            VirtDataLexer lexer = new VirtDataLexer(cstream);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            VirtDataParser parser = new VirtDataParser(tokens);
+            VirtDataParser parser = getVirtDataParser(cstream);
             VirtDataBuilder astListener = new VirtDataBuilder();
             parser.addParseListener(astListener);
-
-            VirtDataParser.VirtdataFlowContext virtdataFlowContext = parser.virtdataFlow();
-            logger.trace(() -> "parse tree: " + virtdataFlowContext.toStringTree(parser));
+            VirtDataParser.VirtdataRecipeContext virtdataRecipeContext = parser.virtdataRecipe();
+            logger.trace(() -> "parse tree: " + virtdataRecipeContext.toStringTree(parser));
 
             if (astListener.hasErrors()) {
                 System.out.println(astListener.getErrorNodes());
@@ -65,6 +60,18 @@ public class VirtDataDSL {
             logger.warn("Error while parsing flow:" + e.getMessage());
             return new ParseResult(e);
         }
+    }
+
+    private static VirtDataParser getVirtDataParser(CodePointCharStream cstream) {
+        VirtDataLexer lexer = new VirtDataLexer(cstream);
+        lexer.addErrorListener(new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        return new VirtDataParser(tokens);
     }
 
     public static class ParseResult {
