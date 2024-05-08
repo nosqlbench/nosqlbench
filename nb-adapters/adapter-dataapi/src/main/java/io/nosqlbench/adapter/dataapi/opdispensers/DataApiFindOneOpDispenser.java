@@ -19,7 +19,7 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 import com.datastax.astra.client.Database;
 import com.datastax.astra.client.model.Filter;
 import com.datastax.astra.client.model.FindOneOptions;
-import com.datastax.astra.client.model.Sorts;
+import com.datastax.astra.client.model.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiFindOneOp;
@@ -27,8 +27,6 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class DataApiFindOneOpDispenser extends DataApiOpDispenser {
@@ -43,17 +41,7 @@ public class DataApiFindOneOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            FindOneOptions options = new FindOneOptions();
-            Optional<LongFunction<Map>> sortFunction = op.getAsOptionalFunction("sort", Map.class);
-            if (sortFunction.isPresent()) {
-                Map<String,Object> sortFields = sortFunction.get().apply(l);
-                String sortOrder = sortFields.get("type").toString();
-                String sortField = sortFields.get("field").toString();
-                switch(sortOrder) {
-                    case "asc" -> options = options.sort(Sorts.ascending(sortField));
-                    case "desc" -> options = options.sort(Sorts.descending(sortField));
-                }
-            }
+            FindOneOptions options = getFindOneOptions(op, l);
             return new DataApiFindOneOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
@@ -61,6 +49,15 @@ public class DataApiFindOneOpDispenser extends DataApiOpDispenser {
                 options
             );
         };
+    }
+
+    private FindOneOptions getFindOneOptions(ParsedOp op, long l) {
+        FindOneOptions options = new FindOneOptions();
+        Sort sort = getSortFromOp(op, l);
+        if (sort != null) {
+            options = options.sort(sort);
+        }
+        return options;
     }
 
     @Override

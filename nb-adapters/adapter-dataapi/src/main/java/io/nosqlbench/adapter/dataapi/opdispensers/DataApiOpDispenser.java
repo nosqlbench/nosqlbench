@@ -18,6 +18,8 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.model.Filter;
 import com.datastax.astra.client.model.Filters;
+import com.datastax.astra.client.model.Sort;
+import com.datastax.astra.client.model.Sorts;
 import io.nosqlbench.adapter.dataapi.DataApiSpace;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
@@ -39,6 +41,21 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         super(adapter, op);
         this.targetFunction = targetFunction;
         this.spaceFunction = adapter.getSpaceFunc(op);
+    }
+
+    protected Sort getSortFromOp(ParsedOp op, long l) {
+        Sort sort = null;
+        Optional<LongFunction<Map>> sortFunction = op.getAsOptionalFunction("sort", Map.class);
+        if (sortFunction.isPresent()) {
+            Map<String,Object> sortFields = sortFunction.get().apply(l);
+            String sortOrder = sortFields.get("type").toString();
+            String sortField = sortFields.get("field").toString();
+            switch(sortOrder) {
+                case "asc" -> sort = Sorts.ascending(sortField);
+                case "desc" -> sort = Sorts.descending(sortField);
+            }
+        }
+        return sort;
     }
 
     protected Filter getFilterFromOp(ParsedOp op, long l) {

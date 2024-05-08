@@ -17,10 +17,7 @@
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.DeleteOneOptions;
-import com.datastax.astra.client.model.Filter;
-import com.datastax.astra.client.model.Filters;
-import com.datastax.astra.client.model.Sorts;
+import com.datastax.astra.client.model.*;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiDeleteOneOp;
@@ -45,17 +42,8 @@ public class DataApiDeleteOneOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            DeleteOneOptions options = new DeleteOneOptions();
-            Optional<LongFunction<Map>> sortFunction = op.getAsOptionalFunction("sort", Map.class);
-            if (sortFunction.isPresent()) {
-                Map<String,Object> sortFields = sortFunction.get().apply(l);
-                String sortOrder = sortFields.get("type").toString();
-                String sortField = sortFields.get("field").toString();
-                switch(sortOrder) {
-                    case "asc" -> options = options.sort(Sorts.ascending(sortField));
-                    case "desc" -> options = options.sort(Sorts.descending(sortField));
-                }
-            }
+            DeleteOneOptions options = getDeleteOneOptions(op, l);
+
             return new DataApiDeleteOneOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
@@ -63,6 +51,15 @@ public class DataApiDeleteOneOpDispenser extends DataApiOpDispenser {
                 options
             );
         };
+    }
+
+    private DeleteOneOptions getDeleteOneOptions(ParsedOp op, long l) {
+        DeleteOneOptions options = new DeleteOneOptions();
+        Sort sort = getSortFromOp(op, l);
+        if (sort != null) {
+            options = options.sort(sort);
+        }
+        return options;
     }
 
     @Override
