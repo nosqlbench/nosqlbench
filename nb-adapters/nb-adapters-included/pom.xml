@@ -186,7 +186,7 @@
         <profile>
             <id>adapter-s4j-include</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
@@ -238,6 +238,16 @@
                 </dependency>
             </dependencies>
         </profile>
+
+<!--        <profile>-->
+<!--            <id>adapter-dataapi</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <modules>-->
+<!--                <module>adapter-dataapi</module>-->
+<!--            </modules>-->
+<!--        </profile>-->
     </profiles>
 
 </project>
