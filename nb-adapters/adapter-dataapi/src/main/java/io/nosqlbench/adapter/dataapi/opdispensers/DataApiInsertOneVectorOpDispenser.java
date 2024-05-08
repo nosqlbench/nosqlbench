@@ -20,28 +20,31 @@ import com.datastax.astra.client.model.Document;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiInsertOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiInsertOneVectorOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiInsertOneOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiInsertOneOpDispenser.class);
-    private final LongFunction<DataApiInsertOneOp> opFunction;
+public class DataApiInsertOneVectorOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiInsertOneVectorOpDispenser.class);
+    private final LongFunction<DataApiInsertOneVectorOp> opFunction;
 
-    public DataApiInsertOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiInsertOneVectorOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiInsertOneOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiInsertOneVectorOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Document.parse(op.get("document", l));
-            return new DataApiInsertOneOp(
+            float[] vector = op.get("vector", l);
+            return new DataApiInsertOneVectorOp(
                 spaceFunction.apply(l).getDatabase(),
                 targetFunction.apply(l),
-                Document.parse(op.get("document", l))
+                Document.parse(op.get("document", l)),
+                vector
             );
         };
     }
