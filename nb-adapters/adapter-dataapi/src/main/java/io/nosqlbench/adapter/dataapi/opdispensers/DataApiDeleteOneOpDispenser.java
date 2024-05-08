@@ -17,7 +17,9 @@
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.*;
+import com.datastax.astra.client.model.DeleteOneOptions;
+import com.datastax.astra.client.model.Filter;
+import com.datastax.astra.client.model.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiDeleteOneOp;
@@ -25,8 +27,6 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class DataApiDeleteOneOpDispenser extends DataApiOpDispenser {
