@@ -16,19 +16,49 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
+import com.datastax.astra.client.model.Document;
+import com.datastax.astra.client.model.InsertManyOptions;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiInsertManyOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class DataApiInsertManyOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiInsertManyOpDispenser.class);
+    private final LongFunction<DataApiInsertManyOp> opFunction;
+
     public DataApiInsertManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
+        this.opFunction = createOpFunction(op);
+    }
+
+    private LongFunction<DataApiInsertManyOp> createOpFunction(ParsedOp op) {
+        return (l) -> {
+            List<Document> documents = new ArrayList<>();
+            op.getAsRequiredFunction("documents", List.class).apply(l).forEach(o -> documents.add(Document.parse(o.toString())));
+            return new DataApiInsertManyOp(
+                spaceFunction.apply(l).getDatabase(),
+                targetFunction.apply(l),
+                documents,
+                getInsertManyOptions(op, l)
+            );
+        };
+    }
+
+    private InsertManyOptions getInsertManyOptions(ParsedOp op, long l) {
+        InsertManyOptions options = new InsertManyOptions();
+
+        return options;
     }
 
     @Override
     public DataApiBaseOp getOp(long value) {
-        return null;
+        return opFunction.apply(value);
     }
 }
