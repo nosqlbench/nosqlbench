@@ -27,6 +27,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class DataApiInsertManyOpDispenser extends DataApiOpDispenser {
@@ -53,7 +55,20 @@ public class DataApiInsertManyOpDispenser extends DataApiOpDispenser {
 
     private InsertManyOptions getInsertManyOptions(ParsedOp op, long l) {
         InsertManyOptions options = new InsertManyOptions();
-
+        Optional<LongFunction<Map>> optionsFunction = op.getAsOptionalFunction("options", Map.class);
+        if (optionsFunction.isPresent()) {
+            Map<String, String> optionFields = optionsFunction.get().apply(l);
+            for(Map.Entry<String,String> entry: optionFields.entrySet()) {
+                switch(entry.getKey()) {
+                    case "chunkSize"->
+                        options = options.chunkSize(Integer.parseInt(entry.getValue()));
+                    case "concurrency" ->
+                        options = options.concurrency(Integer.parseInt(entry.getValue()));
+                    case "ordered" ->
+                        options = options.ordered(Boolean.parseBoolean(entry.getValue()));
+                }
+            }
+        }
         return options;
     }
 

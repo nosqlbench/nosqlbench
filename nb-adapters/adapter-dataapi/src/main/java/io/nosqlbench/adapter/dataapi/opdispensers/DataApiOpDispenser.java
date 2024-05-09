@@ -120,4 +120,42 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return update;
     }
 
+    protected float[] getVectorValues(Object rawVectorValues) {
+        float[] floatValues;
+        if (rawVectorValues instanceof String) {
+            String[] rawValues = (((String) rawVectorValues).split(","));
+            floatValues = new float[rawValues.length];
+            for (int i = 0; i < rawValues.length; i++) {
+                floatValues[i] = Float.parseFloat(rawValues[i]);
+            }
+        } else {
+            throw new RuntimeException("Invalid type specified for values");
+        }
+        return floatValues;
+    }
+
+    protected Projection[] getProjectionFromOp(ParsedOp op, long l) {
+        Projection[] projection = null;
+        Optional<LongFunction<Map>> projectionFunction = op.getAsOptionalFunction("projection", Map.class);
+        if (projectionFunction.isPresent()) {
+            Map<String,List<String>> projectionFields = projectionFunction.get().apply(l);
+            for (Map.Entry<String,List<String>> field : projectionFields.entrySet()) {
+                List<String> includeFields = field.getValue();
+                StringBuffer sb = new StringBuffer();
+                for (String includeField : includeFields) {
+                    sb.append(includeField).append(",");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                if (field.getKey().equalsIgnoreCase("include")) {
+                    projection = Projections.include(sb.toString());
+                } else if (field.getKey().equalsIgnoreCase("exclude")) {
+                    projection = Projections.exclude(sb.toString());
+                } else {
+                    logger.error("Projection " + field + " not supported");
+                }
+            }
+        }
+        return projection;
+    }
+
 }

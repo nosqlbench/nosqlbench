@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 import com.datastax.astra.client.Database;
 import com.datastax.astra.client.model.Filter;
 import com.datastax.astra.client.model.FindOneOptions;
+import com.datastax.astra.client.model.Projection;
 import com.datastax.astra.client.model.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
@@ -57,6 +58,11 @@ public class DataApiFindOneOpDispenser extends DataApiOpDispenser {
         if (sort != null) {
             options = options.sort(sort);
         }
+        Projection[] projection = getProjectionFromOp(op, l);
+        if (projection != null) {
+            options = options.projection(projection);
+        }
+        options.setIncludeSimilarity(true);
         return options;
     }
 

@@ -59,7 +59,15 @@ public class DataApiDeleteOneOpDispenser extends DataApiOpDispenser {
         if (sort != null) {
             options = options.sort(sort);
         }
+        float[] vector = getVectorFromOp(op, l);
+        if (vector != null) {
+            options = options.vector(vector);
+        }
         return options;
+    }
+
+    private float[] getVectorFromOp(ParsedOp op, long l) {
+        return getVectorValues(op.get("vector", l));
     }
 
     @Override
