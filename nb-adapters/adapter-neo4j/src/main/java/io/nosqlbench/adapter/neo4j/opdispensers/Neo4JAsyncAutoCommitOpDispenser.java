@@ -17,22 +17,24 @@
 package io.nosqlbench.adapter.neo4j.opdispensers;
 
 import io.nosqlbench.adapter.neo4j.Neo4JDriverAdapter;
+import io.nosqlbench.adapter.neo4j.ops.Neo4JAsyncAutoCommitOp;
 import io.nosqlbench.adapter.neo4j.Neo4JSpace;
-import io.nosqlbench.adapter.neo4j.ops.Neo4JReadTxnOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+
 import org.neo4j.driver.async.AsyncSession;
 
 import java.util.function.LongFunction;
 
 
-public class Neo4JReadTxnOpDispenser extends Neo4JBaseOpDispenser {
-    public Neo4JReadTxnOpDispenser(Neo4JDriverAdapter adapter, ParsedOp op, LongFunction<Neo4JSpace> spaceFunc, String requiredTemplateKey) {
+public class Neo4JAsyncAutoCommitOpDispenser extends Neo4JBaseOpDispenser {
+
+    public Neo4JAsyncAutoCommitOpDispenser(Neo4JDriverAdapter adapter, ParsedOp op, LongFunction<Neo4JSpace> spaceFunc, String requiredTemplateKey) {
         super(adapter, op, spaceFunc, requiredTemplateKey);
     }
 
     @Override
-    public LongFunction<Neo4JReadTxnOp> createOpFunc() {
-        return l -> new Neo4JReadTxnOp(
+    public LongFunction<Neo4JAsyncAutoCommitOp> createOpFunc() {
+        return l -> new Neo4JAsyncAutoCommitOp(
             spaceFunc.apply(l).getDriver().session(AsyncSession.class),
             queryFunc.apply(l)
         );

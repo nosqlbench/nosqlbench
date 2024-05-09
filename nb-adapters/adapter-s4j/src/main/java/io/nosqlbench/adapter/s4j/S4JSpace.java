@@ -99,8 +99,9 @@ public class S4JSpace implements  AutoCloseable {
     // Keep track the transaction count per thread
     private final ThreadLocal<Integer> txnBatchTrackingCnt = ThreadLocal.withInitial(() -> 0);
 
-    // Represents the JMS connection
-    private PulsarConnectionFactory s4jConnFactory;
+    // Instead of using one "physical" connection per NB process,
+    // allows creating multiple connections to the Pulsar broker via the "num_conn" parameter
+    private final ConcurrentHashMap<String, PulsarConnectionFactory> connFactories = new ConcurrentHashMap<>();
 
     private long totalCycleNum;
 
@@ -125,6 +126,7 @@ public class S4JSpace implements  AutoCloseable {
         this.sessionMode = S4JAdapterUtil.getSessionModeFromStr(
             cfg.getOptional("session_mode").orElse(""));
         this.s4JClientConf = new S4JClientConf(webSvcUrl, pulsarSvcUrl, s4jClientConfFileName);
+        logger.info("{}", s4JClientConf.toString());
 
         this.setS4JActivityStartTimeMills(System.currentTimeMillis());
 
@@ -217,45 +219,41 @@ public class S4JSpace implements  AutoCloseable {
 
     public long incTotalNullMsgRecvdCnt() { return nullMsgRecvCnt.incrementAndGet(); }
 
-    public PulsarConnectionFactory getS4jConnFactory() { return s4jConnFactory; }
-
     public long getTotalCycleNum() { return totalCycleNum; }
     public void setTotalCycleNum(long cycleNum) { totalCycleNum = cycleNum; }
 
     public void initializeSpace(S4JClientConf s4JClientConnInfo) {
-        if (s4jConnFactory == null) {
-            Map<String, Object> cfgMap;
-            try {
-                cfgMap = s4JClientConnInfo.getS4jConfObjMap();
-                s4jConnFactory = new PulsarConnectionFactory(cfgMap);
+        Map<String, Object> cfgMap;
+        try {
+            cfgMap = s4JClientConnInfo.getS4jConfObjMap();
 
-                for (int i=0; i<getMaxNumConn(); i++) {
-                    // Establish a JMS connection
-                    String connLvlJmsConnContextIdStr =getConnLvlJmsContextIdentifier(i);
+            for (int i=0; i<getMaxNumConn(); i++) {
+                String connLvlJmsConnContextIdStr =getConnLvlJmsContextIdentifier(i);
 
-                    JMSContext jmsConnContext = getOrCreateConnLvlJMSContext(s4jConnFactory, s4JClientConnInfo, sessionMode);
-                    jmsConnContext.setClientID(connLvlJmsConnContextIdStr);
-                    jmsConnContext.setExceptionListener(e -> {
-                        if (logger.isDebugEnabled()) {
-                            logger.error("onException::Unexpected JMS error happened:" + e);
-                        }
-                    });
+                // Establish a JMS connection
+                PulsarConnectionFactory s4jConnFactory = connFactories.computeIfAbsent(
+                    connLvlJmsConnContextIdStr,
+                    __ -> new PulsarConnectionFactory(cfgMap));
 
-                    connLvlJmsContexts.put(connLvlJmsConnContextIdStr, jmsConnContext);
+                JMSContext jmsConnContext = getOrCreateConnLvlJMSContext(s4jConnFactory, s4JClientConnInfo, sessionMode);
+                jmsConnContext.setClientID(connLvlJmsConnContextIdStr);
+                jmsConnContext.setExceptionListener(e -> {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("[Connection level JMSContext] {} -- {}",
-                            Thread.currentThread().getName(),
-                            jmsConnContext );
+                        logger.error("onException::Unexpected JMS error happened:" + e);
                     }
+                });
+
+                connLvlJmsContexts.put(connLvlJmsConnContextIdStr, jmsConnContext);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[Connection level JMSContext] {} -- {}",
+                        Thread.currentThread().getName(),
+                        jmsConnContext );
                 }
             }
-            catch (JMSRuntimeException e) {
-                logger.error("Unable to initialize JMS connection factory with the following configuration parameters: {}", s4JClientConnInfo.toString());
-                throw new S4JAdapterUnexpectedException("Unable to initialize JMS connection factory with the following error message: " + e.getCause());
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
+        }
+        catch (JMSRuntimeException e) {
+            logger.error("Unable to initialize JMS connection factory with the following configuration parameters: {}", s4JClientConnInfo.toString());
+            throw new S4JAdapterUnexpectedException("Unable to initialize JMS connection factory with the following error message: " + e.getCause());
         }
     }
 
@@ -284,7 +282,9 @@ public class S4JSpace implements  AutoCloseable {
                 if (jmsContext != null) jmsContext.close();
             }
 
-            s4jConnFactory.close();
+            for (PulsarConnectionFactory s4jConnFactory : connFactories.values()) {
+                if (s4jConnFactory != null) s4jConnFactory.close();
+            }
         }
         catch (Exception ex) {
             String exp = "Unexpected error when shutting down the S4J adaptor space";

@@ -26,21 +26,22 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class Neo4JWriteTxnOp extends Neo4JBaseOp{
+public class Neo4JAsyncReadTxnOp extends Neo4JBaseOp{
+    private final AsyncSession session;
 
-    public Neo4JWriteTxnOp(AsyncSession session, Query query) {
-        super(session, query);
+    public Neo4JAsyncReadTxnOp(AsyncSession session, Query query) {
+        super(query);
+        this.session = session;
     }
 
     /**
-     * References:
-     * - https://neo4j.com/docs/java-manual/current/async/
-     * - https://neo4j.com/docs/api/java-driver/current/org.neo4j.driver/org/neo4j/driver/async/AsyncSession.html#executeWriteAsync(org.neo4j.driver.async.AsyncTransactionCallback)
+     * Reference:
+     * - https://neo4j.com/docs/api/java-driver/current/org.neo4j.driver/org/neo4j/driver/async/AsyncSession.html#executeReadAsync(org.neo4j.driver.async.AsyncTransactionCallback)
      */
     @Override
     public final Record[] apply(long value) {
         try {
-            CompletionStage<List<Record>> resultStage = session.executeWriteAsync(
+            CompletionStage<List<Record>> resultStage = session.executeReadAsync(
                 txn -> txn.runAsync(query).thenComposeAsync(
                     cursor -> cursor.listAsync().whenComplete(
                         (records, throwable) -> {

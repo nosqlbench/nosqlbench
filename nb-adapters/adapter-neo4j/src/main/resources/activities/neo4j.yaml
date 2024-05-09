@@ -24,7 +24,7 @@ blocks:
     ops:
       # Reference: https://support.neo4j.com/s/article/360059882854-Deleting-large-numbers-of-nodes#h_01H95CXNJ8TN4126T3Y01BRWKS
       delete_nodes:
-        autocommit: |
+        sync_autocommit: |
           MATCH (n)
           CALL { WITH n
           DETACH DELETE n
@@ -32,14 +32,14 @@ blocks:
         query_params:
           delete_batch_size: TEMPLATE(delete_batch_size,5000)
       drop_index:
-        autocommit: DROP INDEX $index_name IF EXISTS
+        sync_autocommit: DROP INDEX $index_name IF EXISTS
         query_params:
           index_name: vector_index
 
   schema:
     ops:
       create_vector_index:
-        autocommit: |
+        sync_autocommit: |
           CREATE VECTOR INDEX $index_name IF NOT EXISTS FOR (n:TEMPLATE(node_label,Node))
           ON (n.embedding) OPTIONS
           {indexConfig: {`vector.dimensions`: $dimension, `vector.similarity_function`: $similarity_function}}
@@ -51,7 +51,7 @@ blocks:
   rampup:
     ops:
       insert_node:
-        write_transaction: |
+        async_write_transaction: |
           CREATE (v:TEMPLATE(node_label,Node) {id: $id, embedding: $vector})
         query_params:
           id: '{id}'
@@ -61,7 +61,7 @@ blocks:
     ops:
       # Reference: https://community.neo4j.com/t/unwind-multiple-arrays-to-set-property/59908/5
       insert_nodes:
-        write_transaction: |
+        async_write_transaction: |
           WITH $id_list as ids, $vector_list as vectors
           UNWIND RANGE(0, size(ids) - 1) as idx
           CREATE (v:TEMPLATE(node_label,Node) {id: ids[idx], embedding: vectors[idx]})
@@ -72,7 +72,7 @@ blocks:
   search:
     ops:
       search:
-        read_transaction: |
+        async_read_transaction: |
           WITH $query_vector AS queryVector
           CALL db.index.vector.queryNodes($index_name, $k, queryVector)
           YIELD node

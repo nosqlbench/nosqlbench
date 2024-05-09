@@ -40,11 +40,13 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
     private final static Logger logger = LogManager.getLogger("MessageProducerOpDispenser");
 
     public static final String MSG_HEADER_OP_PARAM = "msg_header";
+    public static final String MSG_PRIORITY_OP_PARAM = "msg_priority";
     public static final String MSG_PROP_OP_PARAM = "msg_property";
     public static final String MSG_BODY_OP_PARAM = "msg_body";
     public static final String MSG_TYPE_OP_PARAM = "msg_type";
 
     private final LongFunction<String> msgHeaderRawJsonStrFunc;
+    private final LongFunction<String> msgPriorityStrFunc;
     private final LongFunction<String> msgPropRawJsonStrFunc;
     private final LongFunction<String> msgBodyRawJsonStrFunc;
     private final LongFunction<String> msgTypeFunc;
@@ -56,6 +58,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
         super(adapter, op, tgtNameFunc, s4jSpace);
 
         this.msgHeaderRawJsonStrFunc = lookupOptionalStrOpValueFunc(MSG_HEADER_OP_PARAM);
+        this.msgPriorityStrFunc = lookupOptionalStrOpValueFunc(MSG_PRIORITY_OP_PARAM);
         this.msgPropRawJsonStrFunc = lookupOptionalStrOpValueFunc(MSG_PROP_OP_PARAM);
         this.msgBodyRawJsonStrFunc = lookupMandtoryStrOpValueFunc(MSG_BODY_OP_PARAM);
         this.msgTypeFunc = lookupOptionalStrOpValueFunc(MSG_TYPE_OP_PARAM);
@@ -272,6 +275,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
     public MessageProducerOp getOp(long cycle) {
         String destName = destNameStrFunc.apply(cycle);
         String jmsMsgHeaderRawJsonStr = msgHeaderRawJsonStrFunc.apply(cycle);
+        String jmsMsgPriorityStr = msgPriorityStrFunc.apply(cycle);
         String jmsMsgPropertyRawJsonStr = msgPropRawJsonStrFunc.apply(cycle);
         String jmsMsgBodyRawJsonStr = msgBodyRawJsonStrFunc.apply(cycle);
 
@@ -294,6 +298,9 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
         JMSProducer producer;
         try {
             producer = getJmsProducer(s4JJMSContextWrapper, asyncAPI);
+            int priority = NumberUtils.toInt(jmsMsgPriorityStr);
+            assert (priority >= 0 && priority <= 9);
+            producer.setPriority(priority);
         }
         catch (JMSException jmsException) {
             throw new S4JAdapterUnexpectedException("Unable to create the JMS producer!");

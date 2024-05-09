@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nosqlbench.adapter.s4j.exception.S4JAdapterInvalidParamException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +36,8 @@ import java.util.Map;
  * the S4J driver
  */
 public class S4JClientConfConverter {
+
+    private final static Logger logger = LogManager.getLogger(S4JClientConfConverter.class);
 
     public static Map<String, Object> convertRawClientConf(Map<String, String> pulsarClientConfMapRaw) {
         Map<String, Object> s4jClientConfObjMap = new HashMap<>();
@@ -71,34 +75,31 @@ public class S4JClientConfConverter {
         /**
          * Non-primitive type processing for Pulsar producer configuration items
          */
-        // "compressionType" has value type "CompressionType"
-        // - expecting the following values: 'LZ4', 'ZLIB', 'ZSTD', 'SNAPPY'
         String confKeyName = "compressionType";
         String confVal = pulsarProducerConfMapRaw.get(confKeyName);
-        String expectedVal = "(LZ4|ZLIB|ZSTD|SNAPPY)";
 
-        if (StringUtils.isNotBlank(confVal)) {
-            if (StringUtils.equalsAnyIgnoreCase(confVal, "LZ4", "ZLIB", "ZSTD", "SNAPPY")) {
-                CompressionType compressionType = CompressionType.NONE;
-
-                switch (StringUtils.upperCase(confVal)) {
-                    case "LZ4":
-                        compressionType = CompressionType.LZ4;
-                    case "ZLIB":
-                        compressionType = CompressionType.ZLIB;
-                    case "ZSTD":
-                        compressionType = CompressionType.ZSTD;
-                    case "SNAPPY":
-                        compressionType = CompressionType.SNAPPY;
-                }
-
-                s4jProducerConfObjMap.put(confKeyName, compressionType);
-            } else {
-                throw new S4JAdapterInvalidParamException(
-                    getInvalidConfValStr(confKeyName, confVal, "producer", expectedVal));
+        CompressionType compressionType = CompressionType.NONE;
+        if ( StringUtils.isNotBlank(confVal) ) {
+            try {
+                S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR compressionTypeStr =
+                    S4JAdapterUtil.MSG_COMPRESSION_TYPE_STR.valueOf(confVal);
+                compressionType = switch (compressionTypeStr) {
+                    case LZ4 -> CompressionType.LZ4;
+                    case ZLIB -> CompressionType.ZLIB;
+                    case ZSTD -> CompressionType.ZSTD;
+                    case SNAPPY -> CompressionType.SNAPPY;
+                };
+            } catch (IllegalArgumentException e) {
+                // Any invalid value will be treated as no compression
+                logger.warn("Invalid producer \"compressionType\" value ({}) in the config properties file. " +
+                    "Expecting one of the following values: {}. " +
+                    "No message compression will be applied (for producers).",
+                    confVal,
+                    S4JAdapterUtil.getValidMsgCompressionTypeList());
             }
         }
 
+        s4jProducerConfObjMap.put(confKeyName, compressionType);
         // TODO: Skip the following Pulsar configuration items for now because they're not really
         //       needed in the NB S4J testing at the moment. Add support for them when needed.
         //       * messageRoutingMode
@@ -312,7 +313,9 @@ public class S4JClientConfConverter {
         Map.entry("jms.usePulsarAdmin","boolean"),
         Map.entry("jms.useServerSideFiltering","boolean"),
         Map.entry("jms.waitForServerStartupTimeout","int"),
-        Map.entry("jms.transactionsStickyPartitions", "boolean")
+        Map.entry("jms.transactionsStickyPartitions", "boolean"),
+        Map.entry("jms.enableJMSPriority","boolean"),
+        Map.entry("jms.priorityMapping","String")
     );
     public static Map<String, Object> convertRawJmsConf(Map<String, String> s4jJmsConfMapRaw) {
         Map<String, Object> s4jJmsConfObjMap = new HashMap<>();

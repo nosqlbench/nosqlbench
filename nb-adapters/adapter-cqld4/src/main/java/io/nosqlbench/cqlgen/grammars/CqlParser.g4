@@ -136,7 +136,7 @@ createType
    ;
 
 typeMemberColumnList
-   : column dataType (syntaxComma column dataType)*
+   : column dataType (syntaxComma column dataType)* syntaxComma?
    ;
 
 createTrigger
@@ -244,8 +244,8 @@ alterType
    ;
 
 alterTypeOperation
-   : alterTypeAlterType
-   | alterTypeAdd
+//   : alterTypeAlterType
+   : alterTypeAdd
    | alterTypeRename
    ;
 
@@ -262,7 +262,7 @@ alterTypeRenameItem
    ;
 
 alterTypeAdd
-   : kwAdd column dataType (syntaxComma column dataType)*
+   : kwAdd column dataType
    ;
 
 alterTypeAlterType
@@ -615,7 +615,7 @@ usingTtlTimestamp
    ;
 
 timestamp
-   : kwTimestamp decimalLiteral
+   : K_TIMESTAMP_WITH_DECIMAL_LITERAL
    ;
 
 ttl
@@ -767,6 +767,7 @@ stringLiteral
 booleanLiteral
    : K_TRUE
    | K_FALSE
+   | OBJECT_NAME
    ;
 
 hexadecimalLiteral
@@ -790,10 +791,10 @@ column
 
 dataType
    : dataTypeName
-   | K_FROZEN syntaxBracketLa dataType syntaxBracketRa
-   | K_SET syntaxBracketLa dataType syntaxBracketRa
-   | K_LIST syntaxBracketLa dataType syntaxBracketRa
-   | K_MAP syntaxBracketLa dataType syntaxComma dataType syntaxBracketRa
+   | K_FROZEN_WITH_OPERATOR_LT dataType syntaxBracketRa
+   | K_SET_WITH_OPERATOR_LT dataType syntaxBracketRa
+   | K_LIST_WITH_OPERATOR_LT dataType syntaxBracketRa
+   | K_MAP_WITH_OPERATOR_LT dataType syntaxComma dataType syntaxBracketRa
    ;
 
 dataTypeName
@@ -901,6 +902,7 @@ kwAggregate
 
 kwAll
    : K_ALL
+   | OBJECT_NAME
    ;
 
 kwAllPermissions
@@ -1101,6 +1103,7 @@ kwLogged
 
 kwLogin
    : K_LOGIN
+   | OBJECT_NAME
    ;
 
 kwMaterialized
@@ -1137,6 +1140,7 @@ kwOn
 
 kwOptions
    : K_OPTIONS
+   | OBJECT_NAME
    ;
 
 kwOr
@@ -1149,6 +1153,7 @@ kwOrder
 
 kwPassword
    : K_PASSWORD
+   | OBJECT_NAME
    ;
 
 kwPrimary
@@ -1201,6 +1206,7 @@ kwStype
 
 kwSuperuser
    : K_SUPERUSER
+   | OBJECT_NAME
    ;
 
 kwTable

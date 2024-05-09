@@ -18,11 +18,17 @@ package io.nosqlbench.adapter.neo4j.types;
 
 public enum Neo4JOpType {
 
-    autocommit("autocommit"),
+    sync_autocommit("sync_autocommit"),
 
-    read_transaction("read_transaction"),
+    async_autocommit("async_autocommit"),
 
-    write_transaction("write_transaction");
+    sync_read_transaction("sync_read_transaction"),
+
+    async_read_transaction("async_read_transaction"),
+
+    sync_write_transaction("sync_write_transaction"),
+
+    async_write_transaction("async_write_transaction");
 
     private final String value;
 
