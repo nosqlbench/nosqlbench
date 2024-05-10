@@ -206,32 +206,32 @@ public class NBCLIScenarioPreprocessorTest {
     public void testCommandSplitter() {
         String normalCmd = "run driver=stdout tags==block:main-read cycles==10 threads=auto param=test1";
         assertThat(NBCLIScenarioPreprocessor.splitCommand(normalCmd))
-            .isEqualTo(List.of("run", "driver=stdout", "tags==block:main-read", "cycles==10", "threads=auto", "param=test1"));
+            .isEqualTo(new String[]{"run", "driver=stdout", "tags==block:main-read", "cycles==10", "threads=auto", "param=test1"});
 
         // param='test1' or pram="test1" -> param=test1
         String quotedParamCmd = "run driver=stdout tags==block:\"main.*\" cycles==10 threads=auto param='test1'";
         assertThat(NBCLIScenarioPreprocessor.splitCommand(quotedParamCmd))
-            .isEqualTo(List.of("run", "driver=stdout", "tags==block:main.*", "cycles==10", "threads=auto", "param=test1"));
+            .isEqualTo(new String[]{"run", "driver=stdout", "tags==block:main.*", "cycles==10", "threads=auto", "param=test1"});
 
         // param="test 1" or params='test 1' -> param=test 1
         String paramWithSpaceCmd = "run driver=stdout tags==block:\"main.*\" cycles==10 threads=auto param='test 1'";
         assertThat(NBCLIScenarioPreprocessor.splitCommand(paramWithSpaceCmd))
-            .isEqualTo(List.of("run", "driver=stdout", "tags==block:main.*", "cycles==10", "threads=auto", "param=test 1"));
+            .isEqualTo(new String[]{"run", "driver=stdout", "tags==block:main.*", "cycles==10", "threads=auto", "param=test 1"});
 
         // param=\"test1\"  -> param="test1", param=\'test1\'  -> param='test1'
         String escapingQuotesParamCmd = "run driver=stdout tags==block:'main.*' cycles==10 threads=auto param=\\\"test1\\\"";
         assertThat(NBCLIScenarioPreprocessor.splitCommand(escapingQuotesParamCmd))
-            .isEqualTo(List.of("run", "driver=stdout", "tags==block:main.*", "cycles==10", "threads=auto", "param=\"test1\""));
+            .isEqualTo(new String[]{"run", "driver=stdout", "tags==block:main.*", "cycles==10", "threads=auto", "param=\"test1\""});
 
         // param=test1\\test2 -> param=test1\test2
         String escapingSlashParamCmd = "run driver=stdout tags==block:'main.*' cycles==10 threads=auto param=test1\\\\test2";
         assertThat(NBCLIScenarioPreprocessor.splitCommand(escapingSlashParamCmd))
-            .isEqualTo(List.of("run", "driver=stdout", "tags==block:main.*", "cycles==10", "threads=auto", "param=test1\\test2"));
+            .isEqualTo(new String[]{"run", "driver=stdout", "tags==block:main.*", "cycles==10", "threads=auto", "param=test1\\test2"});
 
         // param="test1 -> unclosed quote "
         String unclosedQuoteCmd = "run driver=stdout tags==block:'main.*' cycles==10 threads=auto param=\"test1";
         assertThatExceptionOfType(BasicError.class)
             .isThrownBy(() -> NBCLIScenarioPreprocessor.splitCommand(unclosedQuoteCmd))
-            .withMessageContaining("Unclosed double quote found in scenario cmd");
+            .withMessageContaining("Unclosed quote found in scenario cmd");
     }
 }
