@@ -1,0 +1,11 @@
+scenarios:
+  default:
+    create_collection: run driver=dataapi tags==blocks:create_collection cycles=1
+
+blocks:
+  create_collection:
+    ops:
+      op1:
+        create_collection: "collectionName"
+        dimensions: 128
+        similarity: "cosine"

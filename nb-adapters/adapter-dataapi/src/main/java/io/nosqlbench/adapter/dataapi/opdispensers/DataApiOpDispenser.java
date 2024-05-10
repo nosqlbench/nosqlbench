@@ -57,35 +57,42 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
 
     protected Filter getFilterFromOp(ParsedOp op, long l) {
         Filter filter = null;
-        Optional<LongFunction<Map>> filterFunction = op.getAsOptionalFunction("filters", Map.class);
+        Optional<LongFunction<List>> filterFunction = op.getAsOptionalFunction("filters", List.class);
         if (filterFunction.isPresent()) {
-            Map<String,Object> filters = filterFunction.get().apply(l);
-            List<Filter> filterList = new ArrayList<>();
-            String conjunction = "and";
-            for (Map.Entry<String, Object> entry : filters.entrySet()) {
-                if (entry.getKey().equalsIgnoreCase("filter")) {
-                    Map<String,Object> filterFields = (Map<String, Object>) entry.getValue();
-                    switch (filterFields.get("operation").toString()) {
-                        case "lt" ->
-                            filterList.add(Filters.lt(filters.get("field").toString(), (long) filters.get("value")));
-                        case "gt" ->
-                            filterList.add(Filters.gt(filters.get("field").toString(), (long) filters.get("value")));
-                        case "eq" -> filterList.add(Filters.eq(filters.get("field").toString(), filters.get("value")));
-                        default -> logger.error("Operation not supported");
+            List<Map<String,Object>> filters = filterFunction.get().apply(l);
+            List<Filter> andFilterList = new ArrayList<>();
+            List<Filter> orFilterList = new ArrayList<>();
+            for (Map<String,Object> filterFields : filters) {
+                switch ((String)filterFields.get("conjunction")) {
+                    case "and" -> {
+                        switch (filterFields.get("operator").toString()) {
+                            case "lt" ->
+                                andFilterList.add(Filters.lt(filterFields.get("field").toString(), (long) filterFields.get("value")));
+                            case "gt" ->
+                                andFilterList.add(Filters.gt(filterFields.get("field").toString(), (long) filterFields.get("value")));
+                            case "eq" ->
+                                andFilterList.add(Filters.eq(filterFields.get("field").toString(), filterFields.get("value")));
+                            default -> logger.error(() -> "Operation " + filterFields.get("operator") + " not supported");
+                        }
                     }
-                } else if (entry.getKey().equalsIgnoreCase("conjunction")) {
-                    conjunction = (String) entry.getValue();
-                } else {
-                    logger.error("Filter " + entry.getKey() + " not supported");
+                    case "or" -> {
+                        switch (filterFields.get("operator").toString()) {
+                            case "lt" ->
+                                orFilterList.add(Filters.lt(filterFields.get("field").toString(), (long) filterFields.get("value")));
+                            case "gt" ->
+                                orFilterList.add(Filters.gt(filterFields.get("field").toString(), (long) filterFields.get("value")));
+                            case "eq" ->
+                                orFilterList.add(Filters.eq(filterFields.get("field").toString(), filterFields.get("value")));
+                            default -> logger.error(() -> "Operation " + filterFields.get("operator") + " not supported");
+                        }
+                    }
+                    default -> logger.error(() -> "Conjunction " + filterFields.get("conjunction") + " not supported");
                 }
             }
-            if (conjunction.equalsIgnoreCase("and")) {
-                filter = Filters.and(filterList);
-            } else if (conjunction.equalsIgnoreCase("or")) {
-                filter = Filters.or(filterList);
-            } else {
-                logger.error("Conjunction " + conjunction + " not supported");
-            }
+            if (!andFilterList.isEmpty())
+                filter = Filters.and(andFilterList.toArray(new Filter[0]));
+            if (!orFilterList.isEmpty())
+                filter = Filters.or(orFilterList.toArray(new Filter[0]));
         }
         return filter;
     }
@@ -110,10 +117,10 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                             update = Updates.min(updateFields.get("field").toString(), (double) updateFields.get("value"));
                         case "rename" ->
                             update = Updates.rename(updateFields.get("field").toString(), updateFields.get("value").toString());
-                        default -> logger.error("Operation " + updateFields.get("operation") + " not supported");
+                        default -> logger.error(() -> "Operation " + updateFields.get("operation") + " not supported");
                     }
                 } else {
-                    logger.error("Filter " + entry.getKey() + " not supported");
+                    logger.error(() -> "Filter " + entry.getKey() + " not supported");
                 }
             }
         }
