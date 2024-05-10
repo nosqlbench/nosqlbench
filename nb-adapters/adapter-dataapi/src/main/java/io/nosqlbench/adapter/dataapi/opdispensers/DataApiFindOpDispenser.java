@@ -55,8 +55,11 @@ public class DataApiFindOpDispenser extends DataApiOpDispenser {
     private FindOptions getFindOptions(ParsedOp op, long l) {
         FindOptions options = new FindOptions();
         Sort sort = getSortFromOp(op, l);
+        float[] vector = getVectorValues(op, l);
         if (sort != null) {
-            options = options.sort(sort);
+            options = vector != null ? options.sort(vector, sort) : options.sort(sort);
+        } else if (vector != null) {
+            options = options.sort(vector);
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {

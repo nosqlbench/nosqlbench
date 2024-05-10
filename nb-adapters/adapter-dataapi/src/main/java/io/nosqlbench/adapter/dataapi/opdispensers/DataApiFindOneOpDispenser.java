@@ -58,6 +58,8 @@ public class DataApiFindOneOpDispenser extends DataApiOpDispenser {
         float[] vector = getVectorValues(op, l);
         if (sort != null) {
             options = vector != null ? options.sort(vector, sort) : options.sort(sort);
+        } else if (vector != null) {
+            options = options.sort(vector);
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {
