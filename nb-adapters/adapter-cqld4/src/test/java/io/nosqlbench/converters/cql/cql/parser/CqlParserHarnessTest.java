@@ -21,6 +21,12 @@ import io.nosqlbench.cqlgen.parser.CqlModelParser;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
+
 public class CqlParserHarnessTest {
 
     private final static String ksddl = """
@@ -81,5 +87,22 @@ public class CqlParserHarnessTest {
             """, null);
     }
 
+    @Test
+    @Disabled
+    public void testCqlExamples() throws IOException {
+        File folderPath = new File("src/test/resources/cql3_examples");
+        for (final File file : Objects.requireNonNull(folderPath.listFiles())) {
+            String query = Files.readString(Path.of(file.getPath()));
+            CqlModelParser.parse(query, null);
+        }
+    }
 
+    @Disabled
+    @Test
+    public void testUdt() {
+        CGWorkloadExporter exporter = new CGWorkloadExporter();
+        exporter.applyAsInt(new String[] {"src/test/resources/testschemas/cql_udt.cql", "cql_udt.yaml"});
+        exporter.setNamingTemplate("[OPTYPE-][COLUMN-][TYPEDEF-][TABLE-]-[KEYSPACE]");
+        exporter.getWorkloadAsYaml();
+    }
 }

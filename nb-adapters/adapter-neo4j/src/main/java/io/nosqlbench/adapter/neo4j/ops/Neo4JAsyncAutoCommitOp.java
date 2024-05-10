@@ -26,28 +26,28 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class Neo4JReadTxnOp extends Neo4JBaseOp{
+public class Neo4JAsyncAutoCommitOp extends Neo4JBaseOp {
+    private final AsyncSession session;
 
-    public Neo4JReadTxnOp(AsyncSession session, Query query) {
-        super(session, query);
+    public Neo4JAsyncAutoCommitOp(AsyncSession session, Query query) {
+        super(query);
+        this.session = session;
     }
 
     /**
      * Reference:
-     * - https://neo4j.com/docs/api/java-driver/current/org.neo4j.driver/org/neo4j/driver/async/AsyncSession.html#executeReadAsync(org.neo4j.driver.async.AsyncTransactionCallback)
+     * - https://neo4j.com/docs/api/java-driver/current/org.neo4j.driver/org/neo4j/driver/async/AsyncSession.html#runAsync(java.lang.String,java.util.Map,org.neo4j.driver.TransactionConfig)
      */
     @Override
     public final Record[] apply(long value) {
         try {
-            CompletionStage<List<Record>> resultStage = session.executeReadAsync(
-                txn -> txn.runAsync(query).thenComposeAsync(
-                    cursor -> cursor.listAsync().whenComplete(
-                        (records, throwable) -> {
-                            if (throwable != null) {
-                                session.closeAsync();
-                            }
+            CompletionStage<List<Record>> resultStage = session.runAsync(query).thenComposeAsync(
+                cursor -> cursor.listAsync().whenComplete(
+                    (records, throwable) -> {
+                        if (throwable != null) {
+                            session.closeAsync();
                         }
-                    )
+                    }
                 )
             );
             List<Record> recordList = resultStage.toCompletableFuture().get(300, TimeUnit.SECONDS);
