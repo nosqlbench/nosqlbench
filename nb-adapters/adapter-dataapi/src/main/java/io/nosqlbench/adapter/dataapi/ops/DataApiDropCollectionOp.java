@@ -20,9 +20,9 @@ import com.datastax.astra.client.Database;
 
 public class DataApiDropCollectionOp extends DataApiBaseOp {
     private final String collectionName;
-    public DataApiDropCollectionOp(Database db, String dbName) {
+    public DataApiDropCollectionOp(Database db, String collectionName) {
         super(db);
-        this.collectionName = dbName;
+        this.collectionName = collectionName;
     }
 
     @Override

@@ -1,0 +1,25 @@
+scenarios:
+  default:
+    find: run driver=dataapi tags==blocks:find cycles=10
+
+blocks:
+  find:
+    ops:
+      op1:
+        find: "collectionName"
+        filters:
+          - conjunction: "and"
+            operator: "lt"
+            field: "field1"
+            value: 10
+          - conjunction: "or"
+            operator: "eq"
+            field: "field2"
+            value: "value2"
+        sort:
+          type: "asc"
+          field: "field1"
+        projection:
+          include:
+            - "field1"
+            - "field2"

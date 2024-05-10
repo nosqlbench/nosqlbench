@@ -7,5 +7,5 @@ blocks:
     ops:
       op1:
         create_collection: "collectionName"
-        dimensions: 128
+        dimensions: 10
         similarity: "cosine"

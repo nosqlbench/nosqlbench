@@ -8,13 +8,11 @@ blocks:
       op1:
         delete_many: "collectionName"
         filters:
-          - name: "filter1"
-            conjunction: "and"
+          - conjunction: "and"
             operator: "lt"
             field: "field1"
             value: 10
-          - name: "filter2"
-            conjunction: "or"
+          - conjunction: "or"
             operator: "eq"
             field: "field2"
             value: "value2"

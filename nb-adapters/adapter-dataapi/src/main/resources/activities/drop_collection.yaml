@@ -1,0 +1,9 @@
+scenarios:
+  default:
+    drop_collection: run driver=dataapi tags==blocks:drop_collection cycles=1
+
+blocks:
+  drop_collection:
+    ops:
+      op1:
+        drop_collection: "collectionName"
