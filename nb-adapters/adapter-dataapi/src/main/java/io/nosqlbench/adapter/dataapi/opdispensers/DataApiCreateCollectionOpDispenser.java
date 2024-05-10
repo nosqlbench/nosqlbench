@@ -51,7 +51,7 @@ public class DataApiCreateCollectionOpDispenser extends DataApiOpDispenser {
             Optional<LongFunction<String>> simFunc = op.getAsOptionalFunction("similarity", String.class);
             if (simFunc.isPresent()) {
                 LongFunction<String> sf = simFunc.get();
-                optionsBldr.vectorSimilarity(SimilarityMetric.valueOf(sf.apply(l)));
+                optionsBldr.vectorSimilarity(SimilarityMetric.fromValue(sf.apply(l)));
             }
 
             DataApiCreateCollectionOp dataApiCreateCollectionOp =
