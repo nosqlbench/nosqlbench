@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2022-2023 nosqlbench
+  ~ Copyright (c) 2022-2024 nosqlbench
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -171,6 +171,16 @@
             </activation>
             <modules>
                 <module>adapter-amqp</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-qdrant-module</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-qdrant</module>
             </modules>
         </profile>
 

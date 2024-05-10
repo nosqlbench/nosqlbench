@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -302,6 +302,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         } else if (isConfig(field)) {
             return getConfig(field);
         }
+        logger.warn("static field '{}' was requested, but it does not exist", field);
         return null;
     }
 

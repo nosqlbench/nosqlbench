@@ -9,12 +9,15 @@ https://github.com/milvus-io/milvus-sdk-java.
 The following parameters must be supplied to the adapter at runtime in order to successfully connect to an
 instance of the Milvus/Zilliz database:
 
-* token - In order to use the pinecone database you must have an account. Once the account is created you can [request
+* `token` - In order to use the Milvus/Zilliz database you must have an account. Once the account is created you
+  can [request
   an api key/token](https://milvus.io/docs/users_and_roles.md#Users-and-Roles). This key will need to be provided any
-  time a
-  database connection is desired.
-* uri - When an Index is created in the database the uri must be specified as well. The adapter will
-  use the default value of localhost:19530 if none is provided at runtime.
+  time a database connection is desired. Alternatively,
+  the api key can be stored in a file securely and referenced via the `token_file` config option pointing to the path of
+  the file.
+* `uri` - When an index is created in the database the URI/endpoint must be specified as well. The adapter will
+  use the default value of `localhost:19530` if none is provided at runtime.
+* `database_name` or `database` - the name of the database to use. For Zilliz, only `default` is supported.
 
 ## Op Templates
 
