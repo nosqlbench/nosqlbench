@@ -51,7 +51,7 @@
             <artifactId>guava</artifactId>
             <!--<version>33.1.0-jre</version>-->
             <!-- Trying to match https://github.com/qdrant/java-client/blob/master/build.gradle#L93 -->
-            <version>30.1-jre</version>
+            <version>32.0.0-jre</version>
         </dependency>
         <dependency>
             <groupId>io.qdrant</groupId>
