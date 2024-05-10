@@ -238,6 +238,20 @@
                 </dependency>
             </dependencies>
         </profile>
+
+        <profile>
+            <id>adapter-qdrant-include</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>adapter-qdrant</artifactId>
+                    <version>${revision}</version>
+                </dependency>
+            </dependencies>
+        </profile>
     </profiles>
 
 </project>
