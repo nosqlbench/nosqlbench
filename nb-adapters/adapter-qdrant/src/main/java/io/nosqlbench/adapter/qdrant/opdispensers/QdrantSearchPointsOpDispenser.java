@@ -216,29 +216,4 @@ public class QdrantSearchPointsOpDispenser extends QdrantBaseOpDispenser<SearchP
             }
         };
     }
-
-    @Deprecated
-    private Optional<LongFunction<List<Float>>> getVectorFieldsFunction(ParsedOp op, String namedVectors) {
-//        return l -> {
-//            if (!op.isDefined(namedVectors)) {
-//                return Optional.empty();
-//            }
-//            List<Float> fields = op.get(namedVectors, 0L);
-//            if (fields == null) {
-//                fields = op.get(namedVectors, 0L);
-//            }
-//            return fields;
-//        };
-        LongFunction<Object> rowF = op.getAsRequiredFunction(namedVectors, Object.class);
-        Object testObject = rowF.apply(0L);
-        LongFunction<List<Float>> rowsF = null;
-        if(testObject instanceof List<?> list) {
-            if (list.isEmpty()) {
-                throw new OpConfigError("Unable to detect type of list object for empty list for op named '" + op.getName() + "'");
-            } else if (list.get(0) instanceof Float) {
-                rowsF = l -> (List<Float>) rowF.apply(l);
-            }
-        }
-        return Optional.ofNullable(rowsF);
-    }
 }

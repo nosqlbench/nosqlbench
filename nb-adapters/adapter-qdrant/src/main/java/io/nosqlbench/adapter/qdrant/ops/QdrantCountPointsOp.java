@@ -37,7 +37,7 @@ public class QdrantCountPointsOp extends QdrantBaseOp<CountPoints> {
                 request.getExact(),
                 Duration.ofMinutes(5) // opinionated default of 5 minutes for timeout
             ).get();
-            logger.info("Total vector points counted: {}", result);
+            logger.info("[QdrantCountPointsOp] Total vector points counted: {}", result);
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

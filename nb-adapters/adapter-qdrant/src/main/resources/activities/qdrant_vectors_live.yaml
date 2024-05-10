@@ -17,27 +17,27 @@ scenarios:
       run tags==block:delete_collection
       errors===stop
       cycles===UNDEF threads===UNDEF
-      uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
+      uri=TEMPLATE(qdranthost) grpc_port=TEMPLATE(grpc_port,6334) token_file=TEMPLATE(token_file)
     schema_collection: >-
       run tags==block:schema_collection
       errors===stop
       cycles===UNDEF threads===UNDEF
-      uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
+      uri=TEMPLATE(qdranthost) grpc_port=TEMPLATE(grpc_port,6334) token_file=TEMPLATE(token_file)
     rampup: >-
       run tags==block:rampup
       errors===warn,counter,retry
       cycles===TEMPLATE(train_cycles,TEMPLATE(trainsize,1000)) threads===TEMPLATE(train_threads,AUTO)
-      uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
+      uri=TEMPLATE(qdranthost) grpc_port=TEMPLATE(grpc_port,6334) token_file=TEMPLATE(token_file)
     count_vectors: >-
       run tags==block:count_vectors
       errors===stop
       cycles===UNDEF threads===UNDEF
-      uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
+      uri=TEMPLATE(qdranthost) grpc_port=TEMPLATE(grpc_port,6334) token_file=TEMPLATE(token_file)
     search_points: >-
       run tags==block:search_points
       errors===warn,counter
       cycles===TEMPLATE(testann_cycles,TEMPLATE(testsize,1000)) threads===TEMPLATE(testann_threads,AUTO)
-      uri=TEMPLATE(qdranthost) token_file=TEMPLATE(token_file)
+      uri=TEMPLATE(qdranthost) grpc_port=TEMPLATE(grpc_port,6334) token_file=TEMPLATE(token_file)
 
 params:
   driver: qdrant

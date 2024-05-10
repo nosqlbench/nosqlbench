@@ -26,7 +26,6 @@ import io.qdrant.client.grpc.Collections.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -58,20 +57,10 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
         LongFunction<CreateCollection.Builder> ebF =
             l -> CreateCollection.newBuilder().setCollectionName(targetF.apply(l));
 
-        // new code - incomplete
         LongFunction<Map<String, VectorParams>> namedVectorParamsMap = buildNamedVectorsStruct(op);
         final LongFunction<CreateCollection.Builder> namedVectorsF = ebF;
         ebF = l -> namedVectorsF.apply(l).setVectorsConfig(VectorsConfig.newBuilder().setParamsMap(
             VectorParamsMap.newBuilder().putAllMap(namedVectorParamsMap.apply(l)).build()));
-        // new code - incomplete
-        // old code
-//        Map<String, VectorParams> namedVectorParamsMap1 = buildNamedVectorsStruct(
-//            op.getAsSubOps("vectors", ParsedOp.SubOpNaming.SubKey)
-//        );
-//        final LongFunction<CreateCollection.Builder> namedVectorsF1 = ebF;
-//        ebF = l -> namedVectorsF1.apply(l).setVectorsConfig(VectorsConfig.newBuilder().setParamsMap(
-//            VectorParamsMap.newBuilder().putAllMap(namedVectorParamsMap1).build()));
-        // old code
 
         ebF = op.enhanceFuncOptionally(ebF, "on_disk_payload", Boolean.class,
             CreateCollection.Builder::setOnDiskPayload);
@@ -92,9 +81,6 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
             LongFunction<WalConfigDiff> wcdF = buildWalConfigDiff(walF.get());
             ebF = l -> wallFunc.apply(l).setWalConfig(wcdF.apply(l));
         }
-//        WalConfigDiff walConfig = buildWalConfigDiff(op);
-//        final LongFunction<CreateCollection.Builder> walConfigF = ebF;
-//        ebF = l -> walConfigF.apply(l).setWalConfig(walConfig);
 
         Optional<LongFunction<Map>> optConDifF = op.getAsOptionalFunction("optimizers_config", Map.class);
         if (optConDifF.isPresent()) {
@@ -103,10 +89,6 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
             ebF = l -> wallFunc.apply(l).setOptimizersConfig(ocdF.apply(l));
         }
 
-//        OptimizersConfigDiff ocDiff = buildOptimizerConfigDiff(op);
-//        final LongFunction<CreateCollection.Builder> ocF = ebF;
-//        ebF = l -> ocF.apply(l).setOptimizersConfig(ocDiff);
-
         Optional<LongFunction<Map>> hnswConfigDiffF = op.getAsOptionalFunction("hnsw_config", Map.class);
         if (hnswConfigDiffF.isPresent()) {
             final LongFunction<CreateCollection.Builder> hnswConfigF = ebF;
@@ -114,21 +96,12 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
             ebF = l -> hnswConfigF.apply(l).setHnswConfig(hcdF.apply(l));
         }
 
-//        HnswConfigDiff hnswConfigDiff = buildHnswConfigDiff(op);
-//        final LongFunction<CreateCollection.Builder> hnswConfigF = ebF;
-//        ebF = l -> hnswConfigF.apply(l).setHnswConfig(hnswConfigDiff);
-
         Optional<LongFunction<Map>> quantConfigF = op.getAsOptionalFunction("quantization_config", Map.class);
         if (quantConfigF.isPresent()) {
             final LongFunction<CreateCollection.Builder> qConF = ebF;
             LongFunction<QuantizationConfig> qcDiffF = buildQuantizationConfig(quantConfigF.get());
             ebF = l -> qConF.apply(l).setQuantizationConfig(qcDiffF.apply(l));
         }
-//        QuantizationConfig qcDiff = buildQuantizationConfig(op);
-//        if (qcDiff != null) {
-//            final LongFunction<CreateCollection.Builder> qcConfigF = ebF;
-//            ebF = l -> qcConfigF.apply(l).setQuantizationConfig(qcDiff);
-//        }
 
         Optional<LongFunction<Map>> sparseVectorsF = op.getAsOptionalFunction("sparse_vectors", Map.class);
         if (sparseVectorsF.isPresent()) {
@@ -136,57 +109,9 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
             LongFunction<SparseVectorConfig> sparseVectorsMap = buildSparseVectorsStruct(sparseVectorsF.get());
             ebF = l -> sparseVecF.apply(l).setSparseVectorsConfig(sparseVectorsMap.apply(l));
         }
-//        if (op.isDefined("sparse_vectors")) {
-//            SparseVectorConfig sparseVectorsMap = buildSparseVectorsStruct(
-//                op.getAsSubOps("sparse_vectors", ParsedOp.SubOpNaming.SubKey)
-//            );
-//            final LongFunction<CreateCollection.Builder> sparseVectorsF = ebF;
-//            ebF = l -> sparseVectorsF.apply(l).setSparseVectorsConfig(sparseVectorsMap);
-//        }
 
         final LongFunction<CreateCollection.Builder> lastF = ebF;
         return l -> lastF.apply(l).build();
-    }
-
-    /**
-     * Build the {@link OptimizersConfigDiff} from the provided {@link ParsedOp}.
-     *
-     * @param op {@link ParsedOp} containing the optimizer config data.
-     * @return {@link OptimizersConfigDiff} containing the optimizer config data
-     */
-    private OptimizersConfigDiff buildOptimizerConfigDiff(ParsedOp op) {
-        OptimizersConfigDiff.Builder ocDiffBuilder = OptimizersConfigDiff.newBuilder();
-        op.getOptionalStaticValue("optimizers_config", Map.class).ifPresent(ocData -> {
-            if (ocData.isEmpty()) {
-                return;
-            } else {
-                if (ocData.containsKey("deleted_threshold")) {
-                    ocDiffBuilder.setDeletedThreshold(((Number) ocData.get("deleted_threshold")).doubleValue());
-                }
-                if (ocData.containsKey("vacuum_min_vector_number")) {
-                    ocDiffBuilder.setVacuumMinVectorNumber(((Number) ocData.get("vacuum_min_vector_number")).longValue());
-                }
-                if (ocData.containsKey("default_segment_number")) {
-                    ocDiffBuilder.setDefaultSegmentNumber(((Number) ocData.get("default_segment_number")).longValue());
-                }
-                if (ocData.containsKey("max_segment_size")) {
-                    ocDiffBuilder.setMaxSegmentSize(((Number) ocData.get("max_segment_size")).longValue());
-                }
-                if (ocData.containsKey("memmap_threshold")) {
-                    ocDiffBuilder.setMemmapThreshold(((Number) ocData.get("memmap_threshold")).longValue());
-                }
-                if (ocData.containsKey("indexing_threshold")) {
-                    ocDiffBuilder.setIndexingThreshold(((Number) ocData.get("indexing_threshold")).longValue());
-                }
-                if (ocData.containsKey(("flush_interval_sec"))) {
-                    ocDiffBuilder.setFlushIntervalSec(((Number) ocData.get("flush_interval_sec")).longValue());
-                }
-                if (ocData.containsKey("max_optimization_threads")) {
-                    ocDiffBuilder.setMaxOptimizationThreads(((Number) ocData.get("max_optimization_threads")).intValue());
-                }
-            }
-        });
-        return ocDiffBuilder.build();
     }
 
     /**
@@ -232,30 +157,6 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
     /**
      * Build the {@link WalConfigDiff} from the provided {@link ParsedOp}.
      *
-     * @param op {@link ParsedOp} containing the WAL config data.
-     * @return {@link WalConfigDiff} containing the WAL config data
-     */
-    @Deprecated
-    private WalConfigDiff buildWalConfigDiff(ParsedOp op) {
-        WalConfigDiff.Builder walConfigDiffBuilder = WalConfigDiff.newBuilder();
-        op.getOptionalStaticValue("wal_config", Map.class).ifPresent(walConfigData -> {
-            if (walConfigData.isEmpty()) {
-                return;
-            } else {
-                if (walConfigData.containsKey("wal_capacity_mb")) {
-                    walConfigDiffBuilder.setWalCapacityMb(((Number) walConfigData.get("wal_capacity_mb")).longValue());
-                }
-                if (walConfigData.containsKey("wal_segments_ahead")) {
-                    walConfigDiffBuilder.setWalSegmentsAhead(((Number) walConfigData.get("wal_segments_ahead")).longValue());
-                }
-            }
-        });
-        return walConfigDiffBuilder.build();
-    }
-
-    /**
-     * Build the {@link WalConfigDiff} from the provided {@link ParsedOp}.
-     *
      * @param mapLongFunction {@link LongFunction<Map>} containing the WAL config data.
      * @return {@link LongFunction<WalConfigDiff>} containing the WAL config data
      */
@@ -273,32 +174,6 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
             );
             return walConfigDiffBuilder.build();
         };
-    }
-
-    /**
-     * Only named vectors are supported at this time in this driver.
-     *
-     * @param {@link Map<String, ParsedOp>} namedVectorsData
-     * @return {@link VectorParams} containing the named vectors
-     */
-    @Deprecated
-    private Map<String, VectorParams> buildNamedVectorsStruct(Map<String, ParsedOp> namedVectorsData) {
-        Map<String, VectorParams> namedVectors = new HashMap<>();
-        VectorParams.Builder builder = VectorParams.newBuilder();
-        namedVectorsData.forEach((name, fieldSpec) -> {
-            builder.setDistanceValue(fieldSpec.getStaticValue("distance_value", Number.class).intValue());
-            builder.setSize(fieldSpec.getStaticValue("size", Number.class).longValue());
-            fieldSpec.getOptionalStaticValue("on_disk", Boolean.class)
-                .ifPresent(builder::setOnDisk);
-            fieldSpec.getOptionalStaticValue("datatype_value", Number.class)
-                .ifPresent((Number value) -> builder.setDatatypeValue(value.intValue()));
-
-            builder.setHnswConfig(buildHnswConfigDiff(fieldSpec));
-            builder.setQuantizationConfig(buildQuantizationConfig(fieldSpec));
-
-            namedVectors.put(name, builder.build());
-        });
-        return namedVectors;
     }
 
     /**
@@ -346,124 +221,6 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
             });
             return namedVectors;
         }).orElse(null);
-    }
-
-    /**
-     * Build the {@link QuantizationConfig} from the provided {@link ParsedOp}.
-     *
-     * @param fieldSpec The {@link ParsedOp} containing the quantization config data
-     * @return The {@link QuantizationConfig} built from the provided {@link ParsedOp}
-     * @see <a href="https://qdrant.tech/documentation/guides/quantization/#setting-up-quantization-in-qdrant">Quantization Config</a>
-     */
-    @Deprecated
-    private QuantizationConfig buildQuantizationConfig(ParsedOp fieldSpec) {
-        QuantizationConfig.Builder qcBuilder = QuantizationConfig.newBuilder();
-        fieldSpec.getOptionalStaticValue("quantization_config", Map.class).ifPresent(qcData -> {
-            if (qcData.isEmpty()) {
-                return;
-            } else {
-                // TODO - Approach #1 - feels ugly
-                Arrays.asList("binary", "product", "scalar")
-                    .forEach(key -> {
-                        if (qcData.containsKey(key)) {
-                            switch (key) {
-                                case "binary":
-                                    BinaryQuantization.Builder binaryBuilder = BinaryQuantization.newBuilder();
-                                    Map<?, ?> binaryQCData = (Map<?, ?>) qcData.get("binary");
-                                    if (null != binaryQCData && !binaryQCData.isEmpty()) {
-                                        if (binaryQCData.containsKey("always_ram")) {
-                                            binaryBuilder.setAlwaysRam((Boolean) binaryQCData.get("always_ram"));
-                                        }
-                                    }
-                                    qcBuilder.setBinary(binaryBuilder);
-                                    break;
-                                case "product":
-                                    ProductQuantization.Builder productBuilder = ProductQuantization.newBuilder();
-                                    Map<?, ?> productQCData = (Map<?, ?>) qcData.get("product");
-                                    if (null != productQCData && !productQCData.isEmpty()) {
-                                        // Mandatory field
-                                        productBuilder.setAlwaysRam((Boolean) productQCData.get("always_ram"));
-                                        // Optional field(s) below
-                                        if (productQCData.containsKey("compression")) {
-                                            productBuilder.setCompression(CompressionRatio.valueOf((String) productQCData.get("compression")));
-                                        }
-                                    }
-                                    qcBuilder.setProduct(productBuilder);
-                                    break;
-                                case "scalar":
-                                    ScalarQuantization.Builder scalarBuilder = ScalarQuantization.newBuilder();
-                                    Map<?, ?> scalarQCData = (Map<?, ?>) qcData.get("scalar");
-                                    if (null != scalarQCData && !scalarQCData.isEmpty()) {
-                                        // Mandatory field
-                                        scalarBuilder.setType(QuantizationType.forNumber(((Number) scalarQCData.get("type")).intValue()));
-                                        // Optional field(s) below
-                                        if (scalarQCData.containsKey("always_ram")) {
-                                            scalarBuilder.setAlwaysRam((Boolean) scalarQCData.get("always_ram"));
-                                        }
-                                        if (scalarQCData.containsKey("quantile")) {
-                                            scalarBuilder.setQuantile(((Number) scalarQCData.get("quantile")).floatValue());
-                                        }
-                                    }
-                                    qcBuilder.setScalar(scalarBuilder);
-                                    break;
-                            }
-                        }
-                    });
-                // TODO - Approach #2 - equally feels ugly too.
-//                if (qcData.containsKey("binary")) {
-//                    if (qcData.containsKey("scalar") || qcData.containsKey("product")) {
-//                        throw new UnsupportedOperationException("Only one of binary, scalar, or product can be specified for quantization config");
-//                    }
-//                    BinaryQuantization.Builder binaryBuilder = BinaryQuantization.newBuilder();
-//                    Map<?, ?> binaryQCData = (Map<?, ?>) qcData.get("binary");
-//                    if (null != binaryQCData && !binaryQCData.isEmpty()) {
-//                        if (binaryQCData.containsKey("always_ram")) {
-//                            binaryBuilder.setAlwaysRam((Boolean) binaryQCData.get("always_ram"));
-//                        }
-//                    }
-//                    qcBuilder.setBinary(binaryBuilder);
-//                } else if (qcData.containsKey("product")) {
-//                    if (qcData.containsKey("binary") || qcData.containsKey("scalar")) {
-//                        throw new UnsupportedOperationException("Only one of binary, scalar, or product can be specified for quantization config");
-//                    }
-//                    ProductQuantization.Builder productBuilder = ProductQuantization.newBuilder();
-//                    Map<?, ?> productQCData = (Map<?, ?>) qcData.get("product");
-//                    if (null != productQCData && !productQCData.isEmpty()) {
-//                        // Mandatory field
-//                        productBuilder.setAlwaysRam((Boolean) productQCData.get("always_ram"));
-//                        // Optional field(s) below
-//                        if (productQCData.containsKey("compression")) {
-//                            productBuilder.setCompression(CompressionRatio.valueOf((String) productQCData.get("compression")));
-//                        }
-//                    }
-//                    qcBuilder.setProduct(productBuilder);
-//                } else if (qcData.containsKey("scalar")) {
-//                    if (qcData.containsKey("binary") || qcData.containsKey("product")) {
-//                        throw new UnsupportedOperationException("Only one of binary, scalar, or product can be specified for quantization config");
-//                    }
-//                    ScalarQuantization.Builder scalarBuilder = ScalarQuantization.newBuilder();
-//                    Map<?, ?> scalarQCData = (Map<?, ?>) qcData.get("scalar");
-//                    if (null != scalarQCData && !scalarQCData.isEmpty()) {
-//                        // Mandatory field
-//                        scalarBuilder.setType(QuantizationType.valueOf((String) scalarQCData.get("type")));
-//                        // Optional field(s) below
-//                        if (scalarQCData.containsKey("always_ram")) {
-//                            scalarBuilder.setAlwaysRam((Boolean) scalarQCData.get("always_ram"));
-//                        }
-//                        if (scalarQCData.containsKey("quantile")) {
-//                            scalarBuilder.setQuantile((Float) scalarQCData.get("quantile"));
-//                        }
-//                    }
-//                    qcBuilder.setScalar(scalarBuilder);
-//                }
-            }
-        });
-
-        // The below check is required to avoid INVALID_ARGUMENT: Unable to convert quantization config
-        if (qcBuilder.hasBinary() || qcBuilder.hasProduct() || qcBuilder.hasScalar()) {
-            return qcBuilder.build();
-        }
-        return null;
     }
 
     private LongFunction<QuantizationConfig> buildQuantizationConfig(LongFunction<Map> quantConfMapLongFunc) {
@@ -590,30 +347,6 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
             }
         );
         return hnswConfigBuilder.build();
-    }
-
-    /**
-     * Build the {@link SparseVectorConfig} from the provided {@link ParsedOp}.
-     *
-     * @param sparseVectorsData The {@link ParsedOp} containing the sparse vectors data
-     * @return The {@link SparseVectorConfig} built from the provided {@link ParsedOp}
-     */
-    @Deprecated
-    private SparseVectorConfig buildSparseVectorsStruct(Map<String, ParsedOp> sparseVectorsData) {
-        SparseVectorConfig.Builder builder = SparseVectorConfig.newBuilder();
-        sparseVectorsData.forEach((name, fieldSpec) -> {
-            SparseVectorParams.Builder svpBuilder = SparseVectorParams.newBuilder();
-            SparseIndexConfig.Builder sicBuilder = SparseIndexConfig.newBuilder();
-
-            fieldSpec.getOptionalStaticValue("full_scan_threshold", Number.class)
-                .ifPresent((Number value) -> sicBuilder.setFullScanThreshold(value.intValue()));
-            fieldSpec.getOptionalStaticValue("on_disk", Boolean.class)
-                .ifPresent(sicBuilder::setOnDisk);
-
-            svpBuilder.setIndex(sicBuilder);
-            builder.putMap(name, svpBuilder.build());
-        });
-        return builder.build();
     }
 
     /**
