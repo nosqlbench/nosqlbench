@@ -142,6 +142,20 @@
         </profile>
 
         <profile>
+            <id>adapter-dataapi-include</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>adapter-dataapi</artifactId>
+                    <version>${revision}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
             <id>adapter-dynamodb-include</id>
             <activation>
                 <activeByDefault>true</activeByDefault>

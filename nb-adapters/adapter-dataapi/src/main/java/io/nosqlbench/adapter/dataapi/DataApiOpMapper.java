@@ -40,7 +40,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp> {
             DataApiOpType.class,
             String.class,
             "type",
-            "target"
+            "collection"
         );
         logger.debug(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
         return switch (typeAndTarget.enumId) {

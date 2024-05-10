@@ -22,6 +22,7 @@ import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.Param;
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,6 +41,7 @@ public class DataApiSpace {
     private DataAPIClient dataAPIClient;
     private Database database;
     private String namespace;
+
     public DataApiSpace(String name, NBConfiguration cfg) {
         this.config = cfg;
         this.name = name;
@@ -67,7 +69,26 @@ public class DataApiSpace {
     }
 
     private void setApiEndpoint() {
-        this.astraApiEndpoint = config.get("astraApiEndpoint");
+        Optional<String> epConfig = config.getOptional("astraApiEndpoint");
+        Optional<String> epFileConfig = config.getOptional("astraApiEndpointFile");
+        if (epConfig.isPresent() && epFileConfig.isPresent()) {
+            throw new BasicError("You can only configure one of astraApiEndpoint or astraApiEndpointFile");
+        }
+        if (epConfig.isEmpty() && epFileConfig.isEmpty()) {
+            throw new BasicError("You must configure one of astraApiEndpoint or astraApiEndpointFile");
+        }
+        epFileConfig
+            .map(Path::of)
+            .map(p -> {
+                try {
+                    return Files.readString(p);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .map(String::trim)
+            .ifPresent(ep -> this.astraApiEndpoint = ep);
+        epConfig.ifPresent(ep -> this.astraApiEndpoint = ep);
     }
 
     private void setNamespace() {
@@ -78,7 +99,7 @@ public class DataApiSpace {
     private void setToken() {
         String tokenFileContents = null;
         Optional<String> tokenFilePath = config.getOptional("astraTokenFile");
-        if(tokenFilePath.isPresent()) {
+        if (tokenFilePath.isPresent()) {
             Path path = Paths.get(tokenFilePath.get());
             try {
                 tokenFileContents = Files.readAllLines(path).getFirst();
@@ -94,15 +115,26 @@ public class DataApiSpace {
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(DataApiSpace.class)
             .add(
-                Param.optional("astraTokenFile", String.class, "file to load the Astra token from")
+                Param.optional("astraTokenFile", String.class)
+                    .setDescription("file to load the Astra token from")
             )
             .add(
-                Param.optional("astraToken",String.class)
+                Param.optional("astraToken", String.class)
                     .setDescription("the Astra token used to connect to the database")
             )
             .add(
-                Param.defaultTo("astraApiEndpoint", String.class)
+                Param.optional("astraApiEndpoint", String.class)
                     .setDescription("the API endpoint for the Astra database")
+            )
+            .add(
+                Param.optional("astraApiEndpointFile", String.class)
+                    .setDescription("file to load the API endpoint for the Astra database")
+            )
+
+            .add(
+                Param.defaultTo("namespace", "default_namespace")
+                    .setDescription("The Astra namespace to use")
+
             )
             .asReadOnly();
     }

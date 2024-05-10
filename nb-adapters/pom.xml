@@ -175,7 +175,7 @@
         </profile>
 
         <profile>
-            <id>adapter-dataapi</id>
+            <id>adapter-dataapi-module</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>

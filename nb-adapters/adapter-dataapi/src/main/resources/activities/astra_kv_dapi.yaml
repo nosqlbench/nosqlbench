@@ -1,0 +1,142 @@
+min_version: "5.21.0"
+
+description: |
+ A basic workload that uses the DataStax Data API Client in Java, emulating what
+ applications would do in the native stack.
+ TEMPLATE(collection,keyvalue)
+
+scenarios:
+  default:
+    schema: run driver=dataapi tags==block:schema threads==1 cycles==UNDEF
+    rampup: run driver=dataapi tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+#    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
+#  kv_dapi:
+#    kv_dapi_schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
+#    kv_dapi_rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
+#    kv_dapi_main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+
+#  basic_check:
+#    schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
+#    rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
+#    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+
+bindings:
+  # To enable an optional weighted set of hosts in place of a load balancer
+  # Examples
+  #   single host: jsonapi_host=host1
+  #   multiple hosts: jsonapi_host=host1,host2,host3
+  #   multiple weighted hosts: jsonapi_host=host1:3,host2:7
+  weighted_hosts: WeightedStrings('<<jsonapi_host:<<stargate_host:localhost>>>>')
+
+  seq_key: Mod(TEMPLATE(keycount,50000000000L)); ToString() -> String
+  seq_value: Hash(); Mod(TEMPLATE(valuecount,50000000000L)); ToString() -> String
+  rw_key: TEMPLATE(keydist,Uniform(0,50000000000L)); ToString() -> String
+  rw_value: Hash(); TEMPLATE(valdist,Uniform(0,50000000000L)); ToString() -> String
+  vector_value: HashedFloatVectors(<<dimensions:1536>>); ToCqlVector()
+
+  request_id: ToHashedUUID(); ToString();
+  token: Discard(); Token('TEMPLATE(auth_token)','TEMPLATE(uri,http://localhost:8081/v1/auth)', 'TEMPLATE(uid,cassandra)', 'TEMPLATE(pswd,cassandra)');
+
+  params:
+    cl: TEMPLATE(cl,LOCAL_QUORUM)
+
+blocks:
+  reset_schema:
+    ops:
+      drop_index:
+        raw: |-
+          DROP INDEX IF EXISTS TEMPLATE(keyspace, baselines).TEMPLATE(table,keyvalue)_value_idx;
+      drop-table:
+        raw: |-
+          DROP TABLE IF EXISTS TEMPLATE(keyspace, baselines).TEMPLATE(table,keyvalue);
+
+  schema:
+    ops:
+      delete_collection_op:
+        delete_collection: "TEMPLATE(collection)"
+      create_collection_op:
+        create_collection: "TEMPLATE(collection)"
+
+  rampup:
+    ops:
+      insert_one_op:
+        insert_one: "TEMPLATE(collection)"
+        document:
+          _id: "{seq_key}"
+          value: "{seq_value}"
+  rampup-uuid:
+    ops:
+      insert_one_op:
+        insert-one: "TEMPLATE(collection)"
+        document:
+          value: "{seq_value}"
+  main_read:
+    params:
+      ratio: 5
+    ops:
+      find_op:
+        find: "TEMPLATE(collection)"
+        filter:
+          _id: "{rw_key}"
+  schema_with_vector:
+    ops:
+      delete_collection_op:
+        delete_collection: "TEMPLATE(collection)"
+      create_collection_op:
+        create_collection: "TEMPLATE(collection)"
+        options:
+          vector:
+            size: 1536
+  rampup_with_vector:
+    ops:
+      insert_one_op:
+        document:
+          _id: "{seq_key}"
+          value: "{seq_value}"
+          $vector: "{vector_value}"
+
+  rampup_with_vector_uuid:
+    ops:
+      insert_one_op:
+        insert_one: "TEMPLATE(collection)"
+        document:
+          value: "{seq_value}"
+          $vector: "{vector_value}"
+  main_read_with_vector:
+    ops:
+      find_op:
+        find: "TEMPLATE(collection)"
+        filter:
+          _id: "{rw_key}"
+  main_ann_with_vector_limit_20:
+    params:
+      ratio: 5
+    ops:
+      find_op:
+        find: "TEMPLATE(collection)"
+        sort:
+          $vector: "{vector_value}"
+          options:
+            limit: 20
+  schema_with_text_sai:
+    ops:
+      delete_collection_op:
+        delete_collection: "TEMPLATE(collection)"
+      create_collection_op:
+        create_collection: "TEMPLATE(collection)"
+  rampup_with_text_sai:
+    ops:
+      insert_one_op:
+        insert_one: "TEMPLATE(collection)"
+        document:
+          _id: "{seq_key}"
+          value: "{seq_value}"
+  main_read_with_text_sai:
+    params:
+      ratio: 5
+    ops:
+      find_op:
+        find: "TEMPLATE(collection)"
+        filter:
+          value: "{rw_value}"

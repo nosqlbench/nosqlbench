@@ -28,6 +28,9 @@ public class DataApiDropCollectionOp extends DataApiBaseOp {
     @Override
     public Object apply(long value) {
         Boolean exists = db.collectionExists(collectionName);
+        // TODO: we need to remove these from the ops when we can, because this hides additional ops which
+        // should be surfaced in the test definition. Condition operations should be provided with clear views
+        // at the workload template level
         if (exists) {
             db.dropCollection(collectionName);
         }
