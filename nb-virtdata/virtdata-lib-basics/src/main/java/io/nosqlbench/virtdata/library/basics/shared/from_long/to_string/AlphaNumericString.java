@@ -34,33 +34,28 @@ public class AlphaNumericString implements LongFunction<String> {
     private static final String AVAILABLE_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private final ThreadLocal<StringBuilder> threadStringBuilder = ThreadLocal.withInitial(StringBuilder::new);
     private final Hash hash = new Hash();
-    private final int length;
-    private final LongToIntFunction sizeFunc;
+    private final LongToIntFunction lengthFunc;
 
 
     public AlphaNumericString(int length)
     {
-        if (length < 0)
-        {
-            throw new RuntimeException("AlphaNumericString must have length >= 0");
-        }
-        this.length = length;
-        this.sizeFunc = (l) -> length;
+        this.lengthFunc = (l) -> length;
     }
 
-    public AlphaNumericString(Object sizefunc)
+    public AlphaNumericString(Object lengthfunc)
     {
-        this.sizeFunc = VirtDataConversions.adaptFunction(sizefunc, LongToIntFunction.class);
-        this.length = this.sizeFunc.applyAsInt(0);
-        if (length < 0)
-        {
-            throw new RuntimeException("AlphaNumericString must have length >= 0");
-        }
+        this.lengthFunc = VirtDataConversions.adaptFunction(lengthfunc, LongToIntFunction.class);
     }
 
     @Override
     public String apply(long operand)
     {
+        int length = lengthFunc.applyAsInt(operand);
+        if (length < 0)
+        {
+            throw new RuntimeException("AlphaNumericString must have length >= 0");
+        }
+
         long hashValue = operand;
         StringBuilder sb = threadStringBuilder.get();
         sb.setLength(0);
@@ -76,6 +71,6 @@ public class AlphaNumericString implements LongFunction<String> {
     @Override
     public String toString()
     {
-        return "AlphaNumericString(length=" + length + ")";
+        return "AlphaNumericString(lengthFunc.class=" + lengthFunc.getClass().getSimpleName() + ")";
     }
 }
