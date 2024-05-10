@@ -225,7 +225,7 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
         String destType,
         String destName) throws JMSRuntimeException
     {
-        String jmsContextIdStr = s4JJMSContextWrapper.getJmsContextIdentifer();
+        String jmsContextIdStr = s4JJMSContextWrapper.getJmsContextIdentifier();
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
 
         S4JSpace.JMSDestinationCacheKey destinationCacheKey =
