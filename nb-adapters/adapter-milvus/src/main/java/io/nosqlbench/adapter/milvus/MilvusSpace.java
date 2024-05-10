@@ -45,7 +45,7 @@ public class MilvusSpace implements AutoCloseable {
 
     protected MilvusServiceClient client;
 
-    private final Map<String, ConnectParam> connections = new HashMap<>();
+//    private final Map<String, ConnectParam> connections = new HashMap<>();
 
     /**
      * Create a new MilvusSpace Object which stores all stateful contextual information needed to interact
