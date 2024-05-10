@@ -127,6 +127,11 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return update;
     }
 
+    protected float[] getVectorValues(ParsedOp op, long l) {
+        Object rawVectorValues = op.get("vector", l);
+        return getVectorValues(rawVectorValues);
+    }
+
     protected float[] getVectorValues(Object rawVectorValues) {
         float[] floatValues;
         if (rawVectorValues instanceof String) {
@@ -135,10 +140,22 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             for (int i = 0; i < rawValues.length; i++) {
                 floatValues[i] = Float.parseFloat(rawValues[i]);
             }
+        } else if (rawVectorValues instanceof List) {
+            return getVectorValuesList(rawVectorValues);
         } else {
             throw new RuntimeException("Invalid type specified for values");
         }
         return floatValues;
+    }
+
+    protected float[] getVectorValuesList(Object rawVectorValues) {
+        float[] vectorValues = null;
+        List<Object> vectorValuesList = (List<Object>) rawVectorValues;
+        vectorValues = new float[vectorValuesList.size()];
+        for (int i = 0; i < vectorValuesList.size(); i++) {
+            vectorValues[i] = Float.parseFloat(vectorValuesList.get(i).toString());
+        }
+        return vectorValues;
     }
 
     protected Projection[] getProjectionFromOp(ParsedOp op, long l) {
