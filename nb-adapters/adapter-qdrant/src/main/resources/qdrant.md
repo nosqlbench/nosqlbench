@@ -22,76 +22,20 @@ instance of the [Qdrant database](https://qdrant.tech/documentation):
 
 ## Op Templates
 
-The Qdrant adapter supports [**all operations**](../java/io/nosqlbench/adapter/qdrant/ops) supported by the Java
-driver published by Qdrant. The official Qdrant API reference can be found at
+The Qdrant adapter supports [**all operations**](../java/io/nosqlbench/adapter/qdrant/ops) supported by the [Java
+driver published by Qdrant](https://github.com/qdrant/java-client). The official Qdrant API reference can be found at
 https://qdrant.github.io/java-client/io/qdrant/client/package-summary.html
 
-The operations include a full-fledged support for all the APIs available in the Qdrant Java driver.
+The operations include a full-fledged support for key APIs available in the Qdrant Java driver.
 The following are a couple high level API operations.
 
-# TODO - Below needs to be updated post driver development.
 * Create Collection
-* Create Index
+* Count Points
 * Drop Collection
-* Drop Index
-* Search (vectors)
+* Search Points (vectors)
 
 ## Examples
-```yaml
-ops:
-  example_create_collection:
-    create_collection: "example_collection"
-    description: "https://qdrant.io/api-reference/java/v2.3.x/Collection/createCollection().md"
-    collection_name: "example_collection"
-    shards_num: 10
-    consistency_level: BOUNDED # BOUNDED, SESSION, EVENTUAL
-    field_types:
-      field1:
-        primary_key: true # only for Int64 and VarChar types
-        description: "field description"
-        data_type: "Varchar"
-        # Bool, Int8, Int16, Int32, Int64,
-        # Float, Double, String, Varchar, BinaryVector, FloatVector
-        type_param:
-          example_param1: example_pvalue1
-        dimension: 1024 # >0
-        max_length: 1024 # for String only, >0
-        auto_id: false # Generate primary key?
-        partition_key: false # Primary key cannot be the partition key too
-      field2:
-        primary_key: false
-        description: "vector column/field"
-        data_type: "FloatVector"
-        dimension: 3
 
-  # https://qdrant.io/api-reference/java/v2.3.x/Index/dropIndex().md
-  example_drop_index:
-    drop_index: "exampe_collection_idx_name"
-    database_name: "my_database"
-    collection_name: "example_collection""
+Check out the [full example available here](activities/qdrant_vectors_live.yaml).
 
-  # https://qdrant.io/api-reference/java/v2.3.x/Collection/dropCollection().md
-  example_drop_collection:
-    drop_collection: "example_collection"
-    database_name: "my_database"
-
-  # https://qdrant.io/api-reference/java/v2.3.x/High-level%20API/insert().md
-  example_insert_op:
-    insert: "example_collection_name"
-    rows:
-      field1: "row_key"
-      field2: "[1.2, 3.4, 5.6]"
-
-  # https://qdrant.io/api-reference/java/v2.3.x/High-level%20API/search().md
-  # https://qdrant.io/api-reference/java/v2.3.x/Query%20and%20Search/search().md
-  example_search:
-    search: "example_collection"
-    vector: "[-0.4, 0.3, 0.99]"
-    metric_type: "COSINE"
-    out_fields:
-      - field1
-      - field2
-    vector_field_name: "field2"
-    top_k: 100
-    consistency_level: "EVENTUALLY"
-```
+---

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.qdrant;
 
+import io.qdrant.client.grpc.Points.ScoredPoint;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -40,7 +41,6 @@ public class QdrantAdapterUtils {
             .toList();
     }
 
-
     /**
      * Mask the digits in the given string with '*'
      *
@@ -61,13 +61,7 @@ public class QdrantAdapterUtils {
         return masked.toString();
     }
 
-//        public static int[] intArrayFromMilvusSearchResults(String fieldName, R<SearchResults> result) {
-//            SearchResultsWrapper wrapper = new SearchResultsWrapper(result.getData().getResults());
-//            List<String> fieldData = (List<String>) wrapper.getFieldData(fieldName, 0);
-//            int[] indices = new int[fieldData.size()];
-//            for (int i = 0; i < indices.length; i++) {
-//                indices[i] = Integer.parseInt(fieldData.get(i));
-//            }
-//            return indices;
-//        }
+    public static int[] searchPointsResponseIdNumToIntArray(List<ScoredPoint> response) {
+        return response.stream().mapToInt(r -> ((Number) r.getId().getNum()).intValue()).toArray();
+    }
 }

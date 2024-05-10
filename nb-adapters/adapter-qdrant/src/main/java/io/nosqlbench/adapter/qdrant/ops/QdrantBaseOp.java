@@ -49,16 +49,6 @@ public abstract class QdrantBaseOp<T> implements CycleOp<Object> {
 
         try {
             Object result = applyOp(value);
-//            if (result instanceof R<?> r) {
-//                var error = r.getException();
-//                if (error != null) {
-//                    throw error;
-//                }
-//            } else {
-//                logger.warn("Op '" + this.toString() + "' did not return a Result 'R' type." +
-//                    " Exception handling will be bypassed"
-//                );
-//            }
             return result;
         } catch (Exception e) {
             RuntimeException rte = (RuntimeException) e;

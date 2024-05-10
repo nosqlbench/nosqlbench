@@ -30,12 +30,18 @@ public class QdrantSearchPointsOp extends QdrantBaseOp<SearchPoints> {
 
     @Override
     public Object applyOp(long value) {
-        List<ScoredPoint> result = null;
+        List<ScoredPoint> response = null;
         try {
-            result = client.searchAsync(request).get();
+            logger.debug("[QdrantSearchPointsOp] Cycle {} has request: {}", value, request.toString());
+            response = client.searchAsync(request).get();
+            if (logger.isDebugEnabled()) {
+                response.forEach(scoredPoint -> {
+                    logger.debug("[QdrantSearchPointsOp] Scored Point: {}", scoredPoint.toString());
+                });
+            }
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-        return result;
+        return response;
     }
 }
