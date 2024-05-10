@@ -19,9 +19,11 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
 import java.util.function.LongFunction;
+import java.util.function.LongToIntFunction;
 
 /**
  * Create an alpha-numeric string of the specified length, character-by-character.
@@ -33,6 +35,8 @@ public class AlphaNumericString implements LongFunction<String> {
     private final ThreadLocal<StringBuilder> threadStringBuilder = ThreadLocal.withInitial(StringBuilder::new);
     private final Hash hash = new Hash();
     private final int length;
+    private final LongToIntFunction sizeFunc;
+
 
     public AlphaNumericString(int length)
     {
@@ -41,6 +45,17 @@ public class AlphaNumericString implements LongFunction<String> {
             throw new RuntimeException("AlphaNumericString must have length >= 0");
         }
         this.length = length;
+        this.sizeFunc = (l) -> length;
+    }
+
+    public AlphaNumericString(Object sizefunc)
+    {
+        this.sizeFunc = VirtDataConversions.adaptFunction(sizefunc, LongToIntFunction.class);
+        this.length = this.sizeFunc.applyAsInt(0);
+        if (length < 0)
+        {
+            throw new RuntimeException("AlphaNumericString must have length >= 0");
+        }
     }
 
     @Override
