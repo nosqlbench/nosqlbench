@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2022-2024 nosqlbench
+  ~ Copyright (c) 2022-2023 nosqlbench
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -147,7 +147,7 @@
         <profile>
             <id>adapter-s4j-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-s4j</module>
@@ -171,6 +171,16 @@
             </activation>
             <modules>
                 <module>adapter-amqp</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-dataapi-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-dataapi</module>
             </modules>
         </profile>
 

@@ -28,6 +28,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParsedTemplateMapTest {
 
+//    @Test
+//    public void testBindpointTypes() {
+//        ParsedTemplateMap ptm = new ParsedTemplateMap(
+//            "name1",
+//            Map.of(
+//                "field1","{binding1}",
+//                "field2", " {binding2}"
+//            ),
+//            Map.of(
+//                "binding1","TestingStringFunc('b1')",
+//                "binding2","TestingStringFunc('b2')"
+//            ),
+//            List.of(Map.of()));
+//
+//    }
+
     @Test
     public void testParsedTemplateMap() {
         ParsedTemplateMap ptm = new ParsedTemplateMap("name1", Map.of("string1", "string2"), Map.of(), List.of());

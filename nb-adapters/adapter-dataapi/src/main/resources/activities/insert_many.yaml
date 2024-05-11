@@ -1,0 +1,17 @@
+scenarios:
+  default:
+    insert_many: run driver=dataapi tags==blocks:insert_many cycles=1
+
+blocks:
+  insert_many:
+    ops:
+      op1:
+        insert_many: "collectionName"
+        options:
+          chunkSize: "1000"
+          concurrency: "10"
+          ordered: "false"
+        documents:
+          - "{valid json here}"
+          - "{valid json here}"
+          - "{valid json here}"

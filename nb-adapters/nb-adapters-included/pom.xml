@@ -142,6 +142,20 @@
         </profile>
 
         <profile>
+            <id>adapter-dataapi-include</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>adapter-dataapi</artifactId>
+                    <version>${revision}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
             <id>adapter-dynamodb-include</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -186,7 +200,7 @@
         <profile>
             <id>adapter-s4j-include</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
@@ -252,6 +266,7 @@
                 </dependency>
             </dependencies>
         </profile>
+
     </profiles>
 
 </project>

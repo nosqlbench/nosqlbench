@@ -1,0 +1,10 @@
+scenarios:
+  default:
+    insert_one: run driver=dataapi tags==blocks:insert_one cycles=1
+
+blocks:
+  insert_one:
+    ops:
+      op1:
+        insert_one: "collectionName"
+        document: "{valid json here}"
