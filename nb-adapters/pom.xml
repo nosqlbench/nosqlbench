@@ -67,7 +67,7 @@
         <profile>
             <id>adapter-milvus-module</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-milvus</module>
@@ -147,7 +147,7 @@
         <profile>
             <id>adapter-s4j-module</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-s4j</module>
@@ -157,7 +157,7 @@
         <profile>
             <id>adapter-kafka-module</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-kafka</module>
@@ -167,7 +167,7 @@
         <profile>
             <id>adapter-amqp-module</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-amqp</module>
@@ -187,7 +187,7 @@
         <profile>
             <id>adapter-qdrant-module</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-qdrant</module>
