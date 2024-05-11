@@ -79,7 +79,7 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
         this.asyncAPI =
             parsedOp.getStaticConfigOr(S4JAdapterUtil.DOC_LEVEL_PARAMS.ASYNC_API.label, Boolean.TRUE);
         this.txnBatchNum =
-            parsedOp.getStaticConfigOr(S4JAdapterUtil.DOC_LEVEL_PARAMS.TXN_BATCH_NUM.label, Integer.valueOf(0));
+            parsedOp.getStaticConfigOr(S4JAdapterUtil.DOC_LEVEL_PARAMS.TXN_BATCH_NUM.label, 0);
 
         this.totalThreadNum = NumberUtils.toInt(parsedOp.getStaticConfig("threads", String.class));
         this.totalCycleNum = NumberUtils.toLong(parsedOp.getStaticConfig("cycles", String.class));

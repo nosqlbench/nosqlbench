@@ -42,6 +42,10 @@ blocks:
         msg_type: "text"
 
         ## (Mandatory) JMS message body. Value depends on msg_type.
+        # NOTE: using NB binding variable to generate the message body may be ignored
+        # if input CLI parameter 'simulate_large_payload' is set to true. In this case,
+        # 'simulated_payload_file' must be set to a valid file path. and all messages will
+        # have the same payload content as read from the file.
         msg_body: "{mytext_val}"
 
 #        # example of having "map" as the message type

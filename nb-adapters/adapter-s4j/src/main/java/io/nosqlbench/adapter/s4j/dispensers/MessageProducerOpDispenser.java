@@ -27,6 +27,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,7 +49,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
     private final LongFunction<String> msgHeaderRawJsonStrFunc;
     private final LongFunction<String> msgPriorityStrFunc;
     private final LongFunction<String> msgPropRawJsonStrFunc;
-    private final LongFunction<String> msgBodyRawJsonStrFunc;
+    private final LongFunction<String> msgBodyRawStrFunc;
     private final LongFunction<String> msgTypeFunc;
 
     public MessageProducerOpDispenser(DriverAdapter adapter,
@@ -60,13 +61,13 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
         this.msgHeaderRawJsonStrFunc = lookupOptionalStrOpValueFunc(MSG_HEADER_OP_PARAM);
         this.msgPriorityStrFunc = lookupOptionalStrOpValueFunc(MSG_PRIORITY_OP_PARAM);
         this.msgPropRawJsonStrFunc = lookupOptionalStrOpValueFunc(MSG_PROP_OP_PARAM);
-        this.msgBodyRawJsonStrFunc = lookupMandtoryStrOpValueFunc(MSG_BODY_OP_PARAM);
+        this.msgBodyRawStrFunc = lookupMandtoryStrOpValueFunc(MSG_BODY_OP_PARAM);
         this.msgTypeFunc = lookupOptionalStrOpValueFunc(MSG_TYPE_OP_PARAM);
     }
 
     private Message createAndSetMessagePayload(
         S4JJMSContextWrapper s4JJMSContextWrapper,
-        String msgType, String msgBodyRawJsonStr) throws JMSException
+        String msgType, String msgPayload) throws JMSException
     {
         Message message;
         int messageSize = 0;
@@ -75,8 +76,8 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
 
         if (StringUtils.equalsIgnoreCase(msgType, S4JAdapterUtil.JMS_MESSAGE_TYPES.TEXT.label)) {
             message = jmsContext.createTextMessage();
-            ((TextMessage) message).setText(msgBodyRawJsonStr);
-            messageSize = msgBodyRawJsonStr.length();
+            ((TextMessage) message).setText(msgPayload);
+            messageSize = msgPayload.length();
         } else if (StringUtils.equalsIgnoreCase(msgType, S4JAdapterUtil.JMS_MESSAGE_TYPES.MAP.label)) {
             message = jmsContext.createMapMessage();
 
@@ -84,7 +85,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
             // Otherwise, it is an error
             Map<String, String> jmsMsgBodyMap;
             try {
-                jmsMsgBodyMap = S4JAdapterUtil.convertJsonToMap(msgBodyRawJsonStr);
+                jmsMsgBodyMap = S4JAdapterUtil.convertJsonToMap(msgPayload);
             } catch (Exception e) {
                 throw new RuntimeException("The specified message payload can't be converted to a map when requiring a 'Map' message type!");
             }
@@ -102,7 +103,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
             // Otherwise, it is an error
             List<Object> jmsMsgBodyObjList;
             try {
-                jmsMsgBodyObjList = S4JAdapterUtil.convertJsonToObjList(msgBodyRawJsonStr);
+                jmsMsgBodyObjList = S4JAdapterUtil.convertJsonToObjList(msgPayload);
             } catch (Exception e) {
                 throw new RuntimeException("The specified message payload can't be converted to a list of Objects when requiring a 'Stream' message type!");
             }
@@ -113,13 +114,13 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
             }
         } else if (StringUtils.equalsIgnoreCase(msgType, S4JAdapterUtil.JMS_MESSAGE_TYPES.OBJECT.label)) {
             message = jmsContext.createObjectMessage();
-            ((ObjectMessage) message).setObject(msgBodyRawJsonStr);
-            messageSize += msgBodyRawJsonStr.getBytes().length;
+            ((ObjectMessage) message).setObject(msgPayload);
+            messageSize += msgPayload.getBytes().length;
         }
         // default: BYTE message type
         else {
             message = jmsContext.createBytesMessage();
-            byte[] msgBytePayload =  msgBodyRawJsonStr.getBytes();
+            byte[] msgBytePayload =  msgPayload.getBytes();
             ((BytesMessage)message).writeBytes(msgBytePayload);
             messageSize += msgBytePayload.length;
         }
@@ -277,9 +278,18 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
         String jmsMsgHeaderRawJsonStr = msgHeaderRawJsonStrFunc.apply(cycle);
         String jmsMsgPriorityStr = msgPriorityStrFunc.apply(cycle);
         String jmsMsgPropertyRawJsonStr = msgPropRawJsonStrFunc.apply(cycle);
-        String jmsMsgBodyRawJsonStr = msgBodyRawJsonStrFunc.apply(cycle);
 
-        if (StringUtils.isBlank(jmsMsgBodyRawJsonStr)) {
+        // If 'simulate_large_payload' is enabled, replace the actual message payload with a static
+        // large payload that is read when the adapter is initialized
+        String effectiveMsgBody;
+        Pair<Boolean, String> largePayloadSimPair = s4jSpace.getLargePayloadSimPair();
+        if (largePayloadSimPair.getLeft()) {
+            effectiveMsgBody = largePayloadSimPair.getRight();
+        }
+        else {
+            effectiveMsgBody = msgBodyRawStrFunc.apply(cycle);
+        }
+        if (StringUtils.isBlank(effectiveMsgBody)) {
             throw new S4JAdapterInvalidParamException("Message payload must be specified and can't be empty!");
         }
 
@@ -322,7 +332,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
         //
         Message message;
         try {
-            message = createAndSetMessagePayload(s4JJMSContextWrapper, jmsMsgType, jmsMsgBodyRawJsonStr);
+            message = createAndSetMessagePayload(s4JJMSContextWrapper, jmsMsgType, effectiveMsgBody);
         }
         catch (JMSException jmsException) {
             throw new RuntimeException("Failed to set create a JMS message and set its payload!");
