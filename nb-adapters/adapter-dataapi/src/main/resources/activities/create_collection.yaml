@@ -8,4 +8,4 @@ blocks:
       op1:
         create_collection: "collectionName"
         dimensions: 10
-        similarity: "cosine"
+        similarity: "COSINE"
