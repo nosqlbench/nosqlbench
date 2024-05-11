@@ -137,6 +137,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
 
     protected float[] getVectorValues(Object rawVectorValues) {
         float[] floatValues;
+        if (rawVectorValues instanceof float[] f) {
+            return f;
+        }
         if (rawVectorValues instanceof String) {
             String[] rawValues = (((String) rawVectorValues).split(","));
             floatValues = new float[rawValues.length];

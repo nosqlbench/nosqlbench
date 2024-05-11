@@ -11,11 +11,29 @@ description: |
  TEMPLATE(valuecount,TEMPLATE(cardinality))
 
 scenarios:
-  default:
+  dapi_novector:
     schema: run driver=dataapi tags==block:schema threads==1 cycles==UNDEF
-    rampup: run driver=dataapi tags==block:rampup cycles===TEMPLATE(rampup-cycles,1000) threads=auto
-    rampup_vector: run driver=dataapi tags==block:rampup_vector cycles===TEMPLATE(rampup-cycles,TEMPLATE(cardinality)) threads=auto
-    find_key: run driver=dataapi tags==block:find_key cycles===TEMPLATE(main-cycles,1000) threads=auto
+    rampup: >-
+      run driver=dataapi tags==block:rampup
+      cycles===TEMPLATE(rampup-cycles,TEMPLATE(cardinality))
+      threads=auto errors=count
+    find_key: >-
+      run driver=dataapi tags==block:find_key
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto errors=count
+
+  dapi_vector_d1536:
+    schema_vector: run driver=dataapi tags==block:schema_vector threads==1 cycles==UNDEF
+    rampup_vector: >-
+      run driver=dataapi tags==block:rampup_vector
+      cycles===TEMPLATE(rampup-cycles,TEMPLATE(cardinality))
+      threads=auto errors=count
+    find_key_vector: >-
+      run driver=dataapi tags==block:find_key_vector
+      cycles===TEMPLATE(main-cycles,TEMPLATE(cardinality))
+      threads=auto errors=count
+
+
 
 #  kv_dapi:
 #    kv_dapi_schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
@@ -35,17 +53,16 @@ bindings:
   #   multiple weighted hosts: jsonapi_host=host1:3,host2:7
   weighted_hosts: WeightedStrings('TEMPLATE(jsonapi_host,TEMPLATE(stargate_host,localhost))')
 
-  seq_key: Mod(TEMPLATE(keycount); ToString() -> String
+  seq_key: Mod(TEMPLATE(keycount)); ToString() -> String
 #  seq_key: Mod(TEMPLATE(keycount,50000000000L));
-  seq_value: Hash(); Mod(TEMPLATE(valuecount); ToString() -> String
+  seq_value: Hash(); Mod(TEMPLATE(valuecount)); ToString() -> String
 #  rw_key: TEMPLATE(keydist,Uniform(0,50000000000L));
   rw_key: TEMPLATE(keydist,Uniform(0,TEMPLATE(keycount))); ToString() -> String
   rw_key_num: TEMPLATE(keydist,Uniform(0,TEMPLATE(keycount)));
-  rw_value: Hash(); TEMPLATE(valdist,Uniform(0,TEMPLATE(valuecount)); ToString() -> String
+  rw_value: Hash(); TEMPLATE(valdist,Uniform(0,TEMPLATE(valuecount))); ToString() -> String
   vector_value: HashedFloatVectors(TEMPLATE(dimensions,1536));
 
   request_id: ToHashedUUID(); ToString();
-  token: Discard(); Token('TEMPLATE(auth_token)','TEMPLATE(uri,http://localhost:8081/v1/auth)', 'TEMPLATE(uid,cassandra)', 'TEMPLATE(pswd,cassandra)');
 
   params:
     cl: TEMPLATE(cl,LOCAL_QUORUM)
@@ -66,18 +83,16 @@ blocks:
         delete_collection: "TEMPLATE(collection)"
       create_collection_op:
         create_collection: "TEMPLATE(collection)"
-        dimensions: TEMPLATE(dimensions)
-        similarity: TEMPLATE(similarity)
 
 #  separate these cases later, when you can recreate the same collection name with/without vector support
-#  schema_vector:
-#    ops:
-#      delete_collection_op:
-#        delete_collection: "TEMPLATE(collection)"
-#      create_collection_op:
-#        create_collection: "TEMPLATE(collection)"
-#        dimensions: TEMPLATE(dimensions)
-#        similarity: TEMPLATE(similarity)
+  schema_vector:
+    ops:
+      delete_collection_op_v:
+        delete_collection: "TEMPLATE(collection)_v"
+      create_collection_op_v:
+        create_collection: "TEMPLATE(collection)_v"
+        dimensions: TEMPLATE(dimensions)
+        similarity: TEMPLATE(similarity)
 
   rampup:
     ops:
@@ -86,6 +101,16 @@ blocks:
         document:
           _id: "{seq_key}"
           value: "{seq_value}"
+
+  rampup_vector:
+    ops:
+      insert_one_op_v:
+        insert_one_vector: "TEMPLATE(collection)_v"
+        document:
+          _id: "{seq_key}"
+          value: "{seq_value}"
+        vector: "{vector_value}"
+
 #  rampup-uuid:
 #    ops:
 #      insert_one_op:
@@ -103,23 +128,22 @@ blocks:
             operator: "lt"
             field: "_id"
             value: "{rw_key_num}"
-#  schema_with_vector:
-#    ops:
-#      delete_collection_op:
-#        delete_collection: "TEMPLATE(collection)"
-#      create_collection_op:
-#        create_collection: "TEMPLATE(collection)"
-#        options:
-#          vector:
-#            size: 1536
-  rampup_vector:
-    ops:
-      insert_one_op:
-        insert_one_vector: "TEMPLATE(collection)"
         vector: "{vector_value}"
-        document:
-          _id: "{seq_key}"
-          value: "{seq_value}"
+
+  find_key_vector:
+    params:
+      ratio: 5
+    ops:
+      find_op_v:
+        find_vector_filter: "TEMPLATE(collection)"
+        filters:
+          - conjunction: "and"
+            operator: "lt"
+            field: "_id"
+            value: "{rw_key_num}"
+        vector: "{vector_value}"
+
+
 #
 #  rampup_with_vector_uuid:
 #    ops:
