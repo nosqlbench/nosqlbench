@@ -56,8 +56,11 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     protected Filter getFilterFromOp(ParsedOp op, long l) {
+        // TODO: Clarify 'filter' vs 'filters' or whether to support both uniformly
         Filter filter = null;
-        Optional<LongFunction<List>> filterFunction = op.getAsOptionalFunction("filters", List.class);
+        Optional<LongFunction<List>> filterFunction = op.getAsOptionalFunction("filters", List.class).or(
+            () -> op.getAsOptionalFunction("filter",List.class)
+        );
         if (filterFunction.isPresent()) {
             List<Map<String,Object>> filters = filterFunction.get().apply(l);
             List<Filter> andFilterList = new ArrayList<>();
@@ -143,7 +146,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         } else if (rawVectorValues instanceof List) {
             return getVectorValuesList(rawVectorValues);
         } else {
-            throw new RuntimeException("Invalid type specified for values");
+            throw new RuntimeException("Invalid type specified for values (type: " + rawVectorValues.getClass().getSimpleName() + "), values: " + rawVectorValues.toString());
         }
         return floatValues;
     }

@@ -24,6 +24,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Map;
 import java.util.function.LongFunction;
 
 public class DataApiInsertOneOpDispenser extends DataApiOpDispenser {
@@ -36,12 +37,13 @@ public class DataApiInsertOneOpDispenser extends DataApiOpDispenser {
     }
 
     private LongFunction<DataApiInsertOneOp> createOpFunction(ParsedOp op) {
+        LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
+        LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
         return (l) -> {
-            Document.parse(op.get("document", l));
             return new DataApiInsertOneOp(
                 spaceFunction.apply(l).getDatabase(),
                 targetFunction.apply(l),
-                Document.parse(op.get("document", l))
+                docFunc.apply(l)
             );
         };
     }

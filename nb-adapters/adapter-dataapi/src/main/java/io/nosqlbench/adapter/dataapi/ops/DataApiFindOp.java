@@ -18,10 +18,10 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.Collection;
 import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.Document;
-import com.datastax.astra.client.model.Filter;
-import com.datastax.astra.client.model.FindOneOptions;
-import com.datastax.astra.client.model.FindOptions;
+import com.datastax.astra.client.model.*;
+
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 public class DataApiFindOp extends DataApiBaseOp {
     private final Collection<Document> collection;
@@ -36,7 +36,10 @@ public class DataApiFindOp extends DataApiBaseOp {
     }
 
     @Override
-    public Object apply(long value) {
-        return collection.find(filter, options);
+    public List<Document> apply(long value) {
+        // TODO: make sure we're traversing result data
+        FindIterable<Document> documentStream = collection.find(filter, options);
+        List<Document> documents = StreamSupport.stream(documentStream.spliterator(), false).toList();
+        return documents;
     }
 }
