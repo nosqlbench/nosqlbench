@@ -133,8 +133,20 @@ public class NBCLIScenarioPreprocessor {
             if (nameparts.length==1) {
                 Map<String, String> namedScenario = scenarios.getNamedScenario(scenarioName);
                 if (namedScenario==null) {
-                    throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
-                    + "', but you can pick from one of: " + String.join(", ", scenarios.getScenarioNames()));
+                    List<String> matchingSteps = new LinkedList<>();
+                    for (String scenario : scenarios.getScenarioNames()) {
+                        Map<String, String> selectedScenario = scenarios.getNamedScenario(scenario);
+                        if (selectedScenario.containsKey(scenarioName)) {
+                            matchingSteps.add(scenario + "." + scenarioName);
+                        }
+                    }
+                    if (matchingSteps.isEmpty()) {
+                        throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
+                            + "', but you can pick from one of: " + String.join(", ", scenarios.getScenarioNames()));
+                    } else {
+                        throw new BasicError("Unable to find named scenario '" + scenarioName + "' in workload '" + workloadName
+                            + "', you might be looking for one of these scenario steps: " + String.join(", ", matchingSteps));
+                    }
                 }
                 namedSteps.putAll(namedScenario);
             } else {

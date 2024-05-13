@@ -201,4 +201,11 @@ public class NBCLIScenarioPreprocessorTest {
             .isThrownBy(() -> new NBCLIOptions(new String[]{"scenario_test", "duplicate_param"}, NBCLIOptions.Mode.ParseAllOptions))
             .withMessageContaining("Duplicate occurrence of parameter \"threads\"");
     }
+
+    @Test
+    public void testThatSuggestionsAreShownForDirectStepNameUsage() {
+        assertThatExceptionOfType(BasicError.class)
+            .isThrownBy(() -> new NBCLIOptions(new String[]{"scenario_test", "schema"}, NBCLIOptions.Mode.ParseAllOptions))
+            .withMessageContainingAll("default.schema", "schema_only.schema");
+    }
 }
