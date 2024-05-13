@@ -67,7 +67,7 @@
         <profile>
             <id>adapter-milvus-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-milvus</module>
