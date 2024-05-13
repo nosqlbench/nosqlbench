@@ -16,11 +16,11 @@
 
 package io.nosqlbench.adapter.qdrant.ops;
 
+import io.nosqlbench.adapter.qdrant.pojos.CreatePayloadIndexRequest;
 import io.qdrant.client.QdrantClient;
-import io.qdrant.client.grpc.Collections.PayloadIndexParams;
 
-public class QdrantPayloadIndexOp extends QdrantBaseOp<PayloadIndexParams> {
-    public QdrantPayloadIndexOp(QdrantClient client, PayloadIndexParams request) {
+public class QdrantCreatePayloadIndexOp extends QdrantBaseOp<CreatePayloadIndexRequest> {
+    public QdrantCreatePayloadIndexOp(QdrantClient client, CreatePayloadIndexRequest request) {
         super(client, request);
     }
 
