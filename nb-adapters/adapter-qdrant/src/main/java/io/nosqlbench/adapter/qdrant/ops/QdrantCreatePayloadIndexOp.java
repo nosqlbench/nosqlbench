@@ -16,17 +16,35 @@
 
 package io.nosqlbench.adapter.qdrant.ops;
 
-import io.nosqlbench.adapter.qdrant.pojos.CreatePayloadIndexRequest;
 import io.qdrant.client.QdrantClient;
+import io.qdrant.client.grpc.Collections.PayloadSchemaType;
+import io.qdrant.client.grpc.Points.CreateFieldIndexCollection;
+import io.qdrant.client.grpc.Points.UpdateResult;
 
-public class QdrantCreatePayloadIndexOp extends QdrantBaseOp<CreatePayloadIndexRequest> {
-    public QdrantCreatePayloadIndexOp(QdrantClient client, CreatePayloadIndexRequest request) {
+import java.time.Duration;
+
+public class QdrantCreatePayloadIndexOp extends QdrantBaseOp<CreateFieldIndexCollection> {
+    public QdrantCreatePayloadIndexOp(QdrantClient client, CreateFieldIndexCollection request) {
         super(client, request);
     }
 
     @Override
     public Object applyOp(long value) {
-        //client.createPayloadIndexAsync(PayloadIndexParams.get);
-        return null;
+        UpdateResult response;
+        try {
+            response = client.createPayloadIndexAsync(
+                    request.getCollectionName(),
+                    request.getFieldName(),
+                    PayloadSchemaType.forNumber(request.getFieldTypeValue()),
+                    request.getFieldIndexParams(),
+                    request.getWait(),
+                    request.getOrdering().getType(),
+                    Duration.ofSeconds(60000))
+                .get();
+            logger.debug("[QdrantCreatePayloadIndexOp] Response is {}", response);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        return response;
     }
 }

@@ -178,9 +178,113 @@ blocks:
           relevancy.accept({relevant_indices_TEMPLATE(filetype)},actual_indices);
           // because we are "verifying" although this needs to be reorganized
           return true;
+        # More complex filtering available. See 'count_points' below for an example filter structure
+
+  create_payload_index:
+    ops:
+      create_payload_index_op:
+        create_payload_index: "TEMPLATE(collection)"
+        field_name: "field17"
+        field_type: "Keyword"
+        ordering: "Strong"
+        wait: true
+        # https://github.com/qdrant/qdrant/blob/v1.9.2/lib/api/src/grpc/proto/collections.proto#L395-L400
 
   count_vectors:
     ops:
       count_points_op:
         count_points: "TEMPLATE(collection)"
         exact: true
+        filter:
+        # More complex filtering logic could be provided as follows
+        #  - clause: "must"
+        #    condition: "match"
+        #    key: "field1"
+        #    value: "abc1"
+        #  - clause: "must_not"
+        #    condition: "match_any"
+        #    key: "field2"
+        #    value:
+        #      - "abc2"
+        #      - "abc3"
+        #  - clause: "should"
+        #    condition: "range"
+        #    key: "field3"
+        #    # any one of below
+        #    value:
+        #      gte: 10
+        #      lte: 20
+        #      gt: null
+        #      lt: null
+        #  - clause: "must"
+        #    condition: "nested"
+        #    key: "field4"
+        #    nested:
+        #      - condition: "match"
+        #        key: "field5[].whatsup"
+        #        value: "ni24maddy"
+        #      - condition: "match"
+        #        key: "field6"
+        #        value: true
+        #  - clause: "should"
+        #    condition: "has_id"
+        #    # no other keys are supported for this type
+        #    key: "id"
+        #    value:
+        #      - 1
+        #      - 2
+        #      - 3
+        #  - clause: "should"
+        #    condition: "match"
+        #    key: "field7"
+        #    # special case of match is text
+        #    text: "abc7"
+        #  - clause: "should"
+        #    condition: "geo_bounding_box"
+        #    key: "field8"
+        #    value:
+        #      top_left:
+        #        lat: 40.7128
+        #        lon: -74.0060
+        #      bottom_right:
+        #        lat: 40.7128
+        #        lon: -74.0060
+        #  - clause: "must_not"
+        #    condition: "geo_radius"
+        #    key: "field9"
+        #    value:
+        #      center:
+        #        lat: 40.7128
+        #        lon: -74.0060
+        #      radius: 100.0
+        #  - clause: "must"
+        #    condition: "geo_polygon"
+        #    key: "field10"
+        #    value:
+        #      exterior_points:
+        #        - lat: 30.7128
+        #          lon: -34.0060
+        #      interior_points:
+        #        - lat: 42.7128
+        #          lon: -54.0060
+        #  - clause: "should"
+        #    condition: "values_count"
+        #    key: "field11"
+        #    # Any one of below
+        #    value:
+        #      gte: 1
+        #      lte: 10
+        #      gt: null
+        #      lt: null
+        #  - clause: "must_not"
+        #    condition: "is_empty"
+        #    key: "field12"
+        #  - clause: "must"
+        #    condition: "is_null"
+        #    key: "field13"
+        #  - clause: "must"
+        #    condition: "match_except"
+        #    key: "field14"
+        #    value:
+        #      - 1
+        #      - 2

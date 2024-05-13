@@ -22,6 +22,7 @@ import io.nosqlbench.adapter.qdrant.ops.QdrantCountPointsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.grpc.Points.CountPoints;
+import io.qdrant.client.grpc.Points.Filter;
 
 import java.util.function.LongFunction;
 
@@ -35,6 +36,10 @@ public class QdrantCountPointsOpDispenser extends QdrantBaseOpDispenser<CountPoi
         LongFunction<QdrantClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<CountPoints.Builder> ebF =
             l -> CountPoints.newBuilder().setCollectionName(targetF.apply(l));
+
+        LongFunction<Filter.Builder> filterBuilder = getFilterFromOp(op);
+        final LongFunction<CountPoints.Builder> filterF = ebF;
+        ebF = l -> filterF.apply(l).setFilter(filterBuilder.apply(l));
 
         final LongFunction<CountPoints.Builder> lastF = ebF;
         return l -> lastF.apply(l).build();
