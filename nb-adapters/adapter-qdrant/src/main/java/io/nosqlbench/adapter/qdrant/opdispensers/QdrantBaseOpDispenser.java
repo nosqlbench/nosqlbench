@@ -117,8 +117,7 @@ public abstract class QdrantBaseOpDispenser<T> extends BaseOpDispenser<QdrantBas
                         case "is_null" -> mustClauseList.add(getIsNullCondition(filterFields));
                         case "has_id" -> mustClauseList.add(getHasIdCondition(filterFields));
                         case "nested" -> mustClauseList.add(getNestedCondition(filterFields));
-                        default ->
-                            logger.warn("Filter condition '{}' is not supported", filterFields.get("condition").toString());
+                        default -> logger.warn("Filter condition '{}' is not supported", filterFields.get("condition"));
                     }
                 }
                 case "must_not" -> {
@@ -136,8 +135,7 @@ public abstract class QdrantBaseOpDispenser<T> extends BaseOpDispenser<QdrantBas
                         case "is_empty" -> mustNotClauseList.add(getIsEmptyCondition(filterFields));
                         case "is_null" -> mustNotClauseList.add(getIsNullCondition(filterFields));
                         case "has_id" -> mustClauseList.add(getHasIdCondition(filterFields));
-                        default ->
-                            logger.warn("Filter condition '{}' is not supported", filterFields.get("condition").toString());
+                        default -> logger.warn("Filter condition '{}' is not supported", filterFields.get("condition"));
                     }
                 }
                 case "should" -> {
@@ -154,8 +152,7 @@ public abstract class QdrantBaseOpDispenser<T> extends BaseOpDispenser<QdrantBas
                         case "is_empty" -> shouldClauseList.add(getIsEmptyCondition(filterFields));
                         case "is_null" -> shouldClauseList.add(getIsNullCondition(filterFields));
                         case "has_id" -> mustClauseList.add(getHasIdCondition(filterFields));
-                        default ->
-                            logger.warn("Filter condition '{}' is not supported", filterFields.get("condition").toString());
+                        default -> logger.warn("Filter condition '{}' is not supported", filterFields.get("condition"));
                     }
                 }
                 default -> logger.error("Clause '{}' is not supported", filterFields.get("clause"));

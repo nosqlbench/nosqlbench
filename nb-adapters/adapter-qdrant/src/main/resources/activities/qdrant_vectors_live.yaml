@@ -195,8 +195,8 @@ blocks:
       count_points_op:
         count_points: "TEMPLATE(collection)"
         exact: true
-        filter:
         # More complex filtering logic could be provided as follows
+        #filter:
         #  - clause: "must"
         #    condition: "match"
         #    key: "field1"

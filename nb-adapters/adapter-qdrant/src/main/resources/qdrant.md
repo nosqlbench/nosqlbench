@@ -33,6 +33,7 @@ The following are a couple high level API operations.
 * Count Points
 * Drop Collection
 * Search Points (vectors)
+* Create Payload Index
 
 ## Examples
 
