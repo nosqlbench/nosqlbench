@@ -200,7 +200,7 @@
         <profile>
             <id>adapter-s4j-include</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
