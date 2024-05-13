@@ -157,7 +157,7 @@
         <profile>
             <id>adapter-kafka-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-kafka</module>
@@ -167,7 +167,7 @@
         <profile>
             <id>adapter-amqp-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-amqp</module>
@@ -187,7 +187,7 @@
         <profile>
             <id>adapter-qdrant-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-qdrant</module>
