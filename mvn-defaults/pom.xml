@@ -675,6 +675,7 @@
                         <include>**/*.java</include>
                     </includes>
                     <excludes>
+                        <exclude>**/gen/**</exclude>
                         <exclude>**/generated/**</exclude>
                         <exclude>**/jmh_generated/**</exclude>
                         <exclude>**/generated-sources/**</exclude>

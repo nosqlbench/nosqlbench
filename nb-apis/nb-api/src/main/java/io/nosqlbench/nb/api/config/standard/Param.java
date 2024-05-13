@@ -136,6 +136,9 @@ public class Param<T> {
      * @return
      */
     public static <V> Param<V> defaultTo(String name, V defaultValue) {
+        if (defaultValue instanceof Class clazz) {
+            throw new RuntimeException("This is not a supported type.");
+        }
         return new Param<V>(List.of(name), (Class<V>) defaultValue.getClass(), null, true, defaultValue, null);
     }
 

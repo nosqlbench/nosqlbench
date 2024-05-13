@@ -1,0 +1,18 @@
+scenarios:
+  default:
+    delete_many: run driver=dataapi tags==blocks:delete_many cycles=1
+
+blocks:
+  delete_many:
+    ops:
+      op1:
+        delete_many: "collectionName"
+        filters:
+          - conjunction: "and"
+            operator: "lt"
+            field: "field1"
+            value: 10
+          - conjunction: "or"
+            operator: "eq"
+            field: "field2"
+            value: "value2"

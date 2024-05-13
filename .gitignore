@@ -18,6 +18,7 @@ bin/**
 **/*.log
 **/logs
 **/*.*log
+**/gen/**
 **/generated
 **/.DS_Store
 **/generated/**
