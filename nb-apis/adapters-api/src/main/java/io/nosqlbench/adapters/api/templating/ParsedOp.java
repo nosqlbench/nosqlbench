@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2022-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,21 @@ package io.nosqlbench.adapters.api.templating;
 
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpData;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
-import io.nosqlbench.nb.api.labels.NBLabelSpec;
-import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.config.fieldreaders.DynamicFieldReader;
-import io.nosqlbench.nb.api.config.fieldreaders.StaticFieldReader;
-import io.nosqlbench.nb.api.config.standard.NBConfigError;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
-import io.nosqlbench.nb.api.errors.OpConfigError;
-import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.engine.api.templating.ObjectCache;
 import io.nosqlbench.engine.api.templating.ParsedTemplateMap;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.engine.api.templating.binders.ArrayBinder;
 import io.nosqlbench.engine.api.templating.binders.ListBinder;
 import io.nosqlbench.engine.api.templating.binders.OrderedMapBinder;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.config.fieldreaders.DynamicFieldReader;
+import io.nosqlbench.nb.api.config.fieldreaders.StaticFieldReader;
+import io.nosqlbench.nb.api.config.standard.NBConfigError;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.errors.OpConfigError;
+import io.nosqlbench.nb.api.labels.NBLabelSpec;
+import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.CapturePoint;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
@@ -1034,8 +1034,8 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
                     ParsedOp parsedOp = makeSubOp(fromOpField, String.format(format, i), stmt.toString(), naming);
                     subOpMap.put(parsedOp.getName(), parsedOp);
                 } else {
-                    throw new OpConfigError("For sub-ops field " + fromOpField + " of op '" + this.getName() + "', element " +
-                        "types must be of Map or String, not '" + o.getClass().getCanonicalName() + "'");
+                    throw new OpConfigError("For sub-ops field '" + fromOpField + "' of op '" + this.getName() + "'," +
+                        " element types must be of Map or String, not '" + listElem.getClass().getCanonicalName() + "'");
                 }
             }
         } else if (o instanceof Map map) {
@@ -1048,8 +1048,8 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
                     ParsedOp subOp = makeSubOp(fromOpField, nameKey.toString(), stmt.toString(), naming);
                     subOpMap.put(subOp.getName(), subOp);
                 } else {
-                    throw new OpConfigError("For sub-ops field " + fromOpField + " of op '" + this.getName() + "', element " +
-                        "types must be of Map or String, not '" + o.getClass().getCanonicalName() + "'");
+                    throw new OpConfigError("For sub-ops field '" + fromOpField + "(" + nameKey.toString() + ")' of op '" + this.getName() + "'" +
+                        ", element " + "types must be of Map or String, not '" + opref.getClass().getCanonicalName() + "'");
                 }
             }
         } else {

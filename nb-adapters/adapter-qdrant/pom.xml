@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>adapter-qdrant</artifactId>
+    <packaging>jar</packaging>
+
+    <parent>
+        <artifactId>mvn-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>${revision}</version>
+        <relativePath>../../mvn-defaults</relativePath>
+    </parent>
+
+    <name>${project.artifactId}</name>
+    <description>
+        An nosqlbench adapter driver module for the Qdrant database.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-annotations</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapters-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <!-- <version>1.63.0</version> -->
+            <!-- Trying to match https://github.com/qdrant/java-client/blob/v1.9.0/build.gradle#L80 -->
+            <version>1.59.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <!--<version>3.25.3</version>-->
+            <!-- Trying to match https://github.com/qdrant/java-client/blob/master/build.gradle#L81 -->
+            <version>3.24.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <!--<version>33.1.0-jre</version>-->
+            <!-- Trying to match https://github.com/qdrant/java-client/blob/master/build.gradle#L93 -->
+            <version>30.1-jre</version>
+        </dependency>
+        <dependency>
+            <groupId>io.qdrant</groupId>
+            <artifactId>client</artifactId>
+            <version>1.9.0</version>
+        </dependency>
+    </dependencies>
+</project>

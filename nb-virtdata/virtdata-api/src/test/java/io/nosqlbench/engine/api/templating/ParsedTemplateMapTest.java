@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,22 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParsedTemplateMapTest {
+
+//    @Test
+//    public void testBindpointTypes() {
+//        ParsedTemplateMap ptm = new ParsedTemplateMap(
+//            "name1",
+//            Map.of(
+//                "field1","{binding1}",
+//                "field2", " {binding2}"
+//            ),
+//            Map.of(
+//                "binding1","TestingStringFunc('b1')",
+//                "binding2","TestingStringFunc('b2')"
+//            ),
+//            List.of(Map.of()));
+//
+//    }
 
     @Test
     public void testParsedTemplateMap() {
@@ -56,6 +72,12 @@ public class ParsedTemplateMapTest {
         assertThat(ofMap).containsKey("test2-verifier-entry2");
         // TODO: Get actual testing bindings into this example
 
+    }
+
+    @Test
+    public void testForNullWhenNoFieldFoundWhenCallingStaticValue() {
+        ParsedTemplateMap ptm = new ParsedTemplateMap("name1", Map.of("string1", "string2"), Map.of(), List.of());
+        assertThat(ptm.getStaticValue("notfound", String.class)).isNull();
     }
 
 }

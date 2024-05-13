@@ -264,10 +264,31 @@ public class NBCLIScenarioPreprocessor {
 
     private static final Pattern WordAndMaybeAssignment = Pattern.compile("(?<name>\\w[-_\\d\\w.]+)((?<oper>=+)(?<val>.+))?");
 
+    public static String[] splitCommand(String cmd) {
+        // split command by honoring single quotes, double quotes and escape characters
+        String[] namedStepPieces = cmd.split(" +(?=([^\"]*\"[^\"]*\")*[^\"]*$)(?=([^']*'[^']*')*[^']*$)");
+        Pattern pattern1 = Pattern.compile("(?<!\\\\)\"");
+        Pattern pattern2 = Pattern.compile("(?<!\\\\)'");
+        for (int i = 0; i < namedStepPieces.length; i++) {
+            // check if the quotes are balanced
+            String stepPiece = namedStepPieces[i];
+            boolean balanced = pattern1.matcher(stepPiece).results().count() % 2 == 0;
+            balanced = balanced && (pattern2.matcher(stepPiece).results().count() % 2 == 0);
+            if (!balanced) {
+                throw new BasicError("Unclosed quote found in scenario cmd '" + cmd + "'");
+            }
+            // remove single quotes, double quotes and escape character
+            stepPiece = pattern1.matcher(stepPiece).replaceAll("");
+            stepPiece = pattern2.matcher(stepPiece).replaceAll("");
+            namedStepPieces[i] = stepPiece.replaceAll(Matcher.quoteReplacement("\\(?!\\)"), "");
+        }
+        return namedStepPieces;
+    }
+
     private static LinkedHashMap<String, SCNamedParam> parseStep(String cmd, String stepName, String scenarioName) {
         LinkedHashMap<String, SCNamedParam> parsedStep = new LinkedHashMap<>();
 
-        String[] namedStepPieces = cmd.split(" +");
+        String[] namedStepPieces = splitCommand(cmd);
         for (String commandFragment : namedStepPieces) {
             Matcher matcher = WordAndMaybeAssignment.matcher(commandFragment);
 

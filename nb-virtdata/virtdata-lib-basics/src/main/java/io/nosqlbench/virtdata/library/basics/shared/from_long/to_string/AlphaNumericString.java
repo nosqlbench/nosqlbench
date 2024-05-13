@@ -18,10 +18,13 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
+import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.Hash;
 
 import java.util.function.LongFunction;
+import java.util.function.LongToIntFunction;
 
 /**
  * Create an alpha-numeric string of the specified length, character-by-character.
@@ -32,20 +35,39 @@ public class AlphaNumericString implements LongFunction<String> {
     private static final String AVAILABLE_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private final ThreadLocal<StringBuilder> threadStringBuilder = ThreadLocal.withInitial(StringBuilder::new);
     private final Hash hash = new Hash();
-    private final int length;
+    private final LongToIntFunction lengthFunc;
 
-    public AlphaNumericString(int length)
-    {
-        if (length < 0)
-        {
-            throw new RuntimeException("AlphaNumericString must have length >= 0");
+    @Example({
+        "AlphaNumericString(10)",
+        "Create a 10-character alpha-numeric string"
+    })
+    @Example({
+        "AlphaNumericString(HashRange(10, 20))",
+        "Create an alpha-numeric string with a length between 10 and 20 characters"
+    })
+    public AlphaNumericString(int length) {
+        this.lengthFunc = l -> length;
+    }
+
+    public AlphaNumericString(Object lengthfunc) {
+        if (lengthfunc instanceof Number) {
+            int length = ((Number) lengthfunc).intValue();
+            this.lengthFunc = l -> length;
         }
-        this.length = length;
+        else {
+            this.lengthFunc = VirtDataConversions.adaptFunction(lengthfunc, LongToIntFunction.class);
+        }
     }
 
     @Override
     public String apply(long operand)
     {
+        int length = lengthFunc.applyAsInt(operand);
+        if (length < 0)
+        {
+            throw new RuntimeException("AlphaNumericString must have length >= 0");
+        }
+
         long hashValue = operand;
         StringBuilder sb = threadStringBuilder.get();
         sb.setLength(0);
@@ -61,6 +83,6 @@ public class AlphaNumericString implements LongFunction<String> {
     @Override
     public String toString()
     {
-        return "AlphaNumericString(length=" + length + ")";
+        return "AlphaNumericString(lengthFunc.class=" + lengthFunc.getClass().getSimpleName() + ")";
     }
 }

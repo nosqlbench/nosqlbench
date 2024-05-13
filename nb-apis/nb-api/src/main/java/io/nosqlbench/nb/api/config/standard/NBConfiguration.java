@@ -178,7 +178,7 @@ public class NBConfiguration {
                     }
                 }
             } else {
-                throw new NBConfigError("Parameter was not found for " + Arrays.toString(names) + ".");
+                throw new NBConfigError("Parameter definition was not found for " + Arrays.toString(names) + ".");
             }
         }
         if (o == null) {

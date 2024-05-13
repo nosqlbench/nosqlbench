@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="astra DAPI read" type="JarApplication" folderName="Astra DAPI">
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <option name="JAR_PATH" value="$PROJECT_DIR$/nb5/target/nb5.jar" />
+    <option name="PROGRAM_PARAMETERS" value="astra_kv_dapi default.read threads=1 astraTokenFile=target/token astraApiEndpointFile=target/endpoint -v" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/local/dataapi" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="ALTERNATIVE_JRE_PATH" value="21" />
+    <method v="2" />
+  </configuration>
+</component>
