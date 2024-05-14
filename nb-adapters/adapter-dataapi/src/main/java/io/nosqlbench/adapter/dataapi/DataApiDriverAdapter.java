@@ -28,6 +28,8 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
 
+// TODO: Add details to dataapi.md in main resources folder, a la cqld4.md
+
 @Service(value = DriverAdapter.class, selector = "dataapi")
 public class DataApiDriverAdapter extends BaseDriverAdapter<DataApiBaseOp, DataApiSpace> {
     public DataApiDriverAdapter(NBComponent parent, NBLabels childLabels) {

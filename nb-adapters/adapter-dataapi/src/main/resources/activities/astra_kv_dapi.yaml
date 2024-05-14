@@ -3,71 +3,118 @@ min_version: "5.21.0"
 description: |
  A basic workload that uses the DataStax Data API Client in Java, emulating what
  applications would do in the native stack.
- TEMPLATE(cardinality,1000)
- TEMPLATE(collection,keyvalue)
- TEMPLATE(dimensions,1536)
- TEMPLATE(similarity,COSINE)
- TEMPLATE(keycount,TEMPLATE(cardinality))
- TEMPLATE(valuecount,TEMPLATE(cardinality))
+ variations:
+  without vector:
+   with _id:
+    search by id=
+    search by id<
+   NOT USED: with uuid:
+  with vector:
+   with _id:
+    search by id=
+    search by id<
+    vector search with filter by id<
+    vector search with vector ~
+   with uuid:
+    vector search with vector ~
+
+ cardinality=TEMPLATE(cardinality,1000)
+ collection=TEMPLATE(collection,keyvalue)
+ dimensions=TEMPLATE(dimensions,1536)
+ similarity=TEMPLATE(similarity,COSINE)
+ keycount=TEMPLATE(keycount,TEMPLATE(cardinality))
+ valuecount=TEMPLATE(valuecount,TEMPLATE(cardinality))
+ rampup-threads=TEMPLATE(rampup-threads,100)
+
 
 scenarios:
-  dapi_novector:
-    schema: run driver=dataapi tags==block:schema threads==1 cycles==UNDEF
+
+  astra_dapi_kv_id:
+    schema: >-
+      run driver=dataapi
+      tags==block:schema_kv
+      threads==1 cycles==UNDEF
     rampup: >-
-      run driver=dataapi tags==block:rampup
+      run driver=dataapi
+      tags==block:rampup_kv_id
       cycles===TEMPLATE(rampup-cycles,TEMPLATE(cardinality))
+      threads=TEMPLATE(rampup-threads)
+      errors=count
+    find_kv_by_id: >-
+      run driver=dataapi
+      tags==block:find_kv_by_id
+      cycles===TEMPLATE(main-cycles,1000)
       threads=auto errors=count
-    find_key: >-
-      run driver=dataapi tags==block:find_key
+    find_kv_lt_id: >-
+      run driver=dataapi
+      tags==block:find_kv_lt_id
       cycles===TEMPLATE(main-cycles,1000)
       threads=auto errors=count
 
-  dapi_vector_d1536:
-    schema_vector: run driver=dataapi tags==block:schema_vector threads==1 cycles==UNDEF
+  astra_dapi_v1536_id:
+    schema_vector: >-
+      run driver=dataapi
+      tags==block:schema_v1536
+      threads==1 cycles==UNDEF
     rampup_vector: >-
-      run driver=dataapi tags==block:rampup_vector
+      run driver=dataapi
+      tags==block:rampup_v1536_id
       cycles===TEMPLATE(rampup-cycles,TEMPLATE(cardinality))
+      threads=TEMPLATE(rampup-threads)
+      errors=count
+    find_kv_by_id: >-
+      run driver=dataapi
+      tags==block:find_kv_by_id
+      cycles===TEMPLATE(main-cycles,1000)
       threads=auto errors=count
-    find_key_vector: >-
-      run driver=dataapi tags==block:find_key_vector
+    find_kv_lt_id: >-
+      run driver=dataapi
+      tags==block:find_kv_lt_id
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto errors=count
+    find_by_vector: >-
+      run driver=dataapi
+      tags==block:find_by_vector
+      cycles===TEMPLATE(main-cycles,TEMPLATE(cardinality))
+      threads=auto errors=count
+    find_by_vector_lt_id: >-
+      run driver=dataapi
+      tags==block:find_by_vector_lt_id
       cycles===TEMPLATE(main-cycles,TEMPLATE(cardinality))
       threads=auto errors=count
 
-
-
-#  kv_dapi:
-#    kv_dapi_schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
-#    kv_dapi_rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-#    kv_dapi_main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
-
-#  basic_check:
-#    schema: run driver=http tags==block:schema threads==1 cycles==UNDEF
-#    rampup: run driver=http tags==block:rampup cycles===TEMPLATE(rampup-cycles,10) threads=auto
-#    main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
+  astra_dapi_v1536_uuid:
+    schema_vector: >-
+      run driver=dataapi
+      tags==block:schema_v1536
+      threads==1 cycles==UNDEF
+    rampup_vector: >-
+      run driver=dataapi
+      tags==block:rampup_v1536_uuid
+      cycles===TEMPLATE(rampup-cycles,TEMPLATE(cardinality))
+      threads=TEMPLATE(rampup-threads)
+      errors=count
+    find_by_vector: >-
+      run driver=dataapi
+      tags==block:find_by_vector
+      cycles===TEMPLATE(main-cycles,TEMPLATE(cardinality))
+      threads=auto errors=count
 
 bindings:
-  # To enable an optional weighted set of hosts in place of a load balancer
-  # Examples
-  #   single host: jsonapi_host=host1
-  #   multiple hosts: jsonapi_host=host1,host2,host3
-  #   multiple weighted hosts: jsonapi_host=host1:3,host2:7
-  weighted_hosts: WeightedStrings('TEMPLATE(jsonapi_host,TEMPLATE(stargate_host,localhost))')
 
   seq_key: Mod(TEMPLATE(keycount)); ToString() -> String
-#  seq_key: Mod(TEMPLATE(keycount,50000000000L));
   seq_value: Hash(); Mod(TEMPLATE(valuecount)); ToString() -> String
-#  rw_key: TEMPLATE(keydist,Uniform(0,50000000000L));
   rw_key: TEMPLATE(keydist,Uniform(0,TEMPLATE(keycount))); ToString() -> String
   rw_key_num: TEMPLATE(keydist,Uniform(0,TEMPLATE(keycount)));
   rw_value: Hash(); TEMPLATE(valdist,Uniform(0,TEMPLATE(valuecount))); ToString() -> String
   vector_value: HashedFloatVectors(TEMPLATE(dimensions,1536));
-
   request_id: ToHashedUUID(); ToString();
 
-  params:
-    cl: TEMPLATE(cl,LOCAL_QUORUM)
+params:
+  cl: TEMPLATE(cl,LOCAL_QUORUM)
 
 blocks:
+
   reset_schema:
     ops:
       drop_index:
@@ -77,15 +124,16 @@ blocks:
         raw: |-
           DROP TABLE IF EXISTS TEMPLATE(keyspace, baselines).TEMPLATE(table,keyvalue);
 
-  schema:
+# Schema
+
+  schema_kv:
     ops:
       delete_collection_op:
         delete_collection: "TEMPLATE(collection)"
       create_collection_op:
         create_collection: "TEMPLATE(collection)"
 
-#  separate these cases later, when you can recreate the same collection name with/without vector support
-  schema_vector:
+  schema_v1536:
     ops:
       delete_collection_op_v:
         delete_collection: "TEMPLATE(collection)_v"
@@ -94,7 +142,9 @@ blocks:
         dimensions: TEMPLATE(dimensions)
         similarity: TEMPLATE(similarity)
 
-  rampup:
+# Rampup
+
+  rampup_kv_id:
     ops:
       insert_one_op:
         insert_one: "TEMPLATE(collection)"
@@ -102,7 +152,15 @@ blocks:
           _id: "{seq_key}"
           value: "{seq_value}"
 
-  rampup_vector:
+#  rampup_kv_uuid:
+#    ops:
+#      insert_one_op:
+#        insert_one: "TEMPLATE(collection)"
+#        document:
+#          value: "{seq_value}"
+
+
+  rampup_v1536_id:
     ops:
       insert_one_op_v:
         insert_one_vector: "TEMPLATE(collection)_v"
@@ -111,17 +169,41 @@ blocks:
           value: "{seq_value}"
         vector: "{vector_value}"
 
-#  rampup-uuid:
-#    ops:
-#      insert_one_op:
-#        insert-one: "TEMPLATE(collection)"
-#        document:
-#          value: "{seq_value}"
-  find_key:
+  rampup_v1536_uuid:
+    ops:
+      insert_one_op_v:
+        insert_one_vector: "TEMPLATE(collection)_v"
+        document:
+          value: "{seq_value}"
+        vector: "{vector_value}"
+
+  find_kv_by_id:
+    ops:
+      find_op:
+        find: "TEMPLATE(collection)"
+        filters:
+          - conjunction: "and"
+            operator: "eq"
+            field: "_id"
+            value: "{rw_key}"
+
+  find_kv_lt_id:
     params:
       ratio: 5
     ops:
-      find_op:
+      find_kv_id_lt:
+        find: "TEMPLATE(collection)"
+        filters:
+          - conjunction: "and"
+            operator: "lt"
+            field: "_id"
+            value: "{rw_key_num}"
+
+  find_by_vector_lt_id:
+    params:
+      ratio: 5
+    ops:
+      find_kv_id_lt:
         find: "TEMPLATE(collection)"
         filters:
           - conjunction: "and"
@@ -130,36 +212,14 @@ blocks:
             value: "{rw_key_num}"
         vector: "{vector_value}"
 
-  find_key_vector:
+  find_by_vector:
     params:
       ratio: 5
     ops:
-      find_op_v:
+      find_op_filter_v:
         find_vector_filter: "TEMPLATE(collection)"
-        filters:
-          - conjunction: "and"
-            operator: "lt"
-            field: "_id"
-            value: "{rw_key_num}"
         vector: "{vector_value}"
 
-
-#
-#  rampup_with_vector_uuid:
-#    ops:
-#      insert_one_op:
-#        insert_one: "TEMPLATE(collection)"
-#        document:
-#          value: "{seq_value}"
-#          vector: "{vector_value}"
-#
-#  main_read_with_vector:
-#    ops:
-#      find_op:
-#        find: "TEMPLATE(collection)"
-#        filter:
-#          _id: "{rw_key}"
-#
 #  main_ann_with_vector_limit_20:
 #    params:
 #      ratio: 5
