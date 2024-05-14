@@ -25,10 +25,12 @@ public abstract class CqlColumnBase implements NBNamedElement, NBLabeledElement 
     private String name;
     private String typedef;
     private ColumnPosition position=ColumnPosition.NonKey;
+    private boolean isStatic;
 
-    protected CqlColumnBase(String colname, String typedef) {
+    protected CqlColumnBase(String colname, String typedef, boolean isStatic) {
         this.typedef = typedef;
         this.name = colname;
+        this.isStatic = isStatic;
     }
 
     public void setPosition(ColumnPosition position) {
@@ -62,7 +64,7 @@ public abstract class CqlColumnBase implements NBNamedElement, NBLabeledElement 
 
     @Override
     public NBLabels getLabels() {
-        return NBLabels.forKV("name", name, "type", "column");
+        return NBLabels.forKV("name", name, "type", "column", "is_static", isStatic);
     }
 
     public boolean isCounter() {
@@ -83,4 +85,11 @@ public abstract class CqlColumnBase implements NBNamedElement, NBLabeledElement 
 
     protected abstract String getParentFullName();
 
+    public boolean isStatic() {
+        return isStatic;
+    }
+
+    public void setStatic(boolean isStatic) {
+        this.isStatic = isStatic;
+    }
 }

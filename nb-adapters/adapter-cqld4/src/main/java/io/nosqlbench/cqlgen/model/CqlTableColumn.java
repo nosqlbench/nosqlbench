@@ -22,8 +22,8 @@ public class CqlTableColumn extends CqlColumnBase {
 
     private CqlTable table;
 
-    public CqlTableColumn(final String colname, final String typedef, final CqlTable table) {
-        super(colname, typedef);
+    public CqlTableColumn(final String colname, final String typedef, final boolean isStatic, final CqlTable table) {
+        super(colname, typedef, isStatic);
         this.table = table;
     }
 
