@@ -1,0 +1,8 @@
+scenarios:
+  default:
+    list_collections: run driver=dataapi tags==blocks:list_collections cycles=1
+
+blocks:
+  list_collections:
+    ops:
+      op1:

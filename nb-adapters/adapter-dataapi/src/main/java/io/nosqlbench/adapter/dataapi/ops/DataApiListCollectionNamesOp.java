@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,21 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-public enum DataApiOpType {
-    create_collection,
-    insert_many,
-    insert_one,
-    insert_one_vector,
-    find,
-    find_one,
-    find_one_and_delete,
-    find_one_and_update,
-    find_vector,
-    find_vector_filter,
-    update_one,
-    update_many,
-    delete_one,
-    delete_many,
-    delete_collection,
-    list_collections,
-    list_collection_names,
+import com.datastax.astra.client.Database;
+
+import java.util.stream.Stream;
+
+public class DataApiListCollectionNamesOp extends DataApiBaseOp {
+
+    public DataApiListCollectionNamesOp(Database db) {
+        super(db);
+    }
+
+    @Override
+    public Object apply(long value) {
+        Stream<String> response;
+        response = db.listCollectionNames();
+        if(logger.isDebugEnabled()) response.forEach(logger::debug);
+        return response;
+    }
 }

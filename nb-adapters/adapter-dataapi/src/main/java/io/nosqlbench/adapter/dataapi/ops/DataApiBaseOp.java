@@ -18,8 +18,11 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.Database;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class DataApiBaseOp implements CycleOp {
+    protected static final Logger logger = LogManager.getLogger(DataApiBaseOp.class);
     protected final Database db;
 
     public DataApiBaseOp(Database db) {
