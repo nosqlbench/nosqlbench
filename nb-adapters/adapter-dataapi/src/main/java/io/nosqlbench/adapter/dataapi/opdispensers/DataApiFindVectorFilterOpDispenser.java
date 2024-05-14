@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.dataapi;
+package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.Database;
 import com.datastax.astra.client.model.Filter;
 import com.datastax.astra.client.model.FindOptions;
 import com.datastax.astra.client.model.Projection;
 import com.datastax.astra.client.model.Sort;
-import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
+import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiFindVectorFilterOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;

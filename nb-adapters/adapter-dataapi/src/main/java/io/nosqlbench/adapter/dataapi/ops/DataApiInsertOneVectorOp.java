@@ -16,8 +16,10 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
+import com.datastax.astra.client.Collection;
 import com.datastax.astra.client.Database;
 import com.datastax.astra.client.model.Document;
+import com.datastax.astra.client.model.InsertOneResult;
 
 public class DataApiInsertOneVectorOp extends DataApiBaseOp {
     private final Document doc;
@@ -33,6 +35,8 @@ public class DataApiInsertOneVectorOp extends DataApiBaseOp {
 
     @Override
     public Object apply(long value) {
-        return db.getCollection(collectionName).insertOne(doc, vector);
+        Collection<Document> collection = db.getCollection(collectionName);
+        InsertOneResult result = collection.insertOne(doc, vector);
+        return result;
     }
 }

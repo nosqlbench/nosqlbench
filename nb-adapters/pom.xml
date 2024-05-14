@@ -147,7 +147,7 @@
         <profile>
             <id>adapter-s4j-module</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-s4j</module>
