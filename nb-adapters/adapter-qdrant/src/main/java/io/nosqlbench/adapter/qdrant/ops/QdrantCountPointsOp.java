@@ -31,9 +31,11 @@ public class QdrantCountPointsOp extends QdrantBaseOp<CountPoints> {
     public Object applyOp(long value) {
         long result;
         try {
+            boolean hasFilters = request.getFilter() != null && (request.getFilter().getMustCount() > 0
+                || request.getFilter().getMustNotCount() > 0 || request.getFilter().getShouldCount() > 0);
             result = client.countAsync(
                 request.getCollectionName(),
-                request.getFilter(),
+                (hasFilters) ? request.getFilter() : null,
                 request.getExact(),
                 Duration.ofMinutes(5) // opinionated default of 5 minutes for timeout
             ).get();

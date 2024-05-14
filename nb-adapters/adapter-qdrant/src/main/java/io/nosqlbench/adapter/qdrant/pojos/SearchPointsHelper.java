@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.qdrant.pojo;
+package io.nosqlbench.adapter.qdrant.pojos;
 
 import io.qdrant.client.grpc.Points.SparseIndices;
 

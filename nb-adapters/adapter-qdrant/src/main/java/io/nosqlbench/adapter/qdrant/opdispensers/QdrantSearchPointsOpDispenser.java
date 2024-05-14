@@ -19,7 +19,7 @@ package io.nosqlbench.adapter.qdrant.opdispensers;
 import io.nosqlbench.adapter.qdrant.QdrantDriverAdapter;
 import io.nosqlbench.adapter.qdrant.ops.QdrantBaseOp;
 import io.nosqlbench.adapter.qdrant.ops.QdrantSearchPointsOp;
-import io.nosqlbench.adapter.qdrant.pojo.SearchPointsHelper;
+import io.nosqlbench.adapter.qdrant.pojos.SearchPointsHelper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.qdrant.client.QdrantClient;
@@ -74,7 +74,7 @@ public class QdrantSearchPointsOpDispenser extends QdrantBaseOpDispenser<SearchP
         ebF = l -> detailsOfNamedVectorsF.apply(l)
             .setVectorName(searchPointsHelperF.apply(l).getVectorName())
             .addAllVector(searchPointsHelperF.apply(l).getVectorValues());
-        //.setSparseIndices(searchPointsHelperF.apply(l).getSparseIndices()); throws NPE at their driver and hence below
+        //.setSparseIndices(searchPointsHelperF.apply(l).getSparseIndices()); throws NPE at Qdrant driver and hence below
         final LongFunction<SearchPoints.Builder> sparseIndicesF = ebF;
         ebF = l -> {
             SearchPoints.Builder builder = sparseIndicesF.apply(l);
@@ -106,7 +106,18 @@ public class QdrantSearchPointsOpDispenser extends QdrantBaseOpDispenser<SearchP
             ebF = l -> withVectorFunc.apply(l).setWithVectors(builtWithVector.apply(l));
         }
 
-        // TODO - Implement filter, params
+        Optional<LongFunction<Map>> optionalParams = op.getAsOptionalFunction("params", Map.class);
+        if (optionalParams.isPresent()) {
+            LongFunction<SearchPoints.Builder> paramsF = ebF;
+            LongFunction<SearchParams> params = buildSearchParams(optionalParams.get());
+            ebF = l -> paramsF.apply(l).setParams(params.apply(l));
+        }
+
+        LongFunction<Filter.Builder> filterBuilder = getFilterFromOp(op);
+        if (filterBuilder != null) {
+            final LongFunction<SearchPoints.Builder> filterF = ebF;
+            ebF = l -> filterF.apply(l).setFilter(filterBuilder.apply(l));
+        }
 
         final LongFunction<SearchPoints.Builder> lastF = ebF;
         return l -> lastF.apply(l).build();
@@ -214,6 +225,39 @@ public class QdrantSearchPointsOpDispenser extends QdrantBaseOpDispenser<SearchP
             } else {
                 throw new OpConfigError("Invalid type for read consistency specified");
             }
+        };
+    }
+
+    private LongFunction<SearchParams> buildSearchParams(LongFunction<Map> mapLongFunction) {
+        return l -> {
+            SearchParams.Builder searchParamsBuilder = SearchParams.newBuilder();
+            mapLongFunction.apply(l).forEach((key, val) -> {
+                if ("hnsw_config".equals(key)) {
+                    searchParamsBuilder.setHnswEf(((Number) val).longValue());
+                }
+                if ("exact".equals(key)) {
+                    searchParamsBuilder.setExact((Boolean) val);
+                }
+                if ("indexed_only".equals(key)) {
+                    searchParamsBuilder.setIndexedOnly((Boolean) val);
+                }
+                if ("quantization".equals(key)) {
+                    QuantizationSearchParams.Builder qsBuilder = QuantizationSearchParams.newBuilder();
+                    ((Map<String, Object>) val).forEach((qKey, qVal) -> {
+                        if ("ignore".equals(qKey)) {
+                            qsBuilder.setIgnore((Boolean) qVal);
+                        }
+                        if ("rescore".equals(qKey)) {
+                            qsBuilder.setRescore((Boolean) qVal);
+                        }
+                        if ("oversampling".equals(qKey)) {
+                            qsBuilder.setOversampling(((Number) qVal).doubleValue());
+                        }
+                    });
+                    searchParamsBuilder.setQuantization(qsBuilder);
+                }
+            });
+            return searchParamsBuilder.build();
         };
     }
 }

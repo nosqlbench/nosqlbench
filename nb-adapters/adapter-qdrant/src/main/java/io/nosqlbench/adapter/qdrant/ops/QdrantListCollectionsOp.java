@@ -17,16 +17,23 @@
 package io.nosqlbench.adapter.qdrant.ops;
 
 import io.qdrant.client.QdrantClient;
-import io.qdrant.client.grpc.Collections.PayloadIndexParams;
 
-public class QdrantPayloadIndexOp extends QdrantBaseOp<PayloadIndexParams> {
-    public QdrantPayloadIndexOp(QdrantClient client, PayloadIndexParams request) {
+import java.time.Duration;
+import java.util.List;
+
+public class QdrantListCollectionsOp extends QdrantBaseOp<Object> {
+    public QdrantListCollectionsOp(QdrantClient client, Object request) {
         super(client, request);
     }
-
     @Override
     public Object applyOp(long value) {
-        //client.createPayloadIndexAsync(PayloadIndexParams.get);
-        return null;
+        List<String> response;
+        try {
+            response = client.listCollectionsAsync(Duration.ofSeconds(300)).get();
+            logger.info("[QdrantListCollectionsOp] Collections: {}", response);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return response;
     }
 }

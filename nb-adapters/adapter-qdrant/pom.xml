@@ -36,27 +36,27 @@
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
             <!-- <version>1.63.0</version> -->
-            <!-- Trying to match https://github.com/qdrant/java-client/blob/v1.9.0/build.gradle#L80 -->
+            <!-- If Trying to match https://github.com/qdrant/java-client/blob/v1.9.1/build.gradle#L80 -->
             <version>1.59.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
-            <!--<version>3.25.3</version>-->
-            <!-- Trying to match https://github.com/qdrant/java-client/blob/master/build.gradle#L81 -->
+            <!-- <version>3.25.3</version> -->
+            <!-- If Trying to match https://github.com/qdrant/java-client/blob/v1.9.1/build.gradle#L81 -->
             <version>3.24.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <!--<version>33.1.0-jre</version>-->
-            <!-- Trying to match https://github.com/qdrant/java-client/blob/master/build.gradle#L93 -->
-            <version>30.1-jre</version>
+            <version>33.1.0-jre</version>
+            <!-- If Trying to match https://github.com/qdrant/java-client/blob/v1.9.1/build.gradle#L93, use below -->
+            <!-- <version>30.1-jre</version> -->
         </dependency>
         <dependency>
             <groupId>io.qdrant</groupId>
             <artifactId>client</artifactId>
-            <version>1.9.0</version>
+            <version>1.9.1</version>
         </dependency>
     </dependencies>
 </project>
