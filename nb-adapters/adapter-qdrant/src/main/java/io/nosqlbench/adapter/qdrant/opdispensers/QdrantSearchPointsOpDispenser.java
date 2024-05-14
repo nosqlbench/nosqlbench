@@ -114,8 +114,10 @@ public class QdrantSearchPointsOpDispenser extends QdrantBaseOpDispenser<SearchP
         }
 
         LongFunction<Filter.Builder> filterBuilder = getFilterFromOp(op);
-        final LongFunction<SearchPoints.Builder> filterF = ebF;
-        ebF = l -> filterF.apply(l).setFilter(filterBuilder.apply(l));
+        if (filterBuilder != null) {
+            final LongFunction<SearchPoints.Builder> filterF = ebF;
+            ebF = l -> filterF.apply(l).setFilter(filterBuilder.apply(l));
+        }
 
         final LongFunction<SearchPoints.Builder> lastF = ebF;
         return l -> lastF.apply(l).build();
