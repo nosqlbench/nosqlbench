@@ -62,6 +62,8 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp> {
             case list_collections -> new DataApiListCollectionsOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case list_collection_names ->
                 new DataApiListCollectionNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case estimated_document_count ->
+                new DataApiEstimatedDocumentCountOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 }
