@@ -112,6 +112,7 @@ bindings:
 
 params:
   cl: TEMPLATE(cl,LOCAL_QUORUM)
+  instrument: true
 
 blocks:
 
