@@ -31,5 +31,8 @@ public enum DataApiOpType {
     update_many,
     delete_one,
     delete_many,
-    delete_collection
+    delete_collection,
+    list_collections,
+    list_collection_names,
+    estimated_document_count,
 }
