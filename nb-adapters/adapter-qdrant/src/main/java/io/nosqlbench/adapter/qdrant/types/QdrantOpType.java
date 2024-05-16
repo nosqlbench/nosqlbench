@@ -28,4 +28,9 @@ public enum QdrantOpType {
     // https://qdrant.github.io/qdrant/redoc/index.html#tag/points/operation/count_points
     // https://qdrant.tech/documentation/concepts/points/#counting-points
     count_points,
+    list_collections,
+    collection_info,
+    collection_exists,
+    list_collection_aliases,
+    list_snapshots,
 }

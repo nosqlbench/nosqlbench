@@ -18,14 +18,18 @@ package io.nosqlbench.adapter.qdrant.opdispensers;
 
 import io.nosqlbench.adapter.qdrant.QdrantDriverAdapter;
 import io.nosqlbench.adapter.qdrant.ops.QdrantBaseOp;
-import io.nosqlbench.adapter.qdrant.ops.QdrantPayloadIndexOp;
+import io.nosqlbench.adapter.qdrant.ops.QdrantCreatePayloadIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.qdrant.client.QdrantClient;
-import io.qdrant.client.grpc.Collections.PayloadIndexParams;
+import io.qdrant.client.grpc.Points.CreateFieldIndexCollection;
+import io.qdrant.client.grpc.Points.FieldType;
+import io.qdrant.client.grpc.Points.WriteOrdering;
+import io.qdrant.client.grpc.Points.WriteOrderingType;
 
+import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class QdrantCreatePayloadIndexOpDispenser extends QdrantBaseOpDispenser<PayloadIndexParams> {
+public class QdrantCreatePayloadIndexOpDispenser extends QdrantBaseOpDispenser<CreateFieldIndexCollection> {
     public QdrantCreatePayloadIndexOpDispenser(
         QdrantDriverAdapter adapter,
         ParsedOp op,
@@ -34,21 +38,44 @@ public class QdrantCreatePayloadIndexOpDispenser extends QdrantBaseOpDispenser<P
     }
 
     @Override
-    public LongFunction<PayloadIndexParams> getParamFunc(
+    public LongFunction<CreateFieldIndexCollection> getParamFunc(
         LongFunction<QdrantClient> clientF,
         ParsedOp op,
         LongFunction<String> targetF) {
-        LongFunction<PayloadIndexParams.Builder> ebF =
-            l -> PayloadIndexParams.newBuilder().setField(null, targetF.apply(l));
-        return l -> ebF.apply(l).build();
+        LongFunction<CreateFieldIndexCollection.Builder> ebF =
+            l -> CreateFieldIndexCollection.newBuilder().setCollectionName(targetF.apply(l));
+        // https://github.com/qdrant/java-client/blob/v1.9.1/src/main/java/io/qdrant/client/QdrantClient.java#L2240-L2248
+
+        ebF = op.enhanceFuncOptionally(ebF, "field_name", String.class, CreateFieldIndexCollection.Builder::setFieldName);
+
+        LongFunction<String> fieldTypeF = op.getAsRequiredFunction("field_type", String.class);
+        final LongFunction<CreateFieldIndexCollection.Builder> ftF = ebF;
+        ebF = l -> ftF.apply(l).setFieldType(FieldType.valueOf(fieldTypeF.apply(l)));
+
+        Optional<LongFunction<String>> writeOrderingF = op.getAsOptionalFunction("ordering", String.class);
+        if (writeOrderingF.isPresent()) {
+            LongFunction<CreateFieldIndexCollection.Builder> woF = ebF;
+            LongFunction<WriteOrdering> writeOrdrF = buildWriteOrderingFunc(writeOrderingF.get());
+            ebF = l -> woF.apply(l).setOrdering(writeOrdrF.apply(l));
+        }
+        ebF = op.enhanceFuncOptionally(ebF, "wait", Boolean.class, CreateFieldIndexCollection.Builder::setWait);
+
+        final LongFunction<CreateFieldIndexCollection.Builder> lastF = ebF;
+        return l -> lastF.apply(l).build();
     }
 
     @Override
-    public LongFunction<QdrantBaseOp<PayloadIndexParams>> createOpFunc(
-        LongFunction<PayloadIndexParams> paramF,
+    public LongFunction<QdrantBaseOp<CreateFieldIndexCollection>> createOpFunc(
+        LongFunction<CreateFieldIndexCollection> paramF,
         LongFunction<QdrantClient> clientF,
         ParsedOp op,
         LongFunction<String> targetF) {
-        return l -> new QdrantPayloadIndexOp(clientF.apply(l), paramF.apply(l));
+        return l -> new QdrantCreatePayloadIndexOp(clientF.apply(l), paramF.apply(l));
+    }
+
+    private LongFunction<WriteOrdering> buildWriteOrderingFunc(LongFunction<String> stringLongFunction) {
+        return l -> {
+            return WriteOrdering.newBuilder().setType(WriteOrderingType.valueOf(stringLongFunction.apply(l))).build();
+        };
     }
 }

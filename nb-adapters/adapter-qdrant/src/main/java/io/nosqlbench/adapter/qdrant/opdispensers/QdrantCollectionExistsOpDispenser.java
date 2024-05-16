@@ -18,43 +18,34 @@ package io.nosqlbench.adapter.qdrant.opdispensers;
 
 import io.nosqlbench.adapter.qdrant.QdrantDriverAdapter;
 import io.nosqlbench.adapter.qdrant.ops.QdrantBaseOp;
-import io.nosqlbench.adapter.qdrant.ops.QdrantCountPointsOp;
+import io.nosqlbench.adapter.qdrant.ops.QdrantCollectionExistsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.qdrant.client.QdrantClient;
-import io.qdrant.client.grpc.Points.CountPoints;
-import io.qdrant.client.grpc.Points.Filter;
+import io.qdrant.client.grpc.Collections.CollectionExistsRequest;
 
 import java.util.function.LongFunction;
 
-public class QdrantCountPointsOpDispenser extends QdrantBaseOpDispenser<CountPoints> {
-    public QdrantCountPointsOpDispenser(QdrantDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class QdrantCollectionExistsOpDispenser extends QdrantBaseOpDispenser<CollectionExistsRequest> {
+    public QdrantCollectionExistsOpDispenser(QdrantDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
     }
 
     @Override
-    public LongFunction<CountPoints> getParamFunc(
+    public LongFunction<CollectionExistsRequest> getParamFunc(
         LongFunction<QdrantClient> clientF, ParsedOp op, LongFunction<String> targetF) {
-        LongFunction<CountPoints.Builder> ebF =
-            l -> CountPoints.newBuilder().setCollectionName(targetF.apply(l));
+        LongFunction<CollectionExistsRequest.Builder> ebF =
+            l -> CollectionExistsRequest.newBuilder().setCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF, "exact", Boolean.class, CountPoints.Builder::setExact);
-
-        LongFunction<Filter.Builder> filterBuilder = getFilterFromOp(op);
-        if (filterBuilder != null) {
-            final LongFunction<CountPoints.Builder> filterF = ebF;
-            ebF = l -> filterF.apply(l).setFilter(filterBuilder.apply(l));
-        }
-
-        final LongFunction<CountPoints.Builder> lastF = ebF;
+        final LongFunction<CollectionExistsRequest.Builder> lastF = ebF;
         return l -> lastF.apply(l).build();
     }
 
     @Override
-    public LongFunction<QdrantBaseOp<CountPoints>> createOpFunc(
-        LongFunction<CountPoints> paramF,
+    public LongFunction<QdrantBaseOp<CollectionExistsRequest>> createOpFunc(
+        LongFunction<CollectionExistsRequest> paramF,
         LongFunction<QdrantClient> clientF,
         ParsedOp op,
         LongFunction<String> targetF) {
-        return l -> new QdrantCountPointsOp(clientF.apply(l), paramF.apply(l));
+        return l -> new QdrantCollectionExistsOp(clientF.apply(l), paramF.apply(l));
     }
 }
