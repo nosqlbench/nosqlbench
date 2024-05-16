@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,22 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
+import com.datastax.astra.client.Collection;
 import com.datastax.astra.client.Database;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.datastax.astra.client.model.Document;
 
-public abstract class DataApiBaseOp implements CycleOp {
-    protected static final Logger logger = LogManager.getLogger(DataApiBaseOp.class);
-    protected final Database db;
+public class DataApiEstimatedDocumentCountOp extends DataApiBaseOp {
+    private final String collectionName;
+    public DataApiEstimatedDocumentCountOp(Database db, String collectionName) {
+        super(db);
+        this.collectionName = collectionName;
+    }
 
-    public DataApiBaseOp(Database db) {
-        this.db = db;
+    @Override
+    public Object apply(long value) {
+        long response;
+        Collection<Document> collection = db.getCollection(collectionName);
+        response = collection.estimatedDocumentCount();
+        return response;
     }
 }

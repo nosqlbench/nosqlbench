@@ -1,0 +1,9 @@
+scenarios:
+  default:
+    estimated_document_count: run driver=dataapi tags==blocks:estimated_document_count cycles=1
+
+blocks:
+  estimated_document_count:
+    ops:
+      op1:
+        estimated_document_count: "collectionName"

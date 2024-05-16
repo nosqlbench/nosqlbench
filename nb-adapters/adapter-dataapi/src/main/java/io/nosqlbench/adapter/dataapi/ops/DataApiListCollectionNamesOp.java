@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,20 @@
 package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.Database;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-public abstract class DataApiBaseOp implements CycleOp {
-    protected static final Logger logger = LogManager.getLogger(DataApiBaseOp.class);
-    protected final Database db;
+import java.util.stream.Stream;
 
-    public DataApiBaseOp(Database db) {
-        this.db = db;
+public class DataApiListCollectionNamesOp extends DataApiBaseOp {
+
+    public DataApiListCollectionNamesOp(Database db) {
+        super(db);
+    }
+
+    @Override
+    public Object apply(long value) {
+        Stream<String> response;
+        response = db.listCollectionNames();
+        if(logger.isDebugEnabled()) response.forEach(logger::debug);
+        return response;
     }
 }
