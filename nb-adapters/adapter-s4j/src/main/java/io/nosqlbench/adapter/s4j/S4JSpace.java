@@ -24,14 +24,18 @@ import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.Param;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.jms.*;
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -105,6 +109,9 @@ public class S4JSpace implements  AutoCloseable {
 
     private long totalCycleNum;
 
+    // Large message payload simulation
+    private final MutablePair<Boolean, String> largePayloadSimPair = MutablePair.of(false, null);
+
 
     public S4JSpace(String spaceName, NBConfiguration cfg) {
         this.spaceName = spaceName;
@@ -127,6 +134,29 @@ public class S4JSpace implements  AutoCloseable {
             cfg.getOptional("session_mode").orElse(""));
         this.s4JClientConf = new S4JClientConf(webSvcUrl, pulsarSvcUrl, s4jClientConfFileName);
         logger.info("{}", s4JClientConf.toString());
+
+        boolean simulateLargePayloadEnabled =
+            BooleanUtils.toBoolean(cfg.getOptional("simulate_large_payload").orElse("false"));
+        String simulatedPayloadFile = cfg.getOptional("simulated_payload_file").orElse(null);
+        if (simulateLargePayloadEnabled &&
+            (simulatedPayloadFile == null || ! new File(simulatedPayloadFile).exists()) ) {
+            throw new S4JAdapterInvalidParamException(
+                "When 'simulate_large_payload' is enabled, 'simulated_payload_file' must be provided and the file must exist.");
+        }
+
+        // Read the large payload file content and store it in the largePayloadSimPair
+        if (simulateLargePayloadEnabled) {
+            this.largePayloadSimPair.setLeft(true);
+            try {
+                String payloadContent = FileUtils.readFileToString(new File(simulatedPayloadFile), "UTF-8");
+                this.largePayloadSimPair.setRight(payloadContent);
+            } catch (Exception ex) {
+                throw new S4JAdapterUnexpectedException(
+                    "Unable to read the simulated large payload file: " + simulatedPayloadFile);
+            }
+        }
+        logger.info("Simulated large payload enabled: {}, payload file: {}",
+            simulateLargePayloadEnabled, simulatedPayloadFile);
 
         this.setS4JActivityStartTimeMills(System.currentTimeMillis());
 
@@ -158,6 +188,10 @@ public class S4JSpace implements  AutoCloseable {
                 .setDescription("JMS session mode"))
             .add(Param.defaultTo("strict_msg_error_handling", false)
                 .setDescription("Whether to do strict error handling which is to stop NB S4J execution."))
+            .add(Param.defaultTo("simulate_large_payload", false)
+                .setDescription("Whether to simulate large message payload."))
+            .add(Param.optional("simulated_payload_file").
+                setDescription("File path to the simulated large message payload."))
             .asReadOnly();
     }
 
@@ -221,6 +255,9 @@ public class S4JSpace implements  AutoCloseable {
 
     public long getTotalCycleNum() { return totalCycleNum; }
     public void setTotalCycleNum(long cycleNum) { totalCycleNum = cycleNum; }
+
+
+    public Pair<Boolean, String> getLargePayloadSimPair() { return largePayloadSimPair; }
 
     public void initializeSpace(S4JClientConf s4JClientConnInfo) {
         Map<String, Object> cfgMap;
