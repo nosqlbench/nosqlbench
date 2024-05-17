@@ -154,9 +154,9 @@ scenarios:
     # Find the optimal rate for the search workload
     findmax: >-
       findmax activity=search_and_verify
-      base_value=200
-      step_value=50
-      min_frames=10
+      base_value=TEMPLATE(200,findmax_base_rate)
+      step_value=TEMPLATE(50,findmax_step_value)
+      min_frames=TEMPLATE(10,findmax_min_frames)
       optimization_type=rate
 
     # Optimize the search workload
