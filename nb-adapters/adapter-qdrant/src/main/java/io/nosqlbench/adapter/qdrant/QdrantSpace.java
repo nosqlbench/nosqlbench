@@ -38,6 +38,7 @@ import java.time.Duration;
  * @see <a href="https://qdrant.tech/documentation/cloud/quickstart-cloud/">Qdrant cloud quick start guide</a>
  * @see <a href="https://qdrant.tech/documentation/quick-start/">Qdrant quick start guide</a>
  * @see <a href="https://github.com/qdrant/java-client">Qdrant Java client</a>
+ * @see <a href="https://github.com/qdrant/qdrant/blob/master/docs/grpc/docs.md">Qdrant GRPC docs</a>
  */
 public class QdrantSpace implements AutoCloseable {
     private final static Logger logger = LogManager.getLogger(QdrantSpace.class);
