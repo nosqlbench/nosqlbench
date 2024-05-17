@@ -430,7 +430,7 @@ columnDefinitionList
 
 //
 columnDefinition
-   : column dataType primaryKeyColumn?
+   : column dataType (primaryKeyColumn | kwStatic)?
    ;
 
 //
@@ -1012,6 +1012,10 @@ kwFiltering
 kwFinalfunc
    : K_FINALFUNC
    ;
+
+kwStatic
+    : K_STATIC
+    ;
 
 kwFrom
    : K_FROM

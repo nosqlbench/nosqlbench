@@ -235,6 +235,7 @@ public class CqlModelBuilder extends CqlParserBaseListener {
             CqlTableColumn coldef = new CqlTableColumn(
                 ctx.column().getText(),
                 ctx.dataType().getText(),
+                ctx.kwStatic() != null,
                 table
             );
             table.addcolumnDef(coldef);

@@ -49,7 +49,8 @@ CREATE TABLE baselines.alltypes
     a_varint    varint,
     an_ascii    ascii,
     an_inet     inet,
-    an_int      int
+    an_int      int,
+    a_static_int int STATIC
 ) WITH additional_write_policy = '99PERCENTILE'
       AND bloom_filter_fp_chance = 0.01
       AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}

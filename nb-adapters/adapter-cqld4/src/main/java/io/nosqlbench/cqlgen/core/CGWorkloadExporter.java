@@ -829,7 +829,7 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genTableColumnDDL(CqlTable cqltable) {
         return cqltable.getColumnDefs().stream()
-                .map(cd -> cd.getName() + " " + cd.getTrimmedTypedef())
+                .map(cd -> cd.getName() + " " + cd.getTrimmedTypedef() + (cd.isStatic() ? " STATIC" : ""))
                 .collect(Collectors.joining(",\n"));
     }
 

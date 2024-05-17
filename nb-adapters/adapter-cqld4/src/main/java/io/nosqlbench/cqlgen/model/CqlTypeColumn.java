@@ -23,7 +23,7 @@ public class CqlTypeColumn extends CqlColumnBase {
     CqlType type;
 
     public CqlTypeColumn(final String colname, final String typedef, final CqlType usertype) {
-        super(colname, typedef);
+        super(colname, typedef, false);
         type = usertype;
     }
 
