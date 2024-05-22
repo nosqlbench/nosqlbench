@@ -21,7 +21,7 @@ import groovy.lang.Binding;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.evalctx.*;
-import io.nosqlbench.adapters.api.metrics.ThreadLocalNamedTimers;
+import io.nosqlbench.adapters.api.metrics.ScopedValueNamedTimers;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabels;
@@ -92,7 +92,7 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
             .orElse(null);
 
         if (null != timerStarts)
-            for (final String timerStart : this.timerStarts) ThreadLocalNamedTimers.addTimer(op, timerStart);
+            for (final String timerStart : this.timerStarts) ScopedValueNamedTimers.addTimer(op, timerStart);
 
         this.configureInstrumentation(op);
         this.configureVerifierImports(op);
@@ -203,7 +203,7 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
 
     @Override
     public void onStart(final long cycleValue) {
-        if (null != timerStarts) ThreadLocalNamedTimers.TL_INSTANCE.get().start(this.timerStarts);
+        if (null != timerStarts) ScopedValueNamedTimers.SV_INSTANCE.get().start(this.timerStarts);
     }
 
     @Override
@@ -211,14 +211,14 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
         if (this.instrument) {
             this.successTimer.update(nanoTime, TimeUnit.NANOSECONDS);
         }
-        if (null != timerStops) ThreadLocalNamedTimers.TL_INSTANCE.get().stop(this.timerStops);
+        if (null != timerStops) ScopedValueNamedTimers.SV_INSTANCE.get().stop(this.timerStops);
     }
 
     @Override
     public void onError(final long cycleValue, final long resultNanos, final Throwable t) {
 
         if (this.instrument) this.errorTimer.update(resultNanos, TimeUnit.NANOSECONDS);
-        if (null != timerStops) ThreadLocalNamedTimers.TL_INSTANCE.get().stop(this.timerStops);
+        if (null != timerStops) ScopedValueNamedTimers.SV_INSTANCE.get().stop(this.timerStops);
     }
 
     @Override

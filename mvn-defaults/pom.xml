@@ -515,9 +515,11 @@
                     <target>21</target>
                     <source>21</source>
                     <release>21</release>
+
                     <compilerArgs>
                         <!--                        <compilerArg>-Xdoclint:all</compilerArg>-->
                         <!--                        <compilerArg>-Xlint:all</compilerArg>-->
+                        <compilerArg>--enable-preview</compilerArg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -743,6 +745,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.4.1</version>
+                    <configuration>
+                        <additionalOptions>
+                            <additionalOption>--enable-preview</additionalOption>
+                        </additionalOptions>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -884,6 +891,7 @@
                             <!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
                             <additionalOptions>
                                 <additionalOption>-Xdoclint:none</additionalOption>
+                                <additionalOption>--enable-preview</additionalOption>
                             </additionalOptions>
                             <!--                    <additionalJOption>-Xdoclint:none</additionalJOption>-->
                             <doclint>none</doclint>
