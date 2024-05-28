@@ -30,7 +30,7 @@ public class LoggingOutput implements Output, CanFilterResultValue {
 
     private final ActivityDef def;
     private final long slot;
-    private final ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
+    private static final ScopedValue<StringBuilder> SV_STRING_BUILDER = ScopedValue.newInstance();
     private Predicate<ResultReadable> filter;
 
     public LoggingOutput(ActivityDef def, long slot) {
@@ -43,12 +43,14 @@ public class LoggingOutput implements Output, CanFilterResultValue {
         if (filter!=null && !filter.test(new ResultReadableWrapper(result))) {
             return true;
         }
-        sb.get().setLength(0);
-        sb.get()
-                .append("activity=").append(def.getAlias())
+        ScopedValue.where(SV_STRING_BUILDER, new StringBuilder()).run(() -> {
+            StringBuilder sb = SV_STRING_BUILDER.get();
+            sb.setLength(0);
+            sb.append("activity=").append(def.getAlias())
                 .append(",cycle=").append(completedCycle)
                 .append(",result=").append((byte) (result & 127));
-        logger.info(() -> sb.get().toString());
+            logger.info(() -> sb.toString());
+        });
         return true;
     }
 
