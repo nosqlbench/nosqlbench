@@ -76,6 +76,7 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
      */
     private final CycleFunction<Boolean> _verifier;
     private final ThreadLocal<CycleFunction<Boolean>> tlVerifier;
+    private final ScopedValue<CycleFunction<Boolean>> cfVerifier;
 
     protected BaseOpDispenser(final DriverAdapter<? extends T, ? extends S> adapter, final ParsedOp op) {
         super(adapter);
@@ -100,6 +101,8 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
         verifiers = configureVerifiers(op);
         this._verifier = CycleFunctions.of((a, b) -> a && b, verifiers, true);
         this.tlVerifier = ThreadLocal.withInitial(_verifier::newInstance);
+        this.cfVerifier = ScopedValue.newInstance();
+        ScopedValue.where(cfVerifier, CycleFunctions.of((a, b) -> a && b, verifiers, true));
         this.verifierTimer = create().timer(
             "verifier",
             3,
