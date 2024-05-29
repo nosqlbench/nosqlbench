@@ -73,8 +73,8 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     private OutputDispenser markerDispenser;
     private IntPredicateDispenser resultFilterDispenser;
     private RunState runState = RunState.Uninitialized;
-    private ThreadLocal<RateLimiter> strideLimiterSource;
-    private ThreadLocal<RateLimiter> cycleLimiterSource;
+    private ScopedValue<RateLimiter> strideLimiterSource = ScopedValue.newInstance();
+    private ScopedValue<RateLimiter> cycleLimiterSource = ScopedValue.newInstance();
     private ActivityInstrumentation activityInstrumentation;
     private PrintWriter console;
     private long startedAtMillis;
@@ -224,7 +224,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
 
     @Override
     public RateLimiter getCycleLimiter() {
-        if (cycleLimiterSource!=null) {
+        if (cycleLimiterSource.isBound()) {
             return cycleLimiterSource.get();
         } else {
             return null;
@@ -232,7 +232,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     }
     @Override
     public synchronized RateLimiter getStrideLimiter() {
-        if (strideLimiterSource!=null) {
+        if (strideLimiterSource.isBound()) {
             return strideLimiterSource.get();
         } else {
             return null;
@@ -292,11 +292,32 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     }
 
     public void createOrUpdateStrideLimiter(SimRateSpec spec) {
-        strideLimiterSource = ThreadLocalRateLimiters.createOrUpdate(this, strideLimiterSource, spec);
+        if (strideLimiterSource.isBound()) {
+            strideLimiterSource.get().applyRateSpec(spec);
+        } else {
+            strideLimiterSource = createRateLimiter(strideLimiterSource, spec);
+        }
     }
 
     public void createOrUpdateCycleLimiter(SimRateSpec spec) {
-        cycleLimiterSource = ThreadLocalRateLimiters.createOrUpdate(this, cycleLimiterSource, spec);
+        if (cycleLimiterSource.isBound()) {
+            cycleLimiterSource.get().applyRateSpec(spec);
+        } else {
+            cycleLimiterSource = createRateLimiter(cycleLimiterSource, spec);
+        }
+    }
+
+    public ScopedValue<RateLimiter> createRateLimiter(final ScopedValue<RateLimiter> extantSource, final SimRateSpec spec) {
+        RateLimiter rl = switch (spec.getScope()) {
+            case activity -> new SimRate(this, spec);
+            case thread -> new SimRate(
+                this,
+                spec,
+                NBLabels.forKV("thread", Thread.currentThread().getName())
+            );
+        };
+        ScopedValue.where(extantSource, rl).run(() -> rl.applyRateSpec(spec));
+        return extantSource;
     }
 
 
