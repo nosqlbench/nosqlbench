@@ -181,9 +181,19 @@
                 <version>1.4.1</version>
             </dependency>
             <dependency>
-                <groupId>com.datastax.oss</groupId>
+                <groupId>org.apache.cassandra</groupId>
+                <artifactId>java-driver-core</artifactId>
+                <version>4.18.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cassandra</groupId>
                 <artifactId>java-driver-query-builder</artifactId>
-                <version>4.17.0</version>
+                <version>4.18.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cassandra</groupId>
+                <artifactId>java-driver-mapper-runtime</artifactId>
+                <version>4.18.1</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
@@ -374,6 +384,12 @@
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
                 <version>23.1.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.stephenc.jcip</groupId>
+                <artifactId>jcip-annotations</artifactId>
+                <scope>provided</scope>
+                <version>1.0-1</version>
             </dependency>
 
         </dependencies>
