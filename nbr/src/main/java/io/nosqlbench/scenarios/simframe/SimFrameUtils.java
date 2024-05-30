@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.concurrent.locks.LockSupport;
 
 public class SimFrameUtils {
+    public static final String SIM_CYCLES = "sim_cycles";
 
     public static void awaitActivity(Activity flywheel) {
         // await flywheel actually spinning, or timeout with error
@@ -54,6 +55,8 @@ public class SimFrameUtils {
         // Start the flywheel at an "idle" speed, even if the user hasn't set it
         flywheel.onEvent(new ParamChange<>(new CycleRateSpec(100.0d, 1.1d, SimRateSpec.Verb.restart)));
         flywheel.getActivityDef().setEndCycle(Long.MAX_VALUE);
+        flywheel.getActivityDef().getParams().set(SIM_CYCLES, Long.MAX_VALUE);
+
         return flywheel;
     }
 }
