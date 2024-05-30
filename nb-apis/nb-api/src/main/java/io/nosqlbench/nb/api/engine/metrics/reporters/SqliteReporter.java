@@ -94,8 +94,8 @@ public class SqliteReporter extends PeriodicTaskComponent {
     public void task() {
         List<NBMetric> metrics = parent.find().metrics();
         final long report_time = System.currentTimeMillis();
+        String report_id = String.valueOf(UUID.randomUUID());
         for (NBMetric metric : metrics) {
-            String report_id = String.valueOf(UUID.randomUUID());
             String metric_name = metric.getLabels().valueOf("name");
             String labels = metric.getHandle();
             String type_name = metric.typeName();
