@@ -31,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The MilvusSpace class is a context object which stores all stateful contextual information needed to interact
@@ -51,8 +52,10 @@ public class MilvusSpace implements AutoCloseable {
      * Create a new MilvusSpace Object which stores all stateful contextual information needed to interact
      * with the Milvus/Zilliz database instance.
      *
-     * @param name The name of this space
-     * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
+     * @param name
+     *     The name of this space
+     * @param cfg
+     *     The configuration ({@link NBConfiguration}) for this nb run
      */
     public MilvusSpace(String name, NBConfiguration cfg) {
         this.name = name;
@@ -72,7 +75,7 @@ public class MilvusSpace implements AutoCloseable {
         cfg.getOptional("database_name").ifPresent(builder::withDatabaseName);
         cfg.getOptional("database").ifPresent(builder::withDatabaseName);
 
-        var requiredToken = cfg.getOptional("token_file")
+        cfg.getOptional("token_file")
             .map(Paths::get)
             .map(
                 tokenFilePath -> {
@@ -84,16 +87,15 @@ public class MilvusSpace implements AutoCloseable {
                         throw new RuntimeException(e);
                     }
                 }
-            ).orElseGet(
-                () -> cfg.getOptional("token")
-                    .orElseThrow(() -> new RuntimeException("You must provide either a token_file or a token to " +
-                        "configure a Milvus/Zilliz client"))
-            );
-        builder = builder.withToken(requiredToken);
+            ).or(() -> cfg.getOptional("token"))
+            .ifPresent(builder::withToken);
+//        builder = builder.withToken(optionalToken);
 
         ConnectParam connectParams = builder.build();
+        String tokenSummary = Optional.ofNullable(builder.getToken())
+                .map(MilvusAdapterUtils::maskDigits).orElse("[none]");
         logger.info("{}: Creating new Milvus/Zilliz Client with (masked) token [{}], uri/endpoint [{}]",
-            this.name, MilvusAdapterUtils.maskDigits(builder.getToken()), builder.getUri());
+            this.name, tokenSummary, builder.getUri());
         return new MilvusServiceClient(connectParams);
     }
 
@@ -101,11 +103,11 @@ public class MilvusSpace implements AutoCloseable {
 
         return ConfigModel.of(MilvusSpace.class)
             .add(
-                Param.optional("token_file", String.class, "the file to load the token from")
+                Param.optional("token_file", String.class, "the file to load the token from  (try root:Milvus within)")
             )
             .add(
-                Param.defaultTo("token", "root:Milvus")
-                    .setDescription("the Milvus/Zilliz token to use to connect to the database")
+                Param.optional("token")
+                    .setDescription("the Milvus/Zilliz token to use to connect to the database (try root:Milvus)")
             )
             .add(
                 Param.defaultTo("uri", "127.0.0.1:19530")
