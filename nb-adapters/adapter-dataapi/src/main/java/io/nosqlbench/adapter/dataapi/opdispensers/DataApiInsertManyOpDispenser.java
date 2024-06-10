@@ -66,6 +66,8 @@ public class DataApiInsertManyOpDispenser extends DataApiOpDispenser {
                         options = options.concurrency(Integer.parseInt(entry.getValue()));
                     case "ordered" ->
                         options = options.ordered(Boolean.parseBoolean(entry.getValue()));
+                    case "timeout" ->
+                        options = options.timeout(Integer.parseInt(entry.getValue()));
                 }
             }
         }
