@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2022-2023 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,6 @@ import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesExceptionHandler;
-import io.nosqlbench.engine.core.lifecycle.activity.ActivityExecutor;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityLoader;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityRuntimeInfo;
 import org.apache.logging.log4j.LogManager;
@@ -70,7 +69,6 @@ public class ContainerActivitiesController extends NBBaseComponent {
         return ari.getActivity();
     }
 
-
     private ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
         if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
             Activity activity = this.activityLoader.loadActivity(activityDef, this);
@@ -78,12 +76,12 @@ public class ContainerActivitiesController extends NBBaseComponent {
             ActivityExecutor executor = new ActivityExecutor(activity);
             Future<ExecutionResult> startedActivity = executorService.submit(executor);
             ActivityRuntimeInfo activityRuntimeInfo = new ActivityRuntimeInfo(activity, startedActivity, executor);
-            activityRuntimeInfo.getActivityExecutor().awaitMotorsRunningOrTerminalState();
             this.activityInfoMap.put(activity.getAlias(), activityRuntimeInfo);
 
         }
         return this.activityInfoMap.get(activityDef.getAlias());
     }
+
 
     /**
      * Start an activity, given a map which holds the activity definition for it. The activity will be known in
@@ -94,7 +92,6 @@ public class ContainerActivitiesController extends NBBaseComponent {
     public Activity start(Map<String, String> activityDefMap) {
         ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
         Activity started = start(ad);
-        awaitAllThreadsOnline(started,30000L);
         return started;
     }
 
@@ -120,9 +117,7 @@ public class ContainerActivitiesController extends NBBaseComponent {
      * @param activityDef A definition for an activity to run
      */
     public synchronized void run(ActivityDef activityDef, long timeoutMs) {
-
-        doStartActivity(activityDef);
-        awaitActivity(activityDef, timeoutMs);
+        throw new RuntimeException("implement me");
     }
 
     public synchronized void run(int timeout, String activityDefString) {
@@ -176,23 +171,9 @@ public class ContainerActivitiesController extends NBBaseComponent {
         runtimeInfo.stopActivity();
     }
 
-    public boolean awaitAllThreadsOnline(ActivityDef activityDef, long timeoutMs) {
-        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
-        if (null == runtimeInfo) {
-            throw new RuntimeException("could not stop missing activity:" + activityDef);
-        }
-
-        scenariologger.debug("STOP {}", activityDef.getAlias());
-        return runtimeInfo.awaitAllThreadsOnline(timeoutMs);
-    }
 
     public synchronized void stop(Activity activity) {
         stop(activity.getActivityDef());
-    }
-
-
-    public boolean awaitAllThreadsOnline(Activity activity, long timeoutMs) {
-        return awaitAllThreadsOnline(activity.getActivityDef(), timeoutMs);
     }
 
 
@@ -342,8 +323,8 @@ public class ContainerActivitiesController extends NBBaseComponent {
      */
     public synchronized void forceStopActivities(int waitTimeMillis) {
         logger.debug("force stopping scenario {}", description());
-        activityInfoMap.values().forEach(a -> a.getActivityExecutor().forceStopActivity(2000));
-        logger.debug("Scenario force stopped.");
+        throw new RuntimeException("implement me");
+        //logger.debug("Scenario force stopped.");
     }
 
 //    public synchronized void stopAll() {

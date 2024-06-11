@@ -22,7 +22,6 @@ import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
-import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
 
 import java.util.Map;
@@ -37,7 +36,7 @@ import java.util.Optional;
  * and by extension, default inputs and motors.</p>
  */
 //@Deprecated(forRemoval = true,since = "5.0")
-public interface ActivityType<A extends Activity> {
+public interface ActivityType<A extends SimpleActivity<?,?>> {
 
 
     /**
@@ -67,17 +66,12 @@ public interface ActivityType<A extends Activity> {
         if (inputDispenser instanceof ActivitiesAware) ((ActivitiesAware) inputDispenser).setActivitiesMap(activities);
         activity.setInputDispenserDelegate(inputDispenser);
 
-        final ActionDispenser actionDispenser = this.getActionDispenser(activity);
-        if (actionDispenser instanceof ActivitiesAware)
-            ((ActivitiesAware) actionDispenser).setActivitiesMap(activities);
-        activity.setActionDispenserDelegate(actionDispenser);
-
         final OutputDispenser outputDispenser = this.getOutputDispenser(activity).orElse(null);
         if ((null != outputDispenser) && (outputDispenser instanceof ActivitiesAware))
             ((ActivitiesAware) outputDispenser).setActivitiesMap(activities);
         activity.setOutputDispenserDelegate(outputDispenser);
 
-        final MotorDispenser motorDispenser = this.getMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser);
+        final MotorDispenser motorDispenser = this.getMotorDispenser(activity, inputDispenser, outputDispenser);
         if (motorDispenser instanceof ActivitiesAware) ((ActivitiesAware) motorDispenser).setActivitiesMap(activities);
         activity.setMotorDispenserDelegate(motorDispenser);
 
@@ -94,15 +88,6 @@ public interface ActivityType<A extends Activity> {
         return CoreServices.getOutputDispenser(activity);
     }
 
-    /**
-     * This method will be called <em>once</em> per action instance.
-     *
-     * @param activity The activity instance that will parameterize the returned ActionDispenser instance.
-     * @return an instance of ActionDispenser
-     */
-    default ActionDispenser getActionDispenser(final A activity) {
-        return new CoreActionDispenser(activity);
-    }
 
     /**
      * Return the InputDispenser instance that will be used by the associated activity to create Input factories
@@ -118,9 +103,8 @@ public interface ActivityType<A extends Activity> {
     default <T> MotorDispenser<T> getMotorDispenser(
         final A activity,
         final InputDispenser inputDispenser,
-        final ActionDispenser actionDispenser,
         final OutputDispenser outputDispenser) {
-        return new CoreMotorDispenser<T>(activity, inputDispenser, actionDispenser, outputDispenser);
+        return new CoreMotorDispenser<T>(activity, inputDispenser, outputDispenser);
     }
 
     /**

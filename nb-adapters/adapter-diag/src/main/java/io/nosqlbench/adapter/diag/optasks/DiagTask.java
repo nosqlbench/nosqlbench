@@ -31,9 +31,7 @@ import java.util.function.BiFunction;
  * be the core driver for the purposes of validating the NoSQLBench engine
  * and associated libraries and extensions.
  *
- * The tasks are retained as shared across threads by default. This means that if
- * you want to have per-thread logic or to do things which are not thread-safe,
- * you need to use ThreadLocal or some other pattern to do so.
+ * The tasks are retained as shared across threads by default.
  *
  * Tasks must provide a no-args constructor (or no constructor, which does the same).
  * Tasks must specify their configuration requirements via the {@link NBConfigurable}

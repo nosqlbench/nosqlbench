@@ -71,8 +71,7 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
     private final List<Class<?>> verifierStaticImports = new ArrayList<>();
     /**
      * optional invokable functions which throw exceptions when results are not verifiable.
-     * This variable is kept here for diagnostics and debugging. The actual instance used within
-     * each thread is provided by a {@link ThreadLocal} via {@link #getVerifier()}
+     * This variable is kept here for diagnostics and debugging.
      */
     private final CycleFunction<Boolean> _verifier;
     private final ThreadLocal<CycleFunction<Boolean>> tlVerifier;

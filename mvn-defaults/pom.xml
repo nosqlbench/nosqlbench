@@ -527,7 +527,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>-ea @{argLine}</argLine>
+                    <argLine>-ea --enable-preview @{argLine}</argLine>
                     <systemPropertyVariables>
                         <Log4jContextSelector>
                             org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
@@ -612,6 +612,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <compilerArgs>--enable-preview</compilerArgs>
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
                     <includes>
@@ -733,12 +734,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M8</version>
+                    <version>3.2.5</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.0.0-M8</version>
+                    <version>3.2.5</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -884,7 +885,7 @@
                             <detectOfflineLinks>false</detectOfflineLinks>
                             <!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
                             <additionalOptions>
-                                <additionalOption>-Xdoclint:none</additionalOption>
+                                <additionalOption>-Xdoclint:none --enable-preview</additionalOption>
                             </additionalOptions>
                             <!--                    <additionalJOption>-Xdoclint:none</additionalJOption>-->
                             <doclint>none</doclint>

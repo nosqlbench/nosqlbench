@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.activity;
+package io.nosqlbench.virtdata.api.coords;
 
-public class ActivityExecutorShutdownHook extends Thread {
-
-    private final ActivityExecutor activityExecutor;
-    public ActivityExecutorShutdownHook(ActivityExecutor activityExecutor) {
-        this.activityExecutor = activityExecutor;
-    }
-
-    @Override
-    public void run() {
-        activityExecutor.finish(false);
-    }
+/**
+ * A virtual coordinate, meant to index into virtual data space with named dimensions
+ */
+public record VirtualCoord(
+    VirtualSpace space,
+    long[] coords
+) {
 
 }

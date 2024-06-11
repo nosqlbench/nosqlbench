@@ -21,6 +21,7 @@ import io.nosqlbench.engine.api.activityapi.core.RunState;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
+import io.nosqlbench.engine.core.lifecycle.scenario.container.ActivityExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,10 +38,9 @@ public class ActivityRuntimeInfo implements ProgressCapable {
     private final ActivityExecutor executor;
 
     public ActivityRuntimeInfo(Activity activity, Future<ExecutionResult> result, ActivityExecutor executor) {
-
+        this.executor = executor;
         this.activity = activity;
         this.future = result;
-        this.executor = executor;
     }
 
     @Override
@@ -76,23 +76,24 @@ public class ActivityRuntimeInfo implements ProgressCapable {
         return this.activity;
     }
 
-    public boolean isRunning() {
-        return executor.isRunning();
-    }
 
     public RunState getRunState() {
         return this.activity.getRunState();
     }
 
-    public void stopActivity() { this.executor.stopActivity(); }
-
-    public void forceStopActivity() { this.executor.forceStopActivity(); }
-
-    public ActivityExecutor getActivityExecutor() {
-        return executor;
+    public boolean isRunning() {
+        throw new RuntimeException("implement me");
     }
 
-    public boolean awaitAllThreadsOnline(long timeoutMs) {
-        return this.executor.awaitAllThreadsOnline(timeoutMs);
+    public void forceStopActivity() {
+        throw new RuntimeException("implement me");
+    }
+
+    public void stopActivity() {
+        throw new RuntimeException("implement me");
+    }
+
+    public ActivityExecutor getActivityExecutor() {
+        return this.executor;
     }
 }

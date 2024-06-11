@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
+import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;
@@ -41,12 +42,16 @@ import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityapi.simrate.*;
-import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
+import io.nosqlbench.nb.annotations.ServiceSelector;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.components.events.NBEvent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
+import io.nosqlbench.nb.api.components.events.SetThreads;
 import io.nosqlbench.nb.api.components.status.NBStatusComponent;
+import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.labels.NBLabels;
@@ -57,12 +62,10 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-/**
- * A default implementation of an Activity, suitable for building upon.
- */
-public class SimpleActivity extends NBStatusComponent implements Activity, InvokableResult {
+public class SimpleActivity<R extends Op, S> extends NBStatusComponent implements Activity, InvokableResult, SyntheticOpTemplateProvider, ActivityDefObserver {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
 
     protected ActivityDef activityDef;
@@ -83,7 +86,9 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     private NBErrorHandler errorHandler;
     private ActivityMetricProgressMeter progressMeter;
     private String workloadSource = "unspecified";
-    private final RunStateTally tally = new RunStateTally();
+    private final ConcurrentHashMap<String, DriverAdapter<?, ?>> adapters = new ConcurrentHashMap<>();
+
+    private final OpSequence<OpDispenser<? extends Op>> sequence;
 
     public SimpleActivity(NBComponent parent, ActivityDef activityDef) {
         super(parent, NBLabels.forKV("activity", activityDef.getAlias()).and(activityDef.auxLabels()));
@@ -102,6 +107,126 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                 nameEnumerator++;
             }
         }
+        OpsDocList workload;
+
+        Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+        NBConfigModel yamlmodel;
+        if (yaml_loc.isPresent()) {
+            Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
+            workload = OpsLoader.loadPath(yaml_loc.get(), disposable, "activities");
+            yamlmodel = workload.getConfigModel();
+        } else {
+            yamlmodel = ConfigModel.of(SimpleActivity.class).asReadOnly();
+        }
+
+        Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
+        Optional<DriverAdapter<?, ?>> defaultAdapter = defaultDriverName
+            .flatMap(name -> ServiceSelector.of(name, ServiceLoader.load(DriverAdapterLoader.class)).get())
+            .map(l -> l.load(this, NBLabels.forKV()));
+
+        if (defaultDriverName.isPresent() && defaultAdapter.isEmpty()) {
+            throw new BasicError("Unable to load default driver adapter '" + defaultDriverName.get() + '\'');
+        }
+
+        // HERE, op templates are loaded before drivers are loaded
+        List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter.orElse(null));
+
+
+        List<ParsedOp> pops = new ArrayList<>();
+        List<DriverAdapter<?, ?>> adapterlist = new ArrayList<>();
+        NBConfigModel supersetConfig = ConfigModel.of(SimpleActivity.class).add(yamlmodel);
+
+        Optional<String> defaultDriverOption = defaultDriverName;
+        ConcurrentHashMap<String, OpMapper<? extends Op>> mappers = new ConcurrentHashMap<>();
+        for (OpTemplate ot : opTemplates) {
+//            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
+            String driverName = ot.getOptionalStringParam("driver", String.class)
+                .or(() -> ot.getOptionalStringParam("type", String.class))
+                .or(() -> defaultDriverOption)
+                .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
+
+//            String driverName = ot.getOptionalStringParam("driver")
+//                .or(() -> activityDef.getParams().getOptionalString("driver"))
+//                .orElseThrow(() -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
+
+
+            // HERE
+            if (!adapters.containsKey(driverName)) {
+
+                DriverAdapter<?, ?> adapter = Optional.of(driverName)
+                    .flatMap(
+                        name -> ServiceSelector.of(
+                                name,
+                                ServiceLoader.load(DriverAdapterLoader.class)
+                            )
+                            .get())
+                    .map(
+                        l -> l.load(
+                            this,
+                            NBLabels.forKV()
+                        )
+                    )
+                    .orElseThrow(() -> new OpConfigError("driver adapter not present for name '" + driverName + "'"));
+
+                NBConfigModel combinedModel = yamlmodel;
+                NBConfiguration combinedConfig = combinedModel.matchConfig(activityDef.getParams());
+
+                if (adapter instanceof NBConfigurable configurable) {
+                    NBConfigModel adapterModel = configurable.getConfigModel();
+                    supersetConfig.add(adapterModel);
+
+                    combinedModel = adapterModel.add(yamlmodel);
+                    combinedConfig = combinedModel.matchConfig(activityDef.getParams());
+                    configurable.applyConfig(combinedConfig);
+                }
+                adapters.put(driverName, adapter);
+                mappers.put(driverName, adapter.getOpMapper());
+            }
+
+            supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
+
+            DriverAdapter<?, ?> adapter = adapters.get(driverName);
+            adapterlist.add(adapter);
+            ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
+            Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
+            pops.add(pop);
+        }
+
+        if (defaultDriverOption.isPresent()) {
+            long matchingDefault = mappers.keySet().stream().filter(n -> n.equals(defaultDriverOption.get())).count();
+            if (0 == matchingDefault) {
+                logger.warn("All op templates used a different driver than the default '{}'", defaultDriverOption.get());
+            }
+        }
+
+        try {
+            sequence = createOpSourceFromParsedOps(adapterlist, pops);
+        } catch (Exception e) {
+            if (e instanceof OpConfigError) {
+                throw e;
+            }
+            throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
+        }
+
+        create().gauge(
+            "ops_pending",
+            () -> this.getProgressMeter().getSummary().pending(),
+            MetricCategory.Core,
+            "The current number of operations which have not been dispatched for processing yet."
+        );
+        create().gauge(
+            "ops_active",
+            () -> this.getProgressMeter().getSummary().current(),
+            MetricCategory.Core,
+            "The current number of operations which have been dispatched for processing, but which have not yet completed."
+        );
+        create().gauge(
+            "ops_complete",
+            () -> this.getProgressMeter().getSummary().complete(),
+            MetricCategory.Core,
+            "The current number of operations which have been completed"
+        );
+
     }
 
     public SimpleActivity(NBComponent parent, String activityDefString) {
@@ -111,6 +236,8 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     @Override
     public synchronized void initActivity() {
         initOrUpdateRateLimiters(this.activityDef);
+        setDefaultsFromOpSequence(sequence);
+
     }
 
     public synchronized NBErrorHandler getErrorHandler() {
@@ -125,14 +252,6 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     @Override
     public synchronized RunState getRunState() {
         return runState;
-    }
-
-    @Override
-    public synchronized void setRunState(RunState runState) {
-        this.runState = runState;
-        if (RunState.Running == runState) {
-            this.startedAtMillis = System.currentTimeMillis();
-        }
     }
 
     @Override
@@ -196,7 +315,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     }
 
     public String toString() {
-        return (activityDef != null ? activityDef.getAlias() : "unset_alias") + ':' + this.runState + ':' + this.tally;
+        return (activityDef != null ? activityDef.getAlias() : "unset_alias") + ':' + this.runState + ':' + this.runState;
     }
 
     @Override
@@ -224,15 +343,16 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
 
     @Override
     public RateLimiter getCycleLimiter() {
-        if (cycleLimiterSource!=null) {
+        if (cycleLimiterSource != null) {
             return cycleLimiterSource.get();
         } else {
             return null;
         }
     }
+
     @Override
     public synchronized RateLimiter getStrideLimiter() {
-        if (strideLimiterSource!=null) {
+        if (strideLimiterSource != null) {
             return strideLimiterSource.get();
         } else {
             return null;
@@ -276,7 +396,28 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
 
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
-//        initOrUpdateRateLimiters(activityDef);
+        for (DriverAdapter<?, ?> adapter : adapters.values()) {
+            if (adapter instanceof NBReconfigurable configurable) {
+                NBConfigModel cfgModel = configurable.getReconfigModel();
+                NBConfiguration cfg = cfgModel.matchConfig(activityDef.getParams());
+                NBReconfigurable.applyMatching(cfg, List.of(configurable));
+            }
+        }
+
+    }
+
+    public void onEvent(NBEvent event) {
+        switch (event) {
+            case ParamChange<?> pc -> {
+                switch (pc.value()) {
+                    case SetThreads st -> activityDef.setThreads(st.threads);
+                    case CycleRateSpec crs -> createOrUpdateCycleLimiter(crs);
+                    case StrideRateSpec srs -> createOrUpdateStrideLimiter(srs);
+                    default -> super.onEvent(event);
+                }
+            }
+            default -> super.onEvent(event);
+        }
     }
 
     public synchronized void initOrUpdateRateLimiters(ActivityDef activityDef) {
@@ -613,8 +754,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
             if (op != null && OpsLoader.isJson(op)) {
                 workloadSource = "commandline: (op/json): '" + op + "'";
                 return OpsLoader.loadString(op, OpTemplateFormat.json, activityDef.getParams(), null);
-            }
-            else if (op != null) {
+            } else if (op != null) {
                 workloadSource = "commandline: (op/inline): '" + op + "'";
                 return OpsLoader.loadString(op, OpTemplateFormat.inline, activityDef.getParams(), null);
             }
@@ -645,32 +785,48 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
         return this.activityDef.getParams().getOptionalInteger("maxtries").orElse(10);
     }
 
-    @Override
-    public RunStateTally getRunStateTally() {
-        return tally;
-    }
-
 
     @Override
     public Map<String, String> asResult() {
-        return Map.of("activity",this.getAlias());
+        return Map.of("activity", this.getAlias());
     }
 
-//    private final ThreadLocal<RateLimiter> cycleLimiterThreadLocal = ThreadLocal.withInitial(() -> {
-//        RateLimiters.createOrUpdate(this,null,new SimRateSpec()
-//        if (cycleratePerThread) {
-//            return RateLimiters.createOrUpdate(new NBThreadComponent(this),null,)
-//        } else {
-//            RateLimiters.createOrUpdate(new NBThreadComponent(this),null,activityDef)
-//        }
-//        if (getCycleLimiter() != null) {
-//            return RateLimiters.createOrUpdate(
-//                new NBThreadComponent(this),
-//                getCycleLimiter(),
-//                getCycleLimiter().getSpec());
-//        } else {
-//            return null;
-//        }
-//    });
+
+    @Override
+    public NBLabels getLabels() {
+        return super.getLabels();
+    }
+
+    public void shutdownActivity() {
+        for (Map.Entry<String, DriverAdapter<?, ?>> entry : adapters.entrySet()) {
+            String adapterName = entry.getKey();
+            DriverAdapter<?, ?> adapter = entry.getValue();
+            adapter.getSpaceCache().getElements().forEach((spaceName, space) -> {
+                if (space instanceof AutoCloseable autocloseable) {
+                    try {
+                        autocloseable.close();
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error while shutting down state space for " +
+                            "adapter=" + adapterName + ", space=" + spaceName + ": " + e, e);
+                    }
+                }
+            });
+        }
+    }
+
+    public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> cfg) {
+        List<OpTemplate> opTemplates = new ArrayList<>();
+        for (DriverAdapter<?, ?> adapter : adapters.values()) {
+            if (adapter instanceof SyntheticOpTemplateProvider sotp) {
+                List<OpTemplate> newTemplates = sotp.getSyntheticOpTemplates(opsDocList, cfg);
+                opTemplates.addAll(newTemplates);
+            }
+        }
+        return opTemplates;
+    }
+
+    public OpSequence<OpDispenser<? extends Op>> getOpSequence() {
+        return sequence;
+    }
 
 }

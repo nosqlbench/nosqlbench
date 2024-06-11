@@ -20,6 +20,7 @@ import io.nosqlbench.adapter.jdbc.JDBCSpace;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
 import io.nosqlbench.adapter.jdbc.utils.JDBCPgVector;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.nb.api.lifecycle.ObjectPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,6 +29,7 @@ import java.util.Properties;
 import java.util.Random;
 
 public abstract class JDBCOp implements CycleOp {
+
     private static final Logger LOGGER = LogManager.getLogger(JDBCOp.class);
     protected static final String LOG_COMMIT_SUCCESS =
         "Executed the JDBC statement & committed the connection successfully";

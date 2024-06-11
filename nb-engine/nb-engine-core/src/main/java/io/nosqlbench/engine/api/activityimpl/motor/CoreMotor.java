@@ -15,17 +15,25 @@
  */
 package io.nosqlbench.engine.api.activityimpl.motor;
 
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
+import io.nosqlbench.adapters.api.evalctx.CycleFunction;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
-import io.nosqlbench.engine.api.activityimpl.MotorState;
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
+import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
+import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.OpTracker;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
+import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.errors.ResultVerificationError;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -40,12 +48,12 @@ import static io.nosqlbench.engine.api.activityapi.core.RunState.*;
  * instance is responsible for taking input from a LongSupplier and applying
  * the provided LongConsumer to it on each cycle. These two parameters are called
  * input and action, respectively.
- *
+ * <p>
  * This motor implementation splits the handling of sync and async actions with a hard
  * fork in the middle to limit potential breakage of the prior sync implementation
  * with new async logic.
  */
-public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
+public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, SyncAction {
 
     private static final Logger logger = LogManager.getLogger(CoreMotor.class);
 
@@ -62,78 +70,81 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
     private Timer cycleResponseTimer;
 
     private Input input;
-    private Action action;
     private final Activity activity;
     private Output output;
 
-    private final MotorState motorState;
-    //    private final AtomicReference<RunState> slotState;
     private int stride = 1;
 
     private OpTracker<D> opTracker;
+    private final Timer executeTimer;
+    private final Histogram triesHistogram;
+    private final Timer resultSuccessTimer;
+    private final Timer resultTimer;
+    private final Timer bindTimer;
+    private final NBErrorHandler errorHandler;
+    private final OpSequence<OpDispenser<? extends Op>> opsequence;
+    private final int maxTries;
+    private final Timer verifierTimer;
+
 
     /**
      * Create an ActivityMotor.
      *
-     * @param activity The activity that this motor will be associated with.
-     * @param slotId   The enumeration of the motor, as assigned by its executor.
-     * @param input    A LongSupplier which provides the cycle number inputs.
+     * @param activity
+     *     The activity that this motor will be associated with.
+     * @param slotId
+     *     The enumeration of the motor, as assigned by its executor.
+     * @param input
+     *     A LongSupplier which provides the cycle number inputs.
      */
     public CoreMotor(
-        Activity activity,
+        SimpleActivity activity,
         long slotId,
         Input input) {
         this.activity = activity;
         this.slotId = slotId;
         setInput(input);
-        motorState = new MotorState(slotId, activity.getRunStateTally());
         onActivityDefUpdate(activity.getActivityDef());
+        this.opsequence = activity.getOpSequence();
+        this.maxTries = activity.getMaxTries();
+        bindTimer = activity.getInstrumentation().getOrCreateBindTimer();
+        executeTimer = activity.getInstrumentation().getOrCreateExecuteTimer();
+        triesHistogram = activity.getInstrumentation().getOrCreateTriesHistogram();
+        resultTimer = activity.getInstrumentation().getOrCreateResultTimer();
+        resultSuccessTimer = activity.getInstrumentation().getOrCreateResultSuccessTimer();
+        errorHandler = activity.getErrorHandler();
+        verifierTimer = activity.getInstrumentation().getOrCreateVerifierTimer();
+
     }
 
 
     /**
      * Create an ActivityMotor.
      *
-     * @param activity The activity that this motor is based on.
-     * @param slotId   The enumeration of the motor, as assigned by its executor.
-     * @param input    A LongSupplier which provides the cycle number inputs.
-     * @param action   An LongConsumer which is applied to the input for each cycle.
+     * @param activity
+     *     The activity that this motor is based on.
+     * @param slotId
+     *     The enumeration of the motor, as assigned by its executor.
+     * @param input
+     *     A LongSupplier which provides the cycle number inputs.
+     * @param output
+     *     An optional opTracker.
      */
     public CoreMotor(
-        Activity activity,
+        SimpleActivity activity,
         long slotId,
         Input input,
-        Action action
-    ) {
-        this(activity, slotId, input);
-        setAction(action);
-    }
-
-    /**
-     * Create an ActivityMotor.
-     *
-     * @param activity The activity that this motor is based on.
-     * @param slotId   The enumeration of the motor, as assigned by its executor.
-     * @param input    A LongSupplier which provides the cycle number inputs.
-     * @param action   An LongConsumer which is applied to the input for each cycle.
-     * @param output   An optional opTracker.
-     */
-    public CoreMotor(
-        Activity activity,
-        long slotId,
-        Input input,
-        Action action,
         Output output
     ) {
         this(activity, slotId, input);
-        setAction(action);
         setResultOutput(output);
     }
 
     /**
      * Set the input for this ActivityMotor.
      *
-     * @param input The LongSupplier that provides the cycle number.
+     * @param input
+     *     The LongSupplier that provides the cycle number.
      * @return this ActivityMotor, for chaining
      */
     @Override
@@ -148,41 +159,14 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
     }
 
 
-    /**
-     * Set the action for this ActivityMotor.
-     *
-     * @param action The LongConsumer that will be applied to the next cycle number.
-     * @return this ActivityMotor, for chaining
-     */
-    @Override
-    public Motor<D> setAction(Action action) {
-        this.action = action;
-        return this;
-    }
-
-    @Override
-    public Action getAction() {
-        return action;
-    }
-
     @Override
     public long getSlotId() {
         return this.slotId;
     }
 
-    @Override
-    public MotorState getState() {
-        return motorState;
-    }
 
     @Override
-    public void removeState() {
-        motorState.removeState();
-    }
-
-    @Override
-    public void run() {
-        motorState.enterState(Starting);
+    public Void call() {
 
         try {
             inputTimer = activity.getInstrumentation().getOrCreateInputTimer();
@@ -192,12 +176,6 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
             strideRateLimiter = activity.getStrideLimiter();
             cycleRateLimiter = activity.getCycleLimiter();
 
-
-            if (motorState.get() == Finished) {
-                logger.warn(() -> "Input was already exhausted for slot " + slotId + ", remaining in finished state.");
-            }
-
-            action.init();
 
             if (input instanceof Startable) {
                 ((Startable) input).start();
@@ -211,119 +189,97 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
             long strideDelay = 0L;
             long cycleDelay = 0L;
 
-            if (action instanceof SyncAction sync) {
-                cycleServiceTimer = activity.getInstrumentation().getOrCreateCyclesServiceTimer();
-                strideServiceTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
+            SyncAction sync = this;
+            cycleServiceTimer = activity.getInstrumentation().getOrCreateCyclesServiceTimer();
+            strideServiceTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
 
-                if (activity.getActivityDef().getParams().containsKey("async")) {
-                    throw new RuntimeException("The async parameter was given for this activity, but it does not seem to know how to do async.");
-                }
+            if (activity.getActivityDef().getParams().containsKey("async")) {
+                throw new RuntimeException("The async parameter was given for this activity, but it does not seem to know how to do async.");
+            }
 
-                motorState.enterState(Running);
-                while (motorState.get() == Running) {
 
-                    CycleSegment cycleSegment = null;
-                    CycleResultSegmentBuffer segBuffer = new CycleResultSegmentBuffer(stride);
+            CycleSegment cycleSegment = null;
+            CycleResultSegmentBuffer segBuffer = new CycleResultSegmentBuffer(stride);
 
-                    try (Timer.Context inputTime = inputTimer.time()) {
-                        cycleSegment = input.getInputSegment(stride);
+
+            try (Timer.Context inputTime = inputTimer.time()) {
+                cycleSegment = input.getInputSegment(stride);
+            }
+
+            if (cycleSegment == null) {
+                throw new RuntimeException("invalid state with cycle segment = null");
+            }
+
+
+            if (strideRateLimiter != null) {
+                // block for strides rate limiter
+                strideDelay = strideRateLimiter.block();
+            }
+
+            long strideStart = System.nanoTime();
+            try {
+
+                while (!cycleSegment.isExhausted()) {
+                    long cyclenum = cycleSegment.nextCycle();
+                    if (cyclenum < 0) {
+                        if (cycleSegment.isExhausted()) {
+                            logger.trace(() -> "input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
+                            continue;
+                        }
                     }
 
-                    if (cycleSegment == null) {
-                        logger.trace(() -> "input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
-                        motorState.enterState(Finished);
-                        continue;
+                    int result = -1;
+
+                    if (cycleRateLimiter != null) {
+                        // Block for cycle rate limiter
+                        cycleDelay = cycleRateLimiter.block();
                     }
 
-
-                    if (strideRateLimiter != null) {
-                        // block for strides rate limiter
-                        strideDelay = strideRateLimiter.block();
-                    }
-
-                    long strideStart = System.nanoTime();
+                    long cycleStart = System.nanoTime();
                     try {
-
-                        while (!cycleSegment.isExhausted()) {
-                            long cyclenum = cycleSegment.nextCycle();
-                            if (cyclenum < 0) {
-                                if (cycleSegment.isExhausted()) {
-                                    logger.trace(() -> "input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
-                                    motorState.enterState(Finished);
-                                    continue;
-                                }
-                            }
-
-                            if (motorState.get() != Running) {
-                                logger.trace(() -> "motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
-                                continue;
-                            }
-                            int result = -1;
-
-                            if (cycleRateLimiter != null) {
-                                // Block for cycle rate limiter
-                                cycleDelay = cycleRateLimiter.block();
-                            }
-
-                            long cycleStart = System.nanoTime();
-                            try {
-                                logger.trace(()->"cycle " + cyclenum);
-                                result = sync.runCycle(cyclenum);
-                            } catch (Exception e) {
-                                motorState.enterState(Errored);
-                                throw e;
-                            } finally {
-                                long cycleEnd = System.nanoTime();
-                                cycleServiceTimer.update((cycleEnd - cycleStart) + cycleDelay, TimeUnit.NANOSECONDS);
-                            }
-                            segBuffer.append(cyclenum, result);
-                        }
-
+                        logger.trace(() -> "cycle " + cyclenum);
+                        result = sync.runCycle(cyclenum);
+                    } catch (Exception e) {
+                        throw e;
                     } finally {
-                        long strideEnd = System.nanoTime();
-                        strideServiceTimer.update((strideEnd - strideStart) + strideDelay, TimeUnit.NANOSECONDS);
+                        long cycleEnd = System.nanoTime();
+                        cycleServiceTimer.update((cycleEnd - cycleStart) + cycleDelay, TimeUnit.NANOSECONDS);
                     }
-
-                    if (output != null) {
-                        CycleResultsSegment outputBuffer = segBuffer.toReader();
-                        try {
-                            output.onCycleResultSegment(outputBuffer);
-                        } catch (Exception t) {
-                            logger.error(()->"Error while feeding result segment " + outputBuffer + " to output '" + output + "', error:" + t);
-                            throw t;
-                        }
-                    }
+                    segBuffer.append(cyclenum, result);
                 }
 
-            } else {
-                throw new RuntimeException("Valid Action implementations must implement SyncAction");
+            } finally {
+                long strideEnd = System.nanoTime();
+                strideServiceTimer.update((strideEnd - strideStart) + strideDelay, TimeUnit.NANOSECONDS);
             }
 
-            if (motorState.get() == Stopping) {
-                motorState.enterState(Stopped);
-                logger.trace(() -> Thread.currentThread().getName() + " shutting down as " + motorState.get());
-            } else if (motorState.get() == Finished) {
-                logger.trace(() -> Thread.currentThread().getName() + " shutting down as " + motorState.get());
-            } else {
-                logger.warn(()->"Unexpected motor state for CoreMotor shutdown: " + motorState.get());
+            if (output != null) {
+                CycleResultsSegment outputBuffer = segBuffer.toReader();
+                try {
+                    output.onCycleResultSegment(outputBuffer);
+                } catch (Exception t) {
+                    logger.error(() -> "Error while feeding result segment " + outputBuffer + " to output '" + output + "', error:" + t);
+                    throw t;
+                }
             }
+
 
         } catch (Throwable t) {
-            logger.error(()->"Error in core motor loop:" + t, t);
-            motorState.enterState(Errored);
+            logger.error(() -> "Error in core motor loop:" + t, t);
             throw t;
         }
+        return null;
     }
 
     @Override
     public String toString() {
-        return this.activity.getAlias() + ": slot:" + this.slotId + "; state:" + motorState.get();
+        return this.activity.getAlias() + ": slot:" + this.slotId;
     }
 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
 
-        for (Object component : (new Object[]{input, opTracker, action, output})) {
+        for (Object component : (new Object[]{input, opTracker, this, output})) {
             if (component instanceof ActivityDefObserver) {
                 ((ActivityDefObserver) component).onActivityDefUpdate(activityDef);
             }
@@ -335,19 +291,89 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
     }
 
-    @Override
-    public synchronized void requestStop() {
-        RunState currentState = motorState.get();
-        if (Objects.requireNonNull(currentState) == Running) {
-            Stoppable.stop(input, action);
-            motorState.enterState(Stopping);
-        } else {
-            logger.warn(() -> "attempted to stop motor " + this.getSlotId() + ": from non Running state:" + currentState);
-        }
-    }
-
     public void setResultOutput(Output resultOutput) {
         this.output = resultOutput;
+    }
+
+    public int runCycle(long cycle) {
+
+        OpDispenser<? extends Op> dispenser = null;
+        Op op = null;
+
+        try (Timer.Context ct = bindTimer.time()) {
+            dispenser = opsequence.apply(cycle);
+            op = dispenser.getOp(cycle);
+        } catch (Exception e) {
+            throw new RuntimeException("while binding request in cycle " + cycle + " for op template named '" + (dispenser != null ? dispenser.getOpName() : "NULL") +
+                "': " + e.getMessage(), e);
+        }
+
+        int code = 0;
+        Object result = null;
+        while (op != null) {
+
+            int tries = 0;
+            while (tries++ < maxTries) {
+                Throwable error = null;
+                long startedAt = System.nanoTime();
+
+                dispenser.onStart(cycle);
+
+                try (Timer.Context ct = executeTimer.time()) {
+                    if (op instanceof RunnableOp runnableOp) {
+                        runnableOp.run();
+                    } else if (op instanceof CycleOp<?> cycleOp) {
+                        result = cycleOp.apply(cycle);
+                    } else if (op instanceof ChainingOp chainingOp) {
+                        result = chainingOp.apply(result);
+                    } else {
+                        throw new RuntimeException("The op implementation did not implement any active logic. Implement " +
+                            "one of [RunnableOp, CycleOp, or ChainingOp]");
+                    }
+                    // TODO: break out validation timer from execute
+                    try (Timer.Context ignored = verifierTimer.time()) {
+                        CycleFunction<Boolean> verifier = dispenser.getVerifier();
+                        try {
+                            verifier.setVariable("result", result);
+                            verifier.setVariable("cycle", cycle);
+                            Boolean isGood = verifier.apply(cycle);
+                            if (!isGood) {
+                                throw new ResultVerificationError("result verification failed", maxTries - tries, verifier.getExpressionDetails());
+                            }
+                        } catch (Exception e) {
+                            throw new ResultVerificationError(e, maxTries - tries, verifier.getExpressionDetails());
+                        }
+                    }
+                } catch (Exception e) {
+                    error = e;
+                } finally {
+                    long nanos = System.nanoTime() - startedAt;
+                    resultTimer.update(nanos, TimeUnit.NANOSECONDS);
+                    if (error == null) {
+                        resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
+                        dispenser.onSuccess(cycle, nanos);
+                        break;
+                    } else {
+                        ErrorDetail detail = errorHandler.handleError(error, cycle, nanos);
+                        dispenser.onError(cycle, nanos, error);
+                        code = detail.resultCode;
+                        if (!detail.isRetryable()) {
+                            break;
+                        }
+                    }
+                }
+            }
+            triesHistogram.update(tries);
+
+            if (op instanceof OpGenerator) {
+                logger.trace(() -> "GEN OP for cycle(" + cycle + ")");
+                op = ((OpGenerator) op).getNextOp();
+            } else {
+                op = null;
+            }
+        }
+
+        return code;
     }
 
 }

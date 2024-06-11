@@ -26,6 +26,7 @@ public class NBComponentExecutionScope implements AutoCloseable {
     public NBComponentExecutionScope(NBComponent... components) {
         this.components = components;
     }
+
     @Override
     public void close() throws RuntimeException {
         for (NBComponent component : components) {

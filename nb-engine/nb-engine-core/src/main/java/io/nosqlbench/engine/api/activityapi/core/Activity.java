@@ -27,7 +27,6 @@ import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
-import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -84,11 +83,6 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
 
     void setOutputDispenserDelegate(OutputDispenser outputDispenser);
 
-    @Override
-    RunState getRunState();
-
-    void setRunState(RunState runState);
-
     long getStartedAtMillis();
 
     default void shutdownActivity() {
@@ -132,21 +126,9 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
 
     ErrorMetrics getExceptionMetrics();
 
-//    /**
-//     * When a driver needs to identify an error uniquely for the purposes of
-//     * routing it to the correct error handler, or naming it in logs, or naming
-//     * metrics, override this method in your activity.
-//     * @return A function that can reliably and safely map an instance of Throwable to a stable name.
-//     */
-//    default Function<Throwable,String> getErrorNameMapper() {
-//        return t -> t.getClass().getSimpleName();
-//    }
-//
     int getMaxTries();
 
     default int getHdrDigits() {
         return this.getParams().getOptionalInteger("hdr_digits").orElse(4);
     }
-
-    RunStateTally getRunStateTally();
 }

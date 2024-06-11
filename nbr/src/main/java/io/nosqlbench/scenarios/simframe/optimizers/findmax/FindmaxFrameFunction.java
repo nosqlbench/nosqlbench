@@ -62,7 +62,7 @@ public class FindmaxFrameFunction implements SimFrameFunction<FindmaxFrameParams
         capture.stopWindow();
         journal.record(params,capture.last());
         System.out.println(journal.last());
-        if (flywheel.getRunStateTally().tallyFor(RunState.Running)==0) {
+        if (flywheel.getRunState()!=RunState.Running) {
             System.out.println("state:" + flywheel.getRunState());
             throw new RuntimeException("Early exit of flywheel activity '" + flywheel.getAlias() + "'. Can't continue.");
         }

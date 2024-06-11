@@ -33,7 +33,7 @@ import java.util.function.LongToIntFunction;
 @Categories({Category.general})
 public class AlphaNumericString implements LongFunction<String> {
     private static final String AVAILABLE_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private final ThreadLocal<StringBuilder> threadStringBuilder = ThreadLocal.withInitial(StringBuilder::new);
+//    private final ThreadLocal<StringBuilder> threadStringBuilder = ThreadLocal.withInitial(StringBuilder::new);
     private final Hash hash = new Hash();
     private final LongToIntFunction lengthFunc;
 
@@ -69,8 +69,7 @@ public class AlphaNumericString implements LongFunction<String> {
         }
 
         long hashValue = operand;
-        StringBuilder sb = threadStringBuilder.get();
-        sb.setLength(0);
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++)
         {
             hashValue = hash.applyAsLong(hashValue);

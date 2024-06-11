@@ -16,8 +16,6 @@
 
 package io.nosqlbench.engine.api.activityapi.core;
 
-import io.nosqlbench.engine.api.activityimpl.MotorState;
-
 /**
  * <P>This enum indicates the state of a thread within an activity. The state is kept in an atomic
  * register. Ownership of state changes is shared between a supervising thread and a managed thread.

@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
@@ -27,7 +28,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.HashMap;
 import java.util.Map;
 
-public class StandardActivityType<A extends StandardActivity<?,?>> implements ActivityType<A> {
+public class StandardActivityType<A extends SimpleActivity<?,?>> implements ActivityType<A> {
 
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final Map<String, DriverAdapter> adapters = new HashMap<>();
@@ -59,13 +60,8 @@ public class StandardActivityType<A extends StandardActivity<?,?>> implements Ac
         if (activityDef.getParams().getOptionalString("async").isPresent())
             throw new RuntimeException("This driver does not support async mode yet.");
 
-        return (A) new StandardActivity(parent, activityDef);
+        return (A) new SimpleActivity(parent, activityDef);
     }
 
-
-    @Override
-    public ActionDispenser getActionDispenser(final A activity) {
-        return new StandardActionDispenser(activity);
-    }
 
 }

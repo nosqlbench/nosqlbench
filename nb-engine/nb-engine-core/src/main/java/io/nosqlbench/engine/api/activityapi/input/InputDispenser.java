@@ -27,8 +27,7 @@ public interface InputDispenser {
     /**
      * Resolve (find or create) an Input instance for the slot specified.
      * The input is not required to be per-slot (per-thread), but any shared inputs must be thread safe.
-     * @param slot The numbered slot within the activity instance for this action.
      * @return A new or cached Input for the specified slot.
      */
-    Input getInput(long slot);
+    Input getInput();
 }

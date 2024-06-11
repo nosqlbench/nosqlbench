@@ -32,9 +32,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * ThreadLocal http clients have been removed from this version, as the built-in
- * HTTP client implementation is meant to be immutable. If shared-state issues
- * occur, thread-local support will be re-added.
+ * per-thread http clients have been removed from this version, as the built-in
+ * HTTP client implementation is meant to be immutable.
  */
 public class HttpSpace implements NBLabeledElement {
     private final static Logger logger = LogManager.getLogger(HttpSpace.class);

@@ -34,9 +34,6 @@ import java.nio.ByteBuffer;
  */
 public class TokenMapFileAPIService {
 
-//    public static ThreadLocal<Map<String, BinaryCursorForTokenCycle>> tl_cll =
-//            ThreadLocal.withInitial(HashMap::new);
-//
     private final int recordCount;
     private final ByteBuffer buffer;
     private final int RECORD_LEN = Long.BYTES * 2;

@@ -16,13 +16,14 @@
 
 package io.nosqlbench.engine.api.activityapi.core;
 
-import io.nosqlbench.engine.api.activityimpl.MotorState;
 import io.nosqlbench.engine.api.activityapi.input.Input;
+
+import java.util.concurrent.Callable;
 
 /**
  * The core threading harness within an activity.
  */
-public interface Motor<T> extends Runnable, Stoppable {
+public interface Motor<T> extends Callable<Void> {
 
     /**
      * Set the input on this motor. It will be read from each cycle before applying the action.
@@ -34,27 +35,9 @@ public interface Motor<T> extends Runnable, Stoppable {
 
     Input getInput();
 
-    /**
-     * Set the action on this motor. It will be applied to each input.
-     *
-     * @param action an instance of activityAction
-     * @return this ActivityMotor, for method chaining
-     */
-    Motor<T> setAction(Action action);
-
-    Action getAction();
-
-    /**
+   /**
      * get the slotId which this motor is assigned to within the activity instance.
      * @return long slot id
      */
     long getSlotId();
-
-    /**
-     * Get a description of the current slot run status.
-     * @return - a value from the {@link RunState} enum
-     */
-    MotorState getState();
-
-    void removeState();
 }

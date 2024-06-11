@@ -19,6 +19,7 @@ import io.nosqlbench.adapter.jdbc.JDBCSpace;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterInvalidParamException;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
 import io.nosqlbench.adapter.jdbc.utils.JDBCPgVector;
+import io.nosqlbench.nb.api.lifecycle.ObjectPool;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,14 +37,12 @@ public abstract class JDBCDMLOp extends JDBCOp {
     protected final String pStmtSqlStr;
     protected final List<Object> pStmtValList;
 
-    protected static ThreadLocal<Statement> jdbcStmtTL = ThreadLocal.withInitial(() -> null);
-
     public JDBCDMLOp(JDBCSpace jdbcSpace,
                      boolean isReadStmt,
                      String pStmtSqlStr,
                      List<Object> pStmtValList) {
         super(jdbcSpace);
-        assert(StringUtils.isNotBlank(pStmtSqlStr));
+        assert (StringUtils.isNotBlank(pStmtSqlStr));
 
         this.isReadStmt = isReadStmt;
         this.pStmtSqlStr = pStmtSqlStr;
@@ -75,7 +74,7 @@ public abstract class JDBCDMLOp extends JDBCOp {
     protected PreparedStatement setPrepStmtValues(PreparedStatement stmt) throws SQLException {
         assert (stmt != null);
 
-        for (int i=0; i<pStmtValList.size(); i++) {
+        for (int i = 0; i < pStmtValList.size(); i++) {
             int fieldIdx = i + 1;
             Object fieldValObj = pStmtValList.get(i);
             assert (fieldValObj != null);
@@ -83,7 +82,7 @@ public abstract class JDBCDMLOp extends JDBCOp {
             try {
                 // Special processing for Vector
                 if (fieldValObj instanceof String) {
-                    String strObj = (String)fieldValObj;
+                    String strObj = (String) fieldValObj;
                     if (StringUtils.isNotBlank(strObj)) {
                         strObj = strObj.trim();
                         // If the 'fieldVal' is a string like "[<float_num_1>, <float_num_2>, ... <float_num_n>]" format,
@@ -96,8 +95,7 @@ public abstract class JDBCDMLOp extends JDBCOp {
                     }
                 }
                 stmt.setObject(fieldIdx, fieldValObj);
-            }
-            catch ( SQLException e) {
+            } catch (SQLException e) {
                 throw new SQLException(
                     "Failed to parse the prepared statement value for field[" + fieldIdx + "] " + fieldValObj);
             }
@@ -115,22 +113,19 @@ public abstract class JDBCDMLOp extends JDBCOp {
     }
 
     protected Statement createDMLStatement() throws SQLException {
-        Statement stmt = jdbcStmtTL.get();
-        if (stmt == null) {
-            if (isPreparedStmt)
-                stmt = jdbcConnection.prepareStatement(pStmtSqlStr);
-            else
-                stmt = jdbcConnection.createStatement();
+        final Statement stmt = isPreparedStmt
+            ? jdbcConnection.prepareStatement(pStmtSqlStr)
+            : jdbcConnection.createStatement();
 
-            jdbcStmtTL.set(stmt);
+        LOGGER.debug(
+            () -> "A statement is created -- prepared: "
+                +isPreparedStmt
+                +", read/write: "
+                + (isReadStmt ? "read" : "write) "
+                + ", stmt: "
+                + stmt)
+        );
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("A statement is created -- prepared: {}, read/write: {}, stmt: {}",
-                    isPreparedStmt,
-                    isReadStmt ? "read" : "write",
-                    stmt);
-            }
-        }
         return stmt;
     }
 }

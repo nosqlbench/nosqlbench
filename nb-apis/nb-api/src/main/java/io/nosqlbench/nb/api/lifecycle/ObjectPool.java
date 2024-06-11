@@ -26,30 +26,30 @@ import java.util.function.Supplier;
 /**
  * <P>This object pooling class provides a simple way to pool objects which:
  * <UL>
- * <LI>Have a non-trivial creation cost</LI>
+ * <LI>Are expensive to create relative to how they are used</LI>
  * <LI>Need to be used my multiple threads</LI>
  * <LI>Are not thread safe</LI>
  * </UL>
  * <p>
- * The overhead of using this pool should be weighed against the simpler case of just
- * creating the object where it is needed. Generally speaking, avoid using this pool
- * unless you know that object caching or pooling is needed.
+ * The overhead of using this pool should be weighed against the simpler case of just creating the object where it is
+ * needed. Generally speaking, avoid using this pool unless you know that object caching or pooling is needed from
+ * profiling.
  * </P>
  *
- * <P>This pool keeps count of how many active elements are in use by caller threads.
- * In the event that the available pool of objects is more than 2X the size of the active
- * ones, it is reduced to 1/2 its current size, <em>after</em> the last element is released.
- * This means that the pool will size down automatically when there are transient or episodic
- * spikes.
+ * <P>This pool keeps count of how many active elements are in use by caller threads. In the event that the available
+ * pool of objects is more than 2X the size of the active ones, it is reduced to 1/2 its current size, <em>after</em>
+ * the last element is released. This means that the pool will size down automatically when there are transient or
+ * episodic spikes.
  * </P>
  *
- * <P>The pool also handles object resetting via the consumer provided. Although it is expressed as a consumer,
- * it doesn't strictly consume references. It simply does whatever the caller needs in order to effectively
- * reset one of the pooled objects as it is returned to the resource pool.</P>
+ * <P>The pool also handles object resetting via the {@link Consumer} provided. Although it is expressed as a consumer,
+ * it doesn't strictly consume references. It simply does whatever the caller needs in order to effectively reset one of
+ * the pooled objects as it is returned to the resource pool.</P>
  *
- * <P>Typical usage of this class will wrap it in a try-with-resources clause so that automatic resource
- * management takes care of returning and reusing objects. The type returned by {@link #get()} is a reference
- * wrapper. For example, you can create and use a pool of {@link StringBuilder}s like this:
+ * <P>Safe usage of this class is achieved by wrapping it with a try-with-resources clause so that automatic
+ * resource management takes care of returning and reusing objects. The type returned by {@link #get()} is a
+ * reference wrapper. For example, you can create and use a pool of {@link StringBuilder}s like this:
+ *
  * <pre><code>
  *         ObjectPool<StringBuilder> pool = new ObjectPool<>(StringBuilder::new, sb -> sb.setLength());
  *         try (var handle = pool.get()) {
@@ -61,10 +61,11 @@ import java.util.function.Supplier;
  *             throw new RuntimeException(e);
  *         }
  * </code></pre>
- *
- * At the end of the try-with-resources, the StringBuilder will be returned to the pool after
- * its length has been reset to 0.
+ * <p>
+ * At the end of the try-with-resources, the StringBuilder will be returned to the pool after its length has been
+ * reset to 0.
  * </P>
+ *
  * @param <T>
  */
 public class ObjectPool<T> implements Supplier<ObjectPool.Borrowed<T>> {
