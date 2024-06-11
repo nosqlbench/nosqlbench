@@ -18,9 +18,6 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.Database;
 import com.datastax.astra.client.model.Filter;
-import com.datastax.astra.client.model.FindOptions;
-import com.datastax.astra.client.model.Projection;
-import com.datastax.astra.client.model.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiFindVectorFilterOp;
@@ -56,23 +53,6 @@ public class DataApiFindVectorFilterOpDispenser extends DataApiOpDispenser {
 
     private int getLimit(ParsedOp op, long l) {
         return op.getConfigOr("limit", 100, l);
-    }
-
-    private FindOptions getFindOptions(ParsedOp op, long l) {
-        FindOptions options = new FindOptions();
-        Sort sort = getSortFromOp(op, l);
-        float[] vector = getVectorValues(op, l);
-        if (sort != null) {
-            options = vector != null ? options.sort(vector, sort) : options.sort(sort);
-        } else if (vector != null) {
-            options = options.sort(vector);
-        }
-        Projection[] projection = getProjectionFromOp(op, l);
-        if (projection != null) {
-            options = options.projection(projection);
-        }
-        options.setIncludeSimilarity(true);
-        return options;
     }
 
     @Override

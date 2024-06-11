@@ -28,6 +28,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class DataApiFindOpDispenser extends DataApiOpDispenser {
@@ -67,7 +68,22 @@ public class DataApiFindOpDispenser extends DataApiOpDispenser {
         if (projection != null) {
             options = options.projection(projection);
         }
-        options.setIncludeSimilarity(true);
+        Optional<LongFunction<Integer>> limitFunction = op.getAsOptionalFunction("limit", Integer.class);
+        if (limitFunction.isPresent()) {
+            options = options.limit(limitFunction.get().apply(l));
+        }
+        Optional<LongFunction<Integer>> skipFunction = op.getAsOptionalFunction("skip", Integer.class);
+        if (skipFunction.isPresent()) {
+            options = options.skip(skipFunction.get().apply(l));
+        }
+        Optional<LongFunction<Boolean>> includeSimilarityFunction = op.getAsOptionalFunction("includeSimilarity", Boolean.class);
+        if (includeSimilarityFunction.isPresent()) {
+            options.setIncludeSimilarity(includeSimilarityFunction.get().apply(l));
+        }
+        Optional<LongFunction<String>> pageStateFunction = op.getAsOptionalFunction("pageState", String.class);
+        if (pageStateFunction.isPresent()) {
+            options.setPageState(pageStateFunction.get().apply(l));
+        }
         return options;
     }
 
