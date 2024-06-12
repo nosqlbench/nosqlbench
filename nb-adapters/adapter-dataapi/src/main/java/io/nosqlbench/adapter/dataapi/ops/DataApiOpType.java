@@ -36,4 +36,5 @@ public enum DataApiOpType {
     list_collection_names,
     estimated_document_count,
     find_by_id,
+    find_distinct,
 }

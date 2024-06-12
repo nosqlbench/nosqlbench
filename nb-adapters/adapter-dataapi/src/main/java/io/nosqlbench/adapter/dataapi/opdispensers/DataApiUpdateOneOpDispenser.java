@@ -43,7 +43,7 @@ public class DataApiUpdateOneOpDispenser extends DataApiOpDispenser {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
             UpdateOneOptions options = getUpdateOneOptions(op, l);
-            LongFunction<Map<String,Object>> docMapFunc = op.getAsRequiredFunction("update", Map.class);
+            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("update", Map.class);
 
             return new DataApiUpdateOneOp(
                 db,
