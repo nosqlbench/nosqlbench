@@ -16,30 +16,20 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-public enum DataApiOpType {
-    create_collection,
-    insert_many,
-    insert_one,
-    insert_one_vector,
-    find,
-    find_one,
-    find_one_and_delete,
-    find_one_and_update,
-    find_vector,
-    find_vector_filter,
-    update_one,
-    update_many,
-    delete_one,
-    delete_many,
-    delete_collection,
-    list_collections,
-    list_collection_names,
-    estimated_document_count,
-    find_by_id,
-    find_distinct,
-    count_documents,
-    replace_one,
-    find_one_and_replace,
-    delete_all,
-    create_collection_with_class,
+import com.datastax.astra.client.Collection;
+import com.datastax.astra.client.Database;
+import com.datastax.astra.client.model.Filter;
+
+public class DataApiDeleteAllOp extends DataApiBaseOp {
+    private final Collection collection;
+
+    public DataApiDeleteAllOp(Database db, Collection collection) {
+        super(db);
+        this.collection = collection;
+    }
+
+    @Override
+    public Object apply(long value) {
+        return collection.deleteAll();
+    }
 }

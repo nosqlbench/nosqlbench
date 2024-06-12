@@ -188,4 +188,19 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return projection;
     }
 
+    protected CollectionOptions getCollectionOptionsFromOp(ParsedOp op, long l) {
+        CollectionOptions.CollectionOptionsBuilder optionsBldr = CollectionOptions.builder();
+        Optional<LongFunction<Integer>> dimFunc = op.getAsOptionalFunction("dimensions", Integer.class);
+        if (dimFunc.isPresent()) {
+            LongFunction<Integer> af = dimFunc.get();
+            optionsBldr.vectorDimension(af.apply(l));
+        }
+        Optional<LongFunction<String>> simFunc = op.getAsOptionalFunction("similarity", String.class);
+        if (simFunc.isPresent()) {
+            LongFunction<String> sf = simFunc.get();
+            optionsBldr.vectorSimilarity(SimilarityMetric.fromValue(sf.apply(l)));
+        }
+        return optionsBldr.build();
+    }
+
 }
