@@ -27,6 +27,7 @@ import java.util.function.Function;
 
 public class StrInterpolator implements Function<String, String> {
     private final static Logger logger = LogManager.getLogger(StrInterpolator.class);
+    private static final Set<String> validatedNames = new HashSet<>();
 
     private final MultiMap multimap = new MultiMap();
     private final StringSubstitutor substitutor =
@@ -76,6 +77,43 @@ public class StrInterpolator implements Function<String, String> {
         return details;
     }
 
+    public static void validateVariableName(String variableName) {
+        if (validatedNames.contains(variableName)) {
+            return;
+        }
+        validatedNames.add(variableName);
+        StringBuilder suggestion = new StringBuilder();
+        boolean snakeCase = true;
+        boolean validChars = true;
+        for (int i = 0; i < variableName.length(); i++) {
+            char c = variableName.charAt(i);
+            if (Character.isLetterOrDigit(c) || c == '_') {
+                if (Character.isUpperCase(c)) {
+                    snakeCase = false;
+                    if (i != 0 && Character.isLowerCase(variableName.charAt(i - 1)) && variableName.charAt(i - 1) != '_') {
+                        suggestion.append('_');
+                    }
+                }
+                suggestion.append(Character.toLowerCase(c));
+            } else {
+                if (c == ' ' || c == '-') {
+                    suggestion.append('_');
+                }
+                validChars = false;
+            }
+        }
+        if (!validChars) {
+            logger.warn(String.format("Variable name \"%s\" contains characters that may cause issues with the " +
+                "downstream metrics systems.  It is recommended to use only alphanumeric characters and underscores " +
+                "so consider renaming it to \"%s\"", variableName, suggestion));
+            return;
+        }
+        if (!snakeCase) {
+            logger.warn(String.format("It is recommended to write the variable names in snake_case so consider " +
+                "renaming \"%s\" to \"%s\".", variableName, suggestion));
+        }
+    }
+
     public static class MultiMap extends StrLookup<String> {
 
         private final List<Map<String, ?>> maps = new ArrayList<>();
@@ -97,6 +135,7 @@ public class StrInterpolator implements Function<String, String> {
                 value = parts[1];
                 if (!extractedDefaults.containsKey(key)) {
                     extractedDefaults.put(key,value);
+                    validateVariableName(key);
                 }
             }
 
