@@ -37,4 +37,7 @@ public enum DataApiOpType {
     estimated_document_count,
     find_by_id,
     find_distinct,
+    count_documents,
+    replace_one,
+    find_one_and_replace,
 }

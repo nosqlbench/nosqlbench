@@ -66,6 +66,9 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp> {
                 new DataApiEstimatedDocumentCountOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_by_id -> new DataApiFindByIdOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_distinct -> new DataApiFindDistinctOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case count_documents -> new DataApiCountDocumentsOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case replace_one -> new DataApiReplaceOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_one_and_replace -> new DataApiFindOneAndReplaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 }
