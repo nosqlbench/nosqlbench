@@ -23,10 +23,7 @@ import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.LongFunction;
 
 public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, DataApiSpace> {
@@ -193,13 +190,39 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         Optional<LongFunction<Integer>> dimFunc = op.getAsOptionalFunction("dimensions", Integer.class);
         if (dimFunc.isPresent()) {
             LongFunction<Integer> af = dimFunc.get();
-            optionsBldr.vectorDimension(af.apply(l));
+            optionsBldr = optionsBldr.vectorDimension(af.apply(l));
         }
         Optional<LongFunction<String>> simFunc = op.getAsOptionalFunction("similarity", String.class);
         if (simFunc.isPresent()) {
             LongFunction<String> sf = simFunc.get();
-            optionsBldr.vectorSimilarity(SimilarityMetric.fromValue(sf.apply(l)));
+            optionsBldr = optionsBldr.vectorSimilarity(SimilarityMetric.fromValue(sf.apply(l)));
         }
+        Optional<LongFunction<String>> typeFunc = op.getAsOptionalFunction("collectionType", String.class);
+        if (typeFunc.isPresent()) {
+            LongFunction<String> tf = typeFunc.get();
+            optionsBldr = optionsBldr.defaultIdType(CollectionIdTypes.fromValue(tf.apply(l)));
+        }
+        Optional<LongFunction<String>> providerFunc = op.getAsOptionalFunction("serviceProvider", String.class);
+        Optional<LongFunction<String>> modeFunc = op.getAsOptionalFunction("serviceMode", String.class);
+        Optional<LongFunction<Map>> paramFunc = op.getAsOptionalFunction("serviceParameters", Map.class);
+        if (providerFunc.isPresent() && modeFunc.isPresent()) {
+            LongFunction<String> pf = providerFunc.get();
+            LongFunction<String> mf = modeFunc.get();
+            optionsBldr = paramFunc.isPresent() ?
+                optionsBldr.vectorize(pf.apply(l), mf.apply(l),  paramFunc.get().apply(l)) :
+                optionsBldr.vectorize(pf.apply(l), mf.apply(l));
+        }
+        Optional<LongFunction<List>> allowFunc = op.getAsOptionalFunction("allowIndex", List.class);
+        if (allowFunc.isPresent()) {
+            LongFunction<List> af = allowFunc.get();
+            optionsBldr = optionsBldr.indexingAllow(Arrays.toString(af.apply(l).toArray(new String[0])));
+        }
+        Optional<LongFunction<List>> denyFunc = op.getAsOptionalFunction("denyIndex", List.class);
+        if (denyFunc.isPresent()) {
+            LongFunction<List> df = denyFunc.get();
+            optionsBldr = optionsBldr.indexingDeny(Arrays.toString(df.apply(l).toArray(new String[0])));
+        }
+
         return optionsBldr.build();
     }
 
