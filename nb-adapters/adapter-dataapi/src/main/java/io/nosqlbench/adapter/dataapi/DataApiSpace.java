@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.dataapi;
 
 import com.datastax.astra.client.DataAPIClient;
 import com.datastax.astra.client.Database;
+import com.datastax.astra.client.admin.AstraDBAdmin;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -42,10 +43,14 @@ public class DataApiSpace {
     private Database database;
     private String namespace;
 
+    private String superUserToken;
+    private AstraDBAdmin admin;
+
     public DataApiSpace(String name, NBConfiguration cfg) {
         this.config = cfg;
         this.name = name;
         setToken();
+        setSuperToken();
         setApiEndpoint();
         setNamespace();
         createClient();
@@ -59,12 +64,21 @@ public class DataApiSpace {
         return database;
     }
 
+    public AstraDBAdmin getAdmin() {
+        return admin;
+    }
+
     private void createClient() {
         this.dataAPIClient = new DataAPIClient(astraToken);
         if (namespace != null) {
             this.database = dataAPIClient.getDatabase(astraApiEndpoint, namespace);
         } else {
             this.database = dataAPIClient.getDatabase(astraApiEndpoint);
+        }
+        if (superUserToken != null) {
+            this.admin = dataAPIClient.getAdmin(superUserToken);
+        } else {
+            this.admin = dataAPIClient.getAdmin();
         }
     }
 
@@ -100,16 +114,31 @@ public class DataApiSpace {
         String tokenFileContents = null;
         Optional<String> tokenFilePath = config.getOptional("astraTokenFile");
         if (tokenFilePath.isPresent()) {
-            Path path = Paths.get(tokenFilePath.get());
-            try {
-                tokenFileContents = Files.readAllLines(path).getFirst();
-            } catch (IOException e) {
-                String error = "Error while reading token from file:" + path;
-                logger.error(error, e);
-                throw new RuntimeException(e);
-            }
+            tokenFileContents = getTokenFileContents(tokenFilePath.get());
         }
         this.astraToken = (tokenFileContents != null) ? tokenFileContents : config.get("astraToken");
+    }
+
+    private String getTokenFileContents(String filePath) {
+        Path path = Paths.get(filePath);
+        try {
+            return Files.readAllLines(path).getFirst();
+        } catch (IOException e) {
+            String error = "Error while reading token from file:" + path;
+            logger.error(error, e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void setSuperToken() {
+        String superTokenFileContents = null;
+        Optional<String> superTokenFilePath = config.getOptional("superTokenFile");
+        if (superTokenFilePath.isPresent()) {
+            superTokenFileContents = getTokenFileContents(superTokenFilePath.get());
+        }
+        Optional<String> maybeSuperToken = config.getOptional("superToken");
+        // It's fine if this is null
+        this.superUserToken = maybeSuperToken.orElse(superTokenFileContents);
     }
 
     public static NBConfigModel getConfigModel() {

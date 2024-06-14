@@ -16,33 +16,18 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-public enum DataApiOpType {
-    create_collection,
-    insert_many,
-    insert_one,
-    insert_one_vector,
-    find,
-    find_one,
-    find_one_and_delete,
-    find_one_and_update,
-    find_vector,
-    find_vector_filter,
-    update_one,
-    update_many,
-    delete_one,
-    delete_many,
-    delete_collection,
-    list_collections,
-    list_collection_names,
-    estimated_document_count,
-    find_by_id,
-    find_distinct,
-    count_documents,
-    replace_one,
-    find_one_and_replace,
-    delete_all,
-    create_collection_with_class,
-    create_database,
-    list_databases,
-    drop_database,
+import com.datastax.astra.client.Database;
+import com.datastax.astra.client.admin.AstraDBAdmin;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+public abstract class DataApiAdminOp extends DataApiBaseOp {
+    protected static final Logger logger = LogManager.getLogger(DataApiAdminOp.class);
+    protected final AstraDBAdmin admin;
+
+    public DataApiAdminOp(Database db, AstraDBAdmin admin) {
+        super(db);
+        this.admin = admin;
+    }
 }

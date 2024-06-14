@@ -71,6 +71,9 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp> {
             case find_one_and_replace -> new DataApiFindOneAndReplaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case delete_all -> new DataApiDeleteAllOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_collection_with_class -> new DataApiCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_database -> new DataApiCreateDatabaseOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case list_databases -> new DataApiListDatabasesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case drop_database -> new DataApiDropDatabaseOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 }
