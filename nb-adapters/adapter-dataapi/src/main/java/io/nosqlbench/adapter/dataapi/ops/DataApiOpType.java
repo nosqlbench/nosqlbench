@@ -45,4 +45,8 @@ public enum DataApiOpType {
     create_database,
     list_databases,
     drop_database,
+    get_database_info,
+    create_namespace,
+    list_namespaces,
+    drop_namespace,
 }

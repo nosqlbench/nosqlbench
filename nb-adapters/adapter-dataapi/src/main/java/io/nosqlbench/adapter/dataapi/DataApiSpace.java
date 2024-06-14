@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.dataapi;
 import com.datastax.astra.client.DataAPIClient;
 import com.datastax.astra.client.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
+import com.datastax.astra.client.admin.DatabaseAdmin;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -32,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.UUID;
 
 public class DataApiSpace {
     private final static Logger logger = LogManager.getLogger(DataApiSpace.class);
@@ -45,6 +47,7 @@ public class DataApiSpace {
 
     private String superUserToken;
     private AstraDBAdmin admin;
+    private DatabaseAdmin namespaceAdmin;
 
     public DataApiSpace(String name, NBConfiguration cfg) {
         this.config = cfg;
@@ -68,6 +71,10 @@ public class DataApiSpace {
         return admin;
     }
 
+    public DatabaseAdmin getNamespaceAdmin() {
+        return namespaceAdmin;
+    }
+
     private void createClient() {
         this.dataAPIClient = new DataAPIClient(astraToken);
         if (namespace != null) {
@@ -80,6 +87,7 @@ public class DataApiSpace {
         } else {
             this.admin = dataAPIClient.getAdmin();
         }
+        this.namespaceAdmin = database.getDatabaseAdmin();
     }
 
     private void setApiEndpoint() {

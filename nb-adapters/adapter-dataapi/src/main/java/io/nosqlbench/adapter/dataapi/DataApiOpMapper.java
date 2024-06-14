@@ -74,6 +74,10 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp> {
             case create_database -> new DataApiCreateDatabaseOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case list_databases -> new DataApiListDatabasesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case drop_database -> new DataApiDropDatabaseOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case get_database_info -> new DataApiGetDatabaseInfoOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_namespace -> new DataApiCreateNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case list_namespaces -> new DataApiListNamespacesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case drop_namespace -> new DataApiDropNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 }
