@@ -16,47 +16,46 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.FindOptions;
-import com.datastax.astra.client.model.Projection;
-import com.datastax.astra.client.model.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiFindVectorOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCreateCollectionWithClassOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiFindVectorOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiFindVectorOpDispenser.class);
-    private final LongFunction<DataApiFindVectorOp> opFunction;
-    public DataApiFindVectorOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiCreateCollectionWithClassOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCreateCollectionWithClassOpDispenser.class);
+    private final LongFunction<DataApiCreateCollectionWithClassOp> opFunction;
+
+    public DataApiCreateCollectionWithClassOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiFindVectorOp> createOpFunction(ParsedOp op) {
-        return (l) -> {
-            Database db = spaceFunction.apply(l).getDatabase();
-            float[] vector = getVectorValues(op, l);
-            int limit = getLimit(op, l);
-            return new DataApiFindVectorOp(
-                db,
-                db.getCollection(targetFunction.apply(l)),
-                vector,
-                limit
-            );
-        };
+    private LongFunction<DataApiCreateCollectionWithClassOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiCreateCollectionWithClassOp(
+            spaceFunction.apply(l).getDatabase(),
+            targetFunction.apply(l),
+            this.getCollectionOptionsFromOp(op, l),
+            getCreateClass(op, l)
+        );
     }
 
-    private int getLimit(ParsedOp op, long l) {
-        return op.getConfigOr("limit", 100, l);
+    private Class<?> getCreateClass(ParsedOp op, long l) {
+        String className = op.getAsFunctionOr("createClass", "com.datastax.astra.client.model.Document").apply(l);
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public DataApiBaseOp getOp(long value) {
         return opFunction.apply(value);
     }
+
+
 }

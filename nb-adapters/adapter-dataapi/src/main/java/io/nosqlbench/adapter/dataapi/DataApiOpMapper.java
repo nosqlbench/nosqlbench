@@ -64,6 +64,20 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp> {
                 new DataApiListCollectionNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case estimated_document_count ->
                 new DataApiEstimatedDocumentCountOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_by_id -> new DataApiFindByIdOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_distinct -> new DataApiFindDistinctOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case count_documents -> new DataApiCountDocumentsOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case replace_one -> new DataApiReplaceOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_one_and_replace -> new DataApiFindOneAndReplaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case delete_all -> new DataApiDeleteAllOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_collection_with_class -> new DataApiCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_database -> new DataApiCreateDatabaseOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case list_databases -> new DataApiListDatabasesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case drop_database -> new DataApiDropDatabaseOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case get_database_info -> new DataApiGetDatabaseInfoOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_namespace -> new DataApiCreateNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case list_namespaces -> new DataApiListNamespacesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case drop_namespace -> new DataApiDropNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 }

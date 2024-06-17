@@ -17,44 +17,47 @@
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.Filter;
-import com.datastax.astra.client.model.FindOptions;
-import com.datastax.astra.client.model.Projection;
-import com.datastax.astra.client.model.Sort;
+import com.datastax.astra.client.model.*;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiFindOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiFindOneAndReplaceOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiFindOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiFindOpDispenser.class);
-    private final LongFunction<DataApiFindOp> opFunction;
-    public DataApiFindOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiFindOneAndReplaceOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiFindOneAndReplaceOpDispenser.class);
+    private final LongFunction<DataApiFindOneAndReplaceOp> opFunction;
+
+    public DataApiFindOneAndReplaceOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiFindOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiFindOneAndReplaceOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            FindOptions options = getFindOptions(op, l);
-            return new DataApiFindOp(
+            FindOneAndReplaceOptions options = getFindOneAndReplaceOptions(op, l);
+            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
+            LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
+
+            return new DataApiFindOneAndReplaceOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
+                docFunc.apply(l),
                 options
             );
         };
     }
 
-    private FindOptions getFindOptions(ParsedOp op, long l) {
-        FindOptions options = new FindOptions();
+    private FindOneAndReplaceOptions getFindOneAndReplaceOptions(ParsedOp op, long l) {
+        FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();
         Sort sort = getSortFromOp(op, l);
         if (op.isDefined("vector")) {
             float[] vector = getVectorValues(op, l);
@@ -68,21 +71,16 @@ public class DataApiFindOpDispenser extends DataApiOpDispenser {
         if (projection != null) {
             options = options.projection(projection);
         }
-        Optional<LongFunction<Integer>> limitFunction = op.getAsOptionalFunction("limit", Integer.class);
-        if (limitFunction.isPresent()) {
-            options = options.limit(limitFunction.get().apply(l));
+        Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
+        if (upsertFunction.isPresent()) {
+            options = options.upsert(upsertFunction.get().apply(l));
         }
-        Optional<LongFunction<Integer>> skipFunction = op.getAsOptionalFunction("skip", Integer.class);
-        if (skipFunction.isPresent()) {
-            options = options.skip(skipFunction.get().apply(l));
-        }
-        Optional<LongFunction<Boolean>> includeSimilarityFunction = op.getAsOptionalFunction("includeSimilarity", Boolean.class);
-        if (includeSimilarityFunction.isPresent()) {
-            options.setIncludeSimilarity(includeSimilarityFunction.get().apply(l));
-        }
-        Optional<LongFunction<String>> pageStateFunction = op.getAsOptionalFunction("pageState", String.class);
-        if (pageStateFunction.isPresent()) {
-            options.setPageState(pageStateFunction.get().apply(l));
+        if (op.isDefined("returnDocument")) {
+            options = switch ((String) op.get("returnDocument", l)) {
+                case "after" -> options.returnDocumentAfter();
+                case "before" -> options.returnDocumentBefore();
+                default -> throw new RuntimeException("Invalid returnDocument value: " + op.get("returnDocument", l));
+            };
         }
         return options;
     }
