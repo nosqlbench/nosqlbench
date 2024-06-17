@@ -33,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.UUID;
 
 public class DataApiSpace {
     private final static Logger logger = LogManager.getLogger(DataApiSpace.class);
@@ -172,6 +171,14 @@ public class DataApiSpace {
                 Param.defaultTo("namespace", "default_namespace")
                     .setDescription("The Astra namespace to use")
 
+            )
+            .add(
+                Param.optional("superTokenFile", String.class)
+                    .setDescription("optional file to load Astra admin user token from")
+            )
+            .add(
+                Param.optional("superToken", String.class)
+                    .setDescription("optional Astra token used to connect as Admin user")
             )
             .asReadOnly();
     }
