@@ -97,6 +97,9 @@ public class ResolverForNBIOCache implements ContentResolver {
         public void run() {
             double progress = (double) totalBytesRead / fileSize * 100;
             logger.info(() -> "Progress: " + String.format("%.2f", progress) + "% completed");
+            if (totalBytesRead==fileSize) {
+                cancel();
+            }
         }
     }
 
