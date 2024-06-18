@@ -234,4 +234,11 @@ public class NBCLIScenarioPreprocessorTest {
             .isThrownBy(() -> NBCLIScenarioPreprocessor.splitCommand(unclosedQuoteCmd))
             .withMessageContaining("Unclosed quote found in scenario cmd");
     }
+    
+    @Test
+    public void testThatSuggestionsAreShownForDirectStepNameUsage() {
+        assertThatExceptionOfType(BasicError.class)
+            .isThrownBy(() -> new NBCLIOptions(new String[]{"scenario_test", "schema"}, NBCLIOptions.Mode.ParseAllOptions))
+            .withMessageContainingAll("default.schema", "schema_only.schema");
+    }
 }
