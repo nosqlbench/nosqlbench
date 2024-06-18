@@ -17,7 +17,7 @@ scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main_write: run driver=cql tags==block:main-write cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main_write: run driver=cql tags==block:main_write cycles===TEMPLATE(main-cycles,10000000) threads=auto
     main_read_ann: run driver=cql tags==block:main_read_ann cycles===TEMPLATE(main-cycles,10000000) threads=auto
     main_read_pk_ann: run driver=cql tags==block:main_read_pk_ann cycles===TEMPLATE(main-cycles,10000000) threads=auto
     main_read: run driver=cql tags==block:"main-read.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
