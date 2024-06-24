@@ -441,6 +441,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 new CsvReporter(session, Path.of(cfg.file), cfg.millis, filter);
             });
 
+            options.wantsReportSqliteTo().ifPresent(cfg -> {
+                MetricInstanceFilter filter = new MetricInstanceFilter();
+                filter.addPattern(cfg.pattern);
+                session.create().sqliteReporter(session, cfg.url, cfg.millis, filter);
+            });
+
             options.wantsReportPromPushTo().ifPresent(cfg -> {
                 String[] words = cfg.split(",");
                 String uri;

@@ -142,6 +142,7 @@ public class NBCLIOptions {
     private final static String NBIO_CACHE_NO_VERIFY = "--nbio-cache-no-verify";
     private final static String NBIO_CACHE_DIR = "--nbio-cache-dir";
     private final static String NBIO_CACHE_MAX_RETRIES = "--nbio-cache-max-retries";
+    private static final String REPORT_SQLITE_TO = "--report-sqlite-to";
 
     //    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
@@ -163,6 +164,7 @@ public class NBCLIOptions {
     private String reportGraphiteTo;
     private String reportPromPushTo;
     private String reportCsvTo;
+    private String reportSqliteTo;
     private int reportInterval = 10;
     private String metricsPrefix = "nosqlbench";
     private String wantsMetricsForActivity;
@@ -607,6 +609,10 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     this.reportCsvTo = arglist.removeFirst();
                     break;
+                case NBCLIOptions.REPORT_SQLITE_TO:
+                    arglist.removeFirst();
+                    this.reportSqliteTo = arglist.removeFirst();
+                    break;
                 case NBCLIOptions.SUMMARY:
                     arglist.removeFirst();
                     this.reportSummaryTo = "stdout:0";
@@ -898,6 +904,10 @@ public class NBCLIOptions {
         return Optional.ofNullable(this.reportCsvTo).map(LoggerConfigData::new);
     }
 
+    public Optional<SqliteConfigData> wantsReportSqliteTo() {
+        return Optional.ofNullable(this.reportSqliteTo).map(SqliteConfigData::new);
+    }
+
     public Path getLogsDirectory() {
         return Path.of(this.logsDirectory);
     }
@@ -979,6 +989,39 @@ public class NBCLIOptions {
     public boolean wantsWorkloadsList() {
         return this.wantsWorkloadsList;
     }
+
+    public static class SqliteConfigData {
+        public String url;
+        public String pattern = ".*";
+        public long millis = 30000L;
+
+        public SqliteConfigData(final String sqlReporterSpec) {
+            final String[] words = sqlReporterSpec.split(",");
+            switch (words.length) {
+                case 3:
+                    if (words[2] != null && !words[2].isEmpty()) {
+                        this.millis = Unit.msFor(words[2]).orElseThrow(() ->
+                            new RuntimeException("Unable to parse interval spec:" + words[2] + '\''));
+                    }
+                case 2:
+                    this.pattern = words[1].isEmpty() ? this.pattern : words[1];
+                case 1:
+                    this.url = words[0];
+                    if (this.url.isEmpty())
+                        throw new RuntimeException("You must not specify a sqlite db file here for recording data.");
+                    break;
+                default:
+                    throw new RuntimeException(
+                        NBCLIOptions.REPORT_SQLITE_TO +
+                            " options must be in either 'db,filter,interval' or 'db,filter' or 'db' format"
+                    );
+            }
+        }
+        public String getUrl() {
+            return this.url;
+        }
+    }
+
 
     public static class LoggerConfigData {
         public String file;
