@@ -7,11 +7,11 @@ The following options are available via the command line to configure this featu
 
 ## Caching Options
 
-Enable caching. Note that by default caching is disabled. It may be turned on with the following parameter
+Disable caching. Note that by default caching is enabled. It may be turned off with the following parameter
 
-    --use-nbio-cache
+    --disable-nbio-cache
 
-If caching is enabled by default nb will use the directory `$HOME/.nosqlbench/nbiocache` to store files.
+If caching is enabled, nb will use the directory `$HOME/.nosqlbench/nbiocache` to store files.
 This location can be user specified with the parameter
 
     --nbio-cache-dir </user/specified/directory>

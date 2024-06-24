@@ -17,42 +17,42 @@
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.FindOptions;
+import com.datastax.astra.client.model.Filter;
+import com.datastax.astra.client.model.FindOneOptions;
 import com.datastax.astra.client.model.Projection;
 import com.datastax.astra.client.model.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiFindVectorOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiFindByIdOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiFindOneOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiFindVectorOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiFindVectorOpDispenser.class);
-    private final LongFunction<DataApiFindVectorOp> opFunction;
-    public DataApiFindVectorOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiFindByIdOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiFindByIdOpDispenser.class);
+    private final LongFunction<DataApiFindByIdOp> opFunction;
+    public DataApiFindByIdOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiFindVectorOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiFindByIdOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            float[] vector = getVectorValues(op, l);
-            int limit = getLimit(op, l);
-            return new DataApiFindVectorOp(
+            Object id = getIdFromOp(op, l);
+            return new DataApiFindByIdOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
-                vector,
-                limit
+                id
             );
         };
     }
 
-    private int getLimit(ParsedOp op, long l) {
-        return op.getConfigOr("limit", 100, l);
+    private Object getIdFromOp(ParsedOp op, long l) {
+        return op.getAsRequiredFunction("id", Object.class).apply(l);
     }
 
     @Override

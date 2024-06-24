@@ -89,7 +89,7 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
 
         try (ResultContext results = new ResultContext(collector).ok()) {
             for (Cmd cmd : assembledCommands) {
-                String explanation = " in context " + cmd.getTargetContext() + ", command '" + cmd.toString() + "'";
+                String explanation = "in container '" + cmd.getTargetContext() + "', command '" + cmd.toString() + "'";
                 try (NBInvokableCommand command = NBCommandAssembly.resolve(cmd,this::getContext)) {
                     NBCommandParams params = NBCommandAssembly.paramsFor(cmd);
                     NBBufferedContainer container = getContext(cmd.getTargetContext());

@@ -17,16 +17,16 @@ scenarios:
   default:
     schema: run driver=cql tags==block:schema threads==1 cycles==UNDEF
     rampup: run driver=cql tags==block:rampup cycles===TEMPLATE(rampup-cycles,10000000) threads=auto
-    main_write: run driver=cql tags==block:main-write cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main_write: run driver=cql tags==block:main_write cycles===TEMPLATE(main-cycles,10000000) threads=auto
     main_read_ann: run driver=cql tags==block:main_read_ann cycles===TEMPLATE(main-cycles,10000000) threads=auto
     main_read_pk_ann: run driver=cql tags==block:main_read_pk_ann cycles===TEMPLATE(main-cycles,10000000) threads=auto
-    main_read: run driver=cql tags==block:"main-read.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    main_read: run driver=cql tags==block:"main_read.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
     main: run driver=cql tags==block:"main.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
   astra:
-    schema: run driver=cql tags==block:schema-astra threads==1 cycles==UNDEF
-  drop_tables: run driver=cql tags==block:drop-tables threads==1 cycles==UNDEF
-  truncate: run driver=cql tags==block:truncate-tables cycles===1 threads=1
-  reads: run driver=cql tags==block:main-read cycles===TEMPLATE(main-cycles,10000000) threads=auto
+    schema: run driver=cql tags==block:schema_astra threads==1 cycles==UNDEF
+  drop_tables: run driver=cql tags==block:drop_tables threads==1 cycles==UNDEF
+  truncate: run driver=cql tags==block:truncate_tables cycles===1 threads=1
+  reads: run driver=cql tags==block:"main_read.*" cycles===TEMPLATE(main-cycles,10000000) threads=auto
 
 bindings:
   seq_key: Mod(<<keycount:1000000000>>); ToString() -> String

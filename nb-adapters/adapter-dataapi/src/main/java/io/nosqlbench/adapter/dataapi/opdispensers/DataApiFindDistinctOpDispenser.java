@@ -12,47 +12,52 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.FindOptions;
-import com.datastax.astra.client.model.Projection;
-import com.datastax.astra.client.model.Sort;
+import com.datastax.astra.client.model.Filter;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiFindVectorOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiFindDistinctOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiFindVectorOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiFindVectorOpDispenser.class);
-    private final LongFunction<DataApiFindVectorOp> opFunction;
-    public DataApiFindVectorOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiFindDistinctOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiFindDistinctOpDispenser.class);
+    private final LongFunction<DataApiFindDistinctOp> opFunction;
+    public DataApiFindDistinctOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiFindVectorOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiFindDistinctOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            float[] vector = getVectorValues(op, l);
-            int limit = getLimit(op, l);
-            return new DataApiFindVectorOp(
+            Filter filter = getFilterFromOp(op, l);
+            Class<?> targetClass = getTargetClass(op, l);
+            return new DataApiFindDistinctOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
-                vector,
-                limit
+                op.getAsRequiredFunction("fieldName", String.class).apply(l),
+                filter,
+                targetClass
             );
         };
     }
 
-    private int getLimit(ParsedOp op, long l) {
-        return op.getConfigOr("limit", 100, l);
+    private Class<?> getTargetClass(ParsedOp op, long l) {
+        String className = op.getAsFunctionOr("resultClass", "java.lang.String").apply(l);
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

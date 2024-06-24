@@ -16,44 +16,35 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.model.CollectionOptions;
-import com.datastax.astra.client.model.SimilarityMetric;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCreateCollectionOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCreateNamespaceOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiDropNamespaceOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCreateCollectionOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCreateCollectionOpDispenser.class);
-    private final LongFunction<DataApiCreateCollectionOp> opFunction;
+public class DataApiDropNamespaceOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiDropNamespaceOpDispenser.class);
+    private final LongFunction<DataApiDropNamespaceOp> opFunction;
 
-    public DataApiCreateCollectionOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiDropNamespaceOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCreateCollectionOp> createOpFunction(ParsedOp op) {
-        return (l) -> {
-            DataApiCreateCollectionOp dataApiCreateCollectionOp =
-                new DataApiCreateCollectionOp(
-                    spaceFunction.apply(l).getDatabase(),
-                    targetFunction.apply(l),
-                    this.getCollectionOptionsFromOp(op, l)
-                );
-
-            return dataApiCreateCollectionOp;
-        };
+    private LongFunction<DataApiDropNamespaceOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiDropNamespaceOp(
+            spaceFunction.apply(l).getDatabase(),
+            spaceFunction.apply(l).getNamespaceAdmin(),
+            targetFunction.apply(l)
+        );
     }
 
     @Override
     public DataApiBaseOp getOp(long value) {
         return opFunction.apply(value);
     }
-
-
 }

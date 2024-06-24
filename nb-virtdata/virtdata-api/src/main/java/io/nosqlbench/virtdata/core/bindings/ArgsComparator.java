@@ -83,8 +83,14 @@ public class ArgsComparator implements Comparator<Constructor<?>> {
         int paramLen = ctor.getParameterCount();
         int argsLen = arguments.length;
 
-        if (paramLen!=argsLen && !ctor.isVarArgs()) {
-            return MATCHRANK.INCOMPATIBLE;
+        if (ctor.isVarArgs()) {
+            if (argsLen<paramLen-1) {
+                return MATCHRANK.INCOMPATIBLE;
+            }
+        } else {
+            if (paramLen!=argsLen) {
+                return MATCHRANK.INCOMPATIBLE;
+            }
         }
 
         int len = arguments.length; // only consider varargs if some provided
@@ -94,7 +100,8 @@ public class ArgsComparator implements Comparator<Constructor<?>> {
         Class<?>[] atypes = Arrays.stream(arguments).map(Object::getClass).toArray(i -> new Class<?>[i]);
 
         for (int position = 0; position < len; position++) {
-            Class<?> ptype = ptypes[position];
+
+            Class<?> ptype = (position<ptypes.length) ? ptypes[position] : ptypes[ptypes.length-1];
             Class<?> atype = (position<atypes.length) ? atypes[position] : atypes[atypes.length-1];
             Class<?> across = WRAPPER_TYPE_MAP.get(atype);
             Class<?> pcross = WRAPPER_TYPE_MAP.get(ptype);

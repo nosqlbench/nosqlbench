@@ -137,7 +137,7 @@ public class NBCLIOptions {
     private static final String DEFAULT_CONSOLE_PATTERN = "TERSE";
     private static final String DEFAULT_LOGFILE_PATTERN = "VERBOSE";
     private final static String ENABLE_DEDICATED_VERIFICATION_LOGGER = "--enable-dedicated-verification-logging";
-    private final static String USE_NBIO_CACHE = "--use-nbio-cache";
+    private final static String DISABLE_NBIO_CACHE = "--disable-nbio-cache";
     private final static String NBIO_CACHE_FORCE_UPDATE = "--nbio-cache-force-update";
     private final static String NBIO_CACHE_NO_VERIFY = "--nbio-cache-no-verify";
     private final static String NBIO_CACHE_DIR = "--nbio-cache-dir";
@@ -213,7 +213,7 @@ public class NBCLIOptions {
     private String metricsLabelSpec = "";
     private String wantsToCatResource = "";
     private long heartbeatIntervalMs = 10000;
-    private boolean useNBIOCache = false;
+    private boolean useNBIOCache = true;
     private boolean nbioCacheForceUpdate = false;
     private boolean nbioCacheVerify = true;
     private String nbioCacheDir;
@@ -667,9 +667,9 @@ public class NBCLIOptions {
                     this.heartbeatIntervalMs =
                         Long.parseLong(this.readWordOrThrow(arglist, "heartbeat interval in ms"));
                     break;
-                case USE_NBIO_CACHE:
+                case DISABLE_NBIO_CACHE:
                     arglist.removeFirst();
-                    this.useNBIOCache = true;
+                    this.useNBIOCache = false;
                     break;
                 case NBIO_CACHE_FORCE_UPDATE:
                     arglist.removeFirst();
