@@ -110,6 +110,7 @@ public class ResolverForNBIOCache implements ContentResolver {
         while (retries < maxRetries) {
             try {
                 if (this.remoteFileExists(uri)) {
+                    checkLocalDiskSpace(uri);
                     Timer timer = new Timer();
                     try {
                         logger.info(() -> "Downloading remote file " + uri + " to cache at " + cachedFilePath);
@@ -146,9 +147,27 @@ public class ResolverForNBIOCache implements ContentResolver {
                 logger.error(() -> "Error downloading remote file to cache at " + cachedFilePath + ":" + e + ", " +
                     "retrying...");
                 retries++;
+            } catch (NBIOCacheException e) {
+                logger.error(() -> "Error downloading remote file to cache at " + cachedFilePath + ":" + e.getMessage());
+                throw new RuntimeException(e);
             }
         }
         return success;
+    }
+
+    private void checkLocalDiskSpace(URI uri) throws NBIOCacheException {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+            connection.setRequestMethod("HEAD");
+            int length = connection.getContentLength();
+            long freeSpace = Files.getFileStore(Path.of(cacheDir)).getUsableSpace();
+            if (length > (freeSpace * 0.9)) {
+                throw new NBIOCacheException("Not enough space to download file " + uri + " of size " + length +
+                    " to cache at " + cacheDir + " with only " + freeSpace + " bytes free");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     private boolean verifyChecksum(Path cachedFilePath, URLContent checksum) {
