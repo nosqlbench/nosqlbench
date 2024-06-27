@@ -16,20 +16,37 @@
 
 package io.nosqlbench.adapter.qdrant.opdispensers;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.LongFunction;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import io.nosqlbench.adapter.qdrant.QdrantDriverAdapter;
 import io.nosqlbench.adapter.qdrant.ops.QdrantBaseOp;
 import io.nosqlbench.adapter.qdrant.ops.QdrantCreateCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.qdrant.client.QdrantClient;
-import io.qdrant.client.grpc.Collections.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.LongFunction;
+import io.qdrant.client.grpc.Collections.BinaryQuantization;
+import io.qdrant.client.grpc.Collections.CompressionRatio;
+import io.qdrant.client.grpc.Collections.CreateCollection;
+import io.qdrant.client.grpc.Collections.HnswConfigDiff;
+import io.qdrant.client.grpc.Collections.OptimizersConfigDiff;
+import io.qdrant.client.grpc.Collections.ProductQuantization;
+import io.qdrant.client.grpc.Collections.QuantizationConfig;
+import io.qdrant.client.grpc.Collections.QuantizationType;
+import io.qdrant.client.grpc.Collections.ScalarQuantization;
+import io.qdrant.client.grpc.Collections.ShardingMethod;
+import io.qdrant.client.grpc.Collections.SparseIndexConfig;
+import io.qdrant.client.grpc.Collections.SparseVectorConfig;
+import io.qdrant.client.grpc.Collections.SparseVectorParams;
+import io.qdrant.client.grpc.Collections.VectorParams;
+import io.qdrant.client.grpc.Collections.VectorParamsMap;
+import io.qdrant.client.grpc.Collections.VectorsConfig;
+import io.qdrant.client.grpc.Collections.WalConfigDiff;
 
 public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<CreateCollection> {
     private static final Logger logger = LogManager.getLogger(QdrantCreateCollectionOpDispenser.class);
@@ -273,43 +290,6 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
             }
         });
         return qcBuilder.build();
-    }
-
-    /**
-     * Build the {@link HnswConfigDiff} from the provided {@link ParsedOp}.
-     *
-     * @param fieldSpec The {@link ParsedOp} containing the hnsw config data
-     * @return The {@link HnswConfigDiff} built from the provided {@link ParsedOp}
-     * @see <a href="https://qdrant.tech/documentation/concepts/indexing/#vector-index">HNSW Config</a>
-     */
-    @Deprecated
-    private HnswConfigDiff buildHnswConfigDiff(ParsedOp fieldSpec) {
-        HnswConfigDiff.Builder hnswConfigBuilder = HnswConfigDiff.newBuilder();
-        fieldSpec.getOptionalStaticValue("hnsw_config", Map.class).ifPresent(hnswConfigData -> {
-            if (hnswConfigData.isEmpty()) {
-                return;
-            } else {
-                if (hnswConfigData.containsKey("ef_construct")) {
-                    hnswConfigBuilder.setEfConstruct(((Number) hnswConfigData.get("ef_construct")).longValue());
-                }
-                if (hnswConfigData.containsKey("m")) {
-                    hnswConfigBuilder.setM(((Number) hnswConfigData.get("m")).intValue());
-                }
-                if (hnswConfigData.containsKey("full_scan_threshold")) {
-                    hnswConfigBuilder.setFullScanThreshold(((Number) hnswConfigData.get("full_scan_threshold")).intValue());
-                }
-                if (hnswConfigData.containsKey("max_indexing_threads")) {
-                    hnswConfigBuilder.setMaxIndexingThreads(((Number) hnswConfigData.get("max_indexing_threads")).intValue());
-                }
-                if (hnswConfigData.containsKey("on_disk")) {
-                    hnswConfigBuilder.setOnDisk((Boolean) hnswConfigData.get("on_disk"));
-                }
-                if (hnswConfigData.containsKey("payload_m")) {
-                    hnswConfigBuilder.setPayloadM(((Number) hnswConfigData.get("payload_m")).intValue());
-                }
-            }
-        });
-        return hnswConfigBuilder.build();
     }
 
     private LongFunction<HnswConfigDiff> buildHnswConfigDiff(LongFunction<Map> hnswConfigDiffMapLongFunc) {
