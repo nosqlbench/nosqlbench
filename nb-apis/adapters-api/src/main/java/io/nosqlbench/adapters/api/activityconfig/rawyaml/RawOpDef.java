@@ -140,7 +140,7 @@ public class RawOpDef extends RawOpFields {
                 if (v == null) {
                     throw new OpConfigError("A map key '" + k.toString() + "' with a null value was encountered. This is not" +
                         " allowed, and may be the result of using an unquoted binding, like {" + k + "}. You can simply wrap this in quotes" +
-                        " like \"{"+ k +"\"} to avoid interpreting this as a JSON map." +
+                        " like \"{"+ k +"}\" to avoid interpreting this as a JSON map." +
                         (path.size()>0 ? String.join(".",path):""));
                 } else {
                     if (v instanceof Map) {
