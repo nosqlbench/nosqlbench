@@ -1,0 +1,334 @@
+min_version: 5.21
+description: |
+  This is a template for live vector search testing.
+  Template Variables:
+
+  schema: Install the schema required to run the test
+  rampup: Measure how long it takes to load a set of embeddings
+  search: Measure how the system responds to queries while it
+   is indexing recently ingested data.
+  search: Run vector search with a set of default (or overridden) parameters
+  In all of these phases, it is important to instance the metrics with distinct names.
+  Also, aggregates of recall should include total aggregate as well as a moving average.
+
+scenarios:
+  weaviate_vectors:
+    delete_collection: >-
+      run tags==block:delete_collection
+      errors===stop
+      cycles===UNDEF threads===UNDEF
+      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+    schema_collection: >-
+      run tags==block:schema_collection
+      errors===stop
+      cycles===UNDEF threads===UNDEF
+      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+    get_collection_schema: >-
+      run tags==block:get_collection_schema
+      errors===stop
+      cycles===UNDEF threads===UNDEF
+      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+    # TODO - ,retry should be added to errors for rampup
+    rampup: >-
+      run tags==block:rampup
+      errors===warn,counter
+      cycles===TEMPLATE(train_cycles,TEMPLATE(trainsize,1000)) threads===TEMPLATE(train_threads,AUTO)
+      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+    count_vectors: >-
+      run tags==block:count_vectors
+      errors===stop
+      cycles===UNDEF threads===UNDEF
+      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+    search_points: >-
+      run tags==block:search_points
+      errors===warn,counter
+      cycles===TEMPLATE(testann_cycles,TEMPLATE(testsize,1000)) threads===TEMPLATE(testann_threads,AUTO)
+      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+
+params:
+  driver: weaviate
+  instrument: true
+
+bindings:
+  id_val: Identity();
+  row_key: ToString()
+  row_key_batch: Mul(TEMPLATE(batch_size)L); ListSizedStepped(TEMPLATE(batch_size),long->ToString());
+  # filetype=hdf5 for TEMPLATE(filetype,hdf5)
+  test_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/test");
+  relevant_indices_hdf5: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
+  distance_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/distance")
+  # TODO - remove the local path
+  train_floatlist_hdf5: HdfFileToFloatList("local/testdata/TEMPLATE(dataset).hdf5", "/train");
+  train_floatlist_hdf5_batch: Mul(TEMPLATE(batch_size)L); ListSizedStepped(TEMPLATE(batch_size),HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train"));
+  # filetype=fvec for TEMPLATE(filetype,fvec)
+  test_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_query_vectors.fvec");
+  relevant_indices_fvec: IVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_indices_query.ivec");
+  distance_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(testsize)_distances_count.fvec",TEMPLATE(dimensions),0);
+  train_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0);
+  train_floatlist_fvec_batch: Mul(TEMPLATE(batch_size,10)L); ListSizedStepped(TEMPLATE(batch_size),FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0));
+
+blocks:
+  delete_collection:
+    ops:
+      # https://weaviate.io/developers/weaviate/manage-data/collections#delete-a-collection
+      delete_col_op:
+        delete_collection: "TEMPLATE(collection)"
+
+  schema_collection1:
+    ops:
+      # https://weaviate.io/developers/weaviate/config-refs/schema#collection-object
+      create_col_op:
+        create_collection: "TEMPLATE(collection)"
+        description: "This is a key/value collection with value being the vector embedding"
+        vectorizer: "none"
+        vectorIndexType: "hnsw"
+        properties:
+          key:
+            description: "the key column, similar to partition key in Cassandra"
+            dataType: "text"
+            tokenization: "word"
+            indexFilterable: true
+            indexSearchable: true
+          value:
+            description: "the actual vector value column that stores embeddings"
+            dataType: "number[]"
+            indexFilterable: true
+
+  schema_collection:
+    ops:
+      # https://weaviate.io/developers/weaviate/config-refs/schema#collection-object
+      create_col_op:
+        create_collection: "TEMPLATE(collection)"
+        description: "This is a key/value collection with value being the vector embedding"
+        vectorConfig:
+          # below 'value' is a named-vector
+          value:
+            vectorizer: "none"
+            vectorIndexType: "hnsw"
+            vectorIndexConfig:
+            #hnsw specifc configs
+              cleanupIntervalSeconds: 300
+              distance: "cosine"
+              ef: 64 # -1 for dynamic ef, https://weaviate.io/developers/weaviate/concepts/vector-index#dynamic-ef
+              efConstruction: 128
+              maxConnections: 32 # default 64
+              dynamicEfMin: 100
+              dynamicEfMax: 500
+              dynamicEfFactor: 8
+              flatSearchCutoff: 40000
+              skip: false
+              vectorCacheMaxObjects: 1e12
+            #pq index specific configs
+              #pq:
+                #enabled: false
+                #trainingLimit: 100000
+                #segments: 2
+                #centroids: 256
+                #encoder:
+                  #type: "kmeans"
+                  #distribution: "log-normal"
+                #distribution: "log-normal"
+            #flat index specific
+              #vectorCacheMaxObjects: 1e12
+            #bq specific configs
+              #bq:
+                #enabled: false
+                #rescoreLimit: -1
+                #cache: false
+            #dynamic index specific configs:
+              #distance: "cosine"
+              #hnsw:
+                #...
+              #flat:
+                #...
+              #threshold: 10000
+        properties:
+          key:
+            description: "the key column, similar to partition key in Cassandra"
+            dataType: "text"
+            tokenization: "word"
+            indexFilterable: true
+            indexSearchable: true
+          value:
+            description: "the actual vector value column that stores embeddings"
+            dataType: "number[]"
+            indexFilterable: true
+        replicationConfig:
+          factor: 3
+        multiTenancyConfig:
+          enabled: true
+          
+  get_collection_schema:
+    ops:
+      get_collection_schema_op:
+        get_collection_schema: "TEMPLATE(collection)"
+
+  rampup:
+    ops:
+      create_objects_op:
+        create_objects: "TEMPLATE(collection)"
+        wait: TEMPLATE(upsert_point_wait,true)
+        # https://github.com/weaviate/weaviate/blob/v1.9.0/lib/api/src/grpc/proto/points.proto#L11-L15
+        # 0 - Weak, 1 - Medium, 2 - Strong
+        ordering: TEMPLATE(upsert_point_ordering,1)
+        #shard_key: "{row_key}"
+        points:
+          - id: "{id_val}"
+            payload:
+              key: "{row_key}"
+            vector:
+              # For dense vectors, use the below format
+              value: "{train_floatlist_TEMPLATE(filetype)}"
+              # For sparse vectors, use the below format
+              #value_sv:
+              #  indices: your array of numbers
+              #  values: your array of floats
+
+  search_points:
+    ops:
+      search_points_op:
+        search_points: "TEMPLATE(collection)"
+        timeout: 300 # 5 minutes
+        # https://github.com/weaviate/weaviate/blob/v1.9.0/lib/api/src/grpc/proto/points.proto#L21-L25
+        # 0 - All, 1 - Majority, 2 - Quorum
+        consistency: "Quorum"
+        with_payload: true
+        with_vector: true
+        limit: TEMPLATE(select_limit,100)
+        # Another option to set with payload is as follows
+        # with_payload: ["key1"]
+        # Another option to set with payload is as follows
+        # with_payload:
+        #   include: ["key1"]
+        #   exclude: ["key2"]
+        vector:
+          - name: "value"
+            values: "{test_floatlist_TEMPLATE(filetype)}"
+            #indices: "[1,7]"
+        verifier-init: |
+          relevancy= new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op);
+          for (int k in List.of(100)) {
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+          }
+        verifier: |
+          // driver-specific function
+          actual_indices=io.nosqlbench.adapter.weaviate.weaviateAdapterUtils.searchPointsResponseIdNumToIntArray(result)
+          // System.out.println("actual_indices ------>>>>: " + actual_indices);
+          // driver-agnostic function
+          relevancy.accept({relevant_indices_TEMPLATE(filetype)},actual_indices);
+          // because we are "verifying" although this needs to be reorganized
+          return true;
+        # More complex filtering available. See 'count_points' below for an example filter structure
+
+  create_payload_index:
+    ops:
+      create_payload_index_op:
+        create_payload_index: "TEMPLATE(collection)"
+        field_name: "field17"
+        field_type: "Keyword"
+        ordering: "Strong"
+        wait: true
+        # https://github.com/weaviate/weaviate/blob/v1.9.2/lib/api/src/grpc/proto/collections.proto#L395-L400
+
+  count_vectors:
+    ops:
+      count_points_op:
+        count_points: "TEMPLATE(collection)"
+        exact: true
+        # More complex filtering logic could be provided as follows
+        #filter:
+        #  - clause: "must"
+        #    condition: "match"
+        #    key: "field1"
+        #    value: "abc1"
+        #  - clause: "must_not"
+        #    condition: "match_any"
+        #    key: "field2"
+        #    value:
+        #      - "abc2"
+        #      - "abc3"
+        #  - clause: "should"
+        #    condition: "range"
+        #    key: "field3"
+        #    # any one of below
+        #    value:
+        #      gte: 10
+        #      lte: 20
+        #      gt: null
+        #      lt: null
+        #  - clause: "must"
+        #    condition: "nested"
+        #    key: "field4"
+        #    nested:
+        #      - condition: "match"
+        #        key: "field5[].whatsup"
+        #        value: "ni24maddy"
+        #      - condition: "match"
+        #        key: "field6"
+        #        value: true
+        #  - clause: "should"
+        #    condition: "has_id"
+        #    # no other keys are supported for this type
+        #    key: "id"
+        #    value:
+        #      - 1
+        #      - 2
+        #      - 3
+        #  - clause: "should"
+        #    condition: "match"
+        #    key: "field7"
+        #    # special case of match is text
+        #    text: "abc7"
+        #  - clause: "should"
+        #    condition: "geo_bounding_box"
+        #    key: "field8"
+        #    value:
+        #      top_left:
+        #        lat: 40.7128
+        #        lon: -74.0060
+        #      bottom_right:
+        #        lat: 40.7128
+        #        lon: -74.0060
+        #  - clause: "must_not"
+        #    condition: "geo_radius"
+        #    key: "field9"
+        #    value:
+        #      center:
+        #        lat: 40.7128
+        #        lon: -74.0060
+        #      radius: 100.0
+        #  - clause: "must"
+        #    condition: "geo_polygon"
+        #    key: "field10"
+        #    value:
+        #      exterior_points:
+        #        - lat: 30.7128
+        #          lon: -34.0060
+        #      interior_points:
+        #        - lat: 42.7128
+        #          lon: -54.0060
+        #  - clause: "should"
+        #    condition: "values_count"
+        #    key: "field11"
+        #    # Any one of below
+        #    value:
+        #      gte: 1
+        #      lte: 10
+        #      gt: null
+        #      lt: null
+        #  - clause: "must_not"
+        #    condition: "is_empty"
+        #    key: "field12"
+        #  - clause: "must"
+        #    condition: "is_null"
+        #    key: "field13"
+        #  - clause: "must"
+        #    condition: "match_except"
+        #    key: "field14"
+        #    value:
+        #      - 1
+        #      - 2
