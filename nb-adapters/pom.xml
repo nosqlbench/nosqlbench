@@ -193,6 +193,15 @@
                 <module>adapter-qdrant</module>
             </modules>
         </profile>
+        <profile>
+            <id>adapter-ragstack-module</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-ragstack</module>
+            </modules>
+        </profile>
 
     </profiles>
 </project>

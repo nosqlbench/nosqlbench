@@ -1,0 +1,9 @@
+scenarios:
+  default:
+    create_collection: run driver=ragstack tags==blocks:load_dataset cycles=1
+
+blocks:
+  load_dataset:
+    ops:
+      op1:
+        create_collection: "loadDataset"

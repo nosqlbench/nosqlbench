@@ -267,6 +267,20 @@
             </dependencies>
         </profile>
 
+        <profile>
+            <id>adapter-ragstack-include</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>adapter-ragstack</artifactId>
+                    <version>${revision}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
     </profiles>
 
 </project>

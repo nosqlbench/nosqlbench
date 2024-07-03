@@ -62,6 +62,7 @@
 
         <!-- Documentation -->
         <module>nb-docsys</module>
+        <module>nb-adapters/adapter-ragstack</module>
 
     </modules>
 
