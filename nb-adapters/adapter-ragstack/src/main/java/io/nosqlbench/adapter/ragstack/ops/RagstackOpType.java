@@ -17,5 +17,5 @@
 package io.nosqlbench.adapter.ragstack.ops;
 
 public enum RagstackOpType {
-    load_dataset,
+    add_documents,
 }

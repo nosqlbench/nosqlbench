@@ -19,13 +19,12 @@ package io.nosqlbench.adapter.ragstack.opdispensers;
 
 import io.nosqlbench.adapter.ragstack.RagstackDriverAdapter;
 import io.nosqlbench.adapter.ragstack.ops.RagstackBaseOp;
-import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class RagstackLoadDatasetOpDispenser extends RagstackOpDispenser {
-    public RagstackLoadDatasetOpDispenser(RagstackDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class RagstackAddDocumentsOpDispenser extends RagstackOpDispenser {
+    public RagstackAddDocumentsOpDispenser(RagstackDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
     }
 

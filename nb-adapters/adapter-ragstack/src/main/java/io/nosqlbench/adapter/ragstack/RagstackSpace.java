@@ -21,7 +21,6 @@ import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.Param;
 import io.nosqlbench.nb.api.errors.BasicError;
-import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.python.core.PyObject;
@@ -38,15 +37,10 @@ public class RagstackSpace {
     private final NBConfiguration config;
     private final String name;
 
-    @Getter
     private String astraToken;
-    @Getter
     private String astraApiEndpoint;
-    @Getter
     private String openApiKey;
-    @Getter
     private String namespace;
-    @Getter
     private String collection;
 
     private PyObject vstore;
@@ -74,12 +68,10 @@ public class RagstackSpace {
             pyInterp.exec("from langchain_astradb import AstraDBVectorStore");
             pyInterp.exec("from langchain_openai import OpenAIEmbeddings");
             pyInterp.exec("from langchain_core.documents import Document");
-            pyInterp.exec("vstore = AstraDBVectorStore(\n" +
-                "    embedding=OpenAIEmbeddings(),\n" +
-                "    collection_name=" + this.collection + ",\n" +
-                "    token=os.environ[\"" + this.astraToken + "\"],\n" +
-                "    api_endpoint=os.environ[\"" + this.astraApiEndpoint + "\"],\n" +
-                ")");
+            pyInterp.exec("vstore = AstraDBVectorStore(embedding=OpenAIEmbeddings(), " +
+                "collection_name=" + this.collection + ", " +
+                "token=os.environ[\"" + this.astraToken + "\"], " +
+                "api_endpoint=os.environ[\"" + this.astraApiEndpoint + "\"])");
             vstore = pyInterp.get("vstore");
         }
     }

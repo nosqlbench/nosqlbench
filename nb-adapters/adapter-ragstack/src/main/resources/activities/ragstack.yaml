@@ -1,0 +1,9 @@
+scenarios:
+  default:
+    add_documents: run driver=ragstack tags==blocks:load_dataset cycles=1
+
+blocks:
+  load_dataset:
+    ops:
+      op1:
+        add_documents: "doc1_TBD"

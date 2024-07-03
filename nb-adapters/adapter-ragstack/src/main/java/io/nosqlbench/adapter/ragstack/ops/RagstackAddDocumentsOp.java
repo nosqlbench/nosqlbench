@@ -12,18 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package io.nosqlbench.adapter.ragstack.ops;
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.python.core.PyObject;
 
-public abstract class RagstackBaseOp implements CycleOp {
-    protected final PyObject vstore;
+public class RagstackAddDocumentsOp extends RagstackBaseOp {
+    private final PyObject[] docs;
 
-    public RagstackBaseOp(PyObject vstore) {
-        this.vstore = vstore;
+    public RagstackAddDocumentsOp(PyObject vstore, PyObject[] docs) {
+        super(vstore);
+        this.docs = docs;
+    }
+
+    @Override
+    public Object apply(long value) {
+        PyObject result = vstore.invoke("add_documents", docs);
+        return result;
     }
 }

@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapter.ragstack.opdispensers;
 
-import com.datastax.astra.client.model.*;
 import io.nosqlbench.adapter.ragstack.RagstackSpace;
 import io.nosqlbench.adapter.ragstack.ops.RagstackBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;

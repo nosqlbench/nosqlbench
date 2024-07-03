@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.ragstack;
 
-import io.nosqlbench.adapter.ragstack.opdispensers.RagstackLoadDatasetOpDispenser;
+import io.nosqlbench.adapter.ragstack.opdispensers.RagstackAddDocumentsOpDispenser;
 import io.nosqlbench.adapter.ragstack.ops.RagstackBaseOp;
 import io.nosqlbench.adapter.ragstack.ops.RagstackOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
@@ -44,7 +44,7 @@ public class RagstackOpMapper implements OpMapper<RagstackBaseOp> {
         );
         logger.debug(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
         return switch (typeAndTarget.enumId) {
-            case load_dataset -> new RagstackLoadDatasetOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case add_documents -> new RagstackAddDocumentsOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 }
