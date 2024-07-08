@@ -6,4 +6,8 @@ blocks:
   load_dataset:
     ops:
       op1:
-        add_documents: "doc1_TBD"
+        add_documents: "collectionName"
+        documents:
+          - "{valid document here}"
+          - "{valid document here}"
+          - "{valid document here}"

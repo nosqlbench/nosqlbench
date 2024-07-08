@@ -18,18 +18,47 @@
 package io.nosqlbench.adapter.ragstack.opdispensers;
 
 import io.nosqlbench.adapter.ragstack.RagstackDriverAdapter;
+import io.nosqlbench.adapter.ragstack.ops.RagstackAddDocumentsOp;
 import io.nosqlbench.adapter.ragstack.ops.RagstackBaseOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.python.core.PyObject;
+import org.python.core.PyString;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 public class RagstackAddDocumentsOpDispenser extends RagstackOpDispenser {
+    private static final Logger logger = LogManager.getLogger(RagstackAddDocumentsOpDispenser.class);
+    private final LongFunction<RagstackAddDocumentsOp> opFunction;
+
     public RagstackAddDocumentsOpDispenser(RagstackDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
+        this.opFunction = createOpFunction(op);
+    }
+
+    private LongFunction<RagstackAddDocumentsOp> createOpFunction(ParsedOp op) {
+        LongFunction<List> docFunc = op.getAsRequiredFunction("documents", List.class);
+        return (l) -> new RagstackAddDocumentsOp(
+            spaceFunction.apply(l).getVstore(),
+            ListToPyArray((List<String>) docFunc.apply(l))
+        );
+    }
+
+    private PyObject[] ListToPyArray(List<String> stringList) {
+        //TODO: Implement this method
+        PyObject[] pyObjects = new PyObject[stringList.size()];
+
+        for (int i = 0; i < stringList.size(); i++) {
+            pyObjects[i] = new PyString(stringList.get(i));
+        }
+
+        return pyObjects;
     }
 
     @Override
     public RagstackBaseOp getOp(long value) {
-        return null;
+        return opFunction.apply(value);
     }
 }
