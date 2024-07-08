@@ -58,11 +58,13 @@ public class ResolverForNBIOCache implements ContentResolver {
 
     /**
      * This method is used to resolve the path of a given URI.
-     * It first checks if the URI has a scheme (http or https) and if it does, it tries to resolve the path from the cache.
+     * It first checks if the URI has a scheme (http or https) and if it does, it tries to resolve the path from the
+     * cache.
      * If the file is not in the cache, it tries to download it from the remote URL.
      * If the URI does not have a scheme, it returns null.
      *
-     * @param uri the URI to resolve the path for
+     * @param uri
+     *     the URI to resolve the path for
      * @return the resolved Path object, or null if the URI does not have a scheme or the path could not be resolved
      */
     private Path resolvePath(URI uri) {
@@ -72,8 +74,7 @@ public class ResolverForNBIOCache implements ContentResolver {
             Path cachedFilePath = Path.of(cacheDir + uri.getPath());
             if (Files.isReadable(cachedFilePath)) {
                 return pathFromLocalCache(cachedFilePath, uri);
-            }
-            else {
+            } else {
                 return pathFromRemoteUrl(uri);
             }
         }
@@ -97,7 +98,7 @@ public class ResolverForNBIOCache implements ContentResolver {
         public void run() {
             double progress = (double) totalBytesRead / fileSize * 100;
             logger.info(() -> "Progress: " + String.format("%.2f", progress) + "% completed");
-            if (totalBytesRead==fileSize) {
+            if (totalBytesRead == fileSize) {
                 cancel();
             }
         }
@@ -109,40 +110,64 @@ public class ResolverForNBIOCache implements ContentResolver {
         while (retries < maxRetries) {
             try {
                 if (this.remoteFileExists(uri)) {
-                    logger.info(() -> "Downloading remote file " + uri + " to cache at " + cachedFilePath);
-                    ReadableByteChannel channel = Channels.newChannel(uri.toURL().openStream());
-                    FileOutputStream outputStream = new FileOutputStream(cachedFilePath.toFile());
-                    long fileSize = uri.toURL().openConnection().getContentLengthLong();
-                    long totalBytesRead = 0;
-                    FileChannel fileChannel = outputStream.getChannel();
-                    ByteBuffer buffer = ByteBuffer.allocate(32768);
-
+                    checkLocalDiskSpace(uri);
                     Timer timer = new Timer();
-                    ProgressPrinter printer = new ProgressPrinter(fileSize, 0);
-                    timer.scheduleAtFixedRate(printer, 2000, 2000);
-                    while (channel.read(buffer) != -1) {
-                        buffer.flip();
-                        totalBytesRead += fileChannel.write(buffer);
-                        printer.update(totalBytesRead);
-                        buffer.clear();
-                    }
-                    outputStream.close();
-                    channel.close();
-                    logger.info(() -> "Downloaded remote file to cache at " + cachedFilePath);
-                    if(checksum == null || verifyChecksum(cachedFilePath, checksum)) {
-                        success = true;
-                        break;
+                    try {
+                        logger.info(() -> "Downloading remote file " + uri + " to cache at " + cachedFilePath);
+                        ReadableByteChannel channel = Channels.newChannel(uri.toURL().openStream());
+                        FileOutputStream outputStream = new FileOutputStream(cachedFilePath.toFile());
+                        long fileSize = uri.toURL().openConnection().getContentLengthLong();
+                        long totalBytesRead = 0;
+                        FileChannel fileChannel = outputStream.getChannel();
+                        ByteBuffer buffer = ByteBuffer.allocate(32768);
+
+                        ProgressPrinter printer = new ProgressPrinter(fileSize, 0);
+                        timer.scheduleAtFixedRate(printer, 2000, 2000);
+                        while (channel.read(buffer) != -1) {
+                            buffer.flip();
+                            totalBytesRead += fileChannel.write(buffer);
+                            printer.update(totalBytesRead);
+                            buffer.clear();
+                        }
+                        outputStream.close();
+                        channel.close();
+                        logger.info(() -> "Downloaded remote file to cache at " + cachedFilePath);
+                        if (checksum == null || verifyChecksum(cachedFilePath, checksum)) {
+                            success = true;
+                            break;
+                        }
+                    } finally {
+                        timer.cancel();
                     }
                 } else {
                     logger.error(() -> "Error downloading remote file to cache at " + cachedFilePath + ", retrying...");
                     retries++;
                 }
             } catch (IOException e) {
-                logger.error(() -> "Error downloading remote file to cache at " + cachedFilePath + ", retrying...");
+                logger.error(() -> "Error downloading remote file to cache at " + cachedFilePath + ":" + e + ", " +
+                    "retrying...");
                 retries++;
+            } catch (NBIOCacheException e) {
+                logger.error(() -> "Error downloading remote file to cache at " + cachedFilePath + ":" + e.getMessage());
+                throw new RuntimeException(e);
             }
         }
         return success;
+    }
+
+    private void checkLocalDiskSpace(URI uri) throws NBIOCacheException {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+            connection.setRequestMethod("HEAD");
+            int length = connection.getContentLength();
+            long freeSpace = Files.getFileStore(Path.of(cacheDir)).getUsableSpace();
+            if (length > (freeSpace * 0.9)) {
+                throw new NBIOCacheException("Not enough space to download file " + uri + " of size " + length +
+                    " to cache at " + cacheDir + " with only " + freeSpace + " bytes free");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     private boolean verifyChecksum(Path cachedFilePath, URLContent checksum) {
@@ -174,19 +199,21 @@ public class ResolverForNBIOCache implements ContentResolver {
      * Then it tries to download the file and if successful, it generates a SHA256 checksum for the downloaded file.
      * It then compares the generated checksum with the remote checksum.
      * If the checksums match, it returns the path to the cached file.
-     * If the checksums don't match or if there was an error during the download, it cleans up the cache and throws a RuntimeException.
+     * If the checksums don't match or if there was an error during the download, it cleans up the cache and throws a
+     * RuntimeException.
      *
-     * @param uri the URI of the remote file to download
+     * @param uri
+     *     the URI of the remote file to download
      * @return the Path to the downloaded file in the local cache
-     * @throws RuntimeException if there was an error during the download or if the checksums don't match
+     * @throws RuntimeException
+     *     if there was an error during the download or if the checksums don't match
      */
     private Path pathFromRemoteUrl(URI uri) {
         Path cachedFilePath = Path.of(cacheDir + uri.getPath());
         createCacheDir(cachedFilePath);
         if (!verifyChecksum) {
             return execute(NBIOResolverConditions.UPDATE_NO_VERIFY, cachedFilePath, uri);
-        }
-        else {
+        } else {
             return execute(NBIOResolverConditions.UPDATE_AND_VERIFY, cachedFilePath, uri);
         }
     }
@@ -214,7 +241,7 @@ public class ResolverForNBIOCache implements ContentResolver {
     private Path execute(NBIOResolverConditions condition, Path cachedFilePath, URI uri) {
         String remoteChecksumFileStr = uri.getPath() + ".sha256";
         URLContent checksum = resolveURI(URI.create(uri.toString().replace(uri.getPath(), remoteChecksumFileStr)));
-        switch(condition) {
+        switch (condition) {
             case UPDATE_AND_VERIFY:
                 if (checksum == null) {
                     logger.warn(() -> "Remote checksum file " + remoteChecksumFileStr + " does not exist. Proceeding without verification");
@@ -244,8 +271,7 @@ public class ResolverForNBIOCache implements ContentResolver {
                     if (localChecksum.equals(remoteChecksum)) {
                         logger.info(() -> "Checksums match, returning cached file " + cachedFilePath);
                         return cachedFilePath;
-                    }
-                    else {
+                    } else {
                         logger.warn(() -> "Checksums do not match, rehydrating cache " + cachedFilePath);
                         return pathFromRemoteUrl(uri);
                     }
@@ -269,10 +295,13 @@ public class ResolverForNBIOCache implements ContentResolver {
      * If the checksums don't match, it deletes the cached file and downloads it from the remote URL.
      * If the remote file or checksum does not exist, it returns the cached file.
      *
-     * @param cachedFilePath the Path to the cached file
-     * @param uri the URI of the remote file
+     * @param cachedFilePath
+     *     the Path to the cached file
+     * @param uri
+     *     the URI of the remote file
      * @return the Path to the cached file
-     * @throws RuntimeException if there was an error during the checksum comparison or if the checksums don't match
+     * @throws RuntimeException
+     *     if there was an error during the checksum comparison or if the checksums don't match
      */
     private Path pathFromLocalCache(Path cachedFilePath, URI uri) {
 
