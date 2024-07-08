@@ -74,7 +74,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: docker test build
-        uses: docker/build-push-action@v5.3.0
+        uses: docker/build-push-action@v6.2.0
         with:
           context: .
           file: Dockerfile
@@ -115,7 +115,7 @@ jobs:
           scripts/bump-minor-version
 
       - name: docker push to hub
-        uses: docker/build-push-action@v5.3.0
+        uses: docker/build-push-action@v6.2.0
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -126,7 +126,7 @@ jobs:
 
       #  https://github.com/softprops/action-gh-release
       - name: create github release
-        uses: softprops/action-gh-release@v2.0.5
+        uses: softprops/action-gh-release@v2.0.6
         if: startsWith(github.ref, 'refs/tags/')
         with:
           #          body: ${{ steps.prepare_summary.outputs.release_summary }}
