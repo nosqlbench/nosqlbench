@@ -28,14 +28,19 @@ import java.util.function.LongFunction;
 
 public class Neo4JSyncWriteTxnOpDispenser extends Neo4JBaseOpDispenser {
 
-    public Neo4JSyncWriteTxnOpDispenser(Neo4JDriverAdapter adapter, ParsedOp op, LongFunction<Neo4JSpace> spaceFunc, String requiredTemplateKey) {
+    public Neo4JSyncWriteTxnOpDispenser(
+        Neo4JDriverAdapter adapter,
+        ParsedOp op,
+        LongFunction<Neo4JSpace> spaceFunc,
+        String requiredTemplateKey
+    ) {
         super(adapter, op, spaceFunc, requiredTemplateKey);
     }
 
     @Override
     public LongFunction<Neo4JSyncWriteTxnOp> createOpFunc() {
         return l -> new Neo4JSyncWriteTxnOp(
-            spaceFunc.apply(l).getDriver().session(Session.class),
+            sessionFunc.apply(l),
             queryFunc.apply(l)
         );
     }
