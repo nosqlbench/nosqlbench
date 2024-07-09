@@ -19,6 +19,7 @@ package io.nosqlbench.engine.cli.atfiles;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.nbio.NBPathsAPI;
+import io.nosqlbench.nb.api.system.NBEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.snakeyaml.engine.v2.api.Load;
@@ -145,8 +146,9 @@ public class NBAtFile {
         while (iter.hasNext()) {
             String word = iter.next();
             String modified = word.replaceAll("\\$\\{DIR}",parent.toString());
+            Optional<String> interpolatedString = NBEnvironment.INSTANCE.interpolate(modified);
             iter.remove();
-            iter.add(modified);
+            iter.add(interpolatedString.orElse(""));
         }
         return formatted;
     }
