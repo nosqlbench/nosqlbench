@@ -35,7 +35,7 @@ public class Neo4JAsyncAutoCommitOpDispenser extends Neo4JBaseOpDispenser {
     @Override
     public LongFunction<Neo4JAsyncAutoCommitOp> createOpFunc() {
         return l -> new Neo4JAsyncAutoCommitOp(
-            spaceFunc.apply(l).getDriver().session(AsyncSession.class),
+            asyncSessionFunc.apply(l),
             queryFunc.apply(l)
         );
     }

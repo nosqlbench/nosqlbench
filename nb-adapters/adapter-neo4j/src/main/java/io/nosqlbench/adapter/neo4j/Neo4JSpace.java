@@ -24,6 +24,8 @@ import org.apache.logging.log4j.Logger;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.*;
+import org.neo4j.driver.async.AsyncSession;
 
 import java.util.Optional;
 
@@ -32,6 +34,7 @@ public class Neo4JSpace implements AutoCloseable {
     private final static Logger logger = LogManager.getLogger(Neo4JSpace.class);
     private final String space;
     private Driver driver;
+    private SessionConfig sessionConfig;
 
     public Neo4JSpace(String space, NBConfiguration cfg) {
         this.space = space;
@@ -40,6 +43,10 @@ public class Neo4JSpace implements AutoCloseable {
     }
 
     private Driver initializeDriver(NBConfiguration cfg) {
+        SessionConfig.Builder builder = SessionConfig.builder();
+        cfg.getOptional("database").ifPresent(builder::withDatabase);
+        this.sessionConfig = builder.build();
+
         String dbURI = cfg.get("db_uri");
         Optional<String> usernameOpt = cfg.getOptional("username");
         Optional<String> passwordOpt = cfg.getOptional("password");
@@ -84,11 +91,20 @@ public class Neo4JSpace implements AutoCloseable {
             .add(Param.required("db_uri", String.class))
             .add(Param.optional("username", String.class))
             .add(Param.optional("password", String.class))
+            .add(Param.optional("database", String.class))
             .asReadOnly();
     }
 
     public Driver getDriver() {
         return driver;
+    }
+
+    public AsyncSession newAsyncSession() {
+        return driver.session(AsyncSession.class,sessionConfig);
+    }
+
+    public Session newSession() {
+        return driver.session(sessionConfig);
     }
 
     @Override

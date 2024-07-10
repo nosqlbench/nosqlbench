@@ -23,6 +23,9 @@ import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import org.neo4j.driver.Query;
+import org.neo4j.driver.Session;
+import org.neo4j.driver.SessionConfig;
+import org.neo4j.driver.async.AsyncSession;
 
 import java.util.Collections;
 import java.util.function.LongFunction;
@@ -35,6 +38,8 @@ public abstract class Neo4JBaseOpDispenser extends BaseOpDispenser<Neo4JBaseOp, 
     protected final LongFunction<Query> queryFunc;
     protected final LongFunction<Map> paramFunc;
     protected final LongFunction<Neo4JBaseOp> opFunc;
+    protected final LongFunction<Session> sessionFunc;
+    protected final LongFunction<AsyncSession> asyncSessionFunc;
 
     public Neo4JBaseOpDispenser(Neo4JDriverAdapter adapter, ParsedOp op, LongFunction<Neo4JSpace> spaceFunc, String requiredTemplateKey) {
         super(adapter, op);
@@ -43,11 +48,31 @@ public abstract class Neo4JBaseOpDispenser extends BaseOpDispenser<Neo4JBaseOp, 
         this.paramFunc = createParamFunc(op);
         this.queryFunc = createQueryFunc();
         this.opFunc = (LongFunction<Neo4JBaseOp>) createOpFunc();
+        this.sessionFunc = getSessionFunction(spaceFunc,op);
+        this.asyncSessionFunc = getAsyncSessionFunction(spaceFunc,op);
     }
 
     private LongFunction<Map> createParamFunc(ParsedOp op) {
         return op.getAsOptionalFunction("query_params", Map.class)
             .orElse(l -> Collections.emptyMap());
+    }
+
+    private LongFunction<Session> getSessionFunction(LongFunction<Neo4JSpace> spaceFunc, ParsedOp op) {
+        LongFunction<SessionConfig.Builder> scbF = (long l) -> SessionConfig.builder();
+        scbF = op.enhanceFuncOptionally(scbF,"database",String.class,SessionConfig.Builder::withDatabase);
+        LongFunction<SessionConfig.Builder> finalScbF = scbF;
+        LongFunction<SessionConfig> scF = (long l) -> finalScbF.apply(l).build();
+        return (long l) -> spaceFunc.apply(l).getDriver().session(Session.class,scF.apply(l));
+
+    }
+
+    private LongFunction<AsyncSession> getAsyncSessionFunction(LongFunction<Neo4JSpace> spaceFunc, ParsedOp op) {
+        LongFunction<SessionConfig.Builder> scbF = (long l) -> SessionConfig.builder();
+        scbF = op.enhanceFuncOptionally(scbF,"database",String.class,SessionConfig.Builder::withDatabase);
+        LongFunction<SessionConfig.Builder> finalScbF = scbF;
+        LongFunction<SessionConfig> scF = (long l) -> finalScbF.apply(l).build();
+        return (long l) -> spaceFunc.apply(l).getDriver().session(AsyncSession.class,scF.apply(l));
+
     }
 
     /**

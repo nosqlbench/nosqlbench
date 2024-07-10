@@ -34,7 +34,7 @@ public class Neo4JAsyncReadTxnOpDispenser extends Neo4JBaseOpDispenser {
     @Override
     public LongFunction<Neo4JAsyncReadTxnOp> createOpFunc() {
         return l -> new Neo4JAsyncReadTxnOp(
-            spaceFunc.apply(l).getDriver().session(AsyncSession.class),
+            asyncSessionFunc.apply(l),
             queryFunc.apply(l)
         );
     }
