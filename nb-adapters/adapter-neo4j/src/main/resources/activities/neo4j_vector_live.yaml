@@ -1,0 +1,135 @@
+min_version: 5.21.1
+description: |
+  Vector workload for Neo4J
+
+  Template Variables:
+  TEMPLATE(dataset)
+  TEMPLATE(node_label,Node)
+  TEMPLATE(k,100)
+  TEMPLATE(batch_size)
+  TEMPLATE(delete_batch_size,1000)
+
+params:
+  driver: neo4j
+  instrument: true
+  labels:
+    target: TEMPLATE(targetname,neo4j)
+  database: TEMPLATE(database,neo4j)
+
+scenarios:
+  default:
+    # Remove any existing data
+    drop: >-
+      run tags='block:drop' threads===1 cycles===UNDEF
+      labels='target:TEMPLATE(targetname,neo4j)'
+      errors=count
+    # Install the schema required to run the test
+    schema: >-
+      run tags='block:schema' threads===1 cycles===UNDEF
+      labels='target:TEMPLATE(targetname,neo4j)'
+    # Load training data, measure how long it takes to load
+    rampup: >-
+      run tags='block:rampup_batch' threads=TEMPLATE(rampup_threads,auto)
+      cycles===TEMPLATE(rampup_cycles,TEMPLATE(trainsize))
+      errors=count,warn
+      labels='target:TEMPLATE(targetname,neo4j)'
+    # Measure how the system responds to queries under a read only workload
+    search_and_verify: >-
+      run alias=search_and_verify tags='block:search_and_verify'
+      threads=TEMPLATE(search_threads,auto) cycles===TEMPLATE(search_cycles,TEMPLATE(testsize))
+      errors=count,warn
+      labels='target:TEMPLATE(targetname,neo4j)'
+    verify_recall: >-
+      run alias=verify_recall tags='block:search_and_verify'
+      threads=TEMPLATE(search_threads,auto) cycles===TEMPLATE(search_cycles,TEMPLATE(testsize))
+      errors=count,warn
+      labels='target:TEMPLATE(targetname,neo4j)'
+
+
+bindings:
+  id: ToString()
+  id_batch: Mul(TEMPLATE(batch_size)L); ListSizedStepped(TEMPLATE(batch_size),long->ToString());
+  train_vector: HdfFileToFloatList("TEMPLATE(dataset)", "/train");
+  train_vector_batch: Mul(TEMPLATE(batch_size)L); ListSizedStepped(TEMPLATE(batch_size),HdfFileToFloatList("TEMPLATE(dataset)", "/train"));
+  test_vector: HdfFileToFloatList("TEMPLATE(dataset)", "/test");
+  relevant_indices: HdfFileToIntArray("TEMPLATE(dataset)", "/neighbors")
+
+blocks:
+  # TODO: Node deletion times out; attempt this in future: CREATE OR REPLACE DATABASE neo4j
+  drop:
+    ops:
+      # Reference: https://support.neo4j.com/s/article/360059882854-Deleting-large-numbers-of-nodes#h_01H95CXNJ8TN4126T3Y01BRWKS
+      delete_nodes:
+        sync_autocommit: |
+          MATCH (n)
+          CALL { WITH n
+          DETACH DELETE n
+          } IN TRANSACTIONS OF $delete_batch_size ROWS;
+        query_params:
+          delete_batch_size: TEMPLATE(delete_batch_size,1000)
+      drop_index:
+        sync_autocommit: DROP INDEX $index_name IF EXISTS
+        query_params:
+          index_name: vector_index
+
+  schema:
+    ops:
+      create_vector_index:
+        sync_autocommit: |
+          CREATE VECTOR INDEX $index_name IF NOT EXISTS FOR (n:TEMPLATE(node_label,Node))
+          ON (n.embedding) OPTIONS
+          {indexConfig: {`vector.dimensions`: $dimensions, `vector.similarity_function`: $similarity_function}}
+        query_params:
+          index_name: vector_index
+          dimensions: TEMPLATE(dimensions)
+          similarity_function: TEMPLATE(similarity_function,cosine)
+
+  rampup:
+    ops:
+      insert_node:
+        async_write_transaction: |
+          CREATE (v:TEMPLATE(node_label,Node) {id: $id, embedding: $vector})
+        query_params:
+          id: '{id}'
+          vector: '{train_vector}'
+
+  rampup_batch:
+    ops:
+      # Reference: https://community.neo4j.com/t/unwind-multiple-arrays-to-set-property/59908/5
+      insert_nodes:
+        async_write_transaction: |
+          WITH $id_list as ids, $vector_list as vectors
+          UNWIND RANGE(0, size(ids) - 1) as idx
+          CREATE (v:TEMPLATE(node_label,Node) {id: ids[idx], embedding: vectors[idx]})
+        query_params:
+          id_list: '{id_batch}'
+          vector_list: '{train_vector_batch}'
+
+  search_and_verify:
+    ops:
+      search:
+        async_read_transaction: |
+          WITH $query_vector AS queryVector
+          CALL db.index.vector.queryNodes($index_name, $k, queryVector)
+          YIELD node
+          RETURN node.id
+        query_params:
+          query_vector: '{test_vector}'
+          index_name: vector_index
+          k: TEMPLATE(k,100)
+        verifier-init: |
+          relevancy = new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op);
+          for (int k in List.of(100)) {
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+          }
+        verifier: |
+          // result is a Record[]
+          values = io.nosqlbench.adapter.neo4j.Neo4JAdapterUtils.getFieldForAllRecords(result, "node.id")
+          ann = values.collect { it.toString().toInteger() }.toArray(new Integer[values.size()])
+          knn = {relevant_indices}
+          relevancy.accept(knn, ann);
+          return true;
