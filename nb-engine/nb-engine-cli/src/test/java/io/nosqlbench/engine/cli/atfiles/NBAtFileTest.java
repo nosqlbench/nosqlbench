@@ -80,8 +80,15 @@ class NBAtFileTest {
     }
 
     @Test
-    public void testAtfileRecursion() {
+    public void testAtfileSimpleRecursion() {
         LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/simple_recursion.yaml");
         assertThat(strings).containsExactly("arg1","arg1","arg2","arg3","arg3");
     }
+
+    @Test
+    public void testAtfileDoubleRecursion() {
+        LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/double_recursion.yaml");
+        assertThat(strings).containsExactly("arg1","arg1","arg1","arg2","arg3","arg3","arg3","deepval");
+    }
+
 }
