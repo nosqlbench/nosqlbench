@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.neo4j;
 
 import io.nosqlbench.nb.api.config.standard.*;
 
+import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,6 +28,10 @@ import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.*;
 import org.neo4j.driver.async.AsyncSession;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 public class Neo4JSpace implements AutoCloseable {
@@ -48,42 +53,59 @@ public class Neo4JSpace implements AutoCloseable {
         this.sessionConfig = builder.build();
 
         String dbURI = cfg.get("db_uri");
+
         Optional<String> usernameOpt = cfg.getOptional("username");
+        Optional<String> userfileOpt = cfg.getOptional("userfile");
         Optional<String> passwordOpt = cfg.getOptional("password");
-        String username;
-        String password;
-        // user has supplied both username and password
-        if (usernameOpt.isPresent() && passwordOpt.isPresent()) {
+        Optional<String> passfileOpt = cfg.getOptional("passfile");
+
+        String username = null;
+        if (usernameOpt.isPresent()) {
             username = usernameOpt.get();
-            password = passwordOpt.get();
-            logger.info(this.space + ": Creating new Neo4J driver with [" +
-                "dbURI = " + dbURI +
-                ", username = " + username +
-                ", password = " + Neo4JAdapterUtils.maskDigits(password) +
-                "]"
-            );
+        } else if (userfileOpt.isPresent()) {
+            Path path = Paths.get(userfileOpt.get());
+            try {
+                username = Files.readAllLines(path).get(0);
+            } catch (IOException e) {
+                String error = "Error while reading username from file:" + path;
+                logger.error(error, e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        String password = null;
+        if (username != null) {
+
+            if (passwordOpt.isPresent()) {
+                password = passwordOpt.get();
+            } else if (passfileOpt.isPresent()) {
+                Path path = Paths.get(passfileOpt.get());
+                try {
+                    password = Files.readAllLines(path).get(0);
+                } catch (IOException e) {
+                    String error = "Error while reading password from file:" + path;
+                    logger.error(error, e);
+                    throw new RuntimeException(e);
+                }
+            } else {
+                String error = "username is present, but neither password nor passfile are defined.";
+                logger.error(error);
+                throw new RuntimeException(error);
+            }
+        }
+
+        if ((username == null) != (password == null)) {
+            throw new BasicError("You must provide both username and password, or neither, with either " +
+                "username|userfile and password|passfile options");
+        }
+        if (username != null) {
             return GraphDatabase.driver(dbURI, AuthTokens.basic(username, password));
+        } else {
+
         }
-        // user has only supplied username
-        else if (usernameOpt.isPresent()) {
-            String error = "username is present, but password is not defined.";
-            logger.error(error);
-            throw new RuntimeException(error);
-        }
-        // user has only supplied password
-        else if (passwordOpt.isPresent()) {
-            String error = "password is present, but username is not defined.";
-            logger.error(error);
-            throw new RuntimeException(error);
-        }
-        // user has supplied neither
-        else {
-            logger.info(this.space + ": Creating new Neo4J driver with [" +
-                "dbURI = " + dbURI +
-                "]"
-            );
-            return GraphDatabase.driver(dbURI);
-        }
+
+        // user has supplied both username and password
+        return GraphDatabase.driver(dbURI);
     }
 
     public static NBConfigModel getConfigModel() {
@@ -92,6 +114,8 @@ public class Neo4JSpace implements AutoCloseable {
             .add(Param.optional("username", String.class))
             .add(Param.optional("password", String.class))
             .add(Param.optional("database", String.class))
+            .add(Param.optional("userfile", String.class))
+            .add(Param.optional("passfile", String.class))
             .asReadOnly();
     }
 
@@ -100,7 +124,7 @@ public class Neo4JSpace implements AutoCloseable {
     }
 
     public AsyncSession newAsyncSession() {
-        return driver.session(AsyncSession.class,sessionConfig);
+        return driver.session(AsyncSession.class, sessionConfig);
     }
 
     public Session newSession() {
@@ -109,7 +133,7 @@ public class Neo4JSpace implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        if (driver != null){
+        if (driver != null) {
             driver.close();
         }
     }
