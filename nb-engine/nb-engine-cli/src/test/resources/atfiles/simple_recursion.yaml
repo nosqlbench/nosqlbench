@@ -1,0 +1,3 @@
+- arg1
+- include:${DIR}/simple_list.yaml
+- arg3

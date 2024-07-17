@@ -21,6 +21,7 @@ import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.nbio.NBPathsAPI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
@@ -49,6 +50,12 @@ public class NBAtFile {
      *     <LI>{@code >-- } asserts each value starts with global option syntax (--)</LI>
      * </UL>
      *
+     * <P>Files can be included recursively using a format like <PRE>{@code
+     * - include:${DIR}/somefile.yaml
+     * }</PRE></P>
+     *
+     *  Standard formatting specifiers above should work in this mode as well.
+     *
      * @param processInPlace The linked list which is statefully modified. If you need
      *                       an unmodified copy, then this is the responsibility of the caller.
      * @return An updated list with all values expanded and injected
@@ -59,10 +66,10 @@ public class NBAtFile {
         ListIterator<String> iter = processInPlace.listIterator();
         while (iter.hasNext()) {
             String spec = iter.next();
-            if (spec.startsWith("@")) {
+            if (spec.startsWith("@") || spec.startsWith("include=")|| spec.startsWith("include:")) {
                 iter.previous();
                 iter.remove();
-                LinkedList<String> spliceIn = includeAt(spec);
+                LinkedList<String> spliceIn = includeAt(spec.replaceFirst("include=","@").replaceFirst("include:","@"));
                 for (String s : spliceIn) {
                     iter.add(s);
                 }
@@ -89,6 +96,22 @@ public class NBAtFile {
      * @return The linked list of arguments which is to be spliced into the caller's command list
      */
     public static LinkedList<String> includeAt(String spec) {
+        LinkedList<String> toInclude = doInclude(spec);
+        boolean recurse = false;
+        for (String s : toInclude) {
+            if (s.startsWith("include=")||s.startsWith("include:")) {
+                recurse=true;
+                break;
+            }
+        }
+        if (recurse) {
+            toInclude=includeAt(toInclude);
+        }
+        return toInclude;
+
+    }
+
+    private static @NotNull LinkedList<String> doInclude(String spec) {
         Matcher matcher = includePattern.matcher(spec);
         if (matcher.matches()) {
             String filepathSpec = matcher.group("filepath");
@@ -96,12 +119,11 @@ public class NBAtFile {
             String formatSpec = matcher.group("formatter");
             String[] datapath = (dataPathSpec!=null && !dataPathSpec.isBlank()) ? dataPathSpec.split("(/|\\.)") : new String[] {};
 
-            String[] parts = filepathSpec.split("\\.",2);
-            if (parts.length==2 && !parts[1].toLowerCase().matches("yaml")) {
+            String filename = Path.of(filepathSpec).getFileName().toString();
+            if (filename.contains(".") && !(filename.toLowerCase().endsWith("yaml"))) {
                 throw new RuntimeException("Only the yaml format and extension is supported for at-files." +
-                    " You specified " + parts[1]);
+                    " You specified " + filepathSpec);
             }
-
             filepathSpec=(filepathSpec.endsWith(".yaml") ? filepathSpec : filepathSpec+".yaml");
             Path atPath = Path.of(filepathSpec);
 
@@ -135,7 +157,6 @@ public class NBAtFile {
         } else {
             throw new RuntimeException("Unable to match at-file specifier: " + spec + " to pattern '" + includePattern.pattern() + "'");
         }
-
     }
 
     private static LinkedList<String> interposePath(LinkedList<String> formatted, Path atPath) {
