@@ -72,6 +72,7 @@ public class CGWorkloadExporter implements BundledApp {
     private String namingTemplate;
     private double partitionMultiplier;
     private int quantizerDigits;
+    private boolean disableIfNotExists = false;
     private Map<String, List<String>> blockplan = Map.of();
 
     private final Map<String, Double> timeouts = new HashMap<String, Double>(Map.of(
@@ -163,6 +164,9 @@ public class CGWorkloadExporter implements BundledApp {
         configureTimeouts(cfgmap.get("timeouts"));
         configureBlocks(cfgmap.get("blockplan"));
         configureQuantizerDigits(cfgmap.get("quantizer_digits"));
+        if (cfgmap.get("disable_if_not_exists").equals(true)) {
+            disableIfNotExists = true;
+        }
 
         this.model = CqlModelParser.parse(ddl, srcpath);
         List<String> errorlist = model.getReferenceErrors();
@@ -736,9 +740,10 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genKeyspaceDDL(CqlKeyspaceDef keyspace) {
         return """
-                create keyspace KEYSPACE
+                create keyspace IF_NOT_EXISTS KEYSPACE
                 with replication = {REPLICATION}DURABLEWRITES?;
                 """
+                .replace("IF_NOT_EXISTS", disableIfNotExists ? "" : "if not exists")
                 .replace("KEYSPACE", keyspace.getName())
                 .replace("REPLICATION", keyspace.getReplicationData())
                 .replace("DURABLEWRITES?", keyspace.isDurableWrites() ? "" : "\n and durable writes = false")
@@ -766,10 +771,11 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genTypeDDL(CqlType type) {
         return """
-                create type KEYSPACE.TYPENAME (
+                create type IF_NOT_EXISTS KEYSPACE.TYPENAME (
                 TYPEDEF
                 );
                 """
+                .replace("IF_NOT_EXISTS", disableIfNotExists ? "" : "if not exists")
                 .replace("KEYSPACE", type.getKeyspace().getName())
                 .replace("TYPENAME", type.getName())
                 .replace("TYPEDEF", type.getColumnDefs().stream()
@@ -782,11 +788,12 @@ public class CGWorkloadExporter implements BundledApp {
         }
 
         return """
-                create table if not exists KEYSPACE.TABLE (
+                create table IF_NOT_EXISTS KEYSPACE.TABLE (
                 COLUMN_DEFS,
                 primary key (PRIMARYKEY)
                 )CLUSTERING;
                 """
+                .replace("IF_NOT_EXISTS", disableIfNotExists ? "" : "if not exists")
                 .replace("KEYSPACE", cqltable.getKeyspace().getName())
                 .replace("TABLE", cqltable.getName())
                 .replace("COLUMN_DEFS", genTableColumnDDL(cqltable))
