@@ -64,28 +64,10 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             List<Filter> orFilterList = new ArrayList<>();
             for (Map<String,Object> filterFields : filters) {
                 switch ((String)filterFields.get("conjunction")) {
-                    case "and" -> {
-                        switch (filterFields.get("operator").toString()) {
-                            case "lt" ->
-                                andFilterList.add(Filters.lt(filterFields.get("field").toString(), (long) filterFields.get("value")));
-                            case "gt" ->
-                                andFilterList.add(Filters.gt(filterFields.get("field").toString(), (long) filterFields.get("value")));
-                            case "eq" ->
-                                andFilterList.add(Filters.eq(filterFields.get("field").toString(), filterFields.get("value")));
-                            default -> logger.error(() -> "Operation " + filterFields.get("operator") + " not supported");
-                        }
-                    }
-                    case "or" -> {
-                        switch (filterFields.get("operator").toString()) {
-                            case "lt" ->
-                                orFilterList.add(Filters.lt(filterFields.get("field").toString(), (long) filterFields.get("value")));
-                            case "gt" ->
-                                orFilterList.add(Filters.gt(filterFields.get("field").toString(), (long) filterFields.get("value")));
-                            case "eq" ->
-                                orFilterList.add(Filters.eq(filterFields.get("field").toString(), filterFields.get("value")));
-                            default -> logger.error(() -> "Operation " + filterFields.get("operator") + " not supported");
-                        }
-                    }
+                    case "and" ->
+                        addOperatorFilter(andFilterList, filterFields.get("operator").toString(), filterFields.get("field").toString(), filterFields.get("value"));
+                    case "or" ->
+                        addOperatorFilter(orFilterList, filterFields.get("operator").toString(), filterFields.get("field").toString(), filterFields.get("value"));
                     default -> logger.error(() -> "Conjunction " + filterFields.get("conjunction") + " not supported");
                 }
             }
@@ -95,6 +77,38 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                 filter = Filters.or(orFilterList.toArray(new Filter[0]));
         }
         return filter;
+    }
+
+    protected void addOperatorFilter(List<Filter> filtersList, String operator, String fieldName, Object fieldValue) {
+        switch (operator) {
+            case "all" ->
+                filtersList.add(Filters.all(fieldName, fieldValue));
+            case "eq" ->
+                filtersList.add(Filters.eq(fieldName, fieldValue));
+            case "exists" -> {
+                if (fieldValue != null) {
+                    logger.warn(() -> "'exists' operator does not support value field");
+                }
+                filtersList.add(Filters.exists(fieldName));
+            }
+            case "gt" ->
+                filtersList.add(Filters.gt(fieldName, (long) fieldValue));
+            case "gte" ->
+                filtersList.add(Filters.gte(fieldName, (long) fieldValue));
+            case "hasSize" ->
+                filtersList.add(Filters.hasSize(fieldName, (int) fieldValue));
+            case "in" ->
+                filtersList.add(Filters.in(fieldName, fieldValue));
+            case "lt" ->
+                filtersList.add(Filters.lt(fieldName, (long) fieldValue));
+            case "lte" ->
+                filtersList.add(Filters.lte(fieldName, (long) fieldValue));
+            case "ne" ->
+                filtersList.add(Filters.ne(fieldName, fieldValue));
+            case "nin" ->
+                filtersList.add(Filters.nin(fieldName, fieldValue));
+            default -> logger.error(() -> "Operation '" + operator + "' not supported");
+        }
     }
 
     protected Update getUpdates(ParsedOp op, long l) {
