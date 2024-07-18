@@ -18,6 +18,8 @@ package io.nosqlbench.cqlgen.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.nosqlbench.cqlgen.api.CGModelTransformer;
+import io.nosqlbench.cqlgen.transformers.CGNameObfuscator;
 import io.nosqlbench.nb.api.apps.BundledApp;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
@@ -172,6 +174,14 @@ public class CGWorkloadExporter implements BundledApp {
             }
             throw new RuntimeException("there were " + errorlist.size() + " reference errors in the model.");
         }
+
+        for (CGModelTransformer transformer : modelTransformers.get()) {
+            // pass the src filepath as a json for the mapfile path for the CGNameObfuscator transformer
+            if (transformer instanceof CGNameObfuscator obfuscator) {
+                obfuscator.setMapFile(srcpath.toString().replace(".cql", ".json"));
+            }
+        }
+
         this.model = modelTransformers.apply(this.model);
 
         String workload = getWorkloadAsYaml();
