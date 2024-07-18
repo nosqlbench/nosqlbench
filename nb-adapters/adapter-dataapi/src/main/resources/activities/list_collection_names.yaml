@@ -6,4 +6,4 @@ blocks:
   list_collection_names:
     ops:
       op1:
-        list_collection_names: "TEMPLATE(collection1)"
+        list_collection_names: TBD
