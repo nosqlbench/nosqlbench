@@ -72,7 +72,7 @@ public class QdrantSpace implements AutoCloseable {
         boolean useTls = cfg.getOptional("use_tls").map(Boolean::parseBoolean).orElse(true);
 
         var builder = QdrantGrpcClient.newBuilder(uri, grpcPort, useTls);
-        var Optional<requiredToken> = cfg.getOptional("token_file")
+        String requiredToken = cfg.getOptional("token_file")
             .map(Paths::get)
             .map(
                 tokenFilePath -> {

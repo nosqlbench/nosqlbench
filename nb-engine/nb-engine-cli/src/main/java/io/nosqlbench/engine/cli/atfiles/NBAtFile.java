@@ -120,12 +120,11 @@ public class NBAtFile {
             String formatSpec = matcher.group("formatter");
             String[] datapath = (dataPathSpec!=null && !dataPathSpec.isBlank()) ? dataPathSpec.split("(/|\\.)") : new String[] {};
 
-            String[] parts = filepathSpec.split("\\.",2);
-            if (parts.length==2 && !parts[1].toLowerCase().matches("yaml")) {
+            String filename = Path.of(filepathSpec).getFileName().toString();
+            if (filename.contains(".") && !(filename.toLowerCase().endsWith("yaml"))) {
                 throw new RuntimeException("Only the yaml format and extension is supported for at-files." +
-                    " You specified " + parts[1]);
+                    " You specified " + filepathSpec);
             }
-
             filepathSpec=(filepathSpec.endsWith(".yaml") ? filepathSpec : filepathSpec+".yaml");
             Path atPath = Path.of(filepathSpec);
 
