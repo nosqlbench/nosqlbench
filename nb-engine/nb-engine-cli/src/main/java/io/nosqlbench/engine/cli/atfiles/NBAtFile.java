@@ -169,7 +169,7 @@ public class NBAtFile {
             String word = iter.next();
             String modified = word.replaceAll("\\$\\{DIR}",parent.toString());
             Optional<String> interpolatedString = NBEnvironment.INSTANCE.interpolate(modified);
-	    String value = interpolatedString.orElseThrow(() -> new RuntimeException("Unable to find environment variable or property in text '"+modified+"' in atfile '" + atPath + "'"));
+            String value = interpolatedString.orElseThrow(() -> new RuntimeException("Unable to find environment variable or property in text '"+modified+"' in atfile '" + atPath + "'"));
             iter.remove();
             iter.add(value);
         }
