@@ -51,6 +51,7 @@ params:
 
 bindings:
   id_val: Identity();
+  id_val_uuid: ToHashedUUID() -> java.util.UUID
   row_key: ToString()
   row_key_batch: Mul(TEMPLATE(batch_size)L); ListSizedStepped(TEMPLATE(batch_size),long->ToString());
   # filetype=hdf5 for TEMPLATE(filetype,hdf5)
@@ -167,22 +168,14 @@ blocks:
     ops:
       create_objects_op:
         create_objects: "TEMPLATE(collection)"
-        wait: TEMPLATE(upsert_point_wait,true)
-        # https://github.com/weaviate/weaviate/blob/v1.9.0/lib/api/src/grpc/proto/points.proto#L11-L15
-        # 0 - Weak, 1 - Medium, 2 - Strong
-        ordering: TEMPLATE(upsert_point_ordering,1)
-        #shard_key: "{row_key}"
-        points:
-          - id: "{id_val}"
-            payload:
-              key: "{row_key}"
-            vector:
-              # For dense vectors, use the below format
+        objects:
+          - id: "{id_val_uuid}"
+            #properties:
+            #  key: "{row_key}"
+            vectors:
+              # Only named vectors are supported at this time
               value: "{train_floatlist_TEMPLATE(filetype)}"
-              # For sparse vectors, use the below format
-              #value_sv:
-              #  indices: your array of numbers
-              #  values: your array of floats
+            #tenant: ""
 
   search_points:
     ops:
