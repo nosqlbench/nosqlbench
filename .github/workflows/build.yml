@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         name: checkout nosqlbench
@@ -24,6 +24,9 @@ jobs:
           distribution: 'oracle'
           java-package: jdk
           java-version: '21'
+
+      - name: install fuse2
+        run: sudo apt install libfuse2
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -74,7 +77,7 @@ jobs:
 
   builddocs:
     needs: build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: ${{ github.repository == 'nosqlbench/nosqlbench' && github.event_name == 'push' && github.ref_name == 'main' }}
     steps:
 

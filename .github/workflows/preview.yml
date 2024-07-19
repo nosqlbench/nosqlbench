@@ -15,7 +15,7 @@ on:
 
 jobs:
   preview-build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       preview_version: ${{ steps.versions.outputs.PREVIEW_VERSION }}
       docker_tags: ${{ steps.versions.outputs.DOCKER_TAGS }}
@@ -45,6 +45,9 @@ jobs:
           sudo apt clean
           docker rmi $(docker image ls -aq)
           df -h
+
+      - name: install fuse2
+        run: sudo apt install libfuse2
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -204,7 +207,7 @@ jobs:
 
   preview-docs:
     needs: preview-build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - name: import env vars
       run: |
