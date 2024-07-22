@@ -66,9 +66,8 @@ public class DataApiDeleteOneOpDispenser extends DataApiOpDispenser {
     }
 
     private float[] getVectorFromOp(ParsedOp op, long l) {
-        Object rawVectorObject = op.get("vector", l);
-        if (rawVectorObject != null) {
-            return getVectorValues(rawVectorObject);
+        if (op.isDefined("vector")) {
+            return getVectorValues(op.get("vector", l));
         }
         return null;
     }
