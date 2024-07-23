@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.stabilization;
+package io.nosqlbench.nb.api.stats;
 
 import java.util.Objects;
 
+/**
+ * This is a relatively efficient statistics bucket which can maintain moving
+ * aggregates over a window of samples for count, mean, variance, stddev, sum.
+ * This is particularly useful when you know that each update to the data
+ * will likely be used in a query.
+ */
 public final class StatBucket {
     DoubleRing ringbuf;
     private double mean;
@@ -98,10 +104,31 @@ public final class StatBucket {
         return "StatBucket[" +
             "count=" + ringbuf.count() + ", " +
             "mean=" + mean + ", " +
-            "stddev=" + stddev() + ']';
+            "stddev=" + stddev()  + ", " +
+            "variance=" + variance() + ']';
     }
 
     public boolean primed() {
         return this.count()== ringbuf.size();
+    }
+
+    public double getMin() {
+        return ringbuf.min();
+    }
+
+    public double getMax() {
+        return ringbuf.max();
+    }
+
+    public double getAverage() {
+        return this.mean();
+    }
+
+    public double getCount() {
+        return count();
+    }
+
+    public double getSum() {
+        return this.mean() * this.count();
     }
 }
