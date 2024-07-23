@@ -16,12 +16,12 @@
 
 package io.nosqlbench.scenarios.simframe.stabilization;
 
+import io.nosqlbench.nb.api.stats.StatBucket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.OptionalDouble;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 

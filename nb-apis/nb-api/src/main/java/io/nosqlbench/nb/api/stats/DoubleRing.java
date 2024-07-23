@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.scenarios.simframe.stabilization;
+package io.nosqlbench.nb.api.stats;
 
 public class DoubleRing {
     private final double[] dbuf;
@@ -47,4 +47,21 @@ public class DoubleRing {
     public int count() {
         return count;
     }
+
+    public double min() {
+        double min = Double.MAX_VALUE;
+        for (int i = 0; i < count; i++) {
+            min = Math.min(min,dbuf[i]);
+        }
+        return min;
+    }
+
+    public double max() {
+        double max = Double.MIN_VALUE;
+        for (int i = 0; i < count; i++) {
+            max = Math.max(max,dbuf[i]);
+        }
+        return max;
+    }
+
 }
