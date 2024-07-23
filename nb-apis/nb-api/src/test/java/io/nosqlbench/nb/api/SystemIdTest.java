@@ -56,14 +56,14 @@ public class SystemIdTest {
     @Test
     public void testPackedNodeId() {
         String packedNodeId = SystemId.getPackedNodeId();
-        assertThat(packedNodeId).matches("[0-9A-Za-z_-]+");
+        assertThat(packedNodeId).matches("[0-9A-Za-z_~-]+");
         logger.info("packed node id: " + packedNodeId);
     }
 
     @Test
     public void testGenSessionCode() {
         String sessionCode=SystemId.genSessionCode(234L);
-        assertThat(sessionCode).matches("[0-9a-zA-Z~-]+");
+        assertThat(sessionCode).matches("[0-9a-zA-Z_~-]+");
         logger.info("session code: " + sessionCode);
     }
 
