@@ -91,4 +91,15 @@ class NBAtFileTest {
         assertThat(strings).containsExactly("arg1","arg1","arg1","arg2","arg3","arg3","arg3","deepval");
     }
 
+    @Test
+    public void testAtfileEnvironmentVariable() {
+        LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/environment_variable.yaml");
+        assertThat(strings).containsExactly("My value environment");
+    }
+
+    @Test
+    public void testAtfileMissingEnvironmentVariable() {
+        assertThrows(RuntimeException.class, () -> NBAtFile.includeAt("@src/test/resources/atfiles/environment_variable_missing.yaml:>:"));
+    }
+
 }
