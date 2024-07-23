@@ -75,6 +75,7 @@ printf "getting appimage tool and building image...\n";
    chmod +x appimagetool-x86_64.AppImage
   fi
 
+  # note if your linux has errors with the following then see https://docs.appimage.org/user-guide/troubleshooting/fuse.html
   ARCH=x86_64 ./appimagetool-x86_64.AppImage NB.AppDir ${BIN_NAME}
   # && chmod +x ${BIN_NAME}
  )

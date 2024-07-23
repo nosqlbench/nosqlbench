@@ -99,12 +99,37 @@ public class NBCreators {
     }
 
 
+    public WindowSummaryGauge windowSummaryGauge(
+        String name,
+        int window,
+        List<String> statspecs,
+        MetricCategory category,
+        String description
+    ) {
+        List<WindowSummaryGauge.Stat> stats =
+            statspecs.stream().map(WindowSummaryGauge.Stat::valueOf).toList();
+        DoubleSummaryStatistics reservoir = new DoubleSummaryStatistics();
+        WindowSummaryGauge anyGauge = null;
+        for (WindowSummaryGauge.Stat stat : stats) {
+            anyGauge = new WindowSummaryGauge(
+                window,
+                base.getLabels().and(NBLabels.forKV("name", name+"_w"+window, "stat", stat)),
+                stat,
+                description,
+                category
+            );
+            base.addComponentMetric(anyGauge, category, description);
+        }
+        return anyGauge;
+
+    }
+
     public DoubleSummaryGauge summaryGauge(String name, List<String> statspecs, MetricCategory category, String description) {
         List<DoubleSummaryGauge.Stat> stats = statspecs.stream().map(DoubleSummaryGauge.Stat::valueOf).toList();
         DoubleSummaryStatistics reservoir = new DoubleSummaryStatistics();
         DoubleSummaryGauge anyGauge = null;
         for (DoubleSummaryGauge.Stat stat : stats) {
-            anyGauge = new DoubleSummaryGauge(base.getLabels().and(NBLabels.forKV("name",name,"stat", stat)), stat, reservoir, description, category);
+            anyGauge = new DoubleSummaryGauge(base.getLabels().and(NBLabels.forKV("name", name, "stat", stat)), stat, reservoir, description, category);
             base.addComponentMetric(anyGauge, category, description);
         }
         return anyGauge;
@@ -113,6 +138,7 @@ public class NBCreators {
     public NBMetricHistogram histogram(String metricFamilyName, MetricCategory category, String description) {
         return histogram(metricFamilyName,4, category, description);
     }
+
     public NBMetricHistogram histogram(String metricFamilyName, int hdrdigits, MetricCategory category, String description) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
         NBMetricHistogram histogram = new NBMetricHistogram(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits), description, category);
@@ -120,7 +146,7 @@ public class NBCreators {
         return histogram;
     }
 
-//    public AttachedMetricsSummaryReporter summaryReporter(long millis, String... labelspecs) {
+    //    public AttachedMetricsSummaryReporter summaryReporter(long millis, String... labelspecs) {
 //        logger.debug("attaching summary reporter to " + base.description());
 //        NBLabels extraLabels = NBLabels.forKV((Object[]) labelspecs);
 //        AttachedMetricsSummaryReporter reporter = new AttachedMetricsSummaryReporter(base, extraLabels, millis);
@@ -198,7 +224,7 @@ public class NBCreators {
         private Logger logger = LogManager.getLogger(Log4JMetricsReporter.class);
         private Log4JMetricsReporter.LoggingLevel loggingLevel = Log4JMetricsReporter.LoggingLevel.INFO;
         private Marker marker;
-        private MetricFilter filter= new MetricInstanceFilter();
+        private MetricFilter filter = new MetricInstanceFilter();
         private boolean oneLastTime = false;
         private NBLabels labels;
         private long millis = 1000;
@@ -206,34 +232,42 @@ public class NBCreators {
         public Log4jReporterBuilder(NBComponent component) {
             this.component = component;
         }
+
         public Log4jReporterBuilder oneLastTime(final boolean oneLastTime) {
             this.oneLastTime = oneLastTime;
             return this;
         }
+
         public Log4jReporterBuilder interval(final int interval) {
             this.millis = interval;
             return this;
         }
+
         public Log4jReporterBuilder outputTo(final Logger logger) {
             this.logger = logger;
             return this;
         }
+
         public Log4jReporterBuilder markWith(final Marker marker) {
             this.marker = marker;
             return this;
         }
+
         public Log4jReporterBuilder labels(final NBLabels labels) {
             this.labels = labels;
             return this;
         }
+
         public Log4jReporterBuilder filter(final MetricFilter filter) {
             this.filter = filter;
             return this;
         }
+
         public Log4jReporterBuilder withLoggingLevel(final Log4JMetricsReporter.LoggingLevel loggingLevel) {
             this.loggingLevel = loggingLevel;
             return this;
         }
+
         public Log4JMetricsReporter build() {
             final LoggerProxy loggerProxy = switch (this.loggingLevel) {
                 case TRACE -> new TraceLoggerProxy(this.logger);
@@ -245,6 +279,7 @@ public class NBCreators {
             return new Log4JMetricsReporter(this.component, loggerProxy, this.marker, this.filter, this.labels, this.millis, this.oneLastTime);
         }
     }
+
     /* private class to allow logger configuration */
     public abstract static class LoggerProxy {
         protected final Logger logger;
@@ -356,22 +391,27 @@ public class NBCreators {
             this.component = component;
             this.output = output;
         }
+
         public ConsoleReporterBuilder labels(NBLabels labels) {
             this.labels = labels;
             return this;
         }
+
         public ConsoleReporterBuilder interval(int interval) {
             this.interval = interval;
             return this;
         }
+
         public ConsoleReporterBuilder oneLastTime(boolean oneLastTime) {
             this.oneLastTime = oneLastTime;
             return this;
         }
+
         public ConsoleReporterBuilder disabledMetricAttributes(Set<MetricAttribute> disabledMetricAttributes) {
             this.disabledMetricAttributes = disabledMetricAttributes;
             return this;
         }
+
         public ConsoleReporter build() {
             return new ConsoleReporter(component, labels, interval, oneLastTime, output, disabledMetricAttributes);
         }
@@ -387,10 +427,12 @@ public class NBCreators {
             this.component = component;
             this.filename = filename;
         }
+
         public CsvOutputWriterBuilder headers(String... headers) {
             this.headers = headers;
             return this;
         }
+
         public CsvOutputPluginWriter build() {
             return new CsvOutputPluginWriter(component, filename, headers);
         }
@@ -406,26 +448,32 @@ public class NBCreators {
         public CsvReporterBuilder(NBComponent component) {
             this.component = component;
         }
+
         public CsvReporterBuilder labels(NBLabels labels) {
             this.labels = labels;
             return this;
         }
+
         public CsvReporterBuilder path(Path reportTo) {
             this.reportTo = reportTo;
             return this;
         }
+
         public CsvReporterBuilder path(String reportTo) {
             this.reportTo = Path.of(reportTo);
             return this;
         }
+
         public CsvReporterBuilder interval(int interval) {
             this.interval = interval;
             return this;
         }
+
         public CsvReporterBuilder filter(MetricInstanceFilter filter) {
             this.filter = filter;
             return this;
         }
+
         public CsvReporter build() {
             return new CsvReporter(component, reportTo, interval, filter, labels);
         }

@@ -15,7 +15,7 @@ on:
 
 jobs:
   release-build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
 
       - name: checkout repo
@@ -42,6 +42,9 @@ jobs:
           sudo apt clean
           docker rmi $(docker image ls -aq)
           df -h
+
+      - name: install fuse2
+        run: sudo apt install libfuse2
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -186,7 +189,7 @@ jobs:
 
 #  javadocs:
 #    needs: release
-#    runs-on: ubuntu-20.04
+#    runs-on: ubuntu-22.04
 #    steps:
 #      - name: set git username
 #        run: git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
@@ -210,7 +213,7 @@ jobs:
 #
 #  docs:
 #    needs: release
-#    runs-on: ubuntu-20.04
+#    runs-on: ubuntu-22.04
 #    steps:
 #
 #      - name: set git username

@@ -21,8 +21,6 @@ import io.nosqlbench.adapter.neo4j.ops.Neo4JSyncReadTxnOp;
 import io.nosqlbench.adapter.neo4j.Neo4JSpace;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-import org.neo4j.driver.Session;
-
 import java.util.function.LongFunction;
 
 
@@ -35,7 +33,7 @@ public class Neo4JSyncReadTxnOpDispenser extends Neo4JBaseOpDispenser {
     @Override
     public LongFunction<Neo4JSyncReadTxnOp> createOpFunc() {
         return l -> new Neo4JSyncReadTxnOp(
-            spaceFunc.apply(l).getDriver().session(Session.class),
+            sessionFunc.apply(l),
             queryFunc.apply(l)
         );
     }
