@@ -573,6 +573,9 @@
                     </includes>
                     <useSystemClassLoader>false
                     </useSystemClassLoader> <!-- fixes reflection tests -->
+                    <environmentVariables>
+                        <TEST_ENV_VAR>value</TEST_ENV_VAR>
+                    </environmentVariables>
                 </configuration>
             </plugin>
 
