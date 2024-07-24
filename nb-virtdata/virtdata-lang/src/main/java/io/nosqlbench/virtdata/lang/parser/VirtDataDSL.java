@@ -20,7 +20,12 @@ import io.nosqlbench.virtdata.lang.ast.VirtDataAST;
 import io.nosqlbench.virtdata.lang.ast.VirtDataFlow;
 import io.nosqlbench.virtdata.lang.generated.VirtDataLexer;
 import io.nosqlbench.virtdata.lang.generated.VirtDataParser;
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
