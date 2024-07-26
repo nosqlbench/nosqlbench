@@ -72,6 +72,7 @@ public class CGWorkloadExporter implements BundledApp {
     private String namingTemplate;
     private double partitionMultiplier;
     private int quantizerDigits;
+    private boolean enableIfExists = true;
     private Map<String, List<String>> blockplan = Map.of();
 
     private final Map<String, Double> timeouts = new HashMap<String, Double>(Map.of(
@@ -163,6 +164,9 @@ public class CGWorkloadExporter implements BundledApp {
         configureTimeouts(cfgmap.get("timeouts"));
         configureBlocks(cfgmap.get("blockplan"));
         configureQuantizerDigits(cfgmap.get("quantizer_digits"));
+        if (cfgmap.get("enable_if_exists").equals(false)) {
+            enableIfExists = false;
+        }
 
         this.model = CqlModelParser.parse(ddl, srcpath);
         List<String> errorlist = model.getReferenceErrors();
@@ -639,7 +643,7 @@ public class CGWorkloadExporter implements BundledApp {
             ops.put(
                     namer.nameFor(table, "optype", "drop", "blockname", blockname),
                     Map.of(
-                            "simple", "drop table if exists " + table.getFullName() + ";",
+                            "simple", (enableIfExists ? "drop table if exists " : "drop table ") + table.getFullName() + ";",
                             "timeout", timeouts.get("drop")
                     )
             );
@@ -655,7 +659,7 @@ public class CGWorkloadExporter implements BundledApp {
             ops.put(
                     namer.nameFor(type, "optype", "drop-type", "blockname", blockname),
                     Map.of(
-                            "simple", "drop type if exists " + type.getKeyspace() + "." + type.getName() + ";",
+                            "simple", (enableIfExists ? "drop type if exists " : "drop type ") + "." + type.getName() + ";",
                             "timeout", timeouts.get("drop")
                     )
             );
@@ -671,7 +675,7 @@ public class CGWorkloadExporter implements BundledApp {
             ops.put(
                     namer.nameFor(type, "optype", "drop-keyspace", "blockname", blockname),
                     Map.of(
-                            "simple", "drop keyspace if exists " + type.getKeyspace() + ";",
+                            "simple", (enableIfExists ? "drop keyspace if exists " : "drop keyspace ") + type.getKeyspace() + ";",
                             "timeout", timeouts.get("drop")
                     )
             );
@@ -736,9 +740,10 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genKeyspaceDDL(CqlKeyspaceDef keyspace) {
         return """
-                create keyspace KEYSPACE
+                create keyspace IF_NOT_EXISTS KEYSPACE
                 with replication = {REPLICATION}DURABLEWRITES?;
                 """
+                .replace("IF_NOT_EXISTS", enableIfExists ? "if not exists" : "")
                 .replace("KEYSPACE", keyspace.getName())
                 .replace("REPLICATION", keyspace.getReplicationData())
                 .replace("DURABLEWRITES?", keyspace.isDurableWrites() ? "" : "\n and durable writes = false")
@@ -766,10 +771,11 @@ public class CGWorkloadExporter implements BundledApp {
 
     private String genTypeDDL(CqlType type) {
         return """
-                create type KEYSPACE.TYPENAME (
+                create type IF_NOT_EXISTS KEYSPACE.TYPENAME (
                 TYPEDEF
                 );
                 """
+                .replace("IF_NOT_EXISTS", enableIfExists ? "if not exists" : "")
                 .replace("KEYSPACE", type.getKeyspace().getName())
                 .replace("TYPENAME", type.getName())
                 .replace("TYPEDEF", type.getColumnDefs().stream()
@@ -782,11 +788,12 @@ public class CGWorkloadExporter implements BundledApp {
         }
 
         return """
-                create table if not exists KEYSPACE.TABLE (
+                create table IF_NOT_EXISTS KEYSPACE.TABLE (
                 COLUMN_DEFS,
                 primary key (PRIMARYKEY)
                 )CLUSTERING;
                 """
+                .replace("IF_NOT_EXISTS", enableIfExists ? "if not exists" : "")
                 .replace("KEYSPACE", cqltable.getKeyspace().getName())
                 .replace("TABLE", cqltable.getName())
                 .replace("COLUMN_DEFS", genTableColumnDDL(cqltable))

@@ -53,7 +53,7 @@ public class FieldDestructuringMapper implements Function<Map<String, Object>, M
                     return stringObjectMap;
                 }
             } else {
-                throw new RuntimeException("During op mapping, can't parse something that is not a CharSequence: '" + fieldname + "' (type is " + o.getClass().getCanonicalName() + ")");
+                throw new RuntimeException("During op mapping, can't parse something that is not a CharSequence: '" + fieldname + "' (type is " + o.getClass().getCanonicalName() + ") (value is:" + o.toString());
             }
         } else {
             return stringObjectMap;

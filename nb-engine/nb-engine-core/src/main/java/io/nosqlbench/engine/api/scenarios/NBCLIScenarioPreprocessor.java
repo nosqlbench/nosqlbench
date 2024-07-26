@@ -313,7 +313,7 @@ public class NBCLIScenarioPreprocessor {
     }
 
     private static final Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
-    private static final Pattern innerTemplatePattern = Pattern.compile("TEMPLATE\\((.+?)$");
+    private static final Pattern innerTemplatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
     private static final Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
 
     public static List<WorkloadDesc> filterForScenarios(List<Content<?>> candidates) {
@@ -444,22 +444,18 @@ public class NBCLIScenarioPreprocessor {
             String match = matcher.group(1);
 
             Matcher innerMatcher = innerTemplatePattern.matcher(match);
-            String[] matchArray = match.split("[,:]");
-            if (matchArray.length==1) {
-                matchArray = new String[]{matchArray[0],""};
-            }
-//            if (matchArray.length!=2) {
-//                throw new BasicError("TEMPLATE form must have two arguments separated by a comma, like 'TEMPLATE(a,b), not '" + match +"'");
-//            }
-            //TODO: support recursive matches
             if (innerMatcher.find()) {
-                String[] innerMatch = innerMatcher.group(1).split("[,:]");
-
-                //We want the outer name with the inner default value
-                templates.put(matchArray[0], innerMatch[1]);
-            } else {
-                templates.put(matchArray[0], matchArray[1]);
+                String innerMatch = innerMatcher.group(1);
+                templates = matchTemplates("TEMPLATE(" + innerMatch + ")", templates);
+                String resolvedInner = templates.getOrDefault(innerMatch.split("[,:]")[0], "");
+                match = match.replace("TEMPLATE(" + innerMatch + ")", resolvedInner);
             }
+
+            String[] matchArray = match.split("[,:]");
+            if (matchArray.length == 1) {
+                matchArray = new String[]{matchArray[0], ""};
+            }
+            templates.put(matchArray[0], matchArray[1]);
         }
         matcher = templatePattern2.matcher(line);
 
