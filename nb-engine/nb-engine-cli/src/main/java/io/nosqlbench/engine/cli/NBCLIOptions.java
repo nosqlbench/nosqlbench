@@ -138,6 +138,7 @@ public class NBCLIOptions {
     private static final String DEFAULT_LOGFILE_PATTERN = "VERBOSE";
     private final static String ENABLE_DEDICATED_VERIFICATION_LOGGER = "--enable-dedicated-verification-logging";
     private final static String DISABLE_NBIO_CACHE = "--disable-nbio-cache";
+    private final static String USE_NBIO_CACHE = "--use-nbio-cache";
     private final static String NBIO_CACHE_FORCE_UPDATE = "--nbio-cache-force-update";
     private final static String NBIO_CACHE_NO_VERIFY = "--nbio-cache-no-verify";
     private final static String NBIO_CACHE_DIR = "--nbio-cache-dir";
@@ -667,6 +668,12 @@ public class NBCLIOptions {
                     this.heartbeatIntervalMs =
                         Long.parseLong(this.readWordOrThrow(arglist, "heartbeat interval in ms"));
                     break;
+                case USE_NBIO_CACHE:
+                    throw new BasicError(
+                        "The option --use-nbio-cache is no longer supported, " +
+                            "since it is on by default. You may disable it, however, " +
+                            "with --disable-nbio-cache. For more help see docs topic 'nbiocache'."
+                    );
                 case DISABLE_NBIO_CACHE:
                     arglist.removeFirst();
                     this.useNBIOCache = false;
@@ -848,18 +855,23 @@ public class NBCLIOptions {
     public NBLogLevel getConsoleLogLevel() {
         return this.consoleLevel;
     }
+
     public boolean wantsToUseNBIOCache() {
         return this.useNBIOCache;
     }
+
     public boolean wantsNbioCacheForceUpdate() {
         return nbioCacheForceUpdate;
     }
+
     public boolean wantsNbioCacheVerify() {
         return nbioCacheVerify;
     }
+
     public String getNbioCacheDir() {
         return nbioCacheDir;
     }
+
     public String getNbioCacheMaxRetries() {
         return nbioCacheMaxRetries;
     }
@@ -1017,6 +1029,7 @@ public class NBCLIOptions {
                     );
             }
         }
+
         public String getUrl() {
             return this.url;
         }
