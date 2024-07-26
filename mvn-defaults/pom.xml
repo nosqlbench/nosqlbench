@@ -401,7 +401,7 @@
 	        <dependency>
 	            <groupId>io.weaviate</groupId>
 	            <artifactId>client</artifactId>
-	            <version>4.7.0</version>
+	            <version>4.8.2</version>
 	        </dependency>
 
 
