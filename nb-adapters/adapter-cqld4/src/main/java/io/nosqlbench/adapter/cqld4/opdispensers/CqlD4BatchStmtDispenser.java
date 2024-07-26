@@ -69,9 +69,10 @@ public class CqlD4BatchStmtDispenser extends Cqld4BaseOpDispenser {
     @NotNull
     private LongFunction<Statement> getBatchAccumulator(LongFunction<BatchStatementBuilder> bsb, OpDispenser<? extends Cqld4CqlOp> subopDispenser) {
         LongFunction<BatchStatementBuilder> f = l -> {
+            long base=l*repeat;
             BatchStatementBuilder bsa = bsb.apply(l);
             for (int i = 0; i < repeat; i++) {
-                Cqld4CqlOp op = subopDispenser.apply(i+l);
+                Cqld4CqlOp op = subopDispenser.apply(base+i);
                 BatchableStatement<?> stmt = (BatchableStatement<?>) op.getStmt();
                 bsa= bsa.addStatement(stmt);
             }
