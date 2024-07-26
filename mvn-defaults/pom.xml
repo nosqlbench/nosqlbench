@@ -546,6 +546,7 @@
                     <source>21</source>
                     <release>21</release>
                     <compilerArgs>
+                      <arg>--enable-preview</arg>
                         <!--                        <compilerArg>-Xdoclint:all</compilerArg>-->
                         <!--                        <compilerArg>-Xlint:all</compilerArg>-->
                     </compilerArgs>
@@ -556,7 +557,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>-ea @{argLine}</argLine>
+                    <!--   <argLine>-ea @{argLine}</argLine> -->
+		    <argLine>--enable-preview @{argLine}</argLine>
                     <systemPropertyVariables>
                         <Log4jContextSelector>
                             org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
