@@ -558,7 +558,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <!--   <argLine>-ea @{argLine}</argLine> -->
-		    <argLine>--enable-preview @{argLine}</argLine>
+                    <argLine>--enable-preview @{argLine}</argLine>
                     <systemPropertyVariables>
                         <Log4jContextSelector>
                             org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
