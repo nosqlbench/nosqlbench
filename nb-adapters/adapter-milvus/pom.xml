@@ -64,14 +64,22 @@
             <artifactId>milvus-sdk-java</artifactId>
             <version>2.4.1</version>
         </dependency>
+	<!--- CONCERNING DEPENDENCY
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
-        </dependency>
-        <dependency>
+        </dependency> -->
+        <!-- https://mvnrepository.com/artifact/ch.qos.reload4j/reload4j -->
+	<dependency>
+	  <groupId>ch.qos.reload4j</groupId>
+	  <artifactId>reload4j</artifactId>
+	  <version>1.2.25</version>
+	</dependency>
+	<dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>2.23.1</version>
         </dependency>
 
 
