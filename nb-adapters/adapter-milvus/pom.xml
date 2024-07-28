@@ -52,30 +52,17 @@
             <artifactId>protobuf-java-util</artifactId>
             <version>3.25.3</version>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>org.apache.logging.log4j</groupId>-->
-<!--            <artifactId>log4j-core</artifactId>-->
-<!--            <version>2.23.1</version>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>io.milvus</groupId>
             <artifactId>milvus-sdk-java</artifactId>
             <version>2.4.1</version>
         </dependency>
-	<!--- CONCERNING DEPENDENCY
+        <!-- https://mvnrepository.com/artifact/ch.qos.reload4j/reload4j replaces log4j 1.X-->
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency> -->
-        <!-- https://mvnrepository.com/artifact/ch.qos.reload4j/reload4j -->
-	<dependency>
-	  <groupId>ch.qos.reload4j</groupId>
-	  <artifactId>reload4j</artifactId>
-	  <version>1.2.25</version>
-	</dependency>
+            <groupId>ch.qos.reload4j</groupId>
+            <artifactId>reload4j</artifactId>
+            <version>1.2.25</version>
+        </dependency>
 	<dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
