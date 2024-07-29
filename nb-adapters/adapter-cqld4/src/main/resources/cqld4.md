@@ -142,12 +142,22 @@ ops:
     raw: |
      create table if not exist {ksname}.{tblname} ...
 
+  # batch statement
+  # In this case, the word 'testing' is just a place holder due to op template requirements
+  # Everything under op_template works exactly as it would at the level above it, except that
+  # op_template is special and activates the batch construction logic.
+  # All ops within the batch are automatically applied to a virtual cycle which includes the
+  # repeat value as a step function. For example, with 'repeat: 50',
+  # - for cycle 0, batch items will be generated as if for cycles 0..49,
+  # - for cycle 1, batch items will be generated as if for cycles 50..99
+  # in this way, batch templates are very similar to non-batch templates.
+  # NOTE: This format is not stable and may change for simplification
   example-batch-stmt:
-    batch:
-      repeat: 50
-      op_template:
-        prepared: |
-         select three, four from knock.onthedoor where ...
+    batch: testing
+    repeat: 50
+    op_template:
+      prepared: |
+        insert into ks.table (key, value) values ({seq_key},{seq_value});
 
   # gremlin statement using the fluent API, as it would be written in a client application
   example-fluent-graph-stmt:
