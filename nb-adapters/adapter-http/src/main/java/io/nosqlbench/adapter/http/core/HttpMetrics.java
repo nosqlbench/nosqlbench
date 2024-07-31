@@ -17,33 +17,32 @@
 package io.nosqlbench.adapter.http.core;
 
 import com.codahale.metrics.Histogram;
+import io.nosqlbench.adapter.http.HttpDriverAdapter;
+import io.nosqlbench.nb.api.components.core.NBComponentProps;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.core.NBComponent;
 
 public class HttpMetrics implements NBLabeledElement {
-    private final NBComponent parent;
-    private final HttpSpace space;
+    private final HttpDriverAdapter parentAdapter;
     final Histogram statusCodeHistogram;
 
-    public HttpMetrics(NBComponent parent, HttpSpace space) {
-        this.parent = parent;
-        this.space = space;
-        statusCodeHistogram = parent.create().histogram(
+    public HttpMetrics(HttpDriverAdapter parentAdapter) {
+        this.parentAdapter = parentAdapter;
+        statusCodeHistogram = parentAdapter.create().histogram(
             "statuscode",
-            space.getHdrDigits(),
+            Integer.parseInt(parentAdapter.getComponentProp(NBComponentProps.HDRDIGITS).orElse("3")),
             MetricCategory.Payload,
             "A histogram of status codes received by the HTTP client"
         );
     }
 
     public String getName() {
-        return "http"+("default".equals(this.space.getSpaceName())?"": '-' + space.getSpaceName());
+        return parentAdapter.getAdapterName() + "-metrics";
     }
 
     @Override
     public NBLabels getLabels() {
-        return space.getLabels();
+        return parentAdapter.getLabels();
     }
 }
