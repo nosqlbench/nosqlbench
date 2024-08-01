@@ -41,11 +41,16 @@ import java.util.function.Function;
 @Service(value = DriverAdapter.class, selector = "http")
 public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
 
-    private final HttpMetrics httpMetrics;
+    public final NBMetricHistogram statusCodeHistogram;
 
     public HttpDriverAdapter(NBComponent parent, NBLabels labels) {
         super(parent, labels);
-        this.httpMetrics=new HttpMetrics(this);
+        this.statusCodeHistogram = create().histogram(
+            "statuscode",
+            Integer.parseInt(getComponentProp(NBComponentProps.HDRDIGITS).orElse("3")),
+            MetricCategory.Payload,
+            "A histogram of status codes received by the HTTP client"
+        );
     }
 
     @Override
@@ -85,10 +90,5 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
             .asReadOnly();
 
         return super.getConfigModel().add(HttpSpace.getConfigModel()).add(thisCfgModel);
-    }
-
-
-    public HttpMetrics getHttpMetrics() {
-        return this.httpMetrics;
     }
 }

@@ -19,24 +19,13 @@ package io.nosqlbench.adapter.http.core;
 import io.nosqlbench.adapter.http.errors.InvalidResponseBodyException;
 import io.nosqlbench.adapter.http.errors.InvalidStatusCodeException;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
-import org.apache.logging.log4j.core.tools.picocli.CommandLine;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Spliterators;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.stream.StreamSupport;
 
 public class HttpOp implements CycleOp {
 
@@ -75,7 +64,7 @@ public class HttpOp implements CycleOp {
         try {
             CompletableFuture<HttpResponse<String>> responseFuture = client.sendAsync(request, bodyreader);
             response = responseFuture.get(space.getTimeoutMillis(), TimeUnit.MILLISECONDS);
-            space.getHttpMetrics().statusCodeHistogram.update(response.statusCode());
+            space.statusCodeHistogram.update(response.statusCode());
 
             if (ok_status != null) {
                 if (!ok_status.matcher(String.valueOf(response.statusCode())).matches()) {

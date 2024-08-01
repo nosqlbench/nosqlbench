@@ -17,6 +17,8 @@
 package io.nosqlbench.adapter.http.core;
 
 import io.nosqlbench.adapter.http.HttpDriverAdapter;
+import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
@@ -43,13 +45,13 @@ public class HttpSpace implements NBLabeledElement {
     private final HttpDriverAdapter parentAdapter;
     private final String name;
     private final NBConfiguration cfg;
+    public NBMetricHistogram statusCodeHistogram;
     private HttpConsoleFormats console;
     private HttpClient.Redirect followRedirects;
     private Duration timeout;
     private long timeoutMillis;
     private final HttpClient httpclient;
     private int hdrDigits;
-    private HttpMetrics httpMetrics;
     private boolean diagnosticsEnabled;
 
 
@@ -58,6 +60,7 @@ public class HttpSpace implements NBLabeledElement {
         this.name = spaceName;
         this.cfg = cfg;
         applyConfig(cfg);
+        this.statusCodeHistogram = parentAdapter.statusCodeHistogram;
         this.httpclient = newClient();
     }
 
@@ -80,10 +83,9 @@ public class HttpSpace implements NBLabeledElement {
             );
         this.timeout = Duration.ofMillis(cfg.get("timeout", long.class));
         this.timeoutMillis = cfg.get("timeout", long.class);
-        this.httpMetrics = parentAdapter.getHttpMetrics();
 
         this.console = cfg.getOptional("diag").map(s -> HttpConsoleFormats.apply(s, this.console))
-            .orElseGet(() -> HttpConsoleFormats.apply(null,null));
+            .orElseGet(() -> HttpConsoleFormats.apply(null, null));
 
         this.diagnosticsEnabled = console.isDiagnosticMode();
 
@@ -106,10 +108,6 @@ public class HttpSpace implements NBLabeledElement {
         return name;
     }
 
-    public HttpMetrics getHttpMetrics() {
-        return httpMetrics;
-    }
-
     public boolean isDiagnosticMode() {
         return diagnosticsEnabled;
     }
@@ -125,18 +123,15 @@ public class HttpSpace implements NBLabeledElement {
                 .setDescription("Whether to follow redirects. Normal redirects are those which do not " +
                     "redirect from HTTPS to HTTP.")
             )
-            .add(Param.optional(List.of("diag","diagnostics"), String.class)
+            .add(Param.optional(List.of("diag", "diagnostics"), String.class)
                 .setDescription("Print extended diagnostics. This option has numerous" +
                     " possible values. See the markdown docs for details. (nb help http)")
             )
-            .add(Param.defaultTo("timeout", 1000L*60L*15L) // 15 minutes
+            .add(Param.defaultTo("timeout", 1000L * 60L * 15L) // 15 minutes
                 .setDescription("How long to wait for requests before timeout out. Default is forever."))
             .add(Param.defaultTo("hdr_digits", 4)
                 .setDescription("number of digits of precision to keep in HDR histograms"))
             .asReadOnly();
-
     }
-
-
 
 }
