@@ -639,6 +639,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <argLine>--enable-preview @{argLine}</argLine>
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
                     <includes>
@@ -903,6 +904,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
+                            <additionalJOptions>--enable-preview</additionalJOptions>
                             <release>21</release>
                             <doctitle>${javadoc.name}</doctitle>
                             <windowtitle>${javadoc.name}</windowtitle>
@@ -911,6 +913,7 @@
                             <detectOfflineLinks>false</detectOfflineLinks>
                             <!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
                             <additionalOptions>
+
                                 <additionalOption>-Xdoclint:none</additionalOption>
                             </additionalOptions>
                             <!--                    <additionalJOption>-Xdoclint:none</additionalJOption>-->

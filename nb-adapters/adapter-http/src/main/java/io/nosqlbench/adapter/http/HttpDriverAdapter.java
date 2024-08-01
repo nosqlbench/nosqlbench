@@ -16,16 +16,16 @@
 
 package io.nosqlbench.adapter.http;
 
-import io.nosqlbench.adapter.http.core.HttpFormatParser;
-import io.nosqlbench.adapter.http.core.HttpOp;
-import io.nosqlbench.adapter.http.core.HttpOpMapper;
-import io.nosqlbench.adapter.http.core.HttpSpace;
+import io.nosqlbench.adapter.http.core.*;
+import io.nosqlbench.nb.api.components.core.NBComponentProps;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.Param;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
@@ -41,8 +41,16 @@ import java.util.function.Function;
 @Service(value = DriverAdapter.class, selector = "http")
 public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
 
+    public final NBMetricHistogram statusCodeHistogram;
+
     public HttpDriverAdapter(NBComponent parent, NBLabels labels) {
         super(parent, labels);
+        this.statusCodeHistogram = create().histogram(
+            "statuscode",
+            Integer.parseInt(getComponentProp(NBComponentProps.HDRDIGITS).orElse("3")),
+            MetricCategory.Payload,
+            "A histogram of status codes received by the HTTP client"
+        );
     }
 
     @Override
@@ -54,7 +62,7 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
 
     @Override
     public Function<String, ? extends HttpSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return spaceName -> new HttpSpace(getParent(), spaceName, cfg);
+        return spaceName -> new HttpSpace(this, spaceName, cfg);
     }
 
     @Override
@@ -83,5 +91,4 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
 
         return super.getConfigModel().add(HttpSpace.getConfigModel()).add(thisCfgModel);
     }
-
 }

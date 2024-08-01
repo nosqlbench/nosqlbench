@@ -70,7 +70,7 @@ import java.util.function.LongFunction;
  * specification tests under the workload_definition folder of the adapters-api module.
  * </P>
  *
- *
+ * <HR/>
  * <H2>Op Template Parsing</H2>
  * <OL>
  * <LI>Rule #1: All op templates are parsed into an internal normalized structure which contains:
@@ -92,36 +92,41 @@ import java.util.function.LongFunction;
  * The net effect of these rules is that the NoSQLBench driver developer may safely use functional forms to access data
  * in the op template, or may decide that certain op fields must only be provided in a static way per operation.
  * </P>
- *
+ * <HR/>
  * <H2>Distinguishing Op Payload from Op Config</H2>
  * <P>When a user specifies an op template, they may choose to provide only a single set of op fields without
  * distinguishing between config or payload, or they may choose to directly configure each.
- * <H4>Example:</H4>
+ *
  * <PRE>{@code
  * ops:
- * # both op and params explicitly named
- * op1:
- * op:
- * opfield1: value1
- * params:
- * param2: value2
- * # neither op field nor params named, so all assumed to be op fields
- * op2:
- * opfield1: value1
- * param2: value2
- * # in this case, if param2 is meant to be config level,
- * # it is a likely config error that should be thrown to the user
- * # only op field explicitly named, so remainder automatically pushed into params
- * op3:
- * op:
- * opfield1: value1
- * param2: value2
- * # only params explicitly named, so remainder pushed into op payload
- * op4:
- * params:
- * param2: value2
- * opfield1: value1
- * }</PRE>
+ *
+ *  # both op and params explicitly named
+ *  op1:
+ *   op:
+ *    opfield1: value1
+ *   params:
+ *    param2: value2
+ *
+ *  # neither op field nor params named, so all assumed to be op fields
+ *  op2:
+ *   opfield1: value1
+ *   param2: value2
+ *
+ *  # in this case, if param2 is meant to be config level,
+ *  # it is a likely config error that should be thrown to the user
+ *  # only op field explicitly named, so remainder automatically pushed into params
+ *  op3:
+ *   op:
+ *    opfield1: value1
+ *    param2: value2
+ *
+ *  # only params explicitly named, so remainder pushed into op payload
+ *  op4:
+ *   params:
+ *    param2: value2
+ *   opfield1: value1
+ * }</PRE></P>
+ *
  * <p>
  * All of these are considered valid constructions, and all of them may actually achieve the same result.
  * This looks like an undesirable problem, but it serves to simplify things for users in one specific way: It allows
@@ -135,37 +140,37 @@ import java.util.function.LongFunction;
  * <HR></HR>
  * <H2>Design Invariants</H2>
  *
- * <P>The above rules imply invariants, which are made explicit here. {@link ParsedOp}.</P>
+ * <P>The above rules imply invariants, which are made explicit here.</P>
  *
- * <P><UL>
+ * <H4>Single Purpose Fields</H4>
+ * <P><EM>You may not use an op field name or parameter name for more than one purpose.</EM></P>
  *
- * <LI><EM>You may not use an op field name or parameter name for more than one purpose.</EM>
- * <UL>
- * <LI>Treat all parameters supported by a driver adapter and it's op fields as a globally shared namespace, even if it
- * is not.
- * This avoids creating any confusion about what a parameter can be used for and how to use it for the right thing in
- * the right place.
- * For example, you may not use the parameter name `socket` in an op template to mean one thing and then use it
+ * <H4>Shared Namespace</H4>
+ * <P><EM>Treat all parameters supported by a driver adapter and it's op fields as a globally shared namespace, even
+ * if it is not.</EM></P>
+ *
+ * <P>This avoids creating any confusion about what a parameter can be used for and how to use it for the right thing in
+ * the right place. For example, you may not use the parameter name `socket` in an op template to mean one thing and then use it
  * at the driver adapter level to mean something different. However, if the meaning is congruent, a driver developer
  * may choose to support some cross-cutting parameters at the activity level. These allowances are explicit,
- * however, as each driver dictates what it will allow as activity parameters.
- * </LI>
- * </UL>
- * </LI>
+ * however, as each driver dictates what it will allow as activity parameters.</P>
  *
- * <LI><EM>Users may specify op payload fields within op params or activity params as fallback config sources in that
- * order.</EM>
+ * <H3>Layered Resolution</H3>
+ *
+ * <P><EM>Users may specify op payload fields within op params or activity params as fallback config sources in that
+ * order.</EM></P>
+ *
  * <UL>
  * <LI>IF a name is valid as an op field, it must also be valid as such when specified in op params.</LI>
  * <LI>If a name is valid as an op field, it must also be valid as such when specified in activity params, within the
  * scope of {@link ParsedOp}</LI>
  * <LI>When an op field is found via op params or activity params, it may NOT be dynamic. If dynamic values are intended
- * to be provided
- * at a common layer in the workload, then bindings support this already.</LI>
+ * to be provided at a common layer in the workload, then bindings or template variables support this already.</LI>
  * </UL>
  * </LI>
  *
- * <LI><EM>You must access non-payload params via Config-oriented methods.</EM>
+ * <H3>Configuration Fields</H3>
+ * <EM>You must access non-payload params via Config-oriented methods.</EM>
  * <UL>
  * <LI>Op Templates contain op payload data and op configs (params, activity params).</LI>
  * <LI>You must use only {@link ParsedOp} getters with "...Config..." names, such as
@@ -176,31 +181,26 @@ import java.util.function.LongFunction;
  * </UL>
  * </LI>
  *
- * <LI><EM>The user must be warned when a required or optional config value is missing from op params (or activity
- * params), but a value
- * of the same name is found in op payload fields.</EM>
- * <UL>
- * <LI>If rule #1 is followed, and names are unambiguous across the driver, then it is almost certainly a configuration
- * error.</LI>
- * </UL>
- * </LI>
+ * <H3>Sanity Checks</H3>
  *
- * <LI><EM>When both an op payload field and a param field of the same name are defined through cascading configuration
- * of param fields,
- * the local op payload field takes precedence.</EM>
+ * <P><EM>The user must be warned when a required or optional config value is missing from op params (or activity
+ * params), but a value of the same name is found in op payload fields.</EM>
+ * If rule #1 is followed, and names are unambiguous across the driver, then it is almost certainly a configuration
+ * error.</P>
+ *
+ * <H3>Precedence</H3>
+ * <P>The order of precedence for values is:
  * <UL>
- * <LI>This is an extension of the param override rules which say that the closest (most local) value to an operation is
- * the one that takes precedence.</LI>
- * <LI>In practice, there will be no conflicts between direct static and dynamic fields, but there will be possibly
- * between
- * static or dynamic fields and parameters and activity params. If a user wants to promote an activity param as an
- * override to existing op fields,
- * template variables allow for this to happen gracefully. Otherwise, the order of precedence is 1) op fields 2) op
- * params 3) activity params.</LI>
- * </UL>
- * </LI>
+ *   <LI>op payload fields</LI>
+ *   <LI>op param fields</LI>
+ *   <LI>activity params (when enabled, see below)</LI>
  * </UL>
  * </P>
+ *
+ * <H3>Enabling Activity Params</H3>
+ * <P>If a user wants to allow an activity param as an default for an fields, they must publish the op field
+ * name in the configuration model for the activity. Otherwise it is an error to specify the value at the activity
+ * level.</P>
  *
  * <HR></HR>
  *
@@ -208,24 +208,22 @@ import java.util.function.LongFunction;
  * Field values can come from multiple sources. These forms and any of their combinations are supported.
  *
  * <H3>Static Op Fields</H3>
- * <H4>Example:</H4>
  * <PRE>{@code
  * op:
- * field1: value1
- * field2:
- * map3:
- * key4: value4
- * map5:
- * key6: value6
- * field7: false
- * field8: 8.8
+ *  field1: value1
+ *  field2:
+ *   map3:
+ *    key4: value4
+ *    map5:
+ *     key6: value6
+ *  field7: false
+ *  field8: 8.8
  * }</PRE>
  * <p>
  * As shown, any literal value of any valid YAML type, including structured values like lists or maps are accepted as
  * static op template values. A static value is any value which contains zero bind points at any level.
  *
  * <H3>Dynamic Op Fields with Binding References</H3>
- * <H4>Example:</H4>
  * <PRE>{@code
  * op:
  * field1: "{binding1}"
@@ -247,34 +245,32 @@ import java.util.function.LongFunction;
  * null values invalid for ANY op template value.</P>
  *
  * <H3>Dynamic Op Fields with Binding Definitions</H3>
- * <H4>Example:</H4>
- *
  * <PRE>{@code
  * op:
- * field1: "{{NumberNameToString()}}"
- * field2: "value is: {{NumberNameToString()}}"
+ *  field1: "{{NumberNameToString()}}"
+ *  field2: "value is: {{NumberNameToString()}}"
  * }
  * </PRE>
  * <p>
  * This form has exactly the same effect as the previous example as long as your bindings definitions included:
  * <PRE>{@code
  * bindings:
- * binding1: NumberNameToString();
+ *  binding1: NumberNameToString();
  * }</PRE>
  *
  * <H3>Dynamic Op Fields with Structure</H3>
- * <H4>Example:</H4>
  *
  * <PRE>{@code
- * field1:
- * k1: "{binding1}
- * k2: "literal value"
- * field2:
- * - "value3"
- * - "{binding4}"
- * - "a value: {binding5}"
- * - "{{NumberNameToString}}"
- * - "a value: {{NumberNameToString()}}"
+ * op:
+ *  field1:
+ *   k1: "{binding1}
+ *   k2: "literal value"
+ *  field2:
+ *   - "value3"
+ *   - "{binding4}"
+ *   - "a value: {binding5}"
+ *   - "{{NumberNameToString}}"
+ *   - "a value: {{NumberNameToString()}}"
  * }</PRE>
  *
  * <P>This example combines the previous ones with structure and dynamic values. Both field1 and field2 are dynamic,
@@ -286,15 +282,14 @@ import java.util.function.LongFunction;
  * configure your binding definitions thusly.</P>
  *
  * <H3>Op Template Params</H3>
- * <H4>Example:</H4>
  * <PRE>{@code
  * params:
- * prepared: true
+ *  prepared: true
  * ops:
- * op1:
- * field1: value1
- * params:
- * prepared: false
+ *  op1:
+ *   field1: value1
+ *   params:
+ *    prepared: false
  * }</PRE>
  * <p>
  * The params section are the first layer of external configuration values that an op template can use to distinguish
@@ -308,7 +303,6 @@ import java.util.function.LongFunction;
  * down to each block and then down to each statement.
  *
  * <H3>Activity Params</H3>
- * <H4>Example:</H4>
  * <PRE>{@code
  * ./nb run driver=... workload=... cl=LOCAL_QUORUM
  * }</PRE>
@@ -317,6 +311,19 @@ import java.util.function.LongFunction;
  * another fallback source for configuration parameters. The {@link ParsedOp} implementation will automatically look
  * in the activity parameters if needed to find a missing configuration parameter, but this will only work if
  * the specific named parameter is allowed at the activity level.</P>
+ *
+ * <HR/>
+ * <H2>Alternate Names</H2>
+ * <P>Sometimes you may need to support more than one name for the same purpose. In such cases, there are helper
+ * methods which can be used to reduce from a set of possible field names to a single one.
+ * <UL>
+ *     <LI>{@link #requiredFieldOf(String...)} and {@link #requiredFieldOf(List)} will find exactly one field within the set of
+ *     possible fields.
+ *     Zero or more than one will throw an error.</LI>
+ *     <LI>{@link #optionalFieldOf(String...)} and {@link #optionalFieldOf(List)} will find exactly zero or one
+ *     field within the set of possible fields. More than one will throw an error.</LI>
+ * </UL>
+ * </P>
  */
 public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String, ?>>, NBComponent, StaticFieldReader, DynamicFieldReader {
 
@@ -570,15 +577,6 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return Optional.ofNullable(tmap.getStaticValue(field, classOfT));
     }
 
-
-    public <T> Optional<T> getOptionalStaticValue(List<String> fieldNames, Class<T> classOfT) {
-        for (String field : fieldNames) {
-            if (isStatic(field)) {
-                return Optional.ofNullable(tmap.getStaticValue(field, classOfT));
-            }
-        }
-        return Optional.empty();
-    }
 
     public <T> Optional<T> takeOptionalStaticValue(String field, Class<T> classOfT) {
         return Optional.ofNullable(tmap.takeStaticValue(field, classOfT));
@@ -919,24 +917,6 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return lfa;
     }
 
-    public <FA, FE> LongFunction<FA> enhanceFunc(
-        LongFunction<FA> func,
-        List<String> fields,
-        Class<FE> type,
-        BiFunction<FA, FE, FA> combiner
-    ) {
-        for (String field : fields) {
-            if (isDefined(field)) {
-                LongFunction<FE> fieldEnhancerFunc = getAsRequiredFunction(field, type);
-                LongFunction<FA> lfa = l -> combiner.apply(func.apply(l), fieldEnhancerFunc.apply(l));
-                return lfa;
-            }
-        }
-        throw new OpConfigError("One of the op fields from " + fields + " is required, but none was found " +
-            "in the op template named '" + this.getName() + "'");
-    }
-
-
     /**
      * <p>Enhance a {@link Function} with a named optional function IFF it exists.</p>
      *
@@ -967,23 +947,6 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
         LongFunction<FA> lfa = l -> combiner.apply(func.apply(l), feLongFunction.apply(l));
         return lfa;
-    }
-
-    public <FA, FE> LongFunction<FA> enhanceFuncOptionally(
-        LongFunction<FA> func,
-        List<String> fields,
-        Class<FE> type,
-        BiFunction<FA, FE, FA> combiner
-    ) {
-        for (String field : fields) {
-            Optional<LongFunction<FE>> fieldEnhancerFunc = getAsOptionalFunction(field, type);
-            if (fieldEnhancerFunc.isPresent()) {
-                LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
-                LongFunction<FA> lfa = l -> combiner.apply(func.apply(l), feLongFunction.apply(l));
-                return lfa;
-            }
-        }
-        return func;
     }
 
 
@@ -1240,5 +1203,39 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return lfa;
     }
 
+
+
+    private String oneFieldOrNull(List<String> fields) {
+        int count = 0;
+        String found = null;
+        for (String field : fields) {
+            if (isDefined(field)) {
+                if (found == null) {
+                    found = field;
+                } else {
+                    throw new OpConfigError(STR."exactly one of \{fields} was required, but it was found as both \{found} and \{field}");
+                }
+            }
+
+        }
+        return found;
+    }
+
+    public Optional<String> optionalFieldOf(List<String> fields) {
+        return Optional.ofNullable(oneFieldOrNull(fields));
+    }
+    public Optional<String> optionalFieldOf(String... fields) {
+        return Optional.ofNullable(oneFieldOrNull(List.of(fields)));
+    }
+    public String requiredFieldOf(String... fields) {
+        return requiredFieldOf(List.of(fields));
+    }
+    public String requiredFieldOf(List<String> fields) {
+        String field = oneFieldOrNull(fields);
+        if (field==null) {
+            throw new OpConfigError(STR."no fields were found with name in (\{fields}) for op template \{this}");
+        }
+        return field;
+    }
 
 }

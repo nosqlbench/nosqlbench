@@ -38,7 +38,8 @@ public class NBBaseComponentMetrics implements NBComponentMetrics {
             lock.lock();
             String openMetricsName = metric.getLabels().linearizeAsMetrics();
             if (metrics.containsKey(openMetricsName)) {
-                throw new RuntimeException("Can't add the same metric by label set to the same live component:" + openMetricsName);
+                throw new RuntimeException("Can't add the same metric by label set to the same live component:" +
+                    " this:" + this.toString());
             }
             metrics.put(openMetricsName,metric);
             for (MetricRegistryListener listener : listeners) {
