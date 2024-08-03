@@ -68,8 +68,8 @@ public class NameCache {
     }
 
     public NameCache setPath(String path) {
-        if (this.path!=null) {
-            if (this.path.equals(path)) {
+        if (path != null) {
+            if (this.path != null && this.path.equals(path)) {
                 logger.debug("mapfile unchanged '" + path + "'");
             } else {
                 logger.info(() -> "mapfile changed from '" + this.path + "' to '" + path + "'");

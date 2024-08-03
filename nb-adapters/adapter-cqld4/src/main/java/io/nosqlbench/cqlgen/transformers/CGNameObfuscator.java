@@ -49,6 +49,7 @@ public class CGNameObfuscator implements CGModelTransformer, NBConfigurable {
 
         if (mapfile != null) {
             cache = NameCache.loadOrCreate(Path.of(mapfile));
+            remapper.updateIndexMapUsingCache(cache);
         }
 
         for (CqlKeyspaceDef keyspaceDef : model.getKeyspaceDefs()) {
@@ -155,5 +156,10 @@ public class CGNameObfuscator implements CGModelTransformer, NBConfigurable {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    public void setMapFile(String mapfile) {
+        this.mapfile = mapfile;
+        cache.setPath(mapfile);
     }
 }

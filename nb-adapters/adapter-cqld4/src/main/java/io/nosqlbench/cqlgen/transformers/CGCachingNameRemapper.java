@@ -16,6 +16,9 @@
 
 package io.nosqlbench.cqlgen.transformers;
 
+import io.nosqlbench.cqlgen.transformers.namecache.NameCache;
+import io.nosqlbench.cqlgen.transformers.namecache.NamedKeyspace;
+import io.nosqlbench.cqlgen.transformers.namecache.NamedTable;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Combinations;
@@ -49,6 +52,21 @@ public class CGCachingNameRemapper {
 //        return getOrCreateName(canonical, prefix);
 //    }
 
+    public void updateIndexMapUsingCache(NameCache cache) {
+        long keyspaceCount = cache.keyspaces().size();
+        long tableCount = 0;
+        long columnCount = 0;
+        for (NamedKeyspace keyspace:cache.keyspaces()) {
+            keyspaceCount++;
+            tableCount += keyspace.tables().size();
+            for (NamedTable table:keyspace.tables()) {
+                columnCount += table.columns().size();
+            }
+        }
+        indexmap.put("keyspace", keyspaceCount);
+        indexmap.put("table", tableCount);
+        indexmap.put("column", columnCount);
+    }
 
     private long indexforType(String type) {
         long newvalue = indexmap.computeIfAbsent(type, t -> 0L)+1;
