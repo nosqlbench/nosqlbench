@@ -398,6 +398,12 @@
                 <version>2.23.1</version>
             </dependency>
 
+	        <dependency>
+	            <groupId>io.weaviate</groupId>
+	            <artifactId>client</artifactId>
+	            <version>4.8.2</version>
+	        </dependency>
+
 
         </dependencies>
     </dependencyManagement>
