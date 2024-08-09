@@ -20,6 +20,7 @@ import java.util.Optional;
 
 public interface NBComponentProps {
     String SUMMARY = "summary";
+    String HDRDIGITS = "hdr_digits";
 
     Optional<String> getComponentProp(String name);
     NBComponentProps setComponentProp(String name, String value);

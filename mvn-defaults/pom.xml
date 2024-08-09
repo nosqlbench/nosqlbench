@@ -26,7 +26,7 @@
 
     <properties>
 
-        <revision>5.21.2-SNAPSHOT</revision>
+        <revision>5.21.3-SNAPSHOT</revision>
         <!-- Set this level to override the logging level for tests during build -->
         <project.testlevel>INFO</project.testlevel>
         <!-- Set this level to override the logging level for tests logging configuration during build -->
@@ -645,6 +645,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <argLine>--enable-preview @{argLine}</argLine>
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
                     <includes>
@@ -909,6 +910,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
+                            <additionalJOptions>--enable-preview</additionalJOptions>
                             <release>21</release>
                             <doctitle>${javadoc.name}</doctitle>
                             <windowtitle>${javadoc.name}</windowtitle>
@@ -917,6 +919,7 @@
                             <detectOfflineLinks>false</detectOfflineLinks>
                             <!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
                             <additionalOptions>
+
                                 <additionalOption>-Xdoclint:none</additionalOption>
                             </additionalOptions>
                             <!--                    <additionalJOption>-Xdoclint:none</additionalJOption>-->

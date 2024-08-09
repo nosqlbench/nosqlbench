@@ -302,7 +302,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         } else if (isConfig(field)) {
             return getConfig(field);
         }
-        logger.warn("static field '{}' was requested, but it does not exist", field);
+//        logger.warn("static field '{}' was requested, but it does not exist", field);
         return null;
     }
 
