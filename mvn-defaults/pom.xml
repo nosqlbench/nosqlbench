@@ -404,6 +404,16 @@
 	            <version>4.8.2</version>
 	        </dependency>
 
+          <dependency>
+              <groupId>com.azure</groupId>
+              <artifactId>azure-search-documents</artifactId>
+              <version>11.7.0</version>
+          </dependency>
+          <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-identity</artifactId>
+            <version>1.13.2</version>
+          </dependency>
 
         </dependencies>
     </dependencyManagement>
