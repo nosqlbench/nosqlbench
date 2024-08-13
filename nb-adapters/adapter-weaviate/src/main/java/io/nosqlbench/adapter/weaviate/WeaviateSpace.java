@@ -44,9 +44,6 @@ import io.weaviate.client.v1.auth.exception.AuthException;
  *      quick start guide</a>
  * @see <a href="https://github.com/weaviate/java-client">Weaviate Java
  *      client</a>
- * @see <a href=
- *      "https://github.com/qdrant/qdrant/blob/master/docs/grpc/docs.md">Qdrant
- *      GRPC docs</a>
  */
 public class WeaviateSpace implements AutoCloseable {
     private final static Logger logger = LogManager.getLogger(WeaviateSpace.class);
@@ -77,10 +74,7 @@ public class WeaviateSpace implements AutoCloseable {
 	private WeaviateClient createClient() throws AuthException {
         String uri = cfg.get("uri");
 		String scheme = cfg.getOptional("scheme").orElse("https");
-//        int grpcPort = cfg.getOptional("grpc_port").map(Integer::parseInt).orElse(6334);
-//        boolean useTls = cfg.getOptional("use_tls").map(Boolean::parseBoolean).orElse(true);
 
-//        var builder = QdrantGrpcClient.newBuilder(uri, grpcPort, useTls);
 		var requiredToken = cfg.getOptional("token_file")
             .map(Paths::get)
             .map(
@@ -102,10 +96,6 @@ public class WeaviateSpace implements AutoCloseable {
 				&& (cfg.getOptional("username").isPresent() || cfg.getOptional("password").isPresent())) {
 			throw new OpConfigError("Username/Password combo cannot be used together with token/tokenFile");
 		}
-//        builder = builder.withApiKey(requiredToken);
-//        builder = builder.withTimeout(
-//            Duration.ofMillis(NumberUtils.toInt(cfg.getOptional("timeout_ms").orElse("3000")))
-//        );
 
 		logger.info("{}: Creating new Weaviate Client with (masked) token [{}], uri/endpoint [{}]",
 				this.name, WeaviateAdapterUtils.maskDigits(requiredToken), uri);
