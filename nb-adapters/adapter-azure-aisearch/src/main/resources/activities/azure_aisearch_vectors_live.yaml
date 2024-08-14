@@ -1,0 +1,174 @@
+min_version: 5.21
+description: |
+  This is a template for live vector search testing.
+  Template Variables:
+
+  schema: Install the schema required to run the test
+  rampup: Measure how long it takes to load a set of embeddings
+  search: Measure how the system responds to queries while it
+   is indexing recently ingested data.
+  search: Run vector search with a set of default (or overridden) parameters
+  In all of these phases, it is important to instance the metrics with distinct names.
+  Also, aggregates of recall should include total aggregate as well as a moving average.
+  TEMPLATE(token_file)
+  TEMPLATE(token)
+
+scenarios:
+  azure_aisearch_vectors:
+    delete_index: >-
+      run tags==block:delete_index
+      errors===stop
+      cycles===UNDEF threads===UNDEF
+      endpoint=TEMPLATE(azureaisearchhost) token_file=TEMPLATE(token_file)
+    
+    create_or_update_index: >-
+      run tags==block:create_or_update_index
+      errors===stop
+      cycles===UNDEF threads===UNDEF
+      endpoint=TEMPLATE(azureaisearchhost) token_file=TEMPLATE(token_file)
+
+    list_indexes: >-
+      run tags==block:list_indexes
+      errors===stop
+      cycles===UNDEF threads===UNDEF
+      endpoint=TEMPLATE(azureaisearchhost) token_file=TEMPLATE(token_file)
+     
+    upload_documents: >-
+      run tags==block:upload_documents
+      errors===warn,counter
+      cycles===TEMPLATE(train_cycles,TEMPLATE(trainsize,1000)) threads===TEMPLATE(train_threads,AUTO)
+      token_file===TEMPLATE(token_file) endpoint===TEMPLATE(azureaisearchhost)
+       
+    search_documents: >-
+      run tags==block:search_documents
+      errors===warn,counter
+      cycles===TEMPLATE(testann_cycles,TEMPLATE(testsize,1000)) threads===TEMPLATE(testann_threads,AUTO)
+      endpoint=TEMPLATE(azureaisearchhost) token_file=TEMPLATE(token_file)
+      
+params:
+  driver: azure_aisearch
+  instrument: true
+
+bindings:
+  id_val: Identity();
+  id_val_uuid: ToHashedUUID() -> java.util.UUID
+  row_key: ToString()
+  row_key_batch: Mul(TEMPLATE(batch_size)L); ListSizedStepped(TEMPLATE(batch_size),long->ToString());
+  # filetype=hdf5 for TEMPLATE(filetype,hdf5)
+  test_floatlist_hdf5: HdfFileToFloatList("local/testdata/TEMPLATE(dataset).hdf5", "/test");
+  relevant_indices_hdf5: HdfFileToIntArray("local/testdata/TEMPLATE(dataset).hdf5", "/neighbors")
+  distance_floatlist_hdf5: HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/distance")
+  # TODO - remove the 'local' keyword in path
+  train_floatlist_hdf5: HdfFileToFloatList("local/testdata/TEMPLATE(dataset).hdf5", "/train");
+  train_floatlist_hdf5_batch: Mul(TEMPLATE(batch_size)L); ListSizedStepped(TEMPLATE(batch_size),HdfFileToFloatList("testdata/TEMPLATE(dataset).hdf5", "/train"));
+  # filetype=fvec for TEMPLATE(filetype,fvec)
+  test_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_query_vectors.fvec");
+  relevant_indices_fvec: IVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_indices_query.ivec");
+  distance_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(testsize)_distances_count.fvec",TEMPLATE(dimensions),0);
+  train_floatlist_fvec: FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0);
+  train_floatlist_fvec_batch: Mul(TEMPLATE(batch_size,10)L); ListSizedStepped(TEMPLATE(batch_size),FVecReader("testdata/TEMPLATE(dataset)_TEMPLATE(trainsize)_base_vectors.fvec",TEMPLATE(dimensions),0));
+
+##############################################
+# NOTE: An Azure AI Search index name must start and end with alphanumeric characters and contain only lowercase letters, digits or dashes.
+##############################################  
+  
+blocks:
+  delete_index:
+    ops:
+      # https://learn.microsoft.com/en-us/rest/api/searchservice/indexes/delete?view=rest-searchservice-2024-07-01&tabs=HTTP
+      delete_idx_op:
+        delete_index: "TEMPLATE(collection)"
+        
+  create_or_update_index:
+    ops:
+      # https://learn.microsoft.com/en-us/rest/api/searchservice/indexes/create-or-update?view=rest-searchservice-2024-07-01&tabs=HTTP
+      create_or_update_index_op:
+        create_or_update_index: "TEMPLATE(collection)"
+        fields:
+          id:
+            type: "Edm.String" # Data types - https://learn.microsoft.com/en-us/rest/api/searchservice/supported-data-types#edm-data-types-for-vector-fields
+            key: true
+            filterable: true
+            sortable: true
+            searchable: true
+            facetable: false
+            retrievable: true
+            hidden: false
+          value:
+            type: "Collection(Edm.Single)"
+            dimensions: TEMPLATE(dimensions)
+            vectorSearchProfile: "vector-profile-hnsw-scalar-1"
+            hidden: false
+            searchable: true
+            retrievable: true
+            filterable: false
+            sortable: false
+            facetable: false
+        vectorSearch:
+          compressions:
+            scalar-quantization-1:
+              kind: "scalarQuantization"
+              rerankWithOriginalVectors: true
+              defaultOversampling: 1
+              scalarQuantizationParameters:
+                quantizedDataType: "int8"
+          algorithms:
+            hnsw-sq-1:
+              kind: "hnsw" # or "exhaustiveKnn"
+              hnswParameters:
+                m: 32
+                efConstruction: 100
+                efSearch: 100
+                metric: "TEMPLATE(similarity_function)"
+              #exhaustiveKnnParameters:
+                #metric: "TEMPLATE(similarity_function)"
+          profiles:
+            vector-profile-hnsw-scalar-1:
+              algorithm: "hnsw-sq-1"
+              compression: "scalar-quantization-1"
+
+  list_indexes:
+    ops:
+      # https://learn.microsoft.com/en-us/rest/api/searchservice/indexes/list?view=rest-searchservice-2024-07-01&tabs=HTTP
+      list_indexes_op:
+        list_indexes: "DUMMY_PLACEHOLDER"
+        
+  upload_documents:
+    ops:
+      upload_documents_op:
+        upload_documents: "TEMPLATE(collection)"
+        fields:
+          id: "{row_key}"
+          value: "{train_floatlist_TEMPLATE(filetype)}"
+                
+  search_documents:
+    ops:
+      search_documents_op:
+        search_documents: "TEMPLATE(collection)"
+        count: false
+        select: "id, value"
+        vectorQueries:
+          kind: "vector"
+          vector: "{test_floatlist_TEMPLATE(filetype)}"
+          exhaustive: false
+          fields: "value"
+          weight: 1.0
+          k: TEMPLATE(select_limit,100)
+          verifier-init: |
+            relevancy= new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op);
+            for (int k in List.of(100)) {
+              relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+              relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+              relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+              relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+              relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+            }
+          verifier: |
+            // driver-specific function
+            actual_indices=io.nosqlbench.adapter.azureaisearch.AzureAISearchAdapterUtils.responseFieldToStringArray("id",result)
+            System.out.println("actual_indices ------>>>>: " + actual_indices);
+            // driver-agnostic function
+            relevancy.accept({relevant_indices_TEMPLATE(filetype)},actual_indices);
+            // because we are "verifying" although this needs to be reorganized
+            return true;
+          

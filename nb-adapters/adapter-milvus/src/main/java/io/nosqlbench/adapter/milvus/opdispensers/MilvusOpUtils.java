@@ -16,16 +16,17 @@
 
 package io.nosqlbench.adapter.milvus.opdispensers;
 
-import com.alibaba.fastjson.JSONObject;
-import io.milvus.param.dml.InsertParam;
-import io.nosqlbench.adapters.api.templating.ParsedOp;
-import io.nosqlbench.nb.api.errors.OpConfigError;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
+
+import com.alibaba.fastjson.JSONObject;
+
+import io.milvus.param.dml.InsertParam;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 
 public class MilvusOpUtils {
 
@@ -68,8 +69,6 @@ public class MilvusOpUtils {
         }
         ParsedOp valueTemplate = op.getAsSubOp(opfield, ParsedOp.SubOpNaming.SubKey);
         Map<String, Object> testFieldsValues = valueTemplate.apply(0L);
-
-        List<LongFunction<InsertParam.Field>> fieldsF = new ArrayList<>(testFieldsValues.size());
 
         for (String fieldName : testFieldsValues.keySet()) {
             Object testFieldValue = testFieldsValues.get(fieldName);

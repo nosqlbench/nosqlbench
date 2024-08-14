@@ -87,7 +87,7 @@
         <profile>
             <id>adapter-jdbc-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-jdbc</module>
@@ -157,7 +157,7 @@
         <profile>
             <id>adapter-kafka-module</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-kafka</module>
@@ -167,7 +167,7 @@
         <profile>
             <id>adapter-amqp-module</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-amqp</module>
@@ -187,10 +187,30 @@
         <profile>
             <id>adapter-qdrant-module</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-qdrant</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-weaviate-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-weaviate</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-azure-aisearch-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-azure-aisearch</module>
             </modules>
         </profile>
 
