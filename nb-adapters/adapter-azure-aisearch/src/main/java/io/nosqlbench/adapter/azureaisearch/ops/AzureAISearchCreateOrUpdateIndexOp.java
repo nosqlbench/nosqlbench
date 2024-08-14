@@ -28,16 +28,8 @@ public class AzureAISearchCreateOrUpdateIndexOp extends AzureAISearchBaseOp<Sear
 	public Object applyOp(long value) {
 		SearchIndex createResponse = null;
 		try {
-			if (logger.isDebugEnabled()) {
-				request.getFields().forEach((field) -> {
-					logger.debug(
-							">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SearchIndex: Name:{}-ProfileName:{}-Type:{}-Dimension:{}",
-							field.getName(), field.getVectorSearchProfileName(), field.getType().toString(),
-							field.getVectorSearchDimensions());
-				});
-			}
 			createResponse = searchIndexClient.createOrUpdateIndex(request);
-			logger.debug("Successfully created the collection with return code of {}", createResponse.toString());
+			logger.debug("Successfully created the collection with return response: {}", createResponse.toString());
 		} catch (RuntimeException rte) {
 			throw rte;
 		}

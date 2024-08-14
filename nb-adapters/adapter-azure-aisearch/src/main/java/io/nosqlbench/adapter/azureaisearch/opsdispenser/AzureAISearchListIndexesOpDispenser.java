@@ -24,6 +24,9 @@ import io.nosqlbench.adapter.azureaisearch.ops.AzureAISearchBaseOp;
 import io.nosqlbench.adapter.azureaisearch.ops.AzureAISearchListIndexesOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+/**
+ * Lists the indexes available.
+ */
 public class AzureAISearchListIndexesOpDispenser extends AzureAISearchBaseOpDispenser<String> {
 	public AzureAISearchListIndexesOpDispenser(AzureAISearchDriverAdapter adapter, ParsedOp op,
 			LongFunction<String> targetF) {

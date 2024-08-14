@@ -31,27 +31,21 @@ public abstract class AzureAISearchBaseOp<T> implements CycleOp<Object> {
 	protected final static Logger logger = LogManager.getLogger(AzureAISearchBaseOp.class);
 
 	protected final SearchIndexClient searchIndexClient;
-//	protected final SearchClient searchClient;
 	protected final T request;
 	protected final LongFunction<Object> apiCall;
 
 	public AzureAISearchBaseOp(SearchIndexClient searchIndexClient, T requestParam) {
 		this.searchIndexClient = searchIndexClient;
-		// TODO - figure out how to do this cleanly
-//		this.searchClient = searchIndexClient.getSearchClient("PLACEHOLDER");
 		this.request = requestParam;
 		this.apiCall = this::applyOp;
 	}
 
 	public AzureAISearchBaseOp(SearchIndexClient searchIndexClient, T requestParam, LongFunction<Object> call) {
 		this.searchIndexClient = searchIndexClient;
-		// TODO - figure out how to do this cleanly
-//		this.searchClient = searchIndexClient.getSearchClient("PLACEHOLDER");
 		this.request = requestParam;
 		this.apiCall = call;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public final Object apply(long value) {
 		logger.trace("applying op: " + this);

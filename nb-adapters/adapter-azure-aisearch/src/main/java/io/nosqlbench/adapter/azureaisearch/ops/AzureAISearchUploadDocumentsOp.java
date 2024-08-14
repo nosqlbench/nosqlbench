@@ -33,12 +33,6 @@ public class AzureAISearchUploadDocumentsOp extends AzureAISearchClientBaseOp<Se
 	public Object applyOp(long value) {
 		IndexDocumentsResult uploadDocsResponse = null;
 		try {
-//			request.getFields().forEach((field) -> {
-//				logger.info(
-//						">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>[AzureAISearchUploadDocumentsOp] SearchIndex: Name:{}-ProfileName:{}-Type:{}-Dimension:{}",
-//						field.getName(), field.getVectorSearchProfileName(), field.getType().toString(),
-//						field.getVectorSearchDimensions());
-//			});
 			uploadDocsResponse = searchClient.uploadDocuments(List.of(request));
 			if (logger.isDebugEnabled()) {
 				uploadDocsResponse.getResults().forEach((r) -> {

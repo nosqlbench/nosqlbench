@@ -33,8 +33,12 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 
 /**
- * @see https://learn.microsoft.com/en-us/rest/api/searchservice/documents/search-get?view=rest-searchservice-2024-07-01&tabs=HTTP#rawvectorquery
- * @see https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-query?tabs=query-2024-07-01%2Cfilter-2024-07-01%2Cbuiltin-portal#vector-query-request
+ * @see <a href=
+ *      "https://learn.microsoft.com/en-us/rest/api/searchservice/documents/search-get?view=rest-searchservice-2024-07-01&tabs=HTTP#rawvectorquery">
+ *      Search GET API<a/>
+ * @see <a href=
+ *      "https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-query?tabs=query-2024-07-01%2Cfilter-2024-07-01%2Cbuiltin-portal#vector-query-request">How
+ *      to query/vector search</a>
  */
 public class AzureAISearchSearchDocumentsOpDispenser extends AzureAISearchBaseOpDispenser<SearchOptions> {
 	public AzureAISearchSearchDocumentsOpDispenser(AzureAISearchDriverAdapter adapter, ParsedOp op,

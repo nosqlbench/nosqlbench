@@ -37,7 +37,8 @@ scenarios:
       run tags==block:upload_documents
       errors===warn,counter
       cycles===TEMPLATE(train_cycles,TEMPLATE(trainsize,1000)) threads===TEMPLATE(train_threads,AUTO)
-      token_file===TEMPLATE(token_file) endpoint===TEMPLATE(azureaisearchhost)
+      endpoint=TEMPLATE(azureaisearchhost) token_file=TEMPLATE(token_file)
+    #token_file===TEMPLATE(token_file) endpoint===TEMPLATE(azureaisearchhost)
        
     search_documents: >-
       run tags==block:search_documents
@@ -94,6 +95,18 @@ blocks:
             facetable: false
             retrievable: true
             hidden: false
+# Caused by: com.azure.core.exception.HttpResponseException: Status code 400, "{"error":{"code":"OperationNotAllowed","message":"The request is invalid. Details: definition : The searchable field 'id' must be of type Edm.String or Collection(Edm.String) or Collection(Edm.Single).","details":[{"code":"CannotEnableFieldForSearching","message":"The searchable field 'id' must be of type Edm.String or Collection(Edm.String) or Collection(Edm.Single). Parameters: definition"}]}}"
+# Caused by: com.azure.core.exception.HttpResponseException: Status code 400, "{"error":{"code":"InvalidRequestParameter","message":"The request is invalid. Details: definition : The key field 'id' must be of type Edm.String.","details":[{"code":"InvalidKeyField","message":"The key field 'id' must be of type Edm.String. Parameters: definition"}]}}"
+# Caused by: com.azure.core.exception.HttpResponseException: Status code 400, "{"error":{"code":"InvalidRequestParameter","message":"The request is invalid. Details: definition : The key field 'id' is marked as non-retrievable. Please set the 'retrievable' property for this field to 'true' or leave it unset.","details":[{"code":"InvalidKeyField","message":"The key field 'id' is marked as non-retrievable. Please set the 'retrievable' property for this field to 'true' or leave it unset. Parameters: definition"}]}}"
+#          dummy_key:
+#            type: "Edm.Int32" # Data types - https://learn.microsoft.com/en-us/rest/api/searchservice/supported-data-types#edm-data-types-for-vector-fields
+#            key: false
+#            filterable: true
+#            sortable: true
+#            searchable: true
+#            facetable: false
+#            retrievable: true
+#            hidden: false
           value:
             type: "Collection(Edm.Single)"
             dimensions: TEMPLATE(dimensions)
@@ -139,6 +152,7 @@ blocks:
         upload_documents: "TEMPLATE(collection)"
         fields:
           id: "{row_key}"
+#          dummy_key: "{id_val}"
           value: "{train_floatlist_TEMPLATE(filetype)}"
                 
   search_documents:
@@ -154,21 +168,21 @@ blocks:
           fields: "value"
           weight: 1.0
           k: TEMPLATE(select_limit,100)
-          verifier-init: |
-            relevancy= new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op);
-            for (int k in List.of(100)) {
-              relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
-              relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
-              relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
-              relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
-              relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
-            }
-          verifier: |
-            // driver-specific function
-            actual_indices=io.nosqlbench.adapter.azureaisearch.AzureAISearchAdapterUtils.responseFieldToStringArray("id",result)
-            System.out.println("actual_indices ------>>>>: " + actual_indices);
-            // driver-agnostic function
-            relevancy.accept({relevant_indices_TEMPLATE(filetype)},actual_indices);
-            // because we are "verifying" although this needs to be reorganized
-            return true;
+        verifier-init: |
+          relevancy= new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op);
+          for (int k in List.of(100)) {
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+          }
+        verifier: |
+          // driver-specific function
+          actual_indices=io.nosqlbench.adapter.azureaisearch.AzureAISearchAdapterUtils.searchDocumentsResponseIdToIntArray("id",result)
+          // System.out.println("actual_indices ------>>>>: " + actual_indices);
+          // driver-agnostic function
+          relevancy.accept({relevant_indices_TEMPLATE(filetype)},actual_indices);
+          // because we are "verifying" although this needs to be reorganized
+          return true;
           

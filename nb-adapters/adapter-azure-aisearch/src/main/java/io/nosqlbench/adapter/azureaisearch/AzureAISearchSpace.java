@@ -56,7 +56,6 @@ public class AzureAISearchSpace implements AutoCloseable {
 	private final NBConfiguration cfg;
 
 	protected SearchIndexClient searchIndexClient;
-//	protected SearchClient searchClient;
 
 	/**
 	 * Create a new {@code AzureAISearchSpace} Object which stores all stateful
@@ -78,13 +77,6 @@ public class AzureAISearchSpace implements AutoCloseable {
 		return searchIndexClient;
 	}
 
-//	public synchronized SearchClient getSearchClient() {
-//		if (searchClient == null) {
-//			createSearchClients();
-//		}
-//		return searchClient;
-//	}
-
 	private SearchIndexClient createSearchClients() {
 		String uri = cfg.get("endpoint");
 		var requiredToken = cfg.getOptional("token_file").map(Paths::get).map(tokenFilePath -> {
@@ -102,23 +94,17 @@ public class AzureAISearchSpace implements AutoCloseable {
 				this.name, AzureAISearchAdapterUtils.maskDigits(requiredToken), uri);
 
 		var searchIndexClientBuilder = new SearchIndexClientBuilder().endpoint(uri);
-//		var searchClientBuilder = new SearchClientBuilder().endpoint(uri);
 		if (!requiredToken.isBlank()) {
 			searchIndexClientBuilder = searchIndexClientBuilder.credential(new AzureKeyCredential(requiredToken));
-//			searchClientBuilder = searchClientBuilder.credential(new AzureKeyCredential(requiredToken));
 		} else {
 			TokenCredential tokenCredential = new DefaultAzureCredentialBuilder().build();
 			searchIndexClientBuilder = searchIndexClientBuilder.credential(tokenCredential);
-//			searchClientBuilder = searchClientBuilder.credential(tokenCredential);
 		}
 		// Should we leave these below to leverage the SearchServiceVersion.getLatest()?
 		String apiVersion = cfg.getOptional("api_version").orElse(SearchServiceVersion.V2024_07_01.name());
 		logger.warn(
 				"Latest search service version supported by this client is '{}', but we're using '{}' version. Ignore this warning if both are same.",
 				SearchServiceVersion.getLatest(), apiVersion);
-		// TODO - try to find a way to get rid of placeholder
-//		this.searchClient = searchClientBuilder.serviceVersion(SearchServiceVersion.valueOf(apiVersion))
-//				.indexName("PLACEHOLDER").buildClient();
 		return searchIndexClientBuilder.serviceVersion(SearchServiceVersion.valueOf(apiVersion)).buildClient();
 	}
 

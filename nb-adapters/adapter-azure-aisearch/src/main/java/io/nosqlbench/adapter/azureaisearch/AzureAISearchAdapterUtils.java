@@ -24,13 +24,12 @@ import com.azure.search.documents.SearchDocument;
 import com.azure.search.documents.util.SearchPagedIterable;
 
 public class AzureAISearchAdapterUtils {
-
 	public static final String AZURE_AI_SEARCH = "azure_aisearch";
 
 	public static List<String> splitNames(String input) {
 		assert StringUtils.isNotBlank(input) && StringUtils.isNotEmpty(input);
 		return Arrays.stream(input.split("( +| *, *)")).filter(StringUtils::isNotBlank).toList();
-}
+	}
 
 	public static List<Long> splitLongs(String input) {
 		assert StringUtils.isNotBlank(input) && StringUtils.isNotEmpty(input);
@@ -57,9 +56,18 @@ public class AzureAISearchAdapterUtils {
 		return masked.toString();
 	}
 
-	public String[] responseFieldToStringArray(String fieldName, SearchPagedIterable response) {
-		return response.stream()
-				.map(searchResult -> searchResult.getDocument(SearchDocument.class).get(fieldName).toString())
-				.toArray(String[]::new);
+	/**
+	 * Prepares an integer array of the indices of keys containing the result
+	 * vectors.
+	 *
+	 * @param field    field to search for the index values of the vectors.
+	 * @param response results from which we need to search for the indexes.
+	 * @return an {@code int[]} of the indexes of the vectors.
+	 */
+	public static int[] searchDocumentsResponseIdToIntArray(String field, SearchPagedIterable response) {
+		return response.stream().mapToInt(r -> {
+			SearchDocument returnObj = r.getDocument(SearchDocument.class);
+			return Integer.valueOf((String) returnObj.get(field));
+		}).toArray();
 	}
 }
