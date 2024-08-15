@@ -48,7 +48,7 @@ public abstract class AzureAISearchBaseOp<T> implements CycleOp<Object> {
 
 	@Override
 	public final Object apply(long value) {
-		logger.trace("applying op: " + this);
+		logger.trace(() -> "applying op: " + this);
 
 		try {
 			Object result = applyOp(value);

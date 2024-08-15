@@ -129,9 +129,6 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 
 									BinaryQuantizationCompression bqComp = new BinaryQuantizationCompression(innerKey);
 									((Map<String, Object>) innerValue).forEach((compressKey, compressValue) -> {
-										logger.debug(
-												">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>kind:{}  compressKey:{}  compressValue:{}",
-												kind, compressKey, compressValue);
 										if (compressKey.equals("kind")) {
 											bqComp.getKind().fromString((String) compressValue);
 										}

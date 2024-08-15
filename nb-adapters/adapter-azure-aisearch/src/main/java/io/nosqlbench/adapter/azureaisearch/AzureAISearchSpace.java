@@ -90,8 +90,8 @@ public class AzureAISearchSpace implements AutoCloseable {
 		}).orElseGet(() -> cfg.getOptional("token").orElseThrow(() -> new RuntimeException(
 				"You must provide either a 'token_file' or a 'token' to configure a Azure AI Search client")));
 
-		logger.info("{}: Creating new Azure AI Search Client with (masked) token/key [{}], uri/endpoint [{}]",
-				this.name, AzureAISearchAdapterUtils.maskDigits(requiredToken), uri);
+		logger.info(() -> "Creating new Azure AI Search Client with (masked) token/key ["
+				+ AzureAISearchAdapterUtils.maskDigits(requiredToken) + "], uri/endpoint [" + uri + "]");
 
 		var searchIndexClientBuilder = new SearchIndexClientBuilder().endpoint(uri);
 		if (!requiredToken.isBlank()) {
@@ -103,8 +103,8 @@ public class AzureAISearchSpace implements AutoCloseable {
 		// Should we leave these below to leverage the SearchServiceVersion.getLatest()?
 		String apiVersion = cfg.getOptional("api_version").orElse(SearchServiceVersion.V2024_07_01.name());
 		logger.warn(
-				"Latest search service version supported by this client is '{}', but we're using '{}' version. Ignore this warning if both are same.",
-				SearchServiceVersion.getLatest(), apiVersion);
+				() -> "Latest search service version supported by this client is '" + SearchServiceVersion.getLatest()
+						+ "', but we're using '" + apiVersion + "' version. Ignore this warning if both are same.");
 		return searchIndexClientBuilder.serviceVersion(SearchServiceVersion.valueOf(apiVersion)).buildClient();
 	}
 
