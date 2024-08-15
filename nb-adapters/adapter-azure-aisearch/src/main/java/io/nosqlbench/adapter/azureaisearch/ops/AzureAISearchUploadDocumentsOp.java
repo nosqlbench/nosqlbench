@@ -33,18 +33,12 @@ public class AzureAISearchUploadDocumentsOp extends AzureAISearchClientBaseOp<Se
 	public Object applyOp(long value) {
 		IndexDocumentsResult uploadDocsResponse = null;
 		try {
-//			request.getFields().forEach((field) -> {
-//				logger.info(
-//						">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>[AzureAISearchUploadDocumentsOp] SearchIndex: Name:{}-ProfileName:{}-Type:{}-Dimension:{}",
-//						field.getName(), field.getVectorSearchProfileName(), field.getType().toString(),
-//						field.getVectorSearchDimensions());
-//			});
 			uploadDocsResponse = searchClient.uploadDocuments(List.of(request));
 			if (logger.isDebugEnabled()) {
 				uploadDocsResponse.getResults().forEach((r) -> {
-					logger.debug(
-							"Successfully created the collection with return status code: {}, key: {}, succeeded?: {}, error message: {}",
-							r.getStatusCode(), r.getKey(), r.isSucceeded(), r.getErrorMessage());
+					logger.debug(() -> "Successfully created the collection with return status code: "
+							+ r.getStatusCode() + ", key: " + r.getKey() + ", succeeded?: " + r.isSucceeded()
+							+ ", error message: " + r.getErrorMessage());
 				});
 			}
 		} catch (RuntimeException rte) {

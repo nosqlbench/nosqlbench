@@ -17,7 +17,6 @@ package io.nosqlbench.adapter.azureaisearch.ops;
 
 import com.azure.core.util.Context;
 import com.azure.search.documents.SearchClient;
-import com.azure.search.documents.SearchDocument;
 import com.azure.search.documents.indexes.SearchIndexClient;
 import com.azure.search.documents.models.SearchOptions;
 import com.azure.search.documents.util.SearchPagedIterable;
@@ -36,14 +35,6 @@ public class AzureAISearchSearchDocumentsOp extends AzureAISearchClientBaseOp<Se
 			searchDocsResponse = searchClient.search(null, // we've not implemented other complex searches yet here.
 					request,
 					Context.NONE);
-			if (logger.isInfoEnabled()) {
-				searchDocsResponse.forEach((r) -> {
-					SearchDocument doc = r.getDocument(SearchDocument.class);
-					logger.debug(
-							"Successfully searched the index and returned id: {}, score: {}, vector embedding: {}",
-							doc.get("id"), r.getScore(), doc.get("value"));
-				});
-			}
 		} catch (RuntimeException rte) {
 			throw rte;
 		}

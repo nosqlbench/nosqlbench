@@ -30,12 +30,11 @@ public class AzureAISearchListIndexesOp extends AzureAISearchBaseOp<String> {
 		try {
 			PagedIterable<SearchIndex> response = searchIndexClient.listIndexes();
 			response.forEach((index) -> {
-				logger.info("Indexes available are: Name: {},  ETag: {}", index.getName(), index.getETag());
+				logger.info(() -> "Indexes available are: Name: " + index.getName() + ",  ETag: " + index.getETag());
 				index.getFields().forEach(field -> {
-					logger.info(
-							"Field Name: {}, Field isKey?: {}, Field Dimension: {}, Field Vector Search Profile: {}",
-							field.getName(), field.isKey(), field.getVectorSearchDimensions(),
-							field.getVectorSearchProfileName());
+					logger.info(() -> "Field Name: " + field.getName() + ", Field isKey?: " + field.isKey()
+							+ ", Field Dimension: " + field.getVectorSearchDimensions()
+							+ ", Field Vector Search Profile: " + field.getVectorSearchProfileName());
 				});
 			});
 		} catch (RuntimeException rte) {

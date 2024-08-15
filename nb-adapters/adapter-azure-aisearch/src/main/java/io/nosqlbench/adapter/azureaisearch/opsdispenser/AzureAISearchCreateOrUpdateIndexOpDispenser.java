@@ -66,7 +66,6 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 	@Override
 	public LongFunction<SearchIndex> getParamFunc(LongFunction<SearchIndexClient> clientF, ParsedOp op,
 			LongFunction<String> targetF) {
-		logger.debug(">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>getParamFunc");
 		LongFunction<SearchIndex> ebF = l -> new SearchIndex(targetF.apply(l));
 
 		Optional<LongFunction<Map>> fieldsMapF = op.getAsOptionalFunction("fields", Map.class);
@@ -94,28 +93,16 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 			Map<String, Object> vsMap = mapLongFunc.apply(l);
 			VectorSearch vectorSearch = new VectorSearch();
 			vsMap.forEach((vsField, vsValue) -> {
-				logger.debug(
-						">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>vsField:{}  vsValue:{}",
-						vsField, vsValue);
 				if (vsValue instanceof Map) {
 					((Map<String, Object>) vsValue).forEach((innerKey, innerValue) -> {
-						logger.debug(
-								">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>innerKey:{}  innerValue:{}",
-								innerKey, innerValue);
 						if ("compressions".equals(vsField)) {
 							List<VectorSearchCompression> vsCompList = new ArrayList<>();
 							String kind;
 							if (((Map<String, Object>) innerValue).containsKey("kind")) {
 								kind = (String) ((Map<String, Object>) innerValue).get("kind");
-								logger.debug(
-										">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>compressions>>>>kind:{}",
-										kind);
 								if (kind.equals("scalarQuantization")) {
 									ScalarQuantizationCompression sqComp = new ScalarQuantizationCompression(innerKey);
 									((Map<String, Object>) innerValue).forEach((compressKey, compressValue) -> {
-										logger.debug(
-												">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>kind:{}  compressKey:{}  compressValue:{}",
-												kind, compressKey, compressValue);
 										if (compressKey.equals("kind")) {
 											sqComp.getKind().fromString((String) compressValue);
 										}
@@ -137,15 +124,11 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 										}
 									});
 									vsCompList.add(sqComp);
-//									vsCompList.add(buildVectorSearchCompression(bqComp, compressKey, compressValue, true));
 								} else {
 									// BinaryQuantization is assumed here
 
 									BinaryQuantizationCompression bqComp = new BinaryQuantizationCompression(innerKey);
 									((Map<String, Object>) innerValue).forEach((compressKey, compressValue) -> {
-										logger.debug(
-												">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>kind:{}  compressKey:{}  compressValue:{}",
-												kind, compressKey, compressValue);
 										if (compressKey.equals("kind")) {
 											bqComp.getKind().fromString((String) compressValue);
 										}
@@ -157,15 +140,10 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 										}
 									});
 									vsCompList.add(bqComp);
-//									vsCompList.add(
-//											buildVectorSearchCompression(bqComp, compressKey, compressValue, false));
 								}
 							} else {
 								VectorSearchCompression vsComp = new VectorSearchCompression(innerKey);
 								((Map<String, Object>) innerValue).forEach((compressKey, compressValue) -> {
-									logger.debug(
-											">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>kind:{}  compressKey:{}  compressValue:{}",
-											null, compressKey, compressValue);
 									if (compressKey.equals("kind")) {
 										vsComp.getKind().fromString((String) compressValue);
 									}
@@ -179,33 +157,18 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 								vsCompList.add(vsComp);
 							}
 							vectorSearch.setCompressions(vsCompList);
-							vectorSearch.getCompressions().forEach((comp) -> {
-								logger.debug(
-										">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>compressions FINAL: Name:{}",
-										comp.getCompressionName());
-							});
 						}
 						if ("algorithms".equals(vsField)) {
 							List<VectorSearchAlgorithmConfiguration> vsAlgoList = new ArrayList<>();
 							String kind;
 							if (((Map<String, Object>) innerValue).containsKey("kind")) {
 								kind = (String) ((Map<String, Object>) innerValue).get("kind");
-								logger.debug(
-										">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>algorithms>>>>kind:{}",
-										kind);
 								if("hnsw".equals(kind)) {
 									HnswAlgorithmConfiguration hnswAlgoConf = new HnswAlgorithmConfiguration(innerKey);
 									((Map<String, Object>) innerValue).forEach((hnswKey, hnswValue) -> {
-										logger.debug(
-												">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>algorithms>>>>kind:{}  hnswKey:{}  hnswValue:{}",
-												kind, hnswKey, hnswValue);
 										if ("hnswParameters".equals(hnswKey)) {
 											((Map<String, Object>) innerValue)
 													.forEach((hnswParamsKey, hnswParamsValue) -> {
-														logger.debug(
-																">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>algorithms>>>>kind:{}  hnswKey:{}  hnswValue:{}  hnswParamsKey:{} hnswParamsValue:{}",
-																kind, hnswKey, hnswValue, hnswParamsKey,
-																hnswParamsValue);
 														HnswParameters hnswParams = new HnswParameters();
 														if ("m".equals(hnswParamsKey)) {
 															hnswParams.setM(((Number) hnswParamsValue).intValue());
@@ -232,15 +195,9 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 									ExhaustiveKnnAlgorithmConfiguration exhausKnnAlgoConf = new ExhaustiveKnnAlgorithmConfiguration(
 											innerKey);
 									((Map<String, Object>) innerValue).forEach((algoKey, algoValue) -> {
-										logger.debug(
-												">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>algorithms>>>>kind:{}  algoKey:{}  algoValue:{}",
-												kind, algoKey, algoValue);
 										if (algoKey.equals("exhaustiveKnnParameters")) {
 											ExhaustiveKnnParameters eKnnParms = new ExhaustiveKnnParameters();
 											((Map<String, Object>) algoValue).forEach((ekpKey, ekpVal) -> {
-												logger.debug(
-														">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>algorithms>>>>kind:{}  algoKey:{}  algoValue:{}  ekpKey:{}  ekpVal:{}",
-														kind, algoKey, algoValue, ekpKey, ekpVal);
 												if (ekpKey.equals("quantizedDataType")) {
 													eKnnParms.setMetric(
 															VectorSearchAlgorithmMetric.fromString((String) ekpVal));
@@ -253,45 +210,21 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 								}
 							}
 							vectorSearch.setAlgorithms(vsAlgoList);
-							vectorSearch.getAlgorithms().forEach((algo) -> {
-								logger.debug(
-										">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>algorithms FINAL: Name:{}",
-										algo.getName());
-							});
 						}
 						if ("profiles".equals(vsField)) {
-							logger.debug(
-									">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>profiles");
 							List<VectorSearchProfile> vsProfileList = new ArrayList<>();
-							// VectorSearchProfile vsProfile = new VectorSearchProfile(innerKey, null);
 							((Map<String, Object>) vsValue).forEach((profKey, profVal) -> {
-								logger.debug(
-										">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>profiles: profKey:{}  profVal:{}",
-										profKey, profVal);
 								((Map<String, Object>) profVal).forEach((pK, pV) -> {
-									logger.debug(
-											">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>profiles: profKey:{}  profVal:{}  pK:{}  pV:{}",
-											profKey, profVal, pK, pV);
 									if ("algorithm".equals(pK)) {
 										vsProfile = new VectorSearchProfile(profKey, (String) pV);
 									}
 									if ("compression".equals(pK)) {
 										vsProfile.setCompressionName((String) pV);
 									}
-
-									logger.debug(
-											">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>profiles: Name:{}>>>AlgoName:{}>>>CompressionName:{}",
-											vsProfile.getName(), vsProfile.getAlgorithmConfigurationName(),
-											vsProfile.getCompressionName());
 								});
 								vsProfileList.add(vsProfile);
 							});
 							vectorSearch.setProfiles(vsProfileList);
-							vectorSearch.getProfiles().forEach((profile) -> {
-								logger.debug(
-										">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>VectorSearch>>>>buildVectorSearchStruct>>>>profiles FINAL: Name:{}  AlgorithmConfName:{}",
-										profile.getName(), profile.getAlgorithmConfigurationName());
-							});
 						}
 					});
 				} else {
@@ -304,48 +237,15 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 		}).orElse(null);
 	}
 
-	@SuppressWarnings({ "unchecked", "static-access" })
-	private VectorSearchCompression buildVectorSearchCompression(VectorSearchCompression vsComp, String key, Object val,
-			boolean isSQ) {
-		if (key.equals("kind")) {
-			vsComp.getKind().fromString((String) val);
-		}
-		if (key.equals("rerankWithOriginalVectors")) {
-			vsComp.setRerankWithOriginalVectors((Boolean) val);
-		}
-		if (key.equals("defaultOversampling")) {
-			vsComp.setDefaultOversampling(((Number) val).doubleValue());
-		}
-		if (isSQ) {
-			if (key.equals("scalarQuantizationParameters")) {
-				ScalarQuantizationParameters sqParams = new ScalarQuantizationParameters();
-				((Map<String, Object>) val).forEach((sqKey, sqVal) -> {
-					if (sqKey.equals("quantizedDataType")) {
-						sqParams.setQuantizedDataType(VectorSearchCompressionTarget.fromString((String) sqVal));
-					}
-				});
-				((ScalarQuantizationCompression) vsComp).setParameters(sqParams);
-			}
-		}
-		return vsComp;
-	}
-
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private LongFunction<List<SearchField>> buildFieldsStruct(ParsedOp op) {
-		logger.debug(">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>buildFieldsStruct");
 		Optional<LongFunction<Map>> baseFunc = op.getAsOptionalFunction("fields", Map.class);
 		return baseFunc.<LongFunction<List<SearchField>>>map(mapLongFunc -> l -> {
 			Map<String, Object> fMap = mapLongFunc.apply(l);
 			List<SearchField> fieldsList = new ArrayList<>();
 			fMap.forEach((fName, fValue) -> {
 				if (fValue instanceof Map) {
-					logger.debug(
-							">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>buildFieldsStruct>>>>fName:{}  fValue:{}",
-							fName, fValue);
 					((Map<String, Object>) fValue).forEach((innerKey, innerValue) -> {
-						logger.debug(
-								">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>buildFieldsStruct>>>>fName:{}  fValue:{}  fName:{}  fValue:{}",
-								fName, fValue, innerKey, innerValue);
 						if (innerKey.equals("type")) {
 							searchField = new SearchField(fName, SearchFieldDataType.fromString((String) innerValue));
 						}
@@ -357,8 +257,6 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 						}
 						if (innerKey.equals("vectorSearchProfile")) {
 							searchField.setVectorSearchProfileName((String) innerValue);
-							logger.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% {} %n",
-									searchField.getVectorSearchProfileName());
 						}
 						if (innerKey.equals("filterable")) {
 							searchField.setFilterable((Boolean) innerValue);
@@ -386,13 +284,6 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 									+ fValue.getClass().getSimpleName() + " instead for the inner value");
 				}
 				fieldsList.add(searchField);
-				if (logger.isDebugEnabled()) {
-					fieldsList.forEach((field) -> {
-						logger.debug(
-								">>>>>>>>>>>>AzureAISearchCreateOrUpdateIndexOpDispenser>>>>>>>>>>>>buildFieldsStruct>>>> fields FINAL: Name:{}  VSProfileName:{}",
-								field.getName(), field.getVectorSearchProfileName());
-					});
-				}
 			});
 			return fieldsList;
 		}).orElse(null);

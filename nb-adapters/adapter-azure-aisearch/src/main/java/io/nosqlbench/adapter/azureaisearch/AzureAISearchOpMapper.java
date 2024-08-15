@@ -68,8 +68,8 @@ public class AzureAISearchOpMapper implements OpMapper<AzureAISearchBaseOp<?>> {
 		case upload_documents -> new AzureAISearchUploadDocumentsOpDispenser(adapter, op, typeAndTarget.targetFunction);
 		case search_documents -> new AzureAISearchSearchDocumentsOpDispenser(adapter, op, typeAndTarget.targetFunction);
 
-//            default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
-//                "mapping parsed op " + op);
+//		default -> throw new RuntimeException(
+//				"Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " + "mapping parsed op " + op);
 		};
 	}
 }
