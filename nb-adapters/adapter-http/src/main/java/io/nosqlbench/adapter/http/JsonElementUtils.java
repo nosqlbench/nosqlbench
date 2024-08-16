@@ -64,6 +64,52 @@ public class JsonElementUtils {
         return keys;
     }
 
+    /**
+     * <Pre>{@code
+     * "root": {
+     *   "children":[
+     *     {"id":"id:vectorsearch:vectorsearch::287",
+     *      "relevance":0.44693907064692884,
+     *      "source":"content",
+     *      "fields":{
+     *        "sddocname":"vectorsearch",
+     *        "documentid":"id:vectorsearch:vectorsearch::287",
+     *        "key":"287"
+     *       }
+     *     },
+     *     {"id":"id:vectorsearch:vectorsearch::85",
+     *     "relevance":0.4449855776862634,
+     *     "source":"content",
+     *     "fields":{
+     *       "sddocname":"vectorsearch",
+     *       "documentid":"id:vectorsearch:vectorsearch::85",
+     *       "key":"85"
+     *       }
+     *     }
+     *   ...
+     * }</Pre>
+     * @param element
+     * @return
+     */
+    public static int[] getIntArrayFromVespaResult(JsonElement jsonElement) {
+        JsonObject json = jsonElement.getAsJsonObject();
+
+        if (!json.has("root") || !json.getAsJsonObject("root").has("children")) {
+            return null;
+        }
+        JsonArray children = json.getAsJsonObject("root").getAsJsonArray("children");
+
+        int count = children.size();
+        int[] keys = new int[count];
+        int i = 0;
+        for (JsonElement element : children) {
+            JsonObject child = element.getAsJsonObject();
+            keys[i] = Integer.parseInt(child.getAsJsonObject("fields").get("key").getAsString());
+            i++;
+        }
+        return keys;
+    }
+
     public static List<Float> customNumberArrayToFloatList(JsonElement element) {
         JsonObject o1 = element.getAsJsonObject();
         JsonElement data = o1.get("data");
