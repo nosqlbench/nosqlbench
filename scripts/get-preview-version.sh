@@ -29,13 +29,18 @@ else
 fi
 
 export TAG=$(git describe --exact-match --tags)
+if [ -e "$TAG" ]
+then
+ printf "There are no tags attached to the current branch. bailing out\n"
+ exit 5
+fi
 if [[ $TAG =~ ([0-9]+)\.([0-9]+)\.([0-9]+)(-preview)? ]]
 then
  printf "The tag format matches the version, continuing\n" 1>&2
  set -- "${BASH_REMATCH[@]}"
  TAG_STRING="${@:2:3}"
 else
- printf "The tag format for '${TAG}' does not match #.#.#-preview form. bailing out\n" 1>&2
+ printf "The tag format for '${TAG}' (from revision ${REVISION}) does not match #.#.#-preview form. bailing out\n" 1>&2
  exit 4
 fi
 
