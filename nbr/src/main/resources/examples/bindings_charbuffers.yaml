@@ -14,7 +14,7 @@ bindings:
   # on the functions below.
   cycle: Identity()
 
-  # CharBufImage(...) creates arbitrarily large characer buffers in memory
+  # CharBufImage(...) creates arbitrarily large character buffers in memory
   # to sample random extracts from. This function comes in a few forms:
 
   # With default image function and fixed length output. This is only
