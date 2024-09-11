@@ -98,6 +98,12 @@ class NBAtFileTest {
     }
 
     @Test
+    public void testAtfileEnvironmentVariableDefault() {
+        LinkedList<String> strings = NBAtFile.includeAt("@src/test/resources/atfiles/environment_variable_default.yaml");
+        assertThat(strings).containsExactly("My default value environment");
+    }
+
+    @Test
     public void testAtfileMissingEnvironmentVariable() {
         assertThrows(RuntimeException.class, () -> NBAtFile.includeAt("@src/test/resources/atfiles/environment_variable_missing.yaml:>:"));
     }
