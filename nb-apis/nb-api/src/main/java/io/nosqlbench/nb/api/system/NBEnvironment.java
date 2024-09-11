@@ -217,7 +217,7 @@ public class NBEnvironment {
      * @return The interpolated value, after substitutions, or null if any lookup failed
      */
     public Optional<String> interpolate(String word, Map<String,String> supplemental) {
-        Pattern envpattern = Pattern.compile("\\$(?<env1>[a-zA-Z_][A-Za-z0-9_.]+)|\\$\\{(?<env2>[a-zA-Z_][A-Za-z0-9_.]*)(:(?<default>[a-zA-Z0-9_.]+))?\\}");
+        Pattern envpattern = Pattern.compile("\\$(?<env1>[a-zA-Z_][A-Za-z0-9_.]+)|\\$\\{(?<env2>[a-zA-Z_][A-Za-z0-9_.]*)(:(?<default>[a-zA-Z0-9_./\\- ]+))?\\}");
         Matcher matcher = envpattern.matcher(word);
         StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
