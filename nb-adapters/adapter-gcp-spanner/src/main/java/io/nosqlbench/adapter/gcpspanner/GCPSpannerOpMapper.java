@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.gcpspanner;
 
+import io.nosqlbench.adapter.gcpspanner.opdispensers.*;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerBaseOp;
 import io.nosqlbench.adapter.gcpspanner.types.GCPSpannerOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;

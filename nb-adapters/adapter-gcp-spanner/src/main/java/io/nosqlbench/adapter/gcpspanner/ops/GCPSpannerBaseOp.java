@@ -54,7 +54,7 @@ public abstract class GCPSpannerBaseOp<T> implements CycleOp<Object> {
         } catch (Exception rte) {
             throw new RuntimeException(rte);
         }
-    };
+    }
 
     public abstract Object applyOp(long value);
 
