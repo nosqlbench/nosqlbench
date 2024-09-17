@@ -23,14 +23,17 @@ import io.nosqlbench.adapter.gcpspanner.GCPSpannerSpace;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-public class GCPSpannerBaseOpDispenser extends BaseOpDispenser<GCPSpannerBaseOp<?>, GCPSpannerSpace> {
+import java.util.function.LongFunction;
 
-    protected GCPSpannerBaseOpDispenser(DriverAdapter<? extends GCPSpannerBaseOp<?>, ? extends GCPSpannerSpace> adapter, ParsedOp op) {
+public abstract class GCPSpannerBaseOpDispenser extends BaseOpDispenser<GCPSpannerBaseOp<?>, GCPSpannerSpace> {
+    protected final LongFunction<String> targetFunction;
+    protected final LongFunction<GCPSpannerSpace> spaceFunction;
+
+    protected GCPSpannerBaseOpDispenser(DriverAdapter<? extends GCPSpannerBaseOp<?>, GCPSpannerSpace> adapter, ParsedOp op,
+                                        LongFunction<String> targetFunction) {
         super(adapter, op);
+        this.targetFunction = targetFunction;
+        this.spaceFunction = adapter.getSpaceFunc(op);
     }
 
-    @Override
-    public GCPSpannerBaseOp<?> getOp(long value) {
-        return null;
-    }
 }

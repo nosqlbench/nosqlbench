@@ -73,6 +73,18 @@ public class GCPSpannerSpace implements AutoCloseable {
         return dbClient;
     }
 
+    public DatabaseId getDatabaseId() {
+        return DatabaseId.of(cfg.get("project_id"), cfg.get("instance_id"), cfg.get("database_id"));
+    }
+
+    public String getInstanceId() {
+        return cfg.get("instance_id");
+    }
+
+    public String getDatabaseIdString() {
+        return cfg.get("database_id");
+    }
+
     private Spanner createSpanner() {
         if (/*cfg.getOptional("service_account_file").isEmpty() ||*/
             cfg.getOptional("database_id").isEmpty() ||
@@ -86,32 +98,7 @@ public class GCPSpannerSpace implements AutoCloseable {
         var spannerClient = SpannerOptions.newBuilder().setProjectId(projectId).build().getService();
         dbAdminClient = spannerClient.getDatabaseAdminClient();
         dbClient = spanner.getDatabaseClient(DatabaseId.of(projectId, instanceId, databaseId));
-//        var requiredToken = cfg.getOptional("token_file").map(Paths::get).map(tokenFilePath -> {
-//            try {
-//                return Files.readAllLines(tokenFilePath).getFirst();
-//            } catch (IOException e) {
-//                String error = "Error while reading token from file:" + tokenFilePath;
-//                logger.error(error, e);
-//                throw new RuntimeException(e);
-//            }
-//        }).orElseGet(() -> cfg.getOptional("token").orElseThrow(() -> new RuntimeException(
-//            "You must provide either a 'token_file' or a 'token' to configure a Azure AI Search client")));
 
-//        logger.info(() -> "Creating new Azure AI Search Client with (masked) token/key ["
-//            + GCPSpannerAdapterUtils.maskDigits(requiredToken) + "], uri/endpoint [" + uri + "]");
-//
-//        var spannerBuilder = SpannerOptions().endpoint(uri);
-//        if (!requiredToken.isBlank()) {
-//            SpannerBuilder = SpannerBuilder.credential(new AzureKeyCredential(requiredToken));
-//        } else {
-//            TokenCredential tokenCredential = new DefaultAzureCredentialBuilder().build();
-//            SpannerBuilder = SpannerBuilder.credential(tokenCredential);
-//        }
-//        // Should we leave these below to leverage the SearchServiceVersion.getLatest()?
-//        String apiVersion = cfg.getOptional("api_version").orElse(SearchServiceVersion.V2024_07_01.name());
-//        logger.warn(
-//            () -> "Latest search service version supported by this client is '" + SearchServiceVersion.getLatest()
-//                + "', but we're using '" + apiVersion + "' version. Ignore this warning if both are same.");
         return spannerClient;
     }
 
@@ -127,6 +114,9 @@ public class GCPSpannerSpace implements AutoCloseable {
     }
     @Override
     public void close() throws Exception {
+        if (spanner != null) {
+            spanner.close();
+        }
         spanner = null;
     }
 }

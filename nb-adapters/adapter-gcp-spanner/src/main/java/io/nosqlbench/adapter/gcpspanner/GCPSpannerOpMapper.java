@@ -55,15 +55,10 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?>> {
         logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
 
         return switch (typeAndTarget.enumId) {
-//            case delete_index -> new GCPSpannerDeleteIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_table ->
                 new GCPSpannerCreateTableOpDispenser(adapter, op, typeAndTarget.targetFunction);
-//            case list_indexes -> new GCPSpannerListIndexesOpDispenser(adapter, op, typeAndTarget.targetFunction);
-//            case upload_documents -> new GCPSpannerUploadDocumentsOpDispenser(adapter, op, typeAndTarget.targetFunction);
-//            case search_documents -> new GCPSpannerSearchDocumentsOpDispenser(adapter, op, typeAndTarget.targetFunction);
-
-//		default -> throw new RuntimeException(
-//				"Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " + "mapping parsed op " + op);
+            case insert_vector ->
+                new GCPSpannerInsertVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 }

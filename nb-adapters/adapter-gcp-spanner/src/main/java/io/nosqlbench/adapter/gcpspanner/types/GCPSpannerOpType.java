@@ -21,4 +21,5 @@ package io.nosqlbench.adapter.gcpspanner.types;
  */
 public enum GCPSpannerOpType {
     create_table,
+    insert_vector,
 }
