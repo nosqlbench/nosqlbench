@@ -57,13 +57,14 @@ public abstract class JDBCOp implements CycleOp {
                 else {
                     String url = jdbcSpace.getConnConfig().getJdbcUrl();
                     Properties props = jdbcSpace.getConnConfig().getDataSourceProperties();
-                    props.put("user", jdbcSpace.getConnConfig().getUsername());
-                    props.put("password", jdbcSpace.getConnConfig().getPassword());
+                    if (jdbcSpace.getConnConfig().getUsername() != null) props.put("user", jdbcSpace.getConnConfig().getUsername());
+                    if (jdbcSpace.getConnConfig().getPassword() != null) props.put("password", jdbcSpace.getConnConfig().getPassword());
                     connection = DriverManager.getConnection(url, props);
                 }
 
-                // Register 'vector' type
-                JDBCPgVector.addVectorType(connection);
+                if (connection.getMetaData().getDatabaseProductName().equals("PostgreSQL")) {
+                    JDBCPgVector.addVectorType(connection);
+                }
 
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("A new JDBC connection ({}) is successfully created: {}",
