@@ -7,6 +7,8 @@ name: release
 # If you want to replace a build, you can use -f and then
 # push the update to the tag like push -f origin <tag>,
 # although this should never be done!
+# The build logic should only build what is necessary, but presently 'preview'
+#  and 'release' do extra work. This needs to be improved.
 
 on:
   push:
