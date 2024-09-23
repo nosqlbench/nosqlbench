@@ -63,8 +63,8 @@ jobs:
           PREVIEW_VERSION=$(scripts/get-preview-version.sh)
           echo "PREVIEW_VERSION=${PREVIEW_VERSION}" >> $GITHUB_ENV
           echo "PREVIEW_VERSION=${PREVIEW_VERSION}" >> $GITHUB_OUTPUT
-          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:preview" >> $GITHUB_ENV
-          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:preview" >> $GITHUB_OUTPUT
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:5.21-preview,nosqlbench/nosqlbench:preview" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:5.21-preview,nosqlbench/nosqlbench:preview" >> $GITHUB_OUTPUT
 
       - name: build preview revision
         run: |
