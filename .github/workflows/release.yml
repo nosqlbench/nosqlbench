@@ -65,7 +65,7 @@ jobs:
           RELEASE_VERSION_SHORT=$(scripts/get-release-version.sh -s)
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_ENV
           echo "RELEASE_VERSION_NUMERIC=${RELEASE_VERSION_NUMERIC}" >> $GITHUB_ENV
-          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${RELEASE_VERSION_NUMERIC},nosqlbench/nosqlbench:${RELEASE_VERSION_SHORT}-latest,latest" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${RELEASE_VERSION_NUMERIC},nosqlbench/nosqlbench:${RELEASE_VERSION_SHORT}-latest,nosqlbench/nosqlbench:latest" >> $GITHUB_ENV
 
       - name: build release revision
         run: |
@@ -81,7 +81,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: docker test build
-        uses: docker/build-push-action@v6.7.0
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
@@ -122,7 +122,7 @@ jobs:
           scripts/bump-minor-version
 
       - name: docker push to hub
-        uses: docker/build-push-action@v6.7.0
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
