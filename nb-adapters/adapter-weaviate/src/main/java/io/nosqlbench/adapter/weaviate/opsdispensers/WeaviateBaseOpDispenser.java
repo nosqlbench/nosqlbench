@@ -1,12 +1,14 @@
+package io.nosqlbench.adapter.weaviate.opsdispensers;
+
 /*
- * Copyright (c) 2020-2024 nosqlbench
- * 
+ * Copyright (c) 2022 nosqlbench
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -15,7 +17,6 @@
  * under the License.
  */
 
-package io.nosqlbench.adapter.weaviate.opsdispensers;
 
 import java.util.function.LongFunction;
 
@@ -39,14 +40,12 @@ public abstract class WeaviateBaseOpDispenser<T> extends BaseOpDispenser<Weaviat
 		super((DriverAdapter) adapter, op);
 		this.weaviateSpaceFunction = adapter.getSpaceFunc(op);
 		this.clientFunction = (long l) -> {
-			try {
-				return this.weaviateSpaceFunction.apply(l).getClient();
-			} catch (AuthException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
-		};
+            try {
+                return this.weaviateSpaceFunction.apply(l).getClient();
+            } catch (AuthException e) {
+                throw new RuntimeException(e);
+            }
+        };
 		this.paramF = getParamFunc(this.clientFunction, op, targetF);
 		this.opF = createOpFunc(paramF, this.clientFunction, op, targetF);
 	}
