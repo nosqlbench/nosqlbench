@@ -17,24 +17,23 @@
 
 package io.nosqlbench.adapter.gcpspanner.ops;
 
-import com.google.cloud.spanner.Spanner;
-import com.google.cloud.spanner.DatabaseClient;
-import com.google.cloud.spanner.Mutation;
+import com.google.cloud.spanner.*;
 
-import java.util.Collections;
-
-public class GCPSpannerInsertVectorOp extends GCPSpannerBaseOp<Long> {
-    private final Mutation mutation;
+public class GCPSpannerExecuteDmlOp extends GCPSpannerBaseOp<Long> {
+    private final Statement statement;
     private final DatabaseClient dbClient;
 
-    public GCPSpannerInsertVectorOp(Spanner searchIndexClient, Long requestParam, Mutation mutation, DatabaseClient dbClient) {
-        super(searchIndexClient, requestParam);
-        this.mutation = mutation;
+    public GCPSpannerExecuteDmlOp(Spanner spanner, Long requestParam, Statement statement,
+                                  DatabaseClient dbClient) {
+        super(spanner, requestParam);
+        this.statement = statement;
         this.dbClient = dbClient;
     }
 
     @Override
     public Object applyOp(long value) {
-        return dbClient.write(Collections.singletonList(mutation));
+        try (ReadContext context = dbClient.singleUse()) {
+            return context.executeQuery(statement);
+        }
     }
 }

@@ -113,7 +113,7 @@ public class GCPSpannerSpace implements AutoCloseable {
             .asReadOnly();
     }
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (spanner != null) {
             spanner.close();
         }

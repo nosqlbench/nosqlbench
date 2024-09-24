@@ -22,13 +22,13 @@ import com.google.cloud.spanner.*;
 import com.google.common.collect.ImmutableList;
 import com.google.spanner.admin.database.v1.UpdateDatabaseDdlMetadata;
 
-public class GCPSpannerCreateTableOp extends GCPSpannerBaseOp<Long> {
+public class GCPSpannerUpdateDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
     private final String createTableStatement;
     private final DatabaseAdminClient dbAdminClient;
     private final Database db;
 
-    public GCPSpannerCreateTableOp(Spanner searchIndexClient, Long requestParam, String createTableStatement,
-                                   DatabaseAdminClient dbAdminClient, Database db) {
+    public GCPSpannerUpdateDatabaseDdlOp(Spanner searchIndexClient, Long requestParam, String createTableStatement,
+                                         DatabaseAdminClient dbAdminClient, Database db) {
         super(searchIndexClient, requestParam);
         this.createTableStatement = createTableStatement;
         this.dbAdminClient = dbAdminClient;

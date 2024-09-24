@@ -17,9 +17,20 @@
 package io.nosqlbench.adapter.gcpspanner.types;
 
 /**
- * https://cloud.google.com/spanner/docs/reference/standard-sql/data-definition-language#vector_index_statements
+ * All the spanner rpc api calls are defined <a href="https://cloud.google.com/spanner/docs/reference/rpc">here</a>, representing a
+ * guide to the set of operations we should define if we want to implement full Spanner api support.
+ * <p>
+ * NOTE that the vector search functionality is still in pre-GA and is not available through rpc calls other than simply
+ * calling ExecuteSql. The SQL functionality related to vector indices is documented
+ * <a href="https://cloud.google.com/spanner/docs/reference/standard-sql/data-definition-language#vector_index_statements">here</a>
+ * <p>
+ * KNN and ANN search through Google SQL are documented respectively
+ * <a href="https://cloud.google.com/spanner/docs/find-k-nearest-neighbors">here</a>
+ * and
+ * <a href="https://cloud.google.com/spanner/docs/find-approximate-nearest-neighbors#query-vector-embeddings">here</a></a>
  */
 public enum GCPSpannerOpType {
-    create_table,
+    update_database_ddl,
     insert_vector,
+    execute_dml,
 }

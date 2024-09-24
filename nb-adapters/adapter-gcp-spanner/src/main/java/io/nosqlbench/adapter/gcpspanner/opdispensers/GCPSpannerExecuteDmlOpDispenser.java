@@ -17,36 +17,37 @@
 
 package io.nosqlbench.adapter.gcpspanner.opdispensers;
 
-import com.google.cloud.spanner.Database;
-import com.google.cloud.spanner.DatabaseAdminClient;
+import com.google.cloud.spanner.Statement;
 import io.nosqlbench.adapter.gcpspanner.GCPSpannerDriverAdapter;
-import io.nosqlbench.adapter.gcpspanner.GCPSpannerSpace;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerBaseOp;
-import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerCreateTableOp;
+import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerExecuteDmlOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class GCPSpannerCreateTableOpDispenser extends GCPSpannerBaseOpDispenser {
-    private static final Logger logger = LogManager.getLogger(GCPSpannerCreateTableOpDispenser.class);
-    private final LongFunction<GCPSpannerCreateTableOp> opFunction;
+public class GCPSpannerExecuteDmlOpDispenser extends GCPSpannerBaseOpDispenser {
+    private static final Logger logger = LogManager.getLogger(GCPSpannerExecuteDmlOpDispenser.class);
+    private final LongFunction<GCPSpannerExecuteDmlOp> opFunction;
 
-    public GCPSpannerCreateTableOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public GCPSpannerExecuteDmlOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<GCPSpannerCreateTableOp> createOpFunction(ParsedOp op) {
+    private LongFunction<GCPSpannerExecuteDmlOp> createOpFunction(ParsedOp op) {
 
-        return (l) -> new GCPSpannerCreateTableOp(
+        return (l) -> new GCPSpannerExecuteDmlOp(
             spaceFunction.apply(l).getSpanner(),
             l,
-            op.getAsRequiredFunction("DDL", String.class).apply(l),
-            spaceFunction.apply(l).getDbAdminClient(),
-            spaceFunction.apply(l).getDbAdminClient().getDatabase(spaceFunction.apply(l).getInstanceId(), spaceFunction.apply(l).getDatabaseIdString())
+            generateStatement(op.getAsRequiredFunction("DML", String.class).apply(l)),
+            spaceFunction.apply(l).getDbClient()
         );
+    }
+
+    private Statement generateStatement(String dml) {
+        return Statement.of(dml);
     }
 
     @Override

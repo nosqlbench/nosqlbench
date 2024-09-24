@@ -37,12 +37,6 @@ public abstract class GCPSpannerBaseOp<T> implements CycleOp<Object> {
         this.apiCall = this::applyOp;
     }
 
-	public GCPSpannerBaseOp(Spanner spanner, T requestParam, LongFunction<Object> call) {
-        this.spannerClient = spanner;
-        this.request = requestParam;
-        this.apiCall = call;
-    }
-
     @Override
     public final Object apply(long value) {
         logger.trace(() -> "applying op: " + this);

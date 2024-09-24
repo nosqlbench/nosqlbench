@@ -16,6 +16,12 @@
 
 package io.nosqlbench.adapter.gcpspanner;
 
+import com.google.cloud.spanner.ResultSet;
+
 public class GCPSpannerAdapterUtils {
     public static final String SPANNER = "gcp_spanner";
+
+    public static int[] getKeyArrayFromResultSet(ResultSet rs) {
+        return rs.getLongList(0).stream().mapToInt(Math::toIntExact).toArray();
+    }
 }

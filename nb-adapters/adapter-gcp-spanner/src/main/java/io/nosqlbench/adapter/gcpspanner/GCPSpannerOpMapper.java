@@ -55,10 +55,12 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?>> {
         logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
 
         return switch (typeAndTarget.enumId) {
-            case create_table ->
-                new GCPSpannerCreateTableOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case update_database_ddl ->
+                new GCPSpannerUpdateDatabaseDdlOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case insert_vector ->
                 new GCPSpannerInsertVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case execute_dml ->
+                new GCPSpannerExecuteDmlOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 }
