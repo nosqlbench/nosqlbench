@@ -30,21 +30,45 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.LongFunction;
 
+/**
+ * This class is responsible for dispensing GCP Spanner insert vector operations.
+ * It extends the GCPSpannerBaseOpDispenser and provides the necessary implementation
+ * to create and configure GCPSpannerInsertVectorOp instances.
+ */
 public class GCPSpannerInsertVectorOpDispenser extends GCPSpannerBaseOpDispenser {
     private static final Logger logger = LogManager.getLogger(GCPSpannerInsertVectorOpDispenser.class);
     private final LongFunction<Map> queryParamsFunction;
 
+    /**
+     * Constructs a new GCPSpannerInsertVectorOpDispenser.
+     *
+     * @param adapter the GCP Spanner driver adapter
+     * @param op the parsed operation
+     * @param targetFunction a function that provides the target table name based on a long value
+     */
     public GCPSpannerInsertVectorOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.queryParamsFunction = createParamsFunction(op);
         op.getAsRequiredFunction("vector", float[].class);
     }
 
+    /**
+     * Creates a function that provides query parameters based on a long value.
+     *
+     * @param op the parsed operation
+     * @return a function that provides query parameters
+     */
     private LongFunction<Map> createParamsFunction(ParsedOp op) {
         return op.getAsOptionalFunction("query_params", Map.class)
             .orElse(_ -> Collections.emptyMap());
     }
 
+    /**
+     * Returns a GCPSpannerInsertVectorOp instance configured with the provided value.
+     *
+     * @param value the value used to configure the operation
+     * @return a configured GCPSpannerInsertVectorOp instance
+     */
     @Override
     public GCPSpannerBaseOp<?> getOp(long value) {
         Mutation.WriteBuilder builder = Mutation.newInsertBuilder(targetFunction.apply(value));

@@ -31,8 +31,8 @@ import org.apache.logging.log4j.Logger;
  * @see <a href="https://cloud.google.com/docs/authentication#getting_credentials_for_server-centric_flow">Authentication methods at Google</a>
  * @see <a href="https://cloud.google.com/java/docs/reference/google-cloud-spanner/latest/overview">Library Reference Doc</a>
  * @see <a href="https://cloud.google.com/spanner/docs/reference/standard-sql/dml-syntax">DML Syntax</a>
- * @see <a href=""></a>
- * @see <a href=""></a>
+ * @see <a href="https://cloud.google.com/spanner/docs/reference/rpc">spanner rpc api calls</a>
+ * @see <a href="https://cloud.google.com/spanner/docs/reference/standard-sql/data-definition-language#vector_index_statements">SQL functionality related to vector indices</a>
  * @see <a href=""></a>
  * @see <a href=""></a>
  * @see <a href=""></a>

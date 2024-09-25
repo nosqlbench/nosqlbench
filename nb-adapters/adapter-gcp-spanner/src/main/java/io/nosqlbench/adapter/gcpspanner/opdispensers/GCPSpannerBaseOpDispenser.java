@@ -25,10 +25,29 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
+/**
+ * Abstract base class for GCP Spanner operation dispensers.
+ * This class extends the BaseOpDispenser and provides common functionality
+ * for creating GCP Spanner operations.
+ */
 public abstract class GCPSpannerBaseOpDispenser extends BaseOpDispenser<GCPSpannerBaseOp<?>, GCPSpannerSpace> {
+    /**
+     * A function that provides the target string based on a long input.
+     */
     protected final LongFunction<String> targetFunction;
+
+    /**
+     * A function that provides the GCP Spanner space based on a long input.
+     */
     protected final LongFunction<GCPSpannerSpace> spaceFunction;
 
+    /**
+     * Constructs a new GCPSpannerBaseOpDispenser.
+     *
+     * @param adapter the driver adapter for GCP Spanner operations
+     * @param op the parsed operation
+     * @param targetFunction a function that provides the target string
+     */
     protected GCPSpannerBaseOpDispenser(DriverAdapter<? extends GCPSpannerBaseOp<?>, GCPSpannerSpace> adapter, ParsedOp op,
                                         LongFunction<String> targetFunction) {
         super(adapter, op);
