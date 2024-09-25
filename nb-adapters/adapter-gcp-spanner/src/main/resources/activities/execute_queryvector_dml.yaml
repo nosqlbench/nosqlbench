@@ -1,0 +1,18 @@
+scenarios:
+  default:
+    execute_dml: run driver=gcp_spanner tags==blocks:execute_dml service_account_file=TEMPLATE(service_account_file)
+      project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=1
+
+bindings:
+  rw_key: ToString();
+  test_vector_hdf5: HdfFileToFloatArray("testdata/TEMPLATE(dataset).hdf5", "/test") ; ToCqlVector()
+  validation_set_hdf5: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
+
+
+blocks:
+  execute_dml:
+    ops:
+      op1:
+        execute_dml: |
+          SELECT * FROM vectors@{FORCE_INDEX=VectorsIndex} ORDER BY APPROX_COSINE_DISTANCE(ARRAY<FLOAT32>{test_vector_hdf5},
+          value, options => JSON '{"num_leaves_to_search": 10}') LIMIT 100

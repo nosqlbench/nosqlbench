@@ -6,13 +6,10 @@ scenarios:
 bindings:
   rw_key: ToString();
   train_vector_hdf5: HdfFileToFloatArray("testdata/TEMPLATE(dataset).hdf5", "/train") ; ToCqlVector()
-  test_vector_hdf5: HdfFileToFloatArray("testdata/TEMPLATE(dataset).hdf5", "/test") ; ToCqlVector()
-  validation_set_hdf5: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
-
 
 blocks:
   execute_dml:
     ops:
       op1:
         execute_dml: |
-          INSERT INTO TEMPLATE(schemaname,baselines).TEMPLATE(tablename,vectors) VALUES ({rw_key},{train_vector_hdf5})
+          INSERT INTO TEMPLATE(tablename,vectors) (key2,value) VALUES ({rw_key},{train_vector_hdf5})

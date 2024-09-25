@@ -1,0 +1,19 @@
+scenarios:
+  default:
+    execute_ddl: run driver=gcp_spanner tags==blocks:execute_ddl service_account_file=TEMPLATE(service_account_file)
+      project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=1
+
+bindings:
+  rw_key: ToString();
+  train_vector_hdf5: HdfFileToFloatArray("testdata/TEMPLATE(dataset).hdf5", "/train") ; ToCqlVector()
+  test_vector_hdf5: HdfFileToFloatArray("testdata/TEMPLATE(dataset).hdf5", "/test") ; ToCqlVector()
+  validation_set_hdf5: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
+
+# https://cloud.google.com/spanner/docs/reference/standard-sql/data-definition-language#vector_index_option_list
+blocks:
+  execute_ddl:
+    ops:
+      op1:
+        execute_ddl: |
+          CREATE VECTOR INDEX VectorsIndex ON vectors(value)
+          OPTIONS (distance_type = 'COSINE', tree_depth = 3, num_branches=1000, num_leaves = 1000000);

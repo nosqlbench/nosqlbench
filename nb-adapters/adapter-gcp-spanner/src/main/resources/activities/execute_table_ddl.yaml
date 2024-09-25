@@ -15,4 +15,4 @@ blocks:
     ops:
       op1:
         execute_ddl: |
-          CREATE TABLE vectors2 (key2 STRING(100),value ARRAY<FLOAT64>,) PRIMARY KEY(key2);;
+          CREATE TABLE vectors (key2 STRING(100),value ARRAY<FLOAT64>,) PRIMARY KEY(key2);;
