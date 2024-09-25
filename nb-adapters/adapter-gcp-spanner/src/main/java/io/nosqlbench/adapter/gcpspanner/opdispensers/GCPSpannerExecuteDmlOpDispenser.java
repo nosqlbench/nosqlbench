@@ -41,7 +41,7 @@ public class GCPSpannerExecuteDmlOpDispenser extends GCPSpannerBaseOpDispenser {
         return (l) -> new GCPSpannerExecuteDmlOp(
             spaceFunction.apply(l).getSpanner(),
             l,
-            generateStatement(op.getAsRequiredFunction("DML", String.class).apply(l)),
+            generateStatement(targetFunction.apply(l)),
             spaceFunction.apply(l).getDbClient()
         );
     }

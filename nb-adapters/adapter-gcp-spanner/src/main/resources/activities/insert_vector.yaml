@@ -1,0 +1,14 @@
+scenarios:
+  default:
+    insert_vector: >-
+      run driver=gcp_spanner tags==blocks:insert_vector service_account_file=TEMPLATE(service_account_file)
+      project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=1
+
+blocks:
+  insert_vector:
+    ops:
+      op1:
+        insert_vector: "tableName"
+        query_params:
+          key2: "pkey"
+          vector: [1.0,2.0,3.0,4.0]

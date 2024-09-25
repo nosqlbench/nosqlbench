@@ -18,6 +18,7 @@
 package io.nosqlbench.adapter.gcpspanner.opdispensers;
 
 import com.google.cloud.spanner.Mutation;
+import com.google.cloud.spanner.Value;
 import io.nosqlbench.adapter.gcpspanner.GCPSpannerDriverAdapter;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerBaseOp;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerInsertVectorOp;
@@ -25,33 +26,37 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.function.LongFunction;
 
 public class GCPSpannerInsertVectorOpDispenser extends GCPSpannerBaseOpDispenser {
     private static final Logger logger = LogManager.getLogger(GCPSpannerInsertVectorOpDispenser.class);
-    private final LongFunction<GCPSpannerInsertVectorOp> opFunction;
+    private final LongFunction<Map> queryParamsFunction;
 
     public GCPSpannerInsertVectorOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
-        this.opFunction = createOpFunction(op);
+        this.queryParamsFunction = createParamsFunction(op);
+        op.getAsRequiredFunction("vector", float[].class);
     }
 
-    private LongFunction<GCPSpannerInsertVectorOp> createOpFunction(ParsedOp op) {
-        LongFunction<float[]> vectorF= op.getAsRequiredFunction("vector", float[].class);
-
-        return (l) -> new GCPSpannerInsertVectorOp(
-            spaceFunction.apply(l).getSpanner(),
-            l,
-            Mutation.newInsertBuilder(op.getStaticValue("table", java.lang.String.class))
-                .set(op.getStaticValue("pkey", java.lang.String.class)).to(l)
-                .set("VectorData").toFloat32Array(vectorF.apply(l))
-                .build(),
-            spaceFunction.apply(l).getDbClient()
-        );
+    private LongFunction<Map> createParamsFunction(ParsedOp op) {
+        return op.getAsOptionalFunction("query_params", Map.class)
+            .orElse(_ -> Collections.emptyMap());
     }
 
     @Override
     public GCPSpannerBaseOp<?> getOp(long value) {
-        return opFunction.apply(value);
+        Mutation.WriteBuilder builder = Mutation.newInsertBuilder(targetFunction.apply(value));
+        Map<String, Object> params = queryParamsFunction.apply(value);
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            builder.set(entry.getKey()).to((Value) entry.getValue());
+        }
+        return new GCPSpannerInsertVectorOp(
+            spaceFunction.apply(value).getSpanner(),
+            value,
+            builder.build(),
+            spaceFunction.apply(value).getDbClient()
+        );
     }
 }

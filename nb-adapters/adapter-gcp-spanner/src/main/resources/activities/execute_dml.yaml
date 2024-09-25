@@ -1,0 +1,18 @@
+scenarios:
+  default:
+    execute_dml: run driver=gcp_spanner tags==blocks:execute_dml service_account_file=TEMPLATE(service_account_file)
+      project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=1
+
+bindings:
+  rw_key: ToString();
+  train_vector_hdf5: HdfFileToFloatArray("testdata/TEMPLATE(dataset).hdf5", "/train") ; ToCqlVector()
+  test_vector_hdf5: HdfFileToFloatArray("testdata/TEMPLATE(dataset).hdf5", "/test") ; ToCqlVector()
+  validation_set_hdf5: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
+
+
+blocks:
+  execute_dml:
+    ops:
+      op1:
+        execute_dml: |
+          INSERT INTO TEMPLATE(schemaname,baselines).TEMPLATE(tablename,vectors) VALUES ({rw_key},{train_vector_hdf5})

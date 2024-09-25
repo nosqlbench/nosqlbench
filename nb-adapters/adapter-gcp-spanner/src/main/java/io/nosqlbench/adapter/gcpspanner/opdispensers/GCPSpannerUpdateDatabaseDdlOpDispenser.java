@@ -40,7 +40,7 @@ public class GCPSpannerUpdateDatabaseDdlOpDispenser extends GCPSpannerBaseOpDisp
         return (l) -> new GCPSpannerUpdateDatabaseDdlOp(
             spaceFunction.apply(l).getSpanner(),
             l,
-            op.getAsRequiredFunction("DDL", String.class).apply(l),
+            targetFunction.apply(l),
             spaceFunction.apply(l).getDbAdminClient(),
             spaceFunction.apply(l).getDbAdminClient().getDatabase(spaceFunction.apply(l).getInstanceId(), spaceFunction.apply(l).getDatabaseIdString())
         );
