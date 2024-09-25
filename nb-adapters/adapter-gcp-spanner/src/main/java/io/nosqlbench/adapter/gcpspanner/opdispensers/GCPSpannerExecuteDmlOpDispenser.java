@@ -27,29 +27,58 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
+/**
+ * Dispenser class for creating GCP Spanner Execute DML operations.
+ * This class extends the GCPSpannerBaseOpDispenser and provides functionality
+ * to create and configure GCPSpannerExecuteDmlOp instances.
+ */
 public class GCPSpannerExecuteDmlOpDispenser extends GCPSpannerBaseOpDispenser {
     private static final Logger logger = LogManager.getLogger(GCPSpannerExecuteDmlOpDispenser.class);
     private final LongFunction<GCPSpannerExecuteDmlOp> opFunction;
 
+    /**
+     * Constructs a new GCPSpannerExecuteDmlOpDispenser.
+     *
+     * @param adapter the driver adapter for GCP Spanner operations
+     * @param op the parsed operation
+     * @param targetFunction a function that provides the target string
+     */
     public GCPSpannerExecuteDmlOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
+    /**
+     * Creates a function that generates GCPSpannerExecuteDmlOp instances.
+     *
+     * @param op the parsed operation
+     * @return a function that generates GCPSpannerExecuteDmlOp instances
+     */
     private LongFunction<GCPSpannerExecuteDmlOp> createOpFunction(ParsedOp op) {
-
         return (l) -> new GCPSpannerExecuteDmlOp(
             spaceFunction.apply(l).getSpanner(),
             l,
-            generateStatement(op.getAsRequiredFunction("DML", String.class).apply(l)),
+            generateStatement(targetFunction.apply(l)),
             spaceFunction.apply(l).getDbClient()
         );
     }
 
+    /**
+     * Generates a Spanner Statement from a DML string.
+     *
+     * @param dml the DML string
+     * @return the generated Statement
+     */
     private Statement generateStatement(String dml) {
         return Statement.of(dml);
     }
 
+    /**
+     * Retrieves the GCP Spanner operation for the given value.
+     *
+     * @param value the input value
+     * @return the GCP Spanner operation
+     */
     @Override
     public GCPSpannerBaseOp<?> getOp(long value) {
         return opFunction.apply(value);

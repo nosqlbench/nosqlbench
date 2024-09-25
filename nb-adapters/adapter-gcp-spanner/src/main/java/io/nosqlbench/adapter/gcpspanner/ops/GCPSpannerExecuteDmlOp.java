@@ -19,10 +19,22 @@ package io.nosqlbench.adapter.gcpspanner.ops;
 
 import com.google.cloud.spanner.*;
 
+/**
+ * This class represents an operation to execute a DML statement on Google Cloud Spanner.
+ * It extends the GCPSpannerBaseOp class and overrides the applyOp method to execute the DML statement.
+ */
 public class GCPSpannerExecuteDmlOp extends GCPSpannerBaseOp<Long> {
     private final Statement statement;
     private final DatabaseClient dbClient;
 
+    /**
+     * Constructs a new GCPSpannerExecuteDmlOp.
+     *
+     * @param spanner the Spanner instance
+     * @param requestParam the request parameter
+     * @param statement the DML statement to execute
+     * @param dbClient the DatabaseClient to use for executing the statement
+     */
     public GCPSpannerExecuteDmlOp(Spanner spanner, Long requestParam, Statement statement,
                                   DatabaseClient dbClient) {
         super(spanner, requestParam);
@@ -30,6 +42,12 @@ public class GCPSpannerExecuteDmlOp extends GCPSpannerBaseOp<Long> {
         this.dbClient = dbClient;
     }
 
+    /**
+     * Executes the DML statement using the provided value.
+     *
+     * @param value the value to use for the operation
+     * @return the result of the DML execution
+     */
     @Override
     public Object applyOp(long value) {
         try (ReadContext context = dbClient.singleUse()) {

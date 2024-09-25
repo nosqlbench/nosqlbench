@@ -26,26 +26,47 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
+/**
+ * Dispenser class for creating instances of GCPSpannerUpdateDatabaseDdlOp.
+ */
 public class GCPSpannerUpdateDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispenser {
     private static final Logger logger = LogManager.getLogger(GCPSpannerUpdateDatabaseDdlOpDispenser.class);
     private final LongFunction<GCPSpannerUpdateDatabaseDdlOp> opFunction;
 
+    /**
+     * Constructor for GCPSpannerUpdateDatabaseDdlOpDispenser.
+     *
+     * @param adapter the GCPSpannerDriverAdapter instance
+     * @param op the ParsedOp instance
+     * @param targetFunction a LongFunction that provides the target string
+     */
     public GCPSpannerUpdateDatabaseDdlOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
+    /**
+     * Creates a LongFunction that generates GCPSpannerUpdateDatabaseDdlOp instances.
+     *
+     * @param op the ParsedOp instance
+     * @return a LongFunction that generates GCPSpannerUpdateDatabaseDdlOp instances
+     */
     private LongFunction<GCPSpannerUpdateDatabaseDdlOp> createOpFunction(ParsedOp op) {
-
         return (l) -> new GCPSpannerUpdateDatabaseDdlOp(
             spaceFunction.apply(l).getSpanner(),
             l,
-            op.getAsRequiredFunction("DDL", String.class).apply(l),
+            targetFunction.apply(l),
             spaceFunction.apply(l).getDbAdminClient(),
             spaceFunction.apply(l).getDbAdminClient().getDatabase(spaceFunction.apply(l).getInstanceId(), spaceFunction.apply(l).getDatabaseIdString())
         );
     }
 
+    /**
+     * Retrieves an operation instance based on the provided value.
+     *
+     * @param value the long value used to generate the operation
+     * @return a GCPSpannerBaseOp instance
+     */
     @Override
     public GCPSpannerBaseOp<?> getOp(long value) {
         return opFunction.apply(value);

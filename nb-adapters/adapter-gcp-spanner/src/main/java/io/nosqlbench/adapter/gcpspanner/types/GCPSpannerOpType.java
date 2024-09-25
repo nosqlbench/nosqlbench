@@ -31,6 +31,6 @@ package io.nosqlbench.adapter.gcpspanner.types;
  */
 public enum GCPSpannerOpType {
     update_database_ddl,
-    insert_vector,
+    insert,
     execute_dml,
 }
