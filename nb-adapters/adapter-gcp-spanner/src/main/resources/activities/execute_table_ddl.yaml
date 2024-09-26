@@ -3,16 +3,9 @@ scenarios:
     execute_ddl: run driver=gcp_spanner tags==blocks:execute_ddl service_account_file=TEMPLATE(service_account_file)
       project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=1
 
-bindings:
-  rw_key: ToString();
-  train_vector_hdf5: HdfFileToFloatArray("testdata/TEMPLATE(dataset).hdf5", "/train") ; ToCqlVector()
-  test_vector_hdf5: HdfFileToFloatArray("testdata/TEMPLATE(dataset).hdf5", "/test") ; ToCqlVector()
-  validation_set_hdf5: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
-
-
 blocks:
   execute_ddl:
     ops:
       op1:
         update_database_ddl: |
-          CREATE TABLE vectors (key2 STRING(100),value ARRAY<FLOAT64>,) PRIMARY KEY(key2);;
+          CREATE TABLE vectors (keycol STRING(100),value ARRAY<FLOAT32>(vector_length=>25)) PRIMARY KEY(key2)
