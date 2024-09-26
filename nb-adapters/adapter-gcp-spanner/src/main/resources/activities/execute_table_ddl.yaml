@@ -14,5 +14,5 @@ blocks:
   execute_ddl:
     ops:
       op1:
-        execute_ddl: |
+        update_database_ddl: |
           CREATE TABLE vectors (key2 STRING(100),value ARRAY<FLOAT64>,) PRIMARY KEY(key2);;

@@ -5,7 +5,7 @@ scenarios:
 
 bindings:
   rw_key: ToString();
-  test_vector_hdf5: HdfFileToFloatArray("testdata/TEMPLATE(dataset).hdf5", "/test") ; ToCqlVector()
+  test_vector_hdf5: HdfFileToFloatArray("testdata/TEMPLATE(dataset).hdf5", "/test")
   validation_set_hdf5: HdfFileToIntArray("testdata/TEMPLATE(dataset).hdf5", "/neighbors")
 
 
