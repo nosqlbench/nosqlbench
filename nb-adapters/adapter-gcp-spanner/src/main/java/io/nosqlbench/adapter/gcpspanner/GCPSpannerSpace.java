@@ -60,7 +60,7 @@ public class GCPSpannerSpace implements AutoCloseable {
 
     public synchronized Spanner getSpanner() {
         if (spanner == null) {
-            spanner = createSpanner();
+            createSpanner();
         }
         return spanner;
     }
@@ -85,8 +85,8 @@ public class GCPSpannerSpace implements AutoCloseable {
         return cfg.get("database_id");
     }
 
-    private Spanner createSpanner() {
-        if (/*cfg.getOptional("service_account_file").isEmpty() ||*/
+    private void createSpanner() {
+        if (
             cfg.getOptional("database_id").isEmpty() ||
             cfg.getOptional("project_id").isEmpty() ||
             cfg.getOptional("instance_id").isEmpty()) {
@@ -95,18 +95,14 @@ public class GCPSpannerSpace implements AutoCloseable {
         String projectId = cfg.get("project_id");
         String instanceId = cfg.get("instance_id");
         String databaseId = cfg.get("database_id");
-        var spannerClient = SpannerOptions.newBuilder().setProjectId(projectId).build().getService();
-        dbAdminClient = spannerClient.getDatabaseAdminClient();
+        spanner = SpannerOptions.newBuilder().setProjectId(projectId).build().getService();
+        dbAdminClient = spanner.getDatabaseAdminClient();
         dbClient = spanner.getDatabaseClient(DatabaseId.of(projectId, instanceId, databaseId));
-
-        return spannerClient;
     }
 
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(GCPSpannerSpace.class)
             .add(Param.optional("service_account_file", String.class, "the file to load the api token/key from. See https://cloud.google.com/docs/authentication/provide-credentials-adc#service-account"))
-//            .add(Param.defaultTo("token", "my-spanner-admin-key-changeme")
-//                .setDescription("the Spanner api token/key to use to connect to the database"))
             .add(Param.optional("project_id", String.class,"Project ID containing the Spanner database. See https://cloud.google.com/resource-manager/docs/creating-managing-projects"))
             .add(Param.optional("instance_id", String.class, "Spanner database's Instance ID containing. See https://cloud.google.com/spanner/docs/getting-started/java#create_an_instance"))
             .add(Param.optional("database_id", String.class, "Spanner Database ID. See https://cloud.google.com/spanner/docs/getting-started/java#create_a_database"))

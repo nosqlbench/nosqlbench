@@ -49,7 +49,7 @@ public class GCPSpannerInsertVectorOpDispenser extends GCPSpannerBaseOpDispenser
     public GCPSpannerInsertVectorOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.queryParamsFunction = createParamsFunction(op);
-        op.getAsRequiredFunction("vector", float[].class);
+        //op.getAsRequiredFunction("vector", float[].class);
     }
 
     /**
@@ -74,7 +74,7 @@ public class GCPSpannerInsertVectorOpDispenser extends GCPSpannerBaseOpDispenser
         Mutation.WriteBuilder builder = Mutation.newInsertBuilder(targetFunction.apply(value));
         Map<String, Object> params = queryParamsFunction.apply(value);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
-            builder.set(entry.getKey()).to((Value) entry.getValue());
+            builder.set(entry.getKey()).to(convertToValue(entry));
         }
         return new GCPSpannerInsertVectorOp(
             spaceFunction.apply(value).getSpanner(),
@@ -82,5 +82,19 @@ public class GCPSpannerInsertVectorOpDispenser extends GCPSpannerBaseOpDispenser
             builder.build(),
             spaceFunction.apply(value).getDbClient()
         );
+    }
+
+    private Value convertToValue(Map.Entry<String, Object> entry) {
+        return switch(entry.getValue()) {
+            case String s -> Value.string(s);
+            case Integer i -> Value.int64(i);
+            case Long l -> Value.int64(l);
+            case Double d -> Value.float64(d);
+            case Float f -> Value.float32(f);
+            case long[] larr -> Value.int64Array(larr);
+            case float[] farr -> Value.float32Array(farr);
+            case double[] darr -> Value.float64Array(darr);
+            default -> throw new IllegalArgumentException("Unsupported value type: " + entry.getValue().getClass());
+        };
     }
 }
