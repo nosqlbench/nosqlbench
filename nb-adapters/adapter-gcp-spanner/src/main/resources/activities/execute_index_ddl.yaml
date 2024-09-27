@@ -10,5 +10,4 @@ blocks:
       op1:
         update_database_ddl: |
           CREATE VECTOR INDEX VectorsIndex ON vectors(value)
-          WHERE value IS NOT NULL
           OPTIONS (distance_type = 'COSINE', tree_depth = 3, num_branches=1000, num_leaves = 1000000);
