@@ -18,10 +18,17 @@ package io.nosqlbench.adapter.gcpspanner;
 
 import com.google.cloud.spanner.ResultSet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GCPSpannerAdapterUtils {
     public static final String SPANNER = "gcp_spanner";
 
     public static int[] getKeyArrayFromResultSet(ResultSet rs) {
-        return rs.getLongList(0).stream().mapToInt(Math::toIntExact).toArray();
+        List<Integer> values = new ArrayList<>();
+        while(rs.next()) {
+            values.add(Integer.valueOf(rs.getString(0)));
+        }
+        return values.stream().mapToInt(i -> i).toArray();
     }
 }
