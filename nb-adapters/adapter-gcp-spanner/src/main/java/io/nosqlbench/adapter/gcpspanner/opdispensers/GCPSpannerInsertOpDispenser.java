@@ -21,7 +21,7 @@ import com.google.cloud.spanner.Mutation;
 import com.google.cloud.spanner.Value;
 import io.nosqlbench.adapter.gcpspanner.GCPSpannerDriverAdapter;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerBaseOp;
-import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerInsertVectorOp;
+import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerInsertOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,8 +35,8 @@ import java.util.function.LongFunction;
  * It extends the GCPSpannerBaseOpDispenser and provides the necessary implementation
  * to create and configure GCPSpannerInsertVectorOp instances.
  */
-public class GCPSpannerInsertVectorOpDispenser extends GCPSpannerBaseOpDispenser {
-    private static final Logger logger = LogManager.getLogger(GCPSpannerInsertVectorOpDispenser.class);
+public class GCPSpannerInsertOpDispenser extends GCPSpannerBaseOpDispenser {
+    private static final Logger logger = LogManager.getLogger(GCPSpannerInsertOpDispenser.class);
     private final LongFunction<Map> queryParamsFunction;
 
     /**
@@ -46,7 +46,7 @@ public class GCPSpannerInsertVectorOpDispenser extends GCPSpannerBaseOpDispenser
      * @param op the parsed operation
      * @param targetFunction a function that provides the target table name based on a long value
      */
-    public GCPSpannerInsertVectorOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public GCPSpannerInsertOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.queryParamsFunction = createParamsFunction(op);
     }
@@ -75,7 +75,7 @@ public class GCPSpannerInsertVectorOpDispenser extends GCPSpannerBaseOpDispenser
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             builder.set(entry.getKey()).to(convertToValue(entry));
         }
-        return new GCPSpannerInsertVectorOp(
+        return new GCPSpannerInsertOp(
             spaceFunction.apply(value).getSpanner(),
             value,
             builder.build(),

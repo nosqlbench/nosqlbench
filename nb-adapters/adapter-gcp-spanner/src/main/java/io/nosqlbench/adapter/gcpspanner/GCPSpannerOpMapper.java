@@ -57,8 +57,8 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?>> {
         return switch (typeAndTarget.enumId) {
             case update_database_ddl ->
                 new GCPSpannerUpdateDatabaseDdlOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case insert_vector ->
-                new GCPSpannerInsertVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case insert ->
+                new GCPSpannerInsertOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case execute_dml ->
                 new GCPSpannerExecuteDmlOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };

@@ -27,7 +27,7 @@ import java.util.Collections;
  * This class represents an operation to insert a vector into a Google Cloud Spanner database.
  * It extends the GCPSpannerBaseOp class and provides the implementation for the applyOp method.
  */
-public class GCPSpannerInsertVectorOp extends GCPSpannerBaseOp<Long> {
+public class GCPSpannerInsertOp extends GCPSpannerBaseOp<Long> {
     private final Mutation mutation;
     private final DatabaseClient dbClient;
 
@@ -39,7 +39,7 @@ public class GCPSpannerInsertVectorOp extends GCPSpannerBaseOp<Long> {
      * @param mutation the Mutation object representing the data to be inserted
      * @param dbClient the DatabaseClient used to execute the mutation
      */
-    public GCPSpannerInsertVectorOp(Spanner searchIndexClient, Long requestParam, Mutation mutation, DatabaseClient dbClient) {
+    public GCPSpannerInsertOp(Spanner searchIndexClient, Long requestParam, Mutation mutation, DatabaseClient dbClient) {
         super(searchIndexClient, requestParam);
         this.mutation = mutation;
         this.dbClient = dbClient;
