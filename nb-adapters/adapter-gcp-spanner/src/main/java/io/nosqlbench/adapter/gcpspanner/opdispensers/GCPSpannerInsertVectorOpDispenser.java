@@ -49,7 +49,6 @@ public class GCPSpannerInsertVectorOpDispenser extends GCPSpannerBaseOpDispenser
     public GCPSpannerInsertVectorOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.queryParamsFunction = createParamsFunction(op);
-        //op.getAsRequiredFunction("vector", float[].class);
     }
 
     /**

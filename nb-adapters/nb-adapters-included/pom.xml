@@ -74,7 +74,7 @@
         <profile>
             <id>adapter-cqld4-include</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
@@ -102,7 +102,7 @@
         <profile>
             <id>adapter-http-include</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
@@ -130,7 +130,7 @@
         <profile>
             <id>adapter-tcp-include</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
@@ -144,7 +144,7 @@
         <profile>
             <id>adapter-dataapi-include</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
