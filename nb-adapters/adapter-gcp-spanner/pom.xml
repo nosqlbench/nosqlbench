@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2023 nosqlbench
+  ~ Copyright (c) 2020-2024 nosqlbench
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,58 +13,43 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>adapter-gcp-spanner</artifactId>
+    <packaging>jar</packaging>
+
     <parent>
-        <groupId>io.nosqlbench</groupId>
         <artifactId>mvn-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
         <version>${revision}</version>
         <relativePath>../../mvn-defaults</relativePath>
     </parent>
 
-    <artifactId>adapter-jdbc</artifactId>
-    <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-
     <description>
-        A JDBC driver for nosqlbench. This provides the ability to inject synthetic data
-        into a PostegreSQL® compatible database leveraging HikariCP.
+        A NoSQLBbench driver adapter module for the Google Spanner database.
     </description>
 
     <dependencies>
-        <!-- core dependencies -->
-        <dependency>
-            <groupId>io.nosqlbench</groupId>
-            <artifactId>adapters-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nb-annotations</artifactId>
             <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
-
-        <!-- https://search.maven.org/artifact/org.postgresql/postgresql -->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.7.2</version>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapters-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
         </dependency>
-
-        <!-- https://search.maven.org/artifact/com.zaxxer/HikariCP -->
         <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>5.0.1</version>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-spanner</artifactId>
         </dependency>
-
     </dependencies>
-
-    <build>
-        <plugins>
-        </plugins>
-    </build>
 </project>

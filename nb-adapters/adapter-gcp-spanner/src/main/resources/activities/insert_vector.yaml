@@ -1,0 +1,18 @@
+scenarios:
+  default:
+    insert_vector: >-
+      run driver=spanner tags==blocks:insert_vector service_account_file=TEMPLATE(service_account_file)
+      project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=TEMPLATE(cycles)
+
+bindings:
+  rw_key: ToString();
+  train_floatlist: HdfFileToFloatArray("glove-25-angular.hdf5", "/train");
+
+blocks:
+  insert_vector:
+    ops:
+      op1:
+        insert_vector: "vectors"
+        query_params:
+          keycol: "{rw_key}"
+          value: "{train_floatlist}"
