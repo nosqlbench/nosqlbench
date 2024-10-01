@@ -1,6 +1,6 @@
 scenarios:
   default:
-    execute_ddl: run driver=gcp_spanner tags==blocks:execute_ddl service_account_file=TEMPLATE(service_account_file)
+    execute_ddl: run driver=spanner tags==blocks:execute_ddl service_account_file=TEMPLATE(service_account_file)
       project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=1
 
 blocks:

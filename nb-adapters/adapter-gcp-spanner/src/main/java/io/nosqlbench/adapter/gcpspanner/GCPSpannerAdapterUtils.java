@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GCPSpannerAdapterUtils {
-    public static final String SPANNER = "gcp_spanner";
+    public static final String SPANNER = "spanner";
 
     public static int[] getKeyArrayFromResultSet(ResultSet rs) {
         List<Integer> values = new ArrayList<>();

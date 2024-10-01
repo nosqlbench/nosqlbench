@@ -33,9 +33,6 @@ import org.apache.logging.log4j.Logger;
  * @see <a href="https://cloud.google.com/spanner/docs/reference/standard-sql/dml-syntax">DML Syntax</a>
  * @see <a href="https://cloud.google.com/spanner/docs/reference/rpc">spanner rpc api calls</a>
  * @see <a href="https://cloud.google.com/spanner/docs/reference/standard-sql/data-definition-language#vector_index_statements">SQL functionality related to vector indices</a>
- * @see <a href=""></a>
- * @see <a href=""></a>
- * @see <a href=""></a>
  */
 public class GCPSpannerSpace implements AutoCloseable {
     private final static Logger logger = LogManager.getLogger(GCPSpannerSpace.class);
@@ -89,8 +86,10 @@ public class GCPSpannerSpace implements AutoCloseable {
         if (
             cfg.getOptional("database_id").isEmpty() ||
             cfg.getOptional("project_id").isEmpty() ||
-            cfg.getOptional("instance_id").isEmpty()) {
-            throw new RuntimeException("You must provide all 'service_account_file', 'project_id', 'instance_id' & 'database_id' to configure a Google Spanner client");
+            cfg.getOptional("instance_id").isEmpty() ||
+            cfg.getOptional("service_account_file").isEmpty()) {
+                throw new RuntimeException("You must provide all 'service_account_file', 'project_id', 'instance_id' &" +
+                    " 'database_id' to configure a Google Spanner client");
         }
         String projectId = cfg.get("project_id");
         String instanceId = cfg.get("instance_id");
