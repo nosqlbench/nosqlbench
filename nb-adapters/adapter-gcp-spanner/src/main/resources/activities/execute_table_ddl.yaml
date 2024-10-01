@@ -1,0 +1,11 @@
+scenarios:
+  default:
+    execute_ddl: run driver=spanner tags==blocks:execute_ddl service_account_file=TEMPLATE(service_account_file)
+      project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=1
+
+blocks:
+  execute_ddl:
+    ops:
+      op1:
+        update_database_ddl: |
+          CREATE TABLE vectors (keycol STRING(100),value ARRAY<FLOAT32>(vector_length=>25) NOT NULL) PRIMARY KEY(keycol)
