@@ -214,5 +214,15 @@
             </modules>
         </profile>
 
+        <profile>
+            <id>adapter-gcp-spanner-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-gcp-spanner</module>
+            </modules>
+        </profile>
+
     </profiles>
 </project>
