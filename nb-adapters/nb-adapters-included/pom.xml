@@ -295,6 +295,20 @@
             </dependencies>
         </profile>
 
+        <profile>
+            <id>adapter-gcp-spanner-include</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>adapter-gcp-spanner</artifactId>
+                    <version>${revision}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
     </profiles>
 
 </project>
