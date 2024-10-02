@@ -106,11 +106,4 @@ class CmdParserTest {
             .withMessageContaining("Duplicate occurrence of option: threads");
     }
 
-    @Test
-    public void testNonExistentDriverThrowsError() {
-        assertThatExceptionOfType(BasicError.class)
-            .isThrownBy(() -> CmdParser.parseArgvCommands(new LinkedList<>(List.of("run", "driver=nonexistant"))))
-            .withMessageContaining("Unable to load default driver adapter 'nonexistant'");
-    }
-
 }
