@@ -30,6 +30,7 @@ package io.nosqlbench.adapter.gcpspanner.types;
  * <a href="https://cloud.google.com/spanner/docs/find-approximate-nearest-neighbors#query-vector-embeddings">here</a></a>
  */
 public enum GCPSpannerOpType {
+    create_database_ddl,
     update_database_ddl,
     insert,
     execute_dml,

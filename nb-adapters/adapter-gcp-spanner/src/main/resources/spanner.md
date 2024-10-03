@@ -19,12 +19,14 @@ to the adapter at runtime.
 ## Op Templates
 
 The Google Cloud Spanner adapter supports the following operations:
+
+* `create_database_ddl` - Data Definition Language operations such as creating and dropping databases.
 * `update_database_ddl` - Data Definition Language operations such as creating and dropping tables, indexes, etc.
 * `execute_dml` - Data Manipulation Language operations. Read only operations are supported at this time, including queries
 and vector queries.
 * `insert` - Insert a single record, vector or non-vector, of data into the database.
+
 ## Examples
 
-
-
+Checkout the sample workload files [here](./activities).
 ---
