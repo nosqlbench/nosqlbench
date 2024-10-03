@@ -1,6 +1,6 @@
 scenarios:
   default:
-    execute_ddl: run driver=spanner tags==blocks:execute_ddl service_account_file=TEMPLATE(service_account_file)
+    execute_ddl: run driver=spanner tags==block:execute_ddl service_account_file=TEMPLATE(service_account_file)
       project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=1
 
 # https://cloud.google.com/spanner/docs/reference/standard-sql/data-definition-language#vector_index_option_list
@@ -9,5 +9,5 @@ blocks:
     ops:
       op1:
         update_database_ddl: |
-          CREATE VECTOR INDEX VectorsIndex ON vectors(value)
+          CREATE VECTOR INDEX IF NOT EXISTS VectorsIndex ON vectors(value)
           OPTIONS (distance_type = 'COSINE', tree_depth = 3, num_branches=1000, num_leaves = 1000000);
