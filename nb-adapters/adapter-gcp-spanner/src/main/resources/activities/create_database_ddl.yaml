@@ -8,4 +8,4 @@ blocks:
     ops:
       op1:
         create_database_ddl: |
-          CREATE DATABASE {database_id}
+          CREATE DATABASE TEMPLATE(database_id)
