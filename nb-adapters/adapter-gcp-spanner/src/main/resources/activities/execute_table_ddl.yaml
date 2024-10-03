@@ -8,4 +8,4 @@ blocks:
     ops:
       op1:
         update_database_ddl: |
-          CREATE TABLE vectors (keycol STRING(100),value ARRAY<FLOAT32>(vector_length=>25) NOT NULL) PRIMARY KEY(keycol)
+          CREATE TABLE IF NOT EXISTS vectors (keycol STRING(100),value ARRAY<FLOAT32>(vector_length=>25) NOT NULL) PRIMARY KEY(keycol)

@@ -19,8 +19,7 @@ package io.nosqlbench.adapter.gcpspanner.opdispensers;
 
 import io.nosqlbench.adapter.gcpspanner.GCPSpannerDriverAdapter;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerBaseOp;
-import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerCreateDatabaseDdlOp;
-import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerUpdateDatabaseDdlOp;
+import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerDropDatabaseDdlOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,40 +27,40 @@ import org.apache.logging.log4j.Logger;
 import java.util.function.LongFunction;
 
 /**
- * Dispenser class for creating databases of {@link GCPSpannerCreateDatabaseDdlOp}.
+ * Dispenser class for creating databases of {@link GCPSpannerDropDatabaseDdlOp}.
  *
- * @see <a href="https://cloud.google.com/spanner/docs/reference/rpc/google.spanner.admin.database.v1#createdatabaserequest">
- *     CreateDatabaseRequest</a> which can be a stretch goal to combine all of DB, Table(s), and Indexes into one-single call.
+ * @see <a href="https://cloud.google.com/spanner/docs/reference/rpc/google.spanner.admin.database.v1#dropdatabaserequest">
+ *     DropDatabaseRequest</a> which can be a stretch goal to combine all of DB, Table(s), and Indexes into one-single call.
  */
-public class GCPSpannerCreateDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispenser {
-    private static final Logger logger = LogManager.getLogger(GCPSpannerCreateDatabaseDdlOpDispenser.class);
-    private final LongFunction<GCPSpannerCreateDatabaseDdlOp> opFunction;
+public class GCPSpannerDropDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispenser {
+    private static final Logger logger = LogManager.getLogger(GCPSpannerDropDatabaseDdlOpDispenser.class);
+    private final LongFunction<GCPSpannerDropDatabaseDdlOp> opFunction;
 
     /**
-     * Constructor for {@link GCPSpannerCreateDatabaseDdlOpDispenser}.
+     * Constructor for {@link GCPSpannerDropDatabaseDdlOpDispenser}.
      *
      * @param adapter        the {@link GCPSpannerDriverAdapter} instance
      * @param op             the {@link ParsedOp} instance
      * @param targetFunction a {@link LongFunction} that provides the target string
      */
-    public GCPSpannerCreateDatabaseDdlOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public GCPSpannerDropDatabaseDdlOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
-        this.opFunction = createOpFunction(op);
+        this.opFunction = DropOpFunction(op);
     }
 
     /**
-     * Creates a {@link LongFunction} that generates {@link GCPSpannerUpdateDatabaseDdlOp} instances.
+     * Drops a {@link LongFunction} that generates {@link GCPSpannerDropDatabaseDdlOp} instances.
      *
      * @param op the {@link ParsedOp} instance
-     * @return a {@link LongFunction} that generates {@link GCPSpannerUpdateDatabaseDdlOp} instances
+     * @return a {@link LongFunction} that generates {@link GCPSpannerDropDatabaseDdlOp} instances
      */
-    private LongFunction<GCPSpannerCreateDatabaseDdlOp> createOpFunction(ParsedOp op) {
-        return (l) -> new GCPSpannerCreateDatabaseDdlOp(
+    private LongFunction<GCPSpannerDropDatabaseDdlOp> DropOpFunction(ParsedOp op) {
+        return (l) -> new GCPSpannerDropDatabaseDdlOp(
             spaceFunction.apply(l).getSpanner(),
             l,
             targetFunction.apply(l),
             spaceFunction.apply(l).getDbAdminClient(),
-            spaceFunction.apply(l).getInstanceId()
+            spaceFunction.apply(l).getDbAdminClient().getDatabase(spaceFunction.apply(l).getInstanceId(), spaceFunction.apply(l).getDatabaseIdString())
         );
     }
 

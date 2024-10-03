@@ -16,40 +16,38 @@
 
 package io.nosqlbench.adapter.gcpspanner.ops;
 
-import com.google.api.gax.longrunning.OperationFuture;
 import com.google.cloud.spanner.Database;
 import com.google.cloud.spanner.DatabaseAdminClient;
 import com.google.cloud.spanner.Spanner;
-import com.google.spanner.admin.database.v1.CreateDatabaseMetadata;
 
 /**
- * This class represents an operation to create the database DDL (Data Definition Language) in Google Cloud Spanner.
+ * This class represents an operation to Drop the database DDL (Data Definition Language) in Google Cloud Spanner.
  * It extends the {@link GCPSpannerBaseOp} class and provides the implementation for applying the DDL update operation.
  */
-public class GCPSpannerCreateDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
-    private final String createDatbaseStatement;
+public class GCPSpannerDropDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
+    private final String databaseId;
     private final DatabaseAdminClient dbAdminClient;
-    private final String instanceId;
+    private final Database db;
 
     /**
      * Constructs a new {@link GCPSpannerUpdateDatabaseDdlOp}.
      *
      * @param searchIndexClient the {@link Spanner} client
      * @param requestParam the request parameter
-     * @param createDatbaseStatement the SQL statement to create the table
+     * @param databaseId the database ID to be dropped
      * @param dbAdminClient the {@link DatabaseAdminClient} to execute the DDL update
-     * @param instanceId the instance ID string representing the target spanner instance
+     * @param db the {@link Database} to be dropped
      */
-    public GCPSpannerCreateDatabaseDdlOp(Spanner searchIndexClient, Long requestParam, String createDatbaseStatement,
-                                         DatabaseAdminClient dbAdminClient, String instanceId) {
+    public GCPSpannerDropDatabaseDdlOp(Spanner searchIndexClient, Long requestParam, String databaseId,
+                                         DatabaseAdminClient dbAdminClient, Database db) {
         super(searchIndexClient, requestParam);
-        this.createDatbaseStatement = createDatbaseStatement;
+        this.databaseId = databaseId;
         this.dbAdminClient = dbAdminClient;
-        this.instanceId = instanceId;
+        this.db = db;
     }
 
     /**
-     * Applies the DDL create operation.
+     * Applies the DDL drop operation.
      *
      * @param value the value to be used in the operation
      * @return the result of the operation
@@ -57,15 +55,16 @@ public class GCPSpannerCreateDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
      */
     @Override
     public Object applyOp(long value) {
-        OperationFuture<Database, CreateDatabaseMetadata> operation = dbAdminClient.createDatabase(
-            instanceId,
-            createDatbaseStatement,
-            null,
-            null);
         try {
-            return operation.get();
+            db.drop();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            logger.warn("Error dropping database using the Database object: {}. Will re-try using the DBAdminClient now...", e.getMessage());
+            try {
+                dbAdminClient.dropDatabase(databaseId, null);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
         }
+        return null;
     }
 }

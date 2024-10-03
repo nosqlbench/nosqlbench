@@ -55,6 +55,8 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?>> {
         logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
 
         return switch (typeAndTarget.enumId) {
+            case drop_database_ddl ->
+                new GCPSpannerDropDatabaseDdlOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_database_ddl ->
                 new GCPSpannerCreateDatabaseDdlOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case update_database_ddl ->

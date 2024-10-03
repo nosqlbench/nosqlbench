@@ -1,10 +1,10 @@
 scenarios:
   default:
-    create_table_ddl: run driver=spanner tags==blocks:create_table_ddl service_account_file=TEMPLATE(service_account_file)
+    create_db_ddl: run driver=spanner tags==blocks:schema_db service_account_file=TEMPLATE(service_account_file)
       project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=1
 
 blocks:
-  create_table_ddl:
+  schema_db:
     ops:
       op1:
         create_database_ddl: |
