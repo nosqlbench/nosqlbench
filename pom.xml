@@ -99,6 +99,13 @@
                             </rules>
                         </configuration>
                     </plugin>
+                    <!-- https://www.baeldung.com/maven-dependency-latest-version -->
+                    <!-- Display available upgrade -> mvn versions:display-dependency-updates -->
+                    <!-- Upgrade dependencies -> mvn versions:use-latest-versions -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>versions-maven-plugin</artifactId>
+                    </plugin>
                 </plugins>
             </build>
         </profile>

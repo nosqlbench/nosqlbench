@@ -57,7 +57,7 @@
         <profile>
             <id>adapter-cqld4-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-cqld4</module>
@@ -77,7 +77,7 @@
         <profile>
             <id>adapter-http-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-http</module>
@@ -97,7 +97,7 @@
         <profile>
             <id>adapter-tcp-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-tcp</module>
@@ -107,7 +107,7 @@
         <profile>
             <id>adapter-dynamodb-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-dynamodb</module>
@@ -117,7 +117,7 @@
         <profile>
             <id>adapter-mongodb-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-mongodb</module>
@@ -127,7 +127,7 @@
         <profile>
             <id>adapter-neo4j-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-neo4j</module>
@@ -137,7 +137,7 @@
         <profile>
             <id>adapter-pulsar-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-pulsar</module>
@@ -147,7 +147,7 @@
         <profile>
             <id>adapter-s4j-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-s4j</module>
@@ -157,7 +157,7 @@
         <profile>
             <id>adapter-kafka-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-kafka</module>
@@ -167,7 +167,7 @@
         <profile>
             <id>adapter-amqp-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-amqp</module>
@@ -177,7 +177,7 @@
         <profile>
             <id>adapter-dataapi-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-dataapi</module>
@@ -187,7 +187,7 @@
         <profile>
             <id>adapter-qdrant-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-qdrant</module>
@@ -197,7 +197,7 @@
         <profile>
             <id>adapter-weaviate-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-weaviate</module>
@@ -207,7 +207,7 @@
         <profile>
             <id>adapter-azure-aisearch-module</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-azure-aisearch</module>
