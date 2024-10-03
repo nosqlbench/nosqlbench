@@ -851,11 +851,6 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>3.0.0</version>
                 </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.17.1</version>
-                </plugin>
             </plugins>
         </pluginManagement>
     </build>

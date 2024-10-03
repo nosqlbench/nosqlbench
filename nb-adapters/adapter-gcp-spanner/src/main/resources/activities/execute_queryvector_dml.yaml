@@ -1,6 +1,6 @@
 scenarios:
   default:
-    execute_dml: run driver=spanner tags==block:execute_dml service_account_file=TEMPLATE(service_account_file)
+    execute_dml: run driver=spanner tags==blocks:execute_dml service_account_file=TEMPLATE(service_account_file)
       project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=TEMPLATE(cycles)
 
 bindings:
