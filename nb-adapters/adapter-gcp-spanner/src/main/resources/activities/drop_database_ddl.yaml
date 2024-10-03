@@ -7,4 +7,4 @@ blocks:
   schema_drop_db:
     ops:
       op1:
-        drop_database_ddl: "{database_id}"
+        drop_database_ddl: TEMPLATE(database_id)

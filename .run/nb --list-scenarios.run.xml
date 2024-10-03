@@ -5,7 +5,7 @@
       <option name="region" />
       <option name="useCurrentConnection" value="false" />
     </extension>
-    <option name="JAR_PATH" value="$PROJECT_DIR$/nb5/target/nb5-5.21.1-SNAPSHOT-jar-with-dependencies.jar" />
+    <option name="JAR_PATH" value="$PROJECT_DIR$/nb5/target/nb5.jar" />
     <option name="PROGRAM_PARAMETERS" value="--list-scenarios --show-stacktraces" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/local/" />
     <option name="ALTERNATIVE_JRE_PATH" />
