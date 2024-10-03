@@ -1,0 +1,10 @@
+scenarios:
+  default:
+    drop_db_ddl: run driver=spanner tags==block:schema_drop_db service_account_file=TEMPLATE(service_account_file)
+      project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=1
+
+blocks:
+  schema_drop_db:
+    ops:
+      op1:
+        drop_database_ddl: TEMPLATE(database_id)

@@ -1,0 +1,11 @@
+scenarios:
+  default:
+    create_db_ddl: run driver=spanner tags==block:schema_db service_account_file=TEMPLATE(service_account_file)
+      project_id=TEMPLATE(project_id) instance_id=TEMPLATE(instance_id) database_id=TEMPLATE(database_id) cycles=1
+
+blocks:
+  schema_db:
+    ops:
+      op1:
+        create_database_ddl: |
+          CREATE DATABASE TEMPLATE(database_id)
