@@ -16,6 +16,8 @@
 
 package io.nosqlbench.adapters.api.scheduling;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -23,6 +25,7 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TimeoutPredicateTest {
+    private final static Logger logger = LogManager.getLogger(TimeoutPredicateTest.class);
 
     @Test
     public void testNeverCompletablePreciate() {
@@ -90,13 +93,13 @@ public class TimeoutPredicateTest {
         );
 
         TimeoutPredicate.Result<Long> result = canMakeIt.test();
-        System.out.println(result);
+        logger.info(result);
 
         while (result.status() == TimeoutPredicate.Status.pending) {
 //            canMakeIt.blockUntilNextInterval();
             result = canMakeIt.test();
-            System.out.println(canMakeIt);
-            System.out.println(result);
+            logger.info(canMakeIt);
+            logger.info(result);
         }
 
         assertThat(result.status()).isEqualTo(TimeoutPredicate.Status.complete);
