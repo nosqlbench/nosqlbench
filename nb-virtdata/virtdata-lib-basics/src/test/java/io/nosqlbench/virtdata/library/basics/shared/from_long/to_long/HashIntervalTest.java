@@ -17,6 +17,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
 import io.nosqlbench.nb.api.errors.BasicError;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,5 +37,16 @@ public class HashIntervalTest {
     public void testRangeError() {
         assertThatExceptionOfType(BasicError.class)
                 .isThrownBy(() -> new HashInterval(3L, 3L));
+    }
+
+    @Test
+    @Disabled("exhaustive boundary check, expensive")
+    public void testDoubleHashIntervalBounds() {
+        io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashInterval hi = new io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashInterval(0.0, 1.0);
+        for (long i = 0; i < 100000000; i++) {
+            double v = hi.applyAsDouble(i);
+            assertThat(v).isGreaterThanOrEqualTo(0.0d);
+            assertThat(v).isLessThan(1.0d);
+        }
     }
 }

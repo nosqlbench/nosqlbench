@@ -61,7 +61,9 @@ import java.util.stream.Collectors;
  * the values will appear monotonically as you scan through the unit interval of all long values.
  * Specifically, 0L represents 0.0d in the unit interval on input, and Long.MAX_VALUE represents
  * 1.0 on the unit interval.) This mode is only recommended for advanced scenarios and should otherwise be
- * avoided. You will know if you need this mode.
+ * avoided. You will know if you need this mode. For alias sampling, the values may not always occur
+ * in the order specified due to the alias table construction. However, the values will be clustered in the order
+ * they appear in that table.
  *
  */
 @Categories(Category.general)

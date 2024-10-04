@@ -38,9 +38,9 @@ public class AliasSamplerDoubleInt implements DoubleToIntFunction {
     private final ByteBuffer stats; // tuples of double,int,int (unfair coin, direct pointers to referents)
     private final double slotCount; // The number of fair die-roll slotCount that contain unfair coin probabilities
     private static final int _r0=0;
-    private static final int _r1=_r0+Double.BYTES;
-    private static final int _r2=_r1+Integer.BYTES;
-    public static int RECORD_LEN = _r2 + Integer.BYTES; // Record size for the above.
+    private static final int _r1=_r0+Double.BYTES; // unfair coin
+    private static final int _r2=_r1+Integer.BYTES; // + referent 1
+    public static int RECORD_LEN = _r2 + Integer.BYTES; // + referent 2 = Record size for the above.
 
     // for testing
     AliasSamplerDoubleInt(ByteBuffer stats) {

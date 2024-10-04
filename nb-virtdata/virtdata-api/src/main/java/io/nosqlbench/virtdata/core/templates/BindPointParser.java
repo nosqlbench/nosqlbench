@@ -26,6 +26,8 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.regex.Matcher.quoteReplacement;
+
 /**
  * BindPointParser parses a user-provide string template into spans. It builds a simple list of
  * BindPoints, and provides both the parsed spans and the BindPoints in a result.
@@ -51,10 +53,10 @@ public class BindPointParser implements BiFunction<String, Map<String, String>, 
         List<String> spans = new ArrayList<>();
         List<BindPoint> bindpoints = new ArrayList<>();
 
-        int genid=0;
+        int genid = 0;
         while (m.find()) {
             String pre = template.substring(lastMatch, m.start());
-            spans.add(pre);
+            spans.add(unescape(pre));
             lastMatch = m.end();
 
             String reference = m.group("reference");
@@ -64,19 +66,27 @@ public class BindPointParser implements BiFunction<String, Map<String, String>, 
                 bindpoints.add(BindPoint.of(reference, bindings.getOrDefault(reference, null), BindPoint.Type.reference));
                 spans.add(reference);
             } else if (inline1 != null) {
-                bindpoints.add(BindPoint.of(DEFINITION, inline1, BindPoint.Type.definition));
+                bindpoints.add(BindPoint.of(DEFINITION, unescape(inline1), BindPoint.Type.definition));
                 spans.add(inline1);
             } else if (inline2 != null) {
-                bindpoints.add(BindPoint.of(DEFINITION, inline2, BindPoint.Type.definition));
+                bindpoints.add(BindPoint.of(DEFINITION, unescape(inline2), BindPoint.Type.definition));
                 spans.add(inline2);
             } else {
                 throw new BasicError("Unable to parse: " + template);
             }
 
         }
-        spans.add(lastMatch >= 0 ? template.substring(lastMatch) : template);
+        spans.add(lastMatch >= 0 ? unescape(template.substring(lastMatch)) : unescape(template));
 
+        for (String span : spans) {
+
+        }
         return new Result(spans, bindpoints);
+    }
+
+    private static String unescape(String s) {
+        String s1 = s.replaceAll("\\\\n", "\n");
+        return s1;
     }
 
     public final static class Result {
