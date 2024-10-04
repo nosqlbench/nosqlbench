@@ -28,7 +28,7 @@ import static io.nosqlbench.virtdata.library.curves4.discrete.int_int.Enumerated
 
 @ThreadSafeMapper
 @Categories({Category.distributions})
-public class EnumeratedInts extends IntToLongDiscreteCurve {
+public class EnumeratedInts extends LongToIntDiscreteCurve {
     public EnumeratedInts(String data, String... mods) {
         super(new EnumeratedIntegerDistribution(parseIntLabels(data), parseDoubleWeights(data)), mods);
     }
