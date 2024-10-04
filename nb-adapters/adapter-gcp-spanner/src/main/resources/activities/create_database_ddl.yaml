@@ -7,5 +7,4 @@ blocks:
   schema_db:
     ops:
       op1:
-        create_database_ddl: |
-          CREATE DATABASE TEMPLATE(database_id)
+        create_database_ddl: TEMPLATE(database_id)
