@@ -22,12 +22,14 @@ import com.google.cloud.spanner.DatabaseAdminClient;
 import com.google.cloud.spanner.Spanner;
 import com.google.spanner.admin.database.v1.CreateDatabaseMetadata;
 
+import java.util.Collections;
+
 /**
  * This class represents an operation to create the database DDL (Data Definition Language) in Google Cloud Spanner.
  * It extends the {@link GCPSpannerBaseOp} class and provides the implementation for applying the DDL update operation.
  */
 public class GCPSpannerCreateDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
-    private final String createDatbaseStatement;
+    private final String databaseId;
     private final DatabaseAdminClient dbAdminClient;
     private final String instanceId;
 
@@ -36,20 +38,20 @@ public class GCPSpannerCreateDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
      *
      * @param searchIndexClient the {@link Spanner} client
      * @param requestParam the request parameter
-     * @param createDatbaseStatement the SQL statement to create the table
+     * @param databaseId the SQL statement to create the table
      * @param dbAdminClient the {@link DatabaseAdminClient} to execute the DDL update
      * @param instanceId the instance ID string representing the target spanner instance
      */
-    public GCPSpannerCreateDatabaseDdlOp(Spanner searchIndexClient, Long requestParam, String createDatbaseStatement,
+    public GCPSpannerCreateDatabaseDdlOp(Spanner searchIndexClient, Long requestParam, String databaseId,
                                          DatabaseAdminClient dbAdminClient, String instanceId) {
         super(searchIndexClient, requestParam);
-        this.createDatbaseStatement = createDatbaseStatement;
+        this.databaseId = databaseId;
         this.dbAdminClient = dbAdminClient;
         this.instanceId = instanceId;
     }
 
     /**
-     * Applies the DDL create operation.
+     * Applies the DDL create database operation.
      *
      * @param value the value to be used in the operation
      * @return the result of the operation
@@ -58,10 +60,7 @@ public class GCPSpannerCreateDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
     @Override
     public Object applyOp(long value) {
         OperationFuture<Database, CreateDatabaseMetadata> operation = dbAdminClient.createDatabase(
-            instanceId,
-            createDatbaseStatement,
-            null,
-            null);
+            instanceId, databaseId, Collections.emptyList());
         try {
             return operation.get();
         } catch (Exception e) {
