@@ -88,4 +88,18 @@ public class BindPointParserTest {
 
     }
 
+    @Test
+    public void testUnescapingNewlines() {
+        BindPointParser bpp = new BindPointParser();
+        assertThat(bpp.apply("a{{Template(\"-{}-\",Combinations(\"a-z\"))}}\\nb", Map.of())).isEqualTo(
+            new BindPointParser.Result(
+                List.of("a","Template(\"-{}-\",Combinations(\"a-z\"))","\nb"),
+                List.of(
+                    BindPoint.of(BindPointParser.DEFINITION,"Template(\"-{}-\",Combinations(\"a-z\"))", BindPoint.Type.definition)
+                )
+            )
+        );
+
+    }
+
 }
