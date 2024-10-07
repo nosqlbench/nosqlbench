@@ -26,4 +26,19 @@ public class INFO_stop extends NBCommandInfo {
     public Class<? extends NBInvokableCommand> getType() {
         return CMD_stop.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            stop the named activity by requesting a graceful shutdown
+
+            This requests a shutdown of an activity which allows current operations
+            to finish before activity resources are closed according to native driver
+            conventions.
+
+            EXAMPLE:
+            stop alias=myactivity1
+            """;
+    }
+
 }

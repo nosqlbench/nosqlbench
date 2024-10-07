@@ -26,4 +26,14 @@ public class INFO_error extends NBCommandInfo {
     public Class<? extends NBInvokableCommand> getType() {
         return CMD_error.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            (diagnostic) throw an error with the provided params in the message
+
+            EXAMPLE:
+            error testing=testing123
+            """;
+    }
 }

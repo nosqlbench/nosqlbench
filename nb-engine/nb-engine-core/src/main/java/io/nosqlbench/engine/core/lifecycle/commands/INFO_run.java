@@ -26,4 +26,37 @@ public class INFO_run extends NBCommandInfo {
     public Class<? extends NBInvokableCommand> getType() {
         return CMD_run.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            run an activity, blocking the main control thread until it is complete
+
+            Thorough documentation for these options can be found at:
+            https://docs.nosqlbench.io/user-guide/core-activity-params/
+
+            Essential parameters for this command are:
+            * driver       (see --list-drivers to see what your runtime has built-in)
+            * workload     a workload template in yaml, JSON, or Jsonnet form
+            * tags         a set of filtering tags to enable or disable specific ops
+            * threads      the number of concurrent requests to run
+            * cycles       the total number of operations to run
+            * errors       the error handling rules
+
+            Diagnostic Options
+            * dryrun       enable dryrun diagnostics at different levels
+
+            Metrics Options
+            * alias        name the activity so that you can observer or modify it concurrently
+            * instrument   enable per-op-template metrics collection and reporting
+            * hdr_digits   set the number of significant digits in histogram collection
+
+            Customization
+            * cyclerate    set the ops/s for the activity
+            * rate         synonym for cyclerate
+            * stride       override the internal micro-batching step size (careful here)
+            * striderate   set the rate for strides / second
+            * seq          set the op sequencer to use
+            """;
+    }
 }

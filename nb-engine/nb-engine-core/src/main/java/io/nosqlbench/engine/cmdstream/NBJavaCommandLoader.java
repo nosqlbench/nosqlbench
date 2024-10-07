@@ -21,16 +21,16 @@ import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
 import io.nosqlbench.nb.annotations.ServiceSelector;
 
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class NBJavaCommandLoader {
     public static Class<? extends NBInvokableCommand> oneExists(String cmdName) {
         ServiceLoader<NBCommandInfo> loader = ServiceLoader.load(NBCommandInfo.class);
         ServiceSelector<NBCommandInfo> selector = ServiceSelector.of(cmdName, loader);
         List<? extends ServiceLoader.Provider<? extends NBCommandInfo>> providers = selector.getAllProviders();
-        if (providers.size()>1) {
-            throw new RuntimeException("looking for an optional command for cmdName '" + cmdName +"' but found " + providers.size());
+        if (providers.size() > 1) {
+            throw new RuntimeException("looking for an optional command for cmdName '" + cmdName + "' but found " + providers.size());
         }
         if (!providers.isEmpty()) {
             return providers.get(0).get().getType();
@@ -49,6 +49,35 @@ public class NBJavaCommandLoader {
         ServiceLoader<NBCommandInfo> loader = ServiceLoader.load(NBCommandInfo.class);
         ServiceSelector<NBCommandInfo> selector = ServiceSelector.of(cmdName, loader);
         return selector;
+    }
+
+    public static List<NBCommandInfo> getCommands() {
+        ServiceLoader<NBCommandInfo> loader = ServiceLoader.load(NBCommandInfo.class);
+        LinkedList<NBCommandInfo> standards = new LinkedList<>();
+        LinkedList<NBCommandInfo> experimental = new LinkedList<>();
+        LinkedList<NBCommandInfo> diagnostic = new LinkedList<>();
+
+        List<NBCommandInfo> all = loader.stream().map(s -> s.get()).collect(Collectors.toCollection(LinkedList::new));
+        Collections.sort(all,Comparator.comparing(i -> i.getName()));
+
+        for (NBCommandInfo nbCommandInfo : all) {
+            String desc = nbCommandInfo.getDescription();
+            if (desc.startsWith("(diagnostic)")) {
+                diagnostic.add(nbCommandInfo);
+            } else if (desc.startsWith("(experimental)")) {
+                experimental.add(nbCommandInfo);
+            } else {
+                standards.add(nbCommandInfo);
+            }
+        }
+
+        standards.addAll(diagnostic);
+        standards.addAll(experimental);
+        return standards;
+    }
+
+    public static Optional<? extends NBCommandInfo> getInfoFor(String cmdName) {
+        return getSelector(cmdName).get();
     }
 
 }

@@ -704,6 +704,7 @@ public class NBCLIOptions {
         this.cmdList.addAll(parsedCmds);
 
         if (!arglist.isEmpty()) {
+
             final String cmdParam = arglist.peekFirst();
             Objects.requireNonNull(cmdParam);
             final String helpmsg = """
@@ -721,7 +722,14 @@ public class NBCLIOptions {
                 """
                 .replaceAll("ARG", cmdParam)
                 .replaceAll("PROG", "nb5")
-                .replaceAll("INCLUDES", String.join(",", wantsIncludes()));
+                .replaceAll("INCLUDES", String.join(",", wantsIncludes()))
+                + (arglist.size()>0 && arglist.peekFirst().startsWith("nb") ?
+                """
+                        (HINT:) It looks like you are starting your command with ARGV0
+                        " which looks like the nb5 command itself. Maybe remove this?
+                    """.replaceAll("ARGV0", arglist.peekFirst()) : ""
+            );
+
 
             final String debugMessage = """
 
@@ -731,6 +739,8 @@ public class NBCLIOptions {
                 """
                 .replaceAll("COMMANDSTREAM",
                     String.join(" ", arglist));
+
+
             if (consoleLevel.isGreaterOrEqualTo(NBLogLevel.INFO)) {
                 System.out.println(debugMessage);
             }

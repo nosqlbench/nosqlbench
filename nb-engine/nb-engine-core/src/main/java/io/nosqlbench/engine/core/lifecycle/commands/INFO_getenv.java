@@ -26,4 +26,21 @@ public class INFO_getenv extends NBCommandInfo {
     public Class<? extends NBInvokableCommand> getType() {
         return CMD_getenv.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            hoist environment variables into the container state under the given names
+
+            EXAMPLE:
+            getenv authfile=AUTHFILE usermode=FOOSELECTED
+
+            This imports the AUTHFILE and FOOSELECTED environment variables into the container state
+            under the names authfile and usermode. The variables are then available to
+            other commands using the container state variable syntax, like ${stepname.authfile}
+            or ${stepname.usermode}
+
+            """;
+    }
+
 }

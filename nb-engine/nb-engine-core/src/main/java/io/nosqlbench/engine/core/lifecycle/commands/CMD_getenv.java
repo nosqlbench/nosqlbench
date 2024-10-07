@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service(value = NBBaseCommand.class, selector = "getenv")
@@ -39,8 +40,16 @@ public class CMD_getenv extends NBBaseCommand {
 
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        String varname = params.maybeGet("var").orElseThrow(() -> new BasicError("The getenv command requires a variable named 'var' to be defined."));
-        String value = System.getenv(varname);
-        return Map.of(varname,value);
+        Map<String, String> got = new LinkedHashMap<>();
+        params.forEach((k, v) -> {
+            String value = System.getenv(v);
+            if (value == null) {
+                logger.warn(() -> "tried to get env var with name '" + v + "', but it was not defined");
+            } else {
+                got.put(k,value);
+            }
+        });
+
+        return got;
     }
 }

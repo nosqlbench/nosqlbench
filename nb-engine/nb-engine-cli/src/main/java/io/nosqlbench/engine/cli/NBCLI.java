@@ -20,6 +20,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.engine.cmdstream.CmdType;
+import io.nosqlbench.engine.cmdstream.NBJavaCommandLoader;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
+import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBHelpTopic;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.apps.BundledApp;
@@ -268,9 +271,13 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         if (options.getWantsListCommands()) {
-            for (CmdType value : CmdType.values()) {
-                System.out.println(value.name());
+            List<NBCommandInfo> commands = NBJavaCommandLoader.getCommands();
+            for (NBCommandInfo command : commands) {
+                System.out.println(
+                    String.format("%-20s     %s", command.getName(),command.getDescription())
+                );
             }
+
             return NBCLI.EXIT_OK;
         }
         if (options.wantsActivityTypes()) {
@@ -369,6 +376,19 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         if (options.wantsTopicalHelp()) {
+            String topic = options.wantsTopicalHelpFor();
+
+            Optional<? extends NBHelpTopic> infoFor = NBJavaCommandLoader.getInfoFor(topic);
+//            infoFor = infoFor.or(() -> MarkdownFinder.forHelpTopic(options.wantsTopicalHelpFor()));
+
+            infoFor.ifPresent(info -> {
+                System.out.print(info.getHelp());
+            });
+
+            if (infoFor.isPresent()) {
+                return NBCLI.EXIT_OK;
+            }
+
             final Optional<String> helpDoc = MarkdownFinder.forHelpTopic(options.wantsTopicalHelpFor());
             System.out.println(helpDoc.orElseThrow(
                 () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())

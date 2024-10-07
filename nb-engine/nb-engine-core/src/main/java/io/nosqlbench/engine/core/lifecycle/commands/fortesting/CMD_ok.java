@@ -34,9 +34,9 @@ public class CMD_ok extends NBBaseCommand {
 
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        stdout.write("Command '" + this.toString() + "' says OK and exits with no object or exception.");
+        stdout.write("Command '" + this.toString() + "' says OK and exits with the params it was given:\n");
         for (String pkey : params.keySet()) {
-            stdout.println("diagnostic 'ok' command setting key '" + pkey + " to " + params.get(pkey));
+            stdout.println(" setting key '" + pkey + " to " + params.get(pkey));
         }
         return params;
     }

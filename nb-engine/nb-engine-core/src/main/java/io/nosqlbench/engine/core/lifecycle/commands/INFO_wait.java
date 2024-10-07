@@ -26,4 +26,22 @@ public class INFO_wait extends NBCommandInfo {
     public Class<? extends NBInvokableCommand> getType() {
         return CMD_wait.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            block the session thread for the specified amount of time
+
+            EXAMPLE:
+            # These all do the same thing
+            wait nanos=100000000
+            wait ns=100000000
+            wait micros=100000
+            wait us=100000
+            wait µs=100000
+            wait millis=100
+            wait ms=100
+            """;
+    }
+
 }

@@ -26,4 +26,16 @@ public class INFO_example extends NBCommandInfo {
     public Class<? extends NBInvokableCommand> getType() {
         return CMD_example.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            (diagnostic) a minimal implementation of a NoSQLBench command
+            This is a no-op command that does nothing and returns nothing
+
+            EXAMPLE:
+            example param1=does_not_matter
+            """;
+    }
+
 }

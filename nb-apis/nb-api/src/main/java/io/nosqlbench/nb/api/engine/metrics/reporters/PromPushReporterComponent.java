@@ -76,7 +76,7 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
             .orElseThrow(() -> new RuntimeException("Unable to create path for apikey file: $NBSTATEDIR/prompush/prompush_apikey"));
         if (Files.isRegularFile(keyfilePath)) {
             try {
-                logger.info("Reading Bearer Token from {}", keyfilePath);
+                logger.debug(() -> "Reading Bearer Token from " + keyfilePath);
                 this.bearerToken = Files.readString(keyfilePath).trim();
             } catch (IOException e) {
                 throw new RuntimeException(e);
