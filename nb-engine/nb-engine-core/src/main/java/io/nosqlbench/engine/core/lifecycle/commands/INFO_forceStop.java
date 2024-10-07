@@ -26,4 +26,15 @@ public class INFO_forceStop extends NBCommandInfo {
     public Class<? extends NBInvokableCommand> getType() {
         return CMD_forceStop.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            forces an activity to stop, interrupting it if necessary
+
+            EXAMPLE:
+            force_stop alias=going_down_now
+            """;
+    }
+
 }

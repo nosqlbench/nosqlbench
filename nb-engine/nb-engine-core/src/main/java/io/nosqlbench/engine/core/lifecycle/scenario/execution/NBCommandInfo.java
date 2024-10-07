@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.execution;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,9 +32,12 @@ import java.lang.reflect.InvocationTargetException;
  * @Service(value = NBCommandInfo.class, selector = "<cmdname>")
  * }</pre>
  */
-public abstract class NBCommandInfo {
+public abstract class NBCommandInfo implements NBHelpTopic {
+
     private final static Logger logger = LogManager.getLogger(NBCommandInfo.class);
+
     public abstract Class<? extends NBInvokableCommand> getType();
+
     public NBInvokableCommand create(NBComponent parent, String cmdName, String ctxName) {
         Constructor<? extends NBInvokableCommand> cmdCtor;
         try {
@@ -43,4 +47,15 @@ public abstract class NBCommandInfo {
             throw new RuntimeException("Unable to instantiate command via ctor(parent,name,ctx): " + e + (e.getCause()!=null ? "cause: " + e.getCause().toString() : ""),e);
         }
     }
+
+    public String getName() {
+        Service service = this.getClass().getAnnotation(Service.class);
+        if (service==null) {
+            throw new RuntimeException("NBCommandInfo types must have Service annotations.");
+        }
+        return service.selector();
+    }
+
+    @Override
+    public abstract String getHelp();
 }

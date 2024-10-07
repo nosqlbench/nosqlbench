@@ -26,4 +26,16 @@ public class INFO_ok extends NBCommandInfo {
     public Class<? extends NBInvokableCommand> getType() {
         return CMD_ok.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            (diagnostic) print and return the given parameters
+
+            EXAMPLE:
+            ok showme_this_varname=has_this_value
+            """;
+    }
+
+
 }

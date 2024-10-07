@@ -26,4 +26,12 @@ public class NBFindmaxInfo extends NBCommandInfo {
     public Class<? extends NBBaseCommand> getType() {
         return CMD_findmax.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            (experimental) invoke the findmax optimizer on a running activity
+            """;
+    }
+
 }

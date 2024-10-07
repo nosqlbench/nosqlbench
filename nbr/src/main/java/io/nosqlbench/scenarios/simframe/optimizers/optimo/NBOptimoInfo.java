@@ -26,4 +26,12 @@ public class NBOptimoInfo extends NBCommandInfo {
     public Class<? extends NBBaseCommand> getType() {
         return CMD_optimo.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            (experimental) invoke the optimo multi-variate optimizer on a running activity
+            """;
+    }
+
 }

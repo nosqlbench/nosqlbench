@@ -20,21 +20,26 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandInfo;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.annotations.Service;
 
-@Service(value = NBCommandInfo.class,selector = "example")
-public class INFO_example extends NBCommandInfo {
+@Service(value = NBCommandInfo.class,selector = "getenv")
+public class INFO_getenv extends NBCommandInfo {
     @Override
     public Class<? extends NBInvokableCommand> getType() {
-        return CMD_example.class;
+        return CMD_getenv.class;
     }
 
     @Override
     public String getHelp() {
         return """
-            (diagnostic) a minimal implementation of a NoSQLBench command
-            This is a no-op command that does nothing and returns nothing
+            hoist environment variables into the container state under the given names
 
             EXAMPLE:
-            example param1=does_not_matter
+            getenv authfile=AUTHFILE usermode=FOOSELECTED
+
+            This imports the AUTHFILE and FOOSELECTED environment variables into the container state
+            under the names authfile and usermode. The variables are then available to
+            other commands using the container state variable syntax, like ${stepname.authfile}
+            or ${stepname.usermode}
+
             """;
     }
 

@@ -49,6 +49,7 @@ public class CMD_wait extends NBBaseCommand {
             .map(l -> l * 1_000_000L)
             .orElse(0L);
         ns += params.maybeGet("us")
+            .or(() -> params.maybeGet("µs"))
             .or(() -> params.maybeGet("micros"))
             .map(Long::parseLong)
             .map(l -> l * 1_000L)

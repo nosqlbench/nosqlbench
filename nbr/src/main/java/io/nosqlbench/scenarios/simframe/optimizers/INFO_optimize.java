@@ -26,4 +26,18 @@ public class INFO_optimize extends NBCommandInfo {
     public Class<? extends NBBaseCommand> getType() {
         return CMD_optimize.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            (experimental) invoke the multi-variate optimizer on a running activity under the given name
+
+            EXAMPLE:
+            # start alias=activity1 ...
+            optimize activity=activity1 planner=ratchet
+
+            This is experimental
+            """;
+    }
+
 }

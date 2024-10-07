@@ -27,4 +27,13 @@ public class INFO_reset extends NBCommandInfo {
     public Class<? extends NBInvokableCommand> getType() {
         return CMD_reset.class;
     }
+
+    @Override
+    public String getHelp() {
+        return """
+            (experimental) restart the initial step activity in a container after optimization
+            results have been determined by the previous steps
+            """;
+    }
+
 }
