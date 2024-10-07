@@ -7,7 +7,7 @@
     </extension>
     <option name="JAR_PATH" value="$PROJECT_DIR$/nb5/target/nb5.jar" />
     <option name="VM_PARAMETERS" value="--enable-preview" />
-    <option name="PROGRAM_PARAMETERS" value="drop_database_ddl default.drop_db_ddl project_id=stratperf instance_id=perftest-spanner database_id=baselines1 service_account_file=./stratperf-068083077315.json --progress console:1s -v --add-labels=&quot;target:spanner,instance:vectors,vendor:gcp&quot; --report-prompush-to https://vector-perf.feat.apps.paas.datastax.com:8427/api/v1/import/prometheus/metrics/job/nosqlbench/instance/vectors --annotators &quot;[{'type':'log','level':'info'},{'type':'grafana','baseurl':'https://vector-perf.feat.apps.paas.datastax.com/'}]&quot; --report-interval 10 --show-stacktraces --logs-max 5" />
+    <option name="PROGRAM_PARAMETERS" value="drop_database_ddl default.drop_db_ddl project_id=stratperf instance_id=spanner-vector database_id=baselines1 service_account_file=./stratperf-068083077315.json --progress console:1s -v --add-labels=&quot;target:spanner,instance:vectors,vendor:gcp&quot; --report-prompush-to https://vector-perf.feat.apps.paas.datastax.com:8427/api/v1/import/prometheus/metrics/job/nosqlbench/instance/vectors --annotators &quot;[{'type':'log','level':'info'},{'type':'grafana','baseurl':'https://vector-perf.feat.apps.paas.datastax.com/'}]&quot; --report-interval 10 --show-stacktraces --logs-max 5" />
     <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/local/google_spanner" />
     <option name="ALTERNATIVE_JRE_PATH" value="jdk21" />
     <envs>
