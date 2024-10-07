@@ -12,7 +12,7 @@ blocks:
   insert_vector:
     ops:
       op1:
-        insert_vector: "vectors"
+        insert: "vectors"
         query_params:
           keycol: "{rw_key}"
           value: "{train_floatlist}"
