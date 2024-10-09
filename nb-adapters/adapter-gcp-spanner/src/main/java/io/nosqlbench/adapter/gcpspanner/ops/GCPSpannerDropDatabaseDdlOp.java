@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.gcpspanner.ops;
 
 import com.google.cloud.spanner.Database;
 import com.google.cloud.spanner.DatabaseAdminClient;
+import com.google.cloud.spanner.DatabaseNotFoundException;
 import com.google.cloud.spanner.Spanner;
 
 /**
@@ -56,11 +57,17 @@ public class GCPSpannerDropDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
     @Override
     public Object applyOp(long value) {
         try {
-            db.drop();
+            if (null != db && db.exists()) {
+                db.drop();
+            }
         } catch (Exception e) {
             logger.warn("Error dropping database using the Database object: {}. Will re-try using the DBAdminClient now...", e.getMessage());
             try {
-                dbAdminClient.dropDatabase(databaseId, null);
+                if (null != dbAdminClient) {
+                    dbAdminClient.dropDatabase(databaseId, null);
+                }
+            } catch (DatabaseNotFoundException noDB) {
+                logger.info("Database does not exist. {}", noDB.getMessage());
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
