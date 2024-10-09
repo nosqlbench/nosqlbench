@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,6 @@ public class OpDef extends OpTemplate {
         return tagsWithName;
     }
 
-    @Override
     public String toString() {
         return "stmt(name:" + getName() + ", stmt:" + getOp() + ", tags:(" + getTags() + "), params:(" + getParams() + "), bindings:(" + getBindings() + "))";
     }

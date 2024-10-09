@@ -17,7 +17,10 @@
 package io.nosqlbench.adapter.gcpspanner.opdispensers;
 
 
+import com.google.cloud.spanner.DatabaseAdminClient;
+import com.google.cloud.spanner.Options;
 import io.nosqlbench.adapter.gcpspanner.GCPSpannerDriverAdapter;
+import io.nosqlbench.adapter.gcpspanner.GCPSpannerSpace;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerBaseOp;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerDropDatabaseDdlOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -45,7 +48,7 @@ public class GCPSpannerDropDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispen
      */
     public GCPSpannerDropDatabaseDdlOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
-        this.opFunction = DropOpFunction(op);
+        this.opFunction = dropOpFunction(op);
     }
 
     /**
@@ -54,14 +57,27 @@ public class GCPSpannerDropDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispen
      * @param op the {@link ParsedOp} instance
      * @return a {@link LongFunction} that generates {@link GCPSpannerDropDatabaseDdlOp} instances
      */
-    private LongFunction<GCPSpannerDropDatabaseDdlOp> DropOpFunction(ParsedOp op) {
-        return (l) -> new GCPSpannerDropDatabaseDdlOp(
-            spaceFunction.apply(l).getSpanner(),
-            l,
-            targetFunction.apply(l),
-            spaceFunction.apply(l).getDbAdminClient(),
-            spaceFunction.apply(l).getDbAdminClient().getDatabase(spaceFunction.apply(l).getInstanceId(), spaceFunction.apply(l).getDatabaseIdString())
-        );
+    private LongFunction<GCPSpannerDropDatabaseDdlOp> dropOpFunction(ParsedOp op) {
+        return l -> {
+            GCPSpannerSpace space = spaceFunction.apply(l);
+            if (space.getSpanner() != null && space.getDbAdminClient() != null && space.getDbClient() != null) {
+                String dbId = targetFunction.apply(l);
+                DatabaseAdminClient dbAdminClient = space.getDbAdminClient();
+
+                if (dbAdminClient.listDatabases(spaceFunction.apply(l).getInstanceId(), Options.filter(null))
+                    .streamValues().anyMatch(d -> d.getId().getDatabase().equals(dbId))) {
+                    return new GCPSpannerDropDatabaseDdlOp(
+                        space.getSpanner(),
+                        l,
+                        dbId,
+                        space.getDbAdminClient(),
+                        space.getDbAdminClient().getDatabase(space.getInstanceId(), space.getDatabaseIdString())
+                    );
+                }
+            }
+            logger.info("Database to be deleted not found [{}]", space.getDatabaseId().getName());
+            return null;
+        };
     }
 
     /**
@@ -72,6 +88,6 @@ public class GCPSpannerDropDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispen
      */
     @Override
     public GCPSpannerBaseOp<?> getOp(long value) {
-        return opFunction.apply(value);
+        return opFunction != null ? opFunction.apply(value) : null;
     }
 }
