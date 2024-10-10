@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 nosqlbench
+ * Copyright (c) 2022-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import io.nosqlbench.nb.api.components.core.NBNamedElement;
 import com.mongodb.client.MongoDatabase;
+import io.nosqlbench.nb.api.components.core.NBNamedElement;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -84,11 +84,11 @@ public class MongoSpace implements NBNamedElement, AutoCloseable {
                 MongoClientSettings.getDefaultCodecRegistry()
         );
 
-        // https://www.mongodb.com/docs/v7.0/reference/stable-api
+        // https://www.mongodb.com/docs/manual/reference/stable-api
         ServerApi serverApi = ServerApi.builder()
             .version(ServerApiVersion.V1)
             .deprecationErrors(false)
-            .strict(false)//Needed because createSearchIndexes is not in stable API
+            .strict(false) // Needed because createSearchIndexes is not in stable API (yet)
             .build();
 
         MongoClientSettings settings = MongoClientSettings.builder()

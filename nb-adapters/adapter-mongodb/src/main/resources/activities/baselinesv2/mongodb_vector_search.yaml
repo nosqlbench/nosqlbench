@@ -92,17 +92,16 @@ blocks:
           indexes: [
             {
               name: "kv_value_vector_search_idx",
+              type: "vectorSearch",
               definition: {
-                mappings: {
-                  dynamic: true,
-                  fields: {
-                    value: {
-                      type: "knnVector",
-                      dimensions: TEMPLATE(dimensions,1536),
-                      similarity: "TEMPLATE(similarity_function,cosine)"
-                    }
+                fields: [
+                  {
+                    type: "vector",
+                    path: "value",
+                    numDimensions: TEMPLATE(dimensions,1536),
+                    similarity: "TEMPLATE(similarity_function,cosine)"
                   }
-                }
+                ]
               }
             }
           ]
@@ -134,6 +133,7 @@ blocks:
             "pipeline": [
               {
                 "$vectorSearch": {
+                  "exact": false,
                   "index": "kv_value_vector_search_idx",
                   "path": "value",
                   "queryVector": {test_floatlist},
@@ -157,15 +157,18 @@ blocks:
           - io.nosqlbench.adapter.mongodb.MongoDbUtils
         verifier-init: |
           k=TEMPLATE(top_k,100)
-          relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op);
+          relevancy=new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op)
           relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
           relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
           relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
           relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
           relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+          windowed_relevancy = new io.nosqlbench.nb.api.engine.metrics.wrappers.WindowedRelevancyMeasures(_parsed_op,10);
+          windowed_relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
         verifier: |
           actual_indices=MongoDbUtils.getFieldFromResults("key",result);
           relevancy.accept({relevant_indices},actual_indices);
+          windowed_relevancy.accept({relevant_indices}, actual_indices);
           return true;
   main_write:
     params:
