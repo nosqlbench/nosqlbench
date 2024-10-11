@@ -137,7 +137,7 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent
      * things needed by operations, or things needed during the
      * construction of operations.
      *
-     * See {@link DriverSpaceCache} for details on when and how to use this function.
+     * See {@link StringDriverSpaceCache} for details on when and how to use this function.
      *
      * <p>During Adapter Initialization, Op Mapping, Op Synthesis, or Op Execution,
      * you may need access to the objects in (the or a) space cache. You can build the
@@ -146,7 +146,7 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent
      *
      * @return A cache of named objects
      */
-    DriverSpaceCache<? extends SPACETYPE> getSpaceCache();
+    StringDriverSpaceCache<? extends SPACETYPE> getSpaceCache();
 
     /**
      * This method allows each driver adapter to create named state which is automatically

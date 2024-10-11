@@ -18,18 +18,18 @@ package io.nosqlbench.adapter.tcpclient;
 
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
 public class TcpClientOpMapper implements OpMapper<TcpClientOp> {
 
-    private final DriverSpaceCache<? extends TcpClientAdapterSpace> ctxcache;
+    private final StringDriverSpaceCache<? extends TcpClientAdapterSpace> ctxcache;
     private final TcpClientDriverAdapter adapter;
 
 
-    public TcpClientOpMapper(TcpClientDriverAdapter adapter, DriverSpaceCache<? extends TcpClientAdapterSpace> ctxcache) {
+    public TcpClientOpMapper(TcpClientDriverAdapter adapter, StringDriverSpaceCache<? extends TcpClientAdapterSpace> ctxcache) {
         this.ctxcache = ctxcache;
         this.adapter = adapter;
     }

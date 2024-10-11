@@ -23,7 +23,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
@@ -34,10 +34,10 @@ public class KafkaOpMapper implements OpMapper<KafkaOp> {
     private final static Logger logger = LogManager.getLogger(KafkaOpMapper.class);
 
     private final NBConfiguration cfg;
-    private final DriverSpaceCache<? extends KafkaSpace> spaceCache;
+    private final StringDriverSpaceCache<? extends KafkaSpace> spaceCache;
     private final DriverAdapter adapter;
 
-    public KafkaOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends KafkaSpace> spaceCache) {
+    public KafkaOpMapper(DriverAdapter adapter, NBConfiguration cfg, StringDriverSpaceCache<? extends KafkaSpace> spaceCache) {
         this.cfg = cfg;
         this.spaceCache = spaceCache;
         this.adapter = adapter;

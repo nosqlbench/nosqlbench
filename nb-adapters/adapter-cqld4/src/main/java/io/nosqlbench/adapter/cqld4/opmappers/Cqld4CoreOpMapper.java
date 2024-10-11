@@ -22,7 +22,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
@@ -35,11 +35,11 @@ public class Cqld4CoreOpMapper implements OpMapper<Op> {
 
     private final static Logger logger = LogManager.getLogger(Cqld4CoreOpMapper.class);
 
-    private final DriverSpaceCache<? extends Cqld4Space> cache;
+    private final StringDriverSpaceCache<? extends Cqld4Space> cache;
     private final NBConfiguration cfg;
     private final DriverAdapter adapter;
 
-    public Cqld4CoreOpMapper(DriverAdapter adapter, NBConfiguration config, DriverSpaceCache<? extends Cqld4Space> cache) {
+    public Cqld4CoreOpMapper(DriverAdapter adapter, NBConfiguration config, StringDriverSpaceCache<? extends Cqld4Space> cache) {
         this.cfg = config;
         this.cache = cache;
         this.adapter = adapter;

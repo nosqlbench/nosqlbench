@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent implements DriverAdapter<R, S>, NBConfigurable, NBReconfigurable {
     private final static Logger logger = LogManager.getLogger("ADAPTER");
 
-    private DriverSpaceCache<? extends S> spaceCache;
+    private StringDriverSpaceCache<? extends S> spaceCache;
     private NBConfiguration cfg;
     private LongFunction<S> spaceF;
 
@@ -129,9 +129,9 @@ public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent
     }
 
     @Override
-    public final synchronized DriverSpaceCache<? extends S> getSpaceCache() {
+    public final synchronized StringDriverSpaceCache<? extends S> getSpaceCache() {
         if (spaceCache == null) {
-            spaceCache = new DriverSpaceCache<>(this, getSpaceInitializer(getConfiguration()));
+            spaceCache = new StringDriverSpaceCache<>(this, getSpaceInitializer(getConfiguration()));
         }
         return spaceCache;
     }
@@ -193,7 +193,7 @@ public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent
     @Override
     public LongFunction<S> getSpaceFunc(ParsedOp pop) {
         LongFunction<String> spaceNameF = pop.getAsFunctionOr("space", "default");
-        DriverSpaceCache<? extends S> cache = getSpaceCache();
+        StringDriverSpaceCache<? extends S> cache = getSpaceCache();
         return l -> getSpaceCache().get(spaceNameF.apply(l));
     }
 }

@@ -20,7 +20,7 @@ import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
@@ -42,7 +42,7 @@ public class PulsarDriverAdapter extends BaseDriverAdapter<PulsarOp, PulsarSpace
 
     @Override
     public OpMapper<PulsarOp> getOpMapper() {
-        DriverSpaceCache<? extends PulsarSpace> spaceCache = getSpaceCache();
+        StringDriverSpaceCache<? extends PulsarSpace> spaceCache = getSpaceCache();
         NBConfiguration adapterConfig = getConfiguration();
         return new PulsarOpMapper(this, adapterConfig, spaceCache);
     }

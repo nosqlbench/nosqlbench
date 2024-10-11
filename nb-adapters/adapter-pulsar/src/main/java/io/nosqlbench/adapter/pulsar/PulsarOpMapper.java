@@ -22,7 +22,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
@@ -33,10 +33,10 @@ public class PulsarOpMapper implements OpMapper<PulsarOp> {
     private final static Logger logger = LogManager.getLogger(PulsarOpMapper.class);
 
     private final NBConfiguration cfg;
-    private final DriverSpaceCache<? extends PulsarSpace> spaceCache;
+    private final StringDriverSpaceCache<? extends PulsarSpace> spaceCache;
     private final DriverAdapter adapter;
 
-    public PulsarOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends PulsarSpace> spaceCache) {
+    public PulsarOpMapper(DriverAdapter adapter, NBConfiguration cfg, StringDriverSpaceCache<? extends PulsarSpace> spaceCache) {
         this.cfg = cfg;
         this.spaceCache = spaceCache;
         this.adapter = adapter;

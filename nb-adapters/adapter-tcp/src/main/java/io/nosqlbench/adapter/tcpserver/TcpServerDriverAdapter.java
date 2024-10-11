@@ -24,7 +24,7 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
@@ -48,7 +48,7 @@ public class TcpServerDriverAdapter extends BaseDriverAdapter<TcpServerOp, TcpSe
 
     @Override
     public OpMapper<TcpServerOp> getOpMapper() {
-        DriverSpaceCache<? extends TcpServerAdapterSpace> ctxCache = getSpaceCache();
+        StringDriverSpaceCache<? extends TcpServerAdapterSpace> ctxCache = getSpaceCache();
         return new TcpServerOpMapper(this,ctxCache);
     }
 

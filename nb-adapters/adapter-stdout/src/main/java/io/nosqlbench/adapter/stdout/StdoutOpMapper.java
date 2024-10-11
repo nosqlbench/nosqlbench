@@ -19,17 +19,17 @@ package io.nosqlbench.adapter.stdout;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
 public class StdoutOpMapper implements OpMapper<StdoutOp> {
 
-    private final DriverSpaceCache<? extends StdoutSpace> ctxcache;
+    private final StringDriverSpaceCache<? extends StdoutSpace> ctxcache;
     private final DriverAdapter adapter;
 
-    public StdoutOpMapper(DriverAdapter adapter, DriverSpaceCache<? extends StdoutSpace> ctxcache) {
+    public StdoutOpMapper(DriverAdapter adapter, StringDriverSpaceCache<? extends StdoutSpace> ctxcache) {
         this.ctxcache = ctxcache;
         this.adapter = adapter;
     }

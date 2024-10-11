@@ -23,7 +23,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
@@ -34,10 +34,10 @@ public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp> {
     private final static Logger logger = LogManager.getLogger(AmqpOpMapper.class);
 
     private final NBConfiguration cfg;
-    private final DriverSpaceCache<? extends AmqpSpace> spaceCache;
+    private final StringDriverSpaceCache<? extends AmqpSpace> spaceCache;
     private final DriverAdapter adapter;
 
-    public AmqpOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends AmqpSpace> spaceCache) {
+    public AmqpOpMapper(DriverAdapter adapter, NBConfiguration cfg, StringDriverSpaceCache<? extends AmqpSpace> spaceCache) {
         this.cfg = cfg;
         this.spaceCache = spaceCache;
         this.adapter = adapter;

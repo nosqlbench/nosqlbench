@@ -46,13 +46,13 @@ import java.util.function.Function;
  * @param <S>
  *     The type which will represent the cache for a given type of adapter.
  */
-public class DriverSpaceCache<S> extends NBBaseComponent {
+public class StringDriverSpaceCache<S> extends NBBaseComponent {
 
     private final ConcurrentHashMap<String, S> cache = new ConcurrentHashMap<>();
 
     private final Function<String, S> newSpaceFunction;
 
-    public DriverSpaceCache(NBComponent parent, Function<String, S> newSpaceFunction) {
+    public StringDriverSpaceCache(NBComponent parent, Function<String, S> newSpaceFunction) {
         super(parent);
         this.newSpaceFunction = newSpaceFunction;
         this.create().gauge(

@@ -22,7 +22,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
@@ -46,7 +46,7 @@ public class Cqld4DriverAdapter extends BaseDriverAdapter<Op, Cqld4Space> {
 
     @Override
     public OpMapper<Op> getOpMapper() {
-        DriverSpaceCache<? extends Cqld4Space> spaceCache = getSpaceCache();
+        StringDriverSpaceCache<? extends Cqld4Space> spaceCache = getSpaceCache();
         NBConfiguration config = getConfiguration();
         return new Cqld4CoreOpMapper(this, config, spaceCache);
     }

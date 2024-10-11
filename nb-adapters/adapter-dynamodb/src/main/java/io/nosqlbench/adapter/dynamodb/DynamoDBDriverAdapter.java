@@ -20,7 +20,7 @@ import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Maturity;
@@ -39,7 +39,7 @@ public class DynamoDBDriverAdapter extends BaseDriverAdapter<DynamoDBOp, DynamoD
 
     @Override
     public OpMapper<DynamoDBOp> getOpMapper() {
-        DriverSpaceCache<? extends DynamoDBSpace> spaceCache = getSpaceCache();
+        StringDriverSpaceCache<? extends DynamoDBSpace> spaceCache = getSpaceCache();
         NBConfiguration adapterConfig = getConfiguration();
         return new DynamoDBOpMapper(this, adapterConfig, spaceCache);
     }

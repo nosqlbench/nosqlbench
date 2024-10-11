@@ -22,7 +22,7 @@ import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -30,10 +30,10 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
 
     private final NBConfiguration cfg;
-    private final DriverSpaceCache<? extends DynamoDBSpace> cache;
+    private final StringDriverSpaceCache<? extends DynamoDBSpace> cache;
     private final DriverAdapter adapter;
 
-    public DynamoDBOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends DynamoDBSpace> cache) {
+    public DynamoDBOpMapper(DriverAdapter adapter, NBConfiguration cfg, StringDriverSpaceCache<? extends DynamoDBSpace> cache) {
         this.cfg = cfg;
         this.cache = cache;
         this.adapter = adapter;

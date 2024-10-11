@@ -21,7 +21,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
@@ -36,10 +36,10 @@ public class MongoOpMapper implements OpMapper<Op> {
 
     private final MongodbDriverAdapter adapter;
     private final NBConfiguration configuration;
-    private final DriverSpaceCache<? extends MongoSpace> spaceCache;
+    private final StringDriverSpaceCache<? extends MongoSpace> spaceCache;
 
     public MongoOpMapper(MongodbDriverAdapter adapter, NBConfiguration cfg,
-                         DriverSpaceCache<? extends MongoSpace> spaceCache) {
+                         StringDriverSpaceCache<? extends MongoSpace> spaceCache) {
         this.configuration = cfg;
         this.spaceCache = spaceCache;
         this.adapter = adapter;
