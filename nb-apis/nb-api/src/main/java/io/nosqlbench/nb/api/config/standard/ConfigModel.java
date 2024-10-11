@@ -159,8 +159,9 @@ public class ConfigModel implements NBConfigModel {
     @Override
     public NBConfiguration matchConfig(Map<String, ?> sharedConfig) {
         LinkedHashMap<String, Object> extracted = new LinkedHashMap<>();
+        Map<String, Param<?>> namedParams = getNamedParams();
         for (String providedCfgField : sharedConfig.keySet()) {
-            if (getNamedParams().containsKey(providedCfgField)) {
+            if (namedParams.containsKey(providedCfgField)) {
                 extracted.put(providedCfgField, sharedConfig.get(providedCfgField));
             }
         }

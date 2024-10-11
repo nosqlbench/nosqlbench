@@ -31,6 +31,10 @@ import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryManagerMXBean;
+import java.lang.management.MemoryPoolMXBean;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +49,7 @@ import java.util.function.Function;
 public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd>, ExecutionResult>, NBTokenWords {
     private final static Logger logger = LogManager.getLogger(NBSession.class);
 //    private final ClientSystemMetricChecker clientMetricChecker;
+    private MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
 
     private final Map<String, NBBufferedContainer> containers = new ConcurrentHashMap<>();
 
@@ -68,6 +73,46 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
         );
 
         new NBSessionSafetyMetrics(this);
+
+        // on-heap
+        create().gauge(
+            "on_heap_memory_used",
+            () -> (double) mbean.getHeapMemoryUsage().getUsed(),
+            MetricCategory.Internals,
+            "heap memory used for nb"
+        );
+        create().gauge(
+            "on_heap_memory_max",
+            () -> (double) mbean.getHeapMemoryUsage().getMax(),
+            MetricCategory.Internals,
+            "heap memory max for nb"
+        );
+        create().gauge(
+            "on_heap_memory_committed",
+            () -> (double) mbean.getHeapMemoryUsage().getCommitted(),
+            MetricCategory.Internals,
+            "heap memory committed for nb"
+        );
+
+        // off-heap
+        create().gauge(
+            "off_heap_memory_used",
+            () -> (double) mbean.getNonHeapMemoryUsage().getUsed(),
+            MetricCategory.Internals,
+            "off-heap memory used for nb"
+        );
+        create().gauge(
+            "off_heap_memory_max",
+            () -> (double) mbean.getNonHeapMemoryUsage().getMax(),
+            MetricCategory.Internals,
+            "off-heap memory max for nb"
+        );
+        create().gauge(
+            "off_heap_memory_committed",
+            () -> (double) mbean.getNonHeapMemoryUsage().getCommitted(),
+            MetricCategory.Internals,
+            "off-heap memory committed for nb"
+        );
 
         create().gauge(
             "session_time",

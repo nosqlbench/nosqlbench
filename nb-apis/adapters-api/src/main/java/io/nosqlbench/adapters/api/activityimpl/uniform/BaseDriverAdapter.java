@@ -131,7 +131,7 @@ public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent
     @Override
     public final synchronized DriverSpaceCache<? extends S> getSpaceCache() {
         if (spaceCache == null) {
-            spaceCache = new DriverSpaceCache<>(getSpaceInitializer(getConfiguration()));
+            spaceCache = new DriverSpaceCache<>(this, getSpaceInitializer(getConfiguration()));
         }
         return spaceCache;
     }
