@@ -47,7 +47,7 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
             DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, ParsedOp op, ParsedTemplateString stmtTpl, RSProcessors processors) {
         super(adapter, sessionFunc, op);
         if (op.isDynamic("space")) {
-            throw new RuntimeException("Prepared statements and dynamic space values are not yet supported" +
+            throw new RuntimeException("Prepared statements and dynamic space values are not yet  supported" +
                 " but are being implemented");
         }
         this.processors = processors;
