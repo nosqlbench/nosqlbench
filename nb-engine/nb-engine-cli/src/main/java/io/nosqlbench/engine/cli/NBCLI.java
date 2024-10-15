@@ -79,9 +79,9 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
     private static final String version;
 
     static {
-        version = new VersionInfo().getVersion();
         loggerConfig = new NBLoggerConfig();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
+        version = new VersionInfo().getVersion();
     }
 
     private final String commandName;
