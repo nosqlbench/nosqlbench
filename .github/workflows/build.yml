@@ -5,9 +5,9 @@ name: build
 
 on:
   push:
-    # tags:
-      # - "![0-9]+.[0-9]+.[0-9]+-preview"
-      # - "![0-9]+.[0-9]+.[0-9]+-release"
+    tags:
+      - "![0-9]+.[0-9]+.[0-9]+-preview"
+      - "![0-9]+.[0-9]+.[0-9]+-release"
   pull_request:
 
 jobs:
