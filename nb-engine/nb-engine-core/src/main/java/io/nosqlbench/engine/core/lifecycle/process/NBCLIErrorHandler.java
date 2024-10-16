@@ -43,7 +43,7 @@ public class NBCLIErrorHandler {
 
     private final static Logger logger = LogManager.getLogger("ERRORHANDLER");
 
-    public static String handle(Throwable t, boolean wantsStackTraces) {
+    public static String handle(Throwable t, boolean wantsStackTraces, String version) {
 
         if (wantsStackTraces) {
             StackTraceElement[] st = Thread.currentThread().getStackTrace();
@@ -59,23 +59,23 @@ public class NBCLIErrorHandler {
         }
         if (t instanceof ScriptException) {
             logger.trace("Handling script exception: " + t);
-            return handleScriptException((ScriptException) t, wantsStackTraces);
+            return handleScriptException((ScriptException) t, wantsStackTraces, version);
         } else if (t instanceof BasicError) {
             logger.trace("Handling basic error: " + t);
-            return handleBasicError((BasicError) t, wantsStackTraces);
+            return handleBasicError((BasicError) t, wantsStackTraces, version);
         } else if (t instanceof Exception) {
             logger.trace("Handling general exception: " + t);
-            return handleInternalError((Exception) t, wantsStackTraces);
+            return handleInternalError((Exception) t, wantsStackTraces, version);
         } else {
-            logger.error("Unknown type for error handler: " + t);
+            logger.error("Unknown type for error handler(" + version + "):" + t);
             throw new RuntimeException("Error in exception handler", t);
         }
     }
 
-    private static String handleInternalError(Exception e, boolean wantsStackTraces) {
-        String prefix = "internal error: ";
+    private static String handleInternalError(Exception e, boolean wantsStackTraces, String version) {
+        String prefix = "internal error(" + version + "):";
         if (e.getCause() != null && !e.getCause().getClass().getCanonicalName().contains("io.nosqlbench")) {
-            prefix = "Error from driver or included library: ";
+            prefix = "Error from driver or included library(" + version + "):";
         }
 
         if (wantsStackTraces) {
@@ -90,18 +90,18 @@ public class NBCLIErrorHandler {
         return e.getMessage();
     }
 
-    private static String handleScriptException(ScriptException e, boolean wantsStackTraces) {
+    private static String handleScriptException(ScriptException e, boolean wantsStackTraces, String version) {
         Throwable cause = e.getCause();
         if (cause instanceof PolyglotException) {
             Throwable hostException = ((PolyglotException) cause).asHostException();
             if (hostException instanceof BasicError) {
-                handleBasicError((BasicError) hostException, wantsStackTraces);
+                handleBasicError((BasicError) hostException, wantsStackTraces, version);
             } else {
-                handle(hostException, wantsStackTraces);
+                handle(hostException, wantsStackTraces, version);
             }
         } else {
             if (wantsStackTraces) {
-                logger.error("Unknown script exception:", e);
+                logger.error("Unknown script exception(" + version + "):", e);
             } else {
                 logger.error(e.getMessage());
                 logger.error("for the full stack trace, run with --show-stacktraces");
@@ -110,7 +110,7 @@ public class NBCLIErrorHandler {
         return e.getMessage();
     }
 
-    private static String handleBasicError(BasicError e, boolean wantsStackTraces) {
+    private static String handleBasicError(BasicError e, boolean wantsStackTraces, String version) {
         if (wantsStackTraces) {
             logger.error(e.getMessage(), e);
         } else {

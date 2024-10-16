@@ -76,10 +76,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
     private static final int EXIT_OK = 0;
     private static final int EXIT_WARNING = 1;
     private static final int EXIT_ERROR = 2;
+    private static final String version;
 
     static {
         loggerConfig = new NBLoggerConfig();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
+        version = new VersionInfo().getVersion();
     }
 
     private final String commandName;
@@ -134,7 +136,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                     break;
                 }
 
-            final String error = NBCLIErrorHandler.handle(e, showStackTraces);
+            final String error = NBCLIErrorHandler.handle(e, showStackTraces, NBCLI.version);
             // Commented for now, as the above handler should do everything needed.
             if (null != error) System.err.println("Scenario stopped due to error. See logs for details.");
             System.err.flush();
@@ -188,7 +190,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             return NBCLI.EXIT_OK;
         }
 
-        NBCLI.logger.info(() -> "Running NoSQLBench Version " + new VersionInfo().getVersion());
+        NBCLI.logger.info(() -> "Running NoSQLBench Version " + NBCLI.version);
         NBCLI.logger.info(() -> "command-line: " + String.join(" ", args));
         NBCLI.logger.info(() -> "client-hardware: " + SystemId.getHostSummary());
 
@@ -251,7 +253,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         if (options.isWantsVersionShort()) {
-            System.out.println(new VersionInfo().getVersion());
+            System.out.println(NBCLI.version);
             return NBCLI.EXIT_OK;
         }
 
