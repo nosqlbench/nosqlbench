@@ -43,6 +43,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.LongFunction;
+import java.util.function.LongToIntFunction;
 
 /**
  * <H1>ParsedOp API</H1>
@@ -661,6 +662,9 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
     @Override
     public <V> LongFunction<V> getAsFunctionOr(String name, V defaultValue) {
         return tmap.getAsFunctionOr(name, defaultValue);
+    }
+    public LongToIntFunction getAsFunctionOrInt(String name, int defaultValue) {
+        return tmap.getAsFunctionOrInt(name, defaultValue);
     }
 
     /**
