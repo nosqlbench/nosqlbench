@@ -23,6 +23,7 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
@@ -58,6 +59,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 /**
  * A default implementation of an Activity, suitable for building upon.
@@ -395,7 +397,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromParsedOps(
 //        Map<String, DriverAdapter<?,?>> adapterCache,
 //        Map<String, OpMapper<? extends Op>> mapperCache,
-        List<DriverAdapter<?, ?>> adapters,
+        List<DriverAdapter<Op, Space>> adapters,
         List<ParsedOp> pops
     ) {
         try {
@@ -424,10 +426,10 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                         continue;
                     }
 
-                    DriverAdapter<?, ?> adapter = adapters.get(i);
-                    OpMapper<? extends Op> opMapper = adapter.getOpMapper();
-                    OpDispenser<? extends Op> dispenser = opMapper.apply(pop);
-
+                    DriverAdapter<Op, Space> adapter = adapters.get(i);
+                    OpMapper<Op, Space> opMapper = adapter.getOpMapper();
+                    LongFunction<Space> spaceFunc = adapter.getSpaceFunc(pop);
+                    OpDispenser<Op> dispenser = opMapper.apply(pop, spaceFunc);
                     String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
                     if ("op".equalsIgnoreCase(dryrunSpec)) {
                         dispenser = new DryRunOpDispenserWrapper((DriverAdapter<Op, Object>) adapter, pop, dispenser);

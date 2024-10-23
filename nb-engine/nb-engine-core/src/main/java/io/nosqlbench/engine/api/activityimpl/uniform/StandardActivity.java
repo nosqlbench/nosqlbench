@@ -23,6 +23,7 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -62,7 +63,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StandardActivity<R extends Op, S> extends SimpleActivity implements SyntheticOpTemplateProvider, ActivityDefObserver {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final OpSequence<OpDispenser<? extends Op>> sequence;
-    private final ConcurrentHashMap<String, DriverAdapter<?, ?>> adapters = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, DriverAdapter<Op,Space>> adapters = new ConcurrentHashMap<>();
 
     public StandardActivity(NBComponent parent, ActivityDef activityDef) {
         super(parent, activityDef);
@@ -92,11 +93,11 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
 
         List<ParsedOp> pops = new ArrayList<>();
-        List<DriverAdapter<?, ?>> adapterlist = new ArrayList<>();
+        List<DriverAdapter<Op, Space>> adapterlist = new ArrayList<>();
         NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(yamlmodel);
 
         Optional<String> defaultDriverOption = defaultDriverName;
-        ConcurrentHashMap<String, OpMapper<? extends Op>> mappers = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, OpMapper<? extends Op, ? extends Space>> mappers = new ConcurrentHashMap<>();
         for (OpTemplate ot : opTemplates) {
 //            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
             String driverName = ot.getOptionalStringParam("driver", String.class)
@@ -112,7 +113,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             // HERE
             if (!adapters.containsKey(driverName)) {
 
-                DriverAdapter<?, ?> adapter = Optional.of(driverName)
+                DriverAdapter<Op,Space> adapter = Optional.of(driverName)
                     .flatMap(
                         name -> ServiceSelector.of(
                                 name,
@@ -144,7 +145,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
             supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
 
-            DriverAdapter<?, ?> adapter = adapters.get(driverName);
+            DriverAdapter<Op, Space> adapter = adapters.get(driverName);
             adapterlist.add(adapter);
             ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
             Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
@@ -261,19 +262,20 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
      */
     @Override
     public void shutdownActivity() {
-        for (Map.Entry<String, DriverAdapter<?, ?>> entry : adapters.entrySet()) {
+        for (Map.Entry<String, DriverAdapter<Op,Space>> entry : adapters.entrySet()) {
             String adapterName = entry.getKey();
             DriverAdapter<?, ?> adapter = entry.getValue();
-            adapter.getSpaceCache().getElements().forEach((spaceName, space) -> {
-                if (space instanceof AutoCloseable autocloseable) {
+            for (Space space : adapter.getSpaceCache()) {
+                if (space instanceof AutoCloseable autoCloseable) {
                     try {
-                        autocloseable.close();
+                        // TODO This should be invariant now, remove conditional?
+                        autoCloseable.close();
                     } catch (Exception e) {
                         throw new RuntimeException("Error while shutting down state space for " +
-                            "adapter=" + adapterName + ", space=" + spaceName + ": " + e, e);
+                            "adapter=" + adapterName + ", space=" + space.getName() + ": " + e, e);
                     }
                 }
-            });
+            }
         }
     }
 

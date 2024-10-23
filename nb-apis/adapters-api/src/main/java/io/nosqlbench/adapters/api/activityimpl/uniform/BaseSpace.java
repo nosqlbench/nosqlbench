@@ -1,4 +1,4 @@
-package io.nosqlbench.adapter.diag;
+package io.nosqlbench.adapters.api.activityimpl.uniform;
 
 /*
  * Copyright (c) 2022 nosqlbench
@@ -18,12 +18,19 @@ package io.nosqlbench.adapter.diag;
  */
 
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.core.NBComponent;
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 
-public interface DriverAdapterLoader {
-    public <A extends Op,B extends Space> DriverAdapter<A,B> load(NBComponent parent, NBLabels childLabels);
+public class BaseSpace implements Space {
+
+    private final String spaceName;
+
+    public BaseSpace(long idx) {
+        this.spaceName = String.valueOf(idx);
+    }
+
+    @Override
+    public String getName() {
+        return spaceName;
+    }
 }

@@ -19,6 +19,7 @@ package io.nosqlbench.adapters.api.activityimpl;
 import com.codahale.metrics.Timer;
 import groovy.lang.Binding;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.evalctx.*;
 import io.nosqlbench.adapters.api.metrics.ThreadLocalNamedTimers;
@@ -42,10 +43,10 @@ import java.util.concurrent.TimeUnit;
  * Some details are tracked per op template, which aligns to the life-cycle of the op dispenser.
  * Thus, each op dispenser is where the stats for all related operations are kept.
  *
- * @param <T>
+ * @param <OP>
  *     The type of operation
  */
-public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent implements OpDispenser<T>{
+public abstract class BaseOpDispenser<OP extends Op,SPACE extends Space> extends NBBaseComponent implements OpDispenser<OP>{
     protected final static Logger logger = LogManager.getLogger(BaseOpDispenser.class);
     public static final String VERIFIER = "verifier";
     public static final String VERIFIER_INIT = "verifier-init";
@@ -55,7 +56,7 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
     public static final String STOP_TIMERS = "stop-timers";
 
     private final String opName;
-    protected final DriverAdapter<? extends T, ? extends S> adapter;
+    protected final DriverAdapter<? extends OP, ? extends SPACE> adapter;
     private final NBLabels labels;
     public final Timer verifierTimer;
     private boolean instrument;
@@ -77,7 +78,7 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
     private final CycleFunction<Boolean> _verifier;
     private final ThreadLocal<CycleFunction<Boolean>> tlVerifier;
 
-    protected BaseOpDispenser(final DriverAdapter<? extends T, ? extends S> adapter, final ParsedOp op) {
+    protected BaseOpDispenser(final DriverAdapter<? extends OP, ? extends SPACE> adapter, final ParsedOp op) {
         super(adapter);
         opName = op.getName();
         this.adapter = adapter;
@@ -177,7 +178,7 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
         return this.opName;
     }
 
-    public DriverAdapter<? extends T, ? extends S> getAdapter() {
+    public DriverAdapter<? extends OP, ? extends SPACE> getAdapter() {
         return this.adapter;
     }
 
@@ -227,8 +228,8 @@ public abstract class BaseOpDispenser<T extends Op, S> extends NBBaseComponent i
     }
 
     @Override
-    public final T apply(long value) {
-        T op = getOp(value);
+    public final OP apply(long value) {
+        OP op = getOp(value);
         return op;
     }
 }

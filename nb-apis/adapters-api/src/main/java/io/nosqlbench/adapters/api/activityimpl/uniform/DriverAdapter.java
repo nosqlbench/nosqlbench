@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 /**
@@ -55,7 +56,7 @@ import java.util.function.LongFunction;
  *            during construction of R type operations, or even for individual
  *            operations.
  */
-public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent {
+public interface DriverAdapter<OPTYPE extends Op, SPACETYPE extends Space> extends NBComponent {
 
     /**
      * <p>
@@ -101,7 +102,7 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent
      *
      * @return a synthesizer function for {@link OPTYPE} op generation
      */
-    OpMapper<OPTYPE> getOpMapper();
+    OpMapper<OPTYPE, SPACETYPE> getOpMapper();
 
     /**
      * The preprocessor function allows the driver adapter to remap
@@ -159,7 +160,7 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent
      * @return A function which can initialize a new Space, which is a place to hold
      * object state related to retained objects for the lifetime of a native driver.
      */
-    default Function<String, ? extends SPACETYPE> getSpaceInitializer(NBConfiguration cfg) {
+    default LongFunction<SPACETYPE> getSpaceInitializer(NBConfiguration cfg) {
         return n -> null;
     }
 

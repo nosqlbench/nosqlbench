@@ -17,17 +17,21 @@
 package io.nosqlbench.adapters.api.activityimpl;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 
 /**
  * <p>
  * <h2>Synopsis</h2>
  * An OpMapper is responsible for converting parsed op templates
  * into dispensers of operations based on the intention of the user.
- *
+ * <p>
  * Op Templates as expressed as a set of field values, some literal, and
  * some dynamic, to be generated based on a specific cycle value.
  * </p>
@@ -79,16 +83,19 @@ import java.util.function.Function;
  *            to hold all the details for executing an operation,
  *            generally something that implements {@link Runnable}.
  */
-public interface OpMapper<OPTYPE extends Op> extends Function<ParsedOp, OpDispenser<? extends OPTYPE>> {
+public interface OpMapper<OPTYPE extends Op, SPACETYPE extends Space>
+    extends BiFunction<ParsedOp, LongFunction<SPACETYPE>, OpDispenser<OPTYPE>> {
 
     /**
      * Interrogate the parsed command, and provide a new
      *
-     * @param op The {@link ParsedOp} which is the parsed version of the user-provided op template.
-     *            This contains all the fields provided by the user, as well as explicit knowledge of
-     *            which ones are static and dynamic.
+     * @param op
+     *     The {@link ParsedOp} which is the parsed version of the user-provided op template.
+     *     This contains all the fields provided by the user, as well as explicit knowledge of
+     *     which ones are static and dynamic.
+     * @param spaceInitF
      * @return An OpDispenser which can be used to synthesize real operations.
      */
-    @Override
-    OpDispenser<? extends OPTYPE> apply(ParsedOp op);
+    OpDispenser<OPTYPE> apply(ParsedOp op, LongFunction<SPACETYPE> spaceInitF);
+
 }
