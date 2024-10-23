@@ -146,7 +146,7 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent
      *
      * @return A cache of named objects
      */
-    StringDriverSpaceCache<? extends SPACETYPE> getSpaceCache();
+    ConcurrentSpaceCache<SPACETYPE> getSpaceCache();
 
     /**
      * This method allows each driver adapter to create named state which is automatically
