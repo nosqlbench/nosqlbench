@@ -21,20 +21,25 @@ import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-public class EmitterOpDispenserWrapper extends BaseOpDispenser<Op, Space> {
+public class DryCycleOpDispenserWrapper<S extends Space, RESULT> extends BaseOpDispenser<CycleOp<RESULT>, S> {
 
-    private final OpDispenser<? extends CycleOp<?>> realDispenser;
+    private final OpDispenser<CycleOp<RESULT>> realDispenser;
 
-    public EmitterOpDispenserWrapper(DriverAdapter<Op,Space> adapter, ParsedOp pop, OpDispenser<? extends CycleOp<?>> realDispenser) {
+    public DryCycleOpDispenserWrapper(
+        DriverAdapter<CycleOp<RESULT>, S> adapter,
+        ParsedOp pop,
+        OpDispenser<CycleOp<RESULT>> realDispenser
+    ) {
         super(adapter, pop);
         this.realDispenser = realDispenser;
     }
+
     @Override
-    public EmitterOp getOp(long cycle) {
-        CycleOp<?> cycleOp = realDispenser.getOp(cycle);
-        return new EmitterOp(cycleOp);
+    public CycleOp<RESULT> getOp(long cycle) {
+        CycleOp<RESULT> op = realDispenser.getOp(cycle);
+        return new DryCycleOp<>(op);
     }
 }

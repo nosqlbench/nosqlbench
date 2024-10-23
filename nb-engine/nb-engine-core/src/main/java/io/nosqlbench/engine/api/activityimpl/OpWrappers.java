@@ -1,0 +1,73 @@
+package io.nosqlbench.engine.api.activityimpl;
+
+import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.DryCycleOpDispenserWrapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.DryRunnableOpDispenserWrapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterCycleOpDispenserWrapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterRunnableOpDispenserWrapper;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.errors.OpConfigError;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+public class OpWrappers {
+
+    public final static Logger logger = LogManager.getLogger(OpWrappers.class);
+
+    public static <OP extends Op, SPACE extends Space> OpDispenser<OP> wrapOptionally(
+        DriverAdapter<OP, SPACE> adapter,
+        OpDispenser<OP> dispenser,
+        ParsedOp pop,
+        String dryrunSpec
+    ) {
+        if (dryrunSpec.isEmpty() || "none".equals(dryrunSpec)) {
+            return dispenser;
+        }
+
+
+        if ("op".equalsIgnoreCase(dryrunSpec)) {
+            Op exampleOp = dispenser.getOp(0L);
+
+            if (exampleOp instanceof RunnableOp runnableOp) {
+                dispenser = new DryRunnableOpDispenserWrapper(adapter, pop, dispenser);
+            } else if (exampleOp instanceof CycleOp<?> cycleOp) {
+                dispenser = new DryCycleOpDispenserWrapper(adapter, pop, dispenser);
+            } else {
+                throw new OpConfigError("Unable to wrap op named '" + pop.getDefinedNames() + "' for dry run, since" +
+                    "only RunnableOp and CycleOp<Result> types are supported");
+            }
+            logger.warn(
+                "initialized {} for dry run only. " +
+                    "This op will be synthesized for each cycle, but will not be executed.",
+                pop.getName()
+            );
+
+        } else if ("emit".equalsIgnoreCase(dryrunSpec)) {
+            Op exampleOp = dispenser.getOp(0L);
+            if (exampleOp instanceof RunnableOp runnableOp) {
+                dispenser = new EmitterRunnableOpDispenserWrapper(adapter, pop, dispenser);
+            } else if (exampleOp instanceof CycleOp<?> cycleOp) {
+                dispenser = new EmitterCycleOpDispenserWrapper(adapter, pop, dispenser);
+            } else {
+                throw new OpConfigError("Unable to make op named '" + pop.getName() + "' emit a value, " +
+                    "since only RunnableOp and CycleOp<Result> types are supported");
+            }
+            dispenser = new EmitterRunnableOpDispenserWrapper(
+                (DriverAdapter<Op, Space>) adapter,
+                pop,
+                (OpDispenser<? extends Op>) dispenser
+            );
+            logger.warn(
+                "initialized {} for to emit the result type to stdout. ",
+                pop.getName()
+            );
+
+        }
+        return dispenser;
+    }
+}

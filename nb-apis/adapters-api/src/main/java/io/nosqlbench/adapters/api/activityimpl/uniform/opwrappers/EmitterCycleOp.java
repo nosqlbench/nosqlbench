@@ -16,17 +16,19 @@
 
 package io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers;
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
-public class DryRunOp implements RunnableOp {
+public class EmitterCycleOp<T> implements CycleOp<T> {
 
-    private final Op op;
-
-    public DryRunOp(Op op) {
-        this.op = op;
+    private final CycleOp<T> cycleOp;
+    public EmitterCycleOp(CycleOp<T> cycleOp) {
+        this.cycleOp = cycleOp;
     }
+
     @Override
-    public void run() {
+    public T apply(long value) {
+            T result = cycleOp.apply(value);
+            System.out.println("result from cycle " + value + ":\n"+result);
+            return result;
     }
 }

@@ -27,8 +27,10 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.DryRunOpDispenserWrapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterOpDispenserWrapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.DryRunnableOpDispenserWrapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterCycleOpDispenserWrapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterRunnableOpDispenserWrapper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
@@ -415,7 +417,6 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                 .orElse(SequencerType.bucket);
             SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
-            int dryrunCount = 0;
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
@@ -431,16 +432,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                     LongFunction<Space> spaceFunc = adapter.getSpaceFunc(pop);
                     OpDispenser<Op> dispenser = opMapper.apply(pop, spaceFunc);
                     String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
-                    if ("op".equalsIgnoreCase(dryrunSpec)) {
-                        dispenser = new DryRunOpDispenserWrapper((DriverAdapter<Op, Object>) adapter, pop, dispenser);
-                        dryrunCount++;
-                    } else if ("emit".equalsIgnoreCase(dryrunSpec)) {
-                        dispenser = new EmitterOpDispenserWrapper(
-                            (DriverAdapter<Op, Object>) adapter,
-                            pop,
-                            (OpDispenser<? extends CycleOp<?>>) dispenser
-                        );
-                    }
+                    dispenser = OpWrappers.wrapOptionally(adapter, dispenser, pop, dryrunSpec);
 
 //                if (strict) {
 //                    optemplate.assertConsumed();
@@ -450,9 +442,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                     throw new OpConfigError("Error while mapping op from template named '" + pop.getName() + "': " + e.getMessage(), e);
                 }
             }
-            if (0 < dryrunCount) {
-                logger.warn("initialized {} op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.", dryrunCount);
-            }
+
 
             return planner.resolve();
 

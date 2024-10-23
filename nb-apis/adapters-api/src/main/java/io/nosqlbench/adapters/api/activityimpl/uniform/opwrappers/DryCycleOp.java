@@ -17,18 +17,18 @@
 package io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
 
-public class EmitterOp<T> implements CycleOp<T> {
+public class DryCycleOp<T> implements CycleOp<T> {
 
-    private final CycleOp<T> cycleOp;
-    public EmitterOp(CycleOp<T> cycleOp) {
-        this.cycleOp = cycleOp;
+    private final CycleOp<T> op;
+
+    public DryCycleOp(CycleOp<T> op) {
+        this.op = op;
     }
 
     @Override
     public T apply(long value) {
-            T result = cycleOp.apply(value);
-            System.out.println("result from cycle " + value + ":\n"+result);
-            return result;
+        return null;
     }
 }
