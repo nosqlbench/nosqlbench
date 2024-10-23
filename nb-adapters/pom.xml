@@ -195,16 +195,6 @@
         </profile>
 
         <profile>
-            <id>adapter-weaviate-module</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <modules>
-                <module>adapter-weaviate</module>
-            </modules>
-        </profile>
-
-        <profile>
             <id>adapter-azure-aisearch-module</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -221,6 +211,16 @@
             </activation>
             <modules>
                 <module>adapter-gcp-spanner</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>adapter-weaviate-module</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-weaviate</module>
             </modules>
         </profile>
 
