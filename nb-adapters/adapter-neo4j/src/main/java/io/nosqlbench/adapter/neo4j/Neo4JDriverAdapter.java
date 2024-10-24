@@ -25,8 +25,8 @@ import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.labels.NBLabels;
-
-import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 
 
 @Service(value = DriverAdapter.class, selector = "neo4j")
@@ -37,12 +37,12 @@ public class Neo4JDriverAdapter extends BaseDriverAdapter<Neo4JBaseOp, Neo4JSpac
     }
 
     @Override
-    public OpMapper getOpMapper() {
+    public OpMapper<Neo4JBaseOp,Neo4JSpace> getOpMapper() {
         return new Neo4JOpMapper(this, getSpaceCache());
     }
 
     @Override
-    public Function<String, ? extends Neo4JSpace> getSpaceInitializer(NBConfiguration cfg) {
+    public LongFunction<Neo4JSpace> getSpaceInitializer(NBConfiguration cfg) {
         return (s) -> new Neo4JSpace(s, cfg);
     }
 

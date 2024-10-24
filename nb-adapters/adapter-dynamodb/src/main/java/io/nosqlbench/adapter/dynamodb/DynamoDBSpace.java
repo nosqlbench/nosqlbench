@@ -21,6 +21,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -29,12 +30,11 @@ import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.util.Optional;
 
-public class DynamoDBSpace {
-    private final String name;
+public class DynamoDBSpace extends BaseSpace {
     DynamoDB dynamoDB;
 
-    public DynamoDBSpace(String name, NBConfiguration cfg) {
-        this.name = name;
+    public DynamoDBSpace(long idx, NBConfiguration cfg) {
+        super(idx);
         AmazonDynamoDB client = createClient(cfg);
         dynamoDB= new DynamoDB(client);
     }

@@ -20,6 +20,7 @@ import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
 import io.nosqlbench.adapter.s4j.exception.S4JAdapterInvalidParamException;
 import io.nosqlbench.adapter.s4j.exception.S4JAdapterUnexpectedException;
 import io.nosqlbench.adapter.s4j.util.*;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -41,11 +42,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-public class S4JSpace implements  AutoCloseable {
+public class S4JSpace extends BaseSpace {
 
     private final static Logger logger = LogManager.getLogger(S4JSpace.class);
 
-    private final String spaceName;
     private final NBConfiguration cfg;
 
     // - Each S4J space currently represents a number of JMS connections (\"num_conn\" NB CLI parameter);
@@ -113,8 +113,8 @@ public class S4JSpace implements  AutoCloseable {
     private final MutablePair<Boolean, String> largePayloadSimPair = MutablePair.of(false, null);
 
 
-    public S4JSpace(String spaceName, NBConfiguration cfg) {
-        this.spaceName = spaceName;
+    public S4JSpace(long idx, NBConfiguration cfg) {
+        super(idx);
         this.cfg = cfg;
 
         this.pulsarSvcUrl = cfg.get("service_url");
@@ -399,14 +399,14 @@ public class S4JSpace implements  AutoCloseable {
     public String getConnLvlJmsContextIdentifier(int jmsConnSeqNum) {
         return String.join(
             "::",
-            this.spaceName,
+            getName(),
             StringUtils.join("conn-", jmsConnSeqNum));
     }
 
     public String getSessionLvlJmsContextIdentifier(int jmsConnSeqNum, int jmsSessionSeqNum) {
         return String.join(
             "::",
-            this.spaceName,
+            getName(),
             StringUtils.join("conn-", jmsConnSeqNum),
             StringUtils.join("session-", jmsSessionSeqNum));
     }

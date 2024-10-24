@@ -20,7 +20,7 @@ import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
@@ -30,6 +30,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 
 @Service(value = DriverAdapter.class, selector = "pulsar")
 public class PulsarDriverAdapter extends BaseDriverAdapter<PulsarOp, PulsarSpace> {
@@ -41,14 +43,14 @@ public class PulsarDriverAdapter extends BaseDriverAdapter<PulsarOp, PulsarSpace
     }
 
     @Override
-    public OpMapper<PulsarOp> getOpMapper() {
-        StringDriverSpaceCache<? extends PulsarSpace> spaceCache = getSpaceCache();
+    public OpMapper<PulsarOp,PulsarSpace> getOpMapper() {
+        ConcurrentSpaceCache<PulsarSpace> spaceCache = getSpaceCache();
         NBConfiguration adapterConfig = getConfiguration();
         return new PulsarOpMapper(this, adapterConfig, spaceCache);
     }
 
     @Override
-    public Function<String, ? extends PulsarSpace> getSpaceInitializer(NBConfiguration cfg) {
+    public LongFunction<PulsarSpace> getSpaceInitializer(NBConfiguration cfg) {
         return (s) -> new PulsarSpace(s, cfg);
     }
 

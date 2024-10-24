@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.qdrant;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -40,9 +41,8 @@ import java.time.Duration;
  * @see <a href="https://github.com/qdrant/java-client">Qdrant Java client</a>
  * @see <a href="https://github.com/qdrant/qdrant/blob/master/docs/grpc/docs.md">Qdrant GRPC docs</a>
  */
-public class QdrantSpace implements AutoCloseable {
+public class QdrantSpace extends BaseSpace {
     private final static Logger logger = LogManager.getLogger(QdrantSpace.class);
-    private final String name;
     private final NBConfiguration cfg;
 
     protected QdrantClient client;
@@ -51,11 +51,10 @@ public class QdrantSpace implements AutoCloseable {
      * Create a new QdrantSpace Object which stores all stateful contextual information needed to interact
      * with the Qdrant database instance.
      *
-     * @param name The name of this space
      * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
      */
-    public QdrantSpace(String name, NBConfiguration cfg) {
-        this.name = name;
+    public QdrantSpace(long idx, NBConfiguration cfg) {
+        super(idx);
         this.cfg = cfg;
     }
 
@@ -95,7 +94,7 @@ public class QdrantSpace implements AutoCloseable {
         );
 
         logger.info("{}: Creating new Qdrant Client with (masked) token [{}], uri/endpoint [{}]",
-            this.name, QdrantAdapterUtils.maskDigits(requiredToken), cfg.get("uri").toString());
+            getName(), QdrantAdapterUtils.maskDigits(requiredToken), cfg.get("uri").toString());
         return new QdrantClient(builder.build());
     }
 

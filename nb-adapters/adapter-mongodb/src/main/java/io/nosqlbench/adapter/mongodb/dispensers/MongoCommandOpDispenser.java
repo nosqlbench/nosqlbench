@@ -20,24 +20,29 @@ import io.nosqlbench.adapter.mongodb.core.MongoSpace;
 import io.nosqlbench.adapter.mongodb.ops.MongoDirectCommandOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.util.Map;
+import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
-public class MongoCommandOpDispenser extends BaseOpDispenser<Op, MongoSpace> {
+public class MongoCommandOpDispenser extends BaseOpDispenser<MongoDirectCommandOp, MongoSpace> {
 
     private final LongFunction<MongoDirectCommandOp> mongoOpF;
 
-    public MongoCommandOpDispenser(DriverAdapter<Op, MongoSpace> adapter, LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
+    public MongoCommandOpDispenser(
+        DriverAdapter adapter, LongFunction<MongoSpace> ctxFunc,
+        ParsedOp op
+    ) {
         super(adapter, op);
         this.mongoOpF = createOpFunc(ctxFunc, op);
     }
 
-    private LongFunction<MongoDirectCommandOp> createOpFunc(LongFunction<MongoSpace> ctxFunc, ParsedOp op) {
+    private LongFunction<MongoDirectCommandOp> createOpFunc(LongFunction<? extends MongoSpace> ctxFunc, ParsedOp op) {
 
         LongFunction<?> payload = op.getAsRequiredFunction("stmt", Object.class);
         Object exampleValue = payload.apply(0);
@@ -53,14 +58,14 @@ public class MongoCommandOpDispenser extends BaseOpDispenser<Op, MongoSpace> {
 
         final LongFunction<String> databaseNamerF = op.getAsRequiredFunction("database", String.class);
         return l -> new MongoDirectCommandOp(
-                ctxFunc.apply(l).getClient(),
-                databaseNamerF.apply(l),
-                bsonFunc.apply(l)
+            ctxFunc.apply(l).getClient(),
+            databaseNamerF.apply(l),
+            bsonFunc.apply(l)
         );
     }
 
     @Override
-    public Op getOp(long cycle) {
+    public MongoDirectCommandOp getOp(long cycle) {
         return mongoOpF.apply(cycle);
     }
 }

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.tcpclient;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -30,13 +31,14 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.Socket;
 
-public class TcpClientAdapterSpace {
+public class TcpClientAdapterSpace extends BaseSpace {
 
     private final static Logger logger = LogManager.getLogger(TcpClientAdapterSpace.class);
     private final NBConfiguration config;
     Writer writer;
 
-    public TcpClientAdapterSpace(NBConfiguration config) {
+    public TcpClientAdapterSpace(long idx, NBConfiguration config) {
+        super(idx);
         this.config = config;
         this.writer = createPrintWriter();
     }

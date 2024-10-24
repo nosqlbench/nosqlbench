@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.weaviate;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,6 +32,9 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
+
 public class WeaviateOpMapper implements OpMapper<WeaviateBaseOp<?>> {
 	private static final Logger logger = LogManager.getLogger(WeaviateOpMapper.class);
 	private final WeaviateDriverAdapter adapter;
@@ -45,15 +49,17 @@ public class WeaviateOpMapper implements OpMapper<WeaviateBaseOp<?>> {
 	}
 
 	/**
-	 * Given an instance of a {@link ParsedOp} returns the appropriate
-	 * {@link WeaviateBaseOpDispenser} subclass
-	 *
-	 * @param op The {@link ParsedOp} to be evaluated
-	 * @return The correct {@link WeaviateBaseOpDispenser} subclass based on the op
-	 *         type
-	 */
+     * Given an instance of a {@link ParsedOp} returns the appropriate
+     * {@link WeaviateBaseOpDispenser} subclass
+     *
+     * @param op
+     *         The {@link ParsedOp} to be evaluated
+     * @param spaceInitF
+     * @return The correct {@link WeaviateBaseOpDispenser} subclass based on the op
+     *         type
+     */
 	@Override
-	public OpDispenser<? extends WeaviateBaseOp<?>> apply(ParsedOp op) {
+	public OpDispenser<WeaviateBaseOp<?>> apply(ParsedOp op, LongFunction<? extends Space> spaceInitF) {
 		TypeAndTarget<WeaviateOpType, String> typeAndTarget = op.getTypeAndTarget(WeaviateOpType.class, String.class,
 				"type", "target");
 		logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");

@@ -23,6 +23,7 @@ import io.nosqlbench.adapter.amqp.exception.AmqpAdapterInvalidParamException;
 import io.nosqlbench.adapter.amqp.exception.AmqpAdapterUnexpectedException;
 import io.nosqlbench.adapter.amqp.util.AmqpAdapterUtil;
 import io.nosqlbench.adapter.amqp.util.AmqpClientConf;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -44,11 +45,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class AmqpSpace implements  AutoCloseable {
+public class AmqpSpace extends BaseSpace {
 
     private final static Logger logger = LogManager.getLogger(AmqpSpace.class);
 
-    private final String spaceName;
     private final NBConfiguration cfg;
 
     private final AmqpClientConf amqpClientConf;
@@ -117,8 +117,8 @@ public class AmqpSpace implements  AutoCloseable {
     private long totalCycleNum;
     private long totalThreadNum;
 
-    public AmqpSpace(String spaceName, NBConfiguration cfg) {
-        this.spaceName = spaceName;
+    public AmqpSpace(long idx, NBConfiguration cfg) {
+        super(idx);
         this.cfg = cfg;
 
         String amqpClientConfFileName = cfg.get("config");

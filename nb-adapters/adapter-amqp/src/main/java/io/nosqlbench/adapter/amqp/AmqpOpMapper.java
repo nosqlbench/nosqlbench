@@ -19,6 +19,8 @@ package io.nosqlbench.adapter.amqp;
 import io.nosqlbench.adapter.amqp.dispensers.AmqpMsgRecvOpDispenser;
 import io.nosqlbench.adapter.amqp.dispensers.AmqpMsgSendOpDispenser;
 import io.nosqlbench.adapter.amqp.ops.AmqpTimeTrackOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
@@ -29,23 +31,26 @@ import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp> {
+import java.util.function.LongFunction;
+
+public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp,AmqpSpace> {
 
     private final static Logger logger = LogManager.getLogger(AmqpOpMapper.class);
 
     private final NBConfiguration cfg;
-    private final StringDriverSpaceCache<? extends AmqpSpace> spaceCache;
+    private final ConcurrentSpaceCache<AmqpSpace> spaceCache;
     private final DriverAdapter adapter;
 
-    public AmqpOpMapper(DriverAdapter adapter, NBConfiguration cfg, StringDriverSpaceCache<? extends AmqpSpace> spaceCache) {
+    public AmqpOpMapper(DriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<AmqpSpace> spaceCache) {
         this.cfg = cfg;
         this.spaceCache = spaceCache;
         this.adapter = adapter;
     }
 
     @Override
-    public OpDispenser<? extends AmqpTimeTrackOp> apply(ParsedOp op) {
-        String spaceName = op.getStaticConfigOr("space", "default");
+        public OpDispenser<AmqpTimeTrackOp> apply(ParsedOp op, LongFunction spaceInitF) {
+    //public OpDispenser<AmqpTimeTrackOp> apply(ParsedOp op, LongFunction<AmqpTimeTrackOp> spaceInitF) {
+        int spaceName = op.getStaticConfigOr("space", 0);
         AmqpSpace amqpSpace = spaceCache.get(spaceName);
 
         /*
@@ -67,5 +72,6 @@ public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp> {
             };
         }
     }
+
 
 }

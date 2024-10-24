@@ -18,29 +18,31 @@ package io.nosqlbench.adapter.http.core;
 
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
 import java.util.function.LongFunction;
 
-public class HttpOpMapper implements OpMapper<HttpOp> {
+public class HttpOpMapper implements OpMapper<HttpOp,HttpSpace> {
 
     private final NBConfiguration cfg;
-    private final StringDriverSpaceCache<? extends HttpSpace> spaceCache;
+    private final ConcurrentSpaceCache<? extends HttpSpace> spaceCache;
     private final DriverAdapter adapter;
 
-    public HttpOpMapper(DriverAdapter adapter, NBConfiguration cfg, StringDriverSpaceCache<? extends HttpSpace> spaceCache) {
+    public HttpOpMapper(DriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<HttpSpace> spaceCache) {
         this.cfg = cfg;
         this.spaceCache = spaceCache;
         this.adapter = adapter;
     }
 
     @Override
-    public OpDispenser<? extends HttpOp> apply(ParsedOp op) {
+    public OpDispenser<HttpOp> apply(ParsedOp op, LongFunction<HttpSpace> spaceInitF) {
         LongFunction<String> spaceNameF = op.getAsFunctionOr("space", "default");
-        LongFunction<HttpSpace> spaceFunc = l -> spaceCache.get(spaceNameF.apply(l));
+        LongFunction<HttpSpace> spaceFunc = l -> spaceCache.get(l);
         return new HttpOpDispenser(adapter, spaceFunc, op);
     }
 }

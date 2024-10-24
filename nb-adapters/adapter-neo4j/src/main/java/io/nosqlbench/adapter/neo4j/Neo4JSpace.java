@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.neo4j;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.*;
 
 import io.nosqlbench.nb.api.errors.BasicError;
@@ -34,15 +35,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-public class Neo4JSpace implements AutoCloseable {
+public class Neo4JSpace extends BaseSpace {
 
     private final static Logger logger = LogManager.getLogger(Neo4JSpace.class);
-    private final String space;
     private Driver driver;
     private SessionConfig sessionConfig;
 
-    public Neo4JSpace(String space, NBConfiguration cfg) {
-        this.space = space;
+    public Neo4JSpace(long idx, NBConfiguration cfg) {
+        super(idx);
         this.driver = initializeDriver(cfg);
         driver.verifyConnectivity();
     }

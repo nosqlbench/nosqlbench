@@ -27,6 +27,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 // TODO: Add details to dataapi.md in main resources folder, a la cqld4.md
 
@@ -42,7 +43,7 @@ public class DataApiDriverAdapter extends BaseDriverAdapter<DataApiBaseOp, DataA
     }
 
     @Override
-    public Function<String, ? extends DataApiSpace> getSpaceInitializer(NBConfiguration cfg) {
+    public LongFunction<DataApiSpace> getSpaceInitializer(NBConfiguration cfg) {
         return (s) -> new DataApiSpace(s, cfg);
     }
 

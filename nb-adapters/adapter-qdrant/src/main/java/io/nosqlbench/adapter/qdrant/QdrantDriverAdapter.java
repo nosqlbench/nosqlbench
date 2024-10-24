@@ -27,24 +27,26 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 
 import static io.nosqlbench.adapter.qdrant.QdrantAdapterUtils.QDRANT;
 
 @Service(value = DriverAdapter.class, selector = QDRANT)
-public class QdrantDriverAdapter extends BaseDriverAdapter<QdrantBaseOp<?>, QdrantSpace> {
+public class QdrantDriverAdapter extends BaseDriverAdapter<QdrantBaseOp, QdrantSpace> {
 
     public QdrantDriverAdapter(NBComponent parentComponent, NBLabels labels) {
         super(parentComponent, labels);
     }
 
     @Override
-    public OpMapper<QdrantBaseOp<?>> getOpMapper() {
+    public OpMapper<QdrantBaseOp,QdrantSpace> getOpMapper() {
         return new QdrantOpMapper(this);
     }
 
     @Override
-    public Function<String, ? extends QdrantSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new QdrantSpace(s, cfg);
+    public LongFunction<QdrantSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (long s) -> new QdrantSpace(s, cfg);
     }
 
     @Override

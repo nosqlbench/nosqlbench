@@ -41,7 +41,7 @@ import java.util.function.LongFunction;
 
 import static io.qdrant.client.ConditionFactory.*;
 
-public abstract class QdrantBaseOpDispenser<T> extends BaseOpDispenser<QdrantBaseOp<T>, QdrantSpace> {
+public abstract class QdrantBaseOpDispenser<T> extends BaseOpDispenser<QdrantBaseOp, QdrantSpace> {
 
     protected final LongFunction<QdrantSpace> qdrantSpaceFunction;
     protected final LongFunction<QdrantClient> clientFunction;

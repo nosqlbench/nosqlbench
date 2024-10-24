@@ -30,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 @Service(value = DriverAdapter.class, selector = "amqp")
 public class AmqpDriverAdapter extends BaseDriverAdapter<AmqpTimeTrackOp, AmqpSpace> {
@@ -40,14 +41,12 @@ public class AmqpDriverAdapter extends BaseDriverAdapter<AmqpTimeTrackOp, AmqpSp
     }
 
     @Override
-    public OpMapper<AmqpTimeTrackOp> getOpMapper() {
-        StringDriverSpaceCache<? extends AmqpSpace> spaceCache = getSpaceCache();
-        NBConfiguration adapterConfig = getConfiguration();
-        return new AmqpOpMapper(this, adapterConfig, spaceCache);
+    public OpMapper<AmqpTimeTrackOp, AmqpSpace> getOpMapper() {
+        return new AmqpOpMapper(this, getConfiguration(), getSpaceCache());
     }
 
     @Override
-    public Function<String, ? extends AmqpSpace> getSpaceInitializer(NBConfiguration cfg) {
+    public LongFunction<AmqpSpace> getSpaceInitializer(NBConfiguration cfg) {
         return (s) -> new AmqpSpace(s, cfg);
     }
 

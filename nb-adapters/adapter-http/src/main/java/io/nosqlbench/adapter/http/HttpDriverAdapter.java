@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 @Service(value = DriverAdapter.class, selector = "http")
 public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
@@ -54,15 +55,14 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
     }
 
     @Override
-    public OpMapper<HttpOp> getOpMapper() {
-        StringDriverSpaceCache<? extends HttpSpace> spaceCache = getSpaceCache();
+    public OpMapper<HttpOp,HttpSpace> getOpMapper() {
         NBConfiguration config = getConfiguration();
-        return new HttpOpMapper(this, config, spaceCache);
+        return new HttpOpMapper(this, config, getSpaceCache());
     }
 
     @Override
-    public Function<String, ? extends HttpSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return spaceName -> new HttpSpace(this, spaceName, cfg);
+    public LongFunction<HttpSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return idx -> new HttpSpace(idx, this, cfg);
     }
 
     @Override

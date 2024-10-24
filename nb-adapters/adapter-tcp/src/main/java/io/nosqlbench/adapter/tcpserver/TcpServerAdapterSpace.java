@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.tcpserver;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -40,7 +41,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class TcpServerAdapterSpace implements AutoCloseable {
+public class TcpServerAdapterSpace extends BaseSpace {
 
 
     private final static Logger logger = LogManager.getLogger(TcpServerAdapterSpace.class);
@@ -51,7 +52,8 @@ public class TcpServerAdapterSpace implements AutoCloseable {
     private final List<Shutdown> managedShutdown = new ArrayList<>();
     private int capacity=10;
 
-    public TcpServerAdapterSpace(NBConfiguration config) {
+    public TcpServerAdapterSpace(long idx, NBConfiguration config) {
+        super(idx);
         this.config = config;
         this.writer = createPrintWriter();
     }

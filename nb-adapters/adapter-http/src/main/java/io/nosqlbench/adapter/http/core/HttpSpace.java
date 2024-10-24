@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.http.core;
 
 import io.nosqlbench.adapter.http.HttpDriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
@@ -39,11 +40,10 @@ import java.util.Locale;
  * HTTP client implementation is meant to be immutable. If shared-state issues
  * occur, thread-local support will be re-added.
  */
-public class HttpSpace implements NBLabeledElement {
+public class HttpSpace extends BaseSpace implements NBLabeledElement {
     private final static Logger logger = LogManager.getLogger(HttpSpace.class);
 
     private final HttpDriverAdapter parentAdapter;
-    private final String name;
     private final NBConfiguration cfg;
     public NBMetricHistogram statusCodeHistogram;
     private HttpConsoleFormats console;
@@ -55,9 +55,9 @@ public class HttpSpace implements NBLabeledElement {
     private boolean diagnosticsEnabled;
 
 
-    public HttpSpace(HttpDriverAdapter parentAdapter, String spaceName, NBConfiguration cfg) {
+    public HttpSpace(long idx, HttpDriverAdapter parentAdapter, NBConfiguration cfg) {
+        super(idx);
         this.parentAdapter = parentAdapter;
-        this.name = spaceName;
         this.cfg = cfg;
         applyConfig(cfg);
         this.statusCodeHistogram = parentAdapter.statusCodeHistogram;
@@ -101,11 +101,7 @@ public class HttpSpace implements NBLabeledElement {
 
     @Override
     public NBLabels getLabels() {
-        return NBLabels.forKV("space", getSpaceName());
-    }
-
-    public String getSpaceName() {
-        return name;
+        return NBLabels.forKV("space", getName());
     }
 
     public boolean isDiagnosticMode() {

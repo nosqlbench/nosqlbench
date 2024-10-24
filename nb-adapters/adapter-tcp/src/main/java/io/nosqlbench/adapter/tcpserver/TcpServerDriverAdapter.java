@@ -34,6 +34,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 
 @Service(value= DriverAdapter.class, selector="tcpserver")
 public class TcpServerDriverAdapter extends BaseDriverAdapter<TcpServerOp, TcpServerAdapterSpace> implements SyntheticOpTemplateProvider {
@@ -47,14 +49,13 @@ public class TcpServerDriverAdapter extends BaseDriverAdapter<TcpServerOp, TcpSe
     }
 
     @Override
-    public OpMapper<TcpServerOp> getOpMapper() {
-        StringDriverSpaceCache<? extends TcpServerAdapterSpace> ctxCache = getSpaceCache();
-        return new TcpServerOpMapper(this,ctxCache);
+    public OpMapper<TcpServerOp,TcpServerAdapterSpace> getOpMapper() {
+        return new TcpServerOpMapper(this,getSpaceCache());
     }
 
     @Override
-    public Function<String, ? extends TcpServerAdapterSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new TcpServerAdapterSpace(cfg);
+    public LongFunction<TcpServerAdapterSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (idx) -> new TcpServerAdapterSpace(idx,cfg);
     }
 
     @Override

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.mongodb.core;
 
+import io.nosqlbench.adapter.mongodb.ops.MongoDirectCommandOp;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
@@ -26,26 +27,27 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 
-import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 
 /**
  * Special thanks to Justin Chu who authored the original NoSQLBench MongoDB ActivityType.
  */
 @Service(value = DriverAdapter.class, selector = "mongodb")
-public class MongodbDriverAdapter extends BaseDriverAdapter<Op, MongoSpace> {
+public class MongodbDriverAdapter extends BaseDriverAdapter<MongoDirectCommandOp, MongoSpace> {
 
     public MongodbDriverAdapter(NBComponent parentComponent, NBLabels labels) {
         super(parentComponent, labels);
     }
 
     @Override
-    public OpMapper<Op> getOpMapper() {
+    public OpMapper<MongoDirectCommandOp,MongoSpace> getOpMapper() {
         return new MongoOpMapper(this, getConfiguration(), getSpaceCache());
     }
 
     @Override
-    public Function<String, ? extends MongoSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return spaceName -> new MongoSpace(spaceName, cfg);
+    public LongFunction<MongoSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return idx -> new MongoSpace(idx, cfg);
     }
 
     @Override
