@@ -19,37 +19,51 @@ package io.nosqlbench.adapter.cqld4.opmappers;
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
-import io.nosqlbench.adapter.cqld4.opdispensers.CqlD4BatchStmtDispenser;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlBatchStatement;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlSimpleStatement;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.errors.OpConfigError;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.LongFunction;
 
-public class CqlD4BatchStmtMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
+public class Cqld4CqlOpMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
 
-    private final TypeAndTarget<CqlD4OpType, String> target;
+    protected final static Logger logger = LogManager.getLogger(Cqld4CqlOpMapper.class);
 
-    public CqlD4BatchStmtMapper(Cqld4DriverAdapter adapter,
-                                TypeAndTarget<CqlD4OpType, String> target) {
+    public Cqld4CqlOpMapper(Cqld4DriverAdapter adapter) {
         super(adapter);
-        this.target = target;
     }
 
     @Override
     public OpDispenser<Cqld4BaseOp> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
-        ParsedOp subop = op.getAsSubOp("op_template", ParsedOp.SubOpNaming.ParentAndSubKey);
-        int repeat = op.getStaticValue("repeat");
-        OpDispenser<? extends Cqld4BaseOp> od = new Cqld4CqlOpMapper(adapter).apply(op, spaceInitF);
-        return new CqlD4BatchStmtDispenser(adapter, sessionFunc, op, repeat, subop, od);
+        CqlD4OpType opType = CqlD4OpType.prepared;
+        TypeAndTarget<CqlD4OpType, String> target = op.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
+        logger.info(() -> "Using " + target.enumId + " statement form for '" + op.getName() + "'");
+
+        return switch (target.enumId) {
+            case raw -> {
+                CqlD4RawStmtMapper cqlD4RawStmtMapper = new CqlD4RawStmtMapper(adapter, target.targetFunction);
+                OpDispenser<Cqld4BaseOp> apply = cqlD4RawStmtMapper.apply(op, spaceFunc);
+                yield apply;
+            }
+            case simple -> new CqlD4CqlSimpleStmtMapper(adapter, target.targetFunction).apply(op, spaceFunc);
+            case prepared -> new CqlD4PreparedStmtMapper(adapter, target).apply(op, spaceFunc);
+
+            case batch -> new CqlD4BatchStmtMapper(adapter, target).apply(op, spaceFunc);
+            default -> throw new OpConfigError("Unsupported op type for CQL category of statement forms:" + target.enumId);
+        };
     }
+
 
 }

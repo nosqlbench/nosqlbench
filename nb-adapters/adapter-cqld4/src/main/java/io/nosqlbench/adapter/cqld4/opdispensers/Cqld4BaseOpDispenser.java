@@ -24,8 +24,10 @@ import com.datastax.oss.driver.api.core.config.DriverExecutionProfile;
 import com.datastax.oss.driver.api.core.cql.*;
 import com.datastax.oss.driver.api.core.metadata.Node;
 import com.datastax.oss.driver.api.core.metadata.token.Token;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.instruments.CqlOpMetrics;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
@@ -40,19 +42,21 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public abstract class Cqld4BaseOpDispenser extends BaseOpDispenser<Cqld4CqlOp, Cqld4Space> implements CqlOpMetrics {
+public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp> extends BaseOpDispenser<Cqld4BaseOp, Cqld4Space> implements CqlOpMetrics {
 
     private final static Logger logger = LogManager.getLogger("CQLD4");
 
     private final int maxpages;
-    private final LongFunction<CqlSession> sessionFunc;
+    protected final LongFunction<CqlSession> sessionFunc;
     private final boolean isRetryReplace;
     private final int maxLwtRetries;
     private final Histogram rowsHistogram;
     private final Histogram pagesHistogram;
     private final Histogram payloadBytesHistogram;
 
-    public Cqld4BaseOpDispenser(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, ParsedOp op) {
+    public Cqld4BaseOpDispenser(Cqld4DriverAdapter adapter,
+                                LongFunction<CqlSession> sessionFunc,
+                                ParsedOp op) {
         super(adapter, op);
         this.sessionFunc = sessionFunc;
         this.maxpages = op.getStaticConfigOr("maxpages", 1);

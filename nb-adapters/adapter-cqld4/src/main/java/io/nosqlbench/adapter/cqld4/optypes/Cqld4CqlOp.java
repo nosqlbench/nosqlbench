@@ -49,7 +49,9 @@ import java.util.concurrent.*;
 // TODO: add rows histogram resultSetSizeHisto
 
 
-public abstract class Cqld4CqlOp implements CycleOp<List<Row>>, VariableCapture, OpGenerator, OpResultSize {
+public abstract class Cqld4CqlOp
+    implements Cqld4BaseOp, CycleOp<List<Row>>, VariableCapture, OpGenerator, OpResultSize {
+
     private final static Logger logger = LogManager.getLogger(Cqld4CqlOp.class);
 
     private final CqlSession session;

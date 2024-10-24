@@ -21,10 +21,16 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4FluentGraphOpDispenser;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4FluentGraphOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
@@ -45,22 +51,21 @@ import java.util.Map;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
-public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
+public class Cqld4FluentGraphOpMapper<CO extends Cqld4FluentGraphOp> extends Cqld4BaseOpMapper<Cqld4BaseOp> {
     private final static Logger logger = LogManager.getLogger(Cqld4FluentGraphOpMapper.class);
 
-    private final LongFunction<CqlSession> sessionFunc;
     private final TypeAndTarget<CqlD4OpType, String> target;
-    private final DriverAdapter adapter;
     private GraphTraversalSource gtsPlaceHolder;
 
-    public Cqld4FluentGraphOpMapper(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, TypeAndTarget<CqlD4OpType, String> target) {
-        this.sessionFunc = sessionFunc;
+
+    public Cqld4FluentGraphOpMapper(Cqld4DriverAdapter adapter,
+                                    TypeAndTarget<CqlD4OpType, String> target) {
+        super(adapter);
         this.target = target;
-        this.adapter = adapter;
     }
 
     @Override
-    public OpDispenser<? extends Op> apply(ParsedOp op) {
+    public OpDispenser<Cqld4BaseOp> apply(ParsedOp op, LongFunction<Cqld4Space> cqld4SpaceLongFunction) {
         GraphTraversalSource g = DseGraph.g;
 
         ParsedTemplateString fluent = op.getAsTemplate(target.field).orElseThrow();
@@ -88,7 +93,15 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
         LongFunction<? extends String> graphnameFunc = op.getAsRequiredFunction("graphname");
         Bindings virtdataBindings = new BindingsTemplate(fluent.getBindPoints()).resolveBindings();
 
-        return new Cqld4FluentGraphOpDispenser(adapter, op, graphnameFunc, sessionFunc, virtdataBindings, supplier);
+        return new Cqld4FluentGraphOpDispenser(
+            adapter,
+            sessionFunc,
+            op,
+            graphnameFunc,
+            sessionFunc,
+            virtdataBindings,
+            supplier
+        );
     }
 
     private String[] expandClassNames(List l) {
@@ -110,4 +123,5 @@ public class Cqld4FluentGraphOpMapper implements OpMapper<Op> {
         }
         return classNames.toArray(new String[0]);
     }
+
 }

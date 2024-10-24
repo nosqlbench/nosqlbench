@@ -16,40 +16,37 @@
 
 package io.nosqlbench.adapter.cqld4.opmappers;
 
+import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
-import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4RawStmtDispenser;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlSimpleStatement;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.OpMapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class CqlD4RawStmtMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
+public abstract class Cqld4BaseOpMapper<T extends Cqld4BaseOp> implements OpMapper<T,Cqld4Space> {
 
-    private final LongFunction<String> targetFunction;
+    protected final static Logger logger = LogManager.getLogger(Cqld4BaseOpMapper.class);
+    protected final Cqld4DriverAdapter adapter;
+    protected final LongFunction<Cqld4Space> spaceFunc;
+    protected final LongFunction<CqlSession> sessionFunc;
 
-    public CqlD4RawStmtMapper(Cqld4DriverAdapter adapter,
-                              LongFunction<String> targetFunction) {
-        super(adapter);
-        this.targetFunction = targetFunction;
+    public Cqld4BaseOpMapper(Cqld4DriverAdapter adapter) {
+        this.adapter = adapter;
+        spaceFunc = l -> adapter.getSpaceCache().get(l);
+        sessionFunc = l -> spaceFunc.apply(l).getSession();
     }
 
     @Override
-    public OpDispenser<Cqld4BaseOp> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
-        return new Cqld4RawStmtDispenser(adapter, sessionFunc, targetFunction, op);
-    }
-
-    //    @Override
-//    public OpDispenser<Cqld4CqlOp> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
-//        return new Cqld4RawStmtDispenser(adapter, sessionFunc, targetFunction, op);
-//    }
-
-//    @Override
-//    public OpDispenser<Cqld4CqlOp> apply(ParsedOp parsedOp, LongFunction<Cqld4Space> longFunction) {
-//        return new Cqld4RawStmtDispenser(adapter, sessionFunc, targetFunction, parsedOp);
-//    }
+    public abstract OpDispenser<T> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF);
 }

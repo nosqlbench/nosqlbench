@@ -17,6 +17,8 @@
 package io.nosqlbench.adapter.cqld4;
 
 import io.nosqlbench.adapter.cqld4.opmappers.Cqld4CoreOpMapper;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
@@ -35,9 +37,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 @Service(value = DriverAdapter.class, selector = "cqld4")
-public class Cqld4DriverAdapter extends BaseDriverAdapter<Op, Cqld4Space> {
+public class Cqld4DriverAdapter extends BaseDriverAdapter<Cqld4BaseOp, Cqld4Space> {
     private final static Logger logger = LogManager.getLogger(Cqld4DriverAdapter.class);
 
     public Cqld4DriverAdapter(NBComponent parentComponent, NBLabels labels) {
@@ -45,14 +48,13 @@ public class Cqld4DriverAdapter extends BaseDriverAdapter<Op, Cqld4Space> {
     }
 
     @Override
-    public OpMapper<Op> getOpMapper() {
-        StringDriverSpaceCache<? extends Cqld4Space> spaceCache = getSpaceCache();
+    public OpMapper<Cqld4BaseOp,Cqld4Space> getOpMapper() {
         NBConfiguration config = getConfiguration();
-        return new Cqld4CoreOpMapper(this, config, spaceCache);
+        return new Cqld4CoreOpMapper(this, config);
     }
 
     @Override
-    public Function<String, ? extends Cqld4Space> getSpaceInitializer(NBConfiguration cfg) {
+    public LongFunction<Cqld4Space> getSpaceInitializer(NBConfiguration cfg) {
         return s -> new Cqld4Space(s,cfg);
     }
 

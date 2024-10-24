@@ -20,6 +20,8 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.core.cql.SimpleStatementBuilder;
 import com.datastax.oss.driver.api.core.cql.Statement;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlSimpleStatement;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
@@ -27,12 +29,14 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class Cqld4RawStmtDispenser extends Cqld4BaseOpDispenser {
+public class Cqld4RawStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlOp> {
 
     private final LongFunction<Statement> stmtFunc;
     private final LongFunction<String> targetFunction;
 
-    public Cqld4RawStmtDispenser(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
+    public Cqld4RawStmtDispenser(Cqld4DriverAdapter adapter,
+                                 LongFunction<CqlSession> sessionFunc,
+                                 LongFunction<String> targetFunction, ParsedOp cmd) {
         super(adapter, sessionFunc, cmd);
         this.targetFunction=targetFunction;
         this.stmtFunc = createStmtFunc(cmd);
@@ -44,7 +48,7 @@ public class Cqld4RawStmtDispenser extends Cqld4BaseOpDispenser {
     }
 
     @Override
-    public Cqld4CqlOp getOp(long value) {
+    public Cqld4CqlSimpleStatement getOp(long value) {
         return new Cqld4CqlSimpleStatement(
             getSessionFunc().apply(value),
             (SimpleStatement) stmtFunc.apply(value),

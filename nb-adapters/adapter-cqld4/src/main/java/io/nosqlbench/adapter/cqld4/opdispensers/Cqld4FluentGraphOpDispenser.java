@@ -20,11 +20,12 @@ import com.datastax.dse.driver.api.core.graph.FluentGraphStatement;
 import com.datastax.dse.driver.api.core.graph.FluentGraphStatementBuilder;
 import com.datastax.oss.driver.api.core.CqlSession;
 import groovy.lang.Script;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4FluentGraphOp;
-import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -34,7 +35,7 @@ import java.util.Map;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
-public class Cqld4FluentGraphOpDispenser extends BaseOpDispenser<Op, Cqld4Space> {
+public class Cqld4FluentGraphOpDispenser extends Cqld4BaseOpDispenser<Cqld4BaseOp> {
 
     private final LongFunction<? extends String> graphnameFunc;
     private final LongFunction<CqlSession> sessionFunc;
@@ -42,22 +43,23 @@ public class Cqld4FluentGraphOpDispenser extends BaseOpDispenser<Op, Cqld4Space>
     private final ThreadLocal<Script> tlScript;
 
     public Cqld4FluentGraphOpDispenser(
-        DriverAdapter adapter,
-        ParsedOp optpl,
-        LongFunction<? extends String> graphnameFunc,
+        Cqld4DriverAdapter adapter,
         LongFunction<CqlSession> sessionFunc,
+        ParsedOp op,
+        LongFunction<? extends String> graphnameFunc,
+        LongFunction<CqlSession> sessionFunc1,
         Bindings virtdataBindings,
-        Supplier<Script> scriptSource
+        Supplier<Script> scriptSupplier
     ) {
-        super(adapter, optpl);
+        super(adapter, sessionFunc, op);
         this.graphnameFunc = graphnameFunc;
-        this.sessionFunc = sessionFunc;
+        this.sessionFunc = sessionFunc1;
         this.virtdataBindings = virtdataBindings;
-        this.tlScript = ThreadLocal.withInitial(scriptSource);
+        this.tlScript = ThreadLocal.withInitial(scriptSupplier);
     }
 
     @Override
-    public Op getOp(long value) {
+    public Cqld4BaseOp getOp(long value) {
         String graphname = graphnameFunc.apply(value);
         Script script = tlScript.get();
         Map<String, Object> allMap = virtdataBindings.getAllMap(value);

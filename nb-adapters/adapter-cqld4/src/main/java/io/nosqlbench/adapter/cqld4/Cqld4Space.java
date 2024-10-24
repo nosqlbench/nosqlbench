@@ -28,6 +28,7 @@ import io.nosqlbench.adapter.cqld4.optionhelpers.OptionHelpers;
 import io.nosqlbench.adapter.cqld4.wrapper.Cqld4LoadBalancerObserver;
 import io.nosqlbench.adapter.cqld4.wrapper.Cqld4SessionBuilder;
 import io.nosqlbench.adapter.cqld4.wrapper.NodeSummary;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.nbio.Content;
@@ -47,14 +48,13 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Cqld4Space implements AutoCloseable {
+public class Cqld4Space extends BaseSpace {
     private final static Logger logger = LogManager.getLogger(Cqld4Space.class);
-    private final String space;
 
     CqlSession session;
 
-    public Cqld4Space(String space, NBConfiguration cfg) {
-        this.space = space;
+    public Cqld4Space(long space, NBConfiguration cfg) {
+        super(space);
         session = createSession(cfg);
     }
 
@@ -340,7 +340,7 @@ public class Cqld4Space implements AutoCloseable {
         try {
             this.getSession().close();
         } catch (Exception e) {
-            logger.warn("auto-closeable cql session threw exception in cql space(" + this.space + "): " + e);
+            logger.warn("auto-closeable cql session threw exception in cql space(" + getName() + "): " + e);
             throw e;
         }
     }

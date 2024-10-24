@@ -20,6 +20,8 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.Statement;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 import io.nosqlbench.adapter.cqld4.diagnostics.CQLD4PreparedStmtDiagnostics;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
@@ -44,7 +46,12 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
     private CqlSession boundSession;
 
     public Cqld4PreparedStmtDispenser(
-            DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, ParsedOp op, ParsedTemplateString stmtTpl, RSProcessors processors) {
+        Cqld4DriverAdapter adapter,
+            LongFunction<CqlSession> sessionFunc,
+            ParsedOp op,
+            ParsedTemplateString stmtTpl,
+            RSProcessors processors
+    ) {
         super(adapter, sessionFunc, op);
         if (op.isDynamic("space")) {
             throw new RuntimeException("Prepared statements and dynamic space values are not yet  supported" +
