@@ -21,12 +21,16 @@ import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerBaseOp;
 import io.nosqlbench.adapter.gcpspanner.types.GCPSpannerOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?>> {
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
+
+public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp, GCPSpannerSpace> {
     private static final Logger logger = LogManager.getLogger(GCPSpannerOpMapper.class);
     private final GCPSpannerDriverAdapter adapter;
 
@@ -34,7 +38,8 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?>> {
      * Create a new {@code GCPSpannerOpMapper} implementing the {@link OpMapper}.
      * interface.
      *
-     * @param adapter The associated {@link GCPSpannerDriverAdapter}
+     * @param adapter
+     *     The associated {@link GCPSpannerDriverAdapter}
      */
     public GCPSpannerOpMapper(GCPSpannerDriverAdapter adapter) {
         this.adapter = adapter;
@@ -44,12 +49,14 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?>> {
      * Given an instance of a {@link ParsedOp} returns the appropriate
      * {@link GCPSpannerBaseOpDispenser} subclass.
      *
-     * @param op The {@link ParsedOp} to be evaluated
+     * @param op
+     *     The {@link ParsedOp} to be evaluated
+     * @param spaceInitF
      * @return The correct {@link GCPSpannerBaseOpDispenser} subclass based on
-     *         the op type
+     *     the op type
      */
     @Override
-    public OpDispenser<? extends GCPSpannerBaseOp<?>> apply(ParsedOp op) {
+    public OpDispenser<GCPSpannerBaseOp> apply(ParsedOp op, LongFunction<GCPSpannerSpace> spaceInitF) {
         TypeAndTarget<GCPSpannerOpType, String> typeAndTarget = op.getTypeAndTarget(GCPSpannerOpType.class,
             String.class, "type", "target");
         logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
@@ -61,10 +68,8 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?>> {
                 new GCPSpannerCreateDatabaseDdlOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case update_database_ddl ->
                 new GCPSpannerUpdateDatabaseDdlOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case insert ->
-                new GCPSpannerInsertOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case execute_dml ->
-                new GCPSpannerExecuteDmlOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case insert -> new GCPSpannerInsertOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case execute_dml -> new GCPSpannerExecuteDmlOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 }

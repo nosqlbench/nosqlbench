@@ -23,7 +23,7 @@ import com.google.cloud.spanner.*;
  * This class represents an operation to execute a DML statement on Google Cloud Spanner.
  * It extends the GCPSpannerBaseOp class and overrides the applyOp method to execute the DML statement.
  */
-public class GCPSpannerExecuteDmlOp extends GCPSpannerBaseOp<Long> {
+public class GCPSpannerExecuteDmlOp extends GCPSpannerBaseOp<Long,ResultSet> {
     private final Statement statement;
     private final DatabaseClient dbClient;
 
@@ -49,7 +49,7 @@ public class GCPSpannerExecuteDmlOp extends GCPSpannerBaseOp<Long> {
      * @return the result of the DML execution
      */
     @Override
-    public Object applyOp(long value) {
+    public ResultSet applyOp(long value) {
         try (ReadContext context = dbClient.singleUse()) {
             return context.executeQuery(statement);
         }

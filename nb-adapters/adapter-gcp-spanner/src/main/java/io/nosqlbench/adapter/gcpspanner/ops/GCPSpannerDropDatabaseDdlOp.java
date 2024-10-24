@@ -25,7 +25,7 @@ import com.google.cloud.spanner.Spanner;
  * This class represents an operation to Drop the database DDL (Data Definition Language) in Google Cloud Spanner.
  * It extends the {@link GCPSpannerBaseOp} class and provides the implementation for applying the DDL update operation.
  */
-public class GCPSpannerDropDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
+public class GCPSpannerDropDatabaseDdlOp extends GCPSpannerBaseOp<Long,Void> {
     private final String databaseId;
     private final DatabaseAdminClient dbAdminClient;
     private final Database db;
@@ -55,7 +55,7 @@ public class GCPSpannerDropDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
      * @throws RuntimeException if an error occurs during the operation
      */
     @Override
-    public Object applyOp(long value) {
+    public Void applyOp(long value) {
         try {
             if (null != db && db.exists()) {
                 db.drop();

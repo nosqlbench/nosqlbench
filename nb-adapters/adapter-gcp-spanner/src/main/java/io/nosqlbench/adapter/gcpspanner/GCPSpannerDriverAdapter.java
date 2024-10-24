@@ -27,23 +27,24 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 import static io.nosqlbench.adapter.gcpspanner.GCPSpannerAdapterUtils.SPANNER;
 
 @Service(value = DriverAdapter.class, selector = SPANNER)
-public class GCPSpannerDriverAdapter extends BaseDriverAdapter<GCPSpannerBaseOp<?>, GCPSpannerSpace> {
+public class GCPSpannerDriverAdapter extends BaseDriverAdapter<GCPSpannerBaseOp, GCPSpannerSpace> {
 
     public GCPSpannerDriverAdapter(NBComponent parentComponent, NBLabels labels) {
         super(parentComponent, labels);
     }
 
     @Override
-    public OpMapper<GCPSpannerBaseOp<?>> getOpMapper() {
+    public OpMapper<GCPSpannerBaseOp,GCPSpannerSpace> getOpMapper() {
         return new GCPSpannerOpMapper(this);
     }
 
     @Override
-    public Function<String, ? extends GCPSpannerSpace> getSpaceInitializer(NBConfiguration cfg) {
+    public LongFunction<GCPSpannerSpace> getSpaceInitializer(NBConfiguration cfg) {
         return (s) -> new GCPSpannerSpace(s, cfg);
     }
 

@@ -29,7 +29,8 @@ import java.util.function.LongFunction;
 /**
  * Dispenser class for creating instances of GCPSpannerUpdateDatabaseDdlOp.
  */
-public class GCPSpannerUpdateDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispenser {
+public class GCPSpannerUpdateDatabaseDdlOpDispenser
+    extends GCPSpannerBaseOpDispenser<GCPSpannerUpdateDatabaseDdlOp,Void> {
     private static final Logger logger = LogManager.getLogger(GCPSpannerUpdateDatabaseDdlOpDispenser.class);
     private final LongFunction<GCPSpannerUpdateDatabaseDdlOp> opFunction;
 
@@ -52,6 +53,7 @@ public class GCPSpannerUpdateDatabaseDdlOpDispenser extends GCPSpannerBaseOpDisp
      * @return a LongFunction that generates GCPSpannerUpdateDatabaseDdlOp instances
      */
     private LongFunction<GCPSpannerUpdateDatabaseDdlOp> createOpFunction(ParsedOp op) {
+
         return (l) -> new GCPSpannerUpdateDatabaseDdlOp(
             spaceFunction.apply(l).getSpanner(),
             l,
@@ -68,7 +70,7 @@ public class GCPSpannerUpdateDatabaseDdlOpDispenser extends GCPSpannerBaseOpDisp
      * @return a GCPSpannerBaseOp instance
      */
     @Override
-    public GCPSpannerBaseOp<?> getOp(long value) {
+    public GCPSpannerUpdateDatabaseDdlOp getOp(long value) {
         return opFunction.apply(value);
     }
 }

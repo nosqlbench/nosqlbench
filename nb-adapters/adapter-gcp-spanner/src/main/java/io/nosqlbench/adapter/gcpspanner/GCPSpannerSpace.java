@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.gcpspanner;
 
 import com.google.cloud.spanner.*;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -34,9 +35,8 @@ import org.apache.logging.log4j.Logger;
  * @see <a href="https://cloud.google.com/spanner/docs/reference/rpc">spanner rpc api calls</a>
  * @see <a href="https://cloud.google.com/spanner/docs/reference/standard-sql/data-definition-language#vector_index_statements">SQL functionality related to vector indices</a>
  */
-public class GCPSpannerSpace implements AutoCloseable {
+public class GCPSpannerSpace extends BaseSpace {
     private final static Logger logger = LogManager.getLogger(GCPSpannerSpace.class);
-    private final String name;
     private final NBConfiguration cfg;
     protected Spanner spanner;
     protected DatabaseAdminClient dbAdminClient;
@@ -47,11 +47,11 @@ public class GCPSpannerSpace implements AutoCloseable {
      * contextual information needed to interact with the <b>Google Spanner</b>
      * database instance.
      *
-     * @param name The name of this space
+     * @param idx The name of this space
      * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
      */
-    public GCPSpannerSpace(String name, NBConfiguration cfg) {
-        this.name = name;
+    public GCPSpannerSpace(long idx, NBConfiguration cfg) {
+        super(idx);
         this.cfg = cfg;
     }
 

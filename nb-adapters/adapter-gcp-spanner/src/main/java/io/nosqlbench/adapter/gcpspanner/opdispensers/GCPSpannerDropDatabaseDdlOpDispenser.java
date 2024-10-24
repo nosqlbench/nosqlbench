@@ -35,7 +35,7 @@ import java.util.function.LongFunction;
  * @see <a href="https://cloud.google.com/spanner/docs/reference/rpc/google.spanner.admin.database.v1#dropdatabaserequest">
  *     DropDatabaseRequest</a> which can be a stretch goal to combine all of DB, Table(s), and Indexes into one-single call.
  */
-public class GCPSpannerDropDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispenser {
+public class GCPSpannerDropDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispenser<GCPSpannerDropDatabaseDdlOp,Void> {
     private static final Logger logger = LogManager.getLogger(GCPSpannerDropDatabaseDdlOpDispenser.class);
     private final LongFunction<GCPSpannerDropDatabaseDdlOp> opFunction;
 
@@ -87,7 +87,7 @@ public class GCPSpannerDropDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispen
      * @return a {@link GCPSpannerBaseOp} instance
      */
     @Override
-    public GCPSpannerBaseOp<?> getOp(long value) {
-        return opFunction != null ? opFunction.apply(value) : null;
+    public GCPSpannerDropDatabaseDdlOp getOp(long value) {
+        return opFunction.apply(value);
     }
 }
