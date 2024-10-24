@@ -17,11 +17,13 @@ package io.nosqlbench.adapter.azureaisearch.ops;
 
 import com.azure.search.documents.SearchClient;
 import com.azure.search.documents.indexes.SearchIndexClient;
+import com.azure.search.documents.util.AutocompletePagedIterable;
+import com.azure.search.documents.util.SearchPagedIterable;
 
-public abstract class AzureAISearchClientBaseOp<T> extends AzureAISearchBaseOp<T> {
+public abstract class AzureAISearchClientBaseOp<REQUEST, RESULT> extends AzureAISearchBaseOp<REQUEST, RESULT> {
 	protected final SearchClient searchClient;
 
-	public AzureAISearchClientBaseOp(SearchIndexClient searchIdxClient, SearchClient searchClnt, T requestParam) {
+	public AzureAISearchClientBaseOp(SearchIndexClient searchIdxClient, SearchClient searchClnt, REQUEST requestParam) {
 		super(searchIdxClient, requestParam);
 		this.searchClient = searchClnt;
 	}

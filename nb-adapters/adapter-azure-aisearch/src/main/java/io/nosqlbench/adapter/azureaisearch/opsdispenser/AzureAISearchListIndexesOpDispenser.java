@@ -27,7 +27,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 /**
  * Lists the indexes available.
  */
-public class AzureAISearchListIndexesOpDispenser extends AzureAISearchBaseOpDispenser<String> {
+public class AzureAISearchListIndexesOpDispenser extends AzureAISearchBaseOpDispenser<String,String> {
 	public AzureAISearchListIndexesOpDispenser(AzureAISearchDriverAdapter adapter, ParsedOp op,
 			LongFunction<String> targetF) {
 		super(adapter, op, targetF);
@@ -40,7 +40,7 @@ public class AzureAISearchListIndexesOpDispenser extends AzureAISearchBaseOpDisp
 	}
 
 	@Override
-	public LongFunction<AzureAISearchBaseOp<String>> createOpFunc(LongFunction<String> paramF,
+	public LongFunction<AzureAISearchBaseOp<String,String>> createOpFunc(LongFunction<String> paramF,
 			LongFunction<SearchIndexClient> clientF, ParsedOp op, LongFunction<String> targetF) {
 		return l -> new AzureAISearchListIndexesOp(clientF.apply(l), paramF.apply(l));
 	}

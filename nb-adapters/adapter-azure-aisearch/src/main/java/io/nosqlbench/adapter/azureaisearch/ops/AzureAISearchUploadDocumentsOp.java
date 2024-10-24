@@ -22,7 +22,7 @@ import com.azure.search.documents.SearchDocument;
 import com.azure.search.documents.indexes.SearchIndexClient;
 import com.azure.search.documents.models.IndexDocumentsResult;
 
-public class AzureAISearchUploadDocumentsOp extends AzureAISearchClientBaseOp<SearchDocument> {
+public class AzureAISearchUploadDocumentsOp extends AzureAISearchClientBaseOp<SearchDocument,IndexDocumentsResult> {
 
 	public AzureAISearchUploadDocumentsOp(SearchIndexClient searchIndexClient, SearchClient searchClient,
 			SearchDocument request) {
@@ -30,7 +30,7 @@ public class AzureAISearchUploadDocumentsOp extends AzureAISearchClientBaseOp<Se
 	}
 
 	@Override
-	public Object applyOp(long value) {
+	public IndexDocumentsResult applyOp(long value) {
 		IndexDocumentsResult uploadDocsResponse = null;
 		try {
 			uploadDocsResponse = searchClient.uploadDocuments(List.of(request));

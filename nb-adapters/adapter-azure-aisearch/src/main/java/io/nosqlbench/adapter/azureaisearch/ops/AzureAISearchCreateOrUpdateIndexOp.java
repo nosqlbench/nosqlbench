@@ -18,14 +18,14 @@ package io.nosqlbench.adapter.azureaisearch.ops;
 import com.azure.search.documents.indexes.SearchIndexClient;
 import com.azure.search.documents.indexes.models.SearchIndex;
 
-public class AzureAISearchCreateOrUpdateIndexOp extends AzureAISearchBaseOp<SearchIndex> {
+public class AzureAISearchCreateOrUpdateIndexOp extends AzureAISearchBaseOp<SearchIndex,SearchIndex> {
 
 	public AzureAISearchCreateOrUpdateIndexOp(SearchIndexClient client, SearchIndex request) {
 		super(client, request);
 	}
 
 	@Override
-	public Object applyOp(long value) {
+	public SearchIndex applyOp(long value) {
 		SearchIndex createResponse = null;
 		try {
 			createResponse = searchIndexClient.createOrUpdateIndex(request);

@@ -26,7 +26,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 /**
  * Delete an Azure AI Search index.
- * 
+ *
  * @see <a href=
  *      "https://learn.microsoft.com/en-us/rest/api/searchservice/indexes/delete?view=rest-searchservice-2024-07-01&tabs=HTTP">Delete
  *      Index docs</a>.
@@ -34,7 +34,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
  *      "https://learn.microsoft.com/en-us/rest/api/searchservice/">REST
  *      API</a>.
  */
-public class AzureAISearchDeleteIndexOpDispenser extends AzureAISearchBaseOpDispenser<String> {
+public class AzureAISearchDeleteIndexOpDispenser extends AzureAISearchBaseOpDispenser<String,String> {
 
 	public AzureAISearchDeleteIndexOpDispenser(AzureAISearchDriverAdapter adapter, ParsedOp op,
 			LongFunction<String> targetF) {
@@ -48,7 +48,7 @@ public class AzureAISearchDeleteIndexOpDispenser extends AzureAISearchBaseOpDisp
 	}
 
 	@Override
-	public LongFunction<AzureAISearchBaseOp<String>> createOpFunc(LongFunction<String> paramF,
+	public LongFunction<AzureAISearchBaseOp<String,String>> createOpFunc(LongFunction<String> paramF,
 			LongFunction<SearchIndexClient> clientF, ParsedOp op, LongFunction<String> targetF) {
 		return l -> new AzureAISearchDeleteIndexOp(clientF.apply(l), paramF.apply(l));
 	}

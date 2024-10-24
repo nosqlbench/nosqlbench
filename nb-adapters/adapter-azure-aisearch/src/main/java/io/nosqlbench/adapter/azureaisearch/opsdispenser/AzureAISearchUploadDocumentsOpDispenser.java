@@ -21,6 +21,7 @@ import java.util.function.LongFunction;
 import com.azure.search.documents.SearchDocument;
 import com.azure.search.documents.indexes.SearchIndexClient;
 
+import com.azure.search.documents.models.IndexDocumentsResult;
 import io.nosqlbench.adapter.azureaisearch.AzureAISearchDriverAdapter;
 import io.nosqlbench.adapter.azureaisearch.ops.AzureAISearchBaseOp;
 import io.nosqlbench.adapter.azureaisearch.ops.AzureAISearchUploadDocumentsOp;
@@ -34,7 +35,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
  *      "https://learn.microsoft.com/en-us/java/api/com.azure.search.documents?view=azure-java-stable">Index
  *      docs</a>
  */
-public class AzureAISearchUploadDocumentsOpDispenser extends AzureAISearchBaseOpDispenser<SearchDocument> {
+public class AzureAISearchUploadDocumentsOpDispenser extends AzureAISearchBaseOpDispenser<SearchDocument, IndexDocumentsResult> {
 	public AzureAISearchUploadDocumentsOpDispenser(AzureAISearchDriverAdapter adapter, ParsedOp op,
 			LongFunction<String> targetF) {
 		super(adapter, op, targetF);
@@ -55,7 +56,7 @@ public class AzureAISearchUploadDocumentsOpDispenser extends AzureAISearchBaseOp
 	}
 
 	@Override
-	public LongFunction<AzureAISearchBaseOp<SearchDocument>> createOpFunc(LongFunction<SearchDocument> paramF,
+	public LongFunction<AzureAISearchBaseOp<SearchDocument,IndexDocumentsResult>> createOpFunc(LongFunction<SearchDocument> paramF,
 			LongFunction<SearchIndexClient> clientF, ParsedOp op, LongFunction<String> targetF) {
 		return l -> new AzureAISearchUploadDocumentsOp(clientF.apply(l),
 				clientF.apply(l).getSearchClient(targetF.apply(l)), paramF.apply(l));
