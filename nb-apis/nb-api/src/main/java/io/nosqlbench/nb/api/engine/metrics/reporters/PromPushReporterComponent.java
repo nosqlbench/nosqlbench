@@ -65,7 +65,6 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
             String[] parts = endpoint.split(":", 3);
             endpoint = "https://" + parts[2] + "/api/v1/import/prometheus/metrics/job/JOBNAME/instance/INSTANCE";
         } else if (endpoint.matches("victoria:[a-zA-Z0-9._-]+(:[0-9]+)?")) {
-            System.out.println("match3");
             String[] parts = endpoint.split(":", 2);
             endpoint = "https://" + parts[1] + "/api/v1/import/prometheus/metrics/job/JOBNAME/instance/INSTANCE";
         }
