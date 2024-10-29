@@ -104,6 +104,7 @@ blocks:
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
             windowed_relevancy = new io.nosqlbench.nb.api.engine.metrics.wrappers.WindowedRelevancyMeasures(_parsed_op,10);
+            windowed_relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
           }
         verifier: |
           // driver-specific function
