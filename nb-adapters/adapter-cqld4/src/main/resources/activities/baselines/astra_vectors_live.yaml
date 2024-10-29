@@ -98,24 +98,20 @@ blocks:
         verifier-init: |
           relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op,"group","relevancy");
           for (int k in List.of(100)) {
+            relevancy=new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op)
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
-          }
-          for (int k in List.of(1,2,3,5,10,25,50,75)) {
-            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("s_recall",k));
-            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("s_precision",k));
-            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("s_F1",k));
-            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("s_RR",k));
-            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("s_AP",k));
+            windowed_relevancy = new io.nosqlbench.nb.api.engine.metrics.wrappers.WindowedRelevancyMeasures(_parsed_op,10);
           }
         verifier: |
           // driver-specific function
           actual_indices=cql_utils.cqlStringColumnToIntArray("key",result);
           // driver-agnostic function
           relevancy.accept({relevant_indices},actual_indices);
+          windowed_relevancy.accept({relevant_indices},actual_indices);
           // because we are "verifying" although this needs to be reorganized
           return true;
       insert_rewrite:
