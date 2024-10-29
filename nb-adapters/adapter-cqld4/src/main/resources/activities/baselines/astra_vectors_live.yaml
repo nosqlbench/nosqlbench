@@ -96,8 +96,7 @@ blocks:
         tags:
           optype: select
         verifier-init: |
-          relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op,"group","relevancy");
-          for (int k in List.of(100)) {
+          for (int k in List.of(50,100)) {
             relevancy=new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op)
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
             relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
