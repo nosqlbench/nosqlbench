@@ -158,8 +158,8 @@ public class NBCreators {
 //        AttachedMetricCsvReporter reporter = new AttachedMetricCsvReporter(base, extraLabels, Path.of(dirpath), seconds);
 //        return reporter;
 //    }
-    public PromPushReporterComponent pushReporter(String endpoint, long millis, NBLabels extraLabels) {
-        PromPushReporterComponent reporter = new PromPushReporterComponent(this.base, endpoint, millis, extraLabels);
+    public PromPushReporterComponent pushReporter(String endpoint, long millis, NBLabels extraLabels, String prompushApikeyfile) {
+        PromPushReporterComponent reporter = new PromPushReporterComponent(this.base, endpoint, millis, extraLabels, prompushApikeyfile);
         return reporter;
     }
 

@@ -118,6 +118,7 @@ public class NBCLIOptions {
     private static final String ENABLE_LOGGED_METRICS = "--enable-logged-metrics";
     private static final String DISABLE_LOGGED_METRICS = "--disable-logged-metrics";
     private static final String REPORT_PROMPUSH_TO = "--report-prompush-to";
+    private static final String PROMPUSH_API_KEYFILE = "--prompush-apikeyfile";
     private static final String GRAPHITE_LOG_LEVEL = "--graphite-log-level";
     private static final String REPORT_CSV_TO = "--report-csv-to";
     private static final String REPORT_SUMMARY_TO = "--report-summary-to";
@@ -164,6 +165,7 @@ public class NBCLIOptions {
     private boolean wantsBasicHelp;
     private String reportGraphiteTo;
     private String reportPromPushTo;
+    private String prompushApikeyfile;
     private String reportCsvTo;
     private String reportSqliteTo;
     private int reportInterval = 10;
@@ -286,6 +288,10 @@ public class NBCLIOptions {
 
     public boolean wantsToCatResource() {
         return this.wantsToCatResource != null && !this.wantsToCatResource.isEmpty();
+    }
+
+    public String getPrompushApikeyfile() {
+        return this.prompushApikeyfile;
     }
 
     public enum Mode {
@@ -413,6 +419,10 @@ public class NBCLIOptions {
                 case NBCLIOptions.REPORT_PROMPUSH_TO:
                     arglist.removeFirst();
                     this.reportPromPushTo = arglist.removeFirst();
+                    break;
+                case NBCLIOptions.PROMPUSH_API_KEYFILE:
+                    arglist.removeFirst();
+                    this.prompushApikeyfile = arglist.removeFirst();
                     break;
                 case NBCLIOptions.GRAPHITE_LOG_LEVEL:
                     arglist.removeFirst();

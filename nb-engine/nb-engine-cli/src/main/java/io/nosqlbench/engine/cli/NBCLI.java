@@ -483,7 +483,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                     default:
                         throw new RuntimeException("Unable to parse '" + cfg + "', must be in <URI> or <URI>,ms form");
                 }
-                session.create().pushReporter(uri, intervalMs, NBLabels.forKV());
+                session.create().pushReporter(uri, intervalMs, NBLabels.forKV(), options.getPrompushApikeyfile());
             });
             for (final NBCLIOptions.LoggerConfigData histoLogger : options.getHistoLoggerConfigs()) {
                 session.create().histoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.millis);

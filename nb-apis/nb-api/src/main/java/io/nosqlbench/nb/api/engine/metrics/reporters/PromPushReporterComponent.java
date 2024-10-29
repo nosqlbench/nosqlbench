@@ -50,7 +50,7 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
     private final URI uri;
     private String bearerToken;
 
-    public PromPushReporterComponent(NBComponent parent, String endpoint, long intervalMs, NBLabels nbLabels) {
+    public PromPushReporterComponent(NBComponent parent, String endpoint,long intervalMs, NBLabels nbLabels, String prompushApikeyfile) {
         super(parent, nbLabels.and("_type", "prom-push"), intervalMs,  "REPORT-PROMPUSH",FirstReport.OnInterval, LastReport.OnInterrupt);
         String jobname = getLabels().valueOfOptional("jobname").orElse("default");
         String instance = getLabels().valueOfOptional("instance").orElse("default");
@@ -58,11 +58,18 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
             logger.warn("It is highly recommended that you set a value for labels jobname and instance other than 'default'.");
         }
 
-        if (endpoint.matches("victoria:[a-zA-Z0-9._-]+:[0-9]+")) {
+        if (endpoint.matches("victoria:plain:[a-zA-Z0-9._-]+(:[0-9]+)?")) {
+            String[] parts = endpoint.split(":", 3);
+            endpoint = "http://" + parts[2] + "/api/v1/import/prometheus/metrics/job/JOBNAME/instance/INSTANCE";
+        } else if (endpoint.matches("victoria:tls:[a-zA-Z0-9._-]+(:[0-9]+)?")) {
+            String[] parts = endpoint.split(":", 3);
+            endpoint = "https://" + parts[2] + "/api/v1/import/prometheus/metrics/job/JOBNAME/instance/INSTANCE";
+        } else if (endpoint.matches("victoria:[a-zA-Z0-9._-]+(:[0-9]+)?")) {
             String[] parts = endpoint.split(":", 2);
             endpoint = "https://" + parts[1] + "/api/v1/import/prometheus/metrics/job/JOBNAME/instance/INSTANCE";
         }
         endpoint = endpoint.replace("JOBNAME", jobname).replace("INSTANCE", instance);
+        logger.trace("Prompush endpoint: {}", endpoint);
         if (!endpoint.contains(jobname)) {
             throw new BasicError("Mismatch between jobname in prompush URI and specified jobname label. You should use the short form for --report-prompush-to victoria:addr:port and set the jobname with --add-labels");
         }
@@ -70,10 +77,17 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
             throw new BasicError("Mismatch between instance in prompush URI and specified instance label. You should use the short form for --report-prompush-to victoria:addr:port and set the instance with --add-labels");
         }
         this.uri = URI.create(endpoint);
-        this.keyfilePath = NBEnvironment.INSTANCE
-            .interpolateWithTimestamp("$NBSTATEDIR/prompush/prompush_apikey", System.currentTimeMillis())
-            .map(Path::of)
-            .orElseThrow(() -> new RuntimeException("Unable to create path for apikey file: $NBSTATEDIR/prompush/prompush_apikey"));
+        if (prompushApikeyfile != null && !prompushApikeyfile.isEmpty()) {
+            this.keyfilePath = Path.of(prompushApikeyfile);
+            if (Files.notExists(this.keyfilePath)) {
+                throw new IllegalArgumentException(String.format("Given path '%s' for prompush-apikeyfile does not exist, please provide a valid path!!!", this.keyfilePath));
+            }
+        } else {
+            this.keyfilePath = NBEnvironment.INSTANCE
+                .interpolateWithTimestamp("$NBSTATEDIR/prompush/prompush_apikey", System.currentTimeMillis())
+                .map(Path::of)
+                .orElseThrow(() -> new RuntimeException("Unable to create path for apikey file: $NBSTATEDIR/prompush/prompush_apikey"));
+        }
         if (Files.isRegularFile(keyfilePath)) {
             try {
                 logger.debug(() -> "Reading Bearer Token from " + keyfilePath);
@@ -81,6 +95,8 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        } else if (prompushApikeyfile != null && !prompushApikeyfile.isEmpty()) {
+            throw new IllegalArgumentException(String.format("Unable to read the bearer token from the given file '%s'", this.keyfilePath));
         }
     }
 
