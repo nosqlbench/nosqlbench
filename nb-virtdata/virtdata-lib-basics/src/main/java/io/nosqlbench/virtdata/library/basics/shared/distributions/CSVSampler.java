@@ -47,7 +47,10 @@ import java.util.stream.Collectors;
  * you can use some combining functions to tabulate these prior to sampling. In that case, you can use
  * any of "sum", "avg", "count", "min", or "max" as the reducing function on the value in the weight column.
  * If none are specified, then "sum" is used by default. All modes except "count" and "name" require a valid weight
- * column to be specified.
+ * column to be specified. These functions apply to the reduction of labels in the selected CSV column, and
+ * only apply when there is more than one row with the same value in that named column. Thus, the order
+ * of appearance row-by-row will be preserved in cases that all values in that column are distinct. This means
+ * that if you have multiple associated values on a given row, you can use the same
  *
  * <UL>
  *     <LI>sum, avg, min, max - takes the given stat for the weight of each distinct label</LI>
@@ -133,7 +136,7 @@ public class CSVSampler implements LongFunction<String> {
 
         final Function<LabeledStatistic, Double> valFunc = weightFunc;
 
-        Map<String, LabeledStatistic> entries = new HashMap<>();
+        Map<String, LabeledStatistic> entries = new LinkedHashMap<>();
 
         for (String filename : data) {
             if (!filename.endsWith(".csv")) {
