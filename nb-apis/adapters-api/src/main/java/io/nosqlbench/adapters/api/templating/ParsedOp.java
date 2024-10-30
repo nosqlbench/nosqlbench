@@ -40,10 +40,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.LongFunction;
-import java.util.function.LongToIntFunction;
+import java.util.function.*;
 
 /**
  * <H1>ParsedOp API</H1>
@@ -1131,19 +1128,26 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
      *     The enhancer function result type
      * @return an (optionally) enhanced base function
      */
-    public <FA, FE extends Enum<FE>> LongFunction<FA> enhanceEnumOptionally(
-        LongFunction<FA> func,
+
+    public <S extends FA, FA, FE extends Enum<FE>> LongFunction<S> enhanceEnumOptionally(
+        LongFunction<S> func,
         String field,
         Class<FE> type,
-        BiFunction<FA, FE, FA> combiner
+        BiFunction<S, FE, S> combiner
     ) {
         Optional<LongFunction<FE>> fieldEnhancerFunc = getAsOptionalEnumFunction(field, type);
         if (fieldEnhancerFunc.isEmpty()) {
             return func;
         }
         LongFunction<FE> feLongFunction = fieldEnhancerFunc.get();
-        LongFunction<FA> lfa = l -> combiner.apply(func.apply(l), feLongFunction.apply(l));
-        return lfa;
+        return l -> {
+            S initialResult = func.apply(l);
+            FE enumValue = feLongFunction.apply(l);
+            return combiner.apply(initialResult, enumValue);  // Apply combiner and return the result
+        };
+
+//        LongFunction<S> lfa = l -> combiner.apply(func.apply(l), feLongFunction.apply(l));
+//        return lfa;
     }
 
     public Map<String, Object> parseStaticCmdMap(String key, String mainField) {

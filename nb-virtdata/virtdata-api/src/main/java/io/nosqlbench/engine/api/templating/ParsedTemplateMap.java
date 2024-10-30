@@ -533,9 +533,9 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return getAsRequiredFunction(name, String.class);
     }
 
-    public <V extends Enum<V>> Optional<LongFunction<V>> getAsOptionalEnumFunction(String name, Class<V> type) {
+    public <V extends Enum<V>> Optional<LongFunction<V>> getAsOptionalEnumFunction(String name, Class<? extends V> type) {
         Optional<LongFunction<String>> nameFunc = this.getAsOptionalFunction(name, String.class);
-        return nameFunc.map((f) -> (l) -> Enum.valueOf(type, f.apply(l)));
+        return nameFunc.map((f) -> (l) -> Enum.valueOf((Class<V>) type, f.apply(l)));
     }
 
     /**
