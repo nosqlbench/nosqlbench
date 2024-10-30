@@ -30,6 +30,7 @@ import io.nosqlbench.adapter.cqld4.wrapper.Cqld4LoadBalancerObserver;
 import io.nosqlbench.adapter.cqld4.wrapper.Cqld4SessionBuilder;
 import io.nosqlbench.adapter.cqld4.wrapper.NodeSummary;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentIndexCache;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.nbio.Content;
@@ -47,12 +48,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
 public class Cqld4Space extends BaseSpace<Cqld4Space> {
     private final static Logger logger = LogManager.getLogger(Cqld4Space.class);
 
-    CqlSession session;
+    private CqlSession session;
+    private ConcurrentIndexCache<PreparedStatement> preparedStmtCache = new ConcurrentIndexCache<>("pstmts");
 
     public Cqld4Space(Cqld4DriverAdapter adapter, long spaceidx, NBConfiguration cfg) {
         super(adapter,spaceidx);
@@ -302,7 +305,6 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
             }
             return Optional.of(mainloader);
         }
-
     }
 
     public CqlSession getSession() {
@@ -339,10 +341,19 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
     @Override
     public void close() {
         try {
+            this.preparedStmtCache.clear();
             this.getSession().close();
         } catch (Exception e) {
             logger.warn("auto-closeable cql session threw exception in cql space(" + getName() + "): " + e);
             throw e;
         }
+    }
+
+    public PreparedStatement getOrCreatePreparedStatement(
+        int refkey,
+        LongFunction<PreparedStatement> psF
+    ) {
+        PreparedStatement ps = preparedStmtCache.get(refkey, psF);
+        return ps;
     }
 }

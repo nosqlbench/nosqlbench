@@ -69,30 +69,38 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPre
 
     protected LongFunction<Statement> createStmtFunc(LongFunction<Object[]> fieldsF, ParsedOp op) {
 
-        String preparedQueryString = stmtTpl.getPositionalStatement(s -> "?");
-        boundSession = getSessionFunc().apply(0);
         try {
-            preparedStmt = boundSession.prepare(preparedQueryString);
+            String preparedQueryString = stmtTpl.getPositionalStatement(s -> "?");
+
+            LongFunction<PreparedStatement> prepareStatementF =
+                (long l) -> (sessionF.apply(l)).prepare(preparedQueryString);
+
+            LongFunction<? extends Cqld4Space> lookupSpaceF =
+                (long l) -> adapter.getSpaceCache().get(l);
+
+            int refKey = op.getRefKey();
+            LongFunction<PreparedStatement> cachedStatementF =
+                (long l) -> lookupSpaceF.apply(l).getOrCreatePreparedStatement(refKey,prepareStatementF);
+
+            LongFunction<Statement> boundStatementF =
+                (long l) -> cachedStatementF.apply(l).bind(fieldsF.apply(l));
+
+            return super.getEnhancedStmtFunc(boundStatementF, op);
+
         } catch (Exception e) {
             throw new OpConfigError(e + "( for statement '" + stmtTpl + "')");
         }
 
-        LongFunction<Statement> boundStmtFunc = c -> {
-            Object[] apply = fieldsF.apply(c);
-            return preparedStmt.bind(apply);
-        };
-        return super.getEnhancedStmtFunc(boundStmtFunc, op);
     }
 
     @Override
-    public Cqld4CqlOp getOp(long cycle) {
-
-        BoundStatement boundStatement;
+    public Cqld4CqlPreparedStatement getOp(long cycle) {
+        BoundStatement stmt = (BoundStatement) stmtFunc.apply(cycle);
         try {
-            boundStatement = (BoundStatement) stmtFunc.apply(cycle);
+            CqlSession session = (CqlSession) sessionF.apply(cycle);
             return new Cqld4CqlPreparedStatement(
-                boundSession,
-                boundStatement,
+                sessionF.apply(cycle),
+                stmt,
                 getMaxPages(),
                 isRetryReplace(),
                 getMaxLwtRetries(),
