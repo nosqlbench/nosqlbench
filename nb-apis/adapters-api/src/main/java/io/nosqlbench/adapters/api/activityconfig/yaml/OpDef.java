@@ -32,6 +32,7 @@ public class OpDef extends OpTemplate {
     private final LinkedHashMap<String, Object> params;
     private final LinkedHashMap<String, String> bindings;
     private final LinkedHashMap<String, String> tags;
+    private int refKey;
 
     public OpDef(OpsBlock block, RawOpDef rawOpDef) {
         this.block = block;
@@ -82,6 +83,16 @@ public class OpDef extends OpTemplate {
     @Override
     public Map<String, Object> getParams() {
         return params;
+    }
+
+    @Override
+    public int getRefKey() {
+        return this.refKey;
+    }
+
+    @Override
+    public void setRefKey(int refKey) {
+        this.refKey = refKey;
     }
 
     private LinkedHashMap<String, Object> composeParams() {

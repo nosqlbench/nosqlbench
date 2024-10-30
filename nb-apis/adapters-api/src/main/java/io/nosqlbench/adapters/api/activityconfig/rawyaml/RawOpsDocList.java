@@ -16,9 +16,13 @@
 
 package io.nosqlbench.adapters.api.activityconfig.rawyaml;
 
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
-public class RawOpsDocList {
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Consumer;
+
+public class RawOpsDocList implements Iterable<RawOpsDoc> {
 
     private final List<RawOpsDoc> rawOpsDocList;
 
@@ -44,5 +48,23 @@ public class RawOpsDocList {
         int blocks = rawOpsDocList.stream().map(RawOpsDoc::getBlocks).mapToInt(List::size).sum();
         long optemplates = rawOpsDocList.stream().flatMap(d -> d.getBlocks().stream()).flatMap(s -> s.getRawOpDefs().stream()).count();
         return "docs:" + docs + " blocks:" + blocks + " optemplates:" + optemplates;
+    }
+
+    @Override
+    public @NotNull Iterator<RawOpsDoc> iterator() {
+        return this.rawOpsDocList.iterator();
+    }
+
+    public int applyModifier(Consumer<RawOpDef> modifier) {
+        int count = 0;
+        for (RawOpsDoc rawOpsDoc : rawOpsDocList) {
+            for (RawOpsBlock opBlock : rawOpsDoc) {
+                for (RawOpDef rawOpDef : opBlock.getRawOpDefs()) {
+                    modifier.accept(rawOpDef);
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 }

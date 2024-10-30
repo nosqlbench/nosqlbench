@@ -43,7 +43,8 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
     private final ParsedTemplateString stmtTpl;
     private final LongFunction<Object[]> fieldsF;
     private PreparedStatement preparedStmt;
-    private CqlSession boundSession;
+    // This is a stable enum for the op template from the workload, bounded by cardinality of all op templates
+    private int refkey;
 
     public Cqld4PreparedStmtDispenser(
         Cqld4DriverAdapter adapter,
@@ -66,6 +67,7 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
     private LongFunction<Object[]> getFieldsFunction(ParsedOp op) {
         LongFunction<Object[]> varbinder;
         varbinder = op.newArrayBinderFromBindPoints(stmtTpl.getBindPoints());
+        this.refkey = op.getRefKey();
         return varbinder;
     }
 

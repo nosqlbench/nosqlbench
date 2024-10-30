@@ -953,6 +953,10 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return lfa;
     }
 
+    public int getRefKey() {
+        return this._opTemplate.getRefKey();
+    }
+
 
     public static enum SubOpNaming {
         SubKey,
