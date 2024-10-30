@@ -634,7 +634,10 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return tmap.getAsOptionalFunction(name, type);
     }
 
-    public <V extends Enum<V>> Optional<LongFunction<V>> getAsOptionalEnumFunction(String name, Class<V> type) {
+    public <V extends Enum<V>> Optional<LongFunction<V>> getAsOptionalEnumFunction(
+        String name,
+        Class<? extends V> type
+    ) {
         return tmap.getAsOptionalEnumFunction(name, type);
     }
 
@@ -662,9 +665,6 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
     @Override
     public <V> LongFunction<V> getAsFunctionOr(String name, V defaultValue) {
         return tmap.getAsFunctionOr(name, defaultValue);
-    }
-    public LongToIntFunction getAsFunctionOrInt(String name, int defaultValue) {
-        return tmap.getAsFunctionOrInt(name, defaultValue);
     }
 
     /**

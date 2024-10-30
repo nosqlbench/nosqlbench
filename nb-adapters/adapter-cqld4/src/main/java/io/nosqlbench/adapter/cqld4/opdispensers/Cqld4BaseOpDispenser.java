@@ -47,12 +47,12 @@ public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp> extends BaseOp
     private final static Logger logger = LogManager.getLogger("CQLD4");
 
     private final int maxpages;
-    protected final LongFunction<CqlSession> sessionFunc;
     private final boolean isRetryReplace;
     private final int maxLwtRetries;
     private final Histogram rowsHistogram;
     private final Histogram pagesHistogram;
     private final Histogram payloadBytesHistogram;
+    protected final LongFunction<CqlSession> sessionF;
 
     public Cqld4BaseOpDispenser(Cqld4DriverAdapter adapter,
                                 LongFunction<CqlSession> sessionFunc,

@@ -619,24 +619,6 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         }
     }
 
-    public LongToIntFunction getAsFunctionOrInt(String name, int defaultValue) {
-        if (isDynamic(name)) {
-            LongFunction<?> f = dynamics.get(name);
-            Object testValue = f.apply(0);
-            if (!testValue.getClass().isPrimitive()) {
-                throw new OpConfigError(STR."getAsFunctionOrInt returned non primitive type: \{testValue.getClass().getCanonicalName()}");
-            }
-            if (!testValue.getClass().equals(int.class)) {
-                throw new OpConfigError(STR."getAsFunctionOrInt returned non-int type: \{testValue.getClass().getCanonicalName()}");
-            }
-            return (long i) -> (int) f.apply(i);
-        } else if (isStatic(name) || isConfig(name)) {
-            int v = (int) getStaticValue(name);
-            return l -> v;
-        } else {
-            return l ->  defaultValue;
-        }
-    }
 
     /**
      * Get a LongFunction that first creates a LongFunction of String as in {@link #getAsFunctionOr(String, Object)} )}, but then

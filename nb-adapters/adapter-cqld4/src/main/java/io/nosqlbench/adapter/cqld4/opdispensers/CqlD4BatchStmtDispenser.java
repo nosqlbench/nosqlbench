@@ -32,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.LongFunction;
 
-public class CqlD4BatchStmtDispenser<OT extends Cqld4CqlBatchStatement> extends Cqld4BaseOpDispenser<Cqld4CqlBatchStatement> {
+public class CqlD4BatchStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlBatchStatement> {
     private final int repeat;
     private final ParsedOp subop;
     private final OpMapper submapper;
