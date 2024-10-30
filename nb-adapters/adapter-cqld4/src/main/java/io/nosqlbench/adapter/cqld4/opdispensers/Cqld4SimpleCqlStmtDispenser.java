@@ -33,8 +33,8 @@ public class Cqld4SimpleCqlStmtDispenser<T extends Cqld4CqlOp> extends Cqld4Base
     private final LongFunction<Statement> stmtFunc;
     private final LongFunction<String> targetFunction;
 
-    public Cqld4SimpleCqlStmtDispenser(Cqld4DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
-        super(adapter, sessionFunc,cmd);
+    public Cqld4SimpleCqlStmtDispenser(Cqld4DriverAdapter adapter, LongFunction<String> targetFunction, ParsedOp cmd) {
+        super(adapter, cmd);
         this.targetFunction=targetFunction;
         this.stmtFunc =createStmtFunc(cmd);
     }
@@ -46,7 +46,7 @@ public class Cqld4SimpleCqlStmtDispenser<T extends Cqld4CqlOp> extends Cqld4Base
     @Override
     public Cqld4CqlSimpleStatement getOp(long value) {
         return new Cqld4CqlSimpleStatement(
-            sessionFunc.apply(value),
+            this.sessionF.apply(value),
             (SimpleStatement) stmtFunc.apply(value),
             getMaxPages(),
             isRetryReplace(),

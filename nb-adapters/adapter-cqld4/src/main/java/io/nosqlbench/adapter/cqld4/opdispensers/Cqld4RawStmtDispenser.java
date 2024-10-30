@@ -35,7 +35,6 @@ public class Cqld4RawStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlOp> {
     private final LongFunction<String> targetFunction;
 
     public Cqld4RawStmtDispenser(Cqld4DriverAdapter adapter,
-                                 LongFunction<CqlSession> sessionFunc,
                                  LongFunction<String> targetFunction, ParsedOp cmd) {
         super(adapter, cmd);
         this.targetFunction=targetFunction;
@@ -50,7 +49,7 @@ public class Cqld4RawStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlOp> {
     @Override
     public Cqld4CqlSimpleStatement getOp(long value) {
         return new Cqld4CqlSimpleStatement(
-            getSessionFunc().apply(value),
+            sessionF.apply(value),
             (SimpleStatement) stmtFunc.apply(value),
             getMaxPages(),
             isRetryReplace(),

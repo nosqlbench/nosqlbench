@@ -29,8 +29,8 @@ public class Cqld4SsTableDispenser extends Cqld4BaseOpDispenser {
 //    private final LongFunction<Statement> stmtFunc;
 //    private final LongFunction<String> targetFunction;
 
-    public Cqld4SsTableDispenser(Cqld4DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
-        super(adapter,sessionFunc,cmd);
+    public Cqld4SsTableDispenser(Cqld4DriverAdapter adapter, LongFunction<String> targetFunction, ParsedOp cmd) {
+        super(adapter,cmd);
 //        this.targetFunction=targetFunction;
 //        this.tableFunc =createTableFunc(cmd);
     }

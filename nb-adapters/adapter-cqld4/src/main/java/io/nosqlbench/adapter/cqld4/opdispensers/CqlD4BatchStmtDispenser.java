@@ -40,13 +40,12 @@ public class CqlD4BatchStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlBat
 
     public CqlD4BatchStmtDispenser(
         Cqld4DriverAdapter adapter,
-        LongFunction<CqlSession> sessionFunc,
         ParsedOp op,
         int repeat,
         ParsedOp subop,
         OpDispenser<? extends Cqld4CqlOp> subopDispenser
     ) {
-        super(adapter, sessionFunc, op);
+        super(adapter, op);
         this.repeat = repeat;
         this.subop = subop;
         this.opfunc = createStmtFunc(op, subopDispenser);
@@ -90,7 +89,7 @@ public class CqlD4BatchStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlBat
     public Cqld4CqlBatchStatement getOp(long value) {
         Statement bstmt = opfunc.apply(value);
         return new Cqld4CqlBatchStatement(
-            getSessionFunc().apply(value),
+            sessionF.apply(value),
             (BatchStatement) bstmt,
             getMaxPages(),
             getMaxLwtRetries(),

@@ -69,7 +69,7 @@ public class CqlD4PreparedStmtMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
             });
         });
 
-        return new Cqld4PreparedStmtDispenser(adapter, sessionFunc, op, stmtTpl, processors);
+        return new Cqld4PreparedStmtDispenser(adapter, op, stmtTpl, processors);
     }
 
 }

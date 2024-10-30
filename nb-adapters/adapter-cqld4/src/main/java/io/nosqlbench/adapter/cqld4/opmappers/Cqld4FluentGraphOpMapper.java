@@ -95,10 +95,8 @@ public class Cqld4FluentGraphOpMapper<CO extends Cqld4FluentGraphOp> extends Cql
 
         return new Cqld4FluentGraphOpDispenser(
             adapter,
-            sessionFunc,
             op,
             graphnameFunc,
-            sessionFunc,
             virtdataBindings,
             supplier
         );

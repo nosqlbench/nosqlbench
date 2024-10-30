@@ -38,22 +38,18 @@ import java.util.function.Supplier;
 public class Cqld4FluentGraphOpDispenser extends Cqld4BaseOpDispenser<Cqld4BaseOp> {
 
     private final LongFunction<? extends String> graphnameFunc;
-    private final LongFunction<CqlSession> sessionFunc;
     private final Bindings virtdataBindings;
     private final ThreadLocal<Script> tlScript;
 
     public Cqld4FluentGraphOpDispenser(
         Cqld4DriverAdapter adapter,
-        LongFunction<CqlSession> sessionFunc,
         ParsedOp op,
         LongFunction<? extends String> graphnameFunc,
-        LongFunction<CqlSession> sessionFunc1,
         Bindings virtdataBindings,
         Supplier<Script> scriptSupplier
     ) {
         super(adapter, op);
         this.graphnameFunc = graphnameFunc;
-        this.sessionFunc = sessionFunc1;
         this.virtdataBindings = virtdataBindings;
         this.tlScript = ThreadLocal.withInitial(scriptSupplier);
     }
@@ -66,7 +62,7 @@ public class Cqld4FluentGraphOpDispenser extends Cqld4BaseOpDispenser<Cqld4BaseO
         allMap.forEach((k,v) -> script.getBinding().setVariable(k,v));
         GraphTraversal<Vertex,Vertex> v = (GraphTraversal<Vertex, Vertex>) script.run();
         FluentGraphStatement fgs = new FluentGraphStatementBuilder(v).setGraphName(graphname).build();
-        return new Cqld4FluentGraphOp(sessionFunc.apply(value),fgs);
+        return new Cqld4FluentGraphOp(sessionF.apply(value),fgs);
     }
 
 

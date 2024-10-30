@@ -48,16 +48,11 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
 
     public Cqld4PreparedStmtDispenser(
         Cqld4DriverAdapter adapter,
-            LongFunction<CqlSession> sessionFunc,
-            ParsedOp op,
-            ParsedTemplateString stmtTpl,
-            RSProcessors processors
+        ParsedOp op,
+        ParsedTemplateString stmtTpl,
+        RSProcessors processors
     ) {
-        super(adapter, sessionFunc, op);
-        if (op.isDynamic("space")) {
-            throw new RuntimeException("Prepared statements and dynamic space values are not yet  supported" +
-                " but are being implemented");
-        }
+        super(adapter, op);
         this.processors = processors;
         this.stmtTpl = stmtTpl;
         this.fieldsF = getFieldsFunction(op);
@@ -71,10 +66,6 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
         return varbinder;
     }
 
-    @Override
-    public LongFunction<CqlSession> getSessionFunc() {
-        return super.getSessionFunc();
-    }
 
     protected LongFunction<Statement> createStmtFunc(LongFunction<Object[]> fieldsF, ParsedOp op) {
 

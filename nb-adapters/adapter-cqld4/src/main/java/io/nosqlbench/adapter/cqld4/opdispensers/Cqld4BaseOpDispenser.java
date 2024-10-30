@@ -55,7 +55,6 @@ public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp> extends BaseOp
     protected final LongFunction<CqlSession> sessionF;
 
     public Cqld4BaseOpDispenser(Cqld4DriverAdapter adapter,
-                                LongFunction<CqlSession> sessionFunc,
                                 ParsedOp op) {
         super((DriverAdapter<? extends T, ? extends Cqld4Space>) adapter, op);
         this.sessionF = l -> adapter.getSpaceCache().get(l).getSession();
@@ -92,11 +91,6 @@ public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp> extends BaseOp
 
     public int getMaxLwtRetries() {
         return maxLwtRetries;
-    }
-
-
-    public LongFunction<CqlSession> getSessionFunc() {
-        return sessionFunc;
     }
 
     /**
