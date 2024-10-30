@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
-public class Cqld4FluentGraphOpDispenser extends Cqld4BaseOpDispenser<Cqld4BaseOp> {
+public class Cqld4FluentGraphOpDispenser extends Cqld4BaseOpDispenser<Cqld4FluentGraphOp> {
 
     private final LongFunction<? extends String> graphnameFunc;
     private final Bindings virtdataBindings;
@@ -55,7 +55,7 @@ public class Cqld4FluentGraphOpDispenser extends Cqld4BaseOpDispenser<Cqld4BaseO
     }
 
     @Override
-    public Cqld4BaseOp getOp(long value) {
+    public Cqld4FluentGraphOp getOp(long value) {
         String graphname = graphnameFunc.apply(value);
         Script script = tlScript.get();
         Map<String, Object> allMap = virtdataBindings.getAllMap(value);

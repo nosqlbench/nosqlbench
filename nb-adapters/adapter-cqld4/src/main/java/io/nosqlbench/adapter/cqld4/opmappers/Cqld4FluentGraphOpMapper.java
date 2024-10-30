@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
-public class Cqld4FluentGraphOpMapper<CO extends Cqld4FluentGraphOp> extends Cqld4BaseOpMapper<Cqld4BaseOp> {
+public class Cqld4FluentGraphOpMapper extends Cqld4BaseOpMapper<Cqld4FluentGraphOp> {
     private final static Logger logger = LogManager.getLogger(Cqld4FluentGraphOpMapper.class);
 
     private final TypeAndTarget<CqlD4OpType, String> target;
@@ -65,7 +65,7 @@ public class Cqld4FluentGraphOpMapper<CO extends Cqld4FluentGraphOp> extends Cql
     }
 
     @Override
-    public OpDispenser<Cqld4BaseOp> apply(ParsedOp op, LongFunction<Cqld4Space> cqld4SpaceLongFunction) {
+    public OpDispenser<Cqld4FluentGraphOp> apply(ParsedOp op, LongFunction<Cqld4Space> cqld4SpaceLongFunction) {
         GraphTraversalSource g = DseGraph.g;
 
         ParsedTemplateString fluent = op.getAsTemplate(target.field).orElseThrow();

@@ -30,6 +30,7 @@ import com.datastax.oss.driver.api.core.type.VectorType;
 import com.datastax.oss.driver.api.core.type.codec.ExtraTypeCodecs;
 import com.datastax.oss.driver.api.core.type.codec.TypeCodec;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -130,7 +131,7 @@ public class CQLD4PreparedStmtDiagnostics {
         };
     }
 
-    public static Cqld4CqlOp rebindWithDiagnostics(
+    public static Cqld4CqlPreparedStatement rebindWithDiagnostics(
         PreparedStatement preparedStmt,
         LongFunction<Object[]> fieldsF,
         long cycle,

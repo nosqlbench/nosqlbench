@@ -26,7 +26,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class CqlD4CqlSimpleStmtMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
+public class CqlD4CqlSimpleStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlSimpleStatement> {
     private final LongFunction<String> targetFunction;
 
     public CqlD4CqlSimpleStmtMapper(Cqld4DriverAdapter adapter,
@@ -36,8 +36,8 @@ public class CqlD4CqlSimpleStmtMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
     }
 
     @Override
-    public OpDispenser<Cqld4BaseOp> apply(ParsedOp op, LongFunction spaceInitF) {
-        return new Cqld4SimpleCqlStmtDispenser(adapter, sessionFunc,targetFunction, op);
+    public OpDispenser<Cqld4CqlSimpleStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+        return new Cqld4SimpleCqlStmtDispenser(adapter, targetFunction, op);
     }
 
 }

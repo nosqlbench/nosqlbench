@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class CqlD4PreparedStmtMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
+public class CqlD4PreparedStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlPreparedStatement> {
 
     private final TypeAndTarget<CqlD4OpType, String> target;
 
@@ -49,7 +49,7 @@ public class CqlD4PreparedStmtMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
     }
 
     @Override
-    public OpDispenser<Cqld4BaseOp> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+    public OpDispenser<Cqld4CqlPreparedStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
         ParsedTemplateString stmtTpl = op.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
             "No statement was found in the op template:" + op
         ));

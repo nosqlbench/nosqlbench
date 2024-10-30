@@ -27,7 +27,7 @@ import io.nosqlbench.engine.api.templating.TypeAndTarget;
 
 import java.util.function.LongFunction;
 
-public class CqlD4BatchStmtMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
+public class CqlD4BatchStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlBatchStatement> {
 
     private final TypeAndTarget<CqlD4OpType, String> target;
 
@@ -41,8 +41,8 @@ public class CqlD4BatchStmtMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
     public OpDispenser<Cqld4CqlBatchStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
         ParsedOp subop = op.getAsSubOp("op_template", ParsedOp.SubOpNaming.ParentAndSubKey);
         int repeat = op.getStaticValue("repeat");
-        OpDispenser<? extends Cqld4BaseOp> od = new Cqld4CqlOpMapper(adapter).apply(op, spaceInitF);
-        return new CqlD4BatchStmtDispenser(adapter, sessionFunc, op, repeat, subop, od);
+        OpDispenser<Cqld4CqlOp> od = new Cqld4CqlOpMapper(adapter).apply(op, spaceInitF);
+        return new CqlD4BatchStmtDispenser(adapter, op, repeat, subop, od);
     }
 
 }

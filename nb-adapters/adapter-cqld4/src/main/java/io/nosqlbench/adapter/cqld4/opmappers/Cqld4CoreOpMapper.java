@@ -58,7 +58,7 @@ public class Cqld4CoreOpMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
         TypeAndTarget<CqlD4OpType, String> target = op.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
         logger.info(() -> "Using " + target.enumId + " statement form for '" + op.getName()+"'");
 
-        return switch (target.enumId) {
+        return (OpDispenser<Cqld4BaseOp>) switch (target.enumId) {
             case raw, simple, prepared, batch -> new Cqld4CqlOpMapper(adapter).apply(op, spaceFunc);
             case gremlin -> new Cqld4GremlinOpMapper(adapter, target.targetFunction).apply(op, spaceFunc);
             case fluent -> new Cqld4FluentGraphOpMapper(adapter, target).apply(op, spaceFunc);

@@ -36,14 +36,14 @@ public class CqlD4BatchStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlBat
     private final int repeat;
     private final ParsedOp subop;
     private final OpMapper submapper;
-    private LongFunction<Statement> opfunc;
+    private LongFunction<BatchStatement> opfunc;
 
     public CqlD4BatchStmtDispenser(
         Cqld4DriverAdapter adapter,
         ParsedOp op,
         int repeat,
         ParsedOp subop,
-        OpDispenser<? extends Cqld4CqlOp> subopDispenser
+        OpDispenser<Cqld4CqlOp> subopDispenser
     ) {
         super(adapter, op);
         this.repeat = repeat;
@@ -54,7 +54,7 @@ public class CqlD4BatchStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlBat
 
     }
 
-    private LongFunction<Statement> createStmtFunc(ParsedOp topOp, OpDispenser<? extends Cqld4CqlOp> subopDispenser) {
+    private LongFunction<BatchStatement> createStmtFunc(ParsedOp topOp, OpDispenser<? extends Cqld4CqlOp> subopDispenser) {
         Cqld4CqlOp exampleOp = subopDispenser.apply(0L);
         Statement<?> example = exampleOp.getStmt();
         if (!(example instanceof BatchableStatement<?> b)) {
@@ -63,13 +63,14 @@ public class CqlD4BatchStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlBat
         }
         BatchTypeEnum bte = topOp.getEnumFromFieldOr(BatchTypeEnum.class, BatchTypeEnum.unlogged, "batchtype");
         LongFunction<BatchStatementBuilder> bsbf = l -> new BatchStatementBuilder(bte.batchtype);
-        LongFunction<Statement> bsf = getBatchAccumulator(bsbf, subopDispenser);
+        LongFunction<BatchStatement> bsf = getBatchAccumulator(bsbf, subopDispenser);
         bsf = getEnhancedStmtFunc(bsf, topOp);
         return bsf;
     }
 
     @NotNull
-    private LongFunction<Statement> getBatchAccumulator(LongFunction<BatchStatementBuilder> bsb, OpDispenser<? extends Cqld4CqlOp> subopDispenser) {
+    private LongFunction<BatchStatement> getBatchAccumulator(LongFunction<BatchStatementBuilder> bsb, OpDispenser<?
+        extends Cqld4CqlOp> subopDispenser) {
         LongFunction<BatchStatementBuilder> f = l -> {
             long base = l * repeat;
             BatchStatementBuilder bsa = bsb.apply(l);
@@ -81,7 +82,7 @@ public class CqlD4BatchStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlBat
             return bsa;
         };
 
-        LongFunction<Statement> bsf = (long l) -> f.apply(l).build();
+        LongFunction<BatchStatement> bsf = (long l) -> f.apply(l).build();
         return bsf;
     }
 

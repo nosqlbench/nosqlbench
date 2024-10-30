@@ -35,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
+public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPreparedStatement> {
     private final static Logger logger = LogManager.getLogger(Cqld4PreparedStmtDispenser.class);
 
     private final RSProcessors processors;

@@ -42,7 +42,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp> extends BaseOpDispenser<Cqld4BaseOp, Cqld4Space> implements CqlOpMetrics {
+public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp> extends BaseOpDispenser<T, Cqld4Space> implements CqlOpMetrics {
 
     private final static Logger logger = LogManager.getLogger("CQLD4");
 
@@ -104,27 +104,50 @@ public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp> extends BaseOp
      * overhead for implicit attributes. This should be called when the stmt function is
      * initialized within each dispenser, not for each time dispensing occurs.
      */
-    protected LongFunction<Statement> getEnhancedStmtFunc(LongFunction<Statement> basefunc, ParsedOp op) {
+    protected <S extends Statement> LongFunction<S> getEnhancedStmtFunc(
+        LongFunction<S> basefunc,
+        ParsedOp op
+    ) {
+        LongFunction<S> partial = basefunc;
 
-        LongFunction<Statement> partial = basefunc;
-        partial = op.enhanceEnumOptionally(partial, "cl", DefaultConsistencyLevel.class, Statement::setConsistencyLevel);
-        partial = op.enhanceEnumOptionally(partial, "consistency_level", DefaultConsistencyLevel.class, Statement::setConsistencyLevel);
-        partial = op.enhanceEnumOptionally(partial, "scl", DefaultConsistencyLevel.class, Statement::setSerialConsistencyLevel);
-        partial = op.enhanceEnumOptionally(partial, "serial_consistency_level", DefaultConsistencyLevel.class, Statement::setSerialConsistencyLevel);
-        partial = op.enhanceFuncOptionally(partial, "idempotent", Boolean.class, Statement::setIdempotent);
-        partial = op.enhanceFuncOptionally(partial, "timeout", double.class, (statement, l) -> statement.setTimeout(Duration.ofMillis((long) (l * 1000L))));
-        partial = op.enhanceFuncOptionally(partial, "custom_payload", Map.class, Statement::setCustomPayload);
-        partial = op.enhanceFuncOptionally(partial, "execution_profile", DriverExecutionProfile.class, Statement::setExecutionProfile);
-        partial = op.enhanceFuncOptionally(partial, "execution_profile_name", String.class, Statement::setExecutionProfileName);
-        partial = op.enhanceFuncOptionally(partial, "node", Node.class, Statement::setNode);
-        partial = op.enhanceFuncOptionally(partial, "now_in_seconds", int.class, Statement::setNowInSeconds);
-        partial = op.enhanceFuncOptionally(partial, "page_size", int.class, Statement::setPageSize);
-        partial = op.enhanceFuncOptionally(partial, "query_timestamp", long.class, Statement::setQueryTimestamp);
-        partial = op.enhanceFuncOptionally(partial, "routing_key", ByteBuffer.class, Statement::setRoutingKey);
-        partial = op.enhanceFuncOptionally(partial, "routing_keys", ByteBuffer[].class, Statement::setRoutingKey);
-        partial = op.enhanceFuncOptionally(partial, "routing_token", Token.class, Statement::setRoutingToken);
-        partial = op.enhanceFuncOptionally(partial, "tracing", boolean.class, Statement::setTracing);
-        partial = op.enhanceFuncOptionally(partial, "showstmt", boolean.class, this::showstmt);
+        // This form is need to overcome limitations in covariant type-checking with method references
+
+        partial = op.enhanceEnumOptionally(partial, "cl", DefaultConsistencyLevel.class,
+            (s, cl) -> (S) s.setConsistencyLevel(cl));
+        partial = op.enhanceEnumOptionally(partial, "consistency_level", DefaultConsistencyLevel.class,
+            (s,v) -> (S) s.setConsistencyLevel(v));
+        partial = op.enhanceEnumOptionally(partial, "scl", DefaultConsistencyLevel.class,
+            (s,v) -> (S) s.setSerialConsistencyLevel(v));
+        partial = op.enhanceEnumOptionally(partial, "serial_consistency_level", DefaultConsistencyLevel.class,
+            (s,v) -> (S) s.setSerialConsistencyLevel(v));
+
+        partial = op.enhanceFuncOptionally(partial, "idempotent", Boolean.class,
+            (s,v) -> (S) s.setIdempotent(v));
+        partial = op.enhanceFuncOptionally(partial, "custom_payload", Map.class,
+            (s,v) -> (S) s.setCustomPayload(v));
+        partial = op.enhanceFuncOptionally(partial, "execution_profile", DriverExecutionProfile.class,
+            (s,v) -> (S) s.setExecutionProfile(v));
+        partial = op.enhanceFuncOptionally(partial, "execution_profile_name", String.class,
+            (s,v) -> (S) s.setExecutionProfileName(v));
+        partial = op.enhanceFuncOptionally(partial, "node", Node.class,
+            (s,v) -> (S) s.setNode(v));
+        partial = op.enhanceFuncOptionally(partial, "now_in_seconds", int.class,
+            (s,v) -> (S) s.setNowInSeconds(v));
+        partial = op.enhanceFuncOptionally(partial, "page_size", int.class,
+            (s,v) -> (S) s.setPageSize(v));
+        partial = op.enhanceFuncOptionally(partial, "query_timestamp", long.class,
+            (s,v) -> (S) s.setQueryTimestamp(v));
+        partial = op.enhanceFuncOptionally(partial, "routing_key", ByteBuffer.class,
+            (s,v) -> (S) s.setRoutingKey(v));
+        partial = op.enhanceFuncOptionally(partial, "routing_keys", ByteBuffer[].class,
+                (s,v) -> (S) s.setRoutingKey(v));
+        partial = op.enhanceFuncOptionally(partial, "routing_token", Token.class,
+            (s,v) -> (S) s.setRoutingToken(v));
+        partial = op.enhanceFuncOptionally(partial, "tracing", boolean.class,
+            (s,v) -> (S) s.setTracing(v));
+        partial = op.enhanceFuncOptionally(partial, "timeout", double.class,
+            (statement, l) -> (S) statement.setTimeout(Duration.ofMillis((long) ((l * 1000L)))));
+        partial = op.enhanceFuncOptionally(partial, "showstmt", boolean.class, (s,v) -> (S) this.showstmt(s,v));
 
         return partial;
     }

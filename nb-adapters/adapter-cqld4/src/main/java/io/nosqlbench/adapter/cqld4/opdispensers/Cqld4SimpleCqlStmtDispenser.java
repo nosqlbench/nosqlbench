@@ -28,7 +28,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class Cqld4SimpleCqlStmtDispenser<T extends Cqld4CqlOp> extends Cqld4BaseOpDispenser<T> {
+public class Cqld4SimpleCqlStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlSimpleStatement> {
 
     private final LongFunction<Statement> stmtFunc;
     private final LongFunction<String> targetFunction;

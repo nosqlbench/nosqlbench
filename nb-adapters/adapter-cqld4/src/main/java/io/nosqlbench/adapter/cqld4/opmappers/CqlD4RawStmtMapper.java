@@ -26,19 +26,17 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class CqlD4RawStmtMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
+public class CqlD4RawStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlSimpleStatement> {
 
     private final LongFunction<String> targetFunction;
-
-    public CqlD4RawStmtMapper(Cqld4DriverAdapter adapter,
-                              LongFunction<String> targetFunction) {
+    public CqlD4RawStmtMapper(Cqld4DriverAdapter adapter,LongFunction<String> targetFunction) {
         super(adapter);
         this.targetFunction = targetFunction;
     }
 
     @Override
-    public OpDispenser<Cqld4BaseOp> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
-        return new Cqld4RawStmtDispenser(adapter, sessionFunc, targetFunction, op);
+    public OpDispenser<Cqld4CqlSimpleStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+        return new Cqld4RawStmtDispenser(adapter, targetFunction,op);
     }
 
     //    @Override

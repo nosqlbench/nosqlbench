@@ -31,15 +31,14 @@ public class CqlD4RainbowTableDispenser extends Cqld4BaseOpDispenser<Cqld4Rainbo
 //    private final LongFunction<Statement> stmtFunc;
     private final LongFunction<String> targetFunction;
 
-    public CqlD4RainbowTableDispenser(Cqld4DriverAdapter adapter, LongFunction<CqlSession> sessionFunc,
-                                      LongFunction<String> targetFunction, ParsedOp cmd) {
-        super(adapter, sessionFunc,cmd);
+    public CqlD4RainbowTableDispenser(Cqld4DriverAdapter adapter, LongFunction<String> targetFunction, ParsedOp cmd) {
+        super(adapter, cmd);
         this.targetFunction=targetFunction;
 //        this.tableFunc =createTableFunc(cmd);
     }
 
     @Override
-    public Cqld4CqlOp getOp(long cycle) {
+    public Cqld4RainbowTableOp getOp(long cycle) {
         throw new RuntimeException("implement me");
 //        return new Cqld4RainbowTableOp(
 //            getSessionFunc().apply(value),

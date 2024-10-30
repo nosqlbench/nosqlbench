@@ -29,7 +29,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class Cqld4RawStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlOp> {
+public class Cqld4RawStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlSimpleStatement> {
 
     private final LongFunction<Statement> stmtFunc;
     private final LongFunction<String> targetFunction;

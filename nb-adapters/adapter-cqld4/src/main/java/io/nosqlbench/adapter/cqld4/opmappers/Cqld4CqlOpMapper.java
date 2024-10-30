@@ -29,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class Cqld4CqlOpMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
+public class Cqld4CqlOpMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlOp> {
 
     protected final static Logger logger = LogManager.getLogger(Cqld4CqlOpMapper.class);
 
@@ -38,22 +38,23 @@ public class Cqld4CqlOpMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
     }
 
     @Override
-    public OpDispenser<Cqld4BaseOp> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+    public OpDispenser<Cqld4CqlOp> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
         CqlD4OpType opType = CqlD4OpType.prepared;
         TypeAndTarget<CqlD4OpType, String> target = op.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
         logger.info(() -> "Using " + target.enumId + " statement form for '" + op.getName() + "'");
 
-        return switch (target.enumId) {
+        return (OpDispenser<Cqld4CqlOp>) switch (target.enumId) {
             case raw -> {
                 CqlD4RawStmtMapper cqlD4RawStmtMapper = new CqlD4RawStmtMapper(adapter, target.targetFunction);
-                OpDispenser<Cqld4BaseOp> apply = cqlD4RawStmtMapper.apply(op, spaceFunc);
+                OpDispenser<Cqld4CqlSimpleStatement> apply = cqlD4RawStmtMapper.apply(op, spaceFunc);
                 yield apply;
             }
             case simple -> new CqlD4CqlSimpleStmtMapper(adapter, target.targetFunction).apply(op, spaceFunc);
             case prepared -> new CqlD4PreparedStmtMapper(adapter, target).apply(op, spaceFunc);
 
             case batch -> new CqlD4BatchStmtMapper(adapter, target).apply(op, spaceFunc);
-            default -> throw new OpConfigError("Unsupported op type for CQL category of statement forms:" + target.enumId);
+            default ->
+                throw new OpConfigError("Unsupported op type for CQL category of statement forms:" + target.enumId);
         };
     }
 

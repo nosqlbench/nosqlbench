@@ -49,7 +49,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Cqld4Space extends BaseSpace {
+public class Cqld4Space extends BaseSpace<Cqld4Space> {
     private final static Logger logger = LogManager.getLogger(Cqld4Space.class);
 
     CqlSession session;
