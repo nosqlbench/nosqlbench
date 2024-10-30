@@ -707,7 +707,7 @@
                         <exclude>**/generated-sources/**</exclude>
                     </excludes>
                     <addLicenseHeaders>true</addLicenseHeaders>
-                    <copyrightMessage>Copyright (c) 2022 nosqlbench</copyrightMessage>
+                    <copyrightMessage>Copyright (c) nosqlbench</copyrightMessage>
                 </configuration>
             </plugin>
 
