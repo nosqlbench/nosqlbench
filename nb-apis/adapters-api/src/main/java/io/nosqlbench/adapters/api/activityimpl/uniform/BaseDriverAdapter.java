@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
+import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
 public abstract class BaseDriverAdapter<R extends Op, S extends Space> extends NBBaseComponent implements DriverAdapter<R, S>, NBConfigurable, NBReconfigurable {
@@ -193,8 +194,26 @@ public abstract class BaseDriverAdapter<R extends Op, S extends Space> extends N
 
     @Override
     public LongFunction<S> getSpaceFunc(ParsedOp pop) {
-        LongToIntFunction spaceIdxF = pop.getAsFunctionOrInt("space", 0);
-        ConcurrentSpaceCache<? extends S> cache = getSpaceCache();
-        return l -> getSpaceCache().get(spaceIdxF.applyAsInt(l));
+
+        Optional<LongFunction<String>> spaceFuncTest = pop.getAsOptionalFunction("space");
+        LongUnaryOperator cycleToSpaceF;
+        if (spaceFuncTest.isEmpty()) {
+            cycleToSpaceF = (long l) -> 0;
+        } else {
+            Object example = spaceFuncTest.get().apply(0L);
+            if (example instanceof Number n) {
+                logger.trace("mapping space indirectly with Number type");
+                LongFunction<Number> numberF = pop.getAsRequiredFunction("space", Number.class);
+                cycleToSpaceF=  l -> numberF.apply(l).longValue();
+            } else {
+                logger.trace("mapping space indirectly through hash table to index pool");
+                LongFunction<?> sourceF = pop.getAsRequiredFunction("space", String.class);
+                LongFunction<String> namerF = l -> sourceF.apply(l).toString();
+                ConcurrentIndexCacheWrapper wrapper = new ConcurrentIndexCacheWrapper();
+                cycleToSpaceF = l -> wrapper.mapKeyToIndex(namerF.apply(l));
+            }
+        }
+        ConcurrentSpaceCache<S> spaceCache1 = getSpaceCache();
+        return l -> spaceCache1.get(cycleToSpaceF.applyAsLong(l));
     }
 }

@@ -138,7 +138,7 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE extends Space> exten
      * things needed by operations, or things needed during the
      * construction of operations.
      *
-     * See {@link StringDriverSpaceCache} for details on when and how to use this function.
+     * See {@link ConcurrentIndexCache} for details on when and how to use this function.
      *
      * <p>During Adapter Initialization, Op Mapping, Op Synthesis, or Op Execution,
      * you may need access to the objects in (the or a) space cache. You can build the
