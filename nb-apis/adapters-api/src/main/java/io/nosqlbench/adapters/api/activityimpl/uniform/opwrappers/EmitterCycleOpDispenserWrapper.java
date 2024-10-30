@@ -35,6 +35,11 @@ public class EmitterCycleOpDispenserWrapper<O,S extends Space,R> extends BaseOpD
     ) {
         super(adapter, pop);
         this.realDispenser = realDispenser;
+        logger.warn(
+            "initialized {} for to emit the result type to stdout. ",
+            pop.getName()
+        );
+
     }
 
     @Override

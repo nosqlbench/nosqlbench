@@ -18,6 +18,8 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
  */
 
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+
 import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
@@ -34,5 +36,11 @@ public class BaseSpace<SelfT extends BaseSpace<SelfT> > implements Space {
     @Override
     public String getName() {
         return spaceName;
+    }
+
+    public static class BasicSpace extends BaseSpace<BasicSpace> implements Space {
+        public BasicSpace(DriverAdapter<Op, BasicSpace> adapter, long idx) {
+            super(adapter, idx);
+        }
     }
 }

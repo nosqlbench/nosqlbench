@@ -35,6 +35,12 @@ public class DryCycleOpDispenserWrapper<S extends Space, RESULT> extends BaseOpD
     ) {
         super(adapter, pop);
         this.realDispenser = realDispenser;
+        logger.warn(
+            "initialized {} for dry run only. " +
+                "This op will be synthesized for each cycle, but will not be executed.",
+            pop.getName()
+        );
+
     }
 
     @Override

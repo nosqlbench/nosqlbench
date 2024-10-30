@@ -195,8 +195,8 @@ public abstract class BaseDriverAdapter<R extends Op, S extends Space> extends N
     @Override
     public LongFunction<S> getSpaceFunc(ParsedOp pop) {
 
-        Optional<LongFunction<String>> spaceFuncTest = pop.getAsOptionalFunction("space");
-        LongUnaryOperator cycleToSpaceF;
+        Optional<LongFunction<Object>> spaceFuncTest = pop.getAsOptionalFunction("space",Object.class);
+        LongToIntFunction cycleToSpaceF;
         if (spaceFuncTest.isEmpty()) {
             cycleToSpaceF = (long l) -> 0;
         } else {
@@ -204,7 +204,7 @@ public abstract class BaseDriverAdapter<R extends Op, S extends Space> extends N
             if (example instanceof Number n) {
                 logger.trace("mapping space indirectly with Number type");
                 LongFunction<Number> numberF = pop.getAsRequiredFunction("space", Number.class);
-                cycleToSpaceF=  l -> numberF.apply(l).longValue();
+                cycleToSpaceF=  l -> numberF.apply(l).intValue();
             } else {
                 logger.trace("mapping space indirectly through hash table to index pool");
                 LongFunction<?> sourceF = pop.getAsRequiredFunction("space", String.class);
@@ -214,6 +214,6 @@ public abstract class BaseDriverAdapter<R extends Op, S extends Space> extends N
             }
         }
         ConcurrentSpaceCache<S> spaceCache1 = getSpaceCache();
-        return l -> spaceCache1.get(cycleToSpaceF.applyAsLong(l));
+        return l -> spaceCache1.get(cycleToSpaceF.applyAsInt(l));
     }
 }

@@ -19,6 +19,7 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
 
 
 import io.nosqlbench.virtdata.library.basics.shared.functionadapters.ToLongFunction;
+import scala.Int;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -32,14 +33,14 @@ import java.util.function.Function;
  */
 public class ConcurrentIndexCacheWrapper {
 
-    private ConcurrentHashMap<Object,Long> forwardMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Object, Integer> forwardMap = new ConcurrentHashMap<>();
 
-    public long mapKeyToIndex(Object key) {
+    public int mapKeyToIndex(Object key) {
         return forwardMap.computeIfAbsent(key, this::nextIndex);
     }
 
-    private long idx=0;
-    private synchronized long nextIndex(Object any) {
+    private int idx=0;
+    private synchronized int nextIndex(Object any) {
         return idx++;
     }
 

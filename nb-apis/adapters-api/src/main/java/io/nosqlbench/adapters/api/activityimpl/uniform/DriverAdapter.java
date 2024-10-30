@@ -161,7 +161,12 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE extends Space> exten
      * object state related to retained objects for the lifetime of a native driver.
      */
     default LongFunction<SPACETYPE> getSpaceInitializer(NBConfiguration cfg) {
-        return n -> null;
+        return n -> (SPACETYPE) new Space() {
+            @Override
+            public String getName() {
+                return "empty_space";
+            }
+        };
     }
 
     NBConfiguration getConfiguration();

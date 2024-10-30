@@ -40,6 +40,7 @@ import org.apache.logging.log4j.Logger;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Map;
+import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp> extends BaseOpDispenser<T, Cqld4Space> implements CqlOpMetrics {

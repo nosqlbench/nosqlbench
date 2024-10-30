@@ -35,6 +35,11 @@ public class EmitterRunnableOpDispenserWrapper<O,S> extends BaseOpDispenser<Runn
     ) {
         super(adapter, pop);
         this.realDispenser = realDispenser;
+        logger.warn(
+            "initialized {} for to emit the result type to stdout. ",
+            pop.getName()
+        );
+
     }
 
     @Override

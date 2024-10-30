@@ -57,7 +57,6 @@ public class MongoOpMapper<MC extends MongoDirectCommandOp> implements OpMapper<
         if (connectionURL == null) {
             throw new BasicError("Must provide a connection value for use by the MongoDB adapter.");
         }
-        spaceCache.get(0).createMongoClient(connectionURL);
 
         Optional<LongFunction<String>> oDatabaseF = op.getAsOptionalFunction("database");
         if (oDatabaseF.isEmpty()) {

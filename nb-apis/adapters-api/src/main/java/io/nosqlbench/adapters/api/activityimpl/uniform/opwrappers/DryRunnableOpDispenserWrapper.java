@@ -22,9 +22,10 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DryRunnableOpDispenserWrapper<S extends Space> extends BaseOpDispenser<RunnableOp, S> {
-
     private final OpDispenser<RunnableOp> realDispenser;
 
     public DryRunnableOpDispenserWrapper(
@@ -34,6 +35,12 @@ public class DryRunnableOpDispenserWrapper<S extends Space> extends BaseOpDispen
     ) {
         super(adapter, pop);
         this.realDispenser = realDispenser;
+        logger.warn(
+            "initialized {} for dry run only. " +
+                "This op will be synthesized for each cycle, but will not be executed.",
+            pop.getName()
+        );
+
     }
 
     @Override
