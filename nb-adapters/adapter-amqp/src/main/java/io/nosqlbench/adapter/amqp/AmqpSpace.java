@@ -45,7 +45,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class AmqpSpace extends BaseSpace {
+public class AmqpSpace extends BaseSpace<AmqpSpace> {
 
     private final static Logger logger = LogManager.getLogger(AmqpSpace.class);
 
@@ -117,8 +117,8 @@ public class AmqpSpace extends BaseSpace {
     private long totalCycleNum;
     private long totalThreadNum;
 
-    public AmqpSpace(long idx, NBConfiguration cfg) {
-        super(idx);
+    public AmqpSpace(AmqpDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter,idx);
         this.cfg = cfg;
 
         String amqpClientConfFileName = cfg.get("config");

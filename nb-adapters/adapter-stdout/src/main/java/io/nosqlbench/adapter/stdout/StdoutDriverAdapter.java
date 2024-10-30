@@ -55,7 +55,7 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
 
     @Override
     public LongFunction<StdoutSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (idx) -> new StdoutSpace(idx, cfg);
+        return (idx) -> new StdoutSpace(this, idx, cfg);
     }
 
     @Override

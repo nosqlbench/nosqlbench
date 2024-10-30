@@ -30,11 +30,11 @@ import io.nosqlbench.nb.api.errors.OpConfigError;
 
 import java.util.Optional;
 
-public class DynamoDBSpace extends BaseSpace {
+public class DynamoDBSpace extends BaseSpace<DynamoDBSpace> {
     DynamoDB dynamoDB;
 
-    public DynamoDBSpace(long idx, NBConfiguration cfg) {
-        super(idx);
+    public DynamoDBSpace(DynamoDBDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter, idx);
         AmazonDynamoDB client = createClient(cfg);
         dynamoDB= new DynamoDB(client);
     }

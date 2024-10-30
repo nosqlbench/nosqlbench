@@ -51,7 +51,7 @@ public class PulsarDriverAdapter extends BaseDriverAdapter<PulsarOp, PulsarSpace
 
     @Override
     public LongFunction<PulsarSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new PulsarSpace(s, cfg);
+        return (s) -> new PulsarSpace(this,s, cfg);
     }
 
     @Override

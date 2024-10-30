@@ -57,8 +57,8 @@ public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp> extends BaseOp
     public Cqld4BaseOpDispenser(Cqld4DriverAdapter adapter,
                                 LongFunction<CqlSession> sessionFunc,
                                 ParsedOp op) {
-        super(adapter, op);
-        this.sessionFunc = sessionFunc;
+        super((DriverAdapter<? extends T, ? extends Cqld4Space>) adapter, op);
+        this.sessionF = l -> adapter.getSpaceCache().get(l).getSession();
         this.maxpages = op.getStaticConfigOr("maxpages", 1);
         this.isRetryReplace = op.getStaticConfigOr("retryreplace", false);
         this.maxLwtRetries = op.getStaticConfigOr("maxlwtretries", 1);

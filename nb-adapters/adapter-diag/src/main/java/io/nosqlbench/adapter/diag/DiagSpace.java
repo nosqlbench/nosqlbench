@@ -27,7 +27,7 @@ import io.nosqlbench.nb.api.config.standard.Param;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DiagSpace extends BaseSpace implements ActivityDefObserver {
+public class DiagSpace extends BaseSpace<DiagSpace> implements ActivityDefObserver {
     private final Logger logger = LogManager.getLogger(DiagSpace.class);
 
     private final NBConfiguration cfg;
@@ -35,8 +35,8 @@ public class DiagSpace extends BaseSpace implements ActivityDefObserver {
     private long interval;
     private boolean errorOnClose;
 
-    public DiagSpace(long idx, NBConfiguration cfg) {
-        super(idx);
+    public DiagSpace(DiagDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter, idx);
         this.cfg = cfg;
         applyConfig(cfg);
         logger.trace(() -> "diag space initialized as '" + idx + "'");

@@ -49,7 +49,7 @@ public class S4JDriverAdapter extends BaseDriverAdapter<S4JOp, S4JSpace> {
 
     @Override
     public LongFunction<S4JSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new S4JSpace(s, cfg);
+        return (s) -> new S4JSpace(this,s, cfg);
     }
 
     @Override

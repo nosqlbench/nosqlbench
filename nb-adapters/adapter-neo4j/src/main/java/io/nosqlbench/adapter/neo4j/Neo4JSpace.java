@@ -35,14 +35,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-public class Neo4JSpace extends BaseSpace {
+public class Neo4JSpace extends BaseSpace<Neo4JSpace> {
 
     private final static Logger logger = LogManager.getLogger(Neo4JSpace.class);
     private Driver driver;
     private SessionConfig sessionConfig;
 
-    public Neo4JSpace(long idx, NBConfiguration cfg) {
-        super(idx);
+    public Neo4JSpace(Neo4JDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter,idx);
         this.driver = initializeDriver(cfg);
         driver.verifyConnectivity();
     }

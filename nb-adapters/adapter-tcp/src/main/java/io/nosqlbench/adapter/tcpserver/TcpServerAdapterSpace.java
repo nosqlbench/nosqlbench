@@ -41,7 +41,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class TcpServerAdapterSpace extends BaseSpace {
+public class TcpServerAdapterSpace extends BaseSpace<TcpServerAdapterSpace> {
 
 
     private final static Logger logger = LogManager.getLogger(TcpServerAdapterSpace.class);
@@ -52,8 +52,8 @@ public class TcpServerAdapterSpace extends BaseSpace {
     private final List<Shutdown> managedShutdown = new ArrayList<>();
     private int capacity=10;
 
-    public TcpServerAdapterSpace(long idx, NBConfiguration config) {
-        super(idx);
+    public TcpServerAdapterSpace(TcpServerDriverAdapter adapter, long idx, NBConfiguration config) {
+        super(adapter, idx);
         this.config = config;
         this.writer = createPrintWriter();
     }

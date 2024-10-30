@@ -37,7 +37,7 @@ public class Cqld4RawStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlOp> {
     public Cqld4RawStmtDispenser(Cqld4DriverAdapter adapter,
                                  LongFunction<CqlSession> sessionFunc,
                                  LongFunction<String> targetFunction, ParsedOp cmd) {
-        super(adapter, sessionFunc, cmd);
+        super(adapter, cmd);
         this.targetFunction=targetFunction;
         this.stmtFunc = createStmtFunc(cmd);
     }

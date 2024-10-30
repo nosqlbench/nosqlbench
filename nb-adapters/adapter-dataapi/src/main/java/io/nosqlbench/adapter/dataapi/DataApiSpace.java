@@ -35,7 +35,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-public class DataApiSpace extends BaseSpace {
+public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private final static Logger logger = LogManager.getLogger(DataApiSpace.class);
     private final NBConfiguration config;
     private String astraToken;
@@ -48,8 +48,8 @@ public class DataApiSpace extends BaseSpace {
     private AstraDBAdmin admin;
     private DatabaseAdmin namespaceAdmin;
 
-    public DataApiSpace(long name, NBConfiguration cfg) {
-        super(name);
+    public DataApiSpace(DataApiDriverAdapter adapter, long name, NBConfiguration cfg) {
+        super(adapter,name);
         this.config = cfg;
         setToken();
         setSuperToken();

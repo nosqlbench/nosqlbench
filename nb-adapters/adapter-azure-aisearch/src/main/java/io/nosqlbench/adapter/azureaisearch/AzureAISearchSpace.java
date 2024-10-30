@@ -51,7 +51,7 @@ import io.nosqlbench.nb.api.config.standard.Param;
  *      "https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/search/azure-search-documents/">Azure
  *      AI Search Java searchIndexClient</a>
  */
-public class AzureAISearchSpace extends BaseSpace {
+public class AzureAISearchSpace extends BaseSpace<AzureAISearchSpace> {
 	private final static Logger logger = LogManager.getLogger(AzureAISearchSpace.class);
 	private final NBConfiguration cfg;
 
@@ -65,8 +65,8 @@ public class AzureAISearchSpace extends BaseSpace {
 	 * @param idx The name of this space
 	 * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
 	 */
-	public AzureAISearchSpace(long idx, NBConfiguration cfg) {
-		super(idx);
+	public AzureAISearchSpace(AzureAISearchDriverAdapter adapter, long idx, NBConfiguration cfg) {
+		super(adapter,idx);
 		this.cfg = cfg;
 	}
 

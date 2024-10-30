@@ -47,7 +47,7 @@ public class DynamoDBDriverAdapter extends BaseDriverAdapter<DynamoDBOp, DynamoD
 
     @Override
     public LongFunction<DynamoDBSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new DynamoDBSpace(s,cfg);
+        return (s) -> new DynamoDBSpace(this, s,cfg);
     }
 
     @Override

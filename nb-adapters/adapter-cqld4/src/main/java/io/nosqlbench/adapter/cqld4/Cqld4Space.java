@@ -54,8 +54,8 @@ public class Cqld4Space extends BaseSpace {
 
     CqlSession session;
 
-    public Cqld4Space(long space, NBConfiguration cfg) {
-        super(space);
+    public Cqld4Space(Cqld4DriverAdapter adapter, long spaceidx, NBConfiguration cfg) {
+        super(adapter,spaceidx);
         session = createSession(cfg);
     }
 

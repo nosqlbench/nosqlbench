@@ -45,7 +45,7 @@ public class AzureAISearchDriverAdapter extends BaseDriverAdapter<AzureAISearchB
 
 	@Override
 	public LongFunction<AzureAISearchSpace> getSpaceInitializer(NBConfiguration cfg) {
-		return (s) -> new AzureAISearchSpace(s, cfg);
+		return (s) -> new AzureAISearchSpace(this,s, cfg);
 	}
 
 	@Override

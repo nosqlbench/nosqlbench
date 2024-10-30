@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class KafkaSpace extends BaseSpace {
+public class KafkaSpace extends BaseSpace<KafkaSpace> {
 
     private final static Logger logger = LogManager.getLogger(KafkaSpace.class);
 
@@ -90,8 +90,8 @@ public class KafkaSpace extends BaseSpace {
         new ConcurrentHashMap<>();
 
 
-    public KafkaSpace(int idx, NBConfiguration cfg) {
-        super(idx);
+    public KafkaSpace(KafkaDriverAdapter adapter, int idx, NBConfiguration cfg) {
+        super(adapter, idx);
         this.cfg = cfg;
 
         this.bootstrapSvr = cfg.get("bootstrap_server");

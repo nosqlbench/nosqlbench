@@ -31,14 +31,14 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.Socket;
 
-public class TcpClientAdapterSpace extends BaseSpace {
+public class TcpClientAdapterSpace extends BaseSpace<TcpClientAdapterSpace> {
 
     private final static Logger logger = LogManager.getLogger(TcpClientAdapterSpace.class);
     private final NBConfiguration config;
     Writer writer;
 
-    public TcpClientAdapterSpace(long idx, NBConfiguration config) {
-        super(idx);
+    public TcpClientAdapterSpace(TcpClientDriverAdapter adapter, long idx, NBConfiguration config) {
+        super(adapter, idx);
         this.config = config;
         this.writer = createPrintWriter();
     }

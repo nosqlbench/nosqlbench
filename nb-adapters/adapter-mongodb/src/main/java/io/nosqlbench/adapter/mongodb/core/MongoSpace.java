@@ -39,12 +39,12 @@ import org.bson.codecs.configuration.CodecRegistry;
 import static org.bson.codecs.configuration.CodecRegistries.fromCodecs;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
-public class MongoSpace extends BaseSpace {
+public class MongoSpace extends BaseSpace<MongoSpace> {
     private final static Logger logger = LogManager.getLogger(MongoSpace.class);
     private MongoClient mongoClient;
 
-    public MongoSpace(long idx, NBConfiguration cfg) {
-        super(idx);
+    public MongoSpace(MongodbDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter,idx);
     }
 
     public static NBConfigModel getConfigModel() {

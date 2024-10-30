@@ -26,13 +26,13 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-public class StdoutSpace extends BaseSpace {
+public class StdoutSpace extends BaseSpace<StdoutSpace> {
 
     Writer writer;
     private PrintWriter console;
 
-    public StdoutSpace(long idx, NBConfiguration cfg) {
-        super(idx);
+    public StdoutSpace(StdoutDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter, idx);
         String filename = cfg.get("filename");
         this.writer = createPrintWriter(filename);
     }

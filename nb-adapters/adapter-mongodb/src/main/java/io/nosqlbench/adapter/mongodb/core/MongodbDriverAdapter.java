@@ -47,7 +47,7 @@ public class MongodbDriverAdapter extends BaseDriverAdapter<MongoDirectCommandOp
 
     @Override
     public LongFunction<MongoSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return idx -> new MongoSpace(idx, cfg);
+        return idx -> new MongoSpace(this, idx, cfg);
     }
 
     @Override

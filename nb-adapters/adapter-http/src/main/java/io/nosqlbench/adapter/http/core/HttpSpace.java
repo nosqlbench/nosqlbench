@@ -40,7 +40,7 @@ import java.util.Locale;
  * HTTP client implementation is meant to be immutable. If shared-state issues
  * occur, thread-local support will be re-added.
  */
-public class HttpSpace extends BaseSpace implements NBLabeledElement {
+public class HttpSpace extends BaseSpace<HttpSpace> implements NBLabeledElement {
     private final static Logger logger = LogManager.getLogger(HttpSpace.class);
 
     private final HttpDriverAdapter parentAdapter;
@@ -56,7 +56,7 @@ public class HttpSpace extends BaseSpace implements NBLabeledElement {
 
 
     public HttpSpace(long idx, HttpDriverAdapter parentAdapter, NBConfiguration cfg) {
-        super(idx);
+        super(parentAdapter,idx);
         this.parentAdapter = parentAdapter;
         this.cfg = cfg;
         applyConfig(cfg);

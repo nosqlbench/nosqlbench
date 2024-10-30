@@ -43,7 +43,7 @@ public class Neo4JDriverAdapter extends BaseDriverAdapter<Neo4JBaseOp, Neo4JSpac
 
     @Override
     public LongFunction<Neo4JSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new Neo4JSpace(s, cfg);
+        return (s) -> new Neo4JSpace(this,s, cfg);
     }
 
     @Override

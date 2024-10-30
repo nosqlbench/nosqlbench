@@ -35,7 +35,7 @@ import org.apache.logging.log4j.Logger;
  * @see <a href="https://cloud.google.com/spanner/docs/reference/rpc">spanner rpc api calls</a>
  * @see <a href="https://cloud.google.com/spanner/docs/reference/standard-sql/data-definition-language#vector_index_statements">SQL functionality related to vector indices</a>
  */
-public class GCPSpannerSpace extends BaseSpace {
+public class GCPSpannerSpace extends BaseSpace<GCPSpannerSpace> {
     private final static Logger logger = LogManager.getLogger(GCPSpannerSpace.class);
     private final NBConfiguration cfg;
     protected Spanner spanner;
@@ -50,8 +50,8 @@ public class GCPSpannerSpace extends BaseSpace {
      * @param idx The name of this space
      * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
      */
-    public GCPSpannerSpace(long idx, NBConfiguration cfg) {
-        super(idx);
+    public GCPSpannerSpace(GCPSpannerDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter,idx);
         this.cfg = cfg;
     }
 

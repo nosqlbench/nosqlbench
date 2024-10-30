@@ -21,12 +21,14 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
 import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
-public class BaseSpace implements Space {
+public class BaseSpace<SelfT extends BaseSpace<SelfT> > implements Space {
 
     private final String spaceName;
+    private final DriverAdapter<?, SelfT> adapter;
 
-    public BaseSpace(long idx) {
+    public BaseSpace(DriverAdapter<?,SelfT> adapter, long idx) {
         this.spaceName = String.valueOf(idx);
+        this.adapter = adapter;
     }
 
     @Override

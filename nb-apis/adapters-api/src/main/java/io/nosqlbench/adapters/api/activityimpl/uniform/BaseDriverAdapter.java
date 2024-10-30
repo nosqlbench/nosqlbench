@@ -132,7 +132,7 @@ public abstract class BaseDriverAdapter<R extends Op, S extends Space> extends N
     @Override
     public final synchronized ConcurrentSpaceCache<S> getSpaceCache() {
         if (spaceCache == null) {
-            spaceCache = new ConcurrentSpaceCache<S>(getSpaceInitializer(getConfiguration()));
+            spaceCache = new ConcurrentSpaceCache<S>(this,getSpaceInitializer(getConfiguration()));
         }
         return spaceCache;
     }

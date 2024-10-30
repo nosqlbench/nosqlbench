@@ -41,7 +41,7 @@ import java.time.Duration;
  * @see <a href="https://github.com/qdrant/java-client">Qdrant Java client</a>
  * @see <a href="https://github.com/qdrant/qdrant/blob/master/docs/grpc/docs.md">Qdrant GRPC docs</a>
  */
-public class QdrantSpace extends BaseSpace {
+public class QdrantSpace extends BaseSpace<QdrantSpace> {
     private final static Logger logger = LogManager.getLogger(QdrantSpace.class);
     private final NBConfiguration cfg;
 
@@ -53,8 +53,8 @@ public class QdrantSpace extends BaseSpace {
      *
      * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
      */
-    public QdrantSpace(long idx, NBConfiguration cfg) {
-        super(idx);
+    public QdrantSpace(QdrantDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter, idx);
         this.cfg = cfg;
     }
 

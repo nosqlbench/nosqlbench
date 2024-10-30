@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public class PulsarSpace extends BaseSpace {
+public class PulsarSpace extends BaseSpace<PulsarSpace> {
 
     private final static Logger logger = LogManager.getLogger(PulsarSpace.class);
 
@@ -68,8 +68,8 @@ public class PulsarSpace extends BaseSpace {
     private final ConcurrentHashMap<ReaderCacheKey, Reader<?>> readers = new ConcurrentHashMap<>();
 
 
-    public PulsarSpace(long idx, NBConfiguration cfg) {
-        super(idx);
+    public PulsarSpace(PulsarDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter, idx);
         this.cfg = cfg;
 
         this.pulsarSvcUrl = cfg.get("service_url");

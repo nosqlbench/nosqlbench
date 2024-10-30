@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-public class S4JSpace extends BaseSpace {
+public class S4JSpace extends BaseSpace<S4JSpace> {
 
     private final static Logger logger = LogManager.getLogger(S4JSpace.class);
 
@@ -113,8 +113,8 @@ public class S4JSpace extends BaseSpace {
     private final MutablePair<Boolean, String> largePayloadSimPair = MutablePair.of(false, null);
 
 
-    public S4JSpace(long idx, NBConfiguration cfg) {
-        super(idx);
+    public S4JSpace(S4JDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter, idx);
         this.cfg = cfg;
 
         this.pulsarSvcUrl = cfg.get("service_url");

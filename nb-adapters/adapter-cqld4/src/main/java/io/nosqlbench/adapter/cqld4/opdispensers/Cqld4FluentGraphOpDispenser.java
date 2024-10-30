@@ -51,7 +51,7 @@ public class Cqld4FluentGraphOpDispenser extends Cqld4BaseOpDispenser<Cqld4BaseO
         Bindings virtdataBindings,
         Supplier<Script> scriptSupplier
     ) {
-        super(adapter, sessionFunc, op);
+        super(adapter, op);
         this.graphnameFunc = graphnameFunc;
         this.sessionFunc = sessionFunc1;
         this.virtdataBindings = virtdataBindings;
