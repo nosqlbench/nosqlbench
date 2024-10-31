@@ -25,9 +25,7 @@ public interface RunnableOp extends Op, Runnable {
 
     /**
      * Invoke the operation. If you need to see the value of the current
-     * cycle, then you can use {@link CycleOp} instead. If you need to
-     * use a cached result of a previous operation, then you may need to
-     * use {@link ChainingOp}.
+     * cycle, then you can use {@link CycleOp} instead.
      */
     @Override
     void run();

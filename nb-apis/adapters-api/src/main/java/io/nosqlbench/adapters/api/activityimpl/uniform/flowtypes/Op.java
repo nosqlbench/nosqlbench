@@ -27,7 +27,6 @@ package io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes;
  *  the result type from your operation. In some cases preparing a result body to
  *  hand down the chain is more costly, so implementing this interface allows the runtime
  *  to be more optimized.</li>
- *  <li>{@link ChainingOp}</li>
  *  <li>{@link RunnableOp}</li>
  * </ul>
  * </p>

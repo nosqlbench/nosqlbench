@@ -30,9 +30,6 @@ import java.util.function.LongFunction;
  * <P>This variant of {@link Op} has the ability to see the cycle
  * which was previously used to select the op implementation.</p>
  *
- * <p>It also has the ability to emit an value which can be seen a subsequent operation, if
- * and only if it is a {@link ChainingOp}s.</P>
- *
  * <h2>Designer Notes</h2>
  * <p>
  * If you are using the value in this call to select a specific type of behavior, it is very
@@ -48,7 +45,6 @@ public interface CycleOp<T> extends Op, LongFunction<T> {
      * <p>Run an action for the given cycle.</p>
      *
      * @param value The cycle value for which an operation is run
-     * @return A result object which <em>may</em> be used by a subsequent {@link ChainingOp}
      */
     @Override
     T apply(long value);
