@@ -32,9 +32,12 @@
             <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>io.weaviate</groupId>
             <artifactId>client</artifactId>
+            <version>4.8.2</version>
         </dependency>
+
     </dependencies>
 </project>

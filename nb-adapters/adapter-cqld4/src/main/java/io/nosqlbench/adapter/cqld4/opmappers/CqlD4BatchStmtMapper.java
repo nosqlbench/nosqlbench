@@ -16,44 +16,33 @@
 
 package io.nosqlbench.adapter.cqld4.opmappers;
 
-import com.datastax.oss.driver.api.core.CqlSession;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.opdispensers.CqlD4BatchStmtDispenser;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlBatchStatement;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 
 import java.util.function.LongFunction;
 
-public class CqlD4BatchStmtMapper implements OpMapper<Cqld4CqlOp> {
+public class CqlD4BatchStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlBatchStatement> {
 
-    private final LongFunction<CqlSession> sessionFunc;
     private final TypeAndTarget<CqlD4OpType, String> target;
-    private final DriverAdapter adapter;
 
-
-    public CqlD4BatchStmtMapper(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, TypeAndTarget<CqlD4OpType,String> target) {
-        this.sessionFunc=sessionFunc;
+    public CqlD4BatchStmtMapper(Cqld4DriverAdapter adapter,
+                                TypeAndTarget<CqlD4OpType, String> target) {
+        super(adapter);
         this.target = target;
-        this.adapter = adapter;
     }
 
-    /**
-     * TODO: Make this not require a sub-op element for "uniform batches",
-     * but allow a sub-op sequence for custom batches.
-     * @param op the function argument
-     * @return
-     */
-    public OpDispenser<Cqld4CqlOp> apply(ParsedOp op) {
-
+    @Override
+    public OpDispenser<Cqld4CqlBatchStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
         ParsedOp subop = op.getAsSubOp("op_template", ParsedOp.SubOpNaming.ParentAndSubKey);
         int repeat = op.getStaticValue("repeat");
-        OpMapper<Cqld4CqlOp> subopMapper = adapter.getOpMapper();
-        OpDispenser<? extends Cqld4CqlOp> subopDispenser = subopMapper.apply(subop);
-        return new CqlD4BatchStmtDispenser(adapter, sessionFunc, op,repeat, subop, subopDispenser);
-
+        OpDispenser<Cqld4CqlOp> od = new Cqld4CqlOpMapper(adapter).apply(op, spaceInitF);
+        return new CqlD4BatchStmtDispenser(adapter, op, repeat, subop, od);
     }
+
 }

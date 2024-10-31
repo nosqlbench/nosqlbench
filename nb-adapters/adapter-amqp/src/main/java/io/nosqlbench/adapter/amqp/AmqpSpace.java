@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import io.nosqlbench.adapter.amqp.exception.AmqpAdapterInvalidParamException;
 import io.nosqlbench.adapter.amqp.exception.AmqpAdapterUnexpectedException;
 import io.nosqlbench.adapter.amqp.util.AmqpAdapterUtil;
 import io.nosqlbench.adapter.amqp.util.AmqpClientConf;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -44,11 +45,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class AmqpSpace implements  AutoCloseable {
+public class AmqpSpace extends BaseSpace<AmqpSpace> {
 
     private final static Logger logger = LogManager.getLogger(AmqpSpace.class);
 
-    private final String spaceName;
     private final NBConfiguration cfg;
 
     private final AmqpClientConf amqpClientConf;
@@ -117,8 +117,8 @@ public class AmqpSpace implements  AutoCloseable {
     private long totalCycleNum;
     private long totalThreadNum;
 
-    public AmqpSpace(String spaceName, NBConfiguration cfg) {
-        this.spaceName = spaceName;
+    public AmqpSpace(AmqpDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter,idx);
         this.cfg = cfg;
 
         String amqpClientConfFileName = cfg.get("config");

@@ -23,11 +23,14 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.DryRunOpDispenserWrapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterOpDispenserWrapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.DryRunnableOpDispenserWrapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterCycleOpDispenserWrapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterRunnableOpDispenserWrapper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
@@ -58,6 +61,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 /**
  * A default implementation of an Activity, suitable for building upon.
@@ -395,7 +399,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromParsedOps(
 //        Map<String, DriverAdapter<?,?>> adapterCache,
 //        Map<String, OpMapper<? extends Op>> mapperCache,
-        List<DriverAdapter<?, ?>> adapters,
+        List<DriverAdapter<Op, Space>> adapters,
         List<ParsedOp> pops
     ) {
         try {
@@ -413,7 +417,6 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                 .orElse(SequencerType.bucket);
             SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
-            int dryrunCount = 0;
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
                 ParsedOp pop = pops.get(i);
@@ -424,21 +427,12 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                         continue;
                     }
 
-                    DriverAdapter<?, ?> adapter = adapters.get(i);
-                    OpMapper<? extends Op> opMapper = adapter.getOpMapper();
-                    OpDispenser<? extends Op> dispenser = opMapper.apply(pop);
-
+                    DriverAdapter<Op, Space> adapter = adapters.get(i);
+                    OpMapper<Op, Space> opMapper = adapter.getOpMapper();
+                    LongFunction<Space> spaceFunc = adapter.getSpaceFunc(pop);
+                    OpDispenser<Op> dispenser = opMapper.apply(pop, spaceFunc);
                     String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
-                    if ("op".equalsIgnoreCase(dryrunSpec)) {
-                        dispenser = new DryRunOpDispenserWrapper((DriverAdapter<Op, Object>) adapter, pop, dispenser);
-                        dryrunCount++;
-                    } else if ("emit".equalsIgnoreCase(dryrunSpec)) {
-                        dispenser = new EmitterOpDispenserWrapper(
-                            (DriverAdapter<Op, Object>) adapter,
-                            pop,
-                            (OpDispenser<? extends CycleOp<?>>) dispenser
-                        );
-                    }
+                    dispenser = OpWrappers.wrapOptionally(adapter, dispenser, pop, dryrunSpec);
 
 //                if (strict) {
 //                    optemplate.assertConsumed();
@@ -448,9 +442,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                     throw new OpConfigError("Error while mapping op from template named '" + pop.getName() + "': " + e.getMessage(), e);
                 }
             }
-            if (0 < dryrunCount) {
-                logger.warn("initialized {} op templates for dry run only. These ops will be synthesized for each cycle, but will not be executed.", dryrunCount);
-            }
+
 
             return planner.resolve();
 

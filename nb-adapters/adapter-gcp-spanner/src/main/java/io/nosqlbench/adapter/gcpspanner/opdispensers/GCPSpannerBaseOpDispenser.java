@@ -17,6 +17,7 @@
 
 package io.nosqlbench.adapter.gcpspanner.opdispensers;
 
+import io.nosqlbench.adapter.gcpspanner.GCPSpannerDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerBaseOp;
 import io.nosqlbench.adapter.gcpspanner.GCPSpannerSpace;
@@ -30,7 +31,8 @@ import java.util.function.LongFunction;
  * This class extends the BaseOpDispenser and provides common functionality
  * for creating GCP Spanner operations.
  */
-public abstract class GCPSpannerBaseOpDispenser extends BaseOpDispenser<GCPSpannerBaseOp<?>, GCPSpannerSpace> {
+public abstract class GCPSpannerBaseOpDispenser<OP extends GCPSpannerBaseOp,RESULT>
+    extends BaseOpDispenser<GCPSpannerBaseOp, GCPSpannerSpace> {
     /**
      * A function that provides the target string based on a long input.
      */
@@ -48,7 +50,7 @@ public abstract class GCPSpannerBaseOpDispenser extends BaseOpDispenser<GCPSpann
      * @param op the parsed operation
      * @param targetFunction a function that provides the target string
      */
-    protected GCPSpannerBaseOpDispenser(DriverAdapter<? extends GCPSpannerBaseOp<?>, GCPSpannerSpace> adapter, ParsedOp op,
+    protected GCPSpannerBaseOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op,
                                         LongFunction<String> targetFunction) {
         super(adapter, op);
         this.targetFunction = targetFunction;

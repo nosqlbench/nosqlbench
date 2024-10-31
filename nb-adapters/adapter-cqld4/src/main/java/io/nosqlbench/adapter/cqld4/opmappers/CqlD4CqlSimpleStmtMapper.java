@@ -16,29 +16,28 @@
 
 package io.nosqlbench.adapter.cqld4.opmappers;
 
-import com.datastax.oss.driver.api.core.CqlSession;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4SimpleCqlStmtDispenser;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlSimpleStatement;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class CqlD4CqlSimpleStmtMapper implements OpMapper<Cqld4CqlOp> {
-    private final LongFunction<CqlSession> sessionFunc;
+public class CqlD4CqlSimpleStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlSimpleStatement> {
     private final LongFunction<String> targetFunction;
-    private final DriverAdapter adapter;
 
-    public CqlD4CqlSimpleStmtMapper(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction) {
-        this.sessionFunc = sessionFunc;
+    public CqlD4CqlSimpleStmtMapper(Cqld4DriverAdapter adapter,
+                                    LongFunction<String> targetFunction) {
+        super(adapter);
         this.targetFunction = targetFunction;
-        this.adapter = adapter;
     }
 
     @Override
-    public OpDispenser<? extends Cqld4CqlOp> apply(ParsedOp op) {
-        return new Cqld4SimpleCqlStmtDispenser(adapter, sessionFunc,targetFunction, op);
+    public OpDispenser<Cqld4CqlSimpleStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+        return new Cqld4SimpleCqlStmtDispenser(adapter, targetFunction, op);
     }
+
 }

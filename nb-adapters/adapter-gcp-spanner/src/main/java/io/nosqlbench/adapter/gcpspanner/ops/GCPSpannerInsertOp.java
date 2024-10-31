@@ -17,9 +17,11 @@
 
 package io.nosqlbench.adapter.gcpspanner.ops;
 
+import com.google.cloud.Timestamp;
 import com.google.cloud.spanner.Spanner;
 import com.google.cloud.spanner.DatabaseClient;
 import com.google.cloud.spanner.Mutation;
+import com.google.monitoring.v3.TimeSeries;
 
 import java.util.Collections;
 
@@ -27,7 +29,7 @@ import java.util.Collections;
  * This class represents an operation to insert a vector into a Google Cloud Spanner database.
  * It extends the GCPSpannerBaseOp class and provides the implementation for the applyOp method.
  */
-public class GCPSpannerInsertOp extends GCPSpannerBaseOp<Long> {
+public class GCPSpannerInsertOp extends GCPSpannerBaseOp<Long, Timestamp> {
     private final Mutation mutation;
     private final DatabaseClient dbClient;
 
@@ -52,7 +54,7 @@ public class GCPSpannerInsertOp extends GCPSpannerBaseOp<Long> {
      * @return the result of the write operation
      */
     @Override
-    public Object applyOp(long value) {
+    public Timestamp applyOp(long value) {
         return dbClient.write(Collections.singletonList(mutation));
     }
 }

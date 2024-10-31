@@ -19,7 +19,10 @@ package io.nosqlbench.adapter.cqld4.opdispensers;
 import com.datastax.dse.driver.api.core.graph.ScriptGraphStatement;
 import com.datastax.dse.driver.api.core.graph.ScriptGraphStatementBuilder;
 import com.datastax.oss.driver.api.core.CqlSession;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4ScriptGraphOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
@@ -28,13 +31,14 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class Cqld4GremlinOpDispenser extends BaseOpDispenser<Cqld4ScriptGraphOp, Cqld4Space> {
+public class Cqld4GremlinOpDispenser extends BaseOpDispenser<Cqld4BaseOp, Cqld4Space> {
 
     private final LongFunction<? extends ScriptGraphStatement> stmtFunc;
     private final LongFunction<CqlSession> sessionFunc;
     private final LongFunction<Long> diagFunc;
 
-    public Cqld4GremlinOpDispenser(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
+    public Cqld4GremlinOpDispenser(Cqld4DriverAdapter adapter,
+                                   LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
         super(adapter,cmd);
         this.sessionFunc = sessionFunc;
         this.diagFunc = cmd.getAsFunctionOr("diag", 0L);

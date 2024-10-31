@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package io.nosqlbench.adapter.pulsar;
 
 import io.nosqlbench.adapter.pulsar.util.PulsarAdapterUtil;
 import io.nosqlbench.adapter.pulsar.util.PulsarClientConf;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -36,11 +38,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public class PulsarSpace implements  AutoCloseable {
+public class PulsarSpace extends BaseSpace<PulsarSpace> {
 
     private final static Logger logger = LogManager.getLogger(PulsarSpace.class);
 
-    private final String spaceName;
     private final NBConfiguration cfg;
 
     private final String pulsarSvcUrl;
@@ -67,8 +68,8 @@ public class PulsarSpace implements  AutoCloseable {
     private final ConcurrentHashMap<ReaderCacheKey, Reader<?>> readers = new ConcurrentHashMap<>();
 
 
-    public PulsarSpace(String spaceName, NBConfiguration cfg) {
-        this.spaceName = spaceName;
+    public PulsarSpace(PulsarDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter, idx);
         this.cfg = cfg;
 
         this.pulsarSvcUrl = cfg.get("service_url");

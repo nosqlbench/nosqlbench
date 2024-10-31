@@ -28,7 +28,7 @@ import java.util.Collections;
  * This class represents an operation to create the database DDL (Data Definition Language) in Google Cloud Spanner.
  * It extends the {@link GCPSpannerBaseOp} class and provides the implementation for applying the DDL update operation.
  */
-public class GCPSpannerCreateDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
+public class GCPSpannerCreateDatabaseDdlOp extends GCPSpannerBaseOp<Long,Database> {
     private final String databaseId;
     private final DatabaseAdminClient dbAdminClient;
     private final String instanceId;
@@ -58,7 +58,7 @@ public class GCPSpannerCreateDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
      * @throws RuntimeException if an error occurs during the operation
      */
     @Override
-    public Object applyOp(long value) {
+    public Database applyOp(long value) {
         OperationFuture<Database, CreateDatabaseMetadata> operation = dbAdminClient.createDatabase(
             instanceId, databaseId, Collections.emptyList());
         try {

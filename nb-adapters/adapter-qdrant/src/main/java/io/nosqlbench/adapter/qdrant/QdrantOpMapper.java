@@ -21,12 +21,16 @@ import io.nosqlbench.adapter.qdrant.ops.QdrantBaseOp;
 import io.nosqlbench.adapter.qdrant.types.QdrantOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class QdrantOpMapper implements OpMapper<QdrantBaseOp<?>> {
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
+
+public class QdrantOpMapper implements OpMapper<QdrantBaseOp,QdrantSpace> {
     private static final Logger logger = LogManager.getLogger(QdrantOpMapper.class);
     private final QdrantDriverAdapter adapter;
 
@@ -42,11 +46,13 @@ public class QdrantOpMapper implements OpMapper<QdrantBaseOp<?>> {
     /**
      * Given an instance of a {@link ParsedOp} returns the appropriate {@link QdrantBaseOpDispenser} subclass
      *
-     * @param op The {@link ParsedOp} to be evaluated
+     * @param op
+     *         The {@link ParsedOp} to be evaluated
+     * @param spaceInitF
      * @return The correct {@link QdrantBaseOpDispenser} subclass based on the op type
      */
     @Override
-    public OpDispenser<? extends QdrantBaseOp<?>> apply(ParsedOp op) {
+    public OpDispenser<QdrantBaseOp> apply(ParsedOp op, LongFunction<QdrantSpace> spaceInitF) {
         TypeAndTarget<QdrantOpType, String> typeAndTarget = op.getTypeAndTarget(
             QdrantOpType.class,
             String.class,
@@ -73,4 +79,5 @@ public class QdrantOpMapper implements OpMapper<QdrantBaseOp<?>> {
 //                "mapping parsed op " + op);
         };
     }
+
 }

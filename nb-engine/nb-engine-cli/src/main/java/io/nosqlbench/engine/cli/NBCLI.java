@@ -317,8 +317,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 .pathname(resourceToCat).first();
 
             final Content<?> data = tocat.orElseThrow(
-                () -> new BasicError("Unable to find " + resourceToCat +
-                    " in classpath to cat out"));
+                () -> new BasicError("Unable to find " + resourceToCat + " in classpath to cat out"));
 
             System.out.println(data.get());
             NBCLI.logger.info(() -> "Dumped internal resource '" + data.asPath() + "' to stdout");
@@ -340,9 +339,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 .pathname(resourceToCopy).first();
 
             final Content<?> data = tocopy.orElseThrow(
-                () -> new BasicError(
-                    "Unable to find " + resourceToCopy +
-                        " in classpath to copy out")
+                () -> new BasicError("Unable to find " + resourceToCopy + " in classpath to copy out")
             );
 
             final Path writeTo = Path.of(data.asPath().getFileName().toString());
@@ -381,7 +378,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             String topic = options.wantsTopicalHelpFor();
 
             Optional<? extends NBHelpTopic> infoFor = NBJavaCommandLoader.getInfoFor(topic);
-//            infoFor = infoFor.or(() -> MarkdownFinder.forHelpTopic(options.wantsTopicalHelpFor()));
 
             infoFor.ifPresent(info -> {
                 System.out.print(info.getHelp());
@@ -409,29 +405,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 .build()
         );
 
-//        if ((null != reportPromPushTo) || (null != reportGraphiteTo) || (null != options.wantsReportCsvTo())) {
-//            final MetricReporters reporters = MetricReporters.getInstance();
-//            reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
-//
-//            if (null != reportPromPushTo)
-//                reporters.addPromPush(reportPromPushTo, options.wantsMetricsPrefix(), promPushConfig);
-//            if (null != reportGraphiteTo) reporters.addGraphite(reportGraphiteTo, options.wantsMetricsPrefix());
-//            if (null != options.wantsReportCsvTo())
-//                reporters.addCSVReporter(options.wantsReportCsvTo(), options.wantsMetricsPrefix());
-//            if (options.wantsLoggedMetrics()) {
-//                reporters.addLogger();
-//            }
-//            reporters.start(10, options.getReportInterval());
-//        }
-//
-//        if (options.getConsoleLogLevel().isGreaterOrEqualTo(NBLogLevel.WARN)) {
-//            options.setWantsStackTraces(true);
-//            NBCLI.logger.debug(() -> "enabling stack traces since log level is " + options.getConsoleLogLevel());
-//        }
-
-        // client machine metrics; TODO: modify pollInterval
-
-        // intentionally not shown for warn-only
         NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
 
         Map<String, String> props = Map.of(
@@ -441,10 +414,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             "prompush_cache", "prompush_cache.txt",
             "heartbeat", String.valueOf(options.wantsHeartbeatIntervalMs())
         );
-        /**
-         * At this point, the command stream from the CLI should be handed into the session, and the session should
-         * marshal and transform it for any scenario invocations directly.
-         */
 
         try (
             NBSession session = new NBSession(

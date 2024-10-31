@@ -26,33 +26,32 @@ import com.azure.search.documents.indexes.SearchIndexClient;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
-public abstract class AzureAISearchBaseOp<T> implements CycleOp<Object> {
+public abstract class AzureAISearchBaseOp<REQUEST, RESULT> implements CycleOp<RESULT> {
 
 	protected final static Logger logger = LogManager.getLogger(AzureAISearchBaseOp.class);
 
 	protected final SearchIndexClient searchIndexClient;
-	protected final T request;
-	protected final LongFunction<Object> apiCall;
+	protected final REQUEST request;
+	protected final LongFunction<RESULT> apiCall;
 
-	public AzureAISearchBaseOp(SearchIndexClient searchIndexClient, T requestParam) {
+	public AzureAISearchBaseOp(SearchIndexClient searchIndexClient, REQUEST requestParam) {
 		this.searchIndexClient = searchIndexClient;
 		this.request = requestParam;
 		this.apiCall = this::applyOp;
 	}
 
-	public AzureAISearchBaseOp(SearchIndexClient searchIndexClient, T requestParam, LongFunction<Object> call) {
+	public AzureAISearchBaseOp(SearchIndexClient searchIndexClient, REQUEST requestParam, LongFunction<RESULT> call) {
 		this.searchIndexClient = searchIndexClient;
 		this.request = requestParam;
 		this.apiCall = call;
 	}
 
 	@Override
-	public final Object apply(long value) {
+	public final RESULT apply(long value) {
 		logger.trace(() -> "applying op: " + this);
 
 		try {
-			Object result = applyOp(value);
-
+			RESULT result = applyOp(value);
 			return result;
 		} catch (Exception e) {
 			if (e instanceof RuntimeException rte) {
@@ -63,7 +62,7 @@ public abstract class AzureAISearchBaseOp<T> implements CycleOp<Object> {
 		}
 	};
 
-	public abstract Object applyOp(long value);
+	public abstract RESULT applyOp(long value);
 
 	@Override
 	public String toString() {

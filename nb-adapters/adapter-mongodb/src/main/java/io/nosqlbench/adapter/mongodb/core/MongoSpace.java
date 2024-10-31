@@ -22,6 +22,7 @@ import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import com.mongodb.client.MongoDatabase;
 import io.nosqlbench.nb.api.components.core.NBNamedElement;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
@@ -38,15 +39,12 @@ import org.bson.codecs.configuration.CodecRegistry;
 import static org.bson.codecs.configuration.CodecRegistries.fromCodecs;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
-public class MongoSpace implements NBNamedElement, AutoCloseable {
+public class MongoSpace extends BaseSpace<MongoSpace> {
     private final static Logger logger = LogManager.getLogger(MongoSpace.class);
-    private final String spaceName;
-    private final NBConfiguration mongoConfig;
     private MongoClient mongoClient;
 
-    public MongoSpace(String name, NBConfiguration cfg) {
-        this.spaceName = name;
-        this.mongoConfig = cfg;
+    public MongoSpace(MongodbDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter,idx);
     }
 
     public static NBConfigModel getConfigModel() {
@@ -60,11 +58,6 @@ public class MongoSpace implements NBNamedElement, AutoCloseable {
     }
 
     @Override
-    public String getName() {
-        return spaceName;
-    }
-
-    @Override
     public void close() {
         try {
             if (mongoClient != null) {
@@ -72,7 +65,7 @@ public class MongoSpace implements NBNamedElement, AutoCloseable {
             }
         } catch (Exception e) {
             logger.error(() -> "auto-closeable mongodb connection threw exception in " +
-                    "mongodb space(" + this.spaceName + "): " + e);
+                    "mongodb space(" + getName() + "): " + e);
             throw new RuntimeException(e);
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.diag;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
@@ -26,20 +27,19 @@ import io.nosqlbench.nb.api.config.standard.Param;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DiagSpace implements ActivityDefObserver, AutoCloseable {
+public class DiagSpace extends BaseSpace<DiagSpace> implements ActivityDefObserver {
     private final Logger logger = LogManager.getLogger(DiagSpace.class);
 
     private final NBConfiguration cfg;
-    private final String name;
     private RateLimiter diagRateLimiter;
     private long interval;
     private boolean errorOnClose;
 
-    public DiagSpace(String name, NBConfiguration cfg) {
+    public DiagSpace(DiagDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter, idx);
         this.cfg = cfg;
-        this.name = name;
         applyConfig(cfg);
-        logger.trace(() -> "diag space initialized as '" + name + "'");
+        logger.trace(() -> "diag space initialized as '" + idx + "'");
     }
 
     public void applyConfig(NBConfiguration cfg) {
@@ -68,7 +68,7 @@ public class DiagSpace implements ActivityDefObserver, AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        logger.debug(() -> "closing diag space '" + this.name + "'");
+        logger.debug(() -> "closing diag space '" + getName() + "'");
         if (errorOnClose) {
             throw new RuntimeException("diag space was configured to throw this error when it was configured.");
         }

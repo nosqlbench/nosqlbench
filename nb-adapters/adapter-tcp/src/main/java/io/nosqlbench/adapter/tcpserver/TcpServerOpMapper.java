@@ -18,28 +18,28 @@ package io.nosqlbench.adapter.tcpserver;
 
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class TcpServerOpMapper implements OpMapper<TcpServerOp> {
+public class TcpServerOpMapper implements OpMapper<TcpServerOp,TcpServerAdapterSpace> {
 
-    private final DriverSpaceCache<? extends TcpServerAdapterSpace> ctxcache;
+    private final ConcurrentSpaceCache<TcpServerAdapterSpace> ctxcache;
     private final TcpServerDriverAdapter adapter;
 
 
-    public TcpServerOpMapper(TcpServerDriverAdapter adapter, DriverSpaceCache<? extends TcpServerAdapterSpace> ctxcache) {
+    public TcpServerOpMapper(TcpServerDriverAdapter adapter, ConcurrentSpaceCache<TcpServerAdapterSpace> ctxcache) {
         this.ctxcache = ctxcache;
         this.adapter = adapter;
     }
 
     @Override
-    public OpDispenser<TcpServerOp> apply(ParsedOp op) {
+    public OpDispenser<TcpServerOp> apply(ParsedOp op, LongFunction<TcpServerAdapterSpace> spaceInitF) {
         LongFunction<String> spacefunc = op.getAsFunctionOr("space", "default");
-        LongFunction<TcpServerAdapterSpace> ctxfunc = (cycle) -> ctxcache.get(spacefunc.apply(cycle));
+        LongFunction<TcpServerAdapterSpace> ctxfunc = (cycle) -> ctxcache.get(cycle);
         return new TcpServerOpDispenser(adapter,op,ctxfunc);
     }
-
 }
 

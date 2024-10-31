@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaConsumer;
 import io.nosqlbench.adapter.kafka.ops.OpTimeTrackKafkaProducer;
 import io.nosqlbench.adapter.kafka.util.KafkaAdapterUtil;
 import io.nosqlbench.adapter.kafka.util.KafkaClientConf;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -34,11 +36,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class KafkaSpace implements  AutoCloseable {
+public class KafkaSpace extends BaseSpace<KafkaSpace> {
 
     private final static Logger logger = LogManager.getLogger(KafkaSpace.class);
 
-    private final String spaceName;
     private final NBConfiguration cfg;
 
     // TODO: currently this NB Kafka driver only supports String type for message key and value
@@ -75,7 +76,7 @@ public class KafkaSpace implements  AutoCloseable {
 
     private long totalCycleNum;
 
-    private AtomicBoolean beingShutdown = new AtomicBoolean(false);
+    private final AtomicBoolean beingShutdown = new AtomicBoolean(false);
 
 
     public record ProducerCacheKey(String producerName, String topicName, String clientId) {
@@ -89,8 +90,8 @@ public class KafkaSpace implements  AutoCloseable {
         new ConcurrentHashMap<>();
 
 
-    public KafkaSpace(String spaceName, NBConfiguration cfg) {
-        this.spaceName = spaceName;
+    public KafkaSpace(KafkaDriverAdapter adapter, int idx, NBConfiguration cfg) {
+        super(adapter, idx);
         this.cfg = cfg;
 
         this.bootstrapSvr = cfg.get("bootstrap_server");

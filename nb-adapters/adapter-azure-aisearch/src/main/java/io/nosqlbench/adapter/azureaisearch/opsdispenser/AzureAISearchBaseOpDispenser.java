@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2020-2024 nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,13 +28,13 @@ import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-public abstract class AzureAISearchBaseOpDispenser<T>
-		extends BaseOpDispenser<AzureAISearchBaseOp<T>, AzureAISearchSpace> {
+public abstract class AzureAISearchBaseOpDispenser<REQUEST,RESULT>
+		extends BaseOpDispenser<AzureAISearchBaseOp, AzureAISearchSpace> {
 
 	protected final LongFunction<AzureAISearchSpace> azureAISearchSpaceFunction;
 	protected final LongFunction<SearchIndexClient> clientFunction;
-	private final LongFunction<? extends AzureAISearchBaseOp<T>> opF;
-	private final LongFunction<T> paramF;
+	private final LongFunction<? extends AzureAISearchBaseOp<REQUEST,RESULT>> opF;
+	private final LongFunction<REQUEST> paramF;
 
 	@SuppressWarnings("rawtypes")
 	protected AzureAISearchBaseOpDispenser(AzureAISearchDriverAdapter adapter, ParsedOp op,
@@ -57,14 +57,14 @@ public abstract class AzureAISearchBaseOpDispenser<T>
 		return (AzureAISearchDriverAdapter) adapter;
 	}
 
-	public abstract LongFunction<T> getParamFunc(LongFunction<SearchIndexClient> clientF, ParsedOp op,
+	public abstract LongFunction<REQUEST> getParamFunc(LongFunction<SearchIndexClient> clientF, ParsedOp op,
 			LongFunction<String> targetF);
 
-	public abstract LongFunction<AzureAISearchBaseOp<T>> createOpFunc(LongFunction<T> paramF,
+	public abstract LongFunction<AzureAISearchBaseOp<REQUEST,RESULT>> createOpFunc(LongFunction<REQUEST> paramF,
 			LongFunction<SearchIndexClient> clientF, ParsedOp op, LongFunction<String> targetF);
 
 	@Override
-	public AzureAISearchBaseOp<T> getOp(long value) {
+	public AzureAISearchBaseOp<REQUEST,RESULT> getOp(long value) {
 		return opF.apply(value);
 	}
 

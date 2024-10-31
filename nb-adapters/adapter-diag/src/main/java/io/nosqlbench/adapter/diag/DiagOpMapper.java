@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.diag;
 
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -28,7 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public class DiagOpMapper implements OpMapper<DiagOp>, NBReconfigurable {
+public class DiagOpMapper implements OpMapper<DiagOp,DiagSpace>, NBReconfigurable {
     private final Map<String,DiagOpDispenser> dispensers = new LinkedHashMap<>();
     private final DiagDriverAdapter adapter;
 
@@ -37,7 +38,7 @@ public class DiagOpMapper implements OpMapper<DiagOp>, NBReconfigurable {
     }
 
     @Override
-    public OpDispenser<? extends DiagOp> apply(ParsedOp op) {
+    public OpDispenser<DiagOp> apply(ParsedOp op, LongFunction<DiagSpace> spaceInitF) {
         LongFunction<DiagSpace> spaceF = adapter.getSpaceFunc(op);
         DiagOpDispenser dispenser = new DiagOpDispenser(adapter,spaceF,op);
         dispensers.put(op.getName(),dispenser);

@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.gcpspanner.opdispensers;
 
 
+import com.google.cloud.spanner.Database;
 import io.nosqlbench.adapter.gcpspanner.GCPSpannerDriverAdapter;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerBaseOp;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerCreateDatabaseDdlOp;
@@ -30,19 +31,27 @@ import java.util.function.LongFunction;
 /**
  * Dispenser class for creating databases of {@link GCPSpannerCreateDatabaseDdlOp}.
  *
- * @see <a href="https://cloud.google.com/spanner/docs/reference/rpc/google.spanner.admin.database.v1#createdatabaserequest">
- *     CreateDatabaseRequest</a> which can be a stretch goal to combine all of DB, Table(s), and Indexes into one-single call.
+ * @see <a
+ *     href="https://cloud.google.com/spanner/docs/reference/rpc/google.spanner.admin.database.v1#createdatabaserequest">
+ *     CreateDatabaseRequest</a> which can be a stretch goal to combine all of DB, Table(s), and Indexes into one-single
+ *     call.
  */
-public class GCPSpannerCreateDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispenser {
+public class GCPSpannerCreateDatabaseDdlOpDispenser
+    extends GCPSpannerBaseOpDispenser<GCPSpannerCreateDatabaseDdlOp, Database>
+{
+
     private static final Logger logger = LogManager.getLogger(GCPSpannerCreateDatabaseDdlOpDispenser.class);
     private final LongFunction<GCPSpannerCreateDatabaseDdlOp> opFunction;
 
     /**
      * Constructor for {@link GCPSpannerCreateDatabaseDdlOpDispenser}.
      *
-     * @param adapter        the {@link GCPSpannerDriverAdapter} instance
-     * @param op             the {@link ParsedOp} instance
-     * @param targetFunction a {@link LongFunction} that provides the target string
+     * @param adapter
+     *     the {@link GCPSpannerDriverAdapter} instance
+     * @param op
+     *     the {@link ParsedOp} instance
+     * @param targetFunction
+     *     a {@link LongFunction} that provides the target string
      */
     public GCPSpannerCreateDatabaseDdlOpDispenser(GCPSpannerDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
@@ -52,7 +61,8 @@ public class GCPSpannerCreateDatabaseDdlOpDispenser extends GCPSpannerBaseOpDisp
     /**
      * Creates a {@link LongFunction} that generates {@link GCPSpannerUpdateDatabaseDdlOp} instances.
      *
-     * @param op the {@link ParsedOp} instance
+     * @param op
+     *     the {@link ParsedOp} instance
      * @return a {@link LongFunction} that generates {@link GCPSpannerUpdateDatabaseDdlOp} instances
      */
     private LongFunction<GCPSpannerCreateDatabaseDdlOp> createOpFunction(ParsedOp op) {
@@ -68,11 +78,12 @@ public class GCPSpannerCreateDatabaseDdlOpDispenser extends GCPSpannerBaseOpDisp
     /**
      * Retrieves an operation instance based on the provided value.
      *
-     * @param value the long value used to generate the operation
+     * @param value
+     *     the long value used to generate the operation
      * @return a {@link GCPSpannerBaseOp} instance
      */
     @Override
-    public GCPSpannerBaseOp<?> getOp(long value) {
+    public GCPSpannerCreateDatabaseDdlOp getOp(long value) {
         return opFunction.apply(value);
     }
 }

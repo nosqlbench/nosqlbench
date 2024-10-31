@@ -18,34 +18,39 @@ package io.nosqlbench.adapter.pulsar;
 
 import io.nosqlbench.adapter.pulsar.dispensers.*;
 import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PulsarOpMapper implements OpMapper<PulsarOp> {
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
+
+public class PulsarOpMapper implements OpMapper<PulsarOp,PulsarSpace> {
 
     private final static Logger logger = LogManager.getLogger(PulsarOpMapper.class);
 
     private final NBConfiguration cfg;
-    private final DriverSpaceCache<? extends PulsarSpace> spaceCache;
-    private final DriverAdapter adapter;
+    private final ConcurrentSpaceCache<PulsarSpace> spaceCache;
+    private final PulsarDriverAdapter adapter;
 
-    public PulsarOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends PulsarSpace> spaceCache) {
+    public PulsarOpMapper(PulsarDriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<PulsarSpace> spaceCache) {
         this.cfg = cfg;
         this.spaceCache = spaceCache;
         this.adapter = adapter;
     }
 
     @Override
-    public OpDispenser<? extends PulsarOp> apply(ParsedOp op) {
-        String spaceName = op.getStaticConfigOr("space", "default");
-        PulsarSpace pulsarSpace = spaceCache.get(spaceName);
+    public OpDispenser<PulsarOp> apply(ParsedOp op, LongFunction<PulsarSpace> spaceInitF) {
+        int spaceName = op.getStaticConfigOr("space", 0);
+//        PulsarSpace pulsarSpace = spaceCache.get(spaceName);
+        PulsarSpace pulsarSpace = adapter.getSpaceCache().get(spaceName);
 
         /*
          * If the user provides a body element, then they want to provide the JSON or

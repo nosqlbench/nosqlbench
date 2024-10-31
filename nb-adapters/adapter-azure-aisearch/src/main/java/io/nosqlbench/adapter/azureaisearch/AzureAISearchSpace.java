@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,9 +51,8 @@ import io.nosqlbench.nb.api.config.standard.Param;
  *      "https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/search/azure-search-documents/">Azure
  *      AI Search Java searchIndexClient</a>
  */
-public class AzureAISearchSpace implements AutoCloseable {
+public class AzureAISearchSpace extends BaseSpace<AzureAISearchSpace> {
 	private final static Logger logger = LogManager.getLogger(AzureAISearchSpace.class);
-	private final String name;
 	private final NBConfiguration cfg;
 
 	protected SearchIndexClient searchIndexClient;
@@ -62,11 +62,11 @@ public class AzureAISearchSpace implements AutoCloseable {
 	 * contextual information needed to interact with the <b>Azure AI Search</b>
 	 * database instance.
 	 *
-	 * @param name The name of this space
+	 * @param idx The name of this space
 	 * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
 	 */
-	public AzureAISearchSpace(String name, NBConfiguration cfg) {
-		this.name = name;
+	public AzureAISearchSpace(AzureAISearchDriverAdapter adapter, long idx, NBConfiguration cfg) {
+		super(adapter,idx);
 		this.cfg = cfg;
 	}
 

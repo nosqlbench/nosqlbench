@@ -22,7 +22,6 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
@@ -30,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 @Service(value = DriverAdapter.class, selector = "amqp")
 public class AmqpDriverAdapter extends BaseDriverAdapter<AmqpTimeTrackOp, AmqpSpace> {
@@ -40,15 +40,13 @@ public class AmqpDriverAdapter extends BaseDriverAdapter<AmqpTimeTrackOp, AmqpSp
     }
 
     @Override
-    public OpMapper<AmqpTimeTrackOp> getOpMapper() {
-        DriverSpaceCache<? extends AmqpSpace> spaceCache = getSpaceCache();
-        NBConfiguration adapterConfig = getConfiguration();
-        return new AmqpOpMapper(this, adapterConfig, spaceCache);
+    public OpMapper<AmqpTimeTrackOp, AmqpSpace> getOpMapper() {
+        return new AmqpOpMapper(this, getConfiguration(), getSpaceCache());
     }
 
     @Override
-    public Function<String, ? extends AmqpSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new AmqpSpace(s, cfg);
+    public LongFunction<AmqpSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (s) -> new AmqpSpace(this,s, cfg);
     }
 
     @Override

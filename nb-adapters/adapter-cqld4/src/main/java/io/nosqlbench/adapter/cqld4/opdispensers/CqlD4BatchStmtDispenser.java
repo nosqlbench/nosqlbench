@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,41 +18,43 @@ package io.nosqlbench.adapter.cqld4.opdispensers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.*;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.optionhelpers.BatchTypeEnum;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlBatchStatement;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.LongFunction;
 
-public class CqlD4BatchStmtDispenser extends Cqld4BaseOpDispenser {
+public class CqlD4BatchStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlBatchStatement> {
     private final int repeat;
     private final ParsedOp subop;
     private final OpMapper submapper;
-    private LongFunction<Statement> opfunc;
+    private LongFunction<BatchStatement> opfunc;
 
     public CqlD4BatchStmtDispenser(
-        DriverAdapter adapter,
-        LongFunction<CqlSession> sessionFunc,
+        Cqld4DriverAdapter adapter,
         ParsedOp op,
         int repeat,
         ParsedOp subop,
-        OpDispenser<? extends Cqld4CqlOp> subopDispenser
+        OpDispenser<Cqld4CqlOp> subopDispenser
     ) {
-        super(adapter, sessionFunc, op);
+        super(adapter, op);
         this.repeat = repeat;
         this.subop = subop;
         this.opfunc = createStmtFunc(op, subopDispenser);
         this.submapper = adapter.getOpMapper();
-        subopDispenser = submapper.apply(subop);
+        subopDispenser = submapper.apply(subop, adapter.getSpaceFunc(op));
 
     }
 
-    private LongFunction<Statement> createStmtFunc(ParsedOp topOp, OpDispenser<? extends Cqld4CqlOp> subopDispenser) {
+    private LongFunction<BatchStatement> createStmtFunc(ParsedOp topOp, OpDispenser<? extends Cqld4CqlOp> subopDispenser) {
         Cqld4CqlOp exampleOp = subopDispenser.apply(0L);
         Statement<?> example = exampleOp.getStmt();
         if (!(example instanceof BatchableStatement<?> b)) {
@@ -61,33 +63,34 @@ public class CqlD4BatchStmtDispenser extends Cqld4BaseOpDispenser {
         }
         BatchTypeEnum bte = topOp.getEnumFromFieldOr(BatchTypeEnum.class, BatchTypeEnum.unlogged, "batchtype");
         LongFunction<BatchStatementBuilder> bsbf = l -> new BatchStatementBuilder(bte.batchtype);
-        LongFunction<Statement> bsf = getBatchAccumulator(bsbf, subopDispenser);
-        bsf = getEnhancedStmtFunc(bsf,topOp);
+        LongFunction<BatchStatement> bsf = getBatchAccumulator(bsbf, subopDispenser);
+        bsf = getEnhancedStmtFunc(bsf, topOp);
         return bsf;
     }
 
     @NotNull
-    private LongFunction<Statement> getBatchAccumulator(LongFunction<BatchStatementBuilder> bsb, OpDispenser<? extends Cqld4CqlOp> subopDispenser) {
+    private LongFunction<BatchStatement> getBatchAccumulator(LongFunction<BatchStatementBuilder> bsb, OpDispenser<?
+        extends Cqld4CqlOp> subopDispenser) {
         LongFunction<BatchStatementBuilder> f = l -> {
-            long base=l*repeat;
+            long base = l * repeat;
             BatchStatementBuilder bsa = bsb.apply(l);
             for (int i = 0; i < repeat; i++) {
-                Cqld4CqlOp op = subopDispenser.apply(base+i);
+                Cqld4CqlOp op = subopDispenser.apply(base + i);
                 BatchableStatement<?> stmt = (BatchableStatement<?>) op.getStmt();
-                bsa= bsa.addStatement(stmt);
+                bsa = bsa.addStatement(stmt);
             }
             return bsa;
         };
 
-        LongFunction<Statement> bsf = (long l) -> f.apply(l).build();
+        LongFunction<BatchStatement> bsf = (long l) -> f.apply(l).build();
         return bsf;
     }
 
     @Override
-    public Cqld4CqlOp getOp(long value) {
+    public Cqld4CqlBatchStatement getOp(long value) {
         Statement bstmt = opfunc.apply(value);
         return new Cqld4CqlBatchStatement(
-            getSessionFunc().apply(value),
+            sessionF.apply(value),
             (BatchStatement) bstmt,
             getMaxPages(),
             getMaxLwtRetries(),

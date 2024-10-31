@@ -17,27 +17,30 @@
 package io.nosqlbench.adapter.cqld4.opmappers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4GremlinOpDispenser;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4ScriptGraphOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class Cqld4GremlinOpMapper implements OpMapper<Cqld4ScriptGraphOp> {
-    private final LongFunction<CqlSession> sessionFunc;
+public class Cqld4GremlinOpMapper<CO extends Cqld4ScriptGraphOp> extends Cqld4BaseOpMapper<Cqld4ScriptGraphOp> {
     private final LongFunction<String> targetFunction;
-    private final DriverAdapter adapter;
 
-    public Cqld4GremlinOpMapper(DriverAdapter adapter, LongFunction<CqlSession> session, LongFunction<String> targetFunction) {
-        this.sessionFunc = session;
+    public Cqld4GremlinOpMapper(Cqld4DriverAdapter adapter, LongFunction<String> targetFunction) {
+        super(adapter);
         this.targetFunction = targetFunction;
-        this.adapter = adapter;
     }
 
-    public OpDispenser<Cqld4ScriptGraphOp> apply(ParsedOp op) {
+    @Override
+    public Cqld4GremlinOpDispenser apply(ParsedOp op, LongFunction spaceInitF) {
         return new Cqld4GremlinOpDispenser(adapter, sessionFunc, targetFunction, op);
     }
+
 }

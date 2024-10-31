@@ -53,7 +53,7 @@ import io.nosqlbench.nb.api.errors.OpConfigError;
  *      "https://learn.microsoft.com/en-us/java/api/com.azure.search.documents?view=azure-java-stable">Index
  *      docs</a>
  */
-public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBaseOpDispenser<SearchIndex> {
+public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBaseOpDispenser<SearchIndex,SearchIndex> {
 	private SearchField searchField;
 	private VectorSearchProfile vsProfile;
 
@@ -290,7 +290,7 @@ public class AzureAISearchCreateOrUpdateIndexOpDispenser extends AzureAISearchBa
 	}
 
 	@Override
-	public LongFunction<AzureAISearchBaseOp<SearchIndex>> createOpFunc(LongFunction<SearchIndex> paramF,
+	public LongFunction<AzureAISearchBaseOp<SearchIndex,SearchIndex>> createOpFunc(LongFunction<SearchIndex> paramF,
 			LongFunction<SearchIndexClient> clientF, ParsedOp op, LongFunction<String> targetF) {
 		return l -> new AzureAISearchCreateOrUpdateIndexOp(clientF.apply(l), paramF.apply(l));
 	}

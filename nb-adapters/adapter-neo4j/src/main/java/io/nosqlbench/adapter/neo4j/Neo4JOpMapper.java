@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,27 +21,26 @@ import io.nosqlbench.adapter.neo4j.ops.Neo4JBaseOp;
 import io.nosqlbench.adapter.neo4j.types.Neo4JOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 
+import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 
-public class Neo4JOpMapper implements OpMapper<Neo4JBaseOp> {
-    private final DriverSpaceCache<? extends Neo4JSpace> cache;
+public class Neo4JOpMapper implements OpMapper<Neo4JBaseOp,Neo4JSpace> {
     private final Neo4JDriverAdapter adapter;
 
-    public Neo4JOpMapper(Neo4JDriverAdapter adapter, DriverSpaceCache<? extends Neo4JSpace> cache) {
+    public Neo4JOpMapper(Neo4JDriverAdapter adapter, ConcurrentSpaceCache<Neo4JSpace> cache) {
         this.adapter = adapter;
-        this.cache = cache;
     }
 
     @Override
-    public OpDispenser<? extends Neo4JBaseOp> apply(ParsedOp op) {
+    public OpDispenser<Neo4JBaseOp> apply(ParsedOp op, LongFunction<Neo4JSpace> spaceInitF) {
         TypeAndTarget<Neo4JOpType, String> typeAndTarget = op.getTypeAndTarget(Neo4JOpType.class, String.class);
-        LongFunction<String> spaceNameFunc = op.getAsFunctionOr("space", "default");
-        LongFunction<Neo4JSpace> spaceFunc = l -> cache.get(spaceNameFunc.apply(l));
+        LongFunction<Neo4JSpace> spaceFunc = adapter.getSpaceFunc(op);
         return switch (typeAndTarget.enumId) {
             case sync_autocommit -> new Neo4JSyncAutoCommitOpDispenser(
                 adapter, op, spaceFunc, typeAndTarget.enumId.getValue()

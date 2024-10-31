@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,9 +46,8 @@ import io.weaviate.client.v1.auth.exception.AuthException;
  * @see <a href="https://github.com/weaviate/java-client">Weaviate Java
  *      client</a>
  */
-public class WeaviateSpace implements AutoCloseable {
+public class WeaviateSpace extends BaseSpace {
     private final static Logger logger = LogManager.getLogger(WeaviateSpace.class);
-    private final String name;
     private final NBConfiguration cfg;
 
     protected WeaviateClient client;
@@ -56,11 +56,10 @@ public class WeaviateSpace implements AutoCloseable {
 	 * Create a new WeaviateSpace Object which stores all stateful contextual
 	 * information needed to interact with the <b>Weaviate</b> database instance.
 	 *
-	 * @param name The name of this space
 	 * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
 	 */
-    public WeaviateSpace(String name, NBConfiguration cfg) {
-        this.name = name;
+    public WeaviateSpace(int idx, NBConfiguration cfg) {
+        super(idx);
         this.cfg = cfg;
     }
 
@@ -98,9 +97,9 @@ public class WeaviateSpace implements AutoCloseable {
 		}
 
 		logger.info("{}: Creating new Weaviate Client with (masked) token [{}], uri/endpoint [{}]",
-				this.name, WeaviateAdapterUtils.maskDigits(requiredToken), uri);
+				this.getName(), WeaviateAdapterUtils.maskDigits(requiredToken), uri);
 		Config config = new Config(scheme, uri);
-    	
+
 		if (cfg.getOptional("username").isPresent() && cfg.getOptional("password").isPresent()) {
 			return WeaviateAuthClient.clientPassword(config, cfg.getOptional("username").get(),
 					cfg.getOptional("password").get(), null);

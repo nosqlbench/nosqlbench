@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2024 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package io.nosqlbench.adapter.weaviate;
 import static io.nosqlbench.adapter.weaviate.WeaviateAdapterUtils.WEAVIATE;
 
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 import io.nosqlbench.adapter.weaviate.ops.WeaviateBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
@@ -44,8 +45,8 @@ public class WeaviateDriverAdapter extends BaseDriverAdapter<WeaviateBaseOp<?>, 
 	}
 
 	@Override
-	public Function<String, ? extends WeaviateSpace> getSpaceInitializer(NBConfiguration cfg) {
-		return (s) -> new WeaviateSpace(s, cfg);
+	public IntFunction<WeaviateSpace> getSpaceInitializer(NBConfiguration cfg) {
+		return (int s) -> new WeaviateSpace(s, cfg);
 	}
 
 	@Override

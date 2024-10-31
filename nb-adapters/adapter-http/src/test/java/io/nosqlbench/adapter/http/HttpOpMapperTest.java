@@ -18,13 +18,13 @@ package io.nosqlbench.adapter.http;
 
 import io.nosqlbench.adapter.http.core.HttpOpMapper;
 import io.nosqlbench.adapter.http.core.HttpSpace;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
@@ -49,8 +49,8 @@ public class HttpOpMapperTest {
         HttpOpMapperTest.cfg = HttpSpace.getConfigModel().apply(Map.of());
         HttpOpMapperTest.adapter = new HttpDriverAdapter(new TestComponent("parent","parent"), NBLabels.forKV());
         HttpOpMapperTest.adapter.applyConfig(HttpOpMapperTest.cfg);
-        final DriverSpaceCache<? extends HttpSpace> cache = HttpOpMapperTest.adapter.getSpaceCache();
-        HttpOpMapperTest.mapper = new HttpOpMapper(HttpOpMapperTest.adapter, HttpOpMapperTest.cfg, cache);
+        ConcurrentSpaceCache<HttpSpace> spaceCache = HttpOpMapperTest.adapter.getSpaceCache();
+        HttpOpMapperTest.mapper = new HttpOpMapper(HttpOpMapperTest.adapter, HttpOpMapperTest.cfg, spaceCache);
     }
 
     private static ParsedOp parsedOpFor(final String yaml) {

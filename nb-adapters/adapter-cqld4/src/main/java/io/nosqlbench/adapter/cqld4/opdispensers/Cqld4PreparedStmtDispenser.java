@@ -20,6 +20,8 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.Statement;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 import io.nosqlbench.adapter.cqld4.diagnostics.CQLD4PreparedStmtDiagnostics;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
@@ -33,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
+public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPreparedStatement> {
     private final static Logger logger = LogManager.getLogger(Cqld4PreparedStmtDispenser.class);
 
     private final RSProcessors processors;
@@ -41,15 +43,16 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
     private final ParsedTemplateString stmtTpl;
     private final LongFunction<Object[]> fieldsF;
     private PreparedStatement preparedStmt;
-    private CqlSession boundSession;
+    // This is a stable enum for the op template from the workload, bounded by cardinality of all op templates
+    private int refkey;
 
     public Cqld4PreparedStmtDispenser(
-            DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, ParsedOp op, ParsedTemplateString stmtTpl, RSProcessors processors) {
-        super(adapter, sessionFunc, op);
-        if (op.isDynamic("space")) {
-            throw new RuntimeException("Prepared statements and dynamic space values are not supported." +
-                " This would churn the prepared statement cache, defeating the purpose of prepared statements.");
-        }
+        Cqld4DriverAdapter adapter,
+        ParsedOp op,
+        ParsedTemplateString stmtTpl,
+        RSProcessors processors
+    ) {
+        super(adapter, op);
         this.processors = processors;
         this.stmtTpl = stmtTpl;
         this.fieldsF = getFieldsFunction(op);
@@ -59,40 +62,45 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser {
     private LongFunction<Object[]> getFieldsFunction(ParsedOp op) {
         LongFunction<Object[]> varbinder;
         varbinder = op.newArrayBinderFromBindPoints(stmtTpl.getBindPoints());
+        this.refkey = op.getRefKey();
         return varbinder;
     }
 
-    @Override
-    public LongFunction<CqlSession> getSessionFunc() {
-        return super.getSessionFunc();
-    }
 
     protected LongFunction<Statement> createStmtFunc(LongFunction<Object[]> fieldsF, ParsedOp op) {
 
-        String preparedQueryString = stmtTpl.getPositionalStatement(s -> "?");
-        boundSession = getSessionFunc().apply(0);
         try {
-            preparedStmt = boundSession.prepare(preparedQueryString);
+            String preparedQueryString = stmtTpl.getPositionalStatement(s -> "?");
+
+            LongFunction<PreparedStatement> prepareStatementF =
+                (long l) -> (sessionF.apply(l)).prepare(preparedQueryString);
+
+            LongFunction<? extends Cqld4Space> lookupSpaceF =
+                (long l) -> adapter.getSpaceCache().get(l);
+
+            int refKey = op.getRefKey();
+            LongFunction<PreparedStatement> cachedStatementF =
+                (long l) -> lookupSpaceF.apply(l).getOrCreatePreparedStatement(refKey,prepareStatementF);
+
+            LongFunction<Statement> boundStatementF =
+                (long l) -> cachedStatementF.apply(l).bind(fieldsF.apply(l));
+
+            return super.getEnhancedStmtFunc(boundStatementF, op);
+
         } catch (Exception e) {
             throw new OpConfigError(e + "( for statement '" + stmtTpl + "')");
         }
 
-        LongFunction<Statement> boundStmtFunc = c -> {
-            Object[] apply = fieldsF.apply(c);
-            return preparedStmt.bind(apply);
-        };
-        return super.getEnhancedStmtFunc(boundStmtFunc, op);
     }
 
     @Override
-    public Cqld4CqlOp getOp(long cycle) {
-
-        BoundStatement boundStatement;
+    public Cqld4CqlPreparedStatement getOp(long cycle) {
+        BoundStatement stmt = (BoundStatement) stmtFunc.apply(cycle);
         try {
-            boundStatement = (BoundStatement) stmtFunc.apply(cycle);
+            CqlSession session = (CqlSession) sessionF.apply(cycle);
             return new Cqld4CqlPreparedStatement(
-                boundSession,
-                boundStatement,
+                sessionF.apply(cycle),
+                stmt,
                 getMaxPages(),
                 isRetryReplace(),
                 getMaxLwtRetries(),

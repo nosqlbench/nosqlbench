@@ -6,7 +6,7 @@ import javax.jms.JMSContext;
 import javax.jms.Session;
 
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

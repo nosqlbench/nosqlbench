@@ -56,6 +56,7 @@ public abstract class OpTemplate implements Tagged {
     public final static String FIELD_BINDINGS = "bindings";
     public final static String FIELD_PARAMS = "params";
     public final static String FIELD_TAGS = "tags";
+    public final static String FIELD_REFKEY = "refkey";
 
     /**
      * @return a description for the op template, or an empty string
@@ -129,6 +130,13 @@ public abstract class OpTemplate implements Tagged {
         }
     }
 
+    /**
+     * Get an integer key for the op template for this workload template, based on enumeration of all
+     * active op templates. This value is stable within the current instance of the workload template only.
+     * @return a unique integer key for this op template within the workload template
+     */
+    public abstract int getRefKey();
+    public abstract void setRefKey(int refKey);
 
     public <V> V getParam(String name, Class<? extends V> type) {
         Object object = getParams().get(name);

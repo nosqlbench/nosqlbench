@@ -19,34 +19,34 @@ package io.nosqlbench.adapter.kafka;
 import io.nosqlbench.adapter.kafka.dispensers.MessageConsumerOpDispenser;
 import io.nosqlbench.adapter.kafka.dispensers.MessageProducerOpDispenser;
 import io.nosqlbench.adapter.kafka.ops.KafkaOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 
-public class KafkaOpMapper implements OpMapper<KafkaOp> {
+public class KafkaOpMapper implements OpMapper<KafkaOp,KafkaSpace> {
 
     private final static Logger logger = LogManager.getLogger(KafkaOpMapper.class);
 
-    private final NBConfiguration cfg;
-    private final DriverSpaceCache<? extends KafkaSpace> spaceCache;
-    private final DriverAdapter adapter;
+    private final ConcurrentSpaceCache<KafkaSpace> spaceCache;
+    private final DriverAdapter<KafkaOp,KafkaSpace> adapter;
 
-    public KafkaOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends KafkaSpace> spaceCache) {
-        this.cfg = cfg;
+    public KafkaOpMapper(DriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<KafkaSpace> spaceCache) {
         this.spaceCache = spaceCache;
         this.adapter = adapter;
     }
 
     @Override
-    public OpDispenser<? extends KafkaOp> apply(ParsedOp op) {
-        String spaceName = op.getStaticConfigOr("space", "default");
-        KafkaSpace kafkaSpace = spaceCache.get(spaceName);
+    public OpDispenser<KafkaOp> apply(ParsedOp op, LongFunction<KafkaSpace> spaceInitF) {
+        KafkaSpace kafkaSpace = adapter.getSpaceFunc(op).apply(op.getStaticConfigOr("space",0));
 
         /*
          * If the user provides a body element, then they want to provide the JSON or

@@ -19,9 +19,10 @@ import com.azure.core.util.Context;
 import com.azure.search.documents.SearchClient;
 import com.azure.search.documents.indexes.SearchIndexClient;
 import com.azure.search.documents.models.SearchOptions;
+import com.azure.search.documents.util.AutocompletePagedIterable;
 import com.azure.search.documents.util.SearchPagedIterable;
 
-public class AzureAISearchSearchDocumentsOp extends AzureAISearchClientBaseOp<SearchOptions> {
+public class AzureAISearchSearchDocumentsOp extends AzureAISearchClientBaseOp<SearchOptions,SearchPagedIterable> {
 
 	public AzureAISearchSearchDocumentsOp(SearchIndexClient searchIndexClient, SearchClient searchClient,
 			SearchOptions request) {
@@ -29,7 +30,7 @@ public class AzureAISearchSearchDocumentsOp extends AzureAISearchClientBaseOp<Se
 	}
 
 	@Override
-	public Object applyOp(long value) {
+	public SearchPagedIterable applyOp(long value) {
 		SearchPagedIterable searchDocsResponse = null;
 		try {
 			searchDocsResponse = searchClient.search(null, // we've not implemented other complex searches yet here.

@@ -17,12 +17,14 @@
 package io.nosqlbench.adapters.api.activityconfig.rawyaml;
 
 import io.nosqlbench.adapters.api.util.AdaptersApiVersionInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class RawOpsDoc extends OpsOwner {
+public class RawOpsDoc extends OpsOwner implements Iterable<RawOpsBlock>  {
 
     private RawScenarios scenarios = new RawScenarios();
     private final List<RawOpsBlock> blocks = new ArrayList<>();
@@ -129,4 +131,8 @@ public class RawOpsDoc extends OpsOwner {
         this.versionRegex = regex;
     }
 
+    @Override
+    public @NotNull Iterator<RawOpsBlock> iterator() {
+        return this.blocks.iterator();
+    }
 }

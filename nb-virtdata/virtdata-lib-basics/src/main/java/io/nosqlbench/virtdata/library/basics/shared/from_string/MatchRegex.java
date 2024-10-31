@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class MatchRegex implements Function<String,String>  {
     private final MatchEntry[] entries;
 
     @Example({"MatchRegex('.*(25|6to4).*','$1')","Match 25 or 6 to 4 and set the output to only that"})
-    @Example({"MatchRegex('([0-9]+)-([0-9]+)-([0-9]+)','$1 $2 $3'", "replaced dashes with spaces in a 10 digit US phone number."})
+    @Example({"MatchRegex('([0-9]+)-([0-9]+)-([0-9]+)','$1 $2 $3'", "replace dashes with spaces in a 10 digit US phone number."})
     @SuppressWarnings("unchecked")
     public MatchRegex(String... specs) {
         if ((specs.length%2)!=0) {

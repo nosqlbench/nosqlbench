@@ -28,6 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,7 @@ public class OpsDocList implements Iterable<OpsDoc> {
 
     public OpsDocList(RawOpsDocList rawOpsDocList) {
         this.rawOpsDocList = rawOpsDocList;
+        this.applyModifier(new enumerator());
     }
 
     public static OpsDocList none() {
@@ -180,4 +182,26 @@ public class OpsDocList implements Iterable<OpsDoc> {
         List<RawOpsDoc> stmtDocs = rawOpsDocList.getOpsDocs();
         return Pattern.compile(stmtDocs.size()>0 ? stmtDocs.get(0).getVersionRegex() : ".*");
     }
+
+    public int applyModifier(Consumer<OpTemplate> modifier) {
+        int count=0;
+        for (OpsDoc stmtDoc : this.getStmtDocs()) {
+            for (OpsBlock opTemplates : stmtDoc) {
+                for (OpTemplate opTemplate : opTemplates) {
+                    modifier.accept(opTemplate);
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    public static class enumerator implements Consumer<OpTemplate> {
+        private int count=0;
+        @Override
+        public void accept(OpTemplate opTemplate) {
+            opTemplate.setRefKey(count++);
+        }
+    }
+
 }

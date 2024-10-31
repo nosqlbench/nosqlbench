@@ -16,6 +16,10 @@
 
 package io.nosqlbench.adapters.api.activityimpl.uniform;
 
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,14 +46,21 @@ import java.util.function.Function;
  * @param <S>
  *     The type which will represent the cache for a given type of adapter.
  */
-public class DriverSpaceCache<S> {
+public class StringDriverSpaceCache<S> extends NBBaseComponent {
 
     private final ConcurrentHashMap<String, S> cache = new ConcurrentHashMap<>();
 
     private final Function<String, S> newSpaceFunction;
 
-    public DriverSpaceCache(Function<String, S> newSpaceFunction) {
+    public StringDriverSpaceCache(NBComponent parent, Function<String, S> newSpaceFunction) {
+        super(parent);
         this.newSpaceFunction = newSpaceFunction;
+        this.create().gauge(
+            "spaces",
+            () -> (double) this.getElements().size(),
+            MetricCategory.Internals,
+            "the number of spaces instantiated by this adapter instance"
+        );
     }
 
     public S get(String name) {

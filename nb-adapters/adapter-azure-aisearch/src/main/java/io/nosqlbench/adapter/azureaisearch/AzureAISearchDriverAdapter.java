@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package io.nosqlbench.adapter.azureaisearch;
 
 
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 import io.nosqlbench.adapter.azureaisearch.ops.AzureAISearchBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
@@ -31,20 +32,20 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 import static io.nosqlbench.adapter.azureaisearch.AzureAISearchAdapterUtils.AZURE_AI_SEARCH;
 
 @Service(value = DriverAdapter.class, selector = AZURE_AI_SEARCH)
-public class AzureAISearchDriverAdapter extends BaseDriverAdapter<AzureAISearchBaseOp<?>, AzureAISearchSpace> {
+public class AzureAISearchDriverAdapter extends BaseDriverAdapter<AzureAISearchBaseOp, AzureAISearchSpace> {
 
 	public AzureAISearchDriverAdapter(NBComponent parentComponent, NBLabels labels) {
 		super(parentComponent, labels);
 	}
 
 	@Override
-	public OpMapper<AzureAISearchBaseOp<?>> getOpMapper() {
+	public OpMapper<AzureAISearchBaseOp,AzureAISearchSpace> getOpMapper() {
 		return new AzureAISearchOpMapper(this);
 	}
 
 	@Override
-	public Function<String, ? extends AzureAISearchSpace> getSpaceInitializer(NBConfiguration cfg) {
-		return (s) -> new AzureAISearchSpace(s, cfg);
+	public LongFunction<AzureAISearchSpace> getSpaceInitializer(NBConfiguration cfg) {
+		return (s) -> new AzureAISearchSpace(this,s, cfg);
 	}
 
 	@Override

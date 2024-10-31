@@ -398,29 +398,6 @@
                 <version>2.24.1</version>
             </dependency>
 
-	        <dependency>
-	            <groupId>io.weaviate</groupId>
-	            <artifactId>client</artifactId>
-	            <version>4.8.2</version>
-	        </dependency>
-
-          <dependency>
-              <groupId>com.azure</groupId>
-              <artifactId>azure-search-documents</artifactId>
-              <version>11.7.0</version>
-          </dependency>
-          <dependency>
-            <groupId>com.azure</groupId>
-            <artifactId>azure-identity</artifactId>
-            <version>1.13.2</version>
-          </dependency>
-
-            <dependency>
-                <groupId>com.google.cloud</groupId>
-                <artifactId>google-cloud-spanner</artifactId>
-                <version>6.77.0</version>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -730,7 +707,7 @@
                         <exclude>**/generated-sources/**</exclude>
                     </excludes>
                     <addLicenseHeaders>true</addLicenseHeaders>
-                    <copyrightMessage>Copyright (c) 2022 nosqlbench</copyrightMessage>
+                    <copyrightMessage>Copyright (c) nosqlbench</copyrightMessage>
                 </configuration>
             </plugin>
 

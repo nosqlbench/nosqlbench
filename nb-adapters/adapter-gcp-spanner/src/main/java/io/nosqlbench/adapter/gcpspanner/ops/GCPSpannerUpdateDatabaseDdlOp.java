@@ -26,7 +26,7 @@ import com.google.spanner.admin.database.v1.UpdateDatabaseDdlMetadata;
  * This class represents an operation to update the database DDL (Data Definition Language) in Google Cloud Spanner.
  * It extends the GCPSpannerBaseOp class and provides the implementation for applying the DDL update operation.
  */
-public class GCPSpannerUpdateDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
+public class GCPSpannerUpdateDatabaseDdlOp extends GCPSpannerBaseOp<Long,Void> {
     private final String createTableStatement;
     private final DatabaseAdminClient dbAdminClient;
     private final Database db;
@@ -56,7 +56,7 @@ public class GCPSpannerUpdateDatabaseDdlOp extends GCPSpannerBaseOp<Long> {
      * @throws RuntimeException if an error occurs during the operation
      */
     @Override
-    public Object applyOp(long value) {
+    public Void applyOp(long value) {
         OperationFuture<Void, UpdateDatabaseDdlMetadata> operation = dbAdminClient.updateDatabaseDdl(
             db,
             ImmutableList.of(createTableStatement),

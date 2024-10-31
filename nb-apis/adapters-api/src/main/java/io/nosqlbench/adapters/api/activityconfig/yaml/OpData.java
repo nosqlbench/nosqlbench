@@ -29,6 +29,7 @@ public class OpData extends OpTemplate {
     private Map<String, Object> params = Map.of();
     private Map<String, String> bindings = Map.of();
     private Map<String, String> tags = new LinkedHashMap<>();
+    private int refKey;
 
     public OpData(String desc, String name, Map<String, String> tags, Map<String, String> bindings, Map<String, Object> params, Map<String, Object> op) {
         this.desc = desc;
@@ -139,6 +140,16 @@ public class OpData extends OpTemplate {
     @Override
     public Map<String, Object> getParams() {
         return this.params;
+    }
+
+    @Override
+    public int getRefKey() {
+        return refKey;
+    }
+
+    @Override
+    public void setRefKey(int refKey) {
+        this.refKey = refKey;
     }
 
     @Override

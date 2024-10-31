@@ -19,14 +19,14 @@ import com.azure.core.http.rest.PagedIterable;
 import com.azure.search.documents.indexes.SearchIndexClient;
 import com.azure.search.documents.indexes.models.SearchIndex;
 
-public class AzureAISearchListIndexesOp extends AzureAISearchBaseOp<String> {
+public class AzureAISearchListIndexesOp extends AzureAISearchBaseOp<String,String> {
 
 	public AzureAISearchListIndexesOp(SearchIndexClient client, String request) {
 		super(client, request);
 	}
 
 	@Override
-	public Object applyOp(long value) {
+	public String applyOp(long value) {
 		try {
 			PagedIterable<SearchIndex> response = searchIndexClient.listIndexes();
 			response.forEach((index) -> {

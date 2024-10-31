@@ -19,8 +19,9 @@ package io.nosqlbench.adapter.dynamodb;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.StringDriverSpaceCache;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Maturity;
@@ -29,6 +30,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 @Service(value = DriverAdapter.class, selector = "dynamodb", maturity = Maturity.Experimental)
 public class DynamoDBDriverAdapter extends BaseDriverAdapter<DynamoDBOp, DynamoDBSpace> {
@@ -38,15 +40,14 @@ public class DynamoDBDriverAdapter extends BaseDriverAdapter<DynamoDBOp, DynamoD
     }
 
     @Override
-    public OpMapper<DynamoDBOp> getOpMapper() {
-        DriverSpaceCache<? extends DynamoDBSpace> spaceCache = getSpaceCache();
+    public OpMapper<DynamoDBOp,DynamoDBSpace> getOpMapper() {
         NBConfiguration adapterConfig = getConfiguration();
-        return new DynamoDBOpMapper(this, adapterConfig, spaceCache);
+        return new DynamoDBOpMapper(this, adapterConfig, getSpaceCache());
     }
 
     @Override
-    public Function<String, ? extends DynamoDBSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new DynamoDBSpace(s,cfg);
+    public LongFunction<DynamoDBSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (s) -> new DynamoDBSpace(this, s,cfg);
     }
 
     @Override

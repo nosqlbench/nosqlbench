@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.gcpspanner.ops;
 
 import com.google.cloud.spanner.Spanner;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,14 +28,14 @@ import java.util.function.LongFunction;
  * Abstract base class for GCP Spanner operations.
  * This class implements the CycleOp interface and provides a template for executing operations with a Spanner client.
  *
- * @param <T> the type of the request parameter
+ * @param <RESULT> the type of the request parameter
  */
-public abstract class GCPSpannerBaseOp<T> implements CycleOp<Object> {
+public abstract class GCPSpannerBaseOp<REQUEST, RESULT> implements CycleOp<RESULT> {
 
     protected final static Logger logger = LogManager.getLogger(GCPSpannerBaseOp.class);
 
     protected final Spanner spannerClient;
-    protected final T request;
+    protected final REQUEST request;
     protected final LongFunction<Object> apiCall;
 
     /**
@@ -43,7 +44,7 @@ public abstract class GCPSpannerBaseOp<T> implements CycleOp<Object> {
      * @param spannerClient the Spanner client to use for operations
      * @param requestParam the request parameter for the operation
      */
-    public GCPSpannerBaseOp(Spanner spannerClient, T requestParam) {
+    public GCPSpannerBaseOp(Spanner spannerClient, REQUEST requestParam) {
         this.spannerClient = spannerClient;
         this.request = requestParam;
         this.apiCall = this::applyOp;
@@ -57,11 +58,11 @@ public abstract class GCPSpannerBaseOp<T> implements CycleOp<Object> {
      * @return the result of the operation
      */
     @Override
-    public final Object apply(long value) {
+    public final RESULT apply(long value) {
         logger.trace(() -> "applying op: " + this);
 
         try {
-            Object result = applyOp(value);
+            RESULT result = applyOp(value);
             return result;
         } catch (Exception rte) {
             throw new RuntimeException(rte);
@@ -74,7 +75,7 @@ public abstract class GCPSpannerBaseOp<T> implements CycleOp<Object> {
      * @param value the cycle value
      * @return the result of the operation
      */
-    public abstract Object applyOp(long value);
+    public abstract RESULT applyOp(long value);
 
     /**
      * Returns a string representation of the GCPSpannerBaseOp.

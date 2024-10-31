@@ -17,27 +17,34 @@
 package io.nosqlbench.adapter.cqld4.opmappers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4RainbowTableOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class CqlD4RainbowTableMapper implements OpMapper<Cqld4RainbowTableOp> {
-    private final LongFunction<CqlSession> sessionFunc;
+public class CqlD4RainbowTableMapper<CO extends Cqld4RainbowTableOp> extends Cqld4BaseOpMapper<Cqld4RainbowTableOp> {
     private final LongFunction<String> targetFunction;
     private final DriverAdapter adapter;
 
-    public CqlD4RainbowTableMapper(DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction) {
-        this.sessionFunc = sessionFunc;
+    public CqlD4RainbowTableMapper(
+        Cqld4DriverAdapter adapter,
+        LongFunction<CqlSession> sessionFunc,
+        LongFunction<String> targetFunction
+    ) {
+        super(adapter);
         this.targetFunction = targetFunction;
         this.adapter = adapter;
     }
 
     @Override
-    public OpDispenser<? extends Cqld4RainbowTableOp> apply(ParsedOp op) {
+    public OpDispenser<Cqld4RainbowTableOp> apply(ParsedOp op, LongFunction spaceInitF) {
         return null;
 //        return new CqlD4RainbowTableDispenser(adapter, sessionFunc,targetFunction, op);
     }

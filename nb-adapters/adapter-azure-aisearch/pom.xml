@@ -15,45 +15,50 @@
   -->
 <!--<?xml version="1.0" encoding="UTF-8"?>-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>adapter-azure-aisearch</artifactId>
-  <packaging>jar</packaging>
+    <artifactId>adapter-azure-aisearch</artifactId>
+    <packaging>jar</packaging>
 
-  <parent>
-    <artifactId>mvn-defaults</artifactId>
-    <groupId>io.nosqlbench</groupId>
-    <version>${revision}</version>
-    <relativePath>../../mvn-defaults</relativePath>
-  </parent>
+    <parent>
+        <artifactId>mvn-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>${revision}</version>
+        <relativePath>../../mvn-defaults</relativePath>
+    </parent>
 
-  <name>${project.artifactId}</name>
-  <description>
-    An nosqlbench adapter driver module for the Azure AI Search database.
-  </description>
+    <name>${project.artifactId}</name>
+    <description>
+        An nosqlbench adapter driver module for the Azure AI Search database.
+    </description>
 
-  <dependencies>
-    <dependency>
-      <groupId>io.nosqlbench</groupId>
-      <artifactId>nb-annotations</artifactId>
-      <version>${revision}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.nosqlbench</groupId>
-      <artifactId>adapters-api</artifactId>
-      <version>${revision}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.azure</groupId>
-      <artifactId>azure-search-documents</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.azure</groupId>
-      <artifactId>azure-identity</artifactId>
-    </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-annotations</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapters-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-search-documents</artifactId>
+            <version>11.7.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-identity</artifactId>
+            <version>1.13.2</version>
+        </dependency>
+
+    </dependencies>
 </project>

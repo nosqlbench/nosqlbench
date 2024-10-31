@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 @Service(value = DriverAdapter.class, selector = "diag")
 public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> implements SyntheticOpTemplateProvider {
@@ -54,7 +55,7 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
     }
 
     @Override
-    public synchronized OpMapper<DiagOp> getOpMapper() {
+    public synchronized OpMapper<DiagOp,DiagSpace> getOpMapper() {
         if (this.mapper == null) {
             this.mapper = new DiagOpMapper(this);
         }
@@ -62,8 +63,8 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
     }
 
     @Override
-    public Function<String, ? extends DiagSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (String name) -> new DiagSpace(name, cfg);
+    public LongFunction<DiagSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (long name) -> new DiagSpace(this, name, cfg);
     }
 
     @Override

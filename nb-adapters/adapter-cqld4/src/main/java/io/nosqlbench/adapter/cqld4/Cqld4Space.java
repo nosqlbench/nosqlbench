@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.cqld4;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.datastax.oss.driver.api.core.config.*;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.session.SessionBuilder;
 import com.datastax.oss.driver.internal.core.config.composite.CompositeDriverConfigLoader;
 import com.datastax.oss.driver.internal.core.loadbalancing.helper.NodeFilterToDistanceEvaluatorAdapter;
@@ -28,6 +29,8 @@ import io.nosqlbench.adapter.cqld4.optionhelpers.OptionHelpers;
 import io.nosqlbench.adapter.cqld4.wrapper.Cqld4LoadBalancerObserver;
 import io.nosqlbench.adapter.cqld4.wrapper.Cqld4SessionBuilder;
 import io.nosqlbench.adapter.cqld4.wrapper.NodeSummary;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentIndexCache;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.nbio.Content;
@@ -45,16 +48,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
-public class Cqld4Space implements AutoCloseable {
+public class Cqld4Space extends BaseSpace<Cqld4Space> {
     private final static Logger logger = LogManager.getLogger(Cqld4Space.class);
-    private final String space;
 
-    CqlSession session;
+    private CqlSession session;
+    private ConcurrentIndexCache<PreparedStatement> preparedStmtCache = new ConcurrentIndexCache<>("pstmts");
 
-    public Cqld4Space(String space, NBConfiguration cfg) {
-        this.space = space;
+    public Cqld4Space(Cqld4DriverAdapter adapter, long spaceidx, NBConfiguration cfg) {
+        super(adapter,spaceidx);
         session = createSession(cfg);
     }
 
@@ -301,7 +305,6 @@ public class Cqld4Space implements AutoCloseable {
             }
             return Optional.of(mainloader);
         }
-
     }
 
     public CqlSession getSession() {
@@ -338,10 +341,19 @@ public class Cqld4Space implements AutoCloseable {
     @Override
     public void close() {
         try {
+            this.preparedStmtCache.clear();
             this.getSession().close();
         } catch (Exception e) {
-            logger.warn("auto-closeable cql session threw exception in cql space(" + this.space + "): " + e);
+            logger.warn("auto-closeable cql session threw exception in cql space(" + getName() + "): " + e);
             throw e;
         }
+    }
+
+    public PreparedStatement getOrCreatePreparedStatement(
+        int refkey,
+        LongFunction<PreparedStatement> psF
+    ) {
+        PreparedStatement ps = preparedStmtCache.get(refkey, psF);
+        return ps;
     }
 }

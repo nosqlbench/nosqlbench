@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.datastax.astra.client.DataAPIClient;
 import com.datastax.astra.client.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
 import com.datastax.astra.client.admin.DatabaseAdmin;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -34,10 +35,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-public class DataApiSpace {
+public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private final static Logger logger = LogManager.getLogger(DataApiSpace.class);
     private final NBConfiguration config;
-    private final String name;
     private String astraToken;
     private String astraApiEndpoint;
     private DataAPIClient dataAPIClient;
@@ -48,9 +48,9 @@ public class DataApiSpace {
     private AstraDBAdmin admin;
     private DatabaseAdmin namespaceAdmin;
 
-    public DataApiSpace(String name, NBConfiguration cfg) {
+    public DataApiSpace(DataApiDriverAdapter adapter, long name, NBConfiguration cfg) {
+        super(adapter,name);
         this.config = cfg;
-        this.name = name;
         setToken();
         setSuperToken();
         setApiEndpoint();

@@ -17,19 +17,17 @@
 package io.nosqlbench.adapter.kafka;
 
 import io.nosqlbench.adapter.kafka.ops.KafkaOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.function.Function;
 
 @Service(value = DriverAdapter.class, selector = "kafka")
 public class KafkaDriverAdapter extends BaseDriverAdapter<KafkaOp, KafkaSpace> {
@@ -40,16 +38,12 @@ public class KafkaDriverAdapter extends BaseDriverAdapter<KafkaOp, KafkaSpace> {
     }
 
     @Override
-    public OpMapper<KafkaOp> getOpMapper() {
-        DriverSpaceCache<? extends KafkaSpace> spaceCache = getSpaceCache();
+    public OpMapper<KafkaOp,KafkaSpace> getOpMapper() {
+        ConcurrentSpaceCache<KafkaSpace> spaceCache = getSpaceCache();
         NBConfiguration adapterConfig = getConfiguration();
         return new KafkaOpMapper(this, adapterConfig, spaceCache);
     }
 
-    @Override
-    public Function<String, ? extends KafkaSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new KafkaSpace(s, cfg);
-    }
 
     @Override
     public NBConfigModel getConfigModel() {

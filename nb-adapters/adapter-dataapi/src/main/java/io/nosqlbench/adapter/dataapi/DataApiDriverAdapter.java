@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 // TODO: Add details to dataapi.md in main resources folder, a la cqld4.md
 
@@ -42,8 +43,8 @@ public class DataApiDriverAdapter extends BaseDriverAdapter<DataApiBaseOp, DataA
     }
 
     @Override
-    public Function<String, ? extends DataApiSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new DataApiSpace(s, cfg);
+    public LongFunction<DataApiSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (s) -> new DataApiSpace(this, s, cfg);
     }
 
     @Override

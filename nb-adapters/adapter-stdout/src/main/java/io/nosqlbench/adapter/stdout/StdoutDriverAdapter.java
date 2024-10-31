@@ -22,7 +22,7 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
@@ -34,7 +34,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -47,14 +48,14 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
     }
 
     @Override
-    public OpMapper<StdoutOp> getOpMapper() {
-        DriverSpaceCache<? extends StdoutSpace> ctxCache = getSpaceCache();
+    public OpMapper<StdoutOp,StdoutSpace> getOpMapper() {
+        ConcurrentSpaceCache<StdoutSpace> ctxCache = getSpaceCache();
         return new StdoutOpMapper(this, ctxCache);
     }
 
     @Override
-    public Function<String, ? extends StdoutSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new StdoutSpace(cfg);
+    public LongFunction<StdoutSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (idx) -> new StdoutSpace(this, idx, cfg);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
     public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String, Object> cfg) {
         Set<String> activeBindingNames = new LinkedHashSet<>(opsDocList.getDocBindings().keySet());
 
-        if (activeBindingNames.size()==0) {
+        if (activeBindingNames.isEmpty()) {
             logger.warn("Unable to synthesize op for driver=" + this.getAdapterName() + " with zero bindings.");
             return List.of();
         }
@@ -89,7 +90,7 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
             })
             .collect(Collectors.toSet());
 
-        if (filteredBindingNames.size() == 0) {
+        if (filteredBindingNames.isEmpty()) {
             logger.warn("Unable to synthesize op for driver="+getAdapterName()+" when " + activeBindingNames.size()+"/"+activeBindingNames.size() + " bindings were filtered out with bindings=" + bindings);
             return List.of();
         }

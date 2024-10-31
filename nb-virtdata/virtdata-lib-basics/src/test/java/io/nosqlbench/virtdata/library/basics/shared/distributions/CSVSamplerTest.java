@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -148,6 +149,30 @@ public class CSVSamplerTest {
         assertThat(results.get("alpha")).isCloseTo(20000, Percentage.withPercentage(2.0d));
     }
 
+    /**
+     * If there is no variation in aggregation, then bindings for different named columns
+     * should produce values from the same line for the same input
+     */
+    @Test
+    public void testStablePairingForSum() {
+        Map<String,String> expected = new LinkedHashMap<>() {{
+            put("1","one");
+            put("2","two");
+            put("3","three");
+            put("4","four");
+            put("5","five");
+            put("6","six");
+        }};
+        CSVSampler sampler1 = new CSVSampler("weight", "does not matter", "name", "basicdata");
+        CSVSampler sampler2 = new CSVSampler("wname", "does not matter", "name", "basicdata");
+
+        for (int i = 0; i < 1000; i++) {
+            String v1 = sampler1.apply(i);
+            String v2 = sampler2.apply(i);
+            assertThat(expected.get(v1)).isEqualTo(v2);
+        }
+
+    }
 
 
 }

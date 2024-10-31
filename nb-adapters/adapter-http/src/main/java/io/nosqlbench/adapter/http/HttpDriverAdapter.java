@@ -23,7 +23,6 @@ import io.nosqlbench.nb.api.config.standard.Param;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.labels.NBLabels;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 @Service(value = DriverAdapter.class, selector = "http")
 public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
@@ -54,15 +54,14 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
     }
 
     @Override
-    public OpMapper<HttpOp> getOpMapper() {
-        DriverSpaceCache<? extends HttpSpace> spaceCache = getSpaceCache();
+    public OpMapper<HttpOp,HttpSpace> getOpMapper() {
         NBConfiguration config = getConfiguration();
-        return new HttpOpMapper(this, config, spaceCache);
+        return new HttpOpMapper(this, config, getSpaceCache());
     }
 
     @Override
-    public Function<String, ? extends HttpSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return spaceName -> new HttpSpace(this, spaceName, cfg);
+    public LongFunction<HttpSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return idx -> new HttpSpace(idx, this, cfg);
     }
 
     @Override

@@ -19,34 +19,38 @@ package io.nosqlbench.adapter.s4j;
 import io.nosqlbench.adapter.s4j.dispensers.MessageConsumerOpDispenser;
 import io.nosqlbench.adapter.s4j.dispensers.MessageProducerOpDispenser;
 import io.nosqlbench.adapter.s4j.ops.S4JOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class S4JOpMapper implements OpMapper<S4JOp> {
+import java.util.function.IntFunction;
+import java.util.function.LongFunction;
+
+public class S4JOpMapper implements OpMapper<S4JOp,S4JSpace> {
 
     private final static Logger logger = LogManager.getLogger(S4JOpMapper.class);
 
     private final NBConfiguration cfg;
-    private final DriverSpaceCache<? extends S4JSpace> spaceCache;
+    private final ConcurrentSpaceCache<? extends S4JSpace> spaceCache;
     private final DriverAdapter adapter;
 
-    public S4JOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends S4JSpace> spaceCache) {
+    public S4JOpMapper(DriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<? extends S4JSpace> spaceCache) {
         this.cfg = cfg;
         this.spaceCache = spaceCache;
         this.adapter = adapter;
     }
 
     @Override
-    public OpDispenser<? extends S4JOp> apply(ParsedOp op) {
-        String spaceName = op.getStaticConfigOr("space", "default");
-        S4JSpace s4jSpace = spaceCache.get(spaceName);
+    public OpDispenser<S4JOp> apply(ParsedOp op, LongFunction<S4JSpace> spaceInitF) {
+        int spaceIdx = op.getStaticConfigOr("space", 0);
+        S4JSpace s4jSpace = spaceCache.get(spaceIdx);
 
         /*
          * If the user provides a body element, then they want to provide the JSON or

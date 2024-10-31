@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.stdout;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -25,12 +26,13 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-public class StdoutSpace {
+public class StdoutSpace extends BaseSpace<StdoutSpace> {
 
     Writer writer;
     private PrintWriter console;
 
-    public StdoutSpace(NBConfiguration cfg) {
+    public StdoutSpace(StdoutDriverAdapter adapter, long idx, NBConfiguration cfg) {
+        super(adapter, idx);
         String filename = cfg.get("filename");
         this.writer = createPrintWriter(filename);
     }

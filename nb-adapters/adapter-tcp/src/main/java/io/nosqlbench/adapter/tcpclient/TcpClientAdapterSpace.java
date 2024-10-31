@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.tcpclient;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -30,13 +31,14 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.Socket;
 
-public class TcpClientAdapterSpace {
+public class TcpClientAdapterSpace extends BaseSpace<TcpClientAdapterSpace> {
 
     private final static Logger logger = LogManager.getLogger(TcpClientAdapterSpace.class);
     private final NBConfiguration config;
     Writer writer;
 
-    public TcpClientAdapterSpace(NBConfiguration config) {
+    public TcpClientAdapterSpace(TcpClientDriverAdapter adapter, long idx, NBConfiguration config) {
+        super(adapter, idx);
         this.config = config;
         this.writer = createPrintWriter();
     }

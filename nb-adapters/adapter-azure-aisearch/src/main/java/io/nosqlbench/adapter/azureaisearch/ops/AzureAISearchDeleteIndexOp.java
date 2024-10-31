@@ -17,14 +17,14 @@ package io.nosqlbench.adapter.azureaisearch.ops;
 
 import com.azure.search.documents.indexes.SearchIndexClient;
 
-public class AzureAISearchDeleteIndexOp extends AzureAISearchBaseOp<String> {
+public class AzureAISearchDeleteIndexOp extends AzureAISearchBaseOp<String,String> {
 
 	public AzureAISearchDeleteIndexOp(SearchIndexClient client, String request) {
 		super(client, request);
 	}
 
 	@Override
-	public Object applyOp(long value) {
+	public String applyOp(long value) {
 		try {
 			searchIndexClient.deleteIndex(request);
 			logger.debug("Successfully deleted the index: {}", request);

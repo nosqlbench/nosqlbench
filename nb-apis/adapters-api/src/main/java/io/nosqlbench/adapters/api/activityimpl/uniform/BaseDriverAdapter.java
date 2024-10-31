@@ -32,12 +32,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.LongFunction;
+import java.util.function.LongToIntFunction;
+import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
-public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent implements DriverAdapter<R, S>, NBConfigurable, NBReconfigurable {
+public abstract class BaseDriverAdapter<R extends Op, S extends Space> extends NBBaseComponent implements DriverAdapter<R, S>, NBConfigurable, NBReconfigurable {
     private final static Logger logger = LogManager.getLogger("ADAPTER");
 
-    private DriverSpaceCache<? extends S> spaceCache;
+    private ConcurrentSpaceCache<S> spaceCache;
     private NBConfiguration cfg;
     private LongFunction<S> spaceF;
 
@@ -62,7 +64,7 @@ public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent
         mappers.addAll(stmtRemappers);
         mappers.addAll(getOpFieldRemappers());
 
-        if (mappers.size() == 0) {
+        if (mappers.isEmpty()) {
             return (i) -> i;
         }
 
@@ -121,7 +123,7 @@ public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent
      * <p>Provide a list of field remappers which operate on arbitrary fields.
      * Each function is applied to the op template fields. </p>
      *
-     * @return
+     * @return op field remappers, an empty list by default
      */
     @Override
     public List<Function<Map<String, Object>, Map<String, Object>>> getOpFieldRemappers() {
@@ -129,9 +131,9 @@ public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent
     }
 
     @Override
-    public final synchronized DriverSpaceCache<? extends S> getSpaceCache() {
+    public final synchronized ConcurrentSpaceCache<S> getSpaceCache() {
         if (spaceCache == null) {
-            spaceCache = new DriverSpaceCache<>(getSpaceInitializer(getConfiguration()));
+            spaceCache = new ConcurrentSpaceCache<S>(this,getSpaceInitializer(getConfiguration()));
         }
         return spaceCache;
     }
@@ -192,8 +194,26 @@ public abstract class BaseDriverAdapter<R extends Op, S> extends NBBaseComponent
 
     @Override
     public LongFunction<S> getSpaceFunc(ParsedOp pop) {
-        LongFunction<String> spaceNameF = pop.getAsFunctionOr("space", "default");
-        DriverSpaceCache<? extends S> cache = getSpaceCache();
-        return l -> getSpaceCache().get(spaceNameF.apply(l));
+
+        Optional<LongFunction<Object>> spaceFuncTest = pop.getAsOptionalFunction("space",Object.class);
+        LongToIntFunction cycleToSpaceF;
+        if (spaceFuncTest.isEmpty()) {
+            cycleToSpaceF = (long l) -> 0;
+        } else {
+            Object example = spaceFuncTest.get().apply(0L);
+            if (example instanceof Number n) {
+                logger.trace("mapping space indirectly with Number type");
+                LongFunction<Number> numberF = pop.getAsRequiredFunction("space", Number.class);
+                cycleToSpaceF=  l -> numberF.apply(l).intValue();
+            } else {
+                logger.trace("mapping space indirectly through hash table to index pool");
+                LongFunction<?> sourceF = pop.getAsRequiredFunction("space", String.class);
+                LongFunction<String> namerF = l -> sourceF.apply(l).toString();
+                ConcurrentIndexCacheWrapper wrapper = new ConcurrentIndexCacheWrapper();
+                cycleToSpaceF = l -> wrapper.mapKeyToIndex(namerF.apply(l));
+            }
+        }
+        ConcurrentSpaceCache<S> spaceCache1 = getSpaceCache();
+        return l -> spaceCache1.get(cycleToSpaceF.applyAsInt(l));
     }
 }

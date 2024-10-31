@@ -21,27 +21,30 @@ import io.nosqlbench.adapter.dynamodb.opdispensers.*;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
-public class DynamoDBOpMapper implements OpMapper<DynamoDBOp> {
+import java.util.function.LongFunction;
+
+public class DynamoDBOpMapper implements OpMapper<DynamoDBOp,DynamoDBSpace> {
 
     private final NBConfiguration cfg;
-    private final DriverSpaceCache<? extends DynamoDBSpace> cache;
+    private final ConcurrentSpaceCache<DynamoDBSpace> cache;
     private final DriverAdapter adapter;
 
-    public DynamoDBOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends DynamoDBSpace> cache) {
+    public DynamoDBOpMapper(DriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<DynamoDBSpace> cache) {
         this.cfg = cfg;
         this.cache = cache;
         this.adapter = adapter;
     }
 
     @Override
-    public OpDispenser<DynamoDBOp> apply(ParsedOp op) {
-        String space = op.getStaticConfigOr("space", "default");
+    public OpDispenser<DynamoDBOp> apply(ParsedOp op, LongFunction<DynamoDBSpace> spaceInitF) {
+        int space = op.getStaticConfigOr("space", 0);
         DynamoDB ddb = cache.get(space).getDynamoDB();
 
         /*

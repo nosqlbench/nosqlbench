@@ -38,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.LongFunction;
+import java.util.function.LongToIntFunction;
 
 /**
  * A parsed map template, which allows construction of extracted or projected functions related
@@ -151,7 +152,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                     }
                 });
                 Map<String, Object> submap = (Map<String, Object>) v;
-                ParsedTemplateMap subtpl = new ParsedTemplateMap(getName(),submap, bindings, cfgsources);
+                ParsedTemplateMap subtpl = new ParsedTemplateMap(getName(), submap, bindings, cfgsources);
                 this.captures.addAll(subtpl.getCaptures());
                 if (subtpl.isStatic()) {
                     statics.put(k, submap);
@@ -168,8 +169,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                     statics.put(k, sublist);
                     protomap.put(k, sublist);
                 } else {
-                    dynamics.put(k,subtpl);
-                    protomap.put(k,null);
+                    dynamics.put(k, subtpl);
+                    protomap.put(k, null);
                 }
             } else {
                 // Eventually, nested and mixed static dynamic structure could be supported, but
@@ -215,11 +216,11 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     }
 
     public Map<String, Object> getConfigPrototype() {
-        Map<String,Object> cfgs = new LinkedHashMap<>();
+        Map<String, Object> cfgs = new LinkedHashMap<>();
         for (Map<String, Object> cfgsource : cfgsources) {
             for (String key : cfgsource.keySet()) {
                 if (!cfgs.containsKey(key)) {
-                    cfgs.put(key,cfgsource.get(key));
+                    cfgs.put(key, cfgsource.get(key));
                 } else {
                     logger.warn("config sources contain overlapping keys for '" + key + "', precedence is undefined");
                 }
@@ -244,7 +245,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
 
     public Map<String, Object> applyFull(long value) {
         Map<String, Object> newmap = apply(value);
-        for (int i = cfgsources.size()-1; i>0 ; i--) {
+        for (int i = cfgsources.size() - 1; i > 0; i--) {
             newmap.putAll(cfgsources.get(i));
         }
         return newmap;
@@ -279,7 +280,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     @Override
     public boolean isDefined(String... fields) {
         for (String field : fields) {
-            if (!isStatic(field)&&!isDynamic(field)&&!isConfig(field)) {
+            if (!isStatic(field) && !isDynamic(field) && !isConfig(field)) {
                 return false;
             }
         }
@@ -312,7 +313,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 return (T) cfgsource.get(field);
             }
         }
-        throw new OpConfigError("config value for '" +field +"' was not found in " + cfgsources);
+        throw new OpConfigError("config value for '" + field + "' was not found in " + cfgsources);
     }
 
     public <T> T takeStaticValue(String field, Class<T> classOfT) {
@@ -395,11 +396,11 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
 
     public <T> T getStaticConfig(String name, Class<T> clazz) {
         if (statics.containsKey(name)) {
-            return NBTypeConverter.convert(statics.get(name),clazz);
+            return NBTypeConverter.convert(statics.get(name), clazz);
         }
         for (Map<String, Object> cfgsource : cfgsources) {
             if (cfgsource.containsKey(name)) {
-                return NBTypeConverter.convert(cfgsource.get(name),clazz);
+                return NBTypeConverter.convert(cfgsource.get(name), clazz);
             }
         }
         if (dynamics.containsKey(name)) {
@@ -532,9 +533,9 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return getAsRequiredFunction(name, String.class);
     }
 
-    public <V extends Enum<V>> Optional<LongFunction<V>> getAsOptionalEnumFunction(String name, Class<V> type) {
+    public <V extends Enum<V>> Optional<LongFunction<V>> getAsOptionalEnumFunction(String name, Class<? extends V> type) {
         Optional<LongFunction<String>> nameFunc = this.getAsOptionalFunction(name, String.class);
-        return nameFunc.map((f) -> (l) -> Enum.valueOf(type, f.apply(l)));
+        return nameFunc.map((f) -> (l) -> Enum.valueOf((Class<V>) type, f.apply(l)));
     }
 
     /**
@@ -575,7 +576,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 Object cfgval = getConfig(name);
                 if (type.isAssignableFrom(cfgval.getClass())) {
                     return Optional.of(l -> type.cast(cfgval));
-                } else if (NBTypeConverter.canConvert(cfgval,type)) {
+                } else if (NBTypeConverter.canConvert(cfgval, type)) {
                     return Optional.of(l -> NBTypeConverter.convert(cfgval, type));
                 } else {
                     throw new OpConfigError(
@@ -617,6 +618,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             return l -> defaultValue;
         }
     }
+
 
     /**
      * Get a LongFunction that first creates a LongFunction of String as in {@link #getAsFunctionOr(String, Object)} )}, but then
@@ -765,15 +767,15 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      * @param fieldname the field to take the templates from
      * @return A map of templates, or an empty map if the field is not defined or is empty.
      */
-    public Map<String,ParsedTemplateString> takeAsNamedTemplates(String fieldname) {
+    public Map<String, ParsedTemplateString> takeAsNamedTemplates(String fieldname) {
         Object entry = originalTemplateObject.get(fieldname);
-        if (entry !=null) {
+        if (entry != null) {
             dynamics.remove(fieldname);
             statics.remove(fieldname);
             protomap.remove(fieldname);
         }
 
-        if (entry==null) {
+        if (entry == null) {
             for (Map<String, Object> cfgsource : cfgsources) {
                 if (cfgsource.containsKey(fieldname)) {
                     entry = cfgsource.get(fieldname);
@@ -782,27 +784,27 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             }
         }
 
-        if (entry==null) {
+        if (entry == null) {
             return Map.of();
         }
 
-        Map<String,Object> elements = new LinkedHashMap<>();
+        Map<String, Object> elements = new LinkedHashMap<>();
         if (entry instanceof CharSequence chars) {
-            elements.put(this.getName()+"-verifier-0",chars.toString());
+            elements.put(this.getName() + "-verifier-0", chars.toString());
         } else if (entry instanceof List list) {
             for (int i = 0; i < list.size(); i++) {
-                elements.put(this.getName()+"-verifier-"+i,list.get(0));
+                elements.put(this.getName() + "-verifier-" + i, list.get(0));
             }
         } else if (entry instanceof Map map) {
-            map.forEach((k,v) -> {
-                elements.put(this.getName()+"-verifier-"+k,v);
+            map.forEach((k, v) -> {
+                elements.put(this.getName() + "-verifier-" + k, v);
             });
         }
-        Map<String,ParsedTemplateString> parsedStringTemplates
+        Map<String, ParsedTemplateString> parsedStringTemplates
             = new LinkedHashMap<>();
-        elements.forEach((k,v) -> {
+        elements.forEach((k, v) -> {
             if (v instanceof CharSequence chars) {
-                parsedStringTemplates.put(k,new ParsedTemplateString(chars.toString(), this.bindings));
+                parsedStringTemplates.put(k, new ParsedTemplateString(chars.toString(), this.bindings));
             }
         });
         return parsedStringTemplates;
@@ -903,7 +905,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
 
     public Class<?> getValueType(String fieldname) {
         if (isDynamic(fieldname)) {
-            return get(fieldname,1).getClass();
+            return get(fieldname, 1).getClass();
         }
         if (isStatic(fieldname)) {
             return getStaticValue(fieldname).getClass();
@@ -1095,12 +1097,12 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
 
     public Map<String, Object> parseStaticCmdMap(String taskname, String mainField) {
         Object mapsrc = getStaticValue(taskname);
-        return new LinkedHashMap<String,Object>(ParamsParser.parseToMap(mapsrc,mainField));
+        return new LinkedHashMap<String, Object>(ParamsParser.parseToMap(mapsrc, mainField));
     }
 
     public List<Map<String, Object>> parseStaticCmdMaps(String key, String mainField) {
         Object mapsSrc = getStaticValue(key);
-        List<Map<String,Object>> maps = new ArrayList<>();
+        List<Map<String, Object>> maps = new ArrayList<>();
         for (String spec : mapsSrc.toString().split("; +")) {
             LinkedHashMap<String, Object> map = new LinkedHashMap<>(ParamsParser.parseToMap(spec, mainField));
             maps.add(map);
@@ -1118,7 +1120,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 .append(k)
                 .append("->")
                 .append(
-                    v ==null? originalTemplateObject.get(k) : v.toString()
+                    v == null ? originalTemplateObject.get(k) : v.toString()
                 ).append("\n");
 
         }
@@ -1135,11 +1137,12 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
     }
 
 
-    public Map<String,Object> getCombinedPrototype() {
-        Map<String,Object> prototype = new LinkedHashMap<>();
+    public Map<String, Object> getCombinedPrototype() {
+        Map<String, Object> prototype = new LinkedHashMap<>();
         prototype.putAll(getDynamicPrototype());
         prototype.putAll(getStaticPrototype());
         prototype.putAll(getConfigPrototype());
         return prototype;
     }
+
 }

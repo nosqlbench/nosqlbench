@@ -25,35 +25,37 @@ import io.weaviate.client.WeaviateClient;
 
 /**
  * Delete a Weaviate collection.
- * 
+ *
  * @see <a href=
- *      "https://weaviate.io/developers/weaviate/manage-data/collections#delete-a-collection">Delete
- *      Collection docs</a>.
+ *     "https://weaviate.io/developers/weaviate/manage-data/collections#delete-a-collection">Delete
+ *     Collection docs</a>.
  * @see <a href=
- *      "https://weaviate.io/developers/weaviate/api/rest#tag/schema/delete/schema/{className}">Delete
- *      Collection REST API</a>.
+ *     "https://weaviate.io/developers/weaviate/api/rest#tag/schema/delete/schema/{className}">Delete
+ *     Collection REST API</a>.
  */
-public class WeaviateDeleteCollectionOpDispenser extends WeaviateBaseOpDispenser<String> {
+public class WeaviateDeleteCollectionOpDispenser extends WeaviateBaseOpDispenser<WeaviateDeleteCollectionOp> {
 
-	public WeaviateDeleteCollectionOpDispenser(WeaviateDriverAdapter adapter, ParsedOp op,
-			LongFunction<String> targetF) {
-		super(adapter, op, targetF);
-	}
+    public WeaviateDeleteCollectionOpDispenser(
+        WeaviateDriverAdapter adapter, ParsedOp op,
+        LongFunction<String> targetF) {
+        super(adapter, op, targetF);
+    }
 
-	@Override
-	public LongFunction<String> getParamFunc(LongFunction<WeaviateClient> clientF, ParsedOp op,
-			LongFunction<String> targetF) {
+    @Override
+    public LongFunction<WeaviateDeleteCollectionOp> getParamFunc(
+        LongFunction<WeaviateClient> clientF, ParsedOp op,
+        LongFunction<String> targetF
+    ) {
 //		LongFunction<String> ebF = l -> targetF.apply(l);
 //
 //		final LongFunction<String> lastF = ebF;
 //		return l -> lastF.apply(l);
-		return l -> targetF.apply(l);
-	}
+        return l -> new WeaviateDeleteCollectionOp(clientF.apply(l), targetF.apply(l));
+    }
 
-	@Override
-	public LongFunction<WeaviateBaseOp<String>> createOpFunc(LongFunction<String> paramF,
-			LongFunction<WeaviateClient> clientF, ParsedOp op, LongFunction<String> targetF) {
-		return l -> new WeaviateDeleteCollectionOp(clientF.apply(l), paramF.apply(l));
-	}
+    @Override
+    public LongFunction<WeaviateBaseOp<WeaviateDeleteCollectionOp>> createOpFunc(LongFunction<WeaviateDeleteCollectionOp> paramF, LongFunction<WeaviateClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+        return l -> new WeaviateDeleteCollectionOp(clientF.apply(l), paramF.apply(l));
+    }
 
 }

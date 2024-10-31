@@ -16,33 +16,28 @@
 
 package io.nosqlbench.adapter.cqld4.opmappers;
 
-import com.datastax.oss.driver.api.core.CqlSession;
+import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
+import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class Cqld4CoreOpMapper implements OpMapper<Op> {
+public class Cqld4CoreOpMapper extends Cqld4BaseOpMapper<Cqld4BaseOp> {
 
     private final static Logger logger = LogManager.getLogger(Cqld4CoreOpMapper.class);
 
-    private final DriverSpaceCache<? extends Cqld4Space> cache;
-    private final NBConfiguration cfg;
-    private final DriverAdapter adapter;
-
-    public Cqld4CoreOpMapper(DriverAdapter adapter, NBConfiguration config, DriverSpaceCache<? extends Cqld4Space> cache) {
-        this.cfg = config;
-        this.cache = cache;
-        this.adapter = adapter;
+    public Cqld4CoreOpMapper(Cqld4DriverAdapter adapter,
+                             NBConfiguration config) {
+        super(adapter);
     }
 
     /**
@@ -50,35 +45,27 @@ public class Cqld4CoreOpMapper implements OpMapper<Op> {
      * for it. Since the operations under the CQL driver 4.* do not follow a common type structure, we use the
      * base types in the NoSQLBench APIs and treat them somewhat more generically than with other drivers.
      *
-     * @param op The {@link ParsedOp} which is the parsed version of the user-provided op template.
-     *            This contains all the fields provided by the user, as well as explicit knowledge of
-     *            which ones are static and dynamic.
+     * @param op
+     *     The {@link ParsedOp} which is the parsed version of the user-provided op template.
+     *     This contains all the fields provided by the user, as well as explicit knowledge of
+     *     which ones are static and dynamic.
      * @return An op dispenser for each provided op command
      */
-    public OpDispenser<? extends Op> apply(ParsedOp op) {
 
-        LongFunction<String> spaceName = op.getAsFunctionOr("space", "default");
-        // Since the only needed thing in the Cqld4Space is the session, we can short-circuit
-        // to it here instead of stepping down from the cycle to the space to the session
-        LongFunction<CqlSession> sessionFunc = l -> cache.get(spaceName.apply(l)).getSession();
-
+    @Override
+    public OpDispenser<Cqld4BaseOp> apply(ParsedOp op, LongFunction<Cqld4Space> cqld4SpaceLongFunction) {
         CqlD4OpType opType = CqlD4OpType.prepared;
-
         TypeAndTarget<CqlD4OpType, String> target = op.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
-
         logger.info(() -> "Using " + target.enumId + " statement form for '" + op.getName()+"'");
 
-        return switch (target.enumId) {
-            case raw -> new CqlD4RawStmtMapper(adapter, sessionFunc, target.targetFunction).apply(op);
-            case simple -> new CqlD4CqlSimpleStmtMapper(adapter, sessionFunc, target.targetFunction).apply(op);
-            case prepared -> new CqlD4PreparedStmtMapper(adapter, sessionFunc, target).apply(op);
-            case batch -> new CqlD4BatchStmtMapper(adapter, sessionFunc, target).apply(op);
-            case gremlin -> new Cqld4GremlinOpMapper(adapter, sessionFunc, target.targetFunction).apply(op);
-            case fluent -> new Cqld4FluentGraphOpMapper(adapter, sessionFunc, target).apply(op);
-            case rainbow -> new CqlD4RainbowTableMapper(adapter, sessionFunc, target.targetFunction).apply(op);
+        return (OpDispenser<Cqld4BaseOp>) switch (target.enumId) {
+            case raw, simple, prepared, batch -> new Cqld4CqlOpMapper(adapter).apply(op, spaceFunc);
+            case gremlin -> new Cqld4GremlinOpMapper(adapter, target.targetFunction).apply(op, spaceFunc);
+            case fluent -> new Cqld4FluentGraphOpMapper(adapter, target).apply(op, spaceFunc);
+            case rainbow -> new CqlD4RainbowTableMapper(adapter, sessionFunc, target.targetFunction).apply(op, spaceFunc);
+            default -> throw new OpConfigError("Unsupported op type " + opType);
 //            case sst -> new Cqld4SsTableMapper(adapter, sessionFunc, target.targetFunction).apply(op);
         };
     }
-
 
 }

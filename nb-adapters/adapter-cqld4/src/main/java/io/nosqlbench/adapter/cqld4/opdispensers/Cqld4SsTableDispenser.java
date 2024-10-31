@@ -24,13 +24,13 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
-public class Cqld4SsTableDispenser extends Cqld4BaseOpDispenser {
+public class Cqld4SsTableDispenser extends Cqld4BaseOpDispenser<Cqld4CqlOp> {
 
 //    private final LongFunction<Statement> stmtFunc;
 //    private final LongFunction<String> targetFunction;
 
-    public Cqld4SsTableDispenser(Cqld4DriverAdapter adapter, LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
-        super(adapter,sessionFunc,cmd);
+    public Cqld4SsTableDispenser(Cqld4DriverAdapter adapter, LongFunction<String> targetFunction, ParsedOp cmd) {
+        super(adapter,cmd);
 //        this.targetFunction=targetFunction;
 //        this.tableFunc =createTableFunc(cmd);
     }

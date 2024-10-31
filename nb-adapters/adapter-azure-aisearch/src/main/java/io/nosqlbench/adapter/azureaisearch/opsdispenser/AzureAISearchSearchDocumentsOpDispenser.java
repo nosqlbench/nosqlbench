@@ -26,6 +26,7 @@ import com.azure.search.documents.models.VectorQuery;
 import com.azure.search.documents.models.VectorSearchOptions;
 import com.azure.search.documents.models.VectorizedQuery;
 
+import com.azure.search.documents.util.SearchPagedIterable;
 import io.nosqlbench.adapter.azureaisearch.AzureAISearchDriverAdapter;
 import io.nosqlbench.adapter.azureaisearch.ops.AzureAISearchBaseOp;
 import io.nosqlbench.adapter.azureaisearch.ops.AzureAISearchSearchDocumentsOp;
@@ -40,7 +41,7 @@ import io.nosqlbench.nb.api.errors.OpConfigError;
  *      "https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-query?tabs=query-2024-07-01%2Cfilter-2024-07-01%2Cbuiltin-portal#vector-query-request">How
  *      to query/vector search</a>
  */
-public class AzureAISearchSearchDocumentsOpDispenser extends AzureAISearchBaseOpDispenser<SearchOptions> {
+public class AzureAISearchSearchDocumentsOpDispenser extends AzureAISearchBaseOpDispenser<SearchOptions, SearchPagedIterable> {
 	public AzureAISearchSearchDocumentsOpDispenser(AzureAISearchDriverAdapter adapter, ParsedOp op,
 			LongFunction<String> targetF) {
 		super(adapter, op, targetF);
@@ -70,7 +71,7 @@ public class AzureAISearchSearchDocumentsOpDispenser extends AzureAISearchBaseOp
 	}
 
 	@Override
-	public LongFunction<AzureAISearchBaseOp<SearchOptions>> createOpFunc(LongFunction<SearchOptions> paramF,
+	public LongFunction<AzureAISearchBaseOp<SearchOptions,SearchPagedIterable>> createOpFunc(LongFunction<SearchOptions> paramF,
 			LongFunction<SearchIndexClient> clientF, ParsedOp op, LongFunction<String> targetF) {
 		return l -> new AzureAISearchSearchDocumentsOp(clientF.apply(l),
 				clientF.apply(l).getSearchClient(targetF.apply(l)), paramF.apply(l));

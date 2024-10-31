@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 /**
@@ -55,7 +56,7 @@ import java.util.function.LongFunction;
  *            during construction of R type operations, or even for individual
  *            operations.
  */
-public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent {
+public interface DriverAdapter<OPTYPE extends Op, SPACETYPE extends Space> extends NBComponent {
 
     /**
      * <p>
@@ -101,7 +102,7 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent
      *
      * @return a synthesizer function for {@link OPTYPE} op generation
      */
-    OpMapper<OPTYPE> getOpMapper();
+    OpMapper<OPTYPE, SPACETYPE> getOpMapper();
 
     /**
      * The preprocessor function allows the driver adapter to remap
@@ -137,7 +138,7 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent
      * things needed by operations, or things needed during the
      * construction of operations.
      *
-     * See {@link DriverSpaceCache} for details on when and how to use this function.
+     * See {@link ConcurrentIndexCache} for details on when and how to use this function.
      *
      * <p>During Adapter Initialization, Op Mapping, Op Synthesis, or Op Execution,
      * you may need access to the objects in (the or a) space cache. You can build the
@@ -146,7 +147,7 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent
      *
      * @return A cache of named objects
      */
-    DriverSpaceCache<? extends SPACETYPE> getSpaceCache();
+    ConcurrentSpaceCache<SPACETYPE> getSpaceCache();
 
     /**
      * This method allows each driver adapter to create named state which is automatically
@@ -159,8 +160,13 @@ public interface DriverAdapter<OPTYPE extends Op, SPACETYPE> extends NBComponent
      * @return A function which can initialize a new Space, which is a place to hold
      * object state related to retained objects for the lifetime of a native driver.
      */
-    default Function<String, ? extends SPACETYPE> getSpaceInitializer(NBConfiguration cfg) {
-        return n -> null;
+    default LongFunction<SPACETYPE> getSpaceInitializer(NBConfiguration cfg) {
+        return n -> (SPACETYPE) new Space() {
+            @Override
+            public String getName() {
+                return "empty_space";
+            }
+        };
     }
 
     NBConfiguration getConfiguration();

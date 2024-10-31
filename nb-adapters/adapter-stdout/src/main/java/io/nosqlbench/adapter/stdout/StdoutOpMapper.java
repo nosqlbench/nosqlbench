@@ -19,26 +19,26 @@ package io.nosqlbench.adapter.stdout;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
-public class StdoutOpMapper implements OpMapper<StdoutOp> {
+public class StdoutOpMapper implements OpMapper<StdoutOp,StdoutSpace> {
 
-    private final DriverSpaceCache<? extends StdoutSpace> ctxcache;
+    private final ConcurrentSpaceCache<? extends StdoutSpace> spaceCache;
     private final DriverAdapter adapter;
 
-    public StdoutOpMapper(DriverAdapter adapter, DriverSpaceCache<? extends StdoutSpace> ctxcache) {
-        this.ctxcache = ctxcache;
+    public StdoutOpMapper(DriverAdapter adapter, ConcurrentSpaceCache<? extends StdoutSpace> spaceCache) {
+        this.spaceCache = spaceCache;
         this.adapter = adapter;
     }
 
     @Override
-    public OpDispenser<StdoutOp> apply(ParsedOp op) {
-        LongFunction<String> spacefunc = op.getAsFunctionOr("space", "default");
-        LongFunction<StdoutSpace> ctxfunc = (cycle) -> ctxcache.get(spacefunc.apply(cycle));
-        return new StdoutOpDispenser(adapter,op,ctxfunc);
+    public OpDispenser<StdoutOp> apply(ParsedOp op, LongFunction<StdoutSpace> spaceInitF) {
+        return new StdoutOpDispenser(adapter,op,adapter.getSpaceFunc(op));
     }
 
 }

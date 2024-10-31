@@ -17,6 +17,7 @@
 
 package io.nosqlbench.adapter.gcpspanner.opdispensers;
 
+import com.google.cloud.Timestamp;
 import com.google.cloud.spanner.Mutation;
 import com.google.cloud.spanner.Value;
 import io.nosqlbench.adapter.gcpspanner.GCPSpannerDriverAdapter;
@@ -35,7 +36,7 @@ import java.util.function.LongFunction;
  * It extends the GCPSpannerBaseOpDispenser and provides the necessary implementation
  * to create and configure GCPSpannerInsertVectorOp instances.
  */
-public class GCPSpannerInsertOpDispenser extends GCPSpannerBaseOpDispenser {
+public class GCPSpannerInsertOpDispenser extends GCPSpannerBaseOpDispenser<GCPSpannerInsertOp, Timestamp> {
     private static final Logger logger = LogManager.getLogger(GCPSpannerInsertOpDispenser.class);
     private final LongFunction<Map> queryParamsFunction;
 
@@ -69,7 +70,7 @@ public class GCPSpannerInsertOpDispenser extends GCPSpannerBaseOpDispenser {
      * @return a configured GCPSpannerInsertVectorOp instance
      */
     @Override
-    public GCPSpannerBaseOp<?> getOp(long value) {
+    public GCPSpannerInsertOp getOp(long value) {
         Mutation.WriteBuilder builder = Mutation.newInsertBuilder(targetFunction.apply(value));
         Map<String, Object> params = queryParamsFunction.apply(value);
         for (Map.Entry<String, Object> entry : params.entrySet()) {

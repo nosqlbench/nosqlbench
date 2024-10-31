@@ -17,6 +17,7 @@
 
 package io.nosqlbench.adapter.gcpspanner.opdispensers;
 
+import com.google.cloud.spanner.ResultSet;
 import com.google.cloud.spanner.Statement;
 import io.nosqlbench.adapter.gcpspanner.GCPSpannerDriverAdapter;
 import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerBaseOp;
@@ -32,7 +33,7 @@ import java.util.function.LongFunction;
  * This class extends the GCPSpannerBaseOpDispenser and provides functionality
  * to create and configure GCPSpannerExecuteDmlOp instances.
  */
-public class GCPSpannerExecuteDmlOpDispenser extends GCPSpannerBaseOpDispenser {
+public class GCPSpannerExecuteDmlOpDispenser extends GCPSpannerBaseOpDispenser<GCPSpannerExecuteDmlOp, ResultSet> {
     private static final Logger logger = LogManager.getLogger(GCPSpannerExecuteDmlOpDispenser.class);
     private final LongFunction<GCPSpannerExecuteDmlOp> opFunction;
 
@@ -80,7 +81,7 @@ public class GCPSpannerExecuteDmlOpDispenser extends GCPSpannerBaseOpDispenser {
      * @return the GCP Spanner operation
      */
     @Override
-    public GCPSpannerBaseOp<?> getOp(long value) {
+    public GCPSpannerExecuteDmlOp getOp(long value) {
         return opFunction.apply(value);
     }
 }
