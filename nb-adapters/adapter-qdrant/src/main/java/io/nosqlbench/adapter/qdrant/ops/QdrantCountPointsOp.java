@@ -22,13 +22,13 @@ import io.qdrant.client.grpc.Points.CountPoints;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 
-public class QdrantCountPointsOp extends QdrantBaseOp<CountPoints> {
+public class QdrantCountPointsOp extends QdrantBaseOp<CountPoints,Long> {
     public QdrantCountPointsOp(QdrantClient client, CountPoints request) {
         super(client, request);
     }
 
     @Override
-    public Object applyOp(long value) {
+    public Long applyOp(long value) {
         long result;
         try {
             boolean hasFilters = request.getFilter() != null && (request.getFilter().getMustCount() > 0

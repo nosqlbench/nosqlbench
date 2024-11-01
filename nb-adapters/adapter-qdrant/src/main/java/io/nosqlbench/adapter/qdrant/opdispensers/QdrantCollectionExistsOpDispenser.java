@@ -25,7 +25,7 @@ import io.qdrant.client.grpc.Collections.CollectionExistsRequest;
 
 import java.util.function.LongFunction;
 
-public class QdrantCollectionExistsOpDispenser extends QdrantBaseOpDispenser<CollectionExistsRequest> {
+public class QdrantCollectionExistsOpDispenser extends QdrantBaseOpDispenser<CollectionExistsRequest,Boolean> {
     public QdrantCollectionExistsOpDispenser(QdrantDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
     }
@@ -41,7 +41,7 @@ public class QdrantCollectionExistsOpDispenser extends QdrantBaseOpDispenser<Col
     }
 
     @Override
-    public LongFunction<QdrantBaseOp<CollectionExistsRequest>> createOpFunc(
+    public LongFunction<QdrantBaseOp<CollectionExistsRequest,Boolean>> createOpFunc(
         LongFunction<CollectionExistsRequest> paramF,
         LongFunction<QdrantClient> clientF,
         ParsedOp op,

@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
+import io.qdrant.client.grpc.Collections;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,7 +49,7 @@ import io.qdrant.client.grpc.Collections.VectorParamsMap;
 import io.qdrant.client.grpc.Collections.VectorsConfig;
 import io.qdrant.client.grpc.Collections.WalConfigDiff;
 
-public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<CreateCollection> {
+public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<CreateCollection, Collections.CollectionOperationResponse> {
     private static final Logger logger = LogManager.getLogger(QdrantCreateCollectionOpDispenser.class);
 
     /**
@@ -364,7 +365,7 @@ public class QdrantCreateCollectionOpDispenser extends QdrantBaseOpDispenser<Cre
 
     // https://qdrant.tech/documentation/concepts/collections/#create-a-collection
     @Override
-    public LongFunction<QdrantBaseOp<CreateCollection>> createOpFunc(
+    public LongFunction<QdrantBaseOp<CreateCollection, Collections.CollectionOperationResponse>> createOpFunc(
         LongFunction<CreateCollection> paramF,
         LongFunction<QdrantClient> clientF,
         ParsedOp op,

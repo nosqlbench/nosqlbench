@@ -23,13 +23,13 @@ import io.qdrant.client.grpc.SnapshotsService.SnapshotDescription;
 import java.time.Duration;
 import java.util.List;
 
-public class QdrantListSnapshotsOp extends QdrantBaseOp<ListSnapshotsRequest> {
+public class QdrantListSnapshotsOp extends QdrantBaseOp<ListSnapshotsRequest,List<SnapshotDescription>> {
     public QdrantListSnapshotsOp(QdrantClient client, ListSnapshotsRequest request) {
         super(client, request);
     }
 
     @Override
-    public Object applyOp(long value) {
+    public List<SnapshotDescription> applyOp(long value) {
         List<SnapshotDescription> response;
         try {
             response = client.listSnapshotAsync(request.getCollectionName(), Duration.ofSeconds(600)).get();

@@ -23,7 +23,7 @@ import io.qdrant.client.grpc.Collections.CreateCollection;
 
 import java.util.concurrent.ExecutionException;
 
-public class QdrantCreateCollectionOp extends QdrantBaseOp<CreateCollection> {
+public class QdrantCreateCollectionOp extends QdrantBaseOp<CreateCollection,CollectionOperationResponse> {
     /**
      * Create a new {@link ParsedOp} encapsulating a call to the <b>Qdrant</b> create collection method.
      *
@@ -35,7 +35,7 @@ public class QdrantCreateCollectionOp extends QdrantBaseOp<CreateCollection> {
     }
 
     @Override
-    public Object applyOp(long value) {
+    public CollectionOperationResponse applyOp(long value) {
         CollectionOperationResponse response = null;
         try {
             response = client.createCollectionAsync(request).get();

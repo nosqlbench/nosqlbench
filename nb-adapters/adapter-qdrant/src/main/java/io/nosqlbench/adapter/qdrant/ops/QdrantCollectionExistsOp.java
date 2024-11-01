@@ -21,13 +21,13 @@ import io.qdrant.client.grpc.Collections.CollectionExistsRequest;
 
 import java.time.Duration;
 
-public class QdrantCollectionExistsOp extends QdrantBaseOp<CollectionExistsRequest> {
+public class QdrantCollectionExistsOp extends QdrantBaseOp<CollectionExistsRequest,Boolean> {
     public QdrantCollectionExistsOp(QdrantClient client, CollectionExistsRequest request) {
         super(client, request);
     }
 
     @Override
-    public Object applyOp(long value) {
+    public Boolean applyOp(long value) {
         Boolean response;
         try {
             response = client.collectionExistsAsync(request.getCollectionName(), Duration.ofSeconds(600)).get();

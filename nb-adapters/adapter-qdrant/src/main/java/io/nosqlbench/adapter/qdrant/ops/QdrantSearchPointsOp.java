@@ -23,13 +23,13 @@ import io.qdrant.client.grpc.Points.SearchPoints;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class QdrantSearchPointsOp extends QdrantBaseOp<SearchPoints> {
+public class QdrantSearchPointsOp extends QdrantBaseOp<SearchPoints,List<ScoredPoint>> {
     public QdrantSearchPointsOp(QdrantClient client, SearchPoints request) {
         super(client, request);
     }
 
     @Override
-    public Object applyOp(long value) {
+    public List<ScoredPoint> applyOp(long value) {
         List<ScoredPoint> response = null;
         try {
             logger.debug("[QdrantSearchPointsOp] Cycle {} has request: {}", value, request.toString());

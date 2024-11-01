@@ -33,14 +33,14 @@ import java.util.function.LongFunction;
 import static io.nosqlbench.adapter.qdrant.QdrantAdapterUtils.QDRANT;
 
 @Service(value = DriverAdapter.class, selector = QDRANT)
-public class QdrantDriverAdapter extends BaseDriverAdapter<QdrantBaseOp, QdrantSpace> {
+public class QdrantDriverAdapter extends BaseDriverAdapter<QdrantBaseOp<?,?>, QdrantSpace> {
 
     public QdrantDriverAdapter(NBComponent parentComponent, NBLabels labels) {
         super(parentComponent, labels);
     }
 
     @Override
-    public OpMapper<QdrantBaseOp,QdrantSpace> getOpMapper() {
+    public OpMapper<QdrantBaseOp<?,?>,QdrantSpace> getOpMapper() {
         return new QdrantOpMapper(this);
     }
 

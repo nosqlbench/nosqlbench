@@ -26,7 +26,7 @@ import io.qdrant.client.grpc.Points.Filter;
 
 import java.util.function.LongFunction;
 
-public class QdrantCountPointsOpDispenser extends QdrantBaseOpDispenser<CountPoints> {
+public class QdrantCountPointsOpDispenser extends QdrantBaseOpDispenser<CountPoints,Long> {
     public QdrantCountPointsOpDispenser(QdrantDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
     }
@@ -50,7 +50,7 @@ public class QdrantCountPointsOpDispenser extends QdrantBaseOpDispenser<CountPoi
     }
 
     @Override
-    public LongFunction<QdrantBaseOp<CountPoints>> createOpFunc(
+    public LongFunction<QdrantBaseOp<CountPoints,Long>> createOpFunc(
         LongFunction<CountPoints> paramF,
         LongFunction<QdrantClient> clientF,
         ParsedOp op,

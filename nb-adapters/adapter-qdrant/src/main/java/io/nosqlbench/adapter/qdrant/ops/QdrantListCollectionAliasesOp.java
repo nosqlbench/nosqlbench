@@ -22,13 +22,13 @@ import io.qdrant.client.grpc.Collections.ListCollectionAliasesRequest;
 import java.time.Duration;
 import java.util.List;
 
-public class QdrantListCollectionAliasesOp extends QdrantBaseOp<ListCollectionAliasesRequest> {
+public class QdrantListCollectionAliasesOp extends QdrantBaseOp<ListCollectionAliasesRequest,List<String>> {
     public QdrantListCollectionAliasesOp(QdrantClient client, ListCollectionAliasesRequest request) {
         super(client, request);
     }
 
     @Override
-    public Object applyOp(long value) {
+    public List<String> applyOp(long value) {
         List<String> response;
         try {
             response = client.listCollectionAliasesAsync(request.getCollectionName(), Duration.ofSeconds(600)).get();

@@ -33,13 +33,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class QdrantSearchPointsOpDispenser extends QdrantBaseOpDispenser<SearchPoints> {
+public class QdrantSearchPointsOpDispenser extends QdrantBaseOpDispenser<SearchPoints,List<ScoredPoint>> {
     public QdrantSearchPointsOpDispenser(QdrantDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
     }
 
     @Override
-    public LongFunction<QdrantBaseOp<SearchPoints>> createOpFunc(
+    public LongFunction<QdrantBaseOp<SearchPoints,List<ScoredPoint>>> createOpFunc(
         LongFunction<SearchPoints> paramF,
         LongFunction<QdrantClient> clientF,
         ParsedOp op, LongFunction<String> targetF) {

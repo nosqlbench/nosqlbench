@@ -21,13 +21,13 @@ import io.qdrant.client.grpc.Collections.CollectionInfo;
 
 import java.time.Duration;
 
-public class QdrantCollectionInfoOp extends QdrantBaseOp<String> {
+public class QdrantCollectionInfoOp extends QdrantBaseOp<String, CollectionInfo> {
     public QdrantCollectionInfoOp(QdrantClient client, String request) {
         super(client, request);
     }
 
     @Override
-    public Object applyOp(long value) {
+    public CollectionInfo applyOp(long value) {
         CollectionInfo response;
         try {
             response = client.getCollectionInfoAsync(request, Duration.ofSeconds(600)).get();
