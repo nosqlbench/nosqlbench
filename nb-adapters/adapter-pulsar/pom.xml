@@ -34,7 +34,7 @@
     </description>
 
     <properties>
-        <pulsar.version>3.2.1</pulsar.version>
+        <pulsar.version>3.0.7</pulsar.version>
     </properties>
 
     <dependencies>
