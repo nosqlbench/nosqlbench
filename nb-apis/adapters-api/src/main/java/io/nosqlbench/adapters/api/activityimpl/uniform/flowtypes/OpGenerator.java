@@ -31,5 +31,5 @@ package io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes;
  *
  */
 public interface OpGenerator {
-    Op getNextOp();
+    CycleOp<?> getNextOp();
 }

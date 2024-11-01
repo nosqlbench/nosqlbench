@@ -27,9 +27,6 @@ import java.util.function.LongFunction;
  * and produces a value of type T. It is implemented as
  * {@link LongFunction} of T.</p>
  *
- * <P>This variant of {@link Op} has the ability to see the cycle
- * which was previously used to select the op implementation.</p>
- *
  * <h2>Designer Notes</h2>
  * <p>
  * If you are using the value in this call to select a specific type of behavior, it is very
@@ -40,7 +37,7 @@ import java.util.function.LongFunction;
  * </p>
  *
  */
-public interface CycleOp<T> extends Op, LongFunction<T> {
+public interface CycleOp<T> extends LongFunction<T> {
     /**
      * <p>Run an action for the given cycle.</p>
      *

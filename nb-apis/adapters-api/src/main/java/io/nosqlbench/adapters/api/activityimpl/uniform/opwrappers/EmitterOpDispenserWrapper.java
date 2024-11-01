@@ -21,14 +21,14 @@ import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-public class EmitterOpDispenserWrapper extends BaseOpDispenser<Op, Space> {
+public class EmitterOpDispenserWrapper extends BaseOpDispenser<CycleOp<?>, Space> {
 
     private final OpDispenser<? extends CycleOp<?>> realDispenser;
 
-    public EmitterOpDispenserWrapper(DriverAdapter<Op,Space> adapter, ParsedOp pop, OpDispenser<? extends CycleOp<?>> realDispenser) {
+    public EmitterOpDispenserWrapper(DriverAdapter<CycleOp<?>,Space> adapter, ParsedOp pop,
+                                     OpDispenser<? extends CycleOp<?>> realDispenser) {
         super(adapter, pop);
         this.realDispenser = realDispenser;
     }

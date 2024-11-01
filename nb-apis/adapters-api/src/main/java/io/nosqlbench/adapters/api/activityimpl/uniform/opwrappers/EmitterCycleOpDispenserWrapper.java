@@ -21,7 +21,6 @@ import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 public class EmitterCycleOpDispenserWrapper<O,S extends Space,R> extends BaseOpDispenser<CycleOp<R>, S> {

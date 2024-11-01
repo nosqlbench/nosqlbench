@@ -18,7 +18,7 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
 
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.nb.api.docsapi.Docs;
 import io.nosqlbench.nb.api.docsapi.DocsBinder;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 /**
@@ -56,7 +55,7 @@ import java.util.function.LongFunction;
  *            during construction of R type operations, or even for individual
  *            operations.
  */
-public interface DriverAdapter<OPTYPE extends Op, SPACETYPE extends Space> extends NBComponent {
+public interface DriverAdapter<OPTYPE extends CycleOp<?>, SPACETYPE extends Space> extends NBComponent {
 
     /**
      * <p>
