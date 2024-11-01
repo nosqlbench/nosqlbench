@@ -23,7 +23,7 @@ import java.util.Map;
 
 // Need to create RainbowTableStatement
 public class Cqld4RainbowTableOp
-    implements Cqld4BaseOp, CycleOp<ResultSet>, VariableCapture, OpGenerator, OpResultSize {
+    implements Cqld4BaseOp<ResultSet>, VariableCapture, OpGenerator, OpResultSize {
 //    private final CqlSession session;
 //    private final RainbowTableStatement stmt;
 
@@ -35,7 +35,7 @@ public class Cqld4RainbowTableOp
     }
 
     @Override
-    public Op getNextOp() {
+    public CycleOp getNextOp() {
         throw new RuntimeException("implement me");
     }
 

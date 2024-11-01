@@ -18,7 +18,8 @@ package io.nosqlbench.adapter.cqld4.optypes;
  */
 
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
-public interface Cqld4BaseOp extends Op {
+public interface Cqld4BaseOp<T> extends CycleOp<T> {
 }

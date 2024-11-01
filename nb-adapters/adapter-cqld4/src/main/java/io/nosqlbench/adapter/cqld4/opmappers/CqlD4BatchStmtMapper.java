@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.cqld4.opmappers;
 
+import com.datastax.oss.driver.api.core.cql.Row;
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.opdispensers.CqlD4BatchStmtDispenser;
@@ -25,9 +26,10 @@ import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
-public class CqlD4BatchStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlBatchStatement> {
+public class CqlD4BatchStmtMapper<RESULT extends List<? extends Row>> extends Cqld4CqlBaseOpMapper<Cqld4CqlBatchStatement> {
 
     private final TypeAndTarget<CqlD4OpType, String> target;
 
@@ -39,10 +41,15 @@ public class CqlD4BatchStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlBatchStat
 
     @Override
     public OpDispenser<Cqld4CqlBatchStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
-        ParsedOp subop = op.getAsSubOp("op_template", ParsedOp.SubOpNaming.ParentAndSubKey);
-        int repeat = op.getStaticValue("repeat");
-        OpDispenser<Cqld4CqlOp> od = new Cqld4CqlOpMapper(adapter).apply(op, spaceInitF);
-        return new CqlD4BatchStmtDispenser(adapter, op, repeat, subop, od);
+        return null;
     }
+
+//    @Override
+//    public OpDispenser<Cqld4CqlBatchStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+//        ParsedOp subop = op.getAsSubOp("op_template", ParsedOp.SubOpNaming.ParentAndSubKey);
+//        int repeat = op.getStaticValue("repeat");
+//        OpDispenser<Cqld4CqlOp<?>> od = new Cqld4CqlOpMapper(adapter).apply(op, spaceInitF);
+//        return new CqlD4BatchStmtDispenser(adapter, op, repeat, subop, od);
+//    }
 
 }
