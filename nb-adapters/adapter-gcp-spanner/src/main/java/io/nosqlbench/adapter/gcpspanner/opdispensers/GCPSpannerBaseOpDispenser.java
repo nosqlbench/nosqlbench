@@ -32,7 +32,7 @@ import java.util.function.LongFunction;
  * for creating GCP Spanner operations.
  */
 public abstract class GCPSpannerBaseOpDispenser<OP extends GCPSpannerBaseOp,RESULT>
-    extends BaseOpDispenser<GCPSpannerBaseOp, GCPSpannerSpace> {
+    extends BaseOpDispenser<GCPSpannerBaseOp<?,?>, GCPSpannerSpace> {
     /**
      * A function that provides the target string based on a long input.
      */

@@ -27,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-public class HttpOp implements CycleOp {
+public class HttpOp implements CycleOp<Object> {
 
     public final Pattern ok_status;
     public final Pattern ok_body;

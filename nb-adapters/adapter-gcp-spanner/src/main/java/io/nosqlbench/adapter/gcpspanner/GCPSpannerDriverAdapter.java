@@ -32,14 +32,14 @@ import java.util.function.LongFunction;
 import static io.nosqlbench.adapter.gcpspanner.GCPSpannerAdapterUtils.SPANNER;
 
 @Service(value = DriverAdapter.class, selector = SPANNER)
-public class GCPSpannerDriverAdapter extends BaseDriverAdapter<GCPSpannerBaseOp, GCPSpannerSpace> {
+public class GCPSpannerDriverAdapter extends BaseDriverAdapter<GCPSpannerBaseOp<?,?>, GCPSpannerSpace> {
 
     public GCPSpannerDriverAdapter(NBComponent parentComponent, NBLabels labels) {
         super(parentComponent, labels);
     }
 
     @Override
-    public OpMapper<GCPSpannerBaseOp,GCPSpannerSpace> getOpMapper() {
+    public OpMapper<GCPSpannerBaseOp<?,?>,GCPSpannerSpace> getOpMapper() {
         return new GCPSpannerOpMapper(this);
     }
 

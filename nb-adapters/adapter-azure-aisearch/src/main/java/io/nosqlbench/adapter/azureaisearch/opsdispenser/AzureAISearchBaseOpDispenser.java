@@ -29,7 +29,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 public abstract class AzureAISearchBaseOpDispenser<REQUEST,RESULT>
-		extends BaseOpDispenser<AzureAISearchBaseOp, AzureAISearchSpace> {
+		extends BaseOpDispenser<AzureAISearchBaseOp<?,?>, AzureAISearchSpace> {
 
 	protected final LongFunction<AzureAISearchSpace> azureAISearchSpaceFunction;
 	protected final LongFunction<SearchIndexClient> clientFunction;

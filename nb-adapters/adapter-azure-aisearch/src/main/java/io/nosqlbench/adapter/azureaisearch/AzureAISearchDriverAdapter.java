@@ -32,14 +32,14 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 import static io.nosqlbench.adapter.azureaisearch.AzureAISearchAdapterUtils.AZURE_AI_SEARCH;
 
 @Service(value = DriverAdapter.class, selector = AZURE_AI_SEARCH)
-public class AzureAISearchDriverAdapter extends BaseDriverAdapter<AzureAISearchBaseOp, AzureAISearchSpace> {
+public class AzureAISearchDriverAdapter extends BaseDriverAdapter<AzureAISearchBaseOp<?,?>, AzureAISearchSpace> {
 
 	public AzureAISearchDriverAdapter(NBComponent parentComponent, NBLabels labels) {
 		super(parentComponent, labels);
 	}
 
 	@Override
-	public OpMapper<AzureAISearchBaseOp,AzureAISearchSpace> getOpMapper() {
+	public OpMapper<AzureAISearchBaseOp<?,?>,AzureAISearchSpace> getOpMapper() {
 		return new AzureAISearchOpMapper(this);
 	}
 

@@ -18,7 +18,6 @@ package io.nosqlbench.adapter.gcpspanner.ops;
 
 import com.google.cloud.spanner.Spanner;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -30,7 +30,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
-public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp, GCPSpannerSpace> {
+public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?,?>, GCPSpannerSpace> {
     private static final Logger logger = LogManager.getLogger(GCPSpannerOpMapper.class);
     private final GCPSpannerDriverAdapter adapter;
 
@@ -56,12 +56,12 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp, GCPSpanner
      *     the op type
      */
     @Override
-    public OpDispenser<GCPSpannerBaseOp> apply(ParsedOp op, LongFunction<GCPSpannerSpace> spaceInitF) {
+    public OpDispenser<GCPSpannerBaseOp<?,?>> apply(ParsedOp op, LongFunction<GCPSpannerSpace> spaceInitF) {
         TypeAndTarget<GCPSpannerOpType, String> typeAndTarget = op.getTypeAndTarget(GCPSpannerOpType.class,
             String.class, "type", "target");
         logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
 
-        return switch (typeAndTarget.enumId) {
+         var d =switch (typeAndTarget.enumId) {
             case drop_database_ddl ->
                 new GCPSpannerDropDatabaseDdlOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_database_ddl ->
@@ -71,5 +71,6 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp, GCPSpanner
             case insert -> new GCPSpannerInsertOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case execute_dml -> new GCPSpannerExecuteDmlOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
+         return d;
     }
 }
