@@ -16,5 +16,5 @@
 
 package io.nosqlbench.virtdata.library.realer.todo.inet;
 
-public class IPV4Addrses {
+public class IPV4Address {
 }
