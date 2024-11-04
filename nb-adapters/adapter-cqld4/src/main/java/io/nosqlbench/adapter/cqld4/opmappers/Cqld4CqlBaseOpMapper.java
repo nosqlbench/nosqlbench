@@ -34,10 +34,6 @@ public abstract class Cqld4CqlBaseOpMapper<T extends Cqld4CqlOp> extends Cqld4Ba
     }
 
     @Override
-    public OpDispenser<T> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
-        return null;
-    }
+    public abstract OpDispenser<T> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF);
 
-    //    @Override
-//    public abstract OpDispenser<T> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF);
 }
