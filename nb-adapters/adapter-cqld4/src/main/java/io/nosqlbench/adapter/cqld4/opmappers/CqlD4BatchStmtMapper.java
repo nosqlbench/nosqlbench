@@ -47,12 +47,4 @@ public class CqlD4BatchStmtMapper<RESULT extends List<? extends Row>> extends Cq
         return new CqlD4BatchStmtDispenser(adapter, op, repeat, subop, od);
     }
 
-//    @Override
-//    public OpDispenser<Cqld4CqlBatchStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
-//        ParsedOp subop = op.getAsSubOp("op_template", ParsedOp.SubOpNaming.ParentAndSubKey);
-//        int repeat = op.getStaticValue("repeat");
-//        OpDispenser<Cqld4CqlOp<?>> od = new Cqld4CqlOpMapper(adapter).apply(op, spaceInitF);
-//        return new CqlD4BatchStmtDispenser(adapter, op, repeat, subop, od);
-//    }
-
 }
