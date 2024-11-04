@@ -71,6 +71,6 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?,?>, GCPSp
             case insert -> new GCPSpannerInsertOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case execute_dml -> new GCPSpannerExecuteDmlOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
-         return dispenser;
+        return dispenser;
     }
 }
