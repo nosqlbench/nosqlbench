@@ -22,13 +22,13 @@ import io.qdrant.client.grpc.Collections.DeleteCollection;
 
 import java.util.concurrent.ExecutionException;
 
-public class QdrantDeleteCollectionOp extends QdrantBaseOp<DeleteCollection> {
+public class QdrantDeleteCollectionOp extends QdrantBaseOp<DeleteCollection,CollectionOperationResponse> {
     public QdrantDeleteCollectionOp(QdrantClient client, DeleteCollection request) {
         super(client, request);
     }
 
     @Override
-    public Object applyOp(long value) {
+    public CollectionOperationResponse applyOp(long value) {
         CollectionOperationResponse response = null;
         try {
             response = client.deleteCollectionAsync(request.getCollectionName()).get();

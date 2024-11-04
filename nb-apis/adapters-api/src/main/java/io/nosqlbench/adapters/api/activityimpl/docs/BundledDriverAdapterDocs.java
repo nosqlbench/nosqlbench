@@ -19,7 +19,7 @@ package io.nosqlbench.adapters.api.activityimpl.docs;
 import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.nb.api.docsapi.BundledMarkdownManifest;
 import io.nosqlbench.nb.api.docsapi.Docs;
 import io.nosqlbench.nb.api.docsapi.DocsBinder;
@@ -41,7 +41,7 @@ public class BundledDriverAdapterDocs implements BundledMarkdownManifest {
         List<SimpleServiceLoader.Component<? extends DriverAdapterLoader>> namedProviders = loader.getNamedProviders();
         for (SimpleServiceLoader.Component<? extends DriverAdapterLoader> namedProvider : namedProviders) {
             DriverAdapterLoader driverAdapterLoader = namedProvider.provider.get();
-            DriverAdapter<Op, Space> driverAdapter = driverAdapterLoader.load(
+            DriverAdapter<? extends CycleOp<?>, Space> driverAdapter = driverAdapterLoader.load(
                 NBComponent.EMPTY_COMPONENT,
                 NBLabels.forKV()
             );

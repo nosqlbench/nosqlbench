@@ -23,13 +23,13 @@ import io.qdrant.client.grpc.Points.UpdateResult;
 
 import java.time.Duration;
 
-public class QdrantCreatePayloadIndexOp extends QdrantBaseOp<CreateFieldIndexCollection> {
+public class QdrantCreatePayloadIndexOp extends QdrantBaseOp<CreateFieldIndexCollection,UpdateResult> {
     public QdrantCreatePayloadIndexOp(QdrantClient client, CreateFieldIndexCollection request) {
         super(client, request);
     }
 
     @Override
-    public Object applyOp(long value) {
+    public UpdateResult applyOp(long value) {
         UpdateResult response;
         try {
             response = client.createPayloadIndexAsync(

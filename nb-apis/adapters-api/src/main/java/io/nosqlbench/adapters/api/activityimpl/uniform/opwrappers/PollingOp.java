@@ -17,13 +17,10 @@
 package io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.OpGenerator;
 import io.nosqlbench.adapters.api.evalctx.CycleFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.function.Predicate;
 
 public class PollingOp<T> implements CycleOp<T>, OpGenerator {
     private final static Logger logger = LogManager.getLogger(PollingOp.class);
@@ -52,7 +49,7 @@ public class PollingOp<T> implements CycleOp<T>, OpGenerator {
     }
 
     @Override
-    public synchronized Op getNextOp() {
+    public synchronized CycleOp<T> getNextOp() {
         return nextOp;
     }
 

@@ -20,10 +20,10 @@ package io.nosqlbench.adapter.diag;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 
 public interface DriverAdapterLoader {
-    public <A extends Op,B extends Space> DriverAdapter<A,B> load(NBComponent parent, NBLabels childLabels);
+    public <A extends CycleOp<?>,B extends Space> DriverAdapter<A,B> load(NBComponent parent, NBLabels childLabels);
 }

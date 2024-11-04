@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers;
+package io.nosqlbench.virtdata.library.realer.todo.inet;
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
-
-public class DryRunableOp implements RunnableOp {
-
-    private final RunnableOp op;
-
-    public DryRunableOp(RunnableOp op) {
-        this.op = op;
-    }
-
-    @Override
-    public void run() {
-    }
+public class IPV4Address {
 }

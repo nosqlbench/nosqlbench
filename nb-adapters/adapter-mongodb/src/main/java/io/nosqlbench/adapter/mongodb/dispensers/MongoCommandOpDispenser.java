@@ -20,14 +20,11 @@ import io.nosqlbench.adapter.mongodb.core.MongoSpace;
 import io.nosqlbench.adapter.mongodb.ops.MongoDirectCommandOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.util.Map;
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 public class MongoCommandOpDispenser extends BaseOpDispenser<MongoDirectCommandOp, MongoSpace> {

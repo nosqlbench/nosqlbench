@@ -17,21 +17,14 @@
 package io.nosqlbench.adapter.cqld4.opmappers;
 
 import com.datastax.dse.driver.api.core.graph.DseGraph;
-import com.datastax.oss.driver.api.core.CqlSession;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4FluentGraphOpDispenser;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4FluentGraphOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.errors.OpConfigError;

@@ -21,10 +21,11 @@ import io.nosqlbench.adapter.qdrant.ops.QdrantBaseOp;
 import io.nosqlbench.adapter.qdrant.ops.QdrantCollectionInfoOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.qdrant.client.QdrantClient;
+import io.qdrant.client.grpc.Collections;
 
 import java.util.function.LongFunction;
 
-public class QdrantCollectionInfoOpDispenser extends QdrantBaseOpDispenser<String> {
+public class QdrantCollectionInfoOpDispenser extends QdrantBaseOpDispenser<String, Collections.CollectionInfo> {
     public QdrantCollectionInfoOpDispenser(QdrantDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
     }
@@ -36,7 +37,7 @@ public class QdrantCollectionInfoOpDispenser extends QdrantBaseOpDispenser<Strin
     }
 
     @Override
-    public LongFunction<QdrantBaseOp<String>> createOpFunc(
+    public LongFunction<QdrantBaseOp<String, Collections.CollectionInfo>> createOpFunc(
         LongFunction<String> paramF,
         LongFunction<QdrantClient> clientF,
         ParsedOp op,

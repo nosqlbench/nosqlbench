@@ -23,9 +23,10 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.grpc.Collections.ListCollectionAliasesRequest;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
-public class QdrantListCollectionAliasesOpDispenser extends QdrantBaseOpDispenser<ListCollectionAliasesRequest> {
+public class QdrantListCollectionAliasesOpDispenser extends QdrantBaseOpDispenser<ListCollectionAliasesRequest, List<String>> {
     public QdrantListCollectionAliasesOpDispenser(QdrantDriverAdapter adapter, ParsedOp op,
                                                   LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
@@ -42,7 +43,7 @@ public class QdrantListCollectionAliasesOpDispenser extends QdrantBaseOpDispense
     }
 
     @Override
-    public LongFunction<QdrantBaseOp<ListCollectionAliasesRequest>> createOpFunc(
+    public LongFunction<QdrantBaseOp<ListCollectionAliasesRequest,List<String>>> createOpFunc(
         LongFunction<ListCollectionAliasesRequest> paramF,
         LongFunction<QdrantClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         return l -> new QdrantListCollectionAliasesOp(clientF.apply(l), paramF.apply(l));

@@ -21,11 +21,13 @@ import io.nosqlbench.adapter.qdrant.ops.QdrantBaseOp;
 import io.nosqlbench.adapter.qdrant.ops.QdrantListSnapshotsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.qdrant.client.QdrantClient;
+import io.qdrant.client.grpc.SnapshotsService;
 import io.qdrant.client.grpc.SnapshotsService.ListSnapshotsRequest;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
-public class QdrantListSnapshotsOpDispenser extends QdrantBaseOpDispenser<ListSnapshotsRequest> {
+public class QdrantListSnapshotsOpDispenser extends QdrantBaseOpDispenser<ListSnapshotsRequest, List<SnapshotsService.SnapshotDescription>> {
     public QdrantListSnapshotsOpDispenser(QdrantDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
     }
@@ -41,9 +43,11 @@ public class QdrantListSnapshotsOpDispenser extends QdrantBaseOpDispenser<ListSn
     }
 
     @Override
-    public LongFunction<QdrantBaseOp<ListSnapshotsRequest>> createOpFunc(LongFunction<ListSnapshotsRequest> paramF,
-                                                                         LongFunction<QdrantClient> clientF,
-                                                                         ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<QdrantBaseOp<ListSnapshotsRequest, List<SnapshotsService.SnapshotDescription>>> createOpFunc(
+        LongFunction<ListSnapshotsRequest> paramF,
+        LongFunction<QdrantClient> clientF,
+        ParsedOp op, LongFunction<String> targetF
+    ) {
         return l -> new QdrantListSnapshotsOp(clientF.apply(l), paramF.apply(l));
     }
 }

@@ -18,20 +18,17 @@ package io.nosqlbench.adapter.mongodb.core;
 
 import io.nosqlbench.adapter.mongodb.dispensers.MongoCommandOpDispenser;
 import io.nosqlbench.adapter.mongodb.ops.MongoDirectCommandOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 public class MongoOpMapper<MC extends MongoDirectCommandOp> implements OpMapper<MongoDirectCommandOp,MongoSpace> {

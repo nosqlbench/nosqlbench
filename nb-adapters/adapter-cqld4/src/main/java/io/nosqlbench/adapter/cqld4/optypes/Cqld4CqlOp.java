@@ -17,10 +17,7 @@
 package io.nosqlbench.adapter.cqld4.optypes;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
-import com.datastax.oss.driver.api.core.cql.BoundStatement;
-import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.api.core.cql.Statement;
+import com.datastax.oss.driver.api.core.cql.*;
 import io.nosqlbench.adapter.cqld4.Cqld4CqlReboundStatement;
 import io.nosqlbench.adapter.cqld4.LWTRebinder;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
@@ -50,7 +47,7 @@ import java.util.concurrent.*;
 
 
 public abstract class Cqld4CqlOp
-    implements Cqld4BaseOp, CycleOp<List<Row>>, VariableCapture, OpGenerator, OpResultSize {
+    implements Cqld4BaseOp<List<Row>>, VariableCapture, OpGenerator, OpResultSize {
 
     private final static Logger logger = LogManager.getLogger(Cqld4CqlOp.class);
 
@@ -101,7 +98,8 @@ public abstract class Cqld4CqlOp
         this.metrics = metrics;
     }
 
-    public final ArrayList<Row> apply(long cycle) {
+    @Override
+    public List<Row> apply(long cycle) {
 
         Statement<?> statement = getStmt();
         logger.trace(() -> "apply() invoked, statement obtained, executing async with page size: " + statement.getPageSize() + " thread local rows: ");
@@ -136,15 +134,16 @@ public abstract class Cqld4CqlOp
             metrics.recordFetchedRows(fetchedRows);
             metrics.recordFetchedBytes(fetchedBytes);
         }
+    }
 
 //            logger.trace(() -> "\n\n--- Rows collected for cycle: " + cycle + " count: "
 //                + rs.size() + " dt: " + System.nanoTime());
 //
 //            results.set(completeRowSet);
 //            processors.flush();
-    }
 
-    private static class PrintableRowList extends ArrayList<Row> {
+
+    public static class PrintableRowList extends ArrayList<Row> {
         public PrintableRowList(List<Row> values) {
             super(values);
         }
@@ -159,10 +158,9 @@ public abstract class Cqld4CqlOp
         }
     }
 
-    //    private BiFunction<AsyncResultSet,Throwable> handler
     @Override
-    public Op getNextOp() {
-        Op next = nextOp;
+    public CycleOp<?> getNextOp() {
+        CycleOp<?> next = nextOp;
         nextOp = null;
         return next;
     }
@@ -181,7 +179,7 @@ public abstract class Cqld4CqlOp
     }
 
     private CompletionStage<List<Row>> collect(AsyncResultSet resultSet, ArrayList<Row> rowList, final long cycle) {
-        fetchedBytes+=resultSet.getExecutionInfo().getResponseSizeInBytes();
+        fetchedBytes += resultSet.getExecutionInfo().getResponseSizeInBytes();
         if (++fetchedPages > maxPages) {
             throw new UnexpectedPagingException(resultSet, getQueryString(), fetchedPages, maxPages, getStmt().getPageSize());
         }

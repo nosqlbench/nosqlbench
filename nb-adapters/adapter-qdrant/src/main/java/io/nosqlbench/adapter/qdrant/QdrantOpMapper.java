@@ -30,7 +30,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
-public class QdrantOpMapper implements OpMapper<QdrantBaseOp,QdrantSpace> {
+public class QdrantOpMapper implements OpMapper<QdrantBaseOp<?,?>,QdrantSpace> {
     private static final Logger logger = LogManager.getLogger(QdrantOpMapper.class);
     private final QdrantDriverAdapter adapter;
 
@@ -52,7 +52,7 @@ public class QdrantOpMapper implements OpMapper<QdrantBaseOp,QdrantSpace> {
      * @return The correct {@link QdrantBaseOpDispenser} subclass based on the op type
      */
     @Override
-    public OpDispenser<QdrantBaseOp> apply(ParsedOp op, LongFunction<QdrantSpace> spaceInitF) {
+    public OpDispenser<QdrantBaseOp<?,?>> apply(ParsedOp op, LongFunction<QdrantSpace> spaceInitF) {
         TypeAndTarget<QdrantOpType, String> typeAndTarget = op.getTypeAndTarget(
             QdrantOpType.class,
             String.class,
@@ -61,7 +61,7 @@ public class QdrantOpMapper implements OpMapper<QdrantBaseOp,QdrantSpace> {
         );
         logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
 
-        return switch (typeAndTarget.enumId) {
+        OpDispenser<QdrantBaseOp<?,?>> dispenser =  switch (typeAndTarget.enumId) {
             case delete_collection -> new QdrantDeleteCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_collection -> new QdrantCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_payload_index ->
@@ -78,6 +78,7 @@ public class QdrantOpMapper implements OpMapper<QdrantBaseOp,QdrantSpace> {
 //            default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
 //                "mapping parsed op " + op);
         };
+        return dispenser;
     }
 
 }

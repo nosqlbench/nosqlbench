@@ -17,7 +17,6 @@
 package io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
 
 public class DryCycleOp<T> implements CycleOp<T> {
 

@@ -1,4 +1,4 @@
-package io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes;
+package io.nosqlbench.adapter.mongodb.ops;
 
 /*
  * Copyright (c) nosqlbench
@@ -18,11 +18,13 @@ package io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes;
  */
 
 
-public interface RunnableOp extends CycleOp<Void>,Runnable {
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import org.bson.Document;
+
+public class MongoDbUpdateOp implements CycleOp<Document> {
 
     @Override
-    default Void apply(long value) {
-        run();
+    public Document apply(long value) {
         return null;
     }
 }

@@ -31,7 +31,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class Cqld4GremlinOpDispenser extends BaseOpDispenser<Cqld4BaseOp, Cqld4Space> {
+public class Cqld4GremlinOpDispenser extends BaseOpDispenser<Cqld4BaseOp<?>, Cqld4Space> {
 
     private final LongFunction<? extends ScriptGraphStatement> stmtFunc;
     private final LongFunction<CqlSession> sessionFunc;

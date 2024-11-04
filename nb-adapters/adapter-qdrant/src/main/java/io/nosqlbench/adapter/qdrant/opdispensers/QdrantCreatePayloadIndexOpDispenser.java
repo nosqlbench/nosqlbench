@@ -21,6 +21,7 @@ import io.nosqlbench.adapter.qdrant.ops.QdrantBaseOp;
 import io.nosqlbench.adapter.qdrant.ops.QdrantCreatePayloadIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.qdrant.client.QdrantClient;
+import io.qdrant.client.grpc.Points;
 import io.qdrant.client.grpc.Points.CreateFieldIndexCollection;
 import io.qdrant.client.grpc.Points.FieldType;
 import io.qdrant.client.grpc.Points.WriteOrdering;
@@ -29,7 +30,7 @@ import io.qdrant.client.grpc.Points.WriteOrderingType;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class QdrantCreatePayloadIndexOpDispenser extends QdrantBaseOpDispenser<CreateFieldIndexCollection> {
+public class QdrantCreatePayloadIndexOpDispenser extends QdrantBaseOpDispenser<CreateFieldIndexCollection, Points.UpdateResult> {
     public QdrantCreatePayloadIndexOpDispenser(
         QdrantDriverAdapter adapter,
         ParsedOp op,
@@ -65,7 +66,7 @@ public class QdrantCreatePayloadIndexOpDispenser extends QdrantBaseOpDispenser<C
     }
 
     @Override
-    public LongFunction<QdrantBaseOp<CreateFieldIndexCollection>> createOpFunc(
+    public LongFunction<QdrantBaseOp<CreateFieldIndexCollection, Points.UpdateResult>> createOpFunc(
         LongFunction<CreateFieldIndexCollection> paramF,
         LongFunction<QdrantClient> clientF,
         ParsedOp op,

@@ -21,11 +21,14 @@ import io.nosqlbench.adapter.qdrant.ops.QdrantBaseOp;
 import io.nosqlbench.adapter.qdrant.ops.QdrantDeleteCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.qdrant.client.QdrantClient;
+import io.qdrant.client.grpc.Collections;
 import io.qdrant.client.grpc.Collections.DeleteCollection;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
-public class QdrantDeleteCollectionOpDispenser extends QdrantBaseOpDispenser<DeleteCollection> {
+public class QdrantDeleteCollectionOpDispenser
+    extends QdrantBaseOpDispenser<DeleteCollection, Collections.CollectionOperationResponse> {
 
     /**
      * Create a new {@link QdrantDeleteCollectionOpDispenser} subclassed from {@link QdrantBaseOpDispenser}.
@@ -42,21 +45,15 @@ public class QdrantDeleteCollectionOpDispenser extends QdrantBaseOpDispenser<Del
     }
 
     @Override
-    public LongFunction<DeleteCollection> getParamFunc(
-        LongFunction<QdrantClient> clientF,
-        ParsedOp op,
-        LongFunction<String> targetF) {
+    public LongFunction<DeleteCollection> getParamFunc(LongFunction<QdrantClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<DeleteCollection.Builder> ebF =
             l -> DeleteCollection.newBuilder().setCollectionName(targetF.apply(l));
         return l -> ebF.apply(l).build();
     }
 
     @Override
-    public LongFunction<QdrantBaseOp<DeleteCollection>> createOpFunc(
-        LongFunction<DeleteCollection> paramF,
-        LongFunction<QdrantClient> clientF,
-        ParsedOp op,
-        LongFunction<String> targetF) {
+    public LongFunction<QdrantBaseOp<DeleteCollection, Collections.CollectionOperationResponse>> createOpFunc(LongFunction<DeleteCollection> paramF, LongFunction<QdrantClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         return l -> new QdrantDeleteCollectionOp(clientF.apply(l), paramF.apply(l));
     }
+
 }

@@ -22,13 +22,13 @@ import io.qdrant.client.grpc.Points.UpsertPoints;
 
 import java.util.concurrent.ExecutionException;
 
-public class QdrantUpsertPointsOp extends QdrantBaseOp<UpsertPoints> {
+public class QdrantUpsertPointsOp extends QdrantBaseOp<UpsertPoints,UpdateResult> {
     public QdrantUpsertPointsOp(QdrantClient client, UpsertPoints request) {
         super(client, request);
     }
 
     @Override
-    public Object applyOp(long value) {
+    public UpdateResult applyOp(long value) {
         UpdateResult response = null;
         String responseStatus;
         long responseOperationId;

@@ -18,8 +18,12 @@ package io.nosqlbench.adapter.cqld4.optypes;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BatchStatement;
+import com.datastax.oss.driver.api.core.cql.Row;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 import io.nosqlbench.adapter.cqld4.instruments.CqlOpMetrics;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Cqld4CqlBatchStatement extends Cqld4CqlOp {
 

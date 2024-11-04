@@ -26,11 +26,6 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.RunnableOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.DryRunnableOpDispenserWrapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterCycleOpDispenserWrapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterRunnableOpDispenserWrapper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
@@ -396,10 +391,10 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     }
 
 
-    protected <O extends Op> OpSequence<OpDispenser<? extends O>> createOpSourceFromParsedOps(
+    protected <O extends LongFunction> OpSequence<OpDispenser<? extends CycleOp<?>>> createOpSourceFromParsedOps(
 //        Map<String, DriverAdapter<?,?>> adapterCache,
 //        Map<String, OpMapper<? extends Op>> mapperCache,
-        List<DriverAdapter<Op, Space>> adapters,
+        List<DriverAdapter<CycleOp<?>, Space>> adapters,
         List<ParsedOp> pops
     ) {
         try {
@@ -415,7 +410,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                 .getOptionalString("seq")
                 .map(SequencerType::valueOf)
                 .orElse(SequencerType.bucket);
-            SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
+            SequencePlanner<OpDispenser<? extends CycleOp<?>>> planner = new SequencePlanner<>(sequencerType);
 
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
@@ -427,17 +422,17 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                         continue;
                     }
 
-                    DriverAdapter<Op, Space> adapter = adapters.get(i);
-                    OpMapper<Op, Space> opMapper = adapter.getOpMapper();
+                    DriverAdapter<CycleOp<?>, Space> adapter = adapters.get(i);
+                    OpMapper<CycleOp<?>, Space> opMapper = adapter.getOpMapper();
                     LongFunction<Space> spaceFunc = adapter.getSpaceFunc(pop);
-                    OpDispenser<Op> dispenser = opMapper.apply(pop, spaceFunc);
+                    OpDispenser<CycleOp<?>> dispenser = opMapper.apply(pop, spaceFunc);
                     String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
                     dispenser = OpWrappers.wrapOptionally(adapter, dispenser, pop, dryrunSpec);
 
 //                if (strict) {
 //                    optemplate.assertConsumed();
 //                }
-                    planner.addOp((OpDispenser<? extends O>) dispenser, ratio);
+                    planner.addOp((OpDispenser<? extends CycleOp<?>>) dispenser, ratio);
                 } catch (Exception e) {
                     throw new OpConfigError("Error while mapping op from template named '" + pop.getName() + "': " + e.getMessage(), e);
                 }

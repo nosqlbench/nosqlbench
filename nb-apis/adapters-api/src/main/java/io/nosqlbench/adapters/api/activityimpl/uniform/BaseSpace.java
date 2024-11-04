@@ -18,10 +18,7 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
  */
 
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
-
-import java.util.function.IntFunction;
-import java.util.function.LongFunction;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
 public class BaseSpace<SelfT extends BaseSpace<SelfT> > implements Space {
 
@@ -39,7 +36,7 @@ public class BaseSpace<SelfT extends BaseSpace<SelfT> > implements Space {
     }
 
     public static class BasicSpace extends BaseSpace<BasicSpace> implements Space {
-        public BasicSpace(DriverAdapter<Op, BasicSpace> adapter, long idx) {
+        public BasicSpace(DriverAdapter<? extends CycleOp<?>, BasicSpace> adapter, long idx) {
             super(adapter, idx);
         }
     }

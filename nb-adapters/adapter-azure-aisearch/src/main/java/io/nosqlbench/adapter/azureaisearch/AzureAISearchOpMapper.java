@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.azureaisearch;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,7 +35,7 @@ import io.nosqlbench.engine.api.templating.TypeAndTarget;
 
 import java.util.function.LongFunction;
 
-public class AzureAISearchOpMapper implements OpMapper<AzureAISearchBaseOp, AzureAISearchSpace> {
+public class AzureAISearchOpMapper implements OpMapper<AzureAISearchBaseOp<?,?>, AzureAISearchSpace> {
     private static final Logger logger = LogManager.getLogger(AzureAISearchOpMapper.class);
     private final AzureAISearchDriverAdapter adapter;
 
@@ -60,7 +61,7 @@ public class AzureAISearchOpMapper implements OpMapper<AzureAISearchBaseOp, Azur
      *     the op type
      */
     @Override
-    public OpDispenser<AzureAISearchBaseOp> apply(ParsedOp op, LongFunction<AzureAISearchSpace> spaceInitF) {
+    public OpDispenser<AzureAISearchBaseOp<?,?>> apply(ParsedOp op, LongFunction<AzureAISearchSpace> spaceInitF) {
 
         TypeAndTarget<AzureAISearchOpType, String> typeAndTarget = op.getTypeAndTarget(AzureAISearchOpType.class,
             String.class, "type", "target");

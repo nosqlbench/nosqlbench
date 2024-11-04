@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
-public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp> extends BaseOpDispenser<T, Cqld4Space> implements CqlOpMetrics {
+public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp<?>> extends BaseOpDispenser<T, Cqld4Space> implements CqlOpMetrics {
 
     private final static Logger logger = LogManager.getLogger("CQLD4");
 

@@ -18,12 +18,10 @@ package io.nosqlbench.adapters.api.activityimpl;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 /**
@@ -83,7 +81,7 @@ import java.util.function.LongFunction;
  *            to hold all the details for executing an operation,
  *            generally something that implements {@link Runnable}.
  */
-public interface OpMapper<OPTYPE extends Op, SPACETYPE extends Space>
+public interface OpMapper<OPTYPE extends CycleOp<?>, SPACETYPE extends Space>
     extends BiFunction<ParsedOp, LongFunction<SPACETYPE>, OpDispenser<OPTYPE>> {
 
     /**
@@ -96,6 +94,7 @@ public interface OpMapper<OPTYPE extends Op, SPACETYPE extends Space>
      * @param spaceInitF
      * @return An OpDispenser which can be used to synthesize real operations.
      */
-    OpDispenser<OPTYPE> apply(ParsedOp op, LongFunction<SPACETYPE> spaceInitF);
 
+    @Override
+    OpDispenser<OPTYPE> apply(ParsedOp op, LongFunction<SPACETYPE> spaceInitF);
 }

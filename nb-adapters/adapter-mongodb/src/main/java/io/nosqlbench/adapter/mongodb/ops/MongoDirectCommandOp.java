@@ -21,7 +21,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-public class MongoDirectCommandOp implements CycleOp<Document> {
+public class MongoDirectCommandOp implements MongoOp<Document> {
 
     private final MongoClient client;
     private final Bson rqBson;

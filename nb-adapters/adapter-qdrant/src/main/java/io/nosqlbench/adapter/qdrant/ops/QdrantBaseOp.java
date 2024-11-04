@@ -23,32 +23,32 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public abstract class QdrantBaseOp<T> implements CycleOp<Object> {
+public abstract class QdrantBaseOp<REQUEST,RESULT> implements CycleOp<RESULT> {
 
     protected final static Logger logger = LogManager.getLogger(QdrantBaseOp.class);
 
     protected final QdrantClient client;
-    protected final T request;
+    protected final REQUEST request;
     protected final LongFunction<Object> apiCall;
 
-    public QdrantBaseOp(QdrantClient client, T requestParam) {
+    public QdrantBaseOp(QdrantClient client, REQUEST requestParam) {
         this.client = client;
         this.request = requestParam;
         this.apiCall = this::applyOp;
     }
 
-    public QdrantBaseOp(QdrantClient client, T requestParam, LongFunction<Object> call) {
+    public QdrantBaseOp(QdrantClient client, REQUEST requestParam, LongFunction<Object> call) {
         this.client = client;
         this.request = requestParam;
         this.apiCall = call;
     }
 
     @Override
-    public final Object apply(long value) {
+    public final RESULT apply(long value) {
         logger.trace("applying op: {}", this);
 
         try {
-            Object result = applyOp(value);
+            RESULT result = applyOp(value);
             return result;
         } catch (Exception e) {
             RuntimeException rte = (RuntimeException) e;
@@ -56,7 +56,7 @@ public abstract class QdrantBaseOp<T> implements CycleOp<Object> {
         }
     }
 
-    public abstract Object applyOp(long value);
+    public abstract RESULT applyOp(long value);
 
     @Override
     public String toString() {

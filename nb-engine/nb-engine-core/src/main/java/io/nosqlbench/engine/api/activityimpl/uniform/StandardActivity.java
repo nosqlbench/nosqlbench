@@ -25,7 +25,7 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.lifecycle.Shutdownable;
@@ -60,10 +60,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <S>
  *     The context type for the activity, AKA the 'space' for a named driver instance and its associated object graph
  */
-public class StandardActivity<R extends Op, S> extends SimpleActivity implements SyntheticOpTemplateProvider, ActivityDefObserver {
+public class StandardActivity<R extends java.util.function.LongFunction, S> extends SimpleActivity implements SyntheticOpTemplateProvider, ActivityDefObserver {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
-    private final OpSequence<OpDispenser<? extends Op>> sequence;
-    private final ConcurrentHashMap<String, DriverAdapter<Op,Space>> adapters = new ConcurrentHashMap<>();
+    private final OpSequence<OpDispenser<? extends CycleOp<?>>> sequence;
+    private final ConcurrentHashMap<String, DriverAdapter<CycleOp<?>,Space>> adapters = new ConcurrentHashMap<>();
 
     public StandardActivity(NBComponent parent, ActivityDef activityDef) {
         super(parent, activityDef);
@@ -93,11 +93,11 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
 
         List<ParsedOp> pops = new ArrayList<>();
-        List<DriverAdapter<Op, Space>> adapterlist = new ArrayList<>();
+        List<DriverAdapter<CycleOp<?>, Space>> adapterlist = new ArrayList<>();
         NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(yamlmodel);
 
         Optional<String> defaultDriverOption = defaultDriverName;
-        ConcurrentHashMap<String, OpMapper<? extends Op, ? extends Space>> mappers = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
         for (OpTemplate ot : opTemplates) {
 //            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
             String driverName = ot.getOptionalStringParam("driver", String.class)
@@ -113,7 +113,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
             // HERE
             if (!adapters.containsKey(driverName)) {
 
-                DriverAdapter<Op,Space> adapter = Optional.of(driverName)
+                DriverAdapter<CycleOp<?>,Space> adapter = Optional.of(driverName)
                     .flatMap(
                         name -> ServiceSelector.of(
                                 name,
@@ -145,7 +145,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
 
             supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
 
-            DriverAdapter<Op, Space> adapter = adapters.get(driverName);
+            DriverAdapter<CycleOp<?>, Space> adapter = adapters.get(driverName);
             adapterlist.add(adapter);
             ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
             Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
@@ -195,7 +195,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
     }
 
 
-    public OpSequence<OpDispenser<? extends Op>> getOpSequence() {
+    public OpSequence<OpDispenser<? extends CycleOp<?>>> getOpSequence() {
         return sequence;
     }
 
@@ -262,7 +262,7 @@ public class StandardActivity<R extends Op, S> extends SimpleActivity implements
      */
     @Override
     public void shutdownActivity() {
-        for (Map.Entry<String, DriverAdapter<Op,Space>> entry : adapters.entrySet()) {
+        for (Map.Entry<String, DriverAdapter<CycleOp<?>,Space>> entry : adapters.entrySet()) {
             String adapterName = entry.getKey();
             DriverAdapter<?, ?> adapter = entry.getValue();
             for (Space space : adapter.getSpaceCache()) {

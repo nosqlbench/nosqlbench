@@ -36,7 +36,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.LongFunction;
 
-public class QdrantUpsertPointsOpDispenser extends QdrantBaseOpDispenser<UpsertPoints> {
+public class QdrantUpsertPointsOpDispenser extends QdrantBaseOpDispenser<UpsertPoints,UpdateResult> {
     private static final Logger logger = LogManager.getLogger(QdrantUpsertPointsOpDispenser.class);
 
     /**
@@ -181,7 +181,7 @@ public class QdrantUpsertPointsOpDispenser extends QdrantBaseOpDispenser<UpsertP
      * @see <a href="https://qdrant.tech/documentation/concepts/points/">Upsert Points</a>
      */
     @Override
-    public LongFunction<QdrantBaseOp<UpsertPoints>> createOpFunc(
+    public LongFunction<QdrantBaseOp<UpsertPoints,UpdateResult>> createOpFunc(
         LongFunction<UpsertPoints> paramF,
         LongFunction<QdrantClient> clientF,
         ParsedOp op,

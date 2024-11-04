@@ -27,6 +27,8 @@ public class TcpClientOp implements RunnableOp {
         this.ctx = ctx;
         this.text = text;
     }
+
+    @Override
     public void run() {
         ctx.writeflush(text);
     }

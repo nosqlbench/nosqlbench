@@ -21,12 +21,12 @@ import io.qdrant.client.QdrantClient;
 import java.time.Duration;
 import java.util.List;
 
-public class QdrantListCollectionsOp extends QdrantBaseOp<Object> {
+public class QdrantListCollectionsOp extends QdrantBaseOp<Void,List<String>> {
     public QdrantListCollectionsOp(QdrantClient client, Object request) {
-        super(client, request);
+        super(client, (Void)request);
     }
     @Override
-    public Object applyOp(long value) {
+    public List<String> applyOp(long value) {
         List<String> response;
         try {
             response = client.listCollectionsAsync(Duration.ofSeconds(300)).get();

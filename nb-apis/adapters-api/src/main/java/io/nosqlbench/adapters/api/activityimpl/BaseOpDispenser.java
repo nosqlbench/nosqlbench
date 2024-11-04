@@ -20,7 +20,7 @@ import com.codahale.metrics.Timer;
 import groovy.lang.Binding;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.evalctx.*;
 import io.nosqlbench.adapters.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -46,7 +46,8 @@ import java.util.concurrent.TimeUnit;
  * @param <OP>
  *     The type of operation
  */
-public abstract class BaseOpDispenser<OP extends Op,SPACE extends Space> extends NBBaseComponent implements OpDispenser<OP>{
+public abstract class BaseOpDispenser<OP extends CycleOp<?>,SPACE extends Space>
+    extends NBBaseComponent implements OpDispenser<OP> {
     protected final static Logger logger = LogManager.getLogger(BaseOpDispenser.class);
     public static final String VERIFIER = "verifier";
     public static final String VERIFIER_INIT = "verifier-init";

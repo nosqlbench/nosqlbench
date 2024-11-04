@@ -20,9 +20,14 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import io.nosqlbench.adapter.mongodb.core.MongoSpace;
 import io.nosqlbench.adapter.mongodb.core.MongodbDriverAdapter;
+import io.nosqlbench.adapter.mongodb.ops.MongoDbUpdateOp;
+import io.nosqlbench.adapter.mongodb.ops.MongoDirectCommandOp;
+import io.nosqlbench.adapter.mongodb.ops.MongoOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import org.bson.BsonDocument;
+import org.bson.conversions.Bson;
 
 import java.util.function.LongFunction;
 
@@ -30,9 +35,9 @@ import java.util.function.LongFunction;
  * https://www.mongodb.com/docs/manual/reference/command/update/#mongodb-dbcommand-dbcmd.update
  * https://www.mongodb.com/docs/drivers/java/sync/current/usage-examples/updateOne/
  */
-public class MongoDbUpdateOpDispenser extends BaseOpDispenser<Op, MongoSpace> {
+public class MongoDbUpdateOpDispenser extends BaseOpDispenser<MongoOp<?>, MongoSpace> {
     private final LongFunction<MongoSpace> spaceF;
-    private final LongFunction<Op> opF;
+    private final LongFunction<MongoOp<?>> opF;
     private final LongFunction<String> collectionF;
 
     public MongoDbUpdateOpDispenser(MongodbDriverAdapter adapter, ParsedOp pop, LongFunction<String> collectionF) {
@@ -42,15 +47,16 @@ public class MongoDbUpdateOpDispenser extends BaseOpDispenser<Op, MongoSpace> {
         this.opF = createOpF(pop);
     }
 
-    private LongFunction<Op> createOpF(ParsedOp pop) {
+    private LongFunction<MongoOp<?>> createOpF(ParsedOp pop) {
         LongFunction<MongoClient> clientF = cycle -> spaceF.apply(cycle).getClient();
         LongFunction<MongoDatabase> docF = l -> clientF.apply(l).getDatabase(collectionF.apply(l));
-        return l -> new Op() {};
+        // TODO This needs to be completed for at least one working example of a specialized op form.
+        return l -> new MongoDirectCommandOp(clientF.apply(l),docF.apply(l).getName(),new BsonDocument());
     }
 
     @Override
-    public Op getOp(long value) {
-        Op op = opF.apply(value);
+    public MongoOp<?> getOp(long value) {
+        MongoOp<?> op = opF.apply(value);
         return op;
     }
 

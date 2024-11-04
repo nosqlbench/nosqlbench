@@ -16,8 +16,8 @@
 
 package io.nosqlbench.adapters.api.activityimpl.uniform;
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.labels.NBLabels;
@@ -33,10 +33,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
-import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
-public abstract class BaseDriverAdapter<R extends Op, S extends Space> extends NBBaseComponent implements DriverAdapter<R, S>, NBConfigurable, NBReconfigurable {
+public abstract class BaseDriverAdapter<R extends CycleOp<?>, S extends Space> extends NBBaseComponent implements DriverAdapter<R, S>, NBConfigurable, NBReconfigurable {
     private final static Logger logger = LogManager.getLogger("ADAPTER");
 
     private ConcurrentSpaceCache<S> spaceCache;

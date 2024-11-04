@@ -22,24 +22,29 @@ import io.nosqlbench.adapter.qdrant.ops.QdrantListCollectionsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.qdrant.client.QdrantClient;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
-public class QdrantListCollectionsOpDispenser extends QdrantBaseOpDispenser<Object> {
+public class QdrantListCollectionsOpDispenser extends QdrantBaseOpDispenser<Void,List<String>> {
     public QdrantListCollectionsOpDispenser(QdrantDriverAdapter adapter,
                                             ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
     }
 
     @Override
-    public LongFunction<Object> getParamFunc(LongFunction<QdrantClient> clientF, ParsedOp op, LongFunction<String> targetF) {
-        return l -> "";
+    public LongFunction<Void> getParamFunc(LongFunction<QdrantClient> clientF, ParsedOp op,
+                                         LongFunction<String> targetF) {
+        return null;
     }
 
     @Override
-    public LongFunction<QdrantBaseOp<Object>> createOpFunc(
-        LongFunction<Object> paramF,
+    public LongFunction<QdrantBaseOp<Void, List<String>>> createOpFunc(
+        LongFunction<Void> paramF,
         LongFunction<QdrantClient> clientF,
-        ParsedOp op, LongFunction<String> targetF) {
-            return l -> new QdrantListCollectionsOp(clientF.apply(l), null);
+        ParsedOp op,
+        LongFunction<String> targetF
+    ) {
+        return l -> new QdrantListCollectionsOp(clientF.apply(l), null);
     }
+
 }

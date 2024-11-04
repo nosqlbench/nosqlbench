@@ -41,12 +41,13 @@ import java.util.function.LongFunction;
 
 import static io.qdrant.client.ConditionFactory.*;
 
-public abstract class QdrantBaseOpDispenser<T> extends BaseOpDispenser<QdrantBaseOp, QdrantSpace> {
+public abstract class QdrantBaseOpDispenser<REQUEST,RESULT>
+    extends BaseOpDispenser<QdrantBaseOp<?,?>, QdrantSpace> {
 
     protected final LongFunction<QdrantSpace> qdrantSpaceFunction;
     protected final LongFunction<QdrantClient> clientFunction;
-    private final LongFunction<? extends QdrantBaseOp<T>> opF;
-    private final LongFunction<T> paramF;
+    private final LongFunction<? extends QdrantBaseOp<REQUEST, RESULT>> opF;
+    private final LongFunction<REQUEST> paramF;
 
     protected QdrantBaseOpDispenser(QdrantDriverAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
         super((DriverAdapter)adapter, op);
@@ -59,21 +60,21 @@ public abstract class QdrantBaseOpDispenser<T> extends BaseOpDispenser<QdrantBas
         return (QdrantDriverAdapter) adapter;
     }
 
-    public abstract LongFunction<T> getParamFunc(
+    public abstract LongFunction<REQUEST> getParamFunc(
         LongFunction<QdrantClient> clientF,
         ParsedOp op,
         LongFunction<String> targetF
     );
 
-    public abstract LongFunction<QdrantBaseOp<T>> createOpFunc(
-        LongFunction<T> paramF,
+    public abstract LongFunction<QdrantBaseOp<REQUEST, RESULT>> createOpFunc(
+        LongFunction<REQUEST> paramF,
         LongFunction<QdrantClient> clientF,
         ParsedOp op,
         LongFunction<String> targetF
     );
 
     @Override
-    public QdrantBaseOp<T> getOp(long value) {
+    public QdrantBaseOp<REQUEST, RESULT> getOp(long value) {
         return opF.apply(value);
     }
 
@@ -477,7 +478,7 @@ public abstract class QdrantBaseOpDispenser<T> extends BaseOpDispenser<QdrantBas
     }
 
     /**
-     * This {@link nested} is only valid within a 'must' filter condition.
+     * This {@link io.qdrant.client.grpc.Points.NestedCondition} is only valid within a 'must' filter condition.
      *
      * @param filterFields
      * @return

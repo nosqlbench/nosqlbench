@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  * @param <R>
  *     The type of operation
  */
-public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> implements SyncAction, ActivityDefObserver {
+public class StandardAction<A extends StandardActivity<R, ?>, R extends java.util.function.LongFunction> implements SyncAction, ActivityDefObserver {
     private final static Logger logger = LogManager.getLogger("ACTION");
     private final Timer executeTimer;
     private final Histogram triesHistogram;
@@ -54,7 +54,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     private final Timer resultTimer;
     private final Timer bindTimer;
     private final NBErrorHandler errorHandler;
-    private final OpSequence<OpDispenser<? extends Op>> opsequence;
+    private final OpSequence<OpDispenser<? extends CycleOp<?>>> opsequence;
     private final int maxTries;
     private final Timer verifierTimer;
 
@@ -73,8 +73,8 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
     @Override
     public int runCycle(long cycle) {
 
-        OpDispenser<? extends Op> dispenser=null;
-        Op op = null;
+        OpDispenser<? extends CycleOp<?>> dispenser=null;
+        CycleOp op = null;
 
         try (Timer.Context ct = bindTimer.time()) {
             dispenser = opsequence.apply(cycle);
@@ -96,16 +96,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends Op> impl
                 dispenser.onStart(cycle);
 
                 try (Timer.Context ct = executeTimer.time()) {
-                    if (op instanceof RunnableOp runnableOp) {
-                        runnableOp.run();
-                    } else if (op instanceof CycleOp<?> cycleOp) {
-                        result = cycleOp.apply(cycle);
-                    } else if (op instanceof ChainingOp chainingOp) {
-                        result = chainingOp.apply(result);
-                    } else {
-                        throw new RuntimeException("The op implementation did not implement any active logic. Implement " +
-                            "one of [RunnableOp, CycleOp, or ChainingOp]");
-                    }
+                    result = op.apply(cycle);
                     // TODO: break out validation timer from execute
                     try (Timer.Context ignored = verifierTimer.time()) {
                         CycleFunction<Boolean> verifier = dispenser.getVerifier();

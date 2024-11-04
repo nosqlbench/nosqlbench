@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapters.api.activityimpl;
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.evalctx.CycleFunction;
 
 import java.util.function.LongFunction;
@@ -67,9 +67,9 @@ import java.util.function.LongFunction;
  *
  * @param <OP> The parameter type of the actual operation which will be used
  *            to hold all the details for executing an operation,
- *            something that implements {@link Op}.
+ *            something that implements {@link io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp}.
  */
-public interface OpDispenser<OP extends Op> extends LongFunction<OP>, OpResultTracker {
+public interface OpDispenser<OP extends CycleOp<?>> extends LongFunction<OP>, OpResultTracker {
 
     /**
      * The apply method in an op dispenser should do all the work of

@@ -22,7 +22,7 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.OpResultSize;
 
-public class Cqld4ScriptGraphOp implements Cqld4BaseOp, CycleOp<GraphResultSet>, OpResultSize {
+public class Cqld4ScriptGraphOp implements Cqld4BaseOp<GraphResultSet>, OpResultSize {
     private final CqlSession session;
     private final ScriptGraphStatement stmt;
     private int resultSize=0;
