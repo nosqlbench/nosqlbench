@@ -61,7 +61,7 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?,?>, GCPSp
             String.class, "type", "target");
         logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
 
-         var d =switch (typeAndTarget.enumId) {
+        OpDispenser<GCPSpannerBaseOp<?, ?>> dispenser = switch (typeAndTarget.enumId) {
             case drop_database_ddl ->
                 new GCPSpannerDropDatabaseDdlOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_database_ddl ->
@@ -71,6 +71,6 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?,?>, GCPSp
             case insert -> new GCPSpannerInsertOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case execute_dml -> new GCPSpannerExecuteDmlOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
-         return d;
+         return dispenser;
     }
 }
