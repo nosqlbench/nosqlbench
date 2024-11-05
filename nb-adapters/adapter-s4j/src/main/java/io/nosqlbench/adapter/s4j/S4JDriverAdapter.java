@@ -42,9 +42,7 @@ public class S4JDriverAdapter extends BaseDriverAdapter<S4JOp, S4JSpace> {
 
     @Override
     public OpMapper<S4JOp,S4JSpace> getOpMapper() {
-        ConcurrentSpaceCache<? extends S4JSpace> spaceCache = getSpaceCache();
-        NBConfiguration adapterConfig = getConfiguration();
-        return new S4JOpMapper(this, adapterConfig, spaceCache);
+        return new S4JOpMapper(this);
     }
 
     @Override

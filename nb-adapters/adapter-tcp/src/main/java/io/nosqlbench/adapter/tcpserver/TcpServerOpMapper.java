@@ -26,19 +26,17 @@ import java.util.function.LongFunction;
 
 public class TcpServerOpMapper implements OpMapper<TcpServerOp,TcpServerAdapterSpace> {
 
-    private final ConcurrentSpaceCache<TcpServerAdapterSpace> ctxcache;
     private final TcpServerDriverAdapter adapter;
 
 
-    public TcpServerOpMapper(TcpServerDriverAdapter adapter, ConcurrentSpaceCache<TcpServerAdapterSpace> ctxcache) {
-        this.ctxcache = ctxcache;
+    public TcpServerOpMapper(TcpServerDriverAdapter adapter) {
         this.adapter = adapter;
     }
 
     @Override
     public OpDispenser<TcpServerOp> apply(ParsedOp op, LongFunction<TcpServerAdapterSpace> spaceInitF) {
         LongFunction<String> spacefunc = op.getAsFunctionOr("space", "default");
-        LongFunction<TcpServerAdapterSpace> ctxfunc = (cycle) -> ctxcache.get(cycle);
+        LongFunction<TcpServerAdapterSpace> ctxfunc = adapter.getSpaceFunc(op);
         return new TcpServerOpDispenser(adapter,op,ctxfunc);
     }
 }

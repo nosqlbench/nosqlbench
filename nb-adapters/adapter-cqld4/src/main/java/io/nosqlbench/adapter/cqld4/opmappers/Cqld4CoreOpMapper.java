@@ -51,17 +51,17 @@ public class Cqld4CoreOpMapper extends Cqld4BaseOpMapper<Cqld4BaseOp<?>> {
      */
 
     @Override
-    public OpDispenser<Cqld4BaseOp<?>> apply(ParsedOp op, LongFunction<Cqld4Space> cqld4SpaceLongFunction) {
+    public OpDispenser<Cqld4BaseOp<?>> apply(ParsedOp op, LongFunction<Cqld4Space> spaceF) {
         CqlD4OpType opType = CqlD4OpType.prepared;
         TypeAndTarget<CqlD4OpType, String> target = op.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
         logger.info(() -> "Using " + target.enumId + " statement form for '" + op.getName() + "'");
 
         return (OpDispenser<Cqld4BaseOp<?>>) switch (target.enumId) {
-            case raw, simple, prepared, batch -> new Cqld4CqlOpMapper(adapter).apply(op, spaceFunc);
-            case gremlin -> new Cqld4GremlinOpMapper(adapter, target.targetFunction).apply(op, spaceFunc);
-            case fluent -> new Cqld4FluentGraphOpMapper(adapter, target).apply(op, spaceFunc);
+            case raw, simple, prepared, batch -> new Cqld4CqlOpMapper(adapter).apply(op, spaceF);
+            case gremlin -> new Cqld4GremlinOpMapper(adapter, target.targetFunction).apply(op, spaceF);
+            case fluent -> new Cqld4FluentGraphOpMapper(adapter, target).apply(op, spaceF);
             case rainbow ->
-                new CqlD4RainbowTableMapper(adapter, sessionFunc, target.targetFunction).apply(op, spaceFunc);
+                new CqlD4RainbowTableMapper(adapter, spaceF, target.targetFunction).apply(op, spaceF);
             default -> throw new OpConfigError("Unsupported op type " + opType);
 //            case sst -> new Cqld4SsTableMapper(adapter, sessionFunc, target.targetFunction).apply(op);
         };

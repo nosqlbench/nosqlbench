@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.s4j.dispensers;
 
+import io.nosqlbench.adapter.s4j.S4JDriverAdapter;
 import io.nosqlbench.adapter.s4j.S4JSpace;
 import io.nosqlbench.adapter.s4j.ops.MessageConsumerOp;
 import io.nosqlbench.adapter.s4j.util.S4JAdapterUtil;
@@ -64,13 +65,14 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
     // Setting them here will allow scenario-specific customer configurations. At the moment, only the
     //   DLT related settings are supported
     private final Map<String, Object> combinedS4jConfigObjMap = new HashMap<>();
+    private final HashMap<String, String> stmtLvlConsumerConfRawMap;
 
+    private boolean configured = false;
 
-    public MessageConsumerOpDispenser(DriverAdapter adapter,
+    public MessageConsumerOpDispenser(S4JDriverAdapter adapter,
                                       ParsedOp op,
-                                      LongFunction<String> tgtNameFunc,
-                                      S4JSpace s4jSpace) {
-        super(adapter, op, tgtNameFunc, s4jSpace);
+                                      LongFunction<String> tgtNameFunc) {
+        super(adapter, op, tgtNameFunc);
 
         this.blockingMsgRecv =
             parsedOp.getStaticConfigOr(S4JAdapterUtil.DOC_LEVEL_PARAMS.BLOCKING_MSG_RECV.label, Boolean.FALSE);
@@ -109,6 +111,7 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
             "consumer.deadLetterPolicy",
             "consumer.negativeAckRedeliveryBackoff",
             "consumer.ackTimeoutRedeliveryBackoff"};
+
         HashMap<String, String> stmtLvlConsumerConfRawMap = new HashMap<>();
         for (String confKey : stmtLvlConsumerConfKeyNameList ) {
             String confVal = parsedOp.getStaticConfigOr(confKey, "");
@@ -116,13 +119,17 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
                 StringUtils.substringAfter(confKey, "consumer."),
                 confVal);
         }
-
-        this.combinedS4jConfigObjMap.putAll(
-            s4jSpace.getS4JClientConf().mergeExtraConsumerConfig(stmtLvlConsumerConfRawMap));
+        this.stmtLvlConsumerConfRawMap = stmtLvlConsumerConfRawMap;
     }
 
     @Override
     public MessageConsumerOp getOp(long cycle) {
+        S4JSpace s4jSpace = s4jSpaceF.apply(cycle);
+        if (!configured) {
+            s4jSpace.getS4JClientConf().mergeExtraConsumerConfig(stmtLvlConsumerConfRawMap);
+        }
+        configured=true;
+
         S4JJMSContextWrapper s4JJMSContextWrapper = getS4jJmsContextWrapper(cycle, this.combinedS4jConfigObjMap);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
         boolean commitTransact = super.commitTransaction(txnBatchNum, jmsContext.getSessionMode(), cycle);
@@ -130,7 +137,7 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
         Destination destination;
         try {
             destination = getJmsDestination(
-                s4JJMSContextWrapper, temporaryDest, destType, destNameStrFunc.apply(cycle));
+                cycle, s4JJMSContextWrapper, temporaryDest, destType, destNameStrFunc.apply(cycle));
         }
         catch (JMSRuntimeException jmsRuntimeException) {
             throw new RuntimeException("Unable to create the JMS destination!");
@@ -139,6 +146,7 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
         JMSConsumer jmsConsumer;
         try {
             jmsConsumer = getJmsConsumer(
+                cycle,
                 s4JJMSContextWrapper,
                 destination,
                 destType,
@@ -157,7 +165,7 @@ public class MessageConsumerOpDispenser extends S4JBaseOpDispenser {
 
         return new MessageConsumerOp(
             s4jAdapterMetrics,
-            s4jSpace,
+            this.s4jSpaceF.apply(cycle),
             jmsContext,
             destination,
             asyncAPI,

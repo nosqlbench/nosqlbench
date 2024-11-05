@@ -38,7 +38,7 @@ public class Neo4JDriverAdapter extends BaseDriverAdapter<Neo4JBaseOp, Neo4JSpac
 
     @Override
     public OpMapper<Neo4JBaseOp,Neo4JSpace> getOpMapper() {
-        return new Neo4JOpMapper(this, getSpaceCache());
+        return new Neo4JOpMapper(this);
     }
 
     @Override

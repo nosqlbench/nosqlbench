@@ -33,13 +33,9 @@ public abstract class Cqld4BaseOpMapper<T extends Cqld4BaseOp<?>> implements OpM
 
     protected final static Logger logger = LogManager.getLogger(Cqld4BaseOpMapper.class);
     protected final Cqld4DriverAdapter adapter;
-    protected final LongFunction<Cqld4Space> spaceFunc;
-    protected final LongFunction<CqlSession> sessionFunc;
 
     public Cqld4BaseOpMapper(Cqld4DriverAdapter adapter) {
         this.adapter = adapter;
-        spaceFunc = l -> adapter.getSpaceCache().get(l);
-        sessionFunc = l -> spaceFunc.apply(l).getSession();
     }
 
     @Override

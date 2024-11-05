@@ -41,7 +41,7 @@ public class AmqpDriverAdapter extends BaseDriverAdapter<AmqpTimeTrackOp, AmqpSp
 
     @Override
     public OpMapper<AmqpTimeTrackOp, AmqpSpace> getOpMapper() {
-        return new AmqpOpMapper(this, getConfiguration(), getSpaceCache());
+        return new AmqpOpMapper(this, getConfiguration());
     }
 
     @Override

@@ -41,7 +41,7 @@ public class MongodbDriverAdapter extends BaseDriverAdapter<MongoOp<?>, MongoSpa
 
     @Override
     public OpMapper<MongoOp<?>,MongoSpace> getOpMapper() {
-        return new MongoOpMapper(this, getConfiguration(), getSpaceCache());
+        return new MongoOpMapper(this, getConfiguration());
     }
 
     @Override

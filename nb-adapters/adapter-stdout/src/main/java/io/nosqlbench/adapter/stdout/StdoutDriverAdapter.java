@@ -49,8 +49,7 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
 
     @Override
     public OpMapper<StdoutOp,StdoutSpace> getOpMapper() {
-        ConcurrentSpaceCache<StdoutSpace> ctxCache = getSpaceCache();
-        return new StdoutOpMapper(this, ctxCache);
+        return new StdoutOpMapper(this);
     }
 
     @Override

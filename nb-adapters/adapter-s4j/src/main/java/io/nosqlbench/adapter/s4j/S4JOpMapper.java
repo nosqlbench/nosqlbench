@@ -37,20 +37,14 @@ public class S4JOpMapper implements OpMapper<S4JOp,S4JSpace> {
 
     private final static Logger logger = LogManager.getLogger(S4JOpMapper.class);
 
-    private final NBConfiguration cfg;
-    private final ConcurrentSpaceCache<? extends S4JSpace> spaceCache;
-    private final DriverAdapter adapter;
+    private final S4JDriverAdapter adapter;
 
-    public S4JOpMapper(DriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<? extends S4JSpace> spaceCache) {
-        this.cfg = cfg;
-        this.spaceCache = spaceCache;
+    public S4JOpMapper(S4JDriverAdapter adapter) {
         this.adapter = adapter;
     }
 
     @Override
     public OpDispenser<S4JOp> apply(ParsedOp op, LongFunction<S4JSpace> spaceInitF) {
-        int spaceIdx = op.getStaticConfigOr("space", 0);
-        S4JSpace s4jSpace = spaceCache.get(spaceIdx);
 
         /*
          * If the user provides a body element, then they want to provide the JSON or
@@ -65,9 +59,9 @@ public class S4JOpMapper implements OpMapper<S4JOp,S4JSpace> {
 
             return switch (opType.enumId) {
                 case MessageProduce ->
-                    new MessageProducerOpDispenser(adapter, op, opType.targetFunction, s4jSpace);
+                    new MessageProducerOpDispenser(adapter, op, opType.targetFunction);
                 case MessageConsume ->
-                    new MessageConsumerOpDispenser(adapter, op, opType.targetFunction, s4jSpace);
+                    new MessageConsumerOpDispenser(adapter, op, opType.targetFunction);
             };
         }
     }

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.s4j.dispensers;
 
+import io.nosqlbench.adapter.s4j.S4JDriverAdapter;
 import io.nosqlbench.adapter.s4j.S4JSpace;
 import io.nosqlbench.adapter.s4j.exception.S4JAdapterInvalidParamException;
 import io.nosqlbench.adapter.s4j.exception.S4JAdapterUnexpectedException;
@@ -52,11 +53,10 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
     private final LongFunction<String> msgBodyRawStrFunc;
     private final LongFunction<String> msgTypeFunc;
 
-    public MessageProducerOpDispenser(DriverAdapter adapter,
+    public MessageProducerOpDispenser(S4JDriverAdapter adapter,
                                       ParsedOp op,
-                                      LongFunction<String> tgtNameFunc,
-                                      S4JSpace s4jSpace) {
-        super(adapter, op, tgtNameFunc, s4jSpace);
+                                      LongFunction<String> tgtNameFunc) {
+        super(adapter, op, tgtNameFunc);
 
         this.msgHeaderRawJsonStrFunc = lookupOptionalStrOpValueFunc(MSG_HEADER_OP_PARAM);
         this.msgPriorityStrFunc = lookupOptionalStrOpValueFunc(MSG_PRIORITY_OP_PARAM);
@@ -130,7 +130,8 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
         return message;
     }
 
-    private Message updateMessageHeaders(S4JJMSContextWrapper s4JJMSContextWrapper, Message message, String msgType, String msgHeaderRawJsonStr) throws JMSException {
+    private Message updateMessageHeaders(long curCycle, S4JJMSContextWrapper s4JJMSContextWrapper, Message message,
+                                         String msgType, String msgHeaderRawJsonStr) throws JMSException {
         int messageSize = Integer.parseInt(message.getStringProperty(S4JAdapterUtil.NB_MSG_SIZE_PROP));
 
         // Check if msgHeaderRawJsonStr is a valid JSON string with a collection of key/value pairs
@@ -176,7 +177,8 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
                         if (value != null) {
                             String destType = StringUtils.substringBefore(value, ':');
                             String destName = StringUtils.substringAfter(value, ':');
-                            outMessage.setJMSReplyTo(getJmsDestination(s4JJMSContextWrapper,false, destType, destName));
+                            outMessage.setJMSReplyTo(getJmsDestination(curCycle,s4JJMSContextWrapper,false, destType,
+                                destName));
                         }
                     }
                     // Ignore these headers - handled by S4J API automatically
@@ -274,6 +276,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
 
     @Override
     public MessageProducerOp getOp(long cycle) {
+        S4JSpace s4jSpace = s4jSpaceF.apply(cycle);
         String destName = destNameStrFunc.apply(cycle);
         String jmsMsgHeaderRawJsonStr = msgHeaderRawJsonStrFunc.apply(cycle);
         String jmsMsgPriorityStr = msgPriorityStrFunc.apply(cycle);
@@ -299,7 +302,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
 
         Destination destination;
         try {
-            destination = getJmsDestination(s4JJMSContextWrapper, temporaryDest, destType, destName);
+            destination = getJmsDestination(cycle, s4JJMSContextWrapper, temporaryDest, destType, destName);
         }
         catch (JMSRuntimeException jmsRuntimeException) {
             throw new S4JAdapterUnexpectedException("Unable to create the JMS destination!");
@@ -307,7 +310,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
 
         JMSProducer producer;
         try {
-            producer = getJmsProducer(s4JJMSContextWrapper, asyncAPI);
+            producer = getJmsProducer(cycle, s4JJMSContextWrapper, asyncAPI);
             int priority = NumberUtils.toInt(jmsMsgPriorityStr);
             assert (priority >= 0 && priority <= 9);
             producer.setPriority(priority);
@@ -343,7 +346,7 @@ public class MessageProducerOpDispenser extends S4JBaseOpDispenser {
         // -----------------------
         //
         try {
-            message = updateMessageHeaders(s4JJMSContextWrapper, message, jmsMsgType, jmsMsgHeaderRawJsonStr);
+            message = updateMessageHeaders(cycle, s4JJMSContextWrapper, message, jmsMsgType, jmsMsgHeaderRawJsonStr);
         }
         catch (JMSException jmsException) {
             throw new S4JAdapterUnexpectedException("Failed to set create a JMS message and set its payload!");
