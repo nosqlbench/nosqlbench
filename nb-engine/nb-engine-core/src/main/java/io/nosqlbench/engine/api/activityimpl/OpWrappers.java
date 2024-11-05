@@ -43,6 +43,7 @@ public class OpWrappers {
             case none -> dispenser;
             case op -> new DryCycleOpDispenserWrapper(adapter, pop, dispenser);
             case emit -> new EmitterCycleOpDispenserWrapper(adapter, pop, dispenser);
+            case jsonnet -> dispenser;
         };
     }
 }

@@ -45,6 +45,7 @@ public class INFO_run extends NBCommandInfo {
 
             Diagnostic Options
             * dryrun       enable dryrun diagnostics at different levels
+            * advisor      enable advisor for command validation and enforcement
 
             Metrics Options
             * alias        name the activity so that you can observer or modify it concurrently

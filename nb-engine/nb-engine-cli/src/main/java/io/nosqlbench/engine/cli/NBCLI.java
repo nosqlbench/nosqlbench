@@ -136,12 +136,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                     break;
                 }
 
-            final String error = NBCLIErrorHandler.handle(e, showStackTraces, NBCLI.version);
+            final int result = NBCLIErrorHandler.handle(e, showStackTraces, NBCLI.version);
             // Commented for now, as the above handler should do everything needed.
-            if (null != error) System.err.println("Scenario stopped due to error. See logs for details.");
+            System.err.println("Stopped. See logs for details.");
             System.err.flush();
             System.out.flush();
-            return NBCLI.EXIT_ERROR;
+            return result;
         }
     }
 
