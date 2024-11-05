@@ -20,6 +20,7 @@ import com.amazonaws.util.StringInputStream;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
+import io.nosqlbench.nb.api.errors.ProcessingEarlyExit;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
@@ -129,10 +130,10 @@ public class OpsLoader {
             System.err.println(stderrOutput);
             if (resultStatus==0 && stderrOutput.isEmpty()) {
                 logger.info("no errors detected during jsonnet evaluation.");
-                System.exit(0);
+		throw new ProcessingEarlyExit("dryrun=jsonnet: No errors detected.", 0);
             } else {
                 logger.error("ERRORS detected during jsonnet evaluation:\n" + stderrOutput);
-                System.exit(2);
+		throw new ProcessingEarlyExit("dryrun=jsonnet: Errors detected.", 2);
             }
         }
         if (!stderrOutput.isEmpty()) {

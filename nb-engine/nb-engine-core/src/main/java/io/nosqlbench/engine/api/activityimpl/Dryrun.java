@@ -20,7 +20,7 @@ package io.nosqlbench.engine.api.activityimpl;
 
 public enum Dryrun {
     /**
-     * Ops are executed normally, no change to the dispenser behavior
+     * Ops are executed normally, no change to the dispenser behavior.
      */
     none,
     /**
@@ -32,5 +32,12 @@ public enum Dryrun {
      * Ops will print the toString version of their result to stdout.
      * This is done by wrapping the synthesized op in a post-emit facade.
      */
-    emit
+    emit,
+    /**
+     * Jsonnet evaluation is a one time dry-run and then exit.
+     * With this value the run should exit after the first evaluation of jsonnet
+     * and Ops are not executed, but should processing fall through then processing
+     * will proceed as for none.
+     */
+    jsonnet
 }
