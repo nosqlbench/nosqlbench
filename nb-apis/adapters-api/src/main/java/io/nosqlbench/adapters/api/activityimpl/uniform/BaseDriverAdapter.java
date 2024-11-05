@@ -35,12 +35,15 @@ import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
 import java.util.stream.Collectors;
 
-public abstract class BaseDriverAdapter<R extends CycleOp<?>, S extends Space> extends NBBaseComponent implements DriverAdapter<R, S>, NBConfigurable, NBReconfigurable {
+public abstract class BaseDriverAdapter<RESULT
+    extends CycleOp<?>, SPACE extends Space> extends NBBaseComponent
+    implements DriverAdapter<RESULT, SPACE>, NBConfigurable, NBReconfigurable {
+
     private final static Logger logger = LogManager.getLogger("ADAPTER");
 
-    private ConcurrentSpaceCache<S> spaceCache;
+    private ConcurrentSpaceCache<SPACE> spaceCache;
     private NBConfiguration cfg;
-    private LongFunction<S> spaceF;
+    private LongFunction<SPACE> spaceF;
 
     public BaseDriverAdapter(NBComponent parentComponent, NBLabels labels) {
         super(parentComponent, labels);
@@ -57,9 +60,9 @@ public abstract class BaseDriverAdapter<R extends CycleOp<?>, S extends Space> e
     public final Function<Map<String, Object>, Map<String, Object>> getPreprocessor() {
         List<Function<Map<String, Object>, Map<String, Object>>> mappers = new ArrayList<>();
         List<Function<Map<String, Object>, Map<String, Object>>> stmtRemappers =
-                getOpStmtRemappers().stream()
-                        .map(m -> new FieldDestructuringMapper("stmt", m))
-                        .collect(Collectors.toList());
+            getOpStmtRemappers().stream()
+                .map(m -> new FieldDestructuringMapper("stmt", m))
+                .collect(Collectors.toList());
         mappers.addAll(stmtRemappers);
         mappers.addAll(getOpFieldRemappers());
 
@@ -129,10 +132,9 @@ public abstract class BaseDriverAdapter<R extends CycleOp<?>, S extends Space> e
         return List.of();
     }
 
-    @Override
-    public final synchronized ConcurrentSpaceCache<S> getSpaceCache() {
+    private final synchronized ConcurrentSpaceCache<SPACE> getSpaceCache() {
         if (spaceCache == null) {
-            spaceCache = new ConcurrentSpaceCache<S>(this,getSpaceInitializer(getConfiguration()));
+            spaceCache = new ConcurrentSpaceCache<SPACE>(this, getSpaceInitializer(getConfiguration()));
         }
         return spaceCache;
     }
@@ -161,40 +163,40 @@ public abstract class BaseDriverAdapter<R extends CycleOp<?>, S extends Space> e
     @Override
     public NBConfigModel getConfigModel() {
         return ConfigModel.of(BaseDriverAdapter.class)
-                .add(Param.optional("alias"))
-                .add(Param.optional("labels",String.class,"Labels which will apply to metrics and annotations for this activity only"))
-                .add(Param.defaultTo("strict", true, "strict op field mode, which requires that provided op fields are recognized and used"))
-                .add(Param.optional(List.of("op", "stmt", "statement"), String.class, "op template in statement form"))
-                .add(Param.optional("tags", String.class, "tags to be used to filter operations"))
-                .add(Param.defaultTo("errors", "stop", "error handler configuration"))
-                .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto").setDescription("number of concurrent operations, controlled by threadpool"))
-                .add(Param.optional("stride").setRegex("\\d+"))
-                .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
-                .add(Param.optional("cycles").setRegex("\\d+[KMBGTPE]?|\\d+[KMBGTPE]?\\.\\.\\d+[KMBGTPE]?").setDescription("cycle interval to use"))
-                .add(Param.optional("recycles").setDescription("allow cycles to be re-used this many times"))
-                .add(Param.optional(List.of("cyclerate", "targetrate", "rate"), String.class, "rate limit for cycles per second"))
-                .add(Param.optional("seq", String.class, "sequencing algorithm"))
-                .add(Param.optional("instrument", Boolean.class))
-                .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
-                .add(Param.optional("driver", String.class))
-                .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|emit|none)"))
-                .add(Param.optional("maxtries", Integer.class))
-                .asReadOnly();
+            .add(Param.optional("alias"))
+            .add(Param.optional("labels", String.class, "Labels which will apply to metrics and annotations for this activity only"))
+            .add(Param.defaultTo("strict", true, "strict op field mode, which requires that provided op fields are recognized and used"))
+            .add(Param.optional(List.of("op", "stmt", "statement"), String.class, "op template in statement form"))
+            .add(Param.optional("tags", String.class, "tags to be used to filter operations"))
+            .add(Param.defaultTo("errors", "stop", "error handler configuration"))
+            .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto").setDescription("number of concurrent operations, controlled by threadpool"))
+            .add(Param.optional("stride").setRegex("\\d+"))
+            .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
+            .add(Param.optional("cycles").setRegex("\\d+[KMBGTPE]?|\\d+[KMBGTPE]?\\.\\.\\d+[KMBGTPE]?").setDescription("cycle interval to use"))
+            .add(Param.optional("recycles").setDescription("allow cycles to be re-used this many times"))
+            .add(Param.optional(List.of("cyclerate", "targetrate", "rate"), String.class, "rate limit for cycles per second"))
+            .add(Param.optional("seq", String.class, "sequencing algorithm"))
+            .add(Param.optional("instrument", Boolean.class))
+            .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
+            .add(Param.optional("driver", String.class))
+            .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|emit|none)"))
+            .add(Param.optional("maxtries", Integer.class))
+            .asReadOnly();
     }
 
     @Override
     public NBConfigModel getReconfigModel() {
         return ConfigModel.of(BaseDriverAdapter.class)
-                .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto").setDescription("number of concurrent operations, controlled by threadpool"))
-                .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
-                .add(Param.optional(List.of("cyclerate", "targetrate", "rate"), String.class, "rate limit for cycles per second"))
-                .asReadOnly();
+            .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto").setDescription("number of concurrent operations, controlled by threadpool"))
+            .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
+            .add(Param.optional(List.of("cyclerate", "targetrate", "rate"), String.class, "rate limit for cycles per second"))
+            .asReadOnly();
     }
 
     @Override
-    public LongFunction<S> getSpaceFunc(ParsedOp pop) {
+    public LongFunction<SPACE> getSpaceFunc(ParsedOp pop) {
 
-        Optional<LongFunction<Object>> spaceFuncTest = pop.getAsOptionalFunction("space",Object.class);
+        Optional<LongFunction<Object>> spaceFuncTest = pop.getAsOptionalFunction("space", Object.class);
         LongToIntFunction cycleToSpaceF;
         if (spaceFuncTest.isEmpty()) {
             cycleToSpaceF = (long l) -> 0;
@@ -203,7 +205,7 @@ public abstract class BaseDriverAdapter<R extends CycleOp<?>, S extends Space> e
             if (example instanceof Number n) {
                 logger.trace("mapping space indirectly with Number type");
                 LongFunction<Number> numberF = pop.getAsRequiredFunction("space", Number.class);
-                cycleToSpaceF=  l -> numberF.apply(l).intValue();
+                cycleToSpaceF = l -> numberF.apply(l).intValue();
             } else {
                 logger.trace("mapping space indirectly through hash table to index pool");
                 LongFunction<?> sourceF = pop.getAsRequiredFunction("space", String.class);
@@ -212,7 +214,22 @@ public abstract class BaseDriverAdapter<R extends CycleOp<?>, S extends Space> e
                 cycleToSpaceF = l -> wrapper.mapKeyToIndex(namerF.apply(l));
             }
         }
-        ConcurrentSpaceCache<S> spaceCache1 = getSpaceCache();
+
+        ConcurrentSpaceCache<SPACE> spaceCache1 = getSpaceCache();
         return l -> spaceCache1.get(cycleToSpaceF.applyAsInt(l));
+    }
+
+    @Override
+    public void beforeDetach() {
+        for (SPACE space : this.getSpaceCache()) {
+            try {
+                // TODO This should be invariant now, remove conditional?
+                space.close();
+            } catch (Exception e) {
+                throw new RuntimeException("Error while shutting down state space for " +
+                    "adapter=" + this.getAdapterName() + ", space=" + space.getName() + ": " + e, e);
+            }
+        }
+        super.beforeDetach();
     }
 }
