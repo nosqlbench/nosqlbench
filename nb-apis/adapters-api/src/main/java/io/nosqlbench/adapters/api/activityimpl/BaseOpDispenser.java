@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.LongFunction;
 
 /**
  * See {@link OpDispenser} for details on how to use this type.
@@ -65,6 +66,7 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>,SPACE extends Space>
     private Timer errorTimer;
     private final String[] timerStarts;
     private final String[] timerStops;
+    protected LongFunction<? extends SPACE> spaceF;
 
     /**
      * package imports used with "verifiers" or "expected-result" are accumulated here
@@ -83,6 +85,7 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>,SPACE extends Space>
         super(adapter);
         opName = op.getName();
         this.adapter = adapter;
+        this.spaceF = adapter.getSpaceFunc(op);
         labels = op.getLabels();
 
         this.timerStarts = op.takeOptionalStaticValue(START_TIMERS, String.class)

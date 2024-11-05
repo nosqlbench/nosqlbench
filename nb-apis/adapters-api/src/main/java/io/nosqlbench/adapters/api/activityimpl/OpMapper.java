@@ -82,7 +82,7 @@ import java.util.function.LongFunction;
  *            generally something that implements {@link Runnable}.
  */
 public interface OpMapper<OPTYPE extends CycleOp<?>, SPACETYPE extends Space>
-    extends BiFunction<ParsedOp, LongFunction<SPACETYPE>, OpDispenser<OPTYPE>> {
+    extends BiFunction<ParsedOp, LongFunction<SPACETYPE>, OpDispenser<? extends OPTYPE>> {
 
     /**
      * Interrogate the parsed command, and provide a new
