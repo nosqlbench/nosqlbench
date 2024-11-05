@@ -76,7 +76,7 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPre
                 (long l) -> (sessionF.apply(l)).prepare(preparedQueryString);
 
             LongFunction<? extends Cqld4Space> lookupSpaceF =
-                (long l) -> adapter.getSpaceCache().get(l);
+                (long l) -> adapter.getSpaceFunc(op).apply(l);
 
             int refKey = op.getRefKey();
             LongFunction<PreparedStatement> cachedStatementF =

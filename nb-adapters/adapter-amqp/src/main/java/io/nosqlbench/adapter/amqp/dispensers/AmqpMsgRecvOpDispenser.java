@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.amqp.dispensers;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
+import io.nosqlbench.adapter.amqp.AmqpDriverAdapter;
 import io.nosqlbench.adapter.amqp.AmqpSpace;
 import io.nosqlbench.adapter.amqp.exception.AmqpAdapterUnexpectedException;
 import io.nosqlbench.adapter.amqp.ops.OpTimeTrackAmqpMsgRecvOp;
@@ -35,14 +36,14 @@ public class AmqpMsgRecvOpDispenser extends AmqpBaseOpDispenser {
     private final static Logger logger = LogManager.getLogger(AmqpMsgRecvOpDispenser.class);
 
     private final LongFunction<String> bindingKeyFunc;
-    public AmqpMsgRecvOpDispenser(DriverAdapter adapter,
-                                  ParsedOp op,
-                                  AmqpSpace amqpSpace) {
-        super(adapter, op, amqpSpace);
+    public AmqpMsgRecvOpDispenser(AmqpDriverAdapter adapter,
+                                  ParsedOp op) {
+        super(adapter, op);
         bindingKeyFunc = lookupOptionalStrOpValueFunc("binding_key", null);
     }
 
     private long getExchangeQueueSeqNum(long cycle) {
+        AmqpSpace amqpSpace = spaceF.apply(cycle);
         return (cycle / ((long) amqpSpace.getAmqpConnNum() *
                                 amqpSpace.getAmqpConnChannelNum() *
                                 amqpSpace.getAmqpChannelExchangeNum())
@@ -50,6 +51,8 @@ public class AmqpMsgRecvOpDispenser extends AmqpBaseOpDispenser {
     }
 
     private long getQueueReceiverSeqNum(long cycle) {
+        AmqpSpace amqpSpace = spaceF.apply(cycle);
+
         return (cycle / ((long) amqpSpace.getAmqpConnNum() *
                                 amqpSpace.getAmqpConnChannelNum() *
                                 amqpSpace.getAmqpChannelExchangeNum() *
@@ -91,6 +94,8 @@ public class AmqpMsgRecvOpDispenser extends AmqpBaseOpDispenser {
     }
 
     private Channel getAmqpChannelForReceiver(long cycle) {
+        AmqpSpace amqpSpace = spaceF.apply(cycle);
+
         long connSeqNum = getConnSeqNum(cycle);
         long channelSeqNum = getConnChannelSeqNum(cycle);
 
@@ -121,6 +126,8 @@ public class AmqpMsgRecvOpDispenser extends AmqpBaseOpDispenser {
 
     @Override
     public AmqpTimeTrackOp getOp(long cycle) {
+        AmqpSpace amqpSpace = spaceF.apply(cycle);
+
         Channel channel = getAmqpChannelForReceiver(cycle);
         if (channel == null) {
             throw new AmqpAdapterUnexpectedException(
@@ -131,7 +138,7 @@ public class AmqpMsgRecvOpDispenser extends AmqpBaseOpDispenser {
         }
 
         String exchangeName = getEffectiveExchangeNameByCycle(cycle);
-        declareExchange(channel, exchangeName, amqpSpace.getAmqpExchangeType());
+        declareExchange(cycle, channel, exchangeName, amqpSpace.getAmqpExchangeType());
 
         boolean durable = true;
         boolean exclusive = true;

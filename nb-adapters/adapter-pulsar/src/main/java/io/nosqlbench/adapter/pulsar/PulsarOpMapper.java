@@ -37,20 +37,18 @@ public class PulsarOpMapper implements OpMapper<PulsarOp,PulsarSpace> {
     private final static Logger logger = LogManager.getLogger(PulsarOpMapper.class);
 
     private final NBConfiguration cfg;
-    private final ConcurrentSpaceCache<PulsarSpace> spaceCache;
     private final PulsarDriverAdapter adapter;
 
-    public PulsarOpMapper(PulsarDriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<PulsarSpace> spaceCache) {
+    public PulsarOpMapper(PulsarDriverAdapter adapter, NBConfiguration cfg) {
         this.cfg = cfg;
-        this.spaceCache = spaceCache;
-        this.adapter = adapter;
+       this.adapter = adapter;
     }
 
     @Override
     public OpDispenser<PulsarOp> apply(ParsedOp op, LongFunction<PulsarSpace> spaceInitF) {
         int spaceName = op.getStaticConfigOr("space", 0);
 //        PulsarSpace pulsarSpace = spaceCache.get(spaceName);
-        PulsarSpace pulsarSpace = adapter.getSpaceCache().get(spaceName);
+        PulsarSpace pulsarSpace = adapter.getSpaceFunc(op).apply(spaceName);
 
         /*
          * If the user provides a body element, then they want to provide the JSON or

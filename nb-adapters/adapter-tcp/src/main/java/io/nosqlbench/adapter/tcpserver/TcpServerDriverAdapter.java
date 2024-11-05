@@ -49,7 +49,7 @@ public class TcpServerDriverAdapter extends BaseDriverAdapter<TcpServerOp, TcpSe
 
     @Override
     public OpMapper<TcpServerOp,TcpServerAdapterSpace> getOpMapper() {
-        return new TcpServerOpMapper(this,getSpaceCache());
+        return new TcpServerOpMapper(this);
     }
 
     @Override

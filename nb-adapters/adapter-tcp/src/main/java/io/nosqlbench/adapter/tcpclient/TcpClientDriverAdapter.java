@@ -51,7 +51,7 @@ public class TcpClientDriverAdapter extends BaseDriverAdapter<TcpClientOp, TcpCl
     @Override
     public OpMapper<TcpClientOp,TcpClientAdapterSpace> getOpMapper() {
 
-        return new TcpClientOpMapper(this,getSpaceCache());
+        return new TcpClientOpMapper(this);
     }
 
     @Override

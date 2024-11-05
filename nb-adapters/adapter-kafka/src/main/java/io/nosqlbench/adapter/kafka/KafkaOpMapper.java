@@ -36,11 +36,9 @@ public class KafkaOpMapper implements OpMapper<KafkaOp,KafkaSpace> {
 
     private final static Logger logger = LogManager.getLogger(KafkaOpMapper.class);
 
-    private final ConcurrentSpaceCache<KafkaSpace> spaceCache;
     private final DriverAdapter<KafkaOp,KafkaSpace> adapter;
 
-    public KafkaOpMapper(DriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<KafkaSpace> spaceCache) {
-        this.spaceCache = spaceCache;
+    public KafkaOpMapper(DriverAdapter adapter, NBConfiguration cfg) {
         this.adapter = adapter;
     }
 

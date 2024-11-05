@@ -42,7 +42,7 @@ public class DynamoDBDriverAdapter extends BaseDriverAdapter<DynamoDBOp, DynamoD
     @Override
     public OpMapper<DynamoDBOp,DynamoDBSpace> getOpMapper() {
         NBConfiguration adapterConfig = getConfiguration();
-        return new DynamoDBOpMapper(this, adapterConfig, getSpaceCache());
+        return new DynamoDBOpMapper(this, adapterConfig);
     }
 
     @Override

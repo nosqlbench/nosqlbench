@@ -56,7 +56,7 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
     @Override
     public OpMapper<HttpOp,HttpSpace> getOpMapper() {
         NBConfiguration config = getConfiguration();
-        return new HttpOpMapper(this, config, getSpaceCache());
+        return new HttpOpMapper(this, config);
     }
 
     @Override

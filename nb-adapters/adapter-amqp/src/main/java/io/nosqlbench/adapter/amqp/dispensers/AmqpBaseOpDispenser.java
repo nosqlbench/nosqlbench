@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.amqp.dispensers;
 
 import com.rabbitmq.client.Channel;
+import io.nosqlbench.adapter.amqp.AmqpDriverAdapter;
 import io.nosqlbench.adapter.amqp.AmqpSpace;
 import io.nosqlbench.adapter.amqp.exception.AmqpAdapterUnexpectedException;
 import io.nosqlbench.adapter.amqp.ops.AmqpTimeTrackOp;
@@ -39,28 +40,21 @@ public abstract  class AmqpBaseOpDispenser extends BaseOpDispenser<AmqpTimeTrack
 
     protected final ParsedOp parsedOp;
     protected final AmqpAdapterMetrics amqpAdapterMetrics;
-    protected final AmqpSpace amqpSpace;
 
     protected final Map<String, String> amqpConfMap = new HashMap<>();
-    protected final String exchangeType;
-    protected AmqpBaseOpDispenser(final DriverAdapter adapter,
-                                  final ParsedOp op,
-                                  final AmqpSpace amqpSpace) {
+    protected String exchangeType;
+
+    private boolean configured= false;
+
+    protected AmqpBaseOpDispenser(final AmqpDriverAdapter adapter,
+                                  final ParsedOp op) {
 
         super(adapter, op);
-
         parsedOp = op;
-        this.amqpSpace = amqpSpace;
 
         amqpAdapterMetrics = new AmqpAdapterMetrics(this, this);
         amqpAdapterMetrics.initS4JAdapterInstrumentation();
 
-        amqpConfMap.putAll(amqpSpace.getAmqpClientConf().getConfigMap());
-
-        this.exchangeType = amqpSpace.getAmqpExchangeType();
-
-        this.amqpSpace.setTotalCycleNum(NumberUtils.toLong(this.parsedOp.getStaticConfig("cycles", String.class)));
-        this.amqpSpace.setTotalThreadNum(NumberUtils.toInt(this.parsedOp.getStaticConfig("threads", String.class)));
     }
 
     protected LongFunction<String> lookupMandtoryStrOpValueFunc(String paramName) {
@@ -73,14 +67,15 @@ public abstract  class AmqpBaseOpDispenser extends BaseOpDispenser<AmqpTimeTrack
 
     protected LongFunction<String> lookupOptionalStrOpValueFunc(String paramName, String defaultValue) {
         LongFunction<String> stringLongFunction;
-        stringLongFunction = parsedOp.getAsOptionalFunction(paramName, String.class)
-            .orElse(l -> defaultValue);
+        stringLongFunction = parsedOp.getAsFunctionOr(paramName, defaultValue);
         logger.info("{}: {}", paramName, stringLongFunction.apply(0));
 
         return stringLongFunction;
     }
 
-    protected void declareExchange(Channel channel, String exchangeName, String exchangeType) {
+    protected void declareExchange(long cycleNum, Channel channel, String exchangeName, String exchangeType) {
+        configureDispenser(cycleNum);
+
         try {
             // Declaring the same exchange multiple times on one channel is considered as a no-op
             channel.exchangeDeclare(exchangeName, exchangeType);
@@ -96,26 +91,40 @@ public abstract  class AmqpBaseOpDispenser extends BaseOpDispenser<AmqpTimeTrack
     }
 
     protected long getConnSeqNum(long cycle) {
+        AmqpSpace amqpSpace = spaceF.apply(cycle);
+        configureDispenser(cycle);
         return cycle % amqpSpace.getAmqpConnNum();
     }
 
     protected long getConnChannelSeqNum(long cycle) {
+        AmqpSpace amqpSpace = spaceF.apply(cycle);
+        configureDispenser(cycle);
+
         return (cycle / amqpSpace.getAmqpConnNum()) % amqpSpace.getAmqpConnChannelNum();
     }
 
     protected long getChannelExchangeSeqNum(long cycle) {
+        AmqpSpace amqpSpace = spaceF.apply(cycle);
+        configureDispenser(cycle);
+
         return (cycle / ((long) amqpSpace.getAmqpConnNum() *
                                 amqpSpace.getAmqpConnChannelNum())
                ) % amqpSpace.getAmqpChannelExchangeNum();
     }
 
     protected String getEffectiveExchangeNameByCycle(long cycle) {
+        configureDispenser(cycle);
+
         return getEffectiveExchangeName(
+            cycle,
             getConnSeqNum(cycle),
             getConnChannelSeqNum(cycle),
             getChannelExchangeSeqNum(cycle));
     }
-    protected String getEffectiveExchangeName(long connSeqNum, long channelSeqNum,  long exchangeSeqNum) {
+    protected String getEffectiveExchangeName(long cycleNum, long connSeqNum, long channelSeqNum,
+                                              long exchangeSeqNum) {
+        configureDispenser(cycleNum);
+
         return String.format(
             "exchange-%d-%d-%d",
             connSeqNum,
@@ -126,4 +135,17 @@ public abstract  class AmqpBaseOpDispenser extends BaseOpDispenser<AmqpTimeTrack
     public String getName() {
         return "AmqpBaseOpDispenser";
     }
+
+    synchronized void configureDispenser(long cycle) {
+        if (!configured) {
+            AmqpSpace amqpSpace = spaceF.apply(cycle);
+            amqpConfMap.putAll(amqpSpace.getAmqpClientConf().getConfigMap());
+            this.exchangeType = amqpSpace.getAmqpExchangeType();
+            amqpSpace.setTotalCycleNum(NumberUtils.toLong(this.parsedOp.getStaticConfig("cycles", String.class)));
+            amqpSpace.setTotalThreadNum(NumberUtils.toInt(this.parsedOp.getStaticConfig("threads", String.class)));
+
+        }
+        configured=true;
+    }
+
 }

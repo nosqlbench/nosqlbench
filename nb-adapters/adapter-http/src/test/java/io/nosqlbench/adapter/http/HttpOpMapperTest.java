@@ -49,8 +49,7 @@ public class HttpOpMapperTest {
         HttpOpMapperTest.cfg = HttpSpace.getConfigModel().apply(Map.of());
         HttpOpMapperTest.adapter = new HttpDriverAdapter(new TestComponent("parent","parent"), NBLabels.forKV());
         HttpOpMapperTest.adapter.applyConfig(HttpOpMapperTest.cfg);
-        ConcurrentSpaceCache<HttpSpace> spaceCache = HttpOpMapperTest.adapter.getSpaceCache();
-        HttpOpMapperTest.mapper = new HttpOpMapper(HttpOpMapperTest.adapter, HttpOpMapperTest.cfg, spaceCache);
+        HttpOpMapperTest.mapper = new HttpOpMapper(HttpOpMapperTest.adapter, HttpOpMapperTest.cfg);
     }
 
     private static ParsedOp parsedOpFor(final String yaml) {

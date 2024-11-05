@@ -37,12 +37,10 @@ public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp,AmqpSpace> {
     private final static Logger logger = LogManager.getLogger(AmqpOpMapper.class);
 
     private final NBConfiguration cfg;
-    private final ConcurrentSpaceCache<AmqpSpace> spaceCache;
-    private final DriverAdapter adapter;
+    private final AmqpDriverAdapter adapter;
 
-    public AmqpOpMapper(DriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<AmqpSpace> spaceCache) {
+    public AmqpOpMapper(AmqpDriverAdapter adapter, NBConfiguration cfg) {
         this.cfg = cfg;
-        this.spaceCache = spaceCache;
         this.adapter = adapter;
     }
 
@@ -50,7 +48,6 @@ public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp,AmqpSpace> {
         public OpDispenser<AmqpTimeTrackOp> apply(ParsedOp op, LongFunction spaceInitF) {
     //public OpDispenser<AmqpTimeTrackOp> apply(ParsedOp op, LongFunction<AmqpTimeTrackOp> spaceInitF) {
         int spaceName = op.getStaticConfigOr("space", 0);
-        AmqpSpace amqpSpace = spaceCache.get(spaceName);
 
         /*
          * If the user provides a body element, then they want to provide the JSON or
@@ -65,9 +62,9 @@ public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp,AmqpSpace> {
 
             return switch (opType.enumId) {
                 case AmqpMsgSender ->
-                    new AmqpMsgSendOpDispenser(adapter, op, amqpSpace);
+                    new AmqpMsgSendOpDispenser(adapter, op);
                 case AmqpMsgReceiver ->
-                    new AmqpMsgRecvOpDispenser(adapter, op, amqpSpace);
+                    new AmqpMsgRecvOpDispenser(adapter, op);
             };
         }
     }
