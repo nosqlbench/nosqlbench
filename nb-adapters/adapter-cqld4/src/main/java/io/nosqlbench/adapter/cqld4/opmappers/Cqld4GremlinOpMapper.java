@@ -40,7 +40,9 @@ public class Cqld4GremlinOpMapper<CO extends Cqld4ScriptGraphOp> extends Cqld4Ba
 
     @Override
     public Cqld4GremlinOpDispenser apply(ParsedOp op, LongFunction spaceInitF) {
-        return new Cqld4GremlinOpDispenser(adapter, sessionFunc, targetFunction, op);
+        return new Cqld4GremlinOpDispenser(
+            adapter,
+            l -> adapter.getSpaceFunc(op).apply(l).getSession(), targetFunction, op);
     }
 
 }

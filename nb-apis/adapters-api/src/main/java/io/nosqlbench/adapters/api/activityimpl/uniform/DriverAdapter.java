@@ -131,22 +131,7 @@ public interface DriverAdapter<OPTYPE extends CycleOp<?>, SPACETYPE extends Spac
         return List.of(f -> f);
     }
 
-    /**
-     * The cache of all objects needed within a single instance
-     * of a DriverAdapter which are not operations. These are generally
-     * things needed by operations, or things needed during the
-     * construction of operations.
-     *
-     * See {@link ConcurrentIndexCache} for details on when and how to use this function.
-     *
-     * <p>During Adapter Initialization, Op Mapping, Op Synthesis, or Op Execution,
-     * you may need access to the objects in (the or a) space cache. You can build the
-     * type of context needed and then provide this function to provide new instances
-     * when needed.</p>
-     *
-     * @return A cache of named objects
-     */
-    ConcurrentSpaceCache<SPACETYPE> getSpaceCache();
+//    ConcurrentSpaceCache<SPACETYPE> getSpaceCache();
 
     /**
      * This method allows each driver adapter to create named state which is automatically
@@ -209,5 +194,27 @@ public interface DriverAdapter<OPTYPE extends CycleOp<?>, SPACETYPE extends Spac
         return this.getClass().getAnnotation(Service.class).maturity();
     }
 
-    LongFunction<SPACETYPE> getSpaceFunc(ParsedOp pop);
+    /**
+     * <p>The cache of all objects needed within a single instance
+     * of a DriverAdapter which are not operations. These are generally
+     * things needed by operations, or things needed during the
+     * construction of operations.</p>
+     *
+     * <p>During Adapter Initialization, Op Mapping, Op Synthesis, or Op Execution,
+     * you may need access to the objects in (the or a) space cache. You can build the
+     * type of context needed and then provide this function to provide new instances
+     * when needed.</p>
+     *
+     * <p>The function returned by this method is specialized to the space mapping
+     * logic in the op template. Specifically, it uses whatever binding is set on a given
+     * op template for the <em>space</em> op field. If none are provided, then this
+     * becomes a short-circuit for the default '0'. If a non-numeric binding is provided,
+     * then an interstitial mapping is added which converts the {@link Object#toString()}
+     * value to ordinals using a hash map. This is less optimal by far than using
+     * any binding that produces a {@link Number}.</p>
+     *
+     * @return A cache of named objects
+     */
+    public LongFunction<SPACETYPE> getSpaceFunc(ParsedOp pop);
+
 }

@@ -28,11 +28,9 @@ import java.util.function.LongFunction;
 
 public class StdoutOpMapper implements OpMapper<StdoutOp,StdoutSpace> {
 
-    private final ConcurrentSpaceCache<? extends StdoutSpace> spaceCache;
     private final DriverAdapter adapter;
 
-    public StdoutOpMapper(DriverAdapter adapter, ConcurrentSpaceCache<? extends StdoutSpace> spaceCache) {
-        this.spaceCache = spaceCache;
+    public StdoutOpMapper(DriverAdapter adapter) {
         this.adapter = adapter;
     }
 

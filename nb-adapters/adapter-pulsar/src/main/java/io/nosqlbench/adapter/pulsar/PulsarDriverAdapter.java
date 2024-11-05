@@ -44,9 +44,8 @@ public class PulsarDriverAdapter extends BaseDriverAdapter<PulsarOp, PulsarSpace
 
     @Override
     public OpMapper<PulsarOp,PulsarSpace> getOpMapper() {
-        ConcurrentSpaceCache<PulsarSpace> spaceCache = getSpaceCache();
         NBConfiguration adapterConfig = getConfiguration();
-        return new PulsarOpMapper(this, adapterConfig, spaceCache);
+        return new PulsarOpMapper(this, adapterConfig);
     }
 
     @Override

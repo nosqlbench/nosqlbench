@@ -33,7 +33,7 @@ import java.util.function.LongFunction;
 public class Neo4JOpMapper implements OpMapper<Neo4JBaseOp,Neo4JSpace> {
     private final Neo4JDriverAdapter adapter;
 
-    public Neo4JOpMapper(Neo4JDriverAdapter adapter, ConcurrentSpaceCache<Neo4JSpace> cache) {
+    public Neo4JOpMapper(Neo4JDriverAdapter adapter) {
         this.adapter = adapter;
     }
 

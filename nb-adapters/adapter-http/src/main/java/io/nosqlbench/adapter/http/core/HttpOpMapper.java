@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.http.core;
 
+import io.nosqlbench.adapter.http.HttpDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
@@ -29,19 +30,16 @@ import java.util.function.LongFunction;
 public class HttpOpMapper implements OpMapper<HttpOp,HttpSpace> {
 
     private final NBConfiguration cfg;
-    private final ConcurrentSpaceCache<? extends HttpSpace> spaceCache;
     private final DriverAdapter adapter;
 
-    public HttpOpMapper(DriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<HttpSpace> spaceCache) {
+    public HttpOpMapper(HttpDriverAdapter adapter, NBConfiguration cfg) {
         this.cfg = cfg;
-        this.spaceCache = spaceCache;
         this.adapter = adapter;
     }
 
     @Override
     public OpDispenser<HttpOp> apply(ParsedOp op, LongFunction<HttpSpace> spaceInitF) {
         LongFunction<String> spaceNameF = op.getAsFunctionOr("space", "default");
-        LongFunction<HttpSpace> spaceFunc = l -> spaceCache.get(l);
-        return new HttpOpDispenser(adapter, spaceFunc, op);
+        return new HttpOpDispenser(adapter, spaceInitF, op);
     }
 }

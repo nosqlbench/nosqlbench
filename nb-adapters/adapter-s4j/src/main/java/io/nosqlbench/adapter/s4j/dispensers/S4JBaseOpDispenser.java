@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.s4j.dispensers;
 
 import com.datastax.oss.pulsar.jms.PulsarJMSContext;
+import io.nosqlbench.adapter.s4j.S4JDriverAdapter;
 import io.nosqlbench.adapter.s4j.S4JSpace;
 import io.nosqlbench.adapter.s4j.ops.S4JOp;
 import io.nosqlbench.adapter.s4j.util.*;
@@ -40,7 +41,6 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
     private static final Logger logger = LogManager.getLogger("PulsarBaseOpDispenser");
 
     protected final ParsedOp parsedOp;
-    protected final S4JSpace s4jSpace;
     protected final S4JAdapterMetrics s4jAdapterMetrics;
 
     // Doc-level parameter: temporary_dest (default: false)
@@ -57,16 +57,15 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
 
     protected final int totalThreadNum;
     protected final long totalCycleNum;
+    protected final LongFunction<S4JSpace> s4jSpaceF;
 
-    protected S4JBaseOpDispenser(DriverAdapter adapter,
+    protected S4JBaseOpDispenser(S4JDriverAdapter adapter,
                                  ParsedOp op,
-                                 LongFunction<String> destNameStrFunc,
-                                 S4JSpace s4jSpace) {
+                                 LongFunction<String> destNameStrFunc) {
 
         super(adapter, op);
 
         this.parsedOp = op;
-        this.s4jSpace = s4jSpace;
 
         this.s4jAdapterMetrics = new S4JAdapterMetrics(this);
         s4jAdapterMetrics.initS4JAdapterInstrumentation();
@@ -83,10 +82,9 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
 
         this.totalThreadNum = NumberUtils.toInt(parsedOp.getStaticConfig("threads", String.class));
         this.totalCycleNum = NumberUtils.toLong(parsedOp.getStaticConfig("cycles", String.class));
-        s4jSpace.setTotalCycleNum(totalCycleNum);
+        this.s4jSpaceF = adapter.getSpaceFunc(op);
     }
 
-    public S4JSpace getS4jSpace() { return s4jSpace; }
     public S4JAdapterMetrics getS4jAdapterMetrics() { return s4jAdapterMetrics; }
 
     protected LongFunction<Boolean> lookupStaticBoolConfigValueFunc(String paramName, boolean defaultValue) {
@@ -179,6 +177,7 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
         long curCycle,
         Map<String, Object> overrideS4jConfMap)
     {
+        S4JSpace s4jSpace = s4jSpaceF.apply(curCycle);
         int totalConnNum = s4jSpace.getMaxNumConn();
         int totalSessionPerConnNum = s4jSpace.getMaxNumSessionPerConn();
 
@@ -220,11 +219,14 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
      * If the JMS destination that corresponds to a topic exists, reuse it; Otherwise, create it
      */
     public Destination getJmsDestination(
+        long curCycle,
         S4JJMSContextWrapper s4JJMSContextWrapper,
         boolean tempDest,
         String destType,
-        String destName) throws JMSRuntimeException
+        String destName
+    ) throws JMSRuntimeException
     {
+        S4JSpace s4jSpace = s4jSpaceF.apply(curCycle);
         String jmsContextIdStr = s4JJMSContextWrapper.getJmsContextIdentifier();
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
 
@@ -269,9 +271,11 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
      * If the JMS producer that corresponds to a destination exists, reuse it; Otherwise, create it
      */
     public JMSProducer getJmsProducer(
+        long curCycle,
         S4JJMSContextWrapper s4JJMSContextWrapper,
         boolean asyncApi) throws JMSException
     {
+        S4JSpace s4jSpace = s4jSpaceF.apply(curCycle);
         JMSContext jmsContext = s4JJMSContextWrapper.getJmsContext();
         S4JSpace.JMSGenObjCacheKey producerCacheKey =
             new S4JSpace.JMSGenObjCacheKey(
@@ -298,6 +302,7 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
      * If the JMS consumer that corresponds to a destination(, subscription, message selector) exists, reuse it; Otherwise, create it
      */
     public JMSConsumer getJmsConsumer(
+        long curCycle,
         S4JJMSContextWrapper s4JJMSContextWrapper,
         Destination destination,
         String destType,
@@ -318,6 +323,7 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
                 String.join("::",
                     getSimplifiedNBThreadName(Thread.currentThread().getName()), "consumer"));
 
+        S4JSpace s4jSpace = s4jSpaceF.apply(curCycle);
         return s4jSpace.getJmsConsumer(consumerCacheKey, () -> {
             JMSConsumer jmsConsumer;
 
@@ -360,6 +366,7 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
         // - session mode is equal to "SESSION_TRANSACTED"
         // - "txn_batch_num" has been reached since last reset
         boolean commitTransaction = (Session.SESSION_TRANSACTED == jmsSessionMode) && (0 < txnBatchNum);
+        S4JSpace s4jSpace = s4jSpaceF.apply(curCycleNum);
         if (commitTransaction) {
             int txnBatchTackingCnt = s4jSpace.getTxnBatchTrackingCnt();
 

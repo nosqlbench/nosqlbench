@@ -39,9 +39,8 @@ public class KafkaDriverAdapter extends BaseDriverAdapter<KafkaOp, KafkaSpace> {
 
     @Override
     public OpMapper<KafkaOp,KafkaSpace> getOpMapper() {
-        ConcurrentSpaceCache<KafkaSpace> spaceCache = getSpaceCache();
         NBConfiguration adapterConfig = getConfiguration();
-        return new KafkaOpMapper(this, adapterConfig, spaceCache);
+        return new KafkaOpMapper(this, adapterConfig);
     }
 
 

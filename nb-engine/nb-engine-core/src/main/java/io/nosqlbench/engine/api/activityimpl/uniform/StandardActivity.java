@@ -265,16 +265,8 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         for (Map.Entry<String, DriverAdapter<CycleOp<?>,Space>> entry : adapters.entrySet()) {
             String adapterName = entry.getKey();
             DriverAdapter<?, ?> adapter = entry.getValue();
-            for (Space space : adapter.getSpaceCache()) {
-                if (space instanceof AutoCloseable autoCloseable) {
-                    try {
-                        // TODO This should be invariant now, remove conditional?
-                        autoCloseable.close();
-                    } catch (Exception e) {
-                        throw new RuntimeException("Error while shutting down state space for " +
-                            "adapter=" + adapterName + ", space=" + space.getName() + ": " + e, e);
-                    }
-                }
+            if (adapter instanceof AutoCloseable autoCloseable) {
+                adapter.close();
             }
         }
     }

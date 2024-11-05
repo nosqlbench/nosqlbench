@@ -33,19 +33,18 @@ import java.util.function.LongFunction;
 public class DynamoDBOpMapper implements OpMapper<DynamoDBOp,DynamoDBSpace> {
 
     private final NBConfiguration cfg;
-    private final ConcurrentSpaceCache<DynamoDBSpace> cache;
     private final DriverAdapter adapter;
 
-    public DynamoDBOpMapper(DriverAdapter adapter, NBConfiguration cfg, ConcurrentSpaceCache<DynamoDBSpace> cache) {
+    public DynamoDBOpMapper(DynamoDBDriverAdapter adapter, NBConfiguration cfg) {
         this.cfg = cfg;
-        this.cache = cache;
         this.adapter = adapter;
     }
 
     @Override
     public OpDispenser<DynamoDBOp> apply(ParsedOp op, LongFunction<DynamoDBSpace> spaceInitF) {
         int space = op.getStaticConfigOr("space", 0);
-        DynamoDB ddb = cache.get(space).getDynamoDB();
+        LongFunction<DynamoDBSpace> spaceFunc = adapter.getSpaceFunc(op);
+        DynamoDB ddb = spaceFunc.apply(space).getDynamoDB();
 
         /*
          * If the user provides a body element, then they want to provide the JSON or

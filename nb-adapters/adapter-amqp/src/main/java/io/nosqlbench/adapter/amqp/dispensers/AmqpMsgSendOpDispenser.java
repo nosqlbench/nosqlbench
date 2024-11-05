@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.amqp.dispensers;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
+import io.nosqlbench.adapter.amqp.AmqpDriverAdapter;
 import io.nosqlbench.adapter.amqp.AmqpSpace;
 import io.nosqlbench.adapter.amqp.exception.AmqpAdapterInvalidParamException;
 import io.nosqlbench.adapter.amqp.exception.AmqpAdapterUnexpectedException;
@@ -52,11 +53,9 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
     private final LongFunction<String> routingKeyFunc;
     private final LongFunction<String> msgPayloadFunc;
 
-    public AmqpMsgSendOpDispenser(DriverAdapter adapter,
-                                  ParsedOp op,
-                                  AmqpSpace amqpSpace) {
-        super(adapter, op, amqpSpace);
-
+    public AmqpMsgSendOpDispenser(AmqpDriverAdapter adapter,
+                                  ParsedOp op) {
+        super(adapter, op);
         publisherConfirm = parsedOp
             .getOptionalStaticConfig("publisher_confirm", String.class)
             .filter(Predicate.not(String::isEmpty))
@@ -87,6 +86,7 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
     }
 
     private long getExchangeSenderSeqNum(long cycle) {
+        AmqpSpace amqpSpace = spaceF.apply(cycle);
         return (cycle / ((long) amqpSpace.getAmqpConnNum() *
                                 amqpSpace.getAmqpConnChannelNum() *
                                 amqpSpace.getAmqpChannelExchangeNum())
@@ -113,6 +113,7 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
     }
 
     private Channel getAmqpChannelForSender(long cycle) {
+        AmqpSpace amqpSpace = spaceF.apply(cycle);
         long connSeqNum = getConnSeqNum(cycle);
         long channelSeqNum = getConnChannelSeqNum(cycle);
 
@@ -176,6 +177,7 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
 
     @Override
     public AmqpTimeTrackOp getOp(long cycle) {
+        AmqpSpace amqpSpace = spaceF.apply(cycle);
         String msgPayload = msgPayloadFunc.apply(cycle);
         if (StringUtils.isBlank(msgPayload)) {
             throw new AmqpAdapterInvalidParamException("Message payload must be specified and can't be empty!");
@@ -191,7 +193,7 @@ public class AmqpMsgSendOpDispenser extends AmqpBaseOpDispenser {
         }
 
         String exchangeName = getEffectiveExchangeNameByCycle(cycle);
-        declareExchange(channel, exchangeName, amqpSpace.getAmqpExchangeType());
+        declareExchange(cycle, channel, exchangeName, amqpSpace.getAmqpExchangeType());
 
         return new OpTimeTrackAmqpMsgSendOp(
             amqpAdapterMetrics,

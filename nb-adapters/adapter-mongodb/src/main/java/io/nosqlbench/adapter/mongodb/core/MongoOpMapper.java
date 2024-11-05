@@ -36,12 +36,9 @@ public class MongoOpMapper<MC extends MongoDirectCommandOp> implements OpMapper<
 
     private final MongodbDriverAdapter adapter;
     private final NBConfiguration configuration;
-    private final ConcurrentSpaceCache<MongoSpace> spaceCache;
 
-    public MongoOpMapper(MongodbDriverAdapter adapter, NBConfiguration cfg,
-                         ConcurrentSpaceCache<MongoSpace> spaceCache) {
+    public MongoOpMapper(MongodbDriverAdapter adapter, NBConfiguration cfg) {
         this.configuration = cfg;
-        this.spaceCache = spaceCache;
         this.adapter = adapter;
     }
 

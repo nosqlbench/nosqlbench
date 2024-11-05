@@ -46,13 +46,13 @@ public class Cqld4CqlOpMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlOp> {
         return (OpDispenser<Cqld4CqlOp>) switch (target.enumId) {
             case raw -> {
                 CqlD4RawStmtMapper cqlD4RawStmtMapper = new CqlD4RawStmtMapper(adapter, target.targetFunction);
-                OpDispenser<Cqld4CqlSimpleStatement> apply = cqlD4RawStmtMapper.apply(op, spaceFunc);
+                OpDispenser<Cqld4CqlSimpleStatement> apply = cqlD4RawStmtMapper.apply(op, spaceInitF);
                 yield apply;
             }
-            case simple -> new CqlD4CqlSimpleStmtMapper(adapter, target.targetFunction).apply(op, spaceFunc);
-            case prepared -> new CqlD4PreparedStmtMapper(adapter, target).apply(op, spaceFunc);
+            case simple -> new CqlD4CqlSimpleStmtMapper(adapter, target.targetFunction).apply(op, spaceInitF);
+            case prepared -> new CqlD4PreparedStmtMapper(adapter, target).apply(op, spaceInitF);
 
-            case batch -> new CqlD4BatchStmtMapper(adapter, target).apply(op, spaceFunc);
+            case batch -> new CqlD4BatchStmtMapper(adapter, target).apply(op, spaceInitF);
             default ->
                 throw new OpConfigError("Unsupported op type for CQL category of statement forms:" + target.enumId);
         };
