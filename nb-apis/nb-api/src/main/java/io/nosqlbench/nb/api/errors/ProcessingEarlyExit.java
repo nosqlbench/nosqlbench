@@ -27,11 +27,7 @@ public class ProcessingEarlyExit extends RuntimeException {
     }
 
     public String toString() {
-        final String helpmsg = """
-                'ARG'.
-                """
-            .replaceAll("ARG", this.message);
-        return helpmsg;
+        return this.message;
     }
 
     public int getExitCode() {
