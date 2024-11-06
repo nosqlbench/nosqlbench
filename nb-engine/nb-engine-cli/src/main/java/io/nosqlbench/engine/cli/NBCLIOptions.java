@@ -510,7 +510,7 @@ public class NBCLIOptions {
                 case ADVISOR:
                     arglist.removeFirst();
                     final String advisorStr = this.readWordOrThrow(arglist, "advisor level for checking");
-                    advisor = NBAdvisor.valueOf(advisorStr.toLowerCase(Locale.ROOT));
+                    advisor = NBAdvisor.fromString(advisorStr); // includes error checking. invalid values provide a warning.
 		    break;
                 case NBCLIOptions.ENABLE_LOGGED_METRICS:
                     arglist.removeFirst();

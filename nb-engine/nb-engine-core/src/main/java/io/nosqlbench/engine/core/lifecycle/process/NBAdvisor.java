@@ -17,6 +17,8 @@
 
 package io.nosqlbench.engine.core.lifecycle.process;
 
+import java.util.Locale;
+
 public enum NBAdvisor {
     /**
      * Do not analyze arguments, scenarios, activities, and workloads
@@ -29,5 +31,14 @@ public enum NBAdvisor {
     /**
      * Only allow correct operations
      */
-    enforce
+    enforce;
+
+    public static NBAdvisor fromString(String advisorStr) {
+        try {
+            return NBAdvisor.valueOf(advisorStr.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            System.out.println("--advisor=" + advisorStr + " is invalid. Using 'none'");
+            return NBAdvisor.none;
+        }
+    }
 }
