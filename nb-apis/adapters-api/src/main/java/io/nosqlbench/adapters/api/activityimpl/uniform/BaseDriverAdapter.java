@@ -180,7 +180,6 @@ public abstract class BaseDriverAdapter<RESULT
             .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
             .add(Param.optional("driver", String.class))
             .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|emit|none)"))
-            .add(Param.defaultTo("advisor", "none").setRegex("(validate|enforce|none)"))
             .add(Param.optional("maxtries", Integer.class))
             .asReadOnly();
 

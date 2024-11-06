@@ -31,6 +31,7 @@ import io.nosqlbench.nb.api.system.NBStatePath;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.annotations.Maturity;
+import io.nosqlbench.engine.core.lifecycle.process.NBAdvisor;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -96,13 +97,14 @@ public class NBCLIOptions {
     private static final String ADD_LABELS = "--add-labels";
     private static final String ADD_LABEL = "--add-label";
 
+    private static final String ADVISOR = "--advisor";
+    
     // Execution
     private static final String EXPORT_CYCLE_LOG = "--export-cycle-log";
     private static final String IMPORT_CYCLE_LOG = "--import-cycle-log";
     private static final String HDR_DIGITS = "--hdr-digits";
 
     // Execution Options
-
 
     private static final String SESSION_NAME = "--session-name";
     private static final String LOGS_DIR = "--logs-dir";
@@ -207,6 +209,7 @@ public class NBCLIOptions {
     private String reportSummaryTo = NBCLIOptions.REPORT_SUMMARY_TO_DEFAULT;
     private boolean enableAnsi = (null != System.getenv("TERM")) && !System.getenv("TERM").isEmpty();
     private Maturity minMaturity = Maturity.Unspecified;
+    private NBAdvisor advisor = NBAdvisor.none;
     private String graphitelogLevel = "info";
     private boolean wantsListCommands;
     private boolean wantsListApps;
@@ -504,6 +507,11 @@ public class NBCLIOptions {
                     String addLabeldata = arglist.removeFirst();
                     addLabels(addLabeldata);
                     break;
+                case ADVISOR:
+                    arglist.removeFirst();
+                    final String advisorStr = this.readWordOrThrow(arglist, "advisor level for checking");
+                    advisor = NBAdvisor.valueOf(advisorStr.toLowerCase(Locale.ROOT));
+		    break;
                 case NBCLIOptions.ENABLE_LOGGED_METRICS:
                     arglist.removeFirst();
                     this.wantsConsoleMetrics = true;
@@ -798,6 +806,10 @@ public class NBCLIOptions {
 
     public Maturity allowMinMaturity() {
         return this.minMaturity;
+    }
+
+    public NBAdvisor getAdvisor() {
+        return this.advisor;
     }
 
     public List<Cmd> getCommands() {
