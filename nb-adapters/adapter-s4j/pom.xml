@@ -76,13 +76,13 @@
             <version>2.10.1</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.conscrypt/conscrypt-openjdk -->
+        <!-- https://mvnrepository.com/artifact/org.conscrypt/conscrypt-openjdk
         <dependency>
             <groupId>org.conscrypt</groupId>
             <artifactId>conscrypt-openjdk</artifactId>
             <version>2.5.2</version>
             <classifier>${os.detected.classifier}</classifier>
-        </dependency>
+        </dependency> -->
 
     </dependencies>
 
