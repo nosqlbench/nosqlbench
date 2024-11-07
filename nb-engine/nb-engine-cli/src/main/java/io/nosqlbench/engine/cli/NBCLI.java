@@ -46,7 +46,6 @@ import io.nosqlbench.engine.cli.NBCLIOptions.Mode;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.process.NBCLIErrorHandler;
-import io.nosqlbench.engine.core.lifecycle.process.NBAdvisor;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 import io.nosqlbench.engine.core.logging.NBLoggerConfig;

@@ -43,7 +43,8 @@ public interface NBComponent extends
     NBComponentServices,
     NBComponentEvents,
     NBProviderSearch,
-    NBComponentProps {
+    NBComponentProps,
+    NBComponentAdvisors {
 
     NBComponent EMPTY_COMPONENT = new NBBaseComponent(null);
 

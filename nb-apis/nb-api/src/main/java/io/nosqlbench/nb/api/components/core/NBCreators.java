@@ -16,6 +16,9 @@
 
 package io.nosqlbench.nb.api.components.core;
 
+import io.nosqlbench.nb.api.advisor.NBAdvisorBuilder;
+import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
+import io.nosqlbench.nb.api.advisor.NBAdvisorPointOrBuilder;
 import io.nosqlbench.nb.api.csvoutput.CsvOutputPluginWriter;
 import com.codahale.metrics.Meter;
 import io.nosqlbench.nb.api.engine.metrics.*;
@@ -42,6 +45,7 @@ import java.util.*;
 
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -56,7 +60,7 @@ public class NBCreators {
     }
 
     public NBMetricTimer timer(String metricFamilyName, MetricCategory category, String description) {
-        return timer(metricFamilyName,3, category,description);
+        return timer(metricFamilyName, 3, category, description);
     }
 
     public NBMetricTimer timer(String metricFamilyName, int hdrdigits, MetricCategory category, String description) {
@@ -72,7 +76,7 @@ public class NBCreators {
 
     public Meter meter(String metricFamilyName, MetricCategory category, String description) {
         NBLabels labels = base.getLabels().and("name", metricFamilyName);
-        NBMetricMeter meter = new NBMetricMeter(labels,description, category);
+        NBMetricMeter meter = new NBMetricMeter(labels, description, category);
         base.addComponentMetric(meter, category, description);
         return meter;
     }
@@ -113,7 +117,7 @@ public class NBCreators {
         for (WindowSummaryGauge.Stat stat : stats) {
             anyGauge = new WindowSummaryGauge(
                 window,
-                base.getLabels().and(NBLabels.forKV("name", name+"_w"+window, "stat", stat)),
+                base.getLabels().and(NBLabels.forKV("name", name + "_w" + window, "stat", stat)),
                 stat,
                 description,
                 category
@@ -136,7 +140,7 @@ public class NBCreators {
     }
 
     public NBMetricHistogram histogram(String metricFamilyName, MetricCategory category, String description) {
-        return histogram(metricFamilyName,4, category, description);
+        return histogram(metricFamilyName, 4, category, description);
     }
 
     public NBMetricHistogram histogram(String metricFamilyName, int hdrdigits, MetricCategory category, String description) {
@@ -485,5 +489,17 @@ public class NBCreators {
             .orElseThrow(
                 () -> new RuntimeException("unable to load extension with name '" + name + "' and type '" + type.getSimpleName() + "'")
             );
+    }
+
+    public <PTYPE> NBAdvisorPoint<PTYPE> advisor(Function<NBAdvisorBuilder<PTYPE>, NBAdvisorPointOrBuilder<PTYPE>> builderOrPoint) {
+        NBAdvisorPoint<PTYPE> point = switch (builderOrPoint) {
+            case NBAdvisorPoint p -> p;
+            case NBAdvisorBuilder builder -> builder.build();
+            default -> throw new RuntimeException(
+                "unknown type for mapping builder: " + builderOrPoint.getClass().getCanonicalName()
+            );
+        };
+        base.addAdvisor(point);
+        return point;
     }
 }

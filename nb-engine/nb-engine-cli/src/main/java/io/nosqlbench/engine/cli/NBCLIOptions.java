@@ -21,6 +21,7 @@ import io.nosqlbench.engine.cli.atfiles.NBAtFile;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.PathCanonicalizer;
 import io.nosqlbench.engine.core.lifecycle.session.CmdParser;
+import io.nosqlbench.nb.api.advisor.NBAdvisorLevel;
 import io.nosqlbench.nb.api.engine.util.Unit;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.labels.NBLabelSpec;
@@ -31,7 +32,6 @@ import io.nosqlbench.nb.api.system.NBStatePath;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.annotations.Maturity;
-import io.nosqlbench.engine.core.lifecycle.process.NBAdvisor;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -98,7 +98,7 @@ public class NBCLIOptions {
     private static final String ADD_LABEL = "--add-label";
 
     private static final String ADVISOR = "--advisor";
-    
+
     // Execution
     private static final String EXPORT_CYCLE_LOG = "--export-cycle-log";
     private static final String IMPORT_CYCLE_LOG = "--import-cycle-log";
@@ -209,7 +209,7 @@ public class NBCLIOptions {
     private String reportSummaryTo = NBCLIOptions.REPORT_SUMMARY_TO_DEFAULT;
     private boolean enableAnsi = (null != System.getenv("TERM")) && !System.getenv("TERM").isEmpty();
     private Maturity minMaturity = Maturity.Unspecified;
-    private NBAdvisor advisor = NBAdvisor.none;
+    private NBAdvisorLevel advisor = NBAdvisorLevel.none;
     private String graphitelogLevel = "info";
     private boolean wantsListCommands;
     private boolean wantsListApps;
@@ -510,7 +510,8 @@ public class NBCLIOptions {
                 case ADVISOR:
                     arglist.removeFirst();
                     final String advisorStr = this.readWordOrThrow(arglist, "advisor level for checking");
-                    advisor = NBAdvisor.fromString(advisorStr); // includes error checking. invalid values provide a warning.
+                    advisor = NBAdvisorLevel.fromString(advisorStr); // includes error checking. invalid values
+                    // provide a warning.
 		    break;
                 case NBCLIOptions.ENABLE_LOGGED_METRICS:
                     arglist.removeFirst();
@@ -808,7 +809,7 @@ public class NBCLIOptions {
         return this.minMaturity;
     }
 
-    public NBAdvisor getAdvisor() {
+    public NBAdvisorLevel getAdvisor() {
         return this.advisor;
     }
 

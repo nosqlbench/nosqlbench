@@ -15,11 +15,11 @@
  * under the License.
  */
 
-package io.nosqlbench.engine.core.lifecycle.process;
+package io.nosqlbench.nb.api.advisor;
 
 import java.util.Locale;
 
-public enum NBAdvisor {
+public enum NBAdvisorLevel {
     /**
      * Do not analyze arguments, scenarios, activities, and workloads
      */
@@ -33,12 +33,12 @@ public enum NBAdvisor {
      */
     enforce;
 
-    public static NBAdvisor fromString(String advisorStr) {
+    public static NBAdvisorLevel fromString(String advisorStr) {
         try {
-            return NBAdvisor.valueOf(advisorStr.toUpperCase(Locale.ROOT));
+            return NBAdvisorLevel.valueOf(advisorStr.toLowerCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             System.out.println("--advisor=" + advisorStr + " is invalid. Using 'none'");
-            return NBAdvisor.none;
+            return NBAdvisorLevel.none;
         }
     }
 }
