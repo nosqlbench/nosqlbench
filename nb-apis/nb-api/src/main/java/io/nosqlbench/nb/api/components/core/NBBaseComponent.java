@@ -16,7 +16,9 @@
 
 package io.nosqlbench.nb.api.components.core;
 
+import io.nosqlbench.nb.api.advisor.NBAdvisorBuilder;
 import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
+import io.nosqlbench.nb.api.advisor.NBAdvisorPointOrBuilder;
 import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.nb.api.components.events.ComponentOutOfScope;
@@ -35,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent, NBTokenWords, NBComponentTimeline {
     private final static Logger logger = LogManager.getLogger("RUNTIME");

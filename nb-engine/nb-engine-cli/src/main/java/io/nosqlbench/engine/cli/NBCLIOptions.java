@@ -512,7 +512,7 @@ public class NBCLIOptions {
                     final String advisorStr = this.readWordOrThrow(arglist, "advisor level for checking");
                     advisor = NBAdvisorLevel.fromString(advisorStr); // includes error checking. invalid values
                     // provide a warning.
-		    break;
+                    break;
                 case NBCLIOptions.ENABLE_LOGGED_METRICS:
                     arglist.removeFirst();
                     this.wantsConsoleMetrics = true;
@@ -742,7 +742,7 @@ public class NBCLIOptions {
                 .replaceAll("ARG", cmdParam)
                 .replaceAll("PROG", "nb5")
                 .replaceAll("INCLUDES", String.join(",", wantsIncludes()))
-                + (arglist.size()>0 && arglist.peekFirst().startsWith("nb") ?
+                + (arglist.size() > 0 && arglist.peekFirst().startsWith("nb") ?
                 """
                         (HINT:) It looks like you are starting your command with ARGV0
                         " which looks like the nb5 command itself. Maybe remove this?

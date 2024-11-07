@@ -491,7 +491,9 @@ public class NBCreators {
             );
     }
 
-    public <PTYPE> NBAdvisorPoint<PTYPE> advisor(Function<NBAdvisorBuilder<PTYPE>, NBAdvisorPointOrBuilder<PTYPE>> builderOrPoint) {
+    public <PTYPE> NBAdvisorPoint<PTYPE> advisor(Function<NBAdvisorBuilder<PTYPE>, NBAdvisorPointOrBuilder<PTYPE>> builderOrPointF) {
+        NBAdvisorBuilder<PTYPE> newBuilder = new NBAdvisorBuilder<PTYPE>();
+        NBAdvisorPointOrBuilder<PTYPE> builderOrPoint = builderOrPointF.apply(newBuilder);
         NBAdvisorPoint<PTYPE> point = switch (builderOrPoint) {
             case NBAdvisorPoint p -> p;
             case NBAdvisorBuilder builder -> builder.build();
