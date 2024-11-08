@@ -19,6 +19,14 @@ package io.nosqlbench.nb.api.advisor;
 
 import java.util.Locale;
 
+/**
+ * This is related to {@link io.nosqlbench.nb.api.advisor.conditions.Conditions}, and the terms
+ * should be aligned. When possible, the the Conditions class should be used to capture
+ * re-usable conditions, so that there is only one instance of each distinct type in the runtime,
+ * regardless of how many components use it in their advisor points.
+ *
+ *
+ */
 public enum NBAdvisorLevel {
     /**
      * Do not analyze arguments, scenarios, activities, and workloads
