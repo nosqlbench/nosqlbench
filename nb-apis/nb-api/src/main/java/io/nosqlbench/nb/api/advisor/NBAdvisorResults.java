@@ -17,9 +17,13 @@ package io.nosqlbench.nb.api.advisor;
  * under the License.
  */
 
+import io.nosqlbench.nb.api.errors.ProcessingEarlyExit;
+
+import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 public class NBAdvisorResults {
     private final List<NBAdvisorPoint<?>> points = new ArrayList<>();
@@ -30,6 +34,43 @@ public class NBAdvisorResults {
 
     public List<NBAdvisorPoint.Result<?>> getAdvisorResults() {
         return points.stream().flatMap(a -> a.getResultLog().stream()).toList();
+    }
+
+    public int evaluate() {
+	List<NBAdvisorPoint.Result<?>> results = getAdvisorResults();
+	Iterator<NBAdvisorPoint.Result<?>> iterator = results.iterator();
+        int count = 0;
+	boolean terminate = false;
+        Level level = Level.INFO;
+	while (iterator.hasNext()) {
+            NBAdvisorPoint.Result<?> result = iterator.next();
+	    level = result.isError() ? result.conditionLevel() : level.INFO;
+	    switch (NBAdvisorLevel.get()) {
+	    case NBAdvisorLevel.none:
+	    case NBAdvisorLevel.validate:
+		if ( level == Level.ERROR ) {
+		    System.out.println(result.rendered());
+		    count++;
+		    terminate = true;
+		}
+		break;
+	    case NBAdvisorLevel.enforce:
+		if ( level == Level.ERROR || level == Level.WARN ) {
+		    System.out.println(result.rendered());
+		    count++;
+		    terminate = true;
+		}
+		break;
+	    }
+	}
+	if ( terminate ) {
+	    String message = String.format("Advisor found %d actionable %s.",
+                    count,
+                    (count < 2 ? "error" : "errors"));
+	    System.out.println(message);
+	    throw new ProcessingEarlyExit(message, 2);
+        }
+        return count;
     }
 
 }

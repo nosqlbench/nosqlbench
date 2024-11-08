@@ -56,7 +56,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     }
 
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
-        NBAdvisorPoint<String> labelsAdvisor = create().advisor(b -> b.name("no hyphens in labels"));
+        NBAdvisorPoint<String> labelsAdvisor = create().advisor(b -> b.name("Check labels"));
         //             ^ Explicitly name the generic type here
         //                     ^ retain the advisor instance for customization, even though it is already attached to
         //                       the current component
@@ -67,6 +67,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         labelsAdvisor.validateAll(componentSpecificLabelsOnly.asMap().values());
 
         NBAdvisorResults advisorResults = getAdvisorResults();
+	advisorResults.evaluate();
 
         this.started_ns = System.nanoTime();
         this.started_epoch_ms = System.currentTimeMillis();

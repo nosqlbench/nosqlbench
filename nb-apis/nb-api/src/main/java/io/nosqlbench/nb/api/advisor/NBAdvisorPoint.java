@@ -20,9 +20,7 @@ package io.nosqlbench.nb.api.advisor;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slf4j.event.Level;
-
-import io.nosqlbench.nb.api.errors.ProcessingEarlyExit;
+import org.apache.logging.log4j.Level;
 
 import java.util.*;
 
@@ -33,8 +31,6 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
     private final String name;
     private final String description;
     private NBAdvisorLevel advisorLevel = NBAdvisorLevel.none;
-    private Status status = Status.OK;
-    private int count = 0;
     private NBAdvisorCondition<T>[] conditions = new NBAdvisorCondition[0];
     private List<Result<?>> resultLog = new ArrayList<Result<?>>();
 
@@ -46,26 +42,6 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
         this.name = name;
         this.description = description == null ? name : description;
         this.advisorLevel = NBAdvisorLevel.get();
-        this.status = Status.OK;
-        this.count = 0;
-    }
-
-    public void reset() {
-        this.status = Status.OK;
-        this.count = 0;
-    }
-
-    public int evaluate() {
-        if (NBAdvisorLevel.isEnforcerActive()) {
-            if (status == Status.ERROR) {
-                String message = String.format("Advisor %s found %d %s.",
-                    name,
-                    count,
-                    (count < 2 ? "error" : "errors"));
-                throw new ProcessingEarlyExit(message, 2);
-            }
-        }
-        return count;
     }
 
     public Result<T>[] validateAll(Collection<T> elements) {
@@ -84,10 +60,6 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
         for (int i = 0; i < conditions.length; i++) {
             results[i] = conditions[i].apply(element);
             resultLog.add(results[i]);
-            if (results[i].isError()) {
-                count++;
-                status = Status.ERROR;
-            }
         }
         return results;
     }
@@ -128,10 +100,14 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
             return status == Status.ERROR;
         }
 
+	public Level conditionLevel() {
+	    return condition.level();
+	}
+	
         public String rendered() {
             return switch (status) {
-                case OK -> condition.level() + ": " + condition.okMsg().apply(element);
-                case ERROR -> condition.level() + ": " + condition.errMsg().apply(element);
+                case OK -> conditionLevel() + ": " + condition.okMsg().apply(element);
+                case ERROR -> conditionLevel() + ": " + condition.errMsg().apply(element);
             };
         }
     }

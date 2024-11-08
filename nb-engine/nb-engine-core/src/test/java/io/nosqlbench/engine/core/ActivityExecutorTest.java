@@ -84,7 +84,7 @@ class ActivityExecutorTest {
     @Test
     synchronized void testDelayedStartSanity() {
 
-        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-delayed-start;cycles=1000;initdelay=2000;");
+        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test_delayed_start;cycles=1000;initdelay=2000;");
         new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
 
         Activity activity = new DelayedInitActivity(activityDef);
@@ -118,7 +118,7 @@ class ActivityExecutorTest {
     @Test
     synchronized void testNewActivityExecutor() {
 
-        final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-dynamic-params;cycles=1000;initdelay=5000;");
+        final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test_dynamic_params;cycles=1000;initdelay=5000;");
         new ActivityTypeLoader().load(activityDef,TestComponent.INSTANCE);
 
         Activity simpleActivity = new SimpleActivity(TestComponent.INSTANCE,activityDef);
