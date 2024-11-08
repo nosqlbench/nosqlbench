@@ -69,6 +69,8 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         advisor.validateAll(componentSpecificLabelsOnly.asMap().keySet());
         advisor.validateAll(componentSpecificLabelsOnly.asMap().values());
 
+	advisor.evaluate();
+
         this.started_ns = System.nanoTime();
         this.started_epoch_ms = System.currentTimeMillis();
         this.labels = componentSpecificLabelsOnly;

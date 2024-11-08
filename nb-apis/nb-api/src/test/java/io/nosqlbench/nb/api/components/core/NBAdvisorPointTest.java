@@ -46,6 +46,9 @@ public class NBAdvisorPointTest {
                 "ERROR: String 'one-two three' should not contain hyphens",
                 "WARN: String 'one-two three' should not contain spaces"
             });
+
+	int count = nap.evaluate();
+	assertThat(count).isEqualTo(4);
     }
 
 }

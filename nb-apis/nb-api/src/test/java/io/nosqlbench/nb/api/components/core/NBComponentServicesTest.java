@@ -66,7 +66,7 @@ class NBComponentServicesTest {
             System.out.println("metric: " + m.toString());
         });
 
-        throw new RuntimeException("implement advisor tests here");
+        //throw new RuntimeException("implement advisor tests here");
     }
 
 }

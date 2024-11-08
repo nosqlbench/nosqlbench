@@ -33,12 +33,21 @@ public enum NBAdvisorLevel {
      */
     enforce;
 
+    // Static field to store the last used setting
+    private static NBAdvisorLevel level = none;
+
     public static NBAdvisorLevel fromString(String advisorStr) {
         try {
-            return NBAdvisorLevel.valueOf(advisorStr.toLowerCase(Locale.ROOT));
+            level = NBAdvisorLevel.valueOf(advisorStr.toLowerCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             System.out.println("--advisor=" + advisorStr + " is invalid. Using 'none'");
-            return NBAdvisorLevel.none;
+            level = NBAdvisorLevel.none;
         }
+	return level;
     }
+
+    public static NBAdvisorLevel get() {
+        return level;
+    }
+
 }
