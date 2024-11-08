@@ -24,10 +24,7 @@ import org.slf4j.event.Level;
 
 import io.nosqlbench.nb.api.errors.ProcessingEarlyExit;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
 
@@ -39,6 +36,7 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
     private Status status = Status.OK;
     private int count = 0;
     private NBAdvisorCondition<T>[] conditions = new NBAdvisorCondition[0];
+    private List<Result<?>> resultLog = new ArrayList<Result<?>>();
 
     public NBAdvisorPoint(String name) {
         this(name, null);
@@ -47,27 +45,27 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
     public NBAdvisorPoint(String name, String description) {
         this.name = name;
         this.description = description == null ? name : description;
-	this.advisorLevel = NBAdvisorLevel.get();
-	this.status = Status.OK;
-	this.count = 0;
+        this.advisorLevel = NBAdvisorLevel.get();
+        this.status = Status.OK;
+        this.count = 0;
     }
 
     public void reset() {
-	this.status = Status.OK;
-	this.count = 0;
-    }	
+        this.status = Status.OK;
+        this.count = 0;
+    }
 
     public int evaluate() {
-        if ( NBAdvisorLevel.isEnforcerActive() ) {
-	    if (status == Status.ERROR) {
-		String message =  String.format("Advisor %s found %d %s.",
-						name,
-						count,
-						(count<2 ? "error": "errors"));
-		throw new ProcessingEarlyExit(message,2);
-	    }
-	}
-	return count;
+        if (NBAdvisorLevel.isEnforcerActive()) {
+            if (status == Status.ERROR) {
+                String message = String.format("Advisor %s found %d %s.",
+                    name,
+                    count,
+                    (count < 2 ? "error" : "errors"));
+                throw new ProcessingEarlyExit(message, 2);
+            }
+        }
+        return count;
     }
 
     public Result<T>[] validateAll(Collection<T> elements) {
@@ -81,16 +79,21 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
         return buffer.toArray(new Result[0]);
     }
 
-    public Result<T>[] validate(T element) {
+    public synchronized Result<T>[] validate(T element) {
         Result<T>[] results = new Result[conditions.length];
         for (int i = 0; i < conditions.length; i++) {
             results[i] = conditions[i].apply(element);
-	    if (results[i].isError()) {
-		count++;
-		status = Status.ERROR;
-	    }
+            resultLog.add(results[i]);
+            if (results[i].isError()) {
+                count++;
+                status = Status.ERROR;
+            }
         }
         return results;
+    }
+
+    public List<Result<?>> getResultLog() {
+        return this.resultLog;
     }
 
     public NBAdvisorPoint<T> add(NBAdvisorCondition<T> condition) {

@@ -16,10 +16,7 @@
 
 package io.nosqlbench.nb.api.components.core;
 
-import io.nosqlbench.nb.api.advisor.NBAdvisorLevel;
-import io.nosqlbench.nb.api.advisor.NBAdvisorBuilder;
-import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
-import io.nosqlbench.nb.api.advisor.NBAdvisorPointOrBuilder;
+import io.nosqlbench.nb.api.advisor.*;
 import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.nb.api.components.events.ComponentOutOfScope;
@@ -45,7 +42,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     protected final NBComponent parent;
     protected final NBLabels labels;
     private final List<NBComponent> children = new ArrayList<>();
-    private final List<NBAdvisorPoint> advisors = new ArrayList<>();
+    private final List<NBAdvisorPoint<?>> advisors = new ArrayList<>();
     protected NBMetricsBuffer metricsBuffer = new NBMetricsBuffer();
     protected boolean bufferOrphanedMetrics = false;
     private ConcurrentHashMap<String, String> props = new ConcurrentHashMap<>();
@@ -59,19 +56,17 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     }
 
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
-	if ( NBAdvisorLevel.isAdvisorActive() ) { 
-	    NBAdvisorPoint<String> advisor = create().advisor(b -> b.name("no hyphens in labels"));
-	    //             ^ Explicitly name the generic type here
-	    //                     ^ retain the advisor instance for customization, even though it is already attached to
-	    //                       the current component
-	    advisor.add(Conditions.NoHyphensError);
-	    advisor.add(Conditions.NoSpacesWarning);
+        NBAdvisorPoint<String> labelsAdvisor = create().advisor(b -> b.name("no hyphens in labels"));
+        //             ^ Explicitly name the generic type here
+        //                     ^ retain the advisor instance for customization, even though it is already attached to
+        //                       the current component
+        labelsAdvisor.add(Conditions.NoHyphensError);
+        labelsAdvisor.add(Conditions.NoSpacesWarning);
 
-	    advisor.validateAll(componentSpecificLabelsOnly.asMap().keySet());
-	    advisor.validateAll(componentSpecificLabelsOnly.asMap().values());
+        labelsAdvisor.validateAll(componentSpecificLabelsOnly.asMap().keySet());
+        labelsAdvisor.validateAll(componentSpecificLabelsOnly.asMap().values());
 
-	    advisor.evaluate();
-	}
+        NBAdvisorResults advisorResults = getAdvisorResults();
 
         this.started_ns = System.nanoTime();
         this.started_epoch_ms = System.currentTimeMillis();
@@ -105,9 +100,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
                 NBLabels newLabels = child.getComponentOnlyLabels();
 
                 if (eachLabels != null && newLabels != null && !eachLabels.isEmpty() && !newLabels.isEmpty() && child.getComponentOnlyLabels().equals(extant.getComponentOnlyLabels())) {
-                    throw new RuntimeException("Adding second child under already-defined labels is not allowed:\n" +
-                        " extant: (" + extant.getClass().getSimpleName() + ") " + extant.description() + "\n" +
-                        " adding: (" + child.getClass().getSimpleName() + ") " + child.description());
+                    throw new RuntimeException("Adding second child under already-defined labels is not allowed:\n" + " extant: (" + extant.getClass().getSimpleName() + ") " + extant.description() + "\n" + " adding: (" + child.getClass().getSimpleName() + ") " + child.description());
                 }
             }
 
@@ -345,7 +338,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     }
 
     @Override
-    public List<NBAdvisorPoint> getAdvisors() {
+    public List<NBAdvisorPoint<?>> getAdvisors() {
         return advisors;
     }
 }
