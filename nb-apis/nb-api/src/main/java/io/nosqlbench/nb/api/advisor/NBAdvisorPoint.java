@@ -58,19 +58,14 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
     }	
 
     public int evaluate() {
-        switch (advisorLevel) {
-           case NBAdvisorLevel.none:
-           case NBAdvisorLevel.validate:
-	       break;
-           case NBAdvisorLevel.enforce:
-	       if (status == Status.ERROR) {
-		   String message =  String.format("Advisor %s found %d %s.",
-						   name,
-						   count,
-						   (count<2 ? "error": "errors"));
-		   throw new ProcessingEarlyExit(message,2);
-	       }
-	       break;
+        if ( NBAdvisorLevel.isEnforcerActive() ) {
+	    if (status == Status.ERROR) {
+		String message =  String.format("Advisor %s found %d %s.",
+						name,
+						count,
+						(count<2 ? "error": "errors"));
+		throw new ProcessingEarlyExit(message,2);
+	    }
 	}
 	return count;
     }

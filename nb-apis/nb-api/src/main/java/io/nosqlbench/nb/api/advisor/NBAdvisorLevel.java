@@ -50,4 +50,12 @@ public enum NBAdvisorLevel {
         return level;
     }
 
+    public static boolean isAdvisorActive() {
+        return level != NBAdvisorLevel.none;
+    }
+
+    public static boolean isEnforcerActive() {
+        return level == NBAdvisorLevel.enforce;
+    }
+
 }

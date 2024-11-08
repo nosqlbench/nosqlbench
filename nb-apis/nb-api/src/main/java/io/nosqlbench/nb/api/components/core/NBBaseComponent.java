@@ -16,6 +16,7 @@
 
 package io.nosqlbench.nb.api.components.core;
 
+import io.nosqlbench.nb.api.advisor.NBAdvisorLevel;
 import io.nosqlbench.nb.api.advisor.NBAdvisorBuilder;
 import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
 import io.nosqlbench.nb.api.advisor.NBAdvisorPointOrBuilder;
@@ -58,18 +59,19 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     }
 
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
+	if ( NBAdvisorLevel.isAdvisorActive() ) { 
+	    NBAdvisorPoint<String> advisor = create().advisor(b -> b.name("no hyphens in labels"));
+	    //             ^ Explicitly name the generic type here
+	    //                     ^ retain the advisor instance for customization, even though it is already attached to
+	    //                       the current component
+	    advisor.add(Conditions.NoHyphensError);
+	    advisor.add(Conditions.NoSpacesWarning);
 
-        NBAdvisorPoint<String> advisor = create().advisor(b -> b.name("no hyphens in labels"));
-        //             ^ Explicitly name the generic type here
-        //                     ^ retain the advisor instance for customization, even though it is already attached to
-        //                       the current component
-        advisor.add(Conditions.NoHyphensError);
-        advisor.add(Conditions.NoSpacesWarning);
+	    advisor.validateAll(componentSpecificLabelsOnly.asMap().keySet());
+	    advisor.validateAll(componentSpecificLabelsOnly.asMap().values());
 
-        advisor.validateAll(componentSpecificLabelsOnly.asMap().keySet());
-        advisor.validateAll(componentSpecificLabelsOnly.asMap().values());
-
-	advisor.evaluate();
+	    advisor.evaluate();
+	}
 
         this.started_ns = System.nanoTime();
         this.started_epoch_ms = System.currentTimeMillis();
