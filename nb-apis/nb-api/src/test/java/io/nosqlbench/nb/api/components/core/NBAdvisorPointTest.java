@@ -47,8 +47,8 @@ public class NBAdvisorPointTest {
                 "WARN: String 'one-two three' should not contain spaces"
             });
 
-	//int count = nap.evaluate();
-	//assertThat(count).isEqualTo(4);
+        //int count = nap.evaluate();
+        //assertThat(count).isEqualTo(4);
     }
 
 }

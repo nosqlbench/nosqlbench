@@ -37,38 +37,38 @@ public class NBAdvisorResults {
     }
 
     public int evaluate() {
-	List<NBAdvisorPoint.Result<?>> results = getAdvisorResults();
-	Iterator<NBAdvisorPoint.Result<?>> iterator = results.iterator();
+        List<NBAdvisorPoint.Result<?>> results = getAdvisorResults();
+        Iterator<NBAdvisorPoint.Result<?>> iterator = results.iterator();
         int count = 0;
-	boolean terminate = false;
+        boolean terminate = false;
         Level level = Level.INFO;
-	while (iterator.hasNext()) {
+        while (iterator.hasNext()) {
             NBAdvisorPoint.Result<?> result = iterator.next();
-	    level = result.isError() ? result.conditionLevel() : level.INFO;
-	    switch (NBAdvisorLevel.get()) {
-	    case NBAdvisorLevel.none:
-	    case NBAdvisorLevel.validate:
-		if ( level == Level.ERROR ) {
-		    System.out.println(result.rendered());
-		    count++;
-		    terminate = true;
-		}
-		break;
-	    case NBAdvisorLevel.enforce:
-		if ( level == Level.ERROR || level == Level.WARN ) {
-		    System.out.println(result.rendered());
-		    count++;
-		    terminate = true;
-		}
-		break;
-	    }
-	}
-	if ( terminate ) {
-	    String message = String.format("Advisor found %d actionable %s.",
+            level = result.isError() ? result.conditionLevel() : level.INFO;
+            switch (NBAdvisorLevel.get()) {
+            case NBAdvisorLevel.none:
+            case NBAdvisorLevel.validate:
+                if ( level == Level.ERROR ) {
+                    System.out.println(result.rendered());
+                    count++;
+                    terminate = true;
+                }
+                break;
+            case NBAdvisorLevel.enforce:
+                if ( level == Level.ERROR || level == Level.WARN ) {
+                    System.out.println(result.rendered());
+                    count++;
+                    terminate = true;
+                }
+                break;
+            }
+        }
+        if ( terminate ) {
+            String message = String.format("Advisor found %d actionable %s.",
                     count,
                     (count < 2 ? "error" : "errors"));
-	    System.out.println(message);
-	    throw new ProcessingEarlyExit(message, 2);
+            System.out.println(message);
+            throw new ProcessingEarlyExit(message, 2);
         }
         return count;
     }

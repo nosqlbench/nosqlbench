@@ -51,7 +51,7 @@ public enum NBAdvisorLevel {
             System.out.println("--advisor=" + advisorStr + " is invalid. Using 'none'");
             level = NBAdvisorLevel.none;
         }
-	return level;
+        return level;
     }
 
     public static NBAdvisorLevel get() {
