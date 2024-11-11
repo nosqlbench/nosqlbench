@@ -40,7 +40,7 @@ class ExitStatusIntegrationTests {
         );
         assertThat(result.exception).isNull();
         String stderr = String.join("\n", result.getStderrData());
-	assertThat(stderr).contains("Scenario stopped due to error");
+        assertThat(stderr).contains("Scenario stopped due to error");
         assertThat(result.exitStatus).isEqualTo(2);
     }
 
