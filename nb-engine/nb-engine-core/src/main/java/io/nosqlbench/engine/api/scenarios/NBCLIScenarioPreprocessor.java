@@ -312,10 +312,6 @@ public class NBCLIScenarioPreprocessor {
         return parsedStep;
     }
 
-    private static final Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
-    private static final Pattern innerTemplatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
-    private static final Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
-
     public static List<WorkloadDesc> filterForScenarios(List<Content<?>> candidates) {
 
         List<Path> yamlPathList = candidates.stream().map(Content::asPath).toList();
@@ -437,28 +433,43 @@ public class NBCLIScenarioPreprocessor {
 
     }
 
+    //    private static final Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
+    //    private static final Pattern innerTemplatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
+    private static final Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
+
     public static Map<String, String> matchTemplates(String line, Map<String, String> templates) {
-        Matcher matcher = templatePattern.matcher(line);
-
-        while (matcher.find()) {
-            String match = matcher.group(1);
-
-            Matcher innerMatcher = innerTemplatePattern.matcher(match);
-            if (innerMatcher.find()) {
-                String innerMatch = innerMatcher.group(1);
-                templates = matchTemplates("TEMPLATE(" + innerMatch + ")", templates);
-                String resolvedInner = templates.getOrDefault(innerMatch.split("[,:]")[0], "");
-                match = match.replace("TEMPLATE(" + innerMatch + ")", resolvedInner);
+        int length = line.length();
+        int i = 0;
+        while (i < length) {
+            // Detect an instance of "TEMPLATE("
+            if (line.startsWith("TEMPLATE(", i)) {
+                int start = i + "TEMPLATE(".length();
+                int openParensCount = 1; // We found one '(' with "TEMPLATE("
+                // Find the corresponding closing ')' for this TEMPLATE instance
+                int j = start;
+                while (j < length && openParensCount > 0) {
+                    if (line.charAt(j) == '(') {
+                        openParensCount++;
+                    } else if (line.charAt(j) == ')') {
+                        openParensCount--;
+                    }
+                    j++;
+                }
+                // `j` now points just after the closing ')' of this TEMPLATE
+                if (openParensCount == 0) {
+                    String templateContent = line.substring(start, j - 1);
+                    // Resolve the template content
+                    String resolvedContent = resolveTemplate(templateContent, templates);
+                    line = line.substring(0, i) + resolvedContent + line.substring(j);
+                    // Update `length` and `i` based on the modified `line`
+                    i += resolvedContent.length() - 1;
+                    length = line.length();
+                }
             }
-
-            String[] matchArray = match.split("[,:]");
-            if (matchArray.length == 1) {
-                matchArray = new String[]{matchArray[0], ""};
-            }
-            templates.put(matchArray[0], matchArray[1]);
+            i++;
         }
-        matcher = templatePattern2.matcher(line);
 
+        Matcher matcher = templatePattern2.matcher(line);
         while (matcher.find()) {
             String match = matcher.group(1);
             String[] matchArray = match.split(":");
@@ -471,5 +482,17 @@ public class NBCLIScenarioPreprocessor {
         return templates;
     }
 
+    private static String resolveTemplate(String content, Map<String, String> templates) {
+        String[] parts = content.split("[,:]", 2);
+        String key = parts[0];
+        String value = parts.length > 1 ? parts[1] : "";
+
+        // Store or retrieve the resolved value for the template key
+        if (!templates.containsKey(key)) {
+            templates.put(key, value);
+        }
+        
+        return templates.getOrDefault(key, "");
+    }
 
 }
