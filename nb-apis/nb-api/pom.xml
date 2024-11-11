@@ -161,13 +161,6 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.46.0.0</version>
         </dependency>
-      <dependency>
-        <groupId>io.qdrant</groupId>
-        <artifactId>client</artifactId>
-        <version>1.9.1</version>
-        <scope>test</scope>
-      </dependency>
-
 
     </dependencies>
 
