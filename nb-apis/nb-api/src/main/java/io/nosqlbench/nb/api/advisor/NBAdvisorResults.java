@@ -63,6 +63,7 @@ public class NBAdvisorResults {
                         count++;
                         terminate = true;
                     }
+                    break;
                 case NBAdvisorLevel.validate:
                     if ( level == Level.ERROR ) {
                         render(level, result.rendered());
