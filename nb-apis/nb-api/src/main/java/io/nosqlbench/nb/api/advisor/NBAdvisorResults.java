@@ -17,8 +17,6 @@ package io.nosqlbench.nb.api.advisor;
  * under the License.
  */
 
-import io.nosqlbench.nb.api.errors.ProcessingEarlyExit;
-
 import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
@@ -68,7 +66,7 @@ public class NBAdvisorResults {
                     count,
                     (count < 2 ? "error" : "errors"));
             System.out.println(message);
-            throw new ProcessingEarlyExit(message, 2);
+            throw new NBAdvisorException(message, 2);
         }
         return count;
     }

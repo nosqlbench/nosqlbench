@@ -15,13 +15,13 @@
  * under the License.
  */
 
-package io.nosqlbench.nb.api.errors;
+package io.nosqlbench.nb.api.advisor;
 
-public class ProcessingEarlyExit extends RuntimeException {
+public class NBAdvisorException extends RuntimeException {
     private final String message;
     private final int exitCode;
 
-    public ProcessingEarlyExit(String message, int exitCode) {
+    public NBAdvisorException(String message, int exitCode) {
         this.message = message;
         this.exitCode = exitCode;
     }

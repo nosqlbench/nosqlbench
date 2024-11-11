@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle.process;
 
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.nb.api.errors.ProcessingEarlyExit;
+import io.nosqlbench.nb.api.advisor.NBAdvisorException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.PolyglotException;
@@ -64,9 +64,9 @@ public class NBCLIErrorHandler {
         } else if (t instanceof BasicError) {
             logger.trace("Handling basic error: " + t);
             return handleBasicError((BasicError) t, wantsStackTraces, version);
-        } else if (t instanceof ProcessingEarlyExit) {
+        } else if (t instanceof NBAdvisorException) {
             logger.trace("Handle processing early exit: " + t);
-            return handleProcessingEarlyExit((ProcessingEarlyExit) t, wantsStackTraces, version);
+            return handleNBAdvisorException((NBAdvisorException) t, wantsStackTraces, version);
         } else if (t instanceof Exception) {
             logger.trace("Handling general exception: " + t);
             return handleInternalError((Exception) t, wantsStackTraces, version);
@@ -124,7 +124,7 @@ public class NBCLIErrorHandler {
         return 2;
     }
 
-    private static int handleProcessingEarlyExit(ProcessingEarlyExit e, boolean wantsStackTraces, String version) {
+    private static int handleNBAdvisorException(NBAdvisorException e, boolean wantsStackTraces, String version) {
 	logger.info(e.toString());
         return e.getExitCode();
     }
