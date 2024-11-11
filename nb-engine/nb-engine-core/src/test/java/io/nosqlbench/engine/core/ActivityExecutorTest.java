@@ -18,6 +18,7 @@ package io.nosqlbench.engine.core;
 
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.advisor.NBAdvisorException;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
@@ -80,6 +81,20 @@ class ActivityExecutorTest {
 //        assertThat(inputDispenser.getInput(10).getInputSegment(3)).isNotNull();
 //
 //    }
+
+    @Test
+    synchronized void testAdvisorError() {
+
+        try {
+            ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-delayed-start;cycles=1000;initdelay=2000;");
+            new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
+            Activity activity = new DelayedInitActivity(activityDef);
+	    fail("Expected an Advisor exception");
+	} catch (NBAdvisorException e) {
+            assertThat(e.toString().contains("error"));
+            assertThat(e.getExitCode() == 2);
+        }
+    }
 
     @Test
     synchronized void testDelayedStartSanity() {

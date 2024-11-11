@@ -86,7 +86,7 @@ public class NBAdvisorResults {
             String message = String.format("Advisor found %d actionable %s.",
                     count,
                     (count < 2 ? "error" : "errors"));
-            System.out.println(message);
+            render(Level.ERROR, message);
             throw new NBAdvisorException(message, 2);
         }
         return count;
