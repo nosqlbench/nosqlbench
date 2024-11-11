@@ -38,7 +38,7 @@ public class NoHyphens implements NBAdvisorCondition<String> {
 
     @Override
     public Function<String, String> okMsg() {
-        return s -> "String '" + s + "' should not contain hyphens";
+        return s -> "String '" + s + "' does not contain hyphens";
     }
 
     @Override

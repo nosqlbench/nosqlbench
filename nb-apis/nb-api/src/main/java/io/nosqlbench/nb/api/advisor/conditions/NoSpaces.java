@@ -33,7 +33,7 @@ public class NoSpaces implements NBAdvisorCondition<String> {
 
     @Override
     public Function<String, String> okMsg() {
-        return string -> "String '" + string + "' should not contain spaces";
+        return string -> "String '" + string + "' does not contain spaces";
     }
 
     @Override
