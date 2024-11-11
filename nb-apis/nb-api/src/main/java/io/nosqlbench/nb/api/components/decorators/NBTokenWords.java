@@ -18,6 +18,13 @@ package io.nosqlbench.nb.api.components.decorators;
 
 import java.util.Map;
 
+/**
+ * <P>This is a canonical way to get the words which are acceptable and valid
+ * for token transformations in strings, particularly in identifiers for
+ * external reporting or logging. No other methods should be used to determine
+ * which tokens are valid across NB components. All tokens which are deemed
+ * useful or necessary should be included here. (This derives from built-in labels)</P>
+ */
 public interface NBTokenWords {
     Map<String,String> getTokens();
 }

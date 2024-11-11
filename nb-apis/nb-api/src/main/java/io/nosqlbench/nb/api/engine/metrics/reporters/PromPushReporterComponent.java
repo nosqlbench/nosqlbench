@@ -51,7 +51,7 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
     private String bearerToken;
 
     public PromPushReporterComponent(NBComponent parent, String endpoint,long intervalMs, NBLabels nbLabels, String prompushApikeyfile) {
-        super(parent, nbLabels.and("_type", "prom-push"), intervalMs,  "REPORT-PROMPUSH",FirstReport.OnInterval, LastReport.OnInterrupt);
+        super(parent, nbLabels.and("_type", "prom_push"), intervalMs,  "REPORT-PROMPUSH",FirstReport.OnInterval, LastReport.OnInterrupt);
         String jobname = getLabels().valueOfOptional("jobname").orElse("default");
         String instance = getLabels().valueOfOptional("instance").orElse("default");
         if (jobname.equals("default") || instance.equals("default")) {

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -64,7 +65,6 @@ class NBComponentServicesTest {
         metricsInTree.forEach(m -> {
             System.out.println("metric: " + m.toString());
         });
-
     }
 
 }

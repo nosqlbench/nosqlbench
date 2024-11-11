@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle.process;
 
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.advisor.NBAdvisorException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.PolyglotException;
@@ -43,7 +44,7 @@ public class NBCLIErrorHandler {
 
     private final static Logger logger = LogManager.getLogger("ERRORHANDLER");
 
-    public static String handle(Throwable t, boolean wantsStackTraces, String version) {
+    public static int handle(Throwable t, boolean wantsStackTraces, String version) {
 
         if (wantsStackTraces) {
             StackTraceElement[] st = Thread.currentThread().getStackTrace();
@@ -63,6 +64,9 @@ public class NBCLIErrorHandler {
         } else if (t instanceof BasicError) {
             logger.trace("Handling basic error: " + t);
             return handleBasicError((BasicError) t, wantsStackTraces, version);
+        } else if (t instanceof NBAdvisorException) {
+            logger.trace("Handle processing early exit: " + t);
+            return handleNBAdvisorException((NBAdvisorException) t, wantsStackTraces, version);
         } else if (t instanceof Exception) {
             logger.trace("Handling general exception: " + t);
             return handleInternalError((Exception) t, wantsStackTraces, version);
@@ -72,7 +76,7 @@ public class NBCLIErrorHandler {
         }
     }
 
-    private static String handleInternalError(Exception e, boolean wantsStackTraces, String version) {
+    private static int handleInternalError(Exception e, boolean wantsStackTraces, String version) {
         String prefix = "internal error(" + version + "):";
         if (e.getCause() != null && !e.getCause().getClass().getCanonicalName().contains("io.nosqlbench")) {
             prefix = "Error from driver or included library(" + version + "):";
@@ -87,10 +91,10 @@ public class NBCLIErrorHandler {
             logger.error(e.getMessage());
             logger.error("for the full stack trace, run with --show-stacktraces");
         }
-        return e.getMessage();
+        return 2;
     }
 
-    private static String handleScriptException(ScriptException e, boolean wantsStackTraces, String version) {
+    private static int handleScriptException(ScriptException e, boolean wantsStackTraces, String version) {
         Throwable cause = e.getCause();
         if (cause instanceof PolyglotException) {
             Throwable hostException = ((PolyglotException) cause).asHostException();
@@ -107,17 +111,22 @@ public class NBCLIErrorHandler {
                 logger.error("for the full stack trace, run with --show-stacktraces");
             }
         }
-        return e.getMessage();
+        return 2;
     }
 
-    private static String handleBasicError(BasicError e, boolean wantsStackTraces, String version) {
+    private static int handleBasicError(BasicError e, boolean wantsStackTraces, String version) {
         if (wantsStackTraces) {
             logger.error(e.getMessage(), e);
         } else {
             logger.error(e.getMessage());
             logger.error("for the full stack trace, run with --show-stacktraces");
         }
-        return e.getMessage();
+        return 2;
+    }
+
+    private static int handleNBAdvisorException(NBAdvisorException e, boolean wantsStackTraces, String version) {
+	logger.info(e.toString());
+        return e.getExitCode();
     }
 
 }

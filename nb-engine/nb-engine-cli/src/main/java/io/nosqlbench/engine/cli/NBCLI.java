@@ -136,12 +136,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                     break;
                 }
 
-            final String error = NBCLIErrorHandler.handle(e, showStackTraces, NBCLI.version);
+            final int result = NBCLIErrorHandler.handle(e, showStackTraces, NBCLI.version);
             // Commented for now, as the above handler should do everything needed.
-            if (null != error) System.err.println("Scenario stopped due to error. See logs for details.");
+	    if (result != 0) System.err.println("Scenario stopped due to error. See logs for details.");
             System.err.flush();
             System.out.flush();
-            return NBCLI.EXIT_ERROR;
+            return result;
         }
     }
 
@@ -412,7 +412,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             "logsdir", options.getLogsDirectory().toString(),
             "progress", options.getProgressSpec(),
             "prompush_cache", "prompush_cache.txt",
-            "heartbeat", String.valueOf(options.wantsHeartbeatIntervalMs())
+            "heartbeat", String.valueOf(options.wantsHeartbeatIntervalMs()),
+	    "advisor", String.valueOf(options.getAdvisor())
         );
 
         try (

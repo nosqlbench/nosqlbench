@@ -16,6 +16,8 @@
 
 package io.nosqlbench.nb.api.components.core;
 
+import io.nosqlbench.nb.api.advisor.*;
+import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.nb.api.components.events.ComponentOutOfScope;
 import io.nosqlbench.nb.api.components.events.DownEvent;
@@ -24,6 +26,7 @@ import io.nosqlbench.nb.api.components.events.UpEvent;
 import io.nosqlbench.nb.api.engine.metrics.MetricsCloseable;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.labels.NBLabels;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,15 +35,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent, NBTokenWords, NBComponentTimeline {
     private final static Logger logger = LogManager.getLogger("RUNTIME");
     protected final NBComponent parent;
     protected final NBLabels labels;
     private final List<NBComponent> children = new ArrayList<>();
+    private final List<NBAdvisorPoint<?>> advisors = new ArrayList<>();
     protected NBMetricsBuffer metricsBuffer = new NBMetricsBuffer();
     protected boolean bufferOrphanedMetrics = false;
-    private ConcurrentHashMap<String,String> props = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, String> props = new ConcurrentHashMap<>();
     protected Exception error;
     protected long started_ns, teardown_ns, closed_ns, errored_ns, started_epoch_ms;
     protected NBInvokableState state = NBInvokableState.STARTING;
@@ -51,6 +56,19 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     }
 
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly) {
+        NBAdvisorPoint<String> labelsAdvisor = create().advisor(b -> b.name("Check labels"));
+        //             ^ Explicitly name the generic type here
+        //                     ^ retain the advisor instance for customization, even though it is already attached to
+        //                       the current component
+        labelsAdvisor.add(Conditions.NoHyphensError);
+        labelsAdvisor.add(Conditions.NoSpacesWarning);
+
+        labelsAdvisor.validateAll(componentSpecificLabelsOnly.asMap().keySet());
+        labelsAdvisor.validateAll(componentSpecificLabelsOnly.asMap().values());
+
+        NBAdvisorResults advisorResults = getAdvisorResults();
+        advisorResults.evaluate();
+
         this.started_ns = System.nanoTime();
         this.started_epoch_ms = System.currentTimeMillis();
         this.labels = componentSpecificLabelsOnly;
@@ -60,11 +78,11 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         } else {
             parent = null;
         }
-        state = (state==NBInvokableState.ERRORED) ? state : NBInvokableState.RUNNING;
+        state = (state == NBInvokableState.ERRORED) ? state : NBInvokableState.RUNNING;
     }
 
     public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly, Map<String, String> props) {
-        this(parentComponent,componentSpecificLabelsOnly);
+        this(parentComponent, componentSpecificLabelsOnly);
         props.forEach(this::setComponentProp);
     }
 
@@ -82,10 +100,8 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
                 NBLabels eachLabels = extant.getComponentOnlyLabels();
                 NBLabels newLabels = child.getComponentOnlyLabels();
 
-                if (eachLabels!=null && newLabels!=null && !eachLabels.isEmpty() && !newLabels.isEmpty() && child.getComponentOnlyLabels().equals(extant.getComponentOnlyLabels())) {
-                    throw new RuntimeException("Adding second child under already-defined labels is not allowed:\n" +
-                        " extant: (" + extant.getClass().getSimpleName() + ") " + extant.description() + "\n" +
-                        " adding: (" + child.getClass().getSimpleName() + ") " + child.description());
+                if (eachLabels != null && newLabels != null && !eachLabels.isEmpty() && !newLabels.isEmpty() && child.getComponentOnlyLabels().equals(extant.getComponentOnlyLabels())) {
+                    throw new RuntimeException("Adding second child under already-defined labels is not allowed:\n" + " extant: (" + extant.getClass().getSimpleName() + ") " + extant.description() + "\n" + " adding: (" + child.getClass().getSimpleName() + ") " + child.description());
                 }
             }
 
@@ -129,7 +145,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
 
     @Override
     public final void close() throws RuntimeException {
-        state = (state==NBInvokableState.ERRORED) ? state : NBInvokableState.CLOSING;
+        state = (state == NBInvokableState.ERRORED) ? state : NBInvokableState.CLOSING;
         closed_ns = System.nanoTime();
 
         try {
@@ -156,8 +172,9 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         RuntimeException wrapped = new RuntimeException("While in state " + this.state + ", an error occured: " + e, e);
         logger.error(wrapped);
         this.error = wrapped;
-        state=NBInvokableState.ERRORED;
+        state = NBInvokableState.ERRORED;
     }
+
     /**
      * Override this method in your component implementations when you need to do something
      * to close out your component.
@@ -165,7 +182,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     protected void teardown() {
         logger.debug("tearing down " + description());
         this.teardown_ns = System.nanoTime();
-        this.state=(state==NBInvokableState.ERRORED) ? state : NBInvokableState.STOPPED;
+        this.state = (state == NBInvokableState.ERRORED) ? state : NBInvokableState.STOPPED;
     }
 
     @Override
@@ -240,7 +257,8 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
      * This method is called by the engine to report a component going out of scope. The metrics for that component
      * will bubble up through the component layers and can be buffered for reporting at multiple levels.
      *
-     * @param m The metric to report
+     * @param m
+     *     The metric to report
      */
     @Override
     public void reportExecutionMetric(NBMetric m) {
@@ -254,8 +272,8 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
 
     @Override
     public long getNanosSinceStart() {
-        if (teardown_ns ==0) {
-            return System.nanoTime()- started_ns;
+        if (teardown_ns == 0) {
+            return System.nanoTime() - started_ns;
         } else {
             return teardown_ns - started_ns;
         }
@@ -263,10 +281,10 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
 
     @Override
     public Optional<String> getComponentProp(String name) {
-        if (this.props!=null && this.props.containsKey(name)) {
+        if (this.props != null && this.props.containsKey(name)) {
             return Optional.ofNullable(this.props.get(name));
-        } else if (this.getParent()!=null) {
-                return this.getParent().getComponentProp(name);
+        } else if (this.getParent() != null) {
+            return this.getParent().getComponentProp(name);
         } else {
             return Optional.empty();
         }
@@ -274,7 +292,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
 
     @Override
     public NBComponentProps setComponentProp(String name, String value) {
-        if (this.props==null) {
+        if (this.props == null) {
             this.props = new ConcurrentHashMap<>();
         }
         props.put(name, value);
@@ -315,4 +333,13 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         metricsCloseables.add(metric);
     }
 
+    @Override
+    public void addAdvisor(NBAdvisorPoint advisor) {
+        this.advisors.add(advisor);
+    }
+
+    @Override
+    public List<NBAdvisorPoint<?>> getAdvisors() {
+        return advisors;
+    }
 }

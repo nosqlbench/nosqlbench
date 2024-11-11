@@ -26,7 +26,7 @@ import java.util.Iterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NBComponentTraversalTest {
+public class NBComponentTraversalTest {
 
     /**
      * <pre>{@code

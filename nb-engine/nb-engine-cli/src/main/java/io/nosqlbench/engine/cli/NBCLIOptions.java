@@ -21,6 +21,7 @@ import io.nosqlbench.engine.cli.atfiles.NBAtFile;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.PathCanonicalizer;
 import io.nosqlbench.engine.core.lifecycle.session.CmdParser;
+import io.nosqlbench.nb.api.advisor.NBAdvisorLevel;
 import io.nosqlbench.nb.api.engine.util.Unit;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.labels.NBLabelSpec;
@@ -96,13 +97,14 @@ public class NBCLIOptions {
     private static final String ADD_LABELS = "--add-labels";
     private static final String ADD_LABEL = "--add-label";
 
+    private static final String ADVISOR = "--advisor";
+
     // Execution
     private static final String EXPORT_CYCLE_LOG = "--export-cycle-log";
     private static final String IMPORT_CYCLE_LOG = "--import-cycle-log";
     private static final String HDR_DIGITS = "--hdr-digits";
 
     // Execution Options
-
 
     private static final String SESSION_NAME = "--session-name";
     private static final String LOGS_DIR = "--logs-dir";
@@ -207,6 +209,7 @@ public class NBCLIOptions {
     private String reportSummaryTo = NBCLIOptions.REPORT_SUMMARY_TO_DEFAULT;
     private boolean enableAnsi = (null != System.getenv("TERM")) && !System.getenv("TERM").isEmpty();
     private Maturity minMaturity = Maturity.Unspecified;
+    private NBAdvisorLevel advisor = NBAdvisorLevel.none;
     private String graphitelogLevel = "info";
     private boolean wantsListCommands;
     private boolean wantsListApps;
@@ -504,6 +507,12 @@ public class NBCLIOptions {
                     String addLabeldata = arglist.removeFirst();
                     addLabels(addLabeldata);
                     break;
+                case ADVISOR:
+                    arglist.removeFirst();
+                    final String advisorStr = this.readWordOrThrow(arglist, "advisor level for checking");
+                    advisor = NBAdvisorLevel.fromString(advisorStr); // includes error checking. invalid values
+                    // provide a warning.
+                    break;
                 case NBCLIOptions.ENABLE_LOGGED_METRICS:
                     arglist.removeFirst();
                     this.wantsConsoleMetrics = true;
@@ -733,7 +742,7 @@ public class NBCLIOptions {
                 .replaceAll("ARG", cmdParam)
                 .replaceAll("PROG", "nb5")
                 .replaceAll("INCLUDES", String.join(",", wantsIncludes()))
-                + (arglist.size()>0 && arglist.peekFirst().startsWith("nb") ?
+                + (arglist.size() > 0 && arglist.peekFirst().startsWith("nb") ?
                 """
                         (HINT:) It looks like you are starting your command with ARGV0
                         " which looks like the nb5 command itself. Maybe remove this?
@@ -798,6 +807,10 @@ public class NBCLIOptions {
 
     public Maturity allowMinMaturity() {
         return this.minMaturity;
+    }
+
+    public NBAdvisorLevel getAdvisor() {
+        return this.advisor;
     }
 
     public List<Cmd> getCommands() {
