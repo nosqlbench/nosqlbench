@@ -96,13 +96,22 @@ public class StrInterpolator implements Function<String, String> {
                 int openParensCount = 1; // We found one '(' with "TEMPLATE("
                 // Find the corresponding closing ')' for this TEMPLATE instance
                 int j = start;
+                int k = start;
                 while (j < length && openParensCount > 0) {
                     if (line.charAt(j) == '(') {
                         openParensCount++;
                     } else if (line.charAt(j) == ')') {
+                        k = j;
                         openParensCount--;
                     }
                     j++;
+                }
+                // check for case of not enough ')'
+                if (openParensCount > 0 ) {
+                    if ( k != start ) {
+                        j = k + 1;
+                    }
+                    openParensCount = 0;
                 }
                 // `j` now points just after the closing ')' of this TEMPLATE
                 if (openParensCount == 0) {
@@ -111,7 +120,7 @@ public class StrInterpolator implements Function<String, String> {
                     String resolvedContent = multimap.lookup(templateContent);
                     line = line.substring(0, i) + resolvedContent + line.substring(j);
                     // Update `length` and `i` based on the modified `line`
-                    i += resolvedContent.length() - 1;
+                    // i += resolvedContent.length() - 1;
                     length = line.length();
                 }
             }
