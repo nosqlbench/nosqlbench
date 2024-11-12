@@ -59,8 +59,8 @@ public class StrInterpolator implements Function<String, String> {
             raw = after;
             after = matchTemplates(raw);
         }
-	raw = after;
-	String original = raw;
+        raw = after;
+        String original = raw;
         after = substitutor.replace(raw);
         while (!after.equals(raw)) {
             raw = after;
