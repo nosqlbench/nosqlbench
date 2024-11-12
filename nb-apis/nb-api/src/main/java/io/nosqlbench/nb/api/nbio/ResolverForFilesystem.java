@@ -56,7 +56,15 @@ public class ResolverForFilesystem implements ContentResolver {
         if (uri.getScheme() != null && !uri.getScheme().isEmpty() && !uri.getScheme().equals("file")) {
             return null;
         }
-        Path pathFromUri = Path.of(uri.getPath());
+
+        String rawPath = uri.getPath();
+        
+        // Expand "~" to the user's home directory if it appears at the start of the path
+        if (rawPath.startsWith("~")) {
+            rawPath = System.getProperty("user.home") + rawPath.substring(1);
+        }
+        
+        Path pathFromUri = Path.of(rawPath);
 
         if (Files.isReadable(pathFromUri)) {
             return pathFromUri;
