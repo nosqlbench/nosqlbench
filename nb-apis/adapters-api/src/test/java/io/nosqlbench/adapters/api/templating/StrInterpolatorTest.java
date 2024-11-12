@@ -78,6 +78,13 @@ public class StrInterpolatorTest {
     }
 
     @Test
+    public void shouldMatchNestedParens() {
+        StrInterpolator interp = new StrInterpolator(abcd);
+        String a = interp.apply("TEMPLATE(keydist,Uniform(0,1000000000)->int);");
+        assertThat(a).isEqualTo("Uniform(0,1000000000)->int;");
+    }
+
+    @Test
     public void shouldReturnWarningWhenUnmatched() {
         StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("<<nokeymatchesthis>>");
