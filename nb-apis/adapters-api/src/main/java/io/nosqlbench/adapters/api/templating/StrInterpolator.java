@@ -17,10 +17,12 @@
 package io.nosqlbench.adapters.api.templating;
 
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 import org.apache.commons.text.StrLookup;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import java.util.*;
 import java.util.function.Function;
@@ -31,12 +33,6 @@ public class StrInterpolator implements Function<String, String> {
     private final MultiMap multimap = new MultiMap();
     private final StringSubstitutor substitutor =
         new StringSubstitutor(multimap, "<<", ">>", '\\')
-            .setEnableSubstitutionInVariables(true)
-            .setEnableUndefinedVariableException(true)
-            .setDisableSubstitutionInValues(true);
-
-    private final StringSubstitutor substitutor2 =
-        new StringSubstitutor(multimap, "TEMPLATE(", ")", '\\')
             .setEnableSubstitutionInVariables(true)
             .setEnableUndefinedVariableException(true)
             .setDisableSubstitutionInValues(true);
@@ -58,10 +54,23 @@ public class StrInterpolator implements Function<String, String> {
 
     @Override
     public String apply(String raw) {
-        String after = substitutor.replace(substitutor2.replace(raw));
+        String after = matchTemplates(raw);
         while (!after.equals(raw)) {
             raw = after;
-            after = substitutor.replace(substitutor2.replace(raw));
+            after = matchTemplates(raw);
+        }
+        raw = after;
+        String original = raw;
+        after = substitutor.replace(raw);
+        while (!after.equals(raw)) {
+            raw = after;
+            after = substitutor.replace(raw);
+        }
+        if ( !original.equals(after)) {
+            NBAdvisorOutput.output(Level.WARN,"Transform <<key:value>>");
+            NBAdvisorOutput.output(Level.WARN,"From: "+original);
+            NBAdvisorOutput.output(Level.WARN,"  To: "+after);
+            NBAdvisorOutput.test("Using the deprecated template for of <<key:value>> please use TEMPLATE(key,value)");
         }
         return after;
     }
@@ -74,6 +83,50 @@ public class StrInterpolator implements Function<String, String> {
         LinkedHashMap<String, String> details = new LinkedHashMap<>();
 
         return details;
+    }
+
+    public String matchTemplates(String original) {
+        String line = original;
+        int length = line.length();
+        int i = 0;
+        while (i < length) {
+            // Detect an instance of "TEMPLATE("
+            if (line.startsWith("TEMPLATE(", i)) {
+                int start = i + "TEMPLATE(".length();
+                int openParensCount = 1; // We found one '(' with "TEMPLATE("
+                // Find the corresponding closing ')' for this TEMPLATE instance
+                int j = start;
+                int k = start;
+                while (j < length && openParensCount > 0) {
+                    if (line.charAt(j) == '(') {
+                        openParensCount++;
+                    } else if (line.charAt(j) == ')') {
+                        k = j;
+                        openParensCount--;
+                    }
+                    j++;
+                }
+                // check for case of not enough ')'
+                if (openParensCount > 0 ) {
+                    if ( k != start ) {
+                        j = k + 1;
+                    }
+                    openParensCount = 0;
+                }
+                // `j` now points just after the closing ')' of this TEMPLATE
+                if (openParensCount == 0) {
+                    String templateContent = line.substring(start, j - 1);
+                    // Resolve the template content
+                    String resolvedContent = multimap.lookup(templateContent);
+                    line = line.substring(0, i) + resolvedContent + line.substring(j);
+                    // Update `length` and `i` based on the modified `line`
+                    // i += resolvedContent.length() - 1;
+                    length = line.length();
+                }
+            }
+            i++;
+        }
+        return line;
     }
 
     public static class MultiMap extends StrLookup<String> {
@@ -131,6 +184,5 @@ public class StrInterpolator implements Function<String, String> {
 
         }
     }
-
 
 }

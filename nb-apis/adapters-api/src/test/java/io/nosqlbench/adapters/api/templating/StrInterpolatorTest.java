@@ -19,6 +19,7 @@ package io.nosqlbench.adapters.api.templating;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,13 @@ public class StrInterpolatorTest {
     }
 
     @Test
+    public void shouldMatchNestedParens() {
+        StrInterpolator interp = new StrInterpolator(abcd);
+        String a = interp.apply("TEMPLATE(keydist,Uniform(0,1000000000)->int);");
+        assertThat(a).isEqualTo("Uniform(0,1000000000)->int;");
+    }
+
+    @Test
     public void shouldReturnWarningWhenUnmatched() {
         StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("<<nokeymatchesthis>>");
@@ -129,20 +137,22 @@ public class StrInterpolatorTest {
         assertThat(a).isEqualTo("'Key': 'Value'.'Stuff'");
     }
 
-//    @Test
-//    public void shouldExpandNestedTemplates() {
-//        String a = interp.apply("-TEMPLATE(akey,TEMPLATE(dkey,whee)-");
-//        assertThat(a).isEqualTo("-aval1-");
-//        String b = interp.apply("-TEMPLATE(unknown,TEMPLATE(bkey,whee))-");
-//        assertThat(b).isEqualTo("-bval1-");
-//    }
-//
+    @Test
+    public void shouldExpandNestedTemplates() {
+        StrInterpolator interp = new StrInterpolator(abcd);
+        String a = interp.apply("-TEMPLATE(akey,TEMPLATE(dkey,whee)-");
+        assertThat(a).isEqualTo("-aval1-");
+        String b = interp.apply("-TEMPLATE(unknown,TEMPLATE(bkey,whee))-");
+        assertThat(b).isEqualTo("-bval1-");
+    }
+
 //    @Test
 //    public void shouldGetBasicDetails() {
+//        StrInterpolator interp = new StrInterpolator(abcd);
 //        LinkedHashMap<String, String> details = interp.getTemplateDetails("-TEMPLATE(akey,TEMPLATE(dkey,whee)-");
 //        assertThat(details).containsOnlyKeys("akey","dkey");
 //        assertThat(details).containsValues("test1");
 //
 //    }
-//
+
 }

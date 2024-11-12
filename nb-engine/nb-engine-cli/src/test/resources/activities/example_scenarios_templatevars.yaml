@@ -6,5 +6,6 @@ scenarios:
 bindings:
   cycle: Identity()
   name: NumberNameToCycle()
+  rw_key: TEMPLATE(keydist,Uniform(0,1000000000)->int); ToString() -> String
 ops:
   cycle: "cycle {cycle} TEMPLATE(tvar1,def1) TEMPLATE(tvar1)\n"
