@@ -19,7 +19,6 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
 
 
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
