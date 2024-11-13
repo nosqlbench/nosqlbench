@@ -67,10 +67,10 @@ public class StrInterpolator implements Function<String, String> {
             after = substitutor.replace(raw);
         }
         if ( !original.equals(after)) {
-            NBAdvisorOutput.output(Level.WARN,"Transform <<key:value>>");
-            NBAdvisorOutput.output(Level.WARN,"From: "+original);
-            NBAdvisorOutput.output(Level.WARN,"  To: "+after);
-            NBAdvisorOutput.test("Using the deprecated template for of <<key:value>> please use TEMPLATE(key,value)");
+            NBAdvisorOutput.render(Level.WARN,"Transform <<key:value>>");
+            NBAdvisorOutput.render(Level.WARN,"From: "+original);
+            NBAdvisorOutput.render(Level.WARN,"  To: "+after);
+            NBAdvisorOutput.render(Level.WARN,"The deprecated template <<key:value>> in use. Please use TEMPLATE(key,value)");
         }
         return after;
     }

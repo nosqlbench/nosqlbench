@@ -32,7 +32,6 @@ import io.nosqlbench.adapter.cqld4.wrapper.NodeSummary;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentIndexCache;
 import io.nosqlbench.nb.api.config.standard.*;
-import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.engine.util.SSLKsFactory;
