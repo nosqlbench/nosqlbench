@@ -198,6 +198,16 @@ public class TestNBCLIOptions {
 //    }
 
     @Test
+    public void testLoggerConfigData() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{ "--log-histograms", "console.log:.*:30000"}, NBCLIOptions.Mode.ParseAllOptions);
+        for (final NBCLIOptions.LoggerConfigData histoLogger : opts.getHistoLoggerConfigs()) {
+            assertThat(histoLogger.pattern).isEqualTo(".*");
+            assertThat(histoLogger.file).isEqualTo("console.log");
+            assertThat(histoLogger.millis).isEqualTo(30000L);
+        }
+    }
+
+    @Test
     public void listWorkloads() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-workloads"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsWorkloadsList()).isTrue();

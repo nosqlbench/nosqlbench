@@ -1092,7 +1092,7 @@ public class NBCLIOptions {
                 default:
                     throw new RuntimeException(
                         NBCLIOptions.LOG_HISTOGRAMS +
-                            " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
+                            " options must be in either 'filename:regex:interval' or 'filename:regex' or 'filename' format"
                     );
             }
         }
