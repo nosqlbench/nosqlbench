@@ -25,8 +25,6 @@ import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.engine.api.activityapi.core.ActivityType;
-import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

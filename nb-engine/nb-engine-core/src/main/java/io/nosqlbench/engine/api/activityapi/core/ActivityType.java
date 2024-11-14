@@ -29,8 +29,9 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * <p>An ActivityType is the central extension point in NB for new
- * activity types drivers. It is responsible for naming the activity type, as well as providing
+ * <p>An ActivityType was the central extension point in NB for new
+ * activity types drivers. Please use DriverAdapter instead.
+ * It is responsible for naming the activity type, as well as providing
  * the input, activity, and motor instances that will be assembled into an activity.</p>
  * <p>At the very minimum, a useful implementation of an activity type should provide
  * an action dispenser. Default implementations of input and motor dispensers are provided,

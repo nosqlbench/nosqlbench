@@ -42,13 +42,13 @@ import java.util.stream.Collectors;
 public class ActivityTypeLoader {
 
     private static final Logger logger = LogManager.getLogger(ActivityTypeLoader.class);
-    private final SimpleServiceLoader<ActivityType> ACTIVITYTYPE_SPI_FINDER = new SimpleServiceLoader<ActivityType>(ActivityType.class, Maturity.Any);
+    //private final SimpleServiceLoader<ActivityType> ACTIVITYTYPE_SPI_FINDER = new SimpleServiceLoader<ActivityType>(ActivityType.class, Maturity.Any);
     private final SimpleServiceLoader<DriverAdapter> DRIVERADAPTER_SPI_FINDER = new SimpleServiceLoader<>(DriverAdapter.class, Maturity.Any);
     private final SimpleServiceLoader<DriverAdapterLoader> DRIVERADAPTERLOADER_SPI_FINDER = new SimpleServiceLoader<>(DriverAdapterLoader.class, Maturity.Any);
     private final Set<URL> jarUrls = new HashSet<>();
 
     public ActivityTypeLoader setMaturity(final Maturity maturity) {
-        this.ACTIVITYTYPE_SPI_FINDER.setMaturity(maturity);
+        this.DRIVERADAPTER_SPI_FINDER.setMaturity(maturity);
         return this;
     }
 
@@ -137,8 +137,7 @@ public class ActivityTypeLoader {
             })
             .ifPresent(this::extendClassLoader);
 
-        return getDriverAdapter(driverName,activityDef,parent)
-            .or(() -> this.ACTIVITYTYPE_SPI_FINDER.getOptionally(driverName));
+        return getDriverAdapter(driverName,activityDef,parent);
 
     }
 
