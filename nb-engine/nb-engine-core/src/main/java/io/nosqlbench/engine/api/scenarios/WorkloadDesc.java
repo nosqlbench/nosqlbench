@@ -91,20 +91,17 @@ public class WorkloadDesc implements Comparable<WorkloadDesc> {
         }
 
         if (includeScenarios) {
-            sb.append("# workload found in ");
+            sb.append("# ");
         }
-        sb.append(getYamlPath()).append("\n");
+        sb.append("workload=").append(getYamlPath().substring(1)).append("\n");
 
 
         if (includeScenarios) {
             sb.append("    # scenarios:\n");
 
             for (String scenario : getScenarioNames()) {
-                sb.append("    nb ")
-                    .append(this.getWorkloadName())
-                    .append(" ").append(scenario).append("\n");
+                sb.append("    ").append(scenario).append("\n");
             }
-
 
             if (templates.size() > 0) {
                 sb.append("        # defaults\n");
