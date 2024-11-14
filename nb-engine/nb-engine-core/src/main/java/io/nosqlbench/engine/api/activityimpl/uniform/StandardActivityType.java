@@ -20,14 +20,14 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
-import io.nosqlbench.engine.api.activityapi.core.ActivityType;
+import io.nosqlbench.engine.api.activityapi.core.LegacyActivityType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class StandardActivityType<A extends StandardActivity<?,?>> implements ActivityType<A> {
+public class StandardActivityType<A extends StandardActivity<?,?>> implements LegacyActivityType<A> {
 
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final Map<String, DriverAdapter> adapters = new HashMap<>();
