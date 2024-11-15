@@ -284,6 +284,9 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
         if (options.wantsActivityTypes()) {
             new ActivityTypeLoader().getAllSelectors().forEach(System.out::println);
+            System.out.println("\nIf the driver adapter needed is missing from this list, rebuild NB5 to include the driver adapter.\n"+
+                               "Change '<activeByDefault>false</activeByDefault>' for the driver in "+
+                               "'./nb-adapters/pom.xml' and './nb-adapters/nb-adapters-included/pom.xml' first.");
             return NBCLI.EXIT_OK;
         }
 
