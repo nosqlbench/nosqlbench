@@ -85,7 +85,10 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
             .map(l -> l.load(this, NBLabels.forKV()));
 
         if (defaultDriverName.isPresent() && defaultAdapter.isEmpty()) {
-            throw new BasicError("Unable to load default driver adapter '" + defaultDriverName.get() + '\'');
+            throw new BasicError("Unable to load '" + defaultDriverName.get() + "' driver adapter.\n"+
+                                 "Rebuild NB5 to include this driver adapter. "+
+                                 "Change '<activeByDefault>false</activeByDefault>' for the driver in "+
+                                 "'./nb-adapters/pom.xml' and './nb-adapters/nb-adapters-included/pom.xml' first.");
         }
 
         // HERE, op templates are loaded before drivers are loaded
