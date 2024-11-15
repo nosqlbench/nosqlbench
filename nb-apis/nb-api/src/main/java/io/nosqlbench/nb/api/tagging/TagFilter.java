@@ -156,6 +156,9 @@ public class TagFilter {
             for (String assignment : keyvalues) {
                 String[] keyvalue = assignment.split("[:=]", 2);
                 String key = keyvalue[0];
+                if (key.endsWith("s")) {
+                    key = key.substring(0, key.length() - 1);
+                }
                 String value = keyvalue.length > 1 ? keyvalue[1] : null;
                 if (value != null) {
                     value = unquote(value);

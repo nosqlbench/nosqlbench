@@ -78,6 +78,21 @@ public class TagFilterTest {
     }
 
     @Test
+    public void testMatchingTagKeysValueDoesMatch() {
+        Map<String, String> itemtags = new HashMap<>() {{
+            put("one", "two");
+        }};
+        TagFilter tf = new TagFilter("ones");
+        TagFilter.Result result = tf.matches(itemtags);
+        assertThat(result.matched()).isTrue();
+
+        Map<String, String> itemtags2 = new HashMap<>() {{
+            put("one", null);
+        }};
+        assertThat(tf.matches(itemtags2).matched()).isTrue();
+    }
+
+    @Test
     public void testMatchingKeyMismatchingValueDoesNotMatch() {
         Map<String, String> itemtags = new HashMap<>() {{
             put("one", "four");
