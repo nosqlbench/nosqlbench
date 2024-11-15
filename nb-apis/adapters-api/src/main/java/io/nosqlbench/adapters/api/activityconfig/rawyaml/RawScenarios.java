@@ -39,9 +39,10 @@ public class RawScenarios {
                 String scenarioName = namedEntry.getKey();
                 Object scenarioObj = namedEntry.getValue();
                 if (scenarioObj == null) {
-                    throw new BasicError("Unable to use a null value for scenario named " + scenarioName + " in yaml.");
-                }
-                if (scenarioObj instanceof CharSequence) {
+                    //throw new BasicError("Unable to use a null value for scenario named " + scenarioName + " in yaml.");
+                    Map<String, String> scenarioMap = new LinkedHashMap<>();
+                    scenarios.put(scenarioName, scenarioMap);
+                } else if (scenarioObj instanceof CharSequence) {
                     scenarios.put(scenarioName, Map.of(String.format(STEPNAME, 1), scenarioObj.toString()));
                 } else if (scenarioObj instanceof List) {
                     List<String> list = (List<String>) scenarioObj;
