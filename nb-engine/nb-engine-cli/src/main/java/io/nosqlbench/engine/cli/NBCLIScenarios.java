@@ -44,8 +44,8 @@ public class NBCLIScenarios {
 
         System.out.println(
             "## To include examples, add --include=examples\n" +
-                "## To copy any of these to your local directory, use\n" +
-                "## --include=examples --copy=examplename\n"
+            "## To copy any of these to your local directory, use\n" +
+            "## --include=examples --copy=examplename\n"
         );
 
     }
