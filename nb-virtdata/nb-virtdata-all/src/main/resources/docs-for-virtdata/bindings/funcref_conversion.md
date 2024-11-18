@@ -6,7 +6,7 @@ weight: 30
 ## DigestToByteBuffer
 
 Computes the digest of the ByteBuffer on input and stores it in the output ByteBuffer. The digestTypes available are:
-MD2, MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, SHA3-224, SHA3-256, SHA3-384, SHA3-512.
+SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, SHA3-224, SHA3-256, SHA3-384, SHA3-512.
 
 * java.nio.ByteBuffer -> DigestToByteBuffer(java.lang.String: digestType) -> java.nio.ByteBuffer
 * long -> DigestToByteBuffer(java.lang.String: digestType) -> java.nio.ByteBuffer
@@ -55,6 +55,8 @@ Convert the input value from long to short.
 
 
 ## MD5HexString
+
+[DEPRECATED] MD5 is no longer considered a secure encryption algorithm.
 
 Computes the MD5 digest of the byte image of the input long, and returns it in hexadecimal String form.
 
