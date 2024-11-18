@@ -36,7 +36,7 @@ import java.util.function.Function;
 import java.util.function.LongFunction;
 
 /**
- * <P>The DriverAdapter interface is expected to be the replacement
+ * <P>The DriverAdapter interface is the replacement
  * for ActivityTypes. This interface takes a simpler
  * approach. Specifically, all of the core logic which was being pasted into each
  * driver type is centralized, and only the necessary interfaces

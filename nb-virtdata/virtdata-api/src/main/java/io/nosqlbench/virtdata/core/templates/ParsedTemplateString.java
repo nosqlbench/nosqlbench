@@ -27,8 +27,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-// TODO: Consider using "Driver Adapter" or "Workload Adapter" instead of ActivityType
-
 /**
  * <p>
  * A ParsedTemplate represents any string provided by a user which is meant to be

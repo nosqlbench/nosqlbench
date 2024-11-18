@@ -198,24 +198,24 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.107.Final</version>
+                <version>4.1.115.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-transport-native-epoll</artifactId>
-                <version>4.1.51.Final</version>
+                <version>4.1.115.Final</version>
                 <classifier>linux-x86_64</classifier>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-transport-native-kqueue</artifactId>
-                <version>4.1.46.Final</version>
+                <version>4.1.115.Final</version>
                 <classifier>linux-x86_64</classifier>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-haproxy</artifactId>
-                <version>4.1.86.Final</version>
+                <version>4.1.115.Final</version>
             </dependency>
             <dependency>
                 <groupId>com.github.docker-java</groupId>
@@ -355,17 +355,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
                 <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <version>2.9.8</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-core</artifactId>
-                <version>2.3.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
-                <version>2.4.0-b180830.0438</version>
+                <version>2.18.1</version>
             </dependency>
             <!-- graalvm -->
 
@@ -450,13 +440,13 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>1.9.2</version>
+            <version>1.9.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.9.2</version>
+            <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
 
