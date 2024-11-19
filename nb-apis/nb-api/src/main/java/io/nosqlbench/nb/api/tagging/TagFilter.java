@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.tagging;
 import io.nosqlbench.nb.api.engine.util.Tagged;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 
 import org.apache.logging.log4j.Level;
 
@@ -205,7 +206,9 @@ public class TagFilter {
                 if (filterkey.endsWith("s")) {
                     String filterkey2 = filterkey.substring(0, filterkey.length() - 1);
                     itemval = tags.get(filterkey2);
-                    log.add("(☐, ) '" + filterkey + "' tags do not exist: trying '" + filterkey2 + "')");
+                    String message = "'" + filterkey + "' tags do not exist: try '" + filterkey2 + "'";
+                    NBAdvisorOutput.test(message);
+                    log.add("(☐, ) " + message);
                     filterkey = filterkey2;
                 }
             }
