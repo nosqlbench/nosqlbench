@@ -19,6 +19,9 @@ package io.nosqlbench.nb.api.tagging;
 import io.nosqlbench.nb.api.engine.util.Tagged;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
+
+import org.apache.logging.log4j.Level;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -198,8 +201,18 @@ public class TagFilter {
             boolean matchedKey = true;
             String filterval = filter.get(filterkey);
             String itemval = tags.get(filterkey);
-
-
+            if ( itemval == null ) {
+                // tag category not found, if ends in an 's' then try singular
+                if (filterkey.endsWith("s")) {
+                    String filterkey2 = filterkey.substring(0, filterkey.length() - 1);
+                    itemval = tags.get(filterkey2);
+                    String message = "'" + filterkey + "' tags do not exist: try '" + filterkey2 + "'";
+                    NBAdvisorOutput.test(message);
+                    log.add("(☐, ) " + message);
+                    filterkey = filterkey2;
+                }
+            }
+            
             String detail = "filter(" + filterkey +
                     ((filterval != null) ? ":" + filterval : "") + ") " +
                     "tag(" + ((tags.containsKey(filterkey) ? filterkey : "") +

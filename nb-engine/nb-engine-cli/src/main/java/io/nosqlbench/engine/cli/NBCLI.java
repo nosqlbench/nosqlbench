@@ -416,7 +416,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             "progress", options.getProgressSpec(),
             "prompush_cache", "prompush_cache.txt",
             "heartbeat", String.valueOf(options.wantsHeartbeatIntervalMs()),
-	    "advisor", String.valueOf(options.getAdvisor())
+            "advisor", String.valueOf(options.getAdvisor())
         );
 
         try (
