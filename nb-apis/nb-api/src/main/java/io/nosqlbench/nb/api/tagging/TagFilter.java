@@ -18,7 +18,10 @@ package io.nosqlbench.nb.api.tagging;
 
 import io.nosqlbench.nb.api.engine.util.Tagged;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+
+import org.apache.logging.log4j.Level;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -156,9 +159,6 @@ public class TagFilter {
             for (String assignment : keyvalues) {
                 String[] keyvalue = assignment.split("[:=]", 2);
                 String key = keyvalue[0];
-                if (key.endsWith("s")) {
-                    key = key.substring(0, key.length() - 1);
-                }
                 String value = keyvalue.length > 1 ? keyvalue[1] : null;
                 if (value != null) {
                     value = unquote(value);
@@ -201,8 +201,16 @@ public class TagFilter {
             boolean matchedKey = true;
             String filterval = filter.get(filterkey);
             String itemval = tags.get(filterkey);
-
-
+            if ( itemval == null ) {
+                // tag category not found, if ends in an 's' then try singular
+                if (filterkey.endsWith("s")) {
+                    String filterkey2 = filterkey.substring(0, filterkey.length() - 1);
+                    itemval = tags.get(filterkey2);
+                    log.add("(☐, ) '" + filterkey + "' tags do not exist: trying '" + filterkey2 + "')");
+                    filterkey = filterkey2;
+                }
+            }
+            
             String detail = "filter(" + filterkey +
                     ((filterval != null) ? ":" + filterval : "") + ") " +
                     "tag(" + ((tags.containsKey(filterkey) ? filterkey : "") +
@@ -240,6 +248,9 @@ public class TagFilter {
 
     public <T extends Tagged> Result<T> matchesTaggedResult(T item) {
         Result<Map<String, String>> matches = matches(item.getTags());
+        for ( String m : matches.matchLog ) {
+            NBAdvisorOutput.render(Level.WARN, m);
+        }
         return new Result<>(item,matches.matched(),matches.matchLog);
     }
 

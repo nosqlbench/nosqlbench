@@ -31,20 +31,20 @@ public class NBAdvisorOutput {
     }
     
     public static void test(String message) {
-	output(Level.WARN, message);
+        output(Level.WARN, message);
         if (NBAdvisorLevel.get() == NBAdvisorLevel.enforce) {
-	    throw new NBAdvisorException(message, 2);
+            throw new NBAdvisorException(message, 2);
         }
     }
     
     public static void output(Level level,String message) {
-	if (level ==  Level.INFO) {
-	    logger.info(message);
-	} else if (level == Level.WARN) {
-	    logger.warn(message);
-	} else if (level == Level.ERROR) {
-	    logger.error(message);
-}
+        if (level ==  Level.INFO) {
+            NBAdvisorOutput.logger.info(message);
+        } else if (level == Level.WARN) {
+            NBAdvisorOutput.logger.warn(message);
+        } else if (level == Level.ERROR) {
+            NBAdvisorOutput.logger.error(message);
+        }
     }
 
 }
