@@ -18,7 +18,6 @@ package io.nosqlbench.nb.api.tagging;
 
 import io.nosqlbench.nb.api.engine.util.Tagged;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
-import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import org.apache.logging.log4j.Level;
@@ -248,9 +247,6 @@ public class TagFilter {
 
     public <T extends Tagged> Result<T> matchesTaggedResult(T item) {
         Result<Map<String, String>> matches = matches(item.getTags());
-        for ( String m : matches.matchLog ) {
-            NBAdvisorOutput.render(Level.WARN, m);
-        }
         return new Result<>(item,matches.matched(),matches.matchLog);
     }
 
