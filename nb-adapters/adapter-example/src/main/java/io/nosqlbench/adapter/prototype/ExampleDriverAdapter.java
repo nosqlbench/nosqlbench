@@ -2,13 +2,13 @@ package io.nosqlbench.adapter.prototype;
 
 /*
  * Copyright (c) nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,9 +21,12 @@ package io.nosqlbench.adapter.prototype;
 import io.nosqlbench.adapter.prototype.ops.ExampleOpType1;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
+@Service(value = DriverAdapter.class, selector = "example")
 public class ExampleDriverAdapter extends BaseDriverAdapter<ExampleOpType1, ExampleSpace> {
 
     public ExampleDriverAdapter(NBComponent parentComponent, NBLabels labels) {
