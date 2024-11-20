@@ -19,10 +19,10 @@ package io.nosqlbench.adapter.cqld4.opmappers;
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4SimpleCqlStmtDispenser;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlSimpleStatement;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.util.function.LongFunction;
 
@@ -36,7 +36,7 @@ public class CqlD4CqlSimpleStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlSimpl
     }
 
     @Override
-    public OpDispenser<Cqld4CqlSimpleStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+    public OpDispenser<Cqld4CqlSimpleStatement> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
         return new Cqld4SimpleCqlStmtDispenser(adapter, targetFunction, op);
     }
 

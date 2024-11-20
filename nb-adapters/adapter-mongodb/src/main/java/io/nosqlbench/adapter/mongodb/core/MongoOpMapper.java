@@ -18,7 +18,7 @@ package io.nosqlbench.adapter.mongodb.core;
 
 import io.nosqlbench.adapter.mongodb.dispensers.MongoCommandOpDispenser;
 import io.nosqlbench.adapter.mongodb.ops.MongoDirectCommandOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
@@ -43,7 +43,7 @@ public class MongoOpMapper<MC extends MongoDirectCommandOp> implements OpMapper<
     }
 
     @Override
-    public OpDispenser<MongoDirectCommandOp> apply(ParsedOp op, LongFunction<MongoSpace> spaceInitF) {
+    public OpDispenser<MongoDirectCommandOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<MongoSpace> spaceInitF) {
 
         LongFunction<String> ctxNamer = op.getAsFunctionOr("space", "default");
 

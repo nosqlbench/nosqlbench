@@ -30,5 +30,5 @@ public abstract class Cqld4CqlBaseOpDispenser<T extends Cqld4CqlOp> extends Cqld
     }
 
     @Override
-    public abstract T getOp(long value);
+    public abstract T getOp(long cycle);
 }

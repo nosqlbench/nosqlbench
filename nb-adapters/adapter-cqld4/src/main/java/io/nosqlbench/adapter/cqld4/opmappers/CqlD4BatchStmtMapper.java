@@ -25,6 +25,7 @@ import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.util.List;
 import java.util.function.LongFunction;
@@ -40,10 +41,10 @@ public class CqlD4BatchStmtMapper<RESULT extends List<? extends Row>> extends Cq
     }
 
     @Override
-    public OpDispenser<Cqld4CqlBatchStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+    public OpDispenser<Cqld4CqlBatchStatement> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
         ParsedOp subop = op.getAsSubOp("op_template", ParsedOp.SubOpNaming.ParentAndSubKey);
         int repeat = op.getStaticValue("repeat");
-        OpDispenser<Cqld4CqlOp> od = new Cqld4CqlOpMapper(adapter).apply(op, spaceInitF);
+        OpDispenser<Cqld4CqlOp> od = new Cqld4CqlOpMapper(adapter).apply(adapterC, op, spaceInitF);
         return new CqlD4BatchStmtDispenser(adapter, op, repeat, subop, od);
     }
 

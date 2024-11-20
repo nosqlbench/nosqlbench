@@ -78,12 +78,12 @@ public interface OpDispenser<OP extends CycleOp<?>> extends LongFunction<OP>, Op
      * additional processing if a caller wants to execute the operation
      * multiple times, as for retries.
      *
-     * @param value The cycle number which serves as the seed for any
+     * @param cycle The cycle number which serves as the seed for any
      *              generated op fields to be bound into an operation.
      * @return an executable operation
      */
 
-    OP getOp(long value);
+    OP getOp(long cycle);
 
     CycleFunction<Boolean> getVerifier();
 

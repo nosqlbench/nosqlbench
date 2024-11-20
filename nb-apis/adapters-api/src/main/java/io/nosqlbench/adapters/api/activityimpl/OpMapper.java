@@ -20,8 +20,8 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
-import java.util.function.BiFunction;
 import java.util.function.LongFunction;
 
 /**
@@ -77,24 +77,86 @@ import java.util.function.LongFunction;
  * matches the driver name.
  * </p>
  *
- * @param <OPTYPE> The parameter type of the actual operation which will be used
- *            to hold all the details for executing an operation,
- *            generally something that implements {@link Runnable}.
+ * @param <OPTYPE>
+ *     The parameter type of the actual operation which will be used
+ *     to hold all the details for executing an operation,
+ *     generally something that implements {@link Runnable}.
  */
 public interface OpMapper<OPTYPE extends CycleOp<?>, SPACETYPE extends Space>
-    extends BiFunction<ParsedOp, LongFunction<SPACETYPE>, OpDispenser<? extends OPTYPE>> {
+//    extends BiFunction<ParsedOp, LongFunction<SPACETYPE>, OpDispenser<? extends OPTYPE>>
+{
 
     /**
-     * Interrogate the parsed command, and provide a new
+     * This method is responsible for interrogating the fields in the provided {@link ParsedOp} template object,
+     * determining what adapter-specific operation it maps to, and creating the associated {@link OpDispenser} for
+     * that type.
      *
-     * @param op
-     *     The {@link ParsedOp} which is the parsed version of the user-provided op template.
-     *     This contains all the fields provided by the user, as well as explicit knowledge of
-     *     which ones are static and dynamic.
+     * <H2>Implementation Notes</H2>
+     *
+     * <P>It is important to be familiar with the structure of the {@link ParsedOp}, since this is the runtime model
+     * API for an op template. It provides everything you need to turn various op fields into proper lambdas, which
+     * can then be composed together to make higher-order lambdas. The returned {@link OpDispenser} is essentially
+     * a singular {@link LongFunction} which captures all of the just-in-time construction patterns needed within.</P>
+     *
+     * <H3>Op Mapping</H3>
+     * <p>
+     * Generally speaking, implementations of this method should interrogate the op fields in the ParsedOp to determine
+     * the specific op that matches the user's intentions. It is <EM>Highly</EM> reccommended that each of the valid
+     * op types is presented as an example in the associated adapter documentation. (Each adapter must have a
+     * self-named markdown help file in it's source tree.) Good op mappers are based on specific examples which are
+     * documented, as this is the only way a user knows what op types are available.
+     * </p>
+     *
+     * <p>
+     * What determines the type of op can be based on something explicit, like the value of a {@code type} field, or it
+     * can be based on whether
+     * certain fields are present or not. Advanced implementations might take into account which fields are provided as
+     * static values and which are specified as (dynamic) bindings. The op mapping phase is meant to qualify and
+     * pre-check that the fields provided are valid and specific for a given type of operation.
+     * </p>
+     *
+     * <p>All of the effective logic for op mapping must be contained within the
+     * {@link #apply(NBComponent, ParsedOp, LongFunction)} method. This includes what happens within the constructor of
+     * any {@link OpDispenser}. What happens within {@link OpDispenser} implementations (the second phase), however,
+     * should do as little qualification of field values as possible, focusing simply on constructing the type of
+     * operation for which they are designed. This suggest the following conventions:
+     * <UL>
+     * <LI>Type-mapping logic (determine which op type) is done in the main body of
+     * {@link #apply(NBComponent, ParsedOp, LongFunction)}, and nothing else. Once the desired op dispenser (based on
+     * the intended op type) is determined, it is immediately constructed and returned.
+     * </LI>
+     * <LI>
+     * Lambda-construction logic is contained in the constructor of the returned op dispenser. This pre-bakes
+     * as much of the op construction behavior as possible, building only a single lambda to do the heavy lifting
+     * later.
+     * </LI>
+     * <LI>When {@link OpDispenser#apply(long)}</LI> is called with a cycle value, it only needs to call the lambda to
+     * return a fully-formed op, ready to be executed via its {@link CycleOp#apply(long)} method.
+     * </UL>
+     * </p>
+     *
+     * @param adapterC
+     *     The adapter component. This is passed as an {@link NBComponent} because it is not valid to rely
+     *     on the driver adapter instance directly for anything. All logic for an op should be captured
+     *     in its mapper and dispenser, and all (other) state for it should be captured within the space.
+     *     However, the mapper exists within the nosqlbench runtime as part of the component tree, so it
+     *     is included for that reason alone. (You'll need it for super construtors in some cases)
+     * @param pop
+     *     The {@link ParsedOp} which is the parsed version of the user-provided op template. This contains all the
+     *     fields provided by the user, as well as explicit knowledge of which ones are static and dynamic. It provides
+     *     convenient lambda-construction methods to streamline the effort of creating the top-level op lambda.
      * @param spaceInitF
-     * @return An OpDispenser which can be used to synthesize real operations.
+     *     This is the pre-baked lambda needed to access the specific {@link SPACETYPE} for a given cycle, if or when it
+     *     is needed. Not all op types need this, since they may have all the state needed fully captured within the
+     *     native type. For those that do, ensure that you are accessing the value through this function lazily and
+     *     only within the stack. Using this function to do anything but build more lambdas is probably a
+     *     programming error.
+     * @return An OpDispenser which can be used to synthesize directly executable operations.
      */
 
-    @Override
-    OpDispenser<OPTYPE> apply(ParsedOp op, LongFunction<SPACETYPE> spaceInitF);
+    OpDispenser<OPTYPE> apply(
+        NBComponent adapterC,
+        ParsedOp pop,
+        LongFunction<SPACETYPE> spaceInitF
+    );
 }

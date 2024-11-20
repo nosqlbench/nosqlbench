@@ -425,7 +425,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                     DriverAdapter<CycleOp<?>, Space> adapter = adapters.get(i);
                     OpMapper<CycleOp<?>, Space> opMapper = adapter.getOpMapper();
                     LongFunction<Space> spaceFunc = adapter.getSpaceFunc(pop);
-                    OpDispenser<CycleOp<?>> dispenser = opMapper.apply(pop, spaceFunc);
+                    OpDispenser<CycleOp<?>> dispenser = opMapper.apply(this, pop, spaceFunc);
                     String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
                     dispenser = OpWrappers.wrapOptionally(adapter, dispenser, pop, dryrunSpec);
 

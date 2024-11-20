@@ -19,11 +19,9 @@ package io.nosqlbench.adapter.stdout;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 public class StdoutOpMapper implements OpMapper<StdoutOp,StdoutSpace> {
@@ -35,7 +33,7 @@ public class StdoutOpMapper implements OpMapper<StdoutOp,StdoutSpace> {
     }
 
     @Override
-    public OpDispenser<StdoutOp> apply(ParsedOp op, LongFunction<StdoutSpace> spaceInitF) {
+    public OpDispenser<StdoutOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<StdoutSpace> spaceInitF) {
         return new StdoutOpDispenser(adapter,op,adapter.getSpaceFunc(op));
     }
 

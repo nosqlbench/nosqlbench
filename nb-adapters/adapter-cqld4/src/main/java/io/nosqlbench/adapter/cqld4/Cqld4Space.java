@@ -84,6 +84,7 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
         // stop insights for testing
         OptionsMap defaults = new OptionsMap();
         defaults.put(TypedDriverOption.MONITOR_REPORTING_ENABLED, false); // We don't need to do this every time we run a test or sanity check
+        defaults.put(TypedDriverOption.SESSION_LEAK_THRESHOLD, 100000000);
         DriverConfigLoader dcl = DriverConfigLoader.fromMap(defaults);
 
         // add streamlined cql parameters

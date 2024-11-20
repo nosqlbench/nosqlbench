@@ -19,18 +19,14 @@ package io.nosqlbench.adapter.s4j;
 import io.nosqlbench.adapter.s4j.dispensers.MessageConsumerOpDispenser;
 import io.nosqlbench.adapter.s4j.dispensers.MessageProducerOpDispenser;
 import io.nosqlbench.adapter.s4j.ops.S4JOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 public class S4JOpMapper implements OpMapper<S4JOp,S4JSpace> {
@@ -44,7 +40,7 @@ public class S4JOpMapper implements OpMapper<S4JOp,S4JSpace> {
     }
 
     @Override
-    public OpDispenser<S4JOp> apply(ParsedOp op, LongFunction<S4JSpace> spaceInitF) {
+    public OpDispenser<S4JOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<S4JSpace> spaceInitF) {
 
         /*
          * If the user provides a body element, then they want to provide the JSON or

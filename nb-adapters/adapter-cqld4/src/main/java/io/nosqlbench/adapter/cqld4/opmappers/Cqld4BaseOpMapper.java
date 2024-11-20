@@ -16,14 +16,13 @@
 
 package io.nosqlbench.adapter.cqld4.opmappers;
 
-import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,5 +38,5 @@ public abstract class Cqld4BaseOpMapper<T extends Cqld4BaseOp<?>> implements OpM
     }
 
     @Override
-    public abstract OpDispenser<T> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF);
+    public abstract OpDispenser<T> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceInitF);
 }

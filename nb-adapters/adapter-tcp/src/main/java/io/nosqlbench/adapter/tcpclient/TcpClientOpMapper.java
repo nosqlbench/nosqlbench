@@ -18,9 +18,8 @@ package io.nosqlbench.adapter.tcpclient;
 
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.util.function.LongFunction;
 
@@ -34,7 +33,7 @@ public class TcpClientOpMapper implements OpMapper<TcpClientOp,TcpClientAdapterS
     }
 
     @Override
-    public OpDispenser<TcpClientOp> apply(ParsedOp op, LongFunction<TcpClientAdapterSpace> spaceInitF) {
+    public OpDispenser<TcpClientOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<TcpClientAdapterSpace> spaceInitF) {
         LongFunction<String> spacefunc = op.getAsFunctionOr("space", "default");
         LongFunction<TcpClientAdapterSpace> ctxfunc = adapter.getSpaceFunc(op);
         return new TcpClientOpDispenser(adapter,op,ctxfunc);

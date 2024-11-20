@@ -23,25 +23,25 @@ import java.util.function.LongFunction;
 
 /**
  * <H2>CycleOp: f(cycle) -> T</H2>
- * <p>A CycleOp of T is an operation which takes a long input value
- * and produces a value of type T. It is implemented as
+ * <p>A CycleOp of T is an operation which takes a long input value and produces a value of type T. It is implemented as
  * {@link LongFunction} of T.</p>
  *
  * <h2>Designer Notes</h2>
  * <p>
- * If you are using the value in this call to select a specific type of behavior, it is very
- * likely a candidate for factoring into separate op implementations.
- * The {@link OpMapper}
- * and {@link OpDispenser} abstractions are meant to move
- * op type selection and scheduling to earlier in the activity.
+ * If you are using the value in this call to select a specific type of behavior, i.e.
+ * among a variety of operation types, it is very likely a candidate for factoring
+ * into separate op implementations. By using the <pre>cycle -> mapper -> dispenser -> op</pre>
+ * pattern to move as much of the initialization logic forward, you will have
+ * much more efficient operations and much cleaner code. The {@link OpMapper}
+ * and {@link OpDispenser} abstractions are meant to move op type selection and scheduling to earlier in the activity.
  * </p>
- *
  */
 public interface CycleOp<T> extends LongFunction<T> {
     /**
      * <p>Run an action for the given cycle.</p>
      *
-     * @param value The cycle value for which an operation is run
+     * @param value
+     *     The cycle value for which an operation is run
      */
     @Override
     T apply(long value);

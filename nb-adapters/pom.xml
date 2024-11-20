@@ -224,5 +224,15 @@
             </modules>
         </profile>
 
+        <profile>
+            <id>adapter-example-module</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter-example</module>
+            </modules>
+        </profile>
+
     </profiles>
 </project>

@@ -29,7 +29,7 @@ public class EmitterOpDispenserWrapper extends BaseOpDispenser<CycleOp<?>, Space
 
     public EmitterOpDispenserWrapper(DriverAdapter<CycleOp<?>,Space> adapter, ParsedOp pop,
                                      OpDispenser<? extends CycleOp<?>> realDispenser) {
-        super(adapter, pop);
+        super(adapter, pop, adapter.getSpaceFunc(pop));
         this.realDispenser = realDispenser;
     }
     @Override

@@ -22,7 +22,6 @@ import io.nosqlbench.adapter.s4j.S4JSpace;
 import io.nosqlbench.adapter.s4j.ops.S4JOp;
 import io.nosqlbench.adapter.s4j.util.*;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -63,7 +62,7 @@ public abstract  class S4JBaseOpDispenser extends BaseOpDispenser<S4JOp, S4JSpac
                                  ParsedOp op,
                                  LongFunction<String> destNameStrFunc) {
 
-        super(adapter, op);
+        super(adapter, op, adapter.getSpaceFunc(op));
 
         this.parsedOp = op;
 
