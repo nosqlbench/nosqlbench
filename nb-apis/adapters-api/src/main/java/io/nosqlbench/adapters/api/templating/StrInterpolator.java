@@ -126,14 +126,11 @@ public class StrInterpolator implements Function<String, String> {
             i++;
         }
         // Process << ... >>
-        String before = line;
         String after = substitutor.replace(line);
         while (!after.equals(line)) {
+            NBAdvisorOutput.test("<<key:value>> is deprecated. Matched in '"+line+"'.");
             line = after;
             after = substitutor.replace(line);
-        }
-        if ( !before.equals(after)) {
-            NBAdvisorOutput.test("The deprecated template format <<key:value>> is used. Please use TEMPLATE(key,value)");
         }
         return line;
     }
