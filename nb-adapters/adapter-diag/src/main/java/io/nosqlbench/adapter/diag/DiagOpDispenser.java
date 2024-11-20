@@ -40,7 +40,7 @@ public class DiagOpDispenser extends BaseOpDispenser<DiagOp,DiagSpace> implement
     private OpFunc opFuncs;
 
     public DiagOpDispenser(DiagDriverAdapter adapter, LongFunction<DiagSpace> spaceF, ParsedOp op) {
-        super(adapter,op);
+        super(adapter,op, adapter.getSpaceFunc(op));
         this.opFunc = resolveOpFunc(spaceF, op);
     }
 
@@ -129,7 +129,7 @@ public class DiagOpDispenser extends BaseOpDispenser<DiagOp,DiagSpace> implement
     }
 
     @Override
-    public DiagOp getOp(long value) {
-        return opFunc.apply(value);
+    public DiagOp getOp(long cycle) {
+        return opFunc.apply(cycle);
     }
 }

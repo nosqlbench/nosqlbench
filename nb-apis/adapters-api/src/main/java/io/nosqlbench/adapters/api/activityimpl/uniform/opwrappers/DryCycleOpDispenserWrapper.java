@@ -32,7 +32,7 @@ public class DryCycleOpDispenserWrapper<S extends Space, RESULT> extends BaseOpD
         ParsedOp pop,
         OpDispenser<CycleOp<RESULT>> realDispenser
     ) {
-        super(adapter, pop);
+        super(adapter, pop, adapter.getSpaceFunc(pop));
         this.realDispenser = realDispenser;
         logger.warn(
             "initialized {} for dry run only. " +

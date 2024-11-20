@@ -31,10 +31,7 @@ import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryManagerMXBean;
-import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.*;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,8 +45,9 @@ import java.util.function.Function;
  */
 public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd>, ExecutionResult>, NBTokenWords {
     private final static Logger logger = LogManager.getLogger(NBSession.class);
-//    private final ClientSystemMetricChecker clientMetricChecker;
+    //    private final ClientSystemMetricChecker clientMetricChecker;
     private MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
+    private OperatingSystemMXBean osbean = ManagementFactory.getOperatingSystemMXBean();
 
     private final Map<String, NBBufferedContainer> containers = new ConcurrentHashMap<>();
 
@@ -73,6 +71,17 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
         );
 
         new NBSessionSafetyMetrics(this);
+
+        OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
+
+        if (osMxBean instanceof com.sun.management.UnixOperatingSystemMXBean osb) {
+            create().gauge(
+                "open_file_descriptors",
+                () -> (double) osb.getOpenFileDescriptorCount(),
+                MetricCategory.Internals,
+                "open file descriptors"
+            );
+        }
 
         // on-heap
         create().gauge(
@@ -135,7 +144,7 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
         try (ResultContext results = new ResultContext(collector).ok()) {
             for (Cmd cmd : assembledCommands) {
                 String explanation = "in container '" + cmd.getTargetContext() + "', command '" + cmd.toString() + "'";
-                try (NBInvokableCommand command = NBCommandAssembly.resolve(cmd,this::getContext)) {
+                try (NBInvokableCommand command = NBCommandAssembly.resolve(cmd, this::getContext)) {
                     NBCommandParams params = NBCommandAssembly.paramsFor(cmd);
                     NBBufferedContainer container = getContext(cmd.getTargetContext());
                     NBCommandResult cmdResult = container.apply(command, params);

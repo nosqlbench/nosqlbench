@@ -32,7 +32,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
 
     protected DataApiOpDispenser(DriverAdapter<? extends DataApiBaseOp, DataApiSpace> adapter, ParsedOp op,
                                  LongFunction<String> targetFunction) {
-        super(adapter, op);
+        super(adapter, op, adapter.getSpaceFunc(op));
         this.targetFunction = targetFunction;
         this.spaceFunction = adapter.getSpaceFunc(op);
     }

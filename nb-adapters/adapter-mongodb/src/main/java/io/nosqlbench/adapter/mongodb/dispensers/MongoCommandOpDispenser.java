@@ -35,7 +35,7 @@ public class MongoCommandOpDispenser extends BaseOpDispenser<MongoDirectCommandO
         DriverAdapter adapter, LongFunction<MongoSpace> ctxFunc,
         ParsedOp op
     ) {
-        super(adapter, op);
+        super(adapter, op, adapter.getSpaceFunc(op));
         this.mongoOpF = createOpFunc(ctxFunc, op);
     }
 

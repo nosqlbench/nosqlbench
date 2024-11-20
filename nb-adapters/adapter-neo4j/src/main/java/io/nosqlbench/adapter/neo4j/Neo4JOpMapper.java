@@ -21,12 +21,10 @@ import io.nosqlbench.adapter.neo4j.ops.Neo4JBaseOp;
 import io.nosqlbench.adapter.neo4j.types.Neo4JOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 
@@ -38,7 +36,7 @@ public class Neo4JOpMapper implements OpMapper<Neo4JBaseOp,Neo4JSpace> {
     }
 
     @Override
-    public OpDispenser<Neo4JBaseOp> apply(ParsedOp op, LongFunction<Neo4JSpace> spaceInitF) {
+    public OpDispenser<Neo4JBaseOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<Neo4JSpace> spaceInitF) {
         TypeAndTarget<Neo4JOpType, String> typeAndTarget = op.getTypeAndTarget(Neo4JOpType.class, String.class);
         LongFunction<Neo4JSpace> spaceFunc = adapter.getSpaceFunc(op);
         return switch (typeAndTarget.enumId) {

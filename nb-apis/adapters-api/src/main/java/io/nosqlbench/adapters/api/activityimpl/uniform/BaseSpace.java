@@ -20,6 +20,11 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
+/**
+ * This example of a space uses the <EM>SelfT</EM> technique to enable
+ * the self type to be used in method signatures and return types.
+ * @param <SelfT>
+ */
 public class BaseSpace<SelfT extends BaseSpace<SelfT> > implements Space {
 
     private final String spaceName;

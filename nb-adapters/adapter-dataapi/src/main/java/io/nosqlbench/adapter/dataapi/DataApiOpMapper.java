@@ -21,9 +21,9 @@ import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.util.function.LongFunction;
@@ -38,7 +38,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
 
 
     @Override
-    public OpDispenser<DataApiBaseOp> apply(ParsedOp op, LongFunction<DataApiSpace> spaceInitF) {
+    public OpDispenser<DataApiBaseOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<DataApiSpace> spaceInitF) {
     //public OpDispenser<DataApiBaseOp> apply(ParsedOp op, LongFunction<DataApiSpace> spaceInitF) {
         TypeAndTarget<DataApiOpType, String> typeAndTarget = op.getTypeAndTarget(
             DataApiOpType.class,

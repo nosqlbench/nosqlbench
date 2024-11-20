@@ -27,7 +27,7 @@ public class TcpClientOpDispenser extends BaseOpDispenser<TcpClientOp, TcpClient
     private final LongFunction<String> outFunction;
 
     public TcpClientOpDispenser(TcpClientDriverAdapter adapter, ParsedOp cmd, LongFunction<TcpClientAdapterSpace> ctxfunc) {
-        super(adapter,cmd);
+        super(adapter,cmd, adapter.getSpaceFunc(cmd));
         this.ctxFunction = ctxfunc;
         LongFunction<Object> objectFunction = cmd.getAsRequiredFunction("stmt", Object.class);
         LongFunction<String> stringFunction = l -> objectFunction.apply(l).toString();
@@ -35,9 +35,9 @@ public class TcpClientOpDispenser extends BaseOpDispenser<TcpClientOp, TcpClient
     }
 
     @Override
-    public TcpClientOp getOp(long value) {
-        TcpClientAdapterSpace ctx = ctxFunction.apply(value);
-        String output = outFunction.apply(value);
+    public TcpClientOp getOp(long cycle) {
+        TcpClientAdapterSpace ctx = ctxFunction.apply(cycle);
+        String output = outFunction.apply(cycle);
         return new TcpClientOp(ctx,output);
     }
 }

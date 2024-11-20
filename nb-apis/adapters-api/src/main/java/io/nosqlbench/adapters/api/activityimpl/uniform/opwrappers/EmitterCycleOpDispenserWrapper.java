@@ -32,7 +32,7 @@ public class EmitterCycleOpDispenserWrapper<O,S extends Space,R> extends BaseOpD
         ParsedOp pop,
         OpDispenser<CycleOp<R>> realDispenser
     ) {
-        super(adapter, pop);
+        super(adapter, pop, adapter.getSpaceFunc(pop));
         this.realDispenser = realDispenser;
         logger.warn(
             "initialized {} for to emit the result type to stdout. ",

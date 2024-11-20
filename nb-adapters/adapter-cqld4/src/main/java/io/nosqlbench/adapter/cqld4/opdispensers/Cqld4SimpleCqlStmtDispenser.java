@@ -44,10 +44,10 @@ public class Cqld4SimpleCqlStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4Cq
     }
 
     @Override
-    public Cqld4CqlSimpleStatement getOp(long value) {
+    public Cqld4CqlSimpleStatement getOp(long cycle) {
         return new Cqld4CqlSimpleStatement(
-            this.sessionF.apply(value),
-            (SimpleStatement) stmtFunc.apply(value),
+            this.sessionF.apply(cycle),
+            (SimpleStatement) stmtFunc.apply(cycle),
             getMaxPages(),
             isRetryReplace(),
             getMaxLwtRetries(),

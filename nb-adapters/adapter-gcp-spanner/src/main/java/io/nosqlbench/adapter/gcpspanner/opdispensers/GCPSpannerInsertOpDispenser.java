@@ -66,21 +66,21 @@ public class GCPSpannerInsertOpDispenser extends GCPSpannerBaseOpDispenser<GCPSp
     /**
      * Returns a GCPSpannerInsertVectorOp instance configured with the provided value.
      *
-     * @param value the value used to configure the operation
+     * @param cycle the value used to configure the operation
      * @return a configured GCPSpannerInsertVectorOp instance
      */
     @Override
-    public GCPSpannerInsertOp getOp(long value) {
-        Mutation.WriteBuilder builder = Mutation.newInsertBuilder(targetFunction.apply(value));
-        Map<String, Object> params = queryParamsFunction.apply(value);
+    public GCPSpannerInsertOp getOp(long cycle) {
+        Mutation.WriteBuilder builder = Mutation.newInsertBuilder(targetFunction.apply(cycle));
+        Map<String, Object> params = queryParamsFunction.apply(cycle);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             builder.set(entry.getKey()).to(convertToValue(entry));
         }
         return new GCPSpannerInsertOp(
-            spaceFunction.apply(value).getSpanner(),
-            value,
+            spaceFunction.apply(cycle).getSpanner(),
+                cycle,
             builder.build(),
-            spaceFunction.apply(value).getDbClient()
+            spaceFunction.apply(cycle).getDbClient()
         );
     }
 

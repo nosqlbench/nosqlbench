@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.azureaisearch;
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -54,6 +54,7 @@ public class AzureAISearchOpMapper implements OpMapper<AzureAISearchBaseOp<?,?>,
      * Given an instance of a {@link ParsedOp} returns the appropriate
      * {@link AzureAISearchBaseOpDispenser} subclass.
      *
+     * @param adapterC
      * @param op
      *     The {@link ParsedOp} to be evaluated
      * @param spaceInitF
@@ -61,7 +62,7 @@ public class AzureAISearchOpMapper implements OpMapper<AzureAISearchBaseOp<?,?>,
      *     the op type
      */
     @Override
-    public OpDispenser<AzureAISearchBaseOp<?,?>> apply(ParsedOp op, LongFunction<AzureAISearchSpace> spaceInitF) {
+    public OpDispenser<AzureAISearchBaseOp<?,?>> apply(NBComponent adapterC, ParsedOp op, LongFunction<AzureAISearchSpace> spaceInitF) {
 
         TypeAndTarget<AzureAISearchOpType, String> typeAndTarget = op.getTypeAndTarget(AzureAISearchOpType.class,
             String.class, "type", "target");

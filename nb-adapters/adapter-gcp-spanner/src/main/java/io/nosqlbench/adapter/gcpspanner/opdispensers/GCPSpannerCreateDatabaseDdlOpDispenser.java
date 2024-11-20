@@ -78,12 +78,12 @@ public class GCPSpannerCreateDatabaseDdlOpDispenser
     /**
      * Retrieves an operation instance based on the provided value.
      *
-     * @param value
+     * @param cycle
      *     the long value used to generate the operation
      * @return a {@link GCPSpannerBaseOp} instance
      */
     @Override
-    public GCPSpannerCreateDatabaseDdlOp getOp(long value) {
-        return opFunction.apply(value);
+    public GCPSpannerCreateDatabaseDdlOp getOp(long cycle) {
+        return opFunction.apply(cycle);
     }
 }

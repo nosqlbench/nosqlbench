@@ -21,11 +21,10 @@ import io.nosqlbench.adapter.dynamodb.opdispensers.*;
 import io.nosqlbench.adapter.dynamodb.optypes.DynamoDBOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 
 import java.util.function.LongFunction;
@@ -41,7 +40,7 @@ public class DynamoDBOpMapper implements OpMapper<DynamoDBOp,DynamoDBSpace> {
     }
 
     @Override
-    public OpDispenser<DynamoDBOp> apply(ParsedOp op, LongFunction<DynamoDBSpace> spaceInitF) {
+    public OpDispenser<DynamoDBOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<DynamoDBSpace> spaceInitF) {
         int space = op.getStaticConfigOr("space", 0);
         LongFunction<DynamoDBSpace> spaceFunc = adapter.getSpaceFunc(op);
         DynamoDB ddb = spaceFunc.apply(space).getDynamoDB();

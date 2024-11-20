@@ -36,7 +36,7 @@ public class DDBPutItemOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBS
     private final LongFunction<? extends Item> itemfunc;
 
     public DDBPutItemOpDispenser(DriverAdapter adapter, DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunc) {
-        super(adapter, cmd);
+        super(adapter, cmd, adapter.getSpaceFunc(cmd));
         this.ddb = ddb;
         this.tableNameFunc = l -> targetFunc.apply(l).toString();
         if (cmd.isDefined("item")) {
@@ -51,9 +51,9 @@ public class DDBPutItemOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBS
     }
 
     @Override
-    public DynamoDBOp getOp(long value) {
-        String tablename = tableNameFunc.apply(value);
-        Item item = itemfunc.apply(value);
+    public DynamoDBOp getOp(long cycle) {
+        String tablename = tableNameFunc.apply(cycle);
+        Item item = itemfunc.apply(cycle);
         return new DDBPutItemOp(ddb,tablename,item);
     }
 }

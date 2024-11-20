@@ -141,7 +141,7 @@ public class DDBQueryOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBSpa
     private final LongFunction<QuerySpec> querySpecFunc;
 
     public DDBQueryOpDispenser(DriverAdapter adapter, DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunc) {
-        super(adapter,cmd);
+        super(adapter,cmd, adapter.getSpaceFunc(cmd));
         this.ddb = ddb;
         LongFunction<String> tableNameFunc = l -> targetFunc.apply(l).toString();
         this.tableFunc = l -> ddb.getTable(tableNameFunc.apply(l));
