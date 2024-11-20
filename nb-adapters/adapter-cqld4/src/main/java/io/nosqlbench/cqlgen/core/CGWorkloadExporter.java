@@ -235,17 +235,17 @@ public class CGWorkloadExporter implements BundledApp {
             );
             for (String component : components) {
                 Map<String, Object> additions = switch (component) {
-                    case "schema-keyspaces" -> genCreateKeyspacesOpTemplates(model, blockname);
-                    case "schema-tables" -> genCreateTablesOpTemplates(model, blockname);
-                    case "schema-types" -> genCreateTypesOpTemplates(model, blockname);
-                    case "drop-types" -> genDropTypesBlock(model, blockname);
-                    case "drop-tables" -> genDropTablesBlock(model, blockname);
-                    case "drop-keyspaces" -> genDropKeyspacesOpTemplates(model, blockname);
-                    case "truncate-tables" -> genTruncateTablesOpTemplates(model, blockname);
-                    case "insert-seq" -> genInsertOpTemplates(model, blockname);
-                    case "select-seq" -> genSelectOpTemplates(model, blockname);
-                    case "scan-10-seq" -> genScanOpTemplates(model, blockname);
-                    case "update-seq" -> genUpdateOpTemplates(model, blockname);
+                    case "schema_keyspaces" -> genCreateKeyspacesOpTemplates(model, blockname);
+                    case "schema_tables" -> genCreateTablesOpTemplates(model, blockname);
+                    case "schema_types" -> genCreateTypesOpTemplates(model, blockname);
+                    case "drop_types" -> genDropTypesBlock(model, blockname);
+                    case "drop_tables" -> genDropTablesBlock(model, blockname);
+                    case "drop_keyspaces" -> genDropKeyspacesOpTemplates(model, blockname);
+                    case "truncate_tables" -> genTruncateTablesOpTemplates(model, blockname);
+                    case "insert_seq" -> genInsertOpTemplates(model, blockname);
+                    case "select_seq" -> genSelectOpTemplates(model, blockname);
+                    case "scan_10_seq" -> genScanOpTemplates(model, blockname);
+                    case "update_seq" -> genUpdateOpTemplates(model, blockname);
                     default -> throw new RuntimeException("Unable to create block entries for " + component + ".");
                 };
                 block.putAll(additions);
@@ -325,23 +325,23 @@ public class CGWorkloadExporter implements BundledApp {
             put("default",
                     new LinkedHashMap<>() {{
                         put("schema", "run driver=cql tags=block:\"schema.*\" threads===UNDEF cycles===UNDEF");
-                        put("rampup", "run driver=cql tags=block:rampup threads=auto cycles===TEMPLATE(rampup-cycles,10000)");
-                        put("main", "run driver=cql tags=block:\"main.*\" threads=auto cycles===TEMPLATE(main-cycles,10000)");
+                        put("rampup", "run driver=cql tags=block:rampup threads=auto cycles===TEMPLATE(rampup_cycles,10000)");
+                        put("main", "run driver=cql tags=block:\"main.*\" threads=auto cycles===TEMPLATE(main_cycles,10000)");
                     }});
 
-            put("main-insert", "run driver=cql tags=block:main-insert threads=auto cycles===TEMPLATE(main-cycles,10000)");
-            put("main-select", "run driver=cql tags=block:main-select threads=auto cycles===TEMPLATE(main-cycles,10000)");
-            put("main-scan", "run driver=cql tags=block:main-scan threads=auto cycles===TEMPLATE(main-cycles,10000)");
-            put("main-update", "run driver=cql tags=block:main-update threads=auto cycles===TEMPLATE(main-cycles,10000)");
+            put("main_insert", "run driver=cql tags=block:main_insert threads=auto cycles===TEMPLATE(main_cycles,10000)");
+            put("main_select", "run driver=cql tags=block:main_select threads=auto cycles===TEMPLATE(main_cycles,10000)");
+            put("main_scan", "run driver=cql tags=block:main_scan threads=auto cycles===TEMPLATE(main_cycles,10000)");
+            put("main_update", "run driver=cql tags=block:main_update threads=auto cycles===TEMPLATE(main_cycles,10000)");
 
             put("truncate", "run driver=cql tags=block:truncate.* threads===UNDEF cycles===UNDEF");
-            put("schema-keyspaces", "run driver=cql tags=block:schema-keyspaces threads===UNDEF cycles===UNDEF");
-            put("schema-types", "run driver=cql tags=block:schema-types threads===UNDEF cycles===UNDEF");
-            put("schema-tables", "run driver=cql tags=block:schema-tables threads===UNDEF cycles===UNDEF");
+            put("schema_keyspaces", "run driver=cql tags=block:schema_keyspaces threads===UNDEF cycles===UNDEF");
+            put("schema_types", "run driver=cql tags=block:schema_types threads===UNDEF cycles===UNDEF");
+            put("schema_tables", "run driver=cql tags=block:schema_tables threads===UNDEF cycles===UNDEF");
             put("drop", "run driver=cql tags=block:drop.* threads===UNDEF cycles===UNDEF");
-            put("drop-tables", "run driver=cql tags=block:drop-tables threads===UNDEF cycles===UNDEF");
-            put("drop-types", "run driver=cql tags=block:drop-types threads===UNDEF cycles===UNDEF");
-            put("drop-keyspaces", "run driver=cql tags=block:drop-keyspaces threads===UNDEF cycles===UNDEF");
+            put("drop_tables", "run driver=cql tags=block:drop_tables threads===UNDEF cycles===UNDEF");
+            put("drop_types", "run driver=cql tags=block:drop_types threads===UNDEF cycles===UNDEF");
+            put("drop_keyspaces", "run driver=cql tags=block:drop_keyspaces threads===UNDEF cycles===UNDEF");
 
         }};
     }
