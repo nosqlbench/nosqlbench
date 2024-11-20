@@ -55,7 +55,7 @@ public class StrInterpolator implements Function<String, String> {
     @Override
     public String apply(String raw) {
         String[] lines = raw.split("\\R");
-        boolean endsWithNewline = raw.matches(".*\\R$");
+        boolean endsWithNewline = raw.endsWith("\n");
         int i = 0;
         for (String line : lines) {
             String result = matchTemplates(line);
