@@ -19,7 +19,7 @@ package io.nosqlbench.adapter.cqld4.opmappers;
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -43,6 +43,7 @@ public class Cqld4CoreOpMapper extends Cqld4BaseOpMapper<Cqld4BaseOp<?>> {
      * for it. Since the operations under the CQL driver 4.* do not follow a common type structure, we use the
      * base types in the NoSQLBench APIs and treat them somewhat more generically than with other drivers.
      *
+     * @param adapterC
      * @param op
      *     The {@link ParsedOp} which is the parsed version of the user-provided op template.
      *     This contains all the fields provided by the user, as well as explicit knowledge of
@@ -51,17 +52,17 @@ public class Cqld4CoreOpMapper extends Cqld4BaseOpMapper<Cqld4BaseOp<?>> {
      */
 
     @Override
-    public OpDispenser<Cqld4BaseOp<?>> apply(ParsedOp op, LongFunction<Cqld4Space> spaceF) {
+    public OpDispenser<Cqld4BaseOp<?>> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceF) {
         CqlD4OpType opType = CqlD4OpType.prepared;
         TypeAndTarget<CqlD4OpType, String> target = op.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
         logger.info(() -> "Using " + target.enumId + " statement form for '" + op.getName() + "'");
 
         return (OpDispenser<Cqld4BaseOp<?>>) switch (target.enumId) {
-            case raw, simple, prepared, batch -> new Cqld4CqlOpMapper(adapter).apply(op, spaceF);
-            case gremlin -> new Cqld4GremlinOpMapper(adapter, target.targetFunction).apply(op, spaceF);
-            case fluent -> new Cqld4FluentGraphOpMapper(adapter, target).apply(op, spaceF);
+            case raw, simple, prepared, batch -> new Cqld4CqlOpMapper(adapter).apply(adapterC, op, spaceF);
+            case gremlin -> new Cqld4GremlinOpMapper(adapter, target.targetFunction).apply(adapterC, op, spaceF);
+            case fluent -> new Cqld4FluentGraphOpMapper(adapter, target).apply(adapterC, op, spaceF);
             case rainbow ->
-                new CqlD4RainbowTableMapper(adapter, spaceF, target.targetFunction).apply(op, spaceF);
+                new CqlD4RainbowTableMapper(adapter, spaceF, target.targetFunction).apply(adapterC, op, spaceF);
             default -> throw new OpConfigError("Unsupported op type " + opType);
 //            case sst -> new Cqld4SsTableMapper(adapter, sessionFunc, target.targetFunction).apply(op);
         };

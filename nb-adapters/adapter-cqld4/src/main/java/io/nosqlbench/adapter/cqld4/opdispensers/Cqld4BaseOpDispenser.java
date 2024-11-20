@@ -28,7 +28,6 @@ import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.instruments.CqlOpMetrics;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -40,7 +39,6 @@ import org.apache.logging.log4j.Logger;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Map;
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp<?>> extends BaseOpDispenser<T, Cqld4Space> implements CqlOpMetrics {
@@ -57,7 +55,7 @@ public abstract class Cqld4BaseOpDispenser<T extends Cqld4BaseOp<?>> extends Bas
 
     public Cqld4BaseOpDispenser(Cqld4DriverAdapter adapter,
                                 ParsedOp op) {
-        super((DriverAdapter<? extends T, ? extends Cqld4Space>) adapter, op);
+        super((DriverAdapter<? extends T, ? extends Cqld4Space>) adapter, op, adapter.getSpaceFunc(op));
         this.sessionF = l -> adapter.getSpaceFunc(op).apply(l).getSession();
         this.maxpages = op.getStaticConfigOr("maxpages", 1);
         this.isRetryReplace = op.getStaticConfigOr("retryreplace", false);

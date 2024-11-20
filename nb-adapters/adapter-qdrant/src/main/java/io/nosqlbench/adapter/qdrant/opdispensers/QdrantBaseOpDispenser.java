@@ -50,14 +50,11 @@ public abstract class QdrantBaseOpDispenser<REQUEST,RESULT>
     private final LongFunction<REQUEST> paramF;
 
     protected QdrantBaseOpDispenser(QdrantDriverAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
-        super((DriverAdapter)adapter, op);
+        super((DriverAdapter)adapter, op, adapter.getSpaceFunc(op));
         this.qdrantSpaceFunction = adapter.getSpaceFunc(op);
         this.clientFunction = (long l) -> this.qdrantSpaceFunction.apply(l).getClient();
         this.paramF = getParamFunc(this.clientFunction,op,targetF);
         this.opF = createOpFunc(paramF, this.clientFunction, op, targetF);
-    }
-    protected QdrantDriverAdapter getDriverAdapter() {
-        return (QdrantDriverAdapter) adapter;
     }
 
     public abstract LongFunction<REQUEST> getParamFunc(
@@ -74,8 +71,8 @@ public abstract class QdrantBaseOpDispenser<REQUEST,RESULT>
     );
 
     @Override
-    public QdrantBaseOp<REQUEST, RESULT> getOp(long value) {
-        return opF.apply(value);
+    public QdrantBaseOp<REQUEST, RESULT> getOp(long cycle) {
+        return opF.apply(cycle);
     }
 
     /**

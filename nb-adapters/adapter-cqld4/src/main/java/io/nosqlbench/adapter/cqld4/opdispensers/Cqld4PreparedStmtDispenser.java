@@ -24,9 +24,7 @@ import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 import io.nosqlbench.adapter.cqld4.diagnostics.CQLD4PreparedStmtDiagnostics;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
@@ -42,6 +40,7 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPre
     private final LongFunction<Statement> stmtFunc;
     private final ParsedTemplateString stmtTpl;
     private final LongFunction<Object[]> fieldsF;
+    private final LongFunction<Cqld4Space> spaceInitF;
     private PreparedStatement preparedStmt;
     // This is a stable enum for the op template from the workload, bounded by cardinality of all op templates
     private int refkey;
@@ -50,12 +49,14 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPre
         Cqld4DriverAdapter adapter,
         ParsedOp op,
         ParsedTemplateString stmtTpl,
-        RSProcessors processors
+        RSProcessors processors,
+        LongFunction<Cqld4Space> spaceInitF
     ) {
         super(adapter, op);
         this.processors = processors;
         this.stmtTpl = stmtTpl;
         this.fieldsF = getFieldsFunction(op);
+        this.spaceInitF = spaceInitF;
         stmtFunc = createStmtFunc(fieldsF, op);
     }
 
@@ -76,7 +77,7 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPre
                 (long l) -> (sessionF.apply(l)).prepare(preparedQueryString);
 
             LongFunction<? extends Cqld4Space> lookupSpaceF =
-                (long l) -> adapter.getSpaceFunc(op).apply(l);
+                (long l) -> spaceInitF.apply(l);
 
             int refKey = op.getRefKey();
             LongFunction<PreparedStatement> cachedStatementF =

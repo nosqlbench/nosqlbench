@@ -16,17 +16,13 @@
 
 package io.nosqlbench.adapter.cqld4.opdispensers;
 
-import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.*;
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
-import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.optionhelpers.BatchTypeEnum;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlBatchStatement;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,7 +46,7 @@ public class CqlD4BatchStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlBat
         this.subop = subop;
         this.opfunc = createStmtFunc(op, subopDispenser);
         this.submapper = adapter.getOpMapper();
-        subopDispenser = submapper.apply(subop, adapter.getSpaceFunc(op));
+        subopDispenser = submapper.apply(this, subop, adapter.getSpaceFunc(op));
 
     }
 
@@ -87,10 +83,10 @@ public class CqlD4BatchStmtDispenser extends Cqld4CqlBaseOpDispenser<Cqld4CqlBat
     }
 
     @Override
-    public Cqld4CqlBatchStatement getOp(long value) {
-        Statement bstmt = opfunc.apply(value);
+    public Cqld4CqlBatchStatement getOp(long cycle) {
+        Statement bstmt = opfunc.apply(cycle);
         return new Cqld4CqlBatchStatement(
-            sessionF.apply(value),
+            sessionF.apply(cycle),
             (BatchStatement) bstmt,
             getMaxPages(),
             getMaxLwtRetries(),

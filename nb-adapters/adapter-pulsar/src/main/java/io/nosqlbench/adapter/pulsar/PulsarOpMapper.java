@@ -18,18 +18,15 @@ package io.nosqlbench.adapter.pulsar;
 
 import io.nosqlbench.adapter.pulsar.dispensers.*;
 import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 public class PulsarOpMapper implements OpMapper<PulsarOp,PulsarSpace> {
@@ -45,7 +42,7 @@ public class PulsarOpMapper implements OpMapper<PulsarOp,PulsarSpace> {
     }
 
     @Override
-    public OpDispenser<PulsarOp> apply(ParsedOp op, LongFunction<PulsarSpace> spaceInitF) {
+    public OpDispenser<PulsarOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<PulsarSpace> spaceInitF) {
         int spaceName = op.getStaticConfigOr("space", 0);
 //        PulsarSpace pulsarSpace = spaceCache.get(spaceName);
         PulsarSpace pulsarSpace = adapter.getSpaceFunc(op).apply(spaceName);

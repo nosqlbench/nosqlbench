@@ -37,7 +37,7 @@ public class HttpOpDispenser extends BaseOpDispenser<HttpOp, HttpSpace> {
 
 
     public HttpOpDispenser(DriverAdapter adapter, LongFunction<HttpSpace> ctxF, ParsedOp op) {
-        super(adapter, op);
+        super(adapter, op, adapter.getSpaceFunc(op));
         opFunc = getOpFunc(ctxF, op);
     }
 
@@ -128,8 +128,8 @@ public class HttpOpDispenser extends BaseOpDispenser<HttpOp, HttpSpace> {
     }
 
     @Override
-    public HttpOp getOp(long value) {
-        HttpOp op = this.opFunc.apply(value);
+    public HttpOp getOp(long cycle) {
+        HttpOp op = this.opFunc.apply(cycle);
         return op;
 
     }

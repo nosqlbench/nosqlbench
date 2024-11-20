@@ -22,8 +22,8 @@ import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.util.function.LongFunction;
 
@@ -34,6 +34,6 @@ public abstract class Cqld4CqlBaseOpMapper<T extends Cqld4CqlOp> extends Cqld4Ba
     }
 
     @Override
-    public abstract OpDispenser<T> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF);
+    public abstract OpDispenser<T> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceInitF);
 
 }

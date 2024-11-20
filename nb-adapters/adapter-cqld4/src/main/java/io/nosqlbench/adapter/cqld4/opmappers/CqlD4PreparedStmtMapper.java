@@ -16,19 +16,14 @@
 
 package io.nosqlbench.adapter.cqld4.opmappers;
 
-import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.*;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4PreparedStmtDispenser;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
 import io.nosqlbench.adapter.cqld4.processors.CqlFieldCaptureProcessor;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.params.ParamsParser;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
@@ -49,7 +44,11 @@ public class CqlD4PreparedStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlPrepar
     }
 
     @Override
-    public OpDispenser<Cqld4CqlPreparedStatement> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+    public OpDispenser<Cqld4CqlPreparedStatement> apply(
+        NBComponent adapterC,
+        ParsedOp op,
+        LongFunction<Cqld4Space> spaceInitF
+    ) {
         ParsedTemplateString stmtTpl = op.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
             "No statement was found in the op template:" + op
         ));
@@ -69,7 +68,7 @@ public class CqlD4PreparedStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlPrepar
             });
         });
 
-        return new Cqld4PreparedStmtDispenser(adapter, op, stmtTpl, processors);
+        return new Cqld4PreparedStmtDispenser(adapter, op, stmtTpl, processors, spaceInitF);
     }
 
 }

@@ -32,7 +32,7 @@ public class RawDynamoDBOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDB
     private final DynamoDB ddb;
 
     public RawDynamoDBOpDispenser(DriverAdapter adapter, DynamoDB ddb, ParsedOp pop) {
-        super(adapter,pop);
+        super(adapter,pop, adapter.getSpaceFunc(pop));
         this.ddb = ddb;
 
         String bodytype = pop.getValueType("body").getSimpleName();
@@ -44,8 +44,8 @@ public class RawDynamoDBOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDB
     }
 
     @Override
-    public DynamoDBOp getOp(long value) {
-        String body = jsonFunction.apply(value);
+    public DynamoDBOp getOp(long cycle) {
+        String body = jsonFunction.apply(cycle);
         return new RawDynamodOp(ddb,body);
     }
 }

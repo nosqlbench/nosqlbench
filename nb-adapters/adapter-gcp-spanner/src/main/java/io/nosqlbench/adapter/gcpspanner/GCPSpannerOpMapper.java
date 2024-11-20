@@ -21,13 +21,12 @@ import io.nosqlbench.adapter.gcpspanner.ops.GCPSpannerBaseOp;
 import io.nosqlbench.adapter.gcpspanner.types.GCPSpannerOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?,?>, GCPSpannerSpace> {
@@ -49,6 +48,7 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?,?>, GCPSp
      * Given an instance of a {@link ParsedOp} returns the appropriate
      * {@link GCPSpannerBaseOpDispenser} subclass.
      *
+     * @param adapterC
      * @param op
      *     The {@link ParsedOp} to be evaluated
      * @param spaceInitF
@@ -56,7 +56,7 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?,?>, GCPSp
      *     the op type
      */
     @Override
-    public OpDispenser<GCPSpannerBaseOp<?,?>> apply(ParsedOp op, LongFunction<GCPSpannerSpace> spaceInitF) {
+    public OpDispenser<GCPSpannerBaseOp<?,?>> apply(NBComponent adapterC, ParsedOp op, LongFunction<GCPSpannerSpace> spaceInitF) {
         TypeAndTarget<GCPSpannerOpType, String> typeAndTarget = op.getTypeAndTarget(GCPSpannerOpType.class,
             String.class, "type", "target");
         logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");

@@ -22,10 +22,8 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
-import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlOp;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4ScriptGraphOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.Optional;
@@ -39,7 +37,7 @@ public class Cqld4GremlinOpDispenser extends BaseOpDispenser<Cqld4BaseOp<?>, Cql
 
     public Cqld4GremlinOpDispenser(Cqld4DriverAdapter adapter,
                                    LongFunction<CqlSession> sessionFunc, LongFunction<String> targetFunction, ParsedOp cmd) {
-        super(adapter,cmd);
+        super(adapter,cmd, adapter.getSpaceFunc(cmd));
         this.sessionFunc = sessionFunc;
         this.diagFunc = cmd.getAsFunctionOr("diag", 0L);
 
@@ -59,12 +57,12 @@ public class Cqld4GremlinOpDispenser extends BaseOpDispenser<Cqld4BaseOp<?>, Cql
     }
 
     @Override
-    public Cqld4ScriptGraphOp getOp(long value) {
-        ScriptGraphStatement stmt = stmtFunc.apply(value);
-        if (diagFunc.apply(value)>0L) {
+    public Cqld4ScriptGraphOp getOp(long cycle) {
+        ScriptGraphStatement stmt = stmtFunc.apply(cycle);
+        if (diagFunc.apply(cycle)>0L) {
             System.out.println("## GREMLIN DIAG: ScriptGraphStatement on graphname(" + stmt.getGraphName() + "):\n" + stmt.getScript());
         }
-        return new Cqld4ScriptGraphOp(sessionFunc.apply(value), stmt);
+        return new Cqld4ScriptGraphOp(sessionFunc.apply(cycle), stmt);
     }
 
 }
