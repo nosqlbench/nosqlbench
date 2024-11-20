@@ -68,7 +68,7 @@ public abstract class PulsarBaseOpDispenser extends BaseOpDispenser<PulsarOp, Pu
                                     final LongFunction<String> tgtNameFunc,
                                     final PulsarSpace pulsarSpace) {
 
-        super(adapter, op);
+        super(adapter, op, adapter.getSpaceFunc(op));
 
         parsedOp = op;
         this.tgtNameFunc = tgtNameFunc;

@@ -55,14 +55,14 @@ public class Cqld4FluentGraphOpDispenser extends Cqld4BaseOpDispenser<Cqld4Fluen
     }
 
     @Override
-    public Cqld4FluentGraphOp getOp(long value) {
-        String graphname = graphnameFunc.apply(value);
+    public Cqld4FluentGraphOp getOp(long cycle) {
+        String graphname = graphnameFunc.apply(cycle);
         Script script = tlScript.get();
-        Map<String, Object> allMap = virtdataBindings.getAllMap(value);
+        Map<String, Object> allMap = virtdataBindings.getAllMap(cycle);
         allMap.forEach((k,v) -> script.getBinding().setVariable(k,v));
         GraphTraversal<Vertex,Vertex> v = (GraphTraversal<Vertex, Vertex>) script.run();
         FluentGraphStatement fgs = new FluentGraphStatementBuilder(v).setGraphName(graphname).build();
-        return new Cqld4FluentGraphOp(sessionF.apply(value),fgs);
+        return new Cqld4FluentGraphOp(sessionF.apply(cycle),fgs);
     }
 
 

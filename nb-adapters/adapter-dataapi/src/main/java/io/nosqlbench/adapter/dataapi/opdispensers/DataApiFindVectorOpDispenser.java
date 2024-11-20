@@ -56,7 +56,7 @@ public class DataApiFindVectorOpDispenser extends DataApiOpDispenser {
     }
 
     @Override
-    public DataApiBaseOp getOp(long value) {
-        return opFunction.apply(value);
+    public DataApiBaseOp getOp(long cycle) {
+        return opFunction.apply(cycle);
     }
 }

@@ -62,7 +62,7 @@ public abstract  class KafkaBaseOpDispenser extends BaseOpDispenser<KafkaOp, Kaf
                                    final LongFunction<String> topicNameStrFunc,
                                    final KafkaSpace kafkaSpace) {
 
-        super(adapter, op);
+        super(adapter, op, adapter.getSpaceFunc(op));
 
         parsedOp = op;
         this.kafkaSpace = kafkaSpace;

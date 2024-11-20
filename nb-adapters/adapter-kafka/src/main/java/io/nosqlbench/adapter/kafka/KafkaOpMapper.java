@@ -19,8 +19,7 @@ package io.nosqlbench.adapter.kafka;
 import io.nosqlbench.adapter.kafka.dispensers.MessageConsumerOpDispenser;
 import io.nosqlbench.adapter.kafka.dispensers.MessageProducerOpDispenser;
 import io.nosqlbench.adapter.kafka.ops.KafkaOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
@@ -29,7 +28,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import java.util.function.IntFunction;
+
 import java.util.function.LongFunction;
 
 public class KafkaOpMapper implements OpMapper<KafkaOp,KafkaSpace> {
@@ -43,7 +42,7 @@ public class KafkaOpMapper implements OpMapper<KafkaOp,KafkaSpace> {
     }
 
     @Override
-    public OpDispenser<KafkaOp> apply(ParsedOp op, LongFunction<KafkaSpace> spaceInitF) {
+    public OpDispenser<KafkaOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<KafkaSpace> spaceInitF) {
         KafkaSpace kafkaSpace = adapter.getSpaceFunc(op).apply(op.getStaticConfigOr("space",0));
 
         /*

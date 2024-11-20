@@ -39,7 +39,7 @@ public abstract class AzureAISearchBaseOpDispenser<REQUEST,RESULT>
 	@SuppressWarnings("rawtypes")
 	protected AzureAISearchBaseOpDispenser(AzureAISearchDriverAdapter adapter, ParsedOp op,
 			LongFunction<String> targetF) {
-		super((DriverAdapter) adapter, op);
+		super((DriverAdapter) adapter, op, adapter.getSpaceFunc(op));
 		this.azureAISearchSpaceFunction = adapter.getSpaceFunc(op);
 		this.clientFunction = (long l) -> {
 			try {
@@ -53,10 +53,6 @@ public abstract class AzureAISearchBaseOpDispenser<REQUEST,RESULT>
 		this.opF = createOpFunc(paramF, this.clientFunction, op, targetF);
 	}
 
-	protected AzureAISearchDriverAdapter getDriverAdapter() {
-		return (AzureAISearchDriverAdapter) adapter;
-	}
-
 	public abstract LongFunction<REQUEST> getParamFunc(LongFunction<SearchIndexClient> clientF, ParsedOp op,
 			LongFunction<String> targetF);
 
@@ -64,8 +60,8 @@ public abstract class AzureAISearchBaseOpDispenser<REQUEST,RESULT>
 			LongFunction<SearchIndexClient> clientF, ParsedOp op, LongFunction<String> targetF);
 
 	@Override
-	public AzureAISearchBaseOp<REQUEST,RESULT> getOp(long value) {
-		return opF.apply(value);
+	public AzureAISearchBaseOp<REQUEST,RESULT> getOp(long cycle) {
+		return opF.apply(cycle);
 	}
 
 }

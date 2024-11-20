@@ -28,7 +28,7 @@ public class StdoutOpDispenser extends BaseOpDispenser<StdoutOp,StdoutSpace> {
     private final LongFunction<String> outFunction;
 
     public StdoutOpDispenser(DriverAdapter adapter, ParsedOp cmd, LongFunction<StdoutSpace> ctxfunc) {
-        super(adapter,cmd);
+        super(adapter,cmd, adapter.getSpaceFunc(cmd));
         this.ctxfunc = ctxfunc;
         LongFunction<Object> objectFunction = cmd.getAsRequiredFunction("stmt", Object.class);
         LongFunction<String> stringfunc = l -> objectFunction.apply(l).toString();
@@ -37,9 +37,9 @@ public class StdoutOpDispenser extends BaseOpDispenser<StdoutOp,StdoutSpace> {
     }
 
     @Override
-    public StdoutOp getOp(long value) {
-        StdoutSpace ctx = ctxfunc.apply(value);
-        String output = outFunction.apply(value);
+    public StdoutOp getOp(long cycle) {
+        StdoutSpace ctx = ctxfunc.apply(cycle);
+        String output = outFunction.apply(cycle);
         return new StdoutOp(ctx,output);
     }
 }

@@ -20,14 +20,11 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import io.nosqlbench.adapter.mongodb.core.MongoSpace;
 import io.nosqlbench.adapter.mongodb.core.MongodbDriverAdapter;
-import io.nosqlbench.adapter.mongodb.ops.MongoDbUpdateOp;
 import io.nosqlbench.adapter.mongodb.ops.MongoDirectCommandOp;
 import io.nosqlbench.adapter.mongodb.ops.MongoOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.bson.BsonDocument;
-import org.bson.conversions.Bson;
 
 import java.util.function.LongFunction;
 
@@ -41,7 +38,7 @@ public class MongoDbUpdateOpDispenser extends BaseOpDispenser<MongoOp<?>, MongoS
     private final LongFunction<String> collectionF;
 
     public MongoDbUpdateOpDispenser(MongodbDriverAdapter adapter, ParsedOp pop, LongFunction<String> collectionF) {
-        super(adapter, pop);
+        super(adapter, pop, adapter.getSpaceFunc(pop));
         this.collectionF = collectionF;
         this.spaceF = adapter.getSpaceFunc(pop);
         this.opF = createOpF(pop);
@@ -55,8 +52,8 @@ public class MongoDbUpdateOpDispenser extends BaseOpDispenser<MongoOp<?>, MongoS
     }
 
     @Override
-    public MongoOp<?> getOp(long value) {
-        MongoOp<?> op = opF.apply(value);
+    public MongoOp<?> getOp(long cycle) {
+        MongoOp<?> op = opF.apply(cycle);
         return op;
     }
 

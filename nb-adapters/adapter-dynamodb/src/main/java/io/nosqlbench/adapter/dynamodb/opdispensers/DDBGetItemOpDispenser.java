@@ -37,7 +37,7 @@ public class DDBGetItemOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBS
     private final LongFunction<GetItemSpec> getItemSpecFunc;
 
     public DDBGetItemOpDispenser(DriverAdapter adapter, DynamoDB ddb, ParsedOp cmd, LongFunction<?> targetFunction) {
-        super(adapter,cmd);
+        super(adapter,cmd, adapter.getSpaceFunc(cmd));
         this.ddb = ddb;
         this.targetTableFunction = l -> ddb.getTable(targetFunction.apply(l).toString());
         this.getItemSpecFunc = resolveGetItemSpecFunction(cmd);
@@ -83,9 +83,9 @@ public class DDBGetItemOpDispenser extends BaseOpDispenser<DynamoDBOp, DynamoDBS
     }
 
     @Override
-    public DDBGetItemOp getOp(long value) {
-        Table table = targetTableFunction.apply(value);
-        GetItemSpec getitemSpec = getItemSpecFunc.apply(value);
+    public DDBGetItemOp getOp(long cycle) {
+        Table table = targetTableFunction.apply(cycle);
+        GetItemSpec getitemSpec = getItemSpecFunc.apply(cycle);
         return new DDBGetItemOp(ddb, table, getitemSpec);
     }
 }

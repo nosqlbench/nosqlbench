@@ -18,8 +18,8 @@ package io.nosqlbench.adapter.diag;
 
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.NBReconfigurable;
@@ -38,7 +38,7 @@ public class DiagOpMapper implements OpMapper<DiagOp,DiagSpace>, NBReconfigurabl
     }
 
     @Override
-    public OpDispenser<DiagOp> apply(ParsedOp op, LongFunction<DiagSpace> spaceInitF) {
+    public OpDispenser<DiagOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<DiagSpace> spaceInitF) {
         LongFunction<DiagSpace> spaceF = adapter.getSpaceFunc(op);
         DiagOpDispenser dispenser = new DiagOpDispenser(adapter,spaceF,op);
         dispensers.put(op.getName(),dispenser);

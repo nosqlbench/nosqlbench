@@ -23,6 +23,7 @@ import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlSimpleStatement;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +39,7 @@ public class Cqld4CqlOpMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlOp> {
     }
 
     @Override
-    public OpDispenser<Cqld4CqlOp> apply(ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+    public OpDispenser<Cqld4CqlOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
         CqlD4OpType opType = CqlD4OpType.prepared;
         TypeAndTarget<CqlD4OpType, String> target = op.getTypeAndTarget(CqlD4OpType.class, String.class, "type", "stmt");
         logger.info(() -> "Using " + target.enumId + " statement form for '" + op.getName() + "'");
@@ -46,13 +47,13 @@ public class Cqld4CqlOpMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlOp> {
         return (OpDispenser<Cqld4CqlOp>) switch (target.enumId) {
             case raw -> {
                 CqlD4RawStmtMapper cqlD4RawStmtMapper = new CqlD4RawStmtMapper(adapter, target.targetFunction);
-                OpDispenser<Cqld4CqlSimpleStatement> apply = cqlD4RawStmtMapper.apply(op, spaceInitF);
+                OpDispenser<Cqld4CqlSimpleStatement> apply = cqlD4RawStmtMapper.apply(adapterC, op, spaceInitF);
                 yield apply;
             }
-            case simple -> new CqlD4CqlSimpleStmtMapper(adapter, target.targetFunction).apply(op, spaceInitF);
-            case prepared -> new CqlD4PreparedStmtMapper(adapter, target).apply(op, spaceInitF);
+            case simple -> new CqlD4CqlSimpleStmtMapper(adapter, target.targetFunction).apply(adapterC, op, spaceInitF);
+            case prepared -> new CqlD4PreparedStmtMapper(adapter, target).apply(adapterC, op, spaceInitF);
 
-            case batch -> new CqlD4BatchStmtMapper(adapter, target).apply(op, spaceInitF);
+            case batch -> new CqlD4BatchStmtMapper(adapter, target).apply(adapterC, op, spaceInitF);
             default ->
                 throw new OpConfigError("Unsupported op type for CQL category of statement forms:" + target.enumId);
         };

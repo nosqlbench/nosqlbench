@@ -23,7 +23,6 @@ import io.nosqlbench.adapter.amqp.exception.AmqpAdapterUnexpectedException;
 import io.nosqlbench.adapter.amqp.ops.AmqpTimeTrackOp;
 import io.nosqlbench.adapter.amqp.util.AmqpAdapterMetrics;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
@@ -49,7 +48,7 @@ public abstract  class AmqpBaseOpDispenser extends BaseOpDispenser<AmqpTimeTrack
     protected AmqpBaseOpDispenser(final AmqpDriverAdapter adapter,
                                   final ParsedOp op) {
 
-        super(adapter, op);
+        super(adapter, op, adapter.getSpaceFunc(op));
         parsedOp = op;
 
         amqpAdapterMetrics = new AmqpAdapterMetrics(this, this);

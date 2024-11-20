@@ -27,6 +27,7 @@ import io.nosqlbench.adapter.cqld4.optypes.Cqld4FluentGraphOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.virtdata.core.bindings.Bindings;
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
@@ -58,7 +59,7 @@ public class Cqld4FluentGraphOpMapper extends Cqld4BaseOpMapper<Cqld4FluentGraph
     }
 
     @Override
-    public OpDispenser<Cqld4FluentGraphOp> apply(ParsedOp op, LongFunction<Cqld4Space> cqld4SpaceLongFunction) {
+    public OpDispenser<Cqld4FluentGraphOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> cqld4SpaceLongFunction) {
         GraphTraversalSource g = DseGraph.g;
 
         ParsedTemplateString fluent = op.getAsTemplate(target.field).orElseThrow();

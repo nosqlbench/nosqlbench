@@ -83,11 +83,11 @@ public class GCPSpannerDropDatabaseDdlOpDispenser extends GCPSpannerBaseOpDispen
     /**
      * Retrieves an operation instance based on the provided value.
      *
-     * @param value the long value used to generate the operation
+     * @param cycle the long value used to generate the operation
      * @return a {@link GCPSpannerBaseOp} instance
      */
     @Override
-    public GCPSpannerDropDatabaseDdlOp getOp(long value) {
-        return opFunction.apply(value);
+    public GCPSpannerDropDatabaseDdlOp getOp(long cycle) {
+        return opFunction.apply(cycle);
     }
 }

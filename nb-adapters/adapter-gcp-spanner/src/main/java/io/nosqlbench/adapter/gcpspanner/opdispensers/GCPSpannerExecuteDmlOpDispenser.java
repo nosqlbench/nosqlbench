@@ -77,11 +77,11 @@ public class GCPSpannerExecuteDmlOpDispenser extends GCPSpannerBaseOpDispenser<G
     /**
      * Retrieves the GCP Spanner operation for the given value.
      *
-     * @param value the input value
+     * @param cycle the input value
      * @return the GCP Spanner operation
      */
     @Override
-    public GCPSpannerExecuteDmlOp getOp(long value) {
-        return opFunction.apply(value);
+    public GCPSpannerExecuteDmlOp getOp(long cycle) {
+        return opFunction.apply(cycle);
     }
 }

@@ -42,7 +42,7 @@ public abstract class Neo4JBaseOpDispenser extends BaseOpDispenser<Neo4JBaseOp, 
     protected final LongFunction<AsyncSession> asyncSessionFunc;
 
     public Neo4JBaseOpDispenser(Neo4JDriverAdapter adapter, ParsedOp op, LongFunction<Neo4JSpace> spaceFunc, String requiredTemplateKey) {
-        super(adapter, op);
+        super(adapter, op, adapter.getSpaceFunc(op));
         this.spaceFunc = spaceFunc;
         this.cypherFunc = op.getAsRequiredFunction(requiredTemplateKey);
         this.paramFunc = createParamFunc(op);
