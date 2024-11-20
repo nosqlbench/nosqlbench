@@ -20,7 +20,6 @@ import com.amazonaws.util.StringInputStream;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
-import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 import io.nosqlbench.nb.api.advisor.NBAdvisorException;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDocList;
@@ -71,9 +70,6 @@ public class OpsLoader {
         logger.trace(() -> "Applying string transformer to data:" + sourceData);
         StrInterpolator transformer = new StrInterpolator(params);
         String data = transformer.apply(sourceData);
-        NBAdvisorOutput.render(Level.INFO,"Transform:");
-        NBAdvisorOutput.render(Level.INFO,"From: "+sourceData);
-        NBAdvisorOutput.render(Level.INFO,"  To: "+data);
         if (srcuri!=null) {
             logger.info("workload URI: '" + srcuri + "'");
         }

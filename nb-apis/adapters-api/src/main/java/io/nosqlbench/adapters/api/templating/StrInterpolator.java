@@ -67,10 +67,7 @@ public class StrInterpolator implements Function<String, String> {
             after = substitutor.replace(raw);
         }
         if ( !original.equals(after)) {
-            NBAdvisorOutput.render(Level.WARN,"Transform <<key:value>>");
-            NBAdvisorOutput.render(Level.WARN,"From: "+original);
-            NBAdvisorOutput.render(Level.WARN,"  To: "+after);
-            NBAdvisorOutput.render(Level.WARN,"The deprecated template <<key:value>> in use. Please use TEMPLATE(key,value)");
+            NBAdvisorOutput.test("The deprecated template format <<key:value>> is used. Please use TEMPLATE(key,value)");
         }
         return after;
     }
@@ -89,9 +86,19 @@ public class StrInterpolator implements Function<String, String> {
         String line = original;
         int length = line.length();
         int i = 0;
+        boolean newline = true;
+        boolean comment = false;
         while (i < length) {
+            // Detect state
+            if (line.startsWith("\n", i)) {
+                newline = true;
+                comment = false;
+            } else if (newline) {
+                comment = line.startsWith("#",i);
+                newline = false;
+            }
             // Detect an instance of "TEMPLATE("
-            if (line.startsWith("TEMPLATE(", i)) {
+            if ( !comment && !newline && line.startsWith("TEMPLATE(", i)) {
                 int start = i + "TEMPLATE(".length();
                 int openParensCount = 1; // We found one '(' with "TEMPLATE("
                 // Find the corresponding closing ')' for this TEMPLATE instance

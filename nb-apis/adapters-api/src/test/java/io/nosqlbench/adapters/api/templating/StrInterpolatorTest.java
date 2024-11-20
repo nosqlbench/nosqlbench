@@ -86,6 +86,13 @@ public class StrInterpolatorTest {
     }
 
     @Test
+    public void shouldMatchWithComments() {
+        StrInterpolator interp = new StrInterpolator(abcd);
+        String a = interp.apply("TEMPLATE(start,START)\n# TEMPLATE(blahblah,blah)\nTEMPLATE(keydist,Uniform(0,1000000000)->int);");
+        assertThat(a).isEqualTo("START\n# TEMPLATE(blahblah,blah)\nUniform(0,1000000000)->int;");
+    }
+
+    @Test
     public void shouldReturnWarningWhenUnmatched() {
         StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("<<nokeymatchesthis>>");

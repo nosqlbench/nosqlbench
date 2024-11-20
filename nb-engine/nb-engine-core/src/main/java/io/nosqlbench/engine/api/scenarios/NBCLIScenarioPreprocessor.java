@@ -440,9 +440,19 @@ public class NBCLIScenarioPreprocessor {
     public static Map<String, String> matchTemplates(String line, Map<String, String> templates) {
         int length = line.length();
         int i = 0;
+        boolean newline = true;
+        boolean comment = false;
         while (i < length) {
+            // Detect state
+            if (line.startsWith("\n", i)) {
+                newline = true;
+                comment = false;
+            } else if (newline) {
+                comment = line.startsWith("#",i);
+                newline = false;
+            }
             // Detect an instance of "TEMPLATE("
-            if (line.startsWith("TEMPLATE(", i)) {
+            if ( !comment && !newline && line.startsWith("TEMPLATE(", i)) {
                 int start = i + "TEMPLATE(".length();
                 int openParensCount = 1; // We found one '(' with "TEMPLATE("
                 // Find the corresponding closing ')' for this TEMPLATE instance
