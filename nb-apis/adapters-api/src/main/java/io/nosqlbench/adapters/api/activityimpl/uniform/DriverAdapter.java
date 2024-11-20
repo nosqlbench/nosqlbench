@@ -36,70 +36,95 @@ import java.util.function.Function;
 import java.util.function.LongFunction;
 
 /**
- * <P>The DriverAdapter interface is expected to be the replacement
- * for ActivityTypes. This interface takes a simpler
- * approach. Specifically, all of the core logic which was being pasted into each
- * driver type is centralized, and only the necessary interfaces
- * needed for construction new operations and shared context are exposed.
- * This means all drivers can now benefit from cross-cutting enhancements
- * in the core implementation.
+ * <P>The DriverAdapter interface is the top level API for implementing
+ * operations in NoSQLBench. It defines the related APIs needed to fully realized an adapter
+ * at runtime. A driver adapter can map op templates from YAML form to a fully executable
+ * form in native Java code, just as an application might do with a native driver. It can also
+ * do trivial operations, like simply calling {@code System.out.println(...)}. When you specify an adapter by name,
+ * you are choosing both the available operations, and the rules for converting a YAML op template into those
+ * operations. This is a two-step process: The adapter provides mapping logic for converting high-level templates from
+ * users into op types, and separate dispensing logic which can efficiently create these ops at runtime. When used
+ * together, they power <EM>op synthesis</EM> -- efficient and deterministic construction of runtime operations using
+ * procedural generation methods.
+ * </p>
+ *
+ * <p>
+ * Generally speaking, a driver adapter is responsible for
+ * <UL>
+ * <LI>Defining a class type for holding related state known as a {@link Space}.
+ * <UL><LI>The type of this is specified as
+ * generic parameter {@link SPACETYPE}.</LI></UL></LI>
+ * <LI>Defining a factory method for constructing an instance of the space.</LI>
+ * <LI>Recognizing the op templates that are documented for it via an {@link OpMapper}
+ * and assigning them to an op implementation.
+ * <UL><LI>The base type of these ops is specified as generic
+ * parameter {@link OPTYPE}.</LI></UL>
+ * </LI>
+ * <LI>Constructing dispensers for each matching op implementation with a matching {@link OpDispenser}</LI>
+ * implementation.
+ * </UL>
+ * <P>At runtime, the chain of these together ({@code cycle -> op mapping -> op dispensing -> op}) is cached
+ * as a look-up table of op dispensers. This results in the simpler logical form {@code cycle -> op synthesis ->
+ * operation}.
  * </P>
  *
- * @param <OPTYPE> The type of Runnable operation which will be used to wrap
- *            all operations for this driver adapter. This allows you to
- *            add context or features common to all operations of this
- *            type.
- * @param <SPACETYPE> The type of context space used by this driver to hold
- *            cached instances of clients, session, or other native driver
- *            esoterica. This is the shared state which might be needed
- *            during construction of R type operations, or even for individual
- *            operations.
+ * <H3>Variable Naming Conventions</H3>
+ * <p>
+ * Within the related {@link DriverAdapter} APIs, the following conventions are (more often) used, and will be found
+ * everywhere:
+ * <UL>
+ * <LI>{@code namedF} describes a namedFunction variable. Functional patterns are used everywhere in these APIs
+ * .</LI>
+ * <LI>{@code namedC} describes a namedComponent variable. All key elements of the nosqlbench runtime are
+ * part of a component tree.</LI>
+ * <LI>{@code pop} describes a {@link ParsedOp} instance.</LI>
+ * </UL>
+ * </P>
+ * <H3>Generic Parameters</H3>
+ * <p>
+ * When a new driver adapter is defined with the generic parameters below, it becomes easy to build out a matching
+ * DriverAdapter with any modern IDE.</P>
+ *
+ * @param <OPTYPE>
+ *     The type of {@link CycleOp} which will be used to wrap all operations for this driver adapter. This allows you
+ *     to add context or features common to all operations of this type. This can be a simple <a
+ *     href="https://en.wikipedia.org/wiki/Marker_interface_pattern">Marker</a> interface, or it can be something more
+ *     concrete that captures common logic or state across all the operations used for a given adapter. It is highly
+ *     advised to <EM>NOT</EM> leave it as simply {@code CycleOp<?>}, since specific op implementations offer much
+ *     better performance.
+ * @param <SPACETYPE>
+ *     The type of context space used by this driver to hold cached instances of clients, session, or other native
+ *     driver state. This is the shared state which might be needed during construction operations for an adapter.
+ *     <EM>No other mechanism is provided nor intended for holding adapter-specific state. You must store it in
+ *     this type. This includes client instances, codec mappings, or anything else that a single instance of an
+ *     application would need to effectively use a given native driver.</EM>
  */
 public interface DriverAdapter<OPTYPE extends CycleOp<?>, SPACETYPE extends Space> extends NBComponent {
 
     /**
      * <p>
      * <H2>Op Mapping</H2>
-     * An Op Mapper is a function which can look at the parsed
-     * fields in a {@link ParsedOp} and create an OpDispenser.
-     * An OpDispenser is a function that will produce a special
-     * type {@link OPTYPE} that this DriverAdapter implements as its
-     * op implementation.</p>
+     * An Op Mapper is a function which can look at a {@link ParsedOp} and create a matching {@link OpDispenser}.
+     * An OpDispenser is a function that will produce a special type {@link OPTYPE} that this DriverAdapter implements
+     * as its op implementation. There may be many different ops supported by an adapter, thus there may be similarly
+     * many dispensers.</p>
      *
      * <p>
-     * The function that is returned is responsible for creating another function.
-     * This might seem counter-intuitive but it is very intentional because
-     * of these design constraints:
-     * <UL>
-     * <LI>Mapping op semantics to a type of operation must be very clear
-     * and flexible. Performance is not important at this layer because this is all done
-     * during initialization time for an activity.</LI>
-     * <LI>Synthesizing executable operations from a known type of operational template
-     * must be done very efficiently. This part is done during activity execution, so
-     * having the details of how you are going to create an op for execution already
-     * sorted out is important.</LI>
-     * </UL>
+     * Both {@link OpMapper} and {@link OpDispenser} are functions. The role of {@link OpMapper} is to
+     * map the op template provided by the user to an op implementation provided by the driver adapter,
+     * and then to create a factor function for it (the {@link OpDispenser}).</p>
      *
-     * To clarify the distinction between these two phases, the first is canonically
-     * called <em>op mapping</em> in the documentation. The second is called
-     * <em>op synthesis</em>.
+     * <p>These roles are split for a very good reason: Mapping what the user wants to do with an op template
+     * is resource intenstive, and should be as pre-baked as possible. This phase is the <EM>op mapping</EM> phase.
+     * It is essential that the mapping logic be very clear and maintainable. Performance is not as important
+     * at this phase, because all of the mapping logic is run during initialization of an activity.
      * </p>
-     *
      * <p>
-     * <H2>A note on implementation strategy:</H2>
-     * Generally speaking, implementations of this method should interrogate the op fields
-     * in the ParsedOp and return an OpDispenser that matches the user's intentions.
-     * This can be based on something explicit, like the  value of a {@code type} field,
-     * or it can be based on whether certain fields are present or not. Advanced implementations
-     * might take into account which fields are provided as static values and which are
-     * specified as bindings. In any case, the op mapping phase is meant to qualify and
-     * pre-check that the fields provided are valid and specific for a given type of operation.
-     * What happens within {@link OpDispenser} implementations (the second phase), however, should do
-     * as little qualification of field values as possible, focusing simply on constructing
-     * the type of operation for which they are designed.
+     * Conversely, <EM>op dispensing</EM> (the next phase) while an activity is running should be as efficient as
+     * possible.
      * </p>
      *
-     * @return a synthesizer function for {@link OPTYPE} op generation
+     * @return a dispensing function for {@link OPTYPE} op generation
      */
     OpMapper<OPTYPE, SPACETYPE> getOpMapper();
 
@@ -108,7 +133,8 @@ public interface DriverAdapter<OPTYPE extends CycleOp<?>, SPACETYPE extends Spac
      * the fields in the op template before they are interpreted canonically.
      * At this level, the transform is applied once to the input map
      * (once per op template) to yield the map that is provided to
-     * {@link OpMapper} implementations.
+     * {@link OpMapper} implementations. <EM>This is here to make backwards compatibility
+     * possible for op templates which have changed. Avoid using it unless necessary.</EM>
      *
      * @return A function to pre-process the op template fields.
      */
@@ -121,28 +147,29 @@ public interface DriverAdapter<OPTYPE extends CycleOp<?>, SPACETYPE extends Spac
      * routing it to the correct error handler, or naming it in logs, or naming
      * metrics, override this method in your activity.
      *
-     * @return A function that can reliably and safely map an instance of Throwable to a stable name.
+     * @return A function that can reliably and safely map an instance of Throwable to a stable adapter-specific name.
      */
     default Function<Throwable, String> getErrorNameMapper() {
         return t -> t.getClass().getSimpleName();
     }
 
-    default List<Function<Map<String,Object>,Map<String,Object>>> getOpFieldRemappers() {
+    default List<Function<Map<String, Object>, Map<String, Object>>> getOpFieldRemappers() {
         return List.of(f -> f);
     }
 
-//    ConcurrentSpaceCache<SPACETYPE> getSpaceCache();
-
     /**
-     * This method allows each driver adapter to create named state which is automatically
+     * <P>This method allows each driver adapter to create named state which is automatically
      * cached and re-used by name. For each (driver,space) combination in an activity,
      * a distinct space instance will be created. In general, adapter developers will
      * use the space type associated with an adapter to wrap native driver instances
      * one-to-one. As such, if the space implementation is a {@link AutoCloseable},
-     * it will be explicitly shutdown as part of the activity shutdown.
+     * it will be explicitly shutdown as part of the activity shutdown.</P>
+     *
+     * <p>It is not necessary to implement a space for a stateless driver adapter, or one
+     * which puts all state into each op instance.</p>
      *
      * @return A function which can initialize a new Space, which is a place to hold
-     * object state related to retained objects for the lifetime of a native driver.
+     *     object state related to retained objects for the lifetime of a native driver.
      */
     default LongFunction<SPACETYPE> getSpaceInitializer(NBConfiguration cfg) {
         return n -> (SPACETYPE) new Space() {
@@ -162,8 +189,11 @@ public interface DriverAdapter<OPTYPE extends CycleOp<?>, SPACETYPE extends Spac
      *     markdown file for this driver adapter.</li>
      *     <li>&lt;resources&gt;/docs/&lt;adaptername&gt;/ - A directory containing any type of file which
      *     is to be included in docs under the adapter name, otherwise known as the {@link Service#selector()}</li>
+     *     <li>&lt;resources&gt;/docs/&lt;adaptername&gt;.md</li>
      * </ul>
-     * path &lt;resources&gt;/docs/&lt;adaptername&gt;. Specifically, the file
+     *
+     * <P><EM>A build will fail if any driver adapter implementation is missing at least one self-named
+     * markdown doc file.</EM></P>
      *
      * @return A {@link DocsBinder} which describes docs to include for a given adapter.
      */
@@ -184,7 +214,7 @@ public interface DriverAdapter<OPTYPE extends CycleOp<?>, SPACETYPE extends Spac
 
     default String getAdapterName() {
         Service svc = this.getClass().getAnnotation(Service.class);
-        if (svc==null) {
+        if (svc == null) {
             throw new RuntimeException("The Service annotation for adapter of type " + this.getClass().getCanonicalName() + " is missing.");
         }
         return svc.selector();

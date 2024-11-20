@@ -18,12 +18,12 @@ package io.nosqlbench.adapters.api.activityimpl;
 
 import com.codahale.metrics.Timer;
 import groovy.lang.Binding;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.evalctx.*;
 import io.nosqlbench.adapters.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.errors.OpConfigError;
@@ -47,7 +47,7 @@ import java.util.function.LongFunction;
  * @param <OP>
  *     The type of operation
  */
-public abstract class BaseOpDispenser<OP extends CycleOp<?>,SPACE extends Space>
+public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space>
     extends NBBaseComponent implements OpDispenser<OP> {
     protected final static Logger logger = LogManager.getLogger(BaseOpDispenser.class);
     public static final String VERIFIER = "verifier";
@@ -58,7 +58,6 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>,SPACE extends Space>
     public static final String STOP_TIMERS = "stop-timers";
 
     private final String opName;
-    protected final DriverAdapter<? extends OP, ? extends SPACE> adapter;
     private final NBLabels labels;
     public final Timer verifierTimer;
     private boolean instrument;
@@ -81,11 +80,9 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>,SPACE extends Space>
     private final CycleFunction<Boolean> _verifier;
     private final ThreadLocal<CycleFunction<Boolean>> tlVerifier;
 
-    protected BaseOpDispenser(final DriverAdapter<? extends OP, ? extends SPACE> adapter, final ParsedOp op) {
-        super(adapter);
+    protected BaseOpDispenser(final NBComponent parentC, final ParsedOp op, LongFunction<? extends SPACE> spaceF) {
+        super(parentC);
         opName = op.getName();
-        this.adapter = adapter;
-        this.spaceF = adapter.getSpaceFunc(op);
         labels = op.getLabels();
 
         this.timerStarts = op.takeOptionalStaticValue(START_TIMERS, String.class)
@@ -140,19 +137,19 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>,SPACE extends Space>
         try {
             initBlocks.forEach((initName, stringTemplate) -> {
                 GroovyCycleFunction<?> initFunction =
-                    new GroovyCycleFunction<>(initName,stringTemplate,verifierImports,verifierStaticImports,variables);
+                    new GroovyCycleFunction<>(initName, stringTemplate, verifierImports, verifierStaticImports, variables);
                 logger.info("configured verifier init:" + initFunction);
-                initFunction.setVariable("_parsed_op",op);
+                initFunction.setVariable("_parsed_op", op);
                 initFunction.apply(0L);
             });
         } catch (Exception e) {
-            throw new OpConfigError("error in verifier-init:" + e.getMessage(),e);
+            throw new OpConfigError("error in verifier-init:" + e.getMessage(), e);
         }
 
         Map<String, ParsedTemplateString> namedVerifiers = op.getTemplateMap().takeAsNamedTemplates(VERIFIER);
         List<CycleFunction<Boolean>> verifierFunctions = new ArrayList<>();
         try {
-            namedVerifiers.forEach((verifierName,stringTemplate) -> {
+            namedVerifiers.forEach((verifierName, stringTemplate) -> {
                 GroovyBooleanCycleFunction verifier =
                     new GroovyBooleanCycleFunction(verifierName, stringTemplate, verifierImports, verifierStaticImports, variables);
                 logger.info("configured verifier:" + verifier);
@@ -163,13 +160,13 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>,SPACE extends Space>
         }
 
         try {
-             op.takeAsOptionalStringTemplate(EXPECTED_RESULT)
-                .map(tpl -> new GroovyObjectEqualityFunction(op.getName()+"-"+EXPECTED_RESULT, tpl, verifierImports, verifierStaticImports, variables))
+            op.takeAsOptionalStringTemplate(EXPECTED_RESULT)
+                .map(tpl -> new GroovyObjectEqualityFunction(op.getName() + "-" + EXPECTED_RESULT, tpl, verifierImports, verifierStaticImports, variables))
                 .map(vl -> {
                     logger.info("Configured equality verifier: " + vl);
                     return vl;
                 })
-                 .ifPresent(verifierFunctions::add);
+                .ifPresent(verifierFunctions::add);
         } catch (Exception gre) {
             throw new OpConfigError("error in verifier:" + gre.getMessage(), gre);
         }
@@ -182,23 +179,20 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>,SPACE extends Space>
         return this.opName;
     }
 
-    public DriverAdapter<? extends OP, ? extends SPACE> getAdapter() {
-        return this.adapter;
-    }
-
     private void configureInstrumentation(final ParsedOp pop) {
         instrument = pop.takeStaticConfigOr("instrument", false);
         if (this.instrument) {
             final int hdrDigits = pop.getStaticConfigOr("hdr_digits", 4);
 
             successTimer = create().timer(
-                "successfor_"+getOpName(),
+                "successfor_" + getOpName(),
                 hdrDigits,
                 MetricCategory.Core,
                 "Successful result timer for specific operation '" + pop.getName() + "'"
             );
+
             errorTimer = create().timer(
-                "errorsfor_"+getOpName(),
+                "errorsfor_" + getOpName(),
                 hdrDigits,
                 MetricCategory.Core,
                 "Errored result timer for specific operation '" + pop.getName() + "'"
