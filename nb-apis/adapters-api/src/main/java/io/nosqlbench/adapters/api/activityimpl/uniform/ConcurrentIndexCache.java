@@ -101,7 +101,7 @@ public class ConcurrentIndexCache<T> implements Iterable<T> {
                 return currentCache.get(key);
             }
         }
-        logger.debug(() -> "returning index[ " + key + " ] for [ " + label + " ] cache");
+        logger.trace(() -> "returning    index[ " + key + " ] for [ " + label + " ] cache");
 
         return value;
     }

@@ -24,6 +24,16 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 
+/**
+ * <P>This service allows for the dynamic instancing of {@link DriverAdapter}s as services,
+ * using a well-defined method signature instead of (just) a no-args constructor. Since all key elements
+ * of the nosqlbench runtime are assembled into a component tree, each one requires an attachment
+ * point (parent) and child identifiers (label names and values) that uniquely describe it. This would typically be
+ * encoded as a constructor signature, however, there is no SPI mechanism which makes this easy to manage across JDPA
+ * and non-JDPA runtimes. So instead, we indirect this to a higher level service which has one and only one
+ * responsibility: to provide an instance through the well-defined API of {@link #load(NBComponent, NBLabels)}.
+ * </P>
+ */
 public interface DriverAdapterLoader {
-    public <A extends CycleOp<?>,B extends Space> DriverAdapter<A,B> load(NBComponent parent, NBLabels childLabels);
+    public <A extends CycleOp<?>, B extends Space> DriverAdapter<A, B> load(NBComponent parent, NBLabels childLabels);
 }
