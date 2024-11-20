@@ -54,22 +54,21 @@ public class StrInterpolator implements Function<String, String> {
 
     @Override
     public String apply(String raw) {
-        String after = matchTemplates(raw);
-        while (!after.equals(raw)) {
-            raw = after;
-            after = matchTemplates(raw);
+        String[] lines = raw.split("\\R");
+        boolean endsWithNewline = raw.matches(".*\\R$");
+        int i = 0;
+        for (String line : lines) {
+            String result = matchTemplates(line);
+            if (!result.equals(line)) {
+                lines[i] = result;
+            }
+            i++;
         }
-        raw = after;
-        String original = raw;
-        after = substitutor.replace(raw);
-        while (!after.equals(raw)) {
-            raw = after;
-            after = substitutor.replace(raw);
+        String results = String.join(System.lineSeparator(), lines);
+        if (endsWithNewline) {
+            results += System.lineSeparator();
         }
-        if ( !original.equals(after)) {
-            NBAdvisorOutput.test("The deprecated template format <<key:value>> is used. Please use TEMPLATE(key,value)");
-        }
-        return after;
+        return results;
     }
 
     public Map<String,String> checkpointAccesses() {
@@ -83,22 +82,16 @@ public class StrInterpolator implements Function<String, String> {
     }
 
     public String matchTemplates(String original) {
+        // skip over comment lines
+        if (original.startsWith("#")) {
+            return original;
+        }
+        // process TEMPLATE(...)
         String line = original;
         int length = line.length();
         int i = 0;
-        boolean newline = true;
-        boolean comment = false;
         while (i < length) {
-            // Detect state
-            if (line.startsWith("\n", i)) {
-                newline = true;
-                comment = false;
-            } else if (newline) {
-                comment = line.startsWith("#",i);
-                newline = false;
-            }
-            // Detect an instance of "TEMPLATE("
-            if ( !comment && !newline && line.startsWith("TEMPLATE(", i)) {
+            if (line.startsWith("TEMPLATE(", i)) {
                 int start = i + "TEMPLATE(".length();
                 int openParensCount = 1; // We found one '(' with "TEMPLATE("
                 // Find the corresponding closing ')' for this TEMPLATE instance
@@ -126,12 +119,21 @@ public class StrInterpolator implements Function<String, String> {
                     // Resolve the template content
                     String resolvedContent = multimap.lookup(templateContent);
                     line = line.substring(0, i) + resolvedContent + line.substring(j);
-                    // Update `length` and `i` based on the modified `line`
-                    // i += resolvedContent.length() - 1;
                     length = line.length();
+                    i--;
                 }
             }
             i++;
+        }
+        // Process << ... >>
+        String before = line;
+        String after = substitutor.replace(line);
+        while (!after.equals(line)) {
+            line = after;
+            after = substitutor.replace(line);
+        }
+        if ( !before.equals(after)) {
+            NBAdvisorOutput.test("The deprecated template format <<key:value>> is used. Please use TEMPLATE(key,value)");
         }
         return line;
     }

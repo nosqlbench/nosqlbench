@@ -350,11 +350,10 @@ public class NBCLIScenarioPreprocessor {
                 }
 
                 Map<String, String> templates = new LinkedHashMap<>();
+                StrInterpolator templateparser = new StrInterpolator(templates);
                 try {
-                    List<String> lines = Files.readAllLines(yamlPath);
-                    for (String line : lines) {
-                        templates = matchTemplates(line, templates);
-                    }
+                    templateparser.apply( Files.readString(yamlPath) );
+                    templates = templateparser.checkpointAccesses();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -431,78 +430,6 @@ public class NBCLIScenarioPreprocessor {
 
         return scriptNames;
 
-    }
-
-    //    private static final Pattern templatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
-    //    private static final Pattern innerTemplatePattern = Pattern.compile("TEMPLATE\\((.+?)\\)");
-    private static final Pattern templatePattern2 = Pattern.compile("<<(.+?)>>");
-
-    public static Map<String, String> matchTemplates(String line, Map<String, String> templates) {
-        int length = line.length();
-        int i = 0;
-        boolean newline = true;
-        boolean comment = false;
-        while (i < length) {
-            // Detect state
-            if (line.startsWith("\n", i)) {
-                newline = true;
-                comment = false;
-            } else if (newline) {
-                comment = line.startsWith("#",i);
-                newline = false;
-            }
-            // Detect an instance of "TEMPLATE("
-            if ( !comment && !newline && line.startsWith("TEMPLATE(", i)) {
-                int start = i + "TEMPLATE(".length();
-                int openParensCount = 1; // We found one '(' with "TEMPLATE("
-                // Find the corresponding closing ')' for this TEMPLATE instance
-                int j = start;
-                while (j < length && openParensCount > 0) {
-                    if (line.charAt(j) == '(') {
-                        openParensCount++;
-                    } else if (line.charAt(j) == ')') {
-                        openParensCount--;
-                    }
-                    j++;
-                }
-                // `j` now points just after the closing ')' of this TEMPLATE
-                if (openParensCount == 0) {
-                    String templateContent = line.substring(start, j - 1);
-                    // Resolve the template content
-                    String resolvedContent = resolveTemplate(templateContent, templates);
-                    line = line.substring(0, i) + resolvedContent + line.substring(j);
-                    // Update `length` and `i` based on the modified `line`
-                    i += resolvedContent.length() - 1;
-                    length = line.length();
-                }
-            }
-            i++;
-        }
-
-        Matcher matcher = templatePattern2.matcher(line);
-        while (matcher.find()) {
-            String match = matcher.group(1);
-            String[] matchArray = match.split(":");
-            if (matchArray.length == 1) {
-                templates.put(matchArray[0], "-none-");
-            } else {
-                templates.put(matchArray[0], matchArray[1]);
-            }
-        }
-        return templates;
-    }
-
-    private static String resolveTemplate(String content, Map<String, String> templates) {
-        String[] parts = content.split("[,:]", 2);
-        String key = parts[0];
-        String value = parts.length > 1 ? parts[1] : "";
-
-        // Store or retrieve the resolved value for the template key
-        if (!templates.containsKey(key)) {
-            templates.put(key, value);
-        }
-        
-        return templates.getOrDefault(key, "");
     }
 
 }

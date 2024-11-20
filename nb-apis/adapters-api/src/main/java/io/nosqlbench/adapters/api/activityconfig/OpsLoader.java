@@ -68,11 +68,11 @@ public class OpsLoader {
     public static OpsDocList loadString(final String sourceData, OpTemplateFormat fmt, Map<String, ?> params, URI srcuri) {
 
         logger.trace(() -> "Applying string transformer to data:" + sourceData);
-        StrInterpolator transformer = new StrInterpolator(params);
-        String data = transformer.apply(sourceData);
         if (srcuri!=null) {
             logger.info("workload URI: '" + srcuri + "'");
         }
+        StrInterpolator transformer = new StrInterpolator(params);
+        String data = transformer.apply(sourceData);
 
         RawOpsLoader loader = new RawOpsLoader(transformer);
         RawOpsDocList rawOpsDocList = switch (fmt) {
