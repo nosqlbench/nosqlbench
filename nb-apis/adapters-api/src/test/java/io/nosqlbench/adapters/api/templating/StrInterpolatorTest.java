@@ -16,6 +16,8 @@
 
 package io.nosqlbench.adapters.api.templating;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -113,6 +115,30 @@ public class StrInterpolatorTest {
         StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("TEMPLATE(start,START)\n# TEMPLATE(blahblah,blah)\nTEMPLATE(keydist,Uniform(0,1000000000)->int);");
         assertThat(a).isEqualTo("START\n# TEMPLATE(blahblah,blah)\nUniform(0,1000000000)->int;");
+    }
+
+    @Test
+    public void sustitutionTests() {
+        StrInterpolator interp = new StrInterpolator(abcd);
+        String a = interp.apply("-${setkey:=setme}-${setkey}-");
+        assertThat(a).isEqualTo("-setme-setme-");
+        String b = interp.apply("-${setkey2:-setme}-${setkey2:-setyou}-");
+        assertThat(b).isEqualTo("-setme-setyou-");
+        String c = interp.apply("-${setkey:=setme}-${setkey3:+setme}-${setkey:+setyou}-");
+        assertThat(c).isEqualTo("-setme-setme-setyou-");
+    }
+
+    @Test
+    public void shouldThrowException() {
+        StrInterpolator interp = new StrInterpolator(abcd);
+
+        // Test for missing variable or invalid syntax
+        Exception exception = assertThrows(NullPointerException.class, () -> {
+            interp.apply("-${unsetKey:?unset exception}-");
+        });
+
+        // Verify the exception message if necessary
+        assertThat(exception.getMessage()).contains("unsetKey");
     }
 
     @Test
