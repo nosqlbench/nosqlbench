@@ -58,9 +58,11 @@ public class StrInterpolator implements Function<String, String> {
         boolean endsWithNewline = raw.endsWith("\n");
         int i = 0;
         for (String line : lines) {
-            String result = matchTemplates(line);
-            if (!result.equals(line)) {
-                lines[i] = result;
+            if (!line.startsWith("#")) {
+                String result = matchTemplates(line);
+                if (!result.equals(line)) {
+                    lines[i] = result;
+                }
             }
             i++;
         }
@@ -82,10 +84,6 @@ public class StrInterpolator implements Function<String, String> {
     }
 
     public String matchTemplates(String original) {
-        // skip over comment lines
-        if (original.startsWith("#")) {
-            return original;
-        }
         // process TEMPLATE(...)
         String line = original;
         int length = line.length();
@@ -116,8 +114,9 @@ public class StrInterpolator implements Function<String, String> {
                 // `j` now points just after the closing ')' of this TEMPLATE
                 if (openParensCount == 0) {
                     String templateContent = line.substring(start, j - 1);
-                    // Resolve the template content
-                    String resolvedContent = multimap.lookup(templateContent);
+                    // Recursively process
+                    String templateValue = matchTemplates(templateContent);
+                    String resolvedContent = multimap.lookup(templateValue);
                     line = line.substring(0, i) + resolvedContent + line.substring(j);
                     length = line.length();
                     i--;
@@ -128,7 +127,7 @@ public class StrInterpolator implements Function<String, String> {
         // Process << ... >>
         String after = substitutor.replace(line);
         while (!after.equals(line)) {
-            NBAdvisorOutput.test("<<key:value>> is deprecated. Matched in '"+line+"'.");
+            NBAdvisorOutput.test("<<key:value>> deprecated in "+line);
             line = after;
             after = substitutor.replace(line);
         }
