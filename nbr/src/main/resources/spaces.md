@@ -48,7 +48,7 @@ a great number of spaces (sessions, clients, etc.)
 
 ## Sessions and Ops
 
-Operations which must be attached to a given session to be valid, it is the responsibility
+For, operations which must be attached to a given session to be valid, it is the responsibility
 of the adapter developer to ensure that any such objects are present. As long as the space
 lookup functions are relied on as provided, this should be automatic. In other words, if
 "the driver for a given cycle" is not present, then it should be created automatically, and
