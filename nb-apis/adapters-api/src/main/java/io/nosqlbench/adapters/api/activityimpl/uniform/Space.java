@@ -26,8 +26,9 @@ import io.nosqlbench.nb.api.components.core.NBNamedElement;
  * in testing scenarios. Within the operations for an adapter, the space
  * may be needed, for example, to construct prepared statements, or other
  * 'session-attached' objects. Put any state that you would normally
- * associate with an instance of a native driver into a space, and use
- * the {@link DriverAdapter#getSpaceCache()} to access it when needed.</P>
+ * associate with an instance of a native driver into a space.
+ * A function to access the cycle-specific space instance is provided where
+ * you might needed, such as in the mapping or dispensing APIs.
  */
 public interface Space extends NBNamedElement, AutoCloseable {
 
