@@ -126,6 +126,10 @@ public class StrInterpolatorTest {
         assertThat(b).isEqualTo("-setme-setyou-");
         String c = interp.apply("-${setkey:=setme}-${setkey3:+setme}-${setkey:+setyou}-");
         assertThat(c).isEqualTo("-setme-setme-setyou-");
+        String d = interp.apply("-${setkey:+${setkey3:+setme}}-");
+        assertThat(d).isEqualTo("-setme-");
+        String e = interp.apply("-${${setkey3:+setkey}}-");
+        assertThat(e).isEqualTo("-setme-");
     }
 
     @Test
