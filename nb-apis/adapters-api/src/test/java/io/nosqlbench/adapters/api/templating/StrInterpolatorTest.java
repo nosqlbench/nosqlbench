@@ -79,9 +79,32 @@ public class StrInterpolatorTest {
     }
 
     @Test
+    public void shouldMatchNewAlternateSubst() {
+        StrInterpolator interp = new StrInterpolator(abcd);
+        String a = interp.apply("${akey}");
+        assertThat(a).isEqualTo("aval1");
+        String b = interp.apply("${nokeymatches:value2}");
+        assertThat(b).isEqualTo("value2");
+    }
+
+    @Test
     public void shouldMatchNestedParens() {
         StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("TEMPLATE(keydist,Uniform(0,1000000000)->int);");
+        assertThat(a).isEqualTo("Uniform(0,1000000000)->int;");
+    }
+
+    @Test
+    public void shouldMatchNestedParens2() {
+        StrInterpolator interp = new StrInterpolator(abcd);
+        String a = interp.apply("${keydist:Uniform(0,1000000000)->int};");
+        assertThat(a).isEqualTo("Uniform(0,1000000000)->int;");
+    }
+
+    @Test
+    public void shouldMatchNestedParens3() {
+        StrInterpolator interp = new StrInterpolator(abcd);
+        String a = interp.apply("${keydist:${nokeymatchesthis2:Uniform(0,1000000000)->int}};");
         assertThat(a).isEqualTo("Uniform(0,1000000000)->int;");
     }
 

@@ -89,7 +89,39 @@ public class StrInterpolator implements Function<String, String> {
         int length = line.length();
         int i = 0;
         while (i < length) {
-            if (line.startsWith("TEMPLATE(", i)) {
+            if (line.startsWith("${", i)) {
+                int start = i + "${".length();
+                int openParensCount = 1; // We found one '{' with "${"
+                // Find the corresponding closing ')' for this TEMPLATE instance
+                int j = start;
+                int k = start;
+                while (j < length && openParensCount > 0) {
+                    if (line.charAt(j) == '{') {
+                        openParensCount++;
+                    } else if (line.charAt(j) == '}') {
+                        k = j;
+                        openParensCount--;
+                    }
+                    j++;
+                }
+                // check for case of not enough '}'
+                if (openParensCount > 0 ) {
+                    if ( k != start ) {
+                        j = k + 1;
+                    }
+                    openParensCount = 0;
+                }
+                // `j` now points just after the closing '}' of this ${
+                if (openParensCount == 0) {
+                    String templateContent = line.substring(start, j - 1);
+                    // Recursively process
+                    String templateValue = matchTemplates(templateContent);
+                    String resolvedContent = multimap.lookup(templateValue);
+                    line = line.substring(0, i) + resolvedContent + line.substring(j);
+                    length = line.length();
+                    i--;
+                }
+            } else if (line.startsWith("TEMPLATE(", i)) {
                 int start = i + "TEMPLATE(".length();
                 int openParensCount = 1; // We found one '(' with "TEMPLATE("
                 // Find the corresponding closing ')' for this TEMPLATE instance
