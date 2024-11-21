@@ -54,25 +54,23 @@ public class StrInterpolator implements Function<String, String> {
 
     @Override
     public String apply(String raw) {
-        String after = matchTemplates(raw);
-        while (!after.equals(raw)) {
-            raw = after;
-            after = matchTemplates(raw);
+        String[] lines = raw.split("\\R");
+        boolean endsWithNewline = raw.endsWith("\n");
+        int i = 0;
+        for (String line : lines) {
+            if (!line.startsWith("#")) {
+                String result = matchTemplates(line);
+                if (!result.equals(line)) {
+                    lines[i] = result;
+                }
+            }
+            i++;
         }
-        raw = after;
-        String original = raw;
-        after = substitutor.replace(raw);
-        while (!after.equals(raw)) {
-            raw = after;
-            after = substitutor.replace(raw);
+        String results = String.join(System.lineSeparator(), lines);
+        if (endsWithNewline) {
+            results += System.lineSeparator();
         }
-        if ( !original.equals(after)) {
-            NBAdvisorOutput.render(Level.WARN,"Transform <<key:value>>");
-            NBAdvisorOutput.render(Level.WARN,"From: "+original);
-            NBAdvisorOutput.render(Level.WARN,"  To: "+after);
-            NBAdvisorOutput.render(Level.WARN,"The deprecated template <<key:value>> in use. Please use TEMPLATE(key,value)");
-        }
-        return after;
+        return results;
     }
 
     public Map<String,String> checkpointAccesses() {
@@ -86,12 +84,44 @@ public class StrInterpolator implements Function<String, String> {
     }
 
     public String matchTemplates(String original) {
+        // process TEMPLATE(...)
         String line = original;
         int length = line.length();
         int i = 0;
         while (i < length) {
-            // Detect an instance of "TEMPLATE("
-            if (line.startsWith("TEMPLATE(", i)) {
+            if (line.startsWith("${", i)) {
+                int start = i + "${".length();
+                int openParensCount = 1; // We found one '{' with "${"
+                // Find the corresponding closing ')' for this TEMPLATE instance
+                int j = start;
+                int k = start;
+                while (j < length && openParensCount > 0) {
+                    if (line.charAt(j) == '{') {
+                        openParensCount++;
+                    } else if (line.charAt(j) == '}') {
+                        k = j;
+                        openParensCount--;
+                    }
+                    j++;
+                }
+                // check for case of not enough '}'
+                if (openParensCount > 0 ) {
+                    if ( k != start ) {
+                        j = k + 1;
+                    }
+                    openParensCount = 0;
+                }
+                // `j` now points just after the closing '}' of this ${
+                if (openParensCount == 0) {
+                    String templateContent = line.substring(start, j - 1);
+                    // Recursively process
+                    String templateValue = matchTemplates(templateContent);
+                    String resolvedContent = multimap.lookup(templateValue);
+                    line = line.substring(0, i) + resolvedContent + line.substring(j);
+                    length = line.length();
+                    i--;
+                }
+            } else if (line.startsWith("TEMPLATE(", i)) {
                 int start = i + "TEMPLATE(".length();
                 int openParensCount = 1; // We found one '(' with "TEMPLATE("
                 // Find the corresponding closing ')' for this TEMPLATE instance
@@ -116,15 +146,22 @@ public class StrInterpolator implements Function<String, String> {
                 // `j` now points just after the closing ')' of this TEMPLATE
                 if (openParensCount == 0) {
                     String templateContent = line.substring(start, j - 1);
-                    // Resolve the template content
-                    String resolvedContent = multimap.lookup(templateContent);
+                    // Recursively process
+                    String templateValue = matchTemplates(templateContent);
+                    String resolvedContent = multimap.lookup(templateValue);
                     line = line.substring(0, i) + resolvedContent + line.substring(j);
-                    // Update `length` and `i` based on the modified `line`
-                    // i += resolvedContent.length() - 1;
                     length = line.length();
+                    i--;
                 }
             }
             i++;
+        }
+        // Process << ... >>
+        String after = substitutor.replace(line);
+        while (!after.equals(line)) {
+            NBAdvisorOutput.test("<<key:value>> deprecated in "+line);
+            line = after;
+            after = substitutor.replace(line);
         }
         return line;
     }
