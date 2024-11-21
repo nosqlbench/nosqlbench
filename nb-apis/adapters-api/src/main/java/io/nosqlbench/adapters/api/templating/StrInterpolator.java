@@ -168,10 +168,11 @@ public class StrInterpolator implements Function<String, String> {
 
     public static class MultiMap extends StrLookup<String> {
 
-        private final List<Map<String, ?>> maps = new ArrayList<>();
         private final String warnPrefix = "UNSET";
         private final Map<String,String> accesses = new LinkedHashMap<>();
         private final Map<String,String> extractedDefaults = new LinkedHashMap<>();
+        private final Map<String,String> overrides = new LinkedHashMap<>();
+        private final List<Map<String, ?>> maps = new ArrayList<>();
 
         public void add(Map<String, ?> addedMap) {
             maps.add(addedMap);
@@ -179,25 +180,57 @@ public class StrInterpolator implements Function<String, String> {
 
         @Override
         public String lookup(String key) {
+            //String original = key;
             String value = null;
+            char substitution = ' ';
 
             String[] parts = key.split("[:,]", 2);
             if (parts.length == 2) {
                 key = parts[0];
                 value = parts[1];
+                if ( value.length() > 0 ) {
+                    substitution = value.charAt(0);
+                } else {
+                    substitution = ' ';
+                }
+                if ( substitution == '-' || substitution == '=' || substitution == '?' || substitution == '+') {
+                    if ( value.length() < 2 ) {
+                        value = null;
+                    } else {
+                        value = value.substring(1);
+                    }
+                } else {
+                    substitution = ' ';
+                }
                 if (!extractedDefaults.containsKey(key)) {
-                    extractedDefaults.put(key,value);
+                    extractedDefaults.put(key, value);
+                }
+                if (!overrides.containsKey(key)) {
+                    if ( substitution == '=' ) {
+                        overrides.put(key, value);
+                        //System.out.println(key+"="+value);
+                    } else if ( substitution == '?' ) {
+                        throw new NullPointerException("Parameter "+key+" is not set");
+                    }
                 }
             }
-
-            for (Map<String, ?> map : maps) {
-                Object val = map.get(key);
+            
+            if ( substitution != '+' ) {
+                Object val = overrides.get(key);
                 if (val != null) {
                     value = val.toString();
-                    break;
+                    //System.out.println("for: '"+original+"': "+key+"->"+value);
+                } else {
+                    for (Map<String, ?> map : maps) {
+                        val = map.get(key);
+                        if (val != null) {
+                            value = val.toString();
+                            break;
+                        }
+                    }
                 }
+                value = (value==null? extractedDefaults.get(key) : value);
             }
-            value = (value==null? extractedDefaults.get(key) : value);
 
             value = (value != null) ? value : warnPrefix + ":" + key;
 
