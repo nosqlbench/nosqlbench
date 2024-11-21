@@ -65,7 +65,7 @@ import java.util.function.LongFunction;
 ///
 /// or in another way, simply `opExecution(opFunction(cycle))`.
 ///
-/// This is a simplified view of the detailed steps, most of which are handled automatically by the nosqlbench engine:
+/// This is a simplified view of the detailed steps, many of which are handled automatically by the nosqlbench engine:
 ///
 /// ```
 /// cycle value
@@ -78,7 +78,7 @@ import java.util.function.LongFunction;
 /// -> op execution
 ///```
 ///
-/// Notice that all of the stages are optimized via a form of memoization. This is a side-effect of forcing the
+/// Notice that some stages are optimized via a form of memoization. This is a side-effect of forcing the
 /// initialization of the op construction pipelines into lamda form, where unchanging initialization data is captured
 /// explicitly or by reference in closures. This works in our favor for performance, since these lambdas are
 /// optimized and executed very efficiently within modern Java VMs.
