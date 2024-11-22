@@ -41,6 +41,7 @@ import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityapi.simrate.*;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
+import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.nb.api.components.status.NBStatusComponent;
@@ -467,8 +468,10 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
             // But if there were no ops, and there was no default driver provided, we can't continue
             // There were no ops, and it was because they were all filtered out
             if (!unfilteredOps.isEmpty()) {
-                throw new BasicError("There were no active op templates with tag filter '"
-                    + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out.");
+                String message = "There were no active op templates with tag filter '"+ tagfilter + "', since all " +
+                    unfilteredOps.size() + " were filtered out. Examine the session log for details";
+                NBAdvisorOutput.test(message);
+                //throw new BasicError(message);
             }
             if (defaultDriverAdapter instanceof SyntheticOpTemplateProvider sotp) {
                 filteredOps = sotp.getSyntheticOpTemplates(opsDocList, this.activityDef.getParams());

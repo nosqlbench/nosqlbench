@@ -113,8 +113,18 @@ public class StrInterpolatorTest {
     @Test
     public void shouldMatchWithComments() {
         StrInterpolator interp = new StrInterpolator(abcd);
-        String a = interp.apply("TEMPLATE(start,START)\n# TEMPLATE(blahblah,blah)\nTEMPLATE(keydist,Uniform(0,1000000000)->int);");
-        assertThat(a).isEqualTo("START\n# TEMPLATE(blahblah,blah)\nUniform(0,1000000000)->int;");
+        String a = interp.apply("""
+                                TEMPLATE(start,START)
+                                  # TEMPLATE(blahblah,blah)
+                                TEMPLATE(keydist,Uniform(0,1000000000)->int);
+                                # TEMPLATE(blahblah,blah)
+                                """);
+        assertThat(a).isEqualTo("""
+                                START
+                                  # TEMPLATE(blahblah,blah)
+                                Uniform(0,1000000000)->int;
+                                # TEMPLATE(blahblah,blah)
+                                """);
     }
 
     @Test
@@ -126,6 +136,10 @@ public class StrInterpolatorTest {
         assertThat(b).isEqualTo("-setme-setyou-");
         String c = interp.apply("-${setkey:=setme}-${setkey3:+setme}-${setkey:+setyou}-");
         assertThat(c).isEqualTo("-setme-setme-setyou-");
+        String d = interp.apply("-${setkey:+${setkey3:+setme}}-");
+        assertThat(d).isEqualTo("-setme-");
+        String e = interp.apply("-${${setkey3:+setkey}}-");
+        assertThat(e).isEqualTo("-setme-");
     }
 
     @Test
