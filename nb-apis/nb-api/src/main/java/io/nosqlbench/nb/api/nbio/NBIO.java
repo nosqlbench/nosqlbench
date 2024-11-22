@@ -209,18 +209,14 @@ public class NBIO implements NBPathsAPI.Facets {
                         this.resolver = this.resolver != null ? this.resolver.inNBIOCache() : URIResolvers.inNBIOCache();
                     }
                     break;
-                case "http":
-                case "https":
-                    this.resolver = this.resolver != null ? this.resolver.inURLs() : URIResolvers.inURLs();
-                    break;
                 case "all":
-                    if (useNBIOCache) {
-                        this.resolver = URIResolvers.inFS().inCP().inNBIOCache();
-                    } else {
-                        this.resolver = URIResolvers.inFS().inCP().inURLs();
-                    }
-                    break;
+                    return allContent();
+                default:
+                    throw new BasicError("NBIO Error: the '"+protocol+"' protocol is not available.");                    
             }
+        }
+        if ( this.resolver == null ) {
+            return allContent();
         }
         return this;
     }
