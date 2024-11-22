@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
 
+import java.util.regex.Pattern;
 import java.util.*;
 import java.util.function.Function;
 
@@ -36,6 +37,7 @@ public class StrInterpolator implements Function<String, String> {
             .setEnableSubstitutionInVariables(true)
             .setEnableUndefinedVariableException(true)
             .setDisableSubstitutionInValues(true);
+    private final Pattern COMMENT = Pattern.compile("^\\s+#.*");
 
     public StrInterpolator(ActivityDef... activityDefs) {
         Arrays.stream(activityDefs)
@@ -45,6 +47,10 @@ public class StrInterpolator implements Function<String, String> {
 
     public StrInterpolator(Map<String, ?> basicMap) {
         multimap.add(basicMap);
+    }
+
+    public boolean isComment(String line) {
+        return line != null && COMMENT.matcher(line).matches();
     }
 
     // for testing
@@ -58,7 +64,7 @@ public class StrInterpolator implements Function<String, String> {
         boolean endsWithNewline = raw.endsWith("\n");
         int i = 0;
         for (String line : lines) {
-            if (!line.startsWith("#")) {
+            if (!line.startsWith("#") && !isComment(line)) {
                 String result = matchTemplates(line);
                 if (!result.equals(line)) {
                     lines[i] = result;

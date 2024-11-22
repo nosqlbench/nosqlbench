@@ -113,8 +113,18 @@ public class StrInterpolatorTest {
     @Test
     public void shouldMatchWithComments() {
         StrInterpolator interp = new StrInterpolator(abcd);
-        String a = interp.apply("TEMPLATE(start,START)\n# TEMPLATE(blahblah,blah)\nTEMPLATE(keydist,Uniform(0,1000000000)->int);");
-        assertThat(a).isEqualTo("START\n# TEMPLATE(blahblah,blah)\nUniform(0,1000000000)->int;");
+        String a = interp.apply("""
+                                TEMPLATE(start,START)
+                                  # TEMPLATE(blahblah,blah)
+                                TEMPLATE(keydist,Uniform(0,1000000000)->int);
+                                # TEMPLATE(blahblah,blah)
+                                """);
+        assertThat(a).isEqualTo("""
+                                START
+                                  # TEMPLATE(blahblah,blah)
+                                Uniform(0,1000000000)->int;
+                                # TEMPLATE(blahblah,blah)
+                                """);
     }
 
     @Test
