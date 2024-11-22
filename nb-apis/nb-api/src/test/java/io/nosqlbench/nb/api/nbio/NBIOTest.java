@@ -73,7 +73,8 @@ public class NBIOTest {
 
     @Test
     public void testExpandPrefixesAndFullName() {
-        NBIO extensions = (NBIO) NBIO.all().searchPrefixes("act1","act2").pathname("foo.bar");
+        ParseProtocol proto = new ParseProtocol("local:foo.bar");
+        NBIO extensions = (NBIO) NBIO.protocol(proto.getProtocols()).searchPrefixes("act1","act2").pathname(proto.getPath());
         LinkedHashSet<String> searches = extensions.expandNamesAndSuffixes();
         assertThat(searches).containsExactly("foo.bar","act1/foo.bar","act2/foo.bar");
     }
