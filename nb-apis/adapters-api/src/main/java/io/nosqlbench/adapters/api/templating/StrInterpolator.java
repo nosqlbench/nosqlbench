@@ -37,7 +37,7 @@ public class StrInterpolator implements Function<String, String> {
             .setEnableSubstitutionInVariables(true)
             .setEnableUndefinedVariableException(true)
             .setDisableSubstitutionInValues(true);
-    private final Pattern COMMENT = Pattern.compile("^\\s+#.*");
+    private final Pattern COMMENT = Pattern.compile("^\\s*#.*");
 
     public StrInterpolator(ActivityDef... activityDefs) {
         Arrays.stream(activityDefs)
@@ -64,7 +64,7 @@ public class StrInterpolator implements Function<String, String> {
         boolean endsWithNewline = raw.endsWith("\n");
         int i = 0;
         for (String line : lines) {
-            if (!line.startsWith("#") && !isComment(line)) {
+            if (!isComment(line)) {
                 String result = matchTemplates(line);
                 if (!result.equals(line)) {
                     lines[i] = result;
