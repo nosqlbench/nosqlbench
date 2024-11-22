@@ -70,7 +70,8 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
     public static List<String> readLines(String filename) {
-        Content<?> data = NBIO.all().searchPrefixes("data").pathname(filename).first().orElseThrow(
+        ParseProtocol proto = new ParseProtocol(filename);
+        Content<?> data = NBIO.protocol(proto.getProtocols()).searchPrefixes("data").pathname(proto.getPath()).first().orElseThrow(
             () -> new BasicError("Unable to read lines from " + filename)
         );
         String[] split = data.getCharBuffer().toString().split("\n");
@@ -95,15 +96,18 @@ public class NBIO implements NBPathsAPI.Facets {
 
 
     private static InputStream readInputStream(String filename, String... searchPaths) {
-        return NBIO.all().searchPrefixes(searchPaths).pathname(filename).one().getInputStream();
+        ParseProtocol proto = new ParseProtocol(filename);
+        return NBIO.protocol(proto.getProtocols()).searchPrefixes(searchPaths).pathname(proto.getPath()).one().getInputStream();
     }
 
     private static Reader readReader(String filename, String... searchPaths) {
-        return NBIO.all().searchPrefixes(searchPaths).pathname(filename).one().getReader();
+        ParseProtocol proto = new ParseProtocol(filename);
+        return NBIO.protocol(proto.getProtocols()).searchPrefixes(searchPaths).pathname(proto.getPath()).one().getReader();
     }
 
-    public static CharBuffer readCharBuffer(String fileName, String... searchPaths) {
-        return NBIO.all().searchPrefixes(searchPaths).pathname(fileName).one().getCharBuffer();
+    public static CharBuffer readCharBuffer(String filename, String... searchPaths) {
+        ParseProtocol proto = new ParseProtocol(filename);
+        return NBIO.protocol(proto.getProtocols()).searchPrefixes(searchPaths).pathname(proto.getPath()).one().getCharBuffer();
     }
 
     public static Path getFirstLocalPath(String... potentials) {
@@ -178,6 +182,45 @@ public class NBIO implements NBPathsAPI.Facets {
             this.resolver = URIResolvers.inFS().inCP().inNBIOCache();
         } else {
             this.resolver = URIResolvers.inFS().inCP().inURLs();
+        }
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NBPathsAPI.GetPrefixes protocolContent(List<String> protocols) {
+        this.resolver = null;
+        for (String protocol : protocols) {
+            switch (protocol) {
+                case "cp":
+                case "classpath":
+                    this.resolver = this.resolver != null ? this.resolver.inCP() : URIResolvers.inClasspath();
+                    break;
+                case "file":
+                    this.resolver = this.resolver != null ? this.resolver.inFS() : URIResolvers.inFS();
+                    break;
+                case "local":
+                    this.resolver = this.resolver != null ? this.resolver.inFS().inCP() : URIResolvers.inFS().inCP();
+                    break;
+                case "cache":
+                    if (useNBIOCache) {
+                        this.resolver = this.resolver != null ? this.resolver.inNBIOCache() : URIResolvers.inNBIOCache();
+                    }
+                    break;
+                case "http":
+                case "https":
+                    this.resolver = this.resolver != null ? this.resolver.inURLs() : URIResolvers.inURLs();
+                    break;
+                case "all":
+                    if (useNBIOCache) {
+                        this.resolver = URIResolvers.inFS().inCP().inNBIOCache();
+                    } else {
+                        this.resolver = URIResolvers.inFS().inCP().inURLs();
+                    }
+                    break;
+            }
         }
         return this;
     }
@@ -347,6 +390,15 @@ public class NBIO implements NBPathsAPI.Facets {
      */
     public static NBPathsAPI.GetPrefixes local() {
         return new NBIO().localContent();
+    }
+
+    /**
+     * Search for ordered protocols
+     *
+     * @return a builder
+     */
+    public static NBPathsAPI.GetPrefixes protocol(List<String> protocols) {
+        return new NBIO().protocolContent(protocols);
     }
 
     /**

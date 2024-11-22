@@ -82,6 +82,14 @@ public interface NBPathsAPI {
          * @return this builder
          */
         GetPrefixes allContent();
+
+        /**
+         * Return content from protocols that you choose in the order you specify
+         *
+         * @param protocols A list of protocols to include in the search
+         * @return this builder
+         */
+        GetPrefixes protocolContent(List<String> protocols);
     }
 
     interface GetPrefixes extends GetPathname {
