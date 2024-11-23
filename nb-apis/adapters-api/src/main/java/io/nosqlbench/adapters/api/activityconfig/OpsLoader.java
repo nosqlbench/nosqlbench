@@ -20,7 +20,7 @@ import com.amazonaws.util.StringInputStream;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
-import io.nosqlbench.nb.api.nbio.ParseProtocol;
+import io.nosqlbench.nb.api.nbio.ResolverChain;
 import io.nosqlbench.nb.api.advisor.NBAdvisorException;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDocList;
@@ -59,8 +59,8 @@ public class OpsLoader {
 
     public static OpsDocList loadPath(String path, Map<String, ?> params, String... searchPaths) {
         String[] extensions = path.indexOf('.')>-1 ? new String[]{} : YAML_EXTENSIONS;
-        ParseProtocol proto = new ParseProtocol(path);
-        Content<?> foundPath = NBIO.protocol(proto.getProtocols()).searchPrefixes(searchPaths).pathname(proto.getPath()).extensionSet(extensions).first()
+        ResolverChain chain = new ResolverChain(path);
+        Content<?> foundPath = NBIO.chain(chain.getChain()).searchPrefixes(searchPaths).pathname(chain.getPath()).extensionSet(extensions).first()
             .orElseThrow(() -> new RuntimeException("Unable to load path '" + path + "'"));
         OpTemplateFormat fmt = OpTemplateFormat.valueOfURI(foundPath.getURI());
         return loadString(foundPath.asString(), fmt, params, foundPath.getURI());

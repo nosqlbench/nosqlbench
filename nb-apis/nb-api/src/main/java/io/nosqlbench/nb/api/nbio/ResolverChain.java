@@ -22,26 +22,32 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ParseProtocol {
+public class ResolverChain {
 
-    private List<String> protocols;
+    public enum Chain {
+        ALL, LOCAL, CP, FILE, CACHE
+    }
+
+    private List<Chain> chains;
     private String path;
 
-    public ParseProtocol(String filepath) {
-        protocols = new ArrayList<>();
+    public ResolverChain(String filepath) {
+        chains = new ArrayList<>();
 
-        if (filepath.startsWith("http")) {
+        String[] parts = filepath.split(":",2);
+
+        if (parts.length < 2) {
             path = filepath;
-            protocols.add("all");
-        } else {
-            String[] parts = filepath.split(":");
-
-            if (parts.length < 2) {
+            chains.add(Chain.ALL);
+        }
+        for (String chain : parts[0].split("\\+")) {
+            try {
+                chains.add(Chain.valueOf(chain.toUpperCase()));
+                path = filepath.substring(parts[0].length()+1);
+            } catch (IllegalArgumentException e) {
                 path = filepath;
-                protocols.add("all");
-            } else {
-                path = parts[1];
-                protocols = Arrays.asList(parts[0].split(","));
+                chains.add(Chain.ALL);
+                break;
             }
         }
     }
@@ -50,7 +56,7 @@ public class ParseProtocol {
         return path;
     }
 
-    public List<String> getProtocols() {
-        return protocols;
+    public List<Chain> getChain() {
+        return chains;
     }
 }

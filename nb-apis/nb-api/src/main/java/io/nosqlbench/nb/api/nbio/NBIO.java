@@ -70,8 +70,8 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
     public static List<String> readLines(String filename) {
-        ParseProtocol proto = new ParseProtocol(filename);
-        Content<?> data = NBIO.protocol(proto.getProtocols()).searchPrefixes("data").pathname(proto.getPath()).first().orElseThrow(
+        ResolverChain chain = new ResolverChain(filename);
+        Content<?> data = NBIO.chain(chain.getChain()).searchPrefixes("data").pathname(chain.getPath()).first().orElseThrow(
             () -> new BasicError("Unable to read lines from " + filename)
         );
         String[] split = data.getCharBuffer().toString().split("\n");
@@ -96,18 +96,18 @@ public class NBIO implements NBPathsAPI.Facets {
 
 
     private static InputStream readInputStream(String filename, String... searchPaths) {
-        ParseProtocol proto = new ParseProtocol(filename);
-        return NBIO.protocol(proto.getProtocols()).searchPrefixes(searchPaths).pathname(proto.getPath()).one().getInputStream();
+        ResolverChain chain = new ResolverChain(filename);
+        return NBIO.chain(chain.getChain()).searchPrefixes(searchPaths).pathname(chain.getPath()).one().getInputStream();
     }
 
     private static Reader readReader(String filename, String... searchPaths) {
-        ParseProtocol proto = new ParseProtocol(filename);
-        return NBIO.protocol(proto.getProtocols()).searchPrefixes(searchPaths).pathname(proto.getPath()).one().getReader();
+        ResolverChain chain = new ResolverChain(filename);
+        return NBIO.chain(chain.getChain()).searchPrefixes(searchPaths).pathname(chain.getPath()).one().getReader();
     }
 
     public static CharBuffer readCharBuffer(String filename, String... searchPaths) {
-        ParseProtocol proto = new ParseProtocol(filename);
-        return NBIO.protocol(proto.getProtocols()).searchPrefixes(searchPaths).pathname(proto.getPath()).one().getCharBuffer();
+        ResolverChain chain = new ResolverChain(filename);
+        return NBIO.chain(chain.getChain()).searchPrefixes(searchPaths).pathname(chain.getPath()).one().getCharBuffer();
     }
 
     public static Path getFirstLocalPath(String... potentials) {
@@ -190,29 +190,26 @@ public class NBIO implements NBPathsAPI.Facets {
      * {@inheritDoc}
      */
     @Override
-    public NBPathsAPI.GetPrefixes protocolContent(List<String> protocols) {
+    public NBPathsAPI.GetPrefixes chainContent(List<ResolverChain.Chain> chains) {
         this.resolver = null;
-        for (String protocol : protocols) {
-            switch (protocol) {
-                case "cp":
-                case "classpath":
+        for (ResolverChain.Chain chain : chains) {
+            switch (chain) {
+                case ResolverChain.Chain.CP:
                     this.resolver = this.resolver != null ? this.resolver.inCP() : URIResolvers.inClasspath();
                     break;
-                case "file":
+                case ResolverChain.Chain.FILE:
                     this.resolver = this.resolver != null ? this.resolver.inFS() : URIResolvers.inFS();
                     break;
-                case "local":
+                case ResolverChain.Chain.LOCAL:
                     this.resolver = this.resolver != null ? this.resolver.inFS().inCP() : URIResolvers.inFS().inCP();
                     break;
-                case "cache":
+                case ResolverChain.Chain.CACHE:
                     if (useNBIOCache) {
                         this.resolver = this.resolver != null ? this.resolver.inNBIOCache() : URIResolvers.inNBIOCache();
                     }
                     break;
-                case "all":
+                case ResolverChain.Chain.ALL:
                     return allContent();
-                default:
-                    throw new BasicError("NBIO Error: the '"+protocol+"' protocol is not available.");                    
             }
         }
         if ( this.resolver == null ) {
@@ -389,12 +386,12 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
     /**
-     * Search for ordered protocols
+     * Search for ordered chains
      *
      * @return a builder
      */
-    public static NBPathsAPI.GetPrefixes protocol(List<String> protocols) {
-        return new NBIO().protocolContent(protocols);
+    public static NBPathsAPI.GetPrefixes chain(List<ResolverChain.Chain> chains) {
+        return new NBIO().chainContent(chains);
     }
 
     /**
