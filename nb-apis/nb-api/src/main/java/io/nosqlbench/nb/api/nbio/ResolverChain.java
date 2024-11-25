@@ -24,11 +24,11 @@ import java.util.List;
 
 public class ResolverChain {
 
-    public enum Chain {
+    public enum Link {
         ALL, LOCAL, CP, FILE, CACHE
     }
 
-    private List<Chain> chains;
+    private List<Link> chains;
     private String path;
 
     public ResolverChain(String filepath) {
@@ -38,15 +38,15 @@ public class ResolverChain {
 
         if (parts.length < 2) {
             path = filepath;
-            chains.add(Chain.ALL);
+            chains.add(Link.ALL);
         }
         for (String chain : parts[0].split("\\+")) {
             try {
-                chains.add(Chain.valueOf(chain.toUpperCase()));
+                chains.add(Link.valueOf(chain.toUpperCase()));
                 path = filepath.substring(parts[0].length()+1);
             } catch (IllegalArgumentException e) {
                 path = filepath;
-                chains.add(Chain.ALL);
+                chains.add(Link.ALL);
                 break;
             }
         }
@@ -56,7 +56,7 @@ public class ResolverChain {
         return path;
     }
 
-    public List<Chain> getChain() {
+    public List<Link> getChain() {
         return chains;
     }
 }

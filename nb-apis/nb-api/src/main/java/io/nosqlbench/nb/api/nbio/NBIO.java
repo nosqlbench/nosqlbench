@@ -190,25 +190,25 @@ public class NBIO implements NBPathsAPI.Facets {
      * {@inheritDoc}
      */
     @Override
-    public NBPathsAPI.GetPrefixes chainContent(List<ResolverChain.Chain> chains) {
+    public NBPathsAPI.GetPrefixes chainContent(List<ResolverChain.Link> chains) {
         this.resolver = null;
-        for (ResolverChain.Chain chain : chains) {
+        for (ResolverChain.Link chain : chains) {
             switch (chain) {
-                case ResolverChain.Chain.CP:
+                case ResolverChain.Link.CP:
                     this.resolver = this.resolver != null ? this.resolver.inCP() : URIResolvers.inClasspath();
                     break;
-                case ResolverChain.Chain.FILE:
+                case ResolverChain.Link.FILE:
                     this.resolver = this.resolver != null ? this.resolver.inFS() : URIResolvers.inFS();
                     break;
-                case ResolverChain.Chain.LOCAL:
+                case ResolverChain.Link.LOCAL:
                     this.resolver = this.resolver != null ? this.resolver.inFS().inCP() : URIResolvers.inFS().inCP();
                     break;
-                case ResolverChain.Chain.CACHE:
+                case ResolverChain.Link.CACHE:
                     if (useNBIOCache) {
                         this.resolver = this.resolver != null ? this.resolver.inNBIOCache() : URIResolvers.inNBIOCache();
                     }
                     break;
-                case ResolverChain.Chain.ALL:
+                case ResolverChain.Link.ALL:
                     return allContent();
             }
         }
@@ -390,7 +390,7 @@ public class NBIO implements NBPathsAPI.Facets {
      *
      * @return a builder
      */
-    public static NBPathsAPI.GetPrefixes chain(List<ResolverChain.Chain> chains) {
+    public static NBPathsAPI.GetPrefixes chain(List<ResolverChain.Link> chains) {
         return new NBIO().chainContent(chains);
     }
 

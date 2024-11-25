@@ -89,7 +89,7 @@ public interface NBPathsAPI {
          * @param protocols A list of protocols to include in the search
          * @return this builder
          */
-        GetPrefixes chainContent(List<ResolverChain.Chain> chains);
+        GetPrefixes chainContent(List<ResolverChain.Link> chains);
     }
 
     interface GetPrefixes extends GetPathname {
