@@ -70,7 +70,8 @@ public class NBIO implements NBPathsAPI.Facets {
     }
 
     public static List<String> readLines(String filename) {
-        Content<?> data = NBIO.all().searchPrefixes("data").pathname(filename).first().orElseThrow(
+        ResolverChain chain = new ResolverChain(filename);
+        Content<?> data = NBIO.chain(chain.getChain()).searchPrefixes("data").pathname(chain.getPath()).first().orElseThrow(
             () -> new BasicError("Unable to read lines from " + filename)
         );
         String[] split = data.getCharBuffer().toString().split("\n");
@@ -95,15 +96,18 @@ public class NBIO implements NBPathsAPI.Facets {
 
 
     private static InputStream readInputStream(String filename, String... searchPaths) {
-        return NBIO.all().searchPrefixes(searchPaths).pathname(filename).one().getInputStream();
+        ResolverChain chain = new ResolverChain(filename);
+        return NBIO.chain(chain.getChain()).searchPrefixes(searchPaths).pathname(chain.getPath()).one().getInputStream();
     }
 
     private static Reader readReader(String filename, String... searchPaths) {
-        return NBIO.all().searchPrefixes(searchPaths).pathname(filename).one().getReader();
+        ResolverChain chain = new ResolverChain(filename);
+        return NBIO.chain(chain.getChain()).searchPrefixes(searchPaths).pathname(chain.getPath()).one().getReader();
     }
 
-    public static CharBuffer readCharBuffer(String fileName, String... searchPaths) {
-        return NBIO.all().searchPrefixes(searchPaths).pathname(fileName).one().getCharBuffer();
+    public static CharBuffer readCharBuffer(String filename, String... searchPaths) {
+        ResolverChain chain = new ResolverChain(filename);
+        return NBIO.chain(chain.getChain()).searchPrefixes(searchPaths).pathname(chain.getPath()).one().getCharBuffer();
     }
 
     public static Path getFirstLocalPath(String... potentials) {
@@ -178,6 +182,38 @@ public class NBIO implements NBPathsAPI.Facets {
             this.resolver = URIResolvers.inFS().inCP().inNBIOCache();
         } else {
             this.resolver = URIResolvers.inFS().inCP().inURLs();
+        }
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NBPathsAPI.GetPrefixes chainContent(List<ResolverChain.Link> chains) {
+        this.resolver = null;
+        for (ResolverChain.Link chain : chains) {
+            switch (chain) {
+                case ResolverChain.Link.CP:
+                    this.resolver = this.resolver != null ? this.resolver.inCP() : URIResolvers.inClasspath();
+                    break;
+                case ResolverChain.Link.FILE:
+                    this.resolver = this.resolver != null ? this.resolver.inFS() : URIResolvers.inFS();
+                    break;
+                case ResolverChain.Link.LOCAL:
+                    this.resolver = this.resolver != null ? this.resolver.inFS().inCP() : URIResolvers.inFS().inCP();
+                    break;
+                case ResolverChain.Link.CACHE:
+                    if (useNBIOCache) {
+                        this.resolver = this.resolver != null ? this.resolver.inNBIOCache() : URIResolvers.inNBIOCache();
+                    }
+                    break;
+                case ResolverChain.Link.ALL:
+                    return allContent();
+            }
+        }
+        if ( this.resolver == null ) {
+            return allContent();
         }
         return this;
     }
@@ -347,6 +383,15 @@ public class NBIO implements NBPathsAPI.Facets {
      */
     public static NBPathsAPI.GetPrefixes local() {
         return new NBIO().localContent();
+    }
+
+    /**
+     * Search for ordered chains
+     *
+     * @return a builder
+     */
+    public static NBPathsAPI.GetPrefixes chain(List<ResolverChain.Link> chains) {
+        return new NBIO().chainContent(chains);
     }
 
     /**
