@@ -35,7 +35,7 @@ public enum NBAtFileFormats {
             String[] parts = strings[0].split("[=:]", 2);
             return parts[0]+"="+parts[1];
         } else {
-            throw new RuntimeException("Unable to match data for namedd value form: " + String.join("|",Arrays.asList(strings)));
+            throw new RuntimeException("Unable to match data for named value form: " + String.join("|",Arrays.asList(strings)));
         }
     }
 
@@ -46,7 +46,7 @@ public enum NBAtFileFormats {
             String[] parts = strings[0].split("[=:]", 2);
             return parts[0]+":"+parts[1];
         } else {
-            throw new RuntimeException("Unable to match data for namedd value form: " + String.join("|",Arrays.asList(strings)));
+            throw new RuntimeException("Unable to match data for named value form: " + String.join("|",Arrays.asList(strings)));
         }
     }
 
