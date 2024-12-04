@@ -321,6 +321,7 @@ public class ConfigModel implements NBConfigModel {
     public ConfigModel add(NBConfigModel otherModel) {
         for (Param<?> param : otherModel.getParams()) {
             add(param);
+            System.out.println("ConfigModel.add: "+param);
         }
         return this;
     }

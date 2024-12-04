@@ -32,7 +32,6 @@ import io.nosqlbench.nb.api.lifecycle.Shutdownable;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.events.NBEvent;
@@ -69,6 +68,7 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         super(parent, activityDef);
         OpsDocList workload;
 
+        // (1) Retrieve the workload model
         Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
         NBConfigModel yamlmodel;
         if (yaml_loc.isPresent()) {
@@ -78,29 +78,26 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         } else {
             yamlmodel = ConfigModel.of(StandardActivity.class).asReadOnly();
         }
+        System.out.println("StandardActivity.yamlmodel="+yamlmodel);
+        // This is currently a coarse flattened map. It is not what we need
 
+        // (2) Retrieve the default driver
         Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
-        Optional<DriverAdapter<?, ?>> defaultAdapter = defaultDriverName
-            .flatMap(name -> ServiceSelector.of(name, ServiceLoader.load(DriverAdapterLoader.class)).get())
-            .map(l -> l.load(this, NBLabels.forKV()));
-
-        if (defaultDriverName.isPresent() && defaultAdapter.isEmpty()) {
-            throw new BasicError("Unable to load '" + defaultDriverName.get() + "' driver adapter.\n"+
-                                 "Rebuild NB5 to include this driver adapter. "+
-                                 "Change '<activeByDefault>false</activeByDefault>' for the driver in "+
-                                 "'./nb-adapters/pom.xml' and './nb-adapters/nb-adapters-included/pom.xml' first.");
+        DriverAdapter<CycleOp<?>, Space> defaultAdapter = null;;
+        if (defaultDriverName.isPresent()) {
+            defaultAdapter = getDriverAdapter(defaultDriverName.orElse(null));
+            System.out.println("StandardActivity.driver="+defaultDriverName);
+            System.out.println("StandardActivity.defaultAdapter="+defaultAdapter);
         }
-
         // HERE, op templates are loaded before drivers are loaded
-        List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter.orElse(null));
-
-
+        List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter);
         List<ParsedOp> pops = new ArrayList<>();
-        List<DriverAdapter<CycleOp<?>, Space>> adapterlist = new ArrayList<>();
         NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(yamlmodel);
 
         Optional<String> defaultDriverOption = defaultDriverName;
+        List<DriverAdapter<CycleOp<?>, Space>> adapterlist = new ArrayList<>();
         ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
+
         for (OpTemplate ot : opTemplates) {
 //            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
             String driverName = ot.getOptionalStringParam("driver", String.class)
@@ -115,21 +112,10 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
 
             // HERE
             if (!adapters.containsKey(driverName)) {
-
-                DriverAdapter<CycleOp<?>,Space> adapter = Optional.of(driverName)
-                    .flatMap(
-                        name -> ServiceSelector.of(
-                                name,
-                                ServiceLoader.load(DriverAdapterLoader.class)
-                            )
-                            .get())
-                    .map(
-                        l -> l.load(
-                            this,
-                            NBLabels.forKV()
-                        )
-                    )
-                    .orElseThrow(() -> new OpConfigError("driver adapter not present for name '" + driverName + "'"));
+                DriverAdapter<CycleOp<?>,Space> adapter =
+                    defaultDriverName.equals(driverName) ? defaultAdapter : getDriverAdapter(driverName);
+                System.out.println("StandardActivity.driver="+driverName);
+                System.out.println("StandardActivity.adapter="+adapter);
 
                 NBConfigModel combinedModel = yamlmodel;
                 NBConfiguration combinedConfig = combinedModel.matchConfig(activityDef.getParams());
@@ -189,6 +175,17 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
             MetricCategory.Core,
             "The current number of operations which have been completed"
         );
+    }
+
+    private DriverAdapter<CycleOp<?>, Space> getDriverAdapter(String driverName) {
+        return Optional.of(driverName)
+            .flatMap(name -> ServiceSelector.of(name, ServiceLoader.load(DriverAdapterLoader.class)).get())
+            .map(l -> l.load(this, NBLabels.forKV())
+            )
+            .orElseThrow(() -> new OpConfigError("Unable to load '" + driverName + "' driver adapter.\n"+
+                "Rebuild NB5 to include this driver adapter. "+
+                "Change '<activeByDefault>false</activeByDefault>' for the driver in "+
+                "'./nb-adapters/pom.xml' and './nb-adapters/nb-adapters-included/pom.xml' first."));
     }
 
     @Override
