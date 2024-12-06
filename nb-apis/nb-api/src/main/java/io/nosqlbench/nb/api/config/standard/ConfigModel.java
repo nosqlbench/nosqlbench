@@ -162,6 +162,8 @@ public class ConfigModel implements NBConfigModel {
         Map<String, Param<?>> namedParams = getNamedParams();
         for (String providedCfgField : sharedConfig.keySet()) {
             if (namedParams.containsKey(providedCfgField)) {
+                namedParams.get(providedCfgField).addLayer("StandardActivity");
+//                System.out.println("ConfigModel.matchConfig: "+namedParams.get(providedCfgField).toString());
                 extracted.put(providedCfgField, sharedConfig.get(providedCfgField));
             }
         }
@@ -319,11 +321,18 @@ public class ConfigModel implements NBConfigModel {
 
     @Override
     public ConfigModel add(NBConfigModel otherModel) {
+        String layer = otherModel.getOf().getSimpleName();
         for (Param<?> param : otherModel.getParams()) {
+            param.addLayer(layer);
             add(param);
-            System.out.println("ConfigModel.add: "+param);
         }
         return this;
+    }
+
+    @Override
+    public void print() {
+        System.out.println("ConfigModel: "+ofType);
+        for (Param<?> param : getParams()) System.out.println("ConfigModel: " + param);
     }
 
     @Override

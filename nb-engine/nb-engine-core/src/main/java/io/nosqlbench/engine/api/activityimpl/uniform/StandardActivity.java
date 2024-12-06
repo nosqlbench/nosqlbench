@@ -99,6 +99,7 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
 
         for (OpTemplate ot : opTemplates) {
+            System.out.println("StandardActivity.opTemplate="+ot);
 //            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
             String driverName = ot.getOptionalStringParam("driver", String.class)
                 .or(() -> ot.getOptionalStringParam("type", String.class))
@@ -123,16 +124,18 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
                 if (adapter instanceof NBConfigurable configurable) {
                     NBConfigModel adapterModel = configurable.getConfigModel();
                     supersetConfig.add(adapterModel);
+                    supersetConfig.print();
 
                     combinedModel = adapterModel.add(yamlmodel);
+                    combinedModel.print();
                     combinedConfig = combinedModel.matchConfig(activityDef.getParams());
                     configurable.applyConfig(combinedConfig);
                 }
                 adapters.put(driverName, adapter);
                 mappers.put(driverName, adapter.getOpMapper());
             }
-
             supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
+            System.out.println("StandardActivity.opTemplate assertValidConfig");
 
             DriverAdapter<CycleOp<?>, Space> adapter = adapters.get(driverName);
             adapterlist.add(adapter);
