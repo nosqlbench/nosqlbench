@@ -144,7 +144,7 @@ jobs:
 
       #  https://github.com/softprops/action-gh-release
       - name: create github release
-        uses: softprops/action-gh-release@v2.0.9
+        uses: softprops/action-gh-release@v2.1.0
         if: startsWith(github.ref, 'refs/tags/')
         with:
 #          body: ${{ steps.prepare_summary.outputs.release_summary }}
