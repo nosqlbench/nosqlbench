@@ -18,43 +18,38 @@ package io.nosqlbench.adapter.milvus.opdispensers;
  */
 
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.milvus.client.MilvusServiceClient;
-import io.milvus.param.dml.InsertParam;
 import io.milvus.param.highlevel.dml.InsertRowsParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
-import io.nosqlbench.adapter.milvus.ops.MilvusInsertOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusInsertRowsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class MilvusInsertRowsOpDispenser extends MilvusBaseOpDispenser<InsertRowsParam> {
     private static final Logger logger = LogManager.getLogger(MilvusInsertRowsOpDispenser.class);
 
     /**
-     * Create a new MilvusDeleteOpDispenser subclassed from {@link MilvusBaseOpDispenser}.
-     *
-     * @param adapter
-     *     The associated {@link MilvusDriverAdapter}
-     * @param op
-     *     The {@link ParsedOp} encapsulating the activity for this cycle
-     * @param targetFunction
-     *     A LongFunction that returns the specified Milvus Index for this Op
+     Create a new MilvusDeleteOpDispenser subclassed from {@link MilvusBaseOpDispenser}.
+     @param adapter
+     The associated {@link MilvusDriverAdapter}
+     @param op
+     The {@link ParsedOp} encapsulating the activity for this cycle
+     @param targetFunction
+     A LongFunction that returns the specified Milvus Index for this Op
      */
     public MilvusInsertRowsOpDispenser(MilvusDriverAdapter adapter,
                                        ParsedOp op,
-                                       LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                       LongFunction<String> targetFunction,
+                                       LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction,spaceF);
     }
 
     @Override

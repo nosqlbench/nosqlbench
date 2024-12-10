@@ -21,6 +21,7 @@ import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.param.highlevel.dml.GetIdsParam;
 import io.nosqlbench.adapter.milvus.MilvusAdapterUtils;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -46,8 +47,10 @@ public class MilvusGetOpDispenser extends MilvusBaseOpDispenser<GetIdsParam> {
 
     public MilvusGetOpDispenser(MilvusDriverAdapter adapter,
                                 ParsedOp op,
-                                LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                LongFunction<String> targetFunction,
+                                LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -75,7 +78,7 @@ public class MilvusGetOpDispenser extends MilvusBaseOpDispenser<GetIdsParam> {
         LongFunction<GetIdsParam.Builder> finalEbF2 = ebF;
         ebF = l -> finalEbF2.apply(l).withPrimaryIds(pidsF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF, List.of("collection_name", "collection"), String.class,
+        ebF = op.enhanceFuncOptionally(ebF, "collection", String.class,
             GetIdsParam.Builder::withCollectionName);
         ebF = op.enhanceEnumOptionally(ebF, "consistency_level", ConsistencyLevelEnum.class,
             GetIdsParam.Builder::withConsistencyLevel);

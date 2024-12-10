@@ -52,7 +52,7 @@ public abstract class MilvusBaseOp<T> implements CycleOp<Object> {
         try {
             Object result = applyOp(value);
             if (result instanceof R<?> r) {
-                var error = r.getException();
+                Exception error = r.getException();
                 if (error!=null) {
                     throw error;
                 }

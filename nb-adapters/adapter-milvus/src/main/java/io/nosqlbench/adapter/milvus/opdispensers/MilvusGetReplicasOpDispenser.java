@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.control.GetReplicasParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetReplicasOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -29,8 +30,10 @@ public class MilvusGetReplicasOpDispenser extends MilvusBaseOpDispenser<GetRepli
 
     public MilvusGetReplicasOpDispenser(MilvusDriverAdapter adapter,
                                         ParsedOp op,
-                                        LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                        LongFunction<String> targetFunction,
+                                        LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override

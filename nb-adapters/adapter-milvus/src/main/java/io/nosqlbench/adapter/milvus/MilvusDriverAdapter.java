@@ -27,6 +27,7 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 import static io.nosqlbench.adapter.milvus.MilvusAdapterUtils.MILVUS;
 
@@ -38,14 +39,19 @@ public class MilvusDriverAdapter extends BaseDriverAdapter<MilvusBaseOp<?>, Milv
     }
 
     @Override
-    public OpMapper<MilvusBaseOp<?>> getOpMapper() {
+    public OpMapper<MilvusBaseOp<?>,MilvusSpace> getOpMapper() {
         return new MilvusOpMapper(this);
     }
 
     @Override
-    public Function<String, ? extends MilvusSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new MilvusSpace(s, cfg);
+    public LongFunction<MilvusSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (idx) -> new MilvusSpace(this, idx, cfg);
     }
+
+    //    @Override
+//    public Function<String, ? extends MilvusSpace> getSpaceInitializer(NBConfiguration cfg) {
+//        return (s) -> new MilvusSpace(s, cfg);
+//    }
 
     @Override
     public NBConfigModel getConfigModel() {

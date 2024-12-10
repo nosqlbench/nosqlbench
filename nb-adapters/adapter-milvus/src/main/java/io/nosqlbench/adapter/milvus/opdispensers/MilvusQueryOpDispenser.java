@@ -20,6 +20,7 @@ import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.param.dml.QueryParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusQueryOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -31,8 +32,10 @@ public class MilvusQueryOpDispenser extends MilvusBaseOpDispenser<QueryParam> {
 
     public MilvusQueryOpDispenser(MilvusDriverAdapter adapter,
                                   ParsedOp op,
-                                  LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                  LongFunction<String> targetFunction,
+                                  LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -44,7 +47,7 @@ public class MilvusQueryOpDispenser extends MilvusBaseOpDispenser<QueryParam> {
         LongFunction<QueryParam.Builder> ebF =
             l -> QueryParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF, List.of("partition_names", "partitions"), List.class,
+        ebF = op.enhanceFuncOptionally(ebF, "partitions", List.class,
             QueryParam.Builder::withPartitionNames);
         ebF = op.enhanceEnumOptionally(ebF, "consistency_level", ConsistencyLevelEnum.class, QueryParam.Builder::withConsistencyLevel);
         ebF = op.enhanceFuncOptionally(ebF, "expr", String.class, QueryParam.Builder::withExpr);

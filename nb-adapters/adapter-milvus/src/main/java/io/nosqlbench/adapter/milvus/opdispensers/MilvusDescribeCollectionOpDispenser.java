@@ -18,8 +18,8 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.collection.DescribeCollectionParam;
-import io.milvus.param.partition.CreatePartitionParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusDescribeCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -31,8 +31,10 @@ public class MilvusDescribeCollectionOpDispenser extends MilvusBaseOpDispenser<D
 
     public MilvusDescribeCollectionOpDispenser(MilvusDriverAdapter adapter,
                                                ParsedOp op,
-                                               LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                               LongFunction<String> targetFunction,
+                                               LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -44,7 +46,7 @@ public class MilvusDescribeCollectionOpDispenser extends MilvusBaseOpDispenser<D
         LongFunction<DescribeCollectionParam.Builder> ebF =
             l -> DescribeCollectionParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF, List.of("database","database_name"),String.class,
+        ebF = op.enhanceFuncOptionally(ebF, "database",String.class,
             DescribeCollectionParam.Builder::withDatabaseName);
 
         final LongFunction<DescribeCollectionParam.Builder> lastF = ebF;

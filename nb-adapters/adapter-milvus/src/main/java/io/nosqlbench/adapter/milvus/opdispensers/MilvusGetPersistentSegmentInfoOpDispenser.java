@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.partition.GetPartitionStatisticsParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetPartitionStatisticsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -30,8 +31,10 @@ public class MilvusGetPersistentSegmentInfoOpDispenser extends MilvusBaseOpDispe
 
     public MilvusGetPersistentSegmentInfoOpDispenser(MilvusDriverAdapter adapter,
                                                      ParsedOp op,
-                                                     LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                                     LongFunction<String> targetFunction,
+                                                     LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -44,7 +47,7 @@ public class MilvusGetPersistentSegmentInfoOpDispenser extends MilvusBaseOpDispe
             l -> GetPartitionStatisticsParam.newBuilder().withPartitionName(targetF.apply(l));
 
         ebF = op.enhanceFuncOptionally(ebF,"flush",Boolean.class,GetPartitionStatisticsParam.Builder::withFlush);
-        ebF = op.enhanceFuncOptionally(ebF, List.of("collection_name","collection"),String.class,
+        ebF = op.enhanceFuncOptionally(ebF, "collection",String.class,
             GetPartitionStatisticsParam.Builder::withCollectionName);
 
         final LongFunction<GetPartitionStatisticsParam.Builder> lastF = ebF;

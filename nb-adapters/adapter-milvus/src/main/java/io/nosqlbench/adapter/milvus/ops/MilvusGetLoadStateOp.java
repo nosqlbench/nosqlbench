@@ -22,7 +22,7 @@ import io.milvus.grpc.LoadState;
 import io.milvus.param.R;
 import io.milvus.param.collection.GetLoadStateParam;
 import io.nosqlbench.adapter.milvus.exceptions.MilvusAwaitStateIncompleteError;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.OpGenerator;
 import io.nosqlbench.adapters.api.scheduling.TimeoutPredicate;
 
@@ -65,7 +65,7 @@ public class MilvusGetLoadStateOp extends MilvusBaseOp<GetLoadStateParam> implem
     }
 
     @Override
-    public Op getNextOp() {
+    public CycleOp<Object> getNextOp() {
         return this.nextOp;
     }
 }

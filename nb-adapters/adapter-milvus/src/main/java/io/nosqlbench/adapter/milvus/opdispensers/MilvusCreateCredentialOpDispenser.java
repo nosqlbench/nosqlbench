@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.credential.CreateCredentialParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusCreateCredentialOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -29,8 +30,10 @@ public class MilvusCreateCredentialOpDispenser extends MilvusBaseOpDispenser<Cre
 
     public MilvusCreateCredentialOpDispenser(MilvusDriverAdapter adapter,
                                              ParsedOp op,
-                                             LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                             LongFunction<String> targetFunction,
+                                             LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override

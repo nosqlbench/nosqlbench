@@ -21,6 +21,7 @@ import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.param.MetricType;
 import io.milvus.param.dml.SearchParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusSearchOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -32,8 +33,9 @@ public class MilvusSearchOpDispenser extends MilvusBaseOpDispenser<SearchParam> 
     public MilvusSearchOpDispenser(
         MilvusDriverAdapter adapter,
         ParsedOp op,
-        LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+        LongFunction<String> targetFunction, LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -43,7 +45,7 @@ public class MilvusSearchOpDispenser extends MilvusBaseOpDispenser<SearchParam> 
         LongFunction<SearchParam.Builder> ebF =
             l -> SearchParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFuncOptionally(ebF, List.of("partition_names", "partitions"), List.class, SearchParam.Builder::withPartitionNames);
+        ebF = op.enhanceFuncOptionally(ebF, "partitions", List.class, SearchParam.Builder::withPartitionNames);
         ebF = op.enhanceFuncOptionally(ebF, "out_fields", List.class, SearchParam.Builder::withOutFields);
 
 
@@ -56,7 +58,7 @@ public class MilvusSearchOpDispenser extends MilvusBaseOpDispenser<SearchParam> 
             (SearchParam.Builder b, Number n) -> b.withRoundDecimal(n.intValue()));
         ebF = op.enhanceFuncOptionally(ebF, "ignore_growing", Boolean.class, SearchParam.Builder::withIgnoreGrowing);
         ebF = op.enhanceFuncOptionally(ebF, "params", String.class, SearchParam.Builder::withParams);
-        ebF = op.enhanceFunc(ebF, List.of("vector_field_name", "vector_field"), String.class,
+        ebF = op.enhanceFunc(ebF, "vector_field", String.class,
             SearchParam.Builder::withVectorFieldName);
         // TODO: sanity check List of Floats vs List of List of Floats at func construction time.
         ebF = op.enhanceFuncOptionally(ebF, "vectors", List.class, SearchParam.Builder::withVectors);
