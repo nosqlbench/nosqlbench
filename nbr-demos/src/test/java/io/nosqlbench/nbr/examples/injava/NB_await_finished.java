@@ -20,6 +20,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitie
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import org.jetbrains.annotations.NotNull;
 
 
 import java.io.PrintWriter;
@@ -50,13 +51,9 @@ public class NB_await_finished extends NBBaseCommand {
      */
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        var activitydef1 = Map.of(
-            "alias", "activity_to_await",
-            "driver", "diag",
-            "cycles", "0..1500",
-            "threads", "1",
-            "targetrate", "500",
-            "op", "noop"
+        Map<String, String> activitydef1 = Map.of(
+            "alias", "activity_to_await", "driver", "diag", "cycles", "0..1500", "threads", "1",
+            "targetrate", "500", "op", "noop"
         );
         stdout.println("starting activity activity_to_await");
         controller.start(activitydef1);

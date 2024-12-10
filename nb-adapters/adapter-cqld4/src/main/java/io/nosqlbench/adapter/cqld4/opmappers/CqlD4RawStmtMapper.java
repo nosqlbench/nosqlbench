@@ -35,7 +35,7 @@ public class CqlD4RawStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlSimpleState
     }
 
     @Override
-    public OpDispenser<Cqld4CqlSimpleStatement> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+    public OpDispenser<Cqld4CqlSimpleStatement> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceF) {
         return new Cqld4RawStmtDispenser(adapter, targetFunction,op);
     }
 

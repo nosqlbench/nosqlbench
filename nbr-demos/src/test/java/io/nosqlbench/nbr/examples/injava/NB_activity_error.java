@@ -20,6 +20,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContaine
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
+import org.jetbrains.annotations.NotNull;
 
 
 import java.io.PrintWriter;
@@ -53,12 +54,9 @@ public class NB_activity_error extends NBBaseCommand {
      */
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        var activitydef1 = Map.of("alias", "activity_error",
-            "driver", "diag",
-            "cycles", "0..1500000",
-            "threads", "1",
-            "targetrate", "10",
-            "op", "log: modulo=1"
+        Map<String, String> activitydef1 = Map.of(
+            "alias", "activity_error", "driver", "diag", "cycles", "0..1500000", "threads", "1",
+            "targetrate", "10", "op", "log: modulo=1"
         );
         stdout.write("starting activity activity_error");
         controller.start(activitydef1);

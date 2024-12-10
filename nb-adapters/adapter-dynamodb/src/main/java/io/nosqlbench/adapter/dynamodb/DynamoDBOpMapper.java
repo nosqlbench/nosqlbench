@@ -40,7 +40,7 @@ public class DynamoDBOpMapper implements OpMapper<DynamoDBOp,DynamoDBSpace> {
     }
 
     @Override
-    public OpDispenser<DynamoDBOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<DynamoDBSpace> spaceInitF) {
+    public OpDispenser<DynamoDBOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<DynamoDBSpace> spaceF) {
         int space = op.getStaticConfigOr("space", 0);
         LongFunction<DynamoDBSpace> spaceFunc = adapter.getSpaceFunc(op);
         DynamoDB ddb = spaceFunc.apply(space).getDynamoDB();

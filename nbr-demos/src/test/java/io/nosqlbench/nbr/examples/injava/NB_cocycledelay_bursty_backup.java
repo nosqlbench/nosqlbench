@@ -22,6 +22,7 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
+import org.jetbrains.annotations.NotNull;
 
 
 import java.io.PrintWriter;
@@ -86,13 +87,9 @@ public class NB_cocycledelay_bursty_backup extends NBBaseCommand {
      */
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        var co_cycle_delay_bursty = Map.of(
-            "alias", "co_cycle_delay_bursty",
-            "driver", "diag",
-            "cycles", "0..1000000",
-            "threads", "1",
-            "cyclerate", "1000,1.5",
-            "op", "diagrate: diagrate=500"
+        Map<String, String> co_cycle_delay_bursty = Map.of(
+            "alias", "co_cycle_delay_bursty", "driver", "diag", "cycles", "0..1000000", "threads",
+            "1", "cyclerate", "1000,1.5", "op", "diagrate: diagrate=500"
         );
 
 

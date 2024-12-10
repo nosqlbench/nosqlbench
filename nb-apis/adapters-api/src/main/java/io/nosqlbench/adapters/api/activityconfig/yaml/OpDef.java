@@ -32,7 +32,7 @@ public class OpDef extends OpTemplate {
     private final LinkedHashMap<String, Object> params;
     private final LinkedHashMap<String, String> bindings;
     private final LinkedHashMap<String, String> tags;
-    private int refKey;
+    private int refkey;
 
     public OpDef(OpsBlock block, RawOpDef rawOpDef) {
         this.block = block;
@@ -40,6 +40,7 @@ public class OpDef extends OpTemplate {
         this.params = composeParams();
         this.bindings = composeBindings();
         this.tags = composeTags();
+        this.refkey = rawOpDef.getRefKey();
     }
 
     @Override
@@ -70,6 +71,11 @@ public class OpDef extends OpTemplate {
     }
 
     @Override
+    public int getRefKey() {
+        return this.refkey;
+    }
+
+    @Override
     public LinkedHashMap<String, String> getBindings() {
         return bindings;
 //        return new MultiMapLookup<>(rawStmtDef.getBindings(), block.getBindings());
@@ -85,23 +91,11 @@ public class OpDef extends OpTemplate {
         return params;
     }
 
-    @Override
-    public int getRefKey() {
-        return this.refKey;
-    }
-
-    @Override
-    public void setRefKey(int refKey) {
-        this.refKey = refKey;
-    }
-
     private LinkedHashMap<String, Object> composeParams() {
         MultiMapLookup<Object> lookup = new MultiMapLookup<>(rawOpDef.getParams(), block.getParams());
         LinkedHashMap<String, Object> params = new LinkedHashMap<>(lookup);
         return params;
     }
-
-
 
     @Override
     public Map<String, String> getTags() {

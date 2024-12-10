@@ -16,19 +16,26 @@
 
 package io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
-public class EmitterCycleOp<T> implements CycleOp<T> {
+import java.util.Map;
+import java.util.function.Function;
 
-    private final CycleOp<T> cycleOp;
-    public EmitterCycleOp(CycleOp<T> cycleOp) {
-        this.cycleOp = cycleOp;
+public class CapturingOp<T> implements CycleOp<Map<String,?>> {
+
+    private final CycleOp<T> op;
+    private final Function<T, Map<String, ?>> extractorF;
+
+    public CapturingOp(CycleOp<T> op, Function<T, Map<String,?>> extractorF) {
+        this.op = op;
+        this.extractorF = extractorF;
     }
 
     @Override
-    public T apply(long value) {
-            T result = cycleOp.apply(value);
-            System.out.println("result from cycle " + value + ":\n"+result);
-            return result;
+    public Map<String,?> apply(long value) {
+        T result = op.apply(value);
+        Map<String, ?> map = extractorF.apply(result);
+        return map;
     }
 }

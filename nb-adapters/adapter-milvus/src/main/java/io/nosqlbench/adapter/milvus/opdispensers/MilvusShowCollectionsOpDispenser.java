@@ -21,6 +21,7 @@ import io.milvus.grpc.ShowType;
 import io.milvus.param.collection.ShowCollectionsParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.MilvusAdapterUtils;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusShowCollectionsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -32,8 +33,10 @@ public class MilvusShowCollectionsOpDispenser extends MilvusBaseOpDispenser<Show
 
     public MilvusShowCollectionsOpDispenser(MilvusDriverAdapter adapter,
                                             ParsedOp op,
-                                            LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                            LongFunction<String> targetFunction,
+                                            LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -47,7 +50,7 @@ public class MilvusShowCollectionsOpDispenser extends MilvusBaseOpDispenser<Show
         LongFunction<List<String>> collectionsF = l -> MilvusAdapterUtils.splitNames(targetF.apply(l));
         LongFunction<ShowCollectionsParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withCollectionNames(collectionsF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,List.of("database_name","database"),String.class,
+        ebF = op.enhanceFuncOptionally(ebF,"database",String.class,
             ShowCollectionsParam.Builder::withDatabaseName);
         ebF = op.enhanceEnumOptionally(ebF,"show_type", ShowType.class,ShowCollectionsParam.Builder::withShowType);
         logger.warn(this.getClass().getSimpleName() + " is deprecated, use get_loading_progress instead");

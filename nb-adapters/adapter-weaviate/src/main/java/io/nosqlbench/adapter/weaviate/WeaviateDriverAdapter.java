@@ -21,6 +21,7 @@ import static io.nosqlbench.adapter.weaviate.WeaviateAdapterUtils.WEAVIATE;
 
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 
 import io.nosqlbench.adapter.weaviate.ops.WeaviateBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
@@ -33,26 +34,25 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
 @Service(value = DriverAdapter.class, selector = WEAVIATE)
-public class WeaviateDriverAdapter extends BaseDriverAdapter<WeaviateBaseOp<?>, WeaviateSpace> {
+public class WeaviateDriverAdapter extends BaseDriverAdapter<WeaviateBaseOp<?, ?>, WeaviateSpace> {
 
-	public WeaviateDriverAdapter(NBComponent parentComponent, NBLabels labels) {
-		super(parentComponent, labels);
-	}
+    public WeaviateDriverAdapter(NBComponent parentComponent, NBLabels labels) {
+        super(parentComponent, labels);
+    }
 
-	@Override
-	public OpMapper<WeaviateBaseOp<?>> getOpMapper() {
-		return new WeaviateOpMapper(this);
-	}
+    @Override
+    public NBConfigModel getConfigModel() {
+        return super.getConfigModel().add(WeaviateSpace.getConfigModel());
+    }
 
-	@Override
-	public IntFunction<WeaviateSpace> getSpaceInitializer(NBConfiguration cfg) {
-		return (int s) -> new WeaviateSpace(s, cfg);
-	}
+    @Override
+    public OpMapper<WeaviateBaseOp<?, ?>, WeaviateSpace> getOpMapper() {
+        return new WeaviateOpMapper(this);
+    }
 
-	@Override
-	public NBConfigModel getConfigModel() {
-		return super.getConfigModel().add(WeaviateSpace.getConfigModel());
-	}
-
+    @Override
+    public LongFunction<WeaviateSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return l -> new WeaviateSpace(this, l, cfg);
+    }
 }
 

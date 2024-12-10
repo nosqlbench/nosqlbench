@@ -835,6 +835,22 @@
             <organization>nosqlbench.io</organization>
             <organizationUrl>https://nosqlbench.io/</organizationUrl>
         </developer>
+        <developer>
+            <name>Madhavan Sridharan</name>
+            <organization>nosqlbench.io</organization>
+            <organizationUrl>https://nosqlbench.io/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Dave Fisher</name>
+            <organization>nosqlbench.io</organization>
+            <organizationUrl>https://nosqlbench.io/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Mark Wolters</name>
+            <organization>nosqlbench.io</organization>
+            <organizationUrl>https://nosqlbench.io/</organizationUrl>
+        </developer>
+
     </developers>
 
     <distributionManagement>

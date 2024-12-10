@@ -38,7 +38,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
 
 
     @Override
-    public OpDispenser<DataApiBaseOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<DataApiSpace> spaceInitF) {
+    public OpDispenser<DataApiBaseOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<DataApiSpace> spaceF) {
     //public OpDispenser<DataApiBaseOp> apply(ParsedOp op, LongFunction<DataApiSpace> spaceInitF) {
         TypeAndTarget<DataApiOpType, String> typeAndTarget = op.getTypeAndTarget(
             DataApiOpType.class,

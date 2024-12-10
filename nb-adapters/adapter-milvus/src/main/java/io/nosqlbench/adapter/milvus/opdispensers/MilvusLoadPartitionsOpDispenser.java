@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.partition.LoadPartitionsParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusLoadPartitionsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -29,16 +30,15 @@ import java.util.function.LongFunction;
 public class MilvusLoadPartitionsOpDispenser extends MilvusBaseOpDispenser<LoadPartitionsParam> {
 
     /**
-     * TODO: Refactor this class after API refinements for more type and target variation
-     *
-     * @param adapter
-     * @param op
-     * @param targetFunction
+     TODO: Refactor this class after API refinements for more type and target variation
+     @param adapter
      */
     public MilvusLoadPartitionsOpDispenser(MilvusDriverAdapter adapter,
                                            ParsedOp op,
-                                           LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                           LongFunction<String> targetFunction,
+                                           LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -50,14 +50,14 @@ public class MilvusLoadPartitionsOpDispenser extends MilvusBaseOpDispenser<LoadP
         LongFunction<LoadPartitionsParam.Builder> ebF =
             l -> LoadPartitionsParam.newBuilder().withCollectionName(targetF.apply(l));
 
-        ebF = op.enhanceFunc(ebF, List.of("partition_names", "partitions"), List.class,
+        ebF = op.enhanceFunc(ebF, "partitions", List.class,
             LoadPartitionsParam.Builder::withPartitionNames);
         ebF = op.enhanceFuncOptionally(
             ebF, "resource_groups", List.class,
             LoadPartitionsParam.Builder::withResourceGroups
         );
         ebF = op.enhanceFuncOptionally(
-            ebF, List.of("database_name", "database"), String.class,
+            ebF, "database", String.class,
             LoadPartitionsParam.Builder::withDatabaseName
         );
         ebF = op.enhanceFuncOptionally(ebF, "refresh", Boolean.class, LoadPartitionsParam.Builder::withRefresh);

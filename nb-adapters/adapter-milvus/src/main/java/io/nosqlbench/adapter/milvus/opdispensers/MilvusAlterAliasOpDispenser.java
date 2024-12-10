@@ -17,20 +17,15 @@
 package io.nosqlbench.adapter.milvus.opdispensers;
 
 import io.milvus.client.MilvusServiceClient;
-import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.param.alias.AlterAliasParam;
-import io.milvus.param.collection.CreateCollectionParam;
-import io.milvus.param.collection.FieldType;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusAlterAliasOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
-import io.nosqlbench.adapter.milvus.ops.MilvusCreateCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-import java.util.Map;
 import java.util.function.LongFunction;
 
 public class MilvusAlterAliasOpDispenser extends MilvusBaseOpDispenser<AlterAliasParam> {
@@ -38,8 +33,10 @@ public class MilvusAlterAliasOpDispenser extends MilvusBaseOpDispenser<AlterAlia
 
     public MilvusAlterAliasOpDispenser(MilvusDriverAdapter adapter,
                                        ParsedOp op,
-                                       LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                       LongFunction<String> targetFunction,
+                                       LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction,spaceF);
     }
 
     @Override
@@ -53,7 +50,7 @@ public class MilvusAlterAliasOpDispenser extends MilvusBaseOpDispenser<AlterAlia
         // Add enhancement functions here
 
         ebF = op.enhanceFuncOptionally(
-            ebF,List.of("collection_name","collection"),String.class,AlterAliasParam.Builder::withCollectionName);
+            ebF,"collection",String.class,AlterAliasParam.Builder::withCollectionName);
 
         final LongFunction<AlterAliasParam.Builder> lastF = ebF;
         final LongFunction<AlterAliasParam> collectionParamF = l -> lastF.apply(l).build();

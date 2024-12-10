@@ -34,7 +34,7 @@ import java.util.function.Function;
 public class RawOpsLoader {
     private final static Logger logger = LogManager.getLogger(RawOpsLoader.class);
 
-    public static String[] YAML_EXTENSIONS = new String[]{"yaml","yml"};
+    public static String[] YAML_EXTENSIONS = new String[]{"yaml", "yml"};
 
     private final ArrayList<Function<String,String>> transformers = new ArrayList<>();
 
@@ -113,6 +113,15 @@ public class RawOpsLoader {
             }
         }
         RawOpsDocList rawOpsDocList = new RawOpsDocList(newDocList);
+
+        int refkey = 0;
+        for (RawOpsDoc rawOpsBlocks : rawOpsDocList) {
+            for (RawOpsBlock rawOpsBlock : rawOpsBlocks) {
+                for (RawOpDef rawOpDef : rawOpsBlock.getRawOpDefs()) {
+                    rawOpDef.setRefKey(refkey++);
+                }
+            }
+        }
         return rawOpsDocList;
     }
 

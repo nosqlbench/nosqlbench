@@ -40,7 +40,7 @@ public class OpsDocList implements Iterable<OpsDoc> {
 
     public OpsDocList(RawOpsDocList rawOpsDocList) {
         this.rawOpsDocList = rawOpsDocList;
-        this.applyModifier(new enumerator());
+//        this.applyModifier(new enumerator());
     }
 
     public static OpsDocList none() {
@@ -194,14 +194,6 @@ public class OpsDocList implements Iterable<OpsDoc> {
             }
         }
         return count;
-    }
-
-    public static class enumerator implements Consumer<OpTemplate> {
-        private int count=0;
-        @Override
-        public void accept(OpTemplate opTemplate) {
-            opTemplate.setRefKey(count++);
-        }
     }
 
 }

@@ -19,11 +19,8 @@ package io.nosqlbench.adapter.cqld4.optypes;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
 
-import java.util.Map;
-
 // Need to create RainbowTableStatement
-public class Cqld4RainbowTableOp
-    implements Cqld4BaseOp<ResultSet>, VariableCapture, OpGenerator, OpResultSize {
+public class Cqld4RainbowTableOp implements Cqld4BaseOp<ResultSet>, OpGenerator, OpResultSize {
 //    private final CqlSession session;
 //    private final RainbowTableStatement stmt;
 
@@ -36,11 +33,6 @@ public class Cqld4RainbowTableOp
 
     @Override
     public CycleOp getNextOp() {
-        throw new RuntimeException("implement me");
-    }
-
-    @Override
-    public Map<String, ?> capture() {
         throw new RuntimeException("implement me");
     }
 

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.cqld4.optypes;
 
+import com.datastax.oss.driver.api.core.CqlIdentifier;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.*;
 import io.nosqlbench.adapter.cqld4.Cqld4CqlReboundStatement;
@@ -26,14 +27,16 @@ import io.nosqlbench.adapter.cqld4.exceptions.ExceededRetryReplaceException;
 import io.nosqlbench.adapter.cqld4.exceptions.UnexpectedPagingException;
 import io.nosqlbench.adapter.cqld4.instruments.CqlOpMetrics;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
-import org.apache.commons.lang3.NotImplementedException;
+import io.nosqlbench.virtdata.core.templates.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.function.Function;
 
 
 // TODO: add statement filtering
@@ -47,7 +50,7 @@ import java.util.concurrent.*;
 
 
 public abstract class Cqld4CqlOp
-    implements Cqld4BaseOp<List<Row>>, VariableCapture, OpGenerator, OpResultSize {
+    implements Cqld4BaseOp<List<Row>>, UniformVariableCapture<List<Row>>, OpGenerator, OpResultSize {
 
     private final static Logger logger = LogManager.getLogger(Cqld4CqlOp.class);
 
@@ -165,8 +168,33 @@ public abstract class Cqld4CqlOp
         return next;
     }
 
-    public Map<String, ?> capture() {
-        throw new NotImplementedException("Not implemented for Cqld4CqlOp");
+    @Override
+    public Function<List<Row>, Map<String, ?>> initCaptureF(CapturePoints<List<Row>> points) {
+        Function<List<Row>,Map<String,?>> f = (List<Row> result) -> {
+            if (result.size()!=1) {
+                throw new CapturePointException("result contained " + result.size() + " rows, required exactly 1");
+            }
+            Row row = result.get(0);
+            ColumnDefinitions coldefs = row.getColumnDefinitions();
+            Map<String,Object> values = new HashMap<>(coldefs.size());
+
+            if (points.isGlob()) {
+                for (ColumnDefinition coldef : coldefs) {
+                    String colname = coldef.getName().toString();
+                    values.put(colname,row.getObject(colname));
+                }
+            } else {
+                for (CapturePoint<List<Row>> point : points) {
+                    String sourceName = point.getSourceName();
+                    Object value = row.getObject(point.getSourceName());
+                    Object recast = point.getAsCast().cast(value);
+                    values.put(point.getAsName(), recast);
+                }
+            }
+
+            return values;
+        };
+        return f;
     }
 
     public abstract Statement<?> getStmt();

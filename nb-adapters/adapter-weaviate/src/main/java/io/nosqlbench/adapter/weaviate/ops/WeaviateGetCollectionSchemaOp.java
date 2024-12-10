@@ -21,14 +21,14 @@ import io.weaviate.client.WeaviateClient;
 import io.weaviate.client.base.Result;
 import io.weaviate.client.v1.schema.model.Schema;
 
-public class WeaviateGetCollectionSchemaOp extends WeaviateBaseOp<String> {
+public class WeaviateGetCollectionSchemaOp extends WeaviateBaseOp<String,Result<?>> {
 
 	public WeaviateGetCollectionSchemaOp(WeaviateClient client, String request) {
 		super(client, request);
 	}
 
 	@Override
-	public Object applyOp(long value) {
+	public Result<?> applyOp(long value) {
 		Result<Schema> getColSchemaResponse = null;
 		try {
 			getColSchemaResponse = client.schema().getter().run();

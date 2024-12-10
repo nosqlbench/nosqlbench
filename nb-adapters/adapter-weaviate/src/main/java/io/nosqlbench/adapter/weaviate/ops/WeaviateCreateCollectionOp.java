@@ -19,14 +19,14 @@ import io.weaviate.client.WeaviateClient;
 import io.weaviate.client.base.Result;
 import io.weaviate.client.v1.schema.model.WeaviateClass;
 
-public class WeaviateCreateCollectionOp extends WeaviateBaseOp<WeaviateClass> {
+public class WeaviateCreateCollectionOp extends WeaviateBaseOp<WeaviateClass,Result<?>> {
 
 	public WeaviateCreateCollectionOp(WeaviateClient client, WeaviateClass request) {
 		super(client, request);
 	}
 
 	@Override
-	public Object applyOp(long value) {
+	public Result<?> applyOp(long value) {
 		Result<Boolean> createResponse = null;
 		try {
 			createResponse = client.schema().classCreator().withClass(request).run();

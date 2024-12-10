@@ -11,39 +11,48 @@ description: |
   In all of these phases, it is important to instance the metrics with distinct names.
   Also, aggregates of recall should include total aggregate as well as a moving average.
 
+  Parameters:
+   TEMPLATE(weaviatehost,localhost:8080)
+
 scenarios:
   weaviate_vectors:
     delete_collection: >-
       run tags==block:delete_collection
       errors===stop
       cycles===UNDEF threads===UNDEF
-      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+      uri=TEMPLATE(weaviatehost)
+#      token_file=TEMPLATE(token_file)
     schema_collection: >-
       run tags==block:schema_collection
       errors===stop
       cycles===UNDEF threads===UNDEF
-      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+      uri=TEMPLATE(weaviatehost)
+#      token_file=TEMPLATE(token_file)
     get_collection_schema: >-
       run tags==block:get_collection_schema
       errors===stop
       cycles===UNDEF threads===UNDEF
-      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+      uri=TEMPLATE(weaviatehost)
+#      token_file=TEMPLATE(token_file)
     # TODO - ,retry should be added to errors for rampup
     rampup: >-
       run tags==block:rampup
       errors===warn,counter
       cycles===TEMPLATE(train_cycles,TEMPLATE(trainsize,1000)) threads===TEMPLATE(train_threads,AUTO)
-      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+      uri=TEMPLATE(weaviatehost)
+#      token_file=TEMPLATE(token_file)
     count_vectors: >-
       run tags==block:count_vectors
       errors===stop
       cycles===UNDEF threads===UNDEF
-      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+      uri=TEMPLATE(weaviatehost)
+#      token_file=TEMPLATE(token_file)
     search_points: >-
       run tags==block:search_points
       errors===warn,counter
       cycles===TEMPLATE(testann_cycles,TEMPLATE(testsize,1000)) threads===TEMPLATE(testann_threads,AUTO)
-      uri=TEMPLATE(weaviatehost) token_file=TEMPLATE(token_file)
+      uri=TEMPLATE(weaviatehost)
+#      token_file=TEMPLATE(token_file)
 
 params:
   driver: weaviate
@@ -158,7 +167,7 @@ blocks:
           factor: 3
         multiTenancyConfig:
           enabled: true
-          
+
   get_collection_schema:
     ops:
       get_collection_schema_op:

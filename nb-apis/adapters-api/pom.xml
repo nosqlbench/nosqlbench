@@ -91,7 +91,15 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.md</include>
+                </includes>
+            </resource>
         </resources>
+
     </build>
+
 
 </project>

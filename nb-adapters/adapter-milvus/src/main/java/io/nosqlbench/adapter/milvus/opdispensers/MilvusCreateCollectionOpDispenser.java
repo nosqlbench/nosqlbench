@@ -23,6 +23,7 @@ import io.milvus.param.collection.CollectionSchemaParam;
 import io.milvus.param.collection.CreateCollectionParam;
 import io.milvus.param.collection.FieldType;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusCreateCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -38,16 +39,20 @@ public class MilvusCreateCollectionOpDispenser extends MilvusBaseOpDispenser<Cre
     private static final Logger logger = LogManager.getLogger(MilvusCreateCollectionOpDispenser.class);
 
     /**
-     * Create a new MilvusCreateCollectionOpDispenser subclassed from {@link MilvusBaseOpDispenser}.
-     *
-     * @param adapter        The associated {@link MilvusDriverAdapter}
-     * @param op             The {@link ParsedOp} encapsulating the activity for this cycle
-     * @param targetFunction A LongFunction that returns the specified Milvus Index for this Op
+     Create a new MilvusCreateCollectionOpDispenser subclassed from {@link MilvusBaseOpDispenser}.
+     @param adapter
+     The associated {@link MilvusDriverAdapter}
+     @param op
+     The {@link ParsedOp} encapsulating the activity for this cycle
+     @param targetFunction
+     A LongFunction that returns the specified Milvus Index for this Op
      */
     public MilvusCreateCollectionOpDispenser(MilvusDriverAdapter adapter,
                                              ParsedOp op,
-                                             LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                             LongFunction<String> targetFunction,
+                                             LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction,spaceF);
     }
 
     @Override
@@ -111,7 +116,7 @@ public class MilvusCreateCollectionOpDispenser extends MilvusBaseOpDispenser<Cre
                 .ifPresent((Number n) -> builder.withMaxLength(n.intValue()));
             fieldspec.getOptionalStaticConfig("max_capacity", Number.class)
                 .ifPresent((Number n) -> builder.withMaxCapacity(n.intValue()));
-            fieldspec.getOptionalStaticValue(List.of("partition_key", "partition"), Boolean.class)
+            fieldspec.getOptionalStaticValue("partition", Boolean.class)
                 .ifPresent(builder::withPartitionKey);
             fieldspec.getOptionalStaticValue("dimension", Number.class)
                 .ifPresent((Number n) -> builder.withDimension(n.intValue()));

@@ -24,11 +24,13 @@ import java.util.Optional;
 import java.util.function.LongFunction;
 
 import io.nosqlbench.adapter.weaviate.WeaviateDriverAdapter;
+import io.nosqlbench.adapter.weaviate.WeaviateSpace;
 import io.nosqlbench.adapter.weaviate.ops.WeaviateBaseOp;
 import io.nosqlbench.adapter.weaviate.ops.WeaviateCreateCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.weaviate.client.WeaviateClient;
+import io.weaviate.client.base.Result;
 import io.weaviate.client.v1.misc.model.BQConfig;
 import io.weaviate.client.v1.misc.model.BQConfig.BQConfigBuilder;
 import io.weaviate.client.v1.misc.model.MultiTenancyConfig;
@@ -55,12 +57,12 @@ import io.weaviate.client.v1.schema.model.WeaviateClass.WeaviateClassBuilder;;
  *      "https://weaviate.io/developers/weaviate/manage-data/collections">Collection
  *      docs</a>
  */
-public class WeaviateCreateCollectionOpDispenser extends WeaviateBaseOpDispenser<WeaviateClass> {
+public class WeaviateCreateCollectionOpDispenser extends WeaviateBaseOpDispenser<WeaviateClass, Result<?>> {
 
-	public WeaviateCreateCollectionOpDispenser(WeaviateDriverAdapter adapter, ParsedOp op,
-			LongFunction<String> targetF) {
-		super(adapter, op, targetF);
-	}
+    public WeaviateCreateCollectionOpDispenser(
+        WeaviateDriverAdapter adapter, ParsedOp op, LongFunction<WeaviateSpace> spaceF, LongFunction<String> targetF) {
+        super(adapter, op, spaceF, targetF);
+    }
 
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -344,10 +346,13 @@ public class WeaviateCreateCollectionOpDispenser extends WeaviateBaseOpDispenser
 		};
 	}
 
-	@Override
-	public LongFunction<WeaviateBaseOp<WeaviateClass>> createOpFunc(LongFunction<WeaviateClass> paramF,
-			LongFunction<WeaviateClient> clientF, ParsedOp op, LongFunction<String> targetF) {
-		return l -> new WeaviateCreateCollectionOp(clientF.apply(l), paramF.apply(l));
-	}
+    @Override
+    public LongFunction<WeaviateBaseOp<WeaviateClass, Result<?>>> createOpFunc(
+        LongFunction<WeaviateClass> paramF,
+        LongFunction<WeaviateClient> clientF,
+        ParsedOp op, LongFunction<String> targetF
+    ) {
+        return l -> new WeaviateCreateCollectionOp(clientF.apply(l), paramF.apply(l));
+    }
 
 }

@@ -18,15 +18,17 @@ package io.nosqlbench.adapter.weaviate.opsdispensers;
 import java.util.function.LongFunction;
 
 import io.nosqlbench.adapter.weaviate.WeaviateDriverAdapter;
+import io.nosqlbench.adapter.weaviate.WeaviateSpace;
 import io.nosqlbench.adapter.weaviate.ops.WeaviateBaseOp;
 import io.nosqlbench.adapter.weaviate.ops.WeaviateCreateObjectsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.weaviate.client.WeaviateClient;
+import io.weaviate.client.base.Result;
 import io.weaviate.client.v1.data.api.ObjectCreator;
 
 /**
  * Create objects.
- * 
+ *
  * @see <a href=
  *      "https://weaviate.io/developers/weaviate/manage-data/create">Create
  *      Objects</a>.
@@ -34,10 +36,11 @@ import io.weaviate.client.v1.data.api.ObjectCreator;
  *      "https://weaviate.io/developers/weaviate/api/rest#tag/objects/post/objects">Create
  *      Objects - REST API</a>.
  */
-public class WeaviateCreateObjectsOpDispenser extends WeaviateBaseOpDispenser<ObjectCreator> {
+public class WeaviateCreateObjectsOpDispenser extends WeaviateBaseOpDispenser<ObjectCreator, Result<?>> {
 
-	public WeaviateCreateObjectsOpDispenser(WeaviateDriverAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
-		super(adapter, op, targetF);
+	public WeaviateCreateObjectsOpDispenser(WeaviateDriverAdapter adapter, ParsedOp op,
+                                            LongFunction<WeaviateSpace> spaceF, LongFunction<String> targetF) {
+		super(adapter, op, spaceF, targetF);
 	}
 
 	public LongFunction<ObjectCreator> getParamFunc(LongFunction<WeaviateClient> clientF, ParsedOp op,
@@ -64,7 +67,7 @@ public class WeaviateCreateObjectsOpDispenser extends WeaviateBaseOpDispenser<Ob
 	}
 
 	@Override
-	public LongFunction<WeaviateBaseOp<ObjectCreator>> createOpFunc(LongFunction<ObjectCreator> paramF,
+	public LongFunction<WeaviateBaseOp<ObjectCreator,Result<?>>> createOpFunc(LongFunction<ObjectCreator> paramF,
 			LongFunction<WeaviateClient> clientF, ParsedOp op, LongFunction<String> targetF) {
 		return l -> new WeaviateCreateObjectsOp(clientF.apply(l), paramF.apply(l));
 	}
