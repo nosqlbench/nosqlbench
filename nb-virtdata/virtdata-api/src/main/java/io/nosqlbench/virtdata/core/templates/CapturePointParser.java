@@ -22,12 +22,42 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+/// A capture point is named variable which is to be extracted from the
+/// result of an operation, using whichever syntax and type conventions
+/// that are appropriate to the specific op implementation.
+/// The details are discussed in [NB Field Capture
+/// Discussion](https://github.com/nosqlbench/nosqlbench/discussions/938)
+///
+/// Examples:
+/// * capture the value of "field42" (into variable "field42"): `select \[field42],* from ...`
+/// * capture the value of "field42" into variable "getitgotitgood": `select \[field42 as
+/// getitgotitgood],* from ...`
+///
+/// Valid identifiers consist of any word character followed by zero or more word characters,
+/// digits, hyphens,
+/// underscores, or periods. This applies to both the field name to capture and the variable names
+/// to capture
+/// their values in. Alternately, the `*` character may be used to indicate that all available
+/// fields should be captured.
+///
+/// Optional type assertions are allowed which will ensure that the value can be assigned or
+/// otherwise coerced
+/// into the expected value:
+/// * `select \[(List) field42] ...`
+/// * `select \[(List<Number>)field42)] ...`
+/// * `select \[(int[]) field42)] ...`
+/// * `select \[(java.lang.Number) field42]`
+/// * `select \[(Map) field42] ...`
+///
+/// For details on how capture points are used at runtime, consult [[DynamicVariableCapture]]
 public class CapturePointParser implements Function<String, CapturePointParser.Result> {
 
     public final static Pattern CAPTUREPOINT_PATTERN = Pattern.compile(
-        "(\\[(?<capture>\\w+[-_\\d\\w.]*)(\\s+[aA][sS]\\s+(?<alias>\\w+[-_\\d\\w.]*))?])"
-    );
+        "(\\[(\\((?<cast>[^)]+)\\))? *(?<capture>\\w+[-_\\d\\w.]*|\\*)(\\s+[aA][sS]\\s+" +
+            "(?<alias>\\w+[-_\\d\\w.]*))?])");
+
     @Override
     public Result apply(String template) {
         StringBuilder raw = new StringBuilder();
@@ -35,25 +65,25 @@ public class CapturePointParser implements Function<String, CapturePointParser.R
         List<CapturePoint> captures = new ArrayList<>();
 
         while (m.find()) {
-            CapturePoint captured = CapturePoint.of(m.group("capture"), m.group("alias"));
+            CapturePoint captured = CapturePoint.of(
+                m.group("cast"), m.group("capture"), m.group("alias"));
             captures.add(captured);
-            m.appendReplacement(raw,captured.getName());
+            m.appendReplacement(raw, captured.getSourceName());
         }
         m.appendTail(raw);
 
-        return new Result(raw.toString(),captures);
+        return new Result(raw.toString(), new CapturePoints(captures));
     }
 
-    public final static class Result {
+    public Result parse(java.util.Map<?, ?> rawdata) {
+        String specFromMap = rawdata.keySet().stream().map(
+            ko -> "[" + rawdata.get(ko) + " as " + ko.toString() + "]").collect(
+            Collectors.joining(""));
+        return apply(specFromMap);
+    }
 
-        private final String rawTemplate;
-        private final List<CapturePoint> captures;
-
-        public Result(String rawTemplate, List<CapturePoint> captures) {
-
-            this.rawTemplate = rawTemplate;
-            this.captures = captures;
-        }
+    public final static record Result
+        (String rawTemplate, CapturePoints captures) {
 
         public String getRawTemplate() {
             return this.rawTemplate;
@@ -64,24 +94,13 @@ public class CapturePointParser implements Function<String, CapturePointParser.R
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Result result = (Result) o;
-            return Objects.equals(rawTemplate, result.rawTemplate) && Objects.equals(captures, result.captures);
-        }
-
-        @Override
         public int hashCode() {
             return Objects.hash(rawTemplate, captures);
         }
 
         @Override
         public String toString() {
-            return "Result{" +
-                "rawTemplate='" + rawTemplate + '\'' +
-                ", captures=" + captures +
-                '}';
+            return "Result{" + "rawTemplate='" + rawTemplate + '\'' + ", captures=" + captures + '}';
         }
     }
 }

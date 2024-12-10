@@ -18,6 +18,9 @@ package io.nosqlbench.adapter.cqld4;
 
 import io.nosqlbench.adapter.cqld4.opmappers.Cqld4CoreOpMapper;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
+import io.nosqlbench.adapter.cqld4.validators.Cqld4SingleRowValidator;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
@@ -29,10 +32,7 @@ import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.LongFunction;
 

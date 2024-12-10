@@ -23,27 +23,28 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-public class EmitterCycleOpDispenserWrapper<O,S extends Space,R> extends BaseOpDispenser<CycleOp<R>, S> {
+public class DryrunOpDispenser<S extends Space, RESULT> extends BaseOpDispenser<CycleOp<RESULT>, S> {
 
-    private final OpDispenser<CycleOp<R>> realDispenser;
+    private final OpDispenser<CycleOp<RESULT>> realDispenser;
 
-    public EmitterCycleOpDispenserWrapper(
-        DriverAdapter<? extends CycleOp<R>, S> adapter,
+    public DryrunOpDispenser(
+        DriverAdapter<CycleOp<RESULT>, S> adapter,
         ParsedOp pop,
-        OpDispenser<CycleOp<R>> realDispenser
+        OpDispenser<CycleOp<RESULT>> realDispenser
     ) {
         super(adapter, pop, adapter.getSpaceFunc(pop));
         this.realDispenser = realDispenser;
         logger.warn(
-            "initialized {} for to emit the result type to stdout. ",
+            "initialized {} for dry run only. " +
+                "This op will be synthesized for each cycle, but will not be executed.",
             pop.getName()
         );
 
     }
 
     @Override
-    public EmitterCycleOp<R> getOp(long cycle) {
-        CycleOp<R> cycleOp = realDispenser.getOp(cycle);
-        return new EmitterCycleOp(cycleOp);
+    public CycleOp<RESULT> getOp(long cycle) {
+        CycleOp<RESULT> op = realDispenser.getOp(cycle);
+        return new DryrunOp<>(op);
     }
 }

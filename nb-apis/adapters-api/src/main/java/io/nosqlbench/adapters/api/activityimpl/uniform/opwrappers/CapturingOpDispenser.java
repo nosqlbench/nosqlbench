@@ -23,28 +23,28 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-public class DryCycleOpDispenserWrapper<S extends Space, RESULT> extends BaseOpDispenser<CycleOp<RESULT>, S> {
+import java.util.Map;
+import java.util.function.Function;
+
+public class CapturingOpDispenser<S extends Space, RESULT> extends BaseOpDispenser<CycleOp<Map<String,?>>, S> {
 
     private final OpDispenser<CycleOp<RESULT>> realDispenser;
+    private final Function<RESULT, Map<String, ?>> extractorF;
 
-    public DryCycleOpDispenserWrapper(
+    public CapturingOpDispenser(
         DriverAdapter<CycleOp<RESULT>, S> adapter,
         ParsedOp pop,
-        OpDispenser<CycleOp<RESULT>> realDispenser
+        OpDispenser<CycleOp<RESULT>> realDispenser,
+        Function<RESULT, Map<String,?>> extractorF
     ) {
         super(adapter, pop, adapter.getSpaceFunc(pop));
         this.realDispenser = realDispenser;
-        logger.warn(
-            "initialized {} for dry run only. " +
-                "This op will be synthesized for each cycle, but will not be executed.",
-            pop.getName()
-        );
-
+        this.extractorF = extractorF;
     }
 
     @Override
-    public CycleOp<RESULT> getOp(long cycle) {
+    public CycleOp<Map<String,?>> getOp(long cycle) {
         CycleOp<RESULT> op = realDispenser.getOp(cycle);
-        return new DryCycleOp<>(op);
+        return new CapturingOp<>(op,extractorF);
     }
 }

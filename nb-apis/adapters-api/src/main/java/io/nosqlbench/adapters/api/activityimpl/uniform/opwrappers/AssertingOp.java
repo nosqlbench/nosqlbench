@@ -16,19 +16,23 @@
 
 package io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
-public class EmitterOp<T> implements CycleOp<T> {
+public class AssertingOp<T> implements CycleOp<T> {
 
-    private final CycleOp<T> cycleOp;
-    public EmitterOp(CycleOp<T> cycleOp) {
-        this.cycleOp = cycleOp;
+    private final CycleOp<T> op;
+    private final Validator<T> validator;
+
+    public AssertingOp(CycleOp<T> op, Validator<T> validator) {
+        this.op = op;
+        this.validator = validator;
     }
 
     @Override
     public T apply(long value) {
-            T result = cycleOp.apply(value);
-            System.out.println("result from cycle " + value + ":\n"+result);
-            return result;
+        T result = op.apply(value);
+        validator.validate(result);
+        return result;
     }
 }

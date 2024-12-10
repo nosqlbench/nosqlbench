@@ -20,21 +20,30 @@ import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-public class EmitterOpDispenserWrapper extends BaseOpDispenser<CycleOp<?>, Space> {
+public class AssertingOpDispenser<S extends Space, RESULT> extends BaseOpDispenser<CycleOp<RESULT>, S> {
 
-    private final OpDispenser<? extends CycleOp<?>> realDispenser;
+    private final OpDispenser<CycleOp<RESULT>> realDispenser;
+    private final Validator<RESULT> validator;
 
-    public EmitterOpDispenserWrapper(DriverAdapter<CycleOp<?>,Space> adapter, ParsedOp pop,
-                                     OpDispenser<? extends CycleOp<?>> realDispenser) {
+    public AssertingOpDispenser(
+        DriverAdapter<CycleOp<RESULT>, S> adapter,
+        ParsedOp pop,
+        OpDispenser<CycleOp<RESULT>> realDispenser,
+        Validator<RESULT> validator
+    ) {
         super(adapter, pop, adapter.getSpaceFunc(pop));
         this.realDispenser = realDispenser;
+        this.validator = validator;
+        logger.debug("initialized {} for result validation", pop.getName());
     }
+
     @Override
-    public EmitterOp getOp(long cycle) {
-        CycleOp<?> cycleOp = realDispenser.getOp(cycle);
-        return new EmitterOp(cycleOp);
+    public CycleOp<RESULT> getOp(long cycle) {
+        CycleOp<RESULT> op = realDispenser.getOp(cycle);
+        return new AssertingOp<>(op, validator);
     }
 }

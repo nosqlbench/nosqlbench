@@ -18,11 +18,11 @@ package io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
-public class DryCycleOp<T> implements CycleOp<T> {
+public class DryrunOp<T> implements CycleOp<T> {
 
     private final CycleOp<T> op;
 
-    public DryCycleOp(CycleOp<T> op) {
+    public DryrunOp(CycleOp<T> op) {
         this.op = op;
     }
 
