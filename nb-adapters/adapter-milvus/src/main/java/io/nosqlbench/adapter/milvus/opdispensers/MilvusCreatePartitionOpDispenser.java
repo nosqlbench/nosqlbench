@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.partition.CreatePartitionParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusCreatePartitionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -30,8 +31,10 @@ public class MilvusCreatePartitionOpDispenser extends MilvusBaseOpDispenser<Crea
 
     public MilvusCreatePartitionOpDispenser(MilvusDriverAdapter adapter,
                                             ParsedOp op,
-                                            LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                            LongFunction<String> targetFunction,
+                                            LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -43,7 +46,7 @@ public class MilvusCreatePartitionOpDispenser extends MilvusBaseOpDispenser<Crea
         LongFunction<CreatePartitionParam.Builder> ebF =
             l -> CreatePartitionParam.newBuilder().withCollectionName(targetF.apply(l));
         // Add enhancement functions here
-        ebF = op.enhanceFunc(ebF, List.of("collection","collection_name"),String.class,
+        ebF = op.enhanceFunc(ebF, "collection",String.class,
             CreatePartitionParam.Builder::withCollectionName);
 
         final LongFunction<CreatePartitionParam.Builder> lastF = ebF;

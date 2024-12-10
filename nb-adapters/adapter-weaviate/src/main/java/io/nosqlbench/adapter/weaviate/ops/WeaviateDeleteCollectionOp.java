@@ -18,14 +18,14 @@ package io.nosqlbench.adapter.weaviate.ops;
 import io.weaviate.client.WeaviateClient;
 import io.weaviate.client.base.Result;
 
-public class WeaviateDeleteCollectionOp extends WeaviateBaseOp<String> {
+public class WeaviateDeleteCollectionOp extends WeaviateBaseOp<String,Result<?>> {
 
 	public WeaviateDeleteCollectionOp(WeaviateClient client, String request) {
 		super(client, request);
 	}
 
 	@Override
-	public Object applyOp(long value) {
+	public Result<?> applyOp(long value) {
 		Result<Boolean> delColResponse = null;
 		try {
 			delColResponse = client.schema().classDeleter().withClassName(request).run();

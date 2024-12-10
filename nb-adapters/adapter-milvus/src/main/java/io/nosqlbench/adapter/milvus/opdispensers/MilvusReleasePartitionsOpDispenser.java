@@ -20,6 +20,7 @@ import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.partition.ReleasePartitionsParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.MilvusAdapterUtils;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusReleasePartitionsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -31,8 +32,10 @@ public class MilvusReleasePartitionsOpDispenser extends MilvusBaseOpDispenser<Re
 
     public MilvusReleasePartitionsOpDispenser(MilvusDriverAdapter adapter,
                                               ParsedOp op,
-                                              LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                              LongFunction<String> targetFunction,
+                                              LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -47,7 +50,7 @@ public class MilvusReleasePartitionsOpDispenser extends MilvusBaseOpDispenser<Re
 
         LongFunction<ReleasePartitionsParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withPartitionNames(partNamesF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,List.of("collection_name","collection"),String.class,
+        ebF = op.enhanceFuncOptionally(ebF,"collection",String.class,
             ReleasePartitionsParam.Builder::withCollectionName);
 
         final LongFunction<ReleasePartitionsParam.Builder> lastF = ebF;

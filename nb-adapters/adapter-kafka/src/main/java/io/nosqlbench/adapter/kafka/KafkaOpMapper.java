@@ -42,7 +42,7 @@ public class KafkaOpMapper implements OpMapper<KafkaOp,KafkaSpace> {
     }
 
     @Override
-    public OpDispenser<KafkaOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<KafkaSpace> spaceInitF) {
+    public OpDispenser<KafkaOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<KafkaSpace> spaceF) {
         KafkaSpace kafkaSpace = adapter.getSpaceFunc(op).apply(op.getStaticConfigOr("space",0));
 
         /*

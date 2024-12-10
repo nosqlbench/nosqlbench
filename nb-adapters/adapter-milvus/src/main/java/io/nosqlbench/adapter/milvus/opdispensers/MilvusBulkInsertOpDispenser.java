@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.bulkinsert.BulkInsertParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusBulkInsertOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -31,8 +32,10 @@ public class MilvusBulkInsertOpDispenser extends MilvusBaseOpDispenser<BulkInser
 
     public MilvusBulkInsertOpDispenser(MilvusDriverAdapter adapter,
                                        ParsedOp op,
-                                       LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                       LongFunction<String> targetFunction,
+                                       LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction,spaceF);
     }
 
     @Override
@@ -53,7 +56,7 @@ public class MilvusBulkInsertOpDispenser extends MilvusBaseOpDispenser<BulkInser
             }
         );
         ebF = op.enhanceFuncOptionally(ebF, "files", List.class, BulkInsertParam.Builder::withFiles);
-        ebF = op.enhanceFuncOptionally(ebF, List.of("partition_name", "partition"), String.class,
+        ebF = op.enhanceFuncOptionally(ebF, "partition", String.class,
             BulkInsertParam.Builder::withPartitionName);
         LongFunction<BulkInsertParam.Builder> finalEbF = ebF;
         return l -> finalEbF.apply(l).build();

@@ -24,19 +24,20 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 
 /**
- * See specification for what this should do in UniformWorkloadSpecificationTest
- */
+ See specification for what this should do in UniformWorkloadSpecificationTest */
 public class RawOpDef extends RawOpFields {
     private final static Logger logger = LogManager.getLogger(RawOpDef.class);
 
     /**
-     * Contains all the op fields. If the key <em>params</em> is used, then fields are divided
-     * between the op fields map and the params map, with the non-specified one soaking up the dangling
-     * op fields. (Those not under 'op' or 'params' and which are not reserverd words)
+     Contains all the op fields. If the key <em>params</em> is used, then fields are divided
+     between the op fields map and the params map, with the non-specified one soaking up the dangling
+     op fields. (Those not under 'op' or 'params' and which are not reserverd words)
      */
     private Object op;
 
-    private final static List<String> opFieldSynonyms = List.of("stmt", "statement", "op", "operation");
+    private final static List<String> opFieldSynonyms = List.of(
+        "stmt", "statement", "op", "operation");
+    private int refKey;
 
     public RawOpDef() {
     }
@@ -71,14 +72,15 @@ public class RawOpDef extends RawOpFields {
 //                if (!keyName.equals("stmt")) {
 //                    logger.info("Used implied stmt field under name '" + keyName + "'. You can just use 'stmt: ... "+ s +"' or the equivalent to avoid this warning.");
 //                }
-                map.put("stmt",s.toString());
+                map.put("stmt", s.toString());
 //                setOp(new LinkedHashMap<String,Object>(Map.of("stmt",s.toString())));
             } else {
                 setOp(op);
             }
         }
         if (found.size() > 1) {
-            throw new BasicError("You used " + found + " as an op name, but only one of these is allowed at a time.");
+            throw new BasicError(
+                "You used " + found + " as an op name, but only one of these is allowed at a time.");
         } else if ((getName() == null || getName().isEmpty()) && op == null && !map.isEmpty()) {
             Map.Entry<String, Object> first = map.entrySet().iterator().next();
             setName(first.getKey());
@@ -91,7 +93,8 @@ public class RawOpDef extends RawOpFields {
         if (_op) {
             if (_params) {
                 if (!map.isEmpty()) {
-                    throw new OpConfigError("If you have scoped op and params, you may not have dangling fields. Op template named '" + this.getName() + "' is invalid. Move dangling params ("+ map.keySet() +") under another field.");
+                    throw new OpConfigError(
+                        "If you have scoped op and params, you may not have dangling fields. Op template named '" + this.getName() + "' is invalid. Move dangling params (" + map.keySet() + ") under another field.");
                 }
             } else { // no params. Op was a scoped field and there are dangling fields, so assume they belong to params
                 getParams().putAll(map);
@@ -136,12 +139,11 @@ public class RawOpDef extends RawOpFields {
 
     private void checkForUnintendedJsonMap(Object m, List<String> path) {
         if (m instanceof Map) {
-            ((Map)m).forEach((k,v) -> {
+            ((Map) m).forEach((k, v) -> {
                 if (v == null) {
-                    throw new OpConfigError("A map key '" + k.toString() + "' with a null value was encountered. This is not" +
-                        " allowed, and may be the result of using an unquoted binding, like {" + k + "}. You can simply wrap this in quotes" +
-                        " like \"{"+ k +"}\" to avoid interpreting this as a JSON map." +
-                        (path.size()>0 ? String.join(".",path):""));
+                    throw new OpConfigError(
+                        "A map key '" + k.toString() + "' with a null value was encountered. This is not" + " allowed, and may be the result of using an unquoted binding, like {" + k + "}. You can simply wrap this in quotes" + " like \"{" + k + "}\" to avoid interpreting this as a JSON map." + (path.size() > 0 ? String.join(
+                            ".", path) : ""));
                 } else {
                     if (v instanceof Map) {
                         path.add(k.toString());
@@ -150,6 +152,19 @@ public class RawOpDef extends RawOpFields {
                 }
             });
         }
+    }
+
+    public void setRefKey(int refKey) {
+        this.refKey = refKey;
+    }
+
+    /**
+     * Get an integer key for the op template for this workload template, based on enumeration of all
+     * active op templates. This value is stable within the current instance of the workload template only.
+     * @return a unique integer key for this op template within the workload template
+     */
+    public int getRefKey() {
+        return this.refKey;
     }
 
 }

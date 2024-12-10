@@ -30,12 +30,6 @@ public class NB_extension_csvoutput extends NBBaseCommand {
         super(parentComponent, scenarioName);
     }
 
-    /** <pre>{@code
-     * var csvlogger = csvoutput.open("logs/csvoutputtestfile.csv","header1","header2");
-     *
-     * csvlogger.write({"header1": "value1","header2":"value2"});
-     * }</pre>
-     */
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
         return null;

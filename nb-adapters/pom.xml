@@ -30,6 +30,14 @@
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <url>https://nosqlbench.io/</url>
+    <dependencies>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>adapters-api</artifactId>
+            <version>5.21.5-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
     <version>${revision}</version>
 
     <modules>
@@ -217,7 +225,7 @@
         <profile>
             <id>adapter-weaviate-module</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-weaviate</module>

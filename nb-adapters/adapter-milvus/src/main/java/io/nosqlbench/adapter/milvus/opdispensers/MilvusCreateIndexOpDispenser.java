@@ -21,6 +21,7 @@ import io.milvus.param.IndexType;
 import io.milvus.param.MetricType;
 import io.milvus.param.index.CreateIndexParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusCreateIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -34,18 +35,20 @@ public class MilvusCreateIndexOpDispenser extends MilvusBaseOpDispenser<CreateIn
     private static final Logger logger = LogManager.getLogger(MilvusCreateIndexOpDispenser.class);
 
     /**
-     * Create a new MilvusCreateIndexOpDispenser subclassed from {@link MilvusBaseOpDispenser}.
-     *
-     * @param adapter        The associated {@link MilvusDriverAdapter}
-     * @param op             The {@link ParsedOp} encapsulating the activity for this cycle
-     * @param targetFunction A LongFunction that returns the specified Milvus Index for this Op
+     Create a new MilvusCreateIndexOpDispenser subclassed from {@link MilvusBaseOpDispenser}.
+     @param adapter
+     The associated {@link MilvusDriverAdapter}
+     @param op
+     The {@link ParsedOp} encapsulating the activity for this cycle
+     @param targetFunction
+     A LongFunction that returns the specified Milvus Index for this Op
      */
     public MilvusCreateIndexOpDispenser(
         MilvusDriverAdapter adapter,
         ParsedOp op,
-        LongFunction<String> targetFunction
+        LongFunction<String> targetFunction, LongFunction<MilvusSpace> spaceF
     ) {
-        super(adapter, op, targetFunction);
+        super(adapter, op, targetFunction,spaceF);
     }
 
     @Override
@@ -53,7 +56,7 @@ public class MilvusCreateIndexOpDispenser extends MilvusBaseOpDispenser<CreateIn
         LongFunction<CreateIndexParam.Builder> bF =
             l -> CreateIndexParam.newBuilder().withIndexName(targetF.apply(l));
 
-        bF = op.enhanceFunc(bF, List.of("collection", "collection_name"), String.class,
+        bF = op.enhanceFunc(bF, "collection", String.class,
             CreateIndexParam.Builder::withCollectionName);
         bF = op.enhanceFunc(bF, "field_name", String.class, CreateIndexParam.Builder::withFieldName);
         bF = op.enhanceEnumOptionally(bF, "index_type", IndexType.class, CreateIndexParam.Builder::withIndexType);
@@ -64,7 +67,7 @@ public class MilvusCreateIndexOpDispenser extends MilvusBaseOpDispenser<CreateIn
             (CreateIndexParam.Builder b, Number n) -> b.withSyncWaitingInterval(n.longValue()));
         bF = op.enhanceFuncOptionally(bF, "sync_waiting_timeout", Number.class,
             (CreateIndexParam.Builder b, Number n) -> b.withSyncWaitingTimeout(n.longValue()));
-        bF = op.enhanceFuncOptionally(bF, List.of("database", "database_name"), String.class,
+        bF = op.enhanceFuncOptionally(bF, "database", String.class,
             CreateIndexParam.Builder::withDatabaseName);
         LongFunction<CreateIndexParam.Builder> finalBF1 = bF;
         return l -> finalBF1.apply(l).build();

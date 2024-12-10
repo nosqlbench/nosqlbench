@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.control.GetFlushStateParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetFlushStateOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -31,8 +32,9 @@ public class MilvusGetFlushStateOpDispenser extends MilvusBaseOpDispenser<GetFlu
 
     public MilvusGetFlushStateOpDispenser(MilvusDriverAdapter adapter,
                                           ParsedOp op,
-                                          LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                          LongFunction<String> targetFunction,
+                                          LongFunction<MilvusSpace> spaceF) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -52,7 +54,7 @@ public class MilvusGetFlushStateOpDispenser extends MilvusBaseOpDispenser<GetFlu
         };
         LongFunction<GetFlushStateParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withSegmentIDs(idsF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF, List.of("collection", "collection_name"), String.class,
+        ebF = op.enhanceFuncOptionally(ebF, "collection", String.class,
             GetFlushStateParam.Builder::withCollectionName);
         ebF = op.enhanceFuncOptionally(ebF, "flush_ts", Number.class,
             (GetFlushStateParam.Builder b, Number n) -> b.withFlushTs(n.longValue()));

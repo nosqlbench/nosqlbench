@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.alias.CreateAliasParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusCreateAliasOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -30,8 +31,10 @@ public class MilvusCreateAliasOpDispenser extends MilvusBaseOpDispenser<CreateAl
 
     public MilvusCreateAliasOpDispenser(MilvusDriverAdapter adapter,
                                         ParsedOp op,
-                                        LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                        LongFunction<String> targetFunction,
+                                        LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction,spaceF);
     }
 
     @Override
@@ -42,7 +45,7 @@ public class MilvusCreateAliasOpDispenser extends MilvusBaseOpDispenser<CreateAl
     ) {
         LongFunction<CreateAliasParam.Builder> ebF =
             l -> CreateAliasParam.newBuilder().withAlias(targetF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF, List.of("collection_name","collection"),String.class,
+        ebF = op.enhanceFuncOptionally(ebF, "collection",String.class,
             CreateAliasParam.Builder::withCollectionName);
 
 

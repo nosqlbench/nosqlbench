@@ -33,15 +33,14 @@ public abstract class MilvusBaseOpDispenser<T> extends BaseOpDispenser<MilvusBas
     private final LongFunction<? extends MilvusBaseOp<T>> opF;
     private final LongFunction<T> paramF;
 
-    protected MilvusBaseOpDispenser(MilvusDriverAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
-        super((DriverAdapter)adapter, op);
+    protected MilvusBaseOpDispenser(MilvusDriverAdapter adapter, ParsedOp op,
+                                    LongFunction<String> targetF,
+                                    LongFunction<MilvusSpace> spaceF) {
+        super(adapter,op,spaceF);
         this.mzSpaceFunction = adapter.getSpaceFunc(op);
         this.clientFunction = (long l) -> this.mzSpaceFunction.apply(l).getClient();
         this.paramF = getParamFunc(this.clientFunction,op,targetF);
         this.opF = createOpFunc(paramF, this.clientFunction, op, targetF);
-    }
-    protected MilvusDriverAdapter getDriverAdapter() {
-        return (MilvusDriverAdapter) adapter;
     }
 
     public abstract LongFunction<T> getParamFunc(

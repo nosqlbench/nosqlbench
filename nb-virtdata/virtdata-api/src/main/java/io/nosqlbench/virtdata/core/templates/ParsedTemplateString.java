@@ -109,7 +109,7 @@ public class ParsedTemplateString {
     private final static Logger logger = LogManager.getLogger(ParsedTemplateString.class);
 
     private final String rawtemplate;
-    private final List<CapturePoint> captures = new ArrayList<>();
+    private final CapturePoints captures = new CapturePoints();
     private final List<BindPoint> bindpoints;
 
     public static ParsedTemplateString of(String rawtemplate, Map<String, String> bindings) {
@@ -136,11 +136,10 @@ public class ParsedTemplateString {
      */
     public ParsedTemplateString(String rawtemplate, Map<String, String> availableBindings) {
         this.bindings.putAll(availableBindings);
-        this.rawtemplate = rawtemplate;
-
         CapturePointParser capturePointParser = new CapturePointParser();
         CapturePointParser.Result captureData = capturePointParser.apply(rawtemplate);
         this.captures.addAll(captureData.getCaptures());
+        this.rawtemplate = captures.isEmpty() ? rawtemplate : captureData.getRawTemplate();
 
         BindPointParser bindPointParser = new BindPointParser();
         BindPointParser.Result bindPointsResult = bindPointParser.apply(captureData.getRawTemplate(), availableBindings);
@@ -280,7 +279,7 @@ public class ParsedTemplateString {
         }
     }
 
-    public List<CapturePoint> getCaptures() {
+    public CapturePoints getCaptures() {
         return this.captures;
     }
 

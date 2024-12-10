@@ -19,8 +19,10 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.collection.GetLoadingProgressParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetLoadingProgressOp;
+import io.nosqlbench.adapter.milvus.ops.MilvusSearchOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.List;
@@ -30,8 +32,9 @@ public class MilvusLoadingProgressOpDispenser extends MilvusBaseOpDispenser<GetL
 
     public MilvusLoadingProgressOpDispenser(MilvusDriverAdapter adapter,
                                             ParsedOp op,
-                                            LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                            LongFunction<String> targetFunction,
+                                            LongFunction<MilvusSpace> spaceF) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -42,7 +45,7 @@ public class MilvusLoadingProgressOpDispenser extends MilvusBaseOpDispenser<GetL
     ) {
         LongFunction<GetLoadingProgressParam.Builder> ebF =
             l -> GetLoadingProgressParam.newBuilder().withCollectionName(targetF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,List.of("partition_names","partitions"), List.class,
+        ebF = op.enhanceFuncOptionally(ebF,"partitions", List.class,
             GetLoadingProgressParam.Builder::withPartitionNames);
 
         final LongFunction<GetLoadingProgressParam.Builder> lastF = ebF;

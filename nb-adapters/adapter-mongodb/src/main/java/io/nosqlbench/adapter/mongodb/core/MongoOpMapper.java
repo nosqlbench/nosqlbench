@@ -43,7 +43,7 @@ public class MongoOpMapper<MC extends MongoDirectCommandOp> implements OpMapper<
     }
 
     @Override
-    public OpDispenser<MongoDirectCommandOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<MongoSpace> spaceInitF) {
+    public OpDispenser<MongoDirectCommandOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<MongoSpace> spaceF) {
 
         LongFunction<String> ctxNamer = op.getAsFunctionOr("space", "default");
 
@@ -65,12 +65,12 @@ public class MongoOpMapper<MC extends MongoDirectCommandOp> implements OpMapper<
         if (target.isPresent()) {
             TypeAndTarget<MongoDBOpTypes, String> targetData = target.get();
             return switch (targetData.enumId) {
-                case command -> new MongoCommandOpDispenser(adapter, spaceInitF, op);
+                case command -> new MongoCommandOpDispenser(adapter, spaceF, op);
             };
         }
         // For everything else use the command API
         else {
-            return new MongoCommandOpDispenser(adapter, spaceInitF, op);
+            return new MongoCommandOpDispenser(adapter, spaceF, op);
         }
 
 

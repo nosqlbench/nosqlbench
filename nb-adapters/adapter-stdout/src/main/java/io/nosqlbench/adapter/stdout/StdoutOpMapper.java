@@ -33,7 +33,7 @@ public class StdoutOpMapper implements OpMapper<StdoutOp,StdoutSpace> {
     }
 
     @Override
-    public OpDispenser<StdoutOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<StdoutSpace> spaceInitF) {
+    public OpDispenser<StdoutOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<StdoutSpace> spaceF) {
         return new StdoutOpDispenser(adapter,op,adapter.getSpaceFunc(op));
     }
 

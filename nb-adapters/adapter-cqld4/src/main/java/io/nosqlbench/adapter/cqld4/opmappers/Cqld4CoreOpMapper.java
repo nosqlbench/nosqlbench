@@ -61,8 +61,8 @@ public class Cqld4CoreOpMapper extends Cqld4BaseOpMapper<Cqld4BaseOp<?>> {
             case raw, simple, prepared, batch -> new Cqld4CqlOpMapper(adapter).apply(adapterC, op, spaceF);
             case gremlin -> new Cqld4GremlinOpMapper(adapter, target.targetFunction).apply(adapterC, op, spaceF);
             case fluent -> new Cqld4FluentGraphOpMapper(adapter, target).apply(adapterC, op, spaceF);
-            case rainbow ->
-                new CqlD4RainbowTableMapper(adapter, spaceF, target.targetFunction).apply(adapterC, op, spaceF);
+//            case rainbow ->
+//                new CqlD4RainbowTableMapper(adapter, spaceF, target.targetFunction).apply(adapterC, op, spaceF);
             default -> throw new OpConfigError("Unsupported op type " + opType);
 //            case sst -> new Cqld4SsTableMapper(adapter, sessionFunc, target.targetFunction).apply(op);
         };

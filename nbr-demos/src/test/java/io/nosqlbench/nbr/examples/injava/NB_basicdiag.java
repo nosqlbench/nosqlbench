@@ -45,9 +45,8 @@ public class NB_basicdiag extends NBBaseCommand {
      */
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        var basic_diag = params.withOverrides(
-            Map.of("alias","basic_diag","driver","diag")
-        );
+        NBCommandParams basic_diag = params.withOverrides(
+            Map.of("alias", "basic_diag", "driver", "diag"));
         stdout.println("starting activity basic_diag");
         controller.start(basic_diag);
         stdout.println("stopping activity basic_diag");

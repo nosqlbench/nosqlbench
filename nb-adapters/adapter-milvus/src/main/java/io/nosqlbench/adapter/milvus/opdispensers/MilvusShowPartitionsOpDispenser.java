@@ -20,6 +20,7 @@ import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.partition.ShowPartitionsParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.MilvusAdapterUtils;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusShowPartitionsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -31,8 +32,10 @@ public class MilvusShowPartitionsOpDispenser extends MilvusBaseOpDispenser<ShowP
 
     public MilvusShowPartitionsOpDispenser(MilvusDriverAdapter adapter,
                                            ParsedOp op,
-                                           LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                           LongFunction<String> targetFunction,
+                                           LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
     }
 
     @Override
@@ -47,7 +50,7 @@ public class MilvusShowPartitionsOpDispenser extends MilvusBaseOpDispenser<ShowP
         LongFunction<List<String>> partitionsF = l -> MilvusAdapterUtils.splitNames(targetF.apply(l));
         LongFunction<ShowPartitionsParam.Builder> finalEbF = ebF;
         ebF = l -> finalEbF.apply(l).withPartitionNames(partitionsF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF,List.of("collection_name","collection"),String.class,
+        ebF = op.enhanceFuncOptionally(ebF,"collection",String.class,
             ShowPartitionsParam.Builder::withCollectionName);
         final LongFunction<ShowPartitionsParam.Builder> lastF = ebF;
         final LongFunction<ShowPartitionsParam> collectionParamF = l -> lastF.apply(l).build();

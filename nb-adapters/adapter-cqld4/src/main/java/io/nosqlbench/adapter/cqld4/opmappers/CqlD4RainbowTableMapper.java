@@ -41,7 +41,7 @@ public class CqlD4RainbowTableMapper<CO extends Cqld4RainbowTableOp> extends Cql
     }
 
     @Override
-    public OpDispenser<Cqld4RainbowTableOp> apply(NBComponent adapterC, ParsedOp op, LongFunction spaceInitF) {
+    public OpDispenser<Cqld4RainbowTableOp> apply(NBComponent adapterC, ParsedOp op, LongFunction spaceF) {
         return null;
 //        return new CqlD4RainbowTableDispenser(adapter, sessionFunc,targetFunction, op);
     }

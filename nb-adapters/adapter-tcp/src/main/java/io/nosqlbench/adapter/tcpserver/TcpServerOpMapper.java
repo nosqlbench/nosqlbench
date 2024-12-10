@@ -33,7 +33,7 @@ public class TcpServerOpMapper implements OpMapper<TcpServerOp,TcpServerAdapterS
     }
 
     @Override
-    public OpDispenser<TcpServerOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<TcpServerAdapterSpace> spaceInitF) {
+    public OpDispenser<TcpServerOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<TcpServerAdapterSpace> spaceF) {
         LongFunction<String> spacefunc = op.getAsFunctionOr("space", "default");
         LongFunction<TcpServerAdapterSpace> ctxfunc = adapter.getSpaceFunc(op);
         return new TcpServerOpDispenser(adapter,op,ctxfunc);

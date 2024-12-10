@@ -145,7 +145,7 @@ public interface OpMapper<OPTYPE extends CycleOp<?>, SPACETYPE extends Space>
      *     The {@link ParsedOp} which is the parsed version of the user-provided op template. This contains all the
      *     fields provided by the user, as well as explicit knowledge of which ones are static and dynamic. It provides
      *     convenient lambda-construction methods to streamline the effort of creating the top-level op lambda.
-     * @param spaceInitF
+     * @param spaceF
      *     This is the pre-baked lambda needed to access the specific {@link SPACETYPE} for a given cycle, if or when it
      *     is needed. Not all op types need this, since they may have all the state needed fully captured within the
      *     native type. For those that do, ensure that you are accessing the value through this function lazily and
@@ -154,9 +154,9 @@ public interface OpMapper<OPTYPE extends CycleOp<?>, SPACETYPE extends Space>
      * @return An OpDispenser which can be used to synthesize directly executable operations.
      */
 
-    OpDispenser<OPTYPE> apply(
+    OpDispenser<? extends OPTYPE> apply(
         NBComponent adapterC,
         ParsedOp pop,
-        LongFunction<SPACETYPE> spaceInitF
+        LongFunction<SPACETYPE> spaceF
     );
 }

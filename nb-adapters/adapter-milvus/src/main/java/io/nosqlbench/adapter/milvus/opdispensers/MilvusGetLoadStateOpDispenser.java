@@ -21,6 +21,7 @@ import io.milvus.grpc.LoadState;
 import io.milvus.param.collection.GetLoadStateParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
 import io.nosqlbench.adapter.milvus.MilvusAdapterUtils;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusGetLoadStateOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -40,15 +41,17 @@ public class MilvusGetLoadStateOpDispenser extends MilvusBaseOpDispenser<GetLoad
 
     public MilvusGetLoadStateOpDispenser(MilvusDriverAdapter adapter,
                                          ParsedOp op,
-                                         LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                         LongFunction<String> targetFunction,
+                                         LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
         op.getOptionalStaticValue("await_timeout", Number.class)
             .map(Number::doubleValue)
             .ifPresent(v->this.awaitTimeout=Duration.of((long)(v*1000),ChronoUnit.MILLIS));
         op.getOptionalStaticValue("await_interval", Number.class)
             .map(Number::doubleValue).ifPresent(v->this.awaitInterval=Duration.of((long)(v*1000),ChronoUnit.MILLIS));
         op.getOptionalStaticValue("await_state", String.class).ifPresent(s -> {
-            var spec = s.toLowerCase();
+            String spec = s.toLowerCase();
             for (LoadState value : LoadState.values()) {
                 if (value.name().toLowerCase().equals(spec) || value.name().toLowerCase().equals("loadstate" + spec)) {
                     this.awaitState = value;
@@ -70,7 +73,7 @@ public class MilvusGetLoadStateOpDispenser extends MilvusBaseOpDispenser<GetLoad
     ) {
         LongFunction<GetLoadStateParam.Builder> ebF =
             l -> GetLoadStateParam.newBuilder().withCollectionName(targetF.apply(l));
-        ebF = op.enhanceFuncOptionally(ebF, List.of("database_name", "database"), String.class,
+        ebF = op.enhanceFuncOptionally(ebF, "database", String.class,
             GetLoadStateParam.Builder::withDatabaseName);
 
         Optional<LongFunction<String>> partitionsF = op.getAsOptionalFunction("partition_name", String.class);

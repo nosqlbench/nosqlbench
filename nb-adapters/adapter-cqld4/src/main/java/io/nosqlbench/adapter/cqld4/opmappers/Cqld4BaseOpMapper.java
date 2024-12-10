@@ -38,5 +38,5 @@ public abstract class Cqld4BaseOpMapper<T extends Cqld4BaseOp<?>> implements OpM
     }
 
     @Override
-    public abstract OpDispenser<T> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceInitF);
+    public abstract OpDispenser<T> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceF);
 }

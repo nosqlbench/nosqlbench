@@ -66,7 +66,7 @@ public class AzureAISearchUploadDocumentsOpDispenser extends AzureAISearchBaseOp
 	private LongFunction<SearchDocument> buildFieldsStruct(LongFunction<Map> fieldsFunction) {
 		return l -> {
 			Map<String, Object> fields = fieldsFunction.apply(l);
-			var doc = new SearchDocument();
+            SearchDocument doc = new SearchDocument();
 			fields.forEach((key, val) -> {
 				doc.put(key, val);
 			});

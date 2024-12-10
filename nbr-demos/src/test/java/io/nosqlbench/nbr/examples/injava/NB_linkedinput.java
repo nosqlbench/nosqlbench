@@ -20,6 +20,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContaine
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -30,48 +31,13 @@ public class NB_linkedinput extends NBBaseCommand {
         super(parentComponent, scenarioName);
     }
 
-    /**
-     * <pre>{@code
-     * var leader = {
-     *     driver: 'diag',
-     *     alias: 'leader',
-     *     targetrate: '10000',
-     *     op: 'log:level=info'
-     * };
-     *
-     * var follower = {
-     *     driver: 'diag',
-     *     alias: 'follower',
-     *     // linkinput: 'leader',
-     *     op: 'log:level=INFO'
-     * };
-     *
-     * scenario.start(leader);
-     * print("started leader");
-     * scenario.start(follower);
-     * print("started follower");
-     *
-     * scenario.waitMillis(500);
-     *
-     * scenario.stop(leader);
-     * print("stopped leader");
-     * scenario.stop(follower);
-     * print("stopped follower");
-     * }</pre>
-     */
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-    var leader = Map.of(
-            "driver", "diag",
-            "alias", "leader",
-            "targetrate", "10000",
-            "op", "log:level=info"
-        );
+        Map<String, String> leader = Map.of(
+            "driver", "diag", "alias", "leader", "targetrate", "10000", "op", "log:level=info");
 
-        var follower = Map.of(
-            "driver", "diag",
-            "alias", "follower",
-            "op", "log:level=INFO"
+        Map<String, String> follower = Map.of(
+            "driver", "diag", "alias", "follower", "op", "log:level=INFO"
 
         );
 

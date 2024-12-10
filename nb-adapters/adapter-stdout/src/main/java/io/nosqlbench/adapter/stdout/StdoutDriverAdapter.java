@@ -95,7 +95,7 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
         }
 
         OpData op = new OpData("synthetic", "synthetic", Map.of(), opsDocList.getDocBindings(), cfg,
-            Map.of("stmt", genStatementTemplate(filteredBindingNames, cfg)));
+            Map.of("stmt", genStatementTemplate(filteredBindingNames, cfg)),200);
 
         return List.of(op);
     }

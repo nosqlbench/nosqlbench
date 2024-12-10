@@ -21,7 +21,7 @@ import io.milvus.grpc.DescribeIndexResponse;
 import io.milvus.grpc.IndexDescription;
 import io.milvus.param.R;
 import io.milvus.param.index.DescribeIndexParam;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.OpGenerator;
 import io.nosqlbench.adapters.api.scheduling.TimeoutPredicate;
 
@@ -98,7 +98,7 @@ public class MilvusDescribeIndexOp extends MilvusBaseOp<DescribeIndexParam> impl
     }
 
     @Override
-    public Op getNextOp() {
+    public CycleOp<Object> getNextOp() {
         return nextOp;
     }
 }

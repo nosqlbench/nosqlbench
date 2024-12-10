@@ -51,12 +51,12 @@ public class GCPSpannerOpMapper implements OpMapper<GCPSpannerBaseOp<?,?>, GCPSp
      * @param adapterC
      * @param op
      *     The {@link ParsedOp} to be evaluated
-     * @param spaceInitF
+     * @param spaceF
      * @return The correct {@link GCPSpannerBaseOpDispenser} subclass based on
      *     the op type
      */
     @Override
-    public OpDispenser<GCPSpannerBaseOp<?,?>> apply(NBComponent adapterC, ParsedOp op, LongFunction<GCPSpannerSpace> spaceInitF) {
+    public OpDispenser<GCPSpannerBaseOp<?,?>> apply(NBComponent adapterC, ParsedOp op, LongFunction<GCPSpannerSpace> spaceF) {
         TypeAndTarget<GCPSpannerOpType, String> typeAndTarget = op.getTypeAndTarget(GCPSpannerOpType.class,
             String.class, "type", "target");
         logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");

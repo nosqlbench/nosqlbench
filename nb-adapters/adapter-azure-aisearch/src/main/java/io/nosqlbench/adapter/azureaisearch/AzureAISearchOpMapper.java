@@ -57,12 +57,12 @@ public class AzureAISearchOpMapper implements OpMapper<AzureAISearchBaseOp<?,?>,
      * @param adapterC
      * @param op
      *     The {@link ParsedOp} to be evaluated
-     * @param spaceInitF
+     * @param spaceF
      * @return The correct {@link AzureAISearchBaseOpDispenser} subclass based on
      *     the op type
      */
     @Override
-    public OpDispenser<AzureAISearchBaseOp<?,?>> apply(NBComponent adapterC, ParsedOp op, LongFunction<AzureAISearchSpace> spaceInitF) {
+    public OpDispenser<AzureAISearchBaseOp<?,?>> apply(NBComponent adapterC, ParsedOp op, LongFunction<AzureAISearchSpace> spaceF) {
 
         TypeAndTarget<AzureAISearchOpType, String> typeAndTarget = op.getTypeAndTarget(AzureAISearchOpType.class,
             String.class, "type", "target");

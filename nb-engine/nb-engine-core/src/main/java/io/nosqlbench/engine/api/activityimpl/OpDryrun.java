@@ -22,27 +22,26 @@ import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.DryCycleOpDispenserWrapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.EmitterCycleOpDispenserWrapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.DryrunOpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.ResultPrintingOpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class OpWrappers {
+public class OpDryrun {
 
-    public final static Logger logger = LogManager.getLogger(OpWrappers.class);
+    public final static Logger logger = LogManager.getLogger(OpDryrun.class);
 
-    public static <OP extends CycleOp<?>, SPACE extends Space> OpDispenser<OP> wrapOptionally(
-        DriverAdapter<OP, SPACE> adapter,
-        OpDispenser<OP> dispenser,
+    public static <OP extends CycleOp<?>, SPACE extends Space> OpDispenser<? extends OP> wrapOptionally(
+        DriverAdapter<? extends OP, ? extends SPACE> adapter,
+        OpDispenser<? extends OP> dispenser,
         ParsedOp pop,
-        String dryrunSpec
+        Dryrun dryrun
     ) {
-        Dryrun dryrun = Dryrun.valueOf(dryrunSpec);
         return switch (dryrun) {
             case none -> dispenser;
-            case op -> new DryCycleOpDispenserWrapper(adapter, pop, dispenser);
-            case emit -> new EmitterCycleOpDispenserWrapper(adapter, pop, dispenser);
+            case op -> new DryrunOpDispenser(adapter, pop, dispenser);
+            case emit -> new ResultPrintingOpDispenser(adapter, pop, dispenser);
             case jsonnet -> dispenser;
         };
     }

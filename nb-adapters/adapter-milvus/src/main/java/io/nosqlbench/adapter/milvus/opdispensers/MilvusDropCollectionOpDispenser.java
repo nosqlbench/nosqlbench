@@ -21,6 +21,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.collection.DropCollectionParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusDropCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -34,18 +35,23 @@ public class MilvusDropCollectionOpDispenser extends MilvusBaseOpDispenser<DropC
     private static final Logger logger = LogManager.getLogger(MilvusDropCollectionOpDispenser.class);
 
     /**
-     * <P>Create a new {@link MilvusDropCollectionOpDispenser} subclassed from {@link MilvusBaseOpDispenser}.</P>
-     *
-     * <P>{@see <A HREF="https://milvus.io/docs/drop_collection.md">Drop Collection</A>}</P>
-     *
-     * @param adapter        The associated {@link MilvusDriverAdapter}
-     * @param op             The {@link ParsedOp} encapsulating the activity for this cycle
-     * @param targetFunction A LongFunction that returns the specified Milvus Index for this Op
+     <P>Create a new {@link MilvusDropCollectionOpDispenser} subclassed from
+     {@link MilvusBaseOpDispenser}.</P>
+
+     <P>{@see <A HREF="https://milvus.io/docs/drop_collection.md">Drop Collection</A>}</P>
+     @param adapter
+     The associated {@link MilvusDriverAdapter}
+     @param op
+     The {@link ParsedOp} encapsulating the activity for this cycle
+     @param targetFunction
+     A LongFunction that returns the specified Milvus Index for this Op
      */
     public MilvusDropCollectionOpDispenser(MilvusDriverAdapter adapter,
                                            ParsedOp op,
-                                           LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                           LongFunction<String> targetFunction,
+                                           LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction,spaceF);
     }
 
     @Override
@@ -55,7 +61,7 @@ public class MilvusDropCollectionOpDispenser extends MilvusBaseOpDispenser<DropC
         LongFunction<String> targetF) {
         LongFunction<DropCollectionParam.Builder> f =
             l -> DropCollectionParam.newBuilder().withCollectionName(targetF.apply(l));
-        f = op.enhanceFuncOptionally(f, List.of("database","database_name"),String.class,
+        f = op.enhanceFuncOptionally(f, "database",String.class,
             DropCollectionParam.Builder::withDatabaseName);
         LongFunction<DropCollectionParam.Builder> finalF = f;
         return l -> finalF.apply(l).build();

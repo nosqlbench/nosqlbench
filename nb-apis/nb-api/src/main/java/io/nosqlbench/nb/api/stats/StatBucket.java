@@ -47,21 +47,21 @@ public final class StatBucket {
             mean = value;
             dSquared = 0.0d;
         } else if (Double.isNaN(popped)) {
-            var newMean = mean + ((value - mean) / ringbuf.count());
-            var dSquaredIncrement = ((value - newMean) * (value - mean));
+            double newMean = mean + ((value - mean) / ringbuf.count());
+            double dSquaredIncrement = ((value - newMean) * (value - mean));
             // If this value is too small to be interpreted as a double it gets converted to
             // zero, which is not what we want. So we use the smallest possible double value
             if (dSquaredIncrement == 0) dSquaredIncrement = Double.MIN_VALUE;
             dSquared += dSquaredIncrement;
             mean = newMean;
         } else {
-            var meanIncrement = (value - popped) / ringbuf.count();
-            var newMean = mean + meanIncrement;
-            var dSquaredIncrement = ((value - popped) * (value - newMean + popped - mean));
+            double meanIncrement = (value - popped) / ringbuf.count();
+            double newMean = mean + meanIncrement;
+            double dSquaredIncrement = ((value - popped) * (value - newMean + popped - mean));
             // If this value is too small to be interpreted as a double it gets converted to
             // zero, which is not what we want. So we use the smallest possible double value
             if (dSquaredIncrement == 0) dSquaredIncrement = Double.MIN_VALUE;
-            var newDSquared = this.dSquared + dSquaredIncrement;
+            double newDSquared = this.dSquared + dSquaredIncrement;
             mean = newMean;
             dSquared = newDSquared;
         }
@@ -89,7 +89,7 @@ public final class StatBucket {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (StatBucket) obj;
+        StatBucket that = (StatBucket) obj;
         return this.ringbuf.count() == that.ringbuf.count() &&
             Double.doubleToLongBits(this.mean) == Double.doubleToLongBits(that.mean);
     }

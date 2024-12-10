@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.milvus.opdispensers;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.index.DescribeIndexParam;
 import io.nosqlbench.adapter.milvus.MilvusDriverAdapter;
+import io.nosqlbench.adapter.milvus.MilvusSpace;
 import io.nosqlbench.adapter.milvus.ops.MilvusBaseOp;
 import io.nosqlbench.adapter.milvus.ops.MilvusDescribeIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -35,8 +36,10 @@ public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<Descri
 
     public MilvusDescribeIndexOpDispenser(MilvusDriverAdapter adapter,
                                           ParsedOp op,
-                                          LongFunction<String> targetFunction) {
-        super(adapter, op, targetFunction);
+                                          LongFunction<String> targetFunction,
+                                          LongFunction<MilvusSpace> spaceF
+    ) {
+        super(adapter, op, targetFunction, spaceF);
 
         op.getOptionalStaticValue("await_timeout", Number.class)
             .map(Number::doubleValue)
@@ -53,9 +56,9 @@ public class MilvusDescribeIndexOpDispenser extends MilvusBaseOpDispenser<Descri
     ) {
         LongFunction<DescribeIndexParam.Builder> ebF =
             l -> DescribeIndexParam.newBuilder().withIndexName(targetF.apply(l));
-        ebF = op.enhanceFunc(ebF, List.of("collection","collection_name"), String.class,
+        ebF = op.enhanceFunc(ebF, "collection", String.class,
             DescribeIndexParam.Builder::withCollectionName);
-        ebF = op.enhanceFuncOptionally(ebF, List.of("database_name","database"), String.class,
+        ebF = op.enhanceFuncOptionally(ebF, "database", String.class,
             DescribeIndexParam.Builder::withDatabaseName);
 
 

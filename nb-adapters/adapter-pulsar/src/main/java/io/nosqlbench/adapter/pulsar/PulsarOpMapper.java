@@ -42,7 +42,7 @@ public class PulsarOpMapper implements OpMapper<PulsarOp,PulsarSpace> {
     }
 
     @Override
-    public OpDispenser<PulsarOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<PulsarSpace> spaceInitF) {
+    public OpDispenser<PulsarOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<PulsarSpace> spaceF) {
         int spaceName = op.getStaticConfigOr("space", 0);
 //        PulsarSpace pulsarSpace = spaceCache.get(spaceName);
         PulsarSpace pulsarSpace = adapter.getSpaceFunc(op).apply(spaceName);

@@ -33,7 +33,7 @@ public class Cqld4GremlinOpMapper<CO extends Cqld4ScriptGraphOp> extends Cqld4Ba
     }
 
     @Override
-    public Cqld4GremlinOpDispenser apply(NBComponent adapterC, ParsedOp op, LongFunction spaceInitF) {
+    public Cqld4GremlinOpDispenser apply(NBComponent adapterC, ParsedOp op, LongFunction spaceF) {
         return new Cqld4GremlinOpDispenser(
             adapter,
             l -> adapter.getSpaceFunc(op).apply(l).getSession(), targetFunction, op);

@@ -43,7 +43,7 @@ public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp,AmqpSpace> {
     }
 
     @Override
-        public OpDispenser<AmqpTimeTrackOp> apply(NBComponent adapterC, ParsedOp op, LongFunction spaceInitF) {
+        public OpDispenser<AmqpTimeTrackOp> apply(NBComponent adapterC, ParsedOp op, LongFunction spaceF) {
     //public OpDispenser<AmqpTimeTrackOp> apply(ParsedOp op, LongFunction<AmqpTimeTrackOp> spaceInitF) {
         int spaceName = op.getStaticConfigOr("space", 0);
 

@@ -18,6 +18,8 @@ package io.nosqlbench.adapter.milvus;
 
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.ConnectParam;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
+import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -39,26 +41,16 @@ import java.util.Optional;
  * https://milvus.io/docs/install-java.md
  * https://docs.zilliz.com/docs/connect-to-cluster
  */
-public class MilvusSpace implements AutoCloseable {
+public class MilvusSpace extends BaseSpace<MilvusSpace> {
     private final static Logger logger = LogManager.getLogger(MilvusSpace.class);
-    private final String name;
     private final NBConfiguration cfg;
 
     protected MilvusServiceClient client;
 
-//    private final Map<String, ConnectParam> connections = new HashMap<>();
-
-    /**
-     * Create a new MilvusSpace Object which stores all stateful contextual information needed to interact
-     * with the Milvus/Zilliz database instance.
-     *
-     * @param name
-     *     The name of this space
-     * @param cfg
-     *     The configuration ({@link NBConfiguration}) for this nb run
-     */
-    public MilvusSpace(String name, NBConfiguration cfg) {
-        this.name = name;
+    public MilvusSpace(
+        DriverAdapter<?, MilvusSpace> adapter, long idx, NBConfiguration cfg
+    ) {
+        super(adapter, idx);
         this.cfg = cfg;
     }
 
@@ -70,7 +62,7 @@ public class MilvusSpace implements AutoCloseable {
     }
 
     private MilvusServiceClient createClient() {
-        var builder = ConnectParam.newBuilder();
+        ConnectParam.Builder builder = ConnectParam.newBuilder();
         builder = builder.withUri(cfg.get("uri"));
         cfg.getOptional("database_name").ifPresent(builder::withDatabaseName);
         cfg.getOptional("database").ifPresent(builder::withDatabaseName);
@@ -95,7 +87,7 @@ public class MilvusSpace implements AutoCloseable {
         String tokenSummary = Optional.ofNullable(builder.getToken())
                 .map(MilvusAdapterUtils::maskDigits).orElse("[none]");
         logger.info("{}: Creating new Milvus/Zilliz Client with (masked) token [{}], uri/endpoint [{}]",
-            this.name, tokenSummary, builder.getUri());
+            this.getName(), tokenSummary, builder.getUri());
         return new MilvusServiceClient(connectParams);
     }
 

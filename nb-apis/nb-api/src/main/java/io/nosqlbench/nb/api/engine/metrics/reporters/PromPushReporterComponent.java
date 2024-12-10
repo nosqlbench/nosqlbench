@@ -112,7 +112,7 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
         }
         PromPushReporterComponent.logger.debug("formatted {} metrics in prom expo format", total);
         final String exposition = sb.toString();
-        logger.trace(() -> "prom exposition format:\n" + exposition);
+//        logger.trace(() -> "prom exposition format:\n" + exposition);
 
         final double backoffRatio = 1.5;
         final double maxBackoffSeconds = 10;
