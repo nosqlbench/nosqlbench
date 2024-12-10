@@ -27,6 +27,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -71,14 +73,14 @@ public class ActivityDef implements NBNamedElement {
         this.parameterMap = parameterMap;
     }
 
-    public static Optional<ActivityDef> parseActivityDefOptionally(String namedActivitySpec) {
-        try {
-            ActivityDef activityDef = parseActivityDef(namedActivitySpec);
-            return Optional.of(activityDef);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-    }
+    //public static Optional<ActivityDef> parseActivityDefOptionally(String namedActivitySpec) {
+    //    try {
+    //        ActivityDef activityDef = parseActivityDef(namedActivitySpec);
+    //        return Optional.of(activityDef);
+    //    } catch (Exception e) {
+    //        return Optional.empty();
+    //    }
+    //}
 
     public static ActivityDef parseActivityDef(String namedActivitySpec) {
         Optional<ParameterMap> activityParameterMap = ParameterMap.parseParams(namedActivitySpec);
@@ -202,7 +204,6 @@ public class ActivityDef implements NBNamedElement {
 
     }
 
-
     private void checkInvariants() {
         if (getStartCycle() >= getEndCycle()) {
             throw new InvalidParameterException("Start cycle must be strictly less than end cycle, but they are [" + getStartCycle() + ',' + getEndCycle() + ')');
@@ -261,6 +262,12 @@ public class ActivityDef implements NBNamedElement {
         if ( ! params.containsKey(FIELD_RECYCLES)) {
             cfgmodel.add(Param.defaultTo(FIELD_RECYCLES, DEFAULT_RECYCLES).setDescription("The default number of recycles to test is '1'"));
         }
+        if ( ! params.containsKey("labels")) {
+            cfgmodel.add(Param.optional("labels", String.class).setDescription("Metric labels for this activity"));
+        }
+        if ( ! params.containsKey("tags")) {
+            cfgmodel.add(Param.optional("tags", String.class).setDescription("Tags for selecting workload op templates"));
+        }
         if ( ! params.containsKey("driver")) {
             cfgmodel.add(Param.optional("driver", String.class).setDescription("The default adapter driver to use"));
         }
@@ -269,6 +276,28 @@ public class ActivityDef implements NBNamedElement {
         }
         if ( ! params.containsKey("yaml")) {
             cfgmodel.add(Param.optional("yaml", String.class).setDescription("The test workload"));
+        }
+        if ( ! params.containsKey("async")) {
+            cfgmodel.add(Param.defaultTo("async", 1,"Inflight Ops"));
+        }
+        if ( ! params.containsKey("maxtries")) {
+            cfgmodel.add(Param.defaultTo("maxtries", 10,"Maximum number of retries"));
+        }
+        if ( ! params.containsKey("interval")) {
+            cfgmodel.add(Param.defaultTo("interval", 1000,"Action interval"));
+        }
+        if ( ! params.containsKey("hdr_digits")) {
+            cfgmodel.add(Param.defaultTo("hdr_digits", 4,"HDR Digits"));
+        }
+        if ( ! params.containsKey("errors")) {
+            cfgmodel.add(Param.optional("errors").setDescription("Error handling method"));
+        }
+        if ( ! params.containsKey("striderate")) {
+            cfgmodel.add(Param.optional("striderate").setDescription("Rate limiting stride"));
+        }
+        if ( ! params.containsKey("cyclerate") && ! params.containsKey("targetrate") && ! params.containsKey("rate")) {
+            List<String> rates = Arrays.asList("cyclerate", "targetrate", "rate");
+            cfgmodel.add(Param.optional(rates, String.class, "Rate limit"));
         }
         return cfgmodel.asReadOnly();
     }

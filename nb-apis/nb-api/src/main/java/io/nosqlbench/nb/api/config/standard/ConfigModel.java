@@ -17,6 +17,8 @@
 package io.nosqlbench.nb.api.config.standard;
 
 import io.nosqlbench.nb.api.errors.BasicError;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -24,7 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ConfigModel implements NBConfigModel {
-
+    private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final Map<String, Param<?>> paramsByName = new LinkedHashMap<>();
     private final List<Param<?>> params = new ArrayList<>();
     private Param<?> lastAdded = null;
@@ -326,9 +328,9 @@ public class ConfigModel implements NBConfigModel {
     }
 
     @Override
-    public void print() {
-        System.out.println("ConfigModel: "+ofType);
-        for (Param<?> param : getParams()) System.out.println("ConfigModel: " + param);
+    public void log() {
+        logger.info(() -> "ConfigModel: "+ofType);
+        for (Param<?> param : getParams()) logger.info(() -> "ConfigModel: " + param);
     }
 
     @Override

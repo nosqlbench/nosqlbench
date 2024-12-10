@@ -73,5 +73,5 @@ public interface NBConfigModel {
 
     NBConfigModel add(NBConfigModel otherModel);
 
-    void print();
+    void log();
 }

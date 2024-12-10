@@ -66,15 +66,15 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
 
     public StandardActivity(NBComponent parent, ActivityDef activityDef) {
         super(parent, activityDef);
-        OpsDocList workload;
-
-        // (0) Retrieve the Activity model
+        List<DriverAdapter<CycleOp<?>, Space>> adapterlist = new ArrayList<>();
+        List<ParsedOp> pops = new ArrayList<>();
+        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
         NBConfigModel activityModel = activityDef.getConfigModel();
-        //activityModel.print();
-
-        // (1) Retrieve the workload model
-        Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+        String defaultDriverName = activityDef.getActivityDriver();
+        DriverAdapter<CycleOp<?>, Space> defaultAdapter = getDriverAdapter(defaultDriverName);
         NBConfigModel yamlmodel;
+        OpsDocList workload;
+        Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
         if (yaml_loc.isPresent()) {
             Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
             workload = OpsLoader.loadPath(yaml_loc.get(), disposable, "activities");
@@ -82,21 +82,13 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         } else {
             yamlmodel = ConfigModel.of(StandardActivity.class).asReadOnly();
         }
-        //yamlmodel.print();
-
-        // (2) Retrieve the default driver (there is always a default)
-        String defaultDriverName = activityDef.getActivityDriver();
-        DriverAdapter<CycleOp<?>, Space> defaultAdapter = getDriverAdapter(defaultDriverName);
+        yamlmodel.log();
         NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(yamlmodel);
         //NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(activityModel);
+        // Load the op templates
         List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter);
-        List<ParsedOp> pops = new ArrayList<>();
-
-        List<DriverAdapter<CycleOp<?>, Space>> adapterlist = new ArrayList<>();
-        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
-
         for (OpTemplate ot : opTemplates) {
-            System.out.println("StandardActivity.opTemplate = "+ot);
+            logger.info(() -> "StandardActivity.opTemplate = "+ot);
             String driverName = ot.getOptionalStringParam("driver", String.class)
                 .or(() -> ot.getOptionalStringParam("type", String.class))
                 .orElse(defaultDriverName);
@@ -118,21 +110,18 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
                 mappers.put(driverName, adapter.getOpMapper());
             }
             supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
-            //supersetConfig.print();
-            //System.out.println("StandardActivity.opTemplate assertValidConfig");
-
+            supersetConfig.log();
             DriverAdapter<CycleOp<?>, Space> adapter = adapters.get(driverName);
             adapterlist.add(adapter);
             ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
-            System.out.println("StandardActivity.pop="+pop);
+            logger.info("StandardActivity.pop="+pop);
             Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
             pops.add(pop);
         }
-        System.out.println("StandardActivity.opTemplate loop complete");
+        logger.info(() -> "StandardActivity.opTemplate loop complete");
 
-        long matchingDefault = mappers.keySet().stream().filter(n -> n.equals(defaultDriverName)).count();
-        if (0 == matchingDefault) {
-            logger.warn("All op templates used a different driver than the default '{}'", defaultDriverName);
+        if (0 == mappers.keySet().stream().filter(n -> n.equals(defaultDriverName)).count()) {
+            logger.warn(() -> "All op templates used a different driver than the default '" + defaultDriverName + "'");
         }
 
         try {
@@ -201,7 +190,6 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
-
         for (DriverAdapter<?, ?> adapter : adapters.values()) {
             if (adapter instanceof NBReconfigurable configurable) {
                 NBConfigModel cfgModel = configurable.getReconfigModel();
@@ -263,7 +251,6 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         return super.getLabels();
     }
 
-
     @Override
     public void onEvent(NBEvent event) {
         switch (event) {
@@ -278,6 +265,5 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
             default -> super.onEvent(event);
         }
     }
-
 
 }
