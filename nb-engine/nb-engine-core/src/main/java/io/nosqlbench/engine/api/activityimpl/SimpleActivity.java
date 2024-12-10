@@ -426,9 +426,10 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                     DriverAdapter<CycleOp<?>, Space> adapter = adapters.get(i);
                     OpMapper<CycleOp<?>, Space> opMapper = adapter.getOpMapper();
                     LongFunction<Space> spaceFunc = adapter.getSpaceFunc(pop);
-                    OpDispenser<CycleOp<?>> dispenser = opMapper.apply(this, pop, spaceFunc);
+                    OpDispenser<? extends CycleOp<?>> dispenser = opMapper.apply(this, pop, spaceFunc);
                     String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
-                    dispenser = OpWrappers.wrapOptionally(adapter, dispenser, pop, dryrunSpec);
+                    Dryrun dryrun = pop.takeEnumFromFieldOr(Dryrun.class, Dryrun.none, "dryrun");
+                    dispenser = OpFunctionComposition.wrapOptionally(adapter, dispenser, pop, dryrun);
 
 //                if (strict) {
 //                    optemplate.assertConsumed();
@@ -541,7 +542,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     @Deprecated(forRemoval = true)
     protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate, OpDispenser<? extends O>> opinit, boolean strict, DriverAdapter<?, ?> defaultAdapter) {
 
-        var stmts = loadOpTemplates(defaultAdapter);
+        List<OpTemplate> stmts = loadOpTemplates(defaultAdapter);
 
         List<Long> ratios = new ArrayList<>(stmts.size());
 

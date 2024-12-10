@@ -18,28 +18,27 @@ package io.nosqlbench.adapter.weaviate.opsdispensers;
 import java.util.function.LongFunction;
 
 import io.nosqlbench.adapter.weaviate.WeaviateDriverAdapter;
+import io.nosqlbench.adapter.weaviate.WeaviateSpace;
 import io.nosqlbench.adapter.weaviate.ops.WeaviateBaseOp;
 import io.nosqlbench.adapter.weaviate.ops.WeaviateGetCollectionSchemaOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.weaviate.client.WeaviateClient;
+import io.weaviate.client.base.Result;
 
-public class WeaviateGetCollectionSchemaOpDispenser extends WeaviateBaseOpDispenser<String> {
+public class WeaviateGetCollectionSchemaOpDispenser extends WeaviateBaseOpDispenser<String, Result<?>> {
 
-	public WeaviateGetCollectionSchemaOpDispenser(WeaviateDriverAdapter adapter, ParsedOp op,
-			LongFunction<String> targetF) {
-		super(adapter, op, targetF);
-	}
+    public WeaviateGetCollectionSchemaOpDispenser(WeaviateDriverAdapter adapter, ParsedOp op, LongFunction<WeaviateSpace> spaceF, LongFunction<String> targetF) {
+        super(adapter, op, spaceF, targetF);
+    }
 
-	@Override
-	public LongFunction<String> getParamFunc(LongFunction<WeaviateClient> clientF, ParsedOp op,
-			LongFunction<String> targetF) {
-		return l -> targetF.apply(l);
-	}
+    @Override
+    public LongFunction<String> getParamFunc(LongFunction<WeaviateClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+        return l -> targetF.apply(l);
+    }
 
-	@Override
-	public LongFunction<WeaviateBaseOp<String>> createOpFunc(LongFunction<String> paramF,
-			LongFunction<WeaviateClient> clientF, ParsedOp op, LongFunction<String> targetF) {
-		return l -> new WeaviateGetCollectionSchemaOp(clientF.apply(l), paramF.apply(l));
-	}
+    @Override
+    public LongFunction<WeaviateBaseOp<String,Result<?>>> createOpFunc(LongFunction<String> paramF, LongFunction<WeaviateClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+        return l -> new WeaviateGetCollectionSchemaOp(clientF.apply(l), paramF.apply(l));
+    }
 
 }

@@ -36,7 +36,7 @@ public class CqlD4CqlSimpleStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlSimpl
     }
 
     @Override
-    public OpDispenser<Cqld4CqlSimpleStatement> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceInitF) {
+    public OpDispenser<Cqld4CqlSimpleStatement> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceF) {
         return new Cqld4SimpleCqlStmtDispenser(adapter, targetFunction, op);
     }
 

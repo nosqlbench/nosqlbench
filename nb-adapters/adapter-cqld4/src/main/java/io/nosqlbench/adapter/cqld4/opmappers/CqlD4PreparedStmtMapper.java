@@ -47,7 +47,7 @@ public class CqlD4PreparedStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlPrepar
     public OpDispenser<Cqld4CqlPreparedStatement> apply(
         NBComponent adapterC,
         ParsedOp op,
-        LongFunction<Cqld4Space> spaceInitF
+        LongFunction<Cqld4Space> spaceF
     ) {
         ParsedTemplateString stmtTpl = op.getAsTemplate(target.field).orElseThrow(() -> new BasicError(
             "No statement was found in the op template:" + op
@@ -68,7 +68,7 @@ public class CqlD4PreparedStmtMapper extends Cqld4CqlBaseOpMapper<Cqld4CqlPrepar
             });
         });
 
-        return new Cqld4PreparedStmtDispenser(adapter, op, stmtTpl, processors, spaceInitF);
+        return new Cqld4PreparedStmtDispenser(adapter, op, stmtTpl, processors, spaceF);
     }
 
 }

@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.weaviate;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,7 +36,7 @@ import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
-public class WeaviateOpMapper implements OpMapper<WeaviateBaseOp<?>> {
+public class WeaviateOpMapper implements OpMapper<WeaviateBaseOp<?,?>,WeaviateSpace> {
 	private static final Logger logger = LogManager.getLogger(WeaviateOpMapper.class);
 	private final WeaviateDriverAdapter adapter;
 
@@ -48,31 +49,30 @@ public class WeaviateOpMapper implements OpMapper<WeaviateBaseOp<?>> {
 		this.adapter = adapter;
 	}
 
-	/**
-     * Given an instance of a {@link ParsedOp} returns the appropriate
-     * {@link WeaviateBaseOpDispenser} subclass
-     *
-     * @param op
-     *         The {@link ParsedOp} to be evaluated
-     * @param spaceInitF
-     * @return The correct {@link WeaviateBaseOpDispenser} subclass based on the op
-     *         type
-     */
-	@Override
-	public OpDispenser<WeaviateBaseOp<?>> apply(ParsedOp op, LongFunction<? extends Space> spaceInitF) {
-		TypeAndTarget<WeaviateOpType, String> typeAndTarget = op.getTypeAndTarget(WeaviateOpType.class, String.class,
-				"type", "target");
-		logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
+    @Override
+    public OpDispenser<? extends WeaviateBaseOp<?,?>> apply(
+        NBComponent adapterC,
+        ParsedOp pop,
+        LongFunction spaceF
+    ) {
+        TypeAndTarget<WeaviateOpType, String> typeAndTarget = pop.getTypeAndTarget(
+            WeaviateOpType.class,
+            String.class,
+            "type", "target"
+        );
+        LongFunction<String> targetF = typeAndTarget.targetFunction;
 
-		return switch (typeAndTarget.enumId) {
-		case delete_collection -> new WeaviateDeleteCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
-		case create_collection -> new WeaviateCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
-		case get_collection_schema ->
-			new WeaviateGetCollectionSchemaOpDispenser(adapter, op, typeAndTarget.targetFunction);
-		case create_objects -> new WeaviateCreateObjectsOpDispenser(adapter, op, typeAndTarget.targetFunction);
+        logger.info(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + pop.getName() + "'");
+
+        return switch (typeAndTarget.enumId) {
+            case delete_collection -> new WeaviateDeleteCollectionOpDispenser(adapter, pop, spaceF, targetF);
+            case create_collection -> new WeaviateCreateCollectionOpDispenser(adapter, pop, spaceF, targetF);
+            case get_collection_schema ->
+                new WeaviateGetCollectionSchemaOpDispenser(adapter, pop, spaceF, targetF);
+            case create_objects -> new WeaviateCreateObjectsOpDispenser(adapter, pop, spaceF, targetF);
 //            default -> throw new RuntimeException("Unrecognized op type '" + typeAndTarget.enumId.name() + "' while " +
 //                "mapping parsed op " + op);
-		};
-	}
+        };
+    }
 }
 

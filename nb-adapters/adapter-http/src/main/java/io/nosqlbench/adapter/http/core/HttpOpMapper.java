@@ -37,8 +37,8 @@ public class HttpOpMapper implements OpMapper<HttpOp,HttpSpace> {
     }
 
     @Override
-    public OpDispenser<HttpOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<HttpSpace> spaceInitF) {
+    public OpDispenser<HttpOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<HttpSpace> spaceF) {
         LongFunction<String> spaceNameF = op.getAsFunctionOr("space", "default");
-        return new HttpOpDispenser(adapter, spaceInitF, op);
+        return new HttpOpDispenser(adapter, spaceF, op);
     }
 }

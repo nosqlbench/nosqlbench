@@ -40,7 +40,7 @@ public class S4JOpMapper implements OpMapper<S4JOp,S4JSpace> {
     }
 
     @Override
-    public OpDispenser<S4JOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<S4JSpace> spaceInitF) {
+    public OpDispenser<S4JOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<S4JSpace> spaceF) {
 
         /*
          * If the user provides a body element, then they want to provide the JSON or

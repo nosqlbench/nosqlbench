@@ -36,7 +36,7 @@ public class Neo4JOpMapper implements OpMapper<Neo4JBaseOp,Neo4JSpace> {
     }
 
     @Override
-    public OpDispenser<Neo4JBaseOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<Neo4JSpace> spaceInitF) {
+    public OpDispenser<Neo4JBaseOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<Neo4JSpace> spaceF) {
         TypeAndTarget<Neo4JOpType, String> typeAndTarget = op.getTypeAndTarget(Neo4JOpType.class, String.class);
         LongFunction<Neo4JSpace> spaceFunc = adapter.getSpaceFunc(op);
         return switch (typeAndTarget.enumId) {

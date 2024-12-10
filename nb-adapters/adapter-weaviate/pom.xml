@@ -36,7 +36,7 @@
         <dependency>
             <groupId>io.weaviate</groupId>
             <artifactId>client</artifactId>
-            <version>4.8.2</version>
+            <version>4.9.0</version>
         </dependency>
 
     </dependencies>

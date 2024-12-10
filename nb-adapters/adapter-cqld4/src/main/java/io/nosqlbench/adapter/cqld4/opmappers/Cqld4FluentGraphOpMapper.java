@@ -59,7 +59,7 @@ public class Cqld4FluentGraphOpMapper extends Cqld4BaseOpMapper<Cqld4FluentGraph
     }
 
     @Override
-    public OpDispenser<Cqld4FluentGraphOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> cqld4SpaceLongFunction) {
+    public OpDispenser<Cqld4FluentGraphOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceF) {
         GraphTraversalSource g = DseGraph.g;
 
         ParsedTemplateString fluent = op.getAsTemplate(target.field).orElseThrow();

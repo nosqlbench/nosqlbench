@@ -24,7 +24,7 @@ import io.weaviate.client.v1.data.api.ObjectCreator;
 import io.weaviate.client.v1.data.model.WeaviateObject;
 import io.weaviate.client.v1.data.replication.model.ConsistencyLevel;
 
-public class WeaviateCreateObjectsOp extends WeaviateBaseOp<ObjectCreator> {
+public class WeaviateCreateObjectsOp extends WeaviateBaseOp<ObjectCreator,Result<?>> {
 
 	public WeaviateCreateObjectsOp(WeaviateClient client, ObjectCreator request) {
 		super(client, request);
@@ -32,7 +32,7 @@ public class WeaviateCreateObjectsOp extends WeaviateBaseOp<ObjectCreator> {
 
 	@SuppressWarnings("serial")
 	@Override
-	public Object applyOp(long value) {
+	public Result<?> applyOp(long value) {
 		Result<WeaviateObject> response = null;
 		try {
 			response = client.data().creator().withClassName("Glove25").withProperties(new HashMap<String, Object>() {

@@ -48,11 +48,11 @@ public class QdrantOpMapper implements OpMapper<QdrantBaseOp<?,?>,QdrantSpace> {
      * @param adapterC
      * @param op
      *     The {@link ParsedOp} to be evaluated
-     * @param spaceInitF
+     * @param spaceF
      * @return The correct {@link QdrantBaseOpDispenser} subclass based on the op type
      */
     @Override
-    public OpDispenser<QdrantBaseOp<?,?>> apply(NBComponent adapterC, ParsedOp op, LongFunction<QdrantSpace> spaceInitF) {
+    public OpDispenser<QdrantBaseOp<?,?>> apply(NBComponent adapterC, ParsedOp op, LongFunction<QdrantSpace> spaceF) {
         TypeAndTarget<QdrantOpType, String> typeAndTarget = op.getTypeAndTarget(
             QdrantOpType.class,
             String.class,

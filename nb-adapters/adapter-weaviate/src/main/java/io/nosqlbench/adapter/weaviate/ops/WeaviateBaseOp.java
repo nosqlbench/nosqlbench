@@ -26,21 +26,21 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.weaviate.client.WeaviateClient;
 import io.weaviate.client.base.Result;
 
-public abstract class WeaviateBaseOp<T> implements CycleOp<Object> {
+public abstract class WeaviateBaseOp<REQUEST, RESULT> implements CycleOp<RESULT> {
 
     protected final static Logger logger = LogManager.getLogger(WeaviateBaseOp.class);
 
 	protected final WeaviateClient client;
-    protected final T request;
+    protected final REQUEST request;
     protected final LongFunction<Object> apiCall;
 
-	public WeaviateBaseOp(WeaviateClient client, T requestParam) {
+	public WeaviateBaseOp(WeaviateClient client, REQUEST requestParam) {
         this.client = client;
         this.request = requestParam;
         this.apiCall = this::applyOp;
     }
 
-	public WeaviateBaseOp(WeaviateClient client, T requestParam, LongFunction<Object> call) {
+	public WeaviateBaseOp(WeaviateClient client, REQUEST requestParam, LongFunction<Object> call) {
         this.client = client;
         this.request = requestParam;
         this.apiCall = call;
@@ -48,11 +48,11 @@ public abstract class WeaviateBaseOp<T> implements CycleOp<Object> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-    public final Object apply(long value) {
+    public final RESULT apply(long value) {
         logger.trace("applying op: " + this);
 
         try {
-            Object result = applyOp(value);
+            RESULT result = applyOp(value);
 			if (result instanceof Result<?>) {
 
 //                Result<Boolean> result = client.misc().readyChecker().run();
@@ -81,7 +81,7 @@ public abstract class WeaviateBaseOp<T> implements CycleOp<Object> {
         }
     };
 
-    public abstract Object applyOp(long value);
+    public abstract RESULT applyOp(long value);
 
     @Override
     public String toString() {

@@ -45,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+///  This class is responsible for loading op templates.
 public class OpsLoader {
 
     private final static Logger logger = LogManager.getLogger(OpsLoader.class);
