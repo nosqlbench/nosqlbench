@@ -73,10 +73,10 @@ public enum CqlD4OpType {
      */
     fluent,
 
-    /**
-     * reserved for future use
-     */
-    rainbow,
+//    /**
+//     * reserved for future use
+//     */
+//    rainbow,
 //    /**
 //     * reserved for future use
 //     */
