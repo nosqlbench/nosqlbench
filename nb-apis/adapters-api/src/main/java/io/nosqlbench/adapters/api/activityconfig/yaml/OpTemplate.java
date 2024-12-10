@@ -45,7 +45,7 @@ import java.util.function.Function;
  * for UniformWorkloadSpecification directly to see how this specification is tested and documented.
  * </p>
  */
-public abstract class OpTemplate implements Tagged {
+public abstract class OpTemplate implements Tagged, OpTemplateProps {
 
     private final static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     // TODO: coalesce Gson instances to a few statics on a central NB API class
@@ -57,16 +57,7 @@ public abstract class OpTemplate implements Tagged {
     public final static String FIELD_PARAMS = "params";
     public final static String FIELD_TAGS = "tags";
     public final static String FIELD_REFKEY = "refkey";
-
-    /**
-     * @return a description for the op template, or an empty string
-     */
-    public abstract String getDesc();
-
-    /**
-     * @return a name for the op template, user-specified or auto-generated
-     */
-    public abstract String getName();
+    private int refKey = -1;
 
     /**
      * Return a map of tags for this statement. Implementations are required to
@@ -74,11 +65,8 @@ public abstract class OpTemplate implements Tagged {
      *
      * @return A map of assigned tags for the op, with the name added as an auto-tag.
      */
+    @Override
     public abstract Map<String, String> getTags();
-
-    public abstract Map<String, String> getBindings();
-
-    public abstract Map<String, Object> getParams();
 
     public <T> Map<String, T> getParamsAsValueType(Class<? extends T> type) {
         Map<String, T> map = new LinkedHashMap<>();
@@ -130,13 +118,7 @@ public abstract class OpTemplate implements Tagged {
         }
     }
 
-    /**
-     * Get an integer key for the op template for this workload template, based on enumeration of all
-     * active op templates. This value is stable within the current instance of the workload template only.
-     * @return a unique integer key for this op template within the workload template
-     */
-    public abstract int getRefKey();
-    public abstract void setRefKey(int refKey);
+
 
     public <V> V getParam(String name, Class<? extends V> type) {
         Object object = getParams().get(name);
@@ -196,10 +178,10 @@ public abstract class OpTemplate implements Tagged {
         return getStmt().map(s -> new ParsedTemplateString(s, getBindings()));
     }
 
-    public abstract Optional<Map<String, Object>> getOp();
-
     public Map<String, Object> asData() {
         LinkedHashMap<String, Object> fields = new LinkedHashMap<>();
+
+//        fields.put(FIELD_REFKEY, this.getRefKey());
 
         if (this.getDesc() != null && !this.getDesc().isBlank()) {
             fields.put(FIELD_DESC, this.getDesc());
@@ -266,4 +248,5 @@ public abstract class OpTemplate implements Tagged {
             throw new OpConfigError("The op template named '" + getName() + "' was not fully consumed. These fields are not being applied:" + remainingFields());
         }
     }
+
 }

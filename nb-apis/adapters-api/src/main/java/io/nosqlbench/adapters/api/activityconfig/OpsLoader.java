@@ -18,6 +18,7 @@ package io.nosqlbench.adapters.api.activityconfig;
 
 import com.amazonaws.util.StringInputStream;
 import com.google.gson.GsonBuilder;
+import io.nosqlbench.adapters.api.activityconfig.yaml.*;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.nbio.ResolverChain;
@@ -25,8 +26,6 @@ import io.nosqlbench.nb.api.advisor.NBAdvisorException;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
-import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;
-import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.templating.StrInterpolator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,7 +57,7 @@ public class OpsLoader {
     }
 
     public static OpsDocList loadPath(String path, Map<String, ?> params, String... searchPaths) {
-        String[] extensions = path.indexOf('.')>-1 ? new String[]{} : YAML_EXTENSIONS;
+        String[] extensions = path.indexOf('.') > -1 ? new String[]{} : YAML_EXTENSIONS;
         ResolverChain chain = new ResolverChain(path);
         Content<?> foundPath = NBIO.chain(chain.getChain()).searchPrefixes(searchPaths).pathname(chain.getPath()).extensionSet(extensions).first()
             .orElseThrow(() -> new RuntimeException("Unable to load path '" + path + "'"));
@@ -66,10 +65,11 @@ public class OpsLoader {
         return loadString(foundPath.asString(), fmt, params, foundPath.getURI());
     }
 
-    public static OpsDocList loadString(final String sourceData, OpTemplateFormat fmt, Map<String, ?> params, URI srcuri) {
+    public static OpsDocList loadString(
+        final String sourceData, OpTemplateFormat fmt, Map<String, ?> params, URI srcuri) {
 
         logger.trace(() -> "Applying string transformer to data:" + sourceData);
-        if (srcuri!=null) {
+        if (srcuri != null) {
             logger.info("workload URI: '" + srcuri + "'");
         }
         StrInterpolator transformer = new StrInterpolator(params);
@@ -84,7 +84,6 @@ public class OpsLoader {
         // TODO: itemize inline to support ParamParser
 
         OpsDocList layered = new OpsDocList(rawOpsDocList);
-
         transformer.checkpointAccesses().forEach((k, v) -> {
             layered.addTemplateVariable(k, v);
             params.remove(k);
@@ -95,9 +94,9 @@ public class OpsLoader {
 
     private static String evaluateJsonnet(URI uri, Map<String, ?> params) {
         List<String> injected = new LinkedList<>(List.of(Path.of(uri).toString()));
-        params.forEach((k,v) -> {
+        params.forEach((k, v) -> {
             if (v instanceof CharSequence cs) {
-                injected.addAll(List.of("--ext-str",k+"="+cs));
+                injected.addAll(List.of("--ext-str", k + "=" + cs));
             }
         });
 
@@ -113,15 +112,9 @@ public class OpsLoader {
         }
 
         int resultStatus = SjsonnetMain.main0(
-            injected.toArray(new String[0]),
-            new DefaultParseCache(),
-            inputStream,
-            stdoutStream,
-            stderrStream,
-            new os.Path(Path.of(System.getProperty("user.dir"))),
-            Option.empty(),
-            Option.empty(),
-            null
+            injected.toArray(new String[0]), new DefaultParseCache(), inputStream, stdoutStream,
+            stderrStream, new os.Path(Path.of(System.getProperty("user.dir"))), Option.empty(),
+            Option.empty(), null
         );
 
         String stdoutOutput = stdoutBuffer.toString(StandardCharsets.UTF_8);
@@ -130,7 +123,7 @@ public class OpsLoader {
             logger.info("dryrun=jsonnet, dumping result to stdout and stderr:");
             System.out.println(stdoutOutput);
             System.err.println(stderrOutput);
-            if (resultStatus==0 && stderrOutput.isEmpty()) {
+            if (resultStatus == 0 && stderrOutput.isEmpty()) {
                 logger.info("no errors detected during jsonnet evaluation.");
                 throw new NBAdvisorException("dryrun=jsonnet: No errors detected.", 0);
             } else {
@@ -139,14 +132,16 @@ public class OpsLoader {
             }
         }
         if (!stderrOutput.isEmpty()) {
-            BasicError error = new BasicError("stderr output from jsonnet preprocessing: " + stderrOutput);
-            if (resultStatus!=0) {
+            BasicError error = new BasicError(
+                "stderr output from jsonnet preprocessing: " + stderrOutput);
+            if (resultStatus != 0) {
                 throw error;
             } else {
-                logger.warn(error.toString(),error);
+                logger.warn(error.toString(), error);
             }
         }
-        logger.info("jsonnet processing read '" + uri +"', rendered " + stdoutOutput.split("\n").length + " lines.");
+        logger.info("jsonnet processing read '" + uri + "', rendered " + stdoutOutput.split(
+            "\n").length + " lines.");
         logger.trace("jsonnet result:\n" + stdoutOutput);
 
         return stdoutOutput;

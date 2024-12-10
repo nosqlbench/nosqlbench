@@ -16,6 +16,8 @@
 
 package io.nosqlbench.adapters.api.activityconfig.yaml;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.security.InvalidParameterException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,47 +31,61 @@ public class OpData extends OpTemplate {
     private Map<String, Object> params = Map.of();
     private Map<String, String> bindings = Map.of();
     private Map<String, String> tags = new LinkedHashMap<>();
-    private int refKey;
+    private int refkey;
 
-    public OpData(String desc, String name, Map<String, String> tags, Map<String, String> bindings, Map<String, Object> params, Map<String, Object> op) {
+    public OpData(
+        String desc, String name, Map<String, String> tags, Map<String, String> bindings,
+        Map<String, Object> params, Map<String, Object> op, int refkey
+    ) {
         this.desc = desc;
         this.name = name;
         this.tags = tags;
         this.bindings = bindings;
         this.params = params;
         this.op = op;
+        this.refkey = refkey;
     }
 
-    public OpData() {}
+    public OpData() {
+    }
 
 
-    public OpData(Map<String,Object> opdata) {
+    public OpData(Map<String, Object> opdata) {
         applyFields(opdata);
-        if (opdata.size()>0) {
-            throw new RuntimeException("Unconsumed fields in construction of op data from map: " + opdata);
+        if (opdata.size() > 0) {
+            throw new RuntimeException(
+                "Unconsumed fields in construction of op data from map: " + opdata);
         }
     }
 
-    public OpData applyFields(Map<String,Object> opdata) {
-        LinkedHashMap<String,Object> toapply = new LinkedHashMap<>(opdata);
-        Optional.ofNullable(toapply.remove(OpTemplate.FIELD_DESC)).ifPresent(v -> this.setDesc(v.toString()));
-        Optional.ofNullable(toapply.remove(OpTemplate.FIELD_NAME)).ifPresent(v -> this.setName(v.toString()));
+    public OpData applyFields(Map<String, Object> opdata) {
+        LinkedHashMap<String, Object> toapply = new LinkedHashMap<>(opdata);
+        Optional.ofNullable(toapply.remove(OpTemplate.FIELD_DESC)).ifPresent(
+            v -> this.setDesc(v.toString()));
+        Optional.ofNullable(toapply.remove(OpTemplate.FIELD_NAME)).ifPresent(
+            v -> this.setName(v.toString()));
 
         Optional.ofNullable(toapply.remove(OpTemplate.FIELD_BINDINGS)).ifPresent(this::setBindings);
         Optional.ofNullable(toapply.remove(OpTemplate.FIELD_OP)).ifPresent(this::setOp);
         Optional.ofNullable(toapply.remove(OpTemplate.FIELD_PARAMS)).ifPresent(this::setParams);
         Optional.ofNullable(toapply.remove(OpTemplate.FIELD_TAGS)).ifPresent(this::setTags);
+        Optional.ofNullable(toapply.remove(OpTemplate.FIELD_REFKEY)).map(
+            v -> (Integer) v).ifPresent(this::setRefKey);
 
-        if (toapply.size()>0) {
+        if (toapply.size() > 0) {
             throw new InvalidParameterException("Fields were not applied to OpData:" + toapply);
         }
         return this;
     }
 
+    private void setRefKey(int refkey) {
+        this.refkey = refkey;
+    }
+
     private void setTags(Object o) {
         if (o instanceof Map) {
-            ((Map<?, ?>) o).forEach((k,v) -> {
-                this.tags.put(k.toString(),v.toString());
+            ((Map<?, ?>) o).forEach((k, v) -> {
+                this.tags.put(k.toString(), v.toString());
             });
         } else {
             throw new RuntimeException("Invalid type for tags: " + o.getClass().getSimpleName());
@@ -79,8 +95,8 @@ public class OpData extends OpTemplate {
     private void setParams(Object o) {
         if (o instanceof Map) {
             this.params = new LinkedHashMap<>();
-            ((Map<?, ?>) o).forEach((k,v) -> {
-                this.params.put(k.toString(),v);
+            ((Map<?, ?>) o).forEach((k, v) -> {
+                this.params.put(k.toString(), v);
             });
         } else {
             throw new RuntimeException("Invalid type for params: " + op.getClass().getSimpleName());
@@ -89,9 +105,9 @@ public class OpData extends OpTemplate {
 
     private void setOp(Object o) {
         if (o instanceof CharSequence) {
-            this.op = new LinkedHashMap<>(Map.of("stmt",o.toString()));
+            this.op = new LinkedHashMap<>(Map.of("stmt", o.toString()));
         } else if (o instanceof Map) {
-            this.op = new LinkedHashMap<>((Map)o);
+            this.op = new LinkedHashMap<>((Map) o);
         } else {
             throw new RuntimeException("Invalid type for op:" + op.getClass().getSimpleName());
         }
@@ -100,17 +116,18 @@ public class OpData extends OpTemplate {
     private void setBindings(Object bindings) {
         if (bindings instanceof Map) {
             this.bindings = new LinkedHashMap<>();
-            ((Map<?, ?>) bindings).forEach((k,v) -> {
-                this.bindings.put(k.toString(),v.toString());
+            ((Map<?, ?>) bindings).forEach((k, v) -> {
+                this.bindings.put(k.toString(), v.toString());
             });
-        } else if (bindings!=null) {
-            throw new RuntimeException("Invalid type for bindings: " + bindings.getClass().getSimpleName());
+        } else if (bindings != null) {
+            throw new RuntimeException(
+                "Invalid type for bindings: " + bindings.getClass().getSimpleName());
         }
     }
 
     private void setName(String name) {
         this.name = name;
-        this.tags.put("name",name);
+        this.tags.put("name", name);
     }
 
     private void setDesc(String desc) {
@@ -143,16 +160,6 @@ public class OpData extends OpTemplate {
     }
 
     @Override
-    public int getRefKey() {
-        return refKey;
-    }
-
-    @Override
-    public void setRefKey(int refKey) {
-        this.refKey = refKey;
-    }
-
-    @Override
     public Optional<Map<String, Object>> getOp() {
         return Optional.of(this.op);
     }
@@ -160,5 +167,10 @@ public class OpData extends OpTemplate {
     @Override
     public Optional<String> getStmt() {
         return Optional.empty();
+    }
+
+    @Override
+    public int getRefKey() {
+        return refkey;
     }
 }
