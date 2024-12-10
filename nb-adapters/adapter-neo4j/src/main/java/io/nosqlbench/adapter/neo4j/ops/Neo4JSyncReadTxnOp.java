@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.neo4j.ops;
 
 import org.neo4j.driver.Query;
 import org.neo4j.driver.Record;
+import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class Neo4JSyncReadTxnOp extends Neo4JBaseOp{
     public final Record[] apply(long value) {
         List<Record> recordList = session.executeRead(
             txn -> {
-                var result = txn.run(query);
+                Result result = txn.run(query);
                 return result.list();
             }
         );

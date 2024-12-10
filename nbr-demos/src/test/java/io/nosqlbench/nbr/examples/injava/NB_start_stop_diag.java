@@ -20,6 +20,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitie
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
+import org.jetbrains.annotations.NotNull;
 
 
 import java.io.PrintWriter;
@@ -59,14 +60,10 @@ public class NB_start_stop_diag extends NBBaseCommand {
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
 
-        var activitydef = Map.of(
-            "alias" , "teststartstopdiag",
-            "driver" , "diag",
-            "cycles" , "0..1000000000",
-            "threads" , "5",
-            "interval" , "2000",
-            "op" , "noop",
-            "rate" , "5");
+        Map<String, String> activitydef = Map.of(
+            "alias", "teststartstopdiag", "driver", "diag", "cycles", "0..1000000000", "threads",
+            "5", "interval", "2000", "op", "noop", "rate", "5"
+        );
 
         stdout.println("starting activity teststartstopdiag");
         controller.start(activitydef);

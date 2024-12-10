@@ -79,21 +79,23 @@ public class AzureAISearchSpace extends BaseSpace<AzureAISearchSpace> {
 
 	private SearchIndexClient createSearchClients() {
 		String uri = cfg.get("endpoint");
-		var requiredToken = cfg.getOptional("token_file").map(Paths::get).map(tokenFilePath -> {
-			try {
-				return Files.readAllLines(tokenFilePath).getFirst();
-			} catch (IOException e) {
-				String error = "Error while reading token from file:" + tokenFilePath;
-				logger.error(error, e);
-				throw new RuntimeException(e);
-			}
-		}).orElseGet(() -> cfg.getOptional("token").orElseThrow(() -> new RuntimeException(
-				"You must provide either a 'token_file' or a 'token' to configure a Azure AI Search client")));
+        String requiredToken = cfg.getOptional("token_file").map(Paths::get).map(tokenFilePath -> {
+            try {
+                return Files.readAllLines(tokenFilePath).getFirst();
+            } catch (IOException e) {
+                String error = "Error while reading token from file:" + tokenFilePath;
+                logger.error(error, e);
+                throw new RuntimeException(e);
+            }
+        }).orElseGet(() -> cfg.getOptional("token").orElse(null));
+//            .orElseThrow(() -> new RuntimeException(
+//				"You must provide either a 'token_file' or a 'token' to configure a Azure AI Search client")));
 
 		logger.info(() -> "Creating new Azure AI Search Client with (masked) token/key ["
 				+ AzureAISearchAdapterUtils.maskDigits(requiredToken) + "], uri/endpoint [" + uri + "]");
 
-		var searchIndexClientBuilder = new SearchIndexClientBuilder().endpoint(uri);
+        SearchIndexClientBuilder searchIndexClientBuilder = new SearchIndexClientBuilder().endpoint(
+            uri);
 		if (!requiredToken.isBlank()) {
 			searchIndexClientBuilder = searchIndexClientBuilder.credential(new AzureKeyCredential(requiredToken));
 		} else {

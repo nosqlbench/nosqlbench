@@ -536,7 +536,7 @@ public class CGWorkloadExporter implements BundledApp {
                 pkeys.pop();
             }
         }
-        var lastcount = keycount;
+        int lastcount = keycount;
         keycount = Math.max(table.getPartitionKeys().size(), keycount);
         if (keycount != lastcount) {
             logger.debug("minimum keycount for " + table.getFullName() + " adjusted from " + lastcount + " to " + keycount);

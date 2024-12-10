@@ -52,7 +52,7 @@ public class CqlParserHarnessTest {
         CGWorkloadExporter exporter = new CGWorkloadExporter();
         exporter.applyAsInt(new String[]{"src/test/resources/testschemas/cql_alltypes.cql","_alltypes.yaml"});
         exporter.setNamingTemplate("[OPTYPE-][COLUMN-][TYPEDEF-][TABLE-]-[KEYSPACE]");
-        var data = exporter.getWorkloadAsYaml();
+        String data = exporter.getWorkloadAsYaml();
 
     }
 
