@@ -27,6 +27,9 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
+import io.nosqlbench.nb.api.advisor.NBAdvisorResults;
+import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.lifecycle.Shutdownable;
 import io.nosqlbench.nb.api.components.core.NBComponent;
@@ -63,9 +66,12 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final OpSequence<OpDispenser<? extends CycleOp<?>>> sequence;
     private final ConcurrentHashMap<String, DriverAdapter<CycleOp<?>,Space>> adapters = new ConcurrentHashMap<>();
+    private final List<NBAdvisorPoint<?>> advisors = new ArrayList<>();
 
     public StandardActivity(NBComponent parent, ActivityDef activityDef) {
         super(parent, activityDef);
+        NBAdvisorPoint<String> paramsAdvisor = create().advisor(b -> b.name("Check params"));
+        paramsAdvisor.add(Conditions.ValidNameError);
         List<DriverAdapter<CycleOp<?>, Space>> adapterlist = new ArrayList<>();
         List<ParsedOp> pops = new ArrayList<>();
         ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
@@ -119,6 +125,10 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
             pops.add(pop);
         }
         logger.info(() -> "StandardActivity.opTemplate loop complete");
+
+        paramsAdvisor.validateAll(supersetConfig.getNamedParams().keySet());
+        NBAdvisorResults advisorResults = getAdvisorResults();
+        advisorResults.evaluate();
 
         if (0 == mappers.keySet().stream().filter(n -> n.equals(defaultDriverName)).count()) {
             logger.warn(() -> "All op templates used a different driver than the default '" + defaultDriverName + "'");

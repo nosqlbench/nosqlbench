@@ -48,5 +48,7 @@ public class Conditions {
     public static NoHyphens NoHyphensWarning = new NoHyphens(Level.WARN);
     public static NoSpaces NoSpacesError = new NoSpaces(Level.ERROR);
     public static NoSpaces NoSpacesWarning = new NoSpaces(Level.WARN);
+    public static ValidName ValidNameError = new ValidName(Level.ERROR);
+    public static ValidName ValidNameWarning = new ValidName(Level.WARN);
 
 }

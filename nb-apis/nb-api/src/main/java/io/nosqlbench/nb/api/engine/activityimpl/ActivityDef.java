@@ -224,7 +224,9 @@ public class ActivityDef implements NBNamedElement {
             if (this.parameterMap.containsKey(newName)) {
                 throw new BasicError("You have specified activity param '" + deprecatedName + "' in addition to the valid name '" + newName + "'. Remove '" + deprecatedName + "'.");
             }
-            logger.warn("Auto replacing deprecated activity param '{}={}' with new '{}={}'.", deprecatedName, chars, newName, chars);
+            if (!newName.equals("driver")) {
+                logger.warn("Auto replacing deprecated activity param '{}={}' with new '{}={}'.", deprecatedName, chars, newName, chars);
+            }
             parameterMap.put(newName, parameterMap.remove(deprecatedName));
         } else {
             throw new BasicError("Can't replace deprecated name with value of type " + deprecatedName.getClass().getCanonicalName());
@@ -269,7 +271,7 @@ public class ActivityDef implements NBNamedElement {
             cfgmodel.add(Param.optional("tags", String.class).setDescription("Tags for selecting workload op templates"));
         }
         if ( ! params.containsKey("driver")) {
-            cfgmodel.add(Param.optional("driver", String.class).setDescription("The default adapter driver to use"));
+            cfgmodel.add(Param.defaultTo("driver", DEFAULT_ATYPE).setDescription("The default adapter driver is 'stdout'"));
         }
         if ( ! params.containsKey("workload")) {
             cfgmodel.add(Param.optional("workload", String.class).setDescription("The test workload"));
