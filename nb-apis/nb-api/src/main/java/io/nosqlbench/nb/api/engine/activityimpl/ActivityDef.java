@@ -17,6 +17,9 @@
 package io.nosqlbench.nb.api.engine.activityimpl;
 
 import io.nosqlbench.nb.api.components.core.NBNamedElement;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.Param;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.labels.NBLabelSpec;
 import io.nosqlbench.nb.api.labels.NBLabels;
@@ -24,6 +27,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -99,7 +103,12 @@ public class ActivityDef implements NBNamedElement {
         return parameterMap.getOptionalString("alias").orElse(DEFAULT_ALIAS);
     }
 
-    public String getActivityType() {
+    /**
+     * Return tbe Activity Driver Adapter Name
+     *
+     * @return the driver adapter name
+     */
+    public String getActivityDriver() {
         return parameterMap.getOptionalString("type", "driver").orElse(DEFAULT_ATYPE);
     }
 
@@ -229,5 +238,38 @@ public class ActivityDef implements NBNamedElement {
         }
         return NBLabels.forKV();
 
+    }
+
+    public NBConfigModel getConfigModel() {
+        ConfigModel cfgmodel = ConfigModel.of(this.getClass());
+        Map<String, String> params = parameterMap.getStringStringMap();
+        params.forEach((k, v) -> {
+            cfgmodel.add(Param.defaultTo(k, v, "activity parameter found on command line"));
+        });
+        if ( ! params.containsKey(FIELD_ALIAS)) {
+            cfgmodel.add(Param.defaultTo(FIELD_ALIAS, DEFAULT_ALIAS).setDescription("The alias for the operations"));
+        }
+        if ( ! params.containsKey(FIELD_ATYPE)) {
+            cfgmodel.add(Param.defaultTo(FIELD_ATYPE, DEFAULT_ATYPE).setDescription("The default adapter type is 'stdout'"));
+        }
+        if ( ! params.containsKey(FIELD_CYCLES)) {
+            cfgmodel.add(Param.defaultTo(FIELD_CYCLES, DEFAULT_CYCLES).setDescription("The default number of cycles to test is '0'"));
+        }
+        if ( ! params.containsKey(FIELD_THREADS)) {
+            cfgmodel.add(Param.defaultTo(FIELD_THREADS, DEFAULT_THREADS).setDescription("The default number of threads for testing is '1'"));
+        }
+        if ( ! params.containsKey(FIELD_RECYCLES)) {
+            cfgmodel.add(Param.defaultTo(FIELD_RECYCLES, DEFAULT_RECYCLES).setDescription("The default number of recycles to test is '1'"));
+        }
+        if ( ! params.containsKey("driver")) {
+            cfgmodel.add(Param.optional("driver", String.class).setDescription("The default adapter driver to use"));
+        }
+        if ( ! params.containsKey("workload")) {
+            cfgmodel.add(Param.optional("workload", String.class).setDescription("The test workload"));
+        }
+        if ( ! params.containsKey("yaml")) {
+            cfgmodel.add(Param.optional("yaml", String.class).setDescription("The test workload"));
+        }
+        return cfgmodel.asReadOnly();
     }
 }
