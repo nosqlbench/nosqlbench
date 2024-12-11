@@ -31,14 +31,10 @@
         <project.testlevel>INFO</project.testlevel>
         <!-- Set this level to override the logging level for tests logging configuration during build -->
         <project.test_logstatuslevel>INFO</project.test_logstatuslevel>
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <javadoc.name>nosqlbench</javadoc.name>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-
         <PROG>nb5</PROG>
         <maven.plugin.validation>VERBOSE</maven.plugin.validation>
     </properties>
@@ -524,14 +520,13 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <debug>true</debug>
-                    <target>21</target>
-                    <source>21</source>
-                    <release>21</release>
+                    <release>23</release>
                     <compilerArgs>
                       <arg>--enable-preview</arg>
                         <!--                        <compilerArg>-Xdoclint:all</compilerArg>-->
                         <!--                        <compilerArg>-Xlint:all</compilerArg>-->
                     </compilerArgs>
+                    <proc>full</proc>
                 </configuration>
             </plugin>
 
@@ -910,7 +905,7 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
                             <additionalJOptions>--enable-preview</additionalJOptions>
-                            <release>21</release>
+                            <release>23</release>
                             <doctitle>${javadoc.name}</doctitle>
                             <windowtitle>${javadoc.name}</windowtitle>
                             <detectJavaApiLink>false</detectJavaApiLink>
