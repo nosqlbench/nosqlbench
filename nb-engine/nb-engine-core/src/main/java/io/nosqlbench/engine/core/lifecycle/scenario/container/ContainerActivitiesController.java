@@ -421,11 +421,7 @@ public class ContainerActivitiesController extends NBBaseComponent {
         }
         try {
             result = future.get(timeoutMs, TimeUnit.MILLISECONDS);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (TimeoutException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             throw new RuntimeException(e);
         }
         return null != result;

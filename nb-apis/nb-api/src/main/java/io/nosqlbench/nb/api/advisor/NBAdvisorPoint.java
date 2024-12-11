@@ -103,7 +103,7 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
         public Level conditionLevel() {
             return condition.level();
         }
-        
+
         public String rendered() {
             return switch (status) {
                 case OK -> "OK: " + condition.okMsg().apply(element);
