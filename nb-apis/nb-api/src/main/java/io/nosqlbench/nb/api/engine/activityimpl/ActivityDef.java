@@ -249,58 +249,24 @@ public class ActivityDef implements NBNamedElement {
         params.forEach((k, v) -> {
             cfgmodel.add(Param.defaultTo(k, v, "activity parameter found on command line"));
         });
-        if ( ! params.containsKey(FIELD_ALIAS)) {
-            cfgmodel.add(Param.defaultTo(FIELD_ALIAS, DEFAULT_ALIAS).setDescription("The alias for the operations"));
-        }
-        if ( ! params.containsKey(FIELD_ATYPE)) {
-            cfgmodel.add(Param.defaultTo(FIELD_ATYPE, DEFAULT_ATYPE).setDescription("The default adapter type is 'stdout'"));
-        }
-        if ( ! params.containsKey(FIELD_CYCLES)) {
-            cfgmodel.add(Param.defaultTo(FIELD_CYCLES, DEFAULT_CYCLES).setDescription("The default number of cycles to test is '0'"));
-        }
-        if ( ! params.containsKey(FIELD_THREADS)) {
-            cfgmodel.add(Param.defaultTo(FIELD_THREADS, DEFAULT_THREADS).setDescription("The default number of threads for testing is '1'"));
-        }
-        if ( ! params.containsKey(FIELD_RECYCLES)) {
-            cfgmodel.add(Param.defaultTo(FIELD_RECYCLES, DEFAULT_RECYCLES).setDescription("The default number of recycles to test is '1'"));
-        }
-        if ( ! params.containsKey("labels")) {
-            cfgmodel.add(Param.optional("labels", String.class).setDescription("Metric labels for this activity"));
-        }
-        if ( ! params.containsKey("tags")) {
-            cfgmodel.add(Param.optional("tags", String.class).setDescription("Tags for selecting workload op templates"));
-        }
-        if ( ! params.containsKey("driver")) {
-            cfgmodel.add(Param.defaultTo("driver", DEFAULT_ATYPE).setDescription("The default adapter driver is 'stdout'"));
-        }
-        if ( ! params.containsKey("workload")) {
-            cfgmodel.add(Param.optional("workload", String.class).setDescription("The test workload"));
-        }
-        if ( ! params.containsKey("yaml")) {
-            cfgmodel.add(Param.optional("yaml", String.class).setDescription("The test workload"));
-        }
-        if ( ! params.containsKey("async")) {
-            cfgmodel.add(Param.defaultTo("async", 1,"Inflight Ops"));
-        }
-        if ( ! params.containsKey("maxtries")) {
-            cfgmodel.add(Param.defaultTo("maxtries", 10,"Maximum number of retries"));
-        }
-        if ( ! params.containsKey("interval")) {
-            cfgmodel.add(Param.defaultTo("interval", 1000,"Action interval"));
-        }
-        if ( ! params.containsKey("hdr_digits")) {
-            cfgmodel.add(Param.defaultTo("hdr_digits", 4,"HDR Digits"));
-        }
-        if ( ! params.containsKey("errors")) {
-            cfgmodel.add(Param.optional("errors").setDescription("Error handling method"));
-        }
-        if ( ! params.containsKey("striderate")) {
-            cfgmodel.add(Param.optional("striderate").setDescription("Rate limiting stride"));
-        }
-        if ( ! params.containsKey("cyclerate") && ! params.containsKey("targetrate") && ! params.containsKey("rate")) {
-            List<String> rates = Arrays.asList("cyclerate", "targetrate", "rate");
-            cfgmodel.add(Param.optional(rates, String.class, "Rate limit"));
-        }
+        cfgmodel.add(Param.defaultTo(FIELD_ALIAS, DEFAULT_ALIAS).setDescription("The alias for the operations"));
+        cfgmodel.add(Param.defaultTo(FIELD_ATYPE, DEFAULT_ATYPE).setDescription("The default adapter type is 'stdout'"));
+        cfgmodel.add(Param.defaultTo(FIELD_CYCLES, DEFAULT_CYCLES).setDescription("The default number of cycles to test is '0'"));
+        cfgmodel.add(Param.defaultTo(FIELD_THREADS, DEFAULT_THREADS).setDescription("The default number of threads for testing is '1'"));
+        cfgmodel.add(Param.defaultTo(FIELD_RECYCLES, DEFAULT_RECYCLES).setDescription("The default number of recycles to test is '1'"));
+        cfgmodel.add(Param.optional("labels", String.class).setDescription("Metric labels for this activity"));
+        cfgmodel.add(Param.optional("tags", String.class).setDescription("Tags for selecting workload op templates"));
+        cfgmodel.add(Param.defaultTo("driver", DEFAULT_ATYPE).setDescription("The default adapter driver is 'stdout'"));
+        cfgmodel.add(Param.optional("workload", String.class).setDescription("The test workload"));
+        cfgmodel.add(Param.optional("yaml", String.class).setDescription("The test workload"));
+        cfgmodel.add(Param.defaultTo("async", 1,"Inflight Ops"));
+        cfgmodel.add(Param.defaultTo("maxtries", 10,"Maximum number of retries"));
+        cfgmodel.add(Param.defaultTo("interval", 1000,"Action interval"));
+        cfgmodel.add(Param.defaultTo("hdr_digits", 4,"HDR Digits"));
+        cfgmodel.add(Param.optional("errors").setDescription("Error handling method"));
+        cfgmodel.add(Param.optional("striderate").setDescription("Rate limiting stride"));
+        List<String> rates = Arrays.asList("cyclerate", "targetrate", "rate");
+        cfgmodel.add(Param.optional(rates, String.class, "Rate limit"));
         return cfgmodel.asReadOnly();
     }
 }

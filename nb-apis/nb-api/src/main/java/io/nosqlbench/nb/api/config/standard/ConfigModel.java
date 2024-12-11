@@ -49,10 +49,13 @@ public class ConfigModel implements NBConfigModel {
     }
 
     public <T> ConfigModel add(Param<T> param) {
-        this.params.add(param);
         for (String name : param.getNames()) {
+            if (paramsByName.containsKey(name)) {
+                return this;
+            }
             paramsByName.put(name, param);
         }
+        this.params.add(param);
         lastAdded = null;
         return this;
     }
