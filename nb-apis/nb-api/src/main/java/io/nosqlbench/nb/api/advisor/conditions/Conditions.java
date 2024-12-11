@@ -50,5 +50,7 @@ public class Conditions {
     public static NoSpaces NoSpacesWarning = new NoSpaces(Level.WARN);
     public static ValidName ValidNameError = new ValidName(Level.ERROR);
     public static ValidName ValidNameWarning = new ValidName(Level.WARN);
+    public static Failure FailureError = new Failure(Level.ERROR);
+    public static Failure FailureWarning = new Failure(Level.WARN);
 
 }

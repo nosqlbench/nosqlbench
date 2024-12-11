@@ -32,18 +32,18 @@ public class NBAdvisorOutput {
         Level.DEBUG, logger::debug
     );
 
-    public static void render(Level level,String message) {
-        if (NBAdvisorLevel.get() == NBAdvisorLevel.validate) {
-            output(level, message);
-        }
-    }
-
     public static void test(String message) {
         if (NBAdvisorLevel.get() == NBAdvisorLevel.enforce) {
             output(Level.ERROR, message);
             throw new NBAdvisorException(message, 2);
         }
         output(Level.WARN, message);
+    }
+
+    public static void render(Level level,String message) {
+        if (NBAdvisorLevel.get() == NBAdvisorLevel.validate) {
+            output(level, message);
+        }
     }
 
     public static void output(Level level,String message) {
