@@ -20,9 +20,17 @@ package io.nosqlbench.nb.api.advisor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class NBAdvisorOutput {
-    private final static Logger logger = LogManager.getLogger("ADVISOR");
+    private static final Logger logger = LogManager.getLogger("ADVISOR");
+    private static final Map<Level, Consumer<String>> logActions = Map.of(
+        Level.INFO, logger::info,
+        Level.WARN, logger::warn,
+        Level.ERROR, logger::error,
+        Level.DEBUG, logger::debug
+    );
 
     public static void render(Level level,String message) {
         if (NBAdvisorLevel.get() == NBAdvisorLevel.validate) {
@@ -39,19 +47,8 @@ public class NBAdvisorOutput {
     }
 
     public static void output(Level level,String message) {
-        if (level ==  Level.INFO) {
-            logger.info(message);
-        } else if (level == Level.WARN) {
-            logger.warn(message);
-        } else if (level == Level.ERROR) {
-            logger.error(message);
-        } else if (level == Level.DEBUG) {
-            logger.debug(message);
-        } else if (level == Level.TRACE) {
-            logger.trace(message);
-        } else {
-            logger.warn(message);
-        }
+        logActions.getOrDefault(level, msg -> logger.warn("Unhandled log level: " + msg))
+            .accept(message);
     }
 
 }
