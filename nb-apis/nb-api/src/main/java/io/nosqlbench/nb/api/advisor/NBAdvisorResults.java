@@ -37,16 +37,6 @@ public class NBAdvisorResults {
         return points.stream().flatMap(a -> a.getResultLog().stream()).toList();
     }
 
-    public void render(Level level, String message) {
-	    if (level ==  Level.INFO) {
-	        logger.info(message);
-	    } else if (level == Level.WARN) {
-	        logger.warn(message);
-	    } else if (level == Level.ERROR) {
-	        logger.error(message);
-        }
-    }
-
     public int evaluate() {
         List<NBAdvisorPoint.Result<?>> results = getAdvisorResults();
         Iterator<NBAdvisorPoint.Result<?>> iterator = results.iterator();
@@ -59,25 +49,25 @@ public class NBAdvisorResults {
             switch (NBAdvisorLevel.get()) {
                 case NBAdvisorLevel.none:
                     if ( level == Level.ERROR ) {
-                        render(level, result.rendered());
+                        NBAdvisorOutput.output(level, result.rendered());
                         count++;
                         terminate = true;
                     } else {
-                        render(Level.DEBUG, result.rendered());
+                        NBAdvisorOutput.output(Level.DEBUG, result.rendered());
                     }
                     break;
                 case NBAdvisorLevel.validate:
                     if ( level == Level.ERROR ) {
-                        render(level, result.rendered());
+                        NBAdvisorOutput.output(level, result.rendered());
                         count++;
                         terminate = true;
                     } else {
-                        render(Level.INFO, result.rendered());
+                        NBAdvisorOutput.output(Level.INFO, result.rendered());
                     }
                     break;
                 case NBAdvisorLevel.enforce:
                     if ( level == Level.ERROR || level == Level.WARN ) {
-                        render(level, result.rendered());
+                        NBAdvisorOutput.output(level, result.rendered());
                         count++;
                         terminate = true;
                     }
@@ -88,7 +78,7 @@ public class NBAdvisorResults {
             String message = String.format("Advisor found %d actionable %s.",
                     count,
                     (count < 2 ? "error" : "errors"));
-            render(Level.ERROR, message);
+            NBAdvisorOutput.output(Level.ERROR, message);
             throw new NBAdvisorException(message, 2);
         }
         return count;
