@@ -70,7 +70,7 @@ jobs:
         run: |
           # mvn clean verify -Drevision="${{ env.PREVIEW_VERSION }}" -P enable-container-tests
           # disable container tests until they are fixed
-          mvn clean verify -Drevision="${{ env.PREVIEW_VERSION }}"
+          mvn -U clean verify -Drevision="${{ env.PREVIEW_VERSION }}"
 
       - name: Setup docker buildx
         uses: docker/setup-buildx-action@v3
