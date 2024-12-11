@@ -16,13 +16,15 @@
 
 package io.nosqlbench.adapters.api.templating;
 
+import io.nosqlbench.nb.api.advisor.NBAdvisorBuilder;
+import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
+import io.nosqlbench.nb.api.advisor.NBAdvisorResults;
+import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 import org.apache.commons.text.StrLookup;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Level;
 
 import java.util.regex.Pattern;
 import java.util.*;
@@ -30,7 +32,8 @@ import java.util.function.Function;
 
 public class StrInterpolator implements Function<String, String> {
     private final static Logger logger = LogManager.getLogger(StrInterpolator.class);
-
+    private final NBAdvisorBuilder<String> advisorBuilder = new NBAdvisorBuilder<String>();
+    private NBAdvisorPoint<String> advisor;
     private final MultiMap multimap = new MultiMap();
     private final StringSubstitutor substitutor =
         new StringSubstitutor(multimap, "<<", ">>", '\\')
@@ -60,6 +63,8 @@ public class StrInterpolator implements Function<String, String> {
 
     @Override
     public String apply(String raw) {
+        advisor = advisorBuilder.build();
+        advisor.add(Conditions.DeprecatedWarning);
         String[] lines = raw.split("\\R");
         boolean endsWithNewline = raw.endsWith("\n");
         int i = 0;
@@ -76,6 +81,8 @@ public class StrInterpolator implements Function<String, String> {
         if (endsWithNewline) {
             results += System.lineSeparator();
         }
+        NBAdvisorResults advisorResults = new NBAdvisorResults(List.of(advisor));
+        advisorResults.evaluate();
         return results;
     }
 
@@ -165,7 +172,7 @@ public class StrInterpolator implements Function<String, String> {
         // Process << ... >>
         String after = substitutor.replace(line);
         while (!after.equals(line)) {
-            NBAdvisorOutput.test("<<key:value>> deprecated in "+line);
+            advisor.validate("<<key:value>> in "+line);
             line = after;
             after = substitutor.replace(line);
         }

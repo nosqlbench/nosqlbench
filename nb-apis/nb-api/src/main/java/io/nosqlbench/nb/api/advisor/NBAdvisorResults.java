@@ -62,7 +62,7 @@ public class NBAdvisorResults {
                         count++;
                         terminate = true;
                     } else {
-                        NBAdvisorOutput.output(Level.INFO, result.rendered());
+                        NBAdvisorOutput.output(level, result.rendered());
                     }
                     break;
                 case NBAdvisorLevel.enforce:

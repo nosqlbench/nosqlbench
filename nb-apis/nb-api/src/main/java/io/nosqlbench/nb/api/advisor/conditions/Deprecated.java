@@ -23,11 +23,11 @@ import org.apache.logging.log4j.Level;
 
 import java.util.function.Function;
 
-public class Failure implements NBAdvisorCondition<String> {
+public class Deprecated implements NBAdvisorCondition<String> {
     private final Level level;
     private final boolean b = true;
 
-    public Failure(Level level) {
+    public Deprecated(Level level) {
         this.level = level;
     }
 
