@@ -329,8 +329,8 @@ public class ConfigModel implements NBConfigModel {
 
     @Override
     public void log() {
-        logger.info(() -> "ConfigModel: "+ofType);
-        for (Param<?> param : getParams()) logger.info(() -> "ConfigModel: " + param);
+        logger.debug(() -> "ConfigModel: "+ofType);
+        for (Param<?> param : getParams()) logger.debug(() -> "ConfigModel: " + param);
     }
 
     @Override
