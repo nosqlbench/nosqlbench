@@ -22,7 +22,6 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.ContextShutdownHoo
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
-import io.nosqlbench.nb.api.advisor.NBAdvisorResults;
 import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
@@ -180,8 +179,8 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
             interpolated.put(k, sb.toString());
         });
         paramsAdvisor.validateAll(interpolated.keySet());
-        NBAdvisorResults advisorResults = getAdvisorResults();
-        advisorResults.evaluate();
+        paramsAdvisor.setName("Container", "Check container and variable names")
+            .logName().evaluate();
         return NBCommandParams.of(interpolated);
     }
 

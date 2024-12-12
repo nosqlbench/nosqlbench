@@ -28,7 +28,6 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTem
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
-import io.nosqlbench.nb.api.advisor.NBAdvisorResults;
 import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.lifecycle.Shutdownable;
@@ -66,11 +65,10 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final OpSequence<OpDispenser<? extends CycleOp<?>>> sequence;
     private final ConcurrentHashMap<String, DriverAdapter<CycleOp<?>,Space>> adapters = new ConcurrentHashMap<>();
-    private final List<NBAdvisorPoint<?>> advisors = new ArrayList<>();
 
     public StandardActivity(NBComponent parent, ActivityDef activityDef) {
         super(parent, activityDef);
-        NBAdvisorPoint<String> paramsAdvisor = create().advisor(b -> b.name("Check params"));
+        NBAdvisorPoint<String> paramsAdvisor = create().advisor(b -> b.name("Workload"));
         paramsAdvisor.add(Conditions.ValidNameError);
         List<DriverAdapter<CycleOp<?>, Space>> adapterlist = new ArrayList<>();
         List<ParsedOp> pops = new ArrayList<>();
@@ -129,9 +127,12 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         }
         logger.info(() -> "StandardActivity.opTemplate loop complete");
 
+        paramsAdvisor.setName("Workload", "Check parameters, template, and binding names")
+            .logName().evaluate();
+
+        paramsAdvisor.clear().setName("Superset", "Check overall parameters");
         paramsAdvisor.validateAll(supersetConfig.getNamedParams().keySet());
-        NBAdvisorResults advisorResults = getAdvisorResults();
-        advisorResults.evaluate();
+        paramsAdvisor.logName().evaluate();
 
         if (0 == mappers.keySet().stream().filter(n -> n.equals(defaultDriverName)).count()) {
             logger.warn(() -> "All op templates used a different driver than the default '" + defaultDriverName + "'");

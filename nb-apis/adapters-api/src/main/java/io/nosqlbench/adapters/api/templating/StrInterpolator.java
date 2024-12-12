@@ -18,7 +18,6 @@ package io.nosqlbench.adapters.api.templating;
 
 import io.nosqlbench.nb.api.advisor.NBAdvisorBuilder;
 import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
-import io.nosqlbench.nb.api.advisor.NBAdvisorResults;
 import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import org.apache.commons.text.StrLookup;
@@ -81,8 +80,7 @@ public class StrInterpolator implements Function<String, String> {
         if (endsWithNewline) {
             results += System.lineSeparator();
         }
-        NBAdvisorResults advisorResults = new NBAdvisorResults(List.of(advisor));
-        advisorResults.evaluate();
+        advisor.setName("Workload", "Deprecated template format").logName().evaluate();
         return results;
     }
 
