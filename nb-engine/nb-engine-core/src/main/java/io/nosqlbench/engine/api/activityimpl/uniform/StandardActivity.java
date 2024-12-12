@@ -115,7 +115,7 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
             }
             paramsAdvisor.validateAll(ot.getParams().keySet());
             paramsAdvisor.validateAll(ot.getTags().keySet());
-            paramsAdvisor.validateAll(ot.getBindings().keySet());
+            //TO-DO - paramsAdvisor.validateAll(ot.getBindings().keySet());
             supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
             supersetConfig.log();
             DriverAdapter<CycleOp<?>, Space> adapter = adapters.get(driverName);
