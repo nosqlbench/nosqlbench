@@ -21,6 +21,9 @@ import io.nosqlbench.engine.core.lifecycle.activity.ActivitiesProgressIndicator;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.ContextShutdownHook;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
+import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
+import io.nosqlbench.nb.api.advisor.NBAdvisorResults;
+import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
 import io.nosqlbench.nb.api.labels.NBLabels;
@@ -50,6 +53,8 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
     private Exception error;
     private long endedAtMillis;
     private final Map<String, String> vars = new LinkedHashMap<>();
+    private final List<NBAdvisorPoint<?>> advisors = new ArrayList<>();
+    private NBAdvisorPoint<String> paramsAdvisor;
 
     public enum IOType {
         connected,
@@ -155,6 +160,10 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
     private final static Pattern pattern = Pattern.compile("\\$\\{(?<name>[a-zA-Z_][a-zA-Z0-9_.]*)}");
 
     private NBCommandParams interpolate(NBCommandParams params, Map<String, String> vars, String stepname) {
+        logger.debug("NBBufferedContainer.interpolate stepname=" + stepname);
+        paramsAdvisor = create().advisor(b -> b.name("Check params"));
+        paramsAdvisor.add(Conditions.ValidNameError);
+        paramsAdvisor.validateAll(vars.keySet());
         Map<String, String> interpolated = new LinkedHashMap<>();
         params.forEach((k, v) -> {
             Matcher varmatcher = pattern.matcher(v);
@@ -170,6 +179,9 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
             varmatcher.appendTail(sb);
             interpolated.put(k, sb.toString());
         });
+        paramsAdvisor.validateAll(interpolated.keySet());
+        NBAdvisorResults advisorResults = getAdvisorResults();
+        advisorResults.evaluate();
         return NBCommandParams.of(interpolated);
     }
 
@@ -190,9 +202,7 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
                     Object value = component.getAccessor().invoke(record);
                     results.put(stepname+"."+name,value.toString());
                     filtered.add(name);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                } catch (InvocationTargetException e) {
+                } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -204,9 +214,7 @@ public class NBBufferedContainer extends NBBaseComponent implements NBContainer 
                 try {
                     Object value = property.invoke(record);
                     results.put(stepname+"."+property.getName(),value.toString());
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                } catch (InvocationTargetException e) {
+                } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
             }

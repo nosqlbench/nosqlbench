@@ -101,7 +101,7 @@ public class NBCLIScenarioPreprocessorTest {
 
     @Test
     public void testThatTemplateParamsAreExpandedAndNotRemovedOverride() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario_test", "template_test", "cycles-test=20"}, NBCLIOptions.Mode.ParseAllOptions);
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario_test", "template_test", "cycles_test=20"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
@@ -109,7 +109,7 @@ public class NBCLIScenarioPreprocessorTest {
             "alias", "with_template",
             "container", "template_test",
             "cycles", "20",
-            "cycles-test", "20",
+            "cycles_test", "20",
             "driver", "stdout",
             "labels", "workload:scenario_test,scenario:template_test",
             "step", "with_template",
@@ -119,14 +119,14 @@ public class NBCLIScenarioPreprocessorTest {
 
     @Test
     public void testThatUndefValuesAreUndefined() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario_test", "schema_only", "cycles-test=20"}, NBCLIOptions.Mode.ParseAllOptions);
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario_test", "schema_only", "cycles_test=20"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
             "_impl", "run",
             "alias", "schema",
             "container", "schema_only",
-            "cycles-test", "20",
+            "cycles_test", "20",
             "driver", "stdout",
             "labels", "workload:scenario_test,scenario:schema_only",
             "step", "schema",
@@ -136,7 +136,7 @@ public class NBCLIScenarioPreprocessorTest {
         NBCLIOptions opts1 = new NBCLIOptions(new String[]{"scenario_test", "schema_only", "doundef=20"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds1 = opts1.getCommands();
         assertThat(cmds1.size()).isEqualTo(1);
-        assertThat(cmds1.get(0).getArgValueOrNull("cycles-test")).isNull();
+        assertThat(cmds1.get(0).getArgValueOrNull("cycles_test")).isNull();
     }
 
     @Test
@@ -150,7 +150,7 @@ public class NBCLIScenarioPreprocessorTest {
         Path absolute = rel.toAbsolutePath();
         assertThat(absolute).exists();
 
-        NBCLIOptions opts = new NBCLIOptions(new String[]{absolute.toString(), "schema_only", "cycles-test=20"}, NBCLIOptions.Mode.ParseAllOptions);
+        NBCLIOptions opts = new NBCLIOptions(new String[]{absolute.toString(), "schema_only", "cycles_test=20"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isGreaterThan(0);
     }
@@ -161,7 +161,7 @@ public class NBCLIScenarioPreprocessorTest {
         //TODO: This might change?
         String urlScenario = "https://raw.githubusercontent.com/nosqlbench/nosqlbench/main/engine-cli/src/test/resources/activities/scenario_test.yaml";
 
-        NBCLIOptions opts = new NBCLIOptions(new String[]{urlScenario, "schema_only", "cycles-test=20"}, NBCLIOptions.Mode.ParseAllOptions);
+        NBCLIOptions opts = new NBCLIOptions(new String[]{urlScenario, "schema_only", "cycles_test=20"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isGreaterThan(0);
     }
@@ -174,14 +174,14 @@ public class NBCLIScenarioPreprocessorTest {
 
     @Test
     public void testSubStepSelection() {
-        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario_test", "schema_only", "cycles-test=20"}, NBCLIOptions.Mode.ParseAllOptions);
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario_test", "schema_only", "cycles_test=20"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();
         assertThat(cmds.size()).isEqualTo(1);
         assertThat(cmds.get(0).getArgMap()).isEqualTo(Map.of(
             "_impl", "run",
             "alias", "schema",
             "container", "schema_only",
-            "cycles-test", "20",
+            "cycles_test", "20",
             "driver", "stdout",
             "labels", "workload:scenario_test,scenario:schema_only",
             "step", "schema",
@@ -234,7 +234,7 @@ public class NBCLIScenarioPreprocessorTest {
             .isThrownBy(() -> NBCLIScenarioPreprocessor.splitCommand(unclosedQuoteCmd))
             .withMessageContaining("Unclosed quote found in scenario cmd");
     }
-    
+
     @Test
     public void testThatSuggestionsAreShownForDirectStepNameUsage() {
         assertThatExceptionOfType(BasicError.class)
