@@ -22,8 +22,12 @@ import io.nosqlbench.nb.api.advisor.NBAdvisorCondition;
 import org.apache.logging.log4j.Level;
 
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ValidName implements NBAdvisorCondition<String> {
+
+    private final static Pattern pattern = Pattern.compile("\\$\\{(?<name>[a-zA-Z_][a-zA-Z0-9_.]*)}");
 
     private final Level level;
 
@@ -33,12 +37,12 @@ public class ValidName implements NBAdvisorCondition<String> {
 
     @Override
     public Function<String, String> okMsg() {
-        return string -> "String '" + string + "' does not contain hyphens and spaces";
+        return string -> "String '" + string + "' is a valid name";
     }
 
     @Override
     public Function<String, String> errMsg() {
-        return string -> "String '" +string + "' should not contain hyphens or spaces";
+        return string -> "String '" +string + "' is not a valid name";
     }
 
     @Override
@@ -53,6 +57,6 @@ public class ValidName implements NBAdvisorCondition<String> {
 
     @Override
     public boolean test(String s) {
-        return s.contains("-") || s.contains(" ");
+        return pattern.matcher(s).matches();
     }
 }

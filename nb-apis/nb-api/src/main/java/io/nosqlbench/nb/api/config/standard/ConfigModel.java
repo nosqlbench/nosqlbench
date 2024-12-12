@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ConfigModel implements NBConfigModel {
-    private static final Logger logger = LogManager.getLogger("ACTIVITY");
+    private static final Logger logger = LogManager.getLogger("CONFIGMODEL");
     private final Map<String, Param<?>> paramsByName = new LinkedHashMap<>();
     private final List<Param<?>> params = new ArrayList<>();
     private Param<?> lastAdded = null;

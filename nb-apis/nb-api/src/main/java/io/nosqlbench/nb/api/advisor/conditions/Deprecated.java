@@ -25,7 +25,6 @@ import java.util.function.Function;
 
 public class Deprecated implements NBAdvisorCondition<String> {
     private final Level level;
-    private final boolean b = true;
 
     public Deprecated(Level level) {
         this.level = level;
@@ -53,6 +52,6 @@ public class Deprecated implements NBAdvisorCondition<String> {
 
     @Override
     public boolean test(String s) {
-        return b;
+        return true;
     }
 }
