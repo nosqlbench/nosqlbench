@@ -16,6 +16,7 @@
 
 package io.nosqlbench.nb.api.config.standard;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,6 +36,7 @@ public class Param<T> {
     public boolean required;
     private Pattern regex;
     private final NBConfigModelExpander expander;
+    private List<String> layers;
 
     public Param(
         List<String> names,
@@ -50,6 +52,7 @@ public class Param<T> {
         this.required = required;
         this.defaultValue = defaultValue;
         this.expander = expander;
+        this.layers = new ArrayList<String>();
     }
 
     /**
@@ -179,12 +182,13 @@ public class Param<T> {
 
     @Override
     public String toString() {
-        return "Element{" +
+        return "Param{" +
             "names='" + names.toString() + '\'' +
             ", type=" + type +
             ", description='" + description + '\'' +
             ", required=" + required +
             ", defaultValue = " + defaultValue +
+            ", layers = " + layers.toString() +
             '}';
     }
 
@@ -230,6 +234,25 @@ public class Param<T> {
 
     public Pattern getRegex() {
         return regex;
+    }
+
+    public Param<T> addLayer(String layer) {
+        if (!containsLayer(layer)) {
+            this.layers.add(layer);
+        }
+        return this;
+    }
+
+    public List<String> getLayers() {
+        return layers;
+    }
+
+    public boolean hasLayers() {
+        return layers != null && !layers.isEmpty();
+    }
+
+    public boolean containsLayer(String layer) {
+        return layers.contains(layer);
     }
 
     public CheckResult<T> validate(Object value) {

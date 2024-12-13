@@ -18,7 +18,6 @@ package io.nosqlbench.nb.api.advisor.conditions;
  */
 
 
-import io.nosqlbench.nb.api.advisor.NBAdvisorCondition;
 import org.apache.logging.log4j.Level;
 
 /**
@@ -48,5 +47,9 @@ public class Conditions {
     public static NoHyphens NoHyphensWarning = new NoHyphens(Level.WARN);
     public static NoSpaces NoSpacesError = new NoSpaces(Level.ERROR);
     public static NoSpaces NoSpacesWarning = new NoSpaces(Level.WARN);
+    public static ValidName ValidNameError = new ValidName(Level.ERROR);
+    public static ValidName ValidNameWarning = new ValidName(Level.WARN);
+    public static Deprecated DeprecatedError = new Deprecated(Level.ERROR);
+    public static Deprecated DeprecatedWarning = new Deprecated(Level.WARN);
 
 }

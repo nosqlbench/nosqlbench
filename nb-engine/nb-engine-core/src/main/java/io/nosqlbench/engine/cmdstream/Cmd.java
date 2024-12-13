@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.cmdstream;
 
+import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
+import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.errors.BasicError;
 import jakarta.validation.constraints.NotNull;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +38,6 @@ public class Cmd {
 
     private final Map<String, CmdArg> cmdArgs;
     private final String stepName;
-
 
     public String getTargetContext() {
         return targetContextName;
@@ -86,6 +87,11 @@ public class Cmd {
 //    }
 //
     public Cmd(@NotNull String cmdTypeOrName, Map<String, CmdArg> argmap) {
+        NBAdvisorPoint<String> advisor = new NBAdvisorPoint<String>("Command","Check command arguments");
+        advisor.add(Conditions.ValidNameError);
+        advisor.validate(cmdTypeOrName);
+        advisor.validateAll(argmap.keySet());
+        advisor.logName().evaluate();
         this.cmdType = CmdType.valueOfAnyCaseOrIndirect(cmdTypeOrName);
         this.targetContextName = DEFAULT_TARGET_CONTEXT;
         this.stepName = "";
