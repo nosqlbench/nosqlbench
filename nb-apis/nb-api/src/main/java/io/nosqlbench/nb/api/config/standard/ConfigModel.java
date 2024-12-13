@@ -302,13 +302,9 @@ public class ConfigModel implements NBConfigModel {
                 + ", possible parameter names are " + this.paramsByName.keySet() + ".";
             if (element == null) {
                 String warnonly = System.getenv("NB_CONFIG_WARNINGS_ONLY");
-                if (warnonly != null) {
-                    System.out.println("WARNING: " + warning);
-                } else {
-                    StringBuilder paramhelp = new StringBuilder(
-                        "Unknown config parameter '" + configkey + "' in config model while configuring " + getOf().getSimpleName()
-                            + ", possible parameter names are " + this.paramsByName.keySet() + "."
-                    );
+                logger.warn("WARNING: " + warning);
+                if (warnonly == null) {
+                    StringBuilder paramhelp = new StringBuilder(warning);
                     ConfigSuggestions.getForParam(this, configkey)
                         .ifPresent(suggestion -> paramhelp.append(" ").append(suggestion));
                     throw new BasicError(paramhelp.toString());

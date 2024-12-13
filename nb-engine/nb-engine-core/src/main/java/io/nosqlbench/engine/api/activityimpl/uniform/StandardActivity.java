@@ -74,9 +74,11 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         List<ParsedOp> pops = new ArrayList<>();
         ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
         NBConfigModel activityModel = activityDef.getConfigModel();
-        String defaultDriverName = activityDef.getActivityDriver();
-        DriverAdapter<CycleOp<?>, Space> defaultAdapter = getDriverAdapter(defaultDriverName);
         NBConfigModel yamlmodel;
+        NBConfigModel adapterModel;
+        String defaultDriverName = activityDef.getActivityDriver();
+        DriverAdapter<CycleOp<?>,Space> defaultAdapter = getDriverAdapter(defaultDriverName);
+        DriverAdapter<CycleOp<?>,Space> adapter;
         OpsDocList workload;
         Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
         if (yaml_loc.isPresent()) {
@@ -98,13 +100,12 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
                 .or(() -> ot.getOptionalStringParam("type", String.class))
                 .orElse(defaultDriverName);
             if (!adapters.containsKey(driverName)) {
-                DriverAdapter<CycleOp<?>,Space> adapter =
-                    defaultDriverName.equals(driverName) ? defaultAdapter : getDriverAdapter(driverName);
+                adapter = defaultDriverName.equals(driverName) ? defaultAdapter : getDriverAdapter(driverName);
                 NBConfigModel combinedModel = yamlmodel;
                 //NBConfigModel combinedModel = activityModel;
                 NBConfiguration combinedConfig = combinedModel.matchConfig(activityDef.getParams());
                 if (adapter instanceof NBConfigurable configurable) {
-                    NBConfigModel adapterModel = configurable.getConfigModel();
+                    adapterModel = configurable.getConfigModel();
                     combinedAdapterModel.add(adapterModel);
                     supersetConfig.add(adapterModel);
                     combinedModel = adapterModel.add(yamlmodel);
@@ -114,11 +115,16 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
                 }
                 adapters.put(driverName, adapter);
                 mappers.put(driverName, adapter.getOpMapper());
+            } else {
+                adapter = adapters.get(driverName);
+            }
+            if (adapter instanceof NBConfigurable configurable) {
+                adapterModel = configurable.getConfigModel();
+                adapterModel.assertValidConfig(ot.getParams());
             }
             paramsAdvisor.validateAll(ot.getParams().keySet());
             paramsAdvisor.validateAll(ot.getTags().keySet());
             paramsAdvisor.validateAll(ot.getBindings().keySet());
-            DriverAdapter<CycleOp<?>, Space> adapter = adapters.get(driverName);
             adapterlist.add(adapter);
             ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
             logger.info("StandardActivity.pop="+pop);
