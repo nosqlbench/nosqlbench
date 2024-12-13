@@ -74,9 +74,11 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         List<ParsedOp> pops = new ArrayList<>();
         ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
         NBConfigModel activityModel = activityDef.getConfigModel();
-        String defaultDriverName = activityDef.getActivityDriver();
-        DriverAdapter<CycleOp<?>, Space> defaultAdapter = getDriverAdapter(defaultDriverName);
         NBConfigModel yamlmodel;
+        NBConfigModel adapterModel;
+        String defaultDriverName = activityDef.getActivityDriver();
+        DriverAdapter<CycleOp<?>,Space> defaultAdapter = getDriverAdapter(defaultDriverName);
+        DriverAdapter<CycleOp<?>,Space> adapter;
         OpsDocList workload;
         Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
         if (yaml_loc.isPresent()) {
@@ -91,19 +93,20 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         //NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(activityModel);
         // Load the op templates
         List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter);
+        NBConfigModel combinedAdapterModel = ConfigModel.of(StandardActivity.class);
         for (OpTemplate ot : opTemplates) {
             logger.info(() -> "StandardActivity.opTemplate = "+ot);
             String driverName = ot.getOptionalStringParam("driver", String.class)
                 .or(() -> ot.getOptionalStringParam("type", String.class))
                 .orElse(defaultDriverName);
             if (!adapters.containsKey(driverName)) {
-                DriverAdapter<CycleOp<?>,Space> adapter =
-                    defaultDriverName.equals(driverName) ? defaultAdapter : getDriverAdapter(driverName);
+                adapter = defaultDriverName.equals(driverName) ? defaultAdapter : getDriverAdapter(driverName);
                 NBConfigModel combinedModel = yamlmodel;
                 //NBConfigModel combinedModel = activityModel;
                 NBConfiguration combinedConfig = combinedModel.matchConfig(activityDef.getParams());
                 if (adapter instanceof NBConfigurable configurable) {
-                    NBConfigModel adapterModel = configurable.getConfigModel();
+                    adapterModel = configurable.getConfigModel();
+                    combinedAdapterModel.add(adapterModel);
                     supersetConfig.add(adapterModel);
                     combinedModel = adapterModel.add(yamlmodel);
                     //combinedModel = adapterModel.add(activityModel);
@@ -112,13 +115,16 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
                 }
                 adapters.put(driverName, adapter);
                 mappers.put(driverName, adapter.getOpMapper());
+            } else {
+                adapter = adapters.get(driverName);
+            }
+            if (adapter instanceof NBConfigurable configurable) {
+                adapterModel = configurable.getConfigModel();
+                adapterModel.assertValidConfig(ot.getParams());
             }
             paramsAdvisor.validateAll(ot.getParams().keySet());
             paramsAdvisor.validateAll(ot.getTags().keySet());
-            //TO-DO - paramsAdvisor.validateAll(ot.getBindings().keySet());
-            supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
-            supersetConfig.log();
-            DriverAdapter<CycleOp<?>, Space> adapter = adapters.get(driverName);
+            paramsAdvisor.validateAll(ot.getBindings().keySet());
             adapterlist.add(adapter);
             ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
             logger.info("StandardActivity.pop="+pop);
@@ -133,6 +139,11 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         paramsAdvisor.clear().setName("Superset", "Check overall parameters");
         paramsAdvisor.validateAll(supersetConfig.getNamedParams().keySet());
         paramsAdvisor.logName().evaluate();
+
+        combinedAdapterModel.assertNoConflicts(yamlmodel.getNamedParams(), "Template");
+        combinedAdapterModel.log();
+        supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
+        supersetConfig.log();
 
         if (0 == mappers.keySet().stream().filter(n -> n.equals(defaultDriverName)).count()) {
             logger.warn(() -> "All op templates used a different driver than the default '" + defaultDriverName + "'");
@@ -173,9 +184,9 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
             .map(l -> l.load(this, NBLabels.forKV())
             )
             .orElseThrow(() -> new OpConfigError("Unable to load '" + driverName + "' driver adapter.\n"+
-                "Rebuild NB5 to include this driver adapter. "+
+                "If this is a valid driver then you may need to rebuild NoSqlBench to include this driver adapter. "+
                 "Change '<activeByDefault>false</activeByDefault>' for the driver in "+
-                "'./nb-adapters/pom.xml' and './nb-adapters/nb-adapters-included/pom.xml' first."));
+                "'./nb-adapters/pom.xml' and './nb-adapters/nb-adapters-included/pom.xml'."));
     }
 
     @Override

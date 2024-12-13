@@ -16,7 +16,9 @@
 
 package io.nosqlbench.nb.api.config.standard;
 
+import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 import io.nosqlbench.nb.api.errors.BasicError;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -219,6 +221,17 @@ public class ConfigModel implements NBConfigModel {
     }
 
     @Override
+    public void assertNoConflicts(Map<String, ?> config, String type) {
+        for (String configkey : config.keySet()) {
+            Param<?> element = this.paramsByName.get(configkey);
+            if (element != null) {
+                String warning = "Config parameter '" + configkey + "' is also a " + type + ". Check for possible conflicts.";
+                NBAdvisorOutput.output(Level.WARN, warning);
+            }
+        }
+    }
+
+    @Override
     public void assertValidConfig(Map<String, ?> config) {
         ConfigModel expanded = expand(this, config);
         //expanded.print();
@@ -289,13 +302,9 @@ public class ConfigModel implements NBConfigModel {
                 + ", possible parameter names are " + this.paramsByName.keySet() + ".";
             if (element == null) {
                 String warnonly = System.getenv("NB_CONFIG_WARNINGS_ONLY");
-                if (warnonly != null) {
-                    System.out.println("WARNING: " + warning);
-                } else {
-                    StringBuilder paramhelp = new StringBuilder(
-                        "Unknown config parameter '" + configkey + "' in config model while configuring " + getOf().getSimpleName()
-                            + ", possible parameter names are " + this.paramsByName.keySet() + "."
-                    );
+                logger.warn("WARNING: " + warning);
+                if (warnonly == null) {
+                    StringBuilder paramhelp = new StringBuilder(warning);
                     ConfigSuggestions.getForParam(this, configkey)
                         .ifPresent(suggestion -> paramhelp.append(" ").append(suggestion));
                     throw new BasicError(paramhelp.toString());
