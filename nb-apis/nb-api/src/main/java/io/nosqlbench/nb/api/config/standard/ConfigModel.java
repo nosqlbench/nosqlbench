@@ -16,7 +16,9 @@
 
 package io.nosqlbench.nb.api.config.standard;
 
+import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 import io.nosqlbench.nb.api.errors.BasicError;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -216,6 +218,17 @@ public class ConfigModel implements NBConfigModel {
             }
         }
         return new NBConfiguration(this.asReadOnly(), validConfig);
+    }
+
+    @Override
+    public void assertNoConflicts(Map<String, ?> config, String type) {
+        for (String configkey : config.keySet()) {
+            Param<?> element = this.paramsByName.get(configkey);
+            if (element != null) {
+                String warning = "Config parameter '" + configkey + "' is also a " + type + ". Check for possible conflicts.";
+                NBAdvisorOutput.output(Level.WARN, warning);
+            }
+        }
     }
 
     @Override

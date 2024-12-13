@@ -16,6 +16,7 @@
 
 package io.nosqlbench.nb.api.config.standard;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,8 @@ public interface NBConfigModel {
     Class<?> getOf();
 
     void assertValidConfig(Map<String, ?> config);
+
+    void assertNoConflicts(Map<String, ?> config, String type);
 
     NBConfiguration apply(Map<String, ?> config);
 
