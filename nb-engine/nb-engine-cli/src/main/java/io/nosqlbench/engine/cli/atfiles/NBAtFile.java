@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -121,26 +122,36 @@ public class NBAtFile {
             String[] datapath = (dataPathSpec!=null && !dataPathSpec.isBlank()) ? dataPathSpec.split("(/|\\.)") : new String[] {};
 
             String filename = Path.of(filepathSpec).getFileName().toString();
-            if (filename.contains(".") && !(filename.toLowerCase().endsWith("yaml"))) {
-                throw new RuntimeException("Only the yaml format and extension is supported for at-files." +
+            if (filename.contains(".") && !( filename.toLowerCase().endsWith("yaml") || filename.toLowerCase().endsWith("properties") )) {
+                throw new RuntimeException("Only the yaml and properties format and extension are supported for at-files." +
                     " You specified " + filepathSpec);
             }
-            filepathSpec=(filepathSpec.endsWith(".yaml") ? filepathSpec : filepathSpec+".yaml");
+            filepathSpec=(filepathSpec.endsWith(".yaml") ? filepathSpec : (filepathSpec.endsWith(".properties") ? filepathSpec : filepathSpec+".yaml"));
             Path atPath = Path.of(filepathSpec);
-
-            String argsdata = "";
-            try {
-                argsdata = Files.readString(atPath);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
 
             NBAtFileFormats fmt = (formatSpec!=null) ? NBAtFileFormats.valueOfSymbol(formatSpec) : NBAtFileFormats.Default;
 
             Object scopeOfInclude = null;
             try {
-                Load yaml = new Load(LoadSettings.builder().build());
-                scopeOfInclude= yaml.loadFromString(argsdata);
+                if (filepathSpec.endsWith(".properties")) {
+                    FileInputStream inputStream = new FileInputStream(atPath.toFile());
+                    Properties props = new Properties();
+                    props.load(inputStream);
+                    Map<String, String> propsMap = new HashMap<>();
+                    for (String key : props.stringPropertyNames()) {
+                        propsMap.put(key, props.getProperty(key));
+                    }
+                    scopeOfInclude = propsMap;
+                } else {
+                    Load yaml = new Load(LoadSettings.builder().build());
+                    String argsdata = "";
+                    try {
+                        argsdata = Files.readString(atPath);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    scopeOfInclude = yaml.loadFromString(argsdata);
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
