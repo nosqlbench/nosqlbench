@@ -242,10 +242,8 @@ public class StrInterpolator implements Function<String, String> {
                             break;
                         }
                     }
-                    if (check_env) {
-                        if ( NBEnvironment.INSTANCE.containsKey(key) ) {
-                            value = NBEnvironment.INSTANCE.get(key);
-                        }
+                    if (check_env && NBEnvironment.INSTANCE.hasPropertyLayer() && NBEnvironment.INSTANCE.containsKey(key) ) {
+                        value = NBEnvironment.INSTANCE.get(key);
                     }
                 }
                 value = (value==null? extractedDefaults.get(key) : value);

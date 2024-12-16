@@ -56,6 +56,7 @@ public class NBCLIOptions {
     public static final String ARGS_FILE_DEFAULT = "$NBSTATEDIR/argsfile";
     private static final String INCLUDE = "--include";
     private static final String PROPERTIES = "--properties";
+    private static final String ENVIRONMENT = "--environment";
 
     private static final String userHome = System.getProperty("user.home");
 
@@ -424,6 +425,10 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     final String properties = this.readWordOrThrow(arglist, "path to properties file");
                     this.setProperties(properties);
+                    break;
+                case NBCLIOptions.ENVIRONMENT:
+                    arglist.removeFirst();
+                    NBEnvironment.INSTANCE.setPropertyLayer();
                     break;
                 case NBCLIOptions.REPORT_GRAPHITE_TO:
                     arglist.removeFirst();
@@ -796,7 +801,7 @@ public class NBCLIOptions {
         for (String key : properties.stringPropertyNames()) {
             NBEnvironment.INSTANCE.put(key, properties.getProperty(key));
         }
-
+        NBEnvironment.INSTANCE.setPropertyLayer();
     }
 
     private Map<String, String> parseLogLevelOverrides(final String levelsSpec) {
