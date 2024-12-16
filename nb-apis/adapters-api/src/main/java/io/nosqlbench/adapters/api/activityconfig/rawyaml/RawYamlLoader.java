@@ -43,6 +43,21 @@ public class RawYamlLoader {
         addTransformer(new StrInterpolator());
     }
 
+    public List<Map<String,Object>> loadPath(
+        Logger logger,
+        String path,
+        String... searchPaths) {
+
+        String data = null;
+        try {
+            Optional<Content<?>> oyaml = NBIO.all().searchPrefixes(searchPaths).pathname(path).extensionSet(YAML_EXTENSIONS).first();
+            data = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + path));
+            return loadString(logger, data);
+        } catch (Exception e) {
+            throw new RuntimeException("error while reading file " + path, e);
+        }
+    }
+
     public List<Map<String,Object>> loadString(Logger logger, String originalData) {
         String data = originalData;
         try {
@@ -58,19 +73,17 @@ public class RawYamlLoader {
         return parseYaml(logger, data);
     }
 
-    public List<Map<String,Object>> loadPath(
-            Logger logger,
-            String path,
-            String... searchPaths) {
-
-        String data = null;
-        try {
-            Optional<Content<?>> oyaml = NBIO.all().searchPrefixes(searchPaths).pathname(path).extensionSet(YAML_EXTENSIONS).first();
-            data = oyaml.map(Content::asString).orElseThrow(() -> new BasicError("Unable to load " + path));
-            return loadString(logger, data);
-        } catch (Exception e) {
-            throw new RuntimeException("error while reading file " + path, e);
+    protected String applyTransforms(Logger logger, String data) {
+        for (Function<String, String> xform : stringTransformers) {
+            try {
+                if (logger != null) logger.trace(() -> "Applying string transformer to yaml data:" + xform);
+                data = xform.apply(data);
+            } catch (Exception e) {
+                RuntimeException t = new OpConfigError("Error applying string transforms to input", e);
+                throw t;
+            }
         }
+        return data;
     }
 
     private List<Map<String,Object>> parseYaml(Logger logger, String data) {
@@ -88,19 +101,6 @@ public class RawYamlLoader {
             }
         }
         return maps;
-    }
-
-    protected String applyTransforms(Logger logger, String data) {
-        for (Function<String, String> xform : stringTransformers) {
-            try {
-                if (logger != null) logger.trace(() -> "Applying string transformer to yaml data:" + xform);
-                data = xform.apply(data);
-            } catch (Exception e) {
-                RuntimeException t = new OpConfigError("Error applying string transforms to input", e);
-                throw t;
-            }
-        }
-        return data;
     }
 
 }
