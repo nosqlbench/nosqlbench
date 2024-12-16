@@ -20,6 +20,7 @@ import io.nosqlbench.nb.api.advisor.NBAdvisorBuilder;
 import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
 import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.system.NBEnvironment;
 import org.apache.commons.text.StrLookup;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.LogManager;
@@ -232,11 +233,18 @@ public class StrInterpolator implements Function<String, String> {
                     value = val.toString();
                     //System.out.println("for: '"+original+"': "+key+"->"+value);
                 } else {
+                    boolean check_env = true;
                     for (Map<String, ?> map : maps) {
                         val = map.get(key);
                         if (val != null) {
                             value = val.toString();
+                            check_env = false;
                             break;
+                        }
+                    }
+                    if (check_env) {
+                        if ( NBEnvironment.INSTANCE.containsKey(key) ) {
+                            value = NBEnvironment.INSTANCE.get(key);
                         }
                     }
                 }

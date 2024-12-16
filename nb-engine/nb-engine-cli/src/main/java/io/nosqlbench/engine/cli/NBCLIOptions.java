@@ -28,12 +28,16 @@ import io.nosqlbench.nb.api.labels.NBLabelSpec;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.logging.NBLogLevel;
 import io.nosqlbench.nb.api.metadata.SystemId;
+import io.nosqlbench.nb.api.system.NBEnvironment;
 import io.nosqlbench.nb.api.system.NBStatePath;
 import io.nosqlbench.engine.api.metrics.IndicatorMode;
 import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.annotations.Maturity;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -51,6 +55,7 @@ public class NBCLIOptions {
     private static final String NB_STATE_DIR = "--statedir";
     public static final String ARGS_FILE_DEFAULT = "$NBSTATEDIR/argsfile";
     private static final String INCLUDE = "--include";
+    private static final String PROPERTIES = "--properties";
 
     private static final String userHome = System.getProperty("user.home");
 
@@ -415,6 +420,11 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     annotatorsConfig = this.readWordOrThrow(arglist, "annotators config");
                     break;
+                case NBCLIOptions.PROPERTIES:
+                    arglist.removeFirst();
+                    final String properties = this.readWordOrThrow(arglist, "path to properties file");
+                    this.setProperties(properties);
+                    break;
                 case NBCLIOptions.REPORT_GRAPHITE_TO:
                     arglist.removeFirst();
                     this.reportGraphiteTo = arglist.removeFirst();
@@ -772,6 +782,21 @@ public class NBCLIOptions {
 
     public String[] wantsIncludes() {
         return this.wantsToIncludePaths.toArray(new String[0]);
+    }
+
+    private void setProperties(String filePath) {
+        Properties properties = new Properties();
+        try (FileReader reader = new FileReader(filePath)) {
+            properties.load(reader);
+        } catch (FileNotFoundException e) {
+            throw new BasicError("Property File '"+filePath+"' was not found.", e);
+        } catch (IOException e) {
+            throw new BasicError("IO Exception Loading Property File '"+filePath+"'.", e);
+        }
+        for (String key : properties.stringPropertyNames()) {
+            NBEnvironment.INSTANCE.put(key, properties.getProperty(key));
+        }
+
     }
 
     private Map<String, String> parseLogLevelOverrides(final String levelsSpec) {

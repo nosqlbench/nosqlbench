@@ -16,12 +16,7 @@
 
 package io.nosqlbench.engine.cli.atfiles;
 
-import io.nosqlbench.nb.api.nbio.Content;
-import io.nosqlbench.nb.api.nbio.NBIO;
-import io.nosqlbench.nb.api.nbio.NBPathsAPI;
 import io.nosqlbench.nb.api.system.NBEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
@@ -39,7 +34,6 @@ import java.util.regex.Pattern;
  * TODO:ERRORHANDLER Cannot invoke "Object.getClass()" because "scopeOfInclude" is null on file full of comments only
  */
 public class NBAtFile {
-//    private final static Logger logger = LogManager.getLogger(NBAtFile.class);
 
     /**
      * This will take a command line in raw form, which may include some arguments
@@ -64,7 +58,6 @@ public class NBAtFile {
      * @throws RuntimeException for any errors finding, traversing, parsing, or rendering values
      */
     public static LinkedList<String> includeAt(LinkedList<String> processInPlace) {
-//        logger.trace("argv stream before processing: " + String.join("|",processInPlace));
         ListIterator<String> iter = processInPlace.listIterator();
         while (iter.hasNext()) {
             String spec = iter.next();
@@ -77,8 +70,6 @@ public class NBAtFile {
                 }
             }
         }
-//        logger.trace("argv stream after atfile processing: "+ String.join("|",processInPlace));
-
         return processInPlace;
     }
     private final static Pattern includePattern =
