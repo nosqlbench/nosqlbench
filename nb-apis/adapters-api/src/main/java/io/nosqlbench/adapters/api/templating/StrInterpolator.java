@@ -16,19 +16,29 @@
 
 package io.nosqlbench.adapters.api.templating;
 
+import com.google.gson.Gson;
 import io.nosqlbench.nb.api.advisor.NBAdvisorBuilder;
 import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
 import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.system.NBEnvironment;
+import javassist.NotFoundException;
 import org.apache.commons.text.StrLookup;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.*;
 import java.util.function.Function;
+
+import static java.util.stream.Collectors.*;
 
 public class StrInterpolator implements Function<String, String> {
     private final static Logger logger = LogManager.getLogger(StrInterpolator.class);
@@ -41,6 +51,7 @@ public class StrInterpolator implements Function<String, String> {
             .setEnableUndefinedVariableException(true)
             .setDisableSubstitutionInValues(true);
     private final Pattern COMMENT = Pattern.compile("^\\s*#.*");
+    private final Pattern INSERT = Pattern.compile("^(\\s*)INSERT:\\s+(.+)$");
 
     public StrInterpolator(ActivityDef... activityDefs) {
         Arrays.stream(activityDefs)
@@ -65,19 +76,31 @@ public class StrInterpolator implements Function<String, String> {
     public String apply(String raw) {
         advisor = advisorBuilder.build();
         advisor.add(Conditions.DeprecatedWarning);
-        String[] lines = raw.split("\\R");
+        List<String> lines = new LinkedList<>(Arrays.asList(raw.split("\\R")));
         boolean endsWithNewline = raw.endsWith("\n");
         int i = 0;
-        for (String line : lines) {
+        while (i < lines.size()) {
+            String line = lines.get(i);
             if (!isComment(line)) {
                 String result = matchTemplates(line);
                 if (!result.equals(line)) {
-                    lines[i] = result;
+                    lines.set(i, result);
+                    line = result;
+                }
+                Matcher matcher = INSERT.matcher(line);
+                if (matcher.matches()) {
+                    String leadingSpaces = matcher.group(1);
+                    String filePath = matcher.group(2);
+                    List<String> includes = insertContentFromFile(leadingSpaces, filePath);
+                    System.out.println(leadingSpaces + "INSERT: " + filePath);
+                    lines.remove(i);
+                    lines.addAll(i, includes);
+                    i--;
                 }
             }
             i++;
         }
-        String results = String.join(System.lineSeparator(), lines);
+        String results = lines.stream().collect(joining(System.lineSeparator()));
         if (endsWithNewline) {
             results += System.lineSeparator();
         }
@@ -85,14 +108,57 @@ public class StrInterpolator implements Function<String, String> {
         return results;
     }
 
-    public Map<String,String> checkpointAccesses() {
-        return multimap.checkpointAccesses();
+    private LinkedList<String> insertContentFromFile(String leadingSpaces, String filePath) {
+        // Determine file type and process the inclusion
+        LinkedList<String> result = new LinkedList<>();
+        result.add(leadingSpaces + "# INSERT: " + filePath);
+        if (filePath.endsWith(".properties")) {
+            // Include properties file
+            Properties properties = new Properties();
+            try (FileReader reader = new FileReader(filePath)) {
+                properties.load(reader);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            for (String key : properties.stringPropertyNames()) {
+                result.add(leadingSpaces + key + ": " + properties.getProperty(key));
+            }
+        } else if (filePath.endsWith(".yaml")) {
+            // Include another YAML file
+            try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.add(leadingSpaces + line);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (filePath.endsWith(".json")) {
+            // Include JSON
+            try {
+                Gson gson = new Gson();
+                Reader reader = new FileReader(filePath);
+                Map<String, Object> jsonMap = gson.fromJson(reader, Map.class);
+                reader.close();
+                Yaml yaml = new Yaml();
+                String yamlString = yaml.dumpAsMap(jsonMap);
+                LinkedList<String> include = new LinkedList<>(Arrays.asList(yamlString.split("\\R")));
+                int j = 0;
+                while (j < include.size()) {
+                    result.add(leadingSpaces + include.get(j));
+                    j++;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            throw new IllegalArgumentException("Unsupported file type: " + filePath);
+        }
+        return result;
     }
 
-    public LinkedHashMap<String, String> getTemplateDetails(String input) {
-        LinkedHashMap<String, String> details = new LinkedHashMap<>();
-
-        return details;
+    public Map<String,String> checkpointAccesses() {
+        return multimap.checkpointAccesses();
     }
 
     public String matchTemplates(String original) {
