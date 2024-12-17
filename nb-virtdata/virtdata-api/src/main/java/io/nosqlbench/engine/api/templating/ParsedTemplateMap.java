@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.templating;
 
+import com.fasterxml.jackson.databind.introspect.POJOPropertyBuilder;
 import io.nosqlbench.engine.api.templating.binders.ArrayBinder;
 import io.nosqlbench.engine.api.templating.binders.ListBinder;
 import io.nosqlbench.engine.api.templating.binders.OrderedMapBinder;
@@ -76,6 +77,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      representation of a result. If the values are defined, then each one represents the name
      that the found value should be saved as instead of the original name.
      */
+    private final List<BindPoint> bindpoints = new ArrayList<>();
     private final CapturePoints captures = new CapturePoints();
     private final int mapsize;
 
@@ -127,6 +129,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             if (v instanceof CharSequence charvalue) {
                 ParsedTemplateString pt = ParsedTemplateString.of(charvalue.toString(), bindings);
                 this.captures.addAll(pt.getCaptures());
+                this.bindpoints.addAll(pt.getBindPoints());
                 switch (pt.getType()) {
                     case literal:
                         statics.put(k, charvalue.toString());
@@ -929,6 +932,17 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      */
     public LongFunction<?> getMapper(String field) {
         LongFunction<?> mapper = dynamics.get(field);
+
+        if (mapper == null) {
+            if (bindings.containsKey(field)) {
+                Optional<DataMapper<Object>> globalFunction =
+                    VirtData.getOptionalMapper(bindings.get(field));
+                return globalFunction.orElseThrow(() ->
+                    new OpConfigError("mapper requsted for field '" + field + "' which is not " +
+                                          "a defined op field nor a binding in the op template " +
+                                          "scope."));
+            }
+        }
         return mapper;
     }
 
@@ -1179,4 +1193,11 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         return prototype;
     }
 
+    public List<BindPoint> getBindPoints() {
+        return this.bindpoints;
+    }
+
+    public Map<String,String> getBindings() {
+        return this.bindings;
+    }
 }

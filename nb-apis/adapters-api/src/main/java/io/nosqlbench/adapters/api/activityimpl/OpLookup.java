@@ -1,14 +1,14 @@
-package io.nosqlbench.adapters.api.activityimpl.uniform;
+package io.nosqlbench.adapters.api.activityimpl;
 
 /*
  * Copyright (c) nosqlbench
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,8 +18,10 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
  */
 
 
-import io.nosqlbench.nb.api.components.core.NBNamedElement;
+import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-public interface Validator<RESULT> extends NBNamedElement {
-    public void validate(long cycle, RESULT result);
+import java.util.Optional;
+
+public interface OpLookup {
+    Optional<ParsedOp> lookup(String opName);
 }

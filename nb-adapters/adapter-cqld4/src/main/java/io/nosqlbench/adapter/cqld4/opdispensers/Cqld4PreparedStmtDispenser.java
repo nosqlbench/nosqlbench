@@ -17,23 +17,27 @@
 package io.nosqlbench.adapter.cqld4.opdispensers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.BoundStatement;
-import com.datastax.oss.driver.api.core.cql.PreparedStatement;
-import com.datastax.oss.driver.api.core.cql.Statement;
+import com.datastax.oss.driver.api.core.cql.*;
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
 import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.RSProcessors;
 import io.nosqlbench.adapter.cqld4.diagnostics.CQLD4PreparedStmtDiagnostics;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4CqlPreparedStatement;
+import io.nosqlbench.adapters.api.activityimpl.uniform.FieldBindingsMetadata;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.components.core.NBNamedElement;
 import io.nosqlbench.nb.api.errors.OpConfigError;
+import io.nosqlbench.virtdata.core.templates.BindPoint;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.LongFunction;
 
-public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPreparedStatement> {
+public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPreparedStatement> implements FieldBindingsMetadata {
     private final static Logger logger = LogManager.getLogger(Cqld4PreparedStmtDispenser.class);
 
     private final RSProcessors processors;
@@ -41,6 +45,7 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPre
     private final ParsedTemplateString stmtTpl;
     private final LongFunction<Object[]> fieldsF;
     private final LongFunction<Cqld4Space> spaceInitF;
+    private final LongFunction<PreparedStatement> cachedStatementF;
     private PreparedStatement preparedStmt;
     // This is a stable enum for the op template from the workload, bounded by cardinality of all op templates
     private int refkey;
@@ -57,7 +62,8 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPre
         this.stmtTpl = stmtTpl;
         this.fieldsF = getFieldsFunction(op);
         this.spaceInitF = spaceInitF;
-        stmtFunc = createStmtFunc(fieldsF, op);
+        this.cachedStatementF = getCachedStatementF(fieldsF, op);
+        stmtFunc = createStmtFunc(fieldsF,cachedStatementF, op);
     }
 
     private LongFunction<Object[]> getFieldsFunction(ParsedOp op) {
@@ -68,8 +74,7 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPre
     }
 
 
-    protected LongFunction<Statement> createStmtFunc(LongFunction<Object[]> fieldsF, ParsedOp op) {
-
+    protected LongFunction<PreparedStatement> getCachedStatementF(LongFunction<Object[]> fieldsF, ParsedOp op) {
         try {
             String preparedQueryString = stmtTpl.getPositionalStatement(s -> "?");
 
@@ -80,9 +85,21 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPre
                 (long l) -> spaceInitF.apply(l);
 
             int refKey = op.getRefKey();
-            LongFunction<PreparedStatement> cachedStatementF =
-                (long l) -> lookupSpaceF.apply(l).getOrCreatePreparedStatement(refKey,prepareStatementF);
+            LongFunction<PreparedStatement> cStmtF = (long l) -> lookupSpaceF.apply(
+                l).getOrCreatePreparedStatement(refKey, prepareStatementF);
 
+            return cStmtF;
+        } catch (Exception e) {
+            throw new OpConfigError(e + "( for statement '" + stmtTpl + "')");
+        }
+
+    }
+
+    protected LongFunction<Statement> createStmtFunc(LongFunction<Object[]> fieldsF,
+                                                     LongFunction<PreparedStatement> cachedStatementF,
+                                                     ParsedOp op) {
+
+        try {
             LongFunction<Statement> boundStatementF =
                 (long l) -> cachedStatementF.apply(l).bind(fieldsF.apply(l));
 
@@ -92,6 +109,26 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPre
             throw new OpConfigError(e + "( for statement '" + stmtTpl + "')");
         }
 
+    }
+
+    @Override
+    public Map<String,BindPoint> getFieldBindingsMap() {
+        PreparedStatement ps = this.cachedStatementF.apply(0);
+
+        ColumnDefinitions cdefs = ps.getVariableDefinitions();
+        List<BindPoint> bdefs = stmtTpl.getBindPoints();
+
+        if (cdefs.size()!=bdefs.size()){
+            throw new OpConfigError("The number of column defs does not match the number of " +
+                                        "bindings specified for " + this.getOpName());
+        }
+
+        Map<String,BindPoint> fbmap = new LinkedHashMap<>(cdefs.size());
+        for (int i = 0; i < cdefs.size(); i++) {
+            ColumnDefinition cdef = cdefs.get(i);
+            fbmap.put(cdefs.get(i).getName().asCql(true),bdefs.get(i));
+        }
+        return fbmap;
     }
 
     @Override

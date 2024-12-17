@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityimpl;
 
 
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.OpLookup;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
@@ -65,11 +66,11 @@ public class OpFunctionComposition {
 
     public static <OP extends CycleOp<?>, SPACE extends Space> OpDispenser<? extends OP> wrapOptionally(
         DriverAdapter<? extends OP, ? extends SPACE> adapter, OpDispenser<? extends OP> dispenser,
-        ParsedOp pop, Dryrun dryrun
+        ParsedOp pop, Dryrun dryrun, OpLookup lookup
     ) {
 
         dispenser = OpCapture.wrapOptionally(adapter, dispenser, pop);
-        dispenser = OpAssertions.wrapOptionally(adapter, dispenser, pop);
+        dispenser = OpAssertions.wrapOptionally(adapter, dispenser, pop, lookup);
         dispenser = OpDryrun.wrapOptionally(adapter, dispenser, pop, dryrun);
 
         return dispenser;

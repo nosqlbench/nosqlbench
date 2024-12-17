@@ -32,7 +32,7 @@ public class AssertingOp<T> implements CycleOp<T> {
     @Override
     public T apply(long value) {
         T result = op.apply(value);
-        validator.validate(result);
+        validator.validate(value, result);
         return result;
     }
 }

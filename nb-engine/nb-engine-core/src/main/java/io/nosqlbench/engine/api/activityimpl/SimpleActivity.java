@@ -21,6 +21,7 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.OpLookup;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
@@ -396,8 +397,9 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
 //        Map<String, DriverAdapter<?,?>> adapterCache,
 //        Map<String, OpMapper<? extends Op>> mapperCache,
         List<DriverAdapter<CycleOp<?>, Space>> adapters,
-        List<ParsedOp> pops
-    ) {
+        List<ParsedOp> pops,
+        OpLookup opLookup
+        ) {
         try {
 
             List<Long> ratios = new ArrayList<>(pops.size());
@@ -429,7 +431,14 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                     OpDispenser<? extends CycleOp<?>> dispenser = opMapper.apply(this, pop, spaceFunc);
                     String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
                     Dryrun dryrun = pop.takeEnumFromFieldOr(Dryrun.class, Dryrun.none, "dryrun");
-                    dispenser = OpFunctionComposition.wrapOptionally(adapter, dispenser, pop, dryrun);
+
+                    dispenser = OpFunctionComposition.wrapOptionally(
+                        adapter,
+                        dispenser,
+                        pop,
+                        dryrun,
+                        opLookup
+                    );
 
 //                if (strict) {
 //                    optemplate.assertConsumed();
@@ -454,20 +463,24 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
 
     }
 
-    protected List<OpTemplate> loadOpTemplates(DriverAdapter<?, ?> defaultDriverAdapter) {
+    protected List<OpTemplate> loadOpTemplates(
+        DriverAdapter<?, ?> defaultDriverAdapter,
+        boolean logged,
+        boolean filtered
+    ) {
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
 
         OpsDocList opsDocList = loadStmtsDocList();
 
-        List<OpTemplate> unfilteredOps = opsDocList.getOps(false);
-        List<OpTemplate> filteredOps = opsDocList.getOps(tagfilter, true);
+        List<OpTemplate> filteredOps = opsDocList.getOps(filtered?tagfilter:"", logged);
 
         if (filteredOps.isEmpty()) {
             // There were no ops, and it *wasn't* because they were all filtered out.
             // In this case, let's try to synthesize the ops as long as at least a default driver was provided
             // But if there were no ops, and there was no default driver provided, we can't continue
             // There were no ops, and it was because they were all filtered out
+            List<OpTemplate> unfilteredOps = opsDocList.getOps(false);
             if (!unfilteredOps.isEmpty()) {
                 String message = "There were no active op templates with tag filter '"+ tagfilter + "', since all " +
                     unfilteredOps.size() + " were filtered out. Examine the session log for details";
@@ -489,27 +502,6 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                     3) driver=stdout (or any other drive that can synthesize ops)""");
             }
         }
-//        if (filteredOps.isEmpty()) {
-//            throw new BasicError("There were no active op templates with tag filter '" + tagfilter + '\'');
-//        }
-
-//        if (filteredOps.isEmpty()) {
-//            throw new OpConfigError("No op templates found. You must provide either workload=... or op=..., or use " +
-//                "a default driver (driver=___). This includes " +
-//                ServiceLoader.load(DriverAdapter.class).stream()
-//                    .filter(p -> {
-//                        AnnotatedType[] annotatedInterfaces = p.type().getAnnotatedInterfaces();
-//                        for (AnnotatedType ai : annotatedInterfaces) {
-//                            if (ai.getType().equals(SyntheticOpTemplateProvider.class)) {
-//                                return true;
-//                            }
-//                        }
-//                        return false;
-//                    })
-//                    .map(d -> d.get().getAdapterName())
-//                    .collect(Collectors.joining(",")));
-//        }
-//
         return filteredOps;
     }
 
@@ -543,7 +535,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
     protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate,
         OpDispenser<? extends O>> opinit, boolean strict, DriverAdapter<?, ?> defaultAdapter) {
 
-        List<OpTemplate> stmts = loadOpTemplates(defaultAdapter);
+        List<OpTemplate> stmts = loadOpTemplates(defaultAdapter,true,false);
 
         List<Long> ratios = new ArrayList<>(stmts.size());
 
@@ -556,6 +548,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
             .getOptionalString("seq")
             .map(SequencerType::valueOf)
             .orElse(SequencerType.bucket);
+
         SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
 
         try {

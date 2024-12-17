@@ -105,7 +105,6 @@ public class OpDef extends OpTemplate {
     private LinkedHashMap<String, String> composeTags() {
         LinkedHashMap<String, String> tagsWithName = new LinkedHashMap<>(new MultiMapLookup<>(rawOpDef.getTags(), block.getTags()));
         tagsWithName.put("block",block.getName());
-        tagsWithName.put("name",this.rawOpDef.getName());
         tagsWithName.put("op",this.rawOpDef.getName());
         return tagsWithName;
     }

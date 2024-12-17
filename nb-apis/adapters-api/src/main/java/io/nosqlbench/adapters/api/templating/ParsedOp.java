@@ -30,6 +30,7 @@ import io.nosqlbench.nb.api.config.fieldreaders.DynamicFieldReader;
 import io.nosqlbench.nb.api.config.fieldreaders.StaticFieldReader;
 import io.nosqlbench.nb.api.config.standard.NBConfigError;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.engine.util.Tagged;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.labels.NBLabelSpec;
 import io.nosqlbench.nb.api.labels.NBLabels;
@@ -380,7 +381,7 @@ prepared: false
  field within the set of possible fields. More than one will throw an error.</LI>
  </UL>
  </P> */
-public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String, ?>>, NBComponent, StaticFieldReader, DynamicFieldReader {
+public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String, ?>>, NBComponent, StaticFieldReader, DynamicFieldReader, Tagged {
 
     private static final Logger logger = LogManager.getLogger(ParsedOp.class);
 
@@ -418,9 +419,12 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         List<Function<Map<String, Object>, Map<String, Object>>> preprocessors,
         NBComponent parent
     ) {
+        // TODO: the block and op name below should be populated more robustly
+        // They should not be strictly required, but a way of taking "what is provided" in the
+        // name should be used
         super(
             parent,
-            NBLabels.forKV(((parent instanceof ParsedOp) ? "subop" : "op"), opTemplate.getName())
+            NBLabels.forMap(opTemplate.getTags())
         );
         this._opTemplate = opTemplate;
         this.activityCfg = activityCfg;
@@ -894,6 +898,7 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return tmap.getOptionalTargetEnum(enumclass, valueClass);
     }
 
+
     public <E extends Enum<E>, V> Optional<TypeAndTarget<E, V>> getOptionalTypeAndTargetEnum(
         Class<E> enumclass, Class<V> valueClass) {
         return tmap.getOptionalTargetEnum(enumclass, valueClass);
@@ -1025,6 +1030,11 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return this._opTemplate.getRefKey();
     }
 
+    @Override
+    public Map<String, String> getTags() {
+        return this._opTemplate.getTags();
+    }
+
 
     public static enum SubOpNaming {
         SubKey, ParentAndSubKey
@@ -1046,9 +1056,9 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return new ParsedOp(
             new OpData(
                 "sub-op of '" + this.getName() + "' field '" + fromOpField + "', element '" + elemName + "' name '" + subopName + "'",
-                subopName, new LinkedHashMap<String, String>(_opTemplate.getTags()) {{
-                put("subop", subopName);
-            }}, _opTemplate.getBindings(), _opTemplate.getParams(), opfields, 100
+                subopName,
+                new LinkedHashMap<String, String>(Map.of("subop", subopName)),
+                _opTemplate.getBindings(), _opTemplate.getParams(), opfields, 100
             ), this.activityCfg, List.of(), this
         );
     }
@@ -1096,10 +1106,23 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return subOpMap;
     }
 
+    public ParsedOp takeAsSubConfig(String s) {
+        Object subtree = tmap.takeStaticValue(s, Object.class);
+        if (subtree instanceof Map map) {
+            return makeSubOp(s, s, map, SubOpNaming.SubKey);
+        } else if (subtree instanceof String seq) {
+            return makeSubOp(s, s, Map.of(s, seq), SubOpNaming.SubKey);
+        } else {
+            throw new RuntimeException(
+                "unable to make sub config from key '" + s + "', because " + "it is a " + subtree.getClass().getCanonicalName());
+        }
+    }
+
     public ParsedOp getAsSubOp(String name, SubOpNaming naming) {
         Object o = _opTemplate.getOp().map(raw -> raw.get(name)).orElseThrow(
             () -> new OpConfigError(
                 "Could not find op field '" + name + "' for subop on parent op '" + name + "'"));
+
         if (o instanceof Map map) {
             return makeSubOp(this.getName(), name, map, naming);
         } else {
@@ -1230,8 +1253,8 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return tmap.getCaptures();
     }
 
-    public Map<String, String> getBindPoints() {
-        return null;
+    public List<BindPoint> getBindPoints() {
+        return tmap.getBindPoints();
     }
 
     public boolean isDefinedExactly(String... fields) {
