@@ -114,30 +114,26 @@ public class StrInterpolator implements Function<String, String> {
         // Determine file type and process the inclusion
         LinkedList<String> result = new LinkedList<>();
         result.add(leadingSpaces + "# INSERT: " + filePath);
-        if (filePath.endsWith(".properties")) {
-            // Include properties file
-            Properties properties = new Properties();
-            try (FileReader reader = new FileReader(filePath)) {
-                properties.load(reader);
-            } catch (Exception e) {
-                throw new OpConfigError("While processing file '" + filePath + "' " + e.getMessage());
-            }
-            for (String key : properties.stringPropertyNames()) {
-                result.add(leadingSpaces + key + ": " + properties.getProperty(key));
-            }
-        } else if (filePath.endsWith(".yaml")) {
-            // Include another YAML file
-            try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.add(leadingSpaces + line);
+        try {
+            if (filePath.endsWith(".properties")) {
+                // Include properties file
+                Properties properties = new Properties();
+                try (FileReader reader = new FileReader(filePath)) {
+                    properties.load(reader);
                 }
-            } catch (Exception e) {
-                throw new OpConfigError("While processing file '" + filePath + "' " + e.getMessage());
-            }
-        } else if (filePath.endsWith(".json")) {
-            // Include JSON
-            try {
+                for (String key : properties.stringPropertyNames()) {
+                    result.add(leadingSpaces + key + ": " + properties.getProperty(key));
+                }
+            } else if (filePath.endsWith(".yaml")) {
+                // Include another YAML file
+                try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result.add(leadingSpaces + line);
+                    }
+                }
+            } else if (filePath.endsWith(".json")) {
+                // Include JSON
                 Gson gson = new Gson();
                 Reader reader = new FileReader(filePath);
                 Map<String, Object> jsonMap = gson.fromJson(reader, Map.class);
@@ -150,11 +146,11 @@ public class StrInterpolator implements Function<String, String> {
                     result.add(leadingSpaces + include.get(j));
                     j++;
                 }
-            } catch (Exception e) {
-                throw new OpConfigError("While processing file '" + filePath + "' " + e.getMessage());
+            } else {
+                throw new IllegalArgumentException("Unsupported file type: " + filePath);
             }
-        } else {
-            throw new IllegalArgumentException("Unsupported file type: " + filePath);
+        } catch (Exception e) {
+            throw new OpConfigError("While processing file '" + filePath + "' " + e.getMessage());
         }
         return result;
     }
