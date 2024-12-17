@@ -20,7 +20,9 @@ import com.google.gson.Gson;
 import io.nosqlbench.nb.api.advisor.NBAdvisorBuilder;
 import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
 import io.nosqlbench.nb.api.advisor.conditions.Conditions;
+import io.nosqlbench.nb.api.config.standard.NBConfigError;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.system.NBEnvironment;
 import javassist.NotFoundException;
 import org.apache.commons.text.StrLookup;
@@ -117,8 +119,8 @@ public class StrInterpolator implements Function<String, String> {
             Properties properties = new Properties();
             try (FileReader reader = new FileReader(filePath)) {
                 properties.load(reader);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                throw new OpConfigError("While processing file '" + filePath + "' " + e.getMessage());
             }
             for (String key : properties.stringPropertyNames()) {
                 result.add(leadingSpaces + key + ": " + properties.getProperty(key));
@@ -130,8 +132,8 @@ public class StrInterpolator implements Function<String, String> {
                 while ((line = reader.readLine()) != null) {
                     result.add(leadingSpaces + line);
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                throw new OpConfigError("While processing file '" + filePath + "' " + e.getMessage());
             }
         } else if (filePath.endsWith(".json")) {
             // Include JSON
@@ -148,17 +150,13 @@ public class StrInterpolator implements Function<String, String> {
                     result.add(leadingSpaces + include.get(j));
                     j++;
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                throw new OpConfigError("While processing file '" + filePath + "' " + e.getMessage());
             }
         } else {
             throw new IllegalArgumentException("Unsupported file type: " + filePath);
         }
         return result;
-    }
-
-    public Map<String,String> checkpointAccesses() {
-        return multimap.checkpointAccesses();
     }
 
     public String matchTemplates(String original) {
@@ -242,6 +240,10 @@ public class StrInterpolator implements Function<String, String> {
             after = substitutor.replace(line);
         }
         return line;
+    }
+
+    public Map<String,String> checkpointAccesses() {
+        return multimap.checkpointAccesses();
     }
 
     public static class MultiMap extends StrLookup<String> {
