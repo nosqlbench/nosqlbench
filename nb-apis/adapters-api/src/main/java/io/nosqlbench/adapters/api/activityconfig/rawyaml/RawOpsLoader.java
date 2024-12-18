@@ -64,24 +64,9 @@ public class RawOpsLoader {
         Collections.addAll(this.transformers, newTransformer);
     }
 
-    public RawOpsDocList loadString(final String originalData) {
-        logger.trace(() -> "Applying string transformer to yaml data:" + originalData);
-        String data = originalData;
-        try {
-            for (Function<String, String> transformer : transformers) {
-                data = transformer.apply(data);
-            }
-        } catch (Exception e) {
-            RuntimeException t = new OpConfigError("Error applying string transforms to input", e);
-            throw t;
-        }
-
-        return parseYaml(data);
-    }
-
     public RawOpsDocList loadPath(
-            String path,
-            String... searchPaths) {
+        String path,
+        String... searchPaths) {
 
         String data = null;
         try {
@@ -92,6 +77,29 @@ public class RawOpsLoader {
             throw new RuntimeException("error while reading file " + path, e);
         }
 
+    }
+
+    public RawOpsDocList loadString(final String originalData) {
+        String data = applyTransforms(originalData);
+        return parseYaml(data);
+    }
+
+    public List<Map<String,Object>> loadStringMap(final String originalData) {
+        String data = applyTransforms(originalData);
+        List<Map<String,Object>> maps = parseYamlMap(data);
+        return maps;
+    }
+
+    protected String applyTransforms(String originalData) {
+        String data = originalData;
+        for (Function<String, String> transformer : transformers) {
+            try {
+                data = transformer.apply(data);
+            } catch (Exception e) {
+                throw new OpConfigError("Error applying string transforms to input", e);
+            }
+        }
+        return data;
     }
 
     public RawOpsDocList parseYaml(String data) {
@@ -123,6 +131,20 @@ public class RawOpsLoader {
             }
         }
         return rawOpsDocList;
+    }
+
+    private List<Map<String,Object>> parseYamlMap(String data) {
+        Iterable<Object> objects = yaml.loadAllFromString(data);
+        List<Map<String,Object>> maps = new ArrayList<>();
+
+        for (Object object : objects) {
+            if (object instanceof Map) {
+                maps.add(new LinkedHashMap<>((Map<String,Object>)object));
+            } else {
+                throw new OpConfigError("Unable to coerce a non-map type to a workload structure: " + object.getClass().getCanonicalName());
+            }
+        }
+        return maps;
     }
 
 }

@@ -16,16 +16,12 @@
 
 package io.nosqlbench.engine.cli.atfiles;
 
-import io.nosqlbench.nb.api.nbio.Content;
-import io.nosqlbench.nb.api.nbio.NBIO;
-import io.nosqlbench.nb.api.nbio.NBPathsAPI;
 import io.nosqlbench.nb.api.system.NBEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,7 +34,6 @@ import java.util.regex.Pattern;
  * TODO:ERRORHANDLER Cannot invoke "Object.getClass()" because "scopeOfInclude" is null on file full of comments only
  */
 public class NBAtFile {
-//    private final static Logger logger = LogManager.getLogger(NBAtFile.class);
 
     /**
      * This will take a command line in raw form, which may include some arguments
@@ -63,7 +58,6 @@ public class NBAtFile {
      * @throws RuntimeException for any errors finding, traversing, parsing, or rendering values
      */
     public static LinkedList<String> includeAt(LinkedList<String> processInPlace) {
-//        logger.trace("argv stream before processing: " + String.join("|",processInPlace));
         ListIterator<String> iter = processInPlace.listIterator();
         while (iter.hasNext()) {
             String spec = iter.next();
@@ -76,8 +70,6 @@ public class NBAtFile {
                 }
             }
         }
-//        logger.trace("argv stream after atfile processing: "+ String.join("|",processInPlace));
-
         return processInPlace;
     }
     private final static Pattern includePattern =
@@ -121,26 +113,36 @@ public class NBAtFile {
             String[] datapath = (dataPathSpec!=null && !dataPathSpec.isBlank()) ? dataPathSpec.split("(/|\\.)") : new String[] {};
 
             String filename = Path.of(filepathSpec).getFileName().toString();
-            if (filename.contains(".") && !(filename.toLowerCase().endsWith("yaml"))) {
-                throw new RuntimeException("Only the yaml format and extension is supported for at-files." +
+            if (filename.contains(".") && !( filename.toLowerCase().endsWith("yaml") || filename.toLowerCase().endsWith("properties") )) {
+                throw new RuntimeException("Only the yaml and properties format and extension are supported for at-files." +
                     " You specified " + filepathSpec);
             }
-            filepathSpec=(filepathSpec.endsWith(".yaml") ? filepathSpec : filepathSpec+".yaml");
+            filepathSpec=(filepathSpec.endsWith(".yaml") ? filepathSpec : (filepathSpec.endsWith(".properties") ? filepathSpec : filepathSpec+".yaml"));
             Path atPath = Path.of(filepathSpec);
-
-            String argsdata = "";
-            try {
-                argsdata = Files.readString(atPath);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
 
             NBAtFileFormats fmt = (formatSpec!=null) ? NBAtFileFormats.valueOfSymbol(formatSpec) : NBAtFileFormats.Default;
 
             Object scopeOfInclude = null;
             try {
-                Load yaml = new Load(LoadSettings.builder().build());
-                scopeOfInclude= yaml.loadFromString(argsdata);
+                if (filepathSpec.endsWith(".properties")) {
+                    FileInputStream inputStream = new FileInputStream(atPath.toFile());
+                    Properties props = new Properties();
+                    props.load(inputStream);
+                    Map<String, String> propsMap = new HashMap<>();
+                    for (String key : props.stringPropertyNames()) {
+                        propsMap.put(key, props.getProperty(key));
+                    }
+                    scopeOfInclude = propsMap;
+                } else {
+                    Load yaml = new Load(LoadSettings.builder().build());
+                    String argsdata = "";
+                    try {
+                        argsdata = Files.readString(atPath);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    scopeOfInclude = yaml.loadFromString(argsdata);
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

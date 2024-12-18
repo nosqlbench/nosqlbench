@@ -65,6 +65,10 @@ public class NBEnvironment {
 
     private final LinkedHashMap<String, String> references = new LinkedHashMap<>();
 
+    private final Map<String,String> properties = new HashMap<>();
+
+    private boolean hasPropertyLayer = false;
+
     /**
      * These properties are well-defined in the Java specs. This map redirects common
      * environment variable names to the given system property. This allows
@@ -101,7 +105,9 @@ public class NBEnvironment {
             }
 
         }
-        System.setProperty(propname, value);
+        // Instead of using System properties we keep an internal overlay.
+        properties.put(propname, value);
+        //System.setProperty(propname, value);
     }
 
     /**
@@ -153,6 +159,10 @@ public class NBEnvironment {
             }
         }
         if (name.contains(".")) {
+            value = properties.get(name.toLowerCase());
+            if (value != null) {
+                return value;
+            }
             value = System.getProperty(name.toLowerCase());
             if (value != null) {
                 return value;
@@ -163,10 +173,18 @@ public class NBEnvironment {
             if (logger != null) {
                 logger.debug("redirecting env var '" + name + "' to upper-case property '" + propName + "'");
             }
+            value = properties.get(propName);
+            if (value != null) {
+                return value;
+            }
             value = System.getProperty(propName);
             if (value != null) {
                 return value;
             }
+        }
+        value = properties.get(name);
+        if (value != null) {
+            return value;
         }
         value = System.getProperty(name);
         if (value != null) {
@@ -201,6 +219,14 @@ public class NBEnvironment {
     public boolean containsKey(String name, Map<String,String> supplemental) {
         String value = peek(name, supplemental);
         return (value != null);
+    }
+
+    public boolean hasPropertyLayer() {
+        return hasPropertyLayer;
+    }
+
+    public void setPropertyLayer() {
+        hasPropertyLayer = true;
     }
 
     /**

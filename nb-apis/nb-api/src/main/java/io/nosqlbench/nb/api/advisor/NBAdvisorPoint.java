@@ -98,7 +98,7 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
     }
 
     public NBAdvisorPoint<T> logName() {
-        if (resultLog.size() > 0) {
+        if (resultLog.size() > 0 && advisorLevel != NBAdvisorLevel.none) {
             logger.info("Advisor: " + name + ": " + description);
         }
         return this;
