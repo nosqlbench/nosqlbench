@@ -225,7 +225,7 @@ public class ConfigModel implements NBConfigModel {
         for (String configkey : config.keySet()) {
             Param<?> element = this.paramsByName.get(configkey);
             if (element != null) {
-                String warning = "Config parameter '" + configkey + "' is also a " + type + ". Check for possible conflicts.";
+                String warning = "Config parameter '" + configkey + "' is also a " + type + ". Check for possible conflicts.\n";
                 NBAdvisorOutput.output(Level.WARN, warning);
             }
         }
@@ -299,7 +299,7 @@ public class ConfigModel implements NBConfigModel {
         for (String configkey : config.keySet()) {
             Param<?> element = this.paramsByName.get(configkey);
             String warning = "Unknown config parameter '" + configkey + "' in config model while configuring " + getOf().getSimpleName()
-                + ", possible parameter names are " + this.paramsByName.keySet() + ".";
+                + ", possible parameter names are " + this.paramsByName.keySet() + ".\n";
             if (element == null) {
                 String warnonly = System.getenv("NB_CONFIG_WARNINGS_ONLY");
                 logger.warn("WARNING: " + warning);

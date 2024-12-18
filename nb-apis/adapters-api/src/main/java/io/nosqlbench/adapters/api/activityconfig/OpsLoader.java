@@ -57,6 +57,7 @@ public class OpsLoader {
         return loadString(content.get().toString(), fmt, params, content.getURI());
     }
 
+    // used in OpsDocList (at least)
     public static OpsDocList loadPath(String path, Map<String, ?> params, String... searchPaths) {
         String[] extensions = path.indexOf('.') > -1 ? new String[]{} : YAML_EXTENSIONS;
         ResolverChain chain = new ResolverChain(path);
@@ -69,18 +70,17 @@ public class OpsLoader {
     public static OpsDocList loadString(
         final String sourceData, OpTemplateFormat fmt, Map<String, ?> params, URI srcuri) {
 
-        logger.trace(() -> "Applying string transformer to data:" + sourceData);
         if (srcuri != null) {
             logger.info("workload URI: '" + srcuri + "'");
         }
         StrInterpolator transformer = new StrInterpolator(params);
-        String data = transformer.apply(sourceData);
+        //String data = transformer.apply(sourceData);
 
         RawOpsLoader loader = new RawOpsLoader(transformer);
         RawOpsDocList rawOpsDocList = switch (fmt) {
             case jsonnet -> loader.loadString(evaluateJsonnet(srcuri, params));
-            case yaml, json -> loader.loadString(data);
-            case inline, stmt -> RawOpsDocList.forSingleStatement(data);
+            case yaml, json -> loader.loadString(sourceData);
+            case inline, stmt -> RawOpsDocList.forSingleStatement(transformer.apply(sourceData));
         };
         // TODO: itemize inline to support ParamParser
 

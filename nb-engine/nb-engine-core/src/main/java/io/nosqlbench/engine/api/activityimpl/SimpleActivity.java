@@ -585,8 +585,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
             if ((op != null ? 1 : 0) + (stmt != null ? 1 : 0) + (workload != null ? 1 : 0) > 1) {
                 throw new OpConfigError("Only op, statement, or workload may be provided, not more than one.");
             }
-
-
+            logger.debug("loadStmtsDocList #1");
             if (workload != null && OpsLoader.isJson(workload)) {
                 workloadSource = "commandline: (workload/json):" + workload;
                 return OpsLoader.loadString(workload, OpTemplateFormat.json, activityDef.getParams(), null);
@@ -597,11 +596,13 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                 return OpsLoader.loadPath(workload, activityDef.getParams(), "activities");
             }
 
+            logger.debug("loadStmtsDocList #2");
             if (stmt != null) {
                 workloadSource = "commandline: (stmt/inline): '" + stmt + "'";
                 return OpsLoader.loadString(stmt, OpTemplateFormat.inline, activityDef.getParams(), null);
             }
 
+            logger.debug("loadStmtsDocList #3");
             if (op != null && OpsLoader.isJson(op)) {
                 workloadSource = "commandline: (op/json): '" + op + "'";
                 return OpsLoader.loadString(op, OpTemplateFormat.json, activityDef.getParams(), null);

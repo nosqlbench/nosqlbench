@@ -95,7 +95,7 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter);
         NBConfigModel combinedAdapterModel = ConfigModel.of(StandardActivity.class);
         for (OpTemplate ot : opTemplates) {
-            logger.info(() -> "StandardActivity.opTemplate = "+ot);
+            logger.debug(() -> "StandardActivity.opTemplate = "+ot);
             String driverName = ot.getOptionalStringParam("driver", String.class)
                 .or(() -> ot.getOptionalStringParam("type", String.class))
                 .orElse(defaultDriverName);
@@ -127,11 +127,11 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
             paramsAdvisor.validateAll(ot.getBindings().keySet());
             adapterlist.add(adapter);
             ParsedOp pop = new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
-            logger.info("StandardActivity.pop="+pop);
+            logger.debug("StandardActivity.pop="+pop);
             Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
             pops.add(pop);
         }
-        logger.info(() -> "StandardActivity.opTemplate loop complete");
+        logger.debug(() -> "StandardActivity.opTemplate loop complete");
 
         paramsAdvisor.setName("Workload", "Check parameters, template, and binding names")
             .logName().evaluate();
