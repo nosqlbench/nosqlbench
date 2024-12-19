@@ -53,7 +53,7 @@ class ActivityExecutorTest {
 //        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-restart;cycles=1000;cyclerate=10;op=initdelay:initdelay=5000;");
 //        new ActivityTypeLoader().load(activityDef);
 //
-//        final Activity activity = new DelayedInitActivity(activityDef);
+//        final StandardActivity activity = new DelayedInitActivity(activityDef);
 //        InputDispenser inputDispenser = new CoreInputDispenser(activity);
 //        ActionDispenser adisp = new CoreActionDispenser(activity);
 //        OutputDispenser tdisp = CoreServices.getOutputDispenser(activity).orElse(null);
@@ -108,7 +108,7 @@ class ActivityExecutorTest {
         Optional<StandardActivityType> standardActivityType = new ActivityTypeLoader().load(
             activityDef, TestComponent.INSTANCE);
 
-//        Activity activity = new DelayedInitActivity(activityDef);
+//        StandardActivity activity = new DelayedInitActivity(activityDef);
         ActivityWiring wiring = new ActivityWiring(activityDef);
         StandardActivity activity = standardActivityType.get().getActivity(
             activityDef, TestComponent.INSTANCE, wiring);

@@ -16,18 +16,15 @@
 
 package io.nosqlbench.engine.api.activityapi.core.progress;
 
-import com.codahale.metrics.Counting;
-import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.nb.api.engine.util.Unit;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 
 import java.time.Instant;
 
 public class ActivityMetricProgressMeter implements ProgressMeterDisplay, CompletedMeter, RemainingMeter, ActiveMeter {
 
-    private final Activity activity;
+    private final StandardActivity activity;
     private final Instant startInstant;
     private final NBMetricTimer bindTimer;
     private final NBMetricTimer cyclesTimer;

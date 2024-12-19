@@ -16,6 +16,7 @@
 
 package io.nosqlbench.scenarios.simframe.optimizers.optimo;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
@@ -23,7 +24,6 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.nb.api.components.events.SetThreads;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
@@ -74,7 +74,7 @@ public class CMD_optimo extends NBBaseCommand {
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
         // TODO: having "scenario" here as well as in "named scenario" in workload templates is confusing. Make this clearer.
 
-        Activity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));
+        StandardActivity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));
         stdout.println("starting analysis on activity '" + flywheel.getAlias() + "'");
         SimFrameUtils.awaitActivity(flywheel);
 
@@ -125,7 +125,7 @@ public class CMD_optimo extends NBBaseCommand {
         // could be a better result if the range is arbitrarily limiting the parameter space.
     }
 
-    private SimFrameCapture perfValueMeasures(Activity activity, OptimoSearchSettings settings) {
+    private SimFrameCapture perfValueMeasures(StandardActivity activity, OptimoSearchSettings settings) {
         SimFrameCapture sampler = new SimFrameCapture();
 
         NBMetricTimer result_timer = activity.find().timer("name:result");

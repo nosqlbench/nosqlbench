@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.core.lifecycle.activity;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,14 +33,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ActivityLoader {
     private static final Logger logger = LogManager.getLogger("ACTIVITIES");
-    private final Map<String, Activity> activityMap = new ConcurrentHashMap<>();
+    private final Map<String, StandardActivity> activityMap = new ConcurrentHashMap<>();
 
     public ActivityLoader() {
     }
 
-    public synchronized Activity loadActivity(ActivityDef activityDef, final NBComponent parent) {
+    public synchronized StandardActivity loadActivity(ActivityDef activityDef, final NBComponent parent) {
         activityDef= activityDef.deprecate("yaml","workload").deprecate("type","driver");
-        final Activity activity =
+        final StandardActivity activity =
             new StandardActivityType<>(activityDef, parent).getAssembledActivity(parent, activityDef, this.activityMap);this.activityMap.put(activity.getAlias(),activity);
         ActivityLoader.logger.debug("Resolved activity for alias '{}'", activityDef.getAlias());
         return activity;

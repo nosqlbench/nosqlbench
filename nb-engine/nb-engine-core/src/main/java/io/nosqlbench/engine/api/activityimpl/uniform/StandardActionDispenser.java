@@ -17,13 +17,12 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityimpl.uniform.actions.StandardAction;
 
 public class StandardActionDispenser implements ActionDispenser {
     private final StandardActivity activity;
 
-    public <A extends Activity> StandardActionDispenser(StandardActivity activity) {
+    public <A> StandardActionDispenser(StandardActivity activity) {
         this.activity = activity;
     }
 

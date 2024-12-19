@@ -106,7 +106,7 @@ public class ActivityDef implements NBNamedElement {
     }
 
     /**
-     * Return tbe Activity Driver Adapter Name
+     * Return tbe StandardActivity Driver Adapter Name
      *
      * @return the driver adapter name
      */

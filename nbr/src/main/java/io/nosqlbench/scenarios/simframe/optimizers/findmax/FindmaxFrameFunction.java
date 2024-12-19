@@ -16,8 +16,8 @@
 
 package io.nosqlbench.scenarios.simframe.optimizers.findmax;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.RunState;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameJournal;
@@ -25,7 +25,7 @@ import io.nosqlbench.scenarios.simframe.planning.SimFrameFunction;
 
 public class FindmaxFrameFunction implements SimFrameFunction<FindmaxFrameParams> {
 
-    private final Activity flywheel;
+    private final StandardActivity flywheel;
     private final SimFrameCapture capture;
     private final SimFrameJournal<FindmaxFrameParams> journal;
     private final FindmaxConfig settings;
@@ -35,7 +35,7 @@ public class FindmaxFrameFunction implements SimFrameFunction<FindmaxFrameParams
     public FindmaxFrameFunction(
         ContainerActivitiesController controller,
         FindmaxConfig settings,
-        Activity flywheel,
+        StandardActivity flywheel,
         SimFrameCapture capture,
         SimFrameJournal<FindmaxFrameParams> journal,
         FindmaxParamModel model

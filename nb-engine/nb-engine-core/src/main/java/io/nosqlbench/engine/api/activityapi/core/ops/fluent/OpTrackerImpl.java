@@ -17,15 +17,11 @@
 package io.nosqlbench.engine.api.activityapi.core.ops.fluent;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Counting;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.*;
-import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
-import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;

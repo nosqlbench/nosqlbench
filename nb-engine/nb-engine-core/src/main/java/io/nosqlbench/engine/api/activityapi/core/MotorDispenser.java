@@ -18,7 +18,7 @@ package io.nosqlbench.engine.api.activityapi.core;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 
 /**
- * A MotorDispenser is created for each Activity instance within a scenario.
+ * A MotorDispenser is created for each StandardActivity instance within a scenario.
  * When a thread is created, the motor and its input and action instances are resolved.
  * The MotorDispenser is responsible for choosing how the motor is resolved,
  * whether that is a shared thread-safe motor or, more conventionally, a separate motor per slot.

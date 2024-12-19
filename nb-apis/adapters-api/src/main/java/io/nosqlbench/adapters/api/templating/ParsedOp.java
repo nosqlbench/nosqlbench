@@ -225,7 +225,7 @@ opfield1: value1
  </UL>
  </P>
 
- <H3>Enabling Activity Params</H3>
+ <H3>Enabling StandardActivity Params</H3>
  <P>If a user wants to allow an activity param as an default for an fields, they must publish the op
  field
  name in the configuration model for the activity. Otherwise it is an error to specify the value at
@@ -353,7 +353,7 @@ prepared: false
  document level,
  down to each block and then down to each statement.
 
- <H3>Activity Params</H3>
+ <H3>StandardActivity Params</H3>
  <PRE>{@code
 ./nb run driver=... workload=... cl=LOCAL_QUORUM
 }</PRE>

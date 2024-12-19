@@ -17,10 +17,10 @@
 package io.nosqlbench.engine.api.activityimpl.marker;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsIntervalSegment;
 import io.nosqlbench.engine.api.activityapi.output.Output;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -71,7 +71,7 @@ public class ContiguousOutputChunker implements Output {
         initExtents();
     }
 
-    public ContiguousOutputChunker(Activity activity) {
+    public ContiguousOutputChunker(StandardActivity activity) {
 
         if (!(activity.getWiring().getInputDispenserDelegate().getInput(0).isContiguous())) {
             throw new RuntimeException("This type of output may not be used with non-contiguous inputs yet.");

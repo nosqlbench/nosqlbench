@@ -16,7 +16,7 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
@@ -47,7 +47,7 @@ public class NB_threadchange extends NBBaseCommand {
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
 
-        Activity activity = controller.start(
+        StandardActivity activity = controller.start(
             "driver=diag;alias=threadchange;cycles=0..60000;threads=1;interval=2000;op='noop';rate=1000");
         activity.getActivityDef().setThreads(1);
         stdout.println("threads now " + activity.getActivityDef().getThreads());

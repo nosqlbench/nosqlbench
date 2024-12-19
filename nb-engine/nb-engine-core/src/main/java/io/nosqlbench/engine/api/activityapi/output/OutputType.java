@@ -16,7 +16,6 @@
 
 package io.nosqlbench.engine.api.activityapi.output;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.api.components.core.NBComponent;

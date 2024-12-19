@@ -16,9 +16,9 @@
 
 package io.nosqlbench.scenarios.simframe.optimizers.findmax;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
@@ -48,7 +48,7 @@ public class CMD_findmax extends NBBaseCommand {
 
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        Activity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));
+        StandardActivity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));
         stdout.println("starting analysis on activity '" + flywheel.getAlias() + "'");
         SimFrameUtils.awaitActivity(flywheel);
 

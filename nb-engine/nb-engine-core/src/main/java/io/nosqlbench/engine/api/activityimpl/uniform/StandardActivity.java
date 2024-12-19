@@ -32,7 +32,9 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.core.progress.ActivityMetricProgressMeter;
+import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
+import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
@@ -44,8 +46,8 @@ import io.nosqlbench.engine.api.activityimpl.OpLookupService;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
-import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.status.NBStatusComponent;
+import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
@@ -84,7 +86,9 @@ import java.util.function.LongFunction;
  @param <S>
  The context type for the activity, AKA the 'space' for a named driver instance and its
  associated object graph */
-public class StandardActivity<R extends java.util.function.LongFunction, S> extends NBStatusComponent implements Activity, InvokableResult, SyntheticOpTemplateProvider, ActivityDefObserver {
+public class StandardActivity<R extends java.util.function.LongFunction, S>
+    extends NBStatusComponent implements InvokableResult, SyntheticOpTemplateProvider, ActivityDefObserver, StateCapable,
+    ProgressCapable, Comparable<StandardActivity> {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final OpSequence<OpDispenser<? extends CycleOp<?>>> sequence;
     private final ConcurrentHashMap<String, DriverAdapter<CycleOp<?>, Space>> adapters = new ConcurrentHashMap<>();
@@ -126,10 +130,6 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         this.activityDef = activityDef;
         this.wiring = wiring;
 
-        int hdrdigits = getComponentProp("hdr_digits")
-            .map(Integer::parseInt).orElse(3);
-
-
         this.pendingOpsCounter = create().counter(
             "pending_ops",
             MetricCategory.Core,
@@ -142,6 +142,7 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         /// {@link OpSequence} in conjunction with
         /// an {@link OpDispenser}. This is named for "binding
         /// a cycle to an operation".
+        int hdrdigits = getHdrDigits();
         this.bindTimer = create().timer(
             "bind", hdrdigits, MetricCategory.Core,
             "Time the step within a cycle which binds generated data to an op template to synthesize an executable operation."
@@ -424,6 +425,10 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
 
     }
 
+    public ParameterMap getParams() {
+        return activityDef.getParams();
+    }
+
 
     private ParsedOp upconvert(
         OpTemplate ot, Optional<String> defaultDriverOption, NBConfigModel yamlmodel,
@@ -476,7 +481,6 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
     }
 
 
-    @Override
     public void initActivity() {
         initOrUpdateRateLimiters(this.activityDef);
         setDefaultsFromOpSequence(sequence);
@@ -548,7 +552,6 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
      dedicated <em>state space</em> types. Any space which implements {@link Shutdownable}
      will be closed when this activity shuts down.
      */
-    @Override
     public void shutdownActivity() {
         for (Map.Entry<String, DriverAdapter<CycleOp<?>, Space>> entry : adapters.entrySet()) {
             String adapterName = entry.getKey();
@@ -832,7 +835,6 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         return runState;
     }
 
-    @Override
     public synchronized void setRunState(RunState runState) {
         this.runState = runState;
         if (RunState.Running == runState) {
@@ -840,12 +842,10 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         }
     }
 
-    @Override
     public long getStartedAtMillis() {
         return startedAtMillis;
     }
 
-    @Override
     public ActivityDef getActivityDef() {
         return activityDef;
     }
@@ -874,7 +874,12 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         cycleLimiterSource = ThreadLocalRateLimiters.createOrUpdate(this, cycleLimiterSource, spec);
     }
 
-    @Override
+    /**
+     * Get the current cycle rate limiter for this activity.
+     * The cycle rate limiter is used to throttle the rate at which
+     * cycles are dispatched across all threads in the activity
+     * @return the cycle {@link RateLimiter}
+     */
     public RateLimiter getCycleLimiter() {
         if (cycleLimiterSource!=null) {
             return cycleLimiterSource.get();
@@ -882,7 +887,12 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
             return null;
         }
     }
-    @Override
+    /**
+     * Get the current stride rate limiter for this activity.
+     * The stride rate limiter is used to throttle the rate at which
+     * new strides are dispatched across all threads in an activity.
+     * @return The stride {@link RateLimiter}
+     */
     public synchronized RateLimiter getStrideLimiter() {
         if (strideLimiterSource!=null) {
             return strideLimiterSource.get();
@@ -891,19 +901,17 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         }
     }
 
-    @Override
     public RunStateTally getRunStateTally() {
         return tally;
     }
 
-    @Override
     public ActivityWiring getWiring() {
         return this.wiring;
     }
 
     @Override
     public Map<String, String> asResult() {
-        return Map.of("activity",this.getAlias());
+        return Map.of("activity",this.getActivityDef().getAlias());
     }
 
     /**
@@ -913,7 +921,6 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
      *
      * @return The number of allowable retries
      */
-    @Override
     public int getMaxTries() {
         return this.activityDef.getParams().getOptionalInteger("maxtries").orElse(10);
     }
@@ -927,7 +934,6 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         return errorHandler;
     }
 
-    @Override
     public void closeAutoCloseables() {
         for (AutoCloseable closeable : closeables) {
             logger.debug(() -> "CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable);
@@ -941,16 +947,14 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
     }
 
     @Override
-    public int compareTo(Activity o) {
-        return getAlias().compareTo(o.getAlias());
+    public int compareTo(StandardActivity o) {
+        return this.getActivityDef().getAlias().compareTo(o.getActivityDef().getAlias());
     }
 
-    @Override
     public void registerAutoCloseable(AutoCloseable closeable) {
         this.closeables.add(closeable);
     }
 
-    @Override
     public synchronized PrintWriter getConsoleOut() {
         if (null == console) {
             this.console = new PrintWriter(System.out, false, StandardCharsets.UTF_8);
@@ -958,17 +962,14 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         return this.console;
     }
 
-    @Override
     public synchronized InputStream getConsoleIn() {
         return System.in;
     }
 
-    @Override
     public void setConsoleOut(PrintWriter writer) {
         this.console = writer;
     }
 
-    @Override
     public synchronized ErrorMetrics getExceptionMetrics() {
         if (null == this.errorMetrics) {
             errorMetrics = new ErrorMetrics(this);
@@ -977,6 +978,12 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
     }
 
 
+    public String getAlias() {
+        return getActivityDef().getAlias();
+    }
 
+    public int getHdrDigits() {
+        return getComponentProp("hdr_digits").map(Integer::parseInt).orElse(3);
 
+    }
 }

@@ -18,11 +18,8 @@ package io.nosqlbench.engine.core;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
-import io.nosqlbench.engine.api.activityimpl.uniform.actions.StandardAction;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityapi.core.Action;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.Motor;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;

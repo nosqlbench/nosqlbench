@@ -16,6 +16,8 @@
 
 package io.nosqlbench.engine.api.activityapi.core;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+
 import java.util.Map;
 
 /**
@@ -23,5 +25,5 @@ import java.util.Map;
  * activities that are present in a configuration. Those dispensers will have th
  */
 public interface ActivitiesAware {
-    void setActivitiesMap(Map<String,Activity> activities);
+    void setActivitiesMap(Map<String, StandardActivity> activities);
 }

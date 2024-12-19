@@ -17,9 +17,9 @@
 
 package io.nosqlbench.scenarios.simframe.optimizers;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
@@ -60,11 +60,12 @@ public class CMD_reset extends NBBaseCommand {
      */
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        Optional<Activity> optionalActivity = Optional.ofNullable(params.get("activity")).flatMap(controller::getActivity);
+        Optional<StandardActivity> optionalActivity =
+            Optional.ofNullable(params.get("activity")).flatMap(controller::getActivity);
         if (params.get("activity")!=null && optionalActivity.isEmpty()) {
             throw new RuntimeException("you specified activity '" + params.get("activity") + "' but it was not found.");
         }
-        try (Activity flywheel = optionalActivity.or(controller::getSoloActivity)
+        try (StandardActivity flywheel = optionalActivity.or(controller::getSoloActivity)
                 .orElseThrow(() -> new RuntimeException("You didn't provide the name of an activity to attach to, nor was there a solo activity available in this context"))) {
 
             params.forEach((key, value) -> {

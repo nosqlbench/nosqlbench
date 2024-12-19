@@ -17,6 +17,7 @@ package io.nosqlbench.engine.core.lifecycle.activity;
 
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
@@ -68,7 +69,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
     private static final Logger activitylogger = LogManager.getLogger("ACTIVITY");
 
     private final LinkedList<Motor<?>> motors = new LinkedList<>();
-    private final Activity activity;
+    private final StandardActivity activity;
     private final ActivityDef activityDef;
     private final RunStateTally tally;
     private final MotorDispenser motorSource;
@@ -81,7 +82,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
     private ActivityExecutorShutdownHook shutdownHook = null;
     private NBMetricGauge threadsGauge;
 
-    public ActivityExecutor(Activity activity) {
+    public ActivityExecutor(StandardActivity activity) {
         this.activity = activity;
         this.activityDef = activity.getActivityDef();
         this.motorSource = activity.getWiring().getMotorDispenserDelegate();
@@ -145,7 +146,8 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
 
     public Exception forceStopActivity(int initialMillisToWait) {
 
-        activitylogger.debug("FORCE STOP/before alias=(" + activity.getAlias() + ")");
+        activitylogger.debug("FORCE STOP/before alias=(" + activity.getActivityDef().getAlias() +
+                                                                                       ")");
         activity.setRunState(RunState.Stopped);
 
         executorService.shutdownNow();
@@ -378,7 +380,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         return motors.stream().anyMatch(m -> m.getState().get() == RunState.Running);
     }
 
-    public Activity getActivity() {
+    public StandardActivity getActivity() {
         return activity;
     }
 
@@ -542,7 +544,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
      */
     private void startRunningActivityThreads() {
 
-        logger.info(() -> "starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
+        logger.info(() -> "starting activity " + activity.getAlias() + " for cycles " + activity.getActivityDef().getCycleSummary());
         Annotators.recordAnnotation(Annotation.newBuilder()
             .element(this)
             .now()

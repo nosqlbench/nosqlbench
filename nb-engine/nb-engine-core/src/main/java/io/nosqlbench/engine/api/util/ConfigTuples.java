@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.api.util;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -34,13 +34,13 @@ public class ConfigTuples implements Iterable<ConfigTuples.Section> {
         this.sections = sections;
     }
 
-    public ConfigTuples(Activity activity, String param) {
+    public ConfigTuples(StandardActivity activity, String param) {
         this(activity.getParams().getOptionalString(param).orElse(""));
     }
 
     private List<Section> parseParams(String configdata) {
         try {
-            List<Section> sections = Arrays.stream(configdata.split("[,]"))
+            List<Section> sections = Arrays.stream(configdata.split(","))
                     .filter(Objects::nonNull)
                     .filter(s -> !s.isEmpty())
                     .map(s -> new Section(s, "[:=]"))

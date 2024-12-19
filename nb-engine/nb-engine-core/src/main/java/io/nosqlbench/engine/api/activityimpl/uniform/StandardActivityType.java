@@ -18,10 +18,8 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.engine.api.activityimpl.uniform.actions.StandardAction;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.ActivitiesAware;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.MotorDispenser;
@@ -68,7 +66,7 @@ public class StandardActivityType<A extends StandardActivity<?,?>> {
      * Create an instance of an activity from the activity type.
      *
      * @param activityDef the definition that initializes and controls the activity.
-     * @return a distinct Activity instance for each call
+     * @return a distinct StandardActivity instance for each call
      */
     @SuppressWarnings("unchecked")
     public A getActivity(final ActivityDef activityDef,
@@ -96,9 +94,9 @@ public class StandardActivityType<A extends StandardActivity<?,?>> {
      * @param activities  a map of existing activities
      * @return a distinct activity instance for each call
      */
-    public Activity getAssembledActivity(
+    public StandardActivity getAssembledActivity(
         final NBComponent parent, final ActivityDef activityDef,
-        final Map<String, Activity> activities
+        final Map<String, StandardActivity> activities
     ) {
         //        final A activity = this.getActivity(activityDef, parent);
         ActivityWiring wiring = new ActivityWiring(activityDef);
@@ -141,7 +139,7 @@ public class StandardActivityType<A extends StandardActivity<?,?>> {
      * Return the InputDispenser instance that will be used by the associated activity to create Input factories
      * for each thread slot.
      *
-     * @param activity the Activity instance which will parameterize this InputDispenser
+     * @param activity the StandardActivity instance which will parameterize this InputDispenser
      * @return the InputDispenser for the associated activity
      */
     public InputDispenser getInputDispenser(final StandardActivity activity) {

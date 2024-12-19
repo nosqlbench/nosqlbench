@@ -55,7 +55,7 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
     private static final Logger logger = LogManager.getLogger(CoreMotor.class);
 
     private final long slotId;
-    private final Activity activity;
+    private final StandardActivity activity;
 
     private Timer inputTimer;
 
@@ -69,7 +69,7 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
 
     private Input input;
     private SyncAction action;
-    //    private final Activity activity;
+    //    private final StandardActivity activity;
     private Output output;
 
     private final MotorState motorState;

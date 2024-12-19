@@ -22,13 +22,11 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleRe
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleSpanResults;
 import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import io.nosqlbench.engine.api.util.SimpleConfig;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog.CanFilterResultValue;
 import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;

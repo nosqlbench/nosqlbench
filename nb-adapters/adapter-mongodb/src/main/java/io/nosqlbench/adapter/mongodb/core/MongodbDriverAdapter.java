@@ -30,7 +30,7 @@ import io.nosqlbench.nb.annotations.Service;
 import java.util.function.LongFunction;
 
 /**
- * Special thanks to Justin Chu who authored the original NoSQLBench MongoDB ActivityType.
+ * Special thanks to Justin Chu who authored the original NoSQLBench MongoDB StandardActivityType.
  */
 @Service(value = DriverAdapter.class, selector = "mongodb")
 public class MongodbDriverAdapter extends BaseDriverAdapter<MongoOp<?>, MongoSpace> {

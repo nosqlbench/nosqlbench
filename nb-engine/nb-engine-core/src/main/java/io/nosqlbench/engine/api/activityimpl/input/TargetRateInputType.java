@@ -16,7 +16,6 @@
 
 package io.nosqlbench.engine.api.activityimpl.input;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
@@ -33,10 +32,10 @@ public class TargetRateInputType implements InputType {
 
     public static class Dispenser implements InputDispenser {
 
-        private final Activity activity;
+        private final StandardActivity activity;
         private final AtomicInput input;
 
-        public Dispenser(Activity activity) {
+        public Dispenser(StandardActivity activity) {
             this.activity = activity;
             this.input = new AtomicInput(activity, activity.getActivityDef());
         }

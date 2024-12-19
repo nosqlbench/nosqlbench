@@ -16,19 +16,16 @@
 
 package io.nosqlbench.engine.core.lifecycle.commands;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.nb.annotations.Service;
-import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.util.Optional;
 
 @Service(value = NBBaseCommand.class,selector = "start")
 public class CMD_start extends NBBaseCommand {

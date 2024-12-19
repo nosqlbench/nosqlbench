@@ -16,9 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
-import io.nosqlbench.engine.api.activityimpl.uniform.actions.StandardAction;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
@@ -29,7 +27,6 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegmen
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleResultsRLEBufferReadable;
 import io.nosqlbench.engine.api.util.SimpleConfig;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 

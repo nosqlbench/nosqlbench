@@ -16,11 +16,8 @@
 
 package io.nosqlbench.engine.api.activityapi.input;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.nb.annotations.Maturity;
-import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
 
 public interface InputType {

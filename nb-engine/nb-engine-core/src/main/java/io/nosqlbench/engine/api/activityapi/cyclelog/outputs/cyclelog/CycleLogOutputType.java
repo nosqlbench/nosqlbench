@@ -16,7 +16,6 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.ReorderingConcurrentResultBuffer;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.output.Output;

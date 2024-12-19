@@ -16,6 +16,7 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
@@ -23,7 +24,6 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 
@@ -107,7 +107,7 @@ public class NB_cocycledelay_bursty extends NBBaseCommand {
 
         controller.waitMillis(500);
         stdout.println("starting activity co_cycle_delay_bursty");
-        Activity activity = controller.start(co_cycle_delay_bursty);
+        StandardActivity activity = controller.start(co_cycle_delay_bursty);
         controller.waitMillis(1000);
 
         NBMetricTimer service_time_counter = container.find().topMetric("activity=co_cycle_delay_bursty,name=cycles_servicetime", NBMetricTimer.class);

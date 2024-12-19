@@ -16,9 +16,9 @@
 
 package io.nosqlbench.scenarios.simframe;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
@@ -29,7 +29,7 @@ import java.util.concurrent.locks.LockSupport;
 public class SimFrameUtils {
     public static final String SIM_CYCLES = "sim_cycles";
 
-    public static void awaitActivity(Activity flywheel) {
+    public static void awaitActivity(StandardActivity flywheel) {
         // await flywheel actually spinning, or timeout with error
         NBMetricTimer result_success_timer = flywheel.find().timer("name:result_success");
         for (int i = 0; i < 1000; i++) {
@@ -44,12 +44,12 @@ public class SimFrameUtils {
         }
     }
 
-    public static Activity findFlywheelActivity(ContainerActivitiesController controller, String providedActivityName) {
-        Optional<Activity> optionalActivity = Optional.ofNullable(providedActivityName).flatMap(controller::getActivity);
+    public static StandardActivity findFlywheelActivity(ContainerActivitiesController controller, String providedActivityName) {
+        Optional<StandardActivity> optionalActivity = Optional.ofNullable(providedActivityName).flatMap(controller::getActivity);
         if (providedActivityName!=null && optionalActivity.isEmpty()) {
             throw new RuntimeException("you specified activity '" + providedActivityName + "' but it was not found.");
         }
-        Activity flywheel = optionalActivity.or(controller::getSoloActivity)
+        StandardActivity flywheel = optionalActivity.or(controller::getSoloActivity)
             .orElseThrow(() -> new RuntimeException("You didn't provide the name of an activity to attach to, nor was there a solo activity available in this context"));
 
         // Start the flywheel at an "idle" speed, even if the user hasn't set it
