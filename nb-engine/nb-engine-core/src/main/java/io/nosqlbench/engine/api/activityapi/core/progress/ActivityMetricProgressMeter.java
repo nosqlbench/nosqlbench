@@ -16,7 +16,10 @@
 
 package io.nosqlbench.engine.api.activityapi.core.progress;
 
+import com.codahale.metrics.Counting;
 import com.codahale.metrics.Timer;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.nb.api.engine.util.Unit;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 
@@ -26,14 +29,14 @@ public class ActivityMetricProgressMeter implements ProgressMeterDisplay, Comple
 
     private final Activity activity;
     private final Instant startInstant;
-    private final Timer bindTimer;
-    private final Timer cyclesTimer;
+    private final NBMetricTimer bindTimer;
+    private final NBMetricTimer cyclesTimer;
 
-    public ActivityMetricProgressMeter(Activity activity) {
+    public ActivityMetricProgressMeter(StandardActivity activity) {
         this.activity = activity;
         this.startInstant = Instant.ofEpochMilli(activity.getStartedAtMillis());
-        this.bindTimer = activity.getInstrumentation().getOrCreateBindTimer();
-        this.cyclesTimer = activity.getInstrumentation().getOrCreateCyclesServiceTimer();
+        this.bindTimer = activity.bindTimer;
+        this.cyclesTimer = activity.cycleServiceTimer;
     }
 
     @Override
@@ -60,7 +63,7 @@ public class ActivityMetricProgressMeter implements ProgressMeterDisplay, Comple
 
     @Override
     public double getCurrentValue() {
-        return activity.getInstrumentation().getOrCreateBindTimer().getCount();
+        return bindTimer.getCount();
     }
 
     @Override

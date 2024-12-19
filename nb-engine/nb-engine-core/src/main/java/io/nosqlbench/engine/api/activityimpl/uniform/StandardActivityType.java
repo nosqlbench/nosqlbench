@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.uniform.actions.StandardAction;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
@@ -27,8 +28,6 @@ import io.nosqlbench.engine.api.activityapi.core.MotorDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
-import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
-import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
 
 import org.apache.logging.log4j.LogManager;
@@ -72,20 +71,20 @@ public class StandardActivityType<A extends StandardActivity<?,?>> {
      * @return a distinct Activity instance for each call
      */
     @SuppressWarnings("unchecked")
-    public A getActivity(final ActivityDef activityDef, final NBComponent parent) {
+    public A getActivity(final ActivityDef activityDef,
+                         final NBComponent parent,
+                         final ActivityWiring wiring) {
         if (activityDef.getParams().getOptionalString("async").isPresent())
             throw new RuntimeException("This driver does not support async mode yet.");
 
-        return (A) new StandardActivity(parent, activityDef);
+        return (A) new StandardActivity(parent, activityDef, wiring);
     }
 
     /**
      * This method will be called <em>once</em> per action instance.
-     *
-     * @param activity The activity instance that will parameterize the returned ActionDispenser instance.
      * @return an instance of ActionDispenser
      */
-    public ActionDispenser getActionDispenser(final A activity) {
+    public ActionDispenser getActionDispenser(final StandardActivity activity) {
         return new StandardActionDispenser(activity);
     }
 
@@ -97,28 +96,35 @@ public class StandardActivityType<A extends StandardActivity<?,?>> {
      * @param activities  a map of existing activities
      * @return a distinct activity instance for each call
      */
-    public Activity getAssembledActivity(final ActivityDef activityDef, final Map<String, Activity> activities, final NBComponent parent) {
-        final A activity = this.getActivity(activityDef, parent);
+    public Activity getAssembledActivity(
+        final NBComponent parent, final ActivityDef activityDef,
+        final Map<String, Activity> activities
+    ) {
+        //        final A activity = this.getActivity(activityDef, parent);
+        ActivityWiring wiring = new ActivityWiring(activityDef);
+        StandardActivity activity = new StandardActivity(parent, activityDef, wiring);
 
         final InputDispenser inputDispenser = this.getInputDispenser(activity);
         if (inputDispenser instanceof ActivitiesAware) ((ActivitiesAware) inputDispenser).setActivitiesMap(activities);
-        activity.setInputDispenserDelegate(inputDispenser);
+        wiring.setInputDispenserDelegate(inputDispenser);
+
 
         final ActionDispenser actionDispenser = this.getActionDispenser(activity);
         if (actionDispenser instanceof ActivitiesAware)
             ((ActivitiesAware) actionDispenser).setActivitiesMap(activities);
-        activity.setActionDispenserDelegate(actionDispenser);
+        wiring.setActionDispenserDelegate(actionDispenser);
 
-        final OutputDispenser outputDispenser = this.getOutputDispenser(activity).orElse(null);
+        final OutputDispenser outputDispenser = this.getOutputDispenser(wiring).orElse(null);
         if ((null != outputDispenser) && (outputDispenser instanceof ActivitiesAware))
             ((ActivitiesAware) outputDispenser).setActivitiesMap(activities);
-        activity.setOutputDispenserDelegate(outputDispenser);
+        wiring.setOutputDispenserDelegate(outputDispenser);
 
-        final MotorDispenser motorDispenser = this.getMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser);
+        final MotorDispenser motorDispenser = this.getMotorDispenser(activity, inputDispenser,
+                                                                     actionDispenser, outputDispenser);
         if (motorDispenser instanceof ActivitiesAware) ((ActivitiesAware) motorDispenser).setActivitiesMap(activities);
-        activity.setMotorDispenserDelegate(motorDispenser);
+        wiring.setMotorDispenserDelegate(motorDispenser);
 
-        return activity;
+        return this.getActivity(activityDef,parent,wiring);
     }
 
     /**
@@ -127,8 +133,8 @@ public class StandardActivityType<A extends StandardActivity<?,?>> {
      * @param activity The activity instance that will parameterize the returned MarkerDispenser instance.
      * @return an instance of MarkerDispenser
      */
-    public Optional<OutputDispenser> getOutputDispenser(final A activity) {
-        return CoreServices.getOutputDispenser(activity);
+    public Optional<OutputDispenser> getOutputDispenser(ActivityWiring activity) {
+        return CoreServices.getOutputDispenser(parent, activity);
     }
 
     /**
@@ -138,12 +144,12 @@ public class StandardActivityType<A extends StandardActivity<?,?>> {
      * @param activity the Activity instance which will parameterize this InputDispenser
      * @return the InputDispenser for the associated activity
      */
-    public InputDispenser getInputDispenser(final A activity) {
+    public InputDispenser getInputDispenser(final StandardActivity activity) {
         return CoreServices.getInputDispenser(activity);
     }
 
     public <T> MotorDispenser<T> getMotorDispenser(
-        final A activity,
+        final StandardActivity activity,
         final InputDispenser inputDispenser,
         final ActionDispenser actionDispenser,
         final OutputDispenser outputDispenser) {

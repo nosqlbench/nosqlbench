@@ -29,5 +29,5 @@ public interface ActionDispenser {
      * @param slot The numbered slot within the activity instance for this action.
      * @return A new or cached Action for the specified slot.
      */
-    Action getAction(int slot);
+    SyncAction getAction(int slot);
 }

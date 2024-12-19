@@ -20,14 +20,20 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleResultsRLEBufferTarget;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleSpanResults;
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import io.nosqlbench.engine.api.util.SimpleConfig;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog.CanFilterResultValue;
 import io.nosqlbench.engine.api.activityapi.output.Output;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.config.standard.TestComponent;
+import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -47,7 +53,7 @@ import java.util.function.Predicate;
  * <p>It <em>is</em> valid for RLE segments to be broken apart into contiguous
  * ranges. Any implementation should treat this as normal.
  */
-public class CycleLogOutput implements Output, CanFilterResultValue {
+public class CycleLogOutput extends NBBaseComponent implements Output, CanFilterResultValue, Closeable {
 
     // For use in allocating file data, etc
     private final static Logger logger = LogManager.getLogger(CycleLogOutput.class);
@@ -59,11 +65,13 @@ public class CycleLogOutput implements Output, CanFilterResultValue {
     private final File outputFile;
     private Predicate<ResultReadable> filter;
 
-    public CycleLogOutput(Activity activity) {
+    public CycleLogOutput(NBComponent parent, NBLabels componentOnlyLabels, ActivityWiring wiring) {
+        super(parent, componentOnlyLabels);
 
-        SimpleConfig conf = new SimpleConfig(activity, "output");
+        SimpleConfig conf = new SimpleConfig(wiring, "output");
         this.extentSizeInSpans = conf.getInteger("extentSize").orElse(1000);
-        this.outputFile = new File(conf.getString("file").orElse(activity.getAlias()) + ".cyclelog");
+        this.outputFile = new File(conf.getString("file").orElse(wiring.getActivityDef().getAlias()) +
+                                       ".cyclelog");
 
 
         targetBuffer = new CycleResultsRLEBufferTarget(extentSizeInSpans);
@@ -71,6 +79,8 @@ public class CycleLogOutput implements Output, CanFilterResultValue {
     }
 
     public CycleLogOutput(File outputFile, int extentSizeInSpans) {
+        super(new NBBaseComponent(null),NBLabels.forKV("running","standalone","type",
+                                                       "cycle_log_output"));
         this.extentSizeInSpans = extentSizeInSpans;
         this.outputFile = outputFile;
         targetBuffer = new CycleResultsRLEBufferTarget(extentSizeInSpans);
@@ -131,7 +141,7 @@ public class CycleLogOutput implements Output, CanFilterResultValue {
     }
 
     @Override
-    public synchronized void close() throws Exception {
+    protected void teardown() {
         try {
             flush();
             if (file != null) {
@@ -141,9 +151,13 @@ public class CycleLogOutput implements Output, CanFilterResultValue {
             }
         } catch (Throwable t) {
             logger.error("Error while closing CycleLogOutput: " + t, t);
-            throw t;
+            throw new RuntimeException(t);
         }
+    }
 
+    @Override
+    public void beforeDetach() {
+        super.beforeDetach();
     }
 
     private synchronized void ensureCapacity(long newCapacity) {

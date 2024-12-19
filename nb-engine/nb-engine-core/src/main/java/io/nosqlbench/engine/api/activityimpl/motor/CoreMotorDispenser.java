@@ -15,6 +15,8 @@
  */
 package io.nosqlbench.engine.api.activityimpl.motor;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.input.Input;
@@ -30,12 +32,12 @@ import java.util.function.IntPredicate;
  */
 public class CoreMotorDispenser<D> implements MotorDispenser<D> {
 
-    private final Activity activity;
+    private final StandardActivity activity;
     private final InputDispenser inputDispenser;
     private final ActionDispenser actionDispenser;
     private final OutputDispenser outputDispenser;
 
-    public CoreMotorDispenser(Activity activity,
+    public CoreMotorDispenser(StandardActivity activity,
                               InputDispenser inputDispenser,
                               ActionDispenser actionDispenser,
                               OutputDispenser outputDispenser
@@ -48,7 +50,7 @@ public class CoreMotorDispenser<D> implements MotorDispenser<D> {
 
     @Override
     public Motor<D> getMotor(ActivityDef activityDef, int slotId) {
-        Action action = actionDispenser.getAction(slotId);
+        SyncAction action = actionDispenser.getAction(slotId);
         Input input = inputDispenser.getInput(slotId);
         Output output = null;
         if (outputDispenser !=null) {

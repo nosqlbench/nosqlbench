@@ -17,6 +17,9 @@
 package io.nosqlbench.engine.api.util;
 
 import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -32,8 +35,17 @@ public class SimpleConfig {
         this.params = parseParams(configdata);
     }
 
-    public SimpleConfig(Activity activity, String param) {
-        this(activity.getParams().getOptionalString(param).orElse(""));
+    public SimpleConfig(Activity activity, String params) {
+        this(activity.getActivityDef(),params);
+    }
+    public SimpleConfig(ActivityWiring wiring, String param) {
+        this(wiring.getParams().getOptionalString(param).orElse(""));
+    }
+    public SimpleConfig(ActivityDef activityDef, String param) {
+        this(activityDef.getParams().getOptionalString(param).orElse(""));
+    }
+    public SimpleConfig(ParameterMap parameters, String param) {
+        this(parameters.getOptionalString(param).orElse(""));
     }
 
     private Map<String, String> parseParams(String configdata) {

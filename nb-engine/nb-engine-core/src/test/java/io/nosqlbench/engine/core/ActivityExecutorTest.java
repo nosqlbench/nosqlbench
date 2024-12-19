@@ -16,6 +16,9 @@
 
 package io.nosqlbench.engine.core;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.advisor.NBAdvisorException;
@@ -24,7 +27,6 @@ import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
-import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
@@ -36,6 +38,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -86,11 +89,12 @@ class ActivityExecutorTest {
     synchronized void testAdvisorError() {
 
         try {
-            ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-delayed-start;cycles=1000;initdelay=2000;");
+            ActivityDef activityDef = ActivityDef.parseActivityDef(
+                "driver=diag;alias=test-delayed-start;cycles=1000;initdelay=2000;");
             new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
-            Activity activity = new DelayedInitActivity(activityDef);
-	    fail("Expected an Advisor exception");
-	} catch (NBAdvisorException e) {
+            StandardActivity activity = new DelayedInitActivity(activityDef);
+            fail("Expected an Advisor exception");
+        } catch (NBAdvisorException e) {
             assertThat(e.toString().contains("error"));
             assertThat(e.getExitCode() == 2);
         }
@@ -99,19 +103,28 @@ class ActivityExecutorTest {
     @Test
     synchronized void testDelayedStartSanity() {
 
-        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test_delayed_start;cycles=1000;initdelay=2000;");
-        new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
+        ActivityDef activityDef = ActivityDef.parseActivityDef(
+            "driver=diag;alias=test_delayed_start;cycles=1000;initdelay=2000;");
+        Optional<StandardActivityType> standardActivityType = new ActivityTypeLoader().load(
+            activityDef, TestComponent.INSTANCE);
 
-        Activity activity = new DelayedInitActivity(activityDef);
+//        Activity activity = new DelayedInitActivity(activityDef);
+        ActivityWiring wiring = new ActivityWiring(activityDef);
+        StandardActivity activity = standardActivityType.get().getActivity(
+            activityDef, TestComponent.INSTANCE, wiring);
         final InputDispenser inputDispenser = new CoreInputDispenser(activity);
-        final ActionDispenser actionDispenser = new CoreActionDispenser(activity);
-        final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(activity).orElse(null);
+        final ActionDispenser actionDispenser = new CoreActionDispenser(wiring);
+        final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(
+            TestComponent.INSTANCE, wiring).orElse(null);
 
-        MotorDispenser<?> motorDispenser = new CoreMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser);
-        activity.setActionDispenserDelegate(actionDispenser);
-        activity.setOutputDispenserDelegate(outputDispenser);
-        activity.setInputDispenserDelegate(inputDispenser);
-        activity.setMotorDispenserDelegate(motorDispenser);
+        MotorDispenser<?> motorDispenser = new CoreMotorDispenser(
+            activity, inputDispenser,
+                                                                  actionDispenser, outputDispenser
+        );
+        wiring.setActionDispenserDelegate(actionDispenser);
+        wiring.setOutputDispenserDelegate(outputDispenser);
+        wiring.setInputDispenserDelegate(inputDispenser);
+        wiring.setMotorDispenserDelegate(motorDispenser);
 
         ActivityExecutor activityExecutor = new ActivityExecutor(activity);
 
@@ -133,27 +146,34 @@ class ActivityExecutorTest {
     @Test
     synchronized void testNewActivityExecutor() {
 
-        final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test_dynamic_params;cycles=1000;initdelay=5000;");
-        new ActivityTypeLoader().load(activityDef,TestComponent.INSTANCE);
+        final ActivityDef activityDef = ActivityDef.parseActivityDef(
+            "driver=diag;alias=test_dynamic_params;cycles=1000;initdelay=5000;");
+        new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
+        ActivityWiring wiring = new ActivityWiring(activityDef);
 
-        Activity simpleActivity = new SimpleActivity(TestComponent.INSTANCE,activityDef);
+        StandardActivity activity = new StandardActivity(
+            TestComponent.INSTANCE, activityDef, wiring);
 
-//        this.getActivityMotorFactory(this.motorActionDelay(999), new AtomicInput(simpleActivity,activityDef));
+        final InputDispenser inputDispenser = new CoreInputDispenser(activity);
+        final ActionDispenser actionDispenser = new CoreActionDispenser(wiring);
+        final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(
+            TestComponent.INSTANCE, wiring).orElse(null);
 
-        final InputDispenser inputDispenser = new CoreInputDispenser(simpleActivity);
-        final ActionDispenser actionDispenser = new CoreActionDispenser(simpleActivity);
-        final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(simpleActivity).orElse(null);
+        MotorDispenser<?> motorDispenser = new CoreMotorDispenser<>(
+            activity, inputDispenser, actionDispenser, outputDispenser);
 
-        MotorDispenser<?> motorDispenser = new CoreMotorDispenser<>(simpleActivity,
-                inputDispenser, actionDispenser, outputDispenser);
+        wiring.setActionDispenserDelegate(actionDispenser);
+        wiring.setInputDispenserDelegate(inputDispenser);
+        wiring.setMotorDispenserDelegate(motorDispenser);
 
-        simpleActivity.setActionDispenserDelegate(actionDispenser);
-        simpleActivity.setInputDispenserDelegate(inputDispenser);
-        simpleActivity.setMotorDispenserDelegate(motorDispenser);
-
+        StandardActivity simpleActivity = new StandardActivity<>(
+            TestComponent.INSTANCE,
+                                                                 activityDef, wiring
+        );
         ActivityExecutor activityExecutor = new ActivityExecutor(simpleActivity);
         activityDef.setThreads(5);
-        ForkJoinTask<ExecutionResult> executionResultForkJoinTask = ForkJoinPool.commonPool().submit(activityExecutor);
+        ForkJoinTask<ExecutionResult> executionResultForkJoinTask = ForkJoinPool.commonPool().submit(
+            activityExecutor);
 
 //        activityExecutor.startActivity();
 
@@ -162,7 +182,8 @@ class ActivityExecutorTest {
             final int threadTarget = speeds[offset];
             final int threadTime = speeds[offset + 1];
 
-            ActivityExecutorTest.logger.debug(() -> "Setting thread level to " + threadTarget + " for " + threadTime + " seconds.");
+            ActivityExecutorTest.logger.debug(
+                () -> "Setting thread level to " + threadTarget + " for " + threadTime + " seconds.");
             activityDef.setThreads(threadTarget);
 
             try {
@@ -182,13 +203,13 @@ class ActivityExecutorTest {
         }
     }
 
-    private MotorDispenser<?> getActivityMotorFactory(final Action lc, Input ls) {
+    private MotorDispenser<?> getActivityMotorFactory(final SyncAction lc, Input ls) {
         return new MotorDispenser<>() {
             @Override
             public Motor getMotor(final ActivityDef activityDef, final int slotId) {
-                final Activity activity = new SimpleActivity(TestComponent.INSTANCE,activityDef);
-                final Motor<?> cm = new CoreMotor<>(activity, slotId, ls);
-                cm.setAction(lc);
+                final StandardActivity activity = new StandardActivity(
+                    TestComponent.INSTANCE, activityDef, ActivityWiring.of(activityDef));
+                final Motor<?> cm = new CoreMotor<>(activity, slotId, ls, lc, null);
                 return cm;
             }
         };
@@ -198,7 +219,8 @@ class ActivityExecutorTest {
         return new SyncAction() {
             @Override
             public int runCycle(final long cycle) {
-                ActivityExecutorTest.logger.info(() -> "consuming " + cycle + ", delaying:" + delay);
+                ActivityExecutorTest.logger.info(
+                    () -> "consuming " + cycle + ", delaying:" + delay);
                 try {
                     Thread.sleep(delay);
                 } catch (final InterruptedException ignored) {
@@ -209,16 +231,17 @@ class ActivityExecutorTest {
 
     }
 
-    private static class DelayedInitActivity extends SimpleActivity {
+    private static class DelayedInitActivity extends StandardActivity {
         private static final Logger logger = LogManager.getLogger(DelayedInitActivity.class);
 
         public DelayedInitActivity(final ActivityDef activityDef) {
-            super(TestComponent.INSTANCE,activityDef);
+            super(TestComponent.INSTANCE, activityDef, ActivityWiring.of(activityDef));
         }
 
         @Override
         public void initActivity() {
-            final Integer initDelay = this.activityDef.getParams().getOptionalInteger("initdelay").orElse(0);
+            final Integer initDelay = this.activityDef.getParams().getOptionalInteger(
+                "initdelay").orElse(0);
             DelayedInitActivity.logger.info(() -> "delaying for " + initDelay);
             try {
                 Thread.sleep(initDelay);

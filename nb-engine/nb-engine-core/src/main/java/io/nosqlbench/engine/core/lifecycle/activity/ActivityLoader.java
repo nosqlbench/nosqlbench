@@ -40,8 +40,8 @@ public class ActivityLoader {
 
     public synchronized Activity loadActivity(ActivityDef activityDef, final NBComponent parent) {
         activityDef= activityDef.deprecate("yaml","workload").deprecate("type","driver");
-        final Activity activity = new StandardActivityType<>(activityDef, parent).getAssembledActivity(activityDef, this.activityMap, parent);
-        this.activityMap.put(activity.getAlias(),activity);
+        final Activity activity =
+            new StandardActivityType<>(activityDef, parent).getAssembledActivity(parent, activityDef, this.activityMap);this.activityMap.put(activity.getAlias(),activity);
         ActivityLoader.logger.debug("Resolved activity for alias '{}'", activityDef.getAlias());
         return activity;
     }

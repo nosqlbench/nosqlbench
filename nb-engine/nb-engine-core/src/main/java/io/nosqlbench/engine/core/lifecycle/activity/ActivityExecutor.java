@@ -16,6 +16,7 @@
 package io.nosqlbench.engine.core.lifecycle.activity;
 
 import com.codahale.metrics.Gauge;
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
@@ -70,6 +71,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
     private final Activity activity;
     private final ActivityDef activityDef;
     private final RunStateTally tally;
+    private final MotorDispenser motorSource;
     private ExecutorService executorService;
     private Exception exception;
     private String sessionId = "";
@@ -82,6 +84,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
     public ActivityExecutor(Activity activity) {
         this.activity = activity;
         this.activityDef = activity.getActivityDef();
+        this.motorSource = activity.getWiring().getMotorDispenserDelegate();
         activity.getActivityDef().getParams().addListener(this);
         this.tally = activity.getRunStateTally();
     }
@@ -260,7 +263,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         // Create motor slots
         try {
             while (motors.size() < activityDef.getThreads()) {
-                Motor motor = activity.getMotorDispenserDelegate().getMotor(activityDef, motors.size());
+                Motor motor = motorSource.getMotor(activityDef, motors.size());
                 logger.trace(() -> "Starting cycle motor thread:" + motor);
                 motors.add(motor);
             }

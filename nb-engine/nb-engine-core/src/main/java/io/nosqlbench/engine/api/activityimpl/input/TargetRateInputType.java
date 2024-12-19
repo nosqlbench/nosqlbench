@@ -20,13 +20,14 @@ import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.nb.annotations.Service;
 
 @Service(value= InputType.class, selector="atomicseq")
 public class TargetRateInputType implements InputType {
 
     @Override
-    public InputDispenser getInputDispenser(Activity activity) {
+    public InputDispenser getInputDispenser(StandardActivity activity) {
         return new Dispenser(activity);
     }
 

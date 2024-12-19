@@ -16,26 +16,25 @@
 
 package io.nosqlbench.engine.api.activityapi.core;
 
+import com.codahale.metrics.Counting;
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
-import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
-import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
-import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
-import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.function.Supplier;
 
 /**
  * Provides the components needed to build and run an activity a runtime.
- * The easiest way to build a useful Activity is to extend {@link SimpleActivity}.
+ * The easiest way to build a useful Activity is to extend {@link StandardActivity}.
  */
 public interface Activity extends Comparable<Activity>, ActivityDefObserver, ProgressCapable, StateCapable, NBComponent {
 
@@ -63,26 +62,6 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
      * Close all autocloseables that have been registered with this Activity.
      */
     void closeAutoCloseables();
-
-    MotorDispenser<?> getMotorDispenserDelegate();
-
-    void setMotorDispenserDelegate(MotorDispenser<?> motorDispenser);
-
-    InputDispenser getInputDispenserDelegate();
-
-    void setInputDispenserDelegate(InputDispenser inputDispenser);
-
-    ActionDispenser getActionDispenserDelegate();
-
-    void setActionDispenserDelegate(ActionDispenser actionDispenser);
-
-    IntPredicateDispenser getResultFilterDispenserDelegate();
-
-    void setResultFilterDispenserDelegate(IntPredicateDispenser resultFilterDispenser);
-
-    OutputDispenser getMarkerDispenserDelegate();
-
-    void setOutputDispenserDelegate(OutputDispenser outputDispenser);
 
     @Override
     RunState getRunState();
@@ -115,15 +94,6 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
      */
     RateLimiter getStrideLimiter();
 
-    /**
-     * Get or create the instrumentation needed for this activity. This provides
-     * a single place to find and manage, and document instrumentation that is
-     * uniform across all activities.
-     *
-     * @return A new or existing instrumentation object for this activity.
-     */
-    ActivityInstrumentation getInstrumentation();
-
     PrintWriter getConsoleOut();
 
     InputStream getConsoleIn();
@@ -142,11 +112,12 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver, Pro
 //        return t -> t.getClass().getSimpleName();
 //    }
 //
-    int getMaxTries();
 
+    int getMaxTries();
     default int getHdrDigits() {
         return this.getParams().getOptionalInteger("hdr_digits").orElse(4);
     }
-
     RunStateTally getRunStateTally();
+    ActivityWiring getWiring();
+
 }

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl.input;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.api.util.SimpleConfig;
 import io.nosqlbench.engine.api.activityapi.core.ActivitiesAware;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
@@ -27,11 +28,11 @@ import java.util.Map;
 
 public class CoreInputDispenser implements InputDispenser, ActivitiesAware {
 
-    private final Activity activity;
+    private final StandardActivity activity;
     private Map<String, Activity> activities;
     private Input input;
 
-    public CoreInputDispenser(Activity activity) {
+    public CoreInputDispenser(StandardActivity activity) {
         this.activity = activity;
     }
 
@@ -44,7 +45,7 @@ public class CoreInputDispenser implements InputDispenser, ActivitiesAware {
     }
 
     private synchronized Input createInput(long slot) {
-        SimpleConfig conf = new SimpleConfig(activity, "input");
+        SimpleConfig conf = new SimpleConfig(activity.getActivityDef(), "input");
         String inputType = conf.getString("type").orElse("atomicseq");
         InputType inputTypeImpl = InputType.FINDER.getOrThrow(inputType);
         InputDispenser inputDispenser = inputTypeImpl.getInputDispenser(activity);

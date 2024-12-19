@@ -22,7 +22,10 @@ import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import io.nosqlbench.nb.annotations.Service;
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,20 +33,21 @@ import org.apache.logging.log4j.Logger;
 public class CycleLogOutputType implements OutputType {
 
     @Override
-    public OutputDispenser getOutputDispenser(Activity activity) {
-        return new Dispenser(activity);
+    public OutputDispenser getOutputDispenser(NBComponent parent, ActivityWiring wiring) {
+        return new Dispenser(parent, wiring);
     }
 
     public static class Dispenser implements OutputDispenser {
         private final static Logger logger = LogManager.getLogger(OutputDispenser.class);
 
         private final Output output;
-        private final Activity activity;
+        private final ActivityWiring activity;
 
-        public Dispenser(Activity activity) {
-            this.activity = activity;
-            Input input = activity.getInputDispenserDelegate().getInput(0);
-            CycleLogOutput rleFileWriter = new CycleLogOutput(activity);
+        public Dispenser(NBComponent parent, ActivityWiring wiring) {
+            this.activity = wiring;
+            Input input = wiring.getInputDispenserDelegate().getInput(0);
+            CycleLogOutput rleFileWriter = new CycleLogOutput(parent, NBLabels.forKV("type",
+                                                                                     "output"), wiring);
 
             // TODO: Rework this so that the contiguous marking chunker can onAfterOpStop filtering
 //            if (input.isContiguous()) {
@@ -58,7 +62,7 @@ public class CycleLogOutputType implements OutputType {
                         new ReorderingConcurrentResultBuffer(rleFileWriter);
                 this.output=prebuffer;
 //            }
-            activity.registerAutoCloseable(output);
+//            wiring.registerAutoCloseable(output);
         }
 
         @Override

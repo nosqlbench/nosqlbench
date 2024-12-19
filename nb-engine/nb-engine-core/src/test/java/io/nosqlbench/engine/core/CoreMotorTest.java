@@ -16,13 +16,15 @@
 
 package io.nosqlbench.engine.core;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.actions.StandardAction;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.Motor;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
-import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.core.fortesting.BlockingSegmentInput;
 import org.junit.jupiter.api.Test;
@@ -37,14 +39,13 @@ public class CoreMotorTest {
 
     @Test
     public void testBasicActivityMotor() {
-        final Activity activity = new SimpleActivity(
-            new TestComponent("testing", "coremotor"),
-            ActivityDef.parseActivityDef("alias=foo")
-        );
+        ActivityDef activityDef = ActivityDef.parseActivityDef("alias=foo");
+        final StandardActivity activity = new StandardActivity<>(
+            new TestComponent("testing", "coremotor"), activityDef, ActivityWiring.of(activityDef));
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
-        final Motor cm = new CoreMotor(activity, 5L, lockstepper);
         final AtomicLong observableAction = new AtomicLong(-3L);
-        cm.setAction(this.getTestConsumer(observableAction));
+        SyncAction action = this.getTestConsumer(observableAction);
+        final Motor cm = new CoreMotor(activity, 5L, lockstepper, action, null);
         final Thread t = new Thread(cm);
         t.setName("TestMotor");
         t.start();
@@ -54,18 +55,20 @@ public class CoreMotorTest {
         }
 
         lockstepper.publishSegment(5L);
-        final boolean result = this.awaitCondition(atomicInteger -> 5L == atomicInteger.get(), observableAction, 5000, 100);
+        final boolean result = this.awaitCondition(
+            atomicInteger -> 5L == atomicInteger.get(), observableAction, 5000, 100);
         assertThat(observableAction.get()).isEqualTo(5L);
     }
 
     @Test
     public void testIteratorStride() {
-        SimpleActivity activity = new SimpleActivity(TestComponent.INSTANCE, "stride=3");
+        ActivityDef activityDef = ActivityDef.parseActivityDef("stride=3");
+        StandardActivity activity = new StandardActivity(
+            TestComponent.INSTANCE, activityDef, ActivityWiring.of(activityDef));
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
-        final Motor cm1 = new CoreMotor(activity, 1L, lockstepper);
         final AtomicLongArray ary = new AtomicLongArray(10);
-        final Action a1 = this.getTestArrayConsumer(ary);
-        cm1.setAction(a1);
+        final SyncAction a1 = this.getTestArrayConsumer(ary);
+        final Motor cm1 = new CoreMotor(activity, 1L, lockstepper, a1, null);
 
         final Thread t1 = new Thread(cm1);
         t1.setName("cm1");
@@ -109,7 +112,10 @@ public class CoreMotorTest {
     }
 
 
-    private boolean awaitAryCondition(final Predicate<AtomicLongArray> atomicLongAryPredicate, final AtomicLongArray ary, final long millis, final long retry) {
+    private boolean awaitAryCondition(
+        final Predicate<AtomicLongArray> atomicLongAryPredicate, final AtomicLongArray ary,
+        final long millis, final long retry
+    ) {
         final long start = System.currentTimeMillis();
         long now = start;
         while (now < (start + millis)) {
@@ -124,7 +130,10 @@ public class CoreMotorTest {
         return false;
     }
 
-    private boolean awaitCondition(final Predicate<AtomicLong> atomicPredicate, final AtomicLong atomicInteger, final long millis, final long retry) {
+    private boolean awaitCondition(
+        final Predicate<AtomicLong> atomicPredicate, final AtomicLong atomicInteger,
+        final long millis, final long retry
+    ) {
         final long start = System.currentTimeMillis();
         long now = start;
         while (now < (start + millis)) {

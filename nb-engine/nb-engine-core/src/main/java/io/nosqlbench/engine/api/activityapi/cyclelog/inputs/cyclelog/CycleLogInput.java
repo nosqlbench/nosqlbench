@@ -16,6 +16,11 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.actions.StandardAction;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
@@ -38,24 +43,28 @@ import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
-public class CycleLogInput implements Input, AutoCloseable, Iterable<CycleResultsSegment>, CanFilterResultValue, NBLabeledElement {
+public class CycleLogInput extends NBBaseComponent implements Input, AutoCloseable,
+    Iterable<CycleResultsSegment>
+    , CanFilterResultValue, NBLabeledElement {
     private final static Logger logger = LogManager.getLogger(CycleLogInput.class);
     private final Iterator<CycleResultsSegment> cycleResultSegmentIterator;
-    private final NBLabeledElement parent;
     private RandomAccessFile raf;
     private MappedByteBuffer mbb;
     private Iterator<CycleResult> segmentIter;
     private Predicate<ResultReadable> filter;
 
-    public CycleLogInput(Activity activity) {
-        SimpleConfig conf = new SimpleConfig(activity, "input");
-        mbb = initMappedBuffer(conf.getString("file").orElse(activity.getAlias()) + ".cyclelog");
+    public CycleLogInput(StandardActivity activity) {
+        super(activity, NBLabels.forKV("input","cyclelog"));
+        SimpleConfig conf = new SimpleConfig(activity.getActivityDef(), "input");
+        mbb =
+            initMappedBuffer(conf.getString("file").orElse(activity.getActivityDef().getAlias()) +
+                                   ".cyclelog");
         cycleResultSegmentIterator = iterator();
         segmentIter = cycleResultSegmentIterator.next().iterator();
-        this.parent = activity;
     }
 
-    public CycleLogInput(String filename) {
+    public CycleLogInput(NBComponent parent, String filename) {
+        super(parent, NBLabels.forKV("input","cyclelog"));
         File cycleFile = null;
         try {
             cycleFile = new File(filename);
@@ -71,7 +80,6 @@ public class CycleLogInput implements Input, AutoCloseable, Iterable<CycleResult
         mbb = initMappedBuffer(cycleFile.getPath());
         cycleResultSegmentIterator = new CycleResultsRLEBufferReadable(mbb).iterator();
         segmentIter = cycleResultSegmentIterator.next().iterator();
-        this.parent = NBLabeledElement.EMPTY;
     }
 
     @Override
@@ -140,9 +148,13 @@ public class CycleLogInput implements Input, AutoCloseable, Iterable<CycleResult
     }
 
     @Override
-    public void close() throws Exception {
+    public void teardown() {
         if (raf != null) {
-            raf.close();
+            try {
+                raf.close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             mbb = null;
         }
     }

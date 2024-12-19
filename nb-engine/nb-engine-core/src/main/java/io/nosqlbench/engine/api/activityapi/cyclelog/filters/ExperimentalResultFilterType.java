@@ -29,7 +29,7 @@ public interface ExperimentalResultFilterType {
         new SimpleServiceLoader<>(ExperimentalResultFilterType.class, Maturity.Any);
 
     default IntPredicateDispenser getFilterDispenser(Activity activity) {
-        SimpleConfig conf = new SimpleConfig(activity, "resultfilter");
+        SimpleConfig conf = new SimpleConfig(activity.getWiring(), "resultfilter");
         return getFilterDispenser(conf);
     }
 

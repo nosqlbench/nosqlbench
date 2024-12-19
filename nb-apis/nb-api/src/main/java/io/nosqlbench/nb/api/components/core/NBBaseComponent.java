@@ -115,6 +115,10 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     @Override
     public NBComponent detachChild(NBComponent... children) {
         for (NBComponent child : children) {
+            logger.debug(() -> "notifyinb before detaching " + child.description() + " from " + this.description());
+            child.beforeDetach();
+        }
+        for (NBComponent child : children) {
             logger.debug(() -> "detaching " + child.description() + " from " + this.description());
             this.children.remove(child);
         }
@@ -140,10 +144,27 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     }
 
 
+    /// Override this method when you need to do some action within the active
+    /// component tree after the parent decides to detach your component, but before
+    /// your component loses access to the live component tree.
     @Override
     public void beforeDetach() {
         logger.debug("before detach " + description());
     }
+
+    /// The [java.io.Closeable] and [AutoCloseable] behaviors of components are
+    /// explicitly managed within the core [NBComponent] implementation. Thus, components can not
+    /// override this method, to ensure that subtype behaviors are not orphaned. The way you can
+    /// add a _close_ behavior is to implement [#teardown()].
+    ///
+    /// During component tree unwinding, each component does the following in order:
+    /// 1. Changes state to [NBInvokableState#CLOSING]
+    /// 2. calls [#close()] on every child.
+    /// 3. calls [#beforeDetach()]] on every child
+    /// 4. detaches every child.
+    /// 5. calls [#teardown()] on itself
+    ///
+    /// This happens recursively, and is mediated by the [#close()] method itself.
 
     @Override
     public final void close() throws RuntimeException {
