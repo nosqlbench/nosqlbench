@@ -16,14 +16,12 @@
 
 package io.nosqlbench.engine.api.activityimpl.uniform.actions;
 
-import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
 import io.nosqlbench.adapters.api.evalctx.CycleFunction;
-import io.nosqlbench.engine.api.metrics.ExceptionHistoMetrics;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
-import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
@@ -33,12 +31,10 @@ import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  The type of activity
  @param <R>
  The type of operation */
-public class StandardAction<A extends StandardActivity<R, ?>, R extends java.util.function.LongFunction> extends NBBaseComponent implements SyncAction, ActivityDefObserver {
+public class StandardAction<A extends Activity<R, ?>, R extends java.util.function.LongFunction> extends NBBaseComponent implements SyncAction, ActivityDefObserver {
     private final static Logger logger = LogManager.getLogger("ACTION");
     private final NBErrorHandler errorHandler;
     private final OpSequence<OpDispenser<? extends CycleOp<?>>> opsequence;

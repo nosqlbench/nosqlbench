@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.util;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 
@@ -35,7 +35,7 @@ public class SimpleConfig {
         this.params = parseParams(configdata);
     }
 
-    public SimpleConfig(StandardActivity activity, String params) {
+    public SimpleConfig(Activity activity, String params) {
         this(activity.getActivityDef(),params);
     }
     public SimpleConfig(ActivityWiring wiring, String param) {

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.core.lifecycle.commands;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
@@ -44,7 +44,7 @@ public class CMD_stop extends NBBaseCommand {
             = params.maybeGet("activity").orElseThrow(
             () -> new RuntimeException("The stop command requires an 'activity' parameter")
         );
-        Optional<StandardActivity> activity = controller.getActivity(activityName);
+        Optional<Activity> activity = controller.getActivity(activityName);
         if (activity.isEmpty()) {
             BasicError error = new BasicError("Activity '" + activityName + "' was not found for stop command.");
             logger.warn(error);

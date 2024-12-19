@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.input;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.annotations.Maturity;
 import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
 
@@ -25,5 +25,5 @@ public interface InputType {
     SimpleServiceLoader<InputType> FINDER =
         new SimpleServiceLoader<>(InputType.class, Maturity.Any);
 
-    InputDispenser getInputDispenser(StandardActivity parent);
+    InputDispenser getInputDispenser(Activity parent);
 }

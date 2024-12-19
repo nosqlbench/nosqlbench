@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 
 public interface ActivityDispenser {
-    StandardActivity getActivity(ActivityDef activityDef);
+    Activity getActivity(ActivityDef activityDef);
 }

@@ -18,7 +18,7 @@ package io.nosqlbench.scenarios.simframe.optimizers.planners.rcurve;
 
 import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
@@ -92,7 +92,7 @@ public class RCurvePlanner extends SimFramePlanner<RCurveConfig, RCurveFramePara
     }
 
     @Override
-    public void applyParams(RCurveFrameParams params, StandardActivity flywheel) {
+    public void applyParams(RCurveFrameParams params, Activity flywheel) {
         flywheel.onEvent(ParamChange.of(new CycleRateSpec(params.rate(), 1.1d, SimRateSpec.Verb.restart)));
     }
 

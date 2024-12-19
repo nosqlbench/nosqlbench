@@ -86,9 +86,9 @@ import java.util.function.LongFunction;
  @param <S>
  The context type for the activity, AKA the 'space' for a named driver instance and its
  associated object graph */
-public class StandardActivity<R extends java.util.function.LongFunction, S>
+public class Activity<R extends java.util.function.LongFunction, S>
     extends NBStatusComponent implements InvokableResult, SyntheticOpTemplateProvider, ActivityDefObserver, StateCapable,
-    ProgressCapable, Comparable<StandardActivity> {
+    ProgressCapable, Comparable<Activity> {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final OpSequence<OpDispenser<? extends CycleOp<?>>> sequence;
     private final ConcurrentHashMap<String, DriverAdapter<CycleOp<?>, Space>> adapters = new ConcurrentHashMap<>();
@@ -124,7 +124,7 @@ public class StandardActivity<R extends java.util.function.LongFunction, S>
     private static final String RESPONSE_TIME = "_responsetime";
     private static final String SERVICE_TIME = "_servicetime";
 
-    public StandardActivity(NBComponent parent, ActivityDef activityDef, ActivityWiring wiring) {
+    public Activity(NBComponent parent, ActivityDef activityDef, ActivityWiring wiring) {
 
         super(parent, NBLabels.forKV("activity", activityDef.getAlias()).and(activityDef.auxLabels()));
         this.activityDef = activityDef;
@@ -265,7 +265,7 @@ public class StandardActivity<R extends java.util.function.LongFunction, S>
             workload = OpsLoader.loadPath(yaml_loc.get(), disposable, "activities");
             yamlmodel = workload.getConfigModel();
         } else {
-            yamlmodel = ConfigModel.of(StandardActivity.class).asReadOnly();
+            yamlmodel = ConfigModel.of(Activity.class).asReadOnly();
         }
 
         Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
@@ -283,7 +283,7 @@ public class StandardActivity<R extends java.util.function.LongFunction, S>
         // HERE, op templates are loaded before drivers are loaded
 //        List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter.orElse(null), false);
         List<DriverAdapter<CycleOp<?>, Space>> adapterlist = new ArrayList<>();
-        NBConfigModel supersetConfig = ConfigModel.of(StandardActivity.class).add(yamlmodel);
+        NBConfigModel supersetConfig = ConfigModel.of(Activity.class).add(yamlmodel);
         Optional<String> defaultDriverOption = defaultDriverName;
         ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
 
@@ -947,7 +947,7 @@ public class StandardActivity<R extends java.util.function.LongFunction, S>
     }
 
     @Override
-    public int compareTo(StandardActivity o) {
+    public int compareTo(Activity o) {
         return this.getActivityDef().getAlias().compareTo(o.getActivityDef().getAlias());
     }
 

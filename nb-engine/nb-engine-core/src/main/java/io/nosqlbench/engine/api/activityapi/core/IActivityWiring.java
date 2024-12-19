@@ -19,22 +19,18 @@ package io.nosqlbench.engine.api.activityapi.core;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
-import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
-import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
-import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
 
 /**
  * Provides the components needed to build and run an activity a runtime.
- * The easiest way to build a useful StandardActivity is to extend {@link StandardActivity}.
+ * The easiest way to build a useful StandardActivity is to extend {@link Activity}.
  */
 public interface IActivityWiring extends Comparable<IActivityWiring>, ActivityDefObserver, ProgressCapable, StateCapable, NBComponent {
 

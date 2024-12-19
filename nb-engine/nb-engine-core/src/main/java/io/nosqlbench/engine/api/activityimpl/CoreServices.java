@@ -17,8 +17,8 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.api.util.SimpleConfig;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultFilterDispenser;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultValueFilterType;
@@ -33,7 +33,7 @@ import java.util.function.Predicate;
 
 public class CoreServices {
 
-    private static StandardActivity parent;
+    private static Activity parent;
 
     public static <A> Optional<OutputDispenser> getOutputDispenser(
         NBComponent parent, ActivityWiring activity) {
@@ -69,7 +69,7 @@ public class CoreServices {
 //        return intPredicateDispenser;
 //    }
 //
-    public static <A> InputDispenser getInputDispenser(StandardActivity activity) {
+    public static <A> InputDispenser getInputDispenser(Activity activity) {
         String inputTypeName = new SimpleConfig(activity, "input").getString("type").orElse("atomicseq");
         InputType inputType = InputType.FINDER.getOrThrow(inputTypeName);
         InputDispenser dispenser = inputType.getInputDispenser(activity);
@@ -80,7 +80,7 @@ public class CoreServices {
         return dispenser;
     }
 
-    public static <A> Optional<Predicate<ResultReadable>> getInputFilter(StandardActivity activity) {
+    public static <A> Optional<Predicate<ResultReadable>> getInputFilter(Activity activity) {
         String paramdata= activity.getParams().getOptionalString("if")
                 .orElse(activity.getParams().getOptionalString("inputfilter").orElse(null));
         if (paramdata==null) {

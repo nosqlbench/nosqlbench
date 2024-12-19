@@ -15,7 +15,7 @@
  */
 package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.nb.api.components.core.NBComponent;
@@ -65,7 +65,7 @@ public class ContainerActivitiesController extends NBBaseComponent {
      *
      * @param activityDef string in alias=value1;driver=value2;... format
      */
-    public StandardActivity start(ActivityDef activityDef) {
+    public Activity start(ActivityDef activityDef) {
         ActivityRuntimeInfo ari = doStartActivity(activityDef);
         return ari.getActivity();
     }
@@ -73,7 +73,7 @@ public class ContainerActivitiesController extends NBBaseComponent {
 
     private ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
         if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
-            StandardActivity activity = this.activityLoader.loadActivity(activityDef, this);
+            Activity activity = this.activityLoader.loadActivity(activityDef, this);
             activity.initActivity();
             ActivityExecutor executor = new ActivityExecutor(activity);
             Future<ExecutionResult> startedActivity = executorService.submit(executor);
@@ -91,9 +91,9 @@ public class ContainerActivitiesController extends NBBaseComponent {
      *
      * @param activityDefMap A map containing the activity definition
      */
-    public StandardActivity start(Map<String, String> activityDefMap) {
+    public Activity start(Map<String, String> activityDefMap) {
         ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
-        StandardActivity started = start(ad);
+        Activity started = start(ad);
         awaitAllThreadsOnline(started,30000L);
         return started;
     }
@@ -104,7 +104,7 @@ public class ContainerActivitiesController extends NBBaseComponent {
      *
      * @param alias the alias of an activity that is already known to the scenario
      */
-    public StandardActivity start(String alias) {
+    public Activity start(String alias) {
         return start(ActivityDef.parseActivityDef(alias));
     }
 
@@ -186,12 +186,12 @@ public class ContainerActivitiesController extends NBBaseComponent {
         return runtimeInfo.awaitAllThreadsOnline(timeoutMs);
     }
 
-    public synchronized void stop(StandardActivity activity) {
+    public synchronized void stop(Activity activity) {
         stop(activity.getActivityDef());
     }
 
 
-    public boolean awaitAllThreadsOnline(StandardActivity activity, long timeoutMs) {
+    public boolean awaitAllThreadsOnline(Activity activity, long timeoutMs) {
         return awaitAllThreadsOnline(activity.getActivityDef(), timeoutMs);
     }
 
@@ -442,13 +442,13 @@ public class ContainerActivitiesController extends NBBaseComponent {
 //        ActivityMetrics.reportTo(System.out);
     }
 
-    public Optional<StandardActivity> getSoloActivity() {
+    public Optional<Activity> getSoloActivity() {
         if (this.getActivityExecutorMap().size()==1) {
             return Optional.of(activityInfoMap.values().iterator().next().getActivity());
         }
         return Optional.empty();
     }
-    public Optional<StandardActivity> getActivity(String activityName) {
+    public Optional<Activity> getActivity(String activityName) {
         return Optional.ofNullable(this.activityInfoMap.get(activityName)).map(ActivityRuntimeInfo::getActivity);
     }
 

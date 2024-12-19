@@ -16,7 +16,7 @@
 
 package io.nosqlbench.scenarios.simframe.optimizers.optimo;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
@@ -74,7 +74,7 @@ public class CMD_optimo extends NBBaseCommand {
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
         // TODO: having "scenario" here as well as in "named scenario" in workload templates is confusing. Make this clearer.
 
-        StandardActivity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));
+        Activity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));
         stdout.println("starting analysis on activity '" + flywheel.getAlias() + "'");
         SimFrameUtils.awaitActivity(flywheel);
 
@@ -125,7 +125,7 @@ public class CMD_optimo extends NBBaseCommand {
         // could be a better result if the range is arbitrarily limiting the parameter space.
     }
 
-    private SimFrameCapture perfValueMeasures(StandardActivity activity, OptimoSearchSettings settings) {
+    private SimFrameCapture perfValueMeasures(Activity activity, OptimoSearchSettings settings) {
         SimFrameCapture sampler = new SimFrameCapture();
 
         NBMetricTimer result_timer = activity.find().timer("name:result");

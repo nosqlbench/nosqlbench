@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 import org.apache.logging.log4j.Logger;
@@ -28,7 +28,7 @@ import org.apache.logging.log4j.LogManager;
  * @param <D> An type of state holder for an operation, holding everything unique to that cycle and operation
  * @param <A> An type of of an Activity, a state holder for a runtime instance of an StandardActivity
  */
-public abstract class BaseAsyncAction<D, A extends StandardActivity> implements AsyncAction<D>,
+public abstract class BaseAsyncAction<D, A extends Activity> implements AsyncAction<D>,
     Stoppable, ActivityDefObserver {
     private final static Logger logger = LogManager.getLogger("BaseAsyncAction");
 

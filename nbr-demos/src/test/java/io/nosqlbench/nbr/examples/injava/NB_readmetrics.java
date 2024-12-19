@@ -16,7 +16,7 @@
 
 package io.nosqlbench.nbr.examples.injava;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
@@ -57,7 +57,7 @@ public class NB_readmetrics extends NBBaseCommand {
      */
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        StandardActivity activity = controller.start(Map.of(
+        Activity activity = controller.start(Map.of(
             "alias", "testactivity",
             "driver", "diag",
             "cycles", "0..1000000000",

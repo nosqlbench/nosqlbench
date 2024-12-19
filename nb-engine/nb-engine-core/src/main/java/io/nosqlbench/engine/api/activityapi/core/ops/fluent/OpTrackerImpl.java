@@ -18,7 +18,7 @@ package io.nosqlbench.engine.api.activityapi.core.ops.fluent;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.*;
@@ -43,7 +43,7 @@ public class OpTrackerImpl<D> implements OpTracker<D>, ActivityDefObserver {
     private LongFunction<D> cycleOpFunction;
 
 
-    public OpTrackerImpl(StandardActivity activity, long slot) {
+    public OpTrackerImpl(Activity activity, long slot) {
         this.slot = slot;
         this.label = "tracker-" + slot + "_" + activity.getAlias();
 

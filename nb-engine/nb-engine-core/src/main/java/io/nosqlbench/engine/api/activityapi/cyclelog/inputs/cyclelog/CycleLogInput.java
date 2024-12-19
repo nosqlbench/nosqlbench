@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
@@ -50,7 +50,7 @@ public class CycleLogInput extends NBBaseComponent implements Input, AutoCloseab
     private Iterator<CycleResult> segmentIter;
     private Predicate<ResultReadable> filter;
 
-    public CycleLogInput(StandardActivity activity) {
+    public CycleLogInput(Activity activity) {
         super(activity, NBLabels.forKV("input","cyclelog"));
         SimpleConfig conf = new SimpleConfig(activity.getActivityDef(), "input");
         mbb =

@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.core;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
@@ -92,7 +92,7 @@ class ActivityExecutorTest {
             ActivityDef activityDef = ActivityDef.parseActivityDef(
                 "driver=diag;alias=test-delayed-start;cycles=1000;initdelay=2000;");
             new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
-            StandardActivity activity = new DelayedInitActivity(activityDef);
+            Activity activity = new DelayedInitActivity(activityDef);
             fail("Expected an Advisor exception");
         } catch (NBAdvisorException e) {
             assertThat(e.toString().contains("error"));
@@ -110,7 +110,7 @@ class ActivityExecutorTest {
 
 //        StandardActivity activity = new DelayedInitActivity(activityDef);
         ActivityWiring wiring = new ActivityWiring(activityDef);
-        StandardActivity activity = standardActivityType.get().getActivity(
+        Activity activity = standardActivityType.get().getActivity(
             activityDef, TestComponent.INSTANCE, wiring);
         final InputDispenser inputDispenser = new CoreInputDispenser(activity);
         final ActionDispenser actionDispenser = new CoreActionDispenser(wiring);
@@ -151,7 +151,7 @@ class ActivityExecutorTest {
         new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
         ActivityWiring wiring = new ActivityWiring(activityDef);
 
-        StandardActivity activity = new StandardActivity(
+        Activity activity = new Activity(
             TestComponent.INSTANCE, activityDef, wiring);
 
         final InputDispenser inputDispenser = new CoreInputDispenser(activity);
@@ -166,7 +166,7 @@ class ActivityExecutorTest {
         wiring.setInputDispenserDelegate(inputDispenser);
         wiring.setMotorDispenserDelegate(motorDispenser);
 
-        StandardActivity simpleActivity = new StandardActivity<>(
+        Activity simpleActivity = new Activity<>(
             TestComponent.INSTANCE,
                                                                  activityDef, wiring
         );
@@ -207,7 +207,7 @@ class ActivityExecutorTest {
         return new MotorDispenser<>() {
             @Override
             public Motor getMotor(final ActivityDef activityDef, final int slotId) {
-                final StandardActivity activity = new StandardActivity(
+                final Activity activity = new Activity(
                     TestComponent.INSTANCE, activityDef, ActivityWiring.of(activityDef));
                 final Motor<?> cm = new CoreMotor<>(activity, slotId, ls, lc, null);
                 return cm;
@@ -231,7 +231,7 @@ class ActivityExecutorTest {
 
     }
 
-    private static class DelayedInitActivity extends StandardActivity {
+    private static class DelayedInitActivity extends Activity {
         private static final Logger logger = LogManager.getLogger(DelayedInitActivity.class);
 
         public DelayedInitActivity(final ActivityDef activityDef) {

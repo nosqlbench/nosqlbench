@@ -16,13 +16,13 @@
 
 package io.nosqlbench.scenarios.simframe.capture;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 
 public class SimFrameValueData extends SimFrameCapture {
-    public SimFrameValueData(StandardActivity activity) {
+    public SimFrameValueData(Activity activity) {
         NBMetricTimer result_timer = activity.find().timer("name:result");
         NBMetricTimer result_success_timer = activity.find().timer("name:result_success");
         NBMetricGauge cyclerate_gauge = activity.find().gauge("name=config_cyclerate");

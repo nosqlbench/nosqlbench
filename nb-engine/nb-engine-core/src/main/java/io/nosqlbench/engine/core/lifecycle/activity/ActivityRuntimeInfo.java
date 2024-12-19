@@ -19,7 +19,7 @@ package io.nosqlbench.engine.core.lifecycle.activity;
 import io.nosqlbench.engine.api.activityapi.core.RunState;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,12 +32,13 @@ import java.util.concurrent.TimeoutException;
 public class ActivityRuntimeInfo implements ProgressCapable {
 
     private final static Logger logger = LogManager.getLogger(ActivityRuntimeInfo.class);
-    private final StandardActivity activity;
+    private final Activity activity;
     private final Future<ExecutionResult> future;
     private final ActivityExecutor executor;
 
-    public ActivityRuntimeInfo(StandardActivity activity, Future<ExecutionResult> result,
-                               ActivityExecutor executor) {
+    public ActivityRuntimeInfo(
+        Activity activity, Future<ExecutionResult> result,
+        ActivityExecutor executor) {
 
         this.activity = activity;
         this.future = result;
@@ -73,7 +74,7 @@ public class ActivityRuntimeInfo implements ProgressCapable {
         return result;
     }
 
-    public StandardActivity getActivity() {
+    public Activity getActivity() {
         return this.activity;
     }
 

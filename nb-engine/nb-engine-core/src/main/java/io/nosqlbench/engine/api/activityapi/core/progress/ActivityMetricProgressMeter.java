@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.core.progress;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.nb.api.engine.util.Unit;
 
@@ -24,12 +24,12 @@ import java.time.Instant;
 
 public class ActivityMetricProgressMeter implements ProgressMeterDisplay, CompletedMeter, RemainingMeter, ActiveMeter {
 
-    private final StandardActivity activity;
+    private final Activity activity;
     private final Instant startInstant;
     private final NBMetricTimer bindTimer;
     private final NBMetricTimer cyclesTimer;
 
-    public ActivityMetricProgressMeter(StandardActivity activity) {
+    public ActivityMetricProgressMeter(Activity activity) {
         this.activity = activity;
         this.startInstant = Instant.ofEpochMilli(activity.getStartedAtMillis());
         this.bindTimer = activity.bindTimer;

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.scenarios.simframe.planning;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
@@ -64,8 +64,8 @@ public abstract class SimFramePlanner<C,P extends Record> extends NBBaseComponen
      */
     public abstract P nextStep(JournalView<P> journal);
 
-    public abstract void applyParams(P params, StandardActivity activity);
-    public P analyze(StandardActivity flywheel, SimFrameCapture capture, PrintWriter stdout, PrintWriter stderr, ContainerActivitiesController controller) {
+    public abstract void applyParams(P params, Activity activity);
+    public P analyze(Activity flywheel, SimFrameCapture capture, PrintWriter stdout, PrintWriter stderr, ContainerActivitiesController controller) {
         var frameParams = initialStep();
 
         while (frameParams != null) {

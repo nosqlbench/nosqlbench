@@ -18,7 +18,7 @@ package io.nosqlbench.scenarios.simframe.optimizers.planners.findmax;
 
 import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
@@ -102,7 +102,7 @@ public class FindmaxPlanner extends SimFramePlanner<FindmaxConfig, FindmaxFrameP
     }
 
     @Override
-    public void applyParams(FindmaxFrameParams params, StandardActivity flywheel) {
+    public void applyParams(FindmaxFrameParams params, Activity flywheel) {
         flywheel.onEvent(ParamChange.of(new CycleRateSpec(params.rate_shelf()+params.rate_delta(), 1.1d, SimRateSpec.Verb.restart)));
     }
 

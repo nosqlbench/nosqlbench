@@ -17,16 +17,11 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
-import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.nb.api.engine.metrics.instruments.*;
-
-import java.util.concurrent.Future;
 
 public class ComponentActivityInstrumentation  {
 
@@ -34,7 +29,7 @@ public class ComponentActivityInstrumentation  {
     private static final String SERVICE_TIME = "_servicetime";
     private static final String RESPONSE_TIME = "_responsetime";
 
-    private final StandardActivity activity;
+    private final Activity activity;
     private final ActivityDef def;
     private final ParameterMap params;
     private final int hdrdigits;
@@ -56,7 +51,7 @@ public class ComponentActivityInstrumentation  {
     private NBMetricGauge errorRateTotal;
     private NBMetricGauge errorsTotal;
 
-    public ComponentActivityInstrumentation(final StandardActivity activity) {
+    public ComponentActivityInstrumentation(final Activity activity) {
         this.activity = activity;
         def = activity.getActivityDef();
         params = this.def.getParams();

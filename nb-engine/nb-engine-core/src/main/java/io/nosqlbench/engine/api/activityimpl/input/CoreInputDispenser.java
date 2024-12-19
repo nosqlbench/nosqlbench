@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl.input;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.api.util.SimpleConfig;
 import io.nosqlbench.engine.api.activityapi.core.ActivitiesAware;
 import io.nosqlbench.engine.api.activityapi.input.Input;
@@ -27,11 +27,11 @@ import java.util.Map;
 
 public class CoreInputDispenser implements InputDispenser, ActivitiesAware {
 
-    private final StandardActivity activity;
-    private Map<String, StandardActivity> activities;
+    private final Activity activity;
+    private Map<String, Activity> activities;
     private Input input;
 
-    public CoreInputDispenser(StandardActivity activity) {
+    public CoreInputDispenser(Activity activity) {
         this.activity = activity;
     }
 
@@ -56,7 +56,7 @@ public class CoreInputDispenser implements InputDispenser, ActivitiesAware {
     }
 
     @Override
-    public void setActivitiesMap(Map<String, StandardActivity> activities) {
+    public void setActivitiesMap(Map<String, Activity> activities) {
         this.activities = activities;
     }
 

@@ -16,7 +16,7 @@
 
 package io.nosqlbench.scenarios.simframe.optimizers;
 
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBBaseCommand;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
@@ -63,7 +63,7 @@ public class CMD_optimize extends NBBaseCommand {
 
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        StandardActivity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));
+        Activity flywheel = SimFrameUtils.findFlywheelActivity(controller, params.get("activity"));
         stdout.println("starting analysis on activity '" + flywheel.getAlias() + "'");
         SimFrameUtils.awaitActivity(flywheel);
         SimFrameCapture capture = new SimFrameValueData(flywheel);

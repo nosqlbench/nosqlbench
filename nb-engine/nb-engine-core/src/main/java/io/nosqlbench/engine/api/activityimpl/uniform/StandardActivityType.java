@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class StandardActivityType<A extends StandardActivity<?,?>> {
+public class StandardActivityType<A extends Activity<?,?>> {
 
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final Map<String, DriverAdapter> adapters = new HashMap<>();
@@ -75,14 +75,14 @@ public class StandardActivityType<A extends StandardActivity<?,?>> {
         if (activityDef.getParams().getOptionalString("async").isPresent())
             throw new RuntimeException("This driver does not support async mode yet.");
 
-        return (A) new StandardActivity(parent, activityDef, wiring);
+        return (A) new Activity(parent, activityDef, wiring);
     }
 
     /**
      * This method will be called <em>once</em> per action instance.
      * @return an instance of ActionDispenser
      */
-    public ActionDispenser getActionDispenser(final StandardActivity activity) {
+    public ActionDispenser getActionDispenser(final Activity activity) {
         return new StandardActionDispenser(activity);
     }
 
@@ -94,13 +94,13 @@ public class StandardActivityType<A extends StandardActivity<?,?>> {
      * @param activities  a map of existing activities
      * @return a distinct activity instance for each call
      */
-    public StandardActivity getAssembledActivity(
+    public Activity getAssembledActivity(
         final NBComponent parent, final ActivityDef activityDef,
-        final Map<String, StandardActivity> activities
+        final Map<String, Activity> activities
     ) {
         //        final A activity = this.getActivity(activityDef, parent);
         ActivityWiring wiring = new ActivityWiring(activityDef);
-        StandardActivity activity = new StandardActivity(parent, activityDef, wiring);
+        Activity activity = new Activity(parent, activityDef, wiring);
 
         final InputDispenser inputDispenser = this.getInputDispenser(activity);
         if (inputDispenser instanceof ActivitiesAware) ((ActivitiesAware) inputDispenser).setActivitiesMap(activities);
@@ -142,12 +142,12 @@ public class StandardActivityType<A extends StandardActivity<?,?>> {
      * @param activity the StandardActivity instance which will parameterize this InputDispenser
      * @return the InputDispenser for the associated activity
      */
-    public InputDispenser getInputDispenser(final StandardActivity activity) {
+    public InputDispenser getInputDispenser(final Activity activity) {
         return CoreServices.getInputDispenser(activity);
     }
 
     public <T> MotorDispenser<T> getMotorDispenser(
-        final StandardActivity activity,
+        final Activity activity,
         final InputDispenser inputDispenser,
         final ActionDispenser actionDispenser,
         final OutputDispenser outputDispenser) {

@@ -25,12 +25,9 @@ import io.nosqlbench.engine.api.activityapi.core.ops.fluent.OpTracker;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
-import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
-import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -55,7 +52,7 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
     private static final Logger logger = LogManager.getLogger(CoreMotor.class);
 
     private final long slotId;
-    private final StandardActivity activity;
+    private final Activity activity;
 
     private Timer inputTimer;
 
@@ -89,8 +86,9 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
      @param input
      A LongSupplier which provides the cycle number inputs.
      */
-    public CoreMotor(StandardActivity activity, long slotId, Input input, SyncAction action,
-                     Output output) {
+    public CoreMotor(
+        Activity activity, long slotId, Input input, SyncAction action,
+        Output output) {
         super(activity, NBLabels.forKV("motor", "coremotor"));
         this.activity = activity;
         this.slotId = slotId;

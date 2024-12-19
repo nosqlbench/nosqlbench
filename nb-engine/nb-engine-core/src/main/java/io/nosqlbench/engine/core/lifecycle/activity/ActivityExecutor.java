@@ -16,8 +16,7 @@
 package io.nosqlbench.engine.core.lifecycle.activity;
 
 import com.codahale.metrics.Gauge;
-import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
@@ -69,7 +68,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
     private static final Logger activitylogger = LogManager.getLogger("ACTIVITY");
 
     private final LinkedList<Motor<?>> motors = new LinkedList<>();
-    private final StandardActivity activity;
+    private final Activity activity;
     private final ActivityDef activityDef;
     private final RunStateTally tally;
     private final MotorDispenser motorSource;
@@ -82,7 +81,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
     private ActivityExecutorShutdownHook shutdownHook = null;
     private NBMetricGauge threadsGauge;
 
-    public ActivityExecutor(StandardActivity activity) {
+    public ActivityExecutor(Activity activity) {
         this.activity = activity;
         this.activityDef = activity.getActivityDef();
         this.motorSource = activity.getWiring().getMotorDispenserDelegate();
@@ -380,7 +379,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         return motors.stream().anyMatch(m -> m.getState().get() == RunState.Running);
     }
 
-    public StandardActivity getActivity() {
+    public Activity getActivity() {
         return activity;
     }
 
