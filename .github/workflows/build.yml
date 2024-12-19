@@ -23,7 +23,7 @@ jobs:
           architecture: x64
           distribution: 'oracle'
           java-package: jdk
-          java-version: '21'
+          java-version: '23'
 
       - name: install fuse2
         run: sudo apt install libfuse2
