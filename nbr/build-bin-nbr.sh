@@ -22,7 +22,8 @@ set -x
 APPDIR=target/NB.AppDir
 JAR_NAME="nbr.jar"
 BIN_NAME="nbr"
-JAVA_VERSION="21"
+JAVA_VERSION="23"
+UNPACKED_NAME="jdk-23.0.1"
 
 
 mkdir -p ${APPDIR}
@@ -39,20 +40,20 @@ cp target/${JAR_NAME} "${APPDIR}/usr/bin/${JAR_NAME}"
 
 mkdir -p "${APPDIR}/usr/bin/jre"
 jdkname="jdk${JAVA_VERSION}"
-if [ "${jdkname}" == "jdk21" ]
+if [ "${jdkname}" == "jdk23" ]
 then
   if [ ! -d "cache/${jdkname}" ] ; then
     printf "getting ${jdkname} once into cache/${jdkname}\n";
-    filename='openjdk-21_linux-x64_bin.tar.gz'
+      filename='openjdk-23.0.1_linux-x64_bin.tar.gz'  
     mkdir -p cache
     (cd cache && (
-      curl -O https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/${filename}
+      curl -O https://download.java.net/java/GA/jdk23.0.1/c28985cbf10d4e648e4004050f8781aa/11/GPL/${filename}
       tar -xf ${filename}
-      mv jdk-21 jdk21
+      mv ${UNPACKED_NAME} ${jdkname}
       rm ${filename}
     ))
   fi
-  rsync -av cache/jdk21/ "${APPDIR}/usr/bin/jre/"
+  rsync -av cache/${jdkname}/ "${APPDIR}/usr/bin/jre/"
 else
   printf "Unknown java version indicated in $0"
   exit 2
