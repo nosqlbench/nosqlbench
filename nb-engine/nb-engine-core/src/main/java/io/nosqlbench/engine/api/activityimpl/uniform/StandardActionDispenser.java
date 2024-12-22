@@ -28,6 +28,6 @@ public class StandardActionDispenser implements ActionDispenser {
 
     @Override
     public StandardAction<?,?> getAction(int slot) {
-        return new StandardAction<>(activity, slot);
+        return new StandardAction<>(activity);
     }
 }

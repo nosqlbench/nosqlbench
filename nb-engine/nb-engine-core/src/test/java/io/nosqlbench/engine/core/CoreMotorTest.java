@@ -17,7 +17,6 @@
 package io.nosqlbench.engine.core;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
-import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.Motor;
@@ -38,7 +37,7 @@ public class CoreMotorTest {
     public void testBasicActivityMotor() {
         ActivityDef activityDef = ActivityDef.parseActivityDef("alias=foo");
         final Activity activity = new Activity<>(
-            new TestComponent("testing", "coremotor"), activityDef, ActivityWiring.of(activityDef));
+            new TestComponent("testing", "coremotor"), activityDef);
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
         final AtomicLong observableAction = new AtomicLong(-3L);
         SyncAction action = this.getTestConsumer(observableAction);
@@ -61,7 +60,7 @@ public class CoreMotorTest {
     public void testIteratorStride() {
         ActivityDef activityDef = ActivityDef.parseActivityDef("stride=3");
         Activity activity = new Activity(
-            TestComponent.INSTANCE, activityDef, ActivityWiring.of(activityDef));
+            TestComponent.INSTANCE, activityDef);
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
         final AtomicLongArray ary = new AtomicLongArray(10);
         final SyncAction a1 = this.getTestArrayConsumer(ary);

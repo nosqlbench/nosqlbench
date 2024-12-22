@@ -151,8 +151,7 @@ class ActivityExecutorTest {
         new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
         ActivityWiring wiring = new ActivityWiring(activityDef);
 
-        Activity activity = new Activity(
-            TestComponent.INSTANCE, activityDef, wiring);
+        Activity activity = new Activity(TestComponent.INSTANCE, activityDef);
 
         final InputDispenser inputDispenser = new CoreInputDispenser(activity);
         final ActionDispenser actionDispenser = new CoreActionDispenser(wiring);
@@ -166,10 +165,7 @@ class ActivityExecutorTest {
         wiring.setInputDispenserDelegate(inputDispenser);
         wiring.setMotorDispenserDelegate(motorDispenser);
 
-        Activity simpleActivity = new Activity<>(
-            TestComponent.INSTANCE,
-                                                                 activityDef, wiring
-        );
+        Activity simpleActivity = new Activity<>(TestComponent.INSTANCE, activityDef);
         ActivityExecutor activityExecutor = new ActivityExecutor(simpleActivity);
         activityDef.setThreads(5);
         ForkJoinTask<ExecutionResult> executionResultForkJoinTask = ForkJoinPool.commonPool().submit(
@@ -207,8 +203,7 @@ class ActivityExecutorTest {
         return new MotorDispenser<>() {
             @Override
             public Motor getMotor(final ActivityDef activityDef, final int slotId) {
-                final Activity activity = new Activity(
-                    TestComponent.INSTANCE, activityDef, ActivityWiring.of(activityDef));
+                final Activity activity = new Activity(TestComponent.INSTANCE, activityDef);
                 final Motor<?> cm = new CoreMotor<>(activity, slotId, ls, lc, null);
                 return cm;
             }
@@ -235,7 +230,7 @@ class ActivityExecutorTest {
         private static final Logger logger = LogManager.getLogger(DelayedInitActivity.class);
 
         public DelayedInitActivity(final ActivityDef activityDef) {
-            super(TestComponent.INSTANCE, activityDef, ActivityWiring.of(activityDef));
+            super(TestComponent.INSTANCE, activityDef);
         }
 
         @Override

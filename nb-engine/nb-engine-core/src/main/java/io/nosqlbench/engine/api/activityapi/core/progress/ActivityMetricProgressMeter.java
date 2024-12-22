@@ -32,8 +32,8 @@ public class ActivityMetricProgressMeter implements ProgressMeterDisplay, Comple
     public ActivityMetricProgressMeter(Activity activity) {
         this.activity = activity;
         this.startInstant = Instant.ofEpochMilli(activity.getStartedAtMillis());
-        this.bindTimer = activity.bindTimer;
-        this.cyclesTimer = activity.cycleServiceTimer;
+        this.bindTimer = activity.metrics.bindTimer;
+        this.cyclesTimer = activity.metrics.cycleServiceTimer;
     }
 
     @Override

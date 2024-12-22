@@ -75,7 +75,7 @@ public class StandardActivityType<A extends Activity<?,?>> {
         if (activityDef.getParams().getOptionalString("async").isPresent())
             throw new RuntimeException("This driver does not support async mode yet.");
 
-        return (A) new Activity(parent, activityDef, wiring);
+        return (A) new Activity(parent, activityDef);
     }
 
     /**
@@ -100,7 +100,7 @@ public class StandardActivityType<A extends Activity<?,?>> {
     ) {
         //        final A activity = this.getActivity(activityDef, parent);
         ActivityWiring wiring = new ActivityWiring(activityDef);
-        Activity activity = new Activity(parent, activityDef, wiring);
+        Activity activity = new Activity(parent, activityDef);
 
         final InputDispenser inputDispenser = this.getInputDispenser(activity);
         if (inputDispenser instanceof ActivitiesAware) ((ActivitiesAware) inputDispenser).setActivitiesMap(activities);

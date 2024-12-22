@@ -47,9 +47,9 @@ public class OpTrackerImpl<D> implements OpTracker<D>, ActivityDefObserver {
         this.slot = slot;
         this.label = "tracker-" + slot + "_" + activity.getAlias();
 
-        this.pendingOpsCounter = activity.pendingOpsCounter;
-        this.cycleServiceTimer = activity.cycleServiceTimer;
-        this.cycleResponseTimer = activity.cycleResponseTimer;
+        this.pendingOpsCounter = activity.metrics.pendingOpsCounter;
+        this.cycleServiceTimer = activity.metrics.cycleServiceTimer;
+        this.cycleResponseTimer = activity.metrics.cycleResponseTimer;
     }
 
     // for testing

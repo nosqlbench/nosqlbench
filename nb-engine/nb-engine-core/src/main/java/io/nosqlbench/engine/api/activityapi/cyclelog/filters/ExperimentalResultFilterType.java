@@ -29,8 +29,8 @@ public interface ExperimentalResultFilterType {
         new SimpleServiceLoader<>(ExperimentalResultFilterType.class, Maturity.Any);
 
     default IntPredicateDispenser getFilterDispenser(Activity activity) {
-        SimpleConfig conf = new SimpleConfig(activity.getWiring(), "resultfilter");
-        return getFilterDispenser(conf);
+        SimpleConfig conf = new SimpleConfig(activity, "resultfilter");
+        return getFilterDispenser(activity);
     }
 
     default IntPredicateDispenser getFilterDispenser(SimpleConfig conf) {

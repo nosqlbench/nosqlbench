@@ -56,7 +56,7 @@ public class StandardAction<A extends Activity<R, ?>, R extends java.util.functi
     private final A activity;
     public NBMetricHistogram triesHistogram;
 
-    public StandardAction(A activity, int slot) {
+    public StandardAction(A activity) {
         super(activity, NBLabels.forKV("action", StandardAction.class.getSimpleName()));
         this.activity = activity;
         this.opsequence = activity.getOpSequence();
@@ -82,7 +82,7 @@ public class StandardAction<A extends Activity<R, ?>, R extends java.util.functi
         OpDispenser<? extends CycleOp<?>> dispenser = null;
         CycleOp op = null;
 
-        try (Timer.Context ct = activity.bindTimer.time()) {
+        try (Timer.Context ct = activity.metrics.bindTimer.time()) {
             dispenser = opsequence.apply(cycle);
             op = dispenser.getOp(cycle);
         } catch (Exception e) {
@@ -103,7 +103,7 @@ public class StandardAction<A extends Activity<R, ?>, R extends java.util.functi
 
                 dispenser.onStart(cycle);
 
-                try (Timer.Context ct = activity.executeTimer.time()) {
+                try (Timer.Context ct = activity.metrics.executeTimer.time()) {
                     result = op.apply(cycle);
                     // TODO: break out validation timer from execute
                     try (Timer.Context ignored = verifierTimer.time()) {
@@ -127,9 +127,9 @@ public class StandardAction<A extends Activity<R, ?>, R extends java.util.functi
                     error = e;
                 } finally {
                     long nanos = System.nanoTime() - startedAt;
-                    activity.resultTimer.update(nanos, TimeUnit.NANOSECONDS);
+                    activity.metrics.resultTimer.update(nanos, TimeUnit.NANOSECONDS);
                     if (error == null) {
-                        activity.resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
+                        activity.metrics.resultSuccessTimer.update(nanos, TimeUnit.NANOSECONDS);
                         dispenser.onSuccess(cycle, nanos);
                         break;
                     } else {

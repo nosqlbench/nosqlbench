@@ -16,6 +16,7 @@
 package io.nosqlbench.engine.core.lifecycle.activity;
 
 import com.codahale.metrics.Gauge;
+import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
@@ -84,7 +85,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
     public ActivityExecutor(Activity activity) {
         this.activity = activity;
         this.activityDef = activity.getActivityDef();
-        this.motorSource = activity.getWiring().getMotorDispenserDelegate();
+        this.motorSource = activity;
         activity.getActivityDef().getParams().addListener(this);
         this.tally = activity.getRunStateTally();
     }
