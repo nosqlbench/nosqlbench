@@ -73,12 +73,13 @@ public class ContiguousOutputChunker implements Output {
 
     public ContiguousOutputChunker(Activity activity) {
 
-        if (!(activity.getWiring().getInputDispenserDelegate().getInput(0).isContiguous())) {
-            throw new RuntimeException("This type of output may not be used with non-contiguous inputs yet.");
-            // If you are looking at this code, it's because we count updates to extents to provide
-            // efficient marker extent handling. The ability to use segmented inputs with markers will
-            // come in a future append.
-        }
+
+//        if (!(activity.getWiring().getInputDispenserDelegate().getInput(0).isContiguous())) {
+//            throw new RuntimeException("This type of output may not be used with non-contiguous inputs yet.");
+//            // If you are looking at this code, it's because we count updates to extents to provide
+//            // efficient marker extent handling. The ability to use segmented inputs with markers will
+//            // come in a future append.
+//        }
         this.min = new AtomicLong(activity.getActivityDef().getStartCycle());
         this.nextMin = new AtomicLong(activity.getActivityDef().getEndCycle());
         long stride = activity.getParams().getOptionalLong("stride").orElse(1L);
