@@ -86,18 +86,22 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.LongFunction;
 
-/**
- This is a typed activity which is expected to become the standard
- core of all new activity types. Extant NB drivers should also migrate
- to this when possible.
- @param <R>
- A type of runnable which wraps the operations for this type of driver.
- @param <S>
- The context type for the activity, AKA the 'space' for a named driver instance and its
- associated object graph */
-public class Activity<R extends java.util.function.LongFunction, S>
-    extends NBStatusComponent implements InvokableResult, SyntheticOpTemplateProvider, ActivityDefObserver, StateCapable,
-    ProgressCapable, Comparable<Activity> {
+/// An [[Activity]] is a flywheel of operations. Each activity consumes ordinals
+/// from a specified interval, maps them to executable operations via _op synthesis_ as determined
+/// by the op templates supplied by the user, and executes those operations.
+///
+/// Activities each run within a named state-sharing partition called an activity container. If
+/// no container name is specified, then a singular `default` container is used for all
+/// activities. For named steps of a named scenario, the container name is set to the step name.
+///
+/// Activities and their containers are hosted within an [NBSession]. Activities run asynchronously
+/// with respect to their container and session. There are a few session commands which
+/// are used to manage activities, such as [start][CMD_start], [stop][CMD_stop], and
+/// [await][CMD_await], for example.
+///
+/// The config parameters for an activity are standard, and custom behaviors afforded to activities
+/// work the same across all op types.
+public class Activity<R extends java.util.function.LongFunction, S> extends NBStatusComponent implements InvokableResult, SyntheticOpTemplateProvider, ActivityDefObserver, StateCapable, ProgressCapable, Comparable<Activity>, MotorDispenser {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final OpSequence<OpDispenser<? extends CycleOp<?>>> sequence;
     private final ConcurrentHashMap<String, DriverAdapter<CycleOp<?>, Space>> adapters = new ConcurrentHashMap<>();
@@ -494,12 +498,13 @@ public class Activity<R extends java.util.function.LongFunction, S>
     }
 
     /**
-     * Modify the provided ActivityDef with defaults for stride and cycles, if they haven't been provided, based on the
-     * length of the sequence as determined by the provided ratios. Also, modify the ActivityDef with reasonable
-     * defaults when requested.
-     *
-     * @param seq
-     *     - The {@link OpSequence} to derive the defaults from
+     Modify the provided ActivityDef with defaults for stride and cycles, if they haven't been
+     provided, based on the
+     length of the sequence as determined by the provided ratios. Also, modify the ActivityDef with
+     reasonable
+     defaults when requested.
+     @param seq
+     - The {@link OpSequence} to derive the defaults from
      */
     public synchronized void setDefaultsFromOpSequence(OpSequence<?> seq) {
         Optional<String> strideOpt = getParams().getOptionalString("stride");
@@ -584,30 +589,29 @@ public class Activity<R extends java.util.function.LongFunction, S>
     }
 
     /**
-     * Given a function that can create an op of type <O> from an OpTemplate, generate
-     * an indexed sequence of ready to call operations.
-     * <p>
-     * This method uses the following conventions to derive the sequence:
-     *
-     * <OL>
-     * <LI>If an 'op', 'stmt', or 'statement' parameter is provided, then it's value is
-     * taken as the only provided statement.</LI>
-     * <LI>If a 'yaml, or 'workload' parameter is provided, then the statements in that file
-     * are taken with their ratios </LI>
-     * <LI>Any provided tags filter is used to select only the op templates which have matching
-     * tags. If no tags are provided, then all the found op templates are included.</LI>
-     * <LI>The ratios and the 'seq' parameter are used to build a sequence of the ready operations,
-     * where the sequence length is the sum of the ratios.</LI>
-     * </OL>
-     *
-     * @param <O>
-     *     A holder for an executable operation for the native driver used by this activity.
-     * @param opinit
-     *     A function to map an OpTemplate to the executable operation form required by
-     *     the native driver for this activity.
-     * @param defaultAdapter
-     *     The adapter which will be used for any op templates with no explicit adapter
-     * @return The sequence of operations as determined by filtering and ratios
+     Given a function that can create an op of type <O> from an OpTemplate, generate
+     an indexed sequence of ready to call operations.
+     <p>
+     This method uses the following conventions to derive the sequence:
+
+     <OL>
+     <LI>If an 'op', 'stmt', or 'statement' parameter is provided, then it's value is
+     taken as the only provided statement.</LI>
+     <LI>If a 'yaml, or 'workload' parameter is provided, then the statements in that file
+     are taken with their ratios </LI>
+     <LI>Any provided tags filter is used to select only the op templates which have matching
+     tags. If no tags are provided, then all the found op templates are included.</LI>
+     <LI>The ratios and the 'seq' parameter are used to build a sequence of the ready operations,
+     where the sequence length is the sum of the ratios.</LI>
+     </OL>
+     @param <O>
+     A holder for an executable operation for the native driver used by this activity.
+     @param opinit
+     A function to map an OpTemplate to the executable operation form required by
+     the native driver for this activity.
+     @param defaultAdapter
+     The adapter which will be used for any op templates with no explicit adapter
+     @return The sequence of operations as determined by filtering and ratios
      */
     @Deprecated(forRemoval = true)
     protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(
@@ -748,10 +752,10 @@ public class Activity<R extends java.util.function.LongFunction, S>
     }
 
     /**
-     * Get the current cycle rate limiter for this activity.
-     * The cycle rate limiter is used to throttle the rate at which
-     * cycles are dispatched across all threads in the activity
-     * @return the cycle {@link RateLimiter}
+     Get the current cycle rate limiter for this activity.
+     The cycle rate limiter is used to throttle the rate at which
+     cycles are dispatched across all threads in the activity
+     @return the cycle {@link RateLimiter}
      */
     public RateLimiter getCycleLimiter() {
         if (cycleLimiterSource != null) {
@@ -760,11 +764,12 @@ public class Activity<R extends java.util.function.LongFunction, S>
             return null;
         }
     }
+
     /**
-     * Get the current stride rate limiter for this activity.
-     * The stride rate limiter is used to throttle the rate at which
-     * new strides are dispatched across all threads in an activity.
-     * @return The stride {@link RateLimiter}
+     Get the current stride rate limiter for this activity.
+     The stride rate limiter is used to throttle the rate at which
+     new strides are dispatched across all threads in an activity.
+     @return The stride {@link RateLimiter}
      */
     public synchronized RateLimiter getStrideLimiter() {
         if (strideLimiterSource != null) {
@@ -778,21 +783,16 @@ public class Activity<R extends java.util.function.LongFunction, S>
         return tally;
     }
 
-    public ActivityWiring getWiring() {
-        return this.wiring;
-    }
-
     @Override
     public Map<String, String> asResult() {
         return Map.of("activity", this.getActivityDef().getAlias());
     }
 
     /**
-     * Activities with retryable operations (when specified with the retry error handler for some
-     * types of error), should allow the user to specify how many retries are allowed before
-     * giving up on the operation.
-     *
-     * @return The number of allowable retries
+     Activities with retryable operations (when specified with the retry error handler for some
+     types of error), should allow the user to specify how many retries are allowed before
+     giving up on the operation.
+     @return The number of allowable retries
      */
     public int getMaxTries() {
         return this.activityDef.getParams().getOptionalInteger("maxtries").orElse(10);

@@ -45,7 +45,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>
  * The nowMarking and nowTracking conditions are meant to be locked and awaited
  * by marking and tracking calls respectively. Conversely, they are expected
- * to be signaled by tracking and marking calls.
+ * to be signalled by tracking and marking calls.
  * <p>
  * This implementation needs to be adapted to onAfterOpStop early exit of either
  * marker or tracker threads with no deadlock.
