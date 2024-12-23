@@ -54,13 +54,12 @@ public class ComponentActivityInstrumentation  {
     public ComponentActivityInstrumentation(final Activity activity) {
         this.activity = activity;
         def = activity.getActivityDef();
+        this.hdrdigits = activity.getComponentProp("hdr_digits").map(Integer::parseInt).orElse(3);
         params = this.def.getParams();
-        hdrdigits = activity.getHdrDigits();
         initMetrics();
     }
 
     private void initMetrics() {
-
 
         this.errorRate1m = activity.create().gauge("error_rate_1m",
             () -> {

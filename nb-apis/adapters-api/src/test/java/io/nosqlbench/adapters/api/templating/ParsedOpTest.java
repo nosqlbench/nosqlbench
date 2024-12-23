@@ -81,8 +81,8 @@ public class ParsedOpTest {
                   ps1: "param-one"
             """;
         final OpsDocList stmtsDocs = OpsLoader.loadString(opt, OpTemplateFormat.yaml, cfg.getMap(), null);
-        assertThat(stmtsDocs.getOps(true).size()).isEqualTo(1);
-        final OpTemplate opTemplate = stmtsDocs.getOps(true).get(0);
+        assertThat(stmtsDocs.getOps().matching("",true).size()).isEqualTo(1);
+        final OpTemplate opTemplate = stmtsDocs.getOps().matching("",true).get(0);
         final ParsedOp parsedOp = new ParsedOp(opTemplate, cfg, List.of(), getParent());
 
         assertThat(parsedOp.getAsFunctionOr("d1", "invalid").apply(1L)).isEqualTo("one");

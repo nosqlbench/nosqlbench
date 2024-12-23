@@ -16,8 +16,10 @@
 
 package io.nosqlbench.adapters.api.activityconfig.rawyaml;
 
+import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -37,6 +39,13 @@ public class RawOpsDocList implements Iterable<RawOpsDoc> {
 
     public static RawOpsDocList none() {
         return new RawOpsDocList(List.of());
+    }
+
+    public static RawOpsDocList combine(RawOpsDocList l1, RawOpsDocList l2) {
+        List<RawOpsDoc> rawOpsDocs = new ArrayList<>();
+        rawOpsDocs.addAll(l1.getOpsDocs());
+        rawOpsDocs.addAll(l2.getOpsDocs());
+        return new RawOpsDocList(rawOpsDocs);
     }
 
     public List<RawOpsDoc> getOpsDocs() {

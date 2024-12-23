@@ -106,15 +106,6 @@ public class ActivityDef implements NBNamedElement {
     }
 
     /**
-     * Return tbe StandardActivity Driver Adapter Name
-     *
-     * @return the driver adapter name
-     */
-    public String getActivityDriver() {
-        return parameterMap.getOptionalString("type", "driver").orElse(DEFAULT_ATYPE);
-    }
-
-    /**
      * The first cycle that will be used for execution of this activity, inclusive.
      * If the value is provided as a range as in 0..10, then the first number is the start cycle
      * and the second number is the end cycle +1. Effectively, cycle ranges
