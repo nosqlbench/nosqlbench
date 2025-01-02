@@ -209,15 +209,13 @@ public class FieldVerifier implements Validator {
                             logbuffer.append(" actual:'").append(result.get(rname)).append("'");
                             diff++;
                         }
-
                     }
-
                 }
             }
             if (diff == 0) {
-                resultsVerifiedError.inc();
-            } else {
                 resultsOkCounter.inc();
+            } else {
+                resultsVerifiedError.inc();
                 throw new RuntimeException("in cycle " + cycle + ", " + logbuffer.toString());
             }
 
