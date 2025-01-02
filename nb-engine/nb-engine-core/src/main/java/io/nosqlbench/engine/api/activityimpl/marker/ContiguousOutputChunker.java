@@ -80,9 +80,9 @@ public class ContiguousOutputChunker implements Output {
 //            // efficient marker extent handling. The ability to use segmented inputs with markers will
 //            // come in a future append.
 //        }
-        this.min = new AtomicLong(activity.getActivityDef().getStartCycle());
-        this.nextMin = new AtomicLong(activity.getActivityDef().getEndCycle());
-        long stride = activity.getParams().getOptionalLong("stride").orElse(1L);
+        this.min = new AtomicLong(activity.getCyclesSpec().first_inclusive());
+        this.nextMin = new AtomicLong(activity.getCyclesSpec().last_exclusive());
+        long stride = activity.getConfig().getOptional(Long.class,"stride").orElse(1L);
         long cycleCount = nextMin.get() - min.get();
         if ((cycleCount % stride) != 0) {
             throw new RuntimeException("stride must evenly divide into cycles.");

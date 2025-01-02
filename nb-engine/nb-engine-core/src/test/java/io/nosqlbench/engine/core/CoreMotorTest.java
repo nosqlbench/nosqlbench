@@ -18,11 +18,11 @@ package io.nosqlbench.engine.core;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.core.Motor;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.core.fortesting.BlockingSegmentInput;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -35,9 +35,9 @@ public class CoreMotorTest {
 
     @Test
     public void testBasicActivityMotor() {
-        ActivityDef activityDef = ActivityDef.parseActivityDef("alias=foo");
+        ActivityConfig config = Activity.configFor("alias=foo");
         final Activity activity = new Activity<>(
-            new TestComponent("testing", "coremotor"), activityDef);
+            new TestComponent("testing", "coremotor"), config);
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
         final AtomicLong observableAction = new AtomicLong(-3L);
         SyncAction action = this.getTestConsumer(observableAction);
@@ -58,7 +58,7 @@ public class CoreMotorTest {
 
     @Test
     public void testIteratorStride() {
-        ActivityDef activityDef = ActivityDef.parseActivityDef("stride=3");
+        ActivityConfig activityDef = Activity.configFor("stride=3");
         Activity activity = new Activity(
             TestComponent.INSTANCE, activityDef);
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();

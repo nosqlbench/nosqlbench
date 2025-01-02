@@ -19,7 +19,6 @@ package io.nosqlbench.engine.api.activityapi.core;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.nb.api.engine.metrics.instruments.*;
 
@@ -30,8 +29,6 @@ public class ComponentActivityInstrumentation  {
     private static final String RESPONSE_TIME = "_responsetime";
 
     private final Activity activity;
-    private final ActivityDef def;
-    private final ParameterMap params;
     private final int hdrdigits;
     private NBMetricTimer readInputTimer;
     private NBMetricTimer stridesServiceTimer;
@@ -53,9 +50,7 @@ public class ComponentActivityInstrumentation  {
 
     public ComponentActivityInstrumentation(final Activity activity) {
         this.activity = activity;
-        def = activity.getActivityDef();
         this.hdrdigits = activity.getComponentProp("hdr_digits").map(Integer::parseInt).orElse(3);
-        params = this.def.getParams();
         initMetrics();
     }
 

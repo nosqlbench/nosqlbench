@@ -36,6 +36,6 @@ public class CoreActionDispenser implements ActionDispenser {
 
     @Override
     public SyncAction getAction(int slot) {
-        return new CoreAction(activity.getActivityDef(), slot);
+        return new CoreAction(activity.getConfig(), slot);
     }
 }

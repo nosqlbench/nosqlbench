@@ -20,6 +20,7 @@ import io.nosqlbench.adapter.diag.optasks.DiagTask;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigurable;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.NBReconfigurable;
 import io.nosqlbench.nb.api.components.core.NBParentComponentInjection;
@@ -102,6 +103,16 @@ public class DiagOpDispenser extends BaseOpDispenser<DiagOp,DiagSpace> implement
         return opFunc.getReconfigModel();
     }
 
+    @Override
+    public void applyConfig(NBConfiguration cfg) {
+
+    }
+
+    @Override
+    public NBConfigModel getConfigModel() {
+        return null;
+    }
+
     private final static class OpFunc implements LongFunction<DiagOp>, NBReconfigurable {
         private final List<DiagTask> tasks;
         private final LongFunction<DiagSpace> spaceF;
@@ -125,6 +136,17 @@ public class DiagOpDispenser extends BaseOpDispenser<DiagOp,DiagSpace> implement
         @Override
         public NBConfigModel getReconfigModel() {
             return NBReconfigurable.collectModels(DiagTask.class, tasks);
+        }
+
+        @Override
+        public void applyConfig(NBConfiguration cfg) {
+            NBConfigurable.applyMatching(cfg, tasks);
+
+        }
+
+        @Override
+        public NBConfigModel getConfigModel() {
+            return NBConfigurable.collectModels(DiagTask.class, tasks);
         }
     }
 

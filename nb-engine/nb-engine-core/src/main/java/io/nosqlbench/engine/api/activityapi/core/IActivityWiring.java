@@ -23,7 +23,7 @@ import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -32,9 +32,9 @@ import java.io.PrintWriter;
  * Provides the components needed to build and run an activity a runtime.
  * The easiest way to build a useful StandardActivity is to extend {@link Activity}.
  */
-public interface IActivityWiring extends Comparable<IActivityWiring>, ActivityDefObserver, ProgressCapable, StateCapable, NBComponent {
+public interface IActivityWiring extends Comparable<IActivityWiring>, ProgressCapable, StateCapable, NBComponent {
 
-    ActivityDef getActivityDef();
+    ActivityConfig getActivityConfig();
 
     MotorDispenser<?> getMotorDispenserDelegate();
 

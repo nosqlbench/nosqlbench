@@ -44,7 +44,7 @@ public class CoreInputDispenser implements InputDispenser, ActivitiesAware {
     }
 
     private synchronized Input createInput(long slot) {
-        SimpleConfig conf = new SimpleConfig(activity.getActivityDef(), "input");
+        SimpleConfig conf = new SimpleConfig(activity, "input");
         String inputType = conf.getString("type").orElse("atomicseq");
         InputType inputTypeImpl = InputType.FINDER.getOrThrow(inputType);
         InputDispenser inputDispenser = inputTypeImpl.getInputDispenser(activity);

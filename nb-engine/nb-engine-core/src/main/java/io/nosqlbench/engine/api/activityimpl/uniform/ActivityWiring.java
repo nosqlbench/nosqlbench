@@ -2,13 +2,13 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 /*
  * Copyright (c) nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,29 +23,26 @@ import io.nosqlbench.engine.api.activityapi.core.MotorDispenser;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
-import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
-import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 
 public class ActivityWiring {
 
-    private final ActivityDef activityDef;
+    private final ActivityConfig activityDef;
     private MotorDispenser<?> motorDispenser;
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
     private OutputDispenser markerDispenser;
     private IntPredicateDispenser resultFilterDispenser;
 
-    public ActivityWiring(ActivityDef activityDef) {
+    public ActivityWiring(ActivityConfig activityDef) {
         this.activityDef = activityDef;
     }
 
-    public static ActivityWiring of(ActivityDef activityDef) {
+    public static ActivityWiring of(ActivityConfig activityDef) {
         return new ActivityWiring(activityDef);
     }
 
-    public ActivityDef getActivityDef() {
+    public ActivityConfig getConfig() {
         return activityDef;
     }
 
@@ -89,8 +86,4 @@ public class ActivityWiring {
         this.markerDispenser = outputDispenser;
     }
 
-
-    public ParameterMap getParams() {
-        return activityDef.getParams();
-    }
 }

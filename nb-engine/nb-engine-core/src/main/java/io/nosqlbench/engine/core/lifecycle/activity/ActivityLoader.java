@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle.activity;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
 import org.apache.logging.log4j.LogManager;
@@ -27,10 +27,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Consolidates the activity type and activity instantiation logic into one place
- * per scope. Within the lifetime of this ActivityLoader, all activities may
- * see each other by name.
- */
+ Consolidates the activity type and activity instantiation logic into one place
+ per scope. Within the lifetime of this ActivityLoader, all activities may
+ see each other by name. */
 public class ActivityLoader {
     private static final Logger logger = LogManager.getLogger("ACTIVITIES");
     private final Map<String, Activity> activityMap = new ConcurrentHashMap<>();
@@ -38,10 +37,14 @@ public class ActivityLoader {
     public ActivityLoader() {
     }
 
-    public synchronized Activity loadActivity(ActivityDef activityDef, final NBComponent parent) {
-        activityDef= activityDef.deprecate("yaml","workload").deprecate("type","driver");
-        final Activity activity =
-            new StandardActivityType<>(activityDef, parent).getAssembledActivity(parent, activityDef, this.activityMap);this.activityMap.put(activity.getAlias(),activity);
+    public synchronized Activity loadActivity(
+        ActivityConfig activityDef,
+        final NBComponent parent
+    )
+    {
+        final Activity activity = new StandardActivityType<>(
+            activityDef, parent).getAssembledActivity(parent, activityDef, this.activityMap);
+        this.activityMap.put(activity.getAlias(), activity);
         ActivityLoader.logger.debug("Resolved activity for alias '{}'", activityDef.getAlias());
         return activity;
     }

@@ -21,8 +21,8 @@ public class LinkedInputTest {
     // TODO: Reintegrate these tests as follow the leader tests via output and input
 //    @Test
 //    public void shouldStayAtOrBehindLinkedInput() {
-//        Input goes2Kfast = new TargetRateInput(ActivityDef.parseActivityDef("alias=goes2k;targetrate=2000"));
-//        LinkedInput goesAsFast = new LinkedInput(ActivityDef.parseActivityDef("alias=asfast"),goes2Kfast);
+//        Input goes2Kfast = new TargetRateInput(Activity.configFor("alias=goes2k;targetrate=2000"));
+//        LinkedInput goesAsFast = new LinkedInput(Activity.configFor("alias=asfast"),goes2Kfast);
 //
 //        long last2kFast = 0L;
 //        long lastAsFast = 0L;
@@ -37,8 +37,8 @@ public class LinkedInputTest {
 //
 //    @Test
 //    public void shouldBlockUntilLinkedAdvances() {
-//        ContiguousInput goes2Kfast = new TargetRateInput(ActivityDef.parseActivityDef("targetrate=2000"));
-//        LinkedInput goesAsFast = new LinkedInput(ActivityDef.parseActivityDef("alias=asfast"),goes2Kfast);
+//        ContiguousInput goes2Kfast = new TargetRateInput(Activity.configFor("targetrate=2000"));
+//        LinkedInput goesAsFast = new LinkedInput(Activity.configFor("alias=asfast"),goes2Kfast);
 //
 //        AtomicLong asFastValue = new AtomicLong(0L);
 //        Runnable linked = new Runnable() {
@@ -68,8 +68,8 @@ public class LinkedInputTest {
 //
 //    @Test(enabled=false)
 //    public void microBenchDiffRate() {
-//        TargetRateInput fastInput = new TargetRateInput(ActivityDef.parseActivityDef("targetrate=10000000"));
-//        LinkedInput slowInput = new LinkedInput(ActivityDef.parseActivityDef("alias=asfast"),fastInput);
+//        TargetRateInput fastInput = new TargetRateInput(Activity.configFor("targetrate=10000000"));
+//        LinkedInput slowInput = new LinkedInput(Activity.configFor("alias=asfast"),fastInput);
 //        Timer fastInputTimer = new NicerTimer("fastinput", new DeltaHdrHistogramReservoir("fastinput",4));
 //        Timer slowInputTimer = new NicerTimer("slowinput", new DeltaHdrHistogramReservoir("slowinput",4));
 //

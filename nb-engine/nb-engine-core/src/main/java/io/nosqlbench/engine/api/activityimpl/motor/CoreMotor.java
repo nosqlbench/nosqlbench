@@ -27,7 +27,7 @@ import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -47,7 +47,7 @@ import static io.nosqlbench.engine.api.activityapi.core.RunState.*;
  This motor implementation splits the handling of sync and async actions with a hard
  fork in the middle to limit potential breakage of the prior sync implementation
  with new async logic. */
-public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver, Motor<D>, Stoppable {
+public class CoreMotor<D> extends NBBaseComponent implements Motor<D>, Stoppable, NBReconfigurable {
 
     private static final Logger logger = LogManager.getLogger(CoreMotor.class);
 
@@ -74,7 +74,7 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
     private int stride = 1;
 
     private OpTracker<D> opTracker;
-
+    private NBConfiguration config;
 
 
     /**
@@ -87,15 +87,20 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
      A LongSupplier which provides the cycle number inputs.
      */
     public CoreMotor(
-        Activity activity, long slotId, Input input, SyncAction action,
-        Output output) {
-        super(activity, NBLabels.forKV("motor", "coremotor"));
+        Activity activity,
+        long slotId,
+        Input input,
+        SyncAction action,
+        Output output
+    )
+    {
+        super(activity, NBLabels.forKV("motor", slotId));
         this.activity = activity;
         this.slotId = slotId;
         setInput(input);
         setResultOutput(output);
         motorState = new MotorState(slotId, activity.getRunStateTally());
-        onActivityDefUpdate(activity.getActivityDef());
+        applyConfig(activity.getConfig());
         this.action = action;
 
         int hdrdigits = activity.getComponentProp("hdr_digits").map(Integer::parseInt).orElse(3);
@@ -150,8 +155,9 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
             cycleRateLimiter = activity.getCycleLimiter();
 
             if (motorState.get() == Finished) {
-                logger.warn(
-                    () -> "Input was already exhausted for slot " + slotId + ", remaining in finished state.");
+                logger.warn(() -> "Input was already exhausted for slot " +
+                    slotId +
+                    ", remaining in finished state.");
             }
 
             action.init();
@@ -174,13 +180,15 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
                 CycleSegment cycleSegment = null;
                 CycleResultSegmentBuffer segBuffer = new CycleResultSegmentBuffer(stride);
 
-                try (Timer.Context inputTime = inputTimer.time()) {
+                try (Timer.Context inputTime = activity.metrics.inputTimer.time()) {
                     cycleSegment = input.getInputSegment(stride);
                 }
 
                 if (cycleSegment == null) {
-                    logger.trace(
-                        () -> "input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
+                    logger.trace(() -> "input exhausted (input " +
+                        input +
+                        ") via null segment, stopping motor thread " +
+                        slotId);
                     motorState.enterState(Finished);
                     continue;
                 }
@@ -198,16 +206,20 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
                         long cyclenum = cycleSegment.nextCycle();
                         if (cyclenum < 0) {
                             if (cycleSegment.isExhausted()) {
-                                logger.trace(
-                                    () -> "input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
+                                logger.trace(() -> "input exhausted (input " +
+                                    input +
+                                    ") via negative read, stopping motor thread " +
+                                    slotId);
                                 motorState.enterState(Finished);
                                 continue;
                             }
                         }
 
                         if (motorState.get() != Running) {
-                            logger.trace(
-                                () -> "motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
+                            logger.trace(() -> "motor stopped after input (input " +
+                                cyclenum +
+                                "), stopping motor thread " +
+                                slotId);
                             continue;
                         }
                         int result = -1;
@@ -226,7 +238,7 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
                             throw e;
                         } finally {
                             long cycleEnd = System.nanoTime();
-                            cycleServiceTimer.update(
+                            activity.metrics.cycleServiceTimer.update(
                                 (cycleEnd - cycleStart) + cycleDelay, TimeUnit.NANOSECONDS);
                         }
                         segBuffer.append(cyclenum, result);
@@ -234,10 +246,9 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
 
                 } finally {
                     long strideEnd = System.nanoTime();
-                    stridesServiceTimer.update(
+                    activity.metrics.stridesServiceTimer.update(
                         (strideEnd - strideStart) + strideDelay,
-                        TimeUnit.NANOSECONDS
-                    );
+                        TimeUnit.NANOSECONDS);
                 }
 
                 if (output != null) {
@@ -245,8 +256,12 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
                     try {
                         output.onCycleResultSegment(outputBuffer);
                     } catch (Exception t) {
-                        logger.error(
-                            () -> "Error while feeding result segment " + outputBuffer + " to output '" + output + "', error:" + t);
+                        logger.error(() -> "Error while feeding result segment " +
+                            outputBuffer +
+                            " to output '" +
+                            output +
+                            "', error:" +
+                            t);
                         throw t;
                     }
                 }
@@ -254,11 +269,13 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
 
             if (motorState.get() == Stopping) {
                 motorState.enterState(Stopped);
-                logger.trace(
-                    () -> Thread.currentThread().getName() + " shutting down as " + motorState.get());
+                logger.trace(() -> Thread.currentThread().getName() +
+                    " shutting down as " +
+                    motorState.get());
             } else if (motorState.get() == Finished) {
-                logger.trace(
-                    () -> Thread.currentThread().getName() + " shutting down as " + motorState.get());
+                logger.trace(() -> Thread.currentThread().getName() +
+                    " shutting down as " +
+                    motorState.get());
             } else {
                 logger.warn(
                     () -> "Unexpected motor state for CoreMotor shutdown: " + motorState.get());
@@ -277,18 +294,11 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
     }
 
     @Override
-    public void onActivityDefUpdate(ActivityDef activityDef) {
-
-        for (Object component : (new Object[]{input, opTracker, action, output})) {
-            if (component instanceof ActivityDefObserver) {
-                ((ActivityDefObserver) component).onActivityDefUpdate(activityDef);
-            }
-        }
-
-        this.stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
+    public void applyConfig(NBConfiguration cfg) {
+        NBConfigurable.applyMatching(cfg, new Object[]{input, opTracker, action, output});
+        this.config = getConfigModel().matchConfig(cfg);
         strideRateLimiter = activity.getStrideLimiter();
         cycleRateLimiter = activity.getCycleLimiter();
-
     }
 
     @Override
@@ -298,8 +308,10 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
             Stoppable.stop(input, action);
             motorState.enterState(Stopping);
         } else {
-            logger.warn(
-                () -> "attempted to stop motor " + this.getSlotId() + ": from non Running state:" + currentState);
+            logger.warn(() -> "attempted to stop motor " +
+                this.getSlotId() +
+                ": from non Running state:" +
+                currentState);
         }
     }
 
@@ -307,4 +319,20 @@ public class CoreMotor<D> extends NBBaseComponent implements ActivityDefObserver
         this.output = resultOutput;
     }
 
+
+    @Override
+    public NBConfigModel getConfigModel() {
+        return ConfigModel.of(CoreMotor.class).add(Param.required("stride", Integer.class))
+            .asReadOnly();
+    }
+
+    @Override
+    public void applyReconfig(NBConfiguration recfg) {
+        applyConfig(recfg);
+    }
+
+    @Override
+    public NBConfigModel getReconfigModel() {
+        return getConfigModel();
+    }
 }

@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import io.nosqlbench.engine.api.activityapi.core.ActivitiesAware;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.MotorDispenser;
@@ -41,9 +41,10 @@ public class StandardActivityType<A extends Activity<?,?>> {
     private final Map<String, DriverAdapter> adapters = new HashMap<>();
     private final NBComponent parent;
 //    private final DriverAdapter<?, ?> adapter;
-    private final ActivityDef activityDef;
+    private final ActivityConfig activityDef;
 
-    public StandardActivityType(final DriverAdapter<?,?> adapter, final ActivityDef activityDef, final NBComponent parent) {
+    public StandardActivityType(final DriverAdapter<?,?> adapter, final ActivityConfig activityDef,
+        final NBComponent parent) {
         this.parent = parent;
 //        this.adapter = adapter;
         this.activityDef = activityDef;
@@ -52,10 +53,9 @@ public class StandardActivityType<A extends Activity<?,?>> {
 //            .deprecate("yaml", "workload")
 //        );
         adapters.put(adapter.getAdapterName(),adapter);
-        if (adapter instanceof ActivityDefAware) ((ActivityDefAware) adapter).setActivityDef(activityDef);
     }
 
-    public StandardActivityType(final ActivityDef activityDef, final NBComponent parent) {
+    public StandardActivityType(final ActivityConfig activityDef, final NBComponent parent) {
         this.parent = parent;
         this.activityDef = activityDef;
 
@@ -69,11 +69,9 @@ public class StandardActivityType<A extends Activity<?,?>> {
      * @return a distinct StandardActivity instance for each call
      */
     @SuppressWarnings("unchecked")
-    public A getActivity(final ActivityDef activityDef,
+    public A getActivity(final ActivityConfig activityDef,
                          final NBComponent parent,
                          final ActivityWiring wiring) {
-        if (activityDef.getParams().getOptionalString("async").isPresent())
-            throw new RuntimeException("This driver does not support async mode yet.");
 
         return (A) new Activity(parent, activityDef);
     }
@@ -95,7 +93,7 @@ public class StandardActivityType<A extends Activity<?,?>> {
      * @return a distinct activity instance for each call
      */
     public Activity getAssembledActivity(
-        final NBComponent parent, final ActivityDef activityDef,
+        final NBComponent parent, final ActivityConfig activityDef,
         final Map<String, Activity> activities
     ) {
         //        final A activity = this.getActivity(activityDef, parent);
@@ -122,7 +120,7 @@ public class StandardActivityType<A extends Activity<?,?>> {
         if (motorDispenser instanceof ActivitiesAware) ((ActivitiesAware) motorDispenser).setActivitiesMap(activities);
         wiring.setMotorDispenserDelegate(motorDispenser);
 
-        return this.getActivity(activityDef,parent,wiring);
+        return activity;
     }
 
     /**

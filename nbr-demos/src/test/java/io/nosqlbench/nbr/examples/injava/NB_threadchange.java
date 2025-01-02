@@ -49,13 +49,13 @@ public class NB_threadchange extends NBBaseCommand {
 
         Activity activity = controller.start(
             "driver=diag;alias=threadchange;cycles=0..60000;threads=1;interval=2000;op='noop';rate=1000");
-        activity.getActivityDef().setThreads(1);
-        stdout.println("threads now " + activity.getActivityDef().getThreads());
+        activity.getConfig().setThreads(1);
+        stdout.println("threads now " + activity.getConfig().getThreads());
         stdout.println("waiting 500 ms");
         controller.waitMillis(500);
 
-        activity.getActivityDef().setThreads(5);
-        stdout.println("threads now " + activity.getActivityDef().getThreads());
+        activity.getConfig().setThreads(5);
+        stdout.println("threads now " + activity.getConfig().getThreads());
         controller.stop("threadchange");
         return null;
     }

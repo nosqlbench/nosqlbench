@@ -15,7 +15,8 @@
  */
 package io.nosqlbench.engine.api.activityapi.core;
 
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 
 /**
  * A MotorDispenser is created for each StandardActivity instance within a scenario.
@@ -29,9 +30,10 @@ public interface MotorDispenser<T> {
      * Resolve (find or create) a Motor instance for the slot specified.
      * The motor is not required to be per-slot (per-thread), but any shared inputs motors be thread safe.
      *
-     * @param activityDef the ActivityDef which will be used to parameterize the returned motor
+     * @param activityConfig the activity config which will be used to parameterize the returned
+     * motor
      * @param slot The numbered slot within the activity instance for this motor
      * @return A new or cached Motor for the specified slot.
      */
-    Motor<T> getMotor(ActivityDef activityDef, int slot);
+    Motor<T> getMotor(ActivityConfig activityConfig, int slot);
 }

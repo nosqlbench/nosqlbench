@@ -394,28 +394,24 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
     private final List<CapturePoint> captures = new ArrayList<>();
 
     private final OpTemplate _opTemplate;
-    private final NBConfiguration activityCfg;
+    private final Map<String,Object> activityCfg;
     private final ParsedTemplateMap tmap;
     private final NBLabels labels;
     private final List<Function<Map<String, Object>, Map<String, Object>>> preprocessors;
 
-    /**
-     Create a parsed command from an Op template. This version is exactly like
-     except that it allows
-     preprocessors. Preprocessors are all applied to the the op template before
-     it is applied to the parsed command fields, allowing you to combine or destructure
-     fields from more tha one representation into a single canonical representation
-     for processing.
-     @param opTemplate
-     The OpTemplate as provided by a user via YAML, JSON, or API (data structure)
-     @param activityCfg
-     The activity configuration, used to resolve nested config parameters
-     @param preprocessors
-     Map->Map transformers.
-     */
-
+    public ParsedOp(ParsedOp pop, NBConfiguration config) {
+        this(pop._opTemplate,new LinkedHashMap<>(pop.activityCfg) {{ this.putAll(config.getMap());}},List.of(),pop.parent);
+    }
+///     Create a parsed command from an Op template. Preprocessors are all applied to the the op template before
+///     it is applied to the parsed command fields, allowing you to combine or destructure
+///     fields from more tha one representation into a single canonical representation
+///     for processing.
+///     @param opTemplate The OpTemplate as provided by a user via YAML, JSON, or API (data structure)
+///     @param activityCfg The activity configuration, used to resolve nested config parameters
+///     @param preprocessors Map->Map transformers.
     public ParsedOp(
-        OpTemplate opTemplate, NBConfiguration activityCfg,
+        OpTemplate opTemplate,
+        Map<String,Object> activityCfg,
         List<Function<Map<String, Object>, Map<String, Object>>> preprocessors,
         NBComponent parent
     ) {
@@ -439,7 +435,7 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
 
         this.tmap = new ParsedTemplateMap(
             getName(), map, opTemplate.getBindings(),
-                                          List.of(opTemplate.getParams(), activityCfg.getMap())
+                                          List.of(opTemplate.getParams(), activityCfg)
         );
 
         NBLabels opLabels = parent.getLabels().and(

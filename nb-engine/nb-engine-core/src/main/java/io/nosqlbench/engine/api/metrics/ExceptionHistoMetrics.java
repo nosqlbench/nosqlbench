@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Histogram;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 
@@ -34,14 +34,15 @@ public class ExceptionHistoMetrics {
     private final ConcurrentHashMap<String, Histogram> histos = new ConcurrentHashMap<>();
     private final Histogram allerrors;
     private final NBComponent parent;
-    private final ActivityDef activityDef;
+    private final ActivityConfig activityDef;
 
-    public ExceptionHistoMetrics(final NBComponent parent, final ActivityDef activityDef) {
+    public ExceptionHistoMetrics(final NBComponent parent, final ActivityConfig config) {
         this.parent = parent;
-        this.activityDef = activityDef;
+        this.activityDef = config;
+        int hdrdigits = parent.getComponentProp("hdr_digits").map(Integer::parseInt).orElse(4);
         this.allerrors = parent.create().histogram(
             "errorhistos_ALL",
-            activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4),
+            hdrdigits,
             MetricCategory.Errors,
             "A histogram for all exceptions"
         );
@@ -50,11 +51,12 @@ public class ExceptionHistoMetrics {
     public void update(final String name, final long magnitude) {
         Histogram h = this.histos.get(name);
         if (null == h) synchronized (this.histos) {
+            int hdrdigits = parent.getComponentProp("hdr_digits").map(Integer::parseInt).orElse(4);
             h = this.histos.computeIfAbsent(
                 name,
                 errName -> parent.create().histogram(
                     "errorhistos_"+errName,
-                    this.activityDef.getParams().getOptionalInteger("hdr_digits").orElse(4),
+                    hdrdigits,
                     MetricCategory.Errors,
                     "error histogram for exception '" + errName + "'"
                 )

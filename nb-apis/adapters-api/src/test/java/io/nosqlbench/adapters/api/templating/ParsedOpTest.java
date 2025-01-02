@@ -37,39 +37,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ParsedOpTest {
 
     private NBComponent getParent() {
-        return new TestComponent("opparent","opparent");
+        return new TestComponent("opparent", "opparent");
     }
+
     private ParsedOp getOp() {
 
-        ParsedOp pc = new ParsedOp(
-            new OpData().applyFields(
-                Map.of(
-                    "op", Map.of(
-                        "stmt", "test",
-                        "dyna1", "{dyna1}",
-                        "dyna2", "{{NumberNameToString()}}",
-                        "identity", "{{Identity()}}"
-                    ),
-                    "bindings", Map.of(
-                        "dyna1", "NumberNameToString()"
-                    )
-                )
-            ),
-            ConfigModel.of(ParsedOpTest.class)
-                .add(Param.defaultTo("testcfg", "testval"))
-                .asReadOnly()
-                .apply(Map.of()),
-            List.of(),
-            getParent()
-        );
+        OpData opTemplate = new OpData().applyFields(Map.of(
+            "op", Map.of(
+                "stmt", "test", "dyna1", "{dyna1}", "dyna2", "{{NumberNameToString()}}", "identity",
+                "{{Identity()}}"), "bindings", Map.of("dyna1", "NumberNameToString()")));
+
+        NBConfiguration nbcfg = ConfigModel.of(ParsedOpTest.class)
+            .add(Param.defaultTo("testcfg", "testval")).asReadOnly().apply(Map.of());
+
+        ParsedOp pc = new ParsedOp(opTemplate, nbcfg.getMap(), List.of(), getParent());
         return pc;
     }
 
     @Test
     public void testFieldDelegationFromDynamicToStaticToConfig() {
         final NBConfiguration cfg = ConfigModel.of(ParsedOpTest.class)
-            .add(Param.defaultTo("puppy", "dog"))
-            .add(Param.required("surname", String.class))
+            .add(Param.defaultTo("puppy", "dog")).add(Param.required("surname", String.class))
             .asReadOnly().apply(Map.of("surname", "yes"));
 
         final String opt = """
@@ -80,10 +68,11 @@ public class ParsedOpTest {
                  params:
                   ps1: "param-one"
             """;
-        final OpsDocList stmtsDocs = OpsLoader.loadString(opt, OpTemplateFormat.yaml, cfg.getMap(), null);
-        assertThat(stmtsDocs.getOps().matching("",true).size()).isEqualTo(1);
-        final OpTemplate opTemplate = stmtsDocs.getOps().matching("",true).get(0);
-        final ParsedOp parsedOp = new ParsedOp(opTemplate, cfg, List.of(), getParent());
+        final OpsDocList stmtsDocs = OpsLoader.loadString(
+            opt, OpTemplateFormat.yaml, cfg.getMap(), null);
+        assertThat(stmtsDocs.getOps().matching("", true).size()).isEqualTo(1);
+        final OpTemplate opTemplate = stmtsDocs.getOps().matching("", true).get(0);
+        final ParsedOp parsedOp = new ParsedOp(opTemplate, cfg.getMap(), List.of(), getParent());
 
         assertThat(parsedOp.getAsFunctionOr("d1", "invalid").apply(1L)).isEqualTo("one");
         assertThat(parsedOp.getAsFunctionOr("s1", "invalid").apply(1L)).isEqualTo("static-one");
@@ -104,31 +93,20 @@ public class ParsedOpTest {
         final ParsedOp parsedOp = new ParsedOp(
             new OpData().applyFields(Map.of(
                 "op", Map.of(
-                    "field1-literal", "literalvalue1",
-                    "field2-object", "{{NumberNameToString()}}",
-                    "field3-template", "pre-{dyna1}-post",
-                    "field4-map-template", Map.of(
-                        "subfield1-object", "{{Identity(); ToString()}}"
-                    ), "field5-map-literal", Map.of(
-                        "subfield2-literal", "LiteralValue"
-                    )
-                ),
-                "bindings", Map.of(
-                    "dyna1", "NumberNameToString()"
-                ))
-            ),
-            ConfigModel.of(ParsedOpTest.class)
-                .add(Param.defaultTo("testcfg", "testval"))
-                .asReadOnly()
-                .apply(Map.of()),
-            List.of(),
-            getParent()
-        );
+                    "field1-literal", "literalvalue1", "field2-object", "{{NumberNameToString()}}",
+                    "field3-template", "pre-{dyna1}-post", "field4-map-template",
+                    Map.of("subfield1-object", "{{Identity(); ToString()}}"), "field5-map-literal",
+                    Map.of("subfield2-literal", "LiteralValue")), "bindings",
+                Map.of("dyna1", "NumberNameToString()"))),
+            ConfigModel.of(ParsedOpTest.class).add(Param.defaultTo("testcfg", "testval"))
+                .asReadOnly().apply(Map.of()).getMap(), List.of(), getParent());
         final LongFunction<? extends String> f1 = parsedOp.getAsRequiredFunction("field1-literal");
         final LongFunction<? extends String> f2 = parsedOp.getAsRequiredFunction("field2-object");
         final LongFunction<? extends String> f3 = parsedOp.getAsRequiredFunction("field3-template");
-        final LongFunction<? extends Map> f4 = parsedOp.getAsRequiredFunction("field4-map-template", Map.class);
-        final LongFunction<? extends Map> f5 = parsedOp.getAsRequiredFunction("field5-map-literal", Map.class);
+        final LongFunction<? extends Map> f4 = parsedOp.getAsRequiredFunction(
+            "field4-map-template", Map.class);
+        final LongFunction<? extends Map> f5 = parsedOp.getAsRequiredFunction(
+            "field5-map-literal", Map.class);
         assertThat(f1.apply(1)).isNotNull();
         assertThat(f2.apply(2)).isNotNull();
         assertThat(f3.apply(3)).isNotNull();
@@ -148,21 +126,25 @@ public class ParsedOpTest {
 
     @Test
     public void testNewListBinder() {
-        final LongFunction<List<Object>> lb = getOp().newListBinder("dyna1", "identity", "dyna2", "identity");
+        final LongFunction<List<Object>> lb = getOp().newListBinder(
+            "dyna1", "identity", "dyna2", "identity");
         final List<Object> objects = lb.apply(1);
         assertThat(objects).isEqualTo(List.of("one", 1L, "one", 1L));
     }
 
     @Test
     public void testNewMapBinder() {
-        final LongFunction<Map<String, Object>> mb = getOp().newOrderedMapBinder("dyna1", "identity", "dyna2");
+        final LongFunction<Map<String, Object>> mb = getOp().newOrderedMapBinder(
+            "dyna1", "identity", "dyna2");
         final Map<String, Object> objects = mb.apply(2);
-        assertThat(objects).isEqualTo(Map.<String, Object>of("dyna1", "two", "identity", 2L, "dyna2", "two"));
+        assertThat(objects).isEqualTo(
+            Map.<String, Object>of("dyna1", "two", "identity", 2L, "dyna2", "two"));
     }
 
     @Test
     public void testNewAryBinder() {
-        final LongFunction<Object[]> ab = getOp().newArrayBinder("dyna1", "dyna1", "identity", "identity");
+        final LongFunction<Object[]> ab = getOp().newArrayBinder(
+            "dyna1", "dyna1", "identity", "identity");
         final Object[] objects = ab.apply(3);
         assertThat(objects).isEqualTo(new Object[]{"three", "three", 3L, 3L});
     }
@@ -170,45 +152,21 @@ public class ParsedOpTest {
     @Test
     public void testLayeredListBinder() {
         ParsedOp pc = new ParsedOp(
-            new OpData().applyFields(
-                Map.of(
-                    "op", Map.of(
-                        "alist", List.of(
-                            List.of(
-                                "item1",
-                                "item2-{dyna1}"
-                            ),
-                            Map.of(
-                                "akey", "avalue",
-                                "akey2", "a {dyna1} value2"
-                            )
-                        )
-                    ),
-                    "bindings", Map.of(
-                        "dyna1", "NumberNameToString()"
-                    )
-                )
-            ),
-            ConfigModel.of(ParsedOpTest.class)
-                .add(Param.defaultTo("testcfg", "testval"))
-                .asReadOnly()
-                .apply(Map.of()),
-            List.of(),
-            getParent()
-        );
+            new OpData().applyFields(Map.of(
+                "op", Map.of(
+                    "alist",
+                    List.of(
+                        List.of("item1", "item2-{dyna1}"),
+                        Map.of("akey", "avalue", "akey2", "a {dyna1} value2"))), "bindings",
+                Map.of("dyna1", "NumberNameToString()"))),
+            ConfigModel.of(ParsedOpTest.class).add(Param.defaultTo("testcfg", "testval"))
+                .asReadOnly().apply(Map.of()).getMap(), List.of(), getParent());
 
         Map<String, Object> result = pc.getTemplateMap().apply(1);
-        assertThat(result).isEqualTo(
-            Map.of(
-                "alist", List.of(
-                    List.of("item1", "item2-one"),
-                    Map.of(
-                        "akey", "avalue",
-                        "akey2", "a one value2"
-                    )
-                )
-            )
-        );
+        assertThat(result).isEqualTo(Map.of(
+            "alist", List.of(
+                List.of("item1", "item2-one"),
+                Map.of("akey", "avalue", "akey2", "a one value2"))));
 
     }
 

@@ -35,7 +35,7 @@ public class ConfigTuples implements Iterable<ConfigTuples.Section> {
     }
 
     public ConfigTuples(Activity activity, String param) {
-        this(activity.getParams().getOptionalString(param).orElse(""));
+        this(activity.getConfig().getOptional(param).orElse(""));
     }
 
     private List<Section> parseParams(String configdata) {

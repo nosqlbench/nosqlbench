@@ -97,11 +97,20 @@ import org.apache.logging.log4j.Logger;
 ///
 /// The config parameters for an activity are standard, and custom behaviors afforded to activities
 /// work the same across all op types.
-public class Activity<R extends java.util.function.LongFunction, S> extends NBStatusComponent implements InvokableResult, SyntheticOpTemplateProvider, ActivityDefObserver, StateCapable, ProgressCapable, Comparable<Activity>, MotorDispenser {
+public class Activity<R extends java.util.function.LongFunction, S> extends NBStatusComponent
+    implements InvokableResult,
+               SyntheticOpTemplateProvider,
+               StateCapable,
+               ProgressCapable,
+               Comparable<Activity>,
+               MotorDispenser,
+               NBConfigurable,
+               NBReconfigurable
+{
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final OpSequence<OpDispenser<? extends CycleOp<?>>> sequence;
-    private final ConcurrentHashMap<String, DriverAdapter<CycleOp<?>, Space>> adapters = new ConcurrentHashMap<>();
-    protected final ActivityDef activityDef;
+    private final ConcurrentHashMap<String, DriverAdapter<CycleOp<?>, Space>> adapters
+        = new ConcurrentHashMap<>();
 
     public final ActivityMetrics metrics;
     private ActivityMetricProgressMeter progressMeter;
@@ -116,28 +125,33 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
     private ErrorMetrics errorMetrics;
     private Input input;
     private StandardAction<?, ?> action;
+    private ActivityConfig config;
 
-    public Activity(NBComponent parent, ActivityDef activityDef) {
+    public Activity(NBComponent parent, ActivityConfig config) {
+        super(parent, NBLabels.forKV("activity", config.getAlias()).and(config.auxLabels()));
+        //        NBConfiguration validConfig = getConfigModel().apply(config.getMap());
 
         this.applyConfig(config);
         this.sequence = initSequence();
         this.metrics = new ActivityMetrics(this);
+    }
 
-        getParams().set(
-            "alias", Optional.ofNullable(activityDef.getAlias()).or(
-                () -> getParams().getOptionalString("workload")).or(
-                () -> getParams().getOptionalString("driver")).orElseThrow(
-                () -> new RuntimeException(
-                    "Unable to determine name of activity from " + activityDef))
-        );
+    public static ActivityConfig configFor(String s) {
+        return configFor(ParameterMap.parseParams(s).orElseThrow());
+    }
+
 
     private OpSequence<OpDispenser<? extends CycleOp<?>>> initSequence() {
         //        this.activityDef = activityDef;
         //        this.metrics = new ActivityMetrics(this);
 
+        //        OpsDocList workload;
+        Optional<String> yaml_loc = config.getOptional("yaml", "workload");
+
+        // TODO: avoid having to load this duplicitously to parse the template variables in a separate phase
         NBConfigModel yamlmodel = yaml_loc.map(path -> {
-            return OpsLoader.loadPath(
-                path, new LinkedHashMap<>(activityDef.getParams()), "activities").getConfigModel();
+            return OpsLoader.loadPath(path, new LinkedHashMap<>(config.getMap()), "activities")
+                .getConfigModel();
         }).orElse(ConfigModel.of(Activity.class).asReadOnly());
 
 
@@ -419,18 +433,6 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
 //    }
 
     @Override
-    public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
-
-        for (DriverAdapter<?, ?> adapter : adapters.values()) {
-            if (adapter instanceof NBReconfigurable configurable) {
-                NBConfigModel cfgModel = configurable.getReconfigModel();
-                NBConfiguration cfg = cfgModel.matchConfig(activityDef.getParams());
-                NBReconfigurable.applyMatching(cfg, List.of(configurable));
-            }
-        }
-    }
-
-    @Override
     public OpTemplates getSyntheticOpTemplates(OpTemplates opsDocList, Map<String, Object> cfg) {
         OpTemplates accumulator = new OpTemplates();
         List<OpTemplates> combined = new ArrayList<>();
@@ -469,7 +471,7 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         switch (event) {
             case ParamChange<?> pc -> {
                 switch (pc.value()) {
-                    case SetThreads st -> activityDef.setThreads(st.threads);
+                    case SetThreads st -> config.update(ActivityConfig.FIELD_THREADS, st.threads);
                     case CycleRateSpec crs -> createOrUpdateCycleLimiter(crs);
                     case StrideRateSpec srs -> createOrUpdateStrideLimiter(srs);
                     default -> super.onEvent(event);
@@ -532,91 +534,94 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
     //    }
 
     /**
-     Modify the provided ActivityDef with defaults for stride and cycles, if they haven't been
+     Modify the provided activity config with defaults for stride and cycles, if they haven't been
      provided, based on the
-     length of the sequence as determined by the provided ratios. Also, modify the ActivityDef with
+     length of the sequence as determined by the provided ratios. Also, modify the activity config
+     with
      reasonable
      defaults when requested.
      @param seq
      - The {@link OpSequence} to derive the defaults from
      */
     private synchronized void setDefaultsFromOpSequence(OpSequence<?> seq) {
-        Optional<String> strideOpt = getParams().getOptionalString("stride");
-        if (strideOpt.isEmpty()) {
-            String stride = String.valueOf(seq.getSequence().length);
-            logger.info(() -> "defaulting stride to " + stride + " (the sequence length)");
-//            getParams().set("stride", stride);
-            getParams().setSilently("stride", stride);
+        Map<String, Object> updates = new LinkedHashMap<>(config.getMap());
+
+        updates.computeIfAbsent(
+            "stride", k -> {
+                String stride = String.valueOf(seq.getSequence().length);
+                logger.info(() -> "defaulting stride to " + stride + " (the sequence length)");
+                return stride;
+            });
+
+        updates.computeIfAbsent(
+            "cycles", k -> {
+                String cycles = (String) updates.get("stride");
+                logger.info(() -> "defaulting cycles to " + cycles + " (the stride length)");
+                return cycles;
+            });
+
+        long cycles = CyclesSpec.parse(updates.get("cycles").toString()).cycle_count();
+        long stride = Long.parseLong(updates.get("stride").toString());
+        if (cycles < stride) {
+            throw new RuntimeException("The specified cycles (" +
+                cycles +
+                ") are less than the stride (" +
+                stride +
+                "). This means there aren't enough cycles to cause a stride to be" +
+                " executed. If this was intended, then set stride low enough to" +
+                " allow it.");
         }
 
-        // CYCLES
-        Optional<String> cyclesOpt = getParams().getOptionalString("cycles");
-        if (cyclesOpt.isEmpty()) {
-            String cycles = getParams().getOptionalString("stride").orElseThrow();
-            logger.info(() -> "defaulting cycles to " + cycles + " (the stride length)");
-            this.getActivityDef().setCycles(getParams().getOptionalString("stride").orElseThrow());
-        } else {
-            if (0 == activityDef.getCycleCount()) {
-                throw new RuntimeException(
-                    "You specified cycles, but the range specified means zero cycles: " + getParams().get(
-                        "cycles"));
-            }
-            long stride = getParams().getOptionalLong("stride").orElseThrow();
-            long cycles = this.activityDef.getCycleCount();
-            if (cycles < stride) {
-                throw new RuntimeException(
-                    "The specified cycles (" + cycles + ") are less than the stride (" + stride + "). This means there aren't enough cycles to cause a stride to be executed." + " If this was intended, then set stride low enough to allow it.");
-            }
-        }
+        Optional<String> threadSpec = Optional.ofNullable(updates.get("threads"))
+            .map(String::valueOf);
 
-        long cycleCount = this.activityDef.getCycleCount();
-        long stride = this.activityDef.getParams().getOptionalLong("stride").orElseThrow();
-
-        if (0 < stride && 0 != cycleCount % stride) {
-            logger.warn(
-                () -> "The stride does not evenly divide cycles. Only full strides will be executed," + "leaving some cycles unused. (stride=" + stride + ", cycles=" + cycleCount + ')');
-        }
-
-        Optional<String> threadSpec = activityDef.getParams().getOptionalString("threads");
         if (threadSpec.isPresent()) {
             String spec = threadSpec.get();
             int processors = Runtime.getRuntime().availableProcessors();
+            int threads = 0;
             if ("auto".equalsIgnoreCase(spec)) {
-                int threads = processors * 10;
-                if (threads > activityDef.getCycleCount()) {
-                    threads = (int) activityDef.getCycleCount();
+                threads = processors * 10;
+                if (threads > cycles) {
+                    threads = (int) cycles;
                     logger.info(
                         "setting threads to {} (auto) [10xCORES, cycle count limited]", threads);
                 } else {
                     logger.info("setting threads to {} (auto) [10xCORES]", threads);
                 }
-//                activityDef.setThreads(threads);
-                activityDef.getParams().setSilently("threads", threads);
             } else if (spec.toLowerCase().matches("\\d+x")) {
                 String multiplier = spec.substring(0, spec.length() - 1);
-                int threads = processors * Integer.parseInt(multiplier);
-                logger.info(() -> "setting threads to " + threads + " (" + multiplier + "x)");
-//                activityDef.setThreads(threads);
-                activityDef.getParams().setSilently("threads", threads);
+                threads = processors * Integer.parseInt(multiplier);
+                int finalThreads = threads;
+                logger.info(() -> "setting threads to " + finalThreads + " (" + multiplier + "x)");
             } else if (spec.toLowerCase().matches("\\d+")) {
                 logger.info(() -> "setting threads to " + spec + " (direct)");
-//                activityDef.setThreads(Integer.parseInt(spec));
-                activityDef.getParams().setSilently("threads", Integer.parseInt(spec));
+            } else {
+                throw new RuntimeException("Unrecognized format for threads:" + spec);
+            }
+            updates.put("threads", threads);
+
+
+            if (threads > cycles) {
+                int finalThreads1 = threads;
+                logger.warn(() -> "threads=" +
+                    finalThreads1 +
+                    " and cycles=" +
+                    updates.get("cycles").toString() +
+                    ", you should have more cycles than threads.");
             }
 
-            if (activityDef.getThreads() > activityDef.getCycleCount()) {
-                logger.warn(
-                    () -> "threads=" + activityDef.getThreads() + " and cycles=" + activityDef.getCycleSummary() + ", you should have more cycles than threads.");
-            }
-
-        } else if (1000 < cycleCount) {
-            logger.warn(
-                () -> "For testing at scale, it is highly recommended that you " + "set threads to a value higher than the default of 1." + " hint: you can use threads=auto for reasonable default, or" + " consult the topic on threads with `help threads` for" + " more information.");
+        } else if (1000 < cycles) {
+            logger.warn(() -> "For testing at scale, it is highly recommended that you " +
+                "set threads to a value higher than the default of 1." +
+                " hint: you can use threads=auto for reasonable default, or" +
+                " consult the topic on threads with `help threads` for" +
+                " more information.");
         }
 
-        if (0 < this.activityDef.getCycleCount() && seq.getOps().isEmpty()) {
+        if (0 < cycles && seq.getOps().isEmpty()) {
             throw new BasicError(
-                "You have configured a zero-length sequence and non-zero cycles. It is not possible to continue with this activity.");
+                "You have configured a zero-length sequence and non-zero cycles. It is not" +
+                    " possible to continue with this activity.");
         }
     }
 
@@ -696,25 +701,23 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
             } else if (workload != null && OpsLoader.isJson(workload)) {
                 workloadSource = "commandline: (workload/json):" + workload;
                 opsDocs = OpsLoader.loadString(
-                    workload, OpTemplateFormat.json, activityDef.getParams(), null);
+                    workload, OpTemplateFormat.json, config.getMap(), null);
             } else if (workload != null && OpsLoader.isYaml(workload)) {
                 workloadSource = "commandline: (workload/yaml):" + workload;
-                opsDocs= OpsLoader.loadString(
-                    workload, OpTemplateFormat.yaml, activityDef.getParams(), null);
+                opsDocs = OpsLoader.loadString(
+                    workload, OpTemplateFormat.yaml, config.getMap(), null);
             } else if (workload != null) {
-                opsDocs= OpsLoader.loadPath(workload, activityDef.getParams(), "activities");
+                opsDocs = OpsLoader.loadPath(workload, config.getMap(), "activities");
             } else if (stmt != null) {
                 workloadSource = "commandline: (stmt/inline): '" + stmt + "'";
-                opsDocs= OpsLoader.loadString(
-                    stmt, OpTemplateFormat.inline, activityDef.getParams(), null);
+                opsDocs = OpsLoader.loadString(
+                    stmt, OpTemplateFormat.inline, config.getMap(), null);
             } else if (op != null && OpsLoader.isJson(op)) {
                 workloadSource = "commandline: (op/json): '" + op + "'";
-                opsDocs= OpsLoader.loadString(
-                    op, OpTemplateFormat.json, activityDef.getParams(), null);
+                opsDocs = OpsLoader.loadString(op, OpTemplateFormat.json, config.getMap(), null);
             } else if (op != null) {
                 workloadSource = "commandline: (op/inline): '" + op + "'";
-                opsDocs= OpsLoader.loadString(
-                    op, OpTemplateFormat.inline, activityDef.getParams(), null);
+                opsDocs = OpsLoader.loadString(op, OpTemplateFormat.inline, config.getMap(), null);
             }
             return new OpTemplates(opsDocs);
 
@@ -747,24 +750,19 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         return startedAtMillis;
     }
 
-    public ActivityDef getActivityDef() {
-        return activityDef;
-    }
-
     public String toString() {
-        return (activityDef != null ? activityDef.getAlias() : "unset_alias") + ':' + this.runState + ':' + this.tally;
+        return config.getAlias() + ':' + this.runState + ':' + this.tally;
     }
 
-    public synchronized void initOrUpdateRateLimiters(ActivityDef activityDef) {
+    public synchronized void initOrUpdateRateLimiters() {
 
 //        cycleratePerThread = activityDef.getParams().takeBoolOrDefault("cyclerate_per_thread", false);
 
-        activityDef.getParams().getOptionalNamedParameter("striderate").map(
-            StrideRateSpec::new).ifPresent(sr -> this.onEvent(new ParamChange<>(sr)));
+        config.getOptional("striderate").map(StrideRateSpec::new)
+            .ifPresent(sr -> this.onEvent(new ParamChange<>(sr)));
 
-        activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate", "rate").map(
-            CycleRateSpec::new).ifPresent(sr -> this.onEvent(new ParamChange<>(sr)));
-
+        config.getOptional("cyclerate", "targetrate", "rate").map(CycleRateSpec::new)
+            .ifPresent(sr -> this.onEvent(new ParamChange<>(sr)));
     }
 
     public void createOrUpdateStrideLimiter(SimRateSpec spec) {
@@ -806,7 +804,7 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
 
     @Override
     public Map<String, String> asResult() {
-        return Map.of("activity", this.getActivityDef().getAlias());
+        return Map.of("activity", config.getAlias());
     }
 
     /**
@@ -816,15 +814,14 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
      @return The number of allowable retries
      */
     public int getMaxTries() {
-        return this.activityDef.getParams().getOptionalInteger("maxtries").orElse(10);
+        return config.getOptional(Integer.class, "maxtries").orElse(10);
     }
 
     public synchronized NBErrorHandler getErrorHandler() {
         if (null == this.errorHandler) {
             errorHandler = new NBErrorHandler(
-                () -> activityDef.getParams().getOptionalString("errors").orElse("stop"),
-                this::getExceptionMetrics
-            );
+                () -> config.getOptional("errors").orElse("stop"),
+                this::getExceptionMetrics);
         }
         return errorHandler;
     }
@@ -844,7 +841,7 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
 
     @Override
     public int compareTo(Activity o) {
-        return this.getActivityDef().getAlias().compareTo(o.getActivityDef().getAlias());
+        return getAlias().compareTo(o.getAlias());
     }
 
     //    public void registerAutoCloseable(AutoCloseable closeable) {
@@ -860,17 +857,17 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
 
 
     public String getAlias() {
-        return getActivityDef().getAlias();
+        return config.getAlias();
     }
 
     @Override
-    public Motor getMotor(ActivityDef activityDef, int slot) {
+    public Motor getMotor(ActivityConfig activityConfig, int slot) {
         return new CoreMotor(this, slot, getInput(), getAction(), getOutput());
     }
 
     public synchronized Input getInput() {
         if (input == null) {
-            this.input = new AtomicInput(this, this.getActivityDef());
+            this.input = new AtomicInput(this);
         }
         return this.input;
     }
@@ -891,5 +888,90 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         cycleLimiterSource = ThreadLocalRateLimiters.createOrUpdate(this, cycleLimiterSource, spec);
     }
 
+    public ActivityConfig getConfig() {
+        return this.config;
+    }
 
+    public static ActivityConfig configFor(Map<String, ?> params) {
+        return new ActivityConfig(configModel.apply(params));
+    }
+
+    private static NBConfigModel configModel = ConfigModel.of(Activity.class)
+        .add(Param.optional("alias")).add(Param.optional(
+            "labels", String.class,
+            "Labels which will apply to metrics and annotations for this activity only"))
+        .add(Param.defaultTo(
+            "strict", true,
+            "strict op field mode, which requires that provided op fields are recognized and used"))
+        .add(Param.optional("op", String.class, "op template in statement form")).add(
+            Param.optional(
+                List.of("stmt", "statement"), String.class,
+                "op template in statement " + "form"))
+        .add(Param.defaultTo("tags", "", "tag filter to be used to filter operations"))
+        .add(Param.defaultTo("errors", "stop", "error handler configuration")).add(
+            Param.defaultTo("threads","1").setRegex("\\d+|\\d+x|auto")
+                .setDescription("number of concurrent operations, controlled by threadpool"))
+        .add(Param.optional("stride").setRegex("\\d+"))
+        .add(Param.optional("striderate", String.class, "rate limit for strides per second")).add(
+            Param.defaultTo("cycles", "1")
+                .setRegex("\\d+[KMBGTPE]?|\\d+[KMBGTPE]?\\.\\" + ".\\d+[KMBGTPE]?")
+                .setDescription("cycle interval to use")).add(Param.defaultTo("recycles", "1")
+            .setDescription("allow cycles to be re-used this many " + "times")).add(Param.optional(
+            List.of("cyclerate", "targetrate", "rate"), String.class,
+            "rate limit for cycles per second"))
+        .add(Param.optional("seq", String.class, "sequencing algorithm"))
+        .add(Param.optional("instrument", Boolean.class)).add(
+            Param.optional(
+                List.of("workload", "yaml"), String.class, "location of workload yaml file"))
+        .add(Param.optional("driver", String.class))
+        .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|emit|none)"))
+        .add(Param.optional("maxtries", Integer.class)).add(
+            Param.defaultTo(
+                "input", "type=atomicseq", "The type of cycle input to use for this " + "activity"))
+        .add(Param.optional(List.of("if","inputfilter"),String.class,"an input filter"))
+        .add(Param.optional("output",String.class))
+        .asReadOnly();
+
+    @Override
+    public NBConfigModel getConfigModel() {
+        return configModel;
+    }
+
+    @Override
+    public void applyConfig(NBConfiguration config) {
+
+        Optional<String> directAlias = config.getOptional("alias");
+        //        if (!directAlias.isPresent()) {
+        //            String indirectAlias = config.getOptional(ActivityConfig.FIELD_ALIAS)
+        //                .or(() -> config.getOptional("workload")).or(() -> config.getOptional("driver"))
+        //                .orElse("ACTIVITYNAME");
+        //
+        //            config.getMap().put("alias", indirectAlias);
+        //        }
+        //
+        NBConfigurable.applyMatchingCollection(config, adapters.values());
+
+        this.config = new ActivityConfig(config);
+    }
+
+    @Override
+    public void applyReconfig(NBConfiguration reconf) {
+        this.config = new ActivityConfig(getReconfigModel().apply(reconf.getMap()));
+    }
+
+    @Override
+    public NBConfigModel getReconfigModel() {
+        return ConfigModel.of(Activity.class).add(
+                Param.optional("threads").setRegex("\\d+|\\d+x|auto")
+                    .setDescription("number of concurrent operations, controlled by threadpool"))
+            .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
+            .add(Param.optional(
+                List.of("cyclerate", "targetrate", "rate"), String.class,
+                "rate limit for cycles per second")).asReadOnly();
+    }
+
+
+    public CyclesSpec getCyclesSpec() {
+        return CyclesSpec.parse(config.get(ActivityConfig.FIELD_CYCLES));
+    }
 }

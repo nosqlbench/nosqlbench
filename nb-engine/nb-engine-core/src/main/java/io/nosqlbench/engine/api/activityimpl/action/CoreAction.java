@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityimpl.action;
 
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -26,12 +26,12 @@ public class CoreAction implements SyncAction {
 
     private final int interval;
     private final int slot;
-    private final ActivityDef activityDef;
+    private final ActivityConfig activityDef;
 
-    public CoreAction(ActivityDef activityDef, int slot) {
+    public CoreAction(ActivityConfig activityDef, int slot) {
         this.activityDef = activityDef;
         this.slot = slot;
-        this.interval = activityDef.getParams().getOptionalInteger("interval").orElse(1000);
+        this.interval = activityDef.getOptional("interval").map(Integer::parseInt).orElse(1000);
     }
 
     @Override

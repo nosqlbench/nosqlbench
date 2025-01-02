@@ -35,7 +35,7 @@ public class LoggingMarkerDispenser implements OutputDispenser {
 
     @Override
     public Output getOutput(long slot) {
-        return new LoggingOutput(activity.getActivityDef(), slot);
+        return new LoggingOutput(activity.getConfig()   , slot);
     }
 
 }

@@ -144,55 +144,6 @@ public abstract class BaseDriverAdapter<RESULT
         return cfg;
     }
 
-    @Override
-    public void applyConfig(NBConfiguration cfg) {
-        this.cfg = cfg;
-    }
-
-    @Override
-    public void applyReconfig(NBConfiguration reconf) {
-        this.cfg = getReconfigModel().apply(reconf.getMap());
-    }
-
-
-    /**
-     * In order to be provided with config information, it is required
-     * that the driver adapter specify the valid configuration options,
-     * their types, and so on.
-     */
-    @Override
-    public NBConfigModel getConfigModel() {
-        return ConfigModel.of(BaseDriverAdapter.class)
-            .add(Param.optional("alias"))
-            .add(Param.optional("labels", String.class, "Labels which will apply to metrics and annotations for this activity only"))
-            .add(Param.defaultTo("strict", true, "strict op field mode, which requires that provided op fields are recognized and used"))
-            .add(Param.optional(List.of("op", "stmt", "statement"), String.class, "op template in statement form"))
-            .add(Param.optional("tags", String.class, "tags to be used to filter operations"))
-            .add(Param.defaultTo("errors", "stop", "error handler configuration"))
-            .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto").setDescription("number of concurrent operations, controlled by threadpool"))
-            .add(Param.optional("stride").setRegex("\\d+"))
-            .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
-            .add(Param.optional("cycles").setRegex("\\d+[KMBGTPE]?|\\d+[KMBGTPE]?\\.\\.\\d+[KMBGTPE]?").setDescription("cycle interval to use"))
-            .add(Param.optional("recycles").setDescription("allow cycles to be re-used this many times"))
-            .add(Param.optional(List.of("cyclerate", "targetrate", "rate"), String.class, "rate limit for cycles per second"))
-            .add(Param.optional("seq", String.class, "sequencing algorithm"))
-            .add(Param.optional("instrument", Boolean.class))
-            .add(Param.optional(List.of("workload", "yaml"), String.class, "location of workload yaml file"))
-            .add(Param.optional("driver", String.class))
-            .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|emit|none)"))
-            .add(Param.optional("maxtries", Integer.class))
-            .asReadOnly();
-
-    }
-
-    @Override
-    public NBConfigModel getReconfigModel() {
-        return ConfigModel.of(BaseDriverAdapter.class)
-            .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto").setDescription("number of concurrent operations, controlled by threadpool"))
-            .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
-            .add(Param.optional(List.of("cyclerate", "targetrate", "rate"), String.class, "rate limit for cycles per second"))
-            .asReadOnly();
-    }
 
     @Override
     public LongFunction<SPACE> getSpaceFunc(ParsedOp pop) {
@@ -232,5 +183,31 @@ public abstract class BaseDriverAdapter<RESULT
             }
         }
         super.beforeDetach();
+    }
+
+    @Override
+    public void applyConfig(NBConfiguration cfg) {
+        this.cfg = cfg;
+    }
+
+    @Override
+    public void applyReconfig(NBConfiguration reconf) {
+        this.cfg = getReconfigModel().apply(reconf.getMap());
+    }
+
+    /// These are implemented here as _unit_ values, meaning, you shouldn't be asking
+    /// "Does this element have a configuration model", but instead you should be asking
+    /// "What is the (possibly empty?) configuration model of this element?"
+    @Override
+    public NBConfigModel getConfigModel() {
+        return ConfigModel.of(BaseDriverAdapter.class).asReadOnly();
+    }
+
+    /// These are implemented here as _unit_ values, meaning, you shouldn't be asking
+    /// "Does this element have a reconfiguration model", but instead you should be asking
+    /// "What is the (possibly empty?) reconfiguration model of this element?"
+    @Override
+    public NBConfigModel getReconfigModel() {
+        return ConfigModel.of(BaseDriverAdapter.class).asReadOnly();
     }
 }

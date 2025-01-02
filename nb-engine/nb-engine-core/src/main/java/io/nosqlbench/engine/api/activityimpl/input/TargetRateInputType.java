@@ -37,7 +37,7 @@ public class TargetRateInputType implements InputType {
 
         public Dispenser(Activity activity) {
             this.activity = activity;
-            this.input = new AtomicInput(activity, activity.getActivityDef());
+            this.input = new AtomicInput(activity);
         }
 
         @Override

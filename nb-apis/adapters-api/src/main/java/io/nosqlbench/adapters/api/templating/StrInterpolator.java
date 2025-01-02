@@ -20,7 +20,7 @@ import com.google.gson.Gson;
 import io.nosqlbench.nb.api.advisor.NBAdvisorBuilder;
 import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
 import io.nosqlbench.nb.api.advisor.conditions.Conditions;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
@@ -53,9 +53,9 @@ public class StrInterpolator implements Function<String, String> {
     private final Pattern COMMENT = Pattern.compile("^\\s*#.*");
     private final Pattern INSERT = Pattern.compile("^(\\s*)INSERT:\\s+(.+)$");
 
-    public StrInterpolator(ActivityDef... activityDefs) {
+    public StrInterpolator(NBConfiguration... activityDefs) {
         Arrays.stream(activityDefs)
-            .map(ad -> ad.getParams().getStringStringMap())
+            .map(ad -> ad.getMap())
             .forEach(multimap::add);
     }
 

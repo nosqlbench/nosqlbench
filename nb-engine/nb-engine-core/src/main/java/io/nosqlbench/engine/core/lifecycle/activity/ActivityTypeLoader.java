@@ -19,9 +19,9 @@ package io.nosqlbench.engine.core.lifecycle.activity;
 import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
 import io.nosqlbench.nb.api.system.NBEnvironment;
@@ -118,29 +118,33 @@ public class ActivityTypeLoader {
         return urlsToAdd;
     }
 
-    public Optional<StandardActivityType> load(final ActivityDef activityDef, final NBComponent parent) {
+    public Optional<StandardActivityType> load(
+        final ActivityConfig activityDef,
+        final NBComponent parent
+    )
+    {
 
-        String driverName = activityDef.getParams()
-            .getOptionalString("driver", "type")
+        String driverName = activityDef.getDriver()
             .orElseThrow(() -> new BasicError("The parameter 'driver=' is required."));
 
-        activityDef.getParams()
-            .getOptionalString("jar")
-            .map(jar -> {
-                final Set<URL> urls = NBIO.local().search(jar)
-                    .list()
-                    .stream().map(Content::getURL)
-                    .collect(Collectors.toSet());
-                return urls;
-            })
-            .ifPresent(this::extendClassLoader);
+        activityDef.getOptional("jar").map(jar -> {
+            final Set<URL> urls = NBIO.local().search(jar).list().stream().map(Content::getURL)
+                .collect(Collectors.toSet());
+            return urls;
+        }).ifPresent(this::extendClassLoader);
 
         return getDriverAdapter(driverName,activityDef,parent);
 
     }
 
-    private Optional<StandardActivityType> getDriverAdapter(final String activityTypeName, final ActivityDef activityDef, final NBComponent parent) {
-        final Optional<DriverAdapter> oda = this.DRIVERADAPTER_SPI_FINDER.getOptionally(activityTypeName);
+    private Optional<StandardActivityType> getDriverAdapter(
+        final String activityTypeName,
+        final ActivityConfig activityDef,
+        final NBComponent parent
+    )
+    {
+        final Optional<DriverAdapter> oda = this.DRIVERADAPTER_SPI_FINDER.getOptionally(
+            activityTypeName);
 
         if (oda.isPresent()) {
             final DriverAdapter<?, ?> driverAdapter = oda.get();

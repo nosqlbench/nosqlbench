@@ -19,8 +19,9 @@ package io.nosqlbench.engine.core;
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import io.nosqlbench.nb.api.advisor.NBAdvisorException;
 import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityapi.input.Input;
@@ -50,7 +51,7 @@ class ActivityExecutorTest {
 // TODO: Design review of this mechanism
 //    @Test
 //    synchronized void testRestart() {
-//        ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test-restart;cycles=1000;cyclerate=10;op=initdelay:initdelay=5000;");
+//        ActivityConfig activityDef = Activity.configFor("driver=diag;alias=test-restart;cycles=1000;cyclerate=10;op=initdelay:initdelay=5000;");
 //        new ActivityTypeLoader().load(activityDef);
 //
 //        final StandardActivity activity = new DelayedInitActivity(activityDef);
@@ -89,7 +90,7 @@ class ActivityExecutorTest {
     synchronized void testAdvisorError() {
 
         try {
-            ActivityDef activityDef = ActivityDef.parseActivityDef(
+            ActivityConfig activityDef = Activity.configFor(
                 "driver=diag;alias=test-delayed-start;cycles=1000;initdelay=2000;");
             new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
             Activity activity = new DelayedInitActivity(activityDef);
@@ -103,7 +104,7 @@ class ActivityExecutorTest {
     @Test
     synchronized void testDelayedStartSanity() {
 
-        ActivityDef activityDef = ActivityDef.parseActivityDef(
+        ActivityConfig activityDef = Activity.configFor(
             "driver=diag;alias=test_delayed_start;cycles=1000;initdelay=2000;");
         Optional<StandardActivityType> standardActivityType = new ActivityTypeLoader().load(
             activityDef, TestComponent.INSTANCE);
@@ -146,7 +147,7 @@ class ActivityExecutorTest {
     @Test
     synchronized void testNewActivityExecutor() {
 
-        final ActivityDef activityDef = ActivityDef.parseActivityDef(
+        final ActivityConfig activityDef = Activity.configFor(
             "driver=diag;alias=test_dynamic_params;cycles=1000;initdelay=5000;");
         new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
         ActivityWiring wiring = new ActivityWiring(activityDef);
@@ -202,8 +203,9 @@ class ActivityExecutorTest {
     private MotorDispenser<?> getActivityMotorFactory(final SyncAction lc, Input ls) {
         return new MotorDispenser<>() {
             @Override
-            public Motor getMotor(final ActivityDef activityDef, final int slotId) {
-                final Activity activity = new Activity(TestComponent.INSTANCE, activityDef);
+            public Motor getMotor(final ActivityConfig activityConfig, final int slotId) {
+                final Activity activity = new Activity(TestComponent.INSTANCE,
+                    new ActivityConfig(activityConfig));
                 final Motor<?> cm = new CoreMotor<>(activity, slotId, ls, lc, null);
                 return cm;
             }
@@ -229,14 +231,14 @@ class ActivityExecutorTest {
     private static class DelayedInitActivity extends Activity {
         private static final Logger logger = LogManager.getLogger(DelayedInitActivity.class);
 
-        public DelayedInitActivity(final ActivityDef activityDef) {
+        public DelayedInitActivity(final ActivityConfig activityDef) {
             super(TestComponent.INSTANCE, activityDef);
         }
 
         @Override
         public void initActivity() {
-            final Integer initDelay = this.activityDef.getParams().getOptionalInteger(
-                "initdelay").orElse(0);
+            final Integer initDelay =
+                this.getConfig().getOptional(Integer.class,"initdelay").orElse(0);
             DelayedInitActivity.logger.info(() -> "delaying for " + initDelay);
             try {
                 Thread.sleep(initDelay);

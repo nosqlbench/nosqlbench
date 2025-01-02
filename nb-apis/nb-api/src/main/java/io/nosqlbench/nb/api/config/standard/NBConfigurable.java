@@ -18,6 +18,7 @@ package io.nosqlbench.nb.api.config.standard;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * All implementation types which wish to have a type-marshalled configuration
@@ -57,6 +58,15 @@ public interface NBConfigurable extends NBCanConfigure, NBConfigModelProvider {
      * @param configurables zero or more Objects which may implement NBConfigurable
      */
     static void applyMatching(NBConfiguration cfg, Object... configurables) {
+        for (Object configurable : configurables) {
+            if (configurable instanceof NBConfigurable c) {
+                NBConfiguration partial = c.getConfigModel().matchConfig(cfg);
+                c.applyConfig(partial);
+            }
+        }
+    }
+
+    static void applyMatchingCollection(NBConfiguration cfg, Collection<?> configurables) {
         for (Object configurable : configurables) {
             if (configurable instanceof NBConfigurable c) {
                 NBConfiguration partial = c.getConfigModel().matchConfig(cfg);

@@ -53,8 +53,8 @@ public class CoreServices {
     }
 
     public static <A> Optional<Predicate<ResultReadable>> getOutputFilter(ActivityWiring activity) {
-        String paramdata= activity.getParams().getOptionalString("of")
-                .orElse(activity.getParams().getOptionalString("outputfilter").orElse(null));
+        String paramdata= activity.getConfig().getOptional("of")
+                .orElse(activity.getConfig().getOptional("outputfilter").orElse(null));
         if (paramdata==null) {
             return Optional.empty();
         }
@@ -81,8 +81,8 @@ public class CoreServices {
     }
 
     public static <A> Optional<Predicate<ResultReadable>> getInputFilter(Activity activity) {
-        String paramdata= activity.getParams().getOptionalString("if")
-                .orElse(activity.getParams().getOptionalString("inputfilter").orElse(null));
+        String paramdata= activity.getConfig().getOptional("if")
+                .orElse(activity.getConfig().getOptional("inputfilter").orElse(null));
         if (paramdata==null) {
             return Optional.empty();
         }

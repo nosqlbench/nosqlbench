@@ -16,7 +16,7 @@
 
 package io.nosqlbench.engine.api.activityapi.errorhandling;
 
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.api.metrics.ExceptionCountMetrics;
 import io.nosqlbench.engine.api.metrics.ExceptionExpectedResultVerificationMetrics;
@@ -46,7 +46,7 @@ public class ErrorMetrics {
 
     public synchronized ExceptionHistoMetrics getExceptionHistoMetrics() {
         if (null == exceptionHistoMetrics)
-            this.exceptionHistoMetrics = new ExceptionHistoMetrics(this.parent, ActivityDef.parseActivityDef(""));
+            this.exceptionHistoMetrics = new ExceptionHistoMetrics(this.parent, Activity.configFor(""));
         return this.exceptionHistoMetrics;
     }
 
@@ -57,7 +57,7 @@ public class ErrorMetrics {
 
     public synchronized ExceptionTimerMetrics getExceptionTimerMetrics() {
         if (null == exceptionTimerMetrics)
-            this.exceptionTimerMetrics = new ExceptionTimerMetrics(this.parent, ActivityDef.parseActivityDef(""));
+            this.exceptionTimerMetrics = new ExceptionTimerMetrics(this.parent, Activity.configFor(""));
         return this.exceptionTimerMetrics;
     }
 

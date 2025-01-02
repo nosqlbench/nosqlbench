@@ -16,9 +16,12 @@
 package io.nosqlbench.engine.core.lifecycle.activity;
 
 import com.codahale.metrics.Gauge;
-import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.config.standard.NBReconfigurable;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
@@ -28,15 +31,12 @@ import io.nosqlbench.engine.api.activityapi.core.*;
 import io.nosqlbench.engine.api.activityimpl.MotorState;
 import io.nosqlbench.nb.api.annotations.Annotation;
 import io.nosqlbench.nb.api.annotations.Layer;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateImage;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.core.annotation.Annotators;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
-//import io.nosqlbench.virtdata.userlibs.apps.valuechecker.IndexedThreadFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,6 +44,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+
+///  TODO: Make this use nbreconfigurable events for live updates
 
 /**
  * <p>An ActivityExecutor is an execution harness for a single activity instance.
@@ -61,7 +63,8 @@ import java.util.stream.Collectors;
  * This allows the state tracking to work consistently for all observers.</p>
  */
 
-public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener, ProgressCapable, Callable<ExecutionResult> {
+public class ActivityExecutor implements NBReconfigurable, NBLabeledElement, ProgressCapable,
+                                         Callable<ExecutionResult> {
 
     // TODO Encapsulate valid state transitions to be only modifiable within the appropriate type view.
 
@@ -70,7 +73,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
 
     private final LinkedList<Motor<?>> motors = new LinkedList<>();
     private final Activity activity;
-    private final ActivityDef activityDef;
+    private final ActivityConfig config;
     private final RunStateTally tally;
     private final MotorDispenser motorSource;
     private ExecutorService executorService;
@@ -84,9 +87,9 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
 
     public ActivityExecutor(Activity activity) {
         this.activity = activity;
-        this.activityDef = activity.getActivityDef();
+        this.config = activity.getConfig();
         this.motorSource = activity;
-        activity.getActivityDef().getParams().addListener(this);
+//        activity.getConfig().addListener(this);
         this.tally = activity.getRunStateTally();
     }
 
@@ -99,7 +102,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
      * Simply stop the motors
      */
     public void stopActivity() {
-        logger.info(() -> "stopping activity in progress: " + this.getActivityDef().getAlias());
+        logger.info(() -> "stopping activity in progress: " + activity.getAlias());
 
         activity.setRunState(RunState.Stopping);
         motors.forEach(Motor::requestStop);
@@ -109,13 +112,13 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         tally.awaitNoneOther(RunState.Stopped, RunState.Finished, RunState.Errored);
         activity.setRunState(RunState.Stopped);
 
-        logger.info(() -> "stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
+        logger.info(() -> "stopped: " + activity.getAlias() + " with " + motors.size() + " slots");
 
         Annotators.recordAnnotation(Annotation.newBuilder()
             .element(this)
             .interval(this.startedAt, this.stoppedAt)
             .layer(Layer.Activity)
-            .addDetail("params", getActivityDef().toString())
+            .addDetail("params", String.valueOf(activity.getConfig()))
             .build()
         );
     }
@@ -124,7 +127,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
      * Force stop the motors without trying to wait for the activity to reach stopped/finished state
      */
     public void forceStopActivity() {
-        logger.info(() -> "force stopping activity in progress: " + this.getActivityDef().getAlias());
+        logger.info(() -> "force stopping activity in progress: " + activity.getAlias());
 
         activity.setRunState(RunState.Stopping);
         motors.forEach(Motor::requestStop);
@@ -133,21 +136,20 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         tally.awaitNoneOther(RunState.Stopped, RunState.Finished);
         activity.setRunState(RunState.Stopped);
 
-        logger.info(() -> "stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
+        logger.info(() -> "stopped: " + activity.getAlias() + " with " + motors.size() + " slots");
 
         Annotators.recordAnnotation(Annotation.newBuilder()
             .element(this)
             .interval(this.startedAt, this.stoppedAt)
             .layer(Layer.Activity)
-            .addDetail("params", getActivityDef().toString())
+            .addDetail("params", String.valueOf(activity.getConfigModel()))
             .build()
         );
     }
 
     public Exception forceStopActivity(int initialMillisToWait) {
 
-        activitylogger.debug("FORCE STOP/before alias=(" + activity.getActivityDef().getAlias() +
-                                                                                       ")");
+        activitylogger.debug("FORCE STOP/before alias=(" + activity.getAlias() + ")");
         activity.setRunState(RunState.Stopped);
 
         executorService.shutdownNow();
@@ -205,36 +207,10 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         }
     }
 
-    /**
-     * Listens for changes to parameter maps, maps them to the activity instance, and notifies all eligible listeners of
-     * changes.
-     */
-    @Override
-    public void handleParameterMapUpdate(ParameterMap parameterMap) {
 
-        activity.onActivityDefUpdate(activityDef);
-
-        // An activity must be initialized before the motors and other components are
-        // considered ready to handle parameter map changes. This is signaled in an activity
-        // by the RunState.
-        if (activity.getRunState() != RunState.Uninitialized) {
-            if (activity.getRunState() == RunState.Running) {
-                adjustMotorCountToThreadParam(activity.getActivityDef());
-            }
-            motors.stream()
-                .filter(m -> (m instanceof ActivityDefObserver))
-//                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Uninitialized)
-//                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Starting)
-                .forEach(m -> ((ActivityDefObserver) m).onActivityDefUpdate(activityDef));
-        }
-    }
-
-    public ActivityDef getActivityDef() {
-        return activityDef;
-    }
 
     public String toString() {
-        return getClass().getSimpleName() + "~" + activityDef.getAlias();
+        return getClass().getSimpleName() + "~" + config.getAlias();
     }
 
     private String getSlotStatus() {
@@ -243,17 +219,12 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
             .collect(Collectors.joining(",", "[", "]"));
     }
 
-    /**
-     * Stop extra motors, start missing motors
-     *
-     * @param activityDef
-     *     the activityDef for this activity instance
-     */
-    private void adjustMotorCountToThreadParam(ActivityDef activityDef) { // TODO: Ensure that threads area allowed to complete their current op gracefully
+    private void adjustMotorCountToThreadParam(int threadCount) { // TODO: Ensure that threads area
+        // allowed to complete their current op gracefully
         logger.trace(() -> ">-pre-adjust->" + getSlotStatus());
 
-        reduceActiveMotorCountDownToThreadParam(activityDef);
-        increaseActiveMotorCountUpToThreadParam(activityDef);
+        reduceActiveMotorCountDownToThreadParam();
+        increaseActiveMotorCountUpToThreadParam();
         alignMotorStateToIntendedActivityState();
         awaitAlignmentOfMotorStateToActivityState();
 
@@ -261,11 +232,11 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
 
     }
 
-    private void increaseActiveMotorCountUpToThreadParam(ActivityDef activityDef) {
+    private void increaseActiveMotorCountUpToThreadParam() {
         // Create motor slots
         try {
-            while (motors.size() < activityDef.getThreads()) {
-                Motor motor = motorSource.getMotor(activityDef, motors.size());
+            while (motors.size() < config.getThreads()) {
+                Motor motor = motorSource.getMotor(config, motors.size());
                 logger.trace(() -> "Starting cycle motor thread:" + motor);
                 motors.add(motor);
             }
@@ -276,24 +247,12 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         }
     }
 
-    private void reduceActiveMotorCountDownToThreadParam(ActivityDef activityDef) {
+    private void reduceActiveMotorCountDownToThreadParam() {
         // Stop and remove extra motor slots
-        if (activityDef.getThreads()==0) {
+        if (config.getThreads()==0) {
             logger.warn("setting threads to zero is not advised. At least one thread has to be active to keep the activity alive.");
         }
-//        LinkedList<Motor<?>> toremove = new LinkedList<>();
-//        while (activityDef.getThreads()>motors.size()) {
-//            Motor<?> motor = motors.removeLast();
-//            toremove.addFirst(motor);
-//        }
-//        for (Motor<?> motor : toremove) {
-//            motor.requestStop();
-//        }
-//        for (Motor<?> motor : toremove) {
-//            motor.removeState();
-//        }
-//
-        while (motors.size() > activityDef.getThreads()) {
+        while (motors.size() > config.getThreads()) {
             Motor motor = motors.get(motors.size() - 1);
             logger.trace(() -> "Stopping cycle motor thread:" + motor);
             motor.requestStop();
@@ -408,7 +367,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
                 .now()
                 .layer(Layer.Activity)
                 .addDetail("event", "start-activity")
-                .addDetail("params", activityDef.toString())
+                .addDetail("params", String.valueOf(activity.getConfig()))
                 .build());
 
             try {
@@ -419,7 +378,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
                 registerMetrics();
                 startRunningActivityThreads();
                 awaitMotorsAtLeastRunning();
-                logger.debug("STARTED " + activityDef.getAlias());
+                logger.debug("STARTED " + config.getAlias());
                 awaitActivityCompletion();
             } catch (Exception e) {
                 this.exception = e;
@@ -544,12 +503,12 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
      */
     private void startRunningActivityThreads() {
 
-        logger.info(() -> "starting activity " + activity.getAlias() + " for cycles " + activity.getActivityDef().getCycleSummary());
+        logger.info(() -> "starting activity " + activity.getAlias() + " for cycles " + activity.getCyclesSpec().summary());
         Annotators.recordAnnotation(Annotation.newBuilder()
             .element(this)
             .now()
             .layer(Layer.Activity)
-            .addDetail("params", getActivityDef().toString())
+            .addDetail("params", activity.getConfig().summary())
             .build()
         );
 
@@ -558,13 +517,12 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         try {
             activity.setRunState(RunState.Starting);
             this.startedAt = System.currentTimeMillis();
-            activity.onActivityDefUpdate(activityDef);
         } catch (Exception e) {
             this.exception = new RuntimeException("Error initializing activity '" + activity.getAlias() + "':\n" + e.getMessage(), e);
             activitylogger.error(() -> "error initializing activity '" + activity.getAlias() + "': " + exception);
             throw new RuntimeException(exception);
         }
-        adjustMotorCountToThreadParam(activity.getActivityDef());
+        adjustMotorCountToThreadParam(activity.getConfig().getThreads());
         tally.awaitAny(RunState.Running, RunState.Finished, RunState.Stopped);
         activity.setRunState(RunState.Running);
         activitylogger.debug("START/after alias=(" + activity.getAlias() + ")");
@@ -592,7 +550,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
             .interval(startedAt, stoppedAt)
             .layer(Layer.Activity)
             .addDetail("event", "stop-activity")
-            .addDetail("params", activityDef.toString())
+            .addDetail("params", config.toString())
             .build());
     }
 
@@ -603,6 +561,39 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
     public boolean awaitAllThreadsOnline(long timeoutMs) {
         RunStateImage image = tally.awaitNoneOther(timeoutMs, RunState.Running);
         return image.isNoneOther(RunState.Running);
+    }
+
+    @Override
+    public void applyReconfig(NBConfiguration recfg) {
+
+        // An activity must be initialized before the motors and other components are
+        // considered ready to handle parameter map changes. This is signaled in an activity
+        // by the RunState.
+        if (activity.getRunState() != RunState.Uninitialized) {
+            if (activity.getRunState() == RunState.Running) {
+                adjustMotorCountToThreadParam(activity.getConfig().getThreads());
+            }
+            motors.stream()
+                .filter(m -> (m instanceof NBReconfigurable reconf))
+                .forEach(r -> ((NBReconfigurable) r).applyReconfig(recfg));
+        }
+
+
+    }
+
+    @Override
+    public NBConfigModel getReconfigModel() {
+        return null;
+    }
+
+    @Override
+    public void applyConfig(NBConfiguration cfg) {
+
+    }
+
+    @Override
+    public NBConfigModel getConfigModel() {
+        return null;
     }
 
     private class ThreadsGauge implements Gauge<Double> {

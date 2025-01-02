@@ -16,7 +16,8 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.container;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
@@ -46,9 +47,7 @@ public class ContainerActivitiesController extends NBBaseComponent {
     private static final Logger scenariologger = LogManager.getLogger("SCENARIO");
 
     private final ActivityLoader activityLoader;
-
     private final Map<String, ActivityRuntimeInfo> activityInfoMap = new ConcurrentHashMap<>();
-
     private final ExecutorService executorService;
 
     public ContainerActivitiesController(NBComponent parent) {
@@ -63,17 +62,17 @@ public class ContainerActivitiesController extends NBBaseComponent {
      * Start an activity, given the activity definition for it. The activity will be known in the scenario
      * by the alias parameter.
      *
-     * @param activityDef string in alias=value1;driver=value2;... format
+     * @param ActivityConfig string in alias=value1;driver=value2;... format
      */
-    public Activity start(ActivityDef activityDef) {
-        ActivityRuntimeInfo ari = doStartActivity(activityDef);
+    public Activity start(ActivityConfig ActivityConfig) {
+        ActivityRuntimeInfo ari = doStartActivity(ActivityConfig);
         return ari.getActivity();
     }
 
 
-    private ActivityRuntimeInfo doStartActivity(ActivityDef activityDef) {
-        if (!this.activityInfoMap.containsKey(activityDef.getAlias())) {
-            Activity activity = this.activityLoader.loadActivity(activityDef, this);
+    private ActivityRuntimeInfo doStartActivity(ActivityConfig ActivityConfig) {
+        if (!this.activityInfoMap.containsKey(ActivityConfig.getAlias())) {
+            Activity activity = this.activityLoader.loadActivity(ActivityConfig, this);
             activity.initActivity();
             ActivityExecutor executor = new ActivityExecutor(activity);
             Future<ExecutionResult> startedActivity = executorService.submit(executor);
@@ -82,17 +81,17 @@ public class ContainerActivitiesController extends NBBaseComponent {
             this.activityInfoMap.put(activity.getAlias(), activityRuntimeInfo);
 
         }
-        return this.activityInfoMap.get(activityDef.getAlias());
+        return this.activityInfoMap.get(ActivityConfig.getAlias());
     }
 
     /**
      * Start an activity, given a map which holds the activity definition for it. The activity will be known in
      * the scenario by the alias parameter.
      *
-     * @param activityDefMap A map containing the activity definition
+     * @param activityParams A map containing the activity definition
      */
-    public Activity start(Map<String, String> activityDefMap) {
-        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
+    public Activity start(Map<String, String> activityParams) {
+        ActivityConfig ad = Activity.configFor(activityParams);
         Activity started = start(ad);
         awaitAllThreadsOnline(started,30000L);
         return started;
@@ -105,11 +104,11 @@ public class ContainerActivitiesController extends NBBaseComponent {
      * @param alias the alias of an activity that is already known to the scenario
      */
     public Activity start(String alias) {
-        return start(ActivityDef.parseActivityDef(alias));
+        return start(Activity.configFor(Map.of("alias",alias)));
     }
 
-    public synchronized void run(int timeout, Map<String, String> activityDefMap) {
-        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
+    public synchronized void run(int timeout, Map<String, String> activityParams) {
+        ActivityConfig ad = Activity.configFor(activityParams);
         run(ad, timeout);
     }
 
@@ -117,30 +116,32 @@ public class ContainerActivitiesController extends NBBaseComponent {
      * Synchronously run the defined activity with a timeout in seconds.
      *
      * @param timeoutMs   seconds to await completion of the activity.
-     * @param activityDef A definition for an activity to run
+     * @param ActivityConfig A definition for an activity to run
      */
-    public synchronized void run(ActivityDef activityDef, long timeoutMs) {
+    public synchronized void run(ActivityConfig ActivityConfig, long timeoutMs) {
 
-        doStartActivity(activityDef);
-        awaitActivity(activityDef, timeoutMs);
+        doStartActivity(ActivityConfig);
+        awaitActivity(ActivityConfig, timeoutMs);
     }
 
-    public synchronized void run(int timeout, String activityDefString) {
-        ActivityDef activityDef = ActivityDef.parseActivityDef(activityDefString);
-        run(activityDef, timeout);
+    public synchronized void run(int timeout, String ActivityConfigString) {
+        Map<String, String> stringStringMap = ParameterMap.parseParams(ActivityConfigString)
+            .map(p -> p.getStringStringMap()).orElseThrow();
+        ActivityConfig activityConfig = Activity.configFor(stringStringMap);
+        run(activityConfig, timeout);
     }
 
-    public synchronized void run(Map<String, String> activityDefMap) {
-        run(Integer.MAX_VALUE, activityDefMap);
+    public synchronized void run(Map<String, String> ActivityConfigMap) {
+        run(Integer.MAX_VALUE, ActivityConfigMap);
     }
 
-    public synchronized void run(String activityDefString) {
-        run(Integer.MAX_VALUE, activityDefString);
+    public synchronized void run(String ActivityConfigString) {
+        run(Integer.MAX_VALUE, ActivityConfigString);
     }
 
 
-    public synchronized void run(ActivityDef activityDef) {
-        run(activityDef, Long.MAX_VALUE);
+    public synchronized void run(ActivityConfig ActivityConfig) {
+        run(ActivityConfig, Long.MAX_VALUE);
     }
 
 
@@ -148,13 +149,13 @@ public class ContainerActivitiesController extends NBBaseComponent {
         return isRunningActivity(aliasToDef(alias));
     }
 
-    public boolean isRunningActivity(ActivityDef activityDef) {
-        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
+    public boolean isRunningActivity(ActivityConfig ActivityConfig) {
+        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(ActivityConfig.getAlias());
         return (null != runtimeInfo) && runtimeInfo.isRunning();
     }
 
-    public boolean isRunningActivity(Map<String, String> activityDefMap) {
-        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
+    public boolean isRunningActivity(Map<String, String> activityParams) {
+        ActivityConfig ad = Activity.configFor(activityParams);
         return isRunningActivity(ad);
     }
 
@@ -163,36 +164,36 @@ public class ContainerActivitiesController extends NBBaseComponent {
      * alias parameter. This method retains the activity def signature to provide convenience for scripting.</p>
      * <p>For example, sc.stop("alias=foo")</p>
      *
-     * @param activityDef An activity def, including at least the alias parameter.
+     * @param ActivityConfig An activity def, including at least the alias parameter.
      */
-    public synchronized void stop(ActivityDef activityDef) {
+    public synchronized void stop(ActivityConfig ActivityConfig) {
 
-        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
+        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(ActivityConfig.getAlias());
         if (null == runtimeInfo) {
-            throw new RuntimeException("could not stop missing activity:" + activityDef);
+            throw new RuntimeException("could not stop missing activity:" + ActivityConfig);
         }
 
-        scenariologger.debug("STOP {}", activityDef.getAlias());
+        scenariologger.debug("STOP {}", ActivityConfig.getAlias());
         runtimeInfo.stopActivity();
     }
 
-    public boolean awaitAllThreadsOnline(ActivityDef activityDef, long timeoutMs) {
-        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
+    public boolean awaitAllThreadsOnline(ActivityConfig ActivityConfig, long timeoutMs) {
+        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(ActivityConfig.getAlias());
         if (null == runtimeInfo) {
-            throw new RuntimeException("could not stop missing activity:" + activityDef);
+            throw new RuntimeException("could not stop missing activity:" + ActivityConfig);
         }
 
-        scenariologger.debug("STOP {}", activityDef.getAlias());
+        scenariologger.debug("STOP {}", ActivityConfig.getAlias());
         return runtimeInfo.awaitAllThreadsOnline(timeoutMs);
     }
 
     public synchronized void stop(Activity activity) {
-        stop(activity.getActivityDef());
+        stop(activity.getConfig());
     }
 
 
     public boolean awaitAllThreadsOnline(Activity activity, long timeoutMs) {
-        return awaitAllThreadsOnline(activity.getActivityDef(), timeoutMs);
+        return awaitAllThreadsOnline(activity.getConfig(), timeoutMs);
     }
 
 
@@ -201,10 +202,10 @@ public class ContainerActivitiesController extends NBBaseComponent {
      * <p>Stop an activity, given an activity def map. The only part of the map that is important is the
      * alias parameter. This method retains the map signature to provide convenience for scripting.</p>
      *
-     * @param activityDefMap A map, containing at least the alias parameter
+     * @param paramsMap A map, containing at least the alias parameter
      */
-    public synchronized void stop(Map<String, String> activityDefMap) {
-        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
+    public synchronized void stop(Map<String, String> paramsMap) {
+        ActivityConfig ad = Activity.configFor(paramsMap);
         stop(ad);
     }
 
@@ -225,7 +226,7 @@ public class ContainerActivitiesController extends NBBaseComponent {
             .filter(s -> !s.isEmpty())
             .flatMap(aspec -> getMatchingAliases(aspec).stream()).collect(Collectors.toList());
         for (String alias : matched) {
-            ActivityDef adef = aliasToDef(alias);
+            ActivityConfig adef = aliasToDef(alias);
             scenariologger.debug("STOP {}", adef.getAlias());
             stop(adef);
         }
@@ -236,16 +237,16 @@ public class ContainerActivitiesController extends NBBaseComponent {
      * alias parameter. This method retains the activity def signature to provide convenience for scripting.</p>
      * <p>For example, sc.forceStop("alias=foo")</p>
      *
-     * @param activityDef An activity def, including at least the alias parameter.
+     * @param ActivityConfig An activity def, including at least the alias parameter.
      */
-    public synchronized void forceStop(ActivityDef activityDef) {
+    public synchronized void forceStop(ActivityConfig ActivityConfig) {
 
-        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
+        ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(ActivityConfig.getAlias());
 
         if (null == runtimeInfo) {
-            throw new RuntimeException("could not force stop missing activity:" + activityDef);
+            throw new RuntimeException("could not force stop missing activity:" + ActivityConfig);
         }
-        scenariologger.debug("FORCE STOP {}", activityDef.getAlias());
+        scenariologger.debug("FORCE STOP {}", ActivityConfig.getAlias());
 
         runtimeInfo.forceStopActivity();
     }
@@ -254,10 +255,10 @@ public class ContainerActivitiesController extends NBBaseComponent {
      * <p>Stop an activity, given an activity def map. The only part of the map that is important is the
      * alias parameter. This method retains the map signature to provide convenience for scripting.</p>
      *
-     * @param activityDefMap A map, containing at least the alias parameter
+     * @param activityParams A map, containing at least the alias parameter
      */
-    public synchronized void forceStop(Map<String, String> activityDefMap) {
-        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
+    public synchronized void forceStop(Map<String, String> activityParams) {
+        ActivityConfig ad = Activity.configFor(activityParams);
         forceStop(ad);
     }
 
@@ -278,7 +279,7 @@ public class ContainerActivitiesController extends NBBaseComponent {
             .filter(s -> !s.isEmpty())
             .flatMap(aspec -> getMatchingAliases(aspec).stream()).collect(Collectors.toList());
         for (String alias : matched) {
-            ActivityDef adef = aliasToDef(alias);
+            ActivityConfig adef = aliasToDef(alias);
             scenariologger.debug("STOP {}", adef.getAlias());
             forceStop(adef);
         }
@@ -376,19 +377,17 @@ public class ContainerActivitiesController extends NBBaseComponent {
         return completed;
     }
 
-    private ActivityDef aliasToDef(String alias) {
-        if (alias.contains("=")) {
-            return ActivityDef.parseActivityDef(alias);
-        }
-        return ActivityDef.parseActivityDef("alias=" + alias + ';');
+    private ActivityConfig aliasToDef(String alias) {
+        String cfg = alias.contains("=") ? alias : "alias=" + alias;
+        return Activity.configFor(ParameterMap.parseOrException(cfg).getStringStringMap());
     }
 
-    public void await(Map<String, String> activityDefMap) {
-        this.awaitActivity(activityDefMap);
+    public void await(Map<String, String> ActivityConfigMap) {
+        this.awaitActivity(ActivityConfigMap);
     }
 
-    public boolean awaitActivity(Map<String, String> activityDefMap) {
-        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
+    public boolean awaitActivity(Map<String, String> activityParams) {
+        ActivityConfig ad = Activity.configFor(activityParams);
         return awaitActivity(ad, Long.MAX_VALUE);
     }
 
@@ -397,21 +396,21 @@ public class ContainerActivitiesController extends NBBaseComponent {
     }
 
     public boolean awaitActivity(String alias, long timeoutMs) {
-        ActivityDef toAwait = aliasToDef(alias);
+        ActivityConfig toAwait = aliasToDef(alias);
         return awaitActivity(toAwait, Long.MAX_VALUE);
     }
 
-    public void await(ActivityDef activityDef, long timeoutMs) {
-        this.awaitActivity(activityDef, timeoutMs);
+    public void await(ActivityConfig ActivityConfig, long timeoutMs) {
+        this.awaitActivity(ActivityConfig, timeoutMs);
     }
 
 
-    public boolean awaitActivity(ActivityDef activityDef, long timeoutMs) {
-        ActivityRuntimeInfo ari = this.activityInfoMap.get(activityDef.getAlias());
+    public boolean awaitActivity(ActivityConfig ActivityConfig, long timeoutMs) {
+        ActivityRuntimeInfo ari = this.activityInfoMap.get(ActivityConfig.getAlias());
         if (null == ari) {
-            throw new RuntimeException("Could not await missing activity: " + activityDef.getAlias());
+            throw new RuntimeException("Could not await missing activity: " + ActivityConfig.getAlias());
         }
-        scenariologger.debug("AWAIT/before alias={}", activityDef.getAlias());
+        scenariologger.debug("AWAIT/before alias={}", ActivityConfig.getAlias());
         ExecutionResult result = null;
         Future<ExecutionResult> future=null;
         try {
@@ -434,8 +433,8 @@ public class ContainerActivitiesController extends NBBaseComponent {
         return Collections.unmodifiableMap(activityInfoMap);
     }
 
-    public List<ActivityDef> getActivityDefs() {
-        return activityInfoMap.values().stream().map(ari -> ari.getActivity().getActivityDef()).toList();
+    public List<ActivityConfig> getActivityConfigs() {
+        return activityInfoMap.values().stream().map(ari -> ari.getActivity().getConfig()).toList();
     }
 
     public void reportMetrics() {
@@ -448,7 +447,11 @@ public class ContainerActivitiesController extends NBBaseComponent {
         }
         return Optional.empty();
     }
-    public Optional<Activity> getActivity(String activityName) {
+    public Activity getActivity(String activityName) {
+        return getOptionalActivity(activityName).orElseThrow(() -> new RuntimeException("Unable " +
+            "to find required activity by name: '" + activityName + "'"));
+    }
+    public Optional<Activity> getOptionalActivity(String activityName) {
         return Optional.ofNullable(this.activityInfoMap.get(activityName)).map(ActivityRuntimeInfo::getActivity);
     }
 
@@ -469,8 +472,8 @@ public class ContainerActivitiesController extends NBBaseComponent {
         throw new RuntimeException(e);
     }
 
-    public ActivityDef getActivityDef(String alias) {
-        return activityInfoMap.get(alias).getActivity().getActivityDef();
+    public ActivityConfig getActivityConfig(String alias) {
+        return activityInfoMap.get(alias).getActivity().getConfig();
     }
 
     public void shutdown() {

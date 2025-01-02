@@ -68,7 +68,7 @@ public class CycleLogOutput extends NBBaseComponent implements Output, CanFilter
 
         SimpleConfig conf = new SimpleConfig(wiring, "output");
         this.extentSizeInSpans = conf.getInteger("extentSize").orElse(1000);
-        this.outputFile = new File(conf.getString("file").orElse(wiring.getActivityDef().getAlias()) +
+        this.outputFile = new File(conf.getString("file").orElse(wiring.getConfig().getAlias()) +
                                        ".cyclelog");
 
 

@@ -61,7 +61,8 @@ public class NB_activity_error extends NBBaseCommand {
         stdout.write("starting activity activity_error");
         controller.start(activitydef1);
         controller.waitMillis(500);
-        controller.getActivityDef("activity_error").getParams().set("threads","unparsable"); // forced error
+        controller.getActivity("activity_error").getConfig().update("threads","unparsable"); //
+        // forced error
         controller.awaitActivity("activity_error", Long.MAX_VALUE);
         return null;
     }

@@ -44,7 +44,7 @@ public class CMD_stop extends NBBaseCommand {
             = params.maybeGet("activity").orElseThrow(
             () -> new RuntimeException("The stop command requires an 'activity' parameter")
         );
-        Optional<Activity> activity = controller.getActivity(activityName);
+        Optional<Activity> activity = controller.getOptionalActivity(activityName);
         if (activity.isEmpty()) {
             BasicError error = new BasicError("Activity '" + activityName + "' was not found for stop command.");
             logger.warn(error);

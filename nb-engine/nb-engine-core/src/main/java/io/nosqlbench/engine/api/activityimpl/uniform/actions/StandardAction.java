@@ -22,11 +22,9 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
 import io.nosqlbench.adapters.api.evalctx.CycleFunction;
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.errors.ResultVerificationError;
-import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
@@ -47,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  The type of activity
  @param <R>
  The type of operation */
-public class StandardAction<A extends Activity<R, ?>, R extends java.util.function.LongFunction> extends NBBaseComponent implements SyncAction, ActivityDefObserver {
+public class StandardAction<A extends Activity<R, ?>, R extends java.util.function.LongFunction> extends NBBaseComponent implements SyncAction {
     private final static Logger logger = LogManager.getLogger("ACTION");
     private final NBErrorHandler errorHandler;
     private final OpSequence<OpDispenser<? extends CycleOp<?>>> opsequence;
@@ -142,7 +140,7 @@ public class StandardAction<A extends Activity<R, ?>, R extends java.util.functi
                     }
                 }
             }
-            this.triesHistogram.update(tries);
+            activity.metrics.triesHistogram.update(tries);
 
             if (op instanceof OpGenerator) {
                 logger.trace(() -> "GEN OP for cycle(" + cycle + ")");
@@ -153,10 +151,6 @@ public class StandardAction<A extends Activity<R, ?>, R extends java.util.functi
         }
 
         return code;
-    }
-
-    @Override
-    public void onActivityDefUpdate(ActivityDef activityDef) {
     }
 
 }

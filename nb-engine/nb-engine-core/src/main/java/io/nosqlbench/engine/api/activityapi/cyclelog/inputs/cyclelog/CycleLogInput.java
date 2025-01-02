@@ -52,9 +52,9 @@ public class CycleLogInput extends NBBaseComponent implements Input, AutoCloseab
 
     public CycleLogInput(Activity activity) {
         super(activity, NBLabels.forKV("input","cyclelog"));
-        SimpleConfig conf = new SimpleConfig(activity.getActivityDef(), "input");
+        SimpleConfig conf = new SimpleConfig(activity, "input");
         mbb =
-            initMappedBuffer(conf.getString("file").orElse(activity.getActivityDef().getAlias()) +
+            initMappedBuffer(conf.getString("file").orElse(activity.getAlias()) +
                                    ".cyclelog");
         cycleResultSegmentIterator = iterator();
         segmentIter = cycleResultSegmentIterator.next().iterator();
