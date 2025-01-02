@@ -33,7 +33,7 @@
         <project.test_logstatuslevel>INFO</project.test_logstatuslevel>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <javadoc.name>nosqlbench 5.23.0-SNAPSHOT</javadoc.name>
+        <javadoc.name>nosqlbench ${revision}</javadoc.name>
         <PROG>nb5</PROG>
         <maven.plugin.validation>VERBOSE</maven.plugin.validation>
     </properties>
