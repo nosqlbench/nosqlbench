@@ -39,6 +39,7 @@ import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.output.Output;
+import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
 import io.nosqlbench.engine.api.activityapi.planning.SequencePlanner;
 import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityapi.simrate.*;
@@ -54,29 +55,32 @@ import io.nosqlbench.engine.core.lifecycle.commands.CMD_start;
 import io.nosqlbench.engine.core.lifecycle.commands.CMD_stop;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
+import io.nosqlbench.nb.annotations.ServiceSelector;
 import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
-import io.nosqlbench.nb.api.components.status.NBStatusComponent;
-import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
-import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
-import io.nosqlbench.nb.api.lifecycle.Shutdownable;
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.config.standard.*;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.errors.BasicError;
-import io.nosqlbench.nb.api.errors.OpConfigError;
-import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.events.NBEvent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.nb.api.components.events.SetThreads;
-import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.nb.annotations.ServiceSelector;
+import io.nosqlbench.nb.api.components.status.NBStatusComponent;
+import io.nosqlbench.nb.api.config.standard.*;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
+import io.nosqlbench.nb.api.engine.activityimpl.CyclesSpec;
+import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
+import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
+import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.errors.OpConfigError;
+import io.nosqlbench.nb.api.labels.NBLabels;
+import io.nosqlbench.nb.api.lifecycle.Shutdownable;
 import io.nosqlbench.nb.api.tagging.TagFilter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.LongFunction;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /// An [[Activity]] is a flywheel of operations. Each activity consumes ordinals
 /// from a specified interval, maps them to executable operations via _op synthesis_ as determined
@@ -115,11 +119,8 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
 
     public Activity(NBComponent parent, ActivityDef activityDef) {
 
-        super(
-            parent,
-            NBLabels.forKV("activity", activityDef.getAlias()).and(activityDef.auxLabels())
-        );
-        this.activityDef = activityDef;
+        this.applyConfig(config);
+        this.sequence = initSequence();
         this.metrics = new ActivityMetrics(this);
 
         getParams().set(
@@ -130,67 +131,114 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
                     "Unable to determine name of activity from " + activityDef))
         );
 
-        OpsDocList workload;
-        Optional<String> yaml_loc = activityDef.getParams().getOptionalString("yaml", "workload");
+    private OpSequence<OpDispenser<? extends CycleOp<?>>> initSequence() {
+        //        this.activityDef = activityDef;
+        //        this.metrics = new ActivityMetrics(this);
 
         NBConfigModel yamlmodel = yaml_loc.map(path -> {
             return OpsLoader.loadPath(
                 path, new LinkedHashMap<>(activityDef.getParams()), "activities").getConfigModel();
         }).orElse(ConfigModel.of(Activity.class).asReadOnly());
 
-        Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
-        Optional<DriverAdapter<?, ?>> defaultAdapter = activityDef.getParams().getOptionalString(
-            "driver").flatMap(name -> ServiceSelector.of(
-            name, ServiceLoader.load(DriverAdapterLoader.class)).get()).map(
-            l -> l.load(this, NBLabels.forKV()));
 
-        if (defaultDriverName.isPresent() && defaultAdapter.isEmpty()) {
-            throw new BasicError(
-                "Unable to load '" + defaultDriverName.get() + "' driver adapter.\n" + "Rebuild NB5 to include this driver adapter. " + "Change '<activeByDefault>false</activeByDefault>' for the driver in " + "'./nb-adapters/pom.xml' and './nb-adapters/nb-adapters-included/pom.xml' first.");
+        //region This region contains all of the refactored op synthesis logic
+        OpTemplates opTemplatesRef = loadOpTemplates();
+
+        /// How to load a named [DriverAdapter] with component parentage and labels, given
+        /// the driver name and the activity (cross-driver) configur    ation
+        AdapterResolver adapterResolver = new AdapterResolver();
+        ConcurrentHashMap<String, DriverAdapter> adapterCache = new ConcurrentHashMap<>();
+
+        /// Promote the driver adapter function into a cached version
+        Function<String, DriverAdapter<? extends CycleOp<?>, Space>> adapterF
+            = (name) -> adapterCache.computeIfAbsent(
+            name,
+            cacheName -> adapterResolver.apply(this, name, this.config));
+
+        /// How to get a parsed op, given an op template and an activity.
+        /// A parsed op depends on back-fill from the activity params, assuming those params
+        /// are included in the activity's [[NBConfiguration]], but the params are also filtered
+        /// through the associated [[DriverAdapter]]'s configuration.
+        ParsedOpResolver parsedOpF = new ParsedOpResolver();
+
+        /// How to get an op dispenser, given an adapter and a parsed op
+        /// The cached [Space] mechanism is included within the adapter's API, and is specific to each parsed op,
+        /// since this is a dynamic op field
+        DispenserResolver dispenserResolver = new DispenserResolver();
+
+        OpResolverBank orb = new OpResolverBank(
+            this, adapterResolver, opTemplatesRef, config.get("tags"), dispenserResolver, parsedOpF,
+            config);
+        List<? extends OpDispenser<?>> dispensers = orb.resolveDispensers();
+
+        /// TODO: Here, we have resolved the dispensers. The next step is to add any modifiers to them
+        /// as composed functions for things like dry-run, etc.
+
+
+        /// TODO: Here, we have resolved the dispensers and their modifiers. The next step is to create the LUT
+        /// for the conventional [[OpSequence]], although other non-deterministic op selection
+        /// methods should also be supported.
+
+        SequencerType sequencerType = config.getOptional("seq").map(SequencerType::valueOf)
+            .orElse(SequencerType.bucket);
+
+        SequencePlanner<OpDispenser<? extends CycleOp<?>>> planner = new SequencePlanner<>(
+            sequencerType);
+
+        for (OpDispenser<?> dispenser : dispensers) {
+            planner.addOp(dispenser, d -> d.getRatio());
         }
+        OpSequence<OpDispenser<? extends CycleOp<?>>> sequence = planner.resolve();
+        return sequence;
 
-        OpResolver opResolver = new OpResolver(() -> loadOpTemplates());
+        // TODO: Perhaps, op templates should be split into core/reserved partition and another, with a proxy
+        // object retained for the core elements
+
+        //endregion
 
 
-        // HERE, op templates are loaded before drivers are loaded
-//        List<OpTemplate> opTemplates = loadOpTemplates(defaultAdapter.orElse(null), false);
-        List<DriverAdapter<CycleOp<?>, Space>> adapterlist = new ArrayList<>();
+        //        Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
+        //        Optional<DriverAdapter<?, ?>> defaultAdapter = activityDef.getParams()
+        //            .getOptionalString("driver")
+        //            .flatMap(name -> ServiceSelector.of(name, ServiceLoader.load(DriverAdapterLoader.class)).get())
+        //            .map(l -> l.load(this, NBLabels.forKV()));
+        //
+        //        if (defaultDriverName.isPresent() && defaultAdapter.isEmpty()) {
+        //            throw new BasicError("Unable to load '" + defaultDriverName.get() + "' driver adapter.\n" + "Rebuild NB5 to include this " + "driver adapter. Change" + " '<activeByDefault>false</activeByDefault>' for the driver in" + " './nb-adapters/pom.xml' and" + " './nb-adapters/nb-adapters-included/pom.xml' first.");
+        //        }
 
-        NBConfigModel supersetConfig = ConfigModel.of(Activity.class).add(yamlmodel);
-        Optional<String> defaultDriverOption = defaultDriverName;
-        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
+        //        NBConfigModel supersetConfig = ConfigModel.of(Activity.class).add(yamlmodel);
+        //        Optional<String> defaultDriverOption = defaultDriverName;
+        //        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
 
-        List<ParsedOp> allParsedOps = loadOpTemplates(
-            defaultAdapter.orElse(null), false, false).stream().map(ot -> upconvert(
-            ot, defaultDriverOption, yamlmodel, supersetConfig, mappers, adapterlist)).toList();
+        //        List<ParsedOp> allParsedOps = loadOpTemplates(defaultAdapter.orElse(null), false, false).stream()
+        //            .map(ot -> upconvert(ot, defaultDriverOption, yamlmodel, supersetConfig, mappers, adapterlist))
+        //            .toList();
 
-        OpLookup lookup = new OpLookupService(() -> allParsedOps);
+        //        OpLookup lookup = new OpLookupService(() -> allParsedOps);
 
-        TagFilter ts = new TagFilter(activityDef.getParams().getOptionalString("tags").orElse(""));
-        List<ParsedOp> activeParsedOps = ts.filter(allParsedOps);
+        //        TagFilter ts = new TagFilter(activityDef.getParams().getOptionalString("tags").orElse(""));
+        //        List<ParsedOp> activeParsedOps = ts.filter(allParsedOps);
 
-        if (defaultDriverOption.isPresent()) {
-            long matchingDefault = mappers.keySet().stream().filter(
-                n -> n.equals(defaultDriverOption.get())).count();
-            if (0 == matchingDefault) {
-                logger.warn(
-                    "All op templates used a different driver than the default '{}'",
-                    defaultDriverOption.get()
-                );
-            }
-        }
+        //        if (defaultDriverOption.isPresent()) {
+        //            long matchingDefault = mappers.keySet().stream().filter(n -> n.equals(defaultDriverOption.get())).count();
+        //            if (0 == matchingDefault) {
+        //                logger.warn(
+        //                    "All op templates used a different driver than the default '{}'",
+        //                    defaultDriverOption.get()
+        //                );
+        //            }
+        //        }
 
-        try {
-            sequence = createOpSourceFromParsedOps(adapterlist, activeParsedOps, lookup);
-        } catch (Exception e) {
-            if (e instanceof OpConfigError) {
-                throw e;
-            }
-            throw new OpConfigError(
-                "Error mapping workload template to operations: " + e.getMessage(), null, e);
-        }
 
-        initOpsMetrics();
+        //        try {
+        //            sequence = createOpSourceFromParsedOps(adapterlist, activeParsedOps, lookup);
+        //        } catch (Exception e) {
+        //            if (e instanceof OpConfigError) {
+        //                throw e;
+        //            }
+        //            throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
+        //        }
 
     }
 
@@ -212,16 +260,11 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
 
     }
 
-
-    protected <O extends LongFunction> OpSequence<OpDispenser<? extends CycleOp<?>>> createOpSourceFromParsedOps(
-        List<DriverAdapter<CycleOp<?>, Space>> adapters, List<ParsedOp> pops, OpLookup opLookup) {
-        return createOpSourceFromParsedOps2(adapters, pops, opLookup);
-    }
-
-    protected <O extends LongFunction> OpSequence<OpDispenser<? extends CycleOp<?>>> createOpSourceFromParsedOps2(
-//        Map<String, DriverAdapter<?,?>> adapterCache,
-//        Map<String, OpMapper<? extends Op>> mapperCache,
-        List<DriverAdapter<CycleOp<?>, Space>> adapters, List<ParsedOp> pops, OpLookup opLookup) {
+    protected <O extends LongFunction> OpSequence<OpDispenser<? extends CycleOp<?>>> createOpSourceFromParsedOps2(List<DriverAdapter<CycleOp<?>, Space>> adapters,
+        List<ParsedOp> pops,
+        OpLookup opLookup
+    )
+    {
         try {
 
             List<Long> ratios = new ArrayList<>(pops.size());
@@ -231,8 +274,8 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
                 ratios.add(ratio);
             }
 
-            SequencerType sequencerType = getParams().getOptionalString("seq").map(
-                SequencerType::valueOf).orElse(SequencerType.bucket);
+            SequencerType sequencerType = config.getOptional("seq").map(SequencerType::valueOf)
+                .orElse(SequencerType.bucket);
             SequencePlanner<OpDispenser<? extends CycleOp<?>>> planner = new SequencePlanner<>(
                 sequencerType);
 
@@ -287,57 +330,71 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         return activityDef.getParams();
     }
 
+    //    private ParsedOp upconvert(
+    //        OpTemplate ot,
+    //        Optional<String> defaultDriverOption,
+    //        NBConfigModel yamlmodel,
+    //        NBConfigModel supersetConfig,
+    //        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers,
+    //        List<DriverAdapter<CycleOp<?>, Space>> adapterlist
+    //    )
+    //    {
+    //        //            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(),
+    //        // List.of(), this);
+    //        String
+    //            driverName =
+    //            ot.getOptionalStringParam("driver", String.class)
+    //                .or(() -> ot.getOptionalStringParam("type", String.class))
+    //                .or(() -> defaultDriverOption).orElseThrow(() -> new OpConfigError(
+    //                    "Unable to identify driver name for op template:\n" + ot));
+    //
+    //        DriverAdapter<CycleOp<?>, Space>
+    //            adapter =
+    //            adapters.computeIfAbsent(
+    //                driverName,
+    //                dn -> loadAdapter(dn, yamlmodel, supersetConfig, mappers));
+    //        supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
+    //        adapterlist.add(adapter);
+    //
+    //        ParsedOp
+    //            pop =
+    //            new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
+    //        Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
+    //
+    //        return pop;
+    //    }
 
-    private ParsedOp upconvert(
-        OpTemplate ot, Optional<String> defaultDriverOption, NBConfigModel yamlmodel,
-        NBConfigModel supersetConfig,
-        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers,
-        List<DriverAdapter<CycleOp<?>, Space>> adapterlist
-    ) {
-        //            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(), List.of(), this);
-        String driverName = ot.getOptionalStringParam("driver", String.class).or(
-            () -> ot.getOptionalStringParam("type", String.class)).or(
-            () -> defaultDriverOption).orElseThrow(
-            () -> new OpConfigError("Unable to identify driver name for op template:\n" + ot));
-
-        DriverAdapter<CycleOp<?>, Space> adapter = adapters.computeIfAbsent(
-            driverName, dn -> loadAdapter(
-                dn, yamlmodel, supersetConfig, mappers));
-        supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
-        adapterlist.add(adapter);
-
-        ParsedOp pop = new ParsedOp(
-            ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
-        Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
-
-        return pop;
-    }
-
-    private DriverAdapter<CycleOp<?>, Space> loadAdapter(
-        String driverName, NBConfigModel yamlmodel, NBConfigModel supersetConfig,
-        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers
-    ) {
-        DriverAdapter<CycleOp<?>, Space> adapter = Optional.of(driverName).flatMap(
-            name -> ServiceSelector.of(
-                name, ServiceLoader.load(DriverAdapterLoader.class)).get()).map(
-            l -> l.load(this, NBLabels.forKV())).orElseThrow(
-            () -> new OpConfigError("driver adapter not present for name '" + driverName + "'"));
-
-        NBConfigModel combinedModel = yamlmodel;
-        NBConfiguration combinedConfig = combinedModel.matchConfig(activityDef.getParams());
-
-        if (adapter instanceof NBConfigurable configurable) {
-            NBConfigModel adapterModel = configurable.getConfigModel();
-            supersetConfig.add(adapterModel);
-
-            combinedModel = adapterModel.add(yamlmodel);
-            combinedConfig = combinedModel.matchConfig(activityDef.getParams());
-            configurable.applyConfig(combinedConfig);
-        }
-        mappers.put(driverName, adapter.getOpMapper());
-        return adapter;
-    }
-
+    //    private DriverAdapter<CycleOp<?>, Space> loadAdapter(
+    //        String driverName,
+    //        NBConfigModel yamlmodel,
+    //        NBConfigModel supersetConfig,
+    //        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers
+    //    )
+    //    {
+    //        DriverAdapter<CycleOp<?>, Space>
+    //            adapter =
+    //            Optional.of(driverName).flatMap(name -> ServiceSelector.of(
+    //                    name,
+    //                    ServiceLoader.load(DriverAdapterLoader.class)).get())
+    //                .map(l -> l.load(this, NBLabels.forKV()))
+    //                .orElseThrow(() -> new OpConfigError("driver adapter not present for name '" +
+    //                                                     driverName +
+    //                                                     "'"));
+    //
+    //        NBConfigModel combinedModel = yamlmodel;
+    //        NBConfiguration combinedConfig = combinedModel.matchConfig(activityDef.getParams());
+    //
+    //        if (adapter instanceof NBConfigurable configurable) {
+    //            NBConfigModel adapterModel = configurable.getConfigModel();
+    //            supersetConfig.add(adapterModel);
+    //
+    //            combinedModel = adapterModel.add(yamlmodel);
+    //            combinedConfig = combinedModel.matchConfig(activityDef.getParams());
+    //            configurable.applyConfig(combinedConfig);
+    //        }
+    //        mappers.put(driverName, adapter.getOpMapper());
+    //        return adapter;
+    //    }
 
     public void initActivity() {
         initOrUpdateRateLimiters(this.activityDef);
@@ -422,42 +479,57 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         }
     }
 
-    private OpTemplates loadOpTemplates(
-        DriverAdapter<?, ?> defaultDriverAdapter, boolean logged, boolean filtered) {
-
-        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-
-        OpTemplates templates = loadOpTemplates();
-        OpTemplates filteredOps = templates.matching(filtered ? tagfilter : "", logged);
-
-        if (filteredOps.isEmpty()) {
-            // There were no ops, and it *wasn't* because they were all filtered out.
-            // In this case, let's try to synthesize the ops as long as at least a default driver was provided
-            // But if there were no ops, and there was no default driver provided, we can't continue
-            // There were no ops, and it was because they were all filtered out
-            OpTemplates unfilteredOps = templates.matching("",false);
-            if (!unfilteredOps.isEmpty()) {
-                String message = "There were no active op templates with tag filter '" + tagfilter + "', since all " + unfilteredOps.size() + " were filtered out. Examine the session log for details";
-                NBAdvisorOutput.test(message);
-                //throw new BasicError(message);
-            }
-            if (defaultDriverAdapter instanceof SyntheticOpTemplateProvider sotp) {
-                filteredOps = sotp.getSyntheticOpTemplates(templates, this.activityDef.getParams());
-                Objects.requireNonNull(filteredOps);
-                if (filteredOps.isEmpty()) {
-                    throw new BasicError(
-                        "Attempted to create synthetic ops from driver '" + defaultDriverAdapter.getAdapterName() + '\'' + " but no ops were created. You must provide either a workload or an op parameter. Activities require op templates.");
-                }
-            } else {
-                throw new BasicError("""
-                                         No op templates were provided. You must provide one of these activity parameters:
-                                         1) workload=some.yaml
-                                         2) op='inline template'
-                                         3) driver=stdout (or any other drive that can synthesize ops)""");
-            }
-        }
-        return filteredOps;
-    }
+    //    private OpTemplates loadOpTemplates(
+    //        DriverAdapter<?, ?> defaultDriverAdapter,
+    //        boolean logged,
+    //        boolean filtered
+    //    )
+    //    {
+    //
+    //        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
+    //
+    //        OpTemplates templates = loadOpTemplates();
+    //        OpTemplates filteredOps = templates.matching(filtered ? tagfilter : "", logged);
+    //
+    //        if (filteredOps.isEmpty()) {
+    //            // There were no ops, and it *wasn't* because they were all filtered out.
+    //            // In this case, let's try to synthesize the ops as long as at least a default driver
+    //            // was provided
+    //            // But if there were no ops, and there was no default driver provided, we can't continue
+    //            // There were no ops, and it was because they were all filtered out
+    //            OpTemplates unfilteredOps = templates.matching("", false);
+    //            if (!unfilteredOps.isEmpty()) {
+    //                String
+    //                    message =
+    //                    "There were no active op templates with tag filter '" +
+    //                    tagfilter +
+    //                    "', since all " +
+    //                    unfilteredOps.size() +
+    //                    " were filtered out. Examine the session log for details";
+    //                NBAdvisorOutput.test(message);
+    //                // throw new BasicError(message);
+    //            }
+    //            if (defaultDriverAdapter instanceof SyntheticOpTemplateProvider sotp) {
+    //                filteredOps = sotp.getSyntheticOpTemplates(templates, this.activityDef.getParams());
+    //                Objects.requireNonNull(filteredOps);
+    //                if (filteredOps.isEmpty()) {
+    //                    throw new BasicError("Attempted to create synthetic ops from driver '" +
+    //                                         defaultDriverAdapter.getAdapterName() +
+    //                                         '\'' +
+    //                                         " but no ops were created. You must provide either a workload" +
+    //                                         " or an op parameter. Activities require op templates.");
+    //                }
+    //            } else {
+    //                throw new BasicError("""
+    //                    No op templates were provided. You must provide one of these activity parameters:
+    //                    1) workload=some.yaml
+    //                    2) op='inline template'
+    //                    3) driver=stdout (or any other drive that can synthesize ops)\
+    //                    """);
+    //            }
+    //        }
+    //        return filteredOps;
+    //    }
 
     /**
      Modify the provided ActivityDef with defaults for stride and cycles, if they haven't been
@@ -614,10 +686,9 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
     protected OpTemplates loadOpTemplates() {
         OpsDocList opsDocs = null;
         try {
-            String op = activityDef.getParams().getOptionalString("op").orElse(null);
-            String stmt = activityDef.getParams().getOptionalString("stmt", "statement").orElse(
-                null);
-            String workload = activityDef.getParams().getOptionalString("workload").orElse(null);
+            String op = config.getOptional("op").orElse(null);
+            String stmt = config.getOptional("stmt", "statement").orElse(null);
+            String workload = config.getOptional("workload").orElse(null);
 
             if ((op != null ? 1 : 0) + (stmt != null ? 1 : 0) + (workload != null ? 1 : 0) > 1) {
                 throw new OpConfigError(

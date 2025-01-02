@@ -40,6 +40,7 @@ public interface OpSequence<T> extends LongFunction<T> {
      */
     int[] getSequence();
 
+    SequencerType getSequencerType();
     /**
      * Map this OpSequence to another type of OpSequence.
      * @param func The transformation function from this to another type

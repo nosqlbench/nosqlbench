@@ -84,11 +84,13 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
      */
     private final CycleFunction<Boolean> _verifier;
     private final ThreadLocal<CycleFunction<Boolean>> tlVerifier;
+    private final long ratio;
 
     protected BaseOpDispenser(final NBComponent parentC, final ParsedOp op, LongFunction<? extends SPACE> spaceF) {
         super(parentC);
         opName = op.getName();
         labels = op.getLabels();
+        this.ratio = op.takeOptionalStaticValue("ratio", Long.class).orElse(1L);
 
         this.timerStarts = op.takeOptionalStaticValue(START_TIMERS, String.class)
             .map(s -> s.split(", *"))
@@ -239,5 +241,10 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
     @Override
     public List<Validator> getValidator(NBComponent parent, ParsedOp pop, OpLookup lookup) {
         return CoreOpValidators.getValidator(this, pop, lookup);
+    }
+
+    @Override
+    public long getRatio() {
+        return this.ratio;
     }
 }

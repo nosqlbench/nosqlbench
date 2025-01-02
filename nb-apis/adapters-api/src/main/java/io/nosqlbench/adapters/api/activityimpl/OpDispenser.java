@@ -109,4 +109,6 @@ public interface OpDispenser<OPTYPE extends CycleOp<?>> extends LongFunction<OPT
     CycleFunction<Boolean> getVerifier();
 
     String getOpName();
+
+    long getRatio();
 }
