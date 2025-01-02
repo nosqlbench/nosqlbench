@@ -27,6 +27,7 @@ public interface ProgressMeterDisplay {
     default double getMinValue() {
         return 0.0d;
     }
+
     double getMaxValue();
 
     double getCurrentValue();
@@ -50,10 +51,10 @@ public interface ProgressMeterDisplay {
 
     default ProgressSummary getSummary() {
         return new ProgressSummary(
-                getProgressName(),
-                (this instanceof RemainingMeter rm) ? rm.getRemainingCount() : -1.0,
-                (this instanceof ActiveMeter am) ? am.getActiveOps() : -1.0,
-                (this instanceof CompletedMeter cm) ? cm.getCompletedCount() : -1.0);
+            getProgressName(), (this instanceof RemainingMeter rm) ? rm.getRemainingCount() : -1.0,
+            (this instanceof ActiveMeter am) ? am.getActiveOps() : -1.0,
+            (this instanceof ConcurrentMeter conc) ? conc.getConcurrency() : -1,
+            (this instanceof CompletedMeter cm) ? cm.getCompletedCount() : -1.0);
     }
 
     default long getProgressETAMillis() {
@@ -70,7 +71,7 @@ public interface ProgressMeterDisplay {
     }
 
     default Instant getETAInstant() {
-        return Instant.ofEpochMilli(System.currentTimeMillis()+getProgressETAMillis());
+        return Instant.ofEpochMilli(System.currentTimeMillis() + getProgressETAMillis());
     }
 
 

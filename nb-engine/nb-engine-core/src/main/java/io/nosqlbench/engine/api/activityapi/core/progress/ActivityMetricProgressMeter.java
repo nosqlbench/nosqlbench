@@ -17,12 +17,15 @@
 package io.nosqlbench.engine.api.activityapi.core.progress;
 
 import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
+import io.nosqlbench.nb.api.engine.activityimpl.CyclesSpec;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.nb.api.engine.util.Unit;
 
 import java.time.Instant;
 
-public class ActivityMetricProgressMeter implements ProgressMeterDisplay, CompletedMeter, RemainingMeter, ActiveMeter {
+public class ActivityMetricProgressMeter
+    implements ProgressMeterDisplay, CompletedMeter, RemainingMeter, ActiveMeter, ConcurrentMeter
+{
 
     private final Activity activity;
     private final Instant startInstant;
@@ -49,12 +52,10 @@ public class ActivityMetricProgressMeter implements ProgressMeterDisplay, Comple
 
     @Override
     public double getMaxValue() {
-        double totalRecycles = 1.0d + activity.getActivityDef()
-            .getParams()
-            .getOptionalString("recycles")
-            .flatMap(Unit::longCountFor)
-            .orElse(0L);
-        double totalCycles = activity.getActivityDef().getCycleCount() * totalRecycles;
+        double total_recycles = CyclesSpec.parse(activity.getConfig().get("recycles"))
+            .cycle_count();
+        double total_cycles = CyclesSpec.parse(activity.getConfig().get("cycles")).cycle_count();
+        double totalCycles = total_recycles * total_cycles;
         return totalCycles;
     }
 
@@ -65,12 +66,12 @@ public class ActivityMetricProgressMeter implements ProgressMeterDisplay, Comple
 
     @Override
     public double getRemainingCount() {
-        return getMaxValue()- getCurrentValue();
+        return getMaxValue() - getCurrentValue();
     }
 
     @Override
     public double getActiveOps() {
-        return bindTimer.getCount()-cyclesTimer.getCount();
+        return bindTimer.getCount() - cyclesTimer.getCount();
     }
 
     @Override
@@ -84,4 +85,8 @@ public class ActivityMetricProgressMeter implements ProgressMeterDisplay, Comple
     }
 
 
+    @Override
+    public int getConcurrency() {
+        return activity.getConfig().getThreads();
+    }
 }
