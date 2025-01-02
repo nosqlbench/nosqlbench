@@ -41,8 +41,10 @@ import java.util.stream.Collectors;
 public class ActivityTypeLoader {
 
     private static final Logger logger = LogManager.getLogger(ActivityTypeLoader.class);
-    private final SimpleServiceLoader<DriverAdapter> DRIVERADAPTER_SPI_FINDER = new SimpleServiceLoader<>(DriverAdapter.class, Maturity.Any);
-    private final SimpleServiceLoader<DriverAdapterLoader> DRIVERADAPTERLOADER_SPI_FINDER = new SimpleServiceLoader<>(DriverAdapterLoader.class, Maturity.Any);
+    private final SimpleServiceLoader<DriverAdapter> DRIVERADAPTER_SPI_FINDER
+        = new SimpleServiceLoader<>(DriverAdapter.class, Maturity.Any);
+    private final SimpleServiceLoader<DriverAdapterLoader> DRIVERADAPTERLOADER_SPI_FINDER
+        = new SimpleServiceLoader<>(DriverAdapterLoader.class, Maturity.Any);
     private final Set<URL> jarUrls = new HashSet<>();
 
     public ActivityTypeLoader setMaturity(final Maturity maturity) {
@@ -52,15 +54,19 @@ public class ActivityTypeLoader {
 
     public ActivityTypeLoader() {
 
-        final List<String> libpaths = NBEnvironment.INSTANCE.interpolateEach(":", '$' + NBEnvironment.NBLIBS);
+        final List<String> libpaths = NBEnvironment.INSTANCE.interpolateEach(
+            ":", '$' + NBEnvironment.NBLIBS);
         Set<URL> urlsToAdd = new HashSet<>();
 
         for (final String libpaths_entry : libpaths) {
             final Path libpath = Path.of(libpaths_entry);
-            if (Files.isDirectory(libpath)) urlsToAdd = this.addLibDir(urlsToAdd, libpath);
-            else if (Files.isRegularFile(libpath) && libpath.toString().toLowerCase().endsWith(".zip"))
+            if (Files.isDirectory(libpath))
+                urlsToAdd = this.addLibDir(urlsToAdd, libpath);
+            else if (Files.isRegularFile(libpath) &&
+                libpath.toString().toLowerCase().endsWith(".zip"))
                 urlsToAdd = this.addZipDir(urlsToAdd, libpath);
-            else if (Files.isRegularFile(libpath) && libpath.toString().toLowerCase().endsWith(".jar"))
+            else if (Files.isRegularFile(libpath) &&
+                libpath.toString().toLowerCase().endsWith(".jar"))
                 urlsToAdd = this.addJarFile(urlsToAdd, libpath);
         }
         this.extendClassLoader(urlsToAdd);
@@ -89,10 +95,12 @@ public class ActivityTypeLoader {
                     this.jarUrls.add(url);
                 }
             final URL[] newUrlAry = newUrls.toArray(new URL[]{});
-            final URLClassLoader ucl = URLClassLoader.newInstance(newUrlAry, Thread.currentThread().getContextClassLoader());
+            final URLClassLoader ucl = URLClassLoader.newInstance(
+                newUrlAry, Thread.currentThread().getContextClassLoader());
             Thread.currentThread().setContextClassLoader(ucl);
             ActivityTypeLoader.logger.debug("Extended class loader layering with {}", newUrls);
-        } else ActivityTypeLoader.logger.debug("All URLs specified were already in a class loader.");
+        } else
+            ActivityTypeLoader.logger.debug("All URLs specified were already in a class loader.");
     }
 
     private Set<URL> addJarFile(final Set<URL> urls, final Path libpath) {
@@ -109,11 +117,8 @@ public class ActivityTypeLoader {
     }
 
     private Set<URL> addLibDir(final Set<URL> urlsToAdd, final Path libpath) {
-        final Set<URL> urls = NBIO.local()
-            .searchPrefixes(libpath.toString())
-            .extensionSet(".jar")
-            .list().stream().map(Content::getURL)
-            .collect(Collectors.toSet());
+        final Set<URL> urls = NBIO.local().searchPrefixes(libpath.toString()).extensionSet(".jar")
+            .list().stream().map(Content::getURL).collect(Collectors.toSet());
         urlsToAdd.addAll(urls);
         return urlsToAdd;
     }
@@ -133,7 +138,7 @@ public class ActivityTypeLoader {
             return urls;
         }).ifPresent(this::extendClassLoader);
 
-        return getDriverAdapter(driverName,activityDef,parent);
+        return getDriverAdapter(driverName, activityDef, parent);
 
     }
 
@@ -149,18 +154,20 @@ public class ActivityTypeLoader {
         if (oda.isPresent()) {
             final DriverAdapter<?, ?> driverAdapter = oda.get();
 
-            final StandardActivityType activityType = new StandardActivityType<>(driverAdapter, activityDef, parent);
+            final StandardActivityType activityType = new StandardActivityType<>(
+                driverAdapter, activityDef, parent);
             return Optional.of(activityType);
         }
         return Optional.empty();
     }
 
     public Set<String> getAllSelectors() {
-//        final Map<String, Maturity> allSelectors = this.ACTIVITYTYPE_SPI_FINDER.getAllSelectors();
-//        final Map<String, Maturity> allAdapters = this.DRIVERADAPTER_SPI_FINDER.getAllSelectors();
-        final Map<String, Maturity> allAdapterLoaders = this.DRIVERADAPTERLOADER_SPI_FINDER.getAllSelectors();
+        //        final Map<String, Maturity> allSelectors = this.ACTIVITYTYPE_SPI_FINDER.getAllSelectors();
+        //        final Map<String, Maturity> allAdapters = this.DRIVERADAPTER_SPI_FINDER.getAllSelectors();
+        final Map<String, Maturity> allAdapterLoaders
+            = this.DRIVERADAPTERLOADER_SPI_FINDER.getAllSelectors();
         final Set<String> all = new LinkedHashSet<>();
-//        all.addAll(allSelectors.keySet());
+        //        all.addAll(allSelectors.keySet());
         all.addAll(allAdapterLoaders.keySet());
         return all;
     }

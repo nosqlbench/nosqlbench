@@ -2,13 +2,13 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 /*
  * Copyright (c) nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -36,7 +36,7 @@ public class ActivityMetrics {
     public static final String RESPONSE_TIME = "_responsetime";
     public static final String SERVICE_TIME = "_servicetime";
 
-    public final Activity<?,?> activity;
+    public final Activity<?, ?> activity;
     public final int hdrdigits;
     public NBMetricCounter pendingOpsCounter;
     public NBMetricTimer bindTimer;
@@ -50,7 +50,7 @@ public class ActivityMetrics {
     public NBMetricTimer cycleResponseTimer;
     public NBMetricHistogram triesHistogram;
 
-    public <S, R extends LongFunction> ActivityMetrics(Activity<?,?> activity) {
+    public <S, R extends LongFunction> ActivityMetrics(Activity<?, ?> activity) {
         this.activity = activity;
         this.hdrdigits = activity.getComponentProp("hdr_digits").map(Integer::parseInt).orElse(3);
         initMetrics();
@@ -60,8 +60,8 @@ public class ActivityMetrics {
 
         this.pendingOpsCounter = activity.create().counter(
             "pending_ops", MetricCategory.Core,
-            "Indicate the number of operations which have been started, but which have not been completed." + " This starts "
-        );
+            "Indicate the number of operations which have been started, but which have not been completed." +
+                " This starts ");
 
 
         /// The bind timer keeps track of how long it takes for NoSQLBench to create an instance
@@ -71,8 +71,7 @@ public class ActivityMetrics {
         /// a cycle to an operation".
         this.bindTimer = activity.create().timer(
             "bind", hdrdigits, MetricCategory.Core,
-            "Time the step within a cycle which binds generated data to an op template to synthesize an executable operation."
-        );
+            "Time the step within a cycle which binds generated data to an op template to synthesize an executable operation.");
 
         /// The execute timer keeps track of how long it takes to submit an operation to be executed
         /// to an underlying native driver. For asynchronous APIs, such as those which return a
@@ -82,14 +81,13 @@ public class ActivityMetrics {
         /// and the result timer to measure the blocking calls to aquire the result.
         this.executeTimer = activity.create().timer(
             "execute", hdrdigits, MetricCategory.Core,
-            "Time how long it takes to submit a request and receive a result, including reading the result in the client."
-        );
+            "Time how long it takes to submit a request and receive a result, including reading the result in the client.");
 
         /// The cycles service timer measures how long it takes to complete a cycle of work.
         this.cycleServiceTimer = activity.create().timer(
             "cycles" + SERVICE_TIME, hdrdigits, MetricCategory.Core,
-            "service timer for a cycle, including all of bind, execute, result and result_success;" + " service timers measure the time between submitting a request and receiving the response"
-        );
+            "service timer for a cycle, including all of bind, execute, result and result_success;" +
+                " service timers measure the time between submitting a request and receiving the response");
 
 
         /// The result timer keeps track of how long it takes a native driver to service a request once submitted.
@@ -99,8 +97,8 @@ public class ActivityMetrics {
         /// cover each attempt at an operation through a native driver. Retries are not to be combined in this measurement.
         this.resultTimer = activity.create().timer(
             "result", hdrdigits, MetricCategory.Core,
-            "Time how long it takes to submit a request, receive a result, including binding, reading results, " + "and optionally verifying them, including all operations whether successful or not, for each attempted request."
-        );
+            "Time how long it takes to submit a request, receive a result, including binding, reading results, " +
+                "and optionally verifying them, including all operations whether successful or not, for each attempted request.");
 
         /// The result-success timer keeps track of operations which had no exception. The measurements for this timer should
         /// be exactly the same values as used for the result timer ({@link #getOrCreateResultTimer()}, except that
@@ -109,23 +107,20 @@ public class ActivityMetrics {
         /// the error handler logic.
         this.resultSuccessTimer = activity.create().timer(
             "result_success", hdrdigits, MetricCategory.Core,
-            "The execution time of successful operations, which includes submitting the operation, waiting for a response, and reading the result"
-        );
+            "The execution time of successful operations, which includes submitting the operation, waiting for a response, and reading the result");
 
         /// The input timer measures how long it takes to get the cycle value to be used for
         /// an operation.
         this.inputTimer = activity.create().timer(
             "read_input", activity.getComponentProp("hdr_digits").map(Integer::parseInt).orElse(3),
             MetricCategory.Internals,
-            "measures overhead of acquiring a cycle range for an activity thread"
-        );
+            "measures overhead of acquiring a cycle range for an activity thread");
 
         /// The strides service timer measures how long it takes to complete a stride of work.
         this.stridesServiceTimer = activity.create().timer(
             "strides", activity.getComponentProp("hdr_digits").map(Integer::parseInt).orElse(3),
             MetricCategory.Core,
-            "service timer for a stride, which is the same as the op sequence length by default"
-        );
+            "service timer for a stride, which is the same as the op sequence length by default");
 
         if (null != activity.getStrideLimiter()) {
             ///  The strides response timer measures the total response time from the scheduled
@@ -134,8 +129,8 @@ public class ActivityMetrics {
             ///  there is no strides rate limiter.
             this.stridesResponseTimer = activity.create().timer(
                 "strides" + RESPONSE_TIME, hdrdigits, MetricCategory.Core,
-                "response timer for a stride, which is the same as the op sequence length by default;" + " response timers include scheduling delays which occur when an activity falls behind its target rate"
-            );
+                "response timer for a stride, which is the same as the op sequence length by default;" +
+                    " response timers include scheduling delays which occur when an activity falls behind its target rate");
         } else {
             stridesResponseTimer = null;
         }
@@ -151,8 +146,8 @@ public class ActivityMetrics {
         if (null != activity.getCycleLimiter()) {
             this.cycleResponseTimer = activity.create().timer(
                 "cycles" + RESPONSE_TIME, hdrdigits, MetricCategory.Core,
-                "response timer for a cycle, including all of bind, execute, result and result_success;" + " response timers include scheduling delays which occur when an activity falls behind its target rate"
-            );
+                "response timer for a cycle, including all of bind, execute, result and result_success;" +
+                    " response timers include scheduling delays which occur when an activity falls behind its target rate");
         } else {
             cycleResponseTimer = null;
         }
@@ -167,9 +162,15 @@ public class ActivityMetrics {
         /// This metric should be measured around every retry loop for a native operation.
         this.triesHistogram = activity.create().histogram(
             "tries", hdrdigits, MetricCategory.Core,
-            "A histogram of all tries for an activity. Perfect results mean all quantiles return 1." + " Slight saturation is indicated by p99 or p95 returning higher values." + " Lower quantiles returning more than 1, or higher values at high quantiles indicate incremental overload."
-        );
+            "A histogram of all tries for an activity. Perfect results mean all quantiles return 1." +
+                " Slight saturation is indicated by p99 or p95 returning higher values." +
+                " Lower quantiles returning more than 1, or higher values at high quantiles indicate incremental overload.");
+    }
 
-
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("ActivityMetrics{");
+        sb.append(this.activity.description());
+        return sb.toString();
     }
 }

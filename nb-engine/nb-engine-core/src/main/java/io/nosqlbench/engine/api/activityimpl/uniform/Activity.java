@@ -108,6 +108,7 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
                NBReconfigurable
 {
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
+
     private final OpSequence<OpDispenser<? extends CycleOp<?>>> sequence;
     private final ConcurrentHashMap<String, DriverAdapter<CycleOp<?>, Space>> adapters
         = new ConcurrentHashMap<>();
@@ -260,18 +261,15 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         create().gauge(
             "ops_pending", () -> this.getProgressMeter().getSummary().pending(),
             MetricCategory.Core,
-            "The current number of operations which have not been dispatched for processing yet."
-        );
+            "The current number of operations which have not been dispatched for" +
+                " processing yet.");
         create().gauge(
             "ops_active", () -> this.getProgressMeter().getSummary().current(), MetricCategory.Core,
-            "The current number of operations which have been dispatched for processing, but which have not yet completed."
-        );
+            "The current number of operations which have been dispatched for" +
+                " processing, but which have not yet completed.");
         create().gauge(
             "ops_complete", () -> this.getProgressMeter().getSummary().complete(),
-            MetricCategory.Core, "The current number of operations which have been completed"
-        );
-
-
+            MetricCategory.Core, "The current number of operations which have been completed");
     }
 
     protected <O extends LongFunction> OpSequence<OpDispenser<? extends CycleOp<?>>> createOpSourceFromParsedOps2(List<DriverAdapter<CycleOp<?>, Space>> adapters,
@@ -312,20 +310,18 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
                     Dryrun dryrun = pop.takeEnumFromFieldOr(Dryrun.class, Dryrun.none, "dryrun");
 
                     dispenser = OpFunctionComposition.wrapOptionally(
-                        adapter, dispenser, pop, dryrun, opLookup);
+                        adapter, dispenser, pop,
+                        dryrun, opLookup);
 
-//                if (strict) {
-//                    optemplate.assertConsumed();
-//                }
                     planner.addOp((OpDispenser<? extends CycleOp<?>>) dispenser, ratio);
                 } catch (Exception e) {
                     throw new OpConfigError(
-                        "Error while mapping op from template named '" + pop.getName() + "': " + e.getMessage(),
-                        e
-                    );
+                        "Error while mapping op from template named '" +
+                        pop.getName() +
+                        "': " +
+                        e.getMessage(), e);
                 }
             }
-
 
             return planner.resolve();
 
@@ -336,12 +332,6 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
                 throw new OpConfigError(e.getMessage(), workloadSource, e);
             }
         }
-
-
-    }
-
-    public ParameterMap getParams() {
-        return activityDef.getParams();
     }
 
     //    private ParsedOp upconvert(
@@ -411,26 +401,26 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
     //    }
 
     public void initActivity() {
-        initOrUpdateRateLimiters(this.activityDef);
+        initOrUpdateRateLimiters();
         setDefaultsFromOpSequence(sequence);
     }
-
 
     public OpSequence<OpDispenser<? extends CycleOp<?>>> getOpSequence() {
         return sequence;
     }
 
-//    /**
-//     * When an adapter needs to identify an error uniquely for the purposes of
-//     * routing it to the correct error handler, or naming it in logs, or naming
-//     * metrics, override this method in your activity.
-//     *
-//     * @return A function that can reliably and safely map an instance of Throwable to a stable name.
-//     */
-//    @Override
-//    public final Function<Throwable, String> getErrorNameMapper() {
-//        return adapter.getErrorNameMapper();
-//    }
+    //    /**
+    //     * When an adapter needs to identify an error uniquely for the purposes of
+    //     * routing it to the correct error handler, or naming it in logs, or naming
+    //     * metrics, override this method in your activity.
+    //     *
+    //     * @return A function that can reliably and safely map an instance of Throwable to a
+    // stable name.
+    //     */
+    //    @Override
+    //    public final Function<Throwable, String> getErrorNameMapper() {
+    //        return adapter.getErrorNameMapper();
+    //    }
 
     @Override
     public OpTemplates getSyntheticOpTemplates(OpTemplates opsDocList, Map<String, Object> cfg) {
@@ -464,7 +454,6 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
     public NBLabels getLabels() {
         return super.getLabels();
     }
-
 
     @Override
     public void onEvent(NBEvent event) {
@@ -584,7 +573,8 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
                 if (threads > cycles) {
                     threads = (int) cycles;
                     logger.info(
-                        "setting threads to {} (auto) [10xCORES, cycle count limited]", threads);
+                        "setting threads to {} (auto) [10xCORES, cycle count limited]",
+                        threads);
                 } else {
                     logger.info("setting threads to {} (auto) [10xCORES]", threads);
                 }
@@ -625,67 +615,69 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         }
     }
 
-//    /**
-//     Given a function that can create an op of type <O> from an OpTemplate, generate
-//     an indexed sequence of ready to call operations.
-//     <p>
-//     This method uses the following conventions to derive the sequence:
-//
-//     <OL>
-//     <LI>If an 'op', 'stmt', or 'statement' parameter is provided, then it's value is
-//     taken as the only provided statement.</LI>
-//     <LI>If a 'yaml, or 'workload' parameter is provided, then the statements in that file
-//     are taken with their ratios </LI>
-//     <LI>Any provided tags filter is used to select only the op templates which have matching
-//     tags. If no tags are provided, then all the found op templates are included.</LI>
-//     <LI>The ratios and the 'seq' parameter are used to build a sequence of the ready operations,
-//     where the sequence length is the sum of the ratios.</LI>
-//     </OL>
-//     @param <O>
-//     A holder for an executable operation for the native driver used by this activity.
-//     @param opinit
-//     A function to map an OpTemplate to the executable operation form required by
-//     the native driver for this activity.
-//     @param defaultAdapter
-//     The adapter which will be used for any op templates with no explicit adapter
-//     @return The sequence of operations as determined by filtering and ratios
-//     */
-//    @Deprecated(forRemoval = true)
-//    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(
-//            Function<OpTemplate, OpDispenser<? extends O>> opinit, boolean strict,
-//            DriverAdapter<?, ?> defaultAdapter
-//    ) {
-//
-//        List<OpTemplate> stmts = loadOpTemplates(defaultAdapter, true, false);
-//
-//        List<Long> ratios = new ArrayList<>(stmts.size());
-//
-//        for (OpTemplate opTemplate : stmts) {
-//            long ratio = opTemplate.removeParamOrDefault("ratio", 1);
-//            ratios.add(ratio);
-//        }
-//
-//        SequencerType sequencerType = getParams().getOptionalString("seq").map(
-//                SequencerType::valueOf).orElse(SequencerType.bucket);
-//
-//        SequencePlanner<OpDispenser<? extends O>> planner = new SequencePlanner<>(sequencerType);
-//
-//        try {
-//            for (int i = 0; i < stmts.size(); i++) {
-//                long ratio = ratios.get(i);
-//                OpTemplate optemplate = stmts.get(i);
-//                OpDispenser<? extends O> driverSpecificReadyOp = opinit.apply(optemplate);
-//                if (strict) {
-//                    optemplate.assertConsumed();
-//                }
-//                planner.addOp(driverSpecificReadyOp, ratio);
-//            }
-//        } catch (Exception e) {
-//            throw new OpConfigError(e.getMessage(), workloadSource, e);
-//        }
-//
-//        return planner.resolve();
-//    }
+    //    /**
+    //     Given a function that can create an op of type <O> from an OpTemplate, generate
+    //     an indexed sequence of ready to call operations.
+    //     <p>
+    //     This method uses the following conventions to derive the sequence:
+    //
+    //     <OL>
+    //     <LI>If an 'op', 'stmt', or 'statement' parameter is provided, then it's value is
+    //     taken as the only provided statement.</LI>
+    //     <LI>If a 'yaml, or 'workload' parameter is provided, then the statements in that file
+    //     are taken with their ratios </LI>
+    //     <LI>Any provided tags filter is used to select only the op templates which have matching
+    //     tags. If no tags are provided, then all the found op templates are included.</LI>
+    //     <LI>The ratios and the 'seq' parameter are used to build a sequence of the ready
+    // operations,
+    //     where the sequence length is the sum of the ratios.</LI>
+    //     </OL>
+    //     @param <O>
+    //     A holder for an executable operation for the native driver used by this activity.
+    //     @param opinit
+    //     A function to map an OpTemplate to the executable operation form required by
+    //     the native driver for this activity.
+    //     @param defaultAdapter
+    //     The adapter which will be used for any op templates with no explicit adapter
+    //     @return The sequence of operations as determined by filtering and ratios
+    //     */
+    //    @Deprecated(forRemoval = true)
+    //    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(
+    //            Function<OpTemplate, OpDispenser<? extends O>> opinit, boolean strict,
+    //            DriverAdapter<?, ?> defaultAdapter
+    //    ) {
+    //
+    //        List<OpTemplate> stmts = loadOpTemplates(defaultAdapter, true, false);
+    //
+    //        List<Long> ratios = new ArrayList<>(stmts.size());
+    //
+    //        for (OpTemplate opTemplate : stmts) {
+    //            long ratio = opTemplate.removeParamOrDefault("ratio", 1);
+    //            ratios.add(ratio);
+    //        }
+    //
+    //        SequencerType sequencerType = getParams().getOptionalString("seq").map(
+    //                SequencerType::valueOf).orElse(SequencerType.bucket);
+    //
+    //        SequencePlanner<OpDispenser<? extends O>> planner = new
+    // SequencePlanner<>(sequencerType);
+    //
+    //        try {
+    //            for (int i = 0; i < stmts.size(); i++) {
+    //                long ratio = ratios.get(i);
+    //                OpTemplate optemplate = stmts.get(i);
+    //                OpDispenser<? extends O> driverSpecificReadyOp = opinit.apply(optemplate);
+    //                if (strict) {
+    //                    optemplate.assertConsumed();
+    //                }
+    //                planner.addOp(driverSpecificReadyOp, ratio);
+    //            }
+    //        } catch (Exception e) {
+    //            throw new OpConfigError(e.getMessage(), workloadSource, e);
+    //        }
+    //
+    //        return planner.resolve();
+    //    }
 
     ///  TODO: Move this out, adjacent to [OpsLoader]
     protected OpTemplates loadOpTemplates() {
@@ -756,7 +748,8 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
 
     public synchronized void initOrUpdateRateLimiters() {
 
-//        cycleratePerThread = activityDef.getParams().takeBoolOrDefault("cyclerate_per_thread", false);
+        //        cycleratePerThread =
+        // activityDef.getParams().takeBoolOrDefault("cyclerate_per_thread", false);
 
         config.getOptional("striderate").map(StrideRateSpec::new)
             .ifPresent(sr -> this.onEvent(new ParamChange<>(sr)));
@@ -845,16 +838,15 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
     }
 
     //    public void registerAutoCloseable(AutoCloseable closeable) {
-//        this.closeables.add(closeable);
-//    }
-//
+    //        this.closeables.add(closeable);
+    //    }
+    //
     public synchronized ErrorMetrics getExceptionMetrics() {
         if (null == this.errorMetrics) {
             errorMetrics = new ErrorMetrics(this);
         }
         return errorMetrics;
     }
-
 
     public String getAlias() {
         return config.getAlias();

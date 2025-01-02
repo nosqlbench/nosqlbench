@@ -37,7 +37,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public class NBBaseComponent extends NBBaseComponentMetrics implements NBComponent, NBTokenWords, NBComponentTimeline {
+public class NBBaseComponent extends NBBaseComponentMetrics
+    implements NBComponent, NBTokenWords, NBComponentTimeline
+{
     private final static Logger logger = LogManager.getLogger("RUNTIME");
     protected final NBComponent parent;
     protected final NBLabels labels;
@@ -66,8 +68,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         labelsAdvisor.validateAll(componentSpecificLabelsOnly.asMap().keySet());
         labelsAdvisor.validateAll(componentSpecificLabelsOnly.asMap().values());
 
-        labelsAdvisor.setName("Labels", "Check label names and values")
-            .logName();
+        labelsAdvisor.setName("Labels", "Check label names and values").logName();
         NBAdvisorResults advisorResults = getAdvisorResults();
         advisorResults.evaluate();
 
@@ -83,7 +84,12 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         state = (state == NBInvokableState.ERRORED) ? state : NBInvokableState.RUNNING;
     }
 
-    public NBBaseComponent(NBComponent parentComponent, NBLabels componentSpecificLabelsOnly, Map<String, String> props) {
+    public NBBaseComponent(
+        NBComponent parentComponent,
+        NBLabels componentSpecificLabelsOnly,
+        Map<String, String> props
+    )
+    {
         this(parentComponent, componentSpecificLabelsOnly);
         props.forEach(this::setComponentProp);
     }
@@ -96,18 +102,34 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     @Override
     public synchronized NBComponent attachChild(NBComponent... children) {
 
-        for (NBComponent child : children) {
-            logger.debug(() -> "attaching " + child.description() + " to parent " + this.description());
+        for (NBComponent adding : children) {
+            logger.debug(
+                () -> "attaching " + adding.description() + " to parent " + this.description());
             for (NBComponent extant : this.children) {
                 NBLabels eachLabels = extant.getComponentOnlyLabels();
-                NBLabels newLabels = child.getComponentOnlyLabels();
+                NBLabels newLabels = adding.getComponentOnlyLabels();
 
-                if (eachLabels != null && newLabels != null && !eachLabels.isEmpty() && !newLabels.isEmpty() && child.getComponentOnlyLabels().equals(extant.getComponentOnlyLabels())) {
-                    throw new RuntimeException("Adding second child under already-defined labels is not allowed:\n" + " extant: (" + extant.getClass().getSimpleName() + ") " + extant.description() + "\n" + " adding: (" + child.getClass().getSimpleName() + ") " + child.description());
+                if (eachLabels != null &&
+                    newLabels != null &&
+                    !eachLabels.isEmpty() &&
+                    !newLabels.isEmpty() &&
+                    adding.getComponentOnlyLabels().equals(extant.getComponentOnlyLabels()))
+                {
+                    throw new RuntimeException("""
+                        Adding second child under already-defined labels is not allowed:
+                         parent:  (PARENTCLASS) PARENTNAME
+                          extant: (EXTANTCLASS) EXTANTNAME
+                          adding: (ADDINGCLASS) ADDINGNAME
+                        """
+                        .replaceAll("PARENTCLASS", this.getClass().getSimpleName())
+                        .replaceAll("PARENTNAME", this.description())
+                        .replaceAll("EXTANTCLASS", extant.getClass().getSimpleName())
+                        .replaceAll("EXTANTNAME", extant.description())
+                        .replaceAll("ADDINGCLASS", adding.getClass().getSimpleName())
+                        .replaceAll("ADDINGNAME", adding.description()));
                 }
             }
-
-            this.children.add(child);
+            this.children.add(adding);
         }
         return this;
     }
@@ -115,7 +137,10 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     @Override
     public NBComponent detachChild(NBComponent... children) {
         for (NBComponent child : children) {
-            logger.debug(() -> "notifyinb before detaching " + child.description() + " from " + this.description());
+            logger.debug(() -> "notifyinb before detaching " +
+                child.description() +
+                " from " +
+                this.description());
             child.beforeDetach();
         }
         for (NBComponent child : children) {
@@ -134,7 +159,9 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     @Override
     public NBLabels getLabels() {
         NBLabels effectiveLabels = (this.parent == null ? NBLabels.forKV() : parent.getLabels());
-        effectiveLabels = (this.labels == null) ? effectiveLabels : effectiveLabels.and(this.labels);
+        effectiveLabels = (this.labels == null) ?
+            effectiveLabels :
+            effectiveLabels.and(this.labels);
         return effectiveLabels;
     }
 
@@ -192,15 +219,16 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     }
 
     public void onError(Exception e) {
-        RuntimeException wrapped = new RuntimeException("While in state " + this.state + ", an error occured: " + e, e);
+        RuntimeException wrapped = new RuntimeException(
+            "While in state " + this.state + ", an error occured: " + e, e);
         logger.error(wrapped);
         this.error = wrapped;
         state = NBInvokableState.ERRORED;
     }
 
     /**
-     * Override this method in your component implementations when you need to do something
-     * to close out your component.
+     Override this method in your component implementations when you need to do something
+     to close out your component.
      */
     protected void teardown() {
         logger.debug("tearing down " + description());
@@ -237,7 +265,8 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         logger.debug(() -> description() + " handling event " + event.toString());
         switch (event) {
             case UpEvent ue -> {
-                if (parent != null) parent.onEvent(ue);
+                if (parent != null)
+                    parent.onEvent(ue);
             }
             case DownEvent de -> {
                 for (NBComponent child : children) {
@@ -277,11 +306,12 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
     }
 
     /**
-     * This method is called by the engine to report a component going out of scope. The metrics for that component
-     * will bubble up through the component layers and can be buffered for reporting at multiple levels.
-     *
-     * @param m
-     *     The metric to report
+     This method is called by the engine to report a component going out of scope. The metrics for
+     that component
+     will bubble up through the component layers and can be buffered for reporting at multiple
+     levels.
+     @param m
+     The metric to report
      */
     @Override
     public void reportExecutionMetric(NBMetric m) {
