@@ -33,8 +33,7 @@
         <project.test_logstatuslevel>INFO</project.test_logstatuslevel>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <javadoc.name>nosqlbench</javadoc.name>
+        <javadoc.name>nosqlbench ${revision}</javadoc.name>
         <PROG>nb5</PROG>
         <maven.plugin.validation>VERBOSE</maven.plugin.validation>
     </properties>
@@ -907,6 +906,7 @@
                             <additionalJOptions>--enable-preview</additionalJOptions>
                             <release>23</release>
                             <doctitle>${javadoc.name}</doctitle>
+                            <header>${javadoc.name}</header>
                             <windowtitle>${javadoc.name}</windowtitle>
                             <detectJavaApiLink>false</detectJavaApiLink>
                             <detectLinks>false</detectLinks>
@@ -918,12 +918,47 @@
                             </additionalOptions>
                             <!--                    <additionalJOption>-Xdoclint:none</additionalJOption>-->
                             <doclint>none</doclint>
+                            <notimestamp>true</notimestamp>
+                            <groups>
+                              <group>
+                                <title>Adapter Drivers</title>
+                                <packages>io.nosqlbench.adapter.*</packages>
+                              </group>
+                              <group>
+                                <title>Adapters API</title>
+                                <packages>io.nosqlbench.adapters*</packages>
+                              </group>
+                              <group>
+                                <title>Engine</title>
+                                <packages>io.nosqlbench.engine*</packages>
+                              </group>
+                              <group>
+                                <title>NB</title>
+                                <packages>io.nosqlbench.nb*</packages>
+                              </group>
+                              <group>
+                                <title>Scenarios</title>
+                                <packages>io.nosqlbench.scenarios*</packages>
+                              </group>
+                              <group>
+                                <title>CQL Gen</title>
+                                <packages>io.nosqlbench.cqlgen*</packages>
+                              </group>
+                              <group>
+                                <title>Data Mappers</title>
+                                <packages>io.nosqlbench.datamappers*</packages>
+                              </group>
+                              <group>
+                                <title>Virtual Data</title>
+                                <packages>io.nosqlbench.virtdata*</packages>
+                              </group>
+                            </groups>
                         </configuration>
                         <executions>
                             <execution>
                                 <id>attach-javadoc</id>
                                 <goals>
-                                    <goal>jar</goal>
+                                    <goal>aggregate-jar</goal>
                                 </goals>
                             </execution>
 
