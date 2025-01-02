@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.s4j;
 import io.nosqlbench.adapter.s4j.dispensers.MessageConsumerOpDispenser;
 import io.nosqlbench.adapter.s4j.dispensers.MessageProducerOpDispenser;
 import io.nosqlbench.adapter.s4j.ops.S4JOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;

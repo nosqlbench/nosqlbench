@@ -17,8 +17,10 @@
 package io.nosqlbench.adapter.cqld4.opmappers;
 
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.opdispensers.Cqld4GremlinOpDispenser;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4ScriptGraphOp;
+import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 
@@ -33,7 +35,7 @@ public class Cqld4GremlinOpMapper<CO extends Cqld4ScriptGraphOp> extends Cqld4Ba
     }
 
     @Override
-    public Cqld4GremlinOpDispenser apply(NBComponent adapterC, ParsedOp op, LongFunction spaceF) {
+    public OpDispenser<Cqld4ScriptGraphOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceF) {
         return new Cqld4GremlinOpDispenser(
             adapter,
             l -> adapter.getSpaceFunc(op).apply(l).getSession(), targetFunction, op);

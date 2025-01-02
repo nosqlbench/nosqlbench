@@ -169,7 +169,7 @@ public abstract class Cqld4CqlOp
     }
 
     @Override
-    public Function<List<Row>, Map<String, ?>> initCaptureF(CapturePoints<List<Row>> points) {
+    public Function<List<Row>, Map<String, ?>> captureF(CapturePoints<List<Row>> points) {
         Function<List<Row>,Map<String,?>> f = (List<Row> result) -> {
             if (result.size()!=1) {
                 throw new CapturePointException("result contained " + result.size() + " rows, required exactly 1");

@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.azureaisearch;
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

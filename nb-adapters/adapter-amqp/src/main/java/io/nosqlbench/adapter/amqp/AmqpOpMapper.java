@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.amqp;
 import io.nosqlbench.adapter.amqp.dispensers.AmqpMsgRecvOpDispenser;
 import io.nosqlbench.adapter.amqp.dispensers.AmqpMsgSendOpDispenser;
 import io.nosqlbench.adapter.amqp.ops.AmqpTimeTrackOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
@@ -43,7 +44,7 @@ public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp,AmqpSpace> {
     }
 
     @Override
-        public OpDispenser<AmqpTimeTrackOp> apply(NBComponent adapterC, ParsedOp op, LongFunction spaceF) {
+        public OpDispenser<AmqpTimeTrackOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<AmqpSpace> spaceF) {
     //public OpDispenser<AmqpTimeTrackOp> apply(ParsedOp op, LongFunction<AmqpTimeTrackOp> spaceInitF) {
         int spaceName = op.getStaticConfigOr("space", 0);
 
@@ -66,6 +67,4 @@ public class AmqpOpMapper implements OpMapper<AmqpTimeTrackOp,AmqpSpace> {
             };
         }
     }
-
-
 }

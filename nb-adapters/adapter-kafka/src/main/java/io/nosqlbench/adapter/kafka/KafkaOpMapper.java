@@ -19,6 +19,7 @@ package io.nosqlbench.adapter.kafka;
 import io.nosqlbench.adapter.kafka.dispensers.MessageConsumerOpDispenser;
 import io.nosqlbench.adapter.kafka.dispensers.MessageProducerOpDispenser;
 import io.nosqlbench.adapter.kafka.ops.KafkaOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
