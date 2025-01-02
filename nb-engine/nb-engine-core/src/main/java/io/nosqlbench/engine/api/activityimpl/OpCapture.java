@@ -55,7 +55,7 @@ public class OpCapture {
         OP op = dispenser.getOp(0L);
 
         if (op instanceof UniformVariableCapture<?> captureF) {
-            Function<?, Map<String,?>> function = captureF.initCaptureF(captures);
+            Function<?, Map<String,?>> function = captureF.captureF(captures);
             return new CapturingOpDispenser(adapter, pop, dispenser, function);
         } else {
             throw new OpConfigError(

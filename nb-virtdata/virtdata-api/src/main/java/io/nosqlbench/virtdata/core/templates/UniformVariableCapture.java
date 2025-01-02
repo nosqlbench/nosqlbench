@@ -39,5 +39,5 @@ import java.util.function.Function;
 /// additional phase of type validation and coercion. If required types are not compatible a
 /// variable capture error should be thrown.
 public interface UniformVariableCapture<RESULT> {
-    Function<RESULT,Map<String,?>> initCaptureF(CapturePoints<RESULT> points);
+    Function<RESULT,Map<String,?>> captureF(CapturePoints<RESULT> points);
 }
