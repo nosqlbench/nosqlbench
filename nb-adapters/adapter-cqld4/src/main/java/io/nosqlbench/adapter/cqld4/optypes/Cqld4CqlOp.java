@@ -50,7 +50,7 @@ import java.util.function.Function;
 
 
 public abstract class Cqld4CqlOp
-    implements Cqld4BaseOp<List<Row>>, UniformVariableCapture<List<Row>>, OpGenerator, OpResultSize {
+    implements Cqld4BaseOp<List<Row>>, OpGenerator, OpResultSize {
 
     private final static Logger logger = LogManager.getLogger(Cqld4CqlOp.class);
 
@@ -168,34 +168,6 @@ public abstract class Cqld4CqlOp
         return next;
     }
 
-    @Override
-    public Function<List<Row>, Map<String, ?>> captureF(CapturePoints<List<Row>> points) {
-        Function<List<Row>,Map<String,?>> f = (List<Row> result) -> {
-            if (result.size()!=1) {
-                throw new CapturePointException("result contained " + result.size() + " rows, required exactly 1");
-            }
-            Row row = result.get(0);
-            ColumnDefinitions coldefs = row.getColumnDefinitions();
-            Map<String,Object> values = new HashMap<>(coldefs.size());
-
-            if (points.isGlob()) {
-                for (ColumnDefinition coldef : coldefs) {
-                    String colname = coldef.getName().toString();
-                    values.put(colname,row.getObject(colname));
-                }
-            } else {
-                for (CapturePoint<List<Row>> point : points) {
-                    String sourceName = point.getSourceName();
-                    Object value = row.getObject(point.getSourceName());
-                    Object recast = point.getAsCast().cast(value);
-                    values.put(point.getAsName(), recast);
-                }
-            }
-
-            return values;
-        };
-        return f;
-    }
 
     public abstract Statement<?> getStmt();
 
