@@ -16,10 +16,10 @@
 
 package io.nosqlbench.engine.core.lifecycle.activity;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.RunState;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
 import io.nosqlbench.engine.api.activityapi.core.progress.ProgressMeterDisplay;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +36,9 @@ public class ActivityRuntimeInfo implements ProgressCapable {
     private final Future<ExecutionResult> future;
     private final ActivityExecutor executor;
 
-    public ActivityRuntimeInfo(Activity activity, Future<ExecutionResult> result, ActivityExecutor executor) {
+    public ActivityRuntimeInfo(
+        Activity activity, Future<ExecutionResult> result,
+        ActivityExecutor executor) {
 
         this.activity = activity;
         this.future = result;

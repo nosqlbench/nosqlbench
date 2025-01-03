@@ -16,9 +16,9 @@
 
 package io.nosqlbench.engine.api.activityimpl.input;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.api.util.SimpleConfig;
 import io.nosqlbench.engine.api.activityapi.core.ActivitiesAware;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputType;

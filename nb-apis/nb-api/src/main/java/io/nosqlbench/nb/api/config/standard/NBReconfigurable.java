@@ -39,7 +39,7 @@ import java.util.Collection;
  * {@link #applyMatching(NBConfiguration, Collection)} can be used to apply
  * reconfigurations to groups of elements with a shared configuration model.
  */
-public interface NBReconfigurable extends NBCanReconfigure, NBReconfigModelProvider {
+public interface NBReconfigurable extends NBConfigurable, NBCanReconfigure, NBReconfigModelProvider {
 
     /**
      * This applies a configuration to an element <EM>AFTER</EM> the initial

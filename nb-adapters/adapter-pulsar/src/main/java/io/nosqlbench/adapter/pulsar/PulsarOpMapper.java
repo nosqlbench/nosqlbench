@@ -18,6 +18,7 @@ package io.nosqlbench.adapter.pulsar;
 
 import io.nosqlbench.adapter.pulsar.dispensers.*;
 import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;

@@ -18,25 +18,22 @@ package io.nosqlbench.nb.api.config.standard;
 
 import io.nosqlbench.nb.api.system.NBEnvironment;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class NBConfiguration {
 
     private final LinkedHashMap<String, Object> data;
     private final NBConfigModel model;
+    private final List<NBReconfigurable> listeners = new ArrayList<>();
 
     /**
-     * Create a NBConfigReader from a known valid configuration and a config model.
-     * This method is restricted to encourage construction of readers only by passing
-     * through the friendly {@link NBConfigModel#apply(Map)} method.
-     *
-     * @param model
-     *     A configuration model, describing what is allowed to be configured by name and type.
-     * @param validConfig
-     *     A valid config reader.
+     Create a NBConfigReader from a known valid configuration and a config model.
+     This method is restricted to encourage construction of readers only by passing
+     through the friendly {@link NBConfigModel#apply(Map)} method.
+     @param model
+     A configuration model, describing what is allowed to be configured by name and type.
+     @param validConfig
+     A valid config reader.
      */
     protected NBConfiguration(NBConfigModel model, LinkedHashMap<String, Object> validConfig) {
         this.data = validConfig;
@@ -48,16 +45,17 @@ public class NBConfiguration {
     }
 
     public static NBConfiguration empty() {
-        return new NBConfiguration(ConfigModel.of(Object.class).asReadOnly(), new LinkedHashMap<>());
+        return new NBConfiguration(
+            ConfigModel.of(Object.class).asReadOnly(),
+            new LinkedHashMap<>());
     }
 
     /**
-     * Returns the value of the named parameter as {@link #getOptional(String)}, so long
-     * as no env vars were reference OR all env var references were found.
-     *
-     * @param name
-     *     The name of the variable to look up
-     * @return An optional value, if present and (optionally) interpolated correctly from the environment
+     Returns the value of the named parameter as {@link #getOptional(String)}, so long
+     as no env vars were reference OR all env var references were found.
+     @param name
+     The name of the variable to look up
+     @return An optional value, if present and (optionally) interpolated correctly from the environment
      */
     public Optional<String> getEnvOptional(String name) {
         Optional<String> optionalValue = getOptional(name);
@@ -84,44 +82,56 @@ public class NBConfiguration {
         if (value instanceof String) {
             Optional<String> interpolated = NBEnvironment.INSTANCE.interpolate(value.toString());
             if (interpolated.isEmpty()) {
-                throw new NBConfigError("Unable to interpolate env and sys props in '" + value + "'");
+                throw new NBConfigError("Unable to interpolate env and sys props in '" +
+                                        value +
+                                        "'");
             }
             String result = interpolated.get();
-            return ConfigModel.convertValueTo(this.getClass().getSimpleName(), name, result, vclass);
+            return ConfigModel.convertValueTo(
+                this.getClass().getSimpleName(),
+                name,
+                result,
+                vclass);
         } else {
             return value;
         }
     }
 
     /**
-     * Get a config value or object by name. This uses type inference (as a generic method)
-     * in addition to the internal model for type checking and ergonomic use. If you do not
-     * call this within an assignment or context where the Java compiler knows what type you
-     * are expecting, then use {@link #get(String, Class)} instead.
-     *
-     * @param name
-     *     The name of the configuration parameter
-     * @param <T>
-     *     The (inferred) generic type of the configuration value
-     * @return The value of type T, matching the config model type for the provided field name
+     Get a config value or object by name. This uses type inference (as a generic method)
+     in addition to the internal model for type checking and ergonomic use. If you do not
+     call this within an assignment or context where the Java compiler knows what type you
+     are expecting, then use {@link #get(String, Class)} instead.
+     @param name
+     The name of the configuration parameter
+     @param <T>
+     The (inferred) generic type of the configuration value
+     @return The value of type T, matching the config model type for the provided field name
      */
     public <T> T get(String name) {
         Param<T> param = (Param<T>) model.getNamedParams().get(name);
         if (param == null) {
-            throw new NBConfigError("Attempted to get parameter for name '" + name + "' but this parameter has no " +
-                "model defined for " + this.getModel().getOf());
+            throw new NBConfigError("Attempted to get parameter for name '" +
+                                    name +
+                                    "' but this parameter has no " +
+                                    "model defined for " +
+                                    this.getModel().getOf());
         }
-//        if (param.isRequired() && (param.getDefaultValue()==null) && )
+        //        if (param.isRequired() && (param.getDefaultValue()==null) && )
         Object object = this.data.get(name);
         object = object != null ? object : param.getDefaultValue();
         if (object == null && param.isRequired()) {
-            throw new NBConfigError("An object by name '" + name + "' was requested as required, and no value was" +
-                " defined for it. This user provided value must be set or otherwise marked optional or given a" +
-                " default value in the parameter model.");
+            throw new NBConfigError("An object by name '" +
+                                    name +
+                                    "' was requested as required, and no value was" +
+                                    " defined for it. This user provided value must be set or otherwise marked optional or given a" +
+                                    " default value in the parameter model.");
         } else if (object == null && !param.isRequired()) {
-            throw new NBConfigError("An object by name '" + name + "' was requested as given by the config layer," +
-                " but no value was present, and no default was found in the config model. This is an ambiguous " +
-                "scenario. Either access the object as optional, or give it a default value. (code change)");
+            throw new NBConfigError("An object by name '" +
+                                    name +
+                                    "' was requested as given by the config layer," +
+                                    " but no value was present, and no default was found in the config model. This is an ambiguous " +
+                                    "scenario. Either access the object as optional, or give it a default value. (code change)");
         }
         if (param.type.isInstance(object)) {
             return (T) object;
@@ -130,7 +140,14 @@ public class NBConfiguration {
         } else if (NBTypeConverter.canConvert(object, param.type)) {
             return NBTypeConverter.convert(object, param.type);
         } else {
-            throw new NBConfigError("Unable to assign config value for field '" + name + "' of type '" + object.getClass().getCanonicalName() + "' to the required return type '" + param.type.getCanonicalName() + "' as specified in the config model for '" + model.getOf().getCanonicalName());
+            throw new NBConfigError("Unable to assign config value for field '" +
+                                    name +
+                                    "' of type '" +
+                                    object.getClass().getCanonicalName() +
+                                    "' to the required return type '" +
+                                    param.type.getCanonicalName() +
+                                    "' as specified in the config model for '" +
+                                    model.getOf().getCanonicalName());
         }
     }
 
@@ -138,12 +155,20 @@ public class NBConfiguration {
 
         Param<T> param = model.getParam(name);
         if (param == null) {
-            throw new NBConfigError("Parameter named '" + name + "' is not valid for " + model.getOf().getSimpleName() + ".");
+            throw new NBConfigError("Parameter named '" +
+                                    name +
+                                    "' is not valid for " +
+                                    model.getOf().getSimpleName() +
+                                    ".");
         }
 
         if ((!param.isRequired()) && param.getDefaultValue() == null) {
-            throw new RuntimeException("Non-optional get on optional parameter " + name + "' which has no default value while configuring " + model.getOf() + "." +
-                "\nTo avoid user impact, ensure that ConfigModel and NBConfigurable usage are aligned.");
+            throw new RuntimeException("Non-optional get on optional parameter " +
+                                       name +
+                                       "' which has no default value while configuring " +
+                                       model.getOf() +
+                                       "." +
+                                       "\nTo avoid user impact, ensure that ConfigModel and NBConfigurable usage are aligned.");
         }
 
         Object o = data.get(name);
@@ -178,7 +203,9 @@ public class NBConfiguration {
                     }
                 }
             } else {
-                throw new NBConfigError("Parameter definition was not found for " + Arrays.toString(names) + ".");
+                throw new NBConfigError("Parameter definition was not found for " +
+                                        Arrays.toString(names) +
+                                        ".");
             }
         }
         if (o == null) {
@@ -195,7 +222,11 @@ public class NBConfiguration {
         } else if (NBTypeConverter.canConvert(o, type)) {
             return Optional.of((T) NBTypeConverter.convert(o, type));
         } else {
-            throw new NBConfigError("config param " + Arrays.toString(names) + " was not assignable to class '" + type.getCanonicalName() + "'");
+            throw new NBConfigError("config param " +
+                                    Arrays.toString(names) +
+                                    " was not assignable to class '" +
+                                    type.getCanonicalName() +
+                                    "'");
         }
 
     }
@@ -208,7 +239,11 @@ public class NBConfiguration {
         if (defaultValue.getClass().isAssignableFrom(o.getClass())) {
             return (T) o;
         }
-        throw new NBConfigError("config parameter '" + name + "' is not assignable to required type '" + defaultValue.getClass() + "'");
+        throw new NBConfigError("config parameter '" +
+                                name +
+                                "' is not assignable to required type '" +
+                                defaultValue.getClass() +
+                                "'");
     }
 
     public <T> T param(String name, Class<? extends T> vclass) {
@@ -236,6 +271,38 @@ public class NBConfiguration {
 
     public LinkedHashMap<String, Object> getMap() {
         return data;
+    }
+
+    ///  see [#update(Map)]
+    public <T> NBConfiguration update(String fieldName, T value) {
+        return update(Map.of(fieldName,value));
+    }
+
+    /// This will create a new configuration without modifying the existing one,
+    /// retaining the same config model and all other values except for the modified ones.
+    /// Further, any reconfig listeners which are registered will be notified via the
+    /// [NBReconfigurable#applyConfig(NBConfiguration)] method
+    ///
+    /// This eventing will occur whether or not the value was actually changed. Spurious
+    /// evenging of duplicate values should be considered an design bug.
+    ///
+    /// Any holders of an updated configurations must maintain their own copies if necessary for
+    /// deltas.
+    public <T> NBConfiguration update(Map<String,Object> entries) {
+        NBConfiguration updated = model.apply(new LinkedHashMap<>(this.data) {
+            {
+                putAll(entries);
+            }
+        });
+        for (NBReconfigurable listener : this.listeners) {
+            listener.applyReconfig(updated);
+        }
+        return updated;
+    }
+
+    public NBConfiguration addListener(NBReconfigurable reconfigurable) {
+        this.listeners.add(reconfigurable);
+        return this;
     }
 
 }

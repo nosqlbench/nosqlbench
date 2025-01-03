@@ -16,7 +16,7 @@
 package io.nosqlbench.engine.api.activityapi.core;
 
 /**
- * An ActionDispenser is created for each Activity instance within a scenario.
+ * An ActionDispenser is created for each StandardActivity instance within a scenario.
  * When a thread is created, the motor and its input and action instances are resolved.
  * The ActionDispenser is responsible for choosing how the action is resolved,
  * whether that is a shared thread-safe action or an action per slot.
@@ -29,5 +29,5 @@ public interface ActionDispenser {
      * @param slot The numbered slot within the activity instance for this action.
      * @return A new or cached Action for the specified slot.
      */
-    Action getAction(int slot);
+    SyncAction getAction(int slot);
 }

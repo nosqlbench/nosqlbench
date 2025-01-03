@@ -16,26 +16,26 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ActivityDefTest {
+public class ActivityConfigTest {
 
     @Test
     public void testSimpleCycleCount() {
-        ActivityDef d = ActivityDef.parseActivityDef("cycles=1M");
-        assertThat(d.getStartCycle()).isEqualTo(0);
-        assertThat(d.getEndCycle()).isEqualTo(1000000);
+        ActivityConfig config = Activity.configFor("cycles=1M");
+        assertThat(config.getCyclesSpec().firstSpec()).isEqualTo(0L);
+        assertThat(config.getCyclesSpec().last_exclusive()).isEqualTo(1000000L);
     }
 
     @Test
     public void testCycleRange() {
-        ActivityDef d = ActivityDef.parseActivityDef("cycles=1M..5M");
-        assertThat(d.getStartCycle()).isEqualTo(1000000);
-        assertThat(d.getEndCycle()).isEqualTo(5000000);
-        assertThat(d.getCycleCount()).isEqualTo(4000000);
+        ActivityConfig config = Activity.configFor("cycles=1M..5M");
+        assertThat(config.getCyclesSpec().firstSpec()).isEqualTo(1000000L);
+        assertThat(config.getCyclesSpec().last_exclusive()).isEqualTo(5000000L);
     }
 
 }

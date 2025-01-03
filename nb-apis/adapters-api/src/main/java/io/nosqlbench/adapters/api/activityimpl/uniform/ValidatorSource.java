@@ -2,13 +2,13 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
 
 /*
  * Copyright (c) nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,12 +18,15 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
  */
 
 
+import io.nosqlbench.adapters.api.activityimpl.OpLookup;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
+import java.util.List;
 import java.util.Optional;
 
 /// A [DriverAdapter] may implement this interface to provide adapter-specific
 /// validators.
 public interface ValidatorSource {
-    Optional<Validator> getValidator(String name, ParsedOp pop);
+    List<Validator> getValidator(NBComponent parent, ParsedOp pop, OpLookup lookup);
 }

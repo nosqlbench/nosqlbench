@@ -17,24 +17,29 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import io.nosqlbench.engine.api.util.SimpleConfig;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultFilterDispenser;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultValueFilterType;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputType;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.util.Optional;
 import java.util.function.Predicate;
 
 public class CoreServices {
 
-    public static <A extends Activity> Optional<OutputDispenser> getOutputDispenser(A activity) {
+    private static Activity parent;
+
+    public static <A> Optional<OutputDispenser> getOutputDispenser(
+        NBComponent parent, ActivityWiring activity) {
         OutputDispenser outputDispenser = new SimpleConfig(activity, "output").getString("type")
                 .flatMap(OutputType.FINDER::get)
-                .map(mt -> mt.getOutputDispenser(activity)).orElse(null);
+                .map(mt -> mt.getOutputDispenser(parent, activity)).orElse(null);
         if (outputDispenser==null) {
             return Optional.empty();
         }
@@ -47,9 +52,9 @@ public class CoreServices {
         return Optional.ofNullable(outputDispenser);
     }
 
-    public static <A extends Activity> Optional<Predicate<ResultReadable>> getOutputFilter(A activity) {
-        String paramdata= activity.getParams().getOptionalString("of")
-                .orElse(activity.getParams().getOptionalString("outputfilter").orElse(null));
+    public static <A> Optional<Predicate<ResultReadable>> getOutputFilter(ActivityWiring activity) {
+        String paramdata= activity.getConfig().getOptional("of")
+                .orElse(activity.getConfig().getOptional("outputfilter").orElse(null));
         if (paramdata==null) {
             return Optional.empty();
         }
@@ -64,7 +69,7 @@ public class CoreServices {
 //        return intPredicateDispenser;
 //    }
 //
-    public static <A extends Activity> InputDispenser getInputDispenser(A activity) {
+    public static <A> InputDispenser getInputDispenser(Activity activity) {
         String inputTypeName = new SimpleConfig(activity, "input").getString("type").orElse("atomicseq");
         InputType inputType = InputType.FINDER.getOrThrow(inputTypeName);
         InputDispenser dispenser = inputType.getInputDispenser(activity);
@@ -75,9 +80,9 @@ public class CoreServices {
         return dispenser;
     }
 
-    public static <A extends Activity> Optional<Predicate<ResultReadable>> getInputFilter(A activity) {
-        String paramdata= activity.getParams().getOptionalString("if")
-                .orElse(activity.getParams().getOptionalString("inputfilter").orElse(null));
+    public static <A> Optional<Predicate<ResultReadable>> getInputFilter(Activity activity) {
+        String paramdata= activity.getConfig().getOptional("if")
+                .orElse(activity.getConfig().getOptional("inputfilter").orElse(null));
         if (paramdata==null) {
             return Optional.empty();
         }

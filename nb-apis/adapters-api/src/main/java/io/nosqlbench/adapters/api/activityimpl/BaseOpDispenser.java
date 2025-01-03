@@ -19,6 +19,8 @@ package io.nosqlbench.adapters.api.activityimpl;
 import com.codahale.metrics.Timer;
 import groovy.lang.Binding;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ValidatorSource;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.evalctx.*;
 import io.nosqlbench.adapters.api.metrics.ThreadLocalNamedTimers;
@@ -35,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongFunction;
 
@@ -48,7 +51,9 @@ import java.util.function.LongFunction;
  *     The type of operation
  */
 public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space>
-    extends NBBaseComponent implements OpDispenser<OP> {
+    extends NBBaseComponent
+    implements OpDispenser<OP>, ValidatorSource
+{
     protected final static Logger logger = LogManager.getLogger(BaseOpDispenser.class);
     public static final String VERIFIER = "verifier";
     public static final String VERIFIER_INIT = "verifier-init";
@@ -79,11 +84,13 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
      */
     private final CycleFunction<Boolean> _verifier;
     private final ThreadLocal<CycleFunction<Boolean>> tlVerifier;
+    private final long ratio;
 
     protected BaseOpDispenser(final NBComponent parentC, final ParsedOp op, LongFunction<? extends SPACE> spaceF) {
         super(parentC);
         opName = op.getName();
         labels = op.getLabels();
+        this.ratio = op.takeOptionalStaticValue("ratio", Long.class).orElse(1L);
 
         this.timerStarts = op.takeOptionalStaticValue(START_TIMERS, String.class)
             .map(s -> s.split(", *"))
@@ -229,5 +236,15 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
     public final OP apply(long value) {
         OP op = getOp(value);
         return op;
+    }
+
+    @Override
+    public List<Validator> getValidator(NBComponent parent, ParsedOp pop, OpLookup lookup) {
+        return CoreOpValidators.getValidator(this, pop, lookup);
+    }
+
+    @Override
+    public long getRatio() {
+        return this.ratio;
     }
 }

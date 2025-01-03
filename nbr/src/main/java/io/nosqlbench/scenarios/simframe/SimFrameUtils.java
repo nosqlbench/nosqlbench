@@ -16,9 +16,9 @@
 
 package io.nosqlbench.scenarios.simframe;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.nb.api.components.events.ParamChange;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
@@ -45,7 +45,8 @@ public class SimFrameUtils {
     }
 
     public static Activity findFlywheelActivity(ContainerActivitiesController controller, String providedActivityName) {
-        Optional<Activity> optionalActivity = Optional.ofNullable(providedActivityName).flatMap(controller::getActivity);
+        Optional<Activity> optionalActivity =
+            Optional.ofNullable(providedActivityName).flatMap(controller::getOptionalActivity);
         if (providedActivityName!=null && optionalActivity.isEmpty()) {
             throw new RuntimeException("you specified activity '" + providedActivityName + "' but it was not found.");
         }
@@ -54,8 +55,8 @@ public class SimFrameUtils {
 
         // Start the flywheel at an "idle" speed, even if the user hasn't set it
         flywheel.onEvent(new ParamChange<>(new CycleRateSpec(100.0d, 1.1d, SimRateSpec.Verb.restart)));
-        flywheel.getActivityDef().setEndCycle(Long.MAX_VALUE);
-        flywheel.getActivityDef().getParams().set(SIM_CYCLES, Long.MAX_VALUE);
+        flywheel.getConfig().updateLastCycle(Long.MAX_VALUE);
+        flywheel.getConfig().update(SIM_CYCLES, Long.MAX_VALUE);
 
         return flywheel;
     }

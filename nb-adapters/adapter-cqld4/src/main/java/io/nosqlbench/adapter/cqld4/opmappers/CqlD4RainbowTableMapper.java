@@ -18,9 +18,11 @@ package io.nosqlbench.adapter.cqld4.opmappers;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.nosqlbench.adapter.cqld4.Cqld4DriverAdapter;
+import io.nosqlbench.adapter.cqld4.Cqld4Space;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4RainbowTableOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 
@@ -41,7 +43,7 @@ public class CqlD4RainbowTableMapper<CO extends Cqld4RainbowTableOp> extends Cql
     }
 
     @Override
-    public OpDispenser<Cqld4RainbowTableOp> apply(NBComponent adapterC, ParsedOp op, LongFunction spaceF) {
+    public OpDispenser<Cqld4RainbowTableOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<Cqld4Space> spaceF) {
         return null;
 //        return new CqlD4RainbowTableDispenser(adapter, sessionFunc,targetFunction, op);
     }

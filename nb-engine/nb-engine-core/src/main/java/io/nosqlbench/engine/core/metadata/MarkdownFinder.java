@@ -23,7 +23,6 @@ import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;

@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.input;
 
 /**
- * An InputDispenser is created for each Activity instance within a scenario.
+ * An InputDispenser is created for each StandardActivity instance within a scenario.
  * When a thread is created, the motor and its input and action instances are resolved.
  * The InputDispenser is responsible for choosing how the input is resolved,
  * whether that is a shared thread-safe input or an input per slot.

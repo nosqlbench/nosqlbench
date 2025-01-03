@@ -29,7 +29,9 @@ public class NBComponentExecutionScope implements AutoCloseable {
     @Override
     public void close() throws RuntimeException {
         for (NBComponent component : components) {
-            component.beforeDetach();
+//          This is now handled inline with [NBComponent#detachChild], which puts it after the
+//          out of scope notification -- this might need testing adjustments or clarification
+//          component.beforeDetach();
             component.onEvent(new ComponentOutOfScope(component));
             NBComponent parent = component.getParent();
             if (parent!=null) {

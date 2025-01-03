@@ -16,11 +16,10 @@
 
 package io.nosqlbench.scenarios.simframe.capture;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
-import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 
 public class SimFrameValueData extends SimFrameCapture {
     public SimFrameValueData(Activity activity) {
