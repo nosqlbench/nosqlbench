@@ -44,24 +44,34 @@ public class OpCapture {
     public final static Logger logger = LogManager.getLogger(OpCapture.class);
 
     public static <OP extends CycleOp<?>, SPACE extends Space> OpDispenser<? extends OP> wrapOptionally(
-        DriverAdapter<? extends OP, ? extends SPACE> adapter, OpDispenser<? extends OP> dispenser,
+        DriverAdapter<? extends OP, ? extends SPACE> adapter,
+        OpDispenser<? extends OP> dispenser,
         ParsedOp pop
-    ) {
+    )
+    {
 
         CapturePoints captures = pop.getCaptures();
         if (captures.isEmpty()) {
             return dispenser;
         }
+
+        for (Object captureImpl : new Object[]{dispenser, adapter}) {
+            if (captureImpl instanceof UniformVariableCapture<?> captureF) {
+                Function<?, Map<String, ?>> function = captureF.captureF(captures);
+                return new CapturingOpDispenser(adapter, pop, dispenser, function);
+            }
+        }
+
         OP op = dispenser.getOp(0L);
 
         if (op instanceof UniformVariableCapture<?> captureF) {
-            Function<?, Map<String,?>> function = captureF.captureF(captures);
+            Function<?, Map<String, ?>> function = captureF.captureF(captures);
             return new CapturingOpDispenser(adapter, pop, dispenser, function);
-        } else {
-            throw new OpConfigError(
-                "variable capture configuration failed because adapter " + adapter + " does not " +
-                    "implement " + UniformVariableCapture.class.getSimpleName()
-            );
         }
+
+        throw new OpConfigError("variable capture configuration failed because adapter " + adapter
+                                + " does not implement "
+                                + UniformVariableCapture.class.getSimpleName());
+
     }
 }

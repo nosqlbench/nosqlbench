@@ -70,7 +70,7 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
 
     @Override
     public NBConfigModel getConfigModel() {
-        NBConfigModel model = getConfigModel();
+        NBConfigModel model = super.getConfigModel();
         model.add(DiagSpace.getStaticConfigModel());
         return model;
     }

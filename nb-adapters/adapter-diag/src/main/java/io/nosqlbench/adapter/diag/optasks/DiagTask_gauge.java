@@ -137,6 +137,7 @@ public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double>, NBPar
         }
 
         logger.info("Registering gauge for diag task with labels:" + getParentLabels().getLabels() + " label:" + label);
+        this.sampleValue=this.function.applyAsDouble(0L);
         this.gauge=parent.create().gauge(
             label,
             () -> this.sampleValue,

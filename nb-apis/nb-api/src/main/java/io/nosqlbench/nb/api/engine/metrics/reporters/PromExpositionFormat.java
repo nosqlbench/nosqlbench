@@ -161,7 +161,8 @@ public class PromExpositionFormat {
                         .append(stringValue)
                         .append('\n');
                 } else throw new RuntimeException(
-                        "Unknown label set for metric type '" + metric.getClass().getCanonicalName() + '\''
+                        "Unknown label set for metric value type '" + (value==null? "NULL" :
+                            value.getClass()) + '\''
                     );
             }
             if (metric instanceof final Metered meter) {
