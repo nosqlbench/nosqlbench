@@ -39,10 +39,9 @@ public class OpDryrun {
         Dryrun dryrun
     ) {
         return switch (dryrun) {
-            case none -> dispenser;
+            default -> dispenser;
             case op -> new DryrunOpDispenser(adapter, pop, dispenser);
             case emit -> new ResultPrintingOpDispenser(adapter, pop, dispenser);
-            case jsonnet -> dispenser;
         };
     }
 }

@@ -188,6 +188,12 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
             planner.addOp(dispenser, d -> d.getRatio());
         }
         OpSequence<OpDispenser<? extends CycleOp<?>>> sequence = planner.resolve();
+
+        if (config.get("dryrun", Dryrun.class) == Dryrun.sequence) {
+            System.out.println(Diagnostics.summarizeSequencedOps(sequence));
+            System.exit(1);
+        }
+
         return sequence;
     }
 

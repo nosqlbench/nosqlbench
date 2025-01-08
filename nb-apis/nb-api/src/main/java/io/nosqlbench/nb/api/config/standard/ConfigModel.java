@@ -99,7 +99,29 @@ public class ConfigModel implements NBConfigModel {
         try {
             if (type.isAssignableFrom(value.getClass())) {
                 return type.cast(value);
-
+            } else if (Enum.class.isAssignableFrom(type)) {
+                if (value instanceof CharSequence cseq) {
+                    String lowerval = cseq.toString().toLowerCase();
+                    EnumSet<?> values = EnumSet.allOf((Class<? extends Enum>) type);
+                    List<T> matched = new ArrayList<>();
+                    for (Enum<?> _enum : values) {
+                        String lowerenum = _enum.name().toLowerCase(Locale.ROOT).replaceAll("\\W","");
+                        if (lowerval.equals(lowerenum)) {
+                            matched.add((T)_enum);
+                        }
+                    }
+                    if (matched.size() == 1) {
+                        return matched.get(0);
+                    }
+                    if (matched.size() > 1) {
+                        throw new OpConfigError(
+                            "Multiple matches were found for config param [" + paramName + "] to "
+                            + "possible enums: [" + values + "]");
+                    }
+                } else {
+                    throw new RuntimeException("Cannot convert " + value + " to " + type + " for "
+                                               + "config param [" + paramName + "] (must be "
+                                               + "string)");}
             } else if (Number.class.isAssignableFrom(value.getClass())) { // A numeric value, and do we have a compatible target type?
                 Number number = (Number) value;
                 // This series of double fake-outs is heinous, but it works to get around design
@@ -118,8 +140,9 @@ public class ConfigModel implements NBConfigModel {
                 } else if (type.equals(Short.class) || type == short.class) {
                     return (T) (Short) number.shortValue();
                 } else {
-                    throw new RuntimeException("Number type " + type.getSimpleName() + " could " +
-                        " not be converted from " + value.getClass().getSimpleName());
+                    throw new RuntimeException("Number type " + type.getSimpleName() + " could "
+                                               + " not be converted from " + value.getClass()
+                                                   .getSimpleName());
                 }
             } else if (value instanceof CharSequence) { // A stringy type, and do we have a compatible target type?
                 String string = ((CharSequence) value).toString();
@@ -139,15 +162,17 @@ public class ConfigModel implements NBConfigModel {
                 } else if (type == boolean.class || type == Boolean.class) {
                     return (T) Boolean.valueOf(Boolean.parseBoolean(string));
                 } else {
-                    throw new RuntimeException("CharSequence type " + type.getSimpleName() + " could " +
-                        " not be converted from " + value.getClass().getSimpleName());
+                    throw new RuntimeException(
+                        "CharSequence type " + type.getSimpleName() + " could "
+                        + " not be converted from " + value.getClass().getSimpleName());
                 }
             } else if (value instanceof Boolean bool) {
                 if (type == boolean.class) {
                     return (T) bool;
                 } else {
-                    throw new RuntimeException("Boolean type " + type.getSimpleName() + " could " +
-                        " not be converted from " + value.getClass().getSimpleName());
+                    throw new RuntimeException("Boolean type " + type.getSimpleName() + " could "
+                                               + " not be converted from " + value.getClass()
+                                                   .getSimpleName());
 
                 }
             }
@@ -157,10 +182,8 @@ public class ConfigModel implements NBConfigModel {
         }
 
         throw new RuntimeException(
-            "While configuring " + paramName + " for " + configName + ", " +
-                "Unable to convert " + value.getClass() + " to " +
-                type.getCanonicalName()
-        );
+            "While configuring " + paramName + " for " + configName + ", " + "Unable to convert "
+            + value.getClass() + " to " + type.getCanonicalName());
     }
 
     @Override
@@ -217,7 +240,8 @@ public class ConfigModel implements NBConfigModel {
             }
             if (cval == null && param.isRequired()) {
                 activename = param.getNames().get(0);
-                cval = param.getDefaultValue();  // We know this will be valid. It was validated, correct?
+                cval
+                    = param.getDefaultValue();  // We know this will be valid. It was validated, correct?
             }
             if (cval != null) {
                 cval = convertValueTo(ofType.getSimpleName(), activename, cval, type);
@@ -232,7 +256,8 @@ public class ConfigModel implements NBConfigModel {
         for (String configkey : config.keySet()) {
             Param<?> element = this.paramsByName.get(configkey);
             if (element != null) {
-                String warning = "Config parameter '" + configkey + "' is also a " + type + ". Check for possible conflicts.\n";
+                String warning = "Config parameter '" + configkey + "' is also a " + type
+                                 + ". Check for possible conflicts.\n";
                 NBAdvisorOutput.output(Level.WARN, warning);
             }
         }
@@ -248,8 +273,8 @@ public class ConfigModel implements NBConfigModel {
     }
 
     private ConfigModel expand(ConfigModel configModel, Map<String, ?> config) {
-        List<Param<?>> expanders = configModel.params.stream()
-            .filter(p -> p.getExpander() != null).toList();
+        List<Param<?>> expanders = configModel.params.stream().filter(p -> p.getExpander() != null)
+            .toList();
         for (Param<?> expandingParameter : expanders) {
             for (String name : expandingParameter.getNames()) {
                 if (config.containsKey(name)) {
@@ -292,9 +317,10 @@ public class ConfigModel implements NBConfigModel {
                     }
                 }
                 if (!provided) {
-                    throw new RuntimeException("A required config element named '" + param.getNames() +
-                        "' and type '" + param.getType().getSimpleName() + "' was not found\n" +
-                        "for configuring a " + getOf().getSimpleName());
+                    throw new RuntimeException(
+                        "A required config element named '" + param.getNames() + "' and type '"
+                        + param.getType().getSimpleName() + "' was not found\n"
+                        + "for configuring a " + getOf().getSimpleName());
                 }
 
             }
@@ -305,8 +331,10 @@ public class ConfigModel implements NBConfigModel {
         // For each provided configuration element ...
         for (String configkey : config.keySet()) {
             Param<?> element = this.paramsByName.get(configkey);
-            String warning = "Unknown config parameter '" + configkey + "' in config model while configuring " + getOf().getSimpleName()
-                + ", possible parameter names are " + this.paramsByName.keySet() + ".\n";
+            String warning = "Unknown config parameter '" + configkey
+                             + "' in config model while configuring " + getOf().getSimpleName()
+                             + ", possible parameter names are " + this.paramsByName.keySet()
+                             + ".\n";
             if (element == null) {
                 String warnonly = System.getenv("NB_CONFIG_WARNINGS_ONLY");
                 logger.warn("WARNING: " + warning);
@@ -331,7 +359,8 @@ public class ConfigModel implements NBConfigModel {
                 }
             }
             if (names.size() > 1) {
-                throw new NBConfigError("Multiple names for the same parameter were provided: " + names);
+                throw new NBConfigError(
+                    "Multiple names for the same parameter were provided: " + names);
             }
         }
     }
@@ -348,15 +377,15 @@ public class ConfigModel implements NBConfigModel {
 
     @Override
     public void log() {
-        logger.debug(() -> "ConfigModel: "+ofType);
-        for (Param<?> param : getParams()) logger.debug(() -> "ConfigModel: " + param);
+        logger.debug(() -> "ConfigModel: " + ofType);
+        for (Param<?> param : getParams())
+            logger.debug(() -> "ConfigModel: " + param);
     }
 
     @Override
     public String toString() {
-        String sb = "[" +
-            params.stream().map(p -> p.getNames().get(0)).collect(Collectors.joining(",")) +
-            "]";
+        String sb = "[" + params.stream().map(p -> p.getNames().get(0))
+            .collect(Collectors.joining(",")) + "]";
         return sb;
     }
 }
