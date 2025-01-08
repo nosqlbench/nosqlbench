@@ -107,17 +107,14 @@ public class OpResolution implements Tagged {
     }
 
     /// This is the top-level product of this resolution layer. An [OpDispenser] can produce a
-    /// stable
-    /// and type-specific [CycleOp] for a given coordinate. It will call other more primitive layers
-    /// as needed
-    /// to get the components or component functions around which to build the final dispenser.
-    /// These elements may be
-    /// initialized by side-effect of other operations being resolved. In every case, once an
-    /// element of any op
-    /// resolution is resolved, it should be considered _defined_, and not resolved again.
+    /// stable and type-specific [CycleOp] for a given coordinate. It will call other more
+    /// primitive layers as needed to get the components or component functions around which to
+    /// build the final dispenser. These elements may be initialized by side-effect of other
+    /// operations being resolved. In every case, once an element of any op resolution is
+    /// resolved, it should be considered _defined_, and not resolved again.
     public synchronized <OPTYPE extends CycleOp<?>, SPACETYPE extends Space> OpDispenser<OPTYPE> resolveDispenser() {
         if (resolvingDispenser == true) {
-            throw new OpConfigError("Auto-recursion while resolving dispenser for op '" +
+            throw new OpConfigError("Cyclic reference while resolving dispenser for op '" +
                                     template.getName() +
                                     "'");
         }
@@ -137,7 +134,7 @@ public class OpResolution implements Tagged {
     /// activity parameter.
     public synchronized <OPTYPE extends CycleOp<?>, SPACETYPE extends Space> ParsedOp getParsedOp() {
         if (resolvingParsedOp == true) {
-            throw new OpConfigError("Auto-recursion while resolving dispenser for op '" +
+            throw new OpConfigError("Cyclic reference while resolving dispenser for op '" +
                                     template.getName() +
                                     "'");
         }
@@ -154,7 +151,7 @@ public class OpResolution implements Tagged {
     /// the associated driver needs to be loaded.
     private synchronized <OPTYPE extends CycleOp<?>, SPACETYPE extends Space> DriverAdapter<OPTYPE, SPACETYPE> resolveAdapter() {
         if (resolvingAdapter) {
-            throw new OpConfigError("Auto-recursion while resolving adapter for op '" +
+            throw new OpConfigError("Cyclic reference while resolving adapter for op '" +
                                     template.getName() +
                                     "'");
         }
