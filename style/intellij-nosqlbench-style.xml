@@ -68,7 +68,7 @@
     <option name="ALIGN_MULTILINE_THROWS_LIST" value="true" />
     <option name="ALIGN_MULTILINE_EXTENDS_LIST" value="true" />
     <option name="ALIGN_MULTILINE_ARRAY_INITIALIZER_EXPRESSION" value="true" />
-    <option name="CALL_PARAMETERS_WRAP" value="1" />
+    <option name="CALL_PARAMETERS_WRAP" value="5" />
     <option name="CALL_PARAMETERS_LPAREN_ON_NEXT_LINE" value="true" />
     <option name="CALL_PARAMETERS_RPAREN_ON_NEXT_LINE" value="true" />
     <option name="METHOD_PARAMETERS_WRAP" value="5" />
@@ -80,6 +80,7 @@
     <option name="EXTENDS_KEYWORD_WRAP" value="1" />
     <option name="THROWS_KEYWORD_WRAP" value="1" />
     <option name="METHOD_CALL_CHAIN_WRAP" value="1" />
+    <option name="PARENTHESES_EXPRESSION_LPAREN_WRAP" value="true" />
     <option name="BINARY_OPERATION_WRAP" value="1" />
     <option name="BINARY_OPERATION_SIGN_ON_NEXT_LINE" value="true" />
     <option name="TERNARY_OPERATION_WRAP" value="1" />
@@ -87,7 +88,6 @@
     <option name="ARRAY_INITIALIZER_LBRACE_ON_NEXT_LINE" value="true" />
     <option name="ARRAY_INITIALIZER_RBRACE_ON_NEXT_LINE" value="true" />
     <option name="ASSIGNMENT_WRAP" value="1" />
-    <option name="PLACE_ASSIGNMENT_SIGN_ON_NEXT_LINE" value="true" />
     <option name="WRAP_COMMENTS" value="true" />
     <option name="ASSERT_STATEMENT_WRAP" value="5" />
     <option name="SWITCH_EXPRESSIONS_WRAP" value="5" />

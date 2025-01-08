@@ -18,7 +18,6 @@ package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
-import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplates;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
@@ -45,7 +44,6 @@ import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityapi.simrate.*;
 import io.nosqlbench.engine.api.activityimpl.Dryrun;
 import io.nosqlbench.engine.api.activityimpl.OpFunctionComposition;
-import io.nosqlbench.engine.api.activityimpl.OpLookupService;
 import io.nosqlbench.engine.api.activityimpl.input.AtomicInput;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
@@ -56,7 +54,6 @@ import io.nosqlbench.engine.core.lifecycle.commands.CMD_stop;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 import io.nosqlbench.nb.annotations.ServiceSelector;
-import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.components.events.NBEvent;
 import io.nosqlbench.nb.api.components.events.ParamChange;
@@ -71,11 +68,9 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.lifecycle.Shutdownable;
-import io.nosqlbench.nb.api.tagging.TagFilter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.LongFunction;
 
@@ -110,8 +105,8 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
 
     private final OpSequence<OpDispenser<? extends CycleOp<?>>> sequence;
-    private final ConcurrentHashMap<String, DriverAdapter<CycleOp<?>, Space>> adapters
-        = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, DriverAdapter<CycleOp<?>, Space>> adapters =
+        new ConcurrentHashMap<>();
 
     public final ActivityMetrics metrics;
     private ActivityMetricProgressMeter progressMeter;
@@ -130,8 +125,6 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
 
     public Activity(NBComponent parent, ActivityConfig config) {
         super(parent, NBLabels.forKV("activity", config.getAlias()).and(config.auxLabels()));
-        //        NBConfiguration validConfig = getConfigModel().apply(config.getMap());
-
         this.applyConfig(config);
         this.sequence = initSequence();
         this.metrics = new ActivityMetrics(this);
@@ -141,34 +134,22 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         return configFor(ParameterMap.parseParams(s).orElseThrow());
     }
 
-
     private OpSequence<OpDispenser<? extends CycleOp<?>>> initSequence() {
-        //        this.activityDef = activityDef;
-        //        this.metrics = new ActivityMetrics(this);
-
-        //        OpsDocList workload;
         Optional<String> yaml_loc = config.getOptional("yaml", "workload");
 
-        // TODO: avoid having to load this duplicitously to parse the template variables in a separate phase
-        NBConfigModel yamlmodel = yaml_loc.map(path -> {
-            return OpsLoader.loadPath(path, new LinkedHashMap<>(config.getMap()), "activities")
-                .getConfigModel();
-        }).orElse(ConfigModel.of(Activity.class).asReadOnly());
-
-
-        //region This region contains all of the refactored op synthesis logic
         OpTemplates opTemplatesRef = loadOpTemplates();
 
         /// How to load a named [DriverAdapter] with component parentage and labels, given
-        /// the driver name and the activity (cross-driver) configur    ation
+        /// the driver name and the activity (cross-driver) configuration
         AdapterResolver adapterResolver = new AdapterResolver();
         ConcurrentHashMap<String, DriverAdapter> adapterCache = new ConcurrentHashMap<>();
 
         /// Promote the driver adapter function into a cached version
-        Function<String, DriverAdapter<? extends CycleOp<?>, Space>> adapterF
-            = (name) -> adapterCache.computeIfAbsent(
-            name,
-            cacheName -> adapterResolver.apply(this, name, this.config));
+        Function<String, DriverAdapter<? extends CycleOp<?>, Space>> adapterF =
+            (name) -> adapterCache.computeIfAbsent(
+                name,
+                cacheName -> adapterResolver.apply(this, name, this.config)
+            );
 
         /// How to get a parsed op, given an op template and an activity.
         /// A parsed op depends on back-fill from the activity params, assuming those params
@@ -182,94 +163,55 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         DispenserResolver dispenserResolver = new DispenserResolver();
 
         OpResolverBank orb = new OpResolverBank(
-            this, adapterResolver, opTemplatesRef, config.get("tags"), dispenserResolver, parsedOpF,
-            config);
+            this,
+            adapterResolver,
+            opTemplatesRef,
+            config.get("tags"),
+            dispenserResolver,
+            parsedOpF,
+            config
+        );
         List<? extends OpDispenser<?>> dispensers = orb.resolveDispensers();
 
-        /// TODO: Here, we have resolved the dispensers. The next step is to add any modifiers to them
-        /// as composed functions for things like dry-run, etc.
+        if (config.get("dryrun", Dryrun.class) == Dryrun.mapper) {
+            System.out.println(Diagnostics.summarizeMappedOps(dispensers));
+            System.exit(1);
+        }
 
+        SequencerType sequencerType =
+            config.getOptional("seq").map(SequencerType::valueOf).orElse(SequencerType.bucket);
 
-        /// TODO: Here, we have resolved the dispensers and their modifiers. The next step is to create the LUT
-        /// for the conventional [[OpSequence]], although other non-deterministic op selection
-        /// methods should also be supported.
-
-        SequencerType sequencerType = config.getOptional("seq").map(SequencerType::valueOf)
-            .orElse(SequencerType.bucket);
-
-        SequencePlanner<OpDispenser<? extends CycleOp<?>>> planner = new SequencePlanner<>(
-            sequencerType);
+        SequencePlanner<OpDispenser<? extends CycleOp<?>>> planner =
+            new SequencePlanner<>(sequencerType);
 
         for (OpDispenser<?> dispenser : dispensers) {
             planner.addOp(dispenser, d -> d.getRatio());
         }
         OpSequence<OpDispenser<? extends CycleOp<?>>> sequence = planner.resolve();
         return sequence;
-
-        // TODO: Perhaps, op templates should be split into core/reserved partition and another, with a proxy
-        // object retained for the core elements
-
-        //endregion
-
-
-        //        Optional<String> defaultDriverName = activityDef.getParams().getOptionalString("driver");
-        //        Optional<DriverAdapter<?, ?>> defaultAdapter = activityDef.getParams()
-        //            .getOptionalString("driver")
-        //            .flatMap(name -> ServiceSelector.of(name, ServiceLoader.load(DriverAdapterLoader.class)).get())
-        //            .map(l -> l.load(this, NBLabels.forKV()));
-        //
-        //        if (defaultDriverName.isPresent() && defaultAdapter.isEmpty()) {
-        //            throw new BasicError("Unable to load '" + defaultDriverName.get() + "' driver adapter.\n" + "Rebuild NB5 to include this " + "driver adapter. Change" + " '<activeByDefault>false</activeByDefault>' for the driver in" + " './nb-adapters/pom.xml' and" + " './nb-adapters/nb-adapters-included/pom.xml' first.");
-        //        }
-
-        //        NBConfigModel supersetConfig = ConfigModel.of(Activity.class).add(yamlmodel);
-        //        Optional<String> defaultDriverOption = defaultDriverName;
-        //        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers = new ConcurrentHashMap<>();
-
-        //        List<ParsedOp> allParsedOps = loadOpTemplates(defaultAdapter.orElse(null), false, false).stream()
-        //            .map(ot -> upconvert(ot, defaultDriverOption, yamlmodel, supersetConfig, mappers, adapterlist))
-        //            .toList();
-
-        //        OpLookup lookup = new OpLookupService(() -> allParsedOps);
-
-        //        TagFilter ts = new TagFilter(activityDef.getParams().getOptionalString("tags").orElse(""));
-        //        List<ParsedOp> activeParsedOps = ts.filter(allParsedOps);
-
-        //        if (defaultDriverOption.isPresent()) {
-        //            long matchingDefault = mappers.keySet().stream().filter(n -> n.equals(defaultDriverOption.get())).count();
-        //            if (0 == matchingDefault) {
-        //                logger.warn(
-        //                    "All op templates used a different driver than the default '{}'",
-        //                    defaultDriverOption.get()
-        //                );
-        //            }
-        //        }
-
-
-        //        try {
-        //            sequence = createOpSourceFromParsedOps(adapterlist, activeParsedOps, lookup);
-        //        } catch (Exception e) {
-        //            if (e instanceof OpConfigError) {
-        //                throw e;
-        //            }
-        //            throw new OpConfigError("Error mapping workload template to operations: " + e.getMessage(), null, e);
-        //        }
-
     }
 
     private void initOpsMetrics() {
         create().gauge(
-            "ops_pending", () -> this.getProgressMeter().getSummary().pending(),
+            "ops_pending",
+            () -> this.getProgressMeter().getSummary().pending(),
             MetricCategory.Core,
-            "The current number of operations which have not been dispatched for" +
-                " processing yet.");
+            "The current number of operations which have not been dispatched for"
+            + " processing yet."
+        );
         create().gauge(
-            "ops_active", () -> this.getProgressMeter().getSummary().current(), MetricCategory.Core,
-            "The current number of operations which have been dispatched for" +
-                " processing, but which have not yet completed.");
+            "ops_active",
+            () -> this.getProgressMeter().getSummary().current(),
+            MetricCategory.Core,
+            "The current number of operations which have been dispatched for"
+            + " processing, but which have not yet completed."
+        );
         create().gauge(
-            "ops_complete", () -> this.getProgressMeter().getSummary().complete(),
-            MetricCategory.Core, "The current number of operations which have been completed");
+            "ops_complete",
+            () -> this.getProgressMeter().getSummary().complete(),
+            MetricCategory.Core,
+            "The current number of operations which have been completed"
+        );
     }
 
     protected <O extends LongFunction> OpSequence<OpDispenser<? extends CycleOp<?>>> createOpSourceFromParsedOps2(List<DriverAdapter<CycleOp<?>, Space>> adapters,
@@ -286,10 +228,10 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
                 ratios.add(ratio);
             }
 
-            SequencerType sequencerType = config.getOptional("seq").map(SequencerType::valueOf)
-                .orElse(SequencerType.bucket);
-            SequencePlanner<OpDispenser<? extends CycleOp<?>>> planner = new SequencePlanner<>(
-                sequencerType);
+            SequencerType sequencerType =
+                config.getOptional("seq").map(SequencerType::valueOf).orElse(SequencerType.bucket);
+            SequencePlanner<OpDispenser<? extends CycleOp<?>>> planner =
+                new SequencePlanner<>(sequencerType);
 
             for (int i = 0; i < pops.size(); i++) {
                 long ratio = ratios.get(i);
@@ -304,22 +246,25 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
                     DriverAdapter<CycleOp<?>, Space> adapter = adapters.get(i);
                     OpMapper<CycleOp<?>, Space> opMapper = adapter.getOpMapper();
                     LongFunction<Space> spaceFunc = adapter.getSpaceFunc(pop);
-                    OpDispenser<? extends CycleOp<?>> dispenser = opMapper.apply(
-                        this, pop, spaceFunc);
+                    OpDispenser<? extends CycleOp<?>> dispenser =
+                        opMapper.apply(this, pop, spaceFunc);
                     String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
                     Dryrun dryrun = pop.takeEnumFromFieldOr(Dryrun.class, Dryrun.none, "dryrun");
 
                     dispenser = OpFunctionComposition.wrapOptionally(
-                        adapter, dispenser, pop,
-                        dryrun, opLookup);
+                        adapter,
+                        dispenser,
+                        pop,
+                        dryrun,
+                        opLookup
+                    );
 
                     planner.addOp((OpDispenser<? extends CycleOp<?>>) dispenser, ratio);
                 } catch (Exception e) {
                     throw new OpConfigError(
-                        "Error while mapping op from template named '" +
-                        pop.getName() +
-                        "': " +
-                        e.getMessage(), e);
+                        "Error while mapping op from template named '" + pop.getName() + "': "
+                        + e.getMessage(), e
+                    );
                 }
             }
 
@@ -334,72 +279,6 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         }
     }
 
-    //    private ParsedOp upconvert(
-    //        OpTemplate ot,
-    //        Optional<String> defaultDriverOption,
-    //        NBConfigModel yamlmodel,
-    //        NBConfigModel supersetConfig,
-    //        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers,
-    //        List<DriverAdapter<CycleOp<?>, Space>> adapterlist
-    //    )
-    //    {
-    //        //            ParsedOp incompleteOpDef = new ParsedOp(ot, NBConfiguration.empty(),
-    //        // List.of(), this);
-    //        String
-    //            driverName =
-    //            ot.getOptionalStringParam("driver", String.class)
-    //                .or(() -> ot.getOptionalStringParam("type", String.class))
-    //                .or(() -> defaultDriverOption).orElseThrow(() -> new OpConfigError(
-    //                    "Unable to identify driver name for op template:\n" + ot));
-    //
-    //        DriverAdapter<CycleOp<?>, Space>
-    //            adapter =
-    //            adapters.computeIfAbsent(
-    //                driverName,
-    //                dn -> loadAdapter(dn, yamlmodel, supersetConfig, mappers));
-    //        supersetConfig.assertValidConfig(activityDef.getParams().getStringStringMap());
-    //        adapterlist.add(adapter);
-    //
-    //        ParsedOp
-    //            pop =
-    //            new ParsedOp(ot, adapter.getConfiguration(), List.of(adapter.getPreprocessor()), this);
-    //        Optional<String> discard = pop.takeOptionalStaticValue("driver", String.class);
-    //
-    //        return pop;
-    //    }
-
-    //    private DriverAdapter<CycleOp<?>, Space> loadAdapter(
-    //        String driverName,
-    //        NBConfigModel yamlmodel,
-    //        NBConfigModel supersetConfig,
-    //        ConcurrentHashMap<String, OpMapper<? extends CycleOp<?>, ? extends Space>> mappers
-    //    )
-    //    {
-    //        DriverAdapter<CycleOp<?>, Space>
-    //            adapter =
-    //            Optional.of(driverName).flatMap(name -> ServiceSelector.of(
-    //                    name,
-    //                    ServiceLoader.load(DriverAdapterLoader.class)).get())
-    //                .map(l -> l.load(this, NBLabels.forKV()))
-    //                .orElseThrow(() -> new OpConfigError("driver adapter not present for name '" +
-    //                                                     driverName +
-    //                                                     "'"));
-    //
-    //        NBConfigModel combinedModel = yamlmodel;
-    //        NBConfiguration combinedConfig = combinedModel.matchConfig(activityDef.getParams());
-    //
-    //        if (adapter instanceof NBConfigurable configurable) {
-    //            NBConfigModel adapterModel = configurable.getConfigModel();
-    //            supersetConfig.add(adapterModel);
-    //
-    //            combinedModel = adapterModel.add(yamlmodel);
-    //            combinedConfig = combinedModel.matchConfig(activityDef.getParams());
-    //            configurable.applyConfig(combinedConfig);
-    //        }
-    //        mappers.put(driverName, adapter.getOpMapper());
-    //        return adapter;
-    //    }
-
     public void initActivity() {
         initOrUpdateRateLimiters();
         setDefaultsFromOpSequence(sequence);
@@ -408,19 +287,6 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
     public OpSequence<OpDispenser<? extends CycleOp<?>>> getOpSequence() {
         return sequence;
     }
-
-    //    /**
-    //     * When an adapter needs to identify an error uniquely for the purposes of
-    //     * routing it to the correct error handler, or naming it in logs, or naming
-    //     * metrics, override this method in your activity.
-    //     *
-    //     * @return A function that can reliably and safely map an instance of Throwable to a
-    // stable name.
-    //     */
-    //    @Override
-    //    public final Function<Throwable, String> getErrorNameMapper() {
-    //        return adapter.getErrorNameMapper();
-    //    }
 
     @Override
     public OpTemplates getSyntheticOpTemplates(OpTemplates opsDocList, Map<String, Object> cfg) {
@@ -470,68 +336,11 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         }
     }
 
-    //    private OpTemplates loadOpTemplates(
-    //        DriverAdapter<?, ?> defaultDriverAdapter,
-    //        boolean logged,
-    //        boolean filtered
-    //    )
-    //    {
-    //
-    //        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-    //
-    //        OpTemplates templates = loadOpTemplates();
-    //        OpTemplates filteredOps = templates.matching(filtered ? tagfilter : "", logged);
-    //
-    //        if (filteredOps.isEmpty()) {
-    //            // There were no ops, and it *wasn't* because they were all filtered out.
-    //            // In this case, let's try to synthesize the ops as long as at least a default driver
-    //            // was provided
-    //            // But if there were no ops, and there was no default driver provided, we can't continue
-    //            // There were no ops, and it was because they were all filtered out
-    //            OpTemplates unfilteredOps = templates.matching("", false);
-    //            if (!unfilteredOps.isEmpty()) {
-    //                String
-    //                    message =
-    //                    "There were no active op templates with tag filter '" +
-    //                    tagfilter +
-    //                    "', since all " +
-    //                    unfilteredOps.size() +
-    //                    " were filtered out. Examine the session log for details";
-    //                NBAdvisorOutput.test(message);
-    //                // throw new BasicError(message);
-    //            }
-    //            if (defaultDriverAdapter instanceof SyntheticOpTemplateProvider sotp) {
-    //                filteredOps = sotp.getSyntheticOpTemplates(templates, this.activityDef.getParams());
-    //                Objects.requireNonNull(filteredOps);
-    //                if (filteredOps.isEmpty()) {
-    //                    throw new BasicError("Attempted to create synthetic ops from driver '" +
-    //                                         defaultDriverAdapter.getAdapterName() +
-    //                                         '\'' +
-    //                                         " but no ops were created. You must provide either a workload" +
-    //                                         " or an op parameter. Activities require op templates.");
-    //                }
-    //            } else {
-    //                throw new BasicError("""
-    //                    No op templates were provided. You must provide one of these activity parameters:
-    //                    1) workload=some.yaml
-    //                    2) op='inline template'
-    //                    3) driver=stdout (or any other drive that can synthesize ops)\
-    //                    """);
-    //            }
-    //        }
-    //        return filteredOps;
-    //    }
-
-    /**
-     Modify the provided activity config with defaults for stride and cycles, if they haven't been
-     provided, based on the
-     length of the sequence as determined by the provided ratios. Also, modify the activity config
-     with
-     reasonable
-     defaults when requested.
-     @param seq
-     - The {@link OpSequence} to derive the defaults from
-     */
+    /// Modify the provided activity config with defaults for stride and cycles, if they haven't
+    /// been provided, based on the length of the sequence as determined by the provided ratios.
+    /// Also, modify the activity config with reasonable defaults when requested.
+    /// @param seq
+    ///     - The {@link OpSequence} to derive the defaults from
     private synchronized void setDefaultsFromOpSequence(OpSequence<?> seq) {
         Map<String, Object> updates = new LinkedHashMap<>(config.getMap());
 
@@ -540,29 +349,30 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
                 String stride = String.valueOf(seq.getSequence().length);
                 logger.info(() -> "defaulting stride to " + stride + " (the sequence length)");
                 return stride;
-            });
+            }
+        );
 
         updates.computeIfAbsent(
             "cycles", k -> {
                 String cycles = (String) updates.get("stride");
                 logger.info(() -> "defaulting cycles to " + cycles + " (the stride length)");
                 return cycles;
-            });
+            }
+        );
 
         long cycles = CyclesSpec.parse(updates.get("cycles").toString()).cycle_count();
         long stride = Long.parseLong(updates.get("stride").toString());
         if (cycles < stride) {
-            throw new RuntimeException("The specified cycles (" +
-                cycles +
-                ") are less than the stride (" +
-                stride +
-                "). This means there aren't enough cycles to cause a stride to be" +
-                " executed. If this was intended, then set stride low enough to" +
-                " allow it.");
+            throw new RuntimeException("""
+                The specified cycles (CYCLES) are less than the stride (STRIDE)
+                 This means there aren't enough cycles to cause a stride to be
+                 executed. If this was intended, then set stride low enough to allow it
+                """.replaceAll("CYCLES", String.valueOf(cycles))
+                .replaceAll("STRIDE", String.valueOf(stride)));
         }
 
-        Optional<String> threadSpec = Optional.ofNullable(updates.get("threads"))
-            .map(String::valueOf);
+        Optional<String> threadSpec =
+            Optional.ofNullable(updates.get("threads")).map(String::valueOf);
 
         if (threadSpec.isPresent()) {
             String spec = threadSpec.get();
@@ -574,7 +384,8 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
                     threads = (int) cycles;
                     logger.info(
                         "setting threads to {} (auto) [10xCORES, cycle count limited]",
-                        threads);
+                        threads
+                    );
                 } else {
                     logger.info("setting threads to {} (auto) [10xCORES]", threads);
                 }
@@ -593,93 +404,26 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
 
             if (threads > cycles) {
                 int finalThreads1 = threads;
-                logger.warn(() -> "threads=" +
-                    finalThreads1 +
-                    " and cycles=" +
-                    updates.get("cycles").toString() +
-                    ", you should have more cycles than threads.");
+                logger.warn(() -> "threads=" + finalThreads1 + " and cycles="
+                                  + updates.get("cycles").toString()
+                                  + ", you should have more cycles than threads.");
             }
 
         } else if (1000 < cycles) {
-            logger.warn(() -> "For testing at scale, it is highly recommended that you " +
-                "set threads to a value higher than the default of 1." +
-                " hint: you can use threads=auto for reasonable default, or" +
-                " consult the topic on threads with `help threads` for" +
-                " more information.");
+            logger.warn(() -> "For testing at scale, it is highly recommended that you "
+                              + "set threads to a value higher than the default of 1."
+                              + " hint: you can use threads=auto for reasonable default, or"
+                              + " consult the topic on threads with `help threads` for"
+                              + " more information.");
         }
 
         if (0 < cycles && seq.getOps().isEmpty()) {
             throw new BasicError(
-                "You have configured a zero-length sequence and non-zero cycles. It is not" +
-                    " possible to continue with this activity.");
+                "You have configured a zero-length sequence and non-zero cycles. It is not"
+                + " possible to continue with this activity.");
         }
     }
 
-    //    /**
-    //     Given a function that can create an op of type <O> from an OpTemplate, generate
-    //     an indexed sequence of ready to call operations.
-    //     <p>
-    //     This method uses the following conventions to derive the sequence:
-    //
-    //     <OL>
-    //     <LI>If an 'op', 'stmt', or 'statement' parameter is provided, then it's value is
-    //     taken as the only provided statement.</LI>
-    //     <LI>If a 'yaml, or 'workload' parameter is provided, then the statements in that file
-    //     are taken with their ratios </LI>
-    //     <LI>Any provided tags filter is used to select only the op templates which have matching
-    //     tags. If no tags are provided, then all the found op templates are included.</LI>
-    //     <LI>The ratios and the 'seq' parameter are used to build a sequence of the ready
-    // operations,
-    //     where the sequence length is the sum of the ratios.</LI>
-    //     </OL>
-    //     @param <O>
-    //     A holder for an executable operation for the native driver used by this activity.
-    //     @param opinit
-    //     A function to map an OpTemplate to the executable operation form required by
-    //     the native driver for this activity.
-    //     @param defaultAdapter
-    //     The adapter which will be used for any op templates with no explicit adapter
-    //     @return The sequence of operations as determined by filtering and ratios
-    //     */
-    //    @Deprecated(forRemoval = true)
-    //    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(
-    //            Function<OpTemplate, OpDispenser<? extends O>> opinit, boolean strict,
-    //            DriverAdapter<?, ?> defaultAdapter
-    //    ) {
-    //
-    //        List<OpTemplate> stmts = loadOpTemplates(defaultAdapter, true, false);
-    //
-    //        List<Long> ratios = new ArrayList<>(stmts.size());
-    //
-    //        for (OpTemplate opTemplate : stmts) {
-    //            long ratio = opTemplate.removeParamOrDefault("ratio", 1);
-    //            ratios.add(ratio);
-    //        }
-    //
-    //        SequencerType sequencerType = getParams().getOptionalString("seq").map(
-    //                SequencerType::valueOf).orElse(SequencerType.bucket);
-    //
-    //        SequencePlanner<OpDispenser<? extends O>> planner = new
-    // SequencePlanner<>(sequencerType);
-    //
-    //        try {
-    //            for (int i = 0; i < stmts.size(); i++) {
-    //                long ratio = ratios.get(i);
-    //                OpTemplate optemplate = stmts.get(i);
-    //                OpDispenser<? extends O> driverSpecificReadyOp = opinit.apply(optemplate);
-    //                if (strict) {
-    //                    optemplate.assertConsumed();
-    //                }
-    //                planner.addOp(driverSpecificReadyOp, ratio);
-    //            }
-    //        } catch (Exception e) {
-    //            throw new OpConfigError(e.getMessage(), workloadSource, e);
-    //        }
-    //
-    //        return planner.resolve();
-    //    }
-
-    ///  TODO: Move this out, adjacent to [OpsLoader]
     protected OpTemplates loadOpTemplates() {
         OpsDocList opsDocs = null;
         try {
@@ -687,31 +431,100 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
             String stmt = config.getOptional("stmt", "statement").orElse(null);
             String workload = config.getOptional("workload").orElse(null);
 
+            // If the user has specified more than one way of loading operations via
+            // activity parameters, then throw an error saying so
             if ((op != null ? 1 : 0) + (stmt != null ? 1 : 0) + (workload != null ? 1 : 0) > 1) {
                 throw new OpConfigError(
                     "Only op, statement, or workload may be provided, not more than one.");
-            } else if (workload != null && OpsLoader.isJson(workload)) {
+            }
+
+            // If the workload is literally in JSON format that starts with '{' and parsed to JSON,
+            // then it is parsed into the workload template structure
+            // instead of being loaded from a file.
+            if (workload != null && OpsLoader.isJson(workload)) {
                 workloadSource = "commandline: (workload/json):" + workload;
-                opsDocs = OpsLoader.loadString(
-                    workload, OpTemplateFormat.json, config.getMap(), null);
-            } else if (workload != null && OpsLoader.isYaml(workload)) {
+                opsDocs =
+                    OpsLoader.loadString(workload, OpTemplateFormat.json, config.getMap(), null);
+                return new OpTemplates(opsDocs);
+            }
+
+            // If the workload is literally in a multiline format that parses to YAML,
+            // then it is parsed into the workload template structure
+            // instead of being loaded from a file.
+            if (workload != null && OpsLoader.isYaml(workload)) {
                 workloadSource = "commandline: (workload/yaml):" + workload;
-                opsDocs = OpsLoader.loadString(
-                    workload, OpTemplateFormat.yaml, config.getMap(), null);
-            } else if (workload != null) {
+                opsDocs =
+                    OpsLoader.loadString(workload, OpTemplateFormat.yaml, config.getMap(), null);
+                return new OpTemplates(opsDocs);
+            }
+
+            // We try to load the workload from a file assuming YAML format,
+            // if the workload parameter is defined and not loadable by other means
+            if (workload != null) {
                 opsDocs = OpsLoader.loadPath(workload, config.getMap(), "activities");
-            } else if (stmt != null) {
+                return new OpTemplates(opsDocs);
+            }
+
+            // We take the stmt parameter
+            // if defined
+            // then wrap it in default workload template structure
+            // as an op with an op field 'stmt'
+            if (stmt != null) {
                 workloadSource = "commandline: (stmt/inline): '" + stmt + "'";
-                opsDocs = OpsLoader.loadString(
-                    stmt, OpTemplateFormat.inline, config.getMap(), null);
-            } else if (op != null && OpsLoader.isJson(op)) {
+                opsDocs =
+                    OpsLoader.loadString(stmt, OpTemplateFormat.inline, config.getMap(), null);
+                return new OpTemplates(opsDocs);
+            }
+
+            // We take the op parameter
+            // if defined and in JSON format
+            // the wrap it in default workload structure
+            // as a set of op fields in JSON format
+            if (op != null && OpsLoader.isJson(op)) {
                 workloadSource = "commandline: (op/json): '" + op + "'";
                 opsDocs = OpsLoader.loadString(op, OpTemplateFormat.json, config.getMap(), null);
-            } else if (op != null) {
+            }
+
+            // We take the op parameter
+            // if defined and not loadable via other means
+            // then assume it is yaml
+            // then wrap it in default workload structure
+            // as a set of op fields in YAML format
+            if (op != null) {
                 workloadSource = "commandline: (op/inline): '" + op + "'";
                 opsDocs = OpsLoader.loadString(op, OpTemplateFormat.inline, config.getMap(), null);
+                return new OpTemplates(opsDocs);
             }
-            return new OpTemplates(opsDocs);
+
+            // If no methods of loading op templates were provided
+            // via op, stmt, or workload parameters, then we also check
+            // for synthetic ops, as in stdout making default formats from
+            // binding names
+            if (config.getOptional("driver").isPresent()) {
+                String driverName = config.get("driver");
+                DriverAdapter<? extends CycleOp<?>, Space> defaultDriverAdapter =
+                    AdapterResolver.loadNamedAdapter(this, driverName);
+                if (defaultDriverAdapter instanceof SyntheticOpTemplateProvider sotp) {
+                    var filteredOps =
+                        sotp.getSyntheticOpTemplates(new OpTemplates(), config.getMap());
+                    Objects.requireNonNull(filteredOps);
+                    if (filteredOps.isEmpty()) {
+                        throw new BasicError("""
+                            Attempted to create synthetic ops from driver ADAPTERNAME
+                            but no ops were created. You must provide either a workload
+                            or an op parameter. Activities require op templates.
+                            """.replaceAll("ADAPTERNAME", defaultDriverAdapter.getAdapterName()));
+                    }
+                }
+            }
+
+            // All possible methods of loading a op templates have failed
+            throw new BasicError("""
+                No op templates were provided. You must provide one of these activity parameters:
+                1) workload=some.yaml
+                2) op='inline template'
+                3) driver=stdout (or any other drive that can synthesize ops)\
+                """);
 
         } catch (Exception e) {
             throw new OpConfigError("Error loading op templates: " + e, workloadSource, e);
@@ -759,16 +572,14 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
     }
 
     public void createOrUpdateStrideLimiter(SimRateSpec spec) {
-        strideLimiterSource = ThreadLocalRateLimiters.createOrUpdate(
-            this, strideLimiterSource, spec);
+        strideLimiterSource =
+            ThreadLocalRateLimiters.createOrUpdate(this, strideLimiterSource, spec);
     }
 
-    /**
-     Get the current cycle rate limiter for this activity.
-     The cycle rate limiter is used to throttle the rate at which
-     cycles are dispatched across all threads in the activity
-     @return the cycle {@link RateLimiter}
-     */
+    /// Get the current cycle rate limiter for this activity.
+    /// The cycle rate limiter is used to throttle the rate at which
+    /// cycles are dispatched across all threads in the activity
+    /// @return the cycle {@link RateLimiter}
     public RateLimiter getCycleLimiter() {
         if (cycleLimiterSource != null) {
             return cycleLimiterSource.get();
@@ -777,12 +588,10 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         }
     }
 
-    /**
-     Get the current stride rate limiter for this activity.
-     The stride rate limiter is used to throttle the rate at which
-     new strides are dispatched across all threads in an activity.
-     @return The stride {@link RateLimiter}
-     */
+    /// Get the current stride rate limiter for this activity.
+    /// The stride rate limiter is used to throttle the rate at which
+    /// new strides are dispatched across all threads in an activity.
+    /// @return The stride {@link RateLimiter}
     public synchronized RateLimiter getStrideLimiter() {
         if (strideLimiterSource != null) {
             return strideLimiterSource.get();
@@ -800,12 +609,10 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         return Map.of("activity", config.getAlias());
     }
 
-    /**
-     Activities with retryable operations (when specified with the retry error handler for some
-     types of error), should allow the user to specify how many retries are allowed before
-     giving up on the operation.
-     @return The number of allowable retries
-     */
+    /// Activities with retryable operations (when specified with the retry error handler for some
+    /// types of error), should allow the user to specify how many retries are allowed before
+    /// giving up on the operation.
+    /// @return The number of allowable retries
     public int getMaxTries() {
         return config.getOptional(Integer.class, "maxtries").orElse(10);
     }
@@ -814,15 +621,16 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         if (null == this.errorHandler) {
             errorHandler = new NBErrorHandler(
                 () -> config.getOptional("errors").orElse("stop"),
-                this::getExceptionMetrics);
+                this::getExceptionMetrics
+            );
         }
         return errorHandler;
     }
 
     public void closeAutoCloseables() {
         for (AutoCloseable closeable : closeables) {
-            logger.debug(
-                () -> "CLOSING " + closeable.getClass().getCanonicalName() + ": " + closeable);
+            logger.debug(() -> "CLOSING " + closeable.getClass().getCanonicalName() + ": "
+                               + closeable);
             try {
                 closeable.close();
             } catch (Exception e) {
@@ -888,41 +696,47 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
         return new ActivityConfig(configModel.apply(params));
     }
 
-    private static NBConfigModel configModel = ConfigModel.of(Activity.class)
-        .add(Param.optional("alias")).add(Param.optional(
-            "labels", String.class,
-            "Labels which will apply to metrics and annotations for this activity only"))
-        .add(Param.defaultTo(
-            "strict", true,
-            "strict op field mode, which requires that provided op fields are recognized and used"))
-        .add(Param.optional("op", String.class, "op template in statement form")).add(
-            Param.optional(
-                List.of("stmt", "statement"), String.class,
-                "op template in statement " + "form"))
-        .add(Param.defaultTo("tags", "", "tag filter to be used to filter operations"))
-        .add(Param.defaultTo("errors", "stop", "error handler configuration")).add(
-            Param.defaultTo("threads","1").setRegex("\\d+|\\d+x|auto")
+    private static NBConfigModel configModel =
+        ConfigModel.of(Activity.class).add(Param.optional("alias")).add(Param.optional(
+                "labels",
+                String.class,
+                "Labels which will apply to metrics and annotations for this activity only"
+            )).add(Param.defaultTo(
+                "strict",
+                true,
+                "strict op field mode, which requires that provided op fields are recognized and used"
+            )).add(Param.optional("op", String.class, "op template in statement form"))
+            .add(Param.optional(
+                List.of("stmt", "statement"),
+                String.class,
+                "op template in statement " + "form"
+            )).add(Param.defaultTo("tags", "", "tag filter to be used to filter operations"))
+            .add(Param.defaultTo("errors", "stop", "error handler configuration"))
+            .add(Param.defaultTo("threads", "1").setRegex("\\d+|\\d+x|auto")
                 .setDescription("number of concurrent operations, controlled by threadpool"))
-        .add(Param.optional("stride").setRegex("\\d+"))
-        .add(Param.optional("striderate", String.class, "rate limit for strides per second")).add(
-            Param.defaultTo("cycles", "1")
+            .add(Param.optional("stride").setRegex("\\d+"))
+            .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
+            .add(Param.defaultTo("cycles", "1")
                 .setRegex("\\d+[KMBGTPE]?|\\d+[KMBGTPE]?\\.\\" + ".\\d+[KMBGTPE]?")
                 .setDescription("cycle interval to use")).add(Param.defaultTo("recycles", "1")
-            .setDescription("allow cycles to be re-used this many " + "times")).add(Param.optional(
-            List.of("cyclerate", "targetrate", "rate"), String.class,
-            "rate limit for cycles per second"))
-        .add(Param.optional("seq", String.class, "sequencing algorithm"))
-        .add(Param.optional("instrument", Boolean.class)).add(
-            Param.optional(
-                List.of("workload", "yaml"), String.class, "location of workload yaml file"))
-        .add(Param.optional("driver", String.class))
-        .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|emit|none)"))
-        .add(Param.optional("maxtries", Integer.class)).add(
-            Param.defaultTo(
-                "input", "type=atomicseq", "The type of cycle input to use for this " + "activity"))
-        .add(Param.optional(List.of("if","inputfilter"),String.class,"an input filter"))
-        .add(Param.optional("output",String.class))
-        .asReadOnly();
+                .setDescription("allow cycles to be re-used this many " + "times")).add(Param.optional(
+                List.of("cyclerate", "targetrate", "rate"),
+                String.class,
+                "rate limit for cycles per second"
+            )).add(Param.optional("seq", String.class, "sequencing algorithm"))
+            .add(Param.optional("instrument", Boolean.class))
+            .add(Param.optional(
+                List.of("workload", "yaml"),
+                String.class,
+                "location of workload yaml file"
+            )).add(Param.optional("driver", String.class))
+            .add(Param.defaultTo("dryrun", "none").setRegex("(op|jsonnet|emit|none)"))
+            .add(Param.optional("maxtries", Integer.class)).add(Param.defaultTo(
+                "input",
+                "type=atomicseq",
+                "The type of cycle input to use for this " + "activity"
+            )).add(Param.optional(List.of("if", "inputfilter"), String.class, "an input filter"))
+            .add(Param.optional("output", String.class)).asReadOnly();
 
     @Override
     public NBConfigModel getConfigModel() {
@@ -933,14 +747,6 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
     public void applyConfig(NBConfiguration config) {
 
         Optional<String> directAlias = config.getOptional("alias");
-        //        if (!directAlias.isPresent()) {
-        //            String indirectAlias = config.getOptional(ActivityConfig.FIELD_ALIAS)
-        //                .or(() -> config.getOptional("workload")).or(() -> config.getOptional("driver"))
-        //                .orElse("ACTIVITYNAME");
-        //
-        //            config.getMap().put("alias", indirectAlias);
-        //        }
-        //
         NBConfigurable.applyMatchingCollection(config, adapters.values());
 
         this.config = new ActivityConfig(config);
@@ -953,13 +759,15 @@ public class Activity<R extends java.util.function.LongFunction, S> extends NBSt
 
     @Override
     public NBConfigModel getReconfigModel() {
-        return ConfigModel.of(Activity.class).add(
-                Param.optional("threads").setRegex("\\d+|\\d+x|auto")
-                    .setDescription("number of concurrent operations, controlled by threadpool"))
+        return ConfigModel.of(Activity.class)
+            .add(Param.optional("threads").setRegex("\\d+|\\d+x|auto")
+                .setDescription("number of concurrent operations, controlled by threadpool"))
             .add(Param.optional("striderate", String.class, "rate limit for strides per second"))
             .add(Param.optional(
-                List.of("cyclerate", "targetrate", "rate"), String.class,
-                "rate limit for cycles per second")).asReadOnly();
+                List.of("cyclerate", "targetrate", "rate"),
+                String.class,
+                "rate limit for cycles per second"
+            )).asReadOnly();
     }
 
 

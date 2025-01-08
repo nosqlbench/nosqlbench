@@ -103,25 +103,22 @@ public class NBBaseComponent extends NBBaseComponentMetrics
     public synchronized NBComponent attachChild(NBComponent... children) {
 
         for (NBComponent adding : children) {
-            logger.debug(
-                () -> "attaching " + adding.description() + " to parent " + this.description());
+            logger.debug(() -> "attaching " + adding.description() + " to parent "
+                               + this.description());
             for (NBComponent extant : this.children) {
                 NBLabels eachLabels = extant.getComponentOnlyLabels();
                 NBLabels newLabels = adding.getComponentOnlyLabels();
 
-                if (eachLabels != null &&
-                    newLabels != null &&
-                    !eachLabels.isEmpty() &&
-                    !newLabels.isEmpty() &&
-                    adding.getComponentOnlyLabels().equals(extant.getComponentOnlyLabels()))
+                if (eachLabels != null && newLabels != null && !eachLabels.isEmpty()
+                    && !newLabels.isEmpty() && adding.getComponentOnlyLabels()
+                        .equals(extant.getComponentOnlyLabels()))
                 {
                     throw new RuntimeException("""
                         Adding second child under already-defined labels is not allowed:
                          parent:  (PARENTCLASS) PARENTNAME
                           extant: (EXTANTCLASS) EXTANTNAME
                           adding: (ADDINGCLASS) ADDINGNAME
-                        """
-                        .replaceAll("PARENTCLASS", this.getClass().getSimpleName())
+                        """.replaceAll("PARENTCLASS", this.getClass().getSimpleName())
                         .replaceAll("PARENTNAME", this.description())
                         .replaceAll("EXTANTCLASS", extant.getClass().getSimpleName())
                         .replaceAll("EXTANTNAME", extant.description())
@@ -137,10 +134,8 @@ public class NBBaseComponent extends NBBaseComponentMetrics
     @Override
     public NBComponent detachChild(NBComponent... children) {
         for (NBComponent child : children) {
-            logger.debug(() -> "notifyinb before detaching " +
-                child.description() +
-                " from " +
-                this.description());
+            logger.debug(() -> "notifying before detaching " + child.description() + " from "
+                               + this.description());
             child.beforeDetach();
         }
         for (NBComponent child : children) {
@@ -159,8 +154,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics
     @Override
     public NBLabels getLabels() {
         NBLabels effectiveLabels = (this.parent == null ? NBLabels.forKV() : parent.getLabels());
-        effectiveLabels = (this.labels == null) ?
-            effectiveLabels :
+        effectiveLabels = (this.labels == null) ? effectiveLabels :
             effectiveLabels.and(this.labels);
         return effectiveLabels;
     }

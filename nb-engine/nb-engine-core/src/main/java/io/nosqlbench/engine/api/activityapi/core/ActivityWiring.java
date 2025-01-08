@@ -28,11 +28,15 @@ import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import java.io.InputStream;
 import java.io.PrintWriter;
 
-/**
- * Provides the components needed to build and run an activity a runtime.
- * The easiest way to build a useful StandardActivity is to extend {@link Activity}.
- */
-public interface IActivityWiring extends Comparable<IActivityWiring>, ProgressCapable, StateCapable, NBComponent {
+/// This is a vestigial layer which will be removed. It originally provided a way
+/// to assemble ad-hoc activity logic from component factory delegates. This meant that the
+/// core activity engine could be wired differently from a set of variations in each component.
+/// The core engine has been consolidated at this point and modal behaviors pushed to variations
+/// of edge components -- particularly in op synthesis and modifiers to op behavior. Thus, this
+/// layer is no longer needed and should be removed.
+public interface ActivityWiring
+    extends Comparable<ActivityWiring>, ProgressCapable, StateCapable, NBComponent
+{
 
     ActivityConfig getActivityConfig();
 

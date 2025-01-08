@@ -51,9 +51,14 @@ public class OpResolverBank {
         this.optpl = reference;
         this.tagFilter = new TagFilter(tagFilter);
         OpTemplates activeOpTemplates = reference.matching(tagFilter, false);
+        if (reference.size() > 0 && activeOpTemplates.size() == 0) {
+            String message =
+                "There were no active op templates with tag filter '" + tagFilter + "', since all "
+                + reference.size() + " were filtered out. Examine the session log for details";
+        }
+
         for (OpTemplate opTemplate : activeOpTemplates) {
-            OpResolution
-                opres =
+            OpResolution opres =
                 new OpResolution(activity, adapterF, opTemplate, popF, dispF, this);
             resolvers.add(opres);
         }

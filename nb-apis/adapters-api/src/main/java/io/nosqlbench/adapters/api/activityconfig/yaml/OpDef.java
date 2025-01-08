@@ -102,6 +102,10 @@ public class OpDef extends OpTemplate {
         return tags;
     }
 
+    /// Op template definitions are auto-tagged according to their placement within the workload
+    /// template. The block name and op name are both added as individual labels.
+    /// No other label should be added as before with auto-concatenation, since this breaks the
+    /// definitive behavior of tag filters over label combinations.
     private LinkedHashMap<String, String> composeTags() {
         LinkedHashMap<String, String> tagsWithName = new LinkedHashMap<>(new MultiMapLookup<>(rawOpDef.getTags(), block.getTags()));
         tagsWithName.put("block",block.getName());

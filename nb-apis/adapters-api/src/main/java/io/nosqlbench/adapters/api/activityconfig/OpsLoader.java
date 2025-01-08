@@ -61,14 +61,21 @@ public class OpsLoader {
     public static OpsDocList loadPath(String path, Map<String, ?> params, String... searchPaths) {
         String[] extensions = path.indexOf('.') > -1 ? new String[]{} : YAML_EXTENSIONS;
         ResolverChain chain = new ResolverChain(path);
-        Content<?> foundPath = NBIO.chain(chain.getChain()).searchPrefixes(searchPaths).pathname(chain.getPath()).extensionSet(extensions).first()
-            .orElseThrow(() -> new RuntimeException("Unable to load path '" + path + "'"));
+        Content<?> foundPath =
+            NBIO.chain(chain.getChain()).searchPrefixes(searchPaths).pathname(chain.getPath())
+                .extensionSet(extensions).first()
+                .orElseThrow(() -> new RuntimeException("Unable to load path '" + path + "'"));
         OpTemplateFormat fmt = OpTemplateFormat.valueOfURI(foundPath.getURI());
         return loadString(foundPath.asString(), fmt, params, foundPath.getURI());
     }
 
     public static OpsDocList loadString(
-        final String sourceData, OpTemplateFormat fmt, Map<String, ?> params, URI srcuri) {
+        final String sourceData,
+        OpTemplateFormat fmt,
+        Map<String, ?> params,
+        URI srcuri
+    )
+    {
 
         if (srcuri != null) {
             logger.info("workload URI: '" + srcuri + "'");
@@ -113,9 +120,15 @@ public class OpsLoader {
         }
 
         int resultStatus = SjsonnetMain.main0(
-            injected.toArray(new String[0]), new DefaultParseCache(), inputStream, stdoutStream,
-            stderrStream, new os.Path(Path.of(System.getProperty("user.dir"))), Option.empty(),
-            Option.empty(), null
+            injected.toArray(new String[0]),
+            new DefaultParseCache(),
+            inputStream,
+            stdoutStream,
+            stderrStream,
+            new os.Path(Path.of(System.getProperty("user.dir"))),
+            Option.empty(),
+            Option.empty(),
+            null
         );
 
         String stdoutOutput = stdoutBuffer.toString(StandardCharsets.UTF_8);
@@ -133,16 +146,17 @@ public class OpsLoader {
             }
         }
         if (!stderrOutput.isEmpty()) {
-            BasicError error = new BasicError(
-                "stderr output from jsonnet preprocessing: " + stderrOutput);
+            BasicError error =
+                new BasicError("stderr output from jsonnet preprocessing: " + stderrOutput);
             if (resultStatus != 0) {
                 throw error;
             } else {
                 logger.warn(error.toString(), error);
             }
         }
-        logger.info("jsonnet processing read '" + uri + "', rendered " + stdoutOutput.split(
-            "\n").length + " lines.");
+        logger.info(
+            "jsonnet processing read '" + uri + "', rendered " + stdoutOutput.split("\n").length
+            + " lines.");
         logger.trace("jsonnet result:\n" + stdoutOutput);
 
         return stdoutOutput;
@@ -152,8 +166,11 @@ public class OpsLoader {
     // into the parsers in a non-exception way
     public static boolean isJson(String workload) {
         try {
-            new GsonBuilder().setPrettyPrinting().create().fromJson(workload, Map.class);
-            return true;
+            if (workload.matches("^\\s*\\{.+")) {
+                new GsonBuilder().setPrettyPrinting().create().fromJson(workload, Map.class);
+                return true;
+            }
+            return false;
         } catch (Exception e) {
             return false;
         }
@@ -163,8 +180,11 @@ public class OpsLoader {
     // into the parsers in a non-exception way
     public static boolean isYaml(String workload) {
         try {
-            Object result = new Load(LoadSettings.builder().build()).loadFromString(workload);
-            return (result instanceof Map);
+            if (workload.indexOf('\n')>=0) {
+                Object result = new Load(LoadSettings.builder().build()).loadFromString(workload);
+                return (result instanceof Map);
+            }
+            return false;
         } catch (Exception e) {
             return false;
         }

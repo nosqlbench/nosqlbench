@@ -42,18 +42,26 @@ public class AdapterResolver
         NBConfiguration configSuperset
     )
     {
-        ServiceSelector<DriverAdapterLoader> selector = ServiceSelector.of(
-            name, ServiceLoader.load(DriverAdapterLoader.class));
-        DriverAdapterLoader loader = selector.get()
-            .orElseThrow(() -> new OpConfigError("No DriverAdapterLoader found for " + name));
-        DriverAdapter<CycleOp<?>, Space> adapter = loader.load(parent, NBLabels.forKV());
-
+        DriverAdapter<? extends CycleOp<?>, Space> adapter = loadNamedAdapter(parent, name);
         if (adapter instanceof NBConfigurable configurable) {
             NBConfigModel adapterModel = configurable.getConfigModel();
             NBConfiguration matchingConfig = adapterModel.matchConfig(configSuperset.getMap());
             configurable.applyConfig(matchingConfig);
         }
 
+        return adapter;
+    }
+
+    public static DriverAdapter<? extends CycleOp<?>, Space> loadNamedAdapter(
+        NBComponent parent,
+        String adapterName
+    )
+    {
+        ServiceSelector<DriverAdapterLoader> selector =
+            ServiceSelector.of(adapterName, ServiceLoader.load(DriverAdapterLoader.class));
+        DriverAdapterLoader loader = selector.get()
+            .orElseThrow(() -> new OpConfigError("No DriverAdapterLoader found for " + adapterName));
+        DriverAdapter<CycleOp<?>, Space> adapter = loader.load(parent, NBLabels.forKV());
         return adapter;
     }
 }

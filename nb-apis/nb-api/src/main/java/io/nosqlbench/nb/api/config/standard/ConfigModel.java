@@ -18,6 +18,7 @@ package io.nosqlbench.nb.api.config.standard;
 
 import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,10 +64,10 @@ public class ConfigModel implements NBConfigModel {
     }
 
     /**
-     * Add a param that, when present in a runtime configuration, will cause the config
-     * model to be expanded dynamically. This is for scenarios in which you have external
-     * configurable resources or templates which contain their own models that can
-     * only be known at runtime.
+     Add a param that, when present in a runtime configuration, will cause the config
+     model to be expanded dynamically. This is for scenarios in which you have external
+     configurable resources or templates which contain their own models that can
+     only be known at runtime.
      */
 
     public NBConfigModel asReadOnly() {
@@ -88,7 +89,13 @@ public class ConfigModel implements NBConfigModel {
         return ofType;
     }
 
-    public static <T> T convertValueTo(String configName, String paramName, Object value, Class<T> type) {
+    public static <T> T convertValueTo(
+        String configName,
+        String paramName,
+        Object value,
+        Class<T> type
+    )
+    {
         try {
             if (type.isAssignableFrom(value.getClass())) {
                 return type.cast(value);
