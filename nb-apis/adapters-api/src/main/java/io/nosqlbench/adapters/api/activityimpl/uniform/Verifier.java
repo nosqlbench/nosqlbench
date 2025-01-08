@@ -17,9 +17,8 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
  * under the License.
  */
 
-
 import io.nosqlbench.nb.api.components.core.NBNamedElement;
 
-public interface Validator<RESULT> extends NBNamedElement {
-    public void validate(long cycle, RESULT result);
+public interface Verifier<RESULT> extends NBNamedElement {
+    public void verify(long cycle, RESULT result);
 }

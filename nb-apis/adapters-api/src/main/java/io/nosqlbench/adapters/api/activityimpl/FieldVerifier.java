@@ -17,8 +17,7 @@ package io.nosqlbench.adapters.api.activityimpl;
  * under the License.
  */
 
-
-import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Verifier;
 import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.DiffType;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.components.core.NBComponent;
@@ -32,8 +31,19 @@ import java.util.*;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
-// TODO: Make op(verifyref) use tags, and require 1
-public class FieldVerifier implements Validator {
+/// The field verifier is a type of result checker which can assert
+/// that fields in an op result match the values expected, or in other
+/// words, that the data is _correct_.
+///
+/// The field verifier works with another optional capability, called
+/// _field capture_ which is able to extract the results of an operation
+/// into a specific set of named fields, asserting their value types, and
+/// renaming the results if needed.
+///
+/// Together field capture and field verify behaviors allow an adapter-agnostic
+/// way of asserting correctness of results. Further details on how this
+/// works will be provided in a separate doc, with examples.
+public class FieldVerifier implements Verifier {
 
     private final LongFunction<Map<String, Object>> expectedValuesF;
     private final DiffType diffType;
@@ -108,13 +118,24 @@ public class FieldVerifier implements Validator {
         this.fieldNames = fields.toArray(new String[fields.size()]);
         this.bindingNames = bindings.toArray(new String[bindings.size()]);
         this.expectedValuesF = pop.newOrderedMapBinder(bindingNames);
-
     }
 
+    /// This is not stable yet, and may change again soon
+    ///
+    /// There are two ways a field verifier is expected to be configured:
+    /// 1. By reference to another op template which is presumed to have written
+    ///    the data to be verified.
+    /// 2. Directly, by telling the field verifier the names, value bindings, and level
+    ///    of verification.
     private void parseFieldSpec(
         String fieldSpec, OpLookup lookup, List<String> fields,
         List<String> bindings, CapturePoints captures, ParsedOp pop
     ) {
+        // This is an indirect way of configuring a verifier. A user specifies
+        // a tag filter which is meant to locate another op template within the
+        // current workload template (it can be an active or inactive op template)
+        // and that referenced template is used to derive the field names, bindings,
+        // etc to verify against results of this op templates result values.
         if (fieldSpec.startsWith("op(") && fieldSpec.endsWith(")")) {
             String toLookup = fieldSpec.substring("op(".length(), fieldSpec.length() - 1);
             Optional<ParsedOp> referenced = lookup.lookup(toLookup);
@@ -127,7 +148,11 @@ public class FieldVerifier implements Validator {
                 throw new OpConfigError(
                     "no op found for verify setting '" + fieldSpec + "' " + "for op " + "template" + " '" + pop.getName() + "'");
             }
-        } else {
+        }
+        // This is the direct way of configuring a verifier.
+        // See verify.md for details on the supported format. As this is experimental, this doc
+        // should be updated when this code is stable.
+        else {
             String[] vfields = fieldSpec.split("\\s*,\\s*");
             for (String vfield : vfields) {
 //                if (vfield.equals("*")) {
@@ -160,7 +185,7 @@ public class FieldVerifier implements Validator {
     /// operator for the respective type.
     /// @return a count of differences between the row and the reference values
     @Override
-    public void validate(long cycle, Object data) {
+    public void verify(long cycle, Object data) {
         if (data instanceof Map<?, ?> r) {
             Map<String, ?> result = (Map<String, ?>) r;
             Map<String, Object> referenceMap = this.expectedValuesF.apply(cycle);

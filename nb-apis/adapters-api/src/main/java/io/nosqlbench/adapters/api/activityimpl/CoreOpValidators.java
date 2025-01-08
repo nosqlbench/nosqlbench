@@ -2,13 +2,13 @@ package io.nosqlbench.adapters.api.activityimpl;
 
 /*
  * Copyright (c) nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,7 +18,7 @@ package io.nosqlbench.adapters.api.activityimpl;
  */
 
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Verifier;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.components.core.NBComponent;
@@ -32,8 +32,8 @@ import java.util.Optional;
 public class CoreOpValidators {
     private static final Logger logger = LogManager.getLogger(CoreOpValidators.class);
 
-    public static List<Validator> getValidator(NBComponent parent, ParsedOp pop, OpLookup lookup) {
-        List<Validator> validators = new ArrayList();
+    public static List<Verifier> getValidator(NBComponent parent, ParsedOp pop, OpLookup lookup) {
+        List<Verifier> validators = new ArrayList();
         Optional<TypeAndTarget<CoreValidators, Object>> optionalValidator = pop.getOptionalTypeAndTargetEnum(
             CoreValidators.class, Object.class);
 

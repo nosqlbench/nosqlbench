@@ -22,18 +22,16 @@ import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpLookup;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Verifier;
 import io.nosqlbench.adapters.api.activityimpl.uniform.ValidatorSource;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.AssertingOpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /// This is a functional wrapper layer which will upgrade a basic [CycleOp] to
 /// one that has a validator provided by it's [DriverAdapter], so long as the
@@ -61,8 +59,8 @@ public class OpAssertions {
         }
 
         for (ValidatorSource source : sources) {
-            List<Validator> validator = source.getValidator(adapter, pop, lookup);
-            for (Validator v : validator) {
+            List<Verifier> validator = source.getValidator(adapter, pop, lookup);
+            for (Verifier v : validator) {
                 dispenser = new AssertingOpDispenser(adapter, pop, dispenser, v);
                 logger.trace("added post-run validator for op '" + pop.getName() + "'");
             }

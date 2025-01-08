@@ -266,7 +266,7 @@ public class NBConfiguration {
     /// [NBReconfigurable#applyConfig(NBConfiguration)] method
     ///
     /// This eventing will occur whether or not the value was actually changed. Spurious
-    /// evenging of duplicate values should be considered an design bug.
+    /// eventing of duplicate values should be considered a design bug.
     ///
     /// Any holders of an updated configurations must maintain their own copies if necessary for
     /// deltas.

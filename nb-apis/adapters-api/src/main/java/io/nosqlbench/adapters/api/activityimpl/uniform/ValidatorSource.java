@@ -23,10 +23,9 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 
 import java.util.List;
-import java.util.Optional;
 
 /// A [DriverAdapter] may implement this interface to provide adapter-specific
 /// validators.
 public interface ValidatorSource {
-    List<Validator> getValidator(NBComponent parent, ParsedOp pop, OpLookup lookup);
+    List<Verifier> getValidator(NBComponent parent, ParsedOp pop, OpLookup lookup);
 }

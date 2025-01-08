@@ -2,13 +2,13 @@ package io.nosqlbench.adapters.api.activityimpl;
 
 /*
  * Copyright (c) nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,13 +18,13 @@ package io.nosqlbench.adapters.api.activityimpl;
  */
 
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Verifier;
 
 public enum CoreValidators {
     verify_fields(FieldVerifier.class);
-    private final Class<? extends Validator> validatorImpl;
+    private final Class<? extends Verifier> validatorImpl;
 
-    CoreValidators(Class<? extends Validator> validatorClass) {
+    CoreValidators(Class<? extends Verifier> validatorClass) {
         this.validatorImpl = validatorClass;
     }
 }

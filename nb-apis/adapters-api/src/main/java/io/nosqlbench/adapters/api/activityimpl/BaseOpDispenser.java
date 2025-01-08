@@ -19,7 +19,7 @@ package io.nosqlbench.adapters.api.activityimpl;
 import com.codahale.metrics.Timer;
 import groovy.lang.Binding;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Verifier;
 import io.nosqlbench.adapters.api.activityimpl.uniform.ValidatorSource;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.evalctx.*;
@@ -37,7 +37,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongFunction;
 
@@ -239,7 +238,7 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
     }
 
     @Override
-    public List<Validator> getValidator(NBComponent parent, ParsedOp pop, OpLookup lookup) {
+    public List<Verifier> getValidator(NBComponent parent, ParsedOp pop, OpLookup lookup) {
         return CoreOpValidators.getValidator(this, pop, lookup);
     }
 
