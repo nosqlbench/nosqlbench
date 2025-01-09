@@ -269,10 +269,14 @@ public interface DriverAdapter<OPTYPE extends CycleOp<?>, SPACETYPE extends Spac
         Optional<Content<?>> bundled_docs = NBIO.local().pathname(
             dev_docspath, cp_docspath).first();
         bundled_docs.map(Content::asPath).ifPresent(docs::addContentsOf);
+        String markdown = this.getAdapterName() +".md";
+        System.out.println("Markdown: " +   markdown);
         Optional<Content<?>> maindoc = NBIO.local().pathname(
-            "/src/main/resources/" + this.getAdapterName() + ".md",
-            this.getAdapterName() + ".md"
+            "/src/main/resources/" + markdown, markdown
         ).first();
+        if ( !maindoc.isPresent() ) {
+            System.out.println("Could not find main document for " + markdown);
+        }
         maindoc.map(Content::asPath).ifPresent(docs::addPath);
         return docs.asDocsBinder();
     }

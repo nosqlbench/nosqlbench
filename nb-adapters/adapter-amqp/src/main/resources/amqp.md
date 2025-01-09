@@ -1,6 +1,7 @@
 ---
 weight: 0
 title: AMQP
+source: nb-adapters/adapter-amqp/src/main/resources/amqp.md
 ---
 - [1. Overview](#1-overview)
 - [2. NB AMQP Usage](#2-nb-amqp-usage)

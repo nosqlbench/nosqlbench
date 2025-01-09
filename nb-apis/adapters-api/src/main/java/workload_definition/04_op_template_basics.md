@@ -1,3 +1,6 @@
+---
+source: nb-apis/adapters-api/src/main/java/workload_definition/04_op_template_basics.md
+---
 # Op Templates
 
 Op templates are the recipes provided by users for an operation. These hold examples of payload

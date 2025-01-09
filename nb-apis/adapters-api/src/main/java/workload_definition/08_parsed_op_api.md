@@ -1,3 +1,6 @@
+---
+source: nb-apis/adapters-api/src/main/java/workload_definition/08_parsed_op_api.md
+---
 # ParsedOp API
 
 In the workload template examples, we show statements as being formed from a string value. This is a

@@ -1,3 +1,6 @@
+---
+source: nb-apis/adapters-api/src/main/java/workload_definition/05_op_template_payloads.md
+---
 # Op Template Payloads
 
 Payloads in NoSQLBench op templates can be of any type that you can create from bindings, string

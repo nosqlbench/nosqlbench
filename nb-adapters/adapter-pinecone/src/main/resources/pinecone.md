@@ -1,3 +1,6 @@
+---
+source: nb-adapters/adapter-pinecone/src/main/resources/pinecone.md
+---
 # pinecone driver adapter
 The pinecone driver adapter is a nb adapter for the pinecone driver, an open source Java driver for connecting to and
 performing operations on an instance of a Pinecone Vector database. The driver is hosted on github at
