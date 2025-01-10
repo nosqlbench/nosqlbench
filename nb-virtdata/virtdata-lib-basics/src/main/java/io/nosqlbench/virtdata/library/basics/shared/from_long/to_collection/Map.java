@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
 import io.nosqlbench.virtdata.api.annotations.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
@@ -61,12 +62,23 @@ public class Map implements LongFunction<java.util.Map<Object, Object>> {
             "create a map of size 2, with a specific function for each key and each value"})
     @SafeVarargs
     public Map(LongFunction<Object>... objfuncs) {
-        this.mode = Mode.Tuples;
         if ((objfuncs.length%2)!=0) {
-            throw new RuntimeException("An even number of functions must be provided.");
+            Object testValue = objfuncs[0].apply(0L);
+            if (testValue instanceof Number n) {
+                LongFunction<Object>[] finalObjfuncs = objfuncs;
+                this.sizeFunc= l -> ((Number) finalObjfuncs[0].apply(l)).intValue();
+                objfuncs = Arrays.copyOfRange(objfuncs, 1, objfuncs.length);
+                this.mode=Mode.VarSized;
+            } else {
+                throw new RuntimeException("An even number of functions must be provided, unless "
+                                           + "the first one produces a numeric value.");
+            }
+        } else {
+            this.mode = Mode.Tuples;
+            int size = objfuncs.length/2;
+            sizeFunc=(l) -> size;
         }
         int size = objfuncs.length / 2;
-        sizeFunc=(l) -> size;
         keyFuncs = new LongFunction[size];
         valueFuncs = new LongFunction[size];
         for (int i = 0; i < size; i++) {
