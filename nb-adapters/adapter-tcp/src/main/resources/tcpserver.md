@@ -1,3 +1,6 @@
+---
+source: nb-adapters/adapter-tcp/src/main/resources/tcpserver.md
+---
 # tcpserver
 
 **tcpserver acts like a _server push_ version of stdout over TCP**

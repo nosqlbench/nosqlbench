@@ -1,3 +1,6 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/cqld4.md
+---
 # cqld4
 
 This is the newly revamped driver for CQL which uses the DataStax OSS Driver version 4. As

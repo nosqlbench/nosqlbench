@@ -1,3 +1,6 @@
+---
+source: nb-adapters/adapter-dynamodb/src/main/resources/dynamodb.md
+---
 # dynamodb
 
 The DynamoDB driver supports a basic set of commands as specified at

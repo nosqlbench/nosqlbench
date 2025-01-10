@@ -1,3 +1,6 @@
+---
+source: nb-adapters/adapter-diag/src/main/resources/diag.md
+---
 # diag
 
 This is a diagnostic activity type. Its action simply reports the cycle number and the reporting delay between it's schedule reporting time and the current time. The reporting is interleaved between the threads, with the logical number of reports remaining constant regardless of the thread count.

@@ -28,6 +28,7 @@ import java.util.Optional;
 public class MutableFrontMatter extends LinkedHashMap<String,List<String>> {
     String WEIGHT = "weight";
     String TITLE = "title";
+    String SOURCE = "source";
 
     MutableFrontMatter(Map<String,List<String>> data) {
         this.putAll(data);
@@ -43,12 +44,21 @@ public class MutableFrontMatter extends LinkedHashMap<String,List<String>> {
         return Optional.ofNullable(get(WEIGHT)).map(l -> l.get(0)).map(Integer::parseInt).orElse(0);
     }
 
+    public String getSource() {
+        assertMaxSingleValued(SOURCE);
+        return Optional.ofNullable(get(SOURCE)).map(l -> l.get(0)).orElse(null);
+    }
+
     public void setTitle(String title) {
         put(TITLE,List.of(title));
     }
 
     public void setWeight(long weight) {
         put(WEIGHT,List.of(String.valueOf(weight)));
+    }
+
+    public void setSource(String source) {
+        put(SOURCE,List.of(source));
     }
 
     private void assertMaxSingleValued(String fieldname) {
@@ -60,7 +70,8 @@ public class MutableFrontMatter extends LinkedHashMap<String,List<String>> {
     public String asYaml() {
         DumpSettings settings = DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build();
         Dump dump = new Dump(settings);
-        return dump.dumpToString(Map.of(TITLE,getTitle(),WEIGHT,getWeight()));
+        return dump.dumpToString(Map.of(TITLE,getTitle(),WEIGHT,getWeight(),SOURCE,getSource()));
 
     }
+
 }

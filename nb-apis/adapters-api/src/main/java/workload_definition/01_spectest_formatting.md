@@ -1,3 +1,6 @@
+---
+source: nb-apis/adapters-api/src/main/java/workload_definition/01_spectest_formatting.md
+---
 # SpecTest Formatting
 
 The specifications and examples follow a pattern:
