@@ -16,6 +16,7 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
+import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.api.annotations.*;
 
 import java.util.Arrays;
@@ -70,8 +71,8 @@ public class Map implements LongFunction<java.util.Map<Object, Object>> {
                 objfuncs = Arrays.copyOfRange(objfuncs, 1, objfuncs.length);
                 this.mode=Mode.VarSized;
             } else {
-                throw new RuntimeException("An even number of functions must be provided, unless "
-                                           + "the first one produces a numeric value.");
+                throw new BasicError("An even number of functions must be provided, unless "
+                                     + "the first one produces a numeric value.");
             }
         } else {
             this.mode = Mode.Tuples;
