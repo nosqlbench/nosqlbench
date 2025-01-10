@@ -60,7 +60,7 @@ public class GCPSpannerInsertOpDispenser extends GCPSpannerBaseOpDispenser<GCPSp
      */
     private LongFunction<Map> createParamsFunction(ParsedOp op) {
         return op.getAsOptionalFunction("query_params", Map.class)
-            .orElse(_ -> Collections.emptyMap());
+            .orElse(l -> Collections.emptyMap());
     }
 
     /**
