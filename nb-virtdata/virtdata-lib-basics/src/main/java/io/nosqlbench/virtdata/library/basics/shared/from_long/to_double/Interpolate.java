@@ -51,7 +51,7 @@ public class Interpolate implements LongToDoubleFunction {
     private final double resolution;
 
     // The lookup table
-    private final double[] lut;
+    public final double[] lut;
 
     /**
      * The scale of Long.MAX_VALUE and the unit interval scale factor are pre-combined
