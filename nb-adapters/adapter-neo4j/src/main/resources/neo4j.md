@@ -1,3 +1,6 @@
+---
+source: nb-adapters/adapter-neo4j/src/main/resources/neo4j.md
+---
 # neo4j driver adapter
 
 The neo4j driver adapter is a nb adapter for the Neo4J driver, an open source Java driver for connecting to and

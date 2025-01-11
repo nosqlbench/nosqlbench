@@ -1,7 +1,10 @@
+---
+source: nb-adapters/adapter-weaviate/src/main/resources/weaviate.md
+---
 # Weaviate driver adapter
 
 The Weaviate driver adapter is a NoSQLBench adapter for the `weaviate` driver, an open-source Java driver
-for connecting to and performing operations on an instance of a Weaviate vector database. The driver is 
+for connecting to and performing operations on an instance of a Weaviate vector database. The driver is
 leveraged from GitHub at https://github.com/weaviate/java-client.
 
 ## Run Commands (Remove prior to merge)
@@ -39,8 +42,8 @@ The following parameters must be supplied to the adapter at runtime in order to 
 instance of the [Weaviate database](https://weaviate.io/developers/weaviate):
 
 * `token` - In order to use the Weaviate database you must have an account. Once the account is created you can [request
-  an api key/token](https://weaviate.io/developers/wcs/quickstart#explore-the-details-panel). This key will need to be 
-  provided any time a database connection is desired. Alternatively, the api key can be stored in a file securely and 
+  an api key/token](https://weaviate.io/developers/wcs/quickstart#explore-the-details-panel). This key will need to be
+  provided any time a database connection is desired. Alternatively, the api key can be stored in a file securely and
   referenced via the `token_file` config option pointing to the path of the file.
 * `uri` - When a collection/index is created in the database the URI (aka endpoint) must be specified as well. The adapter will
   use the default value of `localhost:8080` if none is provided at runtime. Remember to *not* provide the `https://`

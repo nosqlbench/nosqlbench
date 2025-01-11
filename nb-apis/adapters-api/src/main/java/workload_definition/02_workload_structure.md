@@ -1,3 +1,6 @@
+---
+source: nb-apis/adapters-api/src/main/java/workload_definition/02_workload_structure.md
+---
 # Workload Structure
 
 ## Keywords

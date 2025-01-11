@@ -1,3 +1,6 @@
+---
+source: nb-adapters/adapter-http/src/main/resources/http.md
+---
 # http
 
 This driver allows you to make http requests using the native HTTP client

@@ -16,9 +16,14 @@
 
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
+import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+import java.util.function.LongFunction;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class MapTest {
 
@@ -32,26 +37,47 @@ public class MapTest {
 
     @Test
     public void testStringMap() {
-        StringMap sm = new StringMap((s)->2,(k)->k,(v)->v);
+        StringMap sm = new StringMap((s) -> 2, (k) -> k, (v) -> v);
         java.util.Map<String, String> m2 = sm.apply(11L);
-        assertThat(m2).containsOnlyKeys("11","12");
-        assertThat(m2).containsValues("11","12");
+        assertThat(m2).containsOnlyKeys("11", "12");
+        assertThat(m2).containsValues("11", "12");
     }
 
     @Test
     public void testMapTuple() {
-        Map mf = new Map(s1 -> (int) s1, k2 -> (int) k2, s2 -> (int) s2, k2 -> (int)k2);
+        Map mf = new Map(s1 -> (int) s1, k2 -> (int) k2, s2 -> (int) s2, k2 -> (int) k2);
         java.util.Map<Object, Object> mt = mf.apply(37L);
-        assertThat(mt).containsOnlyKeys(37,38);
-        assertThat(mt).containsValues(37,38);
+        assertThat(mt).containsOnlyKeys(37, 38);
+        assertThat(mt).containsValues(37, 38);
     }
 
     @Test
     public void testStringMapTuple() {
-        StringMap mf = new StringMap(s1 -> (int) s1, k2 -> (int) k2, s2 -> (int) s2, k2 -> (int)k2);
+        StringMap mf =
+            new StringMap(s1 -> (int) s1, k2 -> (int) k2, s2 -> (int) s2, k2 -> (int) k2);
         java.util.Map<String, String> mt = mf.apply(37L);
-        assertThat(mt).containsOnlyKeys("37","38");
-        assertThat(mt).containsValues("37","38");
+        assertThat(mt).containsOnlyKeys("37", "38");
+        assertThat(mt).containsValues("37", "38");
+    }
+
+    @Test
+    public void testLongFunctionsOnlyWithOddArity() {
+        LongFunction<Object> sizeFunc = l -> (double) (l % 5);
+        LongFunction<Object> keyfunc = String::valueOf;
+        LongFunction<Object> valueFunc = String::valueOf;
+        Map map = new Map(sizeFunc, keyfunc, valueFunc);
+        java.util.Map<Object, Object> apply = map.apply(3L);
+        assertThat(apply).isEqualTo(java.util.Map.of("3", "3", "4", "4", "5", "5"));
+    }
+
+    @Test
+    public void testLongFunctionsOnlyWithInvalidSizer() {
+        LongFunction<Object> sizeFunc = l -> Instant.ofEpochMilli(1L);
+        LongFunction<Object> keyfunc = String::valueOf;
+        LongFunction<Object> valueFunc = String::valueOf;
+        assertThatThrownBy(() -> new Map(sizeFunc, keyfunc, valueFunc)).hasMessageContaining("An "
+                                                                                             +
+                                                                                             "even number of functions must be provided, unless the first one produces a numeric value");
     }
 
 }

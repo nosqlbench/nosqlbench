@@ -1,3 +1,6 @@
+---
+source: nb-apis/adapters-api/src/main/java/workload_definition/07_template_variables.md
+---
 # Template Variables
 
 Template variables allow for workload descriptions to be parameterized outside the structure of the

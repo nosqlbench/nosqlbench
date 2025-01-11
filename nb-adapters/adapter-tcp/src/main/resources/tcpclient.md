@@ -1,3 +1,6 @@
+---
+source: nb-adapters/adapter-tcp/src/main/resources/tcpclient.md
+---
 # tcpclient
 
 **tcpclient acts like a _client push_ version of stdout over TCP**
