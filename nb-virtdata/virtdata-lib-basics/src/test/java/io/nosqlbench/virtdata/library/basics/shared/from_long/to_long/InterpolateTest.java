@@ -22,29 +22,47 @@ import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.LongToDoubleFunction;
+import java.util.function.LongUnaryOperator;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InterpolateTest {
     private final static Logger logger = LogManager.getLogger(InterpolateTest.class);
+    private static int iterations = 1000000;
 
     @Test
     public void testRanging() {
         io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.Interpolate interpolate =
             new io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.Interpolate (0.0d, 1.0d);
-        Hash hf = new Hash();
-        DescriptiveStatistics dss = new DescriptiveStatistics();
-        long count=10000000;
-        for (long i = 0; i < count; i++) {
-            long input = (long) (Long.MAX_VALUE * ((double)i/(double)count));
-            long prn = hf.applyAsLong(input);
-            double v = interpolate.applyAsDouble(prn);
-            dss.addValue(v);
-        }
+        DescriptiveStatistics dss = tabulate(new Hash(),interpolate, iterations);
         assertThat(dss.getPercentile(0.000001)).isCloseTo(0.0, Offset.offset(0.01));
+        assertThat(dss.getPercentile(50.0)).isCloseTo(0.5,Offset.offset(0.01));
         assertThat(dss.getPercentile(99.99999)).isCloseTo(1.0, Offset.offset(0.01));
     }
 
+    @Test
+    public void testShaping() {
+        double[] shape = new double[]{0.0,0.9,0.95,1.0};
+        io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.Interpolate interpolate =
+            new io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.Interpolate (shape);
+        DescriptiveStatistics dss = tabulate(new Hash(),interpolate, iterations);
+        assertThat(dss.getPercentile(0.000001)).isCloseTo(0.0, Offset.offset(0.01));
+        assertThat(dss.getPercentile(50.0)).isCloseTo(0.5,Offset.offset(0.925));
+        assertThat(dss.getPercentile(99.99999)).isCloseTo(1.0, Offset.offset(0.01));
+    }
 
+    public static DescriptiveStatistics tabulate(LongUnaryOperator bias,
+        LongToDoubleFunction f, int count) {
+        DescriptiveStatistics dss = new DescriptiveStatistics();
+        for (long i = 0; i < count; i++) {
+            long input = (long) (Long.MAX_VALUE * ((double)i/(double)count));
+            long prn = bias.applyAsLong(input);
+            double v = f.applyAsDouble(prn);
+            dss.addValue(v);
+        }
+        return dss;
+    }
 
     @Test
     public void testDeciles() {
