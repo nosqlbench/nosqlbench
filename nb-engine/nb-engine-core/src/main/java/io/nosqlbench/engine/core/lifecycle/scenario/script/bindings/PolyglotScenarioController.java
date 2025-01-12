@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.core.lifecycle.scenario.script.bindings;
 
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graalvm.polyglot.Value;
@@ -88,8 +88,8 @@ public class PolyglotScenarioController {
             controller.run(timeout, spec.as(Map.class));
         } else if (spec.isHostObject()) {
             Object o = spec.asHostObject();
-            if (o instanceof ActivityDef) {
-                controller.run((ActivityDef) o, timeout);
+            if (o instanceof ActivityConfig) {
+                controller.run((ActivityConfig) o, timeout);
             } else {
                 throw new RuntimeException("unrecognized polyglot host object type for run: " + spec);
             }
@@ -113,7 +113,7 @@ public class PolyglotScenarioController {
 
     private synchronized void startValue(Value spec) {
         if (spec.isHostObject()) {
-            controller.start((ActivityDef) spec.asHostObject());
+            controller.start((ActivityConfig) spec.asHostObject());
         } else if (spec.isString()) {
             controller.start(spec.asString());
         } else if (spec.hasMembers()) {
@@ -137,7 +137,7 @@ public class PolyglotScenarioController {
 
     private synchronized void stopValue(Value spec) {
         if (spec.isHostObject()) {
-            controller.stop((ActivityDef) spec.asHostObject());
+            controller.stop((ActivityConfig) spec.asHostObject());
         } else if (spec.isString()) {
             controller.stop(spec.asString());
         } else if (spec.hasMembers()) {
@@ -162,7 +162,7 @@ public class PolyglotScenarioController {
 
     private synchronized void forceStopValue(Value spec) {
         if (spec.isHostObject()) {
-            controller.forceStop((ActivityDef) spec.asHostObject());
+            controller.forceStop((ActivityConfig) spec.asHostObject());
         } else if (spec.isString()) {
             controller.forceStop(spec.asString());
         } else if (spec.hasMembers()) {
@@ -239,7 +239,7 @@ public class PolyglotScenarioController {
 
     private synchronized boolean isRunningActivityValue(Value spec) {
         if (spec.isHostObject()) {
-            return controller.isRunningActivity((ActivityDef) spec.asHostObject());
+            return controller.isRunningActivity((ActivityConfig) spec.asHostObject());
         } else if (spec.isString()) {
             return controller.isRunningActivity(spec.asString());
         } else if (spec.hasMembers()) {

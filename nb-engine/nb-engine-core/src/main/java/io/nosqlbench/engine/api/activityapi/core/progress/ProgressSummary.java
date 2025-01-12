@@ -22,6 +22,7 @@ public record ProgressSummary(
         String name,
         double pending,
         double current,
+        double concurrency,
         double complete
 ) {
 
@@ -39,8 +40,8 @@ public record ProgressSummary(
 
         legend.append("pending,");
         values.append(String.format("%.0f,",pending));
-        legend.append("current,");
-        values.append(String.format("%.0f,", current));
+        legend.append("current/max,");
+        values.append(String.format("%.0f/%.0f,", current, concurrency));
         legend.append("complete,");
         values.append(String.format("%.0f,",complete));
         legend.setLength(legend.length()-1);

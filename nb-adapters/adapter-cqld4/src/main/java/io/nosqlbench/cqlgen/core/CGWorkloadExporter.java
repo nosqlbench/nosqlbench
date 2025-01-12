@@ -246,6 +246,7 @@ public class CGWorkloadExporter implements BundledApp {
                     case "select_seq" -> genSelectOpTemplates(model, blockname);
                     case "scan_10_seq" -> genScanOpTemplates(model, blockname);
                     case "update_seq" -> genUpdateOpTemplates(model, blockname);
+                    case "verify_rampup" -> genVerifyRampupTemplates(model,blockname,"main_insert");
                     default -> throw new RuntimeException("Unable to create block entries for " + component + ".");
                 };
                 block.putAll(additions);
@@ -379,29 +380,74 @@ public class CGWorkloadExporter implements BundledApp {
     }
 
 
+
     private Map<String, Object> genSelectOpTemplates(CqlModel model, String blockname) {
         Map<String, Object> blockdata = new LinkedHashMap<>();
         Map<String, Object> ops = new LinkedHashMap<>();
         blockdata.put("ops", ops);
         for (CqlTable table : model.getTableDefs()) {
             ops.put(
-                    namer.nameFor(table, "optype", "select", "blockname", blockname),
-                    Map.of(
-                            "prepared", genSelectSyntax(table),
-                            "timeout", timeouts.get("select"),
-                            "ratio", readRatioFor(table)
-                    )
+                namer.nameFor(table, "optype", "select", "blockname", blockname),
+                Map.of(
+                    "prepared", genSelectSyntax(table,false),
+                    "timeout", timeouts.get("select"),
+                    "ratio", readRatioFor(table)
+                )
             );
         }
         return blockdata;
     }
+    private Map<String, Object> genVerifyRampupTemplates(CqlModel model, String blockname,
+                                                         String refBlockName) {
 
-    private String genSelectSyntax(CqlTable table) {
+        Map<String, Object> blockdata = new LinkedHashMap<>();
+        Map<String, Object> ops = new LinkedHashMap<>();
+
+        // select
+        blockdata.put("ops", ops);
+        for (CqlTable table : model.getTableDefs()) {
+            String opName = namer.nameFor(table, "optype", "verify", "blockname", blockname);
+//            String refOpName = namer.nameFor(table,"optype",);
+
+            ops.put(
+                opName,
+                Map.of(
+                    "prepared", genSelectSyntax(table,true),
+                    "timeout", timeouts.get("select"),
+                    "ratio", readRatioFor(table),
+                    "verify", "op(block:"+refBlockName+",op:"+")"
+                )
+            );
+        }
+
+
+        // insert
+        blockdata.put("ops", ops);
+        for (CqlTable table : model.getTableDefs()) {
+            if (!isCounterTable(table)) {
+                ops.put(
+                    namer.nameFor(table, "optype", "insert", "blockname", blockname),
+                    Map.of(
+                        "prepared", genInsertSyntax(table),
+                        "timeout", timeouts.get("insert"),
+                        "ratio", writeRatioFor(table)
+                    )
+                );
+            }
+        }
+
+
+        return blockdata;
+
+    }
+
+    private String genSelectSyntax(CqlTable table, boolean withCapture) {
         return """
-                select * from  KEYSPACE.TABLE
+                select FIELDS from  KEYSPACE.TABLE
                 where PREDICATE
                 LIMIT;
                 """
+                .replace("FIELDS",withCapture ? "[*]" : "*")
                 .replace("KEYSPACE", table.getKeyspace().getName())
                 .replace("TABLE", table.getName())
                 .replace("PREDICATE", genPredicateTemplate(table, 0))

@@ -15,9 +15,9 @@
  */
 package io.nosqlbench.engine.api.activityimpl.action;
 
-import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityapi.core.SyncAction;
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityWiring;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -28,14 +28,14 @@ public class CoreActionDispenser implements ActionDispenser {
 
     private final static Logger logger = LogManager.getLogger(CoreActionDispenser.class);
 
-    private final Activity activity;
+    private final ActivityWiring activity;
 
-    public CoreActionDispenser(Activity activity) {
+    public CoreActionDispenser(ActivityWiring activity) {
         this.activity = activity;
     }
 
     @Override
-    public Action getAction(int slot) {
-        return new CoreAction(activity.getActivityDef(), slot);
+    public SyncAction getAction(int slot) {
+        return new CoreAction(activity.getConfig(), slot);
     }
 }

@@ -21,6 +21,7 @@ import io.nosqlbench.adapter.neo4j.ops.Neo4JBaseOp;
 import io.nosqlbench.adapter.neo4j.types.Neo4JOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.components.core.NBComponent;

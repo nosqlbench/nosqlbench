@@ -17,10 +17,10 @@
 package io.nosqlbench.engine.api.activityimpl.marker;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsSegment;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResultsIntervalSegment;
 import io.nosqlbench.engine.api.activityapi.output.Output;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -45,7 +45,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>
  * The nowMarking and nowTracking conditions are meant to be locked and awaited
  * by marking and tracking calls respectively. Conversely, they are expected
- * to be signaled by tracking and marking calls.
+ * to be signalled by tracking and marking calls.
  * <p>
  * This implementation needs to be adapted to onAfterOpStop early exit of either
  * marker or tracker threads with no deadlock.
@@ -73,15 +73,16 @@ public class ContiguousOutputChunker implements Output {
 
     public ContiguousOutputChunker(Activity activity) {
 
-        if (!(activity.getInputDispenserDelegate().getInput(0).isContiguous())) {
-            throw new RuntimeException("This type of output may not be used with non-contiguous inputs yet.");
-            // If you are looking at this code, it's because we count updates to extents to provide
-            // efficient marker extent handling. The ability to use segmented inputs with markers will
-            // come in a future append.
-        }
-        this.min = new AtomicLong(activity.getActivityDef().getStartCycle());
-        this.nextMin = new AtomicLong(activity.getActivityDef().getEndCycle());
-        long stride = activity.getParams().getOptionalLong("stride").orElse(1L);
+
+//        if (!(activity.getWiring().getInputDispenserDelegate().getInput(0).isContiguous())) {
+//            throw new RuntimeException("This type of output may not be used with non-contiguous inputs yet.");
+//            // If you are looking at this code, it's because we count updates to extents to provide
+//            // efficient marker extent handling. The ability to use segmented inputs with markers will
+//            // come in a future append.
+//        }
+        this.min = new AtomicLong(activity.getCyclesSpec().first_inclusive());
+        this.nextMin = new AtomicLong(activity.getCyclesSpec().last_exclusive());
+        long stride = activity.getConfig().getOptional(Long.class,"stride").orElse(1L);
         long cycleCount = nextMin.get() - min.get();
         if ((cycleCount % stride) != 0) {
             throw new RuntimeException("stride must evenly divide into cycles.");

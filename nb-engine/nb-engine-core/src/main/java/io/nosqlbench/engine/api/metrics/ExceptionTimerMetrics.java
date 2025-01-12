@@ -17,7 +17,7 @@
 package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Timer;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 
@@ -32,11 +32,11 @@ import java.util.concurrent.TimeUnit;
 public class ExceptionTimerMetrics {
     private final ConcurrentHashMap<String, Timer> timers = new ConcurrentHashMap<>();
     private final Timer allerrors;
-    private final ActivityDef activityDef;
+    private final ActivityConfig activityDef;
     private final NBComponent parentLabels;
 
-    public ExceptionTimerMetrics(final NBComponent parent, final ActivityDef activityDef) {
-        this.activityDef = activityDef;
+    public ExceptionTimerMetrics(final NBComponent parent, final ActivityConfig config) {
+        this.activityDef = config;
         this.parentLabels = parent;
 
         this.allerrors=parent.create().timer(

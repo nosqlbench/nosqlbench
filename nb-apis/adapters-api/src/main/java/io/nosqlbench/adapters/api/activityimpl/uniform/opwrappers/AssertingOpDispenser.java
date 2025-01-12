@@ -20,20 +20,20 @@ import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Verifier;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 public class AssertingOpDispenser<S extends Space, RESULT> extends BaseOpDispenser<CycleOp<RESULT>, S> {
 
     private final OpDispenser<CycleOp<RESULT>> realDispenser;
-    private final Validator<RESULT> validator;
+    private final Verifier<RESULT> validator;
 
     public AssertingOpDispenser(
         DriverAdapter<CycleOp<RESULT>, S> adapter,
         ParsedOp pop,
         OpDispenser<CycleOp<RESULT>> realDispenser,
-        Validator<RESULT> validator
+        Verifier<RESULT> validator
     ) {
         super(adapter, pop, adapter.getSpaceFunc(pop));
         this.realDispenser = realDispenser;

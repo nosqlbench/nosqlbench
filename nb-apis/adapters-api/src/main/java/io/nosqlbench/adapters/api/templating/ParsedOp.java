@@ -30,6 +30,7 @@ import io.nosqlbench.nb.api.config.fieldreaders.DynamicFieldReader;
 import io.nosqlbench.nb.api.config.fieldreaders.StaticFieldReader;
 import io.nosqlbench.nb.api.config.standard.NBConfigError;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
+import io.nosqlbench.nb.api.engine.util.Tagged;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.nb.api.labels.NBLabelSpec;
 import io.nosqlbench.nb.api.labels.NBLabels;
@@ -224,7 +225,7 @@ opfield1: value1
  </UL>
  </P>
 
- <H3>Enabling Activity Params</H3>
+ <H3>Enabling StandardActivity Params</H3>
  <P>If a user wants to allow an activity param as an default for an fields, they must publish the op
  field
  name in the configuration model for the activity. Otherwise it is an error to specify the value at
@@ -352,7 +353,7 @@ prepared: false
  document level,
  down to each block and then down to each statement.
 
- <H3>Activity Params</H3>
+ <H3>StandardActivity Params</H3>
  <PRE>{@code
 ./nb run driver=... workload=... cl=LOCAL_QUORUM
 }</PRE>
@@ -380,7 +381,7 @@ prepared: false
  field within the set of possible fields. More than one will throw an error.</LI>
  </UL>
  </P> */
-public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String, ?>>, NBComponent, StaticFieldReader, DynamicFieldReader {
+public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String, ?>>, NBComponent, StaticFieldReader, DynamicFieldReader, Tagged {
 
     private static final Logger logger = LogManager.getLogger(ParsedOp.class);
 
@@ -393,34 +394,33 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
     private final List<CapturePoint> captures = new ArrayList<>();
 
     private final OpTemplate _opTemplate;
-    private final NBConfiguration activityCfg;
+    private final Map<String,Object> activityCfg;
     private final ParsedTemplateMap tmap;
     private final NBLabels labels;
     private final List<Function<Map<String, Object>, Map<String, Object>>> preprocessors;
 
-    /**
-     Create a parsed command from an Op template. This version is exactly like
-     except that it allows
-     preprocessors. Preprocessors are all applied to the the op template before
-     it is applied to the parsed command fields, allowing you to combine or destructure
-     fields from more tha one representation into a single canonical representation
-     for processing.
-     @param opTemplate
-     The OpTemplate as provided by a user via YAML, JSON, or API (data structure)
-     @param activityCfg
-     The activity configuration, used to resolve nested config parameters
-     @param preprocessors
-     Map->Map transformers.
-     */
-
+    public ParsedOp(ParsedOp pop, NBConfiguration config) {
+        this(pop._opTemplate,new LinkedHashMap<>(pop.activityCfg) {{ this.putAll(config.getMap());}},List.of(),pop.parent);
+    }
+///     Create a parsed command from an Op template. Preprocessors are all applied to the the op template before
+///     it is applied to the parsed command fields, allowing you to combine or destructure
+///     fields from more tha one representation into a single canonical representation
+///     for processing.
+///     @param opTemplate The OpTemplate as provided by a user via YAML, JSON, or API (data structure)
+///     @param activityCfg The activity configuration, used to resolve nested config parameters
+///     @param preprocessors Map->Map transformers.
     public ParsedOp(
-        OpTemplate opTemplate, NBConfiguration activityCfg,
+        OpTemplate opTemplate,
+        Map<String,Object> activityCfg,
         List<Function<Map<String, Object>, Map<String, Object>>> preprocessors,
         NBComponent parent
     ) {
+        // TODO: the block and op name below should be populated more robustly
+        // They should not be strictly required, but a way of taking "what is provided" in the
+        // name should be used
         super(
             parent,
-            NBLabels.forKV(((parent instanceof ParsedOp) ? "subop" : "op"), opTemplate.getName())
+            NBLabels.forMap(opTemplate.getTags())
         );
         this._opTemplate = opTemplate;
         this.activityCfg = activityCfg;
@@ -435,7 +435,7 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
 
         this.tmap = new ParsedTemplateMap(
             getName(), map, opTemplate.getBindings(),
-                                          List.of(opTemplate.getParams(), activityCfg.getMap())
+                                          List.of(opTemplate.getParams(), activityCfg)
         );
 
         NBLabels opLabels = parent.getLabels().and(
@@ -894,6 +894,7 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return tmap.getOptionalTargetEnum(enumclass, valueClass);
     }
 
+
     public <E extends Enum<E>, V> Optional<TypeAndTarget<E, V>> getOptionalTypeAndTargetEnum(
         Class<E> enumclass, Class<V> valueClass) {
         return tmap.getOptionalTargetEnum(enumclass, valueClass);
@@ -1025,6 +1026,11 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return this._opTemplate.getRefKey();
     }
 
+    @Override
+    public Map<String, String> getTags() {
+        return this._opTemplate.getTags();
+    }
+
 
     public static enum SubOpNaming {
         SubKey, ParentAndSubKey
@@ -1046,9 +1052,9 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return new ParsedOp(
             new OpData(
                 "sub-op of '" + this.getName() + "' field '" + fromOpField + "', element '" + elemName + "' name '" + subopName + "'",
-                subopName, new LinkedHashMap<String, String>(_opTemplate.getTags()) {{
-                put("subop", subopName);
-            }}, _opTemplate.getBindings(), _opTemplate.getParams(), opfields, 100
+                subopName,
+                new LinkedHashMap<String, String>(Map.of("subop", subopName)),
+                _opTemplate.getBindings(), _opTemplate.getParams(), opfields, 100
             ), this.activityCfg, List.of(), this
         );
     }
@@ -1096,10 +1102,23 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return subOpMap;
     }
 
+    public ParsedOp takeAsSubConfig(String s) {
+        Object subtree = tmap.takeStaticValue(s, Object.class);
+        if (subtree instanceof Map map) {
+            return makeSubOp(s, s, map, SubOpNaming.SubKey);
+        } else if (subtree instanceof String seq) {
+            return makeSubOp(s, s, Map.of(s, seq), SubOpNaming.SubKey);
+        } else {
+            throw new RuntimeException(
+                "unable to make sub config from key '" + s + "', because " + "it is a " + subtree.getClass().getCanonicalName());
+        }
+    }
+
     public ParsedOp getAsSubOp(String name, SubOpNaming naming) {
         Object o = _opTemplate.getOp().map(raw -> raw.get(name)).orElseThrow(
             () -> new OpConfigError(
                 "Could not find op field '" + name + "' for subop on parent op '" + name + "'"));
+
         if (o instanceof Map map) {
             return makeSubOp(this.getName(), name, map, naming);
         } else {
@@ -1230,8 +1249,8 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
         return tmap.getCaptures();
     }
 
-    public Map<String, String> getBindPoints() {
-        return null;
+    public List<BindPoint> getBindPoints() {
+        return tmap.getBindPoints();
     }
 
     public boolean isDefinedExactly(String... fields) {

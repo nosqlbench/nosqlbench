@@ -34,14 +34,6 @@ public interface Motor<T> extends Runnable, Stoppable {
 
     Input getInput();
 
-    /**
-     * Set the action on this motor. It will be applied to each input.
-     *
-     * @param action an instance of activityAction
-     * @return this ActivityMotor, for method chaining
-     */
-    Motor<T> setAction(Action action);
-
     Action getAction();
 
     /**

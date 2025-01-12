@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 @Categories({Category.state})
 public class ThreadNum implements LongUnaryOperator {
 
+    private final long defaultValue;
+
     private static final Pattern pattern = Pattern.compile("^.*?(\\d+).*$");
     private final transient ThreadLocal<Long> threadLocalInt = new ThreadLocal<Long>() {
         @Override
@@ -41,13 +43,17 @@ public class ThreadNum implements LongUnaryOperator {
             if (matcher.matches()) {
                 return Long.valueOf(matcher.group(1));
             } else {
-                throw new RuntimeException(
-                        "Unable to match a digit sequence in thread name:" + Thread.currentThread().getName()
-                );
+                return defaultValue;
             }
         }
     };
 
+    public ThreadNum() {
+        this(-1L);
+    }
+    public ThreadNum(long defaultValue) {
+        this.defaultValue = defaultValue;
+    }
     @Override
     public long applyAsLong(long input) {
         return threadLocalInt.get();
