@@ -217,11 +217,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: exported-docs
+          path: build-docs
 
       - name: overlay docs changes and push
         run: |
           set -x
-          mv exported_docs.zip build-docs/.
           cd build-docs
           ./doimport.sh
           rm exported_docs.zip
