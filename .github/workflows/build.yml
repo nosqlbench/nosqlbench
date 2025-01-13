@@ -136,21 +136,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: javadocs
+          path: javadocs
 
       - name: overlay javadocs changes and push
         run: |
           set -x
           git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
           git config --global user.name "${{ secrets.NBDROID_NAME }}"
-          mkdir javadocs/snapshot
-          cd javadocs/snapshot
-          rm -rf *
-          mv ../../nosqlbench-*-javadoc.jar javadocs/snapshot
-          tar xvf nosqlbench-*-javadoc.jar
-          rm nosqlbench-*-javadoc.jar
+          cd javadocs
+          ./refresh.sh snapshot
           git add .
           CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
-          echo "found $CHANGES to push for doc updates"
+          echo "found $CHANGES to push for javadocs updates"
           if (( $CHANGES > 0 ))
           then
             git commit -m"javadocs update for $GITHUB_REF"
