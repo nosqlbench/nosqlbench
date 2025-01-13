@@ -64,6 +64,16 @@ jobs:
 #          name: nb-logs
 #          path: logfiles.tgz
 
+      - name: generate javadoc
+        run: mvn javadoc:aggregate-jar
+        continue-on-error: false
+
+      - name: upload javadoc
+        uses: actions/upload-artifact@v4
+        with:
+          name: javadocs
+          path: target/nosqlbench-*-javadoc.jar
+
       - name: export docs
         if: success()
         run: nb5/target/nb5 export-docs
@@ -107,5 +117,42 @@ jobs:
           if (( $CHANGES > 0 ))
           then
             git commit -m"docs update for $GITHUB_REF"
+            git push
+          fi
+
+  javadocs:
+    needs: builddocs
+    runs-on: ubuntu-22.04
+    if: ${{ github.repository == 'nosqlbench/nosqlbench' && github.event_name == 'pull_request' && github.ref_name == 'main' }}
+    steps:
+
+      - name: checkout javadocs
+        uses: actions/checkout@v4
+        with:
+          repository: nosqlbench/nosqlbench-javadocs
+          path: javadocs
+
+      - name: download javadocs
+        uses: actions/download-artifact@v4
+        with:
+          name: javadocs
+
+      - name: overlay javadocs changes and push
+        run: |
+          set -x
+          git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
+          git config --global user.name "${{ secrets.NBDROID_NAME }}"
+          mkdir javadocs/snapshot
+          cd javadocs/snapshot
+          rm -rf *
+          mv ../../nosqlbench-*-javadoc.jar javadocs/snapshot
+          tar xvf nosqlbench-*-javadoc.jar
+          rm nosqlbench-*-javadoc.jar
+          git add .
+          CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
+          echo "found $CHANGES to push for doc updates"
+          if (( $CHANGES > 0 ))
+          then
+            git commit -m"javadocs update for $GITHUB_REF"
             git push
           fi
