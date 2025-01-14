@@ -65,7 +65,8 @@ class ExitStatusIntegrationTests {
 
         // Forcing a thread exception via basic command issue.
         ProcessResult result = invoker.run("exitstatus_threadexception", 30,
-                "java", "--enable-preview", "-jar", JARNAME, "--logs-dir", "logs/test/threadexcep", "--logs-level",
+                java, "--enable-preview", "-jar", JARNAME, "--logs-dir", "logs/test/threadexcep",
+            "--logs-level",
             "debug", "run",
                 "driver=diag", "cyclerate=10", "not_a_thing", "cycles=100", "-vvv"
         );
@@ -79,7 +80,8 @@ class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_asyncstoprequest", 60,
-                "java", "--enable-preview", "-jar", JARNAME, "--logs-dir", "logs/test/asyncstop", "--logs-level", "debug", "run",
+                java, "--enable-preview", "-jar", JARNAME, "--logs-dir", "logs/test/asyncstop",
+            "--logs-level", "debug", "run",
                 "driver=diag", "threads=2", "cyclerate=10", "op=erroroncycle:erroroncycle=10", "cycles=50", "-vvv"
         );
         assertThat(result.exception).isNull();
