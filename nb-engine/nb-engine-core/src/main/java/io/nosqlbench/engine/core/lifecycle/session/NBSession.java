@@ -25,7 +25,7 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.nb.api.components.status.NBHeartbeatComponent;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.engine.activityimpl.ActivityConfig;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import org.apache.logging.log4j.LogManager;
@@ -165,7 +165,7 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
         for (String containerName : containers.keySet()) {
             NBBufferedContainer ctx = containers.get(containerName);
             logger.debug("awaiting end of activities in container '" + containerName + "':" +
-                ctx.controller().getActivityDefs().stream().map(ActivityDef::getAlias).toList());
+                ctx.controller().getActivityConfigs().stream().map(ActivityConfig::getAlias).toList());
             ctx.controller().shutdown();
             ctx.controller().awaitCompletion(Long.MAX_VALUE);
             logger.debug("completed");

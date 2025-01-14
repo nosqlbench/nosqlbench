@@ -19,7 +19,7 @@ package io.nosqlbench.engine.api.activityapi.cyclelog.outputs.logger;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog.CanFilterResultValue;
 import io.nosqlbench.engine.api.activityapi.output.Output;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
+import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -28,12 +28,12 @@ import java.util.function.Predicate;
 public class LoggingOutput implements Output, CanFilterResultValue {
     private final static Logger logger = LogManager.getLogger(LoggingOutput.class);
 
-    private final ActivityDef def;
+    private final NBConfiguration def;
     private final long slot;
     private final ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
     private Predicate<ResultReadable> filter;
 
-    public LoggingOutput(ActivityDef def, long slot) {
+    public LoggingOutput(NBConfiguration def, long slot) {
         this.def = def;
         this.slot = slot;
     }
@@ -45,7 +45,7 @@ public class LoggingOutput implements Output, CanFilterResultValue {
         }
         sb.get().setLength(0);
         sb.get()
-                .append("activity=").append(def.getAlias())
+                .append("activity=").append(def.get("alias",String.class))
                 .append(",cycle=").append(completedCycle)
                 .append(",result=").append((byte) (result & 127));
         logger.info(() -> sb.get().toString());

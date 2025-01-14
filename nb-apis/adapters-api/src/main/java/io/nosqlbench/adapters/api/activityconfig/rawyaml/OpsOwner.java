@@ -107,7 +107,7 @@ public class OpsOwner extends RawOpFields {
             }
             setOpsFieldByType(itemizedMaps);
         } else if (object instanceof String) {
-            setOpsFieldByType(Map.of("stmt1", (String) object));
+            setOpsFieldByType(Map.of("stmt", (String) object));
         } else {
             throw new RuntimeException("Unknown object type: " + object.getClass());
         }

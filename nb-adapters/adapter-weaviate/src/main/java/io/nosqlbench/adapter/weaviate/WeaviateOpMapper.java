@@ -22,7 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import io.nosqlbench.adapter.weaviate.ops.WeaviateBaseOp;
-import io.nosqlbench.adapter.weaviate.opsdispensers.WeaviateBaseOpDispenser;
 import io.nosqlbench.adapter.weaviate.opsdispensers.WeaviateCreateCollectionOpDispenser;
 import io.nosqlbench.adapter.weaviate.opsdispensers.WeaviateCreateObjectsOpDispenser;
 import io.nosqlbench.adapter.weaviate.opsdispensers.WeaviateDeleteCollectionOpDispenser;
@@ -33,7 +32,6 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 public class WeaviateOpMapper implements OpMapper<WeaviateBaseOp<?,?>,WeaviateSpace> {
@@ -53,7 +51,7 @@ public class WeaviateOpMapper implements OpMapper<WeaviateBaseOp<?,?>,WeaviateSp
     public OpDispenser<? extends WeaviateBaseOp<?,?>> apply(
         NBComponent adapterC,
         ParsedOp pop,
-        LongFunction spaceF
+        LongFunction<WeaviateSpace> spaceF
     ) {
         TypeAndTarget<WeaviateOpType, String> typeAndTarget = pop.getTypeAndTarget(
             WeaviateOpType.class,

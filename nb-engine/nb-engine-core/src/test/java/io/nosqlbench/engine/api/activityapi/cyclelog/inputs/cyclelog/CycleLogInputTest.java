@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogOutput;
+import io.nosqlbench.nb.api.config.standard.TestComponent;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +53,7 @@ public class CycleLogInputTest {
 
     @Test
     public void testReader() {
-        CycleLogInput cycleLogInput = new CycleLogInput(cyclefile.getPath());
+        CycleLogInput cycleLogInput = new CycleLogInput(TestComponent.INSTANCE,cyclefile.getPath());
         CycleSegment i1;
         long c;
         i1 = cycleLogInput.getInputSegment(1);

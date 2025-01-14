@@ -49,8 +49,7 @@ public interface AsyncAction<D> extends Action {
      * concurrency limits for the new cycle.
      *
      * Each action implementation is responsible for tracking and controlling
-     * its own limits of concurrency. The {@link BaseAsyncAction} base class is a
-     * convenient starting point for such implementations.
+     * its own limits of concurrency.
      *
      * If the action is known to have additional open slots for an operations to
      * be started (according to the configured concurrency limits),

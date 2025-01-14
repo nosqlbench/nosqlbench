@@ -19,18 +19,19 @@ package io.nosqlbench.engine.api.activityimpl;
 
 
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.OpLookup;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
+import io.nosqlbench.adapters.api.activityimpl.uniform.Verifier;
 import io.nosqlbench.adapters.api.activityimpl.uniform.ValidatorSource;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers.AssertingOpDispenser;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import io.nosqlbench.nb.api.errors.OpConfigError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 /// This is a functional wrapper layer which will upgrade a basic [CycleOp] to
 /// one that has a validator provided by it's [DriverAdapter], so long as the
@@ -40,23 +41,31 @@ public class OpAssertions {
     public final static Logger logger = LogManager.getLogger(OpAssertions.class);
 
     public static <OP extends CycleOp<?>, SPACE extends Space> OpDispenser<? extends OP> wrapOptionally(
-        DriverAdapter<? extends OP, ? extends SPACE> adapter, OpDispenser<? extends OP> dispenser,
-        ParsedOp pop
+        DriverAdapter<? extends OP, ? extends SPACE> adapter,
+        OpDispenser<? extends OP> dispenser,
+        ParsedOp pop,
+        OpLookup lookup
     ) {
 
-        Optional<String> validatorName = pop.takeOptionalStaticValue("validator", String.class);
-        if (validatorName.isEmpty()) return dispenser;
+//        Optional<String> validatorName = pop.takeOptionalStaticValue("validators", String.class);
+//        if (validatorName.isEmpty()) return dispenser;
 
-        if (adapter instanceof ValidatorSource vs) {
-            Optional<Validator> validator = vs.getValidator(validatorName.get(),pop);
-            if (validator.isEmpty()) {
-                throw new OpConfigError(
-                    "a validator '" + validatorName.get() + "' was requested, but adapter '" + adapter.getAdapterName() + "' did not find it.");
-            }
-            return new AssertingOpDispenser(adapter, pop, dispenser, validator.get());
-        } else {
-            throw new OpConfigError(
-                "a validator '" + validatorName.get() + "' was specified, " + "but the adapter '" + adapter.getAdapterName() + "' does " + "not implement " + adapter.getClass().getSimpleName());
+        List<ValidatorSource> sources = new ArrayList<>();
+        if (adapter instanceof ValidatorSource s) {
+            sources.add(s);
         }
+        if (dispenser instanceof ValidatorSource s) {
+            sources.add(s);
+        }
+
+        for (ValidatorSource source : sources) {
+            List<Verifier> validator = source.getValidator(adapter, pop, lookup);
+            for (Verifier v : validator) {
+                dispenser = new AssertingOpDispenser(adapter, pop, dispenser, v);
+                logger.trace("added post-run validator for op '" + pop.getName() + "'");
+            }
+        }
+
+        return dispenser;
     }
 }

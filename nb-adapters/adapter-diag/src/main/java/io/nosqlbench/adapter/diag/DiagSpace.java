@@ -17,17 +17,12 @@
 package io.nosqlbench.adapter.diag;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
-import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
 import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.config.standard.ConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfigModel;
-import io.nosqlbench.nb.api.config.standard.NBConfiguration;
-import io.nosqlbench.nb.api.config.standard.Param;
+import io.nosqlbench.nb.api.config.standard.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DiagSpace extends BaseSpace<DiagSpace> implements ActivityDefObserver {
+public class DiagSpace extends BaseSpace<DiagSpace> implements NBConfigurable {
     private final Logger logger = LogManager.getLogger(DiagSpace.class);
 
     private final NBConfiguration cfg;
@@ -47,7 +42,10 @@ public class DiagSpace extends BaseSpace<DiagSpace> implements ActivityDefObserv
         this.errorOnClose = cfg.get("erroronclose",boolean.class);
     }
 
-    public static NBConfigModel getConfigModel() {
+    public NBConfigModel getConfigModel() {
+        return getStaticConfigModel();
+    }
+    public static NBConfigModel getStaticConfigModel() {
         return ConfigModel.of(DiagSpace.class)
             .add(Param.defaultTo("interval",1000))
             .add(Param.defaultTo("erroronclose", false))
@@ -60,11 +58,6 @@ public class DiagSpace extends BaseSpace<DiagSpace> implements ActivityDefObserv
         }
     }
 
-    @Override
-    public void onActivityDefUpdate(ActivityDef activityDef) {
-        NBConfiguration cfg = getConfigModel().apply(activityDef.getParams().getStringStringMap());
-        this.applyConfig(cfg);
-    }
 
     @Override
     public void close() throws Exception {
@@ -73,4 +66,5 @@ public class DiagSpace extends BaseSpace<DiagSpace> implements ActivityDefObserv
             throw new RuntimeException("diag space was configured to throw this error when it was configured.");
         }
     }
+
 }

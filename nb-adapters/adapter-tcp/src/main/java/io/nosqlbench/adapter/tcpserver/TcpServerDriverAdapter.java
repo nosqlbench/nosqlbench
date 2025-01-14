@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapter.tcpserver;
 import io.nosqlbench.adapter.stdout.StdoutDriverAdapter;
+import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplates;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -65,7 +66,9 @@ public class TcpServerDriverAdapter extends BaseDriverAdapter<TcpServerOp, TcpSe
     }
 
     @Override
-    public List<OpTemplate> getSyntheticOpTemplates(OpsDocList opsDocList, Map<String,Object> cfg) {
+    public OpTemplates getSyntheticOpTemplates(
+        OpTemplates opsDocList,
+        Map<String,Object> cfg) {
         return adap.getSyntheticOpTemplates(opsDocList, cfg);
     }
 

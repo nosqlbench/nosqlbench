@@ -16,10 +16,10 @@
 
 package io.nosqlbench.engine.api.activityapi.cyclelog.inputs.cyclelog;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.annotations.Service;
 
 @Service(value = InputType.class, selector = "cyclelog")
@@ -27,15 +27,15 @@ public class CycleLogInputType implements InputType {
 
     @Override
     public InputDispenser getInputDispenser(Activity activity) {
-        return new Dispenser(activity);
+        return new CycleLogInputDispenser(activity);
     }
 
-    public static class Dispenser implements InputDispenser {
+    public static class CycleLogInputDispenser implements InputDispenser {
 
         private final Activity activity;
         private final Input input;
 
-        public Dispenser(Activity activity) {
+        public CycleLogInputDispenser(Activity activity) {
             this.activity = activity;
             this.input = new CycleLogInput(activity);
         }

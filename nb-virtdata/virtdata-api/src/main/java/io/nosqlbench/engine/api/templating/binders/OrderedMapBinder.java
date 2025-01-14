@@ -36,8 +36,11 @@ public class OrderedMapBinder implements LongFunction<Map<String, Object>> {
             } else if (cmd.isDynamic(field)) {
                 bindermap.put(field,cmd.getMapper(field));
                 protomap.put(field,null);
+            } else if (cmd.getBindings().containsKey(field)){
+                bindermap.put(field,cmd.getMapper(field));
+                protomap.put(field,null);
             } else {
-                throw new OpConfigError("There was no field named " + field + " while building a MapBinder");
+                throw new OpConfigError("There was no field named '" + field + "' while building a MapBinder");
             }
         }
     }

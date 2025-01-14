@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers;
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
 import java.util.Map;

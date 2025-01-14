@@ -17,9 +17,9 @@
 
 package io.nosqlbench.scenarios.simframe.optimizers;
 
-import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.simrate.CycleRateSpec;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.ContainerActivitiesController;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
@@ -60,7 +60,8 @@ public class CMD_reset extends NBBaseCommand {
      */
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        Optional<Activity> optionalActivity = Optional.ofNullable(params.get("activity")).flatMap(controller::getActivity);
+        Optional<Activity> optionalActivity =
+            Optional.ofNullable(params.get("activity")).flatMap(controller::getOptionalActivity);
         if (params.get("activity")!=null && optionalActivity.isEmpty()) {
             throw new RuntimeException("you specified activity '" + params.get("activity") + "' but it was not found.");
         }
@@ -80,21 +81,24 @@ public class CMD_reset extends NBBaseCommand {
                     default -> {
                         if (!IGNORABLE.contains(key)) {
                             logger.debug("Resetting parameter: " + key + " to " + value);
-                            flywheel.getActivityDef().getParams().put(key, value);
+                            flywheel.getConfig().update(key, value);
                         }
                     }
                 }
             });
 
             // Get the original cycle count and re-apply it
-            long cycles = Long.parseLong((String) flywheel.getActivityDef().getParams().get("cycles"));
-            logger.debug("Resetting cycle count to " + cycles + " cycles");
-            flywheel.getActivityDef().setEndCycle(cycles);
+            long last_exclusive = flywheel.getConfig().getCyclesSpec().last_exclusive();
+            logger.debug("Resetting last cycle to " + last_exclusive + " cycles");
+            flywheel.getConfig().updateLastCycle(last_exclusive);
 
             //TODO: This needs to be reworked, but simply calling controller.start on the flywheel results in 2
             //      copies of the activity running simultaneously. This is a temporary workaround.
             SimFrameUtils.awaitActivity(flywheel);
-            flywheel.getMotorDispenserDelegate().getMotor(flywheel.getActivityDef(), 0).run();
+
+//            flywheel.getWiring().getMotorDispenserDelegate().getMotor(flywheel.getConfig(), 0)
+            //            .run();
+            // TODO Implement this correctly around new API
         }
 
         return null;

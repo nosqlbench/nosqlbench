@@ -16,8 +16,8 @@
 
 package io.nosqlbench.engine.api.activityimpl.input;
 
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
-import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import org.junit.jupiter.api.Test;
 
@@ -25,16 +25,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class AtomicInputTest {
 
+    private Activity activity(String cfg) {
+        return new Activity(new TestComponent("testing","atomicinput"),
+            Activity.configFor(cfg));
+    }
     @Test
     public void testThatNoCyclesAndNoRecyclesMeansZero() {
-        AtomicInput input = new AtomicInput(new TestComponent("testing","atomicinput"), ActivityDef.parseActivityDef("alias=foo;cycles=0;recycles=0"));
+        AtomicInput input = new AtomicInput(activity("alias=foo;cycles=0;recycles=0"));
         CycleSegment inputSegment = input.getInputSegment(1);
         assertThat(inputSegment).isNull();
     }
 
     @Test
     public void testThatNoCyclesAndDefaultRecyclesMeans1xCycles() {
-        AtomicInput input = new AtomicInput(new TestComponent("testing","atomicinput"), ActivityDef.parseActivityDef("alias=foo;cycles=10"));
+        AtomicInput input = new AtomicInput(activity("alias=foo;cycles=10"));
         CycleSegment inputSegment =null;
 
         inputSegment= input.getInputSegment(10);
@@ -51,7 +55,7 @@ public class AtomicInputTest {
         int intendedRecycles=4;
         int stride=10;
 
-        AtomicInput input = new AtomicInput(new TestComponent("testing","atomicinput"), ActivityDef.parseActivityDef("alias=foo;cycles="+intendedCycles+";recycles="+intendedRecycles));
+        AtomicInput input = new AtomicInput(activity("alias=foo;cycles="+intendedCycles+";recycles="+intendedRecycles));
         CycleSegment segment =null;
         for (int nextRecycle = 0; nextRecycle < intendedRecycles; nextRecycle++) {
             for (int nextCycle = 0; nextCycle < intendedCycles; nextCycle+=stride) {
@@ -66,14 +70,14 @@ public class AtomicInputTest {
 
     @Test
     public void testThatOneCycleAndOneRecycleYieldsOneTotal() {
-        AtomicInput input = new AtomicInput(new TestComponent("testing","atomicinput"), ActivityDef.parseActivityDef("alias=foo;cycles=1;recycles=1"));
+        AtomicInput input = new AtomicInput(activity("alias=foo;cycles=1;recycles=1"));
         CycleSegment segment = input.getInputSegment(1);
         assertThat(segment).isNotNull();
         assertThat(segment.nextCycle()).isEqualTo(0L);
     }
     @Test
     public void testThatCycleAndRecycleOffsetsWork() {
-        AtomicInput input = new AtomicInput(new TestComponent("testing","atomicinput"), ActivityDef.parseActivityDef("alias=foo;cycles=310..330;recycles=37..39"));
+        AtomicInput input = new AtomicInput(activity("alias=foo;cycles=310..330;recycles=37..39"));
         CycleSegment segment = null;
         int stride=10;
         segment = input.getInputSegment(stride);
@@ -95,8 +99,8 @@ public class AtomicInputTest {
 
     @Test
     public void testEmptyIntervalShouldNotProvideValues() {
-        AtomicInput i = new AtomicInput(new TestComponent("testing","atomicinput"),ActivityDef.parseActivityDef("alias=foo;cycles=23..23"));
-        CycleSegment inputSegment = i.getInputSegment(1);
+        AtomicInput input = new AtomicInput(activity("alias=foo;cycles=23..23"));
+        CycleSegment inputSegment = input.getInputSegment(1);
         assertThat(inputSegment).isNull();
     }
 }

@@ -1,0 +1,227 @@
+direction: down
+
+command:"activity command" {
+ params:"activity params" {
+  tooltip:|md
+   An activity is started with a set of named parameters and arguments.
+   These parameters may apply to multiple matching parameters by name:
+   1. The template variables in any workload templates
+   2. The standard activity parameters, like threads, cycles, ...
+   3. Any specific overrides allowed for related op templates
+  |
+  workload
+  other_params:"[other params]"
+  driver
+  }
+}
+
+loader:"loader(workload)"
+
+workload_template:"raw\nworkload\ntemplate" {
+  tooltip:|md
+   Each workload template is a datastructure
+   which can be provided as yaml, json, etc.
+   The raw text of the workload template is
+   first updated with template variables for
+   any TEMPLATE(...) patterns before being
+   deserialized into a native data structure
+   in memory.
+  |
+  tpl1:"raw\nop\ntemplate" {
+    tooltip:|md
+     The raw op template is a minimal "sugared"
+     format which allows users to specify op
+     fields and structure in a minimal form
+    |
+  }
+  tpl2dotdotdot:"...[other templates\nprocessed in\nthe same way]"
+}
+
+normalization:"Op Template\nNormalization\n(raw template)" {
+ tooltip:|md
+  The raw op template structure is de-sugared
+  and layered according to the rules of
+  _Uniform Workload Specification_, combining
+  document, block, and op-level details together
+  to provide a normalized view at the op level.
+ |
+ raw_op_template:"raw op\ntemplate"
+}
+op_template:"(normal)\nop template" {
+ tooltip:|md
+  A normalized op template is self-standing, with
+  all document and block level default and settings
+  applied. This allows activities to view op templates
+  as a simple list of op recipes to be executed
+ |
+}
+
+adapter_selection:"adapter\nselection" {
+ tooltip:|md
+  The adapter selected to interpret the op template
+  can be specified in the op template directly as
+  'driver', or it can come from the 'driver' parameter
+  of the activity params.
+ |
+}
+
+adapterF:"AdapterResolver(parent,name,config)->adapter" {
+        tooltip:|md
+         The adapter is loaded according to the specified
+         adapter name (whether from the op template directly,
+         or from the default provided in the activity parameters)
+        |
+        parent: {
+        tooltip:|md
+         Within the NB component tree, the parent for an adapter is
+         the activity which loaded it. This parent is provided to the
+         adapter resolver to be injected into the adapter when it is loaded.
+        |}
+        name:"adapter\nname" {
+         tooltip:|md
+          Each adapter is identified by a canonical name, like 'http' or 'cql'
+         |
+        }
+        config: "activity\nconfig" {
+         tooltip:|md
+          The adapter is initialized with a subset of matching activity
+          parameters which are valid for it.
+         |
+        }
+        adapters:"adapter\ncache" {
+          tooltip:|md
+           adapter instances are cached by adapter name,
+           and only one instance of any given adapter name
+           is realized for a given activity.
+          |
+          adapter1: "selected\nadapter" {
+           tooltip:|md
+           |
+           spaces: "space\ncache" {
+             tooltip:|md
+              A cache of stateful spaces is maintained per
+              adapter. This is the designated area to keep
+              per-instance state for a given native driver,
+              such as the native driver instance itself and
+              any related object wiring needed for it to
+              function as a normal application would. Think
+              of the space as a mini-application, but just
+              the parts that deal with the native
+              driver API.
+             |
+
+            space1: "selected\nspace"
+            space2: "[other\nspaces]"
+           }
+          }
+          adapter2: "[other\nadapters]"
+        }
+}
+
+
+popF:"ParsedOpResolver(parent, adapter, optemplate)" {
+    tooltip:|md
+     The parsed op resolver creates a parsed op out of the
+     op template and any subset of the adapter parameters
+     which are relevant. The op fields take priority,
+     then any block elements, then any document-level elements,
+     and then if needed, specific op fields may be back-filled
+     from the adapter parameters, but only those indicated
+     by the related adapter's config model.
+    |
+    optemplate
+    parent
+    adapter
+}
+
+mapper: "OpMapper(adapter, parsedOp)" {
+  tooltip:|md
+   The Op Mapper selects the type of dispenser to create
+   based on the fit of the op template to the documented
+   examples. The op mapper is not responsible for dispensing
+   executable operations. It is merely a type routing mechanism.
+   It is meant to determine what type of operation to stage,
+   but then the rest of the work is handed off to the op dispenser
+   layer. The logic which builds an operation may be constructed
+   by either the op mapper or the op dispenser, so long as the work
+   of building the operations is actually executed by the dispenser.
+  |
+  SpaceF
+  parsedOp
+}
+
+dispenser:"OpDispenser(cycle)" {
+ tooltip:|md
+  Op dispensers are the workhorse layer of op synthesis. They hold
+  lambdas which map cycles to operations. These lambdas can be created
+  by op mappers and then passed into op dispensers, or the op dispensers
+  can build the lambdas on their own. In any case, the lambdas should be
+  constructed before or in the dispenser constructors.
+ |
+ cycle {
+  tooltip:|md
+   When the op dispenser is called with a given cycle value, it produces
+   an executable operation. These operations are deterministic by cycle,
+   meaning that they can be reproduced or replayed for a given set of cycles.
+   Calling op dispensers often takes microseconds, given the efficiency
+   of Java lambdas.
+  |
+ }
+}
+
+execution:"execute(op)" {
+ op
+}
+
+pop: "ParsedOp" {
+ tooltip:|md
+  The ParsedOp is a representation of an op template, which
+  provides a toolkit of methods for up-converting the template
+  into functions over cycle values. In other words, it helps
+  developers build the exact lambdas which are needed to
+  fill in the last-minute details of a specific executable
+  operation. This can be considered a precedural generation
+  construction kit, driven by the recipes provided by users
+  in their op templates. This is handled in two stages, see below.
+ |
+}
+
+spaceF: {
+ tooltip:|md
+  The space function is kept as a separate mapping layer because
+  it allows op dispensers to dynamically select a state space for
+  an adapter. Thus, it needs to be provided directly to the op
+  mapper so that it may be used to create op dispensers.
+  The space function is a no-op by default, meaning only one space
+  is ever created for an adapter. However, if the user configures a
+  'space' op field, then the value of this field determines the
+  distribution of spaces over cycles for this op template.
+ |
+}
+
+pop->spaceF
+adapterF.adapters.adapter1.spaces->spaceF
+
+op_template->popF.optemplate
+loader->workload_template: "workload\ndeserialization"
+normalization->op_template
+adapterF.adapters.adapter1->popF.adapter
+
+
+mapper->dispenser
+dispenser -> op
+op -> execution.op
+cycle -> dispenser
+execution -> Result
+popF -> pop
+pop -> mapper.parsedOp
+
+command.params.driver->adapter_selection
+command.params.workload -> loader: "workload\nsource\nselection"
+command.params -> adapterF.config
+command.params.other_params -> loader: "template\nvariable\ninterpolation"
+
+workload_template.tpl1->normalization.raw_op_template
+op_template->adapter_selection
+adapter_selection -> adapterF.name
+spaceF -> mapper.spaceF

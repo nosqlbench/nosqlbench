@@ -744,15 +744,13 @@ public class NBCLIOptions {
             final String helpmsg = """
                 Could not recognize command 'ARG'.
                 This means that all of the following searches for a compatible command failed:
-                1. commands: no scenario command named 'ARG' is known. (start, run, await, ...)
-                2. scripts: no auto script named './scripts/auto/ARG.js' in the local filesystem.
-                3. scripts: no auto script named 'scripts/auto/ARG.js' was found in the PROG binary.
+                1. commands: no command named 'ARG' is known. (start, run, await, ...)
                 4. workloads: no workload file named ARG[.yaml] was found in the local filesystem, even in include paths INCLUDES.
                 5. workloads: no workload file named ARG[.yaml] was bundled in PROG binary, even in include paths INCLUDES.
                 6. apps: no application named ARG was bundled in PROG.
 
                 You can discover available ways to invoke PROG by using the various --list-* commands:
-                [ --list-commands, --list-scripts, --list-workloads (and --list-scenarios), --list-apps ]
+                [ --list-commands, --list-drivers, --list-workloads (and --list-scenarios), --list-apps ]
                 """
                 .replaceAll("ARG", cmdParam)
                 .replaceAll("PROG", "nb5")

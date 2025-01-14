@@ -18,7 +18,7 @@ package io.nosqlbench.engine.api.activityapi.cyclelog.outputs.logger;
 
 import io.nosqlbench.engine.api.activityapi.output.Output;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
-import io.nosqlbench.engine.api.activityapi.core.Activity;
+import io.nosqlbench.engine.api.activityimpl.uniform.Activity;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +35,7 @@ public class LoggingMarkerDispenser implements OutputDispenser {
 
     @Override
     public Output getOutput(long slot) {
-        return new LoggingOutput(activity.getActivityDef(), slot);
+        return new LoggingOutput(activity.getConfig()   , slot);
     }
 
 }
