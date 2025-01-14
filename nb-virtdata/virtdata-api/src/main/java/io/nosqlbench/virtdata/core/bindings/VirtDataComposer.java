@@ -117,9 +117,11 @@ public class VirtDataComposer {
 
         for (int pos = 0; pos <fargs.length; pos++) { // Resolve functions recursively if needed
             Object param = fargs[pos];
-            if (param instanceof FunctionCall) {
-
-                List<ResolvedFunction> resolvedAt = resolve(diagnostics, (FunctionCall) param, cconfig);
+            if (param instanceof FunctionCall innerFcall) {
+                if (innerFcall.getInputType()==null) {
+                    innerFcall.setInputType(fcall.getInputType());
+                }
+                List<ResolvedFunction> resolvedAt = resolve(diagnostics, innerFcall, cconfig);
                 Object[] pfuncs = new Object[resolvedAt.size()];
                 for (int pfunc = 0; pfunc < pfuncs.length; pfunc++) {
                     pfuncs[pfunc]=resolvedAt.get(pfunc).getFunctionObject();
@@ -167,6 +169,11 @@ public class VirtDataComposer {
 
         for (int i = flow.getExpressions().size() - 1; i >= 0; i--) {
             FunctionCall call = flow.getExpressions().get(i).getCall();
+            if (flow.getExpressions().size()==1) {
+                if (call.getInputType()==null) {
+                    call.setInputType("long");
+                }
+            }
 
             diagnostics.trace("FUNCTION[" + i + "]: " + call.toString() + ", resolving args");
 
@@ -306,7 +313,8 @@ public class VirtDataComposer {
      * @param funcs the list of candidate functions offered at each phase, in List&lt;List&gt; form.
      * @return a List of resolved functions that has been fully optimized
      */
-    private List<ResolvedFunction> optimizePath(List<List<ResolvedFunction>> funcs, Class<?> type) {
+    public List<ResolvedFunction> optimizePath(List<List<ResolvedFunction>> funcs,
+        Class<?> type) {
         List<ResolvedFunction> prevFuncs = null;
         List<ResolvedFunction> nextFuncs = null;
         int progress = -1;
@@ -345,12 +353,18 @@ public class VirtDataComposer {
                 progress += reduceByPreferredResultTypes(funcs.get(0));
             }
         }
+
+        for (List<ResolvedFunction> func : funcs) {
+            func.sort(ResolvedFunction.PREFERRED_TYPE_COMPARATOR);
+        }
+
         List<ResolvedFunction> optimized = funcs.stream().map(l -> l.get(0)).collect(Collectors.toList());
 
         return optimized;
     }
 
-    private int reduceByRequiredResultsType(List<ResolvedFunction> endFuncs, Class<?> resultType) {
+    public int reduceByRequiredResultsType(List<ResolvedFunction> endFuncs,
+        Class<?> resultType) {
         int progressed = 0;
         LinkedList<ResolvedFunction> tmpList = new LinkedList<>(endFuncs);
         for (ResolvedFunction endFunc : tmpList) {

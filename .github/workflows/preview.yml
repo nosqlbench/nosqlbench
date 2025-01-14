@@ -207,30 +207,30 @@ jobs:
         echo "PREVIEW_VERSION=${{ needs.preview-build.outputs.preview_version }}" >> $GITHUB_ENV
         echo "DOCKER_TAGS=${{ needs.preview-build.outputs.docker_tags }}" >> $GITHUB_ENV
 
-      - name: checkout build docs
-        uses: actions/checkout@v4
-        with:
-          repository: nosqlbench/nosqlbench-build-docs
-          path: build-docs
+    - name: checkout build docs
+      uses: actions/checkout@v4
+      with:
+        repository: nosqlbench/nosqlbench-build-docs
+        path: build-docs
 
-      - name: download exported_docs
-        uses: actions/download-artifact@v4
-        with:
-          name: exported-docs
-          path: build-docs
+    - name: download exported_docs
+      uses: actions/download-artifact@v4
+      with:
+        name: exported-docs
+        path: build-docs
 
-      - name: overlay docs changes and push
-        run: |
-          set -x
-          cd build-docs
-          ./doimport.sh
-          rm exported_docs.zip
-          git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
-          git config --global user.name "${{ secrets.NBDROID_NAME }}"
-          git add .
-          git tag -f ${{ env.PREVIEW_VERSION }}
-          git commit -m"docs update for ${{ env.PREVIEW_VERSION }}"
-          git push
+    - name: overlay docs changes and push
+      run: |
+        set -x
+        cd build-docs
+        ./doimport.sh
+        rm exported_docs.zip
+        git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
+        git config --global user.name "${{ secrets.NBDROID_NAME }}"
+        git add .
+        git tag -f ${{ env.PREVIEW_VERSION }}
+        git commit -m"docs update for ${{ env.PREVIEW_VERSION }}"
+        git push
 
   javadocs:
     needs: preview-docs
