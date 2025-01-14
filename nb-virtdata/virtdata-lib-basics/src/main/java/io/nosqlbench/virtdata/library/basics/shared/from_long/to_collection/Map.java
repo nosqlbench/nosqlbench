@@ -18,73 +18,88 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.api.annotations.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
 
-/**
- * Create a {@code Map} from a long input based on three functions,
- * the first to determine the map size, and the second to populate
- * the map with key objects, and the third to populate the map with
- * value objects. The long input fed to the second and third functions
- * is incremented between entries.
- *
- * To directly create Maps with key and value Strings using the same
- * mapping functions, simply use {@link StringMap} instead.
- */
+/// Create a {@code Map} from a long input based on three functions,
+/// the first to determine the map size, and the second to populate
+/// the map with key objects, and the third to populate the map with
+/// value objects. The long input fed to the second and third functions
+/// is incremented between entries.
+///
+/// To directly create Maps with key and value Strings using the same
+/// mapping functions, simply use {@link StringMap} instead.
+
 @Categories({Category.collections})
 @ThreadSafeMapper
+@Deprecated
 public class Map implements LongFunction<java.util.Map<Object, Object>> {
+    private final static Logger logger = LogManager.getLogger(Map.class);
 
     private final LongToIntFunction sizeFunc;
     private final LongFunction[] keyFuncs;
     private final LongFunction[] valueFuncs;
     private final Mode mode;
+    private static boolean warned = false;
 
-    @Example({"Map(HashRange(3,7),NumberNameToString(),HashRange(1300,1700))",
-            "create a map of size 3-7 entries, with a key of type " +
-                    "string and a value of type int (Integer by autoboxing)"})
-    public Map(LongToIntFunction sizeFunc,
-               LongFunction<Object> keyFunc,
-               LongFunction<Object> valueFunc) {
+    @Example({
+        "Map(HashRange(3,7),NumberNameToString(),HashRange(1300,1700))",
+        "create a map of size 3-7 entries, with a key of type "
+        + "string and a value of type int (Integer by autoboxing)"
+    })
+    public Map(
+        LongToIntFunction sizeFunc,
+        LongFunction<Object> keyFunc,
+        LongFunction<Object> valueFunc
+    )
+    {
+        logger.warn(this::deprecationMessage);
         this.mode = Mode.VarSized;
 
         this.sizeFunc = sizeFunc;
         this.keyFuncs = new LongFunction[1];
-        keyFuncs[0]=keyFunc;
+        keyFuncs[0] = keyFunc;
         this.valueFuncs = new LongFunction[1];
-        valueFuncs[0]=valueFunc;
+        valueFuncs[0] = valueFunc;
 
     }
 
-    @Example({"Map(NumberNameToString(),HashRange(1300,1700),NumberNameToString(),HashRange(3,7))",
-            "create a map of size 2, with a specific function for each key and each value"})
+    /// This version will allow for an odd number of arguments, in which case it will
+    /// fall back to the other mode where the first argument is a sizing function
+    @Example({
+        "Map(NumberNameToString(),HashRange(1300,1700),NumberNameToString(),HashRange(3,7))",
+        "create a map of size 2, with a specific function for each key and each value"
+    })
     @SafeVarargs
     public Map(LongFunction<Object>... objfuncs) {
-        if ((objfuncs.length%2)!=0) {
+        logger.warn(this::deprecationMessage);
+        if ((objfuncs.length % 2) != 0) {
             Object testValue = objfuncs[0].apply(0L);
             if (testValue instanceof Number n) {
                 LongFunction<Object>[] finalObjfuncs = objfuncs;
-                this.sizeFunc= l -> ((Number) finalObjfuncs[0].apply(l)).intValue();
+                this.sizeFunc = l -> ((Number) finalObjfuncs[0].apply(l)).intValue();
                 objfuncs = Arrays.copyOfRange(objfuncs, 1, objfuncs.length);
-                this.mode=Mode.VarSized;
+                this.mode = Mode.VarSized;
             } else {
                 throw new BasicError("An even number of functions must be provided, unless "
                                      + "the first one produces a numeric value.");
             }
         } else {
             this.mode = Mode.Tuples;
-            int size = objfuncs.length/2;
-            sizeFunc=(l) -> size;
+            int size = objfuncs.length / 2;
+            sizeFunc = (l) -> size;
         }
         int size = objfuncs.length / 2;
         keyFuncs = new LongFunction[size];
         valueFuncs = new LongFunction[size];
         for (int i = 0; i < size; i++) {
-            keyFuncs[i]=objfuncs[i<<1];
-            valueFuncs[i] = objfuncs[(i<<1)+1];
+            keyFuncs[i] = objfuncs[i << 1];
+            valueFuncs[i] = objfuncs[(i << 1) + 1];
         }
     }
 
@@ -102,9 +117,9 @@ public class Map implements LongFunction<java.util.Map<Object, Object>> {
                 break;
             case Tuples:
                 for (int i = 0; i < keyFuncs.length; i++) {
-                    Object keyObject = keyFuncs[i].apply(value +i);
-                    Object valueObject = valueFuncs[i].apply(value+i);
-                    map.put(keyObject,valueObject);
+                    Object keyObject = keyFuncs[i].apply(value + i);
+                    Object valueObject = valueFuncs[i].apply(value + i);
+                    map.put(keyObject, valueObject);
                 }
                 break;
         }
@@ -112,7 +127,23 @@ public class Map implements LongFunction<java.util.Map<Object, Object>> {
     }
 
     private enum Mode {
-        VarSized,
-        Tuples
+        VarSized, Tuples
     }
+
+    private String deprecationMessage() {
+        if (warned) {
+            return "The Map(...) binding is deprecated and will be removed in a future release. "
+                   + "See first warning for help on updating.";
+        }
+        warned = true;
+        return """
+            The Map(...) binding is deprecated and will be removed in a future release.
+            You should use one of the other Map functions which are named more clearly:
+             MapSized(sizefunc,keyfunc,valuefunc)        (sized, with shared seed for all inner functions)
+             MapSizedHashed(sizefunc,keyfunc,valuefunc)  (sized, with re-hashed seed for each inner function)
+             MapSizedStepped(sizefunc,keyfunc,valuefunc) (sized, with incremented seed for each inner function)
+             MapStepped(keyfunc,valuefunc,...)           (pair-wise, with incremented seed for each inner function)
+             MapHashed(keyfunc,valuefunc,...)            (pair-wise, with re-hashed seed for each inner function)""";
+    }
+
 }
