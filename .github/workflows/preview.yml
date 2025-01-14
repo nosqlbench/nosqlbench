@@ -111,6 +111,13 @@ jobs:
           name: javadocs
           path: target/nosqlbench-*-javadoc.jar
 
+# Not sure if this is intended with the new flow, but its absence
+# is breaking downstream jobs, so adding it here as a temporary
+# remedy for now
+      - name: export docs
+        if: success()
+        run: nb5/target/nb5 export-docs
+
       - name: prepare release summary
         id: prepare_summary
         run: |
