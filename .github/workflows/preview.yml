@@ -111,12 +111,18 @@ jobs:
           name: javadocs
           path: target/nosqlbench-*-javadoc.jar
 
-# Not sure if this is intended with the new flow, but its absence
+# Not sure if these are intended with the new flow, but its absence
 # is breaking downstream jobs, so adding it here as a temporary
 # remedy for now
       - name: export docs
         if: success()
         run: nb5/target/nb5 export-docs
+      - name: upload docs artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exported-docs
+          path: exported_docs.zip
 
       - name: prepare release summary
         id: prepare_summary
