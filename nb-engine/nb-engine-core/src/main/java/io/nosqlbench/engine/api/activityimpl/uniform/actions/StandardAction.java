@@ -100,7 +100,6 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends java.uti
                 try {
                     try (Timer.Context ct = executeTimer.time()) {
                         result = op.apply(cycle);
-                        // TODO: break out validation timer from execute
                     }
 
                     try (Timer.Context ignored = verifierTimer.time()) {
