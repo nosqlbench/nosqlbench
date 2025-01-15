@@ -35,18 +35,18 @@ import org.apache.logging.log4j.Logger;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This is the generified version of an Action. All driver adapters us this, as opposed
- * to previous NB versions where it was implemented for each driver.
- * <p>
- * This allows the API to be consolidated so that the internal machinery of NB
- * works in a very consistent and uniform way for all users and drivers.
- *
- * @param <A>
- *     The type of activity
- * @param <R>
- *     The type of operation
- */
-public class StandardAction<A extends StandardActivity<R, ?>, R extends java.util.function.LongFunction> implements SyncAction, ActivityDefObserver {
+ This is the generified version of an Action. All driver adapters us this, as opposed
+ to previous NB versions where it was implemented for each driver.
+ <p>
+ This allows the API to be consolidated so that the internal machinery of NB
+ works in a very consistent and uniform way for all users and drivers.
+ @param <A>
+ The type of activity
+ @param <R>
+ The type of operation */
+public class StandardAction<A extends StandardActivity<R, ?>, R extends java.util.function.LongFunction>
+    implements SyncAction, ActivityDefObserver
+{
     private final static Logger logger = LogManager.getLogger("ACTION");
     private final Timer executeTimer;
     private final Histogram triesHistogram;
@@ -73,15 +73,17 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends java.uti
     @Override
     public int runCycle(long cycle) {
 
-        OpDispenser<? extends CycleOp<?>> dispenser=null;
+        OpDispenser<? extends CycleOp<?>> dispenser = null;
         CycleOp op = null;
 
         try (Timer.Context ct = bindTimer.time()) {
             dispenser = opsequence.apply(cycle);
             op = dispenser.getOp(cycle);
         } catch (Exception e) {
-            throw new RuntimeException("while binding request in cycle " + cycle + " for op template named '" + (dispenser!=null?dispenser.getOpName():"NULL")+
-                "': " + e.getMessage(), e);
+            throw new RuntimeException(
+                "while binding request in cycle " + cycle + " for op template named '" + (
+                    dispenser != null ? dispenser.getOpName() : "NULL") + "': " + e.getMessage(), e
+            );
         }
 
         int code = 0;
@@ -95,22 +97,36 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends java.uti
 
                 dispenser.onStart(cycle);
 
-                try (Timer.Context ct = executeTimer.time()) {
-                    result = op.apply(cycle);
-                    // TODO: break out validation timer from execute
+                try {
+                    try (Timer.Context ct = executeTimer.time()) {
+                        result = op.apply(cycle);
+                        // TODO: break out validation timer from execute
+                    }
+
                     try (Timer.Context ignored = verifierTimer.time()) {
                         CycleFunction<Boolean> verifier = dispenser.getVerifier();
-                        try {
-                            verifier.setVariable("result", result);
-                            verifier.setVariable("cycle",cycle);
-                            Boolean isGood = verifier.apply(cycle);
-                            if (!isGood) {
-                                throw new ResultVerificationError("result verification failed", maxTries - tries, verifier.getExpressionDetails());
+                        if (verifier != null) {
+                            try {
+                                verifier.setVariable("result", result);
+                                verifier.setVariable("cycle", cycle);
+                                Boolean isGood = verifier.apply(cycle);
+                                if (!isGood) {
+                                    throw new ResultVerificationError(
+                                        "result verification failed",
+                                        maxTries - tries,
+                                        verifier.getExpressionDetails()
+                                    );
+                                }
+                            } catch (Exception e) {
+                                throw new ResultVerificationError(
+                                    e,
+                                    maxTries - tries,
+                                    verifier.getExpressionDetails()
+                                );
                             }
-                        } catch (Exception e) {
-                            throw new ResultVerificationError(e, maxTries - tries, verifier.getExpressionDetails());
                         }
                     }
+
                 } catch (Exception e) {
                     error = e;
                 } finally {
