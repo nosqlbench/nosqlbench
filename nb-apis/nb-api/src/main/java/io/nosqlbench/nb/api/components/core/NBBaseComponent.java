@@ -64,9 +64,8 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         labelsAdvisor.add(Conditions.NoSpacesWarning);
 
         labelsAdvisor.validateAll(componentSpecificLabelsOnly.asMap().keySet());
-        labelsAdvisor.validateAll(componentSpecificLabelsOnly.asMap().values());
 
-        labelsAdvisor.setName("Labels", "Check label names and values")
+        labelsAdvisor.setName("Labels", "Check labels")
             .logName();
         NBAdvisorResults advisorResults = getAdvisorResults();
         advisorResults.evaluate();

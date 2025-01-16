@@ -56,6 +56,22 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
         conditions = newConditions;
     }
 
+    public Result<T>[] validateAllBut(Collection<T> elements, T... ignored) {
+        Set<T> ignoreSet = new HashSet(Arrays.asList(ignored));
+        List<T> toValidate = new ArrayList<>();
+        for (T element : elements) {
+            if (!ignoreSet.contains(element)) {
+                toValidate.add(element);
+            }
+        }
+        return validateAll(toValidate);
+    }
+    public Result<T>[] validateOptional(Optional<T> element) {
+        if (element.isPresent()) {
+            return validate(element.get());
+        }
+        return new Result[0];
+    }
     public Result<T>[] validateAll(Collection<T> elements) {
         List<Result<T>> buffer = new ArrayList<>();
         for (T element : elements) {
