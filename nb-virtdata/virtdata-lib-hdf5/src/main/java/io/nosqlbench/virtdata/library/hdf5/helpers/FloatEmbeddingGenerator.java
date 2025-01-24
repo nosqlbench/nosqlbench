@@ -76,4 +76,10 @@ public class FloatEmbeddingGenerator implements EmbeddingGenerator {
         return vector2;
     }
 
+    @Override
+    public int generateIntFrom(Object o, long l) {
+        float[] source = (float[]) o;
+        return (int) source[(int) (l % source.length)];
+    }
+
 }
