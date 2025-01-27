@@ -114,6 +114,7 @@ public class GroovyCycleFunction<T> implements CycleFunction<T> {
         String[] verifiedStaticImports = expandStaticImports(staticImports);
 
         CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
+        compilerConfiguration.setTargetBytecode(CompilerConfiguration.JDK23);
         ImportCustomizer importer = new ImportCustomizer().addImports(verifiedClasses);
         importer.addStaticStars(verifiedStaticImports);
         compilerConfiguration.addCompilationCustomizers(importer);
