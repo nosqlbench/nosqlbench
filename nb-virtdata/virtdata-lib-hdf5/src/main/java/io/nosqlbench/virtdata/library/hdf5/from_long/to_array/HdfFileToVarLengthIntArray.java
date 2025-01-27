@@ -20,9 +20,6 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.hdf5.from_long.AbstractHdfFileToVectorType;
-import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGenerator;
-import io.nosqlbench.virtdata.library.hdf5.helpers.EmbeddingGeneratorFactory;
-import io.nosqlbench.virtdata.library.hdf5.helpers.IntEmbeddingGenerator;
 
 import java.util.function.LongFunction;
 
