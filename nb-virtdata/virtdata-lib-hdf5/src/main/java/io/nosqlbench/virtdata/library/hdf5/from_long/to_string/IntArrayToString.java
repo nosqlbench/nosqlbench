@@ -25,10 +25,11 @@ import java.util.function.Function;
 @ThreadSafeMapper
 @Categories(Category.experimental)
 public class IntArrayToString implements Function<int[],String> {
-    private final StringBuilder sb = new StringBuilder();
+    private final ThreadLocal<StringBuilder> threadSb = ThreadLocal.withInitial(StringBuilder::new);
 
     @Override
     public String apply(int[] ints) {
+        StringBuilder sb = threadSb.get();
         sb.setLength(0);
         for (int i : ints) {
             sb.append(i);
