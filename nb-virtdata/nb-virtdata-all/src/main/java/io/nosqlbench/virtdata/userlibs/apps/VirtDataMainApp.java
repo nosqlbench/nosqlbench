@@ -20,6 +20,7 @@ import io.nosqlbench.nb.api.apps.BundledApp;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.virtdata.userlibs.apps.diagnoseapp.VirtDataDiagnoseApp;
 import io.nosqlbench.virtdata.userlibs.apps.valuechecker.VirtDataCheckPerfApp;
+import io.nosqlbench.virtdata.userlibs.apps.datasetapp.VirtDataDatasetApp;
 
 import java.util.Arrays;
 
@@ -31,10 +32,11 @@ public class VirtDataMainApp implements BundledApp {
 
     private final static String APP_TESTMAPPER = "testmapper";
     private final static String APP_DIAGNOSE = "diagnose";
-    private final static String[] names = new String[]{APP_TESTMAPPER, APP_DIAGNOSE};
+    private final static String DATASET = "dataset";
+    private final static String[] names = new String[]{APP_TESTMAPPER, APP_DIAGNOSE, DATASET};
 
     public static boolean hasNamedApp(String appname) {
-        return (appname.equals(APP_TESTMAPPER)  || appname.equals(APP_DIAGNOSE));
+        return (appname.equals(APP_TESTMAPPER)  || appname.equals(APP_DIAGNOSE) || appname.equals(DATASET));
     }
 
     public static void main(String[] args) {
@@ -44,7 +46,7 @@ public class VirtDataMainApp implements BundledApp {
     @Override
     public int applyAsInt(String[] args) {
         if (args.length == 0) {
-            System.out.println("Usage: app (" + APP_TESTMAPPER  +"|"+ APP_DIAGNOSE +")");
+            System.out.println("Usage: app (" + APP_TESTMAPPER  +"|"+ APP_DIAGNOSE +"|"+ DATASET +")");
             return 1;
         }
 
@@ -58,6 +60,8 @@ public class VirtDataMainApp implements BundledApp {
             VirtDataCheckPerfApp.main(appArgs);
         } else if (appSelection.equalsIgnoreCase(APP_DIAGNOSE)) {
             VirtDataDiagnoseApp.main(appArgs);
+        } else if (appSelection.equalsIgnoreCase(DATASET)) {
+            VirtDataDatasetApp.main(appArgs);
         } else {
             System.err.println("Error in command line. The first argument must one of " + String.join(",", names));
         }
