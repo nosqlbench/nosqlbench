@@ -38,6 +38,8 @@ public class VirtDataDatasetApp {
         int p = scanner.nextInt();
         System.out.print("Enter the number of test vectors (x): ");
         int x = scanner.nextInt();
+        System.out.println("Enter the number of neighbors to compute (k): ");
+        int k = scanner.nextInt();
         System.out.print("Enter the number of contiguous vectors per ID: ");
         int vectorsPerId = scanner.nextInt();
         System.out.print("Enter the output HDF5 file name: ");
@@ -52,8 +54,8 @@ public class VirtDataDatasetApp {
         List<int[]> testIds = usePredicates ? generateTestIds(x, n / vectorsPerId) : null;
 
         // Compute KNN
-        int[][] neighbors = new int[x][100];
-        float[][] distances = new float[x][100];
+        int[][] neighbors = new int[x][k];
+        float[][] distances = new float[x][k];
         computeKnn(trainData, testData, trainIds, testIds, neighbors, distances, usePredicates);
 
         // Write to HDF5
@@ -123,7 +125,7 @@ public class VirtDataDatasetApp {
                 .sorted(Comparator.comparingDouble(index -> queryDistances[index]))
                 .toArray(Integer[]::new);
 
-            for (int k = 0; k < 100; k++) {
+            for (int k = 0; k < neighbors[0].length; k++) {
                 if (k < sortedIndices.length) {
                     neighbors[i][k] = validIndices.get(sortedIndices[k]);
                     distances[i][k] = queryDistances[sortedIndices[k]];
@@ -151,7 +153,19 @@ public class VirtDataDatasetApp {
             Path path = Path.of(outputFile);
             if (file.exists()) Files.delete(path);
             WritableHdfFile hdfFile = HdfFile.write(path);
-            hdfFile.putGroup("/");
+            // Write the root level attributes
+            // How many neighbors were computed for each vector
+            hdfFile.putAttribute("neighbors", neighbors[0].length);
+            // Number of dimensions in each vector
+            hdfFile.putAttribute("dimensions", trainData[0].length);
+            // The number of vectors in the /train dataset
+            hdfFile.putAttribute("train_vectors", trainData.length);
+            // The number of vectors in the /test dataset
+            hdfFile.putAttribute("test_vectors", testData.length);
+            // The name of the model used to generate the data, if any
+            hdfFile.putAttribute("model", "random");
+            // The case-insensitive name of the distance function used to compute distance between vectors
+            hdfFile.putAttribute("distance", "euclidean");
 
             hdfFile.putDataset("train", trainData);
             hdfFile.putDataset("test", testData);
