@@ -44,7 +44,23 @@ public class HdfFileToVarLengthIntArray extends AbstractHdfFileToVectorType impl
     @Override
     public int[] apply(long l) {
         Object data = getDataFrom(l);
-        return extractIds(data, l);
+        if (data instanceof Object[]) {
+            return extractIds(data, l);
+        } else if (data instanceof int[]) {
+            return stripPadding((int[]) data);
+        } else {
+            throw new IllegalArgumentException("Unsupported data type: " + data.getClass().getName());
+        }
+    }
+
+    private int[] stripPadding(int[] data) {
+        int length = data.length;
+        while (length > 0 && data[length - 1] == 0) {
+            length--;
+        }
+        int[] result = new int[length];
+        System.arraycopy(data, 0, result, 0, length);
+        return result;
     }
 
     /**

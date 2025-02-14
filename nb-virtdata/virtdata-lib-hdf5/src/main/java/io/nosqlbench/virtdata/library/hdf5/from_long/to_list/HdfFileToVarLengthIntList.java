@@ -21,6 +21,7 @@ import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.hdf5.from_long.AbstractHdfFileToVectorType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.LongFunction;
 
@@ -45,7 +46,24 @@ public class HdfFileToVarLengthIntList extends AbstractHdfFileToVectorType imple
     @Override
     public List<Integer> apply(long l) {
         Object data = getDataFrom(l);
-        return extractIds(data, l);
+        if (data instanceof Object[]) {
+            return extractIds(data, l);
+        } else if (data instanceof int[]) {
+            return stripPadding((int[]) data);
+        } else {
+            throw new IllegalArgumentException("Unsupported data type: " + data.getClass().getName());
+        }
+    }
+
+    private List<Integer> stripPadding(int[] data) {
+        List<Integer> result = new ArrayList<>();
+        int index = 0;
+        int val = data[index];
+        while (val > 0) {
+            result.add(val);
+            val = data[++index];
+        }
+        return result;
     }
 
     /**
