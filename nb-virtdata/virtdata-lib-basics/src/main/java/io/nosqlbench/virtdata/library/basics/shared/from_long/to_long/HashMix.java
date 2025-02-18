@@ -1,4 +1,4 @@
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
 /*
  * Copyright (c) nosqlbench
@@ -22,7 +22,6 @@ import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.api.bindings.VirtDataConversions;
 
 import java.util.function.LongToDoubleFunction;
 import java.util.function.LongUnaryOperator;
@@ -62,50 +61,31 @@ import java.util.function.LongUnaryOperator;
 /// - sample variates within a defined band gap of the two curves
 @ThreadSafeMapper
 @Categories(Category.functional)
-public class HashMix implements LongToDoubleFunction {
+public class HashMix implements LongUnaryOperator {
 
-    private final LongToDoubleFunction f1;
-    private final LongToDoubleFunction f2;
-    private final LongToDoubleFunction mixF;
-    private final LongUnaryOperator sampleF;
+    private io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashMix mixer;
+
 
     @Example({
-        "HashMix(Func1(),Func2())",
+        "IntervalHashMix(Func1(),Func2())",
         "yield samples between func1 and func2 values at some random random sample point x"
     })
     @Example({
-        "HashMix(Func1(),Func2(),0.25d)",
+        "IntervalHashMix(Func1(),Func2(),0.25d)",
         "yield samples which are 25% from the sample values for func1 and func2 at some random "
         + "sample point x"
     })
     @Example({
-        "HashMix(Func1(),Func2(),HashRange(0.25d,0.75d)",
+        "IntervalHashMix(Func1(),Func2(),HashRange(0.25d,0.75d)",
         "yield samples between 25% and 75% from func1 to func2 values at some random sample point x"
     })
     @Example({
-        "HashMix(Func1(),Func2(),0.0d,ScaledDouble())",
+        "IntervalHashMix(Func1(),Func2(),0.0d,ScaledDouble())",
         "access Func1 values as if it were the only one provided. ScaledDouble adds no "
         + "randomization the input value, but it does map it to the sample domain of 0.0d-0.1d."
     })
     public HashMix(Object curve1F, Object curve2F, Object mixPointF, Object samplePointF) {
-        if (mixPointF instanceof Double v) {
-            if (v > 1.0d || v < 0.0d) {
-                throw new RuntimeException(
-                    "mix value (" + v + ") must be within the unit" + " range [0.0d,1.0d]");
-            }
-            this.mixF = n -> v;
-        } else if (mixPointF instanceof Float v) {
-            if (v > 1.0d || v < 0.0d) {
-                throw new RuntimeException(
-                    "mix value (" + v + ") must be within the unit" + " range [0.0d,1.0d]");
-            }
-            this.mixF = n -> v;
-        } else {
-            this.mixF = VirtDataConversions.adaptFunction(mixPointF, LongToDoubleFunction.class);
-        }
-        this.f1 = VirtDataConversions.adaptFunction(curve1F, LongToDoubleFunction.class);
-        this.f2 = VirtDataConversions.adaptFunction(curve2F, LongToDoubleFunction.class);
-        this.sampleF = VirtDataConversions.adaptFunction(samplePointF, LongUnaryOperator.class);
+        this.mixer = new io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashMix(curve1F, curve2F, mixPointF, samplePointF);
     }
 
     public HashMix(Object curve1F, Object curve2F, Object mixPointF) {
@@ -113,7 +93,7 @@ public class HashMix implements LongToDoubleFunction {
             curve1F,
             curve2F,
             mixPointF,
-            new io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.HashRange(Long.MAX_VALUE)
+            new HashRange(Long.MAX_VALUE)
         );
     }
 
@@ -121,8 +101,8 @@ public class HashMix implements LongToDoubleFunction {
         this(
             curve1F,
             curve2F,
-            new HashRange(0.0d, 1.0d),
-            new io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.HashRange(Long.MAX_VALUE)
+            new io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashRange(0.0d, 1.0d),
+            new HashRange(Long.MAX_VALUE)
         );
     }
 
@@ -130,18 +110,13 @@ public class HashMix implements LongToDoubleFunction {
         this(
             f1,
             f2,
-            new HashRange(0.0d, 1.0d),
-            new io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.HashRange(Long.MAX_VALUE)
+            new io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.HashRange(0.0d, 1.0d),
+            new HashRange(Long.MAX_VALUE)
         );
     }
 
-
     @Override
-    public double applyAsDouble(long value) {
-        long sampleAt = sampleF.applyAsLong(value);
-        double v1 = f1.applyAsDouble(sampleAt);
-        double v2 = f2.applyAsDouble(sampleAt);
-        double mix = mixF.applyAsDouble(value);
-        return LERP.lerp(v1, v2, mix);
+    public long applyAsLong(long value) {
+        return (long) mixer.applyAsDouble(value);
     }
 }
