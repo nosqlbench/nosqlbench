@@ -1,4 +1,4 @@
-package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
+package io.nosqlbench.virtdata.library.basics.shared.from_double.to_long;
 
 /*
  * Copyright (c) nosqlbench
@@ -18,16 +18,17 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
  */
 
 
-import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.AliasSamplerDoubleLong;
 import io.nosqlbench.virtdata.library.basics.core.stathelpers.EvProbLongDouble;
+import io.nosqlbench.virtdata.library.basics.shared.from_long.to_double.EmpiricalDistribution;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleToLongFunction;
 
 /// Empirical Histribution is a portmanteau name to capture the
 /// concept of an empirical distribution based on a discrete histogram.
@@ -38,14 +39,14 @@ import java.util.List;
 /// want to represent accurately.
 @ThreadSafeMapper
 @Categories(Category.distributions)
-public class EmpiricalHistribution extends AliasSamplerDoubleLong {
+public class UnitHistribution extends AliasSamplerDoubleLong implements DoubleToLongFunction {
 
-    @Example({"EmpiricalHistribution('50 25 13 12')", "implied frequencies of 0:50 1:25 2:13 3:12"})
+    @Example({"UnitHistribution('50 25 13 12')", "implied frequencies of 0:50 1:25 2:13 3:12"})
     @Example({
-        "EmpiricalHistribution('234:50 33:25 17:13 3:12')",
+        "UnitHistribution('234:50 33:25 17:13 3:12')",
         "labeled frequencies; 234,33,17,3 are labels, and 50,25,13,12 are weights"
     })
-    public EmpiricalHistribution(String freqs) {
+    public UnitHistribution(String freqs) {
         List<EvProbLongDouble> events = new ArrayList<>();
         boolean labeled = (freqs.contains(":"));
 
@@ -57,20 +58,21 @@ public class EmpiricalHistribution extends AliasSamplerDoubleLong {
                     "If any elements are labeled, all elements must be:" + freqs);
             }
             long id = labeled ? Long.parseLong(parts[0]) : i;
-            events.add(new EvProbLongDouble(id, Long.parseLong(parts[1])));
+            long weight = Long.parseLong(parts[labeled ? 1 : 0]);
+            events.add(new EvProbLongDouble(id, weight));
         }
         super(events);
     }
 
-    public EmpiricalHistribution(long... freqs) {
-        super(genEvents(freqs));
-    }
-
-    private static List<EvProbLongDouble> genEvents(long[] freqs) {
-        ArrayList<EvProbLongDouble> events = new ArrayList<>();
-        for (int i = 0; i < freqs.length; i++) {
-            events.add(new EvProbLongDouble(i, freqs[i]));
-        }
-        return events;
-    }
+    //    public UnitHistribution(long... freqs) {
+    //        super(genEvents(freqs));
+    //    }
+    //
+    //    private static List<EvProbLongDouble> genEvents(long[] freqs) {
+    //        ArrayList<EvProbLongDouble> events = new ArrayList<>();
+    //        for (int i = 0; i < freqs.length; i++) {
+    //            events.add(new EvProbLongDouble(i, freqs[i]));
+    //        }
+    //        return events;
+    //    }
 }
