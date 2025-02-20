@@ -118,10 +118,10 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
             } else {
                 adapter = adapters.get(driverName);
             }
-            if (adapter instanceof NBConfigurable configurable) {
-                adapterModel = configurable.getConfigModel();
-                adapterModel.assertValidConfig(ot.getParams());
-            }
+//            if (adapter instanceof NBConfigurable configurable) {
+//                adapterModel = configurable.getConfigModel();
+//                adapterModel.assertValidConfig(ot.getParams());
+//            }
             paramsAdvisor.validateAll(ot.getParams().keySet());
             paramsAdvisor.validateAll(ot.getTags().keySet());
             paramsAdvisor.validateAll(ot.getBindings().keySet());
