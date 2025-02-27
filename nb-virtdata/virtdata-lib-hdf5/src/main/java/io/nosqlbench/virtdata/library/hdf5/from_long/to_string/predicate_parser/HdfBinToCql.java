@@ -23,7 +23,6 @@ import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.predicates.nodewalk.NodewalkParser;
 
 import java.util.function.LongFunction;
 
@@ -36,22 +35,23 @@ import java.util.function.LongFunction;
 public class HdfBinToCql implements LongFunction<String> {
     private final HdfFile hdfFile;
     private final Dataset predicateDataset;
-    private final Dataset schemaDataset;
-    private final String[] predicateArray;
-    private final NodewalkParser parser;
 
-    public HdfBinToCql(String filename, String predicateName, String schemaName) {
+    private final BinToCqlProcessor processor;
+
+    public HdfBinToCql(String filename, String predicateName, String... schema) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
         predicateDataset = hdfFile.getDatasetByPath(predicateName);
-        predicateArray = (String[]) predicateDataset.getData();
-        schemaDataset = hdfFile.getDatasetByPath(schemaName);
-        parser = new NodewalkParser((String[]) schemaDataset.getData());
+
+        processor = switch (predicateDataset.getJavaType().getSimpleName().toLowerCase()) {
+            case "string" -> new BinStringToCql(predicateDataset, schema);
+            case "byte" -> new BinArrayToCql(predicateDataset, schema);
+            default -> throw new RuntimeException("Unknown data type in predicate dataset: " + predicateDataset.getJavaType().getSimpleName());
+        };
     }
 
     @Override
     public String apply(long l) {
-        String predBytes = predicateArray[(int) (l % predicateArray.length)];
-        return parser.parse(predBytes.getBytes());
+        return processor.process(l);
     }
 
 }

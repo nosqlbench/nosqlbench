@@ -41,7 +41,7 @@ public class PredicateTest {
   public void testRepresenter() {
     Node<?> tn1 = getTestNode1();
     System.out.println("tn1:\n"+tn1.toString());
-    CqlNodeRenderer pr = new CqlNodeRenderer(new String[]{"firstname","lastname"});
+    CqlNodeRenderer pr = new CqlNodeRenderer(new String[]{"field1","field2"});
     String represented = pr.apply(tn1);
     System.out.println(represented);
 

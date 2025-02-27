@@ -47,11 +47,6 @@ public class NodewalkParser {
 
     public String parse(byte[] bytes) {
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
-        nodewalkVersion = buffer.get();
-        logger.info(() -> "version: " + nodewalkVersion);
-        if (nodewalkVersion!=Version.CURRENT) {
-            throw new RuntimeException("Unsupported nodewalk version: " + nodewalkVersion);
-        }
 
         ConjugateType eType = ConjugateType.values()[bytes[1]];
         Node<?> predicateNode = switch(eType) {

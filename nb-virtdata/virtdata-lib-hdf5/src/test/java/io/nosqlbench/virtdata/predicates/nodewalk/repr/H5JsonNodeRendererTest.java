@@ -54,7 +54,7 @@ public class H5JsonNodeRendererTest {
         buffer.flip();
 
         ConjugateNode p =new ConjugateNode(buffer);
-        H5JsonNodeRenderer h5r = new H5JsonNodeRenderer(new String[]{"firstname","lastname"});
+        H5JsonNodeRenderer h5r = new H5JsonNodeRenderer(new String[]{"firstname","middlename","lastname"});
         String result = h5r.apply(p);
         assertThat(result).isEqualTo(test2);
     }
