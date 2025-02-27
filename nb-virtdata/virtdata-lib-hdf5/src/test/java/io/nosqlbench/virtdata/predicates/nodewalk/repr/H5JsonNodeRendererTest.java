@@ -16,9 +16,9 @@
  */
 package io.nosqlbench.virtdata.predicates.nodewalk.repr;
 
-import io.nosqlbench.virtdata.predicates.nodewalk.types.ConjugateNode;
-import io.nosqlbench.virtdata.predicates.nodewalk.types.OpType;
-import io.nosqlbench.virtdata.predicates.nodewalk.types.PredicateNode;
+import io.nosqlbench.nbvectors.buildhdf5.predicates.types.ConjugateNode;
+import io.nosqlbench.nbvectors.buildhdf5.predicates.types.OpType;
+import io.nosqlbench.nbvectors.buildhdf5.predicates.types.PredicateNode;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;

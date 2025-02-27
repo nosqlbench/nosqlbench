@@ -15,7 +15,7 @@
  *
  */
 
-package io.nosqlbench.virtdata.predicates.nodewalk.types;
+package io.nosqlbench.virtdata.predicates.nodewalk;
 
 public interface Version {
 

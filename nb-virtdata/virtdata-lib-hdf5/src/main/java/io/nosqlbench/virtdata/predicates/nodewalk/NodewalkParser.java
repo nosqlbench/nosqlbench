@@ -17,9 +17,9 @@
 
 package io.nosqlbench.virtdata.predicates.nodewalk;
 
+import io.nosqlbench.nbvectors.buildhdf5.predicates.types.*;
 import io.nosqlbench.virtdata.predicates.nodewalk.repr.CqlNodeRenderer;
 import io.nosqlbench.virtdata.predicates.nodewalk.repr.H5JsonNodeRenderer;
-import io.nosqlbench.virtdata.predicates.nodewalk.types.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,7 +49,7 @@ public class NodewalkParser {
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
         ConjugateType eType = ConjugateType.values()[bytes[1]];
-        Node<?> predicateNode = switch(eType) {
+        PNode<?> predicateNode = switch(eType) {
             case PRED -> new PredicateNode(buffer);
             case AND,OR -> new ConjugateNode(buffer);
         };

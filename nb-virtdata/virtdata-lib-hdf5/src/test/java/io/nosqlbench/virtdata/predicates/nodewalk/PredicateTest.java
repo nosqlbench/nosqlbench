@@ -16,8 +16,8 @@
  */
 package io.nosqlbench.virtdata.predicates.nodewalk;
 
+import io.nosqlbench.nbvectors.buildhdf5.predicates.types.*;
 import io.nosqlbench.virtdata.predicates.nodewalk.repr.CqlNodeRenderer;
-import io.nosqlbench.virtdata.predicates.nodewalk.types.*;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -46,16 +46,16 @@ public class PredicateTest {
 //    System.out.println(node);
 //  }
 
-  private Node<?> getTestNode1() {
+  private PNode<?> getTestNode1() {
     PredicateNode inp = new PredicateNode(1, OpType.IN, new long[]{3L, 4L});
     PredicateNode e3 = new PredicateNode(0, OpType.EQ, 3L);
-    ConjugateNode tn = new ConjugateNode(ConjugateType.OR, new Node[]{e3, inp});
+    ConjugateNode tn = new ConjugateNode(ConjugateType.OR, new PNode[]{e3, inp});
     return tn;
   }
 
   @Test
   public void testRepresenter() {
-    Node<?> tn1 = getTestNode1();
+    PNode<?> tn1 = getTestNode1();
     System.out.println("tn1:\n"+tn1.toString());
     CqlNodeRenderer pr = new CqlNodeRenderer(new String[]{"field1","field2"});
     String represented = pr.apply(tn1);

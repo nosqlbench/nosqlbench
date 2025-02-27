@@ -16,10 +16,10 @@
  */
 package io.nosqlbench.virtdata.predicates.nodewalk.repr;
 
-import io.nosqlbench.virtdata.predicates.nodewalk.types.ConjugateNode;
-import io.nosqlbench.virtdata.predicates.nodewalk.types.Node;
-import io.nosqlbench.virtdata.predicates.nodewalk.types.NodeRepresenter;
-import io.nosqlbench.virtdata.predicates.nodewalk.types.PredicateNode;
+import io.nosqlbench.nbvectors.buildhdf5.predicates.types.ConjugateNode;
+import io.nosqlbench.nbvectors.buildhdf5.predicates.types.NodeRepresenter;
+import io.nosqlbench.nbvectors.buildhdf5.predicates.types.PNode;
+import io.nosqlbench.nbvectors.buildhdf5.predicates.types.PredicateNode;
 
 public class CqlNodeRenderer implements NodeRepresenter {
     private final String[] schema;
@@ -29,7 +29,7 @@ public class CqlNodeRenderer implements NodeRepresenter {
     }
 
     @Override
-  public String apply(Node<?> node) {
+  public String apply(PNode<?> node) {
     return switch (node) {
       case ConjugateNode n -> reprConjugate(n);
       case PredicateNode p -> reprPredicate(p);
@@ -70,10 +70,10 @@ public class CqlNodeRenderer implements NodeRepresenter {
     };
   }
 
-  private String concatenate(String name, Node<?>[] values) {
+  private String concatenate(String name, PNode<?>[] values) {
     StringBuilder sb = new StringBuilder();
 
-      for (Node<?> value : values) {
+      for (PNode<?> value : values) {
           String nodeRep = apply(value);
           if (!sb.isEmpty()) {
               sb.append(" ").append(name).append(" ");
