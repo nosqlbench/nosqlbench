@@ -28,6 +28,7 @@ import java.nio.ByteBuffer;
 public class NodewalkParser {
     private static final Logger logger = LogManager.getLogger(NodewalkParser.class);
     private final NodeRepresenter representer;
+    private int nodewalkVersion;
 
     public final String CQL = "cql";
     public final String JSON = "json";
@@ -46,8 +47,13 @@ public class NodewalkParser {
 
     public String parse(byte[] bytes) {
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
-        ConjugateType eType = ConjugateType.values()[bytes[0]];
+        nodewalkVersion = buffer.get();
+        logger.info(() -> "version: " + nodewalkVersion);
+        if (nodewalkVersion!=Version.CURRENT) {
+            throw new RuntimeException("Unsupported nodewalk version: " + nodewalkVersion);
+        }
 
+        ConjugateType eType = ConjugateType.values()[bytes[1]];
         Node<?> predicateNode = switch(eType) {
             case PRED -> new PredicateNode(buffer);
             case AND,OR -> new ConjugateNode(buffer);
