@@ -23,7 +23,6 @@ import io.nosqlbench.adapter.kafka.dispensers.KafkaBaseOpDispenser;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
-import org.apache.kafka.common.Metric;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,7 +51,7 @@ public class KafkaAdapterMetrics {
 
     public KafkaAdapterMetrics(final KafkaBaseOpDispenser kafkaBaseOpDispenser, final NBLabeledElement labeledParent) {
         this.kafkaBaseOpDispenser = kafkaBaseOpDispenser;
-        labels = labeledParent.getLabels().and("name", KafkaAdapterMetrics.class.getSimpleName());
+        labels = labeledParent.getLabels().andPairs("name", KafkaAdapterMetrics.class.getSimpleName());
     }
 
     public void initS4JAdapterInstrumentation() {

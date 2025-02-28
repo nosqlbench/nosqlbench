@@ -24,7 +24,7 @@ import java.util.Map;
 public class AveragePrecision extends BaseRelevancyFunction {
     private final int k;
     public AveragePrecision(String name, int k, Map<String,String> labels) {
-        super(name, NBLabels.forKV("k",labels).and(labels));
+        super(name, NBLabels.forKV("k",labels).andMap(labels));
         this.k = k;
     }
     public AveragePrecision(String name, int k, Object... labels) {
