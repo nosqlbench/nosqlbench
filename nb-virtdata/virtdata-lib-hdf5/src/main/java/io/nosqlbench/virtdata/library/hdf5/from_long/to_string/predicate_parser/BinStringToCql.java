@@ -20,16 +20,13 @@ package io.nosqlbench.virtdata.library.hdf5.from_long.to_string.predicate_parser
 import io.jhdf.api.Dataset;
 
 public class BinStringToCql extends BinToCqlProcessor {
-    private final String[] predicateArray;
 
     public BinStringToCql(Dataset predicateDataset, String[] schema) {
         super(schema);
-        predicateArray = (String[]) predicateDataset.getData();
     }
 
     @Override
     public String process(long l) {
-        String predBytes = predicateArray[(int) (l % predicateArray.length)];
-        return parser.parse(predBytes.getBytes());
+        throw new RuntimeException("String encoding for predicates is not yet implemented");
     }
 }
