@@ -17,17 +17,26 @@
 package io.nosqlbench.virtdata.library.hdf5.from_long;
 
 import io.jhdf.HdfFile;
+import io.jhdf.api.Attribute;
 import io.jhdf.api.Dataset;
+import io.jhdf.api.Group;
+import io.jhdf.api.Node;
 import io.nosqlbench.nb.api.nbio.NBIO;
+import io.nosqlbench.virtdata.library.hdf5.helpers.HdfAttributesProcessor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public abstract class AbstractHdfFileToVectorType {
+import java.util.Map;
+
+public abstract class AbstractHdfFileToVectorType implements HdfAttributesProcessor {
     protected final HdfFile hdfFile;
     protected final Dataset dataset;
     protected final int[] dims;
+    private final static Logger logger = LogManager.getLogger(AbstractHdfFileToVectorType.class);
 
     public AbstractHdfFileToVectorType(String filename, String datasetName) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
-        //TODO: implement a function to get the dataset by name only without needing the full path
+        processAttributes(hdfFile);
         dataset = hdfFile.getDatasetByPath(datasetName);
         dims = dataset.getDimensions();
     }
@@ -45,4 +54,34 @@ public abstract class AbstractHdfFileToVectorType {
             return dataset.getData();
         }
     }
+
+    @Override
+    public void processAttributes(HdfFile hdfFile) {
+        processNode(hdfFile);
+    }
+
+    private static void processNode(Node node) {
+        logger.info("Node: {}", node.getPath());
+        printAttributes(node);
+
+        // If the node is a group, iterate through its children
+        if (node instanceof Group group) {
+            for (Node child : group.getChildren().values()) {
+                processNode(child);
+            }
+        }
+    }
+
+    private static void printAttributes(Node node) {
+        Map<String, Attribute> attributes = node.getAttributes();
+        if (attributes.isEmpty()) {
+            logger.info(() -> "No attributes");
+        } else {
+            logger.info(() -> "Attributes:");
+            for (Map.Entry<String, Attribute> entry : attributes.entrySet()) {
+                logger.info("{} = {}", entry.getKey(), entry.getValue().getData());
+            }
+        }
+    }
+
 }
