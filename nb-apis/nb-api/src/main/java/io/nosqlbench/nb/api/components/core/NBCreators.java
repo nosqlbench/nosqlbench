@@ -64,7 +64,7 @@ public class NBCreators {
     }
 
     public NBMetricTimer timer(String metricFamilyName, int hdrdigits, MetricCategory category, String description) {
-        NBLabels labels = base.getLabels().and("name", metricFamilyName);
+        NBLabels labels = base.getLabels().andPairs("name", metricFamilyName);
         NBMetricTimer timer = new NBMetricTimer(
             labels,
             new DeltaHdrHistogramReservoir(labels, hdrdigits),
@@ -75,7 +75,7 @@ public class NBCreators {
     }
 
     public Meter meter(String metricFamilyName, MetricCategory category, String description) {
-        NBLabels labels = base.getLabels().and("name", metricFamilyName);
+        NBLabels labels = base.getLabels().andPairs("name", metricFamilyName);
         NBMetricMeter meter = new NBMetricMeter(labels, description, category);
         base.addComponentMetric(meter, category, description);
         return meter;
@@ -83,7 +83,7 @@ public class NBCreators {
 
 
     public NBMetricCounter counter(String metricFamilyName, MetricCategory category, String description) {
-        NBLabels labels = base.getLabels().and("name", metricFamilyName);
+        NBLabels labels = base.getLabels().andPairs("name", metricFamilyName);
         NBMetricCounter counter = new NBMetricCounter(labels, description, category);
         base.addComponentMetric(counter, category, description);
         return counter;
@@ -144,7 +144,7 @@ public class NBCreators {
     }
 
     public NBMetricHistogram histogram(String metricFamilyName, int hdrdigits, MetricCategory category, String description) {
-        NBLabels labels = base.getLabels().and("name", metricFamilyName);
+        NBLabels labels = base.getLabels().andPairs("name", metricFamilyName);
         NBMetricHistogram histogram = new NBMetricHistogram(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits), description, category);
         base.addComponentMetric(histogram, category, description);
         return histogram;

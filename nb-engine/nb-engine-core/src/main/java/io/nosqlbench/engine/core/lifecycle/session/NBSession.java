@@ -65,7 +65,7 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
         super(
             null,
             labelContext.getLabels()
-                .and("session", sessionName),
+                .andPairs("session", sessionName),
             props,
             "session"
         );

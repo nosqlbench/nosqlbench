@@ -40,7 +40,7 @@ public class NBVariableGauge implements NBMetricGauge {
         MetricCategory... categories
     ) {
         this.parent = parent;
-        this.labels = additionalLabels.and("name", metricFamilyName);
+        this.labels = additionalLabels.andPairs("name", metricFamilyName);
         this.value = initialValue;
         this.description = description;
         this.categories = categories;

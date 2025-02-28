@@ -42,6 +42,6 @@ public class CqlTypeColumn extends CqlColumnBase {
 
     @Override
     public NBLabels getLabels() {
-        return super.getLabels().and("name", this.type.getName());
+        return super.getLabels().andPairs("name", this.type.getName());
     }
 }

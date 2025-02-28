@@ -83,7 +83,7 @@ public class SimRate extends NBBaseComponent implements RateLimiter, Thread.Unca
     }
 
     public SimRate(NBComponent parent, SimRateSpec spec, NBLabels extraLabels) {
-        super(parent, extraLabels.and("rateType",
+        super(parent, extraLabels.andPairs("rateType",
             (spec instanceof CycleRateSpec? "cycle" : "stride")));
         this.spec = spec;
         initMetrics();
