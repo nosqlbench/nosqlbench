@@ -180,6 +180,6 @@ public class DiagTask_gauge extends BaseDiagTask implements Gauge<Double>, NBPar
 
     @Override
     public NBLabels getLabels() {
-        return super.getLabels().and("stat",this.stat.toString());
+        return super.getLabels().andPairs("stat",this.stat.toString());
     }
 }

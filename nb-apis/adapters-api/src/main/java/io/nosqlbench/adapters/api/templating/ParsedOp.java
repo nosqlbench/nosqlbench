@@ -438,13 +438,17 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
                                           List.of(opTemplate.getParams(), activityCfg.getMap())
         );
 
-        NBLabels opLabels = parent.getLabels().and(
+        NBLabels opLabels = parent.getLabels().andPairs(
             (parent instanceof ParsedOp) ? "subop" : "op", this.getName());
         if (tmap.isStatic("labels")) {
             Object labelSpecObject = tmap.takeStaticValue("labels", Object.class);
             if (labelSpecObject instanceof String labelsSpec) {
                 NBLabels op_specific_labels = NBLabelSpec.parseLabels(labelsSpec);
                 opLabels = opLabels.and(op_specific_labels);
+            } else if (labelSpecObject instanceof Map<?,?> lmap) {
+                Map<String,String> smap = new LinkedHashMap<>();
+                lmap.forEach((k,v) -> smap.put(String.valueOf(k),String.valueOf(v)));
+                opLabels = opLabels.andMap((Map<String,String>)smap);
             } else {
                 throw new OpConfigError(
                     "parsing labels as type '" + labelSpecObject.getClass().getSimpleName() + "' is not supported.");

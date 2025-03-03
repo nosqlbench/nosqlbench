@@ -40,7 +40,7 @@ public class NBFunctionGauge implements NBMetricGauge {
         MetricCategory... categories
     ) {
         this.parent = parent;
-        this.labels = NBLabels.forMap(additionalLabels).and("name",metricFamilyName);
+        this.labels = NBLabels.forMap(additionalLabels).andPairs("name",metricFamilyName);
         this.source = source;
         this.description = description;
         this.categories = categories;

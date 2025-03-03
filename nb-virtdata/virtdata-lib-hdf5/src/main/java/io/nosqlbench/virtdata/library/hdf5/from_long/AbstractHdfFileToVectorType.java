@@ -36,7 +36,6 @@ public abstract class AbstractHdfFileToVectorType implements HdfAttributesProces
 
     public AbstractHdfFileToVectorType(String filename, String datasetName) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
-        //TODO: implement a function to get the dataset by name only without needing the full path
         processAttributes(hdfFile);
         dataset = hdfFile.getDatasetByPath(datasetName);
         dims = dataset.getDimensions();
