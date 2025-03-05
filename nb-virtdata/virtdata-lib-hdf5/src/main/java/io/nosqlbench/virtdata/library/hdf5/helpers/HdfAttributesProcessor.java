@@ -20,6 +20,13 @@ package io.nosqlbench.virtdata.library.hdf5.helpers;
 import io.jhdf.HdfFile;
 
 public interface HdfAttributesProcessor {
+    public static final String NEIGHBORS = "neighbors";
+    public static final String DIMENSIONS = "dimensions";
+    public static final String TRAIN_VECTORS = "train_vectors";
+    public static final String TEST_VECTORS = "test_vectors";
+    public static final String MODEL = "model";
+    public static final String DISTANCE_FUNCTION = "distance_function";
+    public static final String COMPONENT_ENCODING = "component_encoding";
 
     public void processAttributes(HdfFile hdfFile);
 

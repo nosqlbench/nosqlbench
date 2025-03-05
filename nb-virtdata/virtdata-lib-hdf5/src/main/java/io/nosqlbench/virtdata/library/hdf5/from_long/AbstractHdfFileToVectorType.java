@@ -31,14 +31,18 @@ import java.util.Map;
 public abstract class AbstractHdfFileToVectorType implements HdfAttributesProcessor {
     protected final HdfFile hdfFile;
     protected final Dataset dataset;
+    protected final String datasetName;
     protected final int[] dims;
-    private final static Logger logger = LogManager.getLogger(AbstractHdfFileToVectorType.class);
+    protected String dataType;
+    protected final static Logger logger = LogManager.getLogger(AbstractHdfFileToVectorType.class);
 
     public AbstractHdfFileToVectorType(String filename, String datasetName) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
-        processAttributes(hdfFile);
+        this.datasetName = datasetName;
         dataset = hdfFile.getDatasetByPath(datasetName);
         dims = dataset.getDimensions();
+        processAttributes(hdfFile);
+        this.dataType = (dataType == null) ? dataset.getJavaType().getSimpleName().toLowerCase() : dataType;
     }
 
     protected Object getDataFrom(long l) {
@@ -60,9 +64,9 @@ public abstract class AbstractHdfFileToVectorType implements HdfAttributesProces
         processNode(hdfFile);
     }
 
-    private static void processNode(Node node) {
+    private void processNode(Node node) {
         logger.info("Node: {}", node.getPath());
-        printAttributes(node);
+        readAttributes(node);
 
         // If the node is a group, iterate through its children
         if (node instanceof Group group) {
@@ -72,7 +76,7 @@ public abstract class AbstractHdfFileToVectorType implements HdfAttributesProces
         }
     }
 
-    private static void printAttributes(Node node) {
+    private void readAttributes(Node node) {
         Map<String, Attribute> attributes = node.getAttributes();
         if (attributes.isEmpty()) {
             logger.info(() -> "No attributes");
@@ -80,6 +84,9 @@ public abstract class AbstractHdfFileToVectorType implements HdfAttributesProces
             logger.info(() -> "Attributes:");
             for (Map.Entry<String, Attribute> entry : attributes.entrySet()) {
                 logger.info("{} = {}", entry.getKey(), entry.getValue().getData());
+                if (entry.getKey().equals(COMPONENT_ENCODING) && (node.getPath().equalsIgnoreCase(datasetName))) {
+                    dataType = entry.getValue().getData().toString();
+                }
             }
         }
     }
