@@ -109,36 +109,4 @@ public class H5JsonNodeRendererTest {
     ]
   }""";
 
-  public static final String testExample = """
-        {
-            "conjunction": "none",
-            "terms": [
-                {
-                    "field": {"name": "firstname"},
-                    "operator": "in",
-                    "comparator": {"value":
-                        ["Mark","Mark's friend Joe"]
-                        }
-                }
-            ]
-        }
-        """;
-  public static final String test3 = """
-        {
-            "conjunction": "or",
-            "terms": [
-                {
-                    "field": {"name": "highprice"},
-                    "operator": "gt",
-                    "comparator": {"value": 1000}
-                },
-                {
-                    "field": {"name": "lowprice"},
-                    "operator": "lt",
-                    "comparator": {"value": 1}
-                }
-            ]
-        }
-        """;
-
 }

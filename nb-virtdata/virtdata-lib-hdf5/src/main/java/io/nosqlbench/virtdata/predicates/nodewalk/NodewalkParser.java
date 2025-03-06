@@ -17,11 +17,7 @@
 
 package io.nosqlbench.virtdata.predicates.nodewalk;
 
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.ConjugateType;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.ConjugateNode;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.NodeRepresenter;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.PNode;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.PredicateNode;
+import io.nosqlbench.nbvectors.buildhdf5.predicates.types.*;
 import io.nosqlbench.virtdata.predicates.nodewalk.repr.CqlNodeRenderer;
 import io.nosqlbench.virtdata.predicates.nodewalk.repr.H5JsonNodeRenderer;
 import org.apache.logging.log4j.LogManager;

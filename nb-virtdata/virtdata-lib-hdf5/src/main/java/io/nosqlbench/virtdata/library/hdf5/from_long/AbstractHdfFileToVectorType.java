@@ -28,14 +28,24 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 
+/**
+ * Abstract base class for reading data from HDF5 files.
+ * Provides common functionality for accessing and processing HDF5 datasets and their attributes.
+ */
 public abstract class AbstractHdfFileToVectorType implements HdfAttributesProcessor {
-    protected final HdfFile hdfFile;
-    protected final Dataset dataset;
-    protected final String datasetName;
-    protected final int[] dims;
-    protected String dataType;
+    protected final HdfFile hdfFile;           // The HDF5 file handle
+    protected final Dataset dataset;           // The specific dataset within the HDF5 file
+    protected final String datasetName;        // Name/path of the dataset
+    protected final int[] dims;                // Dimensions of the dataset
+    protected String dataType;                 // Data type of the dataset
     protected final static Logger logger = LogManager.getLogger(AbstractHdfFileToVectorType.class);
 
+    /**
+     * Constructs a new instance for reading data from an HDF5 file.
+     *
+     * @param filename The name of the HDF5 file to read
+     * @param datasetName The path to the dataset within the HDF5 file
+     */
     public AbstractHdfFileToVectorType(String filename, String datasetName) {
         hdfFile = new HdfFile(NBIO.all().search(filename).one().asPath());
         this.datasetName = datasetName;
@@ -45,6 +55,13 @@ public abstract class AbstractHdfFileToVectorType implements HdfAttributesProces
         this.dataType = (dataType == null) ? dataset.getJavaType().getSimpleName().toLowerCase() : dataType;
     }
 
+    /**
+     * Retrieves data from the dataset at a specific position.
+     * For multi-dimensional datasets, returns a slice of data.
+     *
+     * @param l The position to read from
+     * @return The data at the specified position
+     */
     protected Object getDataFrom(long l) {
         long[] sliceOffset = new long[dims.length];
         sliceOffset[0] = (l % dims[0]);
@@ -59,11 +76,21 @@ public abstract class AbstractHdfFileToVectorType implements HdfAttributesProces
         }
     }
 
+    /**
+     * Processes attributes of the HDF5 file by traversing its node hierarchy.
+     *
+     * @param hdfFile The HDF5 file to process
+     */
     @Override
     public void processAttributes(HdfFile hdfFile) {
         processNode(hdfFile);
     }
 
+    /**
+     * Recursively processes a node and its children in the HDF5 file hierarchy.
+     *
+     * @param node The node to process
+     */
     private void processNode(Node node) {
         logger.info("Node: {}", node.getPath());
         readAttributes(node);
@@ -76,6 +103,12 @@ public abstract class AbstractHdfFileToVectorType implements HdfAttributesProces
         }
     }
 
+    /**
+     * Reads and processes attributes of a node, updating the dataType if a
+     * COMPONENT_ENCODING attribute is found for the target dataset.
+     *
+     * @param node The node whose attributes should be read
+     */
     private void readAttributes(Node node) {
         Map<String, Attribute> attributes = node.getAttributes();
         if (attributes.isEmpty()) {

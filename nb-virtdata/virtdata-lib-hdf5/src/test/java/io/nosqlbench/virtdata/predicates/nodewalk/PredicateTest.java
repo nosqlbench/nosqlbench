@@ -16,11 +16,7 @@
  */
 package io.nosqlbench.virtdata.predicates.nodewalk;
 
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.ConjugateNode;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.ConjugateType;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.OpType;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.PNode;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.PredicateNode;
+import io.nosqlbench.nbvectors.buildhdf5.predicates.types.*;
 import io.nosqlbench.virtdata.predicates.nodewalk.repr.CqlNodeRenderer;
 import org.junit.jupiter.api.Test;
 
@@ -40,15 +36,15 @@ public class PredicateTest {
     System.out.println(p1);
   }
 
-//  @Test
-//  public void testNesting() {
-//    Node tn = getTestNode1();
-//    ByteBuffer b = ByteBuffer.allocate(100);
-//    tn.encode(b);
-//    b.flip();
-//    Node<?> node = new ConjugateNode(b);
-//    System.out.println(node);
-//  }
+  @Test
+  public void testNesting() {
+    PNode tn = getTestNode1();
+    ByteBuffer b = ByteBuffer.allocate(100);
+    tn.encode(b);
+    b.flip();
+    PNode<?> node = new ConjugateNode(b);
+    System.out.println(node);
+  }
 
   private PNode<?> getTestNode1() {
     PredicateNode inp = new PredicateNode(1, OpType.IN, new long[]{3L, 4L});
