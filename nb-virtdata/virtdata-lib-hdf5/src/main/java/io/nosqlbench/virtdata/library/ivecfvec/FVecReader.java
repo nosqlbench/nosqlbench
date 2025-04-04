@@ -20,6 +20,7 @@ import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
+import io.nosqlbench.virtdata.api.annotations.Example;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.io.IOException;
@@ -31,37 +32,48 @@ import java.nio.file.StandardOpenOption;
 import java.util.function.LongFunction;
 
 /**
- * Reads ivec files with random access, using the input to specify the record number.
+ * Reads fvec files with random access, using the input to specify the record number.
+ * This is used for testing with generated KNN test data which is uniform in dimensions and neighborhood size.
+ * While it is possible to specify different dimensioned vectors per record, this is not supported, since this
+ * function honors the pure-function behavior of other NB binding functions. This requires uniform record structure for random access.
  */
 @ThreadSafeMapper
 @Categories(Category.readers)
 public class FVecReader implements LongFunction<float[]>, AutoCloseable {
 
-    private final FileChannel channel;
+    private static final ScopedValue<FileChannel> CHANNEL = ScopedValue.newInstance();
+
     private final int dimensions;
     private final int reclen;
     private final long filesize;
     private final Path path;
     private final int reclim;
-    private final ByteBuffer headerBuffer = ByteBuffer.allocate(Integer.BYTES);
-    private final ByteBuffer vectorBuffer;
 
+    /**
+     * Read the fvec file, determining the record size from the first record.
+     * @param pathname The location of the fvec file
+     */
+    @Example({"FvecReader('testfile.fvec')","Create a reader for float vectors, detecting the dimensions and dataset size automatically."})
     public FVecReader(String pathname) {
         this(pathname, 0, 0);
     }
 
+    @Example({"FvecReader('testfile.fvec', 46, 12)","Create a reader for float vectors, asserting 46 dimensions and limit total records to 12."})
     public FVecReader(String pathname, int expectedDimensions, int recordLimit) {
         Content<?> src = NBIO.fs().search(pathname).one();
         this.path = src.asPath();
+
         try {
-            this.channel = FileChannel.open(this.path, StandardOpenOption.READ);
-            this.filesize = channel.size();
+            FileChannel initChannel = FileChannel.open(this.path, StandardOpenOption.READ);
+            this.filesize = initChannel.size();
 
             // Read dimensions from the first 4 bytes
-            channel.position(0);
-            channel.read(headerBuffer);
+            ByteBuffer headerBuffer = ByteBuffer.allocate(Integer.BYTES);
+            initChannel.position(0);
+            initChannel.read(headerBuffer);
             headerBuffer.flip();
             this.dimensions = Integer.reverseBytes(headerBuffer.getInt());
+            initChannel.close();
 
             if(expectedDimensions > 0 && expectedDimensions != dimensions) {
                 throw new RuntimeException("Invalid dimensions specified for '" + pathname +
@@ -70,9 +82,6 @@ public class FVecReader implements LongFunction<float[]>, AutoCloseable {
 
             int datalen = (dimensions * Float.BYTES);
             this.reclen = Integer.BYTES + datalen;
-
-            // Pre-allocate buffer for vector data
-            this.vectorBuffer = ByteBuffer.allocate(datalen);
 
             long totalRecords = filesize / reclen;
             if (totalRecords > Integer.MAX_VALUE) {
@@ -96,40 +105,60 @@ public class FVecReader implements LongFunction<float[]>, AutoCloseable {
         }
     }
 
+    private FileChannel getOrCreateChannel() throws IOException {
+        FileChannel channel = CHANNEL.get();
+        if (channel == null) {
+            channel = FileChannel.open(path, StandardOpenOption.READ);
+            ScopedValue.where(CHANNEL, channel).run(() -> {});
+        }
+        return channel;
+    }
+
     @Override
     public float[] apply(long value) {
-        int recordIdx = (int) (value % reclim);
-        long recpos = (long)recordIdx * reclen;
+        return ScopedValue.where(CHANNEL, null).call(() -> {
+            int recordIdx = (int) (value % reclim);
+            long recpos = (long)recordIdx * reclen;
 
-        try {
-            // Read record dimensions
-            headerBuffer.clear();
-            channel.position(recpos);
-            channel.read(headerBuffer);
-            headerBuffer.flip();
-            int recdim = Integer.reverseBytes(headerBuffer.getInt());
+            try {
+                FileChannel channel = getOrCreateChannel();
+                ByteBuffer headerBuffer = ByteBuffer.allocate(Integer.BYTES);
+                ByteBuffer vectorBuffer = ByteBuffer.allocate(dimensions * Float.BYTES)
+                    .order(ByteOrder.BIG_ENDIAN);
 
-            if(recdim != dimensions) {
-                throw new RuntimeException("dimensions are not uniform for fvec file '" +
-                    this.path + "', found dim " + recdim + " at record " + value);
+                // Read record dimensions
+                headerBuffer.clear();
+                channel.position(recpos);
+                channel.read(headerBuffer);
+                headerBuffer.flip();
+                int recdim = Integer.reverseBytes(headerBuffer.getInt());
+
+                if(recdim != dimensions) {
+                    throw new RuntimeException("dimensions are not uniform for fvec file '" +
+                        this.path + "', found dim " + recdim + " at record " + value);
+                }
+
+                // Read vector data
+                vectorBuffer.clear();
+                channel.read(vectorBuffer);
+                vectorBuffer.flip();
+
+                float[] data = new float[dimensions];
+                for (int i = 0; i < dimensions; i++) {
+                    int intBits = Integer.reverseBytes(vectorBuffer.getInt());
+                    data[i] = Float.intBitsToFloat(intBits);
+                }
+                return data;
+
+            } catch (IOException e) {
+                throw new RuntimeException("Error reading from file: " + e.getMessage(), e);
             }
-
-            // Read vector data
-            vectorBuffer.clear();
-            channel.read(vectorBuffer);
-            vectorBuffer.flip();
-
-            float[] vectors = new float[dimensions];
-            vectorBuffer.order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer().get(vectors);
-            return vectors;
-
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading from file: " + e.getMessage(), e);
-        }
+        });
     }
 
     @Override
     public void close() throws Exception {
+        FileChannel channel = CHANNEL.get();
         if (channel != null && channel.isOpen()) {
             channel.close();
         }

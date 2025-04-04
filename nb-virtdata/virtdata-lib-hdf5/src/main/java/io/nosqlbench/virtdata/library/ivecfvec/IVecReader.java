@@ -40,14 +40,13 @@ import java.util.function.LongFunction;
 @Categories(Category.readers)
 public class IVecReader implements LongFunction<int[]>, AutoCloseable {
 
-    private final FileChannel channel;
+    private static final ScopedValue<FileChannel> CHANNEL = ScopedValue.newInstance();
+
     private final int dimensions;
     private final int reclen;
     private final long filesize;
     private final Path path;
     private final int reclim;
-    private final ByteBuffer headerBuffer = ByteBuffer.allocate(Integer.BYTES);
-    private final ByteBuffer vectorBuffer;
 
     /**
      * Read the ivec file, determining the record size from the first record.
@@ -62,15 +61,18 @@ public class IVecReader implements LongFunction<int[]>, AutoCloseable {
     public IVecReader(String pathname, int expectedDimensions, int recordLimit) {
         Content<?> src = NBIO.fs().search(pathname).one();
         this.path = src.asPath();
+
         try {
-            this.channel = FileChannel.open(this.path, StandardOpenOption.READ);
-            this.filesize = channel.size();
+            FileChannel initChannel = FileChannel.open(this.path, StandardOpenOption.READ);
+            this.filesize = initChannel.size();
 
             // Read dimensions from the first 4 bytes
-            channel.position(0);
-            channel.read(headerBuffer);
+            ByteBuffer headerBuffer = ByteBuffer.allocate(Integer.BYTES);
+            initChannel.position(0);
+            initChannel.read(headerBuffer);
             headerBuffer.flip();
             this.dimensions = Integer.reverseBytes(headerBuffer.getInt());
+            initChannel.close();
 
             if(expectedDimensions > 0 && expectedDimensions != dimensions) {
                 throw new RuntimeException("Invalid dimensions specified for '" + pathname +
@@ -79,9 +81,6 @@ public class IVecReader implements LongFunction<int[]>, AutoCloseable {
 
             int datalen = (dimensions * Integer.BYTES);
             this.reclen = Integer.BYTES + datalen;
-
-            // Pre-allocate buffer for vector data
-            this.vectorBuffer = ByteBuffer.allocate(datalen);
 
             long totalRecords = filesize / reclen;
             if (totalRecords > Integer.MAX_VALUE) {
@@ -105,42 +104,58 @@ public class IVecReader implements LongFunction<int[]>, AutoCloseable {
         }
     }
 
+    private FileChannel getOrCreateChannel() throws IOException {
+        FileChannel channel = CHANNEL.get();
+        if (channel == null) {
+            channel = FileChannel.open(path, StandardOpenOption.READ);
+            ScopedValue.where(CHANNEL, channel).run(() -> {});
+        }
+        return channel;
+    }
+
     @Override
     public int[] apply(long value) {
-        int recordIdx = (int) (value % reclim);
-        long recpos = (long)recordIdx * reclen;
+        return ScopedValue.where(CHANNEL, null).call(() -> {
+            int recordIdx = (int) (value % reclim);
+            long recpos = (long)recordIdx * reclen;
 
-        try {
-            // Read record dimensions
-            headerBuffer.clear();
-            channel.position(recpos);
-            channel.read(headerBuffer);
-            headerBuffer.flip();
-            int recdim = Integer.reverseBytes(headerBuffer.getInt());
+            try {
+                FileChannel channel = getOrCreateChannel();
+                ByteBuffer headerBuffer = ByteBuffer.allocate(Integer.BYTES);
+                ByteBuffer vectorBuffer = ByteBuffer.allocate(dimensions * Integer.BYTES);
 
-            if(recdim != dimensions) {
-                throw new RuntimeException("dimensions are not uniform for ivec file '" +
-                    this.path + "', found dim " + recdim + " at record " + value);
+                // Read record dimensions
+                headerBuffer.clear();
+                channel.position(recpos);
+                channel.read(headerBuffer);
+                headerBuffer.flip();
+                int recdim = Integer.reverseBytes(headerBuffer.getInt());
+
+                if(recdim != dimensions) {
+                    throw new RuntimeException("dimensions are not uniform for ivec file '" +
+                        this.path + "', found dim " + recdim + " at record " + value);
+                }
+
+                // Read vector data
+                vectorBuffer.clear();
+                channel.read(vectorBuffer);
+                vectorBuffer.flip();
+
+                int[] data = new int[dimensions];
+                for (int i = 0; i < dimensions; i++) {
+                    data[i] = Integer.reverseBytes(vectorBuffer.getInt());
+                }
+                return data;
+
+            } catch (IOException e) {
+                throw new RuntimeException("Error reading from file: " + e.getMessage(), e);
             }
-
-            // Read vector data
-            vectorBuffer.clear();
-            channel.read(vectorBuffer);
-            vectorBuffer.flip();
-
-            int[] data = new int[dimensions];
-            for (int i = 0; i < dimensions; i++) {
-                data[i] = Integer.reverseBytes(vectorBuffer.getInt());
-            }
-            return data;
-
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading from file: " + e.getMessage(), e);
-        }
+        });
     }
 
     @Override
     public void close() throws Exception {
+        FileChannel channel = CHANNEL.get();
         if (channel != null && channel.isOpen()) {
             channel.close();
         }
