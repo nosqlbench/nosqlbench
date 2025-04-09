@@ -33,23 +33,37 @@ class ComputeFunctionsIntTest {
     private final static int[] highInts56789 = new int[]{5,6,7,8,9};
 
     private final static int[] intsBy3_369 = new int[]{3,6,9};
+    private final static int[] intsBy3_369_12_15 = new int[]{3,6,9,12,15};
     private final static int[] intsBy3_693 = new int[]{6,9,3};
     private final static int[] midInts45678 = new int[]{4,5,6,7,8};
     private final static int[] ints12390 = new int[]{1,2,3,9,0};
 
     @Test
     void testRecallIntArrays() {
-        assertThat(ComputeFunctions.recall(evenInts86204,oddInts37195, 10))
+        assertThat(ComputeFunctions.recall(evenInts86204,oddInts37195, 5))
             .as("finding 0 actual of any should yield recall=0.0")
             .isCloseTo(0.0d, offset);
 
-        assertThat(ComputeFunctions.recall(evenInts86204,intsBy3_369, 10))
+        assertThat(ComputeFunctions.recall(evenInts86204,intsBy3_369_12_15, 5))
             .as("finding 1 actual of 5 relevant should yield recall=0.2")
             .isCloseTo(0.2d, offset);
 
-        assertThat(ComputeFunctions.recall(evenInts86204,intsBy3_369,1))
+        assertThat(ComputeFunctions.recall(evenInts86204,intsBy3_369_12_15,5))
             .as("finding 0 (limited) actual of 5 relevant should yield recall=0.0")
-            .isCloseTo(0.0d, offset);
+            .isCloseTo(0.2d, offset);
+
+        assertThat(ComputeFunctions.recall(evenInts86204,intsBy3_369_12_15,1))
+            .as("finding 1 (limited) actual of 1 (limited) relevant should yield recall=1.0")
+            .isCloseTo(1.0d, offset);
+
+        assertThat(ComputeFunctions.recall(evenInts86204,intsBy3_369_12_15,2))
+            .as("finding 1 (limited) actual of 2 (limited) relevant should yield recall=0.5")
+            .isCloseTo(0.5d, offset);
+
+        assertThat(ComputeFunctions.recall(evenInts86204,intsBy3_369_12_15,3))
+            .as("finding 1 (limited) actual of 3 (limited) relevant should yield recall=0.3...")
+            .isCloseTo(0.3333d, offset);
+
     }
 
     @Test

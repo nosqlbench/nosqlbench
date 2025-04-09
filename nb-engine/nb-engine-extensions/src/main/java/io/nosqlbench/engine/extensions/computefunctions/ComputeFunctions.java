@@ -67,8 +67,6 @@ public class ComputeFunctions extends NBBaseComponent {
     }
     Arrays.sort(ground_truth);
     Arrays.sort(actual);
-    ground_truth = Arrays.copyOfRange(ground_truth, 0, k);
-    actual = Arrays.copyOfRange(actual, 0, k);
     int intersection = Intersections.count(ground_truth, actual, k);
     return (double) intersection / (double) k;
   }
@@ -114,8 +112,6 @@ public class ComputeFunctions extends NBBaseComponent {
     }
     Arrays.sort(ground_truth);
     Arrays.sort(actual);
-    ground_truth = Arrays.copyOfRange(ground_truth, 0, k);
-    actual = Arrays.copyOfRange(actual, 0, k);
     int intersection = Intersections.count(ground_truth, actual);
     return (double) intersection / (double) k;
   }
