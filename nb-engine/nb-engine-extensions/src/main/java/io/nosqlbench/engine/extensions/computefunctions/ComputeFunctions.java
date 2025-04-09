@@ -47,36 +47,29 @@ public class ComputeFunctions extends NBBaseComponent {
         super(parentComponent);
     }
 
-    /**
-     * Compute the recall as the proportion of matching indices divided by the expected indices
-     *
-     * @param relevant
-     *     long array of indices
-     * @param actual
-     *     long array of indices
-     * @return a fractional measure of matching vs expected indices
-     */
-    public static double recall(long[] relevant, long[] actual) {
-        Arrays.sort(relevant);
-        Arrays.sort(actual);
-        long[] intersection = Intersections.find(relevant, actual);
-        return (double) intersection.length / (double) relevant.length;
+  /**
+   Compute the recall as the proportion of matching indices divided by the expected indices
+   @param ground_truth
+   long array of indices
+   @param actual
+   long array of indices
+   @param k
+   the limit of the expected indices
+   @return a fractional measure of matching vs expected indices
+   */
+  public static double recall(long[] ground_truth, long[] actual, int k) {
+    if (ground_truth.length < k) {
+      throw new RuntimeException(
+          "ground truth size " + ground_truth.length + " is less than k=" + k);
     }
-
-    public static double recall(long[] relevant, long[] actual, int k) {
-
-        if (relevant.length < actual.length) {
-            throw new RuntimeException("Result indices greater than ground truth size, invalid precision computation: " +
-                "index count=" + actual.length + ", ground truth=" + relevant.length + ", limit=" + k);
-        }
-        long divisor = Math.min(relevant.length, k);
-        relevant = Arrays.copyOfRange(relevant,0,relevant.length);
-        actual = Arrays.copyOfRange(actual, 0, relevant.length);
-        Arrays.sort(relevant);
-        Arrays.sort(actual);
-        long[] intersection = Intersections.find(relevant, actual);
-        return (double) intersection.length / (double) divisor;
+    if (actual.length < k) {
+      throw new RuntimeException("result size " + actual.length + " is less than k=" + k);
     }
+    Arrays.sort(ground_truth);
+    Arrays.sort(actual);
+    int intersection = Intersections.count(ground_truth, actual, k);
+    return (double) intersection / (double) k;
+  }
 
     public static double precision(long[] relevant, long[] actual) {
         Arrays.sort(relevant);
@@ -98,35 +91,29 @@ public class ComputeFunctions extends NBBaseComponent {
         return (double) intersection.length / (double) actual.length;
     }
 
-    /**
-     * Compute the recall as the proportion of matching indices divided by the expected indices
-     *
-     * @param relevant
-     *     int array of indices
-     * @param actual
-     *     int array of indices
-     * @return a fractional measure of matching vs expected indices
-     */
-    public static double recall(int[] relevant, int[] actual) {
-        Arrays.sort(relevant);
-        Arrays.sort(actual);
-        int intersection = Intersections.count(relevant, actual);
-        return (double) intersection / (double) relevant.length;
+  /**
+   Compute the recall as the proportion of matching indices divided by the expected indices
+   @param ground_truth
+   int array of indices
+   @param actual
+   int array of indices
+   @param k
+   the limit of the expected indices
+   @return a fractional measure of matching vs expected indices
+   */
+  public static double recall(int[] ground_truth, int[] actual, int k) {
+    if (ground_truth.length < k) {
+      throw new RuntimeException(
+          "ground truth size " + ground_truth.length + " is less than k=" + k);
     }
-
-    public static double recall(int[] relevant, int[] actual, int k) {
-        if (relevant.length < actual.length) {
-            throw new RuntimeException("Result indices greater than ground truth size, invalid precision computation: " +
-                "index count=" + actual.length + ", ground truth=" + relevant.length + ", limit=" + k);
-        }
-        long divisor = Math.min(relevant.length, k);
-        relevant = Arrays.copyOfRange(relevant,0,relevant.length);
-        actual = Arrays.copyOfRange(actual, 0, relevant.length);
-        Arrays.sort(relevant);
-        Arrays.sort(actual);
-        int intersection = Intersections.count(relevant, actual);
-        return (double) intersection / (double) divisor;
+    if (actual.length < k) {
+      throw new RuntimeException("result size " + actual.length + " is less than k=" + k);
     }
+    Arrays.sort(ground_truth);
+    Arrays.sort(actual);
+    int intersection = Intersections.count(ground_truth, actual, k);
+    return (double) intersection / (double) k;
+  }
 
     public static double precision(int[] relevant, int[] actual) {
         Arrays.sort(relevant);

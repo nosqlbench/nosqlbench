@@ -46,47 +46,59 @@ public class Intersections {
         return -1;
     }
 
-    public static int count(int[] reference, int[] sample) {
-        int a_index = 0, b_index = 0, matches = 0;
-        int a_element, b_element;
-        while (a_index < reference.length && b_index < sample.length) {
-            a_element = reference[a_index];
-            b_element = sample[b_index];
-            if (a_element == b_element) {
-                ++matches;
-                a_index++;
-                b_index++;
-            } else if (b_element < a_element) {
-                b_index++;
-            } else {
-                a_index++;
-            }
-        }
-        return matches;
+  public static int count(int[] reference, int[] sample) {
+    return count(reference, sample, Integer.MAX_VALUE);
+  }
+
+  public static int count(int[] reference, int[] sample, int depth) {
+    int a_index = 0, b_index = 0, matches = 0;
+    int a_element, b_element;
+
+    int a_limit = Math.min(reference.length, depth);
+    int b_limit = Math.min(sample.length, depth);
+
+    while (a_index < a_limit && b_index < b_limit) {
+      a_element = reference[a_index];
+      b_element = sample[b_index];
+      if (a_element == b_element) {
+        ++matches;
+        a_index++;
+        b_index++;
+      } else if (b_element < a_element) {
+        b_index++;
+      } else { // a_element < b_element
+        a_index++;
+      }
     }
+    return matches;
+  }
 
     public static int count(long[] reference, long[] sample) {
         return count(reference, sample, reference.length);
     }
 
-    public static int count(long[] reference, long[] sample, int limit) {
-        int a_index = 0, b_index = 0, matches = 0;
-        long a_element, b_element;
-        while (a_index < reference.length && a_index < limit && b_index < sample.length && b_index < limit) {
-            a_element = reference[a_index];
-            b_element = sample[b_index];
-            if (a_element == b_element) {
-                ++matches;
-                a_index++;
-                b_index++;
-            } else if (b_element < a_element) {
-                b_index++;
-            } else {
-                a_index++;
-            }
-        }
-        return matches;
+  public static int count(long[] reference, long[] sample, int limit) {
+    int a_index = 0, b_index = 0, matches = 0;
+    long a_element, b_element;
+
+    int a_limit = Math.min(reference.length, limit);
+    int b_limit = Math.min(sample.length, limit);
+
+    while (a_index < a_limit && b_index < b_limit) {
+      a_element = reference[a_index];
+      b_element = sample[b_index];
+      if (a_element == b_element) {
+        ++matches;
+        a_index++;
+        b_index++;
+      } else if (b_element < a_element) {
+        b_index++;
+      } else { // a_element < b_element
+        a_index++;
+      }
     }
+    return matches;
+  }
 
     public static int[] find(int[] reference, int[] sample) {
         int[] result = new int[sample.length];
