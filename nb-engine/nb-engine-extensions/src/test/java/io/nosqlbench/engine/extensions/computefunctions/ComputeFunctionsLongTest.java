@@ -33,23 +33,24 @@ class ComputeFunctionsLongTest {
     private final static long[] longs_56789 = new long[]{5,6,7,8,9};
 
     private final static long[] longs_369 = new long[]{3,6,9};
+    private final static long[] longs_369_12_15 = new long[]{3,6,9,12,15};
     private final static long[] longs_693 = new long[]{6,9,3};
     private final static long[] longs_45678 = new long[]{4,5,6,7,8};
     private final static long[] longs_12390 = new long[]{1,2,3,9,0};
 
     @Test
     void testRecallLongArrays() {
-        assertThat(ComputeFunctions.recall(longs_86204, longs_37195))
+        assertThat(ComputeFunctions.recall(longs_86204, longs_37195, 5))
             .as("finding 0 actual of any should yield recall=0.0")
             .isCloseTo(0.0d, offset);
 
-        assertThat(ComputeFunctions.recall(longs_86204, longs_369))
+        assertThat(ComputeFunctions.recall(longs_86204, longs_369_12_15, 5))
             .as("finding 1 actual of 5 relevant should yield recall=0.2")
             .isCloseTo(0.2d, offset);
 
-        assertThat(ComputeFunctions.recall(longs_86204, longs_369,1))
-            .as("finding 0 (limited) actual of 5 relevant should yield recall=0.0")
-            .isCloseTo(2.0d, offset);
+        assertThat(ComputeFunctions.recall(longs_86204, longs_369_12_15,5))
+            .as("finding 1 (limited) actual of 5 relevant should yield recall=0.0")
+            .isCloseTo(0.2d, offset);
     }
 
     @Test
@@ -72,9 +73,9 @@ class ComputeFunctionsLongTest {
         for (int i = 1; i < hundo.length; i++) {
             long[] partial=LongStream.range(0,i).toArray();
             int finalI = i;
-            assertThat(ComputeFunctions.recall(hundo, partial))
+            assertThat(ComputeFunctions.recall(hundo, partial, i))
                 .as(() -> "for subset size " + finalI +", recall should be fractional/100")
-                .isCloseTo((double)partial.length/(double)hundo.length,offset);
+                .isCloseTo((double)partial.length/(double)i,offset);
         }
     }
 

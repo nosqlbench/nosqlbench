@@ -39,17 +39,17 @@ class ComputeFunctionsIntTest {
 
     @Test
     void testRecallIntArrays() {
-        assertThat(ComputeFunctions.recall(evenInts86204,oddInts37195))
+        assertThat(ComputeFunctions.recall(evenInts86204,oddInts37195, 10))
             .as("finding 0 actual of any should yield recall=0.0")
             .isCloseTo(0.0d, offset);
 
-        assertThat(ComputeFunctions.recall(evenInts86204,intsBy3_369))
+        assertThat(ComputeFunctions.recall(evenInts86204,intsBy3_369, 10))
             .as("finding 1 actual of 5 relevant should yield recall=0.2")
             .isCloseTo(0.2d, offset);
 
         assertThat(ComputeFunctions.recall(evenInts86204,intsBy3_369,1))
             .as("finding 0 (limited) actual of 5 relevant should yield recall=0.0")
-            .isCloseTo(2.0d, offset);
+            .isCloseTo(0.0d, offset);
     }
 
     @Test
@@ -72,9 +72,10 @@ class ComputeFunctionsIntTest {
         for (int i = 1; i < hundo.length; i++) {
             int[] partial=IntStream.range(0,i).toArray();
             int finalI = i;
-            assertThat(ComputeFunctions.recall(hundo, partial))
+            assertThat(ComputeFunctions.recall(hundo, partial, i))
                 .as(() -> "for subset size " + finalI +", recall should be fractional/100")
-                .isCloseTo((double)partial.length/(double)hundo.length,offset);
+                .isCloseTo((double)partial.length/(double)i,offset);
+
         }
 
     }
@@ -100,6 +101,11 @@ class ComputeFunctionsIntTest {
     public void testCountIntIntersection() {
         int result = Intersections.count(oddInts37195, ints12390);
         assertThat(result).isEqualTo(2L);
+    }
+
+    @Test
+    public void tesTCountIntersectionDepth() {
+        assertThat(Intersections.count(oddInts37195, ints12390,0)).isEqualTo(0);;
     }
 
     @Test
