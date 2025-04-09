@@ -112,7 +112,7 @@ public class ComputeFunctions extends NBBaseComponent {
     }
     Arrays.sort(ground_truth);
     Arrays.sort(actual);
-    int intersection = Intersections.count(ground_truth, actual);
+    int intersection = Intersections.count(ground_truth, actual, k);
     return (double) intersection / (double) k;
   }
 
