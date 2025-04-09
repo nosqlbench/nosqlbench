@@ -263,9 +263,7 @@ public class NBCLIScenarioPreprocessor {
     }
 
     private static final Pattern WordAndMaybeAssignment =
-        Pattern.compile("""
-            (?<name>\\w[-_\\d\\w.]*)((?<oper>=+)(?<val>.+))?
-            """);
+        Pattern.compile("(?<name>\\w[-_\\d\\w.]*)((?<oper>=+)(?<val>.+))?");
     public static String[] splitCommand(String cmd) {
         // split command by honoring single quotes, double quotes and escape characters
         String[] namedStepPieces = cmd.split(" +(?=([^\"]*\"[^\"]*\")*[^\"]*$)(?=([^']*'[^']*')*[^']*$)");
