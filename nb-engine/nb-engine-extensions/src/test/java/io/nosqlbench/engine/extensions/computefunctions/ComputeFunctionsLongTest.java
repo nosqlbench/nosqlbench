@@ -39,6 +39,35 @@ class ComputeFunctionsLongTest {
     private final static long[] longs_1_2_3_9_0 = new long[]{1, 2, 3, 9, 0};
 
     @Test
+    public void testNoIntersectionAtAnyK() {
+        for (int k = 1; k < 5; k++) {
+            assertThat(ComputeFunctions.recall(longs_8_6_2_0_4, longs_3_7_1_9_5, k)).as(
+                "When no elements intersect, recall can never be > 0.0").isCloseTo(0.0d, offset);
+        }
+    }
+
+    @Test
+    public void testFullIdentityIntersectionAtAnyK() {
+        for (int k = 1; k < 5; k++) {
+            assertThat(ComputeFunctions.recall(longs_8_6_2_0_4, longs_8_6_2_0_4, k)).as(
+                "When all elements intersect, recall can never be < 1.0").isCloseTo(1.0d, offset);
+        }
+    }
+
+    @Test
+    public void testProportionalIntersectionAtSomeK() {
+        long[] image = new long[]{101,102,103,104,105};
+        long[] gt = new long[]{34,30,12,9,37};
+        for (int k = 1; k < 5; k++) {
+            image[k] = gt[k];
+            assertThat(ComputeFunctions.recall(image, gt, 5)).as(
+                    "When some elements intersect ("+k+"/"+image.length+"), recall should be proportional")
+                .isCloseTo((double) k/5, offset);
+        }
+    }
+
+
+    @Test
     void testRecallLongArrays() {
         assertThat(ComputeFunctions.recall(longs_8_6_2_0_4, longs_3_7_1_9_5, 5))
             .as("finding 0 actual of any should yield recall=0.0")

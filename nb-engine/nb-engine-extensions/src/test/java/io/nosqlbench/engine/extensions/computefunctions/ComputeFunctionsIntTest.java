@@ -38,8 +38,37 @@ class ComputeFunctionsIntTest {
   private final static int[] int_4_5_6_7_8 = new int[]{4, 5, 6, 7, 8};
   private final static int[] int_1_2_3_9_0 = new int[]{1, 2, 3, 9, 0};
 
+
   @Test
-  void testRecallIntArrays() {
+  public void testNoIntersectionAtAnyK() {
+    for (int k = 1; k < 5; k++) {
+      assertThat(ComputeFunctions.recall(int_8_6_2_0_4, int_3_7_1_9_5, k)).as(
+          "When no elements intersect, recall can never be > 0.0").isCloseTo(0.0d, offset);
+    }
+  }
+
+  @Test
+  public void testFullIdentityIntersectionAtAnyK() {
+    for (int k = 1; k < 5; k++) {
+      assertThat(ComputeFunctions.recall(int_8_6_2_0_4, int_8_6_2_0_4, k)).as(
+          "When all elements intersect, recall can never be < 1.0").isCloseTo(1.0d, offset);
+    }
+  }
+
+  @Test
+  public void testProportionalIntersectionAtSomeK() {
+    int[] image = new int[]{101,102,103,104,105};
+    int[] gt = new int[]{34,30,12,9,37};
+    for (int k = 1; k < 5; k++) {
+      image[k] = gt[k];
+      assertThat(ComputeFunctions.recall(image, gt, 5)).as(
+              "When some elements intersect ("+k+"/"+image.length+"), recall should be proportional")
+          .isCloseTo((double) k/5, offset);
+    }
+  }
+
+  @Test
+  public void testMiscExamples() {
     assertThat(ComputeFunctions.recall(int_8_6_2_0_4, int_3_7_1_9_5, 5)).as(
         "finding 0 actual of any should yield recall=0.0").isCloseTo(0.0d, offset);
 
@@ -57,22 +86,28 @@ class ComputeFunctionsIntTest {
             "finding 1 (limited) actual of 5 (limited) relevant should yield recall=1.0")
         .isCloseTo(0.2d, offset);
 
-    assertThat(ComputeFunctions.recall(int_8_6_2_0_4, int_1_2_3_9_0, 2)).as(
-            "finding 1 (limited) actual of 2 (limited) relevant should yield recall=0.5")
-        .isCloseTo(0.5d, offset);
+    assertThat(ComputeFunctions.recall(int_8_6_2_0_4, int_1_2_3_9_0, 4)).as(
+            "finding 1 (limited) actual of 4 (limited) relevant should yield recall=0.25")
+        .isCloseTo(0.25d, offset);
 
+  }
 
-    // Test k-dependent intersection
+  /**
+   Test intersections which would yield an incorrect result were they not be properly limited at
+   k before truncation
+   */
+  @Test
+  public void testKDependentIntersection() {
     assertThat(ComputeFunctions.recall(int_3_7_1_9_5, int_1_2_3_9_0, 1)).as(
             "finding 0 (limited) actual of 1 (limited) relevant should yield recall=0.0")
         .isCloseTo(0.0, offset);
-    assertThat(ComputeFunctions.recall(int_3_7_1_9_5, int_1_2_3_9_0, 2)).as(
-            "finding 0 (limited) actual of 1 (limited) relevant should yield recall=0.0")
-        .isCloseTo(0.5, offset);
-    assertThat(ComputeFunctions.recall(int_3_7_1_9_5, int_1_2_3_9_0, 3)).as(
-            "finding 0 (limited) actual of 1 (limited) relevant should yield recall=0.0")
-        .isCloseTo(0.3333d, offset);
 
+    assertThat(ComputeFunctions.recall(int_3_7_1_9_5, int_1_2_3_9_0, 2)).as(
+            "finding 0 (limited) actual of 2 (limited) relevant should yield recall=0.0")
+        .isCloseTo(0.0, offset);
+    assertThat(ComputeFunctions.recall(int_3_7_1_9_5, int_1_2_3_9_0, 3)).as(
+            "finding 2 (limited) actual of 3 (limited) relevant should yield recall=0.6666")
+        .isCloseTo(0.6666d, offset);
 
   }
 
@@ -119,12 +154,6 @@ class ComputeFunctionsIntTest {
   public void testCountIntIntersection() {
     int result = Intersections.count(int_3_7_1_9_5, int_1_2_3_9_0);
     assertThat(result).isEqualTo(2L);
-  }
-
-  @Test
-  public void tesTCountIntersectionDepth() {
-    assertThat(Intersections.count(int_3_7_1_9_5, int_1_2_3_9_0, 0)).isEqualTo(0);
-    ;
   }
 
   @Test

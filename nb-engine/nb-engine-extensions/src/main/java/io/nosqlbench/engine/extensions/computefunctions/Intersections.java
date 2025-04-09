@@ -46,20 +46,23 @@ public class Intersections {
         return -1;
     }
 
-  public static int count(int[] reference, int[] sample) {
-    return count(reference, sample, Integer.MAX_VALUE);
-  }
-
-  public static int count(int[] reference, int[] sample, int depth) {
+  /**
+   Use the two-pointer method to count the number of matches between the two arrays.
+   This method requires that the values be sorted in ascending order already,
+   with no duplicate values.
+   * @param a
+   * a set of integers
+   * @param b
+   * a set of integers
+   * @return The number of matches between the two arrays.
+   */
+  public static int count(int[] a, int[] b) {
     int a_index = 0, b_index = 0, matches = 0;
     int a_element, b_element;
 
-    int a_limit = Math.min(reference.length, depth);
-    int b_limit = Math.min(sample.length, depth);
-
-    while (a_index < a_limit && b_index < b_limit) {
-      a_element = reference[a_index];
-      b_element = sample[b_index];
+    while (a_index < a.length && b_index < b.length) {
+      a_element = a[a_index];
+      b_element = b[b_index];
       if (a_element == b_element) {
         ++matches;
         a_index++;
@@ -73,20 +76,23 @@ public class Intersections {
     return matches;
   }
 
-    public static int count(long[] reference, long[] sample) {
-        return count(reference, sample, reference.length);
-    }
-
-  public static int count(long[] reference, long[] sample, int limit) {
+  /**
+   Use the two-pointer method to count the number of matches between the two arrays.
+   This method requires that the values be sorted in ascending order already,
+   with no duplicate values.
+   * @param a
+   * a set of integers
+   * @param b
+   * a set of integers
+   * @return The number of matches between the two arrays.
+   */
+  public static int count(long[] a, long[] b) {
     int a_index = 0, b_index = 0, matches = 0;
     long a_element, b_element;
 
-    int a_limit = Math.min(reference.length, limit);
-    int b_limit = Math.min(sample.length, limit);
-
-    while (a_index < a_limit && b_index < b_limit) {
-      a_element = reference[a_index];
-      b_element = sample[b_index];
+    while (a_index < a.length && b_index < b.length) {
+      a_element = a[a_index];
+      b_element = b[b_index];
       if (a_element == b_element) {
         ++matches;
         a_index++;
@@ -100,13 +106,13 @@ public class Intersections {
     return matches;
   }
 
-    public static int[] find(int[] reference, int[] sample) {
-        int[] result = new int[sample.length];
+    public static int[] find(int[] a, int[] b) {
+        int[] result = new int[b.length];
         int a_index = 0, b_index = 0, acc_index = -1;
         int a_element, b_element;
-        while (a_index < reference.length && b_index < sample.length) {
-            a_element = reference[a_index];
-            b_element = sample[b_index];
+        while (a_index < a.length && b_index < b.length) {
+            a_element = a[a_index];
+            b_element = b[b_index];
             if (a_element == b_element) {
                 result[++acc_index] = a_element;
                 a_index++;
