@@ -114,7 +114,7 @@ public class S4JSpace extends BaseSpace<S4JSpace> {
 
 
     public S4JSpace(S4JDriverAdapter adapter, long idx, NBConfiguration cfg) {
-        super(adapter, idx);
+        super(adapter, String.valueOf(idx));
         this.cfg = cfg;
 
         this.pulsarSvcUrl = cfg.get("service_url");

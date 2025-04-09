@@ -36,7 +36,7 @@ public class DiagSpace extends BaseSpace<DiagSpace> implements ActivityDefObserv
     private boolean errorOnClose;
 
     public DiagSpace(DiagDriverAdapter adapter, long idx, NBConfiguration cfg) {
-        super(adapter, idx);
+        super(adapter, String.valueOf(idx));
         this.cfg = cfg;
         applyConfig(cfg);
         logger.trace(() -> "diag space initialized as '" + idx + "'");

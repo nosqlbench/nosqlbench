@@ -49,7 +49,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private DatabaseAdmin namespaceAdmin;
 
     public DataApiSpace(DataApiDriverAdapter adapter, long name, NBConfiguration cfg) {
-        super(adapter,name);
+        super(adapter,String.valueOf(name));
         this.config = cfg;
         setToken();
         setSuperToken();

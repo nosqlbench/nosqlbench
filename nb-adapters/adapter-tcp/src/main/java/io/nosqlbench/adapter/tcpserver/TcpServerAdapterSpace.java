@@ -53,7 +53,7 @@ public class TcpServerAdapterSpace extends BaseSpace<TcpServerAdapterSpace> {
     private int capacity=10;
 
     public TcpServerAdapterSpace(TcpServerDriverAdapter adapter, long idx, NBConfiguration config) {
-        super(adapter, idx);
+        super(adapter, String.valueOf(idx));
         this.config = config;
         this.writer = createPrintWriter();
     }

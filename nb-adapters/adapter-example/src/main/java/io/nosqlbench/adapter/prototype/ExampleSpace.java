@@ -27,7 +27,7 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 public class ExampleSpace extends BaseSpace<ExampleSpace> {
 
     public ExampleSpace(DriverAdapter<?, ExampleSpace> adapter, long idx) {
-        super(adapter, idx);
+        super(adapter, String.valueOf(idx));
     }
 
 }

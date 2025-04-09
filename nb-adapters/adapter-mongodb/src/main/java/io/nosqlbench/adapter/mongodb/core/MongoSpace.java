@@ -45,7 +45,7 @@ public class MongoSpace extends BaseSpace<MongoSpace> {
     private final NBConfiguration cfg;
 
     public MongoSpace(MongodbDriverAdapter adapter, long idx, NBConfiguration cfg) {
-        super(adapter,idx);
+        super(adapter,String.valueOf(idx));
         this.cfg = cfg;
         logger.debug(() -> "Creating MongoSpace with config: " + cfg);
     }

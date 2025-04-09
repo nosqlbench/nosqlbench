@@ -34,7 +34,7 @@ public class DynamoDBSpace extends BaseSpace<DynamoDBSpace> {
     DynamoDB dynamoDB;
 
     public DynamoDBSpace(DynamoDBDriverAdapter adapter, long idx, NBConfiguration cfg) {
-        super(adapter, idx);
+        super(adapter, String.valueOf(idx));
         AmazonDynamoDB client = createClient(cfg);
         dynamoDB= new DynamoDB(client);
     }

@@ -69,7 +69,7 @@ public class PulsarSpace extends BaseSpace<PulsarSpace> {
 
 
     public PulsarSpace(PulsarDriverAdapter adapter, long idx, NBConfiguration cfg) {
-        super(adapter, idx);
+        super(adapter, String.valueOf(idx));
         this.cfg = cfg;
 
         this.pulsarSvcUrl = cfg.get("service_url");
@@ -244,5 +244,3 @@ public class PulsarSpace extends BaseSpace<PulsarSpace> {
         shutdownSpace();
     }
 }
-
-

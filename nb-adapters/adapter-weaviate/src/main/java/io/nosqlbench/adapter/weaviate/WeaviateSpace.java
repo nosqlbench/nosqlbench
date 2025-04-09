@@ -59,7 +59,7 @@ public class WeaviateSpace extends BaseSpace<WeaviateSpace> {
      * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
      */
     public WeaviateSpace(WeaviateDriverAdapter adapter, long idx, NBConfiguration cfg) {
-        super(adapter, idx);
+        super(adapter, String.valueOf(idx));
         this.cfg = cfg;
     }
 

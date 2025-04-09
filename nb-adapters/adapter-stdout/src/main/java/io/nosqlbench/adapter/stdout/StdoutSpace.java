@@ -32,7 +32,7 @@ public class StdoutSpace extends BaseSpace<StdoutSpace> {
     private PrintWriter console;
 
     public StdoutSpace(StdoutDriverAdapter adapter, long idx, NBConfiguration cfg) {
-        super(adapter, idx);
+        super(adapter, String.valueOf(idx));
         String filename = cfg.get("filename");
         this.writer = createPrintWriter(filename);
     }

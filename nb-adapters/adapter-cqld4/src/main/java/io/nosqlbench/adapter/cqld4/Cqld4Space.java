@@ -58,7 +58,7 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
       new ConcurrentIndexCache<>("pstmts");
 
   public Cqld4Space(Cqld4DriverAdapter adapter, long spaceidx, NBConfiguration cfg) {
-    super(adapter, spaceidx);
+    super(adapter, String.valueOf(spaceidx));
     session = createSession(cfg);
   }
 
@@ -321,12 +321,6 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
     }
   }
 
-  private String interpolateSpace(String template) {
-    if (template.matches(".*\\{[Ss][Pp][Aa][Cc][Ee]}.*")) {
-      template = template.replaceAll("\\{[Ss][Pp][Aa][Cc][Ee]}", getName());
-    }
-    return template;
-  }
 
   public CqlSession getSession() {
     return session;

@@ -91,7 +91,7 @@ public class KafkaSpace extends BaseSpace<KafkaSpace> {
 
 
     public KafkaSpace(KafkaDriverAdapter adapter, int idx, NBConfiguration cfg) {
-        super(adapter, idx);
+        super(adapter, String.valueOf(idx));
         this.cfg = cfg;
 
         this.bootstrapSvr = cfg.get("bootstrap_server");

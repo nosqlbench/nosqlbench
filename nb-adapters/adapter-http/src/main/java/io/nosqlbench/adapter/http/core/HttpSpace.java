@@ -56,7 +56,7 @@ public class HttpSpace extends BaseSpace<HttpSpace> implements NBLabeledElement 
 
 
     public HttpSpace(long idx, HttpDriverAdapter parentAdapter, NBConfiguration cfg) {
-        super(parentAdapter,idx);
+        super(parentAdapter, String.valueOf(idx));
         this.parentAdapter = parentAdapter;
         this.cfg = cfg;
         applyConfig(cfg);

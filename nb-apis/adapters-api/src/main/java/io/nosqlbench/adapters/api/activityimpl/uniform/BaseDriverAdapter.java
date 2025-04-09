@@ -43,6 +43,7 @@ public abstract class BaseDriverAdapter<RESULT
     private final static Logger logger = LogManager.getLogger("ADAPTER");
 
     private ConcurrentSpaceCache<SPACE> spaceCache;
+    private ConcurrentStringSpaceCache<SPACE> stringSpaceCache;
     private NBConfiguration cfg;
     private LongFunction<SPACE> spaceF;
 
@@ -140,6 +141,26 @@ public abstract class BaseDriverAdapter<RESULT
         return spaceCache;
     }
 
+    private final synchronized ConcurrentStringSpaceCache<SPACE> getStringSpaceCache() {
+        if (stringSpaceCache == null) {
+            stringSpaceCache = new ConcurrentStringSpaceCache<SPACE>(this, getStringSpaceInitializer(getConfiguration()));
+        }
+        return stringSpaceCache;
+    }
+
+    /**
+     * Get a function that initializes a space with a string name.
+     * This is used for non-numeric space functions.
+     *
+     * @param cfg The configuration to use
+     * @return A function that creates a space for a given string name
+     */
+    protected Function<String, SPACE> getStringSpaceInitializer(NBConfiguration cfg) {
+        // Use the existing space initializer but with a fixed index and the string name
+        LongFunction<SPACE> initializer = getSpaceInitializer(cfg);
+        return name -> initializer.apply(0);
+    }
+
     @Override
     public NBConfiguration getConfiguration() {
         return cfg;
@@ -218,80 +239,79 @@ public abstract class BaseDriverAdapter<RESULT
         }
     }
 
+    /**
+     * Get the function that provides space instances for a given cycle value.
+     * This method constructs an appropriate lambda that does the following:
+     * <UL>
+     *   <LI>Determines whether the function provided for "space" is present or not. If it is
+     *   not, then the default one is used which simply returns a 0.</LI>
+     *   <LI>If the type of the returned value is a Number, then the Number.intValue method is
+     *   used to in combination with a ConcurrentSpaceCache to provide the space, ensuring that
+     *   the space is named after the string form of the int.</LI>
+     *   <LI>If the type is not a Number, then different type other than ConcurrentSpaceCache is
+     *   used to cache spaces, ensuring that the space is named after the string form of the value.</LI>
+     * </UL>
+     * @param pop The parsed operation
+     * @return A function that provides space instances for a given cycle value
+     */
     @Override
     public LongFunction<SPACE> getSpaceFunc(ParsedOp pop) {
-
         Optional<LongFunction<Object>> spaceFuncTest = pop.getAsOptionalFunction("space", Object.class);
-        ConcurrentIndexCacheWrapperWithName wrapper = null;
-        LongFunction<String> namerF = null;
-        LongToIntFunction cycleToSpaceF;
 
+        // If no space function is provided, use the default one that returns 0
         if (spaceFuncTest.isEmpty()) {
-            cycleToSpaceF = DEFAULT_CYCLE_TO_SPACE_F;
-        } else {
-            Object example = spaceFuncTest.get().apply(0L);
-            if (example instanceof Number n) {
-                logger.trace("mapping space indirectly with Number type");
-                LongFunction<Number> numberF = pop.getAsRequiredFunction("space", Number.class);
-                cycleToSpaceF = l -> numberF.apply(l).intValue();
-            } else {
-                logger.trace("mapping space indirectly through hash table to index pool");
-                LongFunction<?> sourceF = pop.getAsRequiredFunction("space", String.class);
-                final LongFunction<?> finalSourceF = sourceF;
-                namerF = l -> finalSourceF.apply(l).toString();
-                wrapper = new ConcurrentIndexCacheWrapperWithName();
-                final ConcurrentIndexCacheWrapperWithName finalWrapper = wrapper;
-                final LongFunction<String> finalNamerF = namerF;
-                cycleToSpaceF = l -> finalWrapper.mapKeyToIndex(finalNamerF.apply(l));
-            }
+            ConcurrentSpaceCache<SPACE> spaceCache1 = getSpaceCache();
+            return l -> spaceCache1.get(0);
         }
 
-        ConcurrentSpaceCache<SPACE> spaceCache1 = getSpaceCache();
-        final LongToIntFunction finalCycleToSpaceF = cycleToSpaceF;
+        // Check the type of the space function's return value
+        Object example = spaceFuncTest.get().apply(0L);
 
-        // If we're using the wrapper, capture it in the final variables for the lambda
-        final ConcurrentIndexCacheWrapperWithName finalWrapper = wrapper;
-
-        if (finalWrapper != null) {
-            return l -> {
-                int spaceIndex = finalCycleToSpaceF.applyAsInt(l);
-                SPACE space = spaceCache1.get(spaceIndex);
-
-                // If the space is a BaseSpace, set the original name
-                if (space instanceof BaseSpace) {
-                    String nameForIndex = finalWrapper.getNameForIndex(spaceIndex);
-                    // Ensure the original name is never null
-                    ((BaseSpace<?>) space).setOriginalName(nameForIndex != null ? nameForIndex : String.valueOf(spaceIndex));
-                }
-
-                return space;
-            };
-        } else {
-            return l -> {
-                int spaceIndex = finalCycleToSpaceF.applyAsInt(l);
-                SPACE space = spaceCache1.get(spaceIndex);
-
-                // If the space is a BaseSpace, set the original name to the string value of the index
-                if (space instanceof BaseSpace) {
-                    ((BaseSpace<?>) space).setOriginalName(String.valueOf(spaceIndex));
-                }
-
-                return space;
-            };
+        // If the space function returns a Number, use ConcurrentSpaceCache
+        if (example instanceof Number) {
+            logger.trace("mapping space indirectly with Number type");
+            LongFunction<Number> numberF = pop.getAsRequiredFunction("space", Number.class);
+            ConcurrentSpaceCache<SPACE> spaceCache1 = getSpaceCache();
+            return l -> spaceCache1.get(numberF.apply(l).intValue());
+        } 
+        // If the space function returns a non-Number, use ConcurrentStringSpaceCache
+        else {
+            logger.trace("mapping space directly with string key using ConcurrentHashMap");
+            LongFunction<?> sourceF = pop.getAsRequiredFunction("space", Object.class);
+            final LongFunction<?> finalSourceF = sourceF;
+            LongFunction<String> namerF = l -> finalSourceF.apply(l).toString();
+            ConcurrentStringSpaceCache<SPACE> stringSpaceCache1 = getStringSpaceCache();
+            return l -> stringSpaceCache1.get(namerF.apply(l));
         }
     }
 
     @Override
     public void beforeDetach() {
-        for (SPACE space : this.getSpaceCache()) {
-            try {
-                // TODO This should be invariant now, remove conditional?
-                space.close();
-            } catch (Exception e) {
-                throw new RuntimeException("Error while shutting down state space for " +
-                    "adapter=" + this.getAdapterName() + ", space=" + space.getName() + ": " + e, e);
+        // Close all spaces in the numeric space cache
+        if (spaceCache != null) {
+            for (SPACE space : this.getSpaceCache()) {
+                try {
+                    // TODO This should be invariant now, remove conditional?
+                    space.close();
+                } catch (Exception e) {
+                    throw new RuntimeException("Error while shutting down state space for " +
+                        "adapter=" + this.getAdapterName() + ", space=" + space.getName() + ": " + e, e);
+                }
             }
         }
+
+        // Close all spaces in the string space cache
+        if (stringSpaceCache != null) {
+            for (SPACE space : this.getStringSpaceCache()) {
+                try {
+                    space.close();
+                } catch (Exception e) {
+                    throw new RuntimeException("Error while shutting down state space for " +
+                        "adapter=" + this.getAdapterName() + ", space=" + space.getName() + ": " + e, e);
+                }
+            }
+        }
+
         super.beforeDetach();
     }
 

@@ -31,37 +31,31 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 public class BaseSpace<SelfT extends BaseSpace<SelfT> > implements Space {
 
     private final String spaceName;
-    private String originalName;
     private final DriverAdapter<?, SelfT> adapter;
 
-    public BaseSpace(DriverAdapter<?,SelfT> adapter, long idx) {
-        this(adapter, idx, String.valueOf(idx));
-    }
-
-    public BaseSpace(DriverAdapter<?,SelfT> adapter, long idx, String originalName) {
-        this.spaceName = String.valueOf(idx);
+    public BaseSpace(DriverAdapter<?,SelfT> adapter, String spaceName) {
+        this.spaceName = spaceName;
         this.adapter = adapter;
-        this.originalName = originalName;
     }
 
     /**
-     * Set the original name (string representation of the key) for this space.
-     * This is used when a space is created via ConcurrentIndexCacheWrapperWithName.
+     * Interpolate a template string with space-specific values.
+     * Replaces {SPACEID}, {SPACE}, and {SPACENAME} with their respective values.
      *
-     * @param originalName The original name for this space
+     * @param template The template string to interpolate
+     * @return The interpolated string
      */
-    public void setOriginalName(String originalName) {
-        this.originalName = originalName;
-    }
-
-    /**
-     * Get the original name (string representation of the key) for this space.
-     * This may be null if the space was not created via ConcurrentIndexCacheWrapperWithName.
-     *
-     * @return The original name for this space, or null if not set
-     */
-    public String getOriginalName() {
-        return originalName;
+    public String interpolateSpace(String template) {
+        if (template.matches(".*\\{[Ss][Pp][Aa][Cc][Ee][Ii][Dd]\\}.*")) {
+            template = template.replaceAll("\\{[Ss][Pp][Aa][Cc][Ee][Ii][Dd]\\}", getName());
+        }
+        if (template.matches(".*\\{[Ss][Pp][Aa][Cc][Ee]}.*")) {
+            template = template.replaceAll("\\{[Ss][Pp][Aa][Cc][Ee]}", getName());
+        }
+        if (template.matches(".*\\{[Ss][Pp][Aa][Cc][Ee][Nn][Aa][Mm][Ee]\\}.*")) {
+            template = template.replaceAll("\\{[Ss][Pp][Aa][Cc][Ee][Nn][Aa][Mm][Ee]}", getName());
+        }
+        return template;
     }
 
     @Override
@@ -71,11 +65,11 @@ public class BaseSpace<SelfT extends BaseSpace<SelfT> > implements Space {
 
     public static class BasicSpace extends BaseSpace<BasicSpace> implements Space {
         public BasicSpace(DriverAdapter<? extends CycleOp<?>, BasicSpace> adapter, long idx) {
-            super(adapter, idx);
+            super(adapter, String.valueOf(idx));
         }
 
         public BasicSpace(DriverAdapter<? extends CycleOp<?>, BasicSpace> adapter, long idx, String originalName) {
-            super(adapter, idx, originalName);
+            super(adapter, originalName);
         }
     }
 }

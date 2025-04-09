@@ -66,7 +66,7 @@ public class AzureAISearchSpace extends BaseSpace<AzureAISearchSpace> {
 	 * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
 	 */
 	public AzureAISearchSpace(AzureAISearchDriverAdapter adapter, long idx, NBConfiguration cfg) {
-		super(adapter,idx);
+		super(adapter,String.valueOf(idx));
 		this.cfg = cfg;
 	}
 

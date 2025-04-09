@@ -118,7 +118,7 @@ public class AmqpSpace extends BaseSpace<AmqpSpace> {
     private long totalThreadNum;
 
     public AmqpSpace(AmqpDriverAdapter adapter, long idx, NBConfiguration cfg) {
-        super(adapter,idx);
+        super(adapter,String.valueOf(idx));
         this.cfg = cfg;
 
         String amqpClientConfFileName = cfg.get("config");

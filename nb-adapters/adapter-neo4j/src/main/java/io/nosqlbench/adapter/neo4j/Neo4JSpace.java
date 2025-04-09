@@ -42,7 +42,7 @@ public class Neo4JSpace extends BaseSpace<Neo4JSpace> {
     private SessionConfig sessionConfig;
 
     public Neo4JSpace(Neo4JDriverAdapter adapter, long idx, NBConfiguration cfg) {
-        super(adapter,idx);
+        super(adapter, String.valueOf(idx));
         this.driver = initializeDriver(cfg);
         driver.verifyConnectivity();
     }

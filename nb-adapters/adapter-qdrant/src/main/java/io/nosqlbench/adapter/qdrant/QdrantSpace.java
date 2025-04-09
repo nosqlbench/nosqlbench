@@ -54,7 +54,7 @@ public class QdrantSpace extends BaseSpace<QdrantSpace> {
      * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
      */
     public QdrantSpace(QdrantDriverAdapter adapter, long idx, NBConfiguration cfg) {
-        super(adapter, idx);
+        super(adapter, String.valueOf(idx));
         this.cfg = cfg;
     }
 

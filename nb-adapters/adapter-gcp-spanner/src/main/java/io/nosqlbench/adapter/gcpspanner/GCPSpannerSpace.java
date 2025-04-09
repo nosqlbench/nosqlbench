@@ -51,7 +51,7 @@ public class GCPSpannerSpace extends BaseSpace<GCPSpannerSpace> {
      * @param cfg  The configuration ({@link NBConfiguration}) for this nb run
      */
     public GCPSpannerSpace(GCPSpannerDriverAdapter adapter, long idx, NBConfiguration cfg) {
-        super(adapter,idx);
+        super(adapter, String.valueOf(idx));
         this.cfg = cfg;
     }
 

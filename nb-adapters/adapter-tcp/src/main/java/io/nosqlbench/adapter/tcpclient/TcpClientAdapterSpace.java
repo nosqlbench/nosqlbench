@@ -38,7 +38,7 @@ public class TcpClientAdapterSpace extends BaseSpace<TcpClientAdapterSpace> {
     Writer writer;
 
     public TcpClientAdapterSpace(TcpClientDriverAdapter adapter, long idx, NBConfiguration config) {
-        super(adapter, idx);
+        super(adapter, String.valueOf(idx));
         this.config = config;
         this.writer = createPrintWriter();
     }
