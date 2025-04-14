@@ -22,7 +22,7 @@ params:
   instrument: true
 
 bindings:
-  machine_id: Mod(TEMPLATE(sources,10000)); Mod(TEMPLATE(stations,1000); ToUUID(); ToBase64String()
+  machine_id: Mod(TEMPLATE(sources,10000)); Mod(TEMPLATE(stations,1000)); ToUUID(); ToBase64String()
   sensor_name: HashedLineToString('data/variable_words.txt')
   time: Mul(TEMPLATE(timespace,600000)L); StartingEpochMillis('1985-10-29 00:00:00')
   cell_timestamp: Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); Mul(1000L)
