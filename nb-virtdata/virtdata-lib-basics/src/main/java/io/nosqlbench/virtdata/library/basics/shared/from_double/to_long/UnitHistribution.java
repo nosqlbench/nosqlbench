@@ -47,6 +47,10 @@ public class UnitHistribution extends AliasSamplerDoubleLong implements DoubleTo
         "labeled frequencies; 234,33,17,3 are labels, and 50,25,13,12 are weights"
     })
     public UnitHistribution(String freqs) {
+        super(computeEvents(freqs));
+    }
+
+    private static List<EvProbLongDouble> computeEvents(String freqs) {
         List<EvProbLongDouble> events = new ArrayList<>();
         boolean labeled = (freqs.contains(":"));
 
@@ -61,7 +65,7 @@ public class UnitHistribution extends AliasSamplerDoubleLong implements DoubleTo
             long weight = Long.parseLong(parts[labeled ? 1 : 0]);
             events.add(new EvProbLongDouble(id, weight));
         }
-        super(events);
+        return events;
     }
 
     //    public UnitHistribution(long... freqs) {
