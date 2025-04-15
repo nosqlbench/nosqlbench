@@ -97,6 +97,13 @@ public class StrInterpolatorTest {
     }
 
     @Test
+    public void shouldMatchNestedParens1() {
+        StrInterpolator interp = new StrInterpolator(abcd);
+        String a = interp.apply("Mod(TEMPLATE(stations,1000));");
+        assertThat(a).isEqualTo("Mod(1000);");
+    }
+
+    @Test
     public void shouldMatchNestedParens2() {
         StrInterpolator interp = new StrInterpolator(abcd);
         String a = interp.apply("${keydist:Uniform(0,1000000000)->int};");
