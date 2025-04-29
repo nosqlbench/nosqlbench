@@ -42,9 +42,12 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 public class MongoSpace extends BaseSpace<MongoSpace> {
     private final static Logger logger = LogManager.getLogger(MongoSpace.class);
     private MongoClient mongoClient;
+    private final NBConfiguration cfg;
 
     public MongoSpace(MongodbDriverAdapter adapter, long idx, NBConfiguration cfg) {
         super(adapter,idx);
+        this.cfg = cfg;
+        logger.debug(() -> "Creating MongoSpace with config: " + cfg);
     }
 
     public static NBConfigModel getConfigModel() {
@@ -54,7 +57,6 @@ public class MongoSpace extends BaseSpace<MongoSpace> {
                 .add(Param.required("database", String.class)
                         .setDescription("The database name to connect to."))
                 .asReadOnly();
-
     }
 
     @Override
@@ -70,7 +72,7 @@ public class MongoSpace extends BaseSpace<MongoSpace> {
         }
     }
 
-    public void createMongoClient(String connectionURL) {
+    private void createMongoClient(String connectionURL) {
 
         CodecRegistry codecRegistry = fromRegistries(
                 fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
@@ -99,7 +101,10 @@ public class MongoSpace extends BaseSpace<MongoSpace> {
         logger.info(() -> "Connection ping test to the cluster successful.");
     }
 
-    public MongoClient getClient() {
+    public synchronized MongoClient getClient() {
+        if (this.mongoClient == null) {
+            createMongoClient(cfg.get("connection"));
+        }
         return this.mongoClient;
     }
 
