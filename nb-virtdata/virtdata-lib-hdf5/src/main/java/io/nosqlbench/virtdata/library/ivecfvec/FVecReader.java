@@ -158,9 +158,12 @@ public class FVecReader implements LongFunction<float[]>, AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        FileChannel channel = CHANNEL.get();
-        if (channel != null && channel.isOpen()) {
-            channel.close();
+        if (CHANNEL.isBound()) {
+            FileChannel channel = CHANNEL.get();
+            if (channel != null && channel.isOpen()) {
+                channel.close();
+            }
         }
     }
+
 }
