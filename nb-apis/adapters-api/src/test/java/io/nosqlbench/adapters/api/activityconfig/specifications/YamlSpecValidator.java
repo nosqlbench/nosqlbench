@@ -19,7 +19,7 @@ package io.nosqlbench.adapters.api.activityconfig.specifications;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
-import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawYamlLoader;
+import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplateFormat;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
@@ -145,7 +145,7 @@ public class YamlSpecValidator implements STAssemblyValidator {
         System.out.format("%-40s", "- checking yaml->json");
 
         try {
-            List<Map<String, Object>> docmaps = new RawYamlLoader().loadString(logger, yaml);
+            List<Map<String, Object>> docmaps = new RawOpsLoader().loadStringMap(yaml);
             JsonElement elem = null;
             try {
                 elem = JsonParser.parseString(json);

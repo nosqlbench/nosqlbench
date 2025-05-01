@@ -83,7 +83,9 @@ class ActivityExecutorTest {
 //    }
 
     @Test
-    synchronized void testAdvisorError() {
+    synchronized void testLabelingError() {
+
+        // TODO improve contextual labeling assertions
 
         try {
             ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;"

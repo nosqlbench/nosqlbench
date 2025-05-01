@@ -186,7 +186,7 @@
         <profile>
             <id>adapter-pulsar-include</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>

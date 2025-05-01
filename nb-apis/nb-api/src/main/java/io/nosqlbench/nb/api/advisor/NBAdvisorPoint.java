@@ -28,14 +28,14 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
 
     private final static Logger logger = LogManager.getLogger("ADVISOR");
 
-    private final String name;
-    private final String description;
+    private String name;
+    private String description;
     private NBAdvisorLevel advisorLevel = NBAdvisorLevel.none;
     private NBAdvisorCondition<T>[] conditions = new NBAdvisorCondition[0];
     private List<Result<?>> resultLog = new ArrayList<Result<?>>();
 
     public NBAdvisorPoint(String name) {
-        this(name, null);
+        this(name, "–");
     }
 
     public NBAdvisorPoint(String name, String description) {
@@ -44,6 +44,34 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
         this.advisorLevel = NBAdvisorLevel.get();
     }
 
+    public NBAdvisorPoint<T> add(NBAdvisorCondition<T> condition) {
+        _addArrayCondition(condition);
+        return this;
+    }
+
+    private void _addArrayCondition(NBAdvisorCondition<T> condition) {
+        NBAdvisorCondition<T>[] newConditions = new NBAdvisorCondition[conditions.length + 1];
+        System.arraycopy(conditions, 0, newConditions, 0, conditions.length);
+        newConditions[newConditions.length - 1] = condition;
+        conditions = newConditions;
+    }
+
+    public Result<T>[] validateAllBut(Collection<T> elements, T... ignored) {
+        Set<T> ignoreSet = new HashSet(Arrays.asList(ignored));
+        List<T> toValidate = new ArrayList<>();
+        for (T element : elements) {
+            if (!ignoreSet.contains(element)) {
+                toValidate.add(element);
+            }
+        }
+        return validateAll(toValidate);
+    }
+    public Result<T>[] validateOptional(Optional<T> element) {
+        if (element.isPresent()) {
+            return validate(element.get());
+        }
+        return new Result[0];
+    }
     public Result<T>[] validateAll(Collection<T> elements) {
         List<Result<T>> buffer = new ArrayList<>();
         for (T element : elements) {
@@ -68,22 +96,33 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
         return this.resultLog;
     }
 
-    public NBAdvisorPoint<T> add(NBAdvisorCondition<T> condition) {
-        _addArrayCondition(condition);
+    public NBAdvisorPoint<T> evaluate() {
+        NBAdvisorResults advisorResults = new NBAdvisorResults(List.of(this));
+        advisorResults.evaluate();
+        return this;
+    }
+
+    public NBAdvisorPoint<T> clear() {
+        this.resultLog.clear();
+        return this;
+    }
+
+    public NBAdvisorPoint<T> setName(String name, String description) {
+        this.name = name;
+        this.description = description;
+        return this;
+    }
+
+    public NBAdvisorPoint<T> logName() {
+        if (resultLog.size() > 0 && advisorLevel != NBAdvisorLevel.none) {
+            logger.info("Advisor: " + name + ": " + description);
+        }
         return this;
     }
 
     public String[] errorMessages(T element) {
         Result<T>[] results = this.validate(element);
         return Arrays.stream(results).filter(Result::isError).map(Result::rendered).toArray(String[]::new);
-    }
-
-
-    private void _addArrayCondition(NBAdvisorCondition<T> condition) {
-        NBAdvisorCondition<T>[] newConditions = new NBAdvisorCondition[conditions.length + 1];
-        System.arraycopy(conditions, 0, newConditions, 0, conditions.length);
-        newConditions[newConditions.length - 1] = condition;
-        conditions = newConditions;
     }
 
     public static enum Status {
@@ -103,7 +142,7 @@ public class NBAdvisorPoint<T> extends NBAdvisorPointOrBuilder<T> {
         public Level conditionLevel() {
             return condition.level();
         }
-        
+
         public String rendered() {
             return switch (status) {
                 case OK -> "OK: " + condition.okMsg().apply(element);

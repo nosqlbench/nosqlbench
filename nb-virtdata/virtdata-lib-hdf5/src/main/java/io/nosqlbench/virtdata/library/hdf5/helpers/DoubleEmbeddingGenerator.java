@@ -81,4 +81,10 @@ public class DoubleEmbeddingGenerator implements EmbeddingGenerator {
         return vector2;
     }
 
+    @Override
+    public int generateIntFrom(Object o, long l) {
+        double[] source = (double[]) o;
+        return (int) source[(int) (l % source.length)];
+    }
+
 }

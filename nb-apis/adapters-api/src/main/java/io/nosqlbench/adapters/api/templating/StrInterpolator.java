@@ -16,21 +16,34 @@
 
 package io.nosqlbench.adapters.api.templating;
 
+import com.google.gson.Gson;
+import io.nosqlbench.nb.api.advisor.NBAdvisorBuilder;
+import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
+import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
+import io.nosqlbench.nb.api.errors.OpConfigError;
+import io.nosqlbench.nb.api.nbio.Content;
+import io.nosqlbench.nb.api.nbio.NBIO;
+import io.nosqlbench.nb.api.nbio.ResolverChain;
+import io.nosqlbench.nb.api.system.NBEnvironment;
 import org.apache.commons.text.StrLookup;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Level;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.*;
 import java.util.function.Function;
 
+import static java.util.stream.Collectors.*;
+
 public class StrInterpolator implements Function<String, String> {
     private final static Logger logger = LogManager.getLogger(StrInterpolator.class);
-
+    private final NBAdvisorBuilder<String> advisorBuilder = new NBAdvisorBuilder<String>();
+    private NBAdvisorPoint<String> advisor;
     private final MultiMap multimap = new MultiMap();
     private final StringSubstitutor substitutor =
         new StringSubstitutor(multimap, "<<", ">>", '\\')
@@ -38,6 +51,7 @@ public class StrInterpolator implements Function<String, String> {
             .setEnableUndefinedVariableException(true)
             .setDisableSubstitutionInValues(true);
     private final Pattern COMMENT = Pattern.compile("^\\s*#.*");
+    private final Pattern INSERT = Pattern.compile("^(\\s*)INSERT:\\s+(.+)$");
 
     public StrInterpolator(ActivityDef... activityDefs) {
         Arrays.stream(activityDefs)
@@ -60,33 +74,84 @@ public class StrInterpolator implements Function<String, String> {
 
     @Override
     public String apply(String raw) {
-        String[] lines = raw.split("\\R");
+        logger.debug(() -> "Applying string transformer to data:\n" + raw);
+        advisor = advisorBuilder.build();
+        advisor.add(Conditions.DeprecatedWarning);
+        List<String> lines = new LinkedList<>(Arrays.asList(raw.split("\\R")));
         boolean endsWithNewline = raw.endsWith("\n");
         int i = 0;
-        for (String line : lines) {
+        while (i < lines.size()) {
+            String line = lines.get(i);
             if (!isComment(line)) {
                 String result = matchTemplates(line);
                 if (!result.equals(line)) {
-                    lines[i] = result;
+                    lines.set(i, result);
+                    line = result;
+                }
+                Matcher matcher = INSERT.matcher(line);
+                if (matcher.matches()) {
+                    String leadingSpaces = matcher.group(1);
+                    String filePath = matcher.group(2);
+                    List<String> includes = insertContentFromFile(leadingSpaces, filePath);
+                    System.out.println(leadingSpaces + "INSERT: " + filePath);
+                    lines.remove(i);
+                    lines.addAll(i, includes);
+                    i--;
                 }
             }
             i++;
         }
-        String results = String.join(System.lineSeparator(), lines);
+        String results = lines.stream().collect(joining(System.lineSeparator()));
         if (endsWithNewline) {
             results += System.lineSeparator();
         }
+        advisor.setName("Workload", "Deprecated template format").logName().evaluate();
+        String finalResults = results;
+        logger.debug(() -> "Results of applying string transformer:\n" + finalResults);
         return results;
     }
 
-    public Map<String,String> checkpointAccesses() {
-        return multimap.checkpointAccesses();
-    }
+    private LinkedList<String> insertContentFromFile(String leadingSpaces, String filePath) {
+        // Determine file type and process the inclusion
+        LinkedList<String> result = new LinkedList<>();
+        result.add(leadingSpaces + "# INSERT: " + filePath);
+        try {
+            ResolverChain chain = new ResolverChain(filePath);
+            Content<?> insert = NBIO.chain(chain.getChain()).searchPrefixes("activities")
+                .pathname(chain.getPath()).first()
+                .orElseThrow(() -> new RuntimeException("Unable to load path '" + filePath + "'"));
+            BufferedReader reader = new BufferedReader(new StringReader(insert.asString()));
 
-    public LinkedHashMap<String, String> getTemplateDetails(String input) {
-        LinkedHashMap<String, String> details = new LinkedHashMap<>();
-
-        return details;
+            if (filePath.endsWith(".properties")) {
+                // Include properties file
+                Properties properties = new Properties();
+                properties.load(reader);
+                for (String key : properties.stringPropertyNames()) {
+                    result.add(leadingSpaces + key + ": " + properties.getProperty(key));
+                }
+            } else if (filePath.endsWith(".json")) {
+                // Include JSON
+                Gson gson = new Gson();
+                Map<String, Object> jsonMap = gson.fromJson(reader, Map.class);
+                Yaml yaml = new Yaml();
+                String yamlString = yaml.dumpAsMap(jsonMap);
+                LinkedList<String> include = new LinkedList<>(Arrays.asList(yamlString.split("\\R")));
+                int j = 0;
+                while (j < include.size()) {
+                    result.add(leadingSpaces + include.get(j));
+                    j++;
+                }
+            } else {
+                // Include as a YAML file (if it is not then  if a bad OpDocList is created it will fail.
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.add(leadingSpaces + line);
+                }
+            }
+        } catch (Exception e) {
+            throw new OpConfigError("While processing file '" + filePath + "' " + e.getMessage());
+        }
+        return result;
     }
 
     public String matchTemplates(String original) {
@@ -165,11 +230,15 @@ public class StrInterpolator implements Function<String, String> {
         // Process << ... >>
         String after = substitutor.replace(line);
         while (!after.equals(line)) {
-            NBAdvisorOutput.test("<<key:value>> deprecated in "+line);
+            advisor.validate("<<key:value>> in "+line);
             line = after;
             after = substitutor.replace(line);
         }
         return line;
+    }
+
+    public Map<String,String> checkpointAccesses() {
+        return multimap.checkpointAccesses();
     }
 
     public static class MultiMap extends StrLookup<String> {
@@ -227,12 +296,17 @@ public class StrInterpolator implements Function<String, String> {
                     value = val.toString();
                     //System.out.println("for: '"+original+"': "+key+"->"+value);
                 } else {
+                    boolean check_env = true;
                     for (Map<String, ?> map : maps) {
                         val = map.get(key);
                         if (val != null) {
                             value = val.toString();
+                            check_env = false;
                             break;
                         }
+                    }
+                    if (check_env && NBEnvironment.INSTANCE.hasPropertyLayer() && NBEnvironment.INSTANCE.containsKey(key) ) {
+                        value = NBEnvironment.INSTANCE.get(key);
                     }
                 }
                 value = (value==null? extractedDefaults.get(key) : value);

@@ -1,4 +1,5 @@
 ---
+source: nb-apis/adapters-api/src/main/java/workload_definition/06_op_template_variations.md
 title: Op Template Variations
 ---
 

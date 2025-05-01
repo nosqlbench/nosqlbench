@@ -1,3 +1,6 @@
+---
+source: nb-apis/adapters-api/src/main/java/workload_definition/00_workload_specification.md
+---
 # Workload Specification
 
 This directory contains the testable specification for workload definitions used by NoSQLBench.

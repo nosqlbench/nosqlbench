@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'oracle'
-          java-version: '21'
+          java-version: '23'
           java-package: jdk
           architecture: x64
 
@@ -49,13 +49,6 @@ jobs:
       - name: install fuse2
         run: sudo apt install libfuse2
 
-#      - name: Cache Maven packages
-#        uses: actions/cache@v4
-#        with:
-#          path: ~/.m2
-#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-#          restore-keys: ${{ runner.os }}-m2
-
       - name: read versions
         id: versions
         run: |
@@ -63,8 +56,8 @@ jobs:
           PREVIEW_VERSION=$(scripts/get-preview-version.sh)
           echo "PREVIEW_VERSION=${PREVIEW_VERSION}" >> $GITHUB_ENV
           echo "PREVIEW_VERSION=${PREVIEW_VERSION}" >> $GITHUB_OUTPUT
-          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:5.21-preview,nosqlbench/nosqlbench:preview" >> $GITHUB_ENV
-          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:5.21-preview,nosqlbench/nosqlbench:preview" >> $GITHUB_OUTPUT
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:5.23-preview,nosqlbench/nosqlbench:preview" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=nosqlbench/nosqlbench:${PREVIEW_VERSION},nosqlbench/nosqlbench:5.23-preview,nosqlbench/nosqlbench:preview" >> $GITHUB_OUTPUT
 
       - name: build preview revision
         run: |
@@ -108,15 +101,28 @@ jobs:
           name: binaries
           path: staging
 
-#      - name: generate javadoc
-#        run: mvn javadoc:aggregate-jar
-#        continue-on-error: false
-#
-#      - name: upload javadoc
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: javadoc
-#          path: target/nosqlbench-*-javadoc.jar
+      - name: generate javadoc
+        run: mvn javadoc:aggregate-jar
+        continue-on-error: false
+
+      - name: upload javadoc
+        uses: actions/upload-artifact@v4
+        with:
+          name: javadocs
+          path: target/nosqlbench-*-javadoc.jar
+
+# Not sure if these are intended with the new flow, but its absence
+# is breaking downstream jobs, so adding it here as a temporary
+# remedy for now
+      - name: export docs
+        if: success()
+        run: nb5/target/nb5 export-docs
+      - name: upload docs artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exported-docs
+          path: exported_docs.zip
 
       - name: prepare release summary
         id: prepare_summary
@@ -144,7 +150,7 @@ jobs:
 
       #  https://github.com/softprops/action-gh-release
       - name: create github release
-        uses: softprops/action-gh-release@v2.1.0
+        uses: softprops/action-gh-release@v2.2.1
         if: startsWith(github.ref, 'refs/tags/')
         with:
 #          body: ${{ steps.prepare_summary.outputs.release_summary }}
@@ -213,36 +219,65 @@ jobs:
       run: |
         echo "PREVIEW_VERSION=${{ needs.preview-build.outputs.preview_version }}" >> $GITHUB_ENV
         echo "DOCKER_TAGS=${{ needs.preview-build.outputs.docker_tags }}" >> $GITHUB_ENV
-    - name: clone nosqlbench-build-docs
-      run: |
-        git clone https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git nosqlbench-build-docs
-        cd nosqlbench-build-docs
-        echo "files listing"
-        find .
-        git remote set-url origin https://${{secrets.NBDROID_NAME}}:${{secrets.NBDROID_TOKEN}}@github.com/nosqlbench/nosqlbench-build-docs.git
-        git remote -v
 
-    - name: set CNAME
-      run: |
-        echo "builddocs.nosqlbench.io" > nosqlbench-build-docs/site/static/CNAME
+    - name: checkout build docs
+      uses: actions/checkout@v4
+      with:
+        repository: nosqlbench/nosqlbench-build-docs
+        path: build-docs
 
-    - name: commit changes
-      run: |
-        cd nosqlbench-build-docs
-        git add exported_docs.zip
+    - name: download exported_docs
+      uses: actions/download-artifact@v4
+      with:
+        name: exported-docs
+        path: build-docs
 
-    - name: tag-preview-build
-      run: |
-        cd nosqlbench-build-docs
-        git tag -f ${{ env.PREVIEW_VERSION }}
-
-    - name: push changes
-      env:
-        NBDROID_NAME: ${{ secrets.NBDROID_NAME }}
-        NBDROID_TOKEN: ${{ secrets.NBDROID_TOKEN }}
+    - name: overlay docs changes and push
       run: |
         set -x
-        cd nosqlbench-build-docs
-        CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
-        git push -f --tags
-        echo "push completed"
+        cd build-docs
+        ./doimport.sh
+        rm exported_docs.zip
+        git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
+        git config --global user.name "${{ secrets.NBDROID_NAME }}"
+        git add .
+        git tag -f ${{ env.PREVIEW_VERSION }}
+        git commit -m"docs update for ${{ env.PREVIEW_VERSION }}"
+        git push
+
+  javadocs:
+    needs: preview-docs
+    runs-on: ubuntu-22.04
+    steps:
+      - name: import env vars
+        run: |
+          echo "PREVIEW_VERSION=${{ needs.preview-build.outputs.preview_version }}" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=${{ needs.preview-build.outputs.docker_tags }}" >> $GITHUB_ENV
+
+      - name: checkout javadocs
+        uses: actions/checkout@v4
+        with:
+          repository: nosqlbench/nosqlbench-javadocs
+          path: javadocs
+
+      - name: download javadocs
+        uses: actions/download-artifact@v4
+        with:
+          name: javadocs
+          path: javadocs
+
+      - name: overlay javadocs changes and push
+        run: |
+          set -x
+          git config --global user.email "${{ secrets.NBDROID_EMAIL }}"
+          git config --global user.name "${{ secrets.NBDROID_NAME }}"
+          cd javadocs
+          ./refresh.sh preview
+          git add .
+          CHANGES=$(git status --porcelain 2>/dev/null| wc -l)
+          echo "found $CHANGES to push for javadocs updates"
+          if (( $CHANGES > 0 ))
+          then
+            git commit -m"javadocs update for ${{ env.PREVIEW_VERSION }}"
+            git push
+          fi

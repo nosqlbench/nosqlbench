@@ -16,7 +16,11 @@
 
 package io.nosqlbench.nb.api.config.standard;
 
+import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
 import io.nosqlbench.nb.api.errors.BasicError;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -24,7 +28,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ConfigModel implements NBConfigModel {
-
+    private static final Logger logger = LogManager.getLogger("CONFIGMODEL");
     private final Map<String, Param<?>> paramsByName = new LinkedHashMap<>();
     private final List<Param<?>> params = new ArrayList<>();
     private Param<?> lastAdded = null;
@@ -47,10 +51,13 @@ public class ConfigModel implements NBConfigModel {
     }
 
     public <T> ConfigModel add(Param<T> param) {
-        this.params.add(param);
         for (String name : param.getNames()) {
+            if (paramsByName.containsKey(name)) {
+                return this;
+            }
             paramsByName.put(name, param);
         }
+        this.params.add(param);
         lastAdded = null;
         return this;
     }
@@ -162,6 +169,7 @@ public class ConfigModel implements NBConfigModel {
         Map<String, Param<?>> namedParams = getNamedParams();
         for (String providedCfgField : sharedConfig.keySet()) {
             if (namedParams.containsKey(providedCfgField)) {
+                namedParams.get(providedCfgField).addLayer("StandardActivity");
                 extracted.put(providedCfgField, sharedConfig.get(providedCfgField));
             }
         }
@@ -176,21 +184,6 @@ public class ConfigModel implements NBConfigModel {
     @Override
     public NBConfiguration matchConfig(NBConfiguration cfg) {
         return matchConfig(cfg.getMap());
-    }
-
-    private void assertDistinctSynonyms(Map<String, ?> config) {
-        List<String> names = new ArrayList<>();
-        for (Param<?> param : getParams()) {
-            names.clear();
-            for (String s : param.getNames()) {
-                if (config.containsKey(s)) {
-                    names.add(s);
-                }
-            }
-            if (names.size() > 1) {
-                throw new NBConfigError("Multiple names for the same parameter were provided: " + names);
-            }
-        }
     }
 
     @Override
@@ -228,8 +221,20 @@ public class ConfigModel implements NBConfigModel {
     }
 
     @Override
+    public void assertNoConflicts(Map<String, ?> config, String type) {
+        for (String configkey : config.keySet()) {
+            Param<?> element = this.paramsByName.get(configkey);
+            if (element != null) {
+                String warning = "Config parameter '" + configkey + "' is also a " + type + ". Check for possible conflicts.\n";
+                NBAdvisorOutput.output(Level.WARN, warning);
+            }
+        }
+    }
+
+    @Override
     public void assertValidConfig(Map<String, ?> config) {
         ConfigModel expanded = expand(this, config);
+        //expanded.print();
         expanded.assertRequiredFields(config);
         expanded.assertNoExtraneousFields(config);
         expanded.assertDistinctSynonyms(config);
@@ -238,7 +243,6 @@ public class ConfigModel implements NBConfigModel {
     private ConfigModel expand(ConfigModel configModel, Map<String, ?> config) {
         List<Param<?>> expanders = configModel.params.stream()
             .filter(p -> p.getExpander() != null).toList();
-
         for (Param<?> expandingParameter : expanders) {
             for (String name : expandingParameter.getNames()) {
                 if (config.containsKey(name)) {
@@ -275,7 +279,6 @@ public class ConfigModel implements NBConfigModel {
             if (param.isRequired() && param.getDefaultValue() == null) {
                 boolean provided = false;
                 for (String name : param.getNames()) {
-
                     if (config.containsKey(name)) {
                         provided = true;
                         break;
@@ -296,20 +299,14 @@ public class ConfigModel implements NBConfigModel {
         for (String configkey : config.keySet()) {
             Param<?> element = this.paramsByName.get(configkey);
             String warning = "Unknown config parameter '" + configkey + "' in config model while configuring " + getOf().getSimpleName()
-                + ", possible parameter names are " + this.paramsByName.keySet() + ".";
+                + ", possible parameter names are " + this.paramsByName.keySet() + ".\n";
             if (element == null) {
                 String warnonly = System.getenv("NB_CONFIG_WARNINGS_ONLY");
-                if (warnonly != null) {
-                    System.out.println("WARNING: " + warning);
-                } else {
-                    StringBuilder paramhelp = new StringBuilder(
-                        "Unknown config parameter '" + configkey + "' in config model while configuring " + getOf().getSimpleName()
-                            + ", possible parameter names are " + this.paramsByName.keySet() + "."
-                    );
-
+                logger.warn("WARNING: " + warning);
+                if (warnonly == null) {
+                    StringBuilder paramhelp = new StringBuilder(warning);
                     ConfigSuggestions.getForParam(this, configkey)
                         .ifPresent(suggestion -> paramhelp.append(" ").append(suggestion));
-
                     throw new BasicError(paramhelp.toString());
                 }
             }
@@ -317,12 +314,35 @@ public class ConfigModel implements NBConfigModel {
         }
     }
 
+    private void assertDistinctSynonyms(Map<String, ?> config) {
+        List<String> names = new ArrayList<>();
+        for (Param<?> param : getParams()) {
+            names.clear();
+            for (String s : param.getNames()) {
+                if (config.containsKey(s)) {
+                    names.add(s);
+                }
+            }
+            if (names.size() > 1) {
+                throw new NBConfigError("Multiple names for the same parameter were provided: " + names);
+            }
+        }
+    }
+
     @Override
     public ConfigModel add(NBConfigModel otherModel) {
+        String layer = otherModel.getOf().getSimpleName();
         for (Param<?> param : otherModel.getParams()) {
+            param.addLayer(layer);
             add(param);
         }
         return this;
+    }
+
+    @Override
+    public void log() {
+        logger.debug(() -> "ConfigModel: "+ofType);
+        for (Param<?> param : getParams()) logger.debug(() -> "ConfigModel: " + param);
     }
 
     @Override
@@ -330,7 +350,6 @@ public class ConfigModel implements NBConfigModel {
         String sb = "[" +
             params.stream().map(p -> p.getNames().get(0)).collect(Collectors.joining(",")) +
             "]";
-
         return sb;
     }
 }

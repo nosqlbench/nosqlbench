@@ -46,9 +46,9 @@ public class NormalizeCqlVectorTest {
 
     @Test
     public void normalizeCqlVectorDoubles() {
-        CqlVector square = CqlVector.newInstance(1.0d, 1.0d);
+        CqlVector<Number> square = CqlVector.newInstance(1.0d, 1.0d);
         NormalizeCqlVector nv = new NormalizeCqlVector();
-        CqlVector normaled = nv.apply(square);
+        CqlVector<Number> normaled = nv.apply(square);
 
         assertThat(normaled.size()).isEqualTo(2);
         assertThat(normaled.get(0)).isInstanceOf(Double.class);

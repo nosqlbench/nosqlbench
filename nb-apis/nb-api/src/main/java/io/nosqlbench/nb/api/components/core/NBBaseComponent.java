@@ -64,10 +64,11 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         labelsAdvisor.add(Conditions.NoSpacesWarning);
 
         labelsAdvisor.validateAll(componentSpecificLabelsOnly.asMap().keySet());
-
 //        This change diverged too much to cherry-pick directly
 //        labelsAdvisor.validateAll(componentSpecificLabelsOnly.asMap().values());
 
+        labelsAdvisor.setName("Labels", "Check labels")
+            .logName();
         NBAdvisorResults advisorResults = getAdvisorResults();
         advisorResults.evaluate();
 

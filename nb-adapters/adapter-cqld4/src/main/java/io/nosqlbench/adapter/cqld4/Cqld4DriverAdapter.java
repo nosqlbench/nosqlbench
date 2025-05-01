@@ -18,7 +18,6 @@ package io.nosqlbench.adapter.cqld4;
 
 import io.nosqlbench.adapter.cqld4.opmappers.Cqld4CoreOpMapper;
 import io.nosqlbench.adapter.cqld4.optypes.Cqld4BaseOp;
-import io.nosqlbench.adapter.cqld4.validators.Cqld4SingleRowValidator;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;

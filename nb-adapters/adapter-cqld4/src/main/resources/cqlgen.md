@@ -1,3 +1,6 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/cqlgen.md
+---
 # cqlgen
 
 *cqlgen* is a default CQL workload generator

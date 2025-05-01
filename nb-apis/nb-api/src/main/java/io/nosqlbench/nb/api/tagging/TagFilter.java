@@ -207,12 +207,12 @@ public class TagFilter {
                     String filterkey2 = filterkey.substring(0, filterkey.length() - 1);
                     itemval = tags.get(filterkey2);
                     String message = "'" + filterkey + "' tags do not exist: try '" + filterkey2 + "'";
-                    NBAdvisorOutput.test(message);
                     log.add("(☐, ) " + message);
+                    NBAdvisorOutput.test(message);
                     filterkey = filterkey2;
                 }
             }
-            
+
             String detail = "filter(" + filterkey +
                     ((filterval != null) ? ":" + filterval : "") + ") " +
                     "tag(" + ((tags.containsKey(filterkey) ? filterkey : "") +

@@ -195,7 +195,7 @@ public class MapLabels implements NBLabels {
 
 
     @Override
-    public MapLabels and(final Object... labelsAndValues) {
+    public MapLabels andPairs(final Object... labelsAndValues) {
         final Map<String,String> childLabels = getStringStringMap(labelsAndValues);
         return new MapLabels(labels,childLabels);
     }
@@ -203,7 +203,7 @@ public class MapLabels implements NBLabels {
     @Override
     public NBLabels andDefault(String name, String value) {
         if (!this.labels.containsKey(name)) {
-            return this.and(name, value);
+            return this.andPairs(name, value);
         }
         return this;
     }
@@ -280,7 +280,7 @@ public class MapLabels implements NBLabels {
     }
 
     @Override
-    public NBLabels and(final Map<String, String> moreLabels) {
+    public NBLabels andMap(final Map<String, String> moreLabels) {
         return new MapLabels(this.labels, moreLabels);
     }
 
@@ -356,7 +356,7 @@ public class MapLabels implements NBLabels {
         NBLabels difference = NBLabels.forKV();
         for (String key : labels.keySet()) {
             if (!other.containsKey(key) || !other.get(key).equals(labels.get(key))) {
-                difference = difference.and(key,labels.get(key));
+                difference = difference.andPairs(key,labels.get(key));
             }
         }
         return difference;

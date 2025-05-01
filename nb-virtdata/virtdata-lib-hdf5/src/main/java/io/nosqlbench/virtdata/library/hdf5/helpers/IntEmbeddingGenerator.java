@@ -74,4 +74,10 @@ public class IntEmbeddingGenerator implements EmbeddingGenerator {
     public int[] generateIntArrayEmbeddingFrom(Object o, int[] dims) {
         return ((int[][]) o)[0];
     }
+
+    @Override
+    public int generateIntFrom(Object o, long l) {
+        int[] source = (int[]) o;
+        return source[(int) (l % source.length)];
+    }
 }

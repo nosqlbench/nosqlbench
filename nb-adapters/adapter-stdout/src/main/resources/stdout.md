@@ -1,3 +1,6 @@
+---
+source: nb-adapters/adapter-stdout/src/main/resources/stdout.md
+---
 # stdout
 
 This is an activity type which allows for the generation of data

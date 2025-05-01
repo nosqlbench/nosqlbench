@@ -25,7 +25,7 @@ public class F1 extends BaseRelevancyFunction {
     private final int k;
 
     public F1(String name, int k, Map<String,String> labels) {
-        super(name, NBLabels.forKV("k",labels).and(labels));
+        super(name, NBLabels.forKV("k",labels).andMap(labels));
         this.k = k;
     }
     public F1(String name, int k, Object... labels) {

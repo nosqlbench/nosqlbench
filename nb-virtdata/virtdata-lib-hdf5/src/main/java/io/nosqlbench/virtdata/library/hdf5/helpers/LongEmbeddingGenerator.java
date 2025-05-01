@@ -75,4 +75,10 @@ public class LongEmbeddingGenerator implements EmbeddingGenerator {
         }
         return vector2;
     }
+
+    @Override
+    public int generateIntFrom(Object o, long l) {
+        long[] source = (long[]) o;
+        return Math.toIntExact(source[(int) (l % source.length)]);
+    }
 }

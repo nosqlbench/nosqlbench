@@ -1,3 +1,6 @@
+---
+source: nb-adapters/adapter-mongodb/src/main/resources/mongodb.md
+---
 # MongoDB
 
 This is a driver for MongoDB. It supports the `db.runCommand` API described in [here](https://docs.mongodb.com/manual/reference/command/).

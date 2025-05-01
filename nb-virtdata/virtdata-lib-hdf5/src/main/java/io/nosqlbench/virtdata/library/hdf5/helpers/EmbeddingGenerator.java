@@ -30,4 +30,6 @@ public interface EmbeddingGenerator {
     List<Integer> generateIntListEmbeddingFrom(Object data, int[] dims);
 
     int[] generateIntArrayEmbeddingFrom(Object data, int[] dims);
+
+    int generateIntFrom(Object data, long l);
 }

@@ -1,7 +1,9 @@
 ---
 weight: 0
-title: Pulsar
+source: nb-adapters/adapter-pulsar/src/main/resources/pulsar.md
 ---
+
+# Pulsar
 
 - [1. Overview](#1-overview)
     - [1.1. Issues Tracker](#11-issues-tracker)

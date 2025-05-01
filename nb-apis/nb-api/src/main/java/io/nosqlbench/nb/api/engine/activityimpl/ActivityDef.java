@@ -17,6 +17,9 @@
 package io.nosqlbench.nb.api.engine.activityimpl;
 
 import io.nosqlbench.nb.api.components.core.NBNamedElement;
+import io.nosqlbench.nb.api.config.standard.ConfigModel;
+import io.nosqlbench.nb.api.config.standard.NBConfigModel;
+import io.nosqlbench.nb.api.config.standard.Param;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.labels.NBLabelSpec;
 import io.nosqlbench.nb.api.labels.NBLabels;
@@ -24,6 +27,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.security.InvalidParameterException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -67,14 +73,14 @@ public class ActivityDef implements NBNamedElement {
         this.parameterMap = parameterMap;
     }
 
-    public static Optional<ActivityDef> parseActivityDefOptionally(String namedActivitySpec) {
-        try {
-            ActivityDef activityDef = parseActivityDef(namedActivitySpec);
-            return Optional.of(activityDef);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-    }
+    //public static Optional<ActivityDef> parseActivityDefOptionally(String namedActivitySpec) {
+    //    try {
+    //        ActivityDef activityDef = parseActivityDef(namedActivitySpec);
+    //        return Optional.of(activityDef);
+    //    } catch (Exception e) {
+    //        return Optional.empty();
+    //    }
+    //}
 
     public static ActivityDef parseActivityDef(String namedActivitySpec) {
         Optional<ParameterMap> activityParameterMap = ParameterMap.parseParams(namedActivitySpec);
@@ -99,7 +105,12 @@ public class ActivityDef implements NBNamedElement {
         return parameterMap.getOptionalString("alias").orElse(DEFAULT_ALIAS);
     }
 
-    public String getActivityType() {
+    /**
+     * Return tbe Activity Driver Adapter Name
+     *
+     * @return the driver adapter name
+     */
+    public String getActivityDriver() {
         return parameterMap.getOptionalString("type", "driver").orElse(DEFAULT_ATYPE);
     }
 
@@ -193,7 +204,6 @@ public class ActivityDef implements NBNamedElement {
 
     }
 
-
     private void checkInvariants() {
         if (getStartCycle() >= getEndCycle()) {
             throw new InvalidParameterException("Start cycle must be strictly less than end cycle, but they are [" + getStartCycle() + ',' + getEndCycle() + ')');
@@ -214,7 +224,9 @@ public class ActivityDef implements NBNamedElement {
             if (this.parameterMap.containsKey(newName)) {
                 throw new BasicError("You have specified activity param '" + deprecatedName + "' in addition to the valid name '" + newName + "'. Remove '" + deprecatedName + "'.");
             }
-            logger.warn("Auto replacing deprecated activity param '{}={}' with new '{}={}'.", deprecatedName, chars, newName, chars);
+            if (!newName.equals("driver")) {
+                logger.warn("Auto replacing deprecated activity param '{}={}' with new '{}={}'.", deprecatedName, chars, newName, chars);
+            }
             parameterMap.put(newName, parameterMap.remove(deprecatedName));
         } else {
             throw new BasicError("Can't replace deprecated name with value of type " + deprecatedName.getClass().getCanonicalName());
@@ -229,5 +241,32 @@ public class ActivityDef implements NBNamedElement {
         }
         return NBLabels.forKV();
 
+    }
+
+    public NBConfigModel getConfigModel() {
+        ConfigModel cfgmodel = ConfigModel.of(this.getClass());
+        Map<String, String> params = parameterMap.getStringStringMap();
+        params.forEach((k, v) -> {
+            cfgmodel.add(Param.defaultTo(k, v, "activity parameter found on command line"));
+        });
+        cfgmodel.add(Param.defaultTo(FIELD_ALIAS, DEFAULT_ALIAS).setDescription("The alias for the operations"));
+        cfgmodel.add(Param.defaultTo(FIELD_ATYPE, DEFAULT_ATYPE).setDescription("The default adapter type is 'stdout'"));
+        cfgmodel.add(Param.defaultTo(FIELD_CYCLES, DEFAULT_CYCLES).setDescription("The default number of cycles to test is '0'"));
+        cfgmodel.add(Param.defaultTo(FIELD_THREADS, DEFAULT_THREADS).setDescription("The default number of threads for testing is '1'"));
+        cfgmodel.add(Param.defaultTo(FIELD_RECYCLES, DEFAULT_RECYCLES).setDescription("The default number of recycles to test is '1'"));
+        cfgmodel.add(Param.optional("labels", String.class).setDescription("Metric labels for this activity"));
+        cfgmodel.add(Param.optional("tags", String.class).setDescription("Tags for selecting workload op templates"));
+        cfgmodel.add(Param.defaultTo("driver", DEFAULT_ATYPE).setDescription("The default adapter driver is 'stdout'"));
+        cfgmodel.add(Param.optional("workload", String.class).setDescription("The test workload"));
+        cfgmodel.add(Param.optional("yaml", String.class).setDescription("The test workload"));
+        cfgmodel.add(Param.defaultTo("async", 1,"Inflight Ops"));
+        cfgmodel.add(Param.defaultTo("maxtries", 10,"Maximum number of retries"));
+        cfgmodel.add(Param.defaultTo("interval", 1000,"Action interval"));
+        cfgmodel.add(Param.defaultTo("hdr_digits", 4,"HDR Digits"));
+        cfgmodel.add(Param.optional("errors").setDescription("Error handling method"));
+        cfgmodel.add(Param.optional("striderate").setDescription("Rate limiting stride"));
+        List<String> rates = Arrays.asList("cyclerate", "targetrate", "rate");
+        cfgmodel.add(Param.optional(rates, String.class, "Rate limit"));
+        return cfgmodel.asReadOnly();
     }
 }

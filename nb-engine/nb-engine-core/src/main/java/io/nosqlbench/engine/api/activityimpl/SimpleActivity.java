@@ -97,7 +97,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                 activityDef.getParams().set("alias", workloadOpt.get());
             } else {
                 activityDef.getParams().set("alias",
-                    activityDef.getActivityType().toUpperCase(Locale.ROOT)
+                    activityDef.getActivityDriver().toUpperCase(Locale.ROOT)
                         + nameEnumerator);
                 nameEnumerator++;
             }
@@ -540,7 +540,8 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
      * @return The sequence of operations as determined by filtering and ratios
      */
     @Deprecated(forRemoval = true)
-    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate, OpDispenser<? extends O>> opinit, boolean strict, DriverAdapter<?, ?> defaultAdapter) {
+    protected <O> OpSequence<OpDispenser<? extends O>> createOpSequence(Function<OpTemplate,
+        OpDispenser<? extends O>> opinit, boolean strict, DriverAdapter<?, ?> defaultAdapter) {
 
         List<OpTemplate> stmts = loadOpTemplates(defaultAdapter);
 
@@ -584,8 +585,7 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
             if ((op != null ? 1 : 0) + (stmt != null ? 1 : 0) + (workload != null ? 1 : 0) > 1) {
                 throw new OpConfigError("Only op, statement, or workload may be provided, not more than one.");
             }
-
-
+            logger.debug("loadStmtsDocList #1");
             if (workload != null && OpsLoader.isJson(workload)) {
                 workloadSource = "commandline: (workload/json):" + workload;
                 return OpsLoader.loadString(workload, OpTemplateFormat.json, activityDef.getParams(), null);
@@ -596,11 +596,13 @@ public class SimpleActivity extends NBStatusComponent implements Activity, Invok
                 return OpsLoader.loadPath(workload, activityDef.getParams(), "activities");
             }
 
+            logger.debug("loadStmtsDocList #2");
             if (stmt != null) {
                 workloadSource = "commandline: (stmt/inline): '" + stmt + "'";
                 return OpsLoader.loadString(stmt, OpTemplateFormat.inline, activityDef.getParams(), null);
             }
 
+            logger.debug("loadStmtsDocList #3");
             if (op != null && OpsLoader.isJson(op)) {
                 workloadSource = "commandline: (op/json): '" + op + "'";
                 return OpsLoader.loadString(op, OpTemplateFormat.json, activityDef.getParams(), null);

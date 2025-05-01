@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.nb.api.config;
+package io.nosqlbench.virtdata.library.basics.core.stathelpers;
 
-import io.nosqlbench.nb.api.labels.NBLabeledElement;
+import java.util.Comparator;
 
-import javax.script.ScriptContext;
-
-public interface LabeledScenarioContext extends ScriptContext, NBLabeledElement {
+public record EvProbLongDouble(long id, double prob) {
 }

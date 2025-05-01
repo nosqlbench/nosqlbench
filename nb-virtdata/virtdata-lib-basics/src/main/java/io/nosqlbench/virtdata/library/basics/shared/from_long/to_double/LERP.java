@@ -1,4 +1,4 @@
-package io.nosqlbench.adapter.cqld4.validators;
+package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
 
 /*
  * Copyright (c) nosqlbench
@@ -18,18 +18,8 @@ package io.nosqlbench.adapter.cqld4.validators;
  */
 
 
-import com.datastax.oss.driver.api.core.cql.Row;
-import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
-
-import java.util.List;
-
-public class Cqld4SingleRowValidator implements Validator<List<Row>> {
-
-    public Cqld4SingleRowValidator() {
-    }
-
-    @Override
-    public void validate(List<Row> rows) {
-        System.out.println("validating rows...");
+public class LERP {
+    public static double lerp(double v1, double v2, double mix) {
+        return v1 + (v2 - v1) * mix;
     }
 }
