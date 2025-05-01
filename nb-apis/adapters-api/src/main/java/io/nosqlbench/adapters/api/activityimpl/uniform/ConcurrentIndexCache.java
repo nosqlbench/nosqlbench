@@ -38,7 +38,7 @@ import java.util.function.LongFunction;
  *
  * @param <T>
  */
-public class ConcurrentIndexCache<T> implements Iterable<T> {
+public class ConcurrentIndexCache<T> implements Iterable<T>, AutoCloseable {
     private final static Logger logger = LogManager.getLogger("SPACECACHE");
     private final AtomicReference<AtomicReferenceArray<T>> cacheRef;
     private static final int GROWTH_FACTOR = 2;
@@ -137,6 +137,14 @@ public class ConcurrentIndexCache<T> implements Iterable<T> {
         }
 
         T oldValue = currentCache.get(key);
+        if (oldValue instanceof AutoCloseable ac ) {
+            try {
+                ac.close();
+            } catch (Exception e) {
+                logger.error("Error closing AutoCloseable value for key " + key,e);
+                throw new RuntimeException(e);
+            }
+        }
         currentCache.set(key, null);  // Set the slot to null (safe for garbage collection)
         active.clear(key);
         count--;
@@ -157,6 +165,22 @@ public class ConcurrentIndexCache<T> implements Iterable<T> {
 
     public int size() {
         return this.count;
+    }
+
+    @Override
+    public void close() throws Exception {
+        Iterator<T> iterator = iterator();
+        while (iterator.hasNext()) {
+            T element = iterator.next();
+            if (element instanceof AutoCloseable ac) {
+                try {
+                    ac.close();
+                } catch (Exception e) {
+                    logger.error("Error closing AutoCloseable value for key " + element,e);
+//                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
     public static final class ElementIterator<T> implements @NotNull Iterator<T> {
