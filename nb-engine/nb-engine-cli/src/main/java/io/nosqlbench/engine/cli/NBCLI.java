@@ -434,7 +434,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             options.wantsReportCsvTo().ifPresent(cfg -> {
                 MetricInstanceFilter filter = new MetricInstanceFilter();
                 filter.addPattern(cfg.pattern);
-                new CsvReporter(session, Path.of(cfg.file), cfg.millis, filter);
+                new CsvReporter(session, Path.of(cfg.file), cfg.millis, filter, getLabels());
             });
 
             options.wantsReportSqliteTo().ifPresent(cfg -> {

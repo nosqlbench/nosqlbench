@@ -423,6 +423,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
                 // TODO: close out metrics outputs on component tree if needed
                 activity.shutdownActivity();
                 activity.closeAutoCloseables();
+                activity.close();
                 ExecutionResult result = new ExecutionResult(startedAt, stoppedAt, "", exception);
                 finish(true);
                 return result;
