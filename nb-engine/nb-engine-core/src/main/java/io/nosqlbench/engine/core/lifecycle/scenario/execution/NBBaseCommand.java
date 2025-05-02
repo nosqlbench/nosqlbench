@@ -28,7 +28,6 @@ import java.io.Reader;
 
 public abstract class NBBaseCommand extends NBInvokableCommand {
 
-    private final String targetScenario;
     protected Logger logger = LogManager.getLogger("COMMAND");
 
     public NBBaseCommand(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
@@ -42,11 +41,7 @@ public abstract class NBBaseCommand extends NBInvokableCommand {
     public String getScenarioName() {
         return getLabels().asMap().get("scenario");
     }
-
-    public String getTargetScenario() {
-        return this.targetScenario;
-    }
-
+    
     @Override
     public final Object apply(NBBufferedContainer sctx, NBCommandParams params) {
         return invoke(params, sctx.out(), sctx.err(), sctx.in(), sctx.controller());

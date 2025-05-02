@@ -29,6 +29,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DirectRuntimeScenarioTests {
 
+
+    public void test_NB_session_metrics() {
+        NBBufferedContainer testC = NBBufferedContainer.builder().name("test_NB_session_metrics").build(TestComponent.EMPTY_COMPONENT);
+        NBBaseCommand command = new NB_session_metrics(testC,"test_NB_session_metrics");
+        NBCommandResult result = NBCommandInvoker.invoke(testC,command);
+        assertThat(result.getIOLog()).contains("started activity");
+        assertThat(result.getIOLog()).contains("stopped activity");
+    }
     private final TestComponent testC = new TestComponent("testroot", "testroot");
     @Test
     public void test_SC_linkedinput() {
