@@ -115,6 +115,7 @@ public class IVecReader implements LongFunction<int[]>, AutoCloseable {
 
     @Override
     public int[] apply(long value) {
+      try {
         return ScopedValue.where(CHANNEL, null).call(() -> {
             int recordIdx = (int) (value % reclim);
             long recpos = (long)recordIdx * reclen;
@@ -151,6 +152,9 @@ public class IVecReader implements LongFunction<int[]>, AutoCloseable {
                 throw new RuntimeException("Error reading from file: " + e.getMessage(), e);
             }
         });
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
 
     @Override

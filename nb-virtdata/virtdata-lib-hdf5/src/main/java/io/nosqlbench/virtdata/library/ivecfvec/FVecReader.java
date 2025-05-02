@@ -116,6 +116,7 @@ public class FVecReader implements LongFunction<float[]>, AutoCloseable {
 
     @Override
     public float[] apply(long value) {
+      try {
         return ScopedValue.where(CHANNEL, null).call(() -> {
             int recordIdx = (int) (value % reclim);
             long recpos = (long)recordIdx * reclen;
@@ -154,6 +155,9 @@ public class FVecReader implements LongFunction<float[]>, AutoCloseable {
                 throw new RuntimeException("Error reading from file: " + e.getMessage(), e);
             }
         });
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
 
     @Override
