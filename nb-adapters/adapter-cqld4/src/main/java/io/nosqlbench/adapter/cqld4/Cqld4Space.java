@@ -341,11 +341,12 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
     @Override
     public void close() {
         try {
-            this.preparedStmtCache.clear();
+            this.preparedStmtCache.close();
             this.getSession().close();
+            this.session = null;
         } catch (Exception e) {
             logger.warn("auto-closeable cql session threw exception in cql space(" + getName() + "): " + e);
-            throw e;
+            throw new RuntimeException(e);
         }
     }
 
