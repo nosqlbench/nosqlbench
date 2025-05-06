@@ -34,8 +34,8 @@ import java.util.Optional;
 public class CMD_example extends NBBaseCommand {
     public final static Logger logger = LogManager.getLogger("example");
 
-    public CMD_example(NBBufferedContainer parentComponent, String stepName) {
-        super(parentComponent, stepName);
+    public CMD_example(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
+        super(parentComponent, stepName, targetScenario);
     }
 
     @Override

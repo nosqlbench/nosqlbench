@@ -42,8 +42,8 @@ import java.io.Reader;
 public class CMD_findmax extends NBBaseCommand {
     private final static Logger logger = LogManager.getLogger(CMD_optimize.class);
 
-    public CMD_findmax(NBBufferedContainer parentComponent, String phaseName) {
-        super(parentComponent, phaseName);
+    public CMD_findmax(NBBufferedContainer parentComponent, String phaseName, String targetScenario) {
+        super(parentComponent, phaseName, targetScenario);
     }
 
     @Override

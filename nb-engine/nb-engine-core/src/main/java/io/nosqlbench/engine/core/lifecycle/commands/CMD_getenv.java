@@ -34,8 +34,8 @@ import java.util.Map;
 public class CMD_getenv extends NBBaseCommand {
     public final static Logger logger = LogManager.getLogger("getenv");
 
-    public CMD_getenv(NBBufferedContainer parentComponent, String stepName) {
-        super(parentComponent, stepName);
+    public CMD_getenv(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
+        super(parentComponent, stepName, targetScenario);
     }
 
     @Override

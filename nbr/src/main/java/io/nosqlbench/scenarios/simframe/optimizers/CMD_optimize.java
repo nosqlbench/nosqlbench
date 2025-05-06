@@ -57,8 +57,8 @@ import java.io.Reader;
 public class CMD_optimize extends NBBaseCommand {
     private final static Logger logger = LogManager.getLogger(CMD_optimize.class);
 
-    public CMD_optimize(NBBufferedContainer parentComponent, String scenarioName) {
-        super(parentComponent, scenarioName);
+    public CMD_optimize(NBBufferedContainer parentComponent, String scenarioName, String context) {
+        super(parentComponent, scenarioName, context);
     }
 
     @Override

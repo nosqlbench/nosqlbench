@@ -76,16 +76,17 @@ public class NBScriptedCommand extends NBBaseCommand {
 
     public NBScriptedCommand(
         NBBufferedContainer parentComponent,
-        String phaseName
+        String phaseName,
+        String targetScenario
     ) {
-        super(parentComponent, phaseName);
+        super(parentComponent, phaseName, targetScenario);
         this.phaseName = phaseName;
         this.progressInterval = progressInterval;
         this.buffer = new BasicScriptBuffer();
     }
 
     public static NBScriptedCommand ofScripted(String name, Map<String, String> params, NBBufferedContainer parent, Invocation invocation) {
-        return new NBScriptedCommand(parent, name);
+        return new NBScriptedCommand(parent, name, "default");
     }
     public NBScriptedCommand add(Cmd... cmds) {
         this.buffer.add(cmds);

@@ -34,8 +34,8 @@ import java.util.Optional;
 public class CMD_forceStop extends NBBaseCommand {
     public final static Logger logger = LogManager.getLogger("force_stop");
 
-    public CMD_forceStop(NBBufferedContainer parentComponent, String stepName) {
-        super(parentComponent, stepName);
+    public CMD_forceStop(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
+        super(parentComponent, stepName, targetScenario);
     }
 
     @Override

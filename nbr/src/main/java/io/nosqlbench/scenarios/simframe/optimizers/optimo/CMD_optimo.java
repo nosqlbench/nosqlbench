@@ -66,8 +66,8 @@ import java.util.List;
 public class CMD_optimo extends NBBaseCommand {
     private final static Logger logger = LogManager.getLogger(CMD_optimize.class);
 
-    public CMD_optimo(NBBufferedContainer parentComponent, String phaseName) {
-        super(parentComponent, phaseName);
+    public CMD_optimo(NBBufferedContainer parentComponent, String phaseName, String targetScenario) {
+        super(parentComponent, phaseName, targetScenario);
     }
 
     @Override

@@ -31,8 +31,8 @@ import java.io.Reader;
 public class CMD_run extends NBBaseCommand {
     public final static Logger logger = LogManager.getLogger("run");
 
-    public CMD_run(NBBufferedContainer parentComponent, String stepName) {
-        super(parentComponent, stepName);
+    public CMD_run(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
+        super(parentComponent, stepName, targetScenario);
     }
 
     @Override

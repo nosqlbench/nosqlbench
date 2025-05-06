@@ -28,8 +28,8 @@ import java.io.Reader;
 
 public class CMD_ok extends NBBaseCommand {
 
-    public CMD_ok(NBBufferedContainer parentComponent, String stepName) {
-        super(parentComponent, stepName);
+    public CMD_ok(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
+        super(parentComponent, stepName, targetScenario);
     }
 
     @Override
