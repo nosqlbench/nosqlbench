@@ -97,4 +97,12 @@ public class StdoutSpace extends BaseSpace<StdoutSpace> {
         return this.console;
     }
 
+    @Override
+    public void close() throws Exception {
+        if (writer!=null) {
+            writer.flush();
+            writer = null;
+        }
+        super.close();
+    }
 }
