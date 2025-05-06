@@ -1,5 +1,23 @@
 package io.nosqlbench.nbr.examples.tests;
 
+/*
+ * Copyright (c) nosqlbench
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
@@ -31,6 +49,7 @@ public class TestSessionMetrics {
   /// or spaces, which should be zero in both cases.
   @Test
   public void testSessionResourceRecycling() {
+    String targetScenario="default";
     int totalActivities = 5;
     NBBufferedContainer context = NBBufferedContainer.builder().name("test_NB_session_metrics")
         .build(TestComponent.EMPTY_COMPONENT);
@@ -64,7 +83,7 @@ public class TestSessionMetrics {
       System.out.flush();
       String alias = "step_" + i;
       aliases.add(alias);
-      CMD_start started = new CMD_start(context, alias);
+      CMD_start started = new CMD_start(context, alias, targetScenario);
       LinkedHashMap<String, String> activityMap = new LinkedHashMap<>(activitydef1);
       activityMap.put("alias", alias);
       NBCommandParams params = NBCommandParams.of(activityMap);
@@ -85,7 +104,8 @@ public class TestSessionMetrics {
       String awaitName = "await_" + alias;
 
       System.out.println("awaiting " + alias);
-      context.apply(new CMD_await(context, awaitName), NBCommandParams.of(Map.of("alias", alias)));
+      context.apply(new CMD_await(context, awaitName, targetScenario), NBCommandParams.of(Map.of("alias",
+          alias)));
       System.out.println("awaited  " + alias);
       System.out.flush();
     }

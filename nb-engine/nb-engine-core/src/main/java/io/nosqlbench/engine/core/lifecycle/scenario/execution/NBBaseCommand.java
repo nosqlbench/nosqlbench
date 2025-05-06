@@ -28,6 +28,7 @@ import java.io.Reader;
 
 public abstract class NBBaseCommand extends NBInvokableCommand {
 
+    private final String targetScenario;
     protected Logger logger = LogManager.getLogger("COMMAND");
 
     public NBBaseCommand(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
