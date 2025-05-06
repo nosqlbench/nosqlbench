@@ -427,6 +427,8 @@ public class ContainerActivitiesController extends NBBaseComponent {
             throw new RuntimeException(e);
         } catch (TimeoutException e) {
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return null != result;
     }
