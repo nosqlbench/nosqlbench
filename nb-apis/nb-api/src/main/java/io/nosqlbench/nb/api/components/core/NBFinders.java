@@ -21,6 +21,7 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NBFinders {
     private final NBBaseComponent base;
@@ -142,10 +143,15 @@ public class NBFinders {
     private NBMetric oneMetricInTree(String pattern) {
         List<NBMetric> found = metricsInTree(pattern);
         if (found.size() != 1) {
-            System.out.println("Runtime Components and Metrics at this time:\n" + NBComponentFormats.formatAsTree(base));
-            throw new RuntimeException("Found " + found.size() + " metrics with pattern '" + pattern + "', expected exactly 1");
+            System.out.println(
+                "Runtime Components and Metrics at this time:\n" + NBComponentFormats.formatAsTree(base));
+            throw new RuntimeException("""
+          Found COUNT metrics with pattern 'PATTERN', expected exactly 1.
+          LIST
+          """.replace("COUNT", found.size() + "").replace("PATTERN", pattern)
+                .replace("LIST", found.stream().map(Object::toString).collect(Collectors.joining("\n"))));
         }
-        return found.get(0);
+        return found.getFirst();
     }
 
     public <T extends NBMetric> T topMetric(String pattern, Class<T> type) {
