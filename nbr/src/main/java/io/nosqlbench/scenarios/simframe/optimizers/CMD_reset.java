@@ -42,8 +42,8 @@ public class CMD_reset extends NBBaseCommand {
     public final static Logger logger = LogManager.getLogger("reset");
     private static final HashSet<String> IGNORABLE = new HashSet<>(List.of("activity"));
 
-    public CMD_reset(NBBufferedContainer parentComponent, String scenarioName, String context) {
-        super(parentComponent, scenarioName, context);
+    public CMD_reset(NBBufferedContainer parentComponent, String scenarioName) {
+        super(parentComponent, scenarioName);
     }
 
     /**

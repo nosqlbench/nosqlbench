@@ -27,8 +27,8 @@ import java.io.Reader;
 public class CMD_error extends NBBaseCommand {
 
 
-    public CMD_error(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
-        super(parentComponent, stepName, targetScenario);
+    public CMD_error(NBBufferedContainer parentComponent, String stepName) {
+        super(parentComponent, stepName);
     }
 
     @Override

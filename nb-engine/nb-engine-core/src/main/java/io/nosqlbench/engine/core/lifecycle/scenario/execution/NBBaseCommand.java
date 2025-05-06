@@ -33,7 +33,6 @@ public abstract class NBBaseCommand extends NBInvokableCommand {
 
     public NBBaseCommand(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
         super(parentComponent, NBLabels.forKV("step", stepName));
-        this.targetScenario = targetScenario;
     }
 
     public NBBaseCommand(NBBufferedContainer parentComponent, String commandLabel) {
@@ -55,7 +54,7 @@ public abstract class NBBaseCommand extends NBInvokableCommand {
 
     @Override
     public String toString() {
-        return "CMD (" + this.getClass().getSimpleName();
+        return "CMD (" + this.getClass().getSimpleName() + ")";
     }
 
     public abstract Object invoke(

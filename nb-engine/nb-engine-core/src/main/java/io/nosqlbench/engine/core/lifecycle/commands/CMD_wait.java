@@ -36,8 +36,8 @@ import java.util.stream.LongStream;
 public class CMD_wait extends NBBaseCommand {
     public final static Logger logger = LogManager.getLogger("example");
 
-    public CMD_wait(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
-        super(parentComponent, stepName, targetScenario);
+    public CMD_wait(NBBufferedContainer parentComponent, String stepName) {
+        super(parentComponent, stepName);
     }
 
     @Override
