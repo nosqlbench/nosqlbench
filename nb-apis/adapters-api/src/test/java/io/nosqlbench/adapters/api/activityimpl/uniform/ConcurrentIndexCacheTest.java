@@ -22,12 +22,16 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class ConcurrentIndexCacheTest {
+public class ConcurrentIndexCacheTest {
 
     @Test
     public void testBasicCache() {
@@ -84,4 +88,68 @@ class ConcurrentIndexCacheTest {
         assertThatThrownBy(() -> sc.get(1001)).hasMessageContaining("too high");
     }
 
+    @Test
+    public void testConcurrentInitialization() throws InterruptedException {
+        final int numThreads = 1000;
+        final int numKeys = 100;
+        final int iterationsPerThread = 1000;
+        
+        // Use a shared cache for all threads
+        final ConcurrentIndexCache<String> cache = new ConcurrentIndexCache<>("concurrentTest");
+        
+        // Track initialization count per key
+        final AtomicInteger[] initCounts = new AtomicInteger[numKeys];
+        for (int i = 0; i < numKeys; i++) {
+            initCounts[i] = new AtomicInteger(0);
+        }
+        
+        // Track that all threads get the same object reference for each key
+        final Map<Integer, Set<String>> uniqueValuesPerKey = new ConcurrentHashMap<>();
+        for (int i = 0; i < numKeys; i++) {
+            uniqueValuesPerKey.put(i, ConcurrentHashMap.newKeySet());
+        }
+        
+        // Create and start threads
+        Thread[] threads = new Thread[numThreads];
+        for (int t = 0; t < numThreads; t++) {
+            threads[t] = Thread.ofVirtual().unstarted(() -> {
+                for (int i = 0; i < iterationsPerThread; i++) {
+                    int key = i % numKeys;
+                    String value = cache.get(key, k -> {
+                        // Count each initialization
+                        initCounts[key].incrementAndGet();
+                        // Simulate some work that takes time
+                        try {
+                            Thread.sleep(1);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                        return "value-" + k;
+                    });
+                    
+                    // Record the unique value instance for this key
+                    uniqueValuesPerKey.get(key).add(value);
+                }
+            });
+            threads[t].start();
+        }
+        
+        // Wait for all threads to complete
+        for (Thread thread : threads) {
+            thread.join();
+        }
+        
+        // Verify each key was initialized exactly once
+        for (int i = 0; i < numKeys; i++) {
+            assertThat(initCounts[i].get())
+                .as("Key " + i + " should be initialized exactly once")
+                .isEqualTo(1);
+                
+            // Verify all threads got the same value instance for each key
+            assertThat(uniqueValuesPerKey.get(i).size())
+                .as("All threads should get the same instance for key " + i)
+                .isEqualTo(1);
+        }
+    }
+    
 }
