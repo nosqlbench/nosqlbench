@@ -33,8 +33,8 @@ import java.util.concurrent.locks.LockSupport;
 public class CMD_await extends NBBaseCommand {
     public final static Logger logger = LogManager.getLogger("await");
 
-    public CMD_await(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
-        super(parentComponent, stepName, targetScenario);
+    public CMD_await(NBBufferedContainer parentComponent, String stepName) {
+        super(parentComponent, stepName);
     }
 
     @Override

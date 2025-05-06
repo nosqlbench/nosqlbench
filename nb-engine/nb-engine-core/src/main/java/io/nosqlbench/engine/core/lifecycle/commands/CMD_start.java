@@ -34,8 +34,8 @@ import java.util.Optional;
 public class CMD_start extends NBBaseCommand {
     public final static Logger logger = LogManager.getLogger("start");
 
-    public CMD_start(NBBufferedContainer parentComponent, String stepName, String targetScenario) {
-        super(parentComponent, stepName, targetScenario);
+    public CMD_start(NBBufferedContainer parentComponent, String stepName) {
+        super(parentComponent, stepName);
     }
 
     @Override

@@ -28,7 +28,7 @@ public class NBScriptCommandResolver implements NBInvokableResolver {
     public NBInvokableCommand resolve(Cmd cmd, NBBufferedContainer parent, String stepname) {
         return switch (cmd.getCmdType()) {
             case fragment, script->
-            new NBScriptedCommand(parent, stepname, cmd.getTargetContext()).add(cmd);
+            new NBScriptedCommand(parent, stepname).add(cmd);
 //            case fragment ->
 //                new NBScriptedCommand(parent, phaseName, cmd.getTargetContext()).addScriptText(cmd.getArgValue("fragment"));
 //            case script ->

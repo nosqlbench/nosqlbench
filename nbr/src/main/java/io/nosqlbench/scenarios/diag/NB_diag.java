@@ -27,8 +27,8 @@ import java.io.Reader;
 
 @Service(value = NBBaseCommand.class, selector = "diag")
 public class NB_diag extends NBBaseCommand {
-    public NB_diag(NBBufferedContainer parentComponent, String scenarioName, String targetScenario) {
-        super(parentComponent, scenarioName, targetScenario);
+    public NB_diag(NBBufferedContainer parentComponent, String scenarioName) {
+        super(parentComponent, scenarioName);
     }
 
     @Override
