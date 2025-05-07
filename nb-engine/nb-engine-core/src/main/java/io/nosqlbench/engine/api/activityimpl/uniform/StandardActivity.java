@@ -73,7 +73,7 @@ public class StandardActivity<R extends java.util.function.LongFunction, S> exte
         NBConfigModel yamlmodel;
         if (yaml_loc.isPresent()) {
             Map<String, Object> disposable = new LinkedHashMap<>(activityDef.getParams());
-            workload = loadStmtsDocList();
+            workload = OpsLoader.loadPath(yaml_loc.get(), disposable, "activities");
             yamlmodel = workload.getConfigModel();
         } else {
             yamlmodel = ConfigModel.of(StandardActivity.class).asReadOnly();
