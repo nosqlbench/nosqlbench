@@ -29,6 +29,8 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.LongFunction;
 
 /**
@@ -40,8 +42,6 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 @Categories(Category.readers)
 public class FVecReader implements LongFunction<float[]>, AutoCloseable {
-
-    private static final ScopedValue<FileChannel> CHANNEL = ScopedValue.newInstance();
 
     private final int dimensions;
     private final int reclen;
@@ -105,68 +105,73 @@ public class FVecReader implements LongFunction<float[]>, AutoCloseable {
         }
     }
 
+    // Use a thread-local to store the file channel without closing it between calls
+    private static final ThreadLocal<Map<Path, FileChannel>> THREAD_CHANNELS =
+        ThreadLocal.withInitial(() -> new HashMap<>());
+    
     private FileChannel getOrCreateChannel() throws IOException {
-        FileChannel channel = CHANNEL.get();
-        if (channel == null) {
+        // Get the thread-local map of channels
+        Map<Path, FileChannel> channelMap = THREAD_CHANNELS.get();
+        
+        // Try to get an existing channel for this path
+        FileChannel channel = channelMap.get(path);
+        
+        // Create a new channel if needed
+        if (channel == null || !channel.isOpen()) {
             channel = FileChannel.open(path, StandardOpenOption.READ);
-            ScopedValue.where(CHANNEL, channel).run(() -> {});
+            channelMap.put(path, channel);
         }
+        
         return channel;
     }
-
+    
     @Override
     public float[] apply(long value) {
-      try {
-        return ScopedValue.where(CHANNEL, null).call(() -> {
-            int recordIdx = (int) (value % reclim);
-            long recpos = (long)recordIdx * reclen;
-
-            try {
-                FileChannel channel = getOrCreateChannel();
-                ByteBuffer headerBuffer = ByteBuffer.allocate(Integer.BYTES);
-                ByteBuffer vectorBuffer = ByteBuffer.allocate(dimensions * Float.BYTES)
-                    .order(ByteOrder.BIG_ENDIAN);
-
-                // Read record dimensions
-                headerBuffer.clear();
-                channel.position(recpos);
-                channel.read(headerBuffer);
-                headerBuffer.flip();
-                int recdim = Integer.reverseBytes(headerBuffer.getInt());
-
-                if(recdim != dimensions) {
-                    throw new RuntimeException("dimensions are not uniform for fvec file '" +
-                        this.path + "', found dim " + recdim + " at record " + value);
-                }
-
-                // Read vector data
-                vectorBuffer.clear();
-                channel.read(vectorBuffer);
-                vectorBuffer.flip();
-
-                float[] data = new float[dimensions];
-                for (int i = 0; i < dimensions; i++) {
-                    int intBits = Integer.reverseBytes(vectorBuffer.getInt());
-                    data[i] = Float.intBitsToFloat(intBits);
-                }
-                return data;
-
-            } catch (IOException e) {
-                throw new RuntimeException("Error reading from file: " + e.getMessage(), e);
+        int recordIdx = (int) (value % reclim);
+        long recpos = (long)recordIdx * reclen;
+    
+        try {
+            FileChannel channel = getOrCreateChannel();
+            ByteBuffer headerBuffer = ByteBuffer.allocate(Integer.BYTES);
+            ByteBuffer vectorBuffer = ByteBuffer.allocate(dimensions * Float.BYTES)
+                .order(ByteOrder.BIG_ENDIAN);
+    
+            // Read record dimensions
+            headerBuffer.clear();
+            channel.position(recpos);
+            channel.read(headerBuffer);
+            headerBuffer.flip();
+            int recdim = Integer.reverseBytes(headerBuffer.getInt());
+    
+            if(recdim != dimensions) {
+                throw new RuntimeException("dimensions are not uniform for fvec file '" +
+                    this.path + "', found dim " + recdim + " at record " + value);
             }
-        });
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
+    
+            // Read vector data
+            vectorBuffer.clear();
+            channel.read(vectorBuffer);
+            vectorBuffer.flip();
+    
+            float[] data = new float[dimensions];
+            for (int i = 0; i < dimensions; i++) {
+                int intBits = Integer.reverseBytes(vectorBuffer.getInt());
+                data[i] = Float.intBitsToFloat(intBits);
+            }
+            return data;
+    
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading from file: " + e.getMessage(), e);
+        }
     }
-
+    
     @Override
     public void close() throws Exception {
-        if (CHANNEL.isBound()) {
-            FileChannel channel = CHANNEL.get();
-            if (channel != null && channel.isOpen()) {
-                channel.close();
-            }
+        // Close and remove channel for this path
+        Map<Path, FileChannel> channelMap = THREAD_CHANNELS.get();
+        FileChannel channel = channelMap.remove(path);
+        if (channel != null && channel.isOpen()) {
+            channel.close();
         }
     }
 
