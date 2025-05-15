@@ -34,6 +34,14 @@ import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 
 /**
  * ThreadLocal http clients have been removed from this version, as the built-in
@@ -73,6 +81,30 @@ public class HttpSpace extends BaseSpace<HttpSpace> implements NBLabeledElement 
         logger.debug(() -> "follow_redirects=>" + followRedirects);
         builder = builder.followRedirects(this.followRedirects);
         builder = builder.connectTimeout(this.timeout);
+
+        boolean disable_endpoint_identification = cfg.getOptional("disable_endpoint_identification").map(Boolean::parseBoolean).orElse(false);
+        if (disable_endpoint_identification) {
+            try {
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, new TrustManager[]{
+                    new X509TrustManager() {
+                        public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                    }
+                }, new SecureRandom());
+
+                SSLParameters sslParameters = new SSLParameters();
+                // Disable endpoint identification completely
+                sslParameters.setEndpointIdentificationAlgorithm(null);
+
+                builder = builder.sslContext(sslContext)
+                    .sslParameters(sslParameters);
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                throw new RuntimeException("Error configuring SSL context: " + e.getMessage(), e);
+            }
+        }
+
         return builder.build();
     }
 
@@ -127,6 +159,8 @@ public class HttpSpace extends BaseSpace<HttpSpace> implements NBLabeledElement 
                 .setDescription("How long to wait for requests before timeout out. Default is forever."))
             .add(Param.defaultTo("hdr_digits", 4)
                 .setDescription("number of digits of precision to keep in HDR histograms"))
+            .add(Param.optional("disable_endpoint_identification", Boolean.class)
+                .setDescription("Whether to disable endpoint identification and strict TLS validation. Default is false."))
             .asReadOnly();
     }
 
