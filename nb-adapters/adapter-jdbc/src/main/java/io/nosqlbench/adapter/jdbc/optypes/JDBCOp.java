@@ -27,7 +27,7 @@ import java.sql.*;
 import java.util.Properties;
 import java.util.Random;
 
-public abstract class JDBCOp implements CycleOp {
+public abstract class JDBCOp implements CycleOp<Object> {
     private static final Logger LOGGER = LogManager.getLogger(JDBCOp.class);
     protected static final String LOG_COMMIT_SUCCESS =
         "Executed the JDBC statement & committed the connection successfully";

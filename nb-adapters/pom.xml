@@ -95,7 +95,7 @@
         <profile>
             <id>adapter-jdbc-module</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>adapter-jdbc</module>

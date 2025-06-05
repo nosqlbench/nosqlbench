@@ -19,33 +19,37 @@ package io.nosqlbench.adapter.jdbc;
 import io.nosqlbench.adapter.jdbc.opdispensers.JDBCDMLOpDispenser;
 import io.nosqlbench.adapter.jdbc.opdispensers.JDBCDDLOpDispenser;
 import io.nosqlbench.adapter.jdbc.optypes.JDBCOp;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class JDBCOpMapper implements OpMapper<JDBCOp> {
+import java.util.function.LongFunction;
+
+public class JDBCOpMapper implements OpMapper<JDBCOp,JDBCSpace> {
     private final static Logger logger = LogManager.getLogger(JDBCOpMapper.class);
 
     private final DriverAdapter adapter;
     private final NBConfiguration cfg;
-    private final DriverSpaceCache<? extends JDBCSpace> spaceCache;
 
-    public JDBCOpMapper(DriverAdapter adapter, NBConfiguration cfg, DriverSpaceCache<? extends JDBCSpace> spaceCache) {
+    public JDBCOpMapper(DriverAdapter adapter, NBConfiguration cfg) {
         this.adapter = adapter;
         this.cfg = cfg;
-        this.spaceCache = spaceCache;
     }
 
     @Override
-    public OpDispenser<? extends JDBCOp> apply(ParsedOp op) {
+    public OpDispenser<? extends JDBCOp> apply(
+        NBComponent adapterC,
+        ParsedOp op,
+        LongFunction<JDBCSpace> spaceF
+    )
+    {
         String spaceName = op.getStaticConfigOr("space", "default");
-        JDBCSpace jdbcSpace = spaceCache.get(spaceName);
 
         /*
          * If the user provides a body element, then they want to provide the JSON or
@@ -62,15 +66,15 @@ public class JDBCOpMapper implements OpMapper<JDBCOp> {
             return switch (opType.enumId) {
                 // https://jdbc.postgresql.org/documentation/query/#example54dropping-a-table-in-jdbc
                 case ddl->
-                    new JDBCDDLOpDispenser(adapter, jdbcSpace, op, opType.targetFunction);
+                    new JDBCDDLOpDispenser(adapter, spaceF, op, opType.targetFunction);
 
                 // https://jdbc.postgresql.org/documentation/query/#performing-updates
                 case dmlwrite ->
-                    new JDBCDMLOpDispenser(adapter, jdbcSpace, op, false, opType.targetFunction);
+                    new JDBCDMLOpDispenser(adapter, spaceF, op, false, opType.targetFunction);
 
                 // https://jdbc.postgresql.org/documentation/query/#example51processing-a-simple-query-in-jdbc
                 case dmlread ->
-                    new JDBCDMLOpDispenser(adapter, jdbcSpace, op, true, opType.targetFunction);
+                    new JDBCDMLOpDispenser(adapter, spaceF, op, true, opType.targetFunction);
             };
         }
     }

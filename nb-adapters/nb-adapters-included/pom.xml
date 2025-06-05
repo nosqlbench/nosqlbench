@@ -116,7 +116,7 @@
         <profile>
             <id>adapter-jdbc-include</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>

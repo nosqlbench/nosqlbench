@@ -22,7 +22,6 @@ import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverSpaceCache;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
@@ -30,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.Function;
+import java.util.function.LongFunction;
 
 @Service(value = DriverAdapter.class,selector = "jdbc")
 public class JDBCDriverAdapter extends BaseDriverAdapter<JDBCOp, JDBCSpace> {
@@ -40,15 +40,14 @@ public class JDBCDriverAdapter extends BaseDriverAdapter<JDBCOp, JDBCSpace> {
     }
 
     @Override
-    public OpMapper<JDBCOp> getOpMapper() {
-        DriverSpaceCache<? extends JDBCSpace> spaceCache = getSpaceCache();
-        NBConfiguration adapterConfig = getConfiguration();
-        return new JDBCOpMapper(this, adapterConfig, spaceCache);
+    public OpMapper<JDBCOp,JDBCSpace> getOpMapper() {
+        NBConfiguration config = getConfiguration();
+        return new JDBCOpMapper(this, config);
     }
 
     @Override
-    public Function<String, ? extends JDBCSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new JDBCSpace(s, cfg);
+    public LongFunction<JDBCSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return s ->new JDBCSpace(this,s,cfg);
     }
 
     @Override

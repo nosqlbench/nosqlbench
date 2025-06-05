@@ -40,11 +40,11 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
     private final LongFunction<List<Object>> pStmtValListFunc;
 
     public JDBCDMLOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter,
-                              JDBCSpace jdbcSpace,
+        LongFunction<JDBCSpace> spaceF,
                               ParsedOp op,
                               boolean isReadStmt,
                               LongFunction<String> pStmtSqlStrFunc) {
-        super(adapter, jdbcSpace, op);
+        super(adapter, spaceF, op);
         this.isDdlStatement = false;
         this.isReadStatement = isReadStmt;
 
@@ -53,31 +53,32 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
         // Only apply 'one-thread-per-connection' limit to the WRITE workload
         //    due to the fact that the PostgreSQL connection is not thread safe
         // For the READ workload, Do NOT apply this limitation.
-        int threadNum = jdbcSpace.getTotalThreadNum();
-        int maxNumConnFinal = numConnInput;
 
-        // For write workload, avoid thread-safety issue by using a constrained connection number
-        // For read workload, it is ok to use more threads than available connections
-        if (!isReadStmt)  {
-            if (threadNum > numConnInput) {
-                throw new JDBCAdapterInvalidParamException(
-                    "JDBC connection is NOT thread safe. For write workload, the total NB thread number (" + threadNum +
-                        ") can NOT be greater than the maximum connection number 'num_conn' (" + numConnInput + ")"
-                );
-            }
-        }
-        maxNumConnFinal = Math.min(threadNum, maxNumConnFinal);
-        if (maxNumConnFinal < 1) {
-            throw new JDBCAdapterInvalidParamException(
-                "'num_conn' NB CLI parameter must be a positive number!"
-            );
-        }
-        jdbcSpace.setMaxNumConn(maxNumConnFinal);
-
-        logger.info("Total {} JDBC connections will be created [isReadStmt:{}, threads/{}, num_conn/{}]; " +
-                "dml_batch: {}, autoCommit: {}",
-            maxNumConnFinal, isReadStmt, threadNum, numConnInput,
-            jdbcSpace.getDmlBatchNum(), jdbcSpace.isAutoCommit());
+//        int threadNum = jdbcSpace.getTotalThreadNum();
+//        int maxNumConnFinal = numConnInput;
+//
+//        // For write workload, avoid thread-safety issue by using a constrained connection number
+//        // For read workload, it is ok to use more threads than available connections
+//        if (!isReadStmt)  {
+//            if (threadNum > numConnInput) {
+//                throw new JDBCAdapterInvalidParamException(
+//                    "JDBC connection is NOT thread safe. For write workload, the total NB thread number (" + threadNum +
+//                        ") can NOT be greater than the maximum connection number 'num_conn' (" + numConnInput + ")"
+//                );
+//            }
+//        }
+//        maxNumConnFinal = Math.min(threadNum, maxNumConnFinal);
+//        if (maxNumConnFinal < 1) {
+//            throw new JDBCAdapterInvalidParamException(
+//                "'num_conn' NB CLI parameter must be a positive number!"
+//            );
+//        }
+//        jdbcSpace.setMaxNumConn(maxNumConnFinal);
+//
+//        logger.info("Total {} JDBC connections will be created [isReadStmt:{}, threads/{}, num_conn/{}]; " +
+//                "dml_batch: {}, autoCommit: {}",
+//            maxNumConnFinal, isReadStmt, threadNum, numConnInput,
+//            jdbcSpace.getDmlBatchNum(), jdbcSpace.isAutoCommit());
 
         // TODO: this is a current limitation applied by this adapter
         //       improve this behavior by allowing the user to choose
@@ -102,18 +103,19 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
 
     @Override
     public JDBCDMLOp getOp(long cycle) {
+        JDBCSpace space = spaceF.apply(cycle);
         if (isReadStatement) {
             return new JDBCDMLReadOp(
-                jdbcSpace,
+                space,
                 true,
                 pStmtSqlStrFunc.apply(cycle),
                 pStmtValListFunc.apply(cycle),
                 this.verifierKeyName);
         }
         else {
-            int ddlStmtBatchNum = jdbcSpace.getDmlBatchNum();
+            int ddlStmtBatchNum = space.getDmlBatchNum();
             return new JDBCDMLWriteOp(
-                jdbcSpace,
+                space,
                 false,
                 pStmtSqlStrFunc.apply(cycle),
                 pStmtValListFunc.apply(cycle),

@@ -20,6 +20,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterInvalidParamException;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -35,9 +36,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public class JDBCSpace implements AutoCloseable {
+public class JDBCSpace extends BaseSpace<JDBCSpace> {
     private final static Logger logger = LogManager.getLogger(JDBCSpace.class);
-    private final String spaceName;
 
     // How many JDBC connections per NB JDBC execution
     // NOTE: Since JDBC connection is NOT thread-safe, the total NB threads MUST be less
@@ -65,8 +65,8 @@ public class JDBCSpace implements AutoCloseable {
     }
     private final ConcurrentHashMap<ConnectionCacheKey, Connection> connections = new ConcurrentHashMap<>();
 
-    public JDBCSpace(String spaceName, NBConfiguration cfg) {
-        this.spaceName = spaceName;
+    public JDBCSpace(JDBCDriverAdapter adapter, long spaceidx, NBConfiguration cfg) {
+        super(adapter, spaceidx);
         this.initializeSpace(cfg);
 
         // In this adapter, we treat it as an error if 'autoCommit' is ON and using batch at the same time.

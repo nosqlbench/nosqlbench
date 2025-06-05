@@ -84,6 +84,7 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
         super(parentC);
         opName = op.getName();
         labels = op.getLabels();
+        this.spaceF = spaceF;
 
         this.timerStarts = op.takeOptionalStaticValue(START_TIMERS, String.class)
             .map(s -> s.split(", *"))

@@ -16,6 +16,7 @@
 package io.nosqlbench.adapter.jdbc.optypes;
 
 import io.nosqlbench.adapter.jdbc.JDBCSpace;
+import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterInvalidParamException;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +32,11 @@ public class JDBCDDLOp extends JDBCOp {
     public JDBCDDLOp(JDBCSpace jdbcSpace, String ddlStmtStr) {
         super(jdbcSpace);
         this.ddlStmtStr = ddlStmtStr;
+        assert(jdbcSpace.isAutoCommit());
+//        if (isPreparedStatement) {
+//            throw new JDBCAdapterInvalidParamException("DDL statements can NOT be prepared!");
+//        }
+
     }
 
     @Override

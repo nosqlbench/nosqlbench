@@ -34,7 +34,7 @@ public class JDBCDDLOpDispenser extends JDBCBaseOpDispenser {
     private final LongFunction<String> ddlSqlStrFunc;
 
     public JDBCDDLOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter,
-                              JDBCSpace jdbcSpace,
+        LongFunction<JDBCSpace> jdbcSpace,
                               ParsedOp op,
                               LongFunction<String> sqlStrFunc) {
         super(adapter, jdbcSpace, op);
@@ -42,14 +42,11 @@ public class JDBCDDLOpDispenser extends JDBCBaseOpDispenser {
         this.ddlSqlStrFunc = sqlStrFunc;
 
         // For DDL statements, must use autoCommit
-        assert(jdbcSpace.isAutoCommit());
-        if (isPreparedStatement) {
-            throw new JDBCAdapterInvalidParamException("DDL statements can NOT be prepared!");
-        }
     }
     @Override
     public JDBCDDLOp getOp(long cycle) {
         String ddlSqlStr = ddlSqlStrFunc.apply(cycle);
+        JDBCSpace jdbcSpace = spaceF.apply(cycle);
         return new JDBCDDLOp(jdbcSpace, ddlSqlStr);
     }
 }

@@ -24,20 +24,20 @@ import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import java.util.function.LongFunction;
+
 public abstract class JDBCBaseOpDispenser extends BaseOpDispenser<JDBCOp, JDBCSpace> {
     protected static final String ERROR_STATEMENT_CREATION =
         "Error while attempting to create the jdbc statement from the connection";
 
-    protected final JDBCSpace jdbcSpace;
     protected  boolean isDdlStatement;
     protected final boolean isPreparedStatement;
     protected final String verifierKeyName;
 
     public JDBCBaseOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter,
-                               JDBCSpace jdbcSpace,
+        LongFunction<JDBCSpace> spaceF,
                                ParsedOp op) {
-        super(adapter, op);
-        this.jdbcSpace = jdbcSpace;
+        super(adapter, op,spaceF);
         this.isPreparedStatement = op.getStaticConfigOr("prepared", false);
         this.verifierKeyName = op.getStaticConfigOr("verifier-key", "");
     }
