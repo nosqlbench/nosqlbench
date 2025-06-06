@@ -70,6 +70,7 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
             "session"
         );
 
+        new ClasspathExtender().extend();
         new NBSessionSafetyMetrics(this);
 
         OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();

@@ -27,4 +27,7 @@ public class JDBCAdapterUnexpectedException extends RuntimeException {
         super(e);
         printStackTrace();
     }
+    public JDBCAdapterUnexpectedException(String message, Exception cause) {
+        super(message,cause);
+    }
 }

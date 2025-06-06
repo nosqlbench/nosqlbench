@@ -26,28 +26,30 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class JDBCDDLOp extends JDBCOp {
-    private static final Logger LOGGER = LogManager.getLogger(JDBCDDLOp.class);
-    private final String ddlStmtStr;
+  private static final Logger LOGGER = LogManager.getLogger(JDBCDDLOp.class);
+  private final String ddlStmtStr;
 
-    public JDBCDDLOp(JDBCSpace jdbcSpace, String ddlStmtStr) {
-        super(jdbcSpace);
-        this.ddlStmtStr = ddlStmtStr;
-        assert(jdbcSpace.isAutoCommit());
-//        if (isPreparedStatement) {
-//            throw new JDBCAdapterInvalidParamException("DDL statements can NOT be prepared!");
-//        }
+  public JDBCDDLOp(JDBCSpace jdbcSpace, String ddlStmtStr) {
+    super(jdbcSpace);
+    this.ddlStmtStr = ddlStmtStr;
+    assert (jdbcSpace.isAutoCommit());
+    //        if (isPreparedStatement) {
+    //            throw new JDBCAdapterInvalidParamException("DDL statements can NOT be prepared!");
+    //        }
 
+  }
+
+  @Override
+  public Object apply(long value) {
+    try {
+      Statement stmt = jdbcConnection.createStatement();
+      stmt.execute(ddlStmtStr);
+      return true;
+    } catch (SQLException sqlException) {
+      throw new JDBCAdapterUnexpectedException(
+          "Failed to execute the DDL statement: '" + ddlStmtStr + "': " + sqlException.getMessage(),
+          sqlException
+      );
     }
-
-    @Override
-    public Object apply(long value) {
-        try {
-            Statement stmt = jdbcConnection.createStatement();
-            stmt.execute(ddlStmtStr);
-            return true;
-        } catch (SQLException sqlException) {
-            throw new JDBCAdapterUnexpectedException(
-                "Failed to execute the DDL statement: \"" + ddlStmtStr + "\"");
-        }
-    }
+  }
 }

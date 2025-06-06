@@ -61,6 +61,13 @@
             <version>5.0.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.facebook.presto</groupId>
+            <artifactId>presto-jdbc</artifactId>
+            <version>0.292</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
