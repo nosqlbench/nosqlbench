@@ -101,7 +101,7 @@ public abstract class JDBCOp implements CycleOp<Object> {
   }
 
   private Connection getConnection() {
-    new ClasspathExtender().extend();
+//    new ClasspathExtender().extend();
 
     int rnd = random.nextInt(0, jdbcSpace.getMaxNumConn());
     final String connectionName = "jdbc-conn-" + rnd;

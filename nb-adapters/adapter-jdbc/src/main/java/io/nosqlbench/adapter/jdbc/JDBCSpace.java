@@ -71,6 +71,7 @@ public class JDBCSpace extends BaseSpace<JDBCSpace> {
   public JDBCSpace(JDBCDriverAdapter adapter, long spaceidx, NBConfiguration cfg) {
     super(adapter, spaceidx);
     this.initializeSpace(cfg);
+//    new ClasspathExtender().extend();
 
     // In this adapter, we treat it as an error if 'autoCommit' is ON and using batch at the same time.
     if ((this.dmlBatchNum > 1) && isAutoCommit()) {
@@ -142,7 +143,7 @@ public class JDBCSpace extends BaseSpace<JDBCSpace> {
     // JDBC driver's `DriverManager` to create connection directly.
     //
 
-    new ClasspathExtender().extend();
+//    new ClasspathExtender().extend();
 
     this.useHikariCP = BooleanUtils.toBoolean(cfg.getOptional("use_hikaricp").orElse("true"));
     this.autoCommitCLI = BooleanUtils.toBoolean(cfg.getOptional("autoCommit").orElse("true"));

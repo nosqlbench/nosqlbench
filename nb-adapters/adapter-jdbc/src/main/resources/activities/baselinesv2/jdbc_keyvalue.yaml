@@ -1,18 +1,34 @@
-# run driver=jdbc workload="/path/to/postgresql-keyvalue.yaml" tags="block:schema" threads=AUTO cycles=4 url="jdbc:postgresql://host:port/database" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName=insectdb sslrootcert="/path/to/postgresql_certs/root.crt" -vv --show-stacktraces
+# jdbc_keyvalue.yaml default.drop dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=false
+# jdbc_keyvalue.yaml default.schema dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=false
+# jdbc_keyvalue.yaml default.rampup dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=false
+# jdbc_keyvalue.yaml default.select dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=false
+
 min_version: "5.17.2"
 
 description: |
   A workload which reads ann-benchmarks vector data from HDF5 file format for PostgreSql with baselinetor.
+  Template variable values:
   TEMPLATE(schemaname,public)
   TEMPLATE(tablename,baselines)
+  TEMPLATE(rampupsize,1000)
+  TEMPLATE(connections,10)
+  TEMPLATE(select_cycles,1000)
   
 
 scenarios:
   default:
-    drop:    run driver=jdbc tags==block:drop     threads===1   cycles==UNDEF url=TEMPLATE(dburl)
-    schema:  run driver=jdbc tags==block:schema   threads===1   cycles==UNDEF url=TEMPLATE(dburl)
-#    testann: run driver=jdbc tags==block:testann  threads=AUTO cycles===TEMPLATE(main-cycles,1000)  url="jdbc:TEMPLATE(jdbctype)://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
-#    train:   run driver=jdbc tags==block:train    threads=AUTO cycles===TEMPLATE(trainsize) dml_batch=120 autoCommit=false url="jdbc:TEMPLATE(jdbctype)://host:port/" databaseName="defaultdb" portNumber=5432 user="newuser" password="CHANGE_ME" sslmode="prefer" serverName="pgsql" sslrootcert="/path/to/postgresql_certs/root.crt"
+    drop: >-
+     run driver=jdbc tags==block:drop threads===1 cycles==UNDEF 
+     url=TEMPLATE(dburl)
+    schema: >-
+      run driver=jdbc tags==block:schema threads===1 cycles==UNDEF 
+      url=TEMPLATE(dburl)
+    rampup: >-
+      run driver=jdbc tags==block:rampup threads=10  
+      cycles===TEMPLATE(rampupsize) url=TEMPLATE(dburl) num_conn=TEMPLATE(connections)
+    select: >-
+      run driver=jdbc tags==block:select threads=10  
+      cycles===TEMPLATE(select_cycles) url=TEMPLATE(dburl) num_conn=TEMPLATE(connections)
 
 bindings:
   rw_key: ToString();
@@ -21,13 +37,9 @@ bindings:
 blocks:
   drop:
     ops:
-      drop_vector_index:
-        ddl: |
-          DROP INDEX IF EXISTS TEMPLATE(schemaname).idx_TEMPLATE(tablename)_TEMPLATE
-          (indextype)_TEMPLATE(similarity_function);
       drop_table:
         ddl: |
-          DROP TABLE IF EXISTS TEMPLATE(schemaname).TEMPLATE(tablename);
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).TEMPLATE(tablename)
       ##
       # NOTE: Do NOT enable this block for 'runall.sh' script
       # --------------------------------------------------
@@ -40,22 +52,29 @@ blocks:
       create_schema:
         ddl: |
           CREATE SCHEMA IF NOT EXISTS TEMPLATE(schemaname)
-#      create_table:
-#        ddl: |
-#          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).TEMPLATE(tablename)
-#          (key TEXT PRIMARY KEY, value TEXT);
+      create_table:
+        ddl: |-
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).TEMPLATE(tablename)
+          (key varchar, value varchar)
 
-#  train:
-#    params:
-#      prepared: true
-#    ops:
-#      main_insert:
-#        dmlwrite: |
-#          INSERT INTO TEMPLATE(schemaname).TEMPLATE(tablename) VALUES (?,?)
-#          ON CONFLICT DO NOTHING;
-#        prep_stmt_val_arr: |
-#          {rw_key},{rw_value}
-#
+  rampup:
+    params:
+      prepared: true
+    ops:
+      main_insert:
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).TEMPLATE(tablename) VALUES (?,?)
+        prep_stmt_val_arr: |
+          {rw_key},{rw_value}
+
+  select:
+    params:
+      prepared: true
+    ops:
+      select:
+        dmlread: |
+          SELECT * FROM TEMPLATE(schemaname).TEMPLATE(tablename) where key={rw_key}
+
 #  main:
 ##    params:
 ##      prepared: true

@@ -87,8 +87,8 @@ public class JDBCDMLReadOp extends JDBCDMLOp {
         }
         catch (SQLException sqlException) {
             throw new JDBCAdapterUnexpectedException(
-                "Failed to execute the prepared DDL stmt: \"" + pStmtSqlStr + "\", " +
-                    "with values: \"" + pStmtValList + "\"");
+                "Failed to execute the prepared DDL stmt: '" + pStmtSqlStr + "', " +
+                    "with values: [" + pStmtValList + "]: " + sqlException.getMessage(), sqlException);
         }
     }
 }

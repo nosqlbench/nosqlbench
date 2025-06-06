@@ -88,8 +88,8 @@ public class JDBCDMLWriteOp extends JDBCDMLOp {
         }
         catch (SQLException sqlException) {
             throw new JDBCAdapterUnexpectedException(
-                "Failed to execute the prepared DDL statement: \"" + pStmtSqlStr + "\", " +
-                    "with values: \"" + pStmtValList + "\"");
+                "Failed to execute the prepared DML statement: \"" + pStmtSqlStr + "\", " +
+                    "with values: '" + pStmtValList + "':" + sqlException.getMessage(), sqlException);
         }
     }
 }
