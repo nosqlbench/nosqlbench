@@ -53,12 +53,12 @@ public class JDBCDMLReadOp extends JDBCDMLOp {
             ResultSet rs;
             if (!isPreparedStmt) {
                 rs = stmt.executeQuery(pStmtSqlStr);
-                do {
+                while (rs.next()) {
                     String keyVal = rs.getString(this.verifierKeyName);
                     if (StringUtils.isNotBlank(keyVal)) {
                         verifierValueList.add(keyVal);
                     }
-                } while (rs.next());
+                }
             }
             else {
                 boolean isResultSet = ((PreparedStatement)stmt).execute();

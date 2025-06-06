@@ -1,0 +1,338 @@
+# jdbc_analytics_corrected.yaml - Corrected Analytics workload for PrestoDB
+# Usage examples:
+# jdbc_analytics_corrected.yaml default.drop dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+# jdbc_analytics_corrected.yaml default.schema dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+# jdbc_analytics_corrected.yaml default.rampup dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+# jdbc_analytics_corrected.yaml default.analytics dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+
+description: |
+  Corrected Analytics workload for PrestoDB with proper NoSQLBench binding syntax.
+  This workload demonstrates TPC-H inspired analytical queries with correct binding patterns.
+  Template variable values:
+  TEMPLATE(schemaname,analytics)
+  TEMPLATE(connections,10)
+  TEMPLATE(rampup_cycles,10000)
+  TEMPLATE(analytics_cycles,1000)
+
+scenarios:
+  default:
+    drop: >-
+      run driver=jdbc tags==block:drop cycles==UNDEF
+      url=TEMPLATE(dburl)
+    schema: >-
+      run driver=jdbc tags==block:schema cycles==UNDEF
+      url=TEMPLATE(dburl)
+    rampup: >-
+      run driver=jdbc tags==block:rampup threads=10
+      cycles===TEMPLATE(rampup_cycles) url=TEMPLATE(dburl) num_conn=TEMPLATE(connections)
+    analytics: >-
+      run driver=jdbc tags==block:analytics threads=5
+      cycles===TEMPLATE(analytics_cycles) url=TEMPLATE(dburl) num_conn=TEMPLATE(connections)
+
+bindings:
+  # Customer data - using proper NoSQLBench syntax
+  custkey: Uniform(1,150000)->long
+  customer_name: Template('Customer-{}', Identity())
+  customer_address: HashedFileExtractToString('data/lorem_ipsum_full.txt',25,40)
+  customer_phone: Template('+1-555-{}', Identity())
+  customer_acctbal: Normal(5000,1000) -> double
+  customer_mktsegment: WeightedStrings('BUILDING:1;AUTOMOBILE:1;MACHINERY:1;HOUSEHOLD:1;FURNITURE:1')
+  customer_comment: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,100)
+
+  # Order data
+  orderkey: Uniform(1,1500000)->long
+  order_custkey: Uniform(1,150000)->long
+  order_status: WeightedStrings('O:1;F:1;P:1')
+  order_totalprice: Normal(10000,5000) -> double
+  order_date: StartingEpochMillis('2020-01-01 00:00:00'); AddHashRange(0L,126230400000L); StringDateWrapper("yyyy-MM-dd")
+  order_priority: WeightedStrings('1-URGENT:1;2-HIGH:1;3-MEDIUM:1;4-NOT SPECIFIED:1;5-LOW:1')
+  order_clerk: Template('Clerk-{}', Identity())
+  order_shippriority: Uniform(0,1)->int
+  order_comment: HashedFileExtractToString('data/lorem_ipsum_full.txt',30,80)
+
+  # Lineitem data
+  lineitem_orderkey: Uniform(1,1500000)->long
+  lineitem_partkey: Uniform(1,200000)->long
+  lineitem_suppkey: Uniform(1,10000)->long
+  lineitem_linenumber: Uniform(1,7)->int
+  lineitem_quantity: Uniform(1,50) -> double
+  lineitem_extendedprice: Normal(1000,500) -> double
+  lineitem_discount: Uniform(0,10); Div(100) -> double
+  lineitem_tax: Uniform(0,8); Div(100) -> double
+  lineitem_returnflag: WeightedStrings('A:1;N:1;R:1')
+  lineitem_linestatus: WeightedStrings('O:1;F:1')
+  lineitem_shipdate: StartingEpochMillis('2020-01-01 00:00:00'); AddHashRange(0L,126230400000L); StringDateWrapper("yyyy-MM-dd")
+  lineitem_commitdate: StartingEpochMillis('2020-01-01 00:00:00'); AddHashRange(0L,126230400000L); StringDateWrapper("yyyy-MM-dd")
+  lineitem_receiptdate: StartingEpochMillis('2020-01-01 00:00:00'); AddHashRange(0L,126230400000L); StringDateWrapper("yyyy-MM-dd")
+  lineitem_shipinstruct: WeightedStrings('DELIVER IN PERSON:1;COLLECT COD:1;NONE:1;TAKE BACK RETURN:1')
+  lineitem_shipmode: WeightedStrings('TRUCK:1;MAIL:1;SHIP:1;AIR:1;REG AIR:1;RAIL:1;FOB:1')
+  lineitem_comment: HashedFileExtractToString('data/lorem_ipsum_full.txt',20,60)
+
+  # Part data
+  partkey: Uniform(1,200000)->long
+  part_name: Template('Part-{}', Identity())
+  part_mfgr: WeightedStrings('Manufacturer#1:1;Manufacturer#2:1;Manufacturer#3:1;Manufacturer#4:1;Manufacturer#5:1')
+  part_brand: Template('Brand-{}', Identity())
+  part_type: WeightedStrings('STANDARD:1;SMALL:1;MEDIUM:1;LARGE:1;ECONOMY:1;PROMO:1')
+  part_size: Uniform(1,50)->int
+  part_container: WeightedStrings('SM CASE:1;SM BOX:1;SM PACK:1;SM PKG:1;MED BAG:1;MED BOX:1;MED PKG:1;MED PACK:1;LG CASE:1;LG BOX:1;LG PACK:1;LG PKG:1')
+  part_retailprice: Normal(500,200) -> double
+  part_comment: HashedFileExtractToString('data/lorem_ipsum_full.txt',15,50)
+
+  # Supplier data
+  suppkey: Uniform(1,10000)->long
+  supplier_name: Template('Supplier-{}', Identity())
+  supplier_address: HashedFileExtractToString('data/lorem_ipsum_full.txt',25,40)
+  supplier_phone: Template('+1-800-{}', Identity())
+  supplier_acctbal: Normal(2500,1000) -> double
+  supplier_comment: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,100)
+
+  # Nation and region (simplified)
+  nationkey: Uniform(0,24)->long
+  nation_name: WeightedStrings('ALGERIA:1;ARGENTINA:1;BRAZIL:1;CANADA:1;EGYPT:1;ETHIOPIA:1;FRANCE:1;GERMANY:1;INDIA:1;INDONESIA:1;IRAN:1;IRAQ:1;JAPAN:1;JORDAN:1;KENYA:1;MOROCCO:1;MOZAMBIQUE:1;PERU:1;CHINA:1;ROMANIA:1;SAUDI ARABIA:1;VIETNAM:1;RUSSIA:1;UNITED KINGDOM:1;UNITED STATES:1')
+  nation_comment: ToString()
+  regionkey: Uniform(0,4)->long
+  region_name: WeightedStrings('AFRICA:1;AMERICA:1;ASIA:1;EUROPE:1;MIDDLE EAST:1')
+  region_comment: ToString()
+
+  # Random selectors for queries
+  random_customer: Uniform(1,150000)->long
+  random_part: Uniform(1,200000)->long
+  random_supplier: Uniform(1,10000)->long
+
+blocks:
+  drop:
+    ops:
+      drop_lineitem:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).lineitem
+      drop_orders:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).orders
+      drop_customer:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).customer
+      drop_part:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).part
+      drop_supplier:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).supplier
+      drop_nation:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).nation
+      drop_region:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).region
+
+  schema:
+    ops:
+      create_schema:
+        ddl: |
+          CREATE SCHEMA IF NOT EXISTS TEMPLATE(schemaname)
+      create_nation:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).nation (
+            n_nationkey varchar(50),
+            n_name varchar(50),
+            n_regionkey varchar(50),
+            n_comment varchar(200)
+          )
+      create_region:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).region (
+            r_regionkey varchar(50),
+            r_name varchar(50),
+            r_comment varchar(200)
+          )
+      create_customer:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).customer (
+            c_custkey varchar(50),
+            c_name varchar(50),
+            c_address varchar(100),
+            c_nationkey varchar(50),
+            c_phone varchar(50),
+            c_acctbal varchar(50),
+            c_mktsegment varchar(50),
+            c_comment varchar(200)
+          )
+      create_supplier:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).supplier (
+            s_suppkey varchar(50),
+            s_name varchar(50),
+            s_address varchar(100),
+            s_nationkey varchar(50),
+            s_phone varchar(50),
+            s_acctbal varchar(50),
+            s_comment varchar(200)
+          )
+      create_part:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).part (
+            p_partkey varchar(50),
+            p_name varchar(100),
+            p_mfgr varchar(50),
+            p_brand varchar(50),
+            p_type varchar(50),
+            p_size varchar(50),
+            p_container varchar(50),
+            p_retailprice varchar(50),
+            p_comment varchar(200)
+          )
+      create_orders:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).orders (
+            o_orderkey varchar(50),
+            o_custkey varchar(50),
+            o_orderstatus varchar(50),
+            o_totalprice varchar(50),
+            o_orderdate varchar(50),
+            o_orderpriority varchar(50),
+            o_clerk varchar(50),
+            o_shippriority varchar(50),
+            o_comment varchar(200)
+          )
+      create_lineitem:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).lineitem (
+            l_orderkey varchar(50),
+            l_partkey varchar(50),
+            l_suppkey varchar(50),
+            l_linenumber varchar(50),
+            l_quantity varchar(50),
+            l_extendedprice varchar(50),
+            l_discount varchar(50),
+            l_tax varchar(50),
+            l_returnflag varchar(50),
+            l_linestatus varchar(50),
+            l_shipdate varchar(50),
+            l_commitdate varchar(50),
+            l_receiptdate varchar(50),
+            l_shipinstruct varchar(50),
+            l_shipmode varchar(50),
+            l_comment varchar(200)
+          )
+
+  rampup:
+    params:
+      prepared: true
+    ops:
+      insert_region:
+        ratio: 1
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).region VALUES (?,?,?)
+        prep_stmt_val_arr: |
+          {regionkey},{region_name},{region_comment}
+      insert_nation:
+        ratio: 5
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).nation VALUES (?,?,?,?)
+        prep_stmt_val_arr: |
+          {nationkey},{nation_name},{regionkey},{nation_comment}
+      insert_customer:
+        ratio: 30
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).customer VALUES (?,?,?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {custkey},{customer_name},{customer_address},{nationkey},{customer_phone},{customer_acctbal},{customer_mktsegment},{customer_comment}
+      insert_supplier:
+        ratio: 2
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).supplier VALUES (?,?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {suppkey},{supplier_name},{supplier_address},{nationkey},{supplier_phone},{supplier_acctbal},{supplier_comment}
+      insert_part:
+        ratio: 40
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).part VALUES (?,?,?,?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {partkey},{part_name},{part_mfgr},{part_brand},{part_type},{part_size},{part_container},{part_retailprice},{part_comment}
+      insert_orders:
+        ratio: 300
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).orders VALUES (?,?,?,?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {orderkey},{order_custkey},{order_status},{order_totalprice},{order_date},{order_priority},{order_clerk},{order_shippriority},{order_comment}
+      insert_lineitem:
+        ratio: 1200
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).lineitem VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {lineitem_orderkey},{lineitem_partkey},{lineitem_suppkey},{lineitem_linenumber},{lineitem_quantity},{lineitem_extendedprice},{lineitem_discount},{lineitem_tax},{lineitem_returnflag},{lineitem_linestatus},{lineitem_shipdate},{lineitem_commitdate},{lineitem_receiptdate},{lineitem_shipinstruct},{lineitem_shipmode},{lineitem_comment}
+
+  analytics:
+    params:
+      prepared: true
+    ops:
+      # TPC-H Query 1: Pricing Summary Report
+      query_pricing_summary:
+        ratio: 10
+        dmlread: |
+          SELECT
+            l_returnflag,
+            l_linestatus,
+            sum(l_quantity) as sum_qty,
+            sum(l_extendedprice) as sum_base_price,
+            avg(l_quantity) as avg_qty,
+            avg(l_extendedprice) as avg_price,
+            avg(l_discount) as avg_disc,
+            count(*) as count_order
+          FROM TEMPLATE(schemaname).lineitem
+          WHERE l_shipdate <= date '1998-09-01'
+          GROUP BY l_returnflag, l_linestatus
+          ORDER BY l_returnflag, l_linestatus
+
+      # Customer Analysis Query
+      query_customer_analysis:
+        ratio: 8
+        dmlread: |
+          SELECT
+            c.c_mktsegment,
+            count(*) as customer_count,
+            avg(c.c_acctbal) as avg_balance
+          FROM TEMPLATE(schemaname).customer c
+          GROUP BY c.c_mktsegment
+          ORDER BY customer_count desc
+
+      # Part Analysis Query
+      query_part_analysis:
+        ratio: 6
+        dmlread: |
+          SELECT
+            p.p_type,
+            p.p_size,
+            count(*) as part_count,
+            avg(p.p_retailprice) as avg_price
+          FROM TEMPLATE(schemaname).part p
+          GROUP BY p.p_type, p.p_size
+          ORDER BY part_count desc
+          LIMIT 20
+
+      # Order Trends Query
+      query_order_trends:
+        ratio: 5
+        dmlread: |
+          SELECT
+            extract(year from o.o_orderdate) as order_year,
+            extract(month from o.o_orderdate) as order_month,
+            count(*) as order_count,
+            sum(o.o_totalprice) as total_revenue
+          FROM TEMPLATE(schemaname).orders o
+          WHERE o.o_orderdate >= date '2020-01-01'
+          GROUP BY extract(year from o.o_orderdate), extract(month from o.o_orderdate)
+          ORDER BY order_year, order_month
+
+      # Simple join query
+      query_customer_orders:
+        ratio: 4
+        dmlread: |
+          SELECT
+            c.c_name,
+            count(o.o_orderkey) as order_count,
+            sum(o.o_totalprice) as total_spent
+          FROM TEMPLATE(schemaname).customer c
+          LEFT JOIN TEMPLATE(schemaname).orders o ON c.c_custkey = o.o_custkey
+          WHERE c.c_custkey = {random_customer}
+          GROUP BY c.c_name
