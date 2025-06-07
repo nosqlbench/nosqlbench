@@ -33,11 +33,11 @@ bindings:
   # Customer data - using proper NoSQLBench syntax
   custkey: Uniform(1,150000)->long
   customer_name: Template('Customer-{}', Identity())
-  customer_address: HashedFileExtractToString('data/lorem_ipsum_full.txt',25,40)
+  customer_address: Template('Address-{}', Identity())
   customer_phone: Template('+1-555-{}', Identity())
   customer_acctbal: Normal(5000,1000) -> double
   customer_mktsegment: WeightedStrings('BUILDING:1;AUTOMOBILE:1;MACHINERY:1;HOUSEHOLD:1;FURNITURE:1')
-  customer_comment: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,100)
+  customer_comment: Template('Comment-{}', Identity())
 
   # Order data
   orderkey: Uniform(1,1500000)->long
@@ -48,7 +48,7 @@ bindings:
   order_priority: WeightedStrings('1-URGENT:1;2-HIGH:1;3-MEDIUM:1;4-NOT SPECIFIED:1;5-LOW:1')
   order_clerk: Template('Clerk-{}', Identity())
   order_shippriority: Uniform(0,1)->int
-  order_comment: HashedFileExtractToString('data/lorem_ipsum_full.txt',30,80)
+  order_comment: Template('OrderComment-{}', Identity())
 
   # Lineitem data
   lineitem_orderkey: Uniform(1,1500000)->long
@@ -66,7 +66,7 @@ bindings:
   lineitem_receiptdate: StartingEpochMillis('2020-01-01 00:00:00'); AddHashRange(0L,126230400000L); StringDateWrapper("yyyy-MM-dd")
   lineitem_shipinstruct: WeightedStrings('DELIVER IN PERSON:1;COLLECT COD:1;NONE:1;TAKE BACK RETURN:1')
   lineitem_shipmode: WeightedStrings('TRUCK:1;MAIL:1;SHIP:1;AIR:1;REG AIR:1;RAIL:1;FOB:1')
-  lineitem_comment: HashedFileExtractToString('data/lorem_ipsum_full.txt',20,60)
+  lineitem_comment: Template('LineitemComment-{}', Identity())
 
   # Part data
   partkey: Uniform(1,200000)->long
@@ -77,15 +77,15 @@ bindings:
   part_size: Uniform(1,50)->int
   part_container: WeightedStrings('SM CASE:1;SM BOX:1;SM PACK:1;SM PKG:1;MED BAG:1;MED BOX:1;MED PKG:1;MED PACK:1;LG CASE:1;LG BOX:1;LG PACK:1;LG PKG:1')
   part_retailprice: Normal(500,200) -> double
-  part_comment: HashedFileExtractToString('data/lorem_ipsum_full.txt',15,50)
+  part_comment: Template('PartComment-{}', Identity())
 
   # Supplier data
   suppkey: Uniform(1,10000)->long
   supplier_name: Template('Supplier-{}', Identity())
-  supplier_address: HashedFileExtractToString('data/lorem_ipsum_full.txt',25,40)
+  supplier_address: Template('SupplierAddress-{}', Identity())
   supplier_phone: Template('+1-800-{}', Identity())
   supplier_acctbal: Normal(2500,1000) -> double
-  supplier_comment: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,100)
+  supplier_comment: Template('SupplierComment-{}', Identity())
 
   # Nation and region (simplified)
   nationkey: Uniform(0,24)->long

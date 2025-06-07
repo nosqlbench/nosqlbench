@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.function.LongFunction;
 import java.util.stream.IntStream;
 
 public class JDBCDMLWriteOp extends JDBCDMLOp {
@@ -42,6 +43,16 @@ public class JDBCDMLWriteOp extends JDBCDMLOp {
         this.ddlStmtBatchNum = ddlStmtBatchNum;
     }
 
+    public JDBCDMLWriteOp(JDBCSpace jdbcSpace,
+                          boolean isReadStmt,
+                          String pStmtSqlStr,
+                          List<Object> pStmtValList,
+                          int ddlStmtBatchNum,
+                          LongFunction<PreparedStatement> cachedPreparedStmtFunc) {
+        super(jdbcSpace, isReadStmt, pStmtSqlStr, pStmtValList, cachedPreparedStmtFunc);
+        this.ddlStmtBatchNum = ddlStmtBatchNum;
+    }
+
     @Override
     public Object apply(long value) {
         int trackingCnt = threadBatchTrackingCntTL.get();
@@ -50,7 +61,7 @@ public class JDBCDMLWriteOp extends JDBCDMLOp {
 
         try {
             assert (isPreparedStmt);
-            PreparedStatement stmt = (PreparedStatement) super.createDMLStatement();
+            PreparedStatement stmt = (PreparedStatement) super.createDMLStatement(value);
             stmt = super.setPrepStmtValues(stmt);
 
             // No batch

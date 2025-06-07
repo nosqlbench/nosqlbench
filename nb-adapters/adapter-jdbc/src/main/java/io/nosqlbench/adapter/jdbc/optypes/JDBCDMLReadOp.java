@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.LongFunction;
 
 public class JDBCDMLReadOp extends JDBCDMLOp {
     private static final Logger LOGGER = LogManager.getLogger(JDBCDMLReadOp.class);
@@ -39,10 +40,20 @@ public class JDBCDMLReadOp extends JDBCDMLOp {
         this.verifierKeyName = verifierKeyName;
     }
 
+    public JDBCDMLReadOp(JDBCSpace jdbcSpace,
+                         boolean isReadStmt,
+                         String pStmtSqlStr,
+                         List<Object> pStmtValList,
+                         String verifierKeyName,
+                         LongFunction<PreparedStatement> cachedPreparedStmtFunc) {
+        super(jdbcSpace, isReadStmt, pStmtSqlStr, pStmtValList, cachedPreparedStmtFunc);
+        this.verifierKeyName = verifierKeyName;
+    }
+
     @Override
     public Object apply(long value) {
         try  {
-            Statement stmt = super.createDMLStatement();
+            Statement stmt = super.createDMLStatement(value);
             if (isPreparedStmt) {
                 stmt = setPrepStmtValues((PreparedStatement) stmt);
             }
