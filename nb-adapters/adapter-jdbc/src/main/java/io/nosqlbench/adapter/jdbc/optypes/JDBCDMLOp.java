@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.function.LongFunction;
 
 public abstract class JDBCDMLOp extends JDBCOp {
     private static final Logger LOGGER = LogManager.getLogger(JDBCDMLOp.class);
@@ -35,6 +36,7 @@ public abstract class JDBCDMLOp extends JDBCOp {
     protected final boolean isPreparedStmt;
     protected final String pStmtSqlStr;
     protected final List<Object> pStmtValList;
+    protected final LongFunction<PreparedStatement> cachedPreparedStmtFunc;
 
     protected static ThreadLocal<Statement> jdbcStmtTL = ThreadLocal.withInitial(() -> null);
 
@@ -42,12 +44,21 @@ public abstract class JDBCDMLOp extends JDBCOp {
                      boolean isReadStmt,
                      String pStmtSqlStr,
                      List<Object> pStmtValList) {
+        this(jdbcSpace, isReadStmt, pStmtSqlStr, pStmtValList, null);
+    }
+
+    public JDBCDMLOp(JDBCSpace jdbcSpace,
+                     boolean isReadStmt,
+                     String pStmtSqlStr,
+                     List<Object> pStmtValList,
+                     LongFunction<PreparedStatement> cachedPreparedStmtFunc) {
         super(jdbcSpace);
         assert(StringUtils.isNotBlank(pStmtSqlStr));
 
         this.isReadStmt = isReadStmt;
         this.pStmtSqlStr = pStmtSqlStr;
         this.pStmtValList = pStmtValList;
+        this.cachedPreparedStmtFunc = cachedPreparedStmtFunc;
         this.isPreparedStmt = StringUtils.contains(pStmtSqlStr, "?");
 
         // NOTE:
@@ -115,6 +126,20 @@ public abstract class JDBCDMLOp extends JDBCOp {
     }
 
     protected Statement createDMLStatement() throws SQLException {
+        return createDMLStatement(0L); // Default cycle value for backward compatibility
+    }
+
+    protected Statement createDMLStatement(long cycle) throws SQLException {
+        // If we have a cached prepared statement function, use it
+        if (cachedPreparedStmtFunc != null && isPreparedStmt) {
+            PreparedStatement stmt = cachedPreparedStmtFunc.apply(cycle);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Using cached prepared statement -- cycle: {}, stmt: {}", cycle, stmt);
+            }
+            return stmt;
+        }
+
+        // Fall back to the old ThreadLocal approach for backward compatibility
         Statement stmt = jdbcStmtTL.get();
         if (stmt == null) {
             if (isPreparedStmt)

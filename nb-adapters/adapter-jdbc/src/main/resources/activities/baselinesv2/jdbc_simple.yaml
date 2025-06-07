@@ -1,0 +1,190 @@
+# jdbc_simple_corrected.yaml - Simple corrected workload for PrestoDB
+# Usage examples:
+# jdbc_simple_corrected.yaml default.drop dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+# jdbc_simple_corrected.yaml default.schema dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+# jdbc_simple_corrected.yaml default.rampup dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+# jdbc_simple_corrected.yaml default.main dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+
+
+description: |
+  Simple corrected workload for PrestoDB demonstrating proper NoSQLBench binding syntax.
+  This workload shows correct patterns for bindings without cross-references.
+  Template variable values:
+  TEMPLATE(schemaname,simple_fresh)
+  TEMPLATE(connections,5)
+  TEMPLATE(rampup_cycles,5000)
+  TEMPLATE(main_cycles,1000)
+
+scenarios:
+  default:
+    drop: >-
+      run driver=jdbc tags==block:drop cycles==UNDEF
+      url=TEMPLATE(dburl)
+    schema: >-
+      run driver=jdbc tags==block:schema cycles==UNDEF
+      url=TEMPLATE(dburl)
+    rampup: >-
+      run driver=jdbc tags==block:rampup
+      cycles===TEMPLATE(rampup_cycles) url=TEMPLATE(dburl) num_conn=TEMPLATE(connections)
+    main: >-
+      run driver=jdbc tags==block:main
+      cycles===TEMPLATE(main_cycles) url=TEMPLATE(dburl) num_conn=TEMPLATE(connections)
+
+bindings:
+  # Simple bindings without cross-references
+  id: Uniform(1,100000)->long
+  name: Template('Name-{}', Identity())
+  email: Template('user{}@example.com', Identity())
+  age: Uniform(18,80)->int
+  salary: Normal(50000,15000) -> double
+  department: WeightedStrings('Engineering:30;Sales:25;Marketing:20;HR:15;Finance:10')
+  hire_date: StartingEpochMillis('2020-01-01 00:00:00'); AddHashRange(0L,126230400000L); StringDateWrapper("yyyy-MM-dd")
+  active: WeightedStrings('true:90;false:10')
+
+  # Product data
+  product_id: Uniform(1,10000)->long
+  product_name: Template('Product-{}', Identity())
+  category: WeightedStrings('Electronics:25;Clothing:20;Books:15;Home:15;Sports:10;Other:15')
+  price: Normal(100,50); Max(1.0) -> double
+  in_stock: WeightedStrings('true:85;false:15')
+
+  # Order data
+  order_id: Uniform(1,500000)->long
+  customer_id: Uniform(1,100000)->long
+  order_product_id: Uniform(1,10000)->long
+  quantity: Uniform(1,10)->int
+  order_date: StartingEpochMillis('2023-01-01 00:00:00'); AddHashRange(0L,31536000000L); StringDateWrapper("yyyy-MM-dd")
+  status: WeightedStrings('pending:20;shipped:30;delivered:40;cancelled:10')
+
+  # Calculated fields using Save/Load pattern (if needed)
+  base_price: Normal(100,50); Save('base_price') -> double
+  discount_rate: Uniform(0,20); Div(100); Save('discount_rate') -> double
+  discounted_price: Load('base_price'); Load('discount_rate'); Expr('base_price * (1 - discount_rate)') -> double
+
+  # Random selectors for queries - matching actual data ranges
+  random_id: Uniform(1,1000)->long
+  random_product: Uniform(1,1000)->long
+  random_category: WeightedStrings('Electronics:1;Clothing:1;Books:1;Home:1;Sports:1')
+
+blocks:
+  drop:
+    ops:
+      drop_orders:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).orders
+      drop_products:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).products
+      drop_employees:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).employees
+
+  schema:
+    ops:
+      create_schema:
+        ddl: |
+          CREATE SCHEMA IF NOT EXISTS TEMPLATE(schemaname)
+
+      create_employees:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).employees (
+            id varchar(50),
+            name varchar(100),
+            email varchar(100),
+            age varchar(50),
+            salary varchar(50),
+            department varchar(50),
+            hire_date varchar(50),
+            active varchar(50)
+          )
+
+      create_products:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).products (
+            product_id varchar(50),
+            product_name varchar(100),
+            category varchar(50),
+            price varchar(50),
+            in_stock varchar(50)
+          )
+
+      create_orders:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).orders (
+            order_id varchar(50),
+            customer_id varchar(50),
+            product_id varchar(50),
+            quantity varchar(50),
+            order_date varchar(50),
+            status varchar(50)
+          )
+
+  rampup:
+    params:
+      prepared: true
+    ops:
+      insert_employees:
+        ratio: 10
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).employees VALUES (?,?,?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {id},{name},{email},{age},{salary},{department},{hire_date},{active}
+
+      insert_products:
+        ratio: 20
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).products VALUES (?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {product_id},{product_name},{category},{price},{in_stock}
+
+      insert_orders:
+        ratio: 100
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).orders VALUES (?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {order_id},{customer_id},{order_product_id},{quantity},{order_date},{status}
+
+  main:
+    ops:
+      # All queries use aggregations that always return at least one row
+      query_employee_count:
+        ratio: 20
+        dmlread: |
+          SELECT 'total' as metric, count(*) as value FROM TEMPLATE(schemaname).employees
+        verifier-key: "metric"
+
+      query_employees_by_department:
+        ratio: 15
+        dmlread: |
+          SELECT department, count(*) as emp_count FROM TEMPLATE(schemaname).employees GROUP BY department ORDER BY emp_count desc
+        verifier-key: "department"
+
+      query_product_count:
+        ratio: 15
+        dmlread: |
+          SELECT 'total' as metric, count(*) as value FROM TEMPLATE(schemaname).products
+        verifier-key: "metric"
+
+      query_products_by_category:
+        ratio: 15
+        dmlread: |
+          SELECT category, count(*) as product_count FROM TEMPLATE(schemaname).products GROUP BY category ORDER BY product_count desc
+        verifier-key: "category"
+
+      query_order_count:
+        ratio: 15
+        dmlread: |
+          SELECT 'total' as metric, count(*) as value FROM TEMPLATE(schemaname).orders
+        verifier-key: "metric"
+
+      query_order_summary:
+        ratio: 10
+        dmlread: |
+          SELECT status, count(*) as order_count FROM TEMPLATE(schemaname).orders GROUP BY status ORDER BY order_count desc
+        verifier-key: "status"
+
+      query_sales_by_category:
+        ratio: 10
+        dmlread: |
+          SELECT p.category, count(*) as sales_count FROM TEMPLATE(schemaname).orders o JOIN TEMPLATE(schemaname).products p ON o.product_id = p.product_id GROUP BY p.category ORDER BY sales_count desc
+        verifier-key: "category"
