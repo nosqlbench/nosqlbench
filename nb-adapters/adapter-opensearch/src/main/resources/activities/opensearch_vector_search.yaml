@@ -95,13 +95,15 @@ blocks:
         vector: "{query_vector}"
         field: vector_field
         size: TEMPLATE(k,10)
-      
+        schema: java.lang.Object
+
       knn_search_with_filter:
         knn_search: TEMPLATE(index_name,vector_index)
         k: TEMPLATE(k,10)
         vector: "{query_vector}"
         field: vector_field
         size: TEMPLATE(k,10)
+        schema: java.lang.Object
         filter:
           field: "category"
           comparator: "eq"
