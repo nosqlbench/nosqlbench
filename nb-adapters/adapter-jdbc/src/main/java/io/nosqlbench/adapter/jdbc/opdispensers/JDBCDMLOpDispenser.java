@@ -38,6 +38,7 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
     private final boolean isReadStatement;
     private final LongFunction<String> pStmtSqlStrFunc;
     private final LongFunction<List<Object>> pStmtValListFunc;
+    private final LongFunction<PreparedStatement> cachedPreparedStmtFunc;
 
     public JDBCDMLOpDispenser(DriverAdapter<JDBCOp, JDBCSpace> adapter,
         LongFunction<JDBCSpace> spaceF,
@@ -94,11 +95,92 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
             List<Object> pStmtValListObj = new ArrayList<>();
             if (pStmtValListStrFuncOpt.isPresent()) {
                 String pStmtValListStr = pStmtValListStrFuncOpt.get().apply(l);
-                String[] valList = pStmtValListStr.split(",\\s*(?![^\\(\\[]*[\\]\\)])");
-                pStmtValListObj.addAll(Arrays.asList(valList));
+                List<String> valList = parseParameterValues(pStmtValListStr);
+                pStmtValListObj.addAll(valList);
             }
             return pStmtValListObj;
         };
+
+        if (isPreparedStatement) {
+            int refKey = op.getRefKey();
+            cachedPreparedStmtFunc = (long l) -> {
+                JDBCSpace space = spaceF.apply(l);
+                String sql = pStmtSqlStrFunc.apply(l);
+                return space.getOrCreatePreparedStatement(refKey,
+                    (long key) -> {
+                        try {
+                            return space.getConnection(
+                                new JDBCSpace.ConnectionCacheKey("jdbc-conn-" + (key % space.getMaxNumConn())),
+                                () -> {
+                                    try {
+                                        if (space.useHikariCP()) {
+                                            return space.getHikariDataSource().getConnection();
+                                        } else {
+                                            throw new RuntimeException("Non-HikariCP connections not supported in cached prepared statements");
+                                        }
+                                    } catch (Exception e) {
+                                        throw new RuntimeException("Failed to get connection for prepared statement", e);
+                                    }
+                                }
+                            ).prepareStatement(sql);
+                        } catch (Exception e) {
+                            throw new RuntimeException("Failed to prepare statement: " + sql, e);
+                        }
+                    }
+                );
+            };
+        } else {
+            cachedPreparedStmtFunc = null;
+        }
+    }
+
+    /**
+     * Parse parameter values from a comma-separated string, handling commas within the values themselves.
+     * This method splits on commas but respects the structure of NoSQLBench binding expressions.
+     */
+    private List<String> parseParameterValues(String paramStr) {
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        int braceDepth = 0;
+        boolean inQuotes = false;
+        char quoteChar = 0;
+
+        for (int i = 0; i < paramStr.length(); i++) {
+            char c = paramStr.charAt(i);
+
+            if (!inQuotes) {
+                if (c == '"' || c == '\'') {
+                    inQuotes = true;
+                    quoteChar = c;
+                    current.append(c);
+                } else if (c == '{') {
+                    braceDepth++;
+                    current.append(c);
+                } else if (c == '}') {
+                    braceDepth--;
+                    current.append(c);
+                } else if (c == ',' && braceDepth == 0) {
+                    // Found a parameter separator
+                    result.add(current.toString().trim());
+                    current.setLength(0);
+                } else {
+                    current.append(c);
+                }
+            } else {
+                current.append(c);
+                if (c == quoteChar) {
+                    inQuotes = false;
+                    quoteChar = 0;
+                }
+            }
+        }
+
+        // Add the last parameter
+        if (current.length() > 0) {
+            result.add(current.toString().trim());
+        }
+
+        return result;
     }
 
     @Override
@@ -110,7 +192,8 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
                 true,
                 pStmtSqlStrFunc.apply(cycle),
                 pStmtValListFunc.apply(cycle),
-                this.verifierKeyName);
+                this.verifierKeyName,
+                cachedPreparedStmtFunc);
         }
         else {
             int ddlStmtBatchNum = space.getDmlBatchNum();
@@ -119,7 +202,8 @@ public class JDBCDMLOpDispenser extends JDBCBaseOpDispenser {
                 false,
                 pStmtSqlStrFunc.apply(cycle),
                 pStmtValListFunc.apply(cycle),
-                ddlStmtBatchNum);
+                ddlStmtBatchNum,
+                cachedPreparedStmtFunc);
         }
     }
 }

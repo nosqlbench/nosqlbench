@@ -13,21 +13,21 @@ description: |
   TEMPLATE(rampupsize,1000)
   TEMPLATE(connections,10)
   TEMPLATE(select_cycles,1000)
-  
+
 
 scenarios:
   default:
     drop: >-
-     run driver=jdbc tags==block:drop threads===1 cycles==UNDEF 
+     run driver=jdbc tags==block:drop threads===1 cycles==UNDEF
      url=TEMPLATE(dburl)
     schema: >-
-      run driver=jdbc tags==block:schema threads===1 cycles==UNDEF 
+      run driver=jdbc tags==block:schema threads===1 cycles==UNDEF
       url=TEMPLATE(dburl)
     rampup: >-
-      run driver=jdbc tags==block:rampup threads=10  
+      run driver=jdbc tags==block:rampup threads=10
       cycles===TEMPLATE(rampupsize) url=TEMPLATE(dburl) num_conn=TEMPLATE(connections)
     select: >-
-      run driver=jdbc tags==block:select threads=10  
+      run driver=jdbc tags==block:select threads=10
       cycles===TEMPLATE(select_cycles) url=TEMPLATE(dburl) num_conn=TEMPLATE(connections)
 
 bindings:
@@ -73,7 +73,9 @@ blocks:
     ops:
       select:
         dmlread: |
-          SELECT * FROM TEMPLATE(schemaname).TEMPLATE(tablename) where key={rw_key}
+          SELECT * FROM TEMPLATE(schemaname).TEMPLATE(tablename) where key=?
+        prep_stmt_val_arr: |
+          {rw_key}
 
 #  main:
 ##    params:
