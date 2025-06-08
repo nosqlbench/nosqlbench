@@ -1,0 +1,360 @@
+# jdbc_ecommerce.yaml - E-commerce workload for PrestoDB
+# Usage examples:
+# jdbc_ecommerce.yaml default.drop dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+# jdbc_ecommerce.yaml default.schema dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+# jdbc_ecommerce.yaml default.rampup dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+# jdbc_ecommerce.yaml default.transactions dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+# jdbc_ecommerce.yaml default.analytics dburl=jdbc:presto://hostaddr:8080/memory?user=testuser use_hikaricp=true
+
+description: |
+  E-commerce workload for PrestoDB with proper NoSQLBench binding syntax.
+  This workload simulates online retail operations with realistic data patterns.
+  Template variable values:
+  TEMPLATE(schemaname,ecommerce)
+  TEMPLATE(connections,5)
+  TEMPLATE(rampup_cycles,25000)
+  TEMPLATE(transaction_cycles,10000)
+
+scenarios:
+  default:
+    drop: >-
+      run driver=jdbc tags==block:drop cycles==UNDEF
+      url=TEMPLATE(dburl)
+    schema: >-
+      run driver=jdbc tags==block:schema cycles==UNDEF
+      url=TEMPLATE(dburl)
+    rampup: >-
+      run driver=jdbc tags==block:rampup threads=TEMPLATE(threads,1)
+      cycles===TEMPLATE(rampup_cycles) url=TEMPLATE(dburl) num_conn=TEMPLATE(connections,5) errors=count
+    transactions: >-
+      run driver=jdbc tags==block:transactions threads=TEMPLATE(threads,1)
+      cycles===TEMPLATE(transaction_cycles) url=TEMPLATE(dburl) num_conn=TEMPLATE(connections,5) errors=count
+    analytics: >-
+      run driver=jdbc tags==block:analytics threads=TEMPLATE(threads,1)
+      cycles===TEMPLATE(transaction_cycles) url=TEMPLATE(dburl) num_conn=TEMPLATE(connections,5) errors=count
+
+bindings:
+  # Customer data - using same pattern as working examples
+  customer_id: Uniform(1,50000)->long
+  customer_email: Template('customer{}@example.com', Identity())
+  customer_first_name: FirstNames()
+  customer_last_name: LastNames()
+  customer_phone: Template('+1-555-{}', Identity())
+  customer_birth_date: StartingEpochMillis('1950-01-01 00:00:00'); AddHashRange(0L,1577836800000L); StringDateWrapper("yyyy-MM-dd")
+  registration_date: StartingEpochMillis('2020-01-01 00:00:00'); AddHashRange(0L,126230400000L); StringDateWrapper("yyyy-MM-dd")
+  customer_status: WeightedStrings('active:80;inactive:15;suspended:4;deleted:1')
+  customer_tier: WeightedStrings('bronze:50;silver:30;gold:15;platinum:5')
+
+  # Address data
+  address_id: Uniform(1,100000)->long
+  street_address: Template('{} Main Street', Identity())
+  city: WeightedStrings('New York:10;Los Angeles:8;Chicago:6;Houston:5;Phoenix:4;Philadelphia:4;San Antonio:3;San Diego:3;Dallas:3;San Jose:3;Austin:2;Jacksonville:2;Fort Worth:2;Columbus:2;Charlotte:2;Seattle:2;Denver:2;Boston:2;Nashville:1;Baltimore:1')
+  state: WeightedStrings('CA:12;TX:9;FL:6;NY:6;PA:4;IL:4;OH:4;GA:3;NC:3;MI:3;NJ:3;VA:2;WA:2;AZ:2;MA:2;TN:2;IN:2;MO:2;MD:2;WI:2')
+  zip_code: Uniform(10000,99999)->int
+  address_type: WeightedStrings('billing:40;shipping:40;both:20')
+
+  # Product data
+  product_id: Uniform(1,10000)->long
+  product_name: Template('Product-{}', Identity())
+  product_description: Template('Description for product {}', Identity())
+  category_id: Uniform(1,100)->long
+  category_name: WeightedStrings('Electronics:15;Clothing:12;Home & Garden:10;Sports:8;Books:7;Toys:6;Health:5;Beauty:5;Automotive:4;Jewelry:3;Food:3;Pet Supplies:3;Office:2;Baby:2;Industrial:2;Other:13')
+  brand: WeightedStrings('BrandA:20;BrandB:15;BrandC:12;BrandD:10;BrandE:8;BrandF:6;BrandG:5;BrandH:4;BrandI:3;BrandJ:3;Generic:14')
+  price: Normal(50.0,30.0); Max(1.0) -> double
+  weight_kg: Normal(1.0,0.5); Max(0.1) -> double
+  stock_quantity: Uniform(0,1000)->int
+  reorder_level: Uniform(10,100)->int
+  product_status: WeightedStrings('active:85;discontinued:10;out_of_stock:4;pending:1')
+
+  # Order data
+  order_id: Uniform(1,1000000)->long
+  order_customer_id: Uniform(1,50000)->long
+  order_date: StartingEpochMillis('2023-01-01 00:00:00'); AddHashRange(0L,31536000000L); StringDateWrapper("yyyy-MM-dd")
+  order_status: WeightedStrings('pending:20;processing:15;shipped:25;delivered:30;cancelled:8;returned:2')
+  payment_method: WeightedStrings('credit_card:60;debit_card:20;paypal:10;apple_pay:5;google_pay:3;bank_transfer:2')
+  shipping_method: WeightedStrings('standard:50;express:25;overnight:10;pickup:10;free:5')
+  order_total: Normal(100.0,50.0); Max(5.0) -> double
+
+  # Order item data
+  order_item_id: Uniform(1,5000000)->long
+  order_item_order_id: Uniform(1,1000000)->long
+  order_item_product_id: Uniform(1,10000)->long
+  quantity: Uniform(1,5)->int
+  unit_price: Normal(25.0,15.0); Max(1.0) -> double
+
+  # Review data
+  review_id: Uniform(1,500000)->long
+  review_customer_id: Uniform(1,50000)->long
+  review_product_id: Uniform(1,10000)->long
+  rating: Uniform(1,5)->int
+  review_title: Template('Review title {}', Identity())
+  review_text: Template('This is a review text for product {}', Identity())
+  review_date: StartingEpochMillis('2023-01-01 00:00:00'); AddHashRange(0L,31536000000L); StringDateWrapper("yyyy-MM-dd")
+  verified_purchase: WeightedStrings('true:80;false:20')
+  helpful_votes: Uniform(0,100)->int
+
+  # Random selectors for queries - as strings to match varchar columns
+  random_customer: Uniform(1,50000)->long
+  random_product: Uniform(1,10000)->long
+  random_category: WeightedStrings('Electronics:1;Clothing:1;Home & Garden:1;Sports:1;Books:1')
+
+blocks:
+  drop:
+    ops:
+      drop_order_items:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).order_items
+      drop_orders:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).orders
+      drop_reviews:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).reviews
+      drop_products:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).products
+      drop_categories:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).categories
+      drop_addresses:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).addresses
+      drop_customers:
+        ddl: |
+          DROP TABLE IF EXISTS TEMPLATE(schemaname).customers
+
+  schema:
+    ops:
+      create_schema:
+        ddl: |
+          CREATE SCHEMA IF NOT EXISTS TEMPLATE(schemaname)
+
+      create_customers:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).customers (
+            customer_id varchar(50),
+            email varchar(100),
+            first_name varchar(50),
+            last_name varchar(50),
+            phone varchar(50),
+            birth_date varchar(50),
+            registration_date varchar(50),
+            status varchar(50),
+            tier varchar(50)
+          )
+
+      create_addresses:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).addresses (
+            address_id varchar(50),
+            customer_id varchar(50),
+            address_type varchar(50),
+            street_address varchar(100),
+            city varchar(50),
+            state varchar(50),
+            zip_code varchar(50),
+            country varchar(50)
+          )
+
+      create_categories:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).categories (
+            category_id varchar(50),
+            category_name varchar(50),
+            description varchar(200)
+          )
+
+      create_products:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).products (
+            product_id varchar(50),
+            product_name varchar(100),
+            description varchar(500),
+            category_id varchar(50),
+            brand varchar(50),
+            price varchar(50),
+            weight_kg varchar(50),
+            status varchar(50)
+          )
+
+      create_orders:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).orders (
+            order_id varchar(50),
+            customer_id varchar(50),
+            order_date varchar(50),
+            status varchar(50),
+            payment_method varchar(50),
+            shipping_method varchar(50),
+            total_amount varchar(50)
+          )
+
+      create_order_items:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).order_items (
+            order_item_id varchar(50),
+            order_id varchar(50),
+            product_id varchar(50),
+            quantity varchar(50),
+            unit_price varchar(50)
+          )
+
+      create_reviews:
+        ddl: |
+          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).reviews (
+            review_id varchar(50),
+            customer_id varchar(50),
+            product_id varchar(50),
+            rating varchar(50),
+            title varchar(100),
+            review_text varchar(1000),
+            review_date varchar(50),
+            verified_purchase varchar(50),
+            helpful_votes varchar(50)
+          )
+
+  rampup:
+    params:
+      prepared: true
+    ops:
+      insert_customers:
+        ratio: 10
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).customers VALUES (?,?,?,?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {customer_id},{customer_email},{customer_first_name},{customer_last_name},{customer_phone},{customer_birth_date},{registration_date},{customer_status},{customer_tier}
+
+      insert_addresses:
+        ratio: 15
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).addresses VALUES (?,?,?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {address_id},{customer_id},{address_type},{street_address},{city},{state},{zip_code},'USA'
+
+      insert_categories:
+        ratio: 1
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).categories VALUES (?,?,?)
+        prep_stmt_val_arr: |
+          {category_id},{category_name},'Category description'
+
+      insert_products:
+        ratio: 20
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).products VALUES (?,?,?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {product_id},{product_name},{product_description},{category_id},{brand},{price},{weight_kg},{product_status}
+
+      insert_orders:
+        ratio: 100
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).orders VALUES (?,?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {order_id},{order_customer_id},{order_date},{order_status},{payment_method},{shipping_method},{order_total}
+
+      insert_order_items:
+        ratio: 300
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).order_items VALUES (?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {order_item_id},{order_item_order_id},{order_item_product_id},{quantity},{unit_price}
+
+      insert_reviews:
+        ratio: 50
+        dmlwrite: |
+          INSERT INTO TEMPLATE(schemaname).reviews VALUES (?,?,?,?,?,?,?,?,?)
+        prep_stmt_val_arr: |
+          {review_id},{review_customer_id},{review_product_id},{rating},{review_title},{review_text},{review_date},{verified_purchase},{helpful_votes}
+
+  transactions:
+    params:
+      prepared: true
+    ops:
+      # Customer lookup
+      query_customer_lookup:
+        ratio: 20
+        dmlread: |
+          SELECT customer_id, email, first_name, last_name, phone, birth_date, registration_date, status, tier
+          FROM TEMPLATE(schemaname).customers
+          WHERE customer_id = ?
+        prep_stmt_val_arr: |
+          {random_customer}
+        verifier-key: "customer_id"
+
+      # Product search
+      query_product_search:
+        ratio: 25
+        dmlread: |
+          SELECT product_id, product_name, description, category_id, brand, price, weight_kg, status
+          FROM TEMPLATE(schemaname).products
+          WHERE status = 'active'
+          ORDER BY price
+          LIMIT 20
+        verifier-key: "product_id"
+
+      # Product details
+      query_product_details:
+        ratio: 15
+        dmlread: |
+          SELECT product_id, product_name, description, category_id, brand, price, weight_kg, status
+          FROM TEMPLATE(schemaname).products
+          WHERE product_id = ?
+        prep_stmt_val_arr: |
+          {random_product}
+        verifier-key: "product_id"
+
+      # Order history
+      query_order_history:
+        ratio: 10
+        dmlread: |
+          SELECT order_id, customer_id, order_date, status, payment_method, shipping_method, total_amount
+          FROM TEMPLATE(schemaname).orders
+          WHERE customer_id = ?
+          ORDER BY order_date desc
+          LIMIT 10
+        prep_stmt_val_arr: |
+          {random_customer}
+        verifier-key: "order_id"
+
+      # Popular products
+      query_popular_products:
+        ratio: 8
+        dmlread: |
+          SELECT product_id, product_name, price, status
+          FROM TEMPLATE(schemaname).products
+          WHERE status = 'active'
+          ORDER BY product_name
+          LIMIT 10
+        verifier-key: "product_id"
+
+  analytics:
+    params:
+      prepared: true
+    ops:
+      # Sales analytics
+      query_sales_analytics:
+        ratio: 15
+        dmlread: |
+          SELECT 'total' as metric, count(*) as order_count
+          FROM TEMPLATE(schemaname).orders
+        verifier-key: "metric"
+
+      # Customer analytics
+      query_customer_analytics:
+        ratio: 10
+        dmlread: |
+          SELECT tier, count(*) as customer_count
+          FROM TEMPLATE(schemaname).customers
+          GROUP BY tier
+          ORDER BY customer_count desc
+        verifier-key: "tier"
+
+      # Product performance
+      query_product_performance:
+        ratio: 8
+        dmlread: |
+          SELECT status, count(*) as product_count
+          FROM TEMPLATE(schemaname).products
+          GROUP BY status
+          ORDER BY product_count desc
+        verifier-key: "status"
