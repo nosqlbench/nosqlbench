@@ -233,12 +233,12 @@
         </profile>
 
         <profile>
-            <id>adapter-aws-opensearch-module</id>
+            <id>adapter-opensearch-module</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
-                <module>adapter-aws-opensearch</module>
+                <module>adapter-opensearch</module>
             </modules>
         </profile>
 

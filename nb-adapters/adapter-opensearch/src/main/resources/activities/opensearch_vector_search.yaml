@@ -1,0 +1,113 @@
+description: |
+  OpenSearch vector search workload for testing KNN capabilities.
+  This workload demonstrates:
+  - Creating a vector index with KNN configuration
+  - Indexing documents with vector embeddings
+  - Performing KNN vector searches
+  - Testing different vector similarity metrics
+
+  Required parameters:
+    region - AWS region (e.g., us-east-1)
+    host - OpenSearch endpoint hostname (without https://)
+
+  Optional parameters:
+    profile - AWS profile name for authentication
+    svctype - Service type: 'es' for OpenSearch domains, 'aoss' for Serverless
+
+  Template variables:
+    TEMPLATE(index_name,vector_index) - Name of the vector index
+    TEMPLATE(dimensions,128) - Vector dimensions
+    TEMPLATE(doc_count,10000) - Number of documents to index
+    TEMPLATE(search_count,1000) - Number of search operations
+    TEMPLATE(k,10) - Number of nearest neighbors to return
+    TEMPLATE(ef_construction,512) - HNSW ef_construction parameter
+    TEMPLATE(m,16) - HNSW m parameter
+    TEMPLATE(rampup_threads,20) - Threads for indexing phase
+    TEMPLATE(search_threads,10) - Threads for search phase
+
+params:
+
+scenarios:
+  default:
+    pre_cleanup: run driver=opensearch tags==block:"cleanup.*" threads=1 cycles=1 errors=count,warn
+    schema: run driver=opensearch tags==block:"schema.*" threads=1 cycles=1
+    rampup: run driver=opensearch tags==block:"rampup.*" cycles=TEMPLATE(doc_count,10000) threads=TEMPLATE(rampup_threads,20)
+    search: run driver=opensearch tags==block:"search.*" cycles=TEMPLATE(search_count,1000) threads=TEMPLATE(search_threads,10)
+    cleanup: run driver=opensearch tags==block:"cleanup.*" threads=1 cycles=1
+
+  schema_only:
+    schema: run driver=opensearch tags==block:"schema.*" threads=1 cycles=1
+
+  index_only:
+    rampup: run driver=opensearch tags==block:"rampup.*" cycles=TEMPLATE(doc_count,10000) threads=TEMPLATE(rampup_threads,20)
+
+  search_only:
+    search: run driver=opensearch tags==block:"search.*" cycles=TEMPLATE(search_count,1000) threads=TEMPLATE(search_threads,10)
+
+bindings:
+  doc_id: ToString()
+  # Generate random vectors for testing
+  vector: HashedFloatVectors(TEMPLATE(dimensions,128),0.0,1.0); ToFloatList()
+  # Generate query vectors
+  query_vector: HashedFloatVectors(TEMPLATE(dimensions,128),0.0,1.0); ToFloatList()
+  category: WeightedStrings('A:3,B:2,C:1')
+  timestamp: StartingEpochMillis('2024-01-01')
+
+blocks:
+  schema:
+    ops:
+      create_vector_index:
+        create_index: TEMPLATE(index_name,vector_index)
+        dimensions: TEMPLATE(dimensions,128)
+        ef_construction: TEMPLATE(ef_construction,512)
+        m: TEMPLATE(m,16)
+        mappings:
+          properties:
+            vector_field:
+              type: knn_vector
+              dimension: TEMPLATE(dimensions,128)
+              method:
+                name: hnsw
+                space_type: l2
+                engine: faiss
+                parameters:
+                  ef_construction: TEMPLATE(ef_construction,512)
+                  m: TEMPLATE(m,16)
+            category:
+              type: keyword
+            timestamp:
+              type: date
+
+  rampup:
+    ops:
+      index_vector:
+        index: TEMPLATE(index_name,vector_index)
+        document:
+          vector_field: "{vector}"
+          category: "{category}"
+          timestamp: "{timestamp}"
+
+  search:
+    ops:
+      knn_search:
+        knn_search: TEMPLATE(index_name,vector_index)
+        k: TEMPLATE(k,10)
+        vector: "{query_vector}"
+        field: vector_field
+        size: TEMPLATE(k,10)
+      
+      knn_search_with_filter:
+        knn_search: TEMPLATE(index_name,vector_index)
+        k: TEMPLATE(k,10)
+        vector: "{query_vector}"
+        field: vector_field
+        size: TEMPLATE(k,10)
+        filter:
+          field: "category"
+          comparator: "eq"
+          value: "{category}"
+
+  cleanup:
+    ops:
+      delete_vector_index:
+        delete_index: TEMPLATE(index_name,vector_index)

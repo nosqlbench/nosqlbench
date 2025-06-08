@@ -1,0 +1,49 @@
+description: |
+  Getting started with OpenSearch adapter - minimal example.
+  This is the simplest possible workload to test OpenSearch connectivity.
+
+  Required parameters:
+    region - AWS region (e.g., us-east-1)
+    host - OpenSearch endpoint hostname (without https://)
+
+  Optional parameters:
+    profile - AWS profile name for authentication
+    svctype - Service type: 'es' for OpenSearch domains, 'aoss' for Serverless
+    getinfo - Whether to call cluster info on connect (true/false)
+
+params:
+
+scenarios:
+  default:
+    test: run driver=opensearch tags==block:"test.*" threads=1 cycles=4
+
+bindings:
+  doc_id: ToString()
+  message: TEMPLATE("Hello from NoSQLBench document {}", Identity())
+
+blocks:
+  test:
+    ops:
+      create_test_index:
+        create_index: test_index
+        mappings:
+          properties:
+            message:
+              type: text
+            timestamp:
+              type: date
+
+      index_test_doc:
+        index: test_index
+        document:
+          message: "{message}"
+          timestamp: "2024-01-01T00:00:00Z"
+
+      search_test:
+        search: test_index
+        query:
+          match_all: {}
+        size: 10
+
+      delete_test_index:
+        delete_index: test_index
