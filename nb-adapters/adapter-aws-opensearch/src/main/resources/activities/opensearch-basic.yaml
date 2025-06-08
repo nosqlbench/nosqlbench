@@ -1,0 +1,94 @@
+description: |
+  Basic OpenSearch CRUD operations workload.
+  This workload demonstrates:
+  - Creating an index
+  - Indexing documents
+  - Searching documents
+  - Deleting documents
+  - Deleting an index
+  
+  Template variables:
+    TEMPLATE(index_name,test_index) - Name of the index to create
+    TEMPLATE(doc_count,1000) - Number of documents to index
+    TEMPLATE(search_count,100) - Number of search operations
+
+params:
+  driver: opensearch
+  region: TEMPLATE(region,us-east-1)
+  host: TEMPLATE(host,search-test.us-east-1.es.amazonaws.com)
+  svctype: TEMPLATE(svctype,es)
+
+scenarios:
+  default:
+    schema: run driver=opensearch tags==block:"schema.*" threads=1 cycles=1
+    rampup: run driver=opensearch tags==block:"rampup.*" cycles=TEMPLATE(doc_count,1000) threads=TEMPLATE(rampup_threads,10)
+    search: run driver=opensearch tags==block:"search.*" cycles=TEMPLATE(search_count,100) threads=TEMPLATE(search_threads,5)
+    cleanup: run driver=opensearch tags==block:"cleanup.*" threads=1 cycles=1
+
+  schema_only:
+    schema: run driver=opensearch tags==block:"schema.*" threads=1 cycles=1
+
+  index_only:
+    rampup: run driver=opensearch tags==block:"rampup.*" cycles=TEMPLATE(doc_count,1000) threads=TEMPLATE(rampup_threads,10)
+
+  search_only:
+    search: run driver=opensearch tags==block:"search.*" cycles=TEMPLATE(search_count,100) threads=TEMPLATE(search_threads,5)
+
+bindings:
+  doc_id: ToString()
+  title: Template("Document {{doc_id}}")
+  content: LoremIpsum(50,100)
+  category: WeightedStrings('tech:3,science:2,business:1')
+  timestamp: Epoch()
+  price: Uniform(10.0,1000.0); Format("%.2f")
+  search_term: WeightedStrings('document:5,test:3,sample:2')
+
+blocks:
+  schema:
+    ops:
+      create_index:
+        create_index: TEMPLATE(index_name,test_index)
+        mappings:
+          properties:
+            title:
+              type: text
+            content:
+              type: text
+            category:
+              type: keyword
+            timestamp:
+              type: date
+            price:
+              type: float
+
+  rampup:
+    ops:
+      index_doc:
+        index: TEMPLATE(index_name,test_index)
+        document:
+          title: "{title}"
+          content: "{content}"
+          category: "{category}"
+          timestamp: "{timestamp}"
+          price: "{price}"
+
+  search:
+    ops:
+      search_by_term:
+        knn_search: TEMPLATE(index_name,test_index)
+        query:
+          match:
+            content: "{search_term}"
+        size: 10
+      
+      search_by_category:
+        knn_search: TEMPLATE(index_name,test_index)
+        query:
+          term:
+            category: "{category}"
+        size: 5
+
+  cleanup:
+    ops:
+      delete_index:
+        delete_index: TEMPLATE(index_name,test_index)

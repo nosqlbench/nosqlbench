@@ -1,0 +1,115 @@
+description: |
+  OpenSearch bulk operations workload for high-throughput indexing.
+  This workload demonstrates:
+  - Creating an index optimized for bulk operations
+  - Bulk indexing large numbers of documents
+  - Testing bulk operation performance
+  - Configurable batch sizes
+  
+  Template variables:
+    TEMPLATE(index_name,bulk_index) - Name of the index
+    TEMPLATE(doc_count,100000) - Total number of documents to index
+    TEMPLATE(bulk_size,1000) - Number of documents per bulk request
+    TEMPLATE(refresh_interval,30s) - Index refresh interval
+
+params:
+  driver: opensearch
+  region: TEMPLATE(region,us-east-1)
+  host: TEMPLATE(host,search-test.us-east-1.es.amazonaws.com)
+  svctype: TEMPLATE(svctype,es)
+
+scenarios:
+  default:
+    schema: run driver=opensearch tags==block:"schema.*" threads=1 cycles=1
+    bulk_load: run driver=opensearch tags==block:"bulk.*" cycles=TEMPLATE(doc_count,100000) threads=TEMPLATE(bulk_threads,5)
+    verify: run driver=opensearch tags==block:"verify.*" cycles=100 threads=2
+    cleanup: run driver=opensearch tags==block:"cleanup.*" threads=1 cycles=1
+
+  schema_only:
+    schema: run driver=opensearch tags==block:"schema.*" threads=1 cycles=1
+
+  bulk_only:
+    bulk_load: run driver=opensearch tags==block:"bulk.*" cycles=TEMPLATE(doc_count,100000) threads=TEMPLATE(bulk_threads,5)
+
+  verify_only:
+    verify: run driver=opensearch tags==block:"verify.*" cycles=100 threads=2
+
+bindings:
+  doc_id: ToString()
+  user_id: Uniform(1,10000); ToString()
+  product_id: Uniform(1,1000); ToString()
+  event_type: WeightedStrings('view:5,click:3,purchase:1,add_to_cart:2')
+  timestamp: Epoch()
+  session_id: UUID()
+  price: Uniform(5.0,500.0); Format("%.2f")
+  quantity: Uniform(1,5)
+  category: WeightedStrings('electronics:3,clothing:2,books:2,home:1,sports:1')
+  search_user: Uniform(1,10000); ToString()
+
+blocks:
+  schema:
+    ops:
+      create_bulk_index:
+        create_index: TEMPLATE(index_name,bulk_index)
+        settings:
+          number_of_shards: 3
+          number_of_replicas: 1
+          refresh_interval: TEMPLATE(refresh_interval,30s)
+          index:
+            max_result_window: 50000
+        mappings:
+          properties:
+            user_id:
+              type: keyword
+            product_id:
+              type: keyword
+            event_type:
+              type: keyword
+            timestamp:
+              type: date
+            session_id:
+              type: keyword
+            price:
+              type: float
+            quantity:
+              type: integer
+            category:
+              type: keyword
+
+  bulk:
+    ops:
+      bulk_index:
+        bulk: TEMPLATE(index_name,bulk_index)
+        op_template:
+          repeat: TEMPLATE(bulk_size,1000)
+          index: TEMPLATE(index_name,bulk_index)
+          document:
+            user_id: "{user_id}"
+            product_id: "{product_id}"
+            event_type: "{event_type}"
+            timestamp: "{timestamp}"
+            session_id: "{session_id}"
+            price: "{price}"
+            quantity: "{quantity}"
+            category: "{category}"
+
+  verify:
+    ops:
+      search_by_user:
+        knn_search: TEMPLATE(index_name,bulk_index)
+        query:
+          term:
+            user_id: "{search_user}"
+        size: 20
+      
+      search_by_category:
+        knn_search: TEMPLATE(index_name,bulk_index)
+        query:
+          term:
+            category: "{category}"
+        size: 10
+
+  cleanup:
+    ops:
+      delete_bulk_index:
+        delete_index: TEMPLATE(index_name,bulk_index)

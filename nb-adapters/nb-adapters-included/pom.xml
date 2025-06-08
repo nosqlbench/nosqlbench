@@ -310,6 +310,20 @@
         </profile>
 
         <profile>
+            <id>adapter-aws-opensearch-include</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>adapter-aws-opensearch</artifactId>
+                    <version>${revision}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
             <id>adapter-example-include</id>
             <activation>
                 <activeByDefault>true</activeByDefault>

@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.opensearch.dispensers;
 
 import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSBaseOp;
 import io.nosqlbench.adapter.opensearch.ops.AOSKnnSearchOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.opensearch.client.json.JsonData;
@@ -45,7 +46,7 @@ public class AOSKnnSearchOpDispenser extends AOSBaseOpDispenser {
     }
 
     @Override
-    public LongFunction<AOSKnnSearchOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<? extends AOSBaseOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<KnnQuery.Builder> knnfunc = l -> new KnnQuery.Builder();
         knnfunc = op.enhanceFuncOptionally(knnfunc, "k",Integer.class, KnnQuery.Builder::k);
         knnfunc = op.enhanceFuncOptionally(knnfunc, "vector", List.class, this::convertVector);

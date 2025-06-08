@@ -19,8 +19,8 @@ package io.nosqlbench.adapter.opensearch.dispensers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSBaseOp;
 import io.nosqlbench.adapter.opensearch.ops.AOSBulkOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch.core.BulkRequest;
@@ -35,7 +35,7 @@ public class AOSBulkOpDispenser extends AOSBaseOpDispenser {
     }
 
     @Override
-    public LongFunction<? extends Op> createOpFunc(
+    public LongFunction<? extends AOSBaseOp> createOpFunc(
         LongFunction<OpenSearchClient> clientF,
         ParsedOp op,
         LongFunction<String> targetF

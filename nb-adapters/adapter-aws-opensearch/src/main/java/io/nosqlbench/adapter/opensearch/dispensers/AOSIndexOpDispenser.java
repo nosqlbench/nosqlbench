@@ -17,10 +17,11 @@
 package io.nosqlbench.adapter.opensearch.dispensers;
 
 import com.google.gson.Gson;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSBaseOp;
 import io.nosqlbench.adapter.opensearch.ops.AOSIndexOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,7 +41,7 @@ public class AOSIndexOpDispenser extends AOSBaseOpDispenser {
     }
 
     @Override
-    public LongFunction<? extends Op> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<? extends AOSBaseOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<IndexRequest> irqF = AOSRequests.index(op);
         return l -> new AOSIndexOp(clientF.apply(l), irqF.apply(l));
     }

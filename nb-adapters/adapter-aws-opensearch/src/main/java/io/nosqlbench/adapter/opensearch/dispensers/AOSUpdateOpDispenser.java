@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.opensearch.dispensers;
 
 import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSBaseOp;
 import io.nosqlbench.adapter.opensearch.ops.AOSUpdateOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.opensearch.client.opensearch.OpenSearchClient;
@@ -31,7 +32,7 @@ public class AOSUpdateOpDispenser extends AOSBaseOpDispenser {
     }
 
     @Override
-    public LongFunction<AOSUpdateOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<? extends AOSBaseOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         LongFunction<UpdateRequest.Builder> bfunc = l -> new UpdateRequest.Builder().index(targetF.apply(l));
         // TODO: add details here
         return l -> new AOSUpdateOp(clientF.apply(l),bfunc.apply(l).build(),Object.class);

@@ -18,33 +18,33 @@ package io.nosqlbench.adapter.opensearch.dispensers;
 
 import io.nosqlbench.adapter.opensearch.AOSAdapter;
 import io.nosqlbench.adapter.opensearch.AOSSpace;
+import io.nosqlbench.adapter.opensearch.ops.AOSBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.opensearch.client.opensearch.OpenSearchClient;
 
 import java.util.function.LongFunction;
 
-public abstract class AOSBaseOpDispenser extends BaseOpDispenser<Op,Object> {
+public abstract class AOSBaseOpDispenser extends BaseOpDispenser<AOSBaseOp, AOSSpace> {
     protected final LongFunction<AOSSpace> spaceF;
     protected final LongFunction<OpenSearchClient> clientF;
-    private final LongFunction<? extends Op> opF;
+    private final LongFunction<? extends AOSBaseOp> opF;
 
     protected AOSBaseOpDispenser(AOSAdapter adapter, ParsedOp op, LongFunction<String> targetF) {
-        super(adapter, op);
-        this.spaceF =adapter.getSpaceFunc(op);
+        super(adapter, op, adapter.getSpaceFunc(op));
+        this.spaceF = adapter.getSpaceFunc(op);
         this.clientF = (long l) -> this.spaceF.apply(l).getClient();
         this.opF = createOpFunc(clientF, op, targetF);
     }
 
-    public abstract LongFunction<? extends Op> createOpFunc(
+    public abstract LongFunction<? extends AOSBaseOp> createOpFunc(
         LongFunction<OpenSearchClient> clientF,
         ParsedOp op,
         LongFunction<String> targetF
     );
 
     @Override
-    public Op getOp(long value) {
+    public AOSBaseOp getOp(long value) {
         return opF.apply(value);
     }
 }

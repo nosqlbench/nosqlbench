@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.opensearch.dispensers;
 
 import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSBaseOp;
 import io.nosqlbench.adapter.opensearch.ops.AOSDeleteIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.opensearch.client.opensearch.OpenSearchClient;
@@ -31,7 +32,7 @@ public class AOSDeleteIndexOpDispenser extends AOSBaseOpDispenser {
     }
 
     @Override
-    public LongFunction<AOSDeleteIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
+    public LongFunction<? extends AOSBaseOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op, LongFunction<String> targetF) {
         DeleteIndexRequest.Builder eb = new DeleteIndexRequest.Builder();
         LongFunction<DeleteIndexRequest.Builder> f =
             l -> new DeleteIndexRequest.Builder().index(targetF.apply(l));

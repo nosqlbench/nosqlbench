@@ -17,13 +17,16 @@
 package io.nosqlbench.adapter.opensearch;
 
 import io.nosqlbench.adapter.opensearch.dispensers.*;
+import io.nosqlbench.adapter.opensearch.ops.AOSBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
+import io.nosqlbench.nb.api.components.core.NBComponent;
 
-public class AOSOpMapper implements OpMapper<Op> {
+import java.util.function.LongFunction;
+
+public class AOSOpMapper implements OpMapper<AOSBaseOp, AOSSpace> {
     private final AOSAdapter adapter;
 
     public AOSOpMapper(AOSAdapter AOSAdapter) {
@@ -31,7 +34,7 @@ public class AOSOpMapper implements OpMapper<Op> {
     }
 
     @Override
-    public OpDispenser<? extends Op> apply(ParsedOp op) {
+    public OpDispenser<? extends AOSBaseOp> apply(NBComponent adapterC, ParsedOp op, LongFunction<AOSSpace> spaceF) {
         TypeAndTarget<AOSOpTypes, String> typeAndTarget =
             op.getTypeAndTarget(AOSOpTypes.class, String.class, "verb", "index");
         return switch (typeAndTarget.enumId) {

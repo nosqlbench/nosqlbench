@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.opensearch;
 
 
+import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
@@ -32,13 +33,22 @@ import software.amazon.awssdk.regions.Region;
 
 import java.io.IOException;
 
-public class AOSSpace implements AutoCloseable {
+public class AOSSpace implements Space {
 
     private final NBConfiguration cfg;
+    private final String spaceName;
+    private final AOSAdapter adapter;
     protected OpenSearchClient client;
 
-    public AOSSpace(NBConfiguration cfg) {
+    public AOSSpace(AOSAdapter adapter, long spaceId, NBConfiguration cfg) {
+        this.adapter = adapter;
         this.cfg = cfg;
+        this.spaceName = String.valueOf(spaceId);
+    }
+
+    @Override
+    public String getName() {
+        return spaceName;
     }
 
     public synchronized OpenSearchClient getClient() {

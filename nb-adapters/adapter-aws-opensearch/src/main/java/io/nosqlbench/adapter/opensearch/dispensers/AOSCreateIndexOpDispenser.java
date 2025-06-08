@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.opensearch.dispensers;
 
 import io.nosqlbench.adapter.opensearch.AOSAdapter;
+import io.nosqlbench.adapter.opensearch.ops.AOSBaseOp;
 import io.nosqlbench.adapter.opensearch.ops.AOSCreateIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.opensearch.client.json.JsonData;
@@ -43,7 +44,7 @@ public class AOSCreateIndexOpDispenser extends AOSBaseOpDispenser {
     }
 
     @Override
-    public LongFunction<AOSCreateIndexOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op,
+    public LongFunction<? extends AOSBaseOp> createOpFunc(LongFunction<OpenSearchClient> clientF, ParsedOp op,
                                                        LongFunction<String> targetF) {
         CreateIndexRequest.Builder eb = new CreateIndexRequest.Builder();
         LongFunction<CreateIndexRequest.Builder> bfunc =

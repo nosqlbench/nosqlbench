@@ -16,31 +16,31 @@
 
 package io.nosqlbench.adapter.opensearch;
 
+import io.nosqlbench.adapter.opensearch.ops.AOSBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.Op;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.labels.NBLabels;
 
-import java.util.function.Function;
+import java.util.function.LongFunction;
 
 @Service(value= DriverAdapter.class, selector = "opensearch")
-public class AOSAdapter extends BaseDriverAdapter<Op, AOSSpace> {
+public class AOSAdapter extends BaseDriverAdapter<AOSBaseOp, AOSSpace> {
     public AOSAdapter(NBComponent parentComponent, NBLabels labels) {
         super(parentComponent, labels);
     }
 
     @Override
-    public Function<String, ? extends AOSSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (String spaceName) -> new AOSSpace(cfg);
+    public LongFunction<AOSSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (long spaceId) -> new AOSSpace(this, spaceId, cfg);
     }
 
     @Override
-    public OpMapper<Op> getOpMapper() {
+    public OpMapper<AOSBaseOp, AOSSpace> getOpMapper() {
         return new AOSOpMapper(this);
     }
 
