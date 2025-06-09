@@ -186,7 +186,7 @@
         <profile>
             <id>adapter-pulsar-include</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
                 <dependency>
@@ -304,6 +304,20 @@
                 <dependency>
                     <groupId>io.nosqlbench</groupId>
                     <artifactId>adapter-gcp-spanner</artifactId>
+                    <version>${revision}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>adapter-opensearch-include</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.nosqlbench</groupId>
+                    <artifactId>adapter-opensearch</artifactId>
                     <version>${revision}</version>
                 </dependency>
             </dependencies>
