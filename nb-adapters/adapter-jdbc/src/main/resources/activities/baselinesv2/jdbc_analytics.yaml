@@ -31,34 +31,34 @@ scenarios:
 
 bindings:
   # Customer data - using proper NoSQLBench syntax
-  custkey: Uniform(1,150000)->long
+  custkey: Uniform(1,150000); ToString()
   customer_name: Template('Customer-{}', Identity())
   customer_address: Template('Address-{}', Identity())
   customer_phone: Template('+1-555-{}', Identity())
-  customer_acctbal: Normal(5000,1000) -> double
+  customer_acctbal: Normal(5000,1000); ToString()
   customer_mktsegment: WeightedStrings('BUILDING:1;AUTOMOBILE:1;MACHINERY:1;HOUSEHOLD:1;FURNITURE:1')
   customer_comment: Template('Comment-{}', Identity())
 
   # Order data
-  orderkey: Uniform(1,1500000)->long
-  order_custkey: Uniform(1,150000)->long
+  orderkey: Uniform(1,1500000); ToString()
+  order_custkey: Uniform(1,150000); ToString()
   order_status: WeightedStrings('O:1;F:1;P:1')
-  order_totalprice: Normal(10000,5000) -> double
+  order_totalprice: Normal(10000,5000); ToString()
   order_date: StartingEpochMillis('2020-01-01 00:00:00'); AddHashRange(0L,126230400000L); StringDateWrapper("yyyy-MM-dd")
   order_priority: WeightedStrings('1-URGENT:1;2-HIGH:1;3-MEDIUM:1;4-NOT SPECIFIED:1;5-LOW:1')
   order_clerk: Template('Clerk-{}', Identity())
-  order_shippriority: Uniform(0,1)->int
+  order_shippriority: Uniform(0,1); ToString()
   order_comment: Template('OrderComment-{}', Identity())
 
   # Lineitem data
-  lineitem_orderkey: Uniform(1,1500000)->long
-  lineitem_partkey: Uniform(1,200000)->long
-  lineitem_suppkey: Uniform(1,10000)->long
-  lineitem_linenumber: Uniform(1,7)->int
-  lineitem_quantity: Uniform(1,50) -> double
-  lineitem_extendedprice: Normal(1000,500) -> double
-  lineitem_discount: Uniform(0,10); Div(100) -> double
-  lineitem_tax: Uniform(0,8); Div(100) -> double
+  lineitem_orderkey: Uniform(1,1500000); ToString()
+  lineitem_partkey: Uniform(1,200000); ToString()
+  lineitem_suppkey: Uniform(1,10000); ToString()
+  lineitem_linenumber: Uniform(1,7); ToString()
+  lineitem_quantity: Uniform(1,50); ToString()
+  lineitem_extendedprice: Normal(1000,500); ToString()
+  lineitem_discount: Uniform(0,10); Div(100); ToString()
+  lineitem_tax: Uniform(0,8); Div(100); ToString()
   lineitem_returnflag: WeightedStrings('A:1;N:1;R:1')
   lineitem_linestatus: WeightedStrings('O:1;F:1')
   lineitem_shipdate: StartingEpochMillis('2020-01-01 00:00:00'); AddHashRange(0L,126230400000L); StringDateWrapper("yyyy-MM-dd")
@@ -69,61 +69,61 @@ bindings:
   lineitem_comment: Template('LineitemComment-{}', Identity())
 
   # Part data
-  partkey: Uniform(1,200000)->long
+  partkey: Uniform(1,200000); ToString()
   part_name: Template('Part-{}', Identity())
   part_mfgr: WeightedStrings('Manufacturer#1:1;Manufacturer#2:1;Manufacturer#3:1;Manufacturer#4:1;Manufacturer#5:1')
   part_brand: Template('Brand-{}', Identity())
   part_type: WeightedStrings('STANDARD:1;SMALL:1;MEDIUM:1;LARGE:1;ECONOMY:1;PROMO:1')
-  part_size: Uniform(1,50)->int
+  part_size: Uniform(1,50); ToString()
   part_container: WeightedStrings('SM CASE:1;SM BOX:1;SM PACK:1;SM PKG:1;MED BAG:1;MED BOX:1;MED PKG:1;MED PACK:1;LG CASE:1;LG BOX:1;LG PACK:1;LG PKG:1')
-  part_retailprice: Normal(500,200) -> double
+  part_retailprice: Normal(500,200); ToString()
   part_comment: Template('PartComment-{}', Identity())
 
   # Supplier data
-  suppkey: Uniform(1,10000)->long
+  suppkey: Uniform(1,10000); ToString()
   supplier_name: Template('Supplier-{}', Identity())
   supplier_address: Template('SupplierAddress-{}', Identity())
   supplier_phone: Template('+1-800-{}', Identity())
-  supplier_acctbal: Normal(2500,1000) -> double
+  supplier_acctbal: Normal(2500,1000); ToString()
   supplier_comment: Template('SupplierComment-{}', Identity())
 
   # Nation and region (simplified)
-  nationkey: Uniform(0,24)->long
+  nationkey: Uniform(0,24); ToString()
   nation_name: WeightedStrings('ALGERIA:1;ARGENTINA:1;BRAZIL:1;CANADA:1;EGYPT:1;ETHIOPIA:1;FRANCE:1;GERMANY:1;INDIA:1;INDONESIA:1;IRAN:1;IRAQ:1;JAPAN:1;JORDAN:1;KENYA:1;MOROCCO:1;MOZAMBIQUE:1;PERU:1;CHINA:1;ROMANIA:1;SAUDI ARABIA:1;VIETNAM:1;RUSSIA:1;UNITED KINGDOM:1;UNITED STATES:1')
-  nation_comment: ToString()
-  regionkey: Uniform(0,4)->long
+  nation_comment: FixedValue('Nation comment')
+  regionkey: Uniform(0,4); ToString()
   region_name: WeightedStrings('AFRICA:1;AMERICA:1;ASIA:1;EUROPE:1;MIDDLE EAST:1')
-  region_comment: ToString()
+  region_comment: FixedValue('Region comment')
 
   # Random selectors for queries
-  random_customer: Uniform(1,150000)->long
-  random_part: Uniform(1,200000)->long
-  random_supplier: Uniform(1,10000)->long
+  random_customer: Uniform(1,150000); ToString()
+  random_part: Uniform(1,200000); ToString()
+  random_supplier: Uniform(1,10000); ToString()
 
 blocks:
   drop:
     ops:
       drop_lineitem:
         ddl: |
-          DROP TABLE IF EXISTS TEMPLATE(schemaname).lineitem
+          DROP TABLE TEMPLATE(schemaname).lineitem
       drop_orders:
         ddl: |
-          DROP TABLE IF EXISTS TEMPLATE(schemaname).orders
+          DROP TABLE TEMPLATE(schemaname).orders
       drop_customer:
         ddl: |
-          DROP TABLE IF EXISTS TEMPLATE(schemaname).customer
+          DROP TABLE TEMPLATE(schemaname).customer
       drop_part:
         ddl: |
-          DROP TABLE IF EXISTS TEMPLATE(schemaname).part
+          DROP TABLE TEMPLATE(schemaname).part
       drop_supplier:
         ddl: |
-          DROP TABLE IF EXISTS TEMPLATE(schemaname).supplier
+          DROP TABLE TEMPLATE(schemaname).supplier
       drop_nation:
         ddl: |
-          DROP TABLE IF EXISTS TEMPLATE(schemaname).nation
+          DROP TABLE TEMPLATE(schemaname).nation
       drop_region:
         ddl: |
-          DROP TABLE IF EXISTS TEMPLATE(schemaname).region
+          DROP TABLE TEMPLATE(schemaname).region
 
   schema:
     ops:
@@ -132,7 +132,7 @@ blocks:
           CREATE SCHEMA IF NOT EXISTS TEMPLATE(schemaname)
       create_nation:
         ddl: |
-          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).nation (
+          CREATE TABLE TEMPLATE(schemaname).nation (
             n_nationkey varchar(50),
             n_name varchar(50),
             n_regionkey varchar(50),
@@ -140,14 +140,14 @@ blocks:
           )
       create_region:
         ddl: |
-          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).region (
+          CREATE TABLE TEMPLATE(schemaname).region (
             r_regionkey varchar(50),
             r_name varchar(50),
             r_comment varchar(200)
           )
       create_customer:
         ddl: |
-          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).customer (
+          CREATE TABLE TEMPLATE(schemaname).customer (
             c_custkey varchar(50),
             c_name varchar(50),
             c_address varchar(100),
@@ -159,7 +159,7 @@ blocks:
           )
       create_supplier:
         ddl: |
-          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).supplier (
+          CREATE TABLE TEMPLATE(schemaname).supplier (
             s_suppkey varchar(50),
             s_name varchar(50),
             s_address varchar(100),
@@ -170,7 +170,7 @@ blocks:
           )
       create_part:
         ddl: |
-          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).part (
+          CREATE TABLE TEMPLATE(schemaname).part (
             p_partkey varchar(50),
             p_name varchar(100),
             p_mfgr varchar(50),
@@ -183,7 +183,7 @@ blocks:
           )
       create_orders:
         ddl: |
-          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).orders (
+          CREATE TABLE TEMPLATE(schemaname).orders (
             o_orderkey varchar(50),
             o_custkey varchar(50),
             o_orderstatus varchar(50),
@@ -196,7 +196,7 @@ blocks:
           )
       create_lineitem:
         ddl: |
-          CREATE TABLE IF NOT EXISTS TEMPLATE(schemaname).lineitem (
+          CREATE TABLE TEMPLATE(schemaname).lineitem (
             l_orderkey varchar(50),
             l_partkey varchar(50),
             l_suppkey varchar(50),
@@ -273,16 +273,17 @@ blocks:
           SELECT
             l_returnflag,
             l_linestatus,
-            sum(l_quantity) as sum_qty,
-            sum(l_extendedprice) as sum_base_price,
-            avg(l_quantity) as avg_qty,
-            avg(l_extendedprice) as avg_price,
-            avg(l_discount) as avg_disc,
+            sum(cast(l_quantity as double)) as sum_qty,
+            sum(cast(l_extendedprice as double)) as sum_base_price,
+            avg(cast(l_quantity as double)) as avg_qty,
+            avg(cast(l_extendedprice as double)) as avg_price,
+            avg(cast(l_discount as double)) as avg_disc,
             count(*) as count_order
           FROM TEMPLATE(schemaname).lineitem
-          WHERE l_shipdate <= date '1998-09-01'
+          WHERE l_shipdate <= '1998-09-01'
           GROUP BY l_returnflag, l_linestatus
           ORDER BY l_returnflag, l_linestatus
+        verifier-key: "l_returnflag"
 
       # Customer Analysis Query
       query_customer_analysis:
@@ -291,10 +292,11 @@ blocks:
           SELECT
             c.c_mktsegment,
             count(*) as customer_count,
-            avg(c.c_acctbal) as avg_balance
+            avg(cast(c.c_acctbal as double)) as avg_balance
           FROM TEMPLATE(schemaname).customer c
           GROUP BY c.c_mktsegment
           ORDER BY customer_count desc
+        verifier-key: "c_mktsegment"
 
       # Part Analysis Query
       query_part_analysis:
@@ -302,27 +304,29 @@ blocks:
         dmlread: |
           SELECT
             p.p_type,
-            p.p_size,
+            cast(p.p_size as integer) as p_size,
             count(*) as part_count,
-            avg(p.p_retailprice) as avg_price
+            avg(cast(p.p_retailprice as double)) as avg_price
           FROM TEMPLATE(schemaname).part p
-          GROUP BY p.p_type, p.p_size
+          GROUP BY p.p_type, cast(p.p_size as integer)
           ORDER BY part_count desc
           LIMIT 20
+        verifier-key: "p_type"
 
       # Order Trends Query
       query_order_trends:
         ratio: 5
         dmlread: |
           SELECT
-            extract(year from o.o_orderdate) as order_year,
-            extract(month from o.o_orderdate) as order_month,
+            extract(year from cast(o.o_orderdate as date)) as order_year,
+            extract(month from cast(o.o_orderdate as date)) as order_month,
             count(*) as order_count,
-            sum(o.o_totalprice) as total_revenue
+            sum(cast(o.o_totalprice as double)) as total_revenue
           FROM TEMPLATE(schemaname).orders o
-          WHERE o.o_orderdate >= date '2020-01-01'
-          GROUP BY extract(year from o.o_orderdate), extract(month from o.o_orderdate)
+          WHERE cast(o.o_orderdate as date) >= DATE '2020-01-01'
+          GROUP BY extract(year from cast(o.o_orderdate as date)), extract(month from cast(o.o_orderdate as date))
           ORDER BY order_year, order_month
+        verifier-key: "order_year"
 
       # Simple join query
       query_customer_orders:
@@ -331,8 +335,9 @@ blocks:
           SELECT
             c.c_name,
             count(o.o_orderkey) as order_count,
-            sum(o.o_totalprice) as total_spent
+            sum(cast(o.o_totalprice as double)) as total_spent
           FROM TEMPLATE(schemaname).customer c
           LEFT JOIN TEMPLATE(schemaname).orders o ON c.c_custkey = o.o_custkey
-          WHERE c.c_custkey = {random_customer}
+          WHERE c.c_custkey = '{random_customer}'
           GROUP BY c.c_name
+        verifier-key: "c_name"
