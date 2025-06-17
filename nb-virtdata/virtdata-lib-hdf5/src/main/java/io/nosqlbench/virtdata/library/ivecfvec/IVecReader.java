@@ -28,6 +28,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.LongFunction;
 
 /**
@@ -39,8 +41,6 @@ import java.util.function.LongFunction;
 @ThreadSafeMapper
 @Categories(Category.readers)
 public class IVecReader implements LongFunction<int[]>, AutoCloseable {
-
-    private static final ScopedValue<FileChannel> CHANNEL = ScopedValue.newInstance();
 
     private final int dimensions;
     private final int reclen;
@@ -104,62 +104,71 @@ public class IVecReader implements LongFunction<int[]>, AutoCloseable {
         }
     }
 
+    // Use a thread-local to store the file channel without closing it between calls
+    private static final ThreadLocal<Map<Path, FileChannel>> THREAD_CHANNELS =
+        ThreadLocal.withInitial(() -> new HashMap<>());
+
     private FileChannel getOrCreateChannel() throws IOException {
-        FileChannel channel = CHANNEL.get();
-        if (channel == null) {
+        // Get the thread-local map of channels
+        Map<Path, FileChannel> channelMap = THREAD_CHANNELS.get();
+
+        // Try to get an existing channel for this path
+        FileChannel channel = channelMap.get(path);
+
+        // Create a new channel if needed
+        if (channel == null || !channel.isOpen()) {
             channel = FileChannel.open(path, StandardOpenOption.READ);
-            ScopedValue.where(CHANNEL, channel).run(() -> {});
+            channelMap.put(path, channel);
         }
+
         return channel;
     }
 
     @Override
     public int[] apply(long value) {
-        return ScopedValue.where(CHANNEL, null).call(() -> {
-            int recordIdx = (int) (value % reclim);
-            long recpos = (long)recordIdx * reclen;
+        int recordIdx = (int) (value % reclim);
+        long recpos = (long)recordIdx * reclen;
 
-            try {
-                FileChannel channel = getOrCreateChannel();
-                ByteBuffer headerBuffer = ByteBuffer.allocate(Integer.BYTES);
-                ByteBuffer vectorBuffer = ByteBuffer.allocate(dimensions * Integer.BYTES);
+        try {
+            FileChannel channel = getOrCreateChannel();
+            ByteBuffer headerBuffer = ByteBuffer.allocate(Integer.BYTES);
+            ByteBuffer vectorBuffer = ByteBuffer.allocate(dimensions * Integer.BYTES);
 
-                // Read record dimensions
-                headerBuffer.clear();
-                channel.position(recpos);
-                channel.read(headerBuffer);
-                headerBuffer.flip();
-                int recdim = Integer.reverseBytes(headerBuffer.getInt());
+            // Read record dimensions
+            headerBuffer.clear();
+            channel.position(recpos);
+            channel.read(headerBuffer);
+            headerBuffer.flip();
+            int recdim = Integer.reverseBytes(headerBuffer.getInt());
 
-                if(recdim != dimensions) {
-                    throw new RuntimeException("dimensions are not uniform for ivec file '" +
-                        this.path + "', found dim " + recdim + " at record " + value);
-                }
-
-                // Read vector data
-                vectorBuffer.clear();
-                channel.read(vectorBuffer);
-                vectorBuffer.flip();
-
-                int[] data = new int[dimensions];
-                for (int i = 0; i < dimensions; i++) {
-                    data[i] = Integer.reverseBytes(vectorBuffer.getInt());
-                }
-                return data;
-
-            } catch (IOException e) {
-                throw new RuntimeException("Error reading from file: " + e.getMessage(), e);
+            if(recdim != dimensions) {
+                throw new RuntimeException("dimensions are not uniform for ivec file '" +
+                    this.path + "', found dim " + recdim + " at record " + value);
             }
-        });
+
+            // Read vector data
+            vectorBuffer.clear();
+            channel.read(vectorBuffer);
+            vectorBuffer.flip();
+
+            int[] data = new int[dimensions];
+            for (int i = 0; i < dimensions; i++) {
+                data[i] = Integer.reverseBytes(vectorBuffer.getInt());
+            }
+            return data;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading from file: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public void close() throws Exception {
-        if (CHANNEL.isBound()) {
-            FileChannel channel = CHANNEL.get();
-            if (channel != null && channel.isOpen()) {
-                channel.close();
-            }
+        // Close and remove channel for this path
+        Map<Path, FileChannel> channelMap = THREAD_CHANNELS.get();
+        FileChannel channel = channelMap.remove(path);
+        if (channel != null && channel.isOpen()) {
+            channel.close();
         }
     }
 
