@@ -21,6 +21,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterInvalidParamException;
 import io.nosqlbench.adapter.jdbc.exceptions.JDBCAdapterUnexpectedException;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
+import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentIndexCache;
 import io.nosqlbench.engine.core.lifecycle.session.ClasspathExtender;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
@@ -33,8 +34,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
 public class JDBCSpace extends BaseSpace<JDBCSpace> {
@@ -68,6 +71,10 @@ public class JDBCSpace extends BaseSpace<JDBCSpace> {
   private final ConcurrentHashMap<ConnectionCacheKey, Connection> connections =
       new ConcurrentHashMap<>();
 
+  // Prepared statement cache using refKey for each operation template
+  private final ConcurrentIndexCache<PreparedStatement> preparedStmtCache =
+      new ConcurrentIndexCache<>("jdbc_pstmts");
+
   public JDBCSpace(JDBCDriverAdapter adapter, long spaceidx, NBConfiguration cfg) {
     super(adapter, spaceidx);
     this.initializeSpace(cfg);
@@ -82,6 +89,11 @@ public class JDBCSpace extends BaseSpace<JDBCSpace> {
 
   @Override
   public void close() {
+    try {
+      preparedStmtCache.close();
+    } catch (Exception e) {
+      logger.warn("Error closing prepared statement cache", e);
+    }
     shutdownSpace();
   }
 
@@ -127,6 +139,13 @@ public class JDBCSpace extends BaseSpace<JDBCSpace> {
 
   public Connection getConnection(ConnectionCacheKey key, Supplier<Connection> connectionSupplier) {
     return connections.computeIfAbsent(key, __ -> connectionSupplier.get());
+  }
+
+  public PreparedStatement getOrCreatePreparedStatement(
+      int refkey,
+      LongFunction<PreparedStatement> psF
+  ) {
+    return preparedStmtCache.get(refkey, psF);
   }
 
   private void initializeSpace(NBConfiguration cfg) {
