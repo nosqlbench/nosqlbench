@@ -190,7 +190,7 @@ public class BVecToFloatReaderTest {
         ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
 
         for (int i = 0; i < recordCount; i++) {
-            buffer.putInt(Integer.reverseBytes(dimensions)); // Dimension is stored in little-endian
+            buffer.putInt(dimensions); // Dimension is stored in little-endian
             for (int j = 0; j < dimensions; j++) {
                 buffer.put((byte)(i & 0xFF)); // Use the record index as the value for all dimensions
             }
@@ -211,13 +211,13 @@ public class BVecToFloatReaderTest {
         ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
 
         // First vector
-        buffer.putInt(Integer.reverseBytes(firstDimension));
+        buffer.putInt(firstDimension);
         for (int j = 0; j < firstDimension; j++) {
             buffer.put((byte)1);
         }
 
         // Second vector with different dimension
-        buffer.putInt(Integer.reverseBytes(secondDimension));
+        buffer.putInt(secondDimension);
         for (int j = 0; j < secondDimension; j++) {
             buffer.put((byte)2);
         }
