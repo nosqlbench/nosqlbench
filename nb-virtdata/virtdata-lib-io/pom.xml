@@ -1,0 +1,69 @@
+<!--
+  ~ Copyright (c) nosqlbench
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>mvn-defaults</artifactId>
+        <groupId>io.nosqlbench</groupId>
+        <version>${revision}</version>
+        <relativePath>../../mvn-defaults</relativePath>
+    </parent>
+
+    <artifactId>virtdata-lib-io</artifactId>
+    <packaging>jar</packaging>
+    <name>virtdata-lib-io</name>
+    <url>https://nosqlbench.io/</url>
+    <dependencies>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-lib-basics</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nbvectors</artifactId>
+            <version>0.1.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <excludes>
+                    <exclude>h5ex_t_float.h5</exclude>
+                    <exclude>hdf5_test_strings.h5</exclude>
+                    <exclude>**/*.ivec</exclude>
+                    <exclude>**/*.fvec</exclude>
+                    <exclude>**/*.bvec</exclude>
+                    <exclude>**/*.lvec</exclude>
+                    <exclude>**/*.dvec</exclude>
+                    <exclude>**/*.svec</exclude>
+                    <exclude>**/*.ivecs</exclude>
+                    <exclude>**/*.fvecs</exclude>
+                    <exclude>**/*.bvecs</exclude>
+                    <exclude>**/*.lvecs</exclude>
+                    <exclude>**/*.dvecs</exclude>
+                    <exclude>**/*.svecs</exclude>
+                </excludes>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+    </build>
+
+</project>

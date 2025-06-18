@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.ivecfvec;
+package io.nosqlbench.virtdata.library.xvec;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class FVecReaderTest {
                     try {
                         float[] result = reader.apply(threadId);
                         assertNotNull(result);
-                        assertDoesNotThrow(() -> reader.apply(threadId));
+                        Assertions.assertDoesNotThrow(() -> reader.apply(threadId));
                     } catch (Throwable t) {
                         synchronized (exceptions) {
                             exceptions.add(t);

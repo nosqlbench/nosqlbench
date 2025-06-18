@@ -81,6 +81,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>virtdata-lib-io</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>nb-docsys</artifactId>
             <version>${revision}</version>
             <scope>compile</scope>
