@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.ivecfvec;
+package io.nosqlbench.virtdata.library.xvec;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;

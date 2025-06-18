@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.ivecfvec;
+package io.nosqlbench.virtdata.library.xvec;
 
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
@@ -25,6 +25,7 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -33,14 +34,14 @@ import java.util.Map;
 import java.util.function.LongFunction;
 
 /**
- * Reads ivec files with random access, using the input to specify the record number.
+ * Reads fvec files with random access, using the input to specify the record number.
  * This is used for testing with generated KNN test data which is uniform in dimensions and neighborhood size.
  * While it is possible to specify different dimensioned vectors per record, this is not supported, since this
  * function honors the pure-function behavior of other NB binding functions. This requires uniform record structure for random access.
  */
 @ThreadSafeMapper
 @Categories(Category.readers)
-public class IVecReader implements LongFunction<int[]>, AutoCloseable {
+public class FVecReader implements LongFunction<float[]>, AutoCloseable {
 
     private final int dimensions;
     private final int reclen;
@@ -49,16 +50,16 @@ public class IVecReader implements LongFunction<int[]>, AutoCloseable {
     private final int reclim;
 
     /**
-     * Read the ivec file, determining the record size from the first record.
-     * @param pathname The location of the ivec file
+     * Read the fvec file, determining the record size from the first record.
+     * @param pathname The location of the fvec file
      */
-    @Example({"IvecReader('testfile.ivec')","Create a reader for int vectors, detecting the dimensions and dataset size automatically."})
-    public IVecReader(String pathname) {
+    @Example({"FvecReader('testfile.fvec')","Create a reader for float vectors, detecting the dimensions and dataset size automatically."})
+    public FVecReader(String pathname) {
         this(pathname, 0, 0);
     }
 
-    @Example({"IvecReader('testfile.ivec', 46, 12)","Create a reader for int vectors, asserting 46 dimensions and limit total records to 12."})
-    public IVecReader(String pathname, int expectedDimensions, int recordLimit) {
+    @Example({"FvecReader('testfile.fvec', 46, 12)","Create a reader for float vectors, asserting 46 dimensions and limit total records to 12."})
+    public FVecReader(String pathname, int expectedDimensions, int recordLimit) {
         Content<?> src = NBIO.fs().search(pathname).one();
         this.path = src.asPath();
 
@@ -79,7 +80,7 @@ public class IVecReader implements LongFunction<int[]>, AutoCloseable {
                     "', found " + dimensions + ", but expected " + expectedDimensions);
             }
 
-            int datalen = (dimensions * Integer.BYTES);
+            int datalen = (dimensions * Float.BYTES);
             this.reclen = Integer.BYTES + datalen;
 
             long totalRecords = filesize / reclen;
@@ -125,14 +126,15 @@ public class IVecReader implements LongFunction<int[]>, AutoCloseable {
     }
     
     @Override
-    public int[] apply(long value) {
+    public float[] apply(long value) {
         int recordIdx = (int) (value % reclim);
         long recpos = (long)recordIdx * reclen;
     
         try {
             FileChannel channel = getOrCreateChannel();
             ByteBuffer headerBuffer = ByteBuffer.allocate(Integer.BYTES);
-            ByteBuffer vectorBuffer = ByteBuffer.allocate(dimensions * Integer.BYTES);
+            ByteBuffer vectorBuffer = ByteBuffer.allocate(dimensions * Float.BYTES)
+                .order(ByteOrder.BIG_ENDIAN);
     
             // Read record dimensions
             headerBuffer.clear();
@@ -142,7 +144,7 @@ public class IVecReader implements LongFunction<int[]>, AutoCloseable {
             int recdim = Integer.reverseBytes(headerBuffer.getInt());
     
             if(recdim != dimensions) {
-                throw new RuntimeException("dimensions are not uniform for ivec file '" +
+                throw new RuntimeException("dimensions are not uniform for fvec file '" +
                     this.path + "', found dim " + recdim + " at record " + value);
             }
     
@@ -151,9 +153,10 @@ public class IVecReader implements LongFunction<int[]>, AutoCloseable {
             channel.read(vectorBuffer);
             vectorBuffer.flip();
     
-            int[] data = new int[dimensions];
+            float[] data = new float[dimensions];
             for (int i = 0; i < dimensions; i++) {
-                data[i] = Integer.reverseBytes(vectorBuffer.getInt());
+                int intBits = Integer.reverseBytes(vectorBuffer.getInt());
+                data[i] = Float.intBitsToFloat(intBits);
             }
             return data;
     
