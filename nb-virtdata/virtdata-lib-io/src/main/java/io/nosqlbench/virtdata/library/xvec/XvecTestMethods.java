@@ -25,7 +25,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class IvecFvecMethods {
+public class XvecTestMethods {
 
     public static ArrayList<float[]> readFvecs(String filePath) throws IOException {
         var vectors = new ArrayList<float[]>();
