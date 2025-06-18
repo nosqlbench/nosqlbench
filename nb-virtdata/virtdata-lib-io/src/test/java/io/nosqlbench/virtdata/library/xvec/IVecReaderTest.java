@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.ivecfvec;
+package io.nosqlbench.virtdata.library.xvec;
 
-import com.sun.management.OperatingSystemMXBean;
 import org.junit.jupiter.api.Test;
 
 import java.lang.management.ManagementFactory;

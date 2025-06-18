@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.ivecfvec;
+package io.nosqlbench.virtdata.library.xvec;
 
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
