@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="nosqlbench [clean,compile,package...]" type="MavenRunConfiguration" factoryName="Maven" nameIsGenerated="true">
+  <configuration default="false" name="package -DskipTests" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings">
