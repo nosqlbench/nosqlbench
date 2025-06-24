@@ -918,7 +918,7 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
                             <additionalJOptions>--enable-preview</additionalJOptions>
-                            <release>21</release>
+<!--                            <release>21</release>-->
                             <doctitle>${javadoc.name}</doctitle>
                             <windowtitle>${javadoc.name}</windowtitle>
                             <detectJavaApiLink>false</detectJavaApiLink>
