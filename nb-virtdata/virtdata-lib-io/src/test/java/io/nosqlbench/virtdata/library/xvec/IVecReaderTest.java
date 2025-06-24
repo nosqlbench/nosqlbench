@@ -29,7 +29,7 @@ class IVecReaderTest {
 
 @Test
 public void testReadIvecResources() {
-    final String filePath = "src/test/resources/ivecfvec/test_ada_002_10000_indices_query_10000.ivec";
+    final String filePath = "src/test/resources/xvec/test_ada_002_10000_indices_query_10000.ivec";
 
     // Get initial number of open file descriptors
     long initialFdCount = getOpenFileDescriptorCount();
@@ -122,9 +122,9 @@ private long getOpenFileDescriptorCount() {
     @Test
     public void testReadIvec() {
 
-        ArrayList<HashSet<Integer>> idx_ref = IvecFvecMethods.readIvecs("src/test/resources/ivecfvec/test_ada_002_10000_indices_query_10000.ivec");
+        ArrayList<HashSet<Integer>> idx_ref = IvecFvecMethods.readIvecs("src/test/resources/xvec/test_ada_002_10000_indices_query_10000.ivec");
 
-        IVecReader ir = new IVecReader("src/test/resources/ivecfvec/test_ada_002_10000_indices_query_10000.ivec");
+        IVecReader ir = new IVecReader("src/test/resources/xvec/test_ada_002_10000_indices_query_10000.ivec");
         for (int i = 0; i < 10; i++) {
             int[] indices = ir.apply(0);
             HashSet<Integer> ref = idx_ref.get(0);
@@ -137,7 +137,8 @@ private long getOpenFileDescriptorCount() {
 
     @Test
     public void testReadFvec() {
-        FVecReader ir = new FVecReader("src/test/resources/ivecfvec/test_ada_002_10000_distances_count.fvec");
+        FVecReader ir = new FVecReader("src/test/resources/xvec/test_ada_002_10000_distances_count"
+                                       + ".fvec");
         for (int i = 0; i < 10; i++) {
             float[] dist = ir.apply(i);
             for (int j = 1; j < dist.length; j++) {
@@ -149,7 +150,7 @@ private long getOpenFileDescriptorCount() {
     @Test
     public void testReadFvecSpecificDims() {
         FVecReader ir = new FVecReader(
-            "src/test/resources/ivecfvec/test_ada_002_10000_base_vectors.fvec",
+            "src/test/resources/xvec/test_ada_002_10000_base_vectors.fvec",
             1536,0);
         float[] vec0 = ir.apply(0);
         assertThat(vec0.length).isEqualTo(1536);

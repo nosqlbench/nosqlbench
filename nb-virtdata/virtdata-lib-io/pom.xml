@@ -48,8 +48,18 @@
                 <excludes>
                     <exclude>h5ex_t_float.h5</exclude>
                     <exclude>hdf5_test_strings.h5</exclude>
+                    <exclude>**/*.bvec</exclude>
+                    <exclude>**/*.svec</exclude>
                     <exclude>**/*.ivec</exclude>
+                    <exclude>**/*.lvec</exclude>
+                    <exclude>**/*.dvec</exclude>
                     <exclude>**/*.fvec</exclude>
+                    <exclude>**/*.bvecs</exclude>
+                    <exclude>**/*.svecs</exclude>
+                    <exclude>**/*.ivecs</exclude>
+                    <exclude>**/*.lvecs</exclude>
+                    <exclude>**/*.dvecs</exclude>
+                    <exclude>**/*.fvecs</exclude>
                 </excludes>
                 <filtering>true</filtering>
             </testResource>
