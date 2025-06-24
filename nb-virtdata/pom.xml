@@ -39,6 +39,7 @@
         <module>virtdata-lib-hdf5</module>
         <module>virtdata-lib-vectors</module>
         <module>virtdata-api</module>
+        <module>virtdata-lib-io</module>
         <module>nb-virtdata-all</module>
     </modules>
 

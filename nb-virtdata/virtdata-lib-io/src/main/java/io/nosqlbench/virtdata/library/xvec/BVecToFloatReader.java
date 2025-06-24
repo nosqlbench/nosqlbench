@@ -51,7 +51,7 @@ public class BVecToFloatReader implements LongFunction<float[]>, AutoCloseable {
             throw new RuntimeException(e);
         }
         dimBuffer.flip();
-        this.dimension = Integer.reverseBytes(dimBuffer.getInt());
+        this.dimension = dimBuffer.getInt();
 
         this.vectorSize = 4L + dimension; // 4 bytes for dimension + d bytes for uint8 vector
         long fileSize = fileChannel.size();
@@ -73,7 +73,7 @@ public class BVecToFloatReader implements LongFunction<float[]>, AutoCloseable {
         }
 
         buffer.flip();
-        int dim = Integer.reverseBytes(buffer.getInt());
+        int dim = buffer.getInt();
 
         if (dim != dimension) {
             throw new IllegalStateException("Inconsistent dimension at vector index " + index);

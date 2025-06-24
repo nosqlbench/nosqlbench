@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.virtdata.library.ivecfvec;
+package io.nosqlbench.virtdata.library.xvec;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -25,7 +25,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class IvecFvecMethods {
+public class XvecTestMethods {
 
     public static ArrayList<float[]> readFvecs(String filePath) throws IOException {
         var vectors = new ArrayList<float[]>();

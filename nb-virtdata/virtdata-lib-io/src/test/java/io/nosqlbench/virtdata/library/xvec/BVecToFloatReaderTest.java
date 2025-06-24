@@ -179,6 +179,47 @@ public class BVecToFloatReaderTest {
         });
     }
 
+    @Test
+    public void testReadBigannBaseFirst1k() throws Exception {
+        // Path to the bigann_base_first1k.bvecs file
+        String filePath = "src/test/resources/xvec/bigann_base_first1k.bvecs";
+
+        try (BVecToFloatReader reader = new BVecToFloatReader(filePath)) {
+            // The file should contain 1000 vectors
+            assertDoesNotThrow(() -> reader.apply(0), "Should be able to read the first vector");
+            assertDoesNotThrow(() -> reader.apply(999), "Should be able to read the last vector");
+            assertThrows(IndexOutOfBoundsException.class, () -> reader.apply(1000), 
+                "Should throw exception for index beyond the file");
+
+            // Read all vectors to ensure they can be processed
+            for (int i = 0; i < 1000; i++) {
+                float[] vector = reader.apply(i);
+
+                // Verify the vector is not null and has the expected dimension
+                assertNotNull(vector, "Vector at index " + i + " should not be null");
+
+                // The dimension should be consistent for all vectors
+                if (i == 0) {
+                    int dimension = vector.length;
+                    assertTrue(dimension > 0, "Vector dimension should be positive");
+
+                    // Check a few more vectors to ensure consistent dimensions
+                    for (int j = 1; j < Math.min(10, 1000); j++) {
+                        float[] otherVector = reader.apply(j);
+                        assertEquals(dimension, otherVector.length, 
+                            "All vectors should have the same dimension");
+                    }
+
+                    // Check that values are within the expected range for uint8 (0-255)
+                    for (float value : vector) {
+                        assertTrue(value >= 0 && value <= 255, 
+                            "Vector values should be in range [0, 255] but found " + value);
+                    }
+                }
+            }
+        }
+    }
+
     private void writeBVecFile(Path filePath, int dimensions, int recordCount) throws IOException {
         byte[] data = generateTestBVecData(dimensions, recordCount);
         Files.write(filePath, data);
@@ -190,7 +231,7 @@ public class BVecToFloatReaderTest {
         ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
 
         for (int i = 0; i < recordCount; i++) {
-            buffer.putInt(Integer.reverseBytes(dimensions)); // Dimension is stored in little-endian
+            buffer.putInt(dimensions); // Dimension is stored in little-endian
             for (int j = 0; j < dimensions; j++) {
                 buffer.put((byte)(i & 0xFF)); // Use the record index as the value for all dimensions
             }
@@ -211,13 +252,13 @@ public class BVecToFloatReaderTest {
         ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
 
         // First vector
-        buffer.putInt(Integer.reverseBytes(firstDimension));
+        buffer.putInt(firstDimension);
         for (int j = 0; j < firstDimension; j++) {
             buffer.put((byte)1);
         }
 
         // Second vector with different dimension
-        buffer.putInt(Integer.reverseBytes(secondDimension));
+        buffer.putInt(secondDimension);
         for (int j = 0; j < secondDimension; j++) {
             buffer.put((byte)2);
         }
