@@ -708,7 +708,7 @@
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>[23,)</version>
+                                    <version>[24,)</version>
                                 </requireJavaVersion>
                                 <requireProfileIdsExist/>
                             </rules>
