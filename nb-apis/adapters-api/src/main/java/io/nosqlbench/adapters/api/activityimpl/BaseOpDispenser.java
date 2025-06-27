@@ -247,4 +247,58 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
         OP op = getOp(value);
         return op;
     }
+
+    @Override
+    public Map<String, String> getErrorContext() {
+        return Map.of("space_name", "unknown");
+    }
+
+    /**
+     * Get the error context for a specific cycle value.
+     * This method returns a map containing the space name for the given cycle value.
+     *
+     * @param cycleValue The cycle value to get the error context for
+     * @return A map containing the space name for the given cycle value
+     */
+    @Override
+    public Map<String, String> getErrorContextForCycle(long cycleValue) {
+        String spaceName = getSpaceNameForCycle(cycleValue);
+        return Map.of("space_name", spaceName);
+    }
+
+    /**
+     * Get the name of the space for a given cycle value.
+     * This method uses the spaceNameF function to convert a cycle value to a name.
+     * If spaceNameF is null, it returns the string value of the cycle.
+     *
+     * @param cycleValue The cycle value to get the name for
+     * @return The name of the space for the given cycle value, or the string value of the cycle if spaceNameF is null
+     */
+    public String getSpaceNameForCycle(long cycleValue) {
+        if (spaceNameF == null) {
+            return String.valueOf(cycleValue);
+        }
+        return spaceNameF.apply(cycleValue);
+    }
+
+    /**
+     * Modify an exception message by prepending the space name, but only if the space name is not the default one.
+     * This method is used to provide more context in error messages.
+     *
+     * @param error The original exception to modify
+     * @param cycleValue The cycle value associated with the exception
+     * @return The modified message with the space name prepended if applicable, or the original message
+     */
+    @Override
+    public RuntimeException modifyExceptionMessage(Exception error, long cycleValue) {
+        if (spaceNameF == BaseDriverAdapter.DEFAULT_CYCLE_TO_SPACE_F) {
+            if (error instanceof RuntimeException re) {
+                return re;
+            } else {
+                return new RuntimeException(error);
+            }
+        }
+        String spaceName = getSpaceNameForCycle(cycleValue);
+        return new RuntimeException("Error in space '" + spaceName + "': " + error.getMessage(), error);
+    }
 }
