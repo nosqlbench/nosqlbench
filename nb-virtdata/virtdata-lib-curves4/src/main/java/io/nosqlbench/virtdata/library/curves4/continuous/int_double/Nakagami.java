@@ -25,8 +25,6 @@ import org.apache.commons.statistics.distribution.NakagamiDistribution;
  * @see <a href="https://en.wikipedia.org/wiki/Nakagami_distribution">Wikipedia: Nakagami distribution</a>
  *
  * @see <a href="https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/NakagamiDistribution.html">Commons JavaDoc: NakagamiDistribution</a>
- *
- * {@inheritDoc}
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})

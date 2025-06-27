@@ -28,7 +28,6 @@ import org.apache.commons.statistics.distribution.FDistribution;
  *
  * @see <a href="http://mathworld.wolfram.com/F-Distribution.html">Mathworld: F-Distribution</a>
  *
- * {@inheritDoc}
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})
