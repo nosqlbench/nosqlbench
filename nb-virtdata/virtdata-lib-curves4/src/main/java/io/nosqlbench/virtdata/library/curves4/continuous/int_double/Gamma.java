@@ -26,7 +26,6 @@ import org.apache.commons.statistics.distribution.GammaDistribution;
  *
  * @see <a href="https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/GammaDistribution.html">Commons JavaDoc: GammaDistribution</a>
  *
- * {@inheritDoc}
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})

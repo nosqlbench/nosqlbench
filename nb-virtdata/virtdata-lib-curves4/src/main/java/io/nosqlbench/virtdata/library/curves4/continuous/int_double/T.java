@@ -26,7 +26,6 @@ import org.apache.commons.statistics.distribution.TDistribution;
  *
  * @see <a href="https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/TDistribution.html">Commons JavaDoc: TDistribution</a>
  *
- * {@inheritDoc}
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})

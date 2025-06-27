@@ -26,7 +26,6 @@ import org.apache.commons.statistics.distribution.BinomialDistribution;
  *
  * @see <a href="https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/BinomialDistribution.html">Commons JavaDoc: BinomialDistribution</a>
  *
- * {@inheritDoc}
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})

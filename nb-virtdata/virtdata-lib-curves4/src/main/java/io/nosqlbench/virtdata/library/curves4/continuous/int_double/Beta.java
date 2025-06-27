@@ -25,8 +25,6 @@ import org.apache.commons.statistics.distribution.BetaDistribution;
  * @see <a href="https://en.wikipedia.org/wiki/Beta_distribution">Wikipedia: Beta distribution</a>
  *
  * @see <a href="https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/BetaDistribution.html">Commons JavaDoc: BetaDistribution</a>
- *
- * {@inheritDoc}
  */
 @Categories({Category.distributions})
 @ThreadSafeMapper
