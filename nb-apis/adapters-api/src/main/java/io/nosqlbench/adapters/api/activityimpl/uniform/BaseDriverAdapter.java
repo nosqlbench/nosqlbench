@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapters.api.activityimpl.uniform;
 
+import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -293,4 +294,11 @@ public abstract class BaseDriverAdapter<RESULT
         }
         super.beforeDetach();
     }
+
+    /**
+     * The default cycle to space function used when no custom space mapper is provided.
+     * This is used to determine if a custom space mapper has been provided.
+     */
+    public static final LongToIntFunction DEFAULT_CYCLE_TO_SPACE_F = (long l) -> 0;
+
 }

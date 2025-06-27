@@ -19,6 +19,7 @@ package io.nosqlbench.engine.api.activityimpl.uniform.actions;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
 import io.nosqlbench.adapters.api.evalctx.CycleFunction;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
@@ -32,6 +33,7 @@ import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -80,10 +82,12 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends java.uti
             dispenser = opsequence.apply(cycle);
             op = dispenser.getOp(cycle);
         } catch (Exception e) {
-            throw new RuntimeException(
+            RuntimeException bindingError =  new RuntimeException(
                 "while binding request in cycle " + cycle + " for op template named '" + (
                     dispenser != null ? dispenser.getOpName() : "NULL") + "': " + e.getMessage(), e
             );
+            bindingError = dispenser.modifyExceptionMessage(bindingError, cycle);
+            throw bindingError;
         }
 
         int code = 0;
@@ -127,7 +131,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends java.uti
                     }
 
                 } catch (Exception e) {
-                    error = e;
+                    error = dispenser.modifyExceptionMessage(e,cycle);
                 } finally {
                     long nanos = System.nanoTime() - startedAt;
                     resultTimer.update(nanos, TimeUnit.NANOSECONDS);
