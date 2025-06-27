@@ -26,7 +26,6 @@ import org.apache.commons.statistics.distribution.PoissonDistribution;
  *
  * @see <a href="https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/PoissonDistribution.html">Commons JavaDoc: PoissonDistribution</a>
  *
- * {@inheritDoc}
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})

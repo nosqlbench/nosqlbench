@@ -16,6 +16,7 @@
 
 package io.nosqlbench.adapters.api.activityimpl.uniform;
 
+import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.fieldmappers.FieldDestructuringMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -194,13 +195,39 @@ public abstract class BaseDriverAdapter<RESULT
             .asReadOnly();
     }
 
+    /**
+     * Get the function that names space indexes for a given cycle value.
+     * This method extracts the naming function from the getSpaceFunc method.
+     *
+     * @param pop The parsed op
+     * @return A function that converts a cycle value to a name, or null if no naming function is available
+     */
+    public LongFunction<String> getSpaceNameFunc(ParsedOp pop) {
+        Optional<LongFunction<Object>> spaceFuncTest = pop.getAsOptionalFunction("space", Object.class);
+        if (spaceFuncTest.isEmpty()) {
+            return null;
+        }
+
+        Object example = spaceFuncTest.get().apply(0L);
+        if (example instanceof Number) {
+            return null;
+        } else {
+            LongFunction<?> sourceF = pop.getAsRequiredFunction("space", String.class);
+            final LongFunction<?> finalSourceF = sourceF;
+            return l -> finalSourceF.apply(l).toString();
+        }
+    }
+
     @Override
     public LongFunction<SPACE> getSpaceFunc(ParsedOp pop) {
 
         Optional<LongFunction<Object>> spaceFuncTest = pop.getAsOptionalFunction("space", Object.class);
+        ConcurrentIndexCacheWrapperWithName wrapper = null;
+        LongFunction<String> namerF = null;
         LongToIntFunction cycleToSpaceF;
+
         if (spaceFuncTest.isEmpty()) {
-            cycleToSpaceF = (long l) -> 0;
+            cycleToSpaceF = DEFAULT_CYCLE_TO_SPACE_F;
         } else {
             Object example = spaceFuncTest.get().apply(0L);
             if (example instanceof Number n) {
@@ -210,14 +237,48 @@ public abstract class BaseDriverAdapter<RESULT
             } else {
                 logger.trace("mapping space indirectly through hash table to index pool");
                 LongFunction<?> sourceF = pop.getAsRequiredFunction("space", String.class);
-                LongFunction<String> namerF = l -> sourceF.apply(l).toString();
-                ConcurrentIndexCacheWrapper wrapper = new ConcurrentIndexCacheWrapper();
-                cycleToSpaceF = l -> wrapper.mapKeyToIndex(namerF.apply(l));
+                final LongFunction<?> finalSourceF = sourceF;
+                namerF = l -> finalSourceF.apply(l).toString();
+                wrapper = new ConcurrentIndexCacheWrapperWithName();
+                final ConcurrentIndexCacheWrapperWithName finalWrapper = wrapper;
+                final LongFunction<String> finalNamerF = namerF;
+                cycleToSpaceF = l -> finalWrapper.mapKeyToIndex(finalNamerF.apply(l));
             }
         }
 
         ConcurrentSpaceCache<SPACE> spaceCache1 = getSpaceCache();
-        return l -> spaceCache1.get(cycleToSpaceF.applyAsInt(l));
+        final LongToIntFunction finalCycleToSpaceF = cycleToSpaceF;
+
+        // If we're using the wrapper, capture it in the final variables for the lambda
+        final ConcurrentIndexCacheWrapperWithName finalWrapper = wrapper;
+
+        if (finalWrapper != null) {
+            return l -> {
+                int spaceIndex = finalCycleToSpaceF.applyAsInt(l);
+                SPACE space = spaceCache1.get(spaceIndex);
+
+                // If the space is a BaseSpace, set the original name
+                if (space instanceof BaseSpace) {
+                    String nameForIndex = finalWrapper.getNameForIndex(spaceIndex);
+                    // Ensure the original name is never null
+                    ((BaseSpace<?>) space).setOriginalName(nameForIndex != null ? nameForIndex : String.valueOf(spaceIndex));
+                }
+
+                return space;
+            };
+        } else {
+            return l -> {
+                int spaceIndex = finalCycleToSpaceF.applyAsInt(l);
+                SPACE space = spaceCache1.get(spaceIndex);
+
+                // If the space is a BaseSpace, set the original name to the string value of the index
+                if (space instanceof BaseSpace) {
+                    ((BaseSpace<?>) space).setOriginalName(String.valueOf(spaceIndex));
+                }
+
+                return space;
+            };
+        }
     }
 
     @Override
@@ -233,4 +294,11 @@ public abstract class BaseDriverAdapter<RESULT
         }
         super.beforeDetach();
     }
+
+    /**
+     * The default cycle to space function used when no custom space mapper is provided.
+     * This is used to determine if a custom space mapper has been provided.
+     */
+    public static final LongToIntFunction DEFAULT_CYCLE_TO_SPACE_F = (long l) -> 0;
+
 }

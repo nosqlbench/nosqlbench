@@ -25,8 +25,6 @@ import org.apache.commons.statistics.distribution.ChiSquaredDistribution;
  * @see <a href="https://en.wikipedia.org/wiki/Chi-squared_distribution">Wikipedia: Chi-squared distribution</a>
  *
  * @see <a href="https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/ChiSquaredDistribution.html">Commons JavaDoc: ChiSquaredDistribution</a>
- *
- * {@inheritDoc}
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})

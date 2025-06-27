@@ -26,7 +26,6 @@ import org.apache.commons.math4.legacy.distribution.EmpiricalDistribution;
  *
  * @see <a href="https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/ConstantContinuousDistribution.html">Commons JavaDoc: ConstantContinuousDistribution</a>
  *
- * {@inheritDoc}
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})
