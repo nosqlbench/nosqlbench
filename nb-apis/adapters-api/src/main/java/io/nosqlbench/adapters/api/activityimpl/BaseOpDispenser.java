@@ -18,8 +18,10 @@ package io.nosqlbench.adapters.api.activityimpl;
 
 import com.codahale.metrics.Timer;
 import groovy.lang.Binding;
+import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
+import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.NBErrorContext;
 import io.nosqlbench.adapters.api.evalctx.*;
 import io.nosqlbench.adapters.api.metrics.ThreadLocalNamedTimers;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
@@ -37,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongFunction;
+import java.util.function.LongToIntFunction;
 
 /**
  * See {@link OpDispenser} for details on how to use this type.
@@ -48,7 +51,8 @@ import java.util.function.LongFunction;
  *     The type of operation
  */
 public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space>
-    extends NBBaseComponent implements OpDispenser<OP> {
+    extends NBBaseComponent implements OpDispenser<OP>, NBErrorContext
+{
     protected final static Logger logger = LogManager.getLogger(BaseOpDispenser.class);
     public static final String VERIFIER = "verifier";
     public static final String VERIFIER_INIT = "verifier-init";
@@ -56,6 +60,7 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
     public static final String VERIFIER_IMPORTS = "verifier-imports";
     public static final String START_TIMERS = "start-timers";
     public static final String STOP_TIMERS = "stop-timers";
+
 
     private final String opName;
     private final NBLabels labels;
@@ -66,6 +71,7 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
     private final String[] timerStarts;
     private final String[] timerStops;
     protected LongFunction<? extends SPACE> spaceF;
+    protected LongFunction<String> spaceNameF;
 
     /**
      * package imports used with "verifiers" or "expected-result" are accumulated here
@@ -81,9 +87,20 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
     private final ThreadLocal<CycleFunction<Boolean>> tlVerifier;
 
     protected BaseOpDispenser(final NBComponent parentC, final ParsedOp op, LongFunction<? extends SPACE> spaceF) {
+        this(parentC, op, spaceF, null);
+    }
+
+    protected BaseOpDispenser(final NBComponent parentC, final ParsedOp op, LongFunction<? extends SPACE> spaceF, LongFunction<String> spaceNameF) {
         super(parentC);
         opName = op.getName();
         labels = op.getLabels();
+        this.spaceF = spaceF;
+        this.spaceNameF = spaceNameF;
+
+        // If parentC is a DriverAdapter and spaceNameF is null, get the naming function from it
+        if (this.spaceNameF == null && parentC instanceof io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter) {
+            this.spaceNameF = ((io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter<?, ?>) parentC).getSpaceNameFunc(op);
+        }
 
         this.timerStarts = op.takeOptionalStaticValue(START_TIMERS, String.class)
             .map(s -> s.split(", *"))
