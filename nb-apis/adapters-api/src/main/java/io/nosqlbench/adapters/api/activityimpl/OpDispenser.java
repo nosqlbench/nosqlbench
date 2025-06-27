@@ -21,6 +21,7 @@ import io.nosqlbench.adapters.api.evalctx.CycleFunction;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpTemplate;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
+import java.util.Map;
 import java.util.function.LongFunction;
 
 ///  ## Synopsis
@@ -109,4 +110,23 @@ public interface OpDispenser<OPTYPE extends CycleOp<?>> extends LongFunction<OPT
     CycleFunction<Boolean> getVerifier();
 
     String getOpName();
+
+    /**
+     * Get the error context for a specific cycle value.
+     * This method returns a map containing the space name for the given cycle value.
+     *
+     * @param cycleValue The cycle value to get the error context for
+     * @return A map containing the space name for the given cycle value
+     */
+    Map<String, String> getErrorContextForCycle(long cycleValue);
+
+    /**
+     * Modify an exception  by prepending the space name, but only if it's not the default one.
+     * This method is used to provide more context in error messages.
+     *
+     * @param error The original exception  to modify
+     * @param cycleValue The cycle value associated with the exception
+     * @return The modified message with the space name prepended if applicable, or the original message
+     */
+    RuntimeException modifyExceptionMessage(Exception error, long cycleValue);
 }
