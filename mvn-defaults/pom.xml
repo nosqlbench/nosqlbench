@@ -35,9 +35,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <javadoc.name>nosqlbench ${revision}</javadoc.name>
 
-        <maven.compiler.source>23</maven.compiler.source>
-        <maven.compiler.target>23</maven.compiler.target>
-        <maven.compiler.release>23</maven.compiler.release>
+        <maven.compiler.source>24</maven.compiler.source>
+        <maven.compiler.target>24</maven.compiler.target>
+        <maven.compiler.release>24</maven.compiler.release>
 
         <PROG>nb5</PROG>
         <maven.plugin.validation>VERBOSE</maven.plugin.validation>
@@ -290,7 +290,7 @@
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.13.0</version>
+                <version>2.13.1</version>
             </dependency>
             <dependency>
                 <groupId>com.amazonaws</groupId>
@@ -561,7 +561,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.13</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -917,7 +917,7 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
                             <additionalJOptions>--enable-preview</additionalJOptions>
-                            <release>23</release>
+                            <release>24</release>
                             <doctitle>${javadoc.name}</doctitle>
                             <header>${javadoc.name}</header>
                             <windowtitle>${javadoc.name}</windowtitle>
