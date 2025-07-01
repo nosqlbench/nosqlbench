@@ -64,7 +64,7 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
 
     @Override
     public Function<String,DiagSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (String name) -> new DiagSpace(this, Long.parseLong(name), cfg);
+        return (String name) -> new DiagSpace(this, name, cfg);
     }
 
     @Override
