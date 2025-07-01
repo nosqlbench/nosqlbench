@@ -20,17 +20,14 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.datastax.oss.driver.api.core.config.*;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
-import com.datastax.oss.driver.api.core.session.SessionBuilder;
 import com.datastax.oss.driver.internal.core.config.composite.CompositeDriverConfigLoader;
 import com.datastax.oss.driver.internal.core.loadbalancing.helper.NodeFilterToDistanceEvaluatorAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapter.cqld4.optionhelpers.OptionHelpers;
-import io.nosqlbench.adapter.cqld4.wrapper.Cqld4LoadBalancerObserver;
 import io.nosqlbench.adapter.cqld4.wrapper.Cqld4SessionBuilder;
 import io.nosqlbench.adapter.cqld4.wrapper.NodeSummary;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentIndexCache;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
@@ -47,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
@@ -54,11 +52,10 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
   private final static Logger logger = LogManager.getLogger(Cqld4Space.class);
 
   private CqlSession session;
-  private ConcurrentIndexCache<PreparedStatement> preparedStmtCache =
-      new ConcurrentIndexCache<>("pstmts");
+  private final ConcurrentHashMap<Integer, PreparedStatement> preparedStmtCache = new ConcurrentHashMap<>();
 
-  public Cqld4Space(Cqld4DriverAdapter adapter, long spaceidx, NBConfiguration cfg) {
-    super(adapter, String.valueOf(spaceidx));
+  public Cqld4Space(Cqld4DriverAdapter adapter, String spaceName, NBConfiguration cfg) {
+    super(adapter, spaceName);
     session = createSession(cfg);
   }
 
@@ -117,7 +114,7 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
     //        int port = cfg.getOptional(int.class, "port").orElse(9042);
 
     Optional<String> scb = cfg.getOptional(String.class, "secureconnectbundle", "scb")
-        .map(this::interpolateSpace);
+        .map(this::interpolate);
 
     if (scb.isPresent()) {
       Optional<InputStream> stream =
@@ -139,7 +136,7 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
 
     if (contactPointsOption.isPresent()) {
       builder.addContactPoints(contactPointsOption.get());
-      Optional<String> localdc = cfg.getOptional("localdc").map(this::interpolateSpace);
+      Optional<String> localdc = cfg.getOptional("localdc").map(this::interpolate);
       builder.withLocalDatacenter(localdc.orElseThrow(() -> new BasicError(
           "Starting with driver 4.0, you must specify the local datacenter name with any specified contact points. Example: (use caution) localdc=datacenter1")));
     } else {
@@ -151,10 +148,10 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
 
     //        builder.withCompression(ProtocolOptions.Compression.NONE);
     //
-    Optional<String> usernameOpt = cfg.getOptional("username").map(this::interpolateSpace);
-    Optional<String> userfileOpt = cfg.getOptional("userfile").map(this::interpolateSpace);
-    Optional<String> passwordOpt = cfg.getOptional("password").map(this::interpolateSpace);
-    Optional<String> passfileOpt = cfg.getOptional("passfile").map(this::interpolateSpace);
+    Optional<String> usernameOpt = cfg.getOptional("username").map(this::interpolate);
+    Optional<String> userfileOpt = cfg.getOptional("userfile").map(this::interpolate);
+    Optional<String> passwordOpt = cfg.getOptional("password").map(this::interpolate);
+    Optional<String> passfileOpt = cfg.getOptional("passfile").map(this::interpolate);
 
 
     String username = null;
@@ -266,7 +263,7 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
     }
 
     String driverconfig = maybeDriverConfig.get();
-    driverconfig = interpolateSpace(driverconfig);
+    driverconfig = interpolate(driverconfig);
 
     List<String> loaderspecs = NBConfigSplitter.splitConfigLoaders(driverconfig);
     LinkedList<DriverConfigLoader> loaders = new LinkedList<>();
@@ -362,7 +359,7 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
   @Override
   public void close() {
     try {
-      this.preparedStmtCache.close();
+      this.preparedStmtCache.clear();
       this.getSession().close();
       this.session = null;
     } catch (Exception e) {
@@ -377,7 +374,6 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
       LongFunction<PreparedStatement> psF
   )
   {
-    PreparedStatement ps = preparedStmtCache.get(refkey, psF);
-    return ps;
+    return preparedStmtCache.computeIfAbsent(refkey, k -> psF.apply(k));
   }
 }
