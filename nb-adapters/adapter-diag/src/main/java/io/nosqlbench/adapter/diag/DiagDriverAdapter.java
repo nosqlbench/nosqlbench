@@ -63,8 +63,8 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
     }
 
     @Override
-    public LongFunction<DiagSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (long name) -> new DiagSpace(this, name, cfg);
+    public Function<String,DiagSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (String name) -> new DiagSpace(this, Long.parseLong(name), cfg);
     }
 
     @Override

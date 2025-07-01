@@ -45,8 +45,8 @@ public class AmqpDriverAdapter extends BaseDriverAdapter<AmqpTimeTrackOp, AmqpSp
     }
 
     @Override
-    public LongFunction<AmqpSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new AmqpSpace(this,s, cfg);
+    public Function<String, AmqpSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (name) -> new AmqpSpace(this, Long.parseLong(name), cfg);
     }
 
     @Override

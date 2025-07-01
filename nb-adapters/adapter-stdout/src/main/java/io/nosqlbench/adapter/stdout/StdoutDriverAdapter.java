@@ -22,7 +22,6 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.adapters.api.activityimpl.uniform.decorators.SyntheticOpTemplateProvider;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
@@ -34,7 +33,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.function.IntFunction;
+import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -53,8 +52,8 @@ public class StdoutDriverAdapter extends BaseDriverAdapter<StdoutOp, StdoutSpace
     }
 
     @Override
-    public LongFunction<StdoutSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (idx) -> new StdoutSpace(this, idx, cfg);
+    public Function<String,StdoutSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (idx) -> new StdoutSpace(this, Long.parseLong(idx), cfg);
     }
 
     @Override

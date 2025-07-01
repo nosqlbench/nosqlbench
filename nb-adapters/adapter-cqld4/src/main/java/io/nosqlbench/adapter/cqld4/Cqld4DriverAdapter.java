@@ -51,7 +51,7 @@ public class Cqld4DriverAdapter extends BaseDriverAdapter<Cqld4BaseOp<?>, Cqld4S
     }
 
     @Override
-    public LongFunction<Cqld4Space> getSpaceInitializer(NBConfiguration cfg) {
+    public Function<String,Cqld4Space> getSpaceInitializer(NBConfiguration cfg) {
         return s -> new Cqld4Space(this,s,cfg);
     }
 

@@ -44,14 +44,9 @@ public class MilvusDriverAdapter extends BaseDriverAdapter<MilvusBaseOp<?>, Milv
     }
 
     @Override
-    public LongFunction<MilvusSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (idx) -> new MilvusSpace(this, idx, cfg);
+    public Function<String, MilvusSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (name) -> new MilvusSpace(this, Long.parseLong(name), cfg);
     }
-
-    //    @Override
-//    public Function<String, ? extends MilvusSpace> getSpaceInitializer(NBConfiguration cfg) {
-//        return (s) -> new MilvusSpace(s, cfg);
-//    }
 
     @Override
     public NBConfigModel getConfigModel() {
@@ -59,4 +54,3 @@ public class MilvusDriverAdapter extends BaseDriverAdapter<MilvusBaseOp<?>, Milv
     }
 
 }
-

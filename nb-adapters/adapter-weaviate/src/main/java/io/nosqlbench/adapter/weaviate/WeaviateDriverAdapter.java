@@ -51,8 +51,7 @@ public class WeaviateDriverAdapter extends BaseDriverAdapter<WeaviateBaseOp<?, ?
     }
 
     @Override
-    public LongFunction<WeaviateSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return l -> new WeaviateSpace(this, l, cfg);
+    public Function<String, WeaviateSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return name -> new WeaviateSpace(this, Long.parseLong(name), cfg);
     }
 }
-

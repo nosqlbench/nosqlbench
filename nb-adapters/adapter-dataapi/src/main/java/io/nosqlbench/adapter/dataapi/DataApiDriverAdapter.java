@@ -43,8 +43,8 @@ public class DataApiDriverAdapter extends BaseDriverAdapter<DataApiBaseOp, DataA
     }
 
     @Override
-    public LongFunction<DataApiSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new DataApiSpace(this, s, cfg);
+    public Function<String, DataApiSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (name) -> new DataApiSpace(this, Long.parseLong(name), cfg);
     }
 
     @Override

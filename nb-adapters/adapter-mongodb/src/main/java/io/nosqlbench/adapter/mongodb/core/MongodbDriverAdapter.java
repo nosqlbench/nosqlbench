@@ -27,6 +27,7 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
 
+import java.util.function.Function;
 import java.util.function.LongFunction;
 
 /**
@@ -45,8 +46,8 @@ public class MongodbDriverAdapter extends BaseDriverAdapter<MongoOp<?>, MongoSpa
     }
 
     @Override
-    public LongFunction<MongoSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return idx -> new MongoSpace(this, idx, cfg);
+    public Function<String, MongoSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return name -> new MongoSpace(this, Long.parseLong(name), cfg);
     }
 
     @Override

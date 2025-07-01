@@ -44,8 +44,8 @@ public class GCPSpannerDriverAdapter extends BaseDriverAdapter<GCPSpannerBaseOp<
     }
 
     @Override
-    public LongFunction<GCPSpannerSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new GCPSpannerSpace(this, s, cfg);
+    public Function<String, GCPSpannerSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (name) -> new GCPSpannerSpace(this, Long.parseLong(name), cfg);
     }
 
     @Override

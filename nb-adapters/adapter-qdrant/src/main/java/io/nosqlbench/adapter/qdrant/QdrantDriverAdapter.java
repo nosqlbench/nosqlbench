@@ -45,8 +45,8 @@ public class QdrantDriverAdapter extends BaseDriverAdapter<QdrantBaseOp<?,?>, Qd
     }
 
     @Override
-    public LongFunction<QdrantSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (long s) -> new QdrantSpace(this, s, cfg);
+    public Function<String, QdrantSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return name -> new QdrantSpace(this, Long.parseLong(name), cfg);
     }
 
     @Override

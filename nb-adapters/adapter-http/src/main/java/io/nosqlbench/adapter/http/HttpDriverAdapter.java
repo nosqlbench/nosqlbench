@@ -60,8 +60,8 @@ public class HttpDriverAdapter extends BaseDriverAdapter<HttpOp, HttpSpace> {
     }
 
     @Override
-    public LongFunction<HttpSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return idx -> new HttpSpace(idx, this, cfg);
+    public Function<String, HttpSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return name -> new HttpSpace(Long.parseLong(name), this, cfg);
     }
 
     @Override

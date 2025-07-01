@@ -55,8 +55,8 @@ public class TcpClientDriverAdapter extends BaseDriverAdapter<TcpClientOp, TcpCl
     }
 
     @Override
-    public LongFunction<TcpClientAdapterSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (idx) -> new TcpClientAdapterSpace(this, idx,cfg);
+    public Function<String, TcpClientAdapterSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (name) -> new TcpClientAdapterSpace(this, Long.parseLong(name), cfg);
     }
 
     @Override

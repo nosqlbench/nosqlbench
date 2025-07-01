@@ -20,7 +20,6 @@ import io.nosqlbench.adapter.pulsar.ops.PulsarOp;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.annotations.Service;
@@ -30,7 +29,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.Function;
-import java.util.function.IntFunction;
 import java.util.function.LongFunction;
 
 @Service(value = DriverAdapter.class, selector = "pulsar")
@@ -49,8 +47,8 @@ public class PulsarDriverAdapter extends BaseDriverAdapter<PulsarOp, PulsarSpace
     }
 
     @Override
-    public LongFunction<PulsarSpace> getSpaceInitializer(NBConfiguration cfg) {
-        return (s) -> new PulsarSpace(this,s, cfg);
+    public Function<String,PulsarSpace> getSpaceInitializer(NBConfiguration cfg) {
+        return (s) -> new PulsarSpace(this,Long.parseLong(s), cfg);
     }
 
     @Override

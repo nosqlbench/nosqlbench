@@ -17,7 +17,6 @@
 package io.nosqlbench.adapter.kafka;
 
 import io.nosqlbench.adapter.kafka.ops.KafkaOp;
-import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentSpaceCache;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.adapters.api.activityimpl.OpMapper;

@@ -230,7 +230,7 @@ public interface DriverAdapter<OPTYPE extends CycleOp<?>, SPACETYPE extends Spac
     /// @return A function which can initialize a new Space, which is a place to hold object state
     ///  related to
     /// retained objects for the lifetime of a native driver.
-    default LongFunction<SPACETYPE> getSpaceInitializer(NBConfiguration cfg) {
+    default Function<String,SPACETYPE> getSpaceInitializer(NBConfiguration cfg) {
         return n -> (SPACETYPE) new Space() {
             @Override
             public String getName() {
