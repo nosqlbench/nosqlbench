@@ -71,7 +71,6 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
     private final String[] timerStarts;
     private final String[] timerStops;
     protected LongFunction<? extends SPACE> spaceF;
-    protected LongFunction<String> spaceNameF;
 
     /**
      * package imports used with "verifiers" or "expected-result" are accumulated here
@@ -87,20 +86,10 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
     private final ThreadLocal<CycleFunction<Boolean>> tlVerifier;
 
     protected BaseOpDispenser(final NBComponent parentC, final ParsedOp op, LongFunction<? extends SPACE> spaceF) {
-        this(parentC, op, spaceF, null);
-    }
-
-    protected BaseOpDispenser(final NBComponent parentC, final ParsedOp op, LongFunction<? extends SPACE> spaceF, LongFunction<String> spaceNameF) {
         super(parentC);
         opName = op.getName();
         labels = op.getLabels();
         this.spaceF = spaceF;
-        this.spaceNameF = spaceNameF;
-
-        // If parentC is a DriverAdapter and spaceNameF is null, get the naming function from it
-        if (this.spaceNameF == null && parentC instanceof io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter) {
-            this.spaceNameF = ((io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter<?, ?>) parentC).getSpaceNameFunc(op);
-        }
 
         this.timerStarts = op.takeOptionalStaticValue(START_TIMERS, String.class)
             .map(s -> s.split(", *"))
@@ -268,17 +257,18 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
 
     /**
      * Get the name of the space for a given cycle value.
-     * This method uses the spaceNameF function to convert a cycle value to a name.
-     * If spaceNameF is null, it returns the string value of the cycle.
+     * This method uses the spaceF function to get the space for a cycle value, then gets its name.
+     * If spaceF is null, it returns the string value of the cycle.
      *
      * @param cycleValue The cycle value to get the name for
-     * @return The name of the space for the given cycle value, or the string value of the cycle if spaceNameF is null
+     * @return The name of the space for the given cycle value, or the string value of the cycle if spaceF is null
      */
     public String getSpaceNameForCycle(long cycleValue) {
-        if (spaceNameF == null) {
+        if (spaceF == null) {
             return String.valueOf(cycleValue);
         }
-        return spaceNameF.apply(cycleValue);
+        SPACE space = spaceF.apply(cycleValue);
+        return space.getName();
     }
 
     /**
@@ -291,14 +281,14 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
      */
     @Override
     public RuntimeException modifyExceptionMessage(Exception error, long cycleValue) {
-        if (spaceNameF == BaseDriverAdapter.DEFAULT_CYCLE_TO_SPACE_F) {
+        String spaceName = getSpaceNameForCycle(cycleValue);
+        if ("default".equals(spaceName)) {
             if (error instanceof RuntimeException re) {
                 return re;
             } else {
                 return new RuntimeException(error);
             }
         }
-        String spaceName = getSpaceNameForCycle(cycleValue);
         return new RuntimeException("Error in space '" + spaceName + "': " + error.getMessage(), error);
     }
 }

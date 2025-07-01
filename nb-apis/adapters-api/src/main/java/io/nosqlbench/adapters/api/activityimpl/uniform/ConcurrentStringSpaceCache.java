@@ -33,13 +33,13 @@ import java.util.function.Function;
  * @param <S> The type of Space to cache
  */
 public class ConcurrentStringSpaceCache<S extends Space> extends NBBaseComponent
-    implements Iterable<S> {
+    implements SpaceCache<S> {
 
     private final ConcurrentHashMap<String, S> cache = new ConcurrentHashMap<>();
     private final Function<String, S> valueLoader;
 
     public ConcurrentStringSpaceCache(DriverAdapter<?, S> adapter, Function<String, S> valueLoader) {
-        super(adapter, NBLabels.forKV("string_spacesof", adapter.getAdapterName()));
+        super(adapter, NBLabels.forKV("spacesof", adapter.getAdapterName()));
         this.valueLoader = valueLoader;
 
         create().gauge(
@@ -58,6 +58,18 @@ public class ConcurrentStringSpaceCache<S extends Space> extends NBBaseComponent
      */
     public S get(String key) {
         return cache.computeIfAbsent(key, valueLoader);
+    }
+
+    /**
+     * Get a space for the given key, creating it if it doesn't exist.
+     * This method implements the SpaceCache interface.
+     *
+     * @param key The key to get the space for (will be converted to a string)
+     * @return The space for the key
+     */
+    @Override
+    public S get(Object key) {
+        return get(key.toString());
     }
 
     @Override
