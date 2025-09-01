@@ -14,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         name: checkout nosqlbench
 
       - uses: actions/setup-java@v4
@@ -92,7 +92,7 @@ jobs:
     steps:
 
       - name: checkout build docs
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: nosqlbench/nosqlbench-build-docs
           path: build-docs
@@ -127,7 +127,7 @@ jobs:
     steps:
 
       - name: checkout javadocs
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: nosqlbench/nosqlbench-javadocs
           path: javadocs
