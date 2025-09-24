@@ -22,8 +22,8 @@ set -x
 APPDIR=target/NB.AppDir
 JAR_NAME="nb5.jar"
 BIN_NAME="nb5"
-JAVA_VERSION="23"
-UNPACKED_NAME="jdk-23.0.1"
+JAVA_VERSION="25"
+UNPACKED_NAME="jdk-25"
 
 
 mkdir -p ${APPDIR}
@@ -40,20 +40,20 @@ cp target/${JAR_NAME} "${APPDIR}/usr/bin/${JAR_NAME}"
 
 mkdir -p "${APPDIR}/usr/bin/jre"
 jdkname="jdk${JAVA_VERSION}"
-if [ "${jdkname}" == "jdk23" ]
+if [ "${jdkname}" == "jdk25" ]
 then
   if [ ! -d "cache/${jdkname}" ] ; then
     printf "getting ${jdkname} once into cache/${jdkname}\n";
-    filename='openjdk-23.0.1_linux-x64_bin.tar.gz'
+    filename='openjdk-25_linux-x64_bin.tar.gz'
     mkdir -p cache
     (cd cache && (
-      curl -O https://download.java.net/java/GA/jdk23.0.1/c28985cbf10d4e648e4004050f8781aa/11/GPL/${filename}
+      curl -O https://download.java.net/java/GA/jdk25/bd75d5f9689641da8e1daabeccb5528b/36/GPL/${filename}
       tar -xf ${filename}
-      mv ${UNPACKED_NAME} jdk23
+      mv ${UNPACKED_NAME} ${jdkname}
       rm ${filename}
     ))
   fi
-  rsync -av cache/jdk23/ "${APPDIR}/usr/bin/jre/"
+  rsync -av cache/${jdkname}/ "${APPDIR}/usr/bin/jre/"
 else
   printf "Unknown java version indicated in $0"
   exit 2
@@ -72,7 +72,7 @@ printf "getting appimage tool and building image...\n";
 ( cd target && (
   if [ ! -x "appimagetool-x86_64.AppImage" ]
   then
-   wget -c https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage
+   curl -L -O https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-x86_64.AppImage
    chmod +x appimagetool-x86_64.AppImage
   fi
 
