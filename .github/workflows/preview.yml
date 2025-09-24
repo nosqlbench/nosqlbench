@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'oracle'
-          java-version: '24'
+          java-version: '25'
           java-package: jdk
           architecture: x64
 
@@ -48,6 +48,9 @@ jobs:
 
       - name: install fuse2
         run: sudo apt install libfuse2
+
+      - name: install desktop-file-utils
+        run: sudo apt install desktop-file-utils
 
       - name: read versions
         id: versions
