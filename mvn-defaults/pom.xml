@@ -26,7 +26,7 @@
 
     <properties>
 
-        <revision>5.23.0-SNAPSHOT</revision>
+        <revision>5.25.0-SNAPSHOT</revision>
         <!-- Set this level to override the logging level for tests during build -->
         <project.testlevel>INFO</project.testlevel>
         <!-- Set this level to override the logging level for tests logging configuration during build -->
@@ -35,9 +35,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <javadoc.name>nosqlbench ${revision}</javadoc.name>
 
-        <maven.compiler.source>24</maven.compiler.source>
-        <maven.compiler.target>24</maven.compiler.target>
-        <maven.compiler.release>24</maven.compiler.release>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.release>25</maven.compiler.release>
 
         <PROG>nb5</PROG>
         <maven.plugin.validation>VERBOSE</maven.plugin.validation>
@@ -522,7 +522,7 @@
                     <target>${maven.compiler.target}</target>
                     <release>${maven.compiler.release}</release>
                     <compilerArgs>
-                      <arg>--enable-preview</arg>
+<!--                      <arg>&#45;&#45;enable-preview</arg>-->
                         <!--                        <compilerArg>-Xdoclint:all</compilerArg>-->
                         <!--                        <compilerArg>-Xlint:all</compilerArg>-->
                     </compilerArgs>
@@ -535,7 +535,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <!--   <argLine>-ea @{argLine}</argLine> -->
-                    <argLine>--enable-preview @{argLine}</argLine>
+<!--                    <argLine>&#45;&#45;enable-preview @{argLine}</argLine>-->
                     <systemPropertyVariables>
                         <Log4jContextSelector>
                             org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
@@ -623,7 +623,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <argLine>--enable-preview @{argLine}</argLine>
+<!--                    <argLine>&#45;&#45;enable-preview @{argLine}</argLine>-->
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
                     <includes>
@@ -708,7 +708,7 @@
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>[24,)</version>
+                                    <version>[25,)</version>
                                 </requireJavaVersion>
                                 <requireProfileIdsExist/>
                             </rules>
@@ -916,8 +916,8 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
-                            <additionalJOptions>--enable-preview</additionalJOptions>
-                            <release>24</release>
+<!--                            <additionalJOptions>&#45;&#45;enable-preview</additionalJOptions>-->
+                            <release>25</release>
                             <doctitle>${javadoc.name}</doctitle>
                             <header>${javadoc.name}</header>
                             <windowtitle>${javadoc.name}</windowtitle>
