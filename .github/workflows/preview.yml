@@ -22,7 +22,7 @@ jobs:
     steps:
 
       - name: checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: setup java
         uses: actions/setup-java@v5
@@ -153,7 +153,7 @@ jobs:
 
       #  https://github.com/softprops/action-gh-release
       - name: create github release
-        uses: softprops/action-gh-release@v2.2.2
+        uses: softprops/action-gh-release@v2.3.2
         if: startsWith(github.ref, 'refs/tags/')
         with:
 #          body: ${{ steps.prepare_summary.outputs.release_summary }}
@@ -224,7 +224,7 @@ jobs:
 #        echo "DOCKER_TAGS=${{ needs.preview-build.outputs.docker_tags }}" >> $GITHUB_ENV
 #
 #    - name: checkout build docs
-#      uses: actions/checkout@v4
+#      uses: actions/checkout@v5
 #      with:
 #        repository: nosqlbench/nosqlbench-build-docs
 #        path: build-docs
@@ -258,7 +258,7 @@ jobs:
 #          echo "DOCKER_TAGS=${{ needs.preview-build.outputs.docker_tags }}" >> $GITHUB_ENV
 #
 #      - name: checkout javadocs
-#        uses: actions/checkout@v4
+#        uses: actions/checkout@v5
 #        with:
 #          repository: nosqlbench/nosqlbench-javadocs
 #          path: javadocs
