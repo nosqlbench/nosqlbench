@@ -28,6 +28,9 @@ jobs:
       - name: install fuse2
         run: sudo apt install libfuse2
 
+      - name: install desktop-file-utils
+        run: sudo apt install desktop-file-utils
+
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
