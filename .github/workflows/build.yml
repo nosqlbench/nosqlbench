@@ -14,19 +14,22 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         name: checkout nosqlbench
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         name: setup java
         with:
           architecture: x64
           distribution: 'oracle'
           java-package: jdk
-          java-version: '24'
+          java-version: '25'
 
       - name: install fuse2
         run: sudo apt install libfuse2
+
+      - name: install desktop-file-utils
+        run: sudo apt install desktop-file-utils
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -92,13 +95,13 @@ jobs:
     steps:
 
       - name: checkout build docs
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: nosqlbench/nosqlbench-build-docs
           path: build-docs
 
       - name: download exported_docs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: exported-docs
           path: build-docs
@@ -127,13 +130,13 @@ jobs:
     steps:
 
       - name: checkout javadocs
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: nosqlbench/nosqlbench-javadocs
           path: javadocs
 
       - name: download javadocs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: javadocs
           path: javadocs
