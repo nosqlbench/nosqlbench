@@ -23,10 +23,13 @@ jobs:
           architecture: x64
           distribution: 'oracle'
           java-package: jdk
-          java-version: '23'
+          java-version: '25'
 
       - name: install fuse2
         run: sudo apt install libfuse2
+
+      - name: install desktop-file-utils
+        run: sudo apt install desktop-file-utils
 
       - name: Cache Maven packages
         uses: actions/cache@v4

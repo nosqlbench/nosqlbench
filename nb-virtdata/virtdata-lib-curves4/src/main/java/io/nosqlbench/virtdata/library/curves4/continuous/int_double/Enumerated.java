@@ -28,7 +28,6 @@ import org.apache.commons.math4.legacy.distribution.EnumeratedRealDistribution;
  *
  * @see <a href="http://commons.apache.org/proper/commons-math/apidocs/org/apache/commons/math4/distribution/EnumeratedRealDistribution.html">Commons JavaDoc: EnumeratedRealDistribution</a>
  *
- * {@inheritDoc}
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})

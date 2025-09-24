@@ -35,12 +35,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static io.nosqlbench.virtdata.api.processors.ProcessorClassNames.PerThreadMapper;
-import static io.nosqlbench.virtdata.api.processors.ProcessorClassNames.ThreadSafeMapper;/**
+import static io.nosqlbench.virtdata.api.processors.ProcessorClassNames.ThreadSafeMapper;
+/**
  * This documentation processor is responsible for finding all the enumerated that feed documentation
  * manifests. It simply calls listener interfaces to do the rest of the work.
  */
 @SupportedOptions({"title"})
-@SupportedSourceVersion(SourceVersion.RELEASE_23)
+@SupportedSourceVersion(SourceVersion.RELEASE_24)
 @SupportedAnnotationTypes({
         ThreadSafeMapper,
         PerThreadMapper

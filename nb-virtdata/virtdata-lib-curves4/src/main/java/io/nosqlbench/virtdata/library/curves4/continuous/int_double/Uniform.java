@@ -25,8 +25,6 @@ import org.apache.commons.statistics.distribution.UniformContinuousDistribution;
  * @see <a href="https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)">Wikipedia: Uniform distribution (continuous)</a>
  *
  * @see <a href="https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/UniformContinuousDistribution.html">Commons JavaDoc: UniformContinuousDistribution</a>
- *
- * {@inheritDoc}
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})

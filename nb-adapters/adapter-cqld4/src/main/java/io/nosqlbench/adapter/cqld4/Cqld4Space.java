@@ -31,6 +31,7 @@ import io.nosqlbench.adapter.cqld4.wrapper.Cqld4SessionBuilder;
 import io.nosqlbench.adapter.cqld4.wrapper.NodeSummary;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.adapters.api.activityimpl.uniform.ConcurrentIndexCache;
+import io.nosqlbench.engine.api.templating.Templatizer;
 import io.nosqlbench.nb.api.config.standard.*;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
@@ -254,6 +255,7 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
         if (maybeDriverConfig.isEmpty()) {
             return Optional.empty();
         }
+
 
         String driverconfig = maybeDriverConfig.get();
 

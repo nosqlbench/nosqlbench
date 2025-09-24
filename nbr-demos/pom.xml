@@ -75,7 +75,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <argLine>--enable-preview @{argLine}</argLine>
                     <parallel>methods</parallel>
                     <!--                    <additionalClasspathElements>-->
                     <!--                        <additionalClasspathElement>${project.basedir}/target/virtdata-userlibs-${project.version}.jar-->
