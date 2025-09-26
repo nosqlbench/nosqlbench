@@ -9,6 +9,9 @@ import io.nosqlbench.vectordata.spec.datasets.types.DatasetView;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.LongFunction;
 
 public abstract class CoreVectors<T> implements LongFunction<T> {
@@ -26,7 +29,11 @@ public abstract class CoreVectors<T> implements LongFunction<T> {
         if (prebuffer) {
             CompletableFuture<Void> pbfuture = dataset.prebuffer();
             if (pbfuture instanceof ProgressIndicatingFuture<Void> indicator) {
-                indicator.monitorProgress(System.err, 60000);
+//                try {
+                    indicator.monitorProgress(1000);
+//                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+//                    throw new RuntimeException(e);
+//                }
             }
         }
     }
