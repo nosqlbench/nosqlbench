@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class StandardActivityType<A extends StandardActivity<?,?>> {
+public class StandardActivityType<A extends Activity> {
 
     private static final Logger logger = LogManager.getLogger("ACTIVITY");
     private final Map<String, DriverAdapter> adapters = new HashMap<>();
@@ -76,7 +76,7 @@ public class StandardActivityType<A extends StandardActivity<?,?>> {
         if (activityDef.getParams().getOptionalString("async").isPresent())
             throw new RuntimeException("This driver does not support async mode yet.");
 
-        return (A) new StandardActivity(parent, activityDef);
+        return (A) new Activity(parent, activityDef);
     }
 
     /**

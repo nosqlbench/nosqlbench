@@ -21,7 +21,6 @@ package io.nosqlbench.nbr.tests;
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import io.nosqlbench.engine.core.lifecycle.commands.CMD_await;
 import io.nosqlbench.engine.core.lifecycle.commands.CMD_start;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBBufferedContainer;
@@ -117,7 +116,7 @@ public class TestSessionMetrics {
 
     while (all.hasNext()) {
       NBComponent component = all.next();
-      if (component instanceof StandardActivity<?, ?> activity) {
+      if (component instanceof Activity activity) {
         activities.add(activity);
       }
       if (component instanceof Space space) {

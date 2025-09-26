@@ -25,11 +25,11 @@ import io.nosqlbench.adapters.api.evalctx.CycleFunction;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.ResultVerificationError;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
+import io.nosqlbench.engine.api.activityapi.core.ActivityImpl;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  The type of activity
  @param <R>
  The type of operation */
-public class StandardAction<A extends StandardActivity<R, ?>, R extends java.util.function.LongFunction>
+public class StandardAction<A extends ActivityImpl, R extends java.util.function.LongFunction>
     implements SyncAction, ActivityDefObserver
 {
     private final static Logger logger = LogManager.getLogger("ACTION");

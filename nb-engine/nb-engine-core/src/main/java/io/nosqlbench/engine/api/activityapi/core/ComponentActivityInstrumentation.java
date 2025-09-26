@@ -29,7 +29,7 @@ public class ComponentActivityInstrumentation implements ActivityInstrumentation
     private static final String SERVICE_TIME = "_servicetime";
     private static final String RESPONSE_TIME = "_responsetime";
 
-    private final Activity activity;
+    private final ActivityImpl activity;
     private final ActivityDef def;
     private final ParameterMap params;
     private final int hdrdigits;
@@ -52,7 +52,7 @@ public class ComponentActivityInstrumentation implements ActivityInstrumentation
     private NBMetricGauge errorRateTotal;
     private NBMetricGauge errorsTotal;
 
-    public ComponentActivityInstrumentation(final Activity activity) {
+    public ComponentActivityInstrumentation(final ActivityImpl activity) {
         this.activity = activity;
         def = activity.getActivityDef();
         params = this.def.getParams();

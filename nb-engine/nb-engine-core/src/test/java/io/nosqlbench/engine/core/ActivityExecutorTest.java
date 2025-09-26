@@ -24,14 +24,12 @@ import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
-import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityExecutor;
-import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -93,8 +91,7 @@ class ActivityExecutorTest {
                                                                    + "cycles=1000;initdelay=2000;"
                                                                    + "labels=invalid-name:valid"
                                                                    + "-value");
-            new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
-            Activity activity = new DelayedInitActivity(activityDef);
+                Activity activity = new DelayedInitActivity(activityDef);
 	    fail("Expected an Advisor exception");
 	} catch (RuntimeException e) {
             assertThat(e.toString().contains("error"));
@@ -106,7 +103,6 @@ class ActivityExecutorTest {
     synchronized void testDelayedStartSanity() {
 
         ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test_delayed_start;cycles=1000;initdelay=2000;");
-        new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
 
         Activity activity = new DelayedInitActivity(activityDef);
         final InputDispenser inputDispenser = new CoreInputDispenser(activity);
@@ -215,7 +211,7 @@ class ActivityExecutorTest {
 
     }
 
-    private static class DelayedInitActivity extends SimpleActivity {
+    private static class DelayedInitActivity extends Activity {
         private static final Logger logger = LogManager.getLogger(DelayedInitActivity.class);
 
         public DelayedInitActivity(final ActivityDef activityDef) {

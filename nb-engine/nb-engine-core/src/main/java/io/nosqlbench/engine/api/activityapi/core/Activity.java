@@ -18,135 +18,29 @@ package io.nosqlbench.engine.api.activityapi.core;
 
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.nb.api.engine.activityimpl.ParameterMap;
-import io.nosqlbench.engine.api.activityapi.core.progress.ProgressCapable;
-import io.nosqlbench.engine.api.activityapi.core.progress.StateCapable;
-import io.nosqlbench.engine.api.activityapi.cyclelog.filters.IntPredicateDispenser;
-import io.nosqlbench.engine.api.activityapi.errorhandling.ErrorMetrics;
-import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
-import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
-import io.nosqlbench.engine.api.activityapi.simrate.RateLimiter;
-import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
-import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
-
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.util.function.Supplier;
 
 /**
- * Provides the components needed to build and run an activity a runtime.
- * The easiest way to build a useful Activity is to extend {@link SimpleActivity}.
+ * Provides the components needed to build and run an activity at runtime.
+ * This is now a concrete class that extends ActivityImpl for backward compatibility.
+ *
+ * @deprecated Use ActivityImpl directly instead. This class exists only for migration compatibility.
  */
-public interface Activity extends Comparable<Activity>, ActivityDefObserver, ProgressCapable, StateCapable, NBComponent {
+@Deprecated(since = "5.0", forRemoval = true)
+public class Activity extends ActivityImpl {
 
     /**
-     * Register an object which should be closed after this activity is shutdown.
-     *
-     * @param closeable An Autocloseable object
+     * Constructor for backward compatibility.
+     * Creates a new Activity using the ActivityImpl implementation.
      */
-    void registerAutoCloseable(AutoCloseable closeable);
-
-    ActivityDef getActivityDef();
-
-    default String getAlias() {
-        return this.getActivityDef().getAlias();
-    }
-
-    default ParameterMap getParams() {
-        return this.getActivityDef().getParams();
-    }
-
-    default void initActivity() {
+    public Activity(NBComponent parent, ActivityDef activityDef) {
+        super(parent, activityDef);
     }
 
     /**
-     * Close all autocloseables that have been registered with this Activity.
+     * Alternative constructor for string-based activity definitions.
      */
-    void closeAutoCloseables();
-
-    MotorDispenser<?> getMotorDispenserDelegate();
-
-    void setMotorDispenserDelegate(MotorDispenser<?> motorDispenser);
-
-    InputDispenser getInputDispenserDelegate();
-
-    void setInputDispenserDelegate(InputDispenser inputDispenser);
-
-    ActionDispenser getActionDispenserDelegate();
-
-    void setActionDispenserDelegate(ActionDispenser actionDispenser);
-
-    IntPredicateDispenser getResultFilterDispenserDelegate();
-
-    void setResultFilterDispenserDelegate(IntPredicateDispenser resultFilterDispenser);
-
-    OutputDispenser getMarkerDispenserDelegate();
-
-    void setOutputDispenserDelegate(OutputDispenser outputDispenser);
-
-    @Override
-    RunState getRunState();
-
-    void setRunState(RunState runState);
-
-    long getStartedAtMillis();
-
-    default void shutdownActivity() {
+    public Activity(NBComponent parent, String activityDefString) {
+        this(parent, ActivityDef.parseActivityDef(activityDefString));
     }
 
-    default String getCycleSummary() {
-        return this.getActivityDef().getCycleSummary();
-    }
-
-    /**
-     * Get the current cycle rate limiter for this activity.
-     * The cycle rate limiter is used to throttle the rate at which
-     * cycles are dispatched across all threads in the activity
-     * @return the cycle {@link RateLimiter}
-     */
-    RateLimiter getCycleLimiter();
-
-
-    /**
-     * Get the current stride rate limiter for this activity.
-     * The stride rate limiter is used to throttle the rate at which
-     * new strides are dispatched across all threads in an activity.
-     * @return The stride {@link RateLimiter}
-     */
-    RateLimiter getStrideLimiter();
-
-    /**
-     * Get or create the instrumentation needed for this activity. This provides
-     * a single place to find and manage, and document instrumentation that is
-     * uniform across all activities.
-     *
-     * @return A new or existing instrumentation object for this activity.
-     */
-    ActivityInstrumentation getInstrumentation();
-
-    PrintWriter getConsoleOut();
-
-    InputStream getConsoleIn();
-
-    void setConsoleOut(PrintWriter writer);
-
-    ErrorMetrics getExceptionMetrics();
-
-//    /**
-//     * When a driver needs to identify an error uniquely for the purposes of
-//     * routing it to the correct error handler, or naming it in logs, or naming
-//     * metrics, override this method in your activity.
-//     * @return A function that can reliably and safely map an instance of Throwable to a stable name.
-//     */
-//    default Function<Throwable,String> getErrorNameMapper() {
-//        return t -> t.getClass().getSimpleName();
-//    }
-//
-    int getMaxTries();
-
-    default int getHdrDigits() {
-        return this.getParams().getOptionalInteger("hdr_digits").orElse(4);
-    }
-
-    RunStateTally getRunStateTally();
 }

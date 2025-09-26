@@ -22,7 +22,6 @@ import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.Motor;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
-import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.core.fortesting.BlockingSegmentInput;
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,7 @@ public class CoreMotorTest {
 
     @Test
     public void testBasicActivityMotor() {
-        final Activity activity = new SimpleActivity(
+        final Activity activity = new Activity(
             new TestComponent("testing", "coremotor"),
             ActivityDef.parseActivityDef("alias=foo")
         );
