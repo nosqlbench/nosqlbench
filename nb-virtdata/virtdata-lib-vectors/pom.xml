@@ -47,6 +47,12 @@
             <version>${revision}</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>vectordata</artifactId>
+            <version>0.1.8</version>
+        </dependency>
+
 <!--        <dependency>-->
 <!--            <groupId>org.matheclipse</groupId>-->
 <!--            <artifactId>matheclipse-core</artifactId>-->

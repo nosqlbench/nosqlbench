@@ -41,7 +41,7 @@ import static io.nosqlbench.virtdata.api.processors.ProcessorClassNames.ThreadSa
  * manifests. It simply calls listener interfaces to do the rest of the work.
  */
 @SupportedOptions({"title"})
-@SupportedSourceVersion(SourceVersion.RELEASE_24)
+@SupportedSourceVersion(SourceVersion.RELEASE_25)
 @SupportedAnnotationTypes({
         ThreadSafeMapper,
         PerThreadMapper
@@ -117,25 +117,19 @@ public class FunctionDocInfoProcessor extends AbstractProcessor {
             }
             // apply method types
 
-            boolean foundApply=false;
-            Element applyMethodElem = null;
-            Element applyInClassElem = classElem;
-            while (applyMethodElem==null && applyInClassElem!=null) {
-                for (Element candidateApplyElem : applyInClassElem.getEnclosedElements()) {
-                    if (candidateApplyElem.getKind() == ElementKind.METHOD) {
-                        if (candidateApplyElem.getSimpleName().toString().startsWith("apply")) {
-                            applyMethodElem = candidateApplyElem;
-                            break;
-                        }
+            // Build class hierarchy starting with current class
+            List<TypeElement> classHierarchy = getClassHierarchy((TypeElement) classElem);
 
-                    }
-                }
-                if (applyMethodElem!=null) {
+            // Search for apply method in class hierarchy
+            Element applyMethodElem = null;
+            for (TypeElement typeInHierarchy : classHierarchy) {
+                applyMethodElem = findApplyMethodInType(typeInHierarchy);
+                if (applyMethodElem != null) {
                     break;
                 }
-                applyInClassElem = elementUtils.getTypeElement(((TypeElement) applyInClassElem).getSuperclass().toString());
             }
-            if (applyMethodElem==null) {
+
+            if (applyMethodElem == null) {
                 messenger.printMessage(Diagnostic.Kind.ERROR, "Unable to enumerate input and output types for " + simpleClassName);
                 return false;
             }
@@ -224,6 +218,45 @@ public class FunctionDocInfoProcessor extends AbstractProcessor {
 
     private String cleanJavadoc(String ctorDoc) {
         return ctorDoc.replaceAll("(?m)^ ", "");
+    }
+
+    /**
+     * Build an ordered list of types in the class hierarchy, starting with the given type
+     * and walking up to its parent classes (excluding Object).
+     */
+    private List<TypeElement> getClassHierarchy(TypeElement startType) {
+        List<TypeElement> hierarchy = new ArrayList<>();
+        TypeElement current = startType;
+
+        while (current != null) {
+            hierarchy.add(current);
+
+            // Get the superclass
+            if (current.getSuperclass() != null &&
+                !current.getSuperclass().toString().equals("java.lang.Object") &&
+                !current.getSuperclass().toString().equals("none")) {
+                current = elementUtils.getTypeElement(current.getSuperclass().toString());
+            } else {
+                current = null;
+            }
+        }
+
+        return hierarchy;
+    }
+
+    /**
+     * Find an apply method in the given type element.
+     * Returns the first method whose name starts with "apply", or null if none found.
+     */
+    private Element findApplyMethodInType(TypeElement type) {
+        for (Element element : type.getEnclosedElements()) {
+            if (element.getKind() == ElementKind.METHOD) {
+                if (element.getSimpleName().toString().startsWith("apply")) {
+                    return element;
+                }
+            }
+        }
+        return null;
     }
 
     private static class StdoutListener implements FuncEnumerator.Listener {
