@@ -22,7 +22,6 @@ import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.Motor;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
-import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
 import io.nosqlbench.engine.core.fortesting.BlockingSegmentInput;
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,7 @@ public class CoreMotorTest {
 
     @Test
     public void testBasicActivityMotor() {
-        final Activity activity = new SimpleActivity(
+        final Activity activity = new Activity(
             new TestComponent("testing", "coremotor"),
             ActivityDef.parseActivityDef("alias=foo")
         );
@@ -60,7 +59,7 @@ public class CoreMotorTest {
 
     @Test
     public void testIteratorStride() {
-        SimpleActivity activity = new SimpleActivity(TestComponent.INSTANCE, "stride=3");
+        Activity activity = new Activity(TestComponent.INSTANCE, "stride=3");
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
         final Motor cm1 = new CoreMotor(activity, 1L, lockstepper);
         final AtomicLongArray ary = new AtomicLongArray(10);
