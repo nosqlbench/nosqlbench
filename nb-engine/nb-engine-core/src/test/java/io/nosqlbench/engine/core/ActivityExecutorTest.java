@@ -24,7 +24,6 @@ import io.nosqlbench.engine.api.activityapi.input.Input;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
-import io.nosqlbench.engine.api.activityimpl.SimpleActivity;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
 import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
@@ -56,10 +55,10 @@ class ActivityExecutorTest {
 //        OutputDispenser tdisp = CoreServices.getOutputDispenser(activity).orElse(null);
 //
 //        final MotorDispenser<?> mdisp = new CoreMotorDispenser(activity, inputDispenser, adisp, tdisp);
-//        activity.setActionDispenserDelegate(adisp);
-//        activity.setOutputDispenserDelegate(tdisp);
-//        activity.setInputDispenserDelegate(inputDispenser);
-//        activity.setMotorDispenserDelegate(mdisp);
+//        activity.setActionDispenser(adisp);
+//        activity.setOutputDispenser(tdisp);
+//        activity.setInputDispenser(inputDispenser);
+//        activity.setMotorDispenser(mdisp);
 //
 //        final ExecutorService executor = Executors.newCachedThreadPool();
 //        ActivityExecutor activityExecutor = new ActivityExecutor(activity, "test-restart");
@@ -93,8 +92,7 @@ class ActivityExecutorTest {
                                                                    + "cycles=1000;initdelay=2000;"
                                                                    + "labels=invalid-name:valid"
                                                                    + "-value");
-            new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
-            Activity activity = new DelayedInitActivity(activityDef);
+                Activity activity = new DelayedInitActivity(activityDef);
 	    fail("Expected an Advisor exception");
 	} catch (RuntimeException e) {
             assertThat(e.toString().contains("error"));
@@ -106,7 +104,6 @@ class ActivityExecutorTest {
     synchronized void testDelayedStartSanity() {
 
         ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test_delayed_start;cycles=1000;initdelay=2000;");
-        new ActivityTypeLoader().load(activityDef, TestComponent.INSTANCE);
 
         Activity activity = new DelayedInitActivity(activityDef);
         final InputDispenser inputDispenser = new CoreInputDispenser(activity);
@@ -114,10 +111,10 @@ class ActivityExecutorTest {
         final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(activity).orElse(null);
 
         MotorDispenser<?> motorDispenser = new CoreMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser);
-        activity.setActionDispenserDelegate(actionDispenser);
-        activity.setOutputDispenserDelegate(outputDispenser);
-        activity.setInputDispenserDelegate(inputDispenser);
-        activity.setMotorDispenserDelegate(motorDispenser);
+        activity.setActionDispenser(actionDispenser);
+        activity.setOutputDispenser(outputDispenser);
+        activity.setInputDispenser(inputDispenser);
+        activity.setMotorDispenser(motorDispenser);
 
         ActivityExecutor activityExecutor = new ActivityExecutor(activity);
 
@@ -142,22 +139,22 @@ class ActivityExecutorTest {
         final ActivityDef activityDef = ActivityDef.parseActivityDef("driver=diag;alias=test_dynamic_params;cycles=1000;initdelay=5000;");
         new ActivityTypeLoader().load(activityDef,TestComponent.INSTANCE);
 
-        Activity simpleActivity = new SimpleActivity(TestComponent.INSTANCE,activityDef);
+        Activity activity = new Activity(TestComponent.INSTANCE, activityDef);
 
-//        this.getActivityMotorFactory(this.motorActionDelay(999), new AtomicInput(simpleActivity,activityDef));
+//        this.getActivityMotorFactory(this.motorActionDelay(999), new AtomicInput(activity,activityDef));
 
-        final InputDispenser inputDispenser = new CoreInputDispenser(simpleActivity);
-        final ActionDispenser actionDispenser = new CoreActionDispenser(simpleActivity);
-        final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(simpleActivity).orElse(null);
+        final InputDispenser inputDispenser = new CoreInputDispenser(activity);
+        final ActionDispenser actionDispenser = new CoreActionDispenser(activity);
+        final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(activity).orElse(null);
 
-        MotorDispenser<?> motorDispenser = new CoreMotorDispenser<>(simpleActivity,
+        MotorDispenser<?> motorDispenser = new CoreMotorDispenser<>(activity,
                 inputDispenser, actionDispenser, outputDispenser);
 
-        simpleActivity.setActionDispenserDelegate(actionDispenser);
-        simpleActivity.setInputDispenserDelegate(inputDispenser);
-        simpleActivity.setMotorDispenserDelegate(motorDispenser);
+        activity.setActionDispenser(actionDispenser);
+        activity.setInputDispenser(inputDispenser);
+        activity.setMotorDispenser(motorDispenser);
 
-        ActivityExecutor activityExecutor = new ActivityExecutor(simpleActivity);
+        ActivityExecutor activityExecutor = new ActivityExecutor(activity);
         activityDef.setThreads(5);
         ForkJoinTask<ExecutionResult> executionResultForkJoinTask = ForkJoinPool.commonPool().submit(activityExecutor);
 
@@ -192,7 +189,7 @@ class ActivityExecutorTest {
         return new MotorDispenser<>() {
             @Override
             public Motor getMotor(final ActivityDef activityDef, final int slotId) {
-                final Activity activity = new SimpleActivity(TestComponent.INSTANCE,activityDef);
+                final Activity activity = new Activity(TestComponent.INSTANCE, activityDef);
                 final Motor<?> cm = new CoreMotor<>(activity, slotId, ls);
                 cm.setAction(lc);
                 return cm;
@@ -215,7 +212,7 @@ class ActivityExecutorTest {
 
     }
 
-    private static class DelayedInitActivity extends SimpleActivity {
+    private static class DelayedInitActivity extends Activity {
         private static final Logger logger = LogManager.getLogger(DelayedInitActivity.class);
 
         public DelayedInitActivity(final ActivityDef activityDef) {

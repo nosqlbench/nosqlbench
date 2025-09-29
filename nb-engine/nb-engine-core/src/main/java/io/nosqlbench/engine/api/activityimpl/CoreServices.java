@@ -31,57 +31,40 @@ import java.util.function.Predicate;
 
 public class CoreServices {
 
-    public static <A extends Activity> Optional<OutputDispenser> getOutputDispenser(A activity) {
+    public static Optional<OutputDispenser> getOutputDispenser(Activity activity) {
         OutputDispenser outputDispenser = new SimpleConfig(activity, "output").getString("type")
-                .flatMap(OutputType.FINDER::get)
-                .map(mt -> mt.getOutputDispenser(activity)).orElse(null);
-        if (outputDispenser==null) {
+            .flatMap(OutputType.FINDER::get)
+            .map(mt -> mt.getOutputDispenser(activity))
+            .orElse(null);
+
+        if (outputDispenser == null) {
             return Optional.empty();
         }
 
-        Optional<Predicate<ResultReadable>> outputFilterDispenser = getOutputFilter(activity);
-        if (outputFilterDispenser.isPresent()) {
-            outputDispenser = new FilteringOutputDispenser(outputDispenser, outputFilterDispenser.get());
-        }
-
-        return Optional.ofNullable(outputDispenser);
+        return Optional.of(applyOutputFilter(outputDispenser, resolveFilter(activity, "of", "outputfilter")));
     }
 
-    public static <A extends Activity> Optional<Predicate<ResultReadable>> getOutputFilter(A activity) {
-        String paramdata= activity.getParams().getOptionalString("of")
-                .orElse(activity.getParams().getOptionalString("outputfilter").orElse(null));
-        if (paramdata==null) {
-            return Optional.empty();
-        }
-        return getFilterPredicate(paramdata);
-    }
-
-//    public static <A extends Activity> Optional<IntPredicateDispenser> getResultFilterDispenser(A activity) {
-//        Optional<IntPredicateDispenser> intPredicateDispenser = new SimpleConfig(activity, "resultfilter")
-//                .getString("type")
-//                .flatMap(ExperimentalResultFilterType.FINDER::get)
-//                .map(rft -> rft.getFilterDispenser(activity));
-//        return intPredicateDispenser;
-//    }
-//
-    public static <A extends Activity> InputDispenser getInputDispenser(A activity) {
+    public static InputDispenser getInputDispenser(Activity activity) {
         String inputTypeName = new SimpleConfig(activity, "input").getString("type").orElse("atomicseq");
         InputType inputType = InputType.FINDER.getOrThrow(inputTypeName);
         InputDispenser dispenser = inputType.getInputDispenser(activity);
-        Optional<Predicate<ResultReadable>> inputFilterDispenser = getInputFilter(activity);
-        if (inputFilterDispenser.isPresent()) {
-            dispenser = new FilteringInputDispenser(dispenser, inputFilterDispenser.get());
+        Optional<Predicate<ResultReadable>> inputFilter = resolveFilter(activity, "if", "inputfilter");
+        if (inputFilter.isPresent()) {
+            dispenser = new FilteringInputDispenser(dispenser, inputFilter.get());
         }
         return dispenser;
     }
 
-    public static <A extends Activity> Optional<Predicate<ResultReadable>> getInputFilter(A activity) {
-        String paramdata= activity.getParams().getOptionalString("if")
-                .orElse(activity.getParams().getOptionalString("inputfilter").orElse(null));
-        if (paramdata==null) {
-            return Optional.empty();
-        }
-        return getFilterPredicate(paramdata);
+    private static OutputDispenser applyOutputFilter(OutputDispenser dispenser, Optional<Predicate<ResultReadable>> filter) {
+        return filter
+            .map(predicate -> (OutputDispenser) new FilteringOutputDispenser(dispenser, predicate))
+            .orElse(dispenser);
+    }
+
+    private static Optional<Predicate<ResultReadable>> resolveFilter(Activity activity, String shortKey, String longKey) {
+        return activity.getParams().getOptionalString(shortKey)
+            .or(() -> activity.getParams().getOptionalString(longKey))
+            .flatMap(CoreServices::getFilterPredicate);
     }
 
     private static Optional<Predicate<ResultReadable>> getFilterPredicate(String paramdata) {

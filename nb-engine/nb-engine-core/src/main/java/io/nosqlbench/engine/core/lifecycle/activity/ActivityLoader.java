@@ -19,7 +19,14 @@ package io.nosqlbench.engine.core.lifecycle.activity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
+import io.nosqlbench.engine.api.activityapi.core.ActivitiesAware;
+import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
+import io.nosqlbench.engine.api.activityapi.core.MotorDispenser;
+import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
+import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
+import io.nosqlbench.engine.api.activityimpl.CoreServices;
+import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
+import io.nosqlbench.engine.api.activityimpl.uniform.StandardActionDispenser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,9 +46,37 @@ public class ActivityLoader {
     }
 
     public synchronized Activity loadActivity(ActivityDef activityDef, final NBComponent parent) {
-        activityDef= activityDef.deprecate("yaml","workload").deprecate("type","driver");
-        final Activity activity = new StandardActivityType<>(activityDef, parent).getAssembledActivity(activityDef, this.activityMap, parent);
-        this.activityMap.put(activity.getAlias(),activity);
+        activityDef = activityDef.deprecate("yaml", "workload").deprecate("type", "driver");
+
+        // Create the activity instance directly (using Activity for compatibility)
+        final Activity activity = new Activity(parent, activityDef);
+
+        // Assemble the dispensers like StandardActivityType did
+        final InputDispenser inputDispenser = CoreServices.getInputDispenser(activity);
+        if (inputDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware) inputDispenser).setActivitiesMap(activityMap);
+        }
+        activity.setInputDispenser(inputDispenser);
+
+        final ActionDispenser actionDispenser = new StandardActionDispenser(activity);
+        if (actionDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware) actionDispenser).setActivitiesMap(activityMap);
+        }
+        activity.setActionDispenser(actionDispenser);
+
+        final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(activity).orElse(null);
+        if ((null != outputDispenser) && (outputDispenser instanceof ActivitiesAware)) {
+            ((ActivitiesAware) outputDispenser).setActivitiesMap(activityMap);
+        }
+        activity.setOutputDispenser(outputDispenser);
+
+        final MotorDispenser<?> motorDispenser = new CoreMotorDispenser<>(activity, inputDispenser, actionDispenser, outputDispenser);
+        if (motorDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware) motorDispenser).setActivitiesMap(activityMap);
+        }
+        activity.setMotorDispenser(motorDispenser);
+
+        this.activityMap.put(activity.getAlias(), activity);
         ActivityLoader.logger.debug("Resolved activity for alias '{}'", activityDef.getAlias());
         return activity;
     }
