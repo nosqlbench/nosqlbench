@@ -216,11 +216,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
             if (activity.getRunState() == RunState.Running) {
                 adjustMotorCountToThreadParam(activity.getActivityDef());
             }
-            motors.stream()
-                .filter(m -> (m instanceof ActivityDefObserver))
-//                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Uninitialized)
-//                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Starting)
-                .forEach(m -> ((ActivityDefObserver) m).onActivityDefUpdate(activityDef));
+            ActivityDefObserver.apply(activityDef, motors.toArray());
         }
     }
 
@@ -260,7 +256,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         // Create motor slots
         try {
             while (motors.size() < activityDef.getThreads()) {
-                Motor motor = activity.getMotorDispenserDelegate().getMotor(activityDef, motors.size());
+                Motor motor = activity.getMotorDispenser().getMotor(activityDef, motors.size());
                 logger.trace(() -> "Starting cycle motor thread:" + motor);
                 motors.add(motor);
             }
@@ -612,5 +608,3 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         }
     }
 }
-
-
