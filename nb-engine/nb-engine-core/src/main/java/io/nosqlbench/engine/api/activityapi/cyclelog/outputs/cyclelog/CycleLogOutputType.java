@@ -42,7 +42,7 @@ public class CycleLogOutputType implements OutputType {
 
         public Dispenser(Activity activity) {
             this.activity = activity;
-            Input input = activity.getInputDispenserDelegate().getInput(0);
+            Input input = activity.getInputDispenser().getInput(0);
             CycleLogOutput rleFileWriter = new CycleLogOutput(activity);
 
             // TODO: Rework this so that the contiguous marking chunker can onAfterOpStop filtering

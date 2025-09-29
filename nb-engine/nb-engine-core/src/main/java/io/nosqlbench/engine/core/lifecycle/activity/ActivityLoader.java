@@ -19,7 +19,6 @@ package io.nosqlbench.engine.core.lifecycle.activity;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
-import io.nosqlbench.engine.api.activityapi.core.ActivityImpl;
 import io.nosqlbench.engine.api.activityapi.core.ActivitiesAware;
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
 import io.nosqlbench.engine.api.activityapi.core.MotorDispenser;
@@ -57,25 +56,25 @@ public class ActivityLoader {
         if (inputDispenser instanceof ActivitiesAware) {
             ((ActivitiesAware) inputDispenser).setActivitiesMap(activityMap);
         }
-        activity.setInputDispenserDelegate(inputDispenser);
+        activity.setInputDispenser(inputDispenser);
 
         final ActionDispenser actionDispenser = new StandardActionDispenser(activity);
         if (actionDispenser instanceof ActivitiesAware) {
             ((ActivitiesAware) actionDispenser).setActivitiesMap(activityMap);
         }
-        activity.setActionDispenserDelegate(actionDispenser);
+        activity.setActionDispenser(actionDispenser);
 
         final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(activity).orElse(null);
         if ((null != outputDispenser) && (outputDispenser instanceof ActivitiesAware)) {
             ((ActivitiesAware) outputDispenser).setActivitiesMap(activityMap);
         }
-        activity.setOutputDispenserDelegate(outputDispenser);
+        activity.setOutputDispenser(outputDispenser);
 
         final MotorDispenser<?> motorDispenser = new CoreMotorDispenser<>(activity, inputDispenser, actionDispenser, outputDispenser);
         if (motorDispenser instanceof ActivitiesAware) {
             ((ActivitiesAware) motorDispenser).setActivitiesMap(activityMap);
         }
-        activity.setMotorDispenserDelegate(motorDispenser);
+        activity.setMotorDispenser(motorDispenser);
 
         this.activityMap.put(activity.getAlias(), activity);
         ActivityLoader.logger.debug("Resolved activity for alias '{}'", activityDef.getAlias());

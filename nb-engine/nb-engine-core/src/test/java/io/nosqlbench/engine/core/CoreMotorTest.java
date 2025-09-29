@@ -59,7 +59,7 @@ public class CoreMotorTest {
 
     @Test
     public void testIteratorStride() {
-        SimpleActivity activity = new SimpleActivity(TestComponent.INSTANCE, "stride=3");
+        Activity activity = new Activity(TestComponent.INSTANCE, "stride=3");
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
         final Motor cm1 = new CoreMotor(activity, 1L, lockstepper);
         final AtomicLongArray ary = new AtomicLongArray(10);

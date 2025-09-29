@@ -17,18 +17,18 @@
 package io.nosqlbench.engine.api.activityimpl.uniform;
 
 import io.nosqlbench.engine.api.activityapi.core.ActionDispenser;
-import io.nosqlbench.engine.api.activityapi.core.ActivityImpl;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityimpl.uniform.actions.StandardAction;
 
 public class StandardActionDispenser implements ActionDispenser {
-    private final ActivityImpl activity;
+    private final Activity activity;
 
-    public StandardActionDispenser(ActivityImpl activity) {
+    public StandardActionDispenser(Activity activity) {
         this.activity = activity;
     }
 
     @Override
-    public StandardAction<?,?> getAction(int slot) {
-        return new StandardAction<>(activity, slot);
+    public StandardAction getAction(int slot) {
+        return new StandardAction(activity, slot);
     }
 }
