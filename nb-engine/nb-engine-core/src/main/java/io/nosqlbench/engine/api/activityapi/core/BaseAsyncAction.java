@@ -25,17 +25,16 @@ import org.apache.logging.log4j.LogManager;
 /**
  *
  * @param <D> An type of state holder for an operation, holding everything unique to that cycle and operation
- * @param <A> An type of of an Activity, a state holder for a runtime instance of an Activity
  */
-public abstract class BaseAsyncAction<D, A extends Activity> implements AsyncAction<D>, Stoppable, ActivityDefObserver {
+public abstract class BaseAsyncAction<D> implements AsyncAction<D>, Stoppable, ActivityDefObserver {
     private final static Logger logger = LogManager.getLogger("BaseAsyncAction");
 
-    protected final A activity;
+    protected final Activity activity;
 
     protected int slot;
     protected boolean running = true;
 
-    public BaseAsyncAction(A activity, int slot) {
+    public BaseAsyncAction(Activity activity, int slot) {
         this.activity = activity;
         this.slot = slot;
 

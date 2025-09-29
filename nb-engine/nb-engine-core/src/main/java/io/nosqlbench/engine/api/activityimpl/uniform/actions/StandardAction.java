@@ -19,36 +19,29 @@ package io.nosqlbench.engine.api.activityimpl.uniform.actions;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
-import io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.*;
 import io.nosqlbench.adapters.api.evalctx.CycleFunction;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.ResultVerificationError;
 import io.nosqlbench.engine.api.activityapi.core.ActivityDefObserver;
+import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.SyncAction;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.ErrorDetail;
 import io.nosqlbench.engine.api.activityapi.errorhandling.modular.NBErrorHandler;
 import io.nosqlbench.engine.api.activityapi.planning.OpSequence;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- This is the generified version of an Action. All driver adapters us this, as opposed
+ This is the unified version of an Action. All driver adapters use this, as opposed
  to previous NB versions where it was implemented for each driver.
  <p>
  This allows the API to be consolidated so that the internal machinery of NB
  works in a very consistent and uniform way for all users and drivers.
- @param <A>
- The type of activity
- @param <R>
- The type of operation */
-public class StandardAction<A extends StandardActivity<R, ?>, R extends java.util.function.LongFunction>
-    implements SyncAction, ActivityDefObserver
-{
+ */
+public class StandardAction implements SyncAction, ActivityDefObserver {
     private final static Logger logger = LogManager.getLogger("ACTION");
     private final Timer executeTimer;
     private final Histogram triesHistogram;
@@ -60,7 +53,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends java.uti
     private final int maxTries;
     private final Timer verifierTimer;
 
-    public StandardAction(A activity, int slot) {
+    public StandardAction(Activity activity, int slot) {
         this.opsequence = activity.getOpSequence();
         this.maxTries = activity.getMaxTries();
         bindTimer = activity.getInstrumentation().getOrCreateBindTimer();
@@ -164,6 +157,7 @@ public class StandardAction<A extends StandardActivity<R, ?>, R extends java.uti
 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
+        // Activity handles rate limiter and error handler refresh internally.
     }
 
 }

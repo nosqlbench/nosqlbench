@@ -73,7 +73,7 @@ public class ContiguousOutputChunker implements Output {
 
     public ContiguousOutputChunker(Activity activity) {
 
-        if (!(activity.getInputDispenserDelegate().getInput(0).isContiguous())) {
+        if (!(activity.getInputDispenser().getInput(0).isContiguous())) {
             throw new RuntimeException("This type of output may not be used with non-contiguous inputs yet.");
             // If you are looking at this code, it's because we count updates to extents to provide
             // efficient marker extent handling. The ability to use segmented inputs with markers will
