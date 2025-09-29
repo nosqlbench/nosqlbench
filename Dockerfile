@@ -1,4 +1,4 @@
-FROM eclipse-temurin:24-jdk
+FROM eclipse-temurin:25-jdk
 
 COPY nb5/target/nb5.jar nb5.jar
 ENTRYPOINT ["java","--enable-preview", "-XX:+UseZGC", "-jar", "nb5.jar"]

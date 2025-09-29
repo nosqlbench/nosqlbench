@@ -18,6 +18,7 @@ package io.nosqlbench.engine.core.lifecycle.activity;
 
 import io.nosqlbench.adapter.diag.DriverAdapterLoader;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
+import io.nosqlbench.engine.api.activityimpl.uniform.ActivityDefAware;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
@@ -25,7 +26,6 @@ import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.spi.SimpleServiceLoader;
 import io.nosqlbench.nb.api.system.NBEnvironment;
-import io.nosqlbench.engine.api.activityimpl.uniform.StandardActivityType;
 import io.nosqlbench.nb.annotations.Maturity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -118,7 +118,7 @@ public class ActivityTypeLoader {
         return urlsToAdd;
     }
 
-    public Optional<StandardActivityType> load(final ActivityDef activityDef, final NBComponent parent) {
+    public Optional<DriverAdapter<?, ?>> load(final ActivityDef activityDef, final NBComponent parent) {
 
         String driverName = activityDef.getParams()
             .getOptionalString("driver", "type")
@@ -135,20 +135,19 @@ public class ActivityTypeLoader {
             })
             .ifPresent(this::extendClassLoader);
 
-        return getDriverAdapter(driverName,activityDef,parent);
+        return getDriverAdapter(driverName, activityDef, parent);
 
     }
 
-    private Optional<StandardActivityType> getDriverAdapter(final String activityTypeName, final ActivityDef activityDef, final NBComponent parent) {
+    private Optional<DriverAdapter<?, ?>> getDriverAdapter(final String activityTypeName, final ActivityDef activityDef, final NBComponent parent) {
         final Optional<DriverAdapter> oda = this.DRIVERADAPTER_SPI_FINDER.getOptionally(activityTypeName);
 
-        if (oda.isPresent()) {
-            final DriverAdapter<?, ?> driverAdapter = oda.get();
-
-            final StandardActivityType activityType = new StandardActivityType<>(driverAdapter, activityDef, parent);
-            return Optional.of(activityType);
-        }
-        return Optional.empty();
+        return oda.map(adapter -> {
+            if (adapter instanceof ActivityDefAware aware) {
+                aware.setActivityDef(activityDef);
+            }
+            return adapter;
+        });
     }
 
     public Set<String> getAllSelectors() {

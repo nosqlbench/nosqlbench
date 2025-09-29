@@ -323,11 +323,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
 
-        for (Object component : (new Object[]{input, opTracker, action, output})) {
-            if (component instanceof ActivityDefObserver) {
-                ((ActivityDefObserver) component).onActivityDefUpdate(activityDef);
-            }
-        }
+        ActivityDefObserver.apply(activityDef, input, opTracker, action, output);
 
         this.stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
         strideRateLimiter = activity.getStrideLimiter();
