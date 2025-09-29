@@ -94,7 +94,7 @@ public class CMD_reset extends NBBaseCommand {
             //TODO: This needs to be reworked, but simply calling controller.start on the flywheel results in 2
             //      copies of the activity running simultaneously. This is a temporary workaround.
             SimFrameUtils.awaitActivity(flywheel);
-            flywheel.getMotorDispenserDelegate().getMotor(flywheel.getActivityDef(), 0).run();
+            flywheel.getMotorDispenser().getMotor(flywheel.getActivityDef(), 0).run();
         }
 
         return null;

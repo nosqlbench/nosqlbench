@@ -60,7 +60,12 @@ is responsible for doing two critical steps:
 
 Much of the boilerplate for doing this is handled already by the default
 Activity implementation which is used by all drivers: the
-_SimpleActivity_.
+`Activity` class. The concrete implementation now exposes direct setters
+such as `setInputDispenser(...)`, `setActionDispenser(...)`, and
+`setMotorDispenser(...)`, replacing the older `*Delegate` helpers. When you
+provide dispensers through these methods, NoSQLBench automatically applies
+the current `ActivityDef` to any listeners, removing the need for manual
+wiring in driver code.
 
 ## Op Mapping
 
