@@ -2,8 +2,8 @@ package io.nosqlbench.adapter.s4j.util;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.jms.JMSContext;
-import javax.jms.Session;
+import jakarta.jms.JMSContext;
+import jakarta.jms.Session;
 
 /*
  * Copyright (c) nosqlbench

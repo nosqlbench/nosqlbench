@@ -23,7 +23,6 @@ import io.nosqlbench.adapter.s4j.exception.S4JAdapterUnexpectedException;
 import io.nosqlbench.adapter.s4j.ops.MessageProducerOp;
 import io.nosqlbench.adapter.s4j.util.S4JAdapterUtil;
 import io.nosqlbench.adapter.s4j.util.S4JJMSContextWrapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +31,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.jms.*;
+import jakarta.jms.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

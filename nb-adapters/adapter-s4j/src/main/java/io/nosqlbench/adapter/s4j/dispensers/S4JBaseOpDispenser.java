@@ -29,7 +29,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.jms.*;
+import jakarta.jms.*;
 import java.util.*;
 import java.util.function.LongFunction;
 import java.util.function.Predicate;
