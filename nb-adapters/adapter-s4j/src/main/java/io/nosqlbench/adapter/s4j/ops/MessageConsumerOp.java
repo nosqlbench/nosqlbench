@@ -16,21 +16,13 @@
 
 package io.nosqlbench.adapter.s4j.ops;
 
-import com.codahale.metrics.Timer;
 import io.nosqlbench.adapter.s4j.S4JSpace;
-import io.nosqlbench.adapter.s4j.exception.S4JAdapterAsyncOperationFailedException;
-import io.nosqlbench.adapter.s4j.exception.S4JAdapterUnexpectedException;
 import io.nosqlbench.adapter.s4j.util.S4JAdapterMetrics;
 import io.nosqlbench.adapter.s4j.util.S4JAdapterUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.pulsar.shade.org.apache.avro.AvroRuntimeException;
 
-import javax.jms.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import jakarta.jms.*;
 
 public class MessageConsumerOp extends S4JOp {
 

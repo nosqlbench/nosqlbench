@@ -23,10 +23,10 @@ import io.nosqlbench.adapter.s4j.dispensers.S4JBaseOpDispenser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.jms.JMSContext;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
+import jakarta.jms.JMSContext;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageListener;
 
 /**
  *  Used for async message consumption

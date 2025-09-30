@@ -21,8 +21,8 @@ import io.nosqlbench.adapter.s4j.S4JSpace;
 import io.nosqlbench.adapter.s4j.util.S4JAdapterMetrics;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
-import javax.jms.Destination;
-import javax.jms.JMSContext;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSContext;
 
 public abstract class S4JOp implements CycleOp<Object> {
     protected S4JAdapterMetrics s4jAdapterMetrics;

@@ -10,7 +10,8 @@ bindings:
 # document level parameters that apply to all Pulsar client types:
 params:
   temporary_dest: "false"
-  dest_type: "queue"
+#  dest_type: "queue"
+  dest_type: "topic"
   async_api: "true"
 
 blocks:
