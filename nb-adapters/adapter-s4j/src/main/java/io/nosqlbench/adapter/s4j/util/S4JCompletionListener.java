@@ -22,9 +22,9 @@ import io.nosqlbench.adapter.s4j.dispensers.S4JBaseOpDispenser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.jms.CompletionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
+import jakarta.jms.CompletionListener;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 
 /**
  *  Used for async message production

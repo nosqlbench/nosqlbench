@@ -13,7 +13,8 @@ blocks:
   msg-produce-block:
     ops:
       op1:
-        MessageProduce: "tnt0/ns0/tp0"
+#        MessageProduce: "tnt0/ns0/tp0"
+        MessageProduce: "public/default/tp0"
         msg_key: "{mykey}"
         msg_prop: |
           {

@@ -21,13 +21,12 @@ import io.nosqlbench.adapter.s4j.S4JSpace;
 import io.nosqlbench.adapter.s4j.ops.MessageConsumerOp;
 import io.nosqlbench.adapter.s4j.util.S4JAdapterUtil;
 import io.nosqlbench.adapter.s4j.util.S4JJMSContextWrapper;
-import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.jms.*;
+import jakarta.jms.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.LongFunction;

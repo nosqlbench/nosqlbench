@@ -17,17 +17,13 @@
 package io.nosqlbench.adapter.s4j.ops;
 
 
-import com.codahale.metrics.Histogram;
 import io.nosqlbench.adapter.s4j.S4JSpace;
 import io.nosqlbench.adapter.s4j.util.S4JAdapterMetrics;
 import io.nosqlbench.adapter.s4j.util.S4JAdapterUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
-import javax.jms.*;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.jms.*;
 
 
 public class MessageProducerOp extends S4JOp {
