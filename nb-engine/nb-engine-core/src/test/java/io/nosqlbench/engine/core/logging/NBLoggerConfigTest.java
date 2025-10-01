@@ -19,10 +19,13 @@ package io.nosqlbench.engine.core.logging;
 
 
 import io.nosqlbench.nb.api.logging.NBLogLevel;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.appender.NullAppender;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
@@ -68,6 +71,38 @@ class NBLoggerConfigTest {
                 loggerContext.start(originalConfiguration);
             }
         }
+    }
+
+    @Test
+    void defaultConfigurationIsNoopUntilActivation() {
+        Configuration defaultConfig = loggerContext.getConfiguration();
+        assertThat(defaultConfig.getName()).isEqualTo("nosqlbench-default");
+        assertThat(defaultConfig.getRootLogger().getLevel()).isEqualTo(Level.OFF);
+
+        Appender noopAppender = defaultConfig.getAppender("noop");
+        assertThat(noopAppender).isInstanceOf(NullAppender.class);
+
+        Logger logger = LogManager.getLogger("noop-test");
+        assertThat(logger.isInfoEnabled()).isFalse();
+        assertThat(logger.isErrorEnabled()).isFalse();
+
+        NBLoggerConfig config = new NBLoggerConfig()
+            .setSessionName("noopuntilactivation")
+            .setLogsDirectory(tempDir)
+            .setConsoleLevel(NBLogLevel.INFO)
+            .setLogfileLevel(NBLogLevel.INFO);
+
+        config.activate();
+
+        Configuration activatedConfig = loggerContext.getConfiguration();
+        assertThat(activatedConfig.getName()).isEqualTo("nosqlbench-logging");
+        assertThat(activatedConfig.getRootLogger().getLevel()).isEqualTo(Level.INFO);
+
+        Appender sessionAppender = activatedConfig.getAppender(NBLoggerConfig.SESSION_APPENDER);
+        assertThat(sessionAppender).isInstanceOf(FileAppender.class);
+
+        Logger postActivationLogger = LogManager.getLogger("noop-test");
+        assertThat(postActivationLogger.isInfoEnabled()).isTrue();
     }
 
     @Test
