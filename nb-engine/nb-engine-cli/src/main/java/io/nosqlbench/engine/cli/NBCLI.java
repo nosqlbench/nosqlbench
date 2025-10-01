@@ -71,20 +71,18 @@ import java.util.stream.Collectors;
 
 public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
-    private static Logger logger;
-    private static final NBLoggerConfig loggerConfig;
     private static final int EXIT_OK = 0;
     private static final int EXIT_WARNING = 1;
     private static final int EXIT_ERROR = 2;
     private static final String version;
 
     static {
-        loggerConfig = new NBLoggerConfig();
-        ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig);
         version = new VersionInfo().getVersion();
     }
 
     private final String commandName;
+    private Logger logger;
+    private NBLoggerConfig loggerConfig;
     private String sessionName;
     private String sessionCode;
     private long sessionTime;
@@ -138,8 +136,9 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
             final int result = NBCLIErrorHandler.handle(e, showStackTraces, NBCLI.version);
             // Commented for now, as the above handler should do everything needed.
-            if (result != 0) System.err.println("Scenario stopped due to error. See logs for details. Session log is '"+
-                                                NBCLI.loggerConfig.getLogfileLocation()+"'");
+            if (result != 0) {
+                System.err.println("Scenario stopped due to error. See logs for details.");
+            }
             System.err.flush();
             System.out.flush();
             return result;
@@ -148,23 +147,16 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
     public Integer applyDirect(final String[] args) {
 
-        // Initial logging config covers only command line parsing
-        // We don't want anything to go to console here unless it is a real problem
-        // as some integrations will depend on a stable and parsable program output
-//        new LoggerConfig()
-//                .setConsoleLevel(NBLogLevel.INFO.ERROR)
-//                .setLogfileLevel(NBLogLevel.ERROR)
-//                .activate();
-//        logger = LogManager.getLogger("NBCLI");
-
-        NBCLI.loggerConfig.setConsoleLevel(NBLogLevel.ERROR);
+        // Parse command line options before initializing logging
+        // This ensures we have all the logging configuration ready before activating
         this.sessionTime = System.currentTimeMillis();
         final NBCLIOptions globalOptions = new NBCLIOptions(args, Mode.ParseGlobalsOnly);
         this.labels = globalOptions.getLabels();
         this.sessionCode = SystemId.genSessionCode(sessionTime);
         this.sessionName = SessionNamer.format(globalOptions.getSessionName(), sessionTime).replaceAll("SESSIONCODE", sessionCode);
 
-        NBCLI.loggerConfig
+        // Create and configure logger with all settings at once, then activate
+        this.loggerConfig = new NBLoggerConfig()
             .setSessionName(sessionName)
             .setConsoleLevel(globalOptions.getConsoleLogLevel())
             .setConsolePattern(globalOptions.getConsoleLoggingPattern())
@@ -174,16 +166,25 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             .setMaxLogs(globalOptions.getLogsMax())
             .setLogsDirectory(globalOptions.getLogsDirectory())
             .setAnsiEnabled(globalOptions.isEnableAnsi())
-            .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
-            .activate();
-        ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig); // THIS should be the first time log4j2 is invoked!
+            .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger());
 
-        NBCLI.logger = LogManager.getLogger("NBCLI"); // TODO: Detect if the logger config was already initialized (error)
-        NBCLI.loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
-        if (NBCLI.logger.isInfoEnabled())
-            NBCLI.logger.info(() -> "Configured scenario log at " + NBCLI.loggerConfig.getLogfileLocation());
-        else System.err.println("Configured scenario log at " + NBCLI.loggerConfig.getLogfileLocation());
-        NBCLI.logger.debug("Scenario log started");
+        // Activate initializes Log4j2 and creates log files
+        this.loggerConfig.activate();
+
+        // Now we can safely get loggers
+        this.logger = LogManager.getLogger("NBCLI");
+        this.loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
+        if (this.logger.isInfoEnabled())
+            this.logger.info(() -> "Configured scenario log at " + this.loggerConfig.getLogfileLocation());
+        else System.err.println("Configured scenario log at " + this.loggerConfig.getLogfileLocation());
+
+        Path sessionLink = this.loggerConfig.getSessionLinkPath();
+        if (sessionLink != null) {
+            if (this.logger.isInfoEnabled())
+                this.logger.info(() -> "Latest scenario log symlink at " + sessionLink);
+            else System.err.println("Latest scenario log symlink at " + sessionLink);
+        }
+        this.logger.debug("Scenario log started");
 
         // Global only processing
         if (0 == args.length) {
@@ -191,9 +192,9 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             return NBCLI.EXIT_OK;
         }
 
-        NBCLI.logger.info(() -> "Running NoSQLBench Version " + NBCLI.version);
-        NBCLI.logger.info(() -> "command-line: " + String.join(" ", args));
-        NBCLI.logger.info(() -> "client-hardware: " + SystemId.getHostSummary());
+        this.logger.info(() -> "Running NoSQLBench Version " + NBCLI.version);
+        this.logger.info(() -> "command-line: " + String.join(" ", args));
+        this.logger.info(() -> "client-hardware: " + SystemId.getHostSummary());
 
 
         // Invoke any bundled app which matches the name of the first non-option argument, if it exists.
@@ -203,7 +204,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             final BundledApp app = apploader.get().orElse(null);
             if (null != app) {
                 final String[] appargs = Arrays.copyOfRange(args, 1, args.length);
-                NBCLI.logger.info(() -> "invoking bundled app '" + args[0] + "' (" + app.getClass().getSimpleName() + ").");
+                this.logger.info(() -> "invoking bundled app '" + args[0] + "' (" + app.getClass().getSimpleName() + ").");
                 globalOptions.setWantsStackTraces(true);
                 final int result = app.applyAsInt(appargs);
                 return result;
@@ -224,7 +225,6 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         final NBCLIOptions options = new NBCLIOptions(args, Mode.ParseAllOptions);
-        NBCLI.logger = LogManager.getLogger("NBCLI");
 
         NBIO.addGlobalIncludes(options.wantsIncludes());
         NBIO.setUseNBIOCache(options.wantsToUseNBIOCache());
@@ -308,7 +308,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
         if (options.wantsToCatResource()) {
             final String resourceToCat = options.wantsToCatResourceNamed();
-            NBCLI.logger.debug(() -> "user requests to cat " + resourceToCat);
+            this.logger.debug(() -> "user requests to cat " + resourceToCat);
 
             Optional<Content<?>> tocat = NBIO.classpath()
                 .searchPrefixes("activities")
@@ -324,13 +324,13 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 () -> new BasicError("Unable to find " + resourceToCat + " in classpath to cat out"));
 
             System.out.println(data.get());
-            NBCLI.logger.info(() -> "Dumped internal resource '" + data.asPath() + "' to stdout");
+            this.logger.info(() -> "Dumped internal resource '" + data.asPath() + "' to stdout");
             return NBCLI.EXIT_OK;
         }
 
         if (options.wantsToCopyResource()) {
             final String resourceToCopy = options.wantsToCopyResourceNamed();
-            NBCLI.logger.debug(() -> "user requests to copy out " + resourceToCopy);
+            this.logger.debug(() -> "user requests to copy out " + resourceToCopy);
 
             Optional<Content<?>> tocopy = NBIO.classpath()
                 .searchPrefixes("activities")
@@ -353,7 +353,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             } catch (final IOException e) {
                 throw new BasicError("Unable to write to " + writeTo + ": " + e.getMessage());
             }
-            NBCLI.logger.info(() -> "Copied internal resource '" + data.asPath() + "' to '" + writeTo + '\'');
+            this.logger.info(() -> "Copied internal resource '" + data.asPath() + "' to '" + writeTo + '\'');
             return NBCLI.EXIT_OK;
 
         }
@@ -398,7 +398,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             return NBCLI.EXIT_OK;
         }
 
-        NBCLI.logger.debug("initializing annotators with config:'{}'", annotatorsConfig);
+        this.logger.debug("initializing annotators with config:'{}'", annotatorsConfig);
         Annotators.init(annotatorsConfig, options.getAnnotateLabelSpec());
         Annotators.recordAnnotation(
             Annotation.newBuilder()
@@ -409,7 +409,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 .build()
         );
 
-        NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
+        this.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
 
         Map<String, String> props = Map.of(
             "summary", options.getReportSummaryTo(),
