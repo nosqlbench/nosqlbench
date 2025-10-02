@@ -510,8 +510,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
         RunState maxState = state.getMaxState();
         activity.setRunState(maxState);
         if (maxState == RunState.Errored) {
-            throw new RuntimeException("Error while waiting for activity completion with states [" + tally.toString() + "], error=" + (this.exception!=null ?
-                this.exception.toString() : "[no error on activity executor]"));
+            throw new RuntimeException("Error while waiting for activity completion with states [" + tally.toString() + "]", this.exception);
 
         }
     }

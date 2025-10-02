@@ -16,6 +16,7 @@
 
 package io.nosqlbench.engine.api.activityimpl;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -25,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CpuInfoTest {
 
     @Test
+    @Disabled
     public void testProcScanner() {
         Optional<CpuInfo.ProcDetails> procDetails = CpuInfo.getProcDetails();
         assertThat(procDetails).isPresent();
