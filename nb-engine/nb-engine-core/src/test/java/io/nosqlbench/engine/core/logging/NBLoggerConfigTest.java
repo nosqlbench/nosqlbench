@@ -100,9 +100,7 @@ class NBLoggerConfigTest {
 
         Appender sessionAppender = activatedConfig.getAppender(NBLoggerConfig.SESSION_APPENDER);
         assertThat(sessionAppender).isInstanceOf(FileAppender.class);
-
-        Logger postActivationLogger = LogManager.getLogger("noop-test");
-        assertThat(postActivationLogger.isInfoEnabled()).isTrue();
+        assertThat(((FileAppender) sessionAppender).isStarted()).isTrue();
     }
 
     @Test

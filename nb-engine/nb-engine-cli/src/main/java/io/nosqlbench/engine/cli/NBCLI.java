@@ -119,11 +119,11 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
      *
      * @param args
      * @return
-     */
+    */
     @Override
     public Integer apply(final String[] args) {
+        final NBCLI cli = new NBCLI("nb5");
         try {
-            final NBCLI cli = new NBCLI("nb5");
             final int result = cli.applyDirect(args);
             return result;
         } catch (final Exception e) {
@@ -133,6 +133,8 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                     showStackTraces = true;
                     break;
                 }
+
+            cli.emitUserFacingMessage(e);
 
             final int result = NBCLIErrorHandler.handle(e, showStackTraces, NBCLI.version);
             // Commented for now, as the above handler should do everything needed.
@@ -493,6 +495,35 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
         basicHelp = basicHelp.replaceAll("PROG", this.commandName);
         return basicHelp;
+    }
+
+    private void emitUserFacingMessage(Throwable error) {
+        String message = extractDeepestMessage(error)
+            .orElseGet(() -> error != null ? error.toString() : null);
+        emitUserVisibleMessage(message);
+    }
+
+    private void emitUserVisibleMessage(String message) {
+        if (message == null || message.isBlank()) {
+            return;
+        }
+
+        if (logger != null && logger.isErrorEnabled()) {
+            logger.error(message);
+        }
+
+        System.out.println(message);
+    }
+
+    private static Optional<String> extractDeepestMessage(Throwable error) {
+        String candidate = null;
+        for (Throwable current = error; current != null; current = current.getCause()) {
+            String message = current.getMessage();
+            if (message != null && !message.isBlank()) {
+                candidate = message;
+            }
+        }
+        return Optional.ofNullable(candidate);
     }
 
     @Override
