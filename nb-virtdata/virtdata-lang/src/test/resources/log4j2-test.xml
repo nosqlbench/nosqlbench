@@ -15,14 +15,42 @@
   ~ limitations under the License.
   -->
 
-<Configuration status="off" strict="true" name="nosqlbench-default">
+<Configuration status="${project.test_logstatuslevel}" strict="true" name="XMLConfigTest">
+
+  <Filter type="ThresholdFilter" level="trace"/>
+
   <Appenders>
-    <Null name="noop"/>
+    <Appender type="Console" name="STDOUT">
+      <Layout type="PatternLayout" pattern="%7r %-5level [%t] %-12logger{0} %msg%n%throwable"/>
+      <Filters>
+        <Filter type="MarkerFilter" marker="FLOW" onMatch="DENY" onMismatch="NEUTRAL"/>
+        <Filter type="MarkerFilter" marker="EXCEPTION" onMatch="DENY" onMismatch="ACCEPT"/>
+      </Filters>
+    </Appender>
+    <Appender type="Console" name="FLOW">
+      <Layout type="PatternLayout" pattern="%C{1}.%M %m %ex%n"/><!-- class and line number -->
+      <Filters>
+        <Filter type="MarkerFilter" marker="FLOW" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+        <Filter type="MarkerFilter" marker="EXCEPTION" onMatch="ACCEPT" onMismatch="DENY"/>
+      </Filters>
+    </Appender>
+    <Appender type="File" name="APPSLOG" fileName="docs/apps.log">
+      <Layout type="PatternLayout">
+        <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+      </Layout>
+    </Appender>
   </Appenders>
 
   <Loggers>
-    <Root level="off">
-      <AppenderRef ref="noop"/>
+
+    <Logger name="io.nosqlbench.docsys" level="info" additivity="false">
+      <AppenderRef ref="APPSLOG"/>
+    </Logger>
+
+    <Root level="${project.testlevel}">
+      <AppenderRef ref="STDOUT"/>
     </Root>
+
   </Loggers>
+
 </Configuration>

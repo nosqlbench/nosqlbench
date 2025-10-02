@@ -19,7 +19,6 @@
 
 **Note**: The `jshook/nb523` branch serves as a reference implementation showing the intended architectural changes. This `refactorings1` branch will apply those changes incrementally in a cleaner, more systematic way.
 
-Further work on this will be after 5.25.0 is released.
 ---
 
 ## Executive Summary
