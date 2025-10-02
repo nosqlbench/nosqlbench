@@ -18,6 +18,7 @@ package io.nosqlbench.engine.core.logging;
 
 import io.nosqlbench.nb.api.logging.NBLogLevel;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Filter;
@@ -31,6 +32,7 @@ import org.apache.logging.log4j.core.config.ConfigurationFactory;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
 import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
@@ -89,7 +91,7 @@ public class NBLoggerConfig extends ConfigurationFactory {
     private NBLogLevel consoleLevel = NBLogLevel.DEBUG;
 
     private static final String DEFAULT_LOGFILE_PATTERN = "%d{DEFAULT}{GMT} [%t] %-5level: %msg%n";
-    private final String logfilePattern = DEFAULT_LOGFILE_PATTERN;
+    private String logfilePattern = DEFAULT_LOGFILE_PATTERN;
     private NBLogLevel fileLevel = NBLogLevel.DEBUG;
 
     private Map<String, String> logLevelOverrides = new LinkedHashMap<>();
@@ -99,6 +101,7 @@ public class NBLoggerConfig extends ConfigurationFactory {
     private String logfileLocation;
     private boolean ansiEnabled;
     private boolean isDedicatedVerificationLoggerEnabled = false;
+    private boolean isActivated = false;
 
 
     public NBLoggerConfig() {
@@ -143,7 +146,7 @@ public class NBLoggerConfig extends ConfigurationFactory {
     }
 
 
-    Configuration createConfiguration(final String name, ConfigurationBuilder<BuiltConfiguration> builder) {
+    BuiltConfiguration createConfiguration(final String name, ConfigurationBuilder<BuiltConfiguration> builder) {
 
         Level internalLoggingStatusThreshold = Level.ERROR;
         Level builderThresholdLevel = Level.INFO;
@@ -163,6 +166,7 @@ public class NBLoggerConfig extends ConfigurationFactory {
         RootLoggerComponentBuilder rootBuilder = builder.newRootLogger(rootLoggingLevel);
 
         builder.setConfigurationName(name);
+        builder.setPackages("org.apache.logging.log4j.core");
 
         builder.setStatusLevel(internalLoggingStatusThreshold);
 
@@ -280,34 +284,21 @@ public class NBLoggerConfig extends ConfigurationFactory {
         });
 
         BuiltConfiguration builtConfig = builder.build();
-        updateLink(logfileLocation);
         return builtConfig;
     }
 
     private void updateLink(String logfileLocation) {
         Path logpath = Path.of(logfileLocation);
-        Path logdir = logpath.getParent();
-        if (Files.exists(logpath)) {
-            String basename = logpath.getFileName().toString();
-            String linkname = basename.replace(getSessionName() + "_", "");
-            Path linkPath = logdir.resolve(linkname);
-            try {
-                Files.deleteIfExists(linkPath);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            Path targetPath = Path.of(basename);
+        Path logdir = Objects.requireNonNull(logpath.getParent(), "Logfile path must have a parent directory");
+        String basename = logpath.getFileName().toString();
+        String linkname = basename.replace(getSessionName() + "_", "");
+        Path linkPath = logdir.resolve(linkname);
 
-            try {
-                Files.createSymbolicLink(
-                    linkPath,
-                    targetPath.getFileName()
-                );
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            System.out.println("Unable to find " + logfileLocation + " for symlink update");
+        try {
+            Files.deleteIfExists(linkPath);
+            Files.createSymbolicLink(linkPath, logpath.getFileName());
+        } catch (IOException | UnsupportedOperationException e) {
+            throw new RuntimeException("Failed to create symlink for session log: " + e.getMessage(), e);
         }
     }
 
@@ -351,17 +342,105 @@ public class NBLoggerConfig extends ConfigurationFactory {
     }
 
     public void activate() {
-        if (!Files.exists(loggerDir)) {
+        if (isActivated) {
+            throw new IllegalStateException("NBLoggerConfig has already been activated");
+        }
+
+        LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
+        Configuration previousConfiguration = loggerContext.getConfiguration();
+        boolean contextWasStarted = loggerContext.isStarted();
+
+        try {
+            if (!Files.exists(loggerDir)) {
+                try {
+                    FileAttribute<Set<PosixFilePermission>> attrs = PosixFilePermissions.asFileAttribute(
+                        PosixFilePermissions.fromString("rwxrwx---")
+                    );
+                    Files.createDirectory(loggerDir, attrs);
+                } catch (Exception e) {
+                    throw new RuntimeException("Error while creating directory " + loggerDir + ": " + e.getMessage(), e);
+                }
+            }
+
+            ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
+            BuiltConfiguration configuration = createConfiguration("nosqlbench-logging", builder);
+
+            // Replace any existing configuration so NB settings always take effect
+            if (loggerContext.isStarted()) {
+                loggerContext.stop();
+            }
+            loggerContext.start(configuration);
+
+            // Force Log4j2 to touch appenders so backing files exist before symlink creation
+            Logger initLogger = LogManager.getLogger("INIT");
+            initLogger.info("Logger initialized");
+
+            // Mark as activated before creating symlinks since this is part of the activation process
+            isActivated = true;
+
+            // Now create symlinks to the log files that Log4j2 just created
+            createSymlinks();
+
+        } catch (Exception e) {
+            // If activation fails, ensure we can retry by not marking as activated
+            isActivated = false;
+
+            // Attempt to restore the previous configuration so logging continues working
             try {
-                FileAttribute<Set<PosixFilePermission>> attrs = PosixFilePermissions.asFileAttribute(
-                    PosixFilePermissions.fromString("rwxrwx---")
-                );
-                Path directory = Files.createDirectory(loggerDir, attrs);
-            } catch (Exception e) {
-                throw new RuntimeException("Error while creating directory " + loggerDir.toString() + ": " + e.getMessage(), e);
+                if (loggerContext.isStarted()) {
+                    loggerContext.stop();
+                }
+                if (previousConfiguration != null && contextWasStarted) {
+                    loggerContext.start(previousConfiguration);
+                }
+            } catch (Exception restoreEx) {
+                e.addSuppressed(restoreEx);
+            }
+
+            throw e;
+        }
+    }
+
+    /**
+     * Create symlinks to log files after Log4j2 has initialized and created the actual log files.
+     * This is called internally by activate() after forcing Log4j2 initialization.
+     * Package-private for testing.
+     */
+    void createSymlinks() {
+        // Create symlink for main session log
+        if (logfileLocation != null) {
+            updateLink(logfileLocation);
+        }
+
+        // Create symlinks for auxiliary loggers (VERIFY, RUNTIME)
+        if (sessionName != null) {
+            Level effectiveLevel = Level.valueOf(getEffectiveFileLevel().toString());
+            if (isDedicatedVerificationLoggerEnabled) {
+                primeAuxLogger("VERIFY", effectiveLevel);
+                createAuxLoggerSymlink("VERIFY");
+            }
+            if (effectiveLevel.isInRange(Level.INFO, Level.TRACE)) {
+                primeAuxLogger("RUNTIME", effectiveLevel);
+                createAuxLoggerSymlink("RUNTIME");
             }
         }
-        ConfigurationFactory.setConfigurationFactory(this);
+    }
+
+    private void createAuxLoggerSymlink(String loggerName) {
+        Path logPath = loggerDir.resolve(getFileBase() + "_" + loggerName.toLowerCase() + ".log");
+        Path linkPath = loggerDir.resolve(loggerName.toLowerCase() + ".log");
+
+        try {
+            Files.deleteIfExists(linkPath);
+            Files.createSymbolicLink(linkPath, logPath.getFileName());
+        } catch (IOException | UnsupportedOperationException e) {
+            throw new RuntimeException("Failed to create symlink for " + loggerName + " logger: " + e.getMessage(), e);
+        }
+    }
+
+    private void primeAuxLogger(String loggerName, Level level) {
+        Logger logger = LogManager.getLogger(loggerName);
+        logger.log(level, () -> "Logger initialized");
     }
 
     public NBLoggerConfig setConsolePattern(String consoleLoggingPattern) {
@@ -374,10 +453,12 @@ public class NBLoggerConfig extends ConfigurationFactory {
     }
 
     public NBLoggerConfig setLogfilePattern(String logfileLoggingPattern) {
-        logfileLoggingPattern = (logfileLoggingPattern.endsWith("-ANSI") && STANDARD_FORMATS.containsKey(logfileLoggingPattern))
-            ? logfileLoggingPattern.substring(logfileLoggingPattern.length() - 5) : logfileLoggingPattern;
 
-        this.logfileLocation = STANDARD_FORMATS.getOrDefault(logfileLoggingPattern, logfileLoggingPattern);
+        if (logfileLoggingPattern.endsWith("-ANSI") && STANDARD_FORMATS.containsKey(logfileLoggingPattern)) {
+            logfileLoggingPattern = logfileLoggingPattern.substring(0, logfileLoggingPattern.length() - 5);
+        }
+
+        this.logfilePattern = STANDARD_FORMATS.getOrDefault(logfileLoggingPattern, logfileLoggingPattern);
         return this;
     }
 
@@ -448,7 +529,21 @@ public class NBLoggerConfig extends ConfigurationFactory {
 
 
     public String getLogfileLocation() {
+        if (!isActivated) {
+            return null;
+        }
         return logfileLocation;
+    }
+
+    public Path getSessionLinkPath() {
+        if (!isActivated || logfileLocation == null) {
+            return null;
+        }
+        Path logpath = Path.of(logfileLocation);
+        Path logdir = Objects.requireNonNull(logpath.getParent(), "Logfile path must have a parent directory");
+        String basename = logpath.getFileName().toString();
+        String linkname = basename.replace(getSessionName() + "_", "");
+        return logdir.resolve(linkname);
     }
 
     public NBLoggerConfig setLogsDirectory(Path logsDirectory) {
@@ -459,7 +554,6 @@ public class NBLoggerConfig extends ConfigurationFactory {
     private void attachAuxLogger(ConfigurationBuilder<BuiltConfiguration> builder, String loggerName, Level fileLevel) {
         String appenderName = loggerName + (("_APPENDER").toUpperCase());
         Path logPath = loggerDir.resolve(getFileBase() + "_" + loggerName.toLowerCase() + ".log");
-        Path linkPath = loggerDir.resolve(loggerName.toLowerCase() + ".log");
 
         var appender = builder
             .newAppender(appenderName, FileAppender.PLUGIN_NAME)
@@ -475,14 +569,5 @@ public class NBLoggerConfig extends ConfigurationFactory {
             .addAttribute("additivity", false);
         builder.add(appender);
         builder.add(logger);
-
-        try {
-            Files.deleteIfExists(linkPath);
-            Files.createSymbolicLink(linkPath, logPath.getFileName());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-
     }
 }

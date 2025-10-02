@@ -41,11 +41,11 @@ fi
 if [ "$1" = "-DN" ]
 then
  shift
- exec $DIR/jre/bin/java --enable-preview -XX:+UseZGC ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar $DIR/nbr.jar "$@"
+ exec $DIR/jre/bin/java --enable-native-access=ALL-UNNAMED --enable-preview -XX:+UseZGC ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar $DIR/nbr.jar "$@"
 elif [ "$1" = "-DY" ]
 then
  shift
- exec $DIR/jre/bin/java --enable-preview -XX:+UseZGC ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -jar $DIR/nbr.jar "$@"
+ exec $DIR/jre/bin/java --enable-native-access=ALL-UNNAMED --enable-preview -XX:+UseZGC ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -jar $DIR/nbr.jar "$@"
 else
- exec $DIR/jre/bin/java --enable-preview -XX:+UseZGC ${JAVA_OPTS} -jar $DIR/nbr.jar "$@"
+ exec $DIR/jre/bin/java --enable-native-access=ALL-UNNAMED --enable-preview -XX:+UseZGC ${JAVA_OPTS} -jar $DIR/nbr.jar "$@"
 fi
