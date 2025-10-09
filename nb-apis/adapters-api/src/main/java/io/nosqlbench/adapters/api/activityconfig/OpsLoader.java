@@ -27,6 +27,7 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.adapters.api.templating.StrInterpolator;
+import io.nosqlbench.nb.api.expr.GroovyExpressionProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
@@ -49,6 +50,7 @@ import java.util.Map;
 public class OpsLoader {
 
     private final static Logger logger = LogManager.getLogger(OpsLoader.class);
+    private static final GroovyExpressionProcessor EXPRESSION_PROCESSOR = new GroovyExpressionProcessor();
 
     public static String[] YAML_EXTENSIONS = new String[]{"yaml", "yml"};
 
@@ -73,14 +75,14 @@ public class OpsLoader {
         if (srcuri != null) {
             logger.info("workload URI: '" + srcuri + "'");
         }
+        Map<String, ?> expressionParams = params == null ? Map.of() : Map.copyOf(params);
         StrInterpolator transformer = new StrInterpolator(params);
-        //String data = transformer.apply(sourceData);
 
         RawOpsLoader loader = new RawOpsLoader(transformer);
         RawOpsDocList rawOpsDocList = switch (fmt) {
-            case jsonnet -> loader.loadString(evaluateJsonnet(srcuri, params));
-            case yaml, json -> loader.loadString(sourceData);
-            case inline, stmt -> RawOpsDocList.forSingleStatement(transformer.apply(sourceData));
+            case jsonnet -> loader.loadString(EXPRESSION_PROCESSOR.process(evaluateJsonnet(srcuri, params), srcuri, expressionParams));
+            case yaml, json -> loader.loadString(EXPRESSION_PROCESSOR.process(sourceData, srcuri, expressionParams));
+            case inline, stmt -> RawOpsDocList.forSingleStatement(transformer.apply(EXPRESSION_PROCESSOR.process(sourceData, srcuri, expressionParams)));
         };
         // TODO: itemize inline to support ParamParser
 

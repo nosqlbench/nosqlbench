@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2022-2023 nosqlbench
+  ~ Copyright (c) 2024 nosqlbench
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -20,22 +20,32 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>mvn-defaults</artifactId>
         <groupId>io.nosqlbench</groupId>
+        <artifactId>mvn-defaults</artifactId>
         <version>${revision}</version>
-        <relativePath>../mvn-defaults</relativePath>
+        <relativePath>../../mvn-defaults</relativePath>
     </parent>
 
-    <artifactId>nb-apis</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>expr-api</artifactId>
+    <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-    <url>https://nosqlbench.io/</url>
+    <description>Expression provider SPI and Groovy preprocessing support for nosqlbench workloads.</description>
 
-  <modules>
-    <module>adapters-api</module>
-    <module>expr-api</module>
-    <module>nb-api</module>
-    <module>nb-apis-all</module>
-  </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-annotations</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+    </dependencies>
 
 </project>

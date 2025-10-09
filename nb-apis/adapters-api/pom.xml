@@ -62,6 +62,12 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
+            <artifactId>expr-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
             <artifactId>nb-virtdata-all</artifactId>
             <version>${revision}</version>
         </dependency>

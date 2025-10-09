@@ -34,6 +34,8 @@ that are not found in any other tool.
 - You can design custom workloads that emulate your application, contained in a single file, based
   on statement
   templates - no IDE or coding required.
+- Workload templates can embed Groovy expressions (including memoized locals like `{{token == expr}}`)
+  via a pluggable SPI so you can compute values and share reusable helpers without leaving the YAML.
 - When needed, you can open the access panels and rewire the runtime behavior of NoSQLBench to do
   advanced testing,
   including a full scripting environment with Javascript.
