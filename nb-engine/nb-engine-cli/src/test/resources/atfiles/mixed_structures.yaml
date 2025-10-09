@@ -1,4 +1,4 @@
-# This not valid for traversas, as only maps are supported till the leaf node
+# This not valid for traversals, as only maps are supported till the leaf node
 alist:
   - ofmaps:
       oflist:

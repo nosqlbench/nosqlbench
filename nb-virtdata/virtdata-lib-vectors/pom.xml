@@ -49,8 +49,8 @@
 
         <dependency>
             <groupId>io.nosqlbench</groupId>
-            <artifactId>vectordata</artifactId>
-            <version>0.1.8</version>
+            <artifactId>datatools-vectordata</artifactId>
+            <version>0.1.10</version>
         </dependency>
 
 <!--        <dependency>-->

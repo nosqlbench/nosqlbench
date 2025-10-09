@@ -16,7 +16,7 @@
  */
 package io.nosqlbench.virtdata.predicates.nodewalk;
 
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.*;
+import io.nosqlbench.vectordata.spec.predicates.*;
 import io.nosqlbench.virtdata.predicates.nodewalk.repr.CqlNodeRenderer;
 import org.junit.jupiter.api.Test;
 

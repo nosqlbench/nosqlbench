@@ -48,7 +48,7 @@
         <dependency>
             <groupId>io.nosqlbench</groupId>
             <artifactId>nbvectors</artifactId>
-            <version>0.1.1</version>
+            <version>0.1.9</version>
         </dependency>
 
     </dependencies>
