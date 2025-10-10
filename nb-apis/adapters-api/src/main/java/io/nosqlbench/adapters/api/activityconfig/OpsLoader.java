@@ -19,17 +19,16 @@ package io.nosqlbench.adapters.api.activityconfig;
 import com.amazonaws.util.StringInputStream;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapters.api.activityconfig.yaml.*;
+import io.nosqlbench.nb.api.errors.BasicError;
+import io.nosqlbench.nb.api.expr.ExprPreprocessor;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.nbio.ResolverChain;
-import io.nosqlbench.nb.api.advisor.NBAdvisorException;
-import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.adapters.api.templating.StrInterpolator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Level;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import scala.Option;
@@ -49,6 +48,7 @@ import java.util.Map;
 public class OpsLoader {
 
     private final static Logger logger = LogManager.getLogger(OpsLoader.class);
+    private static final ExprPreprocessor EXPRESSION_PREPROCESSOR = new ExprPreprocessor();
 
     public static String[] YAML_EXTENSIONS = new String[]{"yaml", "yml"};
 
@@ -73,14 +73,17 @@ public class OpsLoader {
         if (srcuri != null) {
             logger.info("workload URI: '" + srcuri + "'");
         }
-        StrInterpolator transformer = new StrInterpolator(params);
-        //String data = transformer.apply(sourceData);
+        Map<String, ?> expressionParams = params == null ? Map.of() : Map.copyOf(params);
 
-        RawOpsLoader loader = new RawOpsLoader(transformer);
+        String expressionProcessed = switch (fmt) {
+            case jsonnet -> processExpressions(evaluateJsonnet(srcuri, params), srcuri, expressionParams);
+            case yaml, json, inline, stmt -> processExpressions(sourceData, srcuri, expressionParams);
+        };
+
+        StrInterpolator transformer = new StrInterpolator(params);
         RawOpsDocList rawOpsDocList = switch (fmt) {
-            case jsonnet -> loader.loadString(evaluateJsonnet(srcuri, params));
-            case yaml, json -> loader.loadString(sourceData);
-            case inline, stmt -> RawOpsDocList.forSingleStatement(transformer.apply(sourceData));
+            case jsonnet, yaml, json -> new RawOpsLoader(transformer).loadString(expressionProcessed);
+            case inline, stmt -> RawOpsDocList.forSingleStatement(transformer.apply(expressionProcessed));
         };
         // TODO: itemize inline to support ParamParser
 
@@ -91,6 +94,19 @@ public class OpsLoader {
         });
 
         return layered;
+    }
+
+    private static String processExpressions(String source, URI srcuri, Map<String, ?> params) {
+        String processed = EXPRESSION_PREPROCESSOR.process(source, srcuri, params);
+        boolean dryrunExprs = params != null && "exprs".equals(String.valueOf(params.get("dryrun")));
+        if (dryrunExprs) {
+            String location = srcuri != null ? srcuri.toString() : "<inline>";
+            logger.info(() -> "dryrun=exprs, dumping expression-processed workload for " + location);
+            System.out.println(processed);
+            System.out.flush();
+            System.exit(0);
+        }
+        return processed;
     }
 
     private static String evaluateJsonnet(URI uri, Map<String, ?> params) {
@@ -120,16 +136,17 @@ public class OpsLoader {
 
         String stdoutOutput = stdoutBuffer.toString(StandardCharsets.UTF_8);
         String stderrOutput = stderrBuffer.toString(StandardCharsets.UTF_8);
-        if ("jsonnet".equals(String.valueOf(params.get("dryrun")))) {
+        boolean dryrunJsonnet = params != null && "jsonnet".equals(String.valueOf(params.get("dryrun")));
+        if (dryrunJsonnet) {
             logger.info("dryrun=jsonnet, dumping result to stdout and stderr:");
             System.out.println(stdoutOutput);
             System.err.println(stderrOutput);
             if (resultStatus == 0 && stderrOutput.isEmpty()) {
                 logger.info("no errors detected during jsonnet evaluation.");
-                throw new NBAdvisorException("dryrun=jsonnet: No errors detected.", 0);
+                System.exit(0);
             } else {
                 logger.error("ERRORS detected during jsonnet evaluation:\n" + stderrOutput);
-                throw new NBAdvisorException("dryrun=jsonnet: Errors detected.", 2);
+                System.exit(2);
             }
         }
         if (!stderrOutput.isEmpty()) {

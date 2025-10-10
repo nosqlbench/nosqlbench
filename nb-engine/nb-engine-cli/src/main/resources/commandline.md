@@ -38,6 +38,10 @@ List the available drivers:
 
     --list-drivers
 
+List the available Groovy expression helper functions:
+
+    --list-exprs
+
 List the available scenarios:
 
     --list-scenarios
@@ -255,4 +259,3 @@ The reason for the optional timing parameter is to allow for results of short sc
 squelched. Metrics for short runs are not generally accurate nor meaningful. Spamming the console
 with boiler-plate in such cases is undesirable. If the minimum session length is not specified, it
 is assumed to be 0, meaning that a report will always show on that channel.
-

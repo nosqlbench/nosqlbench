@@ -38,6 +38,9 @@ import io.nosqlbench.nb.api.logging.NBLogLevel;
 import io.nosqlbench.nb.api.metadata.SessionNamer;
 import io.nosqlbench.nb.api.metadata.SystemId;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.expr.ExprFunctionCatalog;
+import io.nosqlbench.nb.api.expr.ExprFunctionExample;
+import io.nosqlbench.nb.api.expr.ExprFunctionMetadata;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.nosqlbench.engine.api.activityapi.input.InputType;
@@ -281,6 +284,25 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 );
             }
 
+            return NBCLI.EXIT_OK;
+        }
+        if (options.wantsListExprs()) {
+            List<ExprFunctionMetadata> metadata = ExprFunctionCatalog.listMetadata();
+            metadata.forEach(info -> {
+                String provider = info.provider().isBlank() ? "" : " [" + info.provider() + "]";
+                System.out.printf("%-16s %-28s %s%s%n",
+                    info.name(),
+                    info.synopsis(),
+                    info.description(),
+                    provider
+                );
+                if (!info.examples().isEmpty()) {
+                    int index = 1;
+                    for (ExprFunctionExample example : info.examples()) {
+                        System.out.printf("%-16s    example %d: %s%n", "", index++, example.render(info.name()));
+                    }
+                }
+            });
             return NBCLI.EXIT_OK;
         }
         if (options.wantsActivityTypes()) {

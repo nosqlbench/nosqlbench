@@ -207,17 +207,44 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
     @Override
     public void handleParameterMapUpdate(ParameterMap parameterMap) {
 
-        activity.onActivityDefUpdate(activityDef);
+        try {
+            activity.onActivityDefUpdate(activityDef);
 
-        // An activity must be initialized before the motors and other components are
-        // considered ready to handle parameter map changes. This is signaled in an activity
-        // by the RunState.
-        if (activity.getRunState() != RunState.Uninitialized) {
-            if (activity.getRunState() == RunState.Running) {
-                adjustMotorCountToThreadParam(activity.getActivityDef());
+            // An activity must be initialized before the motors and other components are
+            // considered ready to handle parameter map changes. This is signaled in an activity
+            // by the RunState.
+            if (activity.getRunState() != RunState.Uninitialized) {
+                if (activity.getRunState() == RunState.Running) {
+                    adjustMotorCountToThreadParam(activity.getActivityDef());
+                }
+                ActivityDefObserver.apply(activityDef, motors.toArray());
             }
-            ActivityDefObserver.apply(activityDef, motors.toArray());
+        } catch (RuntimeException e) {
+            handleParameterUpdateFailure(e);
+            throw e;
         }
+    }
+
+    private void handleParameterUpdateFailure(RuntimeException updateError) {
+        logger.error(() -> "Error while applying parameter update for activity '" + activity.getAlias() + "'", updateError);
+
+        if (this.exception == null) {
+            this.exception = updateError;
+        }
+
+        motors.forEach(motor -> {
+            RunState current = motor.getState().get();
+            if (current.canTransitionTo(RunState.Errored)) {
+                try {
+                    motor.getState().enterState(RunState.Errored);
+                } catch (RuntimeException transitionError) {
+                    logger.debug(() -> "Unable to mark motor '" + motor + "' as errored", transitionError);
+                }
+            }
+            motor.requestStop();
+        });
+
+        activity.setRunState(RunState.Errored);
     }
 
     public ActivityDef getActivityDef() {

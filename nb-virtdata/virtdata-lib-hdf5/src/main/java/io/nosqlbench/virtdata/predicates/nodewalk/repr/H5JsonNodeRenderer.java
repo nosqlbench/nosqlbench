@@ -18,17 +18,18 @@ package io.nosqlbench.virtdata.predicates.nodewalk.repr;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.ConjugateNode;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.NodeRepresenter;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.PNode;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.PredicateNode;
+import io.nosqlbench.vectordata.spec.predicates.ConjugateNode;
+import io.nosqlbench.vectordata.spec.predicates.PNode;
+import io.nosqlbench.vectordata.spec.predicates.PredicateNode;
+
+import java.util.function.Function;
 
 /**
  * Renders HDF5 predicate nodes as JSON strings.
- * This class implements NodeRepresenter to provide JSON string representations
+ * This class implements {@link Function} to provide JSON string representations
  * of predicate nodes used in HDF5 operations.
  */
-public class H5JsonNodeRenderer implements NodeRepresenter {
+public class H5JsonNodeRenderer implements Function<PNode<?>, String> {
     /** Schema information used for rendering */
     private final String[] schema;
     /** Gson instance configured for pretty printing */
@@ -54,6 +55,7 @@ public class H5JsonNodeRenderer implements NodeRepresenter {
         return switch (node) {
             case ConjugateNode n -> renderConjugate(n);
             case PredicateNode p -> renderPredicate(p);
+            default -> throw new IllegalArgumentException("Unsupported node type: " + node.getClass().getName());
         };
     }
 

@@ -20,6 +20,7 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
 
 import io.nosqlbench.nbdatatools.api.concurrent.ProgressIndicatingFuture;
 import io.nosqlbench.vectordata.VectorTestData;
+import io.nosqlbench.vectordata.discovery.ProfileSelector;
 import io.nosqlbench.vectordata.discovery.TestDataView;
 import io.nosqlbench.vectordata.downloader.Catalog;
 import io.nosqlbench.vectordata.downloader.DatasetEntry;
@@ -34,9 +35,7 @@ public abstract class CoreVectors<T> implements LongFunction<T> {
 
     public CoreVectors(String datasetAndProfile, boolean prebuffer) {
         Catalog catalog = VectorTestData.catalogs().configure().catalog();
-        DatasetEntry datasetEntry = catalog.findExact(datasetAndProfile)
-            .orElseThrow(() -> new RuntimeException("Cannot find dataset and/or profile '" + datasetAndProfile + "'"));
-        tdv = datasetEntry.select().profile(datasetAndProfile);
+        tdv = catalog.profile(datasetAndProfile);
         dataset = getRandomAccessData();
 
         if (prebuffer) {

@@ -1,0 +1,12 @@
+{{alpha = 'one'}}
+alpha={{@alpha}}
+{{alpha = 'two'}}
+alphaAgain={{@alpha}}
+{{beta == 'first'}}
+betaOnce={{@beta}}
+{{beta == 'ignored'}}
+betaStill={{@beta}}
+{{gamma === 'strict'}}
+gammaStrict={{@gamma}}
+gammaStrictBang={{@gamma!}}
+optional={{@missing?}}

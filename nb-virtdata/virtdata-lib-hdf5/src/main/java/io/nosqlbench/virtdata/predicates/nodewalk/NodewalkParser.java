@@ -17,28 +17,29 @@
 
 package io.nosqlbench.virtdata.predicates.nodewalk;
 
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.*;
+import io.nosqlbench.vectordata.spec.predicates.PNode;
 import io.nosqlbench.virtdata.predicates.nodewalk.repr.CqlNodeRenderer;
 import io.nosqlbench.virtdata.predicates.nodewalk.repr.H5JsonNodeRenderer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.ByteBuffer;
+import java.util.Locale;
+import java.util.function.Function;
 
 public class NodewalkParser {
     private static final Logger logger = LogManager.getLogger(NodewalkParser.class);
-    private final NodeRepresenter representer;
-    private int nodewalkVersion;
+    private final Function<PNode<?>, String> representer;
 
-    public final String CQL = "cql";
-    public final String JSON = "json";
+    public static final String CQL = "cql";
+    public static final String JSON = "json";
 
     public NodewalkParser(String[] schema) {
         this(schema, "cql");
     }
 
     public NodewalkParser(String[] schema, String repType) {
-        switch(repType) {
+        switch(repType.toLowerCase(Locale.ROOT)) {
             case CQL -> representer = new CqlNodeRenderer(schema);
             case JSON -> representer = new H5JsonNodeRenderer(schema);
             default -> throw new RuntimeException("Unknown representation type: " + repType);
@@ -48,11 +49,7 @@ public class NodewalkParser {
     public String parse(byte[] bytes) {
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
-        ConjugateType eType = ConjugateType.values()[bytes[1]];
-        PNode<?> predicateNode = switch(eType) {
-            case PRED -> new PredicateNode(buffer);
-            case AND,OR -> new ConjugateNode(buffer);
-        };
+        PNode<?> predicateNode = PNode.fromBuffer(buffer);
         String rendered = representer.apply(predicateNode);
         logger.debug(() -> "rendered: " + rendered);
         return rendered;

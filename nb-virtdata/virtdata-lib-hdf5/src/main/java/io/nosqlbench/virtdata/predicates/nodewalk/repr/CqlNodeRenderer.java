@@ -16,17 +16,18 @@
  */
 package io.nosqlbench.virtdata.predicates.nodewalk.repr;
 
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.ConjugateNode;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.NodeRepresenter;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.PNode;
-import io.nosqlbench.nbvectors.buildhdf5.predicates.types.PredicateNode;
+import io.nosqlbench.vectordata.spec.predicates.ConjugateNode;
+import io.nosqlbench.vectordata.spec.predicates.PNode;
+import io.nosqlbench.vectordata.spec.predicates.PredicateNode;
+
+import java.util.function.Function;
 
 /**
  * Renders predicate nodes into CQL-compatible string representations.
- * This class implements NodeRepresenter to convert different types of nodes
+ * This class implements {@link Function} to convert different types of nodes
  * into their corresponding CQL syntax.
  */
-public class CqlNodeRenderer implements NodeRepresenter {
+public class CqlNodeRenderer implements Function<PNode<?>, String> {
     /** Schema field names used for rendering */
     private final String[] schema;
     /** Constant for space character used in string building */
@@ -50,6 +51,7 @@ public class CqlNodeRenderer implements NodeRepresenter {
         return switch (node) {
             case ConjugateNode n -> reprConjugate(n);
             case PredicateNode p -> reprPredicate(p);
+            default -> throw new IllegalArgumentException("Unsupported node type: " + node.getClass().getName());
         };
     }
 

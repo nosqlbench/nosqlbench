@@ -339,6 +339,41 @@ You can use either named binding points references like `{userid}` or binding de
 as `{{Template('user-{}',ToString())}}`. The only exception to this rule is that you may not
 (yet) use dynamic values for keys within your structure.
 
+### Groovy Expression Preprocessing
+
+Before a workload file is parsed as YAML or JSON, any segment wrapped in `{{= ... }}` is executed as a Groovy expression. The expressions run in a per-file context that includes helper functions contributed via the expression SPI. Nosqlbench ships the following helpers by default:
+
+- `param(name)`, `paramOr(name, default)`, and `hasParam(name)` expose workload parameters.
+- `env(name, default?)` and `prop(name, default?)` read environment variables and JVM properties.
+- `uuid()` and `now()` provide ephemeral identifiers and timestamps.
+
+The resulting value replaces the expression marker before YAML loading continues. For example:
+
+```yaml
+ops:
+  report:
+    stmt: "threshold is {{= paramOr('threshold', 'unset') }}"
+  environment:
+    stmt: "running on {{= env('HOSTNAME', 'local') }}"
+```
+
+#### Memoized locals
+
+You can also capture expression results into workload-local variables without colliding with other template state:
+
+- `{{name = expr}}` overwrites the memoized value each time the sigil is evaluated.
+- `{{name == expr}}` sets the memoized value only if it has not been set already, ignoring subsequent evaluations.
+- `{{name === expr}}` sets the memoized value once and raises an error if the lvar was already defined.
+
+Values are stored in the Groovy binding under the safe namespace `__expr_lvar_<name>` and can be reused later with dereference sigils:
+
+- `{{@name}}` requires that the value has been set previously.
+- `{{@name?}}` returns the value or an empty string when the variable was never set.
+- `{{@name!}}` requires that the value was set and is non-null.
+
+Additional functions can be made available by adding your own `ExprFunctionProvider` implementation to the classpath.
+To see the functions that are currently available in your runtime, run `nb --list-exprs`.
+
 *yaml:*
 
 ```yaml
@@ -405,6 +440,3 @@ ops:
   }
 ]
 ```
-
-
-

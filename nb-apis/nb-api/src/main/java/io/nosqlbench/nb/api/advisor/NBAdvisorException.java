@@ -18,16 +18,15 @@
 package io.nosqlbench.nb.api.advisor;
 
 public class NBAdvisorException extends RuntimeException {
-    private final String message;
     private final int exitCode;
 
     public NBAdvisorException(String message, int exitCode) {
-        this.message = message;
+        super(message);
         this.exitCode = exitCode;
     }
 
     public String toString() {
-        return this.message;
+        return getMessage();
     }
 
     public int getExitCode() {
