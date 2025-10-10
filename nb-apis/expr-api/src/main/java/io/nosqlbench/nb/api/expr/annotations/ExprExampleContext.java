@@ -1,3 +1,5 @@
+package io.nosqlbench.nb.api.expr.annotations;
+
 /*
  * Copyright (c) nosqlbench
  *
@@ -15,21 +17,15 @@
  * under the License.
  */
 
-package io.nosqlbench.nb.api.advisor;
+/**
+ * Defines which flavour of {@link io.nosqlbench.nb.api.expr.ExprRuntimeContext} should be used when
+ * evaluating an {@link ExprExample}. This allows examples to exercise scenarios like the absence
+ * of a source URI while keeping the overall evaluation harness straightforward.
+ */
+public enum ExprExampleContext {
+    /** Use the default evaluation context, including workload parameters and a source URI. */
+    DEFAULT,
 
-public class NBAdvisorException extends RuntimeException {
-    private final int exitCode;
-
-    public NBAdvisorException(String message, int exitCode) {
-        super(message);
-        this.exitCode = exitCode;
-    }
-
-    public String toString() {
-        return getMessage();
-    }
-
-    public int getExitCode() {
-        return this.exitCode;
-    }
+    /** Use an evaluation context that omits the source URI. */
+    NO_SOURCE_URI
 }

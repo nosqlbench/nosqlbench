@@ -46,6 +46,11 @@
             <artifactId>nb-annotations</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>expr-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
         <dependency>
             <groupId>io.nosqlbench</groupId>

@@ -88,6 +88,7 @@ public class NBCLIOptions {
     private static final String LIST_INPUT_TYPES = "--list-input-types";
     private static final String LIST_OUTPUT_TYPES = "--list-output-types";
     private static final String LIST_APPS = "--list-apps";
+    private static final String LIST_EXPRS = "--list-exprs";
     private static final String VERSION_COORDS = "--version-coords";
     private static final String VERSION = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
@@ -219,6 +220,7 @@ public class NBCLIOptions {
     private String graphitelogLevel = "info";
     private boolean wantsListCommands;
     private boolean wantsListApps;
+    private boolean wantsListExprs;
     private boolean dedicatedVerificationLogger;
     private boolean wantsConsoleMetrics = true;
     private String annotateLabelSpec = "";
@@ -241,6 +243,10 @@ public class NBCLIOptions {
 
     public boolean getWantsListCommands() {
         return this.wantsListCommands;
+    }
+
+    public boolean wantsListExprs() {
+        return wantsListExprs;
     }
 
     public String getAnnotatorsConfig() {
@@ -590,6 +596,10 @@ public class NBCLIOptions {
                 case NBCLIOptions.LIST_COMMANDS:
                     arglist.removeFirst();
                     wantsListCommands = true;
+                    break;
+                case NBCLIOptions.LIST_EXPRS:
+                    arglist.removeFirst();
+                    wantsListExprs = true;
                     break;
                 case NBCLIOptions.HDR_DIGITS:
                     arglist.removeFirst();

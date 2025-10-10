@@ -35,7 +35,8 @@ that are not found in any other tool.
   on statement
   templates - no IDE or coding required.
 - Workload templates can embed Groovy expressions (including memoized locals like `{{token == expr}}`)
-  via a pluggable SPI so you can compute values and share reusable helpers without leaving the YAML.
+  via a pluggable SPI so you can compute values and share reusable helpers without leaving the YAML; run `nb --list-exprs`
+  to see the catalog of helpers on your install.
 - When needed, you can open the access panels and rewire the runtime behavior of NoSQLBench to do
   advanced testing,
   including a full scripting environment with Javascript.

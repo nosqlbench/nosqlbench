@@ -2,13 +2,13 @@ package io.nosqlbench.nb.api.expr;
 
 /*
  * Copyright (c) nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,22 +18,19 @@ package io.nosqlbench.nb.api.expr;
  */
 
 
-import java.util.Objects;
+import io.nosqlbench.nb.api.config.params.Element;
 
 /**
- * Wraps an {@link ExprFunction} with a Groovy friendly adapter that exposes a
- * {@code call} method. Groovy treats any object with a {@code call} method as a
- * first-class function reference, allowing expressions like {@code f(args...)}.
+ * Optional mix-in for {@link ExprFunctionProvider} implementations that want direct access to the
+ * workload parameter set for the current evaluation. When present, the runtime supplies the
+ * parameter view before any annotated functions are registered.
  */
-final class GroovyExprFunctionAdapter {
+public interface ExprFunctionParamsAware {
 
-    private final ExprFunction delegate;
-
-    GroovyExprFunctionAdapter(ExprFunction delegate) {
-        this.delegate = Objects.requireNonNull(delegate, "delegate");
-    }
-
-    public Object call(Object... args) {
-        return delegate.apply(args);
-    }
+    /**
+     * Provide the workload parameters associated with the current expression evaluation.
+     *
+     * @param params normalized parameter view; never {@code null}
+     */
+    void setParams(Element params);
 }

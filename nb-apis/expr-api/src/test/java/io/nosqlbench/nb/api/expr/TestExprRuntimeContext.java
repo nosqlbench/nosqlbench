@@ -18,33 +18,28 @@ package io.nosqlbench.nb.api.expr;
  */
 
 
-import groovy.lang.Binding;
-
 import java.net.URI;
-import java.util.LinkedHashMap;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-/**
- * Default runtime context implementation that uses a Groovy {@link Binding} as
- * the storage mechanism for both variables and function adapters.
- */
-final class GroovyExprRuntimeContext implements ExprRuntimeContext {
+public final class TestExprRuntimeContext implements ExprRuntimeContext {
 
-    private final Binding binding;
     private final Optional<URI> sourceUri;
     private final Map<String, ?> parameters;
-    private final Map<String, ExprFunctionMetadata> metadata = new LinkedHashMap<>();
+    private final Map<String, Object> variables = new HashMap<>();
+    private final Map<String, ExprFunction> functions = new HashMap<>();
+    private final Map<String, ExprFunctionMetadata> metadata = new HashMap<>();
 
-    GroovyExprRuntimeContext(Binding binding, Optional<URI> sourceUri, Map<String, ?> parameters) {
-        this.binding = Objects.requireNonNull(binding, "binding");
+    public TestExprRuntimeContext(Map<String, ?> parameters, Optional<URI> sourceUri) {
+        this.parameters = Collections.unmodifiableMap(new HashMap<>(parameters));
         this.sourceUri = Objects.requireNonNull(sourceUri, "sourceUri");
-        this.parameters = Map.copyOf(parameters);
     }
 
-    Binding binding() {
-        return binding;
+    public TestExprRuntimeContext(Map<String, ?> parameters) {
+        this(parameters, Optional.empty());
     }
 
     @Override
@@ -59,19 +54,25 @@ final class GroovyExprRuntimeContext implements ExprRuntimeContext {
 
     @Override
     public void setVariable(String name, Object value) {
-        binding.setVariable(name, value);
+        variables.put(name, value);
     }
 
     @Override
     public void registerFunction(ExprFunctionMetadata metadata, ExprFunction function) {
-        Objects.requireNonNull(metadata, "metadata");
-        Objects.requireNonNull(function, "function");
+        functions.put(metadata.name(), function);
         this.metadata.put(metadata.name(), metadata);
-        binding.setVariable(metadata.name(), new GroovyExprFunctionAdapter(function));
     }
 
     @Override
     public Map<String, ExprFunctionMetadata> getRegisteredMetadata() {
-        return Map.copyOf(metadata);
+        return Collections.unmodifiableMap(metadata);
+    }
+
+    public ExprFunction function(String name) {
+        return functions.get(name);
+    }
+
+    public boolean hasVariable(String name) {
+        return variables.containsKey(name);
     }
 }

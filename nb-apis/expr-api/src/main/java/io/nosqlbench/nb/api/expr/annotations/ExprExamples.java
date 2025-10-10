@@ -1,3 +1,5 @@
+package io.nosqlbench.nb.api.expr.annotations;
+
 /*
  * Copyright (c) nosqlbench
  *
@@ -15,21 +17,14 @@
  * under the License.
  */
 
-package io.nosqlbench.nb.api.advisor;
 
-public class NBAdvisorException extends RuntimeException {
-    private final int exitCode;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    public NBAdvisorException(String message, int exitCode) {
-        super(message);
-        this.exitCode = exitCode;
-    }
-
-    public String toString() {
-        return getMessage();
-    }
-
-    public int getExitCode() {
-        return this.exitCode;
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD})
+public @interface ExprExamples {
+    ExprExample[] value();
 }

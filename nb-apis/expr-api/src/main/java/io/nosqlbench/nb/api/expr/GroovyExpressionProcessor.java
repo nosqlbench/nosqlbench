@@ -1,8 +1,29 @@
 package io.nosqlbench.nb.api.expr;
 
+/*
+ * Copyright (c) nosqlbench
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+import io.nosqlbench.nb.api.config.params.Element;
+import io.nosqlbench.nb.api.config.params.NBParams;
+import io.nosqlbench.nb.api.expr.ExprFunctionParamsAware;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -77,7 +98,13 @@ public class GroovyExpressionProcessor {
 
         providers.forEach(provider -> {
             try {
-                provider.contribute(context);
+                if (provider instanceof ExprFunctionParamsAware paramsAware) {
+                    Element paramsElement = safeParams.isEmpty()
+                        ? NBParams.one(Map.of("parameters", Map.of()))
+                        : NBParams.one(safeParams);
+                    paramsAware.setParams(paramsElement);
+                }
+                ExprFunctionAnnotations.registerAnnotatedFunctions(context, provider);
             } catch (RuntimeException rte) {
                 throw rte;
             } catch (Exception ex) {
@@ -85,6 +112,8 @@ public class GroovyExpressionProcessor {
                     + provider.getClass().getName(), ex);
             }
         });
+
+        context.setVariable(ExpressionVariableStore.FUNCTION_METADATA_NAME, context.getRegisteredMetadata());
 
         GroovyShell shell = new GroovyShell(binding, compilerConfiguration);
         return replaceExpressions(source, shell, Optional.ofNullable(sourceUri), variableStore);
@@ -198,7 +227,8 @@ public class GroovyExpressionProcessor {
 
     private static final class ExpressionVariableStore {
         private static final String BINDING_PREFIX = "__expr_lvar_";
-        private static final String BINDING_MAP_NAME = "__expr_lvars";
+        static final String BINDING_MAP_NAME = "__expr_lvars";
+        static final String FUNCTION_METADATA_NAME = "__expr_function_metadata";
 
         private final Binding binding;
         private final Map<String, Object> values = new LinkedHashMap<>();

@@ -372,6 +372,7 @@ Values are stored in the Groovy binding under the safe namespace `__expr_lvar_<n
 - `{{@name!}}` requires that the value was set and is non-null.
 
 Additional functions can be made available by adding your own `ExprFunctionProvider` implementation to the classpath.
+To see the functions that are currently available in your runtime, run `nb --list-exprs`.
 
 *yaml:*
 
@@ -439,4 +440,3 @@ ops:
   }
 ]
 ```
-
