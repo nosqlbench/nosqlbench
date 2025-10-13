@@ -257,7 +257,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         }
 
         if (options.isWantsVersionShort()) {
-            System.out.println(NBCLI.version);
+            System.out.println(new VersionInfo().getDetailedVersion());
             return NBCLI.EXIT_OK;
         }
 

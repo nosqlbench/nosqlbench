@@ -27,22 +27,45 @@ public class VersionInfo {
     public VersionInfo() {
         InputStream versionStream = getClass().getResourceAsStream("/version.properties");
         try {
-            versionProperties.load(versionStream);
+            if (versionStream != null) {
+                versionProperties.load(versionStream);
+            } else {
+                // Provide defaults if version.properties is not found
+                versionProperties.setProperty("version", "unknown");
+                versionProperties.setProperty("artifactId", "nb-engine-cli");
+                versionProperties.setProperty("groupId", "io.nosqlbench");
+            }
         } catch (IOException e) {
             throw new RuntimeException("unable to read version properties:" + e);
         }
     }
 
     public String getVersion() {
-        return versionProperties.getProperty("version");
+        return versionProperties.getProperty("version", "unknown");
     }
 
     public String getArtifactId() {
-        return versionProperties.getProperty("artifactId");
+        return versionProperties.getProperty("artifactId", "unknown");
     }
 
     public String getGroupId() {
-        return versionProperties.getProperty("groupId");
+        return versionProperties.getProperty("groupId", "io.nosqlbench");
+    }
+
+    public String getGitCommitId() {
+        return versionProperties.getProperty("git.commit.id", "unknown");
+    }
+
+    public String getGitCommitIdAbbrev() {
+        return versionProperties.getProperty("git.commit.id.abbrev", "unknown");
+    }
+
+    public String getGitCommitTime() {
+        return versionProperties.getProperty("git.commit.time", "unknown");
+    }
+
+    public String getBuildTimestamp() {
+        return versionProperties.getProperty("build.timestamp", "unknown");
     }
 
     public String getArtifactCoordinates() {
@@ -51,6 +74,20 @@ public class VersionInfo {
                 " <artifactId>"+ getArtifactId() + "</artifactId>\n" +
                 " <version>" + getVersion() + "</version>\n" +
                 "</dependency>";
+    }
+
+    public String getDetailedVersion() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Version: ").append(getVersion()).append("\n");
+        sb.append("Artifact: ").append(getGroupId()).append(":").append(getArtifactId()).append("\n");
+        sb.append("Git Commit: ").append(getGitCommitIdAbbrev());
+        if (!"unknown".equals(getGitCommitId())) {
+            sb.append(" (").append(getGitCommitId()).append(")");
+        }
+        sb.append("\n");
+        sb.append("Git Commit Time: ").append(getGitCommitTime()).append("\n");
+        sb.append("Build Time: ").append(getBuildTimestamp());
+        return sb.toString();
     }
 
 }
