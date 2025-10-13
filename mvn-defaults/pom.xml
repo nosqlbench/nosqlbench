@@ -380,7 +380,7 @@
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j-impl</artifactId>
-                <version>2.25.1</version>
+                <version>2.25.2</version>
             </dependency>
 
         </dependencies>
@@ -410,13 +410,13 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
-            <version>2.25.1</version>
+            <version>2.25.2</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
-            <version>2.25.1</version>
+            <version>2.25.2</version>
         </dependency>
 
         <dependency>
