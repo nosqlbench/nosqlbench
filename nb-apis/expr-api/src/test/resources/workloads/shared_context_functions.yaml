@@ -1,0 +1,40 @@
+# Test workload demonstrating shared function definitions across expressions
+
+scenarios:
+  default:
+    # Define a function in the shared context
+    define: {{=
+        fibonacci = { n ->
+            if (n <= 1) return n
+            return fibonacci(n-1) + fibonacci(n-2)
+        }
+        return "Function defined"
+    }}
+
+    # Use the function in subsequent expressions
+    fib5: {{= fibonacci(5)}}
+    fib10: {{= fibonacci(10)}}
+
+    # Define another function that uses a shared multiplier variable
+    setup: {{=
+        multiplier = 3
+        return "Multiplier set"
+    }}
+    define2: {{=
+        // Use a method instead of a closure to access binding variables
+        def scaleMethod(x) {
+            return x * multiplier
+        }
+        scale = this.&scaleMethod
+        return "Scale function defined"
+    }}
+
+    # Use the second function
+    scaled: {{= scale(7)}}
+
+    # Change the multiplier and see it affect the function
+    change: {{=
+        multiplier = 5
+        return "Multiplier changed"
+    }}
+    rescaled: {{= scale(7)}}

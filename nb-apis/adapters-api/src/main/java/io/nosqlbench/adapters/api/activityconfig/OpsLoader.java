@@ -97,16 +97,30 @@ public class OpsLoader {
     }
 
     private static String processExpressions(String source, URI srcuri, Map<String, ?> params) {
-        String processed = EXPRESSION_PREPROCESSOR.process(source, srcuri, params);
         boolean dryrunExprs = params != null && "exprs".equals(String.valueOf(params.get("dryrun")));
+
         if (dryrunExprs) {
+            // Use processWithContext to capture both output and binding context
+            io.nosqlbench.nb.api.expr.ProcessingResult result =
+                EXPRESSION_PREPROCESSOR.processWithContext(source, srcuri, params);
+
             String location = srcuri != null ? srcuri.toString() : "<inline>";
             logger.info(() -> "dryrun=exprs, dumping expression-processed workload for " + location);
-            System.out.println(processed);
+
+            System.out.println("═".repeat(80));
+            System.out.println("EXPRESSION-PROCESSED WORKLOAD");
+            System.out.println("═".repeat(80));
+            System.out.println(result.getOutput());
+            System.out.println();
+
+            // Print the scripting context
+            System.out.println(result.getFormattedContext());
+
             System.out.flush();
             System.exit(0);
         }
-        return processed;
+
+        return EXPRESSION_PREPROCESSOR.process(source, srcuri, params);
     }
 
     private static String evaluateJsonnet(URI uri, Map<String, ?> params) {

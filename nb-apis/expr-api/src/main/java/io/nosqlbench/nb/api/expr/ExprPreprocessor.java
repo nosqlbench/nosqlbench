@@ -42,6 +42,23 @@ public final class ExprPreprocessor {
     }
 
     /**
+     * Render the provided source through the expression system and return both the transformed
+     * output and the binding context. When no substitution sigil is detected, returns the original
+     * source with an empty binding.
+     *
+     * @param source raw workload text
+     * @param sourceUri workload origin if available
+     * @param parameters parameters supplied alongside the workload
+     * @return ProcessingResult containing both output and binding context
+     */
+    public ProcessingResult processWithContext(String source, URI sourceUri, Map<String, ?> parameters) {
+        if (!containsExpressions(source)) {
+            return new ProcessingResult(source, new groovy.lang.Binding());
+        }
+        return getProcessor().processWithContext(source, sourceUri, parameters);
+    }
+
+    /**
      * @return {@code true} when the source contains the {@code {{=}}} sigil that requires
      * expression expansion.
      */

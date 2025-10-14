@@ -25,9 +25,12 @@ import io.nosqlbench.nb.api.expr.annotations.ExprFunctionSpec;
 import io.nosqlbench.vectordata.VectorTestData;
 import io.nosqlbench.vectordata.discovery.TestDataView;
 import io.nosqlbench.vectordata.spec.datasets.types.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Service(value = ExprFunctionProvider.class, selector = "virtdata")
-public class VirtdataExprs implements ExprFunctionProvider {
+public class VectorDataExprs implements ExprFunctionProvider {
+    private final static Logger logger = LogManager.getLogger(VectorDataExprs.class);
 
     @ExprExample(args = {"\"airports:demo\""}, expectNotNull = true)
     @ExprExample(args = {"\"airports:demo\""}, matches = ".+" )
@@ -37,6 +40,9 @@ public class VirtdataExprs implements ExprFunctionProvider {
         description = "Return the TestDataView for the named dataset profile."
     )
     public TestDataView dataset(String datasetNameAndProfile) {
+        if (!datasetNameAndProfile.contains(":")) {
+            logger.warn("datasetNameAndProfile missing profile:" + datasetNameAndProfile);
+        }
         return VectorTestData.catalogs().configure().catalog().profile(datasetNameAndProfile);
     }
     @ExprExample(args = {"\"airports:demo\""}, expectNotNull = true)

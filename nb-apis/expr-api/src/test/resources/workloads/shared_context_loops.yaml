@@ -1,0 +1,47 @@
+# Test workload demonstrating shared context with loop-like behavior
+
+scenarios:
+  default:
+    # Initialize accumulator
+    init: {{=
+        sum = 0
+        numbers = []
+        return "Initialized"
+    }}
+
+    # Build up state across multiple expressions (simulating a loop)
+    iter1: {{=
+        numbers << 1
+        sum += 1
+        return "Added 1"
+    }}
+
+    iter2: {{=
+        numbers << 2
+        sum += 2
+        return "Added 2"
+    }}
+
+    iter3: {{=
+        numbers << 3
+        sum += 3
+        return "Added 3"
+    }}
+
+    iter4: {{=
+        numbers << 4
+        sum += 4
+        return "Added 4"
+    }}
+
+    iter5: {{=
+        numbers << 5
+        sum += 5
+        return "Added 5"
+    }}
+
+    # Access accumulated results
+    total: {{= sum}}
+    count: {{= numbers.size()}}
+    list: {{= numbers.join('-')}}
+    average: {{= sum / numbers.size()}}
