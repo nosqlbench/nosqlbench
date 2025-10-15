@@ -16,7 +16,8 @@
 
 package io.nosqlbench.engine.cmdstream;
 
-import io.nosqlbench.adapters.api.templating.StrInterpolator;
+import io.nosqlbench.nb.api.expr.ExprPreprocessor;
+import io.nosqlbench.nb.api.expr.TemplateRewriter;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import org.apache.logging.log4j.Logger;
@@ -149,8 +150,10 @@ public class BasicScriptBuffer implements ScriptBuffer {
         Content<?> one = NBIO.all().searchPrefixes("scripts").pathname(path).extensionSet("js").one();
         scriptData = one.asString();
 
-        StrInterpolator interpolator = new StrInterpolator(cmd.getArgMap());
-        scriptData = interpolator.apply(scriptData);
+        // Rewrite TEMPLATE syntax and evaluate expressions
+        ExprPreprocessor exprPreprocessor = new ExprPreprocessor();
+        scriptData = TemplateRewriter.rewrite(scriptData);
+        scriptData = exprPreprocessor.process(scriptData, one.getURI(), cmd.getArgMap());
         return scriptData;
     }
 

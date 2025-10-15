@@ -19,105 +19,12 @@ package io.nosqlbench.nb.api.expr;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for {@link TemplateRewriter}, verifying TEMPLATE syntax rewriting to expr function calls.
  */
 class TemplateRewriterTest {
-
-    // ==================== Angle Bracket Syntax Tests ====================
-
-    @Test
-    void testAngleBracketSimpleDefault() {
-        String input = "value: <<key:default>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("value: {{= paramOr('key', 'default') }}", output);
-    }
-
-    @Test
-    void testAngleBracketNoDefault() {
-        String input = "value: <<key>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("value: {{= paramOr('key', 'UNSET:key') }}", output);
-    }
-
-    @Test
-    void testAngleBracketNumericDefault() {
-        String input = "count: <<num:100>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("count: {{= paramOr('num', 100) }}", output);
-    }
-
-    @Test
-    void testAngleBracketFloatDefault() {
-        String input = "ratio: <<rate:0.5>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("ratio: {{= paramOr('rate', 0.5) }}", output);
-    }
-
-    @Test
-    void testAngleBracketBooleanDefault() {
-        String input = "enabled: <<flag:true>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("enabled: {{= paramOr('flag', true) }}", output);
-    }
-
-    @Test
-    void testAngleBracketWithExprDefault() {
-        String input = "bind: <<dist:Uniform(0,1000)>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("bind: {{= paramOr('dist', Uniform(0,1000)) }}", output);
-    }
-
-    @Test
-    void testAngleBracketMultipleInSameLine() {
-        String input = "<<prefix:test>>-<<suffix:end>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("{{= paramOr('prefix', 'test') }}-{{= paramOr('suffix', 'end') }}", output);
-    }
-
-    // ==================== Operator Mode Tests ====================
-
-    @Test
-    void testAngleBracketRequiredOperator() {
-        String input = "required: <<apikey:?>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("required: {{= param('apikey') }}", output);
-    }
-
-    @Test
-    void testAngleBracketSetOperator() {
-        String input = "retries: <<count:=3>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("retries: {{= _templateSet('count', 3) }}", output);
-    }
-
-    @Test
-    void testAngleBracketAlternateOperator() {
-        String input = "mode: <<debug:+verbose>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("mode: {{= _templateAlt('debug', 'verbose') }}", output);
-    }
-
-    @Test
-    void testAngleBracketExplicitDefaultOperator() {
-        String input = "port: <<port:-8080>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("port: {{= paramOr('port', 8080) }}", output);
-    }
 
     // ==================== TEMPLATE Function Syntax Tests ====================
 
@@ -146,6 +53,22 @@ class TemplateRewriterTest {
     }
 
     @Test
+    void testTemplateFunctionWithFloatDefault() {
+        String input = "ratio: TEMPLATE(rate,0.5)";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("ratio: {{= paramOr('rate', 0.5) }}", output);
+    }
+
+    @Test
+    void testTemplateFunctionWithBooleanDefault() {
+        String input = "enabled: TEMPLATE(flag,true)";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("enabled: {{= paramOr('flag', true) }}", output);
+    }
+
+    @Test
     void testTemplateFunctionWithExprDefault() {
         String input = "bind: TEMPLATE(keydist,Uniform(0,1000000000))";
         String output = TemplateRewriter.rewrite(input);
@@ -159,6 +82,46 @@ class TemplateRewriterTest {
         String output = TemplateRewriter.rewrite(input);
 
         assertEquals("rw_key: {{= paramOr('keydist', Uniform(0,1000000000)) }}; ToString()", output);
+    }
+
+    @Test
+    void testTemplateFunctionMultipleInSameLine() {
+        String input = "TEMPLATE(prefix,test)-TEMPLATE(suffix,end)";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("{{= paramOr('prefix', 'test') }}-{{= paramOr('suffix', 'end') }}", output);
+    }
+
+    @Test
+    void testTemplateFunctionWithEmptyDefault() {
+        String input = "value: TEMPLATE(key,)";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("value: {{= paramOr('key', null) }}", output);
+    }
+
+    @Test
+    void testTemplateFunctionComplexExpressionAsDefault() {
+        String input = "seq_key: TEMPLATE(keyCount,Mod(1000000); ToString())";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("seq_key: {{= paramOr('keyCount', Mod(1000000); ToString()) }}", output);
+    }
+
+    @Test
+    void testTemplateFunctionWithinYamlString() {
+        String input = "collection: \"TEMPLATE(collection,keyvalue)\"";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("collection: \"{{= paramOr('collection', 'keyvalue') }}\"", output);
+    }
+
+    @Test
+    void testTemplateFunctionValueWithSingleQuotes() {
+        String input = "text: TEMPLATE(msg,it's working)";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("text: {{= paramOr('msg', 'it\\'s working') }}", output);
     }
 
     // ==================== Shell Variable Syntax Tests ====================
@@ -190,8 +153,8 @@ class TemplateRewriterTest {
     // ==================== Mixed Syntax Tests ====================
 
     @Test
-    void testMixedSyntaxInSingleString() {
-        String input = "<<prefix:test>>-TEMPLATE(middle,value)-${suffix:end}";
+    void testMixedTemplateFunctionAndShellVar() {
+        String input = "TEMPLATE(prefix,test)-${middle:value}-TEMPLATE(suffix,end)";
         String output = TemplateRewriter.rewrite(input);
 
         String expected = "{{= paramOr('prefix', 'test') }}-{{= paramOr('middle', 'value') }}-{{= paramOr('suffix', 'end') }}";
@@ -201,7 +164,7 @@ class TemplateRewriterTest {
     @Test
     void testMixedSyntaxAcrossMultipleLines() {
         String input = """
-            prefix: <<start:begin>>
+            prefix: TEMPLATE(start,begin)
             middle: TEMPLATE(center,mid)
             suffix: ${end:finish}
             """;
@@ -238,58 +201,11 @@ class TemplateRewriterTest {
         assertEquals(input, output);
     }
 
-    @Test
-    void testWhitespaceHandling() {
-        String input = "value: <<  key  :  default  >>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("value: {{= paramOr('key', 'default') }}", output);
-    }
-
-    @Test
-    void testValueWithSingleQuotes() {
-        String input = "text: <<msg:it's working>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("text: {{= paramOr('msg', 'it\\'s working') }}", output);
-    }
-
-    // ==================== Complex/Nested Value Tests ====================
-
-    @Test
-    void testComplexExpressionAsDefault() {
-        String input = "seq_key: <<keyCount:Mod(1000000); ToString()>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("seq_key: {{= paramOr('keyCount', Mod(1000000); ToString()) }}", output);
-    }
-
-    @Test
-    void testNestedAngleBrackets() {
-        // This tests whether the rewriter handles templates inside templates
-        // After first pass, inner template becomes an expr, which outer template should preserve
-        String input = "outer: <<a:<<b:inner>>>>";
-        String output = TemplateRewriter.rewrite(input);
-
-        // After first rewrite, inner <<b:inner>> becomes {{= paramOr('b', 'inner') }}
-        // Then outer <<a:...>> should wrap that
-        assertNotNull(output);
-        assertTrue(output.contains("paramOr"));
-    }
-
-    @Test
-    void testTemplateWithinYamlString() {
-        String input = "collection: \"<<collection:keyvalue>>\"";
-        String output = TemplateRewriter.rewrite(input);
-
-        assertEquals("collection: \"{{= paramOr('collection', 'keyvalue') }}\"", output);
-    }
-
-    // ==================== Real-World Examples from Blueprint ====================
+    // ==================== Real-World Examples ====================
 
     @Test
     void testBindingExample() {
-        String input = "seq_key: Mod(<<keyCount:1000000>>); ToString();";
+        String input = "seq_key: Mod(TEMPLATE(keyCount,1000000)); ToString();";
         String output = TemplateRewriter.rewrite(input);
 
         assertEquals("seq_key: Mod({{= paramOr('keyCount', 1000000) }}); ToString();", output);
@@ -303,31 +219,15 @@ class TemplateRewriterTest {
         assertEquals("rampup: run cycles==={{= paramOr('rampup-cycles', 10) }}", output);
     }
 
-    @Test
-    void testMultiOperatorExample() {
-        String input = """
-            default: <<port:-8080>>
-            set: <<retries:=3>>
-            required: <<apikey:?>>
-            alternate: <<debug:+verbose>>
-            """;
-        String output = TemplateRewriter.rewrite(input);
-
-        assertTrue(output.contains("{{= paramOr('port', 8080) }}"));
-        assertTrue(output.contains("{{= _templateSet('retries', 3) }}"));
-        assertTrue(output.contains("{{= param('apikey') }}"));
-        assertTrue(output.contains("{{= _templateAlt('debug', 'verbose') }}"));
-    }
-
     // ==================== Preserve Non-Template Content ====================
 
     @Test
     void testPreserveYamlStructure() {
         String input = """
             bindings:
-              key: Mod(<<count:1000>>)
+              key: Mod(TEMPLATE(count,1000))
             ops:
-              stmt: "value-<<id:123>>"
+              stmt: "value-TEMPLATE(id,123)"
             """;
         String output = TemplateRewriter.rewrite(input);
 
@@ -341,7 +241,7 @@ class TemplateRewriterTest {
 
     @Test
     void testPreserveExistingExpressions() {
-        String input = "existing: {{= 1 + 2 }} and template: <<key:value>>";
+        String input = "existing: {{= 1 + 2 }} and template: TEMPLATE(key,value)";
         String output = TemplateRewriter.rewrite(input);
 
         // Existing expressions should be untouched

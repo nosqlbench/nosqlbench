@@ -88,27 +88,27 @@ public class TemplateExprFunctionsProvider implements ExprFunctionProvider {
         // Check if already overridden
         if (overrides.containsKey(name)) {
             String value = overrides.get(name);
-            trackAccess(name, value);
+            TemplateExprFunctionsProvider.trackAccess(name, value);
             return value;
         }
 
         // Check if in parameters
         if (params.containsKey(name)) {
             String value = String.valueOf(params.get(name));
-            trackAccess(name, value);
+            TemplateExprFunctionsProvider.trackAccess(name, value);
             return value;
         }
 
         // Check environment
         if (NBEnvironment.INSTANCE.containsKey(name)) {
             String value = NBEnvironment.INSTANCE.get(name);
-            trackAccess(name, value);
+            TemplateExprFunctionsProvider.trackAccess(name, value);
             return value;
         }
 
         // Set override and use default
         overrides.put(name, defaultValue);
-        trackAccess(name, defaultValue);
+        TemplateExprFunctionsProvider.trackAccess(name, defaultValue);
         return defaultValue;
     }
 
@@ -137,7 +137,7 @@ public class TemplateExprFunctionsProvider implements ExprFunctionProvider {
                        NBEnvironment.INSTANCE.containsKey(name);
 
         if (isSet) {
-            trackAccess(name, alternate);
+            TemplateExprFunctionsProvider.trackAccess(name, alternate);
             return alternate;
         }
 
@@ -158,7 +158,7 @@ public class TemplateExprFunctionsProvider implements ExprFunctionProvider {
         String name = String.valueOf(args[0]);
         String value = String.valueOf(args[1]);
 
-        trackAccess(name, value);
+        TemplateExprFunctionsProvider.trackAccess(name, value);
         return value;
     }
 
@@ -184,33 +184,33 @@ public class TemplateExprFunctionsProvider implements ExprFunctionProvider {
         // Check if already set via _templateSet
         if (overrides.containsKey(name)) {
             String value = overrides.get(name);
-            trackAccess(name, value);
+            TemplateExprFunctionsProvider.trackAccess(name, value);
             return value;
         }
 
         // Check if in parameters
         if (params.containsKey(name)) {
             String value = String.valueOf(params.get(name));
-            trackAccess(name, value);
+            TemplateExprFunctionsProvider.trackAccess(name, value);
             return value;
         }
 
         // Check environment
         if (NBEnvironment.INSTANCE.containsKey(name)) {
             String value = NBEnvironment.INSTANCE.get(name);
-            trackAccess(name, value);
+            TemplateExprFunctionsProvider.trackAccess(name, value);
             return value;
         }
 
         // Use default without setting
-        trackAccess(name, defaultValue);
+        TemplateExprFunctionsProvider.trackAccess(name, defaultValue);
         return defaultValue;
     }
 
     /**
-     * Helper to track parameter access.
+     * Helper to track parameter access. Public to allow other providers to track template usage.
      */
-    private void trackAccess(String name, String value) {
+    public static void trackAccess(String name, String value) {
         TEMPLATE_ACCESSES.get().put(name, value);
     }
 }

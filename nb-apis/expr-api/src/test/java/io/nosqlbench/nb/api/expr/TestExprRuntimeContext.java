@@ -72,6 +72,12 @@ public final class TestExprRuntimeContext implements ExprRuntimeContext {
         return functions.get(name);
     }
 
+    @Override
+    public Object getVariable(String name) {
+        return variables.get(name);
+    }
+
+    @Override
     public boolean hasVariable(String name) {
         return variables.containsKey(name);
     }

@@ -56,7 +56,9 @@ public class ParameterExprFunctionsProvider implements ExprFunctionProvider {
     @ExprFunctionSpec(
         name = "paramOr",
         synopsis = "paramOr(name, default)",
-        description = "Return the value of a workload parameter or the provided default when absent or null."
+        description = "Return the value of a workload parameter or the provided default when absent or null. " +
+            "Supports lexical scoping: once a parameter is resolved (from params or default), subsequent " +
+            "calls without a default will reuse that value."
     )
     private Object paramOr(ExprRuntimeContext context, Object[] args) {
         Map<String, ?> params = context.parameters();
@@ -64,11 +66,36 @@ public class ParameterExprFunctionsProvider implements ExprFunctionProvider {
             throw new IllegalArgumentException("paramOr(name, default?) expects one or two arguments");
         }
         String name = String.valueOf(args[0]);
-        Object value = params.get(name);
-        if (value == null && args.length == 2) {
-            return args[1];
+
+        // Lexical scoping: check if this parameter was already resolved in the workload
+        String bindingKey = "__param_" + name;
+        if (context.hasVariable(bindingKey)) {
+            Object cached = context.getVariable(bindingKey);
+            // Track template variable access for workload validation
+            if (cached != null) {
+                TemplateExprFunctionsProvider.trackAccess(name, String.valueOf(cached));
+            }
+            return cached;
         }
-        return value;
+
+        // Not yet resolved - determine the value
+        Object value = params.get(name);
+        Object result;
+        if (value == null && args.length == 2) {
+            result = args[1];
+        } else {
+            result = value;
+        }
+
+        // Store in binding for lexical scoping
+        context.setVariable(bindingKey, result);
+
+        // Track template variable access for workload validation
+        if (result != null) {
+            TemplateExprFunctionsProvider.trackAccess(name, String.valueOf(result));
+        }
+
+        return result;
     }
 
     @ExprExample(args = {"\"mode\""}, expect = "true")

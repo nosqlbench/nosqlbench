@@ -29,8 +29,7 @@ import java.util.regex.Pattern;
  *   <li>Shell-style syntax: {@code ${key:default}}</li>
  * </ul>
  *
- * <p>Both syntaxes are converted to specialized template functions
- * ({@code _templateSet}, {@code _templateGet}) that are evaluated by
+ * <p>Both syntaxes are converted to expr function calls ({@code paramOr}) that are evaluated by
  * the standard expr processing pipeline.</p>
  *
  * <h3>Rewriting Strategy</h3>
@@ -40,19 +39,15 @@ import java.util.regex.Pattern;
  *   <li>Requires no changes to the expr grammar or parser</li>
  *   <li>Enables full expr capabilities within template values</li>
  *   <li>Provides automatic nesting and recursion via expr evaluator</li>
- *   <li>Maintains lexical scoping for template variables</li>
  * </ul>
  *
  * <h3>Example Transformations</h3>
  * <pre>
  * Input:  "bind: TEMPLATE(dist,Uniform(0,1000))"
- * Output: "bind: {{= _templateSet('dist', Uniform(0,1000)) }}"
+ * Output: "bind: {{= paramOr('dist', Uniform(0,1000)) }}"
  *
  * Input:  "host: ${server:localhost}"
- * Output: "host: {{= _templateSet('server', 'localhost') }}"
- *
- * Input:  "value: ${key}"
- * Output: "value: {{= _templateGet('key', 'UNSET:key') }}"
+ * Output: "host: {{= paramOr('server', 'localhost') }}"
  * </pre>
  */
 public final class TemplateRewriter {
@@ -70,7 +65,7 @@ public final class TemplateRewriter {
     /**
      * Rewrite TEMPLATE variables to expr function calls.
      *
-     * <p>Processes all three TEMPLATE syntax forms, converting them to equivalent
+     * <p>Processes both TEMPLATE syntax forms, converting them to equivalent
      * expr function calls that will be evaluated by the expression system.</p>
      *
      * @param source the source text potentially containing TEMPLATE variables
@@ -155,18 +150,17 @@ public final class TemplateRewriter {
                 defaultValue = content.substring(commaPos + 1).trim();
             }
 
-            // Generate the replacement with tracking
-            // Use _templateSet to ensure template variables share lexical scope
+            // Generate the replacement
             String replacement;
             if (!hasComma) {
-                // TEMPLATE(key) with no comma - check if already set, otherwise use UNSET:key
-                replacement = String.format("{{= _templateGet('%s', 'UNSET:%s') }}", key, key);
+                // TEMPLATE(key) with no comma - use UNSET:key as default
+                replacement = String.format("{{= paramOr('%s', 'UNSET:%s') }}", key, key);
             } else if (defaultValue.isEmpty()) {
-                // TEMPLATE(key,) with explicit empty default - set and use null
-                replacement = String.format("{{= _templateSet('%s', null) }}", key);
+                // TEMPLATE(key,) with explicit empty default - use null
+                replacement = String.format("{{= paramOr('%s', null) }}", key);
             } else {
-                // TEMPLATE(key,default) with non-empty default - set and use default
-                replacement = String.format("{{= _templateSet('%s', %s) }}",
+                // TEMPLATE(key,default) with non-empty default
+                replacement = String.format("{{= paramOr('%s', %s) }}",
                     key, quoteValue(defaultValue));
             }
 
@@ -222,11 +216,11 @@ public final class TemplateRewriter {
 
             String replacement;
             if (defaultValue == null || defaultValue.trim().isEmpty()) {
-                // ${key} with no default - check if already set
-                replacement = String.format("{{= _templateGet('%s', 'UNSET:%s') }}", key, key);
+                // ${key} with no default - use UNSET:key
+                replacement = String.format("{{= paramOr('%s', 'UNSET:%s') }}", key, key);
             } else {
-                // ${key:default} - set for lexical scope
-                replacement = String.format("{{= _templateSet('%s', %s) }}",
+                // ${key:default} with default value
+                replacement = String.format("{{= paramOr('%s', %s) }}",
                     key, quoteValue(defaultValue.trim()));
             }
 
@@ -245,6 +239,7 @@ public final class TemplateRewriter {
      *   <li>Boolean literals are returned unquoted</li>
      *   <li>Expr function calls (containing parentheses) are returned unquoted</li>
      *   <li>Expr references (already using {{}} syntax) are returned unquoted</li>
+     *   <li>VirtData binding chains (containing ->) are quoted as strings</li>
      *   <li>All other strings are single-quoted with proper escaping</li>
      * </ul>
      *
@@ -264,6 +259,12 @@ public final class TemplateRewriter {
         // Check if it's a boolean literal
         if (value.equals("true") || value.equals("false")) {
             return value;
+        }
+
+        // Check if it contains VirtData binding chain syntax (->)
+        // This should be treated as a string, not an expression
+        if (value.contains("->")) {
+            return "'" + value.replace("'", "\\'") + "'";
         }
 
         // Check if it contains function call syntax (likely an expr function)

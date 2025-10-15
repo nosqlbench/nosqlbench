@@ -86,4 +86,14 @@ final class GroovyExprRuntimeContext implements ExprRuntimeContext {
         Objects.requireNonNull(metadata, "metadata");
         this.metadata.put(metadata.name(), metadata);
     }
+
+    @Override
+    public Object getVariable(String name) {
+        return binding.hasVariable(name) ? binding.getVariable(name) : null;
+    }
+
+    @Override
+    public boolean hasVariable(String name) {
+        return binding.hasVariable(name);
+    }
 }
