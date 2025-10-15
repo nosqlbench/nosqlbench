@@ -20,9 +20,9 @@ Everything here happens **during** activity initialization, before the activity 
 cycles:
 
 1. *Template Variable Expansion* - If there are template variables, such as
-   `TEMPLATE(name,defaultval)` or `<<name:defaultval>>`, then these are expanded
-   according to their defaults and any overrides provided in the activity params. This is a macro
-   substitution only, so the values are simply interposed into the character stream of the document.
+   `TEMPLATE(name,defaultval)`, then these are expanded according to their defaults and any
+   overrides provided in the activity params. This is a macro substitution only, so the values
+   are simply interposed into the character stream of the document.
 2. *Jsonnet Evaluation* - If the source file was in jsonnet format (the extension was `.jsonnet`)
    then it is interpreted by sjsonnet, with all activity parameters available as external variables.
 3. *Structural Normalization* - The workload template (yaml, json, or data structure) is loaded

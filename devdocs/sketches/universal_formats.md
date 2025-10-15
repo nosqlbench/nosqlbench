@@ -25,7 +25,7 @@ Each of these provides an place for a user to specify the behavior of NoSQLBench
 * In YAML op templates, any field containing `{name}` is presumed to be a dynamic variable
 * In YAML op glue, any field containing `{{name}}` is presumed to be a capture point
 * In YAML op glue any field containing `[[...]]` or `[...]` has special meaning.
-* In YAML template variables, `<<name:value>>` or `TEMPLATE(name,value)` are supported
+* In YAML template variables, `TEMPLATE(name,value)` is supported
 * In HTTP driver URl patterns, `E[[...]]` is taken as a URL-Encoded section.
 * In labeling, label names and values depend on parameters or other settings like environment
   variables. There is no presently established convention for these.

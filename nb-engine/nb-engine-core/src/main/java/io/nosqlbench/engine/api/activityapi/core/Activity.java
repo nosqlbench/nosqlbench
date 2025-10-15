@@ -44,7 +44,7 @@ import io.nosqlbench.engine.api.activityapi.planning.SequencerType;
 import io.nosqlbench.engine.api.activityapi.simrate.*;
 import io.nosqlbench.engine.api.activityimpl.motor.RunStateTally;
 import io.nosqlbench.engine.api.activityimpl.OpFunctionComposition;
-import io.nosqlbench.engine.api.activityimpl.Dryrun;
+import io.nosqlbench.adapters.api.activityimpl.Dryrun;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.InvokableResult;
 import io.nosqlbench.nb.annotations.ServiceSelector;
 import io.nosqlbench.nb.api.advisor.NBAdvisorOutput;
@@ -660,7 +660,6 @@ public class Activity extends NBStatusComponent
                     OpMapper<CycleOp<?>, Space> opMapper = adapter.getOpMapper();
                     LongFunction<Space> spaceFunc = adapter.getSpaceFunc(pop);
                     OpDispenser<? extends CycleOp<?>> dispenser = opMapper.apply(this, pop, spaceFunc);
-                    String dryrunSpec = pop.takeStaticConfigOr("dryrun", "none");
                     Dryrun dryrun = pop.takeEnumFromFieldOr(Dryrun.class, Dryrun.none, "dryrun");
                     dispenser = OpFunctionComposition.wrapOptionally(adapter, dispenser, pop, dryrun);
 
