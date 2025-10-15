@@ -23,10 +23,30 @@ import java.util.Map;
  * Lightweight facade that prescans text for Groovy expression sigils before invoking the
  * heavyweight {@link GroovyExpressionProcessor}. This avoids building the expression runtime
  * when workloads contain no substitutions.
+ *
+ * <p>Expressions can be safely embedded in YAML using standard YAML string formats:</p>
+ * <pre>
+ * # Using pipe literal (recommended for multi-line expressions):
+ * key: |
+ *   {{=
+ *   def data = []
+ *   for (int i = 1; i <= 3; i++) {
+ *       data << i * i
+ *   }
+ *   return data.join('-')
+ *   }}
+ *
+ * # Using quoted strings:
+ * key: "{{= 1 + 2 }}"
+ *
+ * # Using folded scalar:
+ * key: >
+ *   {{= someExpression() }}
+ * </pre>
  */
 public final class ExprPreprocessor {
 
-    private static final String SIGIL = "{{=";
+    private static final String SIGIL_START = "{{";
 
     private volatile GroovyExpressionProcessor processor;
 
@@ -59,11 +79,12 @@ public final class ExprPreprocessor {
     }
 
     /**
-     * @return {@code true} when the source contains the {@code {{=}}} sigil that requires
-     * expression expansion.
+     * @return {@code true} when the source contains the {@code {{}} sigil that requires
+     * expression expansion. This detects all expression formats: {@code {{=}}, {@code {{var = ...}}},
+     * {@code {{@var}}}, etc.
      */
     public boolean containsExpressions(String source) {
-        return source != null && source.contains(SIGIL);
+        return source != null && source.contains(SIGIL_START);
     }
 
     private GroovyExpressionProcessor getProcessor() {

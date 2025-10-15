@@ -110,6 +110,9 @@ public class GroovyExpressionProcessor {
         ExpressionVariableStore variableStore = new ExpressionVariableStore(binding);
         context.setVariable(ExpressionVariableStore.BINDING_MAP_NAME, variableStore.getBackingMap());
 
+        // Find the GroovyLibraryAutoLoader provider if it exists
+        GroovyLibraryAutoLoader libraryLoader = null;
+
         providers.forEach(provider -> {
             try {
                 if (provider instanceof ExprFunctionParamsAware paramsAware) {
@@ -127,12 +130,33 @@ public class GroovyExpressionProcessor {
             }
         });
 
+        // Create the GroovyShell FIRST, then load libraries using the same shell
+        GroovyShell shell = new GroovyShell(binding, compilerConfiguration);
+
+        // Load Groovy libraries from lib/groovy/ directory and extract metadata
+        for (ExprFunctionProvider provider : providers) {
+            if (provider instanceof GroovyLibraryAutoLoader loader) {
+                libraryLoader = loader;
+                loader.loadLibrariesWithShell(shell);
+                // The library functions are already in the binding (they're script methods)
+                // We just need to manually add the metadata to the context
+                loader.getLibraryMetadata().forEach((name, metadata) -> {
+                    // Get the registered metadata map and add this entry
+                    // Note: The actual function is already in the binding via the script
+                    if (context instanceof GroovyExprRuntimeContext groovyContext) {
+                        // Access the metadata map directly since functions are already loaded
+                        groovyContext.registerMetadataOnly(metadata);
+                    }
+                });
+                break;
+            }
+        }
+
         context.setVariable(ExpressionVariableStore.FUNCTION_METADATA_NAME, context.getRegisteredMetadata());
 
-        // Capture initial variables (before user scripts run)
+        // Capture initial variables (after providers and libraries load, before user scripts run)
         Set<String> initialVariables = Set.copyOf(binding.getVariables().keySet());
 
-        GroovyShell shell = new GroovyShell(binding, compilerConfiguration);
         String output = replaceExpressions(source, shell, Optional.ofNullable(sourceUri), variableStore);
 
         return new ProcessingResult(output, binding, initialVariables);
@@ -260,8 +284,9 @@ public class GroovyExpressionProcessor {
 
     private Object evaluateExpression(GroovyShell shell, String expression, ExpressionContext context) {
         try {
-            Script script = shell.parse(expression);
-            return script.run();
+            // Use shell.evaluate() instead of parse().run() to ensure proper variable resolution
+            // from the binding, including closures defined in library scripts
+            return shell.evaluate(expression);
         } catch (Exception ex) {
             LOGGER.error("Error evaluating Groovy expression at {}:{}",
                 context.getSourceDescription(),

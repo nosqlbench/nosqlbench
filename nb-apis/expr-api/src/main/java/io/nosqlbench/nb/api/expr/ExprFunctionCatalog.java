@@ -38,12 +38,27 @@ public final class ExprFunctionCatalog {
 
         private static Map<String, ExprFunctionMetadata> load() {
             Map<String, ExprFunctionMetadata> byName = new LinkedHashMap<>();
-            ServiceLoader.load(ExprFunctionProvider.class).forEach(provider ->
+            ServiceLoader.load(ExprFunctionProvider.class).forEach(provider -> {
+                // First, extract metadata from annotations on the provider class itself
                 ExprFunctionAnnotations.extractMetadata(provider.getClass()).forEach(metadata -> {
                     ExprFunctionMetadata finalMeta = Objects.requireNonNull(metadata, "metadata");
                     byName.put(finalMeta.name(), finalMeta);
-                })
-            );
+                });
+
+                // For GroovyLibraryAutoLoader, also load library function metadata
+                if (provider instanceof GroovyLibraryAutoLoader loader) {
+                    // Initialize the loader to load library scripts and their metadata
+                    groovy.lang.Binding binding = new groovy.lang.Binding();
+                    org.codehaus.groovy.control.CompilerConfiguration config = new org.codehaus.groovy.control.CompilerConfiguration();
+                    groovy.lang.GroovyShell shell = new groovy.lang.GroovyShell(binding, config);
+                    loader.loadLibrariesWithShell(shell);
+
+                    // Add library metadata to the catalog
+                    loader.getLibraryMetadata().forEach((name, metadata) -> {
+                        byName.put(name, metadata);
+                    });
+                }
+            });
             return byName;
         }
     }

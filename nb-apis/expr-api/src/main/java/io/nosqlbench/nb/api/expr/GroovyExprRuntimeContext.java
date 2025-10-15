@@ -74,4 +74,16 @@ final class GroovyExprRuntimeContext implements ExprRuntimeContext {
     public Map<String, ExprFunctionMetadata> getRegisteredMetadata() {
         return Map.copyOf(metadata);
     }
+
+    /**
+     * Register metadata for a function that is already available in the binding
+     * (e.g., from a Groovy script method). This allows library scripts to contribute
+     * function metadata without needing to wrap the functions in ExprFunction adapters.
+     *
+     * @param metadata the function metadata to register
+     */
+    void registerMetadataOnly(ExprFunctionMetadata metadata) {
+        Objects.requireNonNull(metadata, "metadata");
+        this.metadata.put(metadata.name(), metadata);
+    }
 }
