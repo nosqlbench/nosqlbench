@@ -8,6 +8,10 @@ templating language.
 
 Template variables are resolved in the workload after the on-disk format is loaded and before yaml parsing.
 
+**Note**: As of version 5.x, the double angle bracket syntax (`<<...>>`) has been removed. Use the
+`TEMPLATE(...)` function form instead. This change improves syntax highlighting and IDE integration
+by avoiding conflicts with YAML anchors and aliases.
+
 ## call form with defaults
 
 This is the preferred form. It's easier on syntax checkers.
@@ -97,28 +101,15 @@ description: This is the description for name 'TEMPLATE(myname)'
 []
 ```
 
-## angle bracket value with defaults
+## angle bracket value with defaults (REMOVED)
 
-This form is deprecated! It conflicts with the YAML syntax for anchors and aliases. It will be
-removed in the next major version.
+**Note**: This form has been removed as of version 5.x. The double angle bracket syntax (`<<...>>`)
+conflicted with YAML syntax for anchors and aliases, and caused issues with syntax highlighting
+and IDE integration. Please use the `TEMPLATE(...)` function form instead.
 
-*yaml:*
+Previously supported syntax (no longer available):
 ```yaml
+# REMOVED - use TEMPLATE(myname,thedefault) instead
 name: <<myname,thedefault>>
 desc: <<mydesc:mydescription>>
-```
-
-*json:*
-```json
-
-{
-    "name": "thedefault",
-    "desc": "mydescription"
-}
-```
-
-*ops:*
-```json
-
-[]
 ```
