@@ -69,18 +69,15 @@ class ComprehensiveExprFeaturesIT {
             "debug", "true"
         );
 
-        // Apply template rewriting first (this is normally done in OpsLoader)
-        String templateRewritten = TemplateRewriter.rewrite(workload);
+        // Use TemplateContext to manage state lifecycle
+        try (io.nosqlbench.nb.api.expr.TemplateContext ctx = io.nosqlbench.nb.api.expr.TemplateContext.enter()) {
+            // Apply template rewriting first (this is normally done in OpsLoader)
+            String templateRewritten = TemplateRewriter.rewrite(workload);
 
-        // Then process with Groovy expressions
-        processed = processor.process(templateRewritten, URI.create("nb://example"), params);
-        assertNotNull(processed, "Processed workload should not be null");
-    }
-
-    @AfterEach
-    void cleanupTemplateState() {
-        // Clean up ThreadLocal state from template functions
-        io.nosqlbench.nb.api.expr.providers.TemplateExprFunctionsProvider.clearThreadState();
+            // Then process with Groovy expressions
+            processed = processor.process(templateRewritten, URI.create("nb://example"), params);
+            assertNotNull(processed, "Processed workload should not be null");
+        }
     }
 
     // === SECTION 1: Core Utility Functions ===
@@ -435,14 +432,14 @@ class ComprehensiveExprFeaturesIT {
         assertTrue(processed.contains("lowercase_example:"), "Should use lower() from CoreExprFunctionsProvider");
         assertTrue(processed.contains("source_uri:"), "Should use source() from CoreExprFunctionsProvider");
 
-        // ParameterExprFunctionsProvider
-        assertTrue(processed.contains("required_mode:"), "Should use param() from ParameterExprFunctionsProvider");
-        assertTrue(processed.contains("optional_timeout:"), "Should use paramOr() from ParameterExprFunctionsProvider");
-        assertTrue(processed.contains("has_mode:"), "Should use hasParam() from ParameterExprFunctionsProvider");
+        // UnifiedParameterProvider - User-facing API
+        assertTrue(processed.contains("required_mode:"), "Should use param() from UnifiedParameterProvider");
+        assertTrue(processed.contains("optional_timeout:"), "Should use paramOr() from UnifiedParameterProvider");
+        assertTrue(processed.contains("has_mode:"), "Should use hasParam() from UnifiedParameterProvider");
 
-        // TemplateExprFunctionsProvider (via TemplateRewriter)
-        assertTrue(processed.contains("template_set_first:"), "Should use _templateSet() from TemplateExprFunctionsProvider");
-        assertTrue(processed.contains("template_use_later:"), "Should use _templateGet() from TemplateExprFunctionsProvider");
+        // UnifiedParameterProvider - Template API (via TemplateRewriter)
+        assertTrue(processed.contains("template_set_first:"), "Should use _templateSet() from UnifiedParameterProvider");
+        assertTrue(processed.contains("template_use_later:"), "Should use _templateGet() from UnifiedParameterProvider");
         assertTrue(processed.contains("template_debug_message:"), "Should use conditional expr for alternate behavior");
     }
 

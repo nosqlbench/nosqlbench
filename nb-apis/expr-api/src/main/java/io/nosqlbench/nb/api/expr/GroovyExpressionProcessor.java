@@ -21,6 +21,7 @@ package io.nosqlbench.nb.api.expr;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.config.params.Element;
 import io.nosqlbench.nb.api.config.params.NBParams;
 import io.nosqlbench.nb.api.expr.ExprFunctionParamsAware;
@@ -30,6 +31,7 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,7 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Applies Groovy backed expression substitution to workload sources. Expressions are
@@ -51,6 +54,10 @@ public class GroovyExpressionProcessor {
     private static final Pattern SIGIL_PATTERN = Pattern.compile("\\{\\{(.+?)}}", Pattern.DOTALL);
     private static final Pattern ASSIGNMENT_PATTERN = Pattern.compile("^([A-Za-z_][\\w.-]*)\\s*(===|==|=)\\s*(.+)$", Pattern.DOTALL);
     private static final Pattern LVAR_REFERENCE_PATTERN = Pattern.compile("^@([A-Za-z_][\\w.-]*)([!?])?$");
+
+    // Memoized ServiceLoader to avoid repeated classpath scanning
+    private static final ServiceLoader<ExprFunctionProvider> SERVICE_LOADER =
+        ServiceLoader.load(ExprFunctionProvider.class);
 
     private final List<ExprFunctionProvider> providers;
     private final CompilerConfiguration compilerConfiguration;
@@ -66,8 +73,132 @@ public class GroovyExpressionProcessor {
 
     private static List<ExprFunctionProvider> loadProviders() {
         List<ExprFunctionProvider> discovered = new ArrayList<>();
-        ServiceLoader.load(ExprFunctionProvider.class).forEach(discovered::add);
+        // Using stream() on ServiceLoader returns a Stream<Provider<T>> for lazy loading
+        SERVICE_LOADER.stream()
+            .map(ServiceLoader.Provider::get)  // Lazy instantiation happens here
+            .forEach(discovered::add);
         return discovered;
+    }
+
+    /**
+     * Get a list of all available expression function provider names (selectors).
+     * These names come from the {@code selector} attribute of the {@link Service} annotation.
+     * This method uses lazy Provider inspection to avoid instantiating providers.
+     *
+     * @return list of provider selector names
+     */
+    public static List<String> getAvailableProviderNames() {
+        List<String> names = new ArrayList<>();
+        // Use Provider.type() to get the class without instantiating
+        SERVICE_LOADER.stream()
+            .map(provider -> {
+                Class<?> providerType = provider.type();
+                Service annotation = providerType.getAnnotation(Service.class);
+                return annotation != null ? annotation.selector() : null;
+            })
+            .filter(selector -> selector != null && !selector.isEmpty())
+            .forEach(names::add);
+        return names;
+    }
+
+    /**
+     * Load providers in a specific order based on selector names.
+     * Providers not in the list are excluded. This allows users to control
+     * function precedence by specifying provider order.
+     *
+     * @param orderedSelectors comma-separated list of provider selectors in desired order
+     * @return list of providers in the specified order
+     */
+    public static List<ExprFunctionProvider> loadProvidersInOrder(String orderedSelectors) {
+        if (orderedSelectors == null || orderedSelectors.trim().isEmpty()) {
+            return loadProviders();
+        }
+
+        List<String> selectorList = Arrays.stream(orderedSelectors.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .collect(Collectors.toList());
+
+        return loadProvidersInOrder(selectorList);
+    }
+
+    /**
+     * Load providers in a specific order based on selector names.
+     * Providers not in the list are excluded. Uses lazy Provider instantiation
+     * so only requested providers are actually created.
+     *
+     * @param orderedSelectors list of provider selectors in desired order
+     * @return list of providers in the specified order
+     */
+    public static List<ExprFunctionProvider> loadProvidersInOrder(List<String> orderedSelectors) {
+        if (orderedSelectors == null || orderedSelectors.isEmpty()) {
+            return loadProviders();
+        }
+
+        // Create a map of selector -> Provider for lazy instantiation
+        Map<String, ServiceLoader.Provider<ExprFunctionProvider>> providerMap = new LinkedHashMap<>();
+        SERVICE_LOADER.stream()
+            .forEach(provider -> {
+                Class<?> providerType = provider.type();
+                Service annotation = providerType.getAnnotation(Service.class);
+                if (annotation != null && annotation.selector() != null && !annotation.selector().isEmpty()) {
+                    providerMap.put(annotation.selector(), provider);
+                }
+            });
+
+        // Build ordered list, instantiating ONLY the requested providers
+        List<ExprFunctionProvider> ordered = new ArrayList<>();
+        for (String selector : orderedSelectors) {
+            ServiceLoader.Provider<ExprFunctionProvider> provider = providerMap.get(selector);
+            if (provider != null) {
+                ordered.add(provider.get());  // Lazy instantiation happens here
+            } else {
+                LOGGER.warn("Expression function provider '{}' was requested but not found", selector);
+            }
+        }
+
+        return ordered;
+    }
+
+    /**
+     * Get metadata about available providers without instantiating them.
+     * Returns a map of selector -> provider class for inspection.
+     *
+     * @return map of provider selectors to their class types
+     */
+    public static Map<String, Class<?>> getProviderMetadata() {
+        Map<String, Class<?>> metadata = new LinkedHashMap<>();
+        SERVICE_LOADER.stream()
+            .forEach(provider -> {
+                Class<?> providerType = provider.type();
+                Service annotation = providerType.getAnnotation(Service.class);
+                if (annotation != null && annotation.selector() != null && !annotation.selector().isEmpty()) {
+                    metadata.put(annotation.selector(), providerType);
+                }
+            });
+        return metadata;
+    }
+
+    /**
+     * Get function metadata from a provider class without instantiating it.
+     * This allows inspection of available functions before loading.
+     *
+     * @param providerClass the provider class
+     * @return list of function metadata
+     */
+    public static List<ExprFunctionMetadata> getProviderFunctionMetadata(Class<?> providerClass) {
+        return new ArrayList<>(ExprFunctionAnnotations.extractMetadata(providerClass));
+    }
+
+    /**
+     * Extract the selector from a provider's {@link Service} annotation.
+     *
+     * @param provider the provider instance
+     * @return the selector string, or null if not found
+     */
+    private static String getProviderSelector(ExprFunctionProvider provider) {
+        Service annotation = provider.getClass().getAnnotation(Service.class);
+        return annotation != null ? annotation.selector() : null;
     }
 
     /**

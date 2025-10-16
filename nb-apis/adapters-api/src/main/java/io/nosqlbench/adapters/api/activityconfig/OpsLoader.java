@@ -22,8 +22,8 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.*;
 import io.nosqlbench.adapters.api.activityimpl.Dryrun;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.expr.ExprPreprocessor;
+import io.nosqlbench.nb.api.expr.TemplateContext;
 import io.nosqlbench.nb.api.expr.TemplateRewriter;
-import io.nosqlbench.nb.api.expr.providers.TemplateExprFunctionsProvider;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.nbio.ResolverChain;
@@ -77,36 +77,36 @@ public class OpsLoader {
         }
         Map<String, ?> expressionParams = params == null ? Map.of() : Map.copyOf(params);
 
-        // PHASE 1: Rewrite TEMPLATE syntax to expr function calls
-        // This converts TEMPLATE(k,v) and ${key:value} to expr paramOr() calls
-        String templateRewritten = switch (fmt) {
-            case jsonnet -> evaluateJsonnet(srcuri, params); // Jsonnet doesn't need template rewriting
-            case yaml, json, inline, stmt -> TemplateRewriter.rewrite(sourceData);
-        };
+        // Use TemplateContext to automatically manage template state lifecycle
+        try (TemplateContext ctx = TemplateContext.enter()) {
+            // PHASE 1: Rewrite TEMPLATE syntax to expr function calls
+            // This converts TEMPLATE(k,v) and ${key:value} to expr paramOr() calls
+            String templateRewritten = switch (fmt) {
+                case jsonnet -> evaluateJsonnet(srcuri, params); // Jsonnet doesn't need template rewriting
+                case yaml, json, inline, stmt -> TemplateRewriter.rewrite(sourceData);
+            };
 
-        // PHASE 2: Process expr expressions (including the rewritten template calls)
-        String expressionProcessed = processExpressions(templateRewritten, srcuri, expressionParams);
+            // PHASE 2: Process expr expressions (including the rewritten template calls)
+            String expressionProcessed = processExpressions(templateRewritten, srcuri, expressionParams);
 
-        // Load the processed content into RawOpsDocList
-        RawOpsDocList rawOpsDocList = switch (fmt) {
-            case jsonnet, yaml, json -> new RawOpsLoader().loadString(expressionProcessed);
-            case inline, stmt -> RawOpsDocList.forSingleStatement(expressionProcessed);
-        };
-        // TODO: itemize inline to support ParamParser
+            // Load the processed content into RawOpsDocList
+            RawOpsDocList rawOpsDocList = switch (fmt) {
+                case jsonnet, yaml, json -> new RawOpsLoader().loadString(expressionProcessed);
+                case inline, stmt -> RawOpsDocList.forSingleStatement(expressionProcessed);
+            };
+            // TODO: itemize inline to support ParamParser
 
-        OpsDocList layered = new OpsDocList(rawOpsDocList);
+            OpsDocList layered = new OpsDocList(rawOpsDocList);
 
-        // Track template variable accesses from TemplateExprFunctionsProvider
-        Map<String, String> templateAccesses = TemplateExprFunctionsProvider.getTemplateAccesses();
-        templateAccesses.forEach((k, v) -> {
-            layered.addTemplateVariable(k, v);
-            params.remove(k);
-        });
+            // Track template variable accesses from TemplateContext
+            Map<String, String> templateAccesses = ctx.getAccesses();
+            templateAccesses.forEach((k, v) -> {
+                layered.addTemplateVariable(k, v);
+                params.remove(k);
+            });
 
-        // Clean up thread-local state
-        TemplateExprFunctionsProvider.clearThreadState();
-
-        return layered;
+            return layered;
+        } // TemplateContext automatically cleaned up here
     }
 
     private static String processExpressions(String source, URI srcuri, Map<String, ?> params) {

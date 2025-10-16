@@ -22,8 +22,8 @@ import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.nb.api.expr.ExprPreprocessor;
 import io.nosqlbench.nb.api.expr.ProcessingResult;
+import io.nosqlbench.nb.api.expr.TemplateContext;
 import io.nosqlbench.nb.api.expr.TemplateRewriter;
-import io.nosqlbench.nb.api.expr.providers.TemplateExprFunctionsProvider;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.api.nbio.Content;
@@ -356,21 +356,16 @@ public class NBCLIScenarioPreprocessor {
 
                 Map<String, String> templates = new LinkedHashMap<>();
                 ExprPreprocessor templatePreprocessor = new ExprPreprocessor();
-                try {
+                try (TemplateContext ctx = TemplateContext.enter()) {
                     String yamlContent = Files.readString(yamlPath);
                     // Rewrite TEMPLATE syntax first
                     String rewritten = TemplateRewriter.rewrite(yamlContent);
-                    // Clear previous tracking state
-                    TemplateExprFunctionsProvider.clearThreadState();
                     // Process with context to track template variable accesses
                     ProcessingResult result = templatePreprocessor.processWithContext(rewritten, yamlPath.toUri(), Map.of());
                     // Get tracked template variable accesses
-                    templates = TemplateExprFunctionsProvider.getTemplateAccesses();
+                    templates = ctx.getAccesses();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                } finally {
-                    // Clean up thread state
-                    TemplateExprFunctionsProvider.clearThreadState();
                 }
                 Scenarios scenarios = stmts.getDocScenarios();
 
