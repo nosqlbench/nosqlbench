@@ -66,6 +66,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.ServiceLoader.Provider;
@@ -359,21 +360,56 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 .searchPrefixes(options.wantsIncludes())
                 .pathname(resourceToCopy).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
 
-            if (tocopy.isEmpty()) tocopy = NBIO.classpath()
-                .searchPrefixes().searchPrefixes(options.wantsIncludes())
-                .searchPrefixes(options.wantsIncludes())
-                .pathname(resourceToCopy).first();
+            if (tocopy.isEmpty()) {
+                tocopy = NBIO.classpath()
+                    .searchPrefixes().searchPrefixes(options.wantsIncludes())
+                    .searchPrefixes(options.wantsIncludes())
+                    .pathname(resourceToCopy).first();
+            }
 
             final Content<?> data = tocopy.orElseThrow(
                 () -> new BasicError("Unable to find " + resourceToCopy + " in classpath to copy out")
             );
 
-            final Path writeTo = Path.of(data.asPath().getFileName().toString());
-            if (Files.exists(writeTo)) throw new BasicError("A file named " + writeTo + " exists. Remove it first.");
+            final Path sourceName = Optional.ofNullable(data.asPath().getFileName())
+                .orElseGet(() -> Path.of(resourceToCopy).getFileName());
+            final String filename = sourceName != null ? sourceName.toString() : resourceToCopy;
+
+            final Path writeTo;
+            final Optional<String> copyDestination = options.wantsToCopyDestination();
+            try {
+                if (copyDestination.isPresent()) {
+                    final Path destination = Path.of(copyDestination.get());
+                    if (Files.exists(destination) && Files.isDirectory(destination)) {
+                        writeTo = destination.resolve(filename);
+                    } else {
+                        writeTo = destination;
+                    }
+                } else {
+                    writeTo = Path.of(filename);
+                }
+            } catch (final InvalidPathException ipe) {
+                throw new BasicError("Destination path is invalid: " + ipe.getInput(), ipe);
+            }
+
+            final Path parent = writeTo.getParent();
+            if (parent != null) {
+                if (!Files.exists(parent)) {
+                    throw new BasicError("Destination directory '" + parent + "' does not exist.");
+                }
+                if (!Files.isDirectory(parent)) {
+                    throw new BasicError("Destination parent '" + parent + "' is not a directory.");
+                }
+            }
+
+            if (Files.exists(writeTo)) {
+                throw new BasicError("Destination file '" + writeTo + "' already exists. Remove it first or choose a different path.");
+            }
+
             try {
                 Files.writeString(writeTo, data.getCharBuffer(), StandardCharsets.UTF_8);
-            } catch (final IOException e) {
-                throw new BasicError("Unable to write to " + writeTo + ": " + e.getMessage());
+            } catch (final IOException ioe) {
+                throw new BasicError("Unable to write to '" + writeTo + "': " + ioe.getMessage(), ioe);
             }
             NBCLI.logger.info(() -> "Copied internal resource '" + data.asPath() + "' to '" + writeTo + '\'');
             return NBCLI.EXIT_OK;

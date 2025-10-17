@@ -139,7 +139,7 @@ public class GroovyLibraryAutoLoader implements ExprFunctionProvider {
         try {
             loadLibrariesFromClasspath(shell, libraryDirPath);
         } catch (Exception ex) {
-            LOGGER.info("Could not load classpath libraries from: {} - {}", libraryDirPath, ex.getMessage());
+            LOGGER.debug("Could not load classpath libraries from: {} - {}", libraryDirPath, ex.getMessage());
             LOGGER.debug("Full exception:", ex);
         }
 
@@ -168,7 +168,7 @@ public class GroovyLibraryAutoLoader implements ExprFunctionProvider {
             return;
         }
 
-        LOGGER.info("Loading {} Groovy library file(s) from filesystem: {}", libraryFiles.size(), libraryPath.toAbsolutePath());
+        LOGGER.debug("Loading {} Groovy library file(s) from filesystem: {}", libraryFiles.size(), libraryPath.toAbsolutePath());
 
         for (Path libraryFile : libraryFiles) {
             try {
@@ -227,7 +227,7 @@ public class GroovyLibraryAutoLoader implements ExprFunctionProvider {
                 return;
             }
 
-            LOGGER.info("Loading {} Groovy library file(s) from classpath: {}", libraryFiles.size(), resource);
+            LOGGER.debug("Loading {} Groovy library file(s) from classpath: {}", libraryFiles.size(), resource);
 
             for (Path libraryFile : libraryFiles) {
                 try {
@@ -283,7 +283,7 @@ public class GroovyLibraryAutoLoader implements ExprFunctionProvider {
             return;
         }
 
-        LOGGER.info("Loading {} Groovy library file(s) from: {}", libraryFiles.size(), libraryPath.toAbsolutePath());
+        LOGGER.debug("Loading {} Groovy library file(s) from: {}", libraryFiles.size(), libraryPath.toAbsolutePath());
 
         GroovyShell shell = new GroovyShell(binding, compilerConfiguration);
 
@@ -305,7 +305,7 @@ public class GroovyLibraryAutoLoader implements ExprFunctionProvider {
         LOGGER.debug("Loading Groovy library: {}", libraryFile);
         String scriptContent = Files.readString(libraryFile);
         shell.evaluate(scriptContent, libraryFile.getFileName().toString());
-        LOGGER.info("Successfully loaded Groovy library: {}", libraryFile);
+        LOGGER.debug("Successfully loaded Groovy library: {}", libraryFile);
     }
 
     /**
@@ -374,7 +374,7 @@ public class GroovyLibraryAutoLoader implements ExprFunctionProvider {
         // Extract metadata from the script class
         extractMetadataFromScript(script.getClass(), libraryFile.getFileName().toString());
 
-        LOGGER.info("Successfully loaded Groovy library: {}", libraryFile);
+        LOGGER.debug("Successfully loaded Groovy library: {}", libraryFile);
     }
 
     /**
